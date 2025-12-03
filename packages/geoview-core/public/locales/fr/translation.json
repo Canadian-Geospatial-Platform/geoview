@@ -16,7 +16,10 @@
     "guide": "Guide",
     "fullScreen": "Plein écran",
     "processing": "Traitement de __param__ element(s) sur __param__",
-    "clickEnlarge": "Cliquer pour agrandir"
+    "clickEnlarge": "Cliquer pour agrandir",
+    "show": "Afficher",
+    "hide": "Masquer",
+    "none": "Aucun"
   },
   "mapnav": {
     "arianavbar": "Groupe de buttons vertical pour navigation sur la carte",
@@ -45,10 +48,9 @@
   },
   "mapctrl": {
     "rotation": {
-      "resetRotation": "Réinitialiser la rotation de la carte",
-      "fixedNorth": "Nord fixe",
       "rotation": "Rotation de la carte",
-      "projection": "Projection"
+      "projection": "Projection",
+      "fixedNorth": "Fixer le Nord"
     },
     "mouseposition": {
       "east": "E",
@@ -96,7 +98,8 @@
     "itemsCount": "{count} sur {totalCount} classes",
     "legendInstructions": "Legend Instructions",
     "noLayersAdded": "Aucune couche ajoutée",
-    "noLayersAddedDescription": "Ajoutez des couches à la carte en cliquant sur le bouton 'Couches' et en sélectionnant les couches que vous souhaitez afficher."
+    "noLayersAddedDescription": "Ajoutez des couches à la carte en cliquant sur le bouton 'Couches' et en sélectionnant les couches que vous souhaitez afficher.",
+    "selectLayerAndScroll": "Voir dans le panneau Couches"
   },
   "layers": {
     "title": "Couches",
@@ -194,7 +197,8 @@
     "tableViewNone": "Tableau (indisponible)",
     "moveLayerUp": "Déplacer la couche vers le haut",
     "moveLayerDown": "Déplacer la couche vers le bas",
-    "layerControls": "Commandes des couches"
+    "layerControls": "Commandes des couches",
+    "selectLayerAndScrollTimeSlider": "Voir dans le panneau Curseur Temporel"
   },
   "details": {
     "title": "Détails",
@@ -203,6 +207,7 @@
     "closeSelection": "Fermer la sélection",
     "externalLink": "Lien externe",
     "feature": "élément",
+    "selected": "sélectionné",
     "clickOnMap": "Cliquer sur la carte",
     "nextFeatureBtn": "Élément suivant",
     "previousFeatureBtn": "Élément précédent",
@@ -227,7 +232,8 @@
     "northing": "Northing",
     "ntsMapsheet": "Carte SNRC",
     "elevation": "Élévation",
-    "guideControls": "Commandes du guide"
+    "guideControls": "Commandes du guide",
+    "selectLayerAndScrollChart": "Voir dans le panneau Graphique"
   },
   "lightbox": {
     "next": "Prochaine",
@@ -339,7 +345,10 @@
     "close": "Fermer",
     "noFeatures": "inconnue...",
     "showing": "affiché(s)",
-    "total": "total"
+    "total": "total",
+    "selectLayerAndScroll": "Voir dans le panneau Données",
+    "accessAdvancedFunctions": "Accéder au panneau Données pour les fonctions avancées",
+    "filterToggle": "les filtres de colonnes"
   },
   "geochart": {
     "noChartAvailable": "Cliquer sur une couche de la carte qui contient un graphique"

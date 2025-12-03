@@ -141,7 +141,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       id: clickMarkerId,
       position: [-1, -1],
       positioning: 'center-center',
-      offset: [-18, -30],
+      offset: [-9, -30],
       element: document.getElementById(clickMarkerId) as HTMLElement,
       stopEvent: false,
     });

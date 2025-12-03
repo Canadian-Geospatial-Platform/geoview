@@ -23,6 +23,8 @@ interface LayoutProps {
   onLayerListClicked: (layer: LayerListEntry) => void;
   onIsEnlargeClicked?: (isEnlarge: boolean) => void;
   onGuideIsOpen?: (isGuideOpen: boolean) => void;
+  onRightPanelClosed?: () => void;
+  onRightPanelVisibilityChanged?: (isVisible: boolean) => void;
 }
 
 // Constants outside component to prevent recreating every render
@@ -45,6 +47,8 @@ export function Layout({
   onIsEnlargeClicked,
   fullWidth,
   onGuideIsOpen,
+  onRightPanelClosed,
+  onRightPanelVisibilityChanged,
   containerType = CONTAINER_TYPE.FOOTER_BAR,
 }: LayoutProps): JSX.Element {
   logger.logTraceRender('components/common/layout');
@@ -133,6 +137,8 @@ export function Layout({
       onIsEnlargeClicked={onIsEnlargeClicked}
       fullWidth={fullWidth}
       onGuideIsOpen={onGuideIsOpen}
+      onRightPanelClosed={onRightPanelClosed}
+      onRightPanelVisibilityChanged={onRightPanelVisibilityChanged}
       containerType={containerType}
     />
   );

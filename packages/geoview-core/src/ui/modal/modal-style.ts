@@ -5,19 +5,28 @@ import type { SxStyles } from '@/ui/style/types';
  * Get custom sx classes for the MUI modal
  *
  * @param {Theme} theme the theme object
+ * @param {string | number} [width] - Optional width for the dialog
+ * @param {string | number} [height] - Optional height for the dialog
  * @returns {Object} the sx classes object
  */
-export const getSxClasses = (theme: Theme): SxStyles => ({
+export const getSxClasses = (theme: Theme, width?: string | number, height?: string | number): SxStyles => ({
   dialog: {
     position: 'absolute',
     "& ~ & > div[class*='backdrop']": {
       backgroundColor: 'transparent',
     },
     '& .MuiPaper-root': {
-      width: 450,
-      height: 'auto',
       borderRadius: '6px',
     },
+    ...(width || height
+      ? {
+          '& .MuiDialog-paper': {
+            ...(width && { width }),
+            ...(height && { height, maxHeight: 'calc(90vh - 200px)' }),
+            maxWidth: 'none',
+          },
+        }
+      : {}),
   },
   backdrop: {
     position: 'absolute',

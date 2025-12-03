@@ -26,6 +26,8 @@ interface ResponsiveGridLayoutProps {
   fullWidth?: boolean;
   onIsEnlargeClicked?: (isEnlarge: boolean) => void;
   onGuideIsOpen?: (isGuideOpen: boolean) => void;
+  onRightPanelClosed?: () => void;
+  onRightPanelVisibilityChanged?: (isVisible: boolean) => void;
   hideEnlargeBtn?: boolean;
   containerType?: TypeContainerBox;
 }
@@ -46,6 +48,8 @@ const ResponsiveGridLayout = forwardRef(
       guideContentIds = [],
       onIsEnlargeClicked,
       onGuideIsOpen,
+      onRightPanelClosed,
+      onRightPanelVisibilityChanged,
       hideEnlargeBtn = false,
       containerType,
     }: ResponsiveGridLayoutProps,
@@ -77,6 +81,11 @@ const ResponsiveGridLayout = forwardRef(
     const [isGuideOpen, setIsGuideOpen] = useState(false);
     const [isEnlarged, setIsEnlarged] = useState(false);
     const [isFullScreen, setIsFullScreen] = useState(false);
+
+    // Notify parent when right panel visibility changes
+    useEffect(() => {
+      onRightPanelVisibilityChanged?.(isRightPanelVisible);
+    }, [isRightPanelVisible, onRightPanelVisibilityChanged]);
 
     // sxClasses
     const sxClasses = useMemo(() => getSxClasses(theme, containerType!), [theme, containerType]);
@@ -239,7 +248,10 @@ const ResponsiveGridLayout = forwardRef(
           variant="outlined"
           color="primary"
           startIcon={<CloseIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />}
-          onClick={() => setIsRightPanelVisible(false)}
+          onClick={() => {
+            setIsRightPanelVisible(false);
+            onRightPanelClosed?.();
+          }}
           tooltip={t('details.closeSelection')!}
         >
           {t('dataTable.close')}

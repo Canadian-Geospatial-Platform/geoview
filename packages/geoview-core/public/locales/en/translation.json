@@ -16,7 +16,10 @@
     "guide": "Guide",
     "fullScreen": "Full screen",
     "processing": "Processing __param__ element(s) of __param__",
-    "clickEnlarge": "Click to enlarge"
+    "clickEnlarge": "Click to enlarge",
+    "show": "Show",
+    "hide": "Hide",
+    "none": "No"
   },
   "mapnav": {
     "arianavbar": "Vertical button group for map navigation",
@@ -45,10 +48,9 @@
   },
   "mapctrl": {
     "rotation": {
-      "resetRotation": "Reset map rotation",
-      "fixedNorth": "Fix North",
       "rotation": "Map rotation",
-      "projection": "Projection"
+      "projection": "Projection",
+      "fixedNorth": "Fix North"
     },
     "mouseposition": {
       "east": "E",
@@ -96,7 +98,8 @@
     "itemsCount": "{count} of {totalCount} classes",
     "legendInstructions": "Legend Instructions",
     "noLayersAdded": "No layers added to the map",
-    "noLayersAddedDescription": "Add layers to the map by clicking on the 'Layers' button and adding the layers you want to display."
+    "noLayersAddedDescription": "Add layers to the map by clicking on the 'Layers' button and adding the layers you want to display.",
+    "selectLayerAndScroll": "Show in Layers panel"
   },
   "layers": {
     "title": "Layers",
@@ -194,7 +197,8 @@
     "tableViewNone": "Table (unavailable)",
     "moveLayerUp": "Move layer up",
     "moveLayerDown": "Move layer down",
-    "layerControls": "Layers controls"
+    "layerControls": "Layers controls",
+    "selectLayerAndScrollTimeSlider": "Show in Time Slider panel"
   },
   "details": {
     "title": "Details",
@@ -203,6 +207,7 @@
     "closeSelection": "Close selection",
     "externalLink": "External Link",
     "feature": "feature",
+    "selected": "selected",
     "clickOnMap": "Click on map",
     "nextFeatureBtn": "Next feature",
     "previousFeatureBtn": "Previous feature",
@@ -227,7 +232,8 @@
     "northing": "Northing",
     "ntsMapsheet": "NTS Mapsheet",
     "elevation": "Elevation",
-    "guideControls": "Guide controls"
+    "guideControls": "Guide controls",
+    "selectLayerAndScrollChart": "Show in Chart panel"
   },
   "lightbox": {
     "next": "Next",
@@ -339,7 +345,10 @@
     "close": "Close",
     "noFeatures": "unknown...",
     "showing": "showing",
-    "total": "total"
+    "total": "total",
+    "selectLayerAndScroll": "Show in Data Table panel",
+    "accessAdvancedFunctions": "Access Data Table panel for advanced functions",
+    "filterToggle": "column filters"
   },
   "geoChart": {
     "noChartAvailable": "Click on the map on a layer with chart"

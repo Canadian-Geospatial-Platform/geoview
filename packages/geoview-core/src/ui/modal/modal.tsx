@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { Fragment, useMemo } from 'react';
+import { Fragment, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
@@ -43,6 +43,13 @@ interface DialogPropsExtend extends Omit<DialogProps, 'title'> {
 
   // action elements / buttons
   actions?: ReactNode;
+
+  // close handler
+  onClose?: () => void;
+
+  // width and height
+  width?: string | number;
+  height?: string | number;
 
   container?: Element;
   open: boolean;
@@ -184,6 +191,9 @@ function ModalUI(props: DialogPropsExtend): JSX.Element {
     contentTextId,
     contentTextClassName,
     contentTextStyle,
+    onClose,
+    width,
+    height,
     'aria-labelledby': ariaLabeledBy,
     'aria-describedby': ariaDescribedBy,
   } = props;
@@ -191,9 +201,26 @@ function ModalUI(props: DialogPropsExtend): JSX.Element {
   // Hooks
   const { t } = useTranslation();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const sxClasses = useMemo(() => getSxClasses(theme, width, height), [theme, width, height]);
   const fadeInAnimation = useFadeIn();
   const AnimatedDialog = animated(Dialog);
+
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('MODAL - open with focus on close', open);
+
+    if (open) {
+      const timer = setTimeout(() => {
+        const closeButton = document.querySelector('.buttonFilledOutline') as HTMLButtonElement;
+        if (closeButton) {
+          closeButton.focus();
+        }
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+
+    return undefined;
+  }, [open]);
 
   /**
    * to return the updated / newly-created modal
@@ -284,6 +311,8 @@ function ModalUI(props: DialogPropsExtend): JSX.Element {
     (modalProps && createdModal(modalProps)) || (
       <Dialog
         open={open}
+        onClose={onClose}
+        maxWidth="xl"
         sx={sxClasses.dialog}
         className={`${className && className}`}
         style={{ ...style, position: 'fixed' }}
@@ -292,17 +321,32 @@ function ModalUI(props: DialogPropsExtend): JSX.Element {
         fullScreen={fullScreen}
         container={container}
       >
-        <DialogTitle id={titleId}>{title}</DialogTitle>
+        <Box sx={sxClasses.modalTitleContainer}>
+          {title && (
+            <DialogTitle id={titleId} sx={sxClasses.modalTitleLabel}>
+              {title}
+            </DialogTitle>
+          )}
+          <Box sx={sxClasses.modalTitleActions}>
+            {onClose && (
+              <IconButton
+                id={`${modalId}-close-button`}
+                aria-label={t('close')}
+                tooltipPlacement="right"
+                onClick={onClose}
+                className="buttonFilledOutline"
+              >
+                <CloseIcon />
+              </IconButton>
+            )}
+          </Box>
+        </Box>
         <DialogContent className={contentClassName} style={contentStyle}>
-          <div
-            id={contentTextId}
-            className={`${sxClasses.content} ${contentTextClassName && contentTextClassName}`}
-            style={contentTextStyle}
-          >
+          <Box component="div" id={contentTextId} className={contentTextClassName} sx={sxClasses.content} style={contentTextStyle}>
             {contentModal}
-          </div>
+          </Box>
         </DialogContent>
-        <DialogActions>{actions}</DialogActions>
+        {actions && <DialogActions>{actions}</DialogActions>}
       </Dialog>
     )
   );

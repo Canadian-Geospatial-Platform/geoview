@@ -4,19 +4,18 @@ import { memo } from 'react';
 import type { MRT_TableInstance as MRTTableInstance, MRT_ColumnDef } from 'material-react-table';
 import {
   MRT_GlobalFilterTextField as MRTGlobalFilterTextField,
-  MRT_ToggleFiltersButton as MRTToggleFiltersButton,
   MRT_ShowHideColumnsButton as MRTShowHideColumnsButton,
   MRT_ToggleDensePaddingButton as MRTToggleDensePaddingButton,
 } from 'material-react-table';
-import ClearFiltersIcon from '@mui/icons-material/ClearAll';
 
-import { Box, IconButton } from '@/ui';
+import { Box, IconButton, Switch } from '@/ui';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
 import type { ColumnsType } from './data-table-types';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import type { SxStyles } from '@/ui/style/types';
+import { ClearFiltersIcon } from '@/ui/icons';
 
 // GV: Disabled prop-types for this to work. From the react 19 ugprade guide it seems that prop-types are deprecated.
 interface TopToolbarProps<TData extends ColumnsType> {
@@ -75,7 +74,6 @@ function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
       <Box display="flex" sx={{ flexDirection: 'column', justifyContent: 'space-evenly' }}>
         <Box sx={sxClasses.selectedRows}>{datatableSettings[layerPath].toolbarRowSelectedMessageRecord}</Box>
         <Box display="flex">
-          <Box sx={sxClasses.selectedRows}>{t('dataTable.filterMap')}</Box>
           <FilterMap layerPath={layerPath} isGlobalFilterOn={!!globalFilter?.length} />
         </Box>
       </Box>
@@ -84,7 +82,17 @@ function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
           <MRTGlobalFilterTextField className="buttonOutline" table={table} />
         </Box>
         <Box display="flex" sx={{ justifyContent: 'space-around' }}>
-          <MRTToggleFiltersButton className="buttonOutline" table={table} />
+          <Switch
+            checked={table.getState().showColumnFilters}
+            onChange={() => table.setShowColumnFilters(!table.getState().showColumnFilters)}
+            size="small"
+            label={
+              table.getState().showColumnFilters
+                ? `${t('general.hide')} ${t('dataTable.filterToggle')}`
+                : `${t('general.show')} ${t('dataTable.filterToggle')}`
+            }
+            sx={sxClasses.filterMap}
+          />
 
           <IconButton
             className="buttonOutline"

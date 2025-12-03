@@ -16,6 +16,7 @@ import {
   RestartAltIcon,
   HighlightOutlinedIcon,
   TableViewIcon,
+  TimeSliderIcon,
   BrowserNotSupportedIcon,
   Divider,
   ListItem,
@@ -47,6 +48,8 @@ import {
   useMapStoreActions,
   useMapSelectorLayerParentHidden,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useTimeSliderLayers, useTimeSliderStoreActions } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 
 // TODO: WCAG Issue #3108 - Fix layers.moreInfo button (button nested within a button)
 // TODO: WCAG Issue #3108 - Check all disabled buttons. They may need special treatment. Need to find instance in UI first)
@@ -146,6 +149,14 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const layerVisible = useMapSelectorLayerVisibility(layerDetails.layerPath);
   const parentHidden = useMapSelectorLayerParentHidden(layerDetails.layerPath);
   const layerHidden = useMapSelectorIsLayerHiddenOnMap(layerDetails.layerPath);
+  const timeSliderLayers = useTimeSliderLayers();
+  const timeSliderActions = useTimeSliderStoreActions();
+
+  // Use navigate hook for time slider (only if time slider state exists)
+  const navigateToTimeSlider = useNavigateToTab(
+    'time-slider',
+    timeSliderActions ? (layerPath: string) => timeSliderActions.setSelectedLayerPath(layerPath) : undefined
+  );
 
   // Is highlight button disabled?
   const isLayerHighlightCapable = layerDetails.controls?.highlight;
@@ -372,17 +383,42 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   }
 
   function renderDetailsButton(): JSX.Element {
-    if (layerDetails.controls?.table !== false)
-      return (
-        <IconButton id="table-details" aria-label={t('legend.tableDetails')} className="buttonOutline" onClick={handleOpenTable}>
-          <TableViewIcon />
-        </IconButton>
-      );
+    const isDisabled = layerDetails.controls?.table === false || layerHidden || parentHidden;
+
     return (
-      <IconButton aria-label={t('layers.tableViewNone')} id="table-details" className="buttonOutline" disabled>
-        <TableViewIcon color="disabled" />
+      <IconButton
+        id="table-details"
+        aria-label={isDisabled ? t('layers.tableViewNone') : t('legend.tableDetails')}
+        className="buttonOutline"
+        onClick={handleOpenTable}
+        disabled={isDisabled}
+      >
+        <TableViewIcon color={isDisabled ? 'disabled' : 'inherit'} />
       </IconButton>
     );
+  }
+
+  function renderTimeSliderButton(): JSX.Element | null {
+    // Check if layer is in time slider
+    const isLayerInTimeSlider = timeSliderLayers && timeSliderLayers[layerDetails.layerPath];
+    const isDisabled = layerHidden || parentHidden;
+
+    if (isLayerInTimeSlider) {
+      return (
+        <IconButton
+          aria-label={t('layers.selectLayerAndScrollTimeSlider')}
+          className="buttonOutline"
+          onClick={(event) => {
+            event.stopPropagation();
+            navigateToTimeSlider({ layerPath: layerDetails.layerPath });
+          }}
+          disabled={isDisabled}
+        >
+          <TimeSliderIcon color={isDisabled ? 'disabled' : 'inherit'} />
+        </IconButton>
+      );
+    }
+    return null;
   }
 
   function renderHighlightButton(): JSX.Element {
@@ -416,9 +452,15 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   }
 
   function renderLayerButtons(): JSX.Element {
+    const timeSliderButton = renderTimeSliderButton();
+    const hasDataTable = datatableSettings[layerDetails.layerPath];
+    const showDivider = hasDataTable || timeSliderButton;
+
     return (
       <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px', marginLeft: 'auto' }}>
-        {datatableSettings[layerDetails.layerPath] && renderDetailsButton()}
+        {hasDataTable && renderDetailsButton()}
+        {timeSliderButton}
+        {showDivider && <Box sx={sxClasses.verticalDivider} />}
         <IconButton aria-label={t('legend.refreshLayer')} className="buttonOutline" onClick={handleRefreshLayer}>
           <RestartAltIcon />
         </IconButton>

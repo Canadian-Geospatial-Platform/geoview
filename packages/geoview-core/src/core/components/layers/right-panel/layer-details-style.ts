@@ -74,4 +74,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       },
     },
   },
+  verticalDivider: {
+    width: '1px',
+    height: '30px',
+    backgroundColor: theme.palette.geoViewColor.bgColor.dark[300],
+  },
 });

@@ -63,7 +63,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
   // Get actions and states from store
   // TODO: evaluate best option to set value by layer path.... through a getter?
-  const { setValues, setLocked, setReversed, setDelay, setStep, setFiltering } = useTimeSliderStoreActions();
+  const { setValues, setLocked, setReversed, setDelay, setStep, setFiltering } = useTimeSliderStoreActions()!; // TODO: This should be handle higher up...  timeSliderStoreActions will always have a value here, ! to ignore possibility of undefined
   const displayLanguage = useAppDisplayLanguage();
 
   // TODO: check performance as we should technically have one selector by constant

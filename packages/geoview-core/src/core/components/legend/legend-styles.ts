@@ -157,4 +157,20 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     paddingTop: '8px',
     paddingLeft: '8px',
   },
+  buttonDivider: {
+    display: 'flex',
+    alignItems: 'center',
+    marginRight: 2,
+    paddingRight: 2,
+    position: 'relative',
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      right: 0,
+      top: '15%',
+      bottom: '15%',
+      width: '1px',
+      backgroundColor: theme.palette.geoViewColor.bgColor.dark[300],
+    },
+  },
 });
