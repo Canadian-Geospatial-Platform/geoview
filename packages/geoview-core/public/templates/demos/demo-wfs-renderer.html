@@ -47,7 +47,6 @@
         resize: none;
       }
     </style>
-
   </head>
 
   <body>
@@ -68,21 +67,21 @@
       <div style="margin-bottom: 15px">
         <label for="renderer">Input WMS/WFS Renderer examples:</label>
         <select class="form-select" name="renderer" id="renderer" style="display: inline-block; width: auto; margin-left: 10px">
-          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/hc/airborne_radioactivity_en","layers":"AIRB_RAD"}'>Airborne (Point simple)</option>
-          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/critical_minerals_en","layers":"mines"}'>Mines (Point simple)</option>
-          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/oam_en","layers":"oam"}'>Abandoned Orphaned Mines (Point uniqueValue)</option>
-          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/earthquakes_en","layers":"earthquakes_2000-2010"}'>Earthquakes 2000-2010 (Point uniqueValue)</option>
-          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/iaac/assessment_inventory_en","layers":"completed"}'>Assessment Completed (Point uniqueValue)</option>
-          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/wind_turbine_database_en","layers":"QC"}'>Wind Turbine (Point uniqueValue (lots!))</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/hc/airborne_radioactivity_en","layers":"AIRB_RAD"}'>Airborne (Point simple) - VPN</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/critical_minerals_en","layers":"mines"}'>Mines (Point simple) - VPN</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/oam_en","layers":"oam"}'>Abandoned Orphaned Mines (Point uniqueValue) - VPN</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/earthquakes_en","layers":"earthquakes_2000-2010"}'>Earthquakes 2000-2010 (Point uniqueValue) - VPN</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/iaac/assessment_inventory_en","layers":"completed"}'>Assessment Completed (Point uniqueValue) - VPN</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/wind_turbine_database_en","layers":"QC"}'>Wind Turbine (Point uniqueValue (lots!)) - VPN</option>
           <option value='{"url":"https://demo.mapserver.org/cgi-bin/wms","layers":"cities"}'>Cities (Point classBreaks)</option>
-          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/charging_corridor_en","layers":"Corridor Public Charging Planning Map"}'>Charging Corridor (LineString uniqueValue)</option>
-          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/gsc_surficial_geology_en","layers":"DMF"}'>Surficial Geology (Polygon simple)</option>
-          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/lidar_point_cloud_canelevation_en","layers":"lidar-projects"}'>Lidar Point Cloud (Polygon simple)</option>
-          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/phys_reg_en","layers":"regions"}'>Regions (Polygon uniqueValue)</option>
-          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/GSC_Seismic_Reflection_en","layers":"pacific"}'>Pacific Seismic (LineString uniqueValue (complex, incomplete))</option>
-          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/EGS_Flood_Archive_DEV_en","layers":"EGS_Flood_Extent_Archive_en"}'>EGS Flood Extent (Polygons with Lines rendering)</option>
-          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/major_projects_inventory_en","layers":"mpi-point"}'>Major Projects (styles with functions!)</option>
-          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_2010_15_20_en","layers":"landcover_2010_19classes"}'>Land Cover 2010-2019 Classes (no GetStyles at all)</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/charging_corridor_en","layers":"Corridor Public Charging Planning Map"}'>Charging Corridor (LineString uniqueValue) - VPN</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/gsc_surficial_geology_en","layers":"DMF"}'>Surficial Geology (Polygon simple) - VPN</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/lidar_point_cloud_canelevation_en","layers":"lidar-projects"}'>Lidar Point Cloud (Polygon simple) - VPN</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/phys_reg_en","layers":"regions"}'>Regions (Polygon uniqueValue) - VPN</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/GSC_Seismic_Reflection_en","layers":"pacific"}'>Pacific Seismic (LineString uniqueValue (complex, incomplete)) - VPN</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/EGS_Flood_Archive_DEV_en","layers":"EGS_Flood_Extent_Archive_en"}'>EGS Flood Extent (Polygons with Lines rendering) - VPN</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/major_projects_inventory_en","layers":"mpi-point"}'>Major Projects (styles with functions!) - VPN</option>
+          <option value='{"url":"https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_2010_15_20_en","layers":"landcover_2010_19classes"}'>Land Cover 2010-2019 Classes (no GetStyles at all) - VPN</option>
         </select>
       </div>
     </div>
@@ -93,12 +92,12 @@
       <span>The layers</span>
       <input id="layers" type="text" style="width:100%;" />
       <div>
-        <button id="executeFetch" style="margin: 10px 0px;">Fetch XML</button>
+        <button class="btn btn-primary" id="executeFetch" style="margin: 10px 0px;">Fetch XML</button>
       </div>
       <div>The GetStyles response from the WMS which will be used to create the Geoview style:</div>
       <textarea id="inputTextArea" ></textarea>
       <div>
-        <button id="executeButton" style="margin: 10px 0px;">Execute</button>
+        <button class="btn btn-primary" id="executeButton" style="margin: 10px 0px;">Execute</button>
       </div>
       <div>Geoview Output Style Configuration:</div>
       <textarea id="outputTextArea"></textarea>
@@ -144,8 +143,6 @@
           lineWrapping: true,
           matchTags: true,
           autoCloseTags: true,
-          // gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
-          // extraKeys: {"Ctrl-Q": function(cm){ cm.foldCode(cm.getCursor()); }},
       });
 
       // Transform the text area into a code text area using CodeMirror
