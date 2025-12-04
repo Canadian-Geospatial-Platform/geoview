@@ -586,9 +586,6 @@ export class GVWMS extends AbstractGVRaster {
     // Read the features
     const features = GeoUtilities.readFeaturesFromGeoJSON(responseData, undefined);
 
-    // Check if has oid field and therefore supports zoom to
-    const supportZoomTo = !!wfsLayerConfig.getOutfields()?.find((outfield) => outfield.type === 'oid');
-
     // Parse the features
     return AbstractGVLayer.helperFormatFeatureInfoResult(
       features,
