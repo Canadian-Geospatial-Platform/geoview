@@ -307,7 +307,7 @@ export class ConfigValidation {
       // If there's a parent
       if (parentInitialSettings) {
         // Merge the rest of parent and child settings
-        ConfigBaseClass.setClassOrTypeInitialSettings(layerConfig, deepMerge(initialSettings, parentInitialSettings));
+        ConfigBaseClass.setClassOrTypeInitialSettings(layerConfig, deepMerge(parentInitialSettings, initialSettings));
       }
 
       const minScale = ConfigBaseClass.getClassOrTypeMinScale(layerConfig);

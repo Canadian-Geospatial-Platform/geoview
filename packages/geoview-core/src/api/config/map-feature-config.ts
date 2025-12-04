@@ -81,18 +81,18 @@ export class MapFeatureConfig {
     const gvMapDefault = MapFeatureConfig.#getDefaultMapConfig(gvMapFromUser?.viewSettings?.projection);
 
     // Combine the default values.
-    this.map = deepMerge(gvMapFromUser, gvMapDefault);
+    this.map = deepMerge(gvMapDefault, gvMapFromUser);
 
     // Above code will add default zoomAndCenter, remove if other initial view is provided
     if (this.map.viewSettings.initialView?.extent || this.map.viewSettings.initialView?.layerIds)
       delete this.map.viewSettings.initialView.zoomAndCenter;
 
-    this.serviceUrls = deepMerge(userMapFeatureConfig.serviceUrls, DEFAULT_MAP_FEATURE_CONFIG.serviceUrls);
+    this.serviceUrls = deepMerge(DEFAULT_MAP_FEATURE_CONFIG.serviceUrls, userMapFeatureConfig.serviceUrls);
     this.theme = userMapFeatureConfig.theme || DEFAULT_MAP_FEATURE_CONFIG.theme;
     this.navBar = [...(userMapFeatureConfig.navBar ?? DEFAULT_MAP_FEATURE_CONFIG.navBar ?? [])];
-    this.appBar = deepMerge(userMapFeatureConfig.appBar, DEFAULT_MAP_FEATURE_CONFIG.appBar);
-    this.footerBar = deepMerge(userMapFeatureConfig.footerBar, DEFAULT_MAP_FEATURE_CONFIG.footerBar);
-    this.overviewMap = deepMerge(userMapFeatureConfig.overviewMap, DEFAULT_MAP_FEATURE_CONFIG.overviewMap);
+    this.appBar = deepMerge(DEFAULT_MAP_FEATURE_CONFIG.appBar, userMapFeatureConfig.appBar);
+    this.footerBar = deepMerge(DEFAULT_MAP_FEATURE_CONFIG.footerBar, userMapFeatureConfig.footerBar);
+    this.overviewMap = deepMerge(DEFAULT_MAP_FEATURE_CONFIG.overviewMap, userMapFeatureConfig.overviewMap);
     this.components = [...(userMapFeatureConfig.components ?? DEFAULT_MAP_FEATURE_CONFIG.components ?? [])];
     this.corePackages = [...(userMapFeatureConfig.corePackages ?? DEFAULT_MAP_FEATURE_CONFIG.corePackages ?? [])];
     this.corePackagesConfig = [...(userMapFeatureConfig.corePackagesConfig ?? DEFAULT_MAP_FEATURE_CONFIG.corePackagesConfig ?? [])];

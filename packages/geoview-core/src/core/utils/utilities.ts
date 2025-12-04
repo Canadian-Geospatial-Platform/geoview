@@ -156,8 +156,8 @@ export function deepClone<T>(value: T): T {
  * Deeply merges two objects, filling in undefined or missing properties
  * from the source object into the target object. Nested objects are merged recursively.
  * Existing values in the target object are preserved.
- * @param target - The target object to merge values into.
- * @param source - The source object to merge values from.
+ * @param {S} base - The source object containing the default values.
+ * @param {T} target - The target object to merge values into.
  * @returns The merged target object.
  * @example
  * ```ts
@@ -168,21 +168,21 @@ export function deepClone<T>(value: T): T {
  * ```
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function deepMerge<T extends any, S extends any>(target: T, source: S): T & S {
-  if (!target) return source as T & S;
-  if (!source) return target as T & S;
+export function deepMerge<S extends any, T extends any>(base: S, target: T): S & T {
+  if (!base) return target as T & S;
+  if (!target) return base as T & S;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const out: any = { ...target };
 
-  for (const key of Object.keys(source)) {
+  for (const key of Object.keys(base)) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const srcVal = (source as any)[key];
+    const srcVal = (base as any)[key];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const tgtVal = (target as any)[key];
 
     if (isPlainObject(srcVal) && isPlainObject(tgtVal)) {
-      out[key] = deepMerge(tgtVal, srcVal); // recurse first on children
+      out[key] = deepMerge(srcVal, tgtVal); // recurse first on children
     } else if (tgtVal === undefined) {
       out[key] = srcVal; // only set if target doesn't have a value
     }
