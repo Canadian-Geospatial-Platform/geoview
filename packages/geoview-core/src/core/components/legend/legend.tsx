@@ -13,7 +13,6 @@ import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 
 interface LegendType {
-  fullWidth?: boolean;
   containerType?: 'appBar' | 'footerBar';
 }
 
@@ -48,7 +47,7 @@ const responsiveWidths = {
   },
 } as const;
 
-export function Legend({ fullWidth, containerType = CONTAINER_TYPE.FOOTER_BAR }: LegendType): JSX.Element | null {
+export function Legend({ containerType = CONTAINER_TYPE.FOOTER_BAR }: LegendType): JSX.Element | null {
   logger.logTraceRender('components/legend/legend');
 
   // Hooks
@@ -161,14 +160,18 @@ export function Legend({ fullWidth, containerType = CONTAINER_TYPE.FOOTER_BAR }:
     }
 
     return formattedLegendLayerList.map((layers, idx) => (
-      // eslint-disable-next-line react/no-array-index-key
-      <Box key={`${idx}`} width={fullWidth ? responsiveWidths.full : responsiveWidths.responsive} sx={styles.layerBox}>
+      <Box
+        // eslint-disable-next-line react/no-array-index-key
+        key={`${idx}`}
+        width={containerType === CONTAINER_TYPE.APP_BAR ? responsiveWidths.full : responsiveWidths.responsive}
+        sx={styles.layerBox}
+      >
         {layers.map((layer) => (
           <LegendLayer layerPath={layer.layerPath} key={layer.layerPath} />
         ))}
       </Box>
     ));
-  }, [formattedLegendLayerList, fullWidth, noLayersContent]);
+  }, [formattedLegendLayerList, noLayersContent, containerType]);
 
   // Early return with empty fragment if not the active tab
   if (footerId !== 'legend' && appBarId.tabId !== 'legend') return null;

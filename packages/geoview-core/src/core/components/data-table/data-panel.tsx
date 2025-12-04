@@ -29,7 +29,6 @@ import type { TypeContainerBox } from '@/core/types/global-types';
 import DataSkeleton from './data-skeleton';
 
 interface DataPanelType {
-  fullWidth?: boolean;
   containerType?: TypeContainerBox;
 }
 /**
@@ -37,7 +36,7 @@ interface DataPanelType {
  * @returns {JSX.Element} Data table as react element.
  */
 
-export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPanelType): JSX.Element {
+export function Datapanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPanelType): JSX.Element {
   // Log
   logger.logTraceRender('components/data-table/data-panel');
 
@@ -297,7 +296,6 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
       selectedLayerPath={selectedLayerPath}
       layerList={memoLayerList}
       onLayerListClicked={handleLayerChange}
-      fullWidth={fullWidth}
       guideContentIds={[
         'dataTable',
         'dataTable.children.filterData',

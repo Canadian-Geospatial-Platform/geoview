@@ -9,10 +9,8 @@ import type { SxStyles } from '@/ui/style/types';
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
   list: {
-    overflowY: 'auto',
     color: 'text.primary',
     width: '100%',
-    paddingRight: '14px',
     '& .MuiListItemText-primary': {
       fontSize: theme.palette.geoViewFontSize.lg,
       fontWeight: '600',
@@ -102,4 +100,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     height: 'auto !important',
     '> span': { height: '2px' },
   },
+  layerCount: {
+    display: 'none',
+    position: 'absolute',
+    right: '12px',
+    top: '12px'
+  }
 });

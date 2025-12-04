@@ -28,7 +28,7 @@ import {
   useUIStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapInteraction, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useAppFullscreenActive, useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import type { AppBarApi, AppBarCreatedEvent, AppBarRemovedEvent } from '@/core/components';
@@ -84,8 +84,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const { tabId, isOpen, isFocusTrapped } = useUIActiveAppBarTab();
   const { hideClickMarker } = useMapStoreActions();
 
-  const isMapFullScreen = useAppFullscreenActive();
-
   const geoviewElement = useAppGeoviewHTMLElement().querySelector('[id^="mapTargetElement-"]') as HTMLElement;
 
   const { setActiveAppBarTab } = useUIStoreActions();
@@ -107,8 +105,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
     return {
       geolocator: { icon: <SearchIcon />, content: <Geolocator key="geolocator" /> },
       guide: { icon: <QuestionMarkIcon />, content: <Guide containerType={CONTAINER_TYPE.APP_BAR} /> },
-      details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
-      legend: { icon: <LegendIcon />, content: <Legend fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
+      details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel containerType={CONTAINER_TYPE.APP_BAR} /> },
+      legend: { icon: <LegendIcon />, content: <Legend containerType={CONTAINER_TYPE.APP_BAR} /> },
       layers: { icon: <LayersOutlinedIcon />, content: <LayersPanel containerType={CONTAINER_TYPE.APP_BAR} /> },
       'data-table': { icon: <StorageIcon />, content: <Datapanel containerType={CONTAINER_TYPE.APP_BAR} /> },
     } as Record<string, GroupPanelType>;
@@ -203,28 +201,21 @@ export function AppBar(props: AppBarProps): JSX.Element {
   );
 
   /**
-   * Get panel width based on window screen for data table and default for other panels
-   * @param {string} tab tab which open the panel.
+   * Panels default to a 100% width of the map container, legend and details panels are set to be slimmer
+   *
+   * @param {string} tab - The id of the panel
+   * @returns {number} The width for the panel
    */
-  const getPanelWidth = useCallback(
-    (tab: string): number => {
-      let width = 400;
-      if (
-        (tab === DEFAULT_APPBAR_CORE.DATA_TABLE || tab === DEFAULT_APPBAR_CORE.LAYERS || tab === DEFAULT_APPBAR_CORE.GUIDE) &&
-        isMapFullScreen
-      ) {
-        width = window.screen.width - 65;
-      }
-      if (
-        (tab === DEFAULT_APPBAR_CORE.DATA_TABLE || tab === DEFAULT_APPBAR_CORE.LAYERS || tab === DEFAULT_APPBAR_CORE.GUIDE) &&
-        !isMapFullScreen
-      ) {
-        width = geoviewElement?.clientWidth ?? 0;
-      }
-      return width;
-    },
-    [geoviewElement, isMapFullScreen]
-  );
+  const getPanelWidth = useCallback((tab: string): number => {
+    let width = 100;
+
+    // set these panels to be slimmer
+    if (tab === DEFAULT_APPBAR_CORE.LEGEND || tab === DEFAULT_APPBAR_CORE.DETAILS) {
+      width = 30;
+    }
+
+    return width;
+  }, []);
 
   useEffect(() => {
     // Log
