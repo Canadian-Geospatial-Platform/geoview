@@ -17,7 +17,6 @@ import {
   useUIFooterBarIsCollapsed,
   useUIHiddenTabs,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 import type { FooterBarApi, FooterTabCreatedEvent, FooterTabRemovedEvent } from '@/core/components';
 import { DEFAULT_FOOTER_TABS_ORDER } from '@/api/types/map-schema-types';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
@@ -75,7 +74,6 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const isCollapsed = useUIFooterBarIsCollapsed();
   const shellContainer = useAppShellContainer();
   const { setActiveFooterBarTab, enableFocusTrap, disableFocusTrap, setFooterBarIsCollapsed } = useUIStoreActions();
-  const mapSize = useMapSize() || [200, 200]; // Default in case the map isn't rendered yet and the Footer tries to render
   const appHeight: number = useAppHeight();
   const hiddenTabs: string[] = useUIHiddenTabs();
 
@@ -435,7 +433,6 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         TabContentVisibilty={!isCollapsed ? 'visible' : 'hidden'}
         containerType={CONTAINER_TYPE.FOOTER_BAR}
         rightButtons={!isCollapsed && isMapFullScreen && <ResizeFooterPanel />}
-        sideAppSize={mapSize}
         appHeight={appHeight}
         hiddenTabs={hiddenTabs}
         isFullScreen={isMapFullScreen}

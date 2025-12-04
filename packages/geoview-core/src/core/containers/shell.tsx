@@ -325,6 +325,8 @@ export function Shell(props: ShellProps): JSX.Element {
       </Link>
       <FocusTrap open={activeTrapGeoView}>
         <Box ref={shellRef} id={`shell-${mapViewer.mapId}`} sx={sxClasses.shell} className="geoview-shell" tabIndex={-1}>
+          <CircularProgress isLoaded={mapLoaded} />
+          <CircularProgress isLoaded={!circularProgressActive} />
           {interaction === 'dynamic' && (
             <Link
               id={`main-map-${mapViewer.mapId}`}
@@ -341,8 +343,6 @@ export function Shell(props: ShellProps): JSX.Element {
           )}
 
           <Box id={`map-${mapViewer.mapId}`} sx={sxClasses.mapShellContainer} className="mapContainer" ref={mapShellContainerRef}>
-            <CircularProgress isLoaded={mapLoaded} />
-            <CircularProgress isLoaded={!circularProgressActive} />
             <AppBar api={mapViewer.appBarApi} onScrollShellIntoView={handleScrollShellIntoView} />
             <Box sx={sxClasses.mapContainer}>
               <Map viewer={mapViewer} />

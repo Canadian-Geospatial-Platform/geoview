@@ -84,7 +84,7 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
           fontWeight: '600',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
-          [theme.breakpoints.up('md')]: { display: 'none' },
+          [theme.breakpoints.up('sm')]: { display: 'none' },
         }}
         component="div"
       >

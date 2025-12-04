@@ -89,7 +89,7 @@ const NotificationItem = memo(function NotificationItem({
           <Box sx={sxClasses.notificationsCount}>{notification.count}</Box>
         </Box>
       )}
-      <IconButton aria-label={t('general.close')} onClick={handleRemove}>
+      <IconButton aria-label={t('general.close')} size="small" onClick={handleRemove}>
         <CloseIcon />
       </IconButton>
     </Box>
@@ -127,7 +127,7 @@ const NotificationHeader = memo(function NotificationHeader({
         >
           {t('appbar.removeAllNotifications')}
         </Button>
-        <IconButton aria-label={t('general.close')} sx={{ ml: '0.25rem' }} onClick={onClose}>
+        <IconButton aria-label={t('general.close')} size="small" sx={{ ml: '0.25rem' }} onClick={onClose}>
           <CloseIcon />
         </IconButton>
       </Box>
@@ -298,7 +298,7 @@ export default memo(function Notifications(): JSX.Element {
               {notifications.length > 0 ? (
                 notificationsList
               ) : (
-                <Typography component="div" sx={{ padding: '10px 15px' }}>
+                <Typography component="div" sx={{ padding: '10px 0' }}>
                   {t('appbar.noNotificationsAvailable')}
                 </Typography>
               )}

@@ -574,19 +574,16 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
 
     // Show the details for a feature on map click
     if (mapClickCoordinates && memoLayersList?.length) {
-      // Select the first layer that has features and isn't the coordinate info
-      const selectedLayer = memoLayersList.find((layer) => !!layer.numOffeatures && layer.layerPath !== 'coordinate-info');
-      let newSelectedLayerPath = selectedLayer?.layerPath ?? '';
-
-      // Fallback to the coordinate info if it's enabled and no features are available
-      if (!selectedLayer && coordinateInfoEnabled) {
-        newSelectedLayerPath = 'coordinate-info';
+      // if we don't have a selected layer path with features select the first layer path with features
+      if (!selectedLayerPath.length) {
+        const selectedLayer = memoLayersList.find((layer) => !!layer.numOffeatures);
+        setSelectedLayerPath(selectedLayer?.layerPath ?? '');
       }
 
-      setSelectedLayerPath(newSelectedLayerPath);
-
       // make sure the right panel is visible
-      layoutRef.current?.showRightPanel(true);
+      if (!isRightPanelVisible) {
+        layoutRef.current?.showRightPanel(true);
+      }
     }
 
     // On new map click (coordinates changed), clear all highlights, checked features, and layer features

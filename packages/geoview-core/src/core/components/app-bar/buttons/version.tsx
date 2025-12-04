@@ -47,17 +47,17 @@ const getSxClasses = (theme: Theme): SxStyles => ({
   versionHeading: {
     display: 'flex',
     alignItems: 'center',
-    borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[100]}}`,
+    borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[100]}`,
+    padding: '10px',
+    justifyContent: 'space-between',
   },
   versionsInfoTitle: {
     fontSize: theme.palette.geoViewFontSize.default,
     fontWeight: '700',
-    padding: '20px',
     color: theme.palette.geoViewColor.textColor.main,
-    marginBottom: '10px',
   },
   versionInfoContent: {
-    padding: '20px',
+    padding: '10px',
     gap: '5px',
     display: 'flex',
     flexDirection: 'column',
@@ -137,7 +137,7 @@ export default function Version(): JSX.Element {
                 <Typography sx={sxClasses.versionsInfoTitle} component="h3">
                   {t('appbar.version')}
                 </Typography>
-                <IconButton onClick={handleClickAway} aria-label={t('general.close')} tooltipPlacement="right">
+                <IconButton onClick={handleClickAway} size="small" aria-label={t('general.close')} tooltipPlacement="right">
                   <CloseIcon />
                 </IconButton>
               </Box>
