@@ -432,7 +432,7 @@ The **Details** tab has two sections: a layer list on the left and feature detai
 
 <div style="border-bottom: 1px solid #999999; margin-bottom: 10px; width: 50%;"></div>
 
- The clear all higlights button ![An icon representing the "Clear highlights" function]({{assetsURL}}/img/guide/layers/clear_highlight_30.svg) is located in the upper right corner above the layer list. Click this button to remove all feature highlights from the map.
+The clear all higlights button ![An icon representing the "Clear highlights" function]({{assetsURL}}/img/guide/layers/clear_highlight_30.svg) is located in the upper right corner above the layer list. Click this button to remove all feature highlights from the map.
 
 **Feature Details Section (Right)**
 
@@ -474,6 +474,8 @@ When coordinate info is enabled, it will appear as the first element in the laye
 
 _**Note: Click on a layer to display its Data Table information in the right section.**_
 
+Click on a layer and the number of available features is displayed below the layer title.
+
 **Important Navigation Information**
 
 - You can request data from one table at a time. While data is being fetched, all _layers_ buttons will be disabled.
@@ -489,21 +491,21 @@ The **Data Table** controls are shown in the upper right section of the layer da
 
 _Note: Some options may not be available or are preselected depending on various factors._
 
-| Symbol                                                                                                      | Name            | Description                                                                                                          |
-| ----------------------------------------------------------------------------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------- |
-| ![An icon representing the "Clear Filters" function]({{assetsURL}}/img/guide/datatable/filters_clear.svg)   | Clear Filters   | Clear all data table filters.                                                                                        |
-| ![An icon representing the "Display Filters" function]({{assetsURL}}/img/guide/datatable/filter_toggle.svg) | Display Filters | Toggle to show or hide filters.                                                                                      |
-| ![An icon representing the "Filter switch" function]({{assetsURL}}/img/guide/datatable/filter.png)          | Filter switch   | Apply filters to the map.                                                                                            |
-| ![An icon representing the "Display Columns" function]({{assetsURL}}/img/guide/datatable/column_show.svg)   | Display Columns | Allows you to choose which columns you want visible and to pin columns to the left or right of the table.            |
-| ![An icon representing the "Density" function]({{assetsURL}}/img/guide/datatable/density.svg)               | Density         | Toggle the height of the rows in the data table.                                                                     |
-| ![An icon representing the "Download" function]({{assetsURL}}/img/guide/datatable/export.svg)               | Download        | Download data table as CSV or GeoJSON. May not work as intended on mobile due to limitations with downloading files. |
+| Symbol                                                                                                    | Name              | Description                                                                                                          |
+| --------------------------------------------------------------------------------------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Switch                                                                                                    | Filter map        | Apply filters to the map.                                                                                            |
+| Switch                                                                                                    | Show/Hide filters | Toggle to show or hide columns filters.                                                                              |
+| ![An icon representing the "Clear Filters" function]({{assetsURL}}/img/guide/datatable/filter_clear.svg)  | Clear filters     | Clear all data table columns filters.                                                                                |
+| ![An icon representing the "Display Columns" function]({{assetsURL}}/img/guide/datatable/column_show.svg) | Show/Hide columns | Allows you to choose which columns you want visible and to pin columns to the left or right of the table.            |
+| ![An icon representing the "Density" function]({{assetsURL}}/img/guide/datatable/density.svg)             | Toggle density    | Toggle the height of the rows in the data table.                                                                     |
+| ![An icon representing the "Download" function]({{assetsURL}}/img/guide/datatable/export.svg)             | Download          | Download data table as CSV or GeoJSON. May not work as intended on mobile due to limitations with downloading files. |
 
 The first three columns of the data table are Icon, Zoom and Details. The remaining columns vary depending on the layer selected.
 
 In addition to scrolling data, it is possible to:
 
-- Sort the data by clicking the header of a column with the sort icon ![]({{assetsURL}}/img/guide/footer/swap_vert_FILL0_wght400_GRAD0_opsz24.svg).
-- Position the map view to the location of the feature corresponding to a given row by selecting the zoom icon ![]({{assetsURL}}/img/guide/datatable/zoom.svg)
+- Access the detailed modal view for a feature by clicking the details icon ![An icon representing the "Details" function]({{assetsURL}}/img/guide/sidebar/details_30.svg)
+- Zoom the map view to the location of the feature corresponding to a given row by selecting the zoom icon ![]({{assetsURL}}/img/guide/datatable/zoom.svg)
 
 Click the action icon ![]({{assetsURL}}/img/guide/datatable/column_action.svg) beside the column header to show the column action dropdown:
 
@@ -511,8 +513,6 @@ Click the action icon ![]({{assetsURL}}/img/guide/datatable/column_action.svg) b
 - Filter the columns by numerical range, text or date (if the configuration allows it). Changes in the table can also be made to reflect on the map by applying or clearing filters from the map (_apply_: ![]({{assetsURL}}/img/guide/datatable/filter_toggle_25.svg), _clear_: ![]({{assetsURL}}/img/guide/datatable/filter_clear_25.svg))
 - Show and/or hide columns by clicking on the _Hide Columns_ icon ![]({{assetsURL}}/img/guide/datatable/column_hide_25.svg)
 - Navigate the table using a keyboard
-
-Click on a layer and the number of available features is displayed below the layer title.
 
 =3!sortingAndReordering=
 
@@ -532,7 +532,7 @@ Columns can be sorted in ascending/descending order (for numerical data) and alp
 
 #### Filter Data
 
-Data can be filtered by column. To show filters, click on the open filters icon ![]({{assetsURL}}/img/guide/datatable/filter_toggle_25.svg). A column is filterable if there is an input field under the title of the header:
+Data can be filtered by column. To show filters, use the **Show/Hide filters** switch in the Data Table Controls. A column is filterable if there is an input field under the title of the header:
 
 There are 3 types of filters:
 
@@ -572,10 +572,10 @@ The **Time Slider** tab on the Footer Bar has two sections. Layers with a time d
 
 The Time Slider section displays a slider bar with one or two draggable handles. A point in time layer will show one handle. A time period layer will show two handles, to adjust the start and end time of the period.
 
-This checkbox ![]({{assetsURL}}/img/guide/layers/check.png) controls whether the time slider filters the data.
+The **Time filtering** switch controls whether the time slider filters the data.
 
-- When checked, only the data matching the selected time is shown.
-- When unchecked, all data from all dates is displayed, regardless of the slider's position.
+- When enabled, only the data matching the selected time is shown.
+- When disabled, all data from all dates is displayed, regardless of the slider's position.
 
 Click hold and drag the handle on the slider bar to set the desired filter values or select a point in time. For a time period layer, click the lock icon ![]({{assetsURL}}/img/guide/footer/lock_30.svg) to lock the start time handle in place.
 

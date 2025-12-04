@@ -471,6 +471,8 @@ Lorsque les informations de coordonnées sont activées, elles apparaîtront com
 
 _**N.B. : Cliquez sur une couche pour afficher ses données dans la section de droite.**_
 
+Si vous cliquez sur une couche, le nombre d’éléments accessibles s’affichera sous le titre de la couche.
+
 **Informations importantes sur la navigation**
 
 - Vous pouvez demander des données à partir d'une seule table à la fois. Pendant l'extraction des données, tous les boutons _couches_ sont désactivés.
@@ -486,21 +488,21 @@ Les commandes de l’onglet **Données** se trouvent dans le coin supérieur dro
 
 _N.B. : Selon différents facteurs, certaines options sont désactivées ou présélectionnées._
 
-| Symbole                                                                                                                     | Nom                           | Description                                                                                                                                        |
-| --------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ![Une icône représentant la fonction « Effacer les filters »]({{assetsURL}}/img/guide/datatable/filters_clear.svg)          | Effacer les filters           | Effacer tout les filtres de la table.                                                                                                              |
-| ![Une icône représentant la fonction « Afficher/masquer les filtres »]({{assetsURL}}/img/guide/datatable/filter_toggle.svg) | Afficher/masquer les filtres  | Basculer entre l'affichage et le masquage des filtres.                                                                                             |
-| ![Une icône représentant la fonction « Interrupteur de filtres »]({{assetsURL}}/img/guide/datatable/filter.png)             | Interrupteur de filtres       | Appliquer les filtres à la carte.                                                                                                                  |
-| ![Une icône représentant la fonction « Afficher/masquer les colonnes »]({{assetsURL}}/img/guide/datatable/column_show.svg)  | Afficher/masquer les colonnes | Choisir les colonnes visibles et épingler des colonnes à gauche ou à droite du tableau.                                                            |
-| ![Une icône représentant la fonction « Densité »]({{assetsURL}}/img/guide/datatable/density.svg)                            | Densité                       | Modifier la hauteur des lignes du tableau de données.                                                                                              |
-| ![Une icône représentant la fonction « Télécharger »]({{assetsURL}}/img/guide/datatable/export.svg)                         | Télécharger                   | Télécharger le tableau en format CSV ou GeoJSON. Pourrait échouer sur un appareil mobile en raison des restrictions de téléchargement de fichiers. |
+| Symbole                                                                                                                    | Nom                           | Description                                                                                                                                        |
+| -------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Interrupteur                                                                                                               | Filtrer la carte              | Appliquer les filtres à la carte.                                                                                                                  |
+| Interupteur                                                                                                                | Afficher/masquer les filtres  | Basculer entre l'affichage et le masquage des filtres de colonnes.                                                                                 |
+| ![Une icône représentant la fonction « Effacer les filters »]({{assetsURL}}/img/guide/datatable/filter_clear.svg)          | Effacer les filters           | Effacer tout les filtres de colonnes de la table.                                                                                                  |
+| ![Une icône représentant la fonction « Afficher/masquer les colonnes »]({{assetsURL}}/img/guide/datatable/column_show.svg) | Afficher/masquer les colonnes | Choisir les colonnes visibles et épingler des colonnes à gauche ou à droite du tableau.                                                            |
+| ![Une icône représentant la fonction « Densité »]({{assetsURL}}/img/guide/datatable/density.svg)                           | Changer la densité            | Modifier la hauteur des lignes du tableau de données.                                                                                              |
+| ![Une icône représentant la fonction « Télécharger »]({{assetsURL}}/img/guide/datatable/export.svg)                        | Télécharger                   | Télécharger le tableau en format CSV ou GeoJSON. Pourrait échouer sur un appareil mobile en raison des restrictions de téléchargement de fichiers. |
 
 Les trois premières colonnes du tableau de données sont **Icône**, **Zoom** et **Détails**. Les autres colonnes varient selon la couche sélectionnée.
 
 En plus de parcourir les données, vous pouvez :
 
-- trier les données en cliquant sur l’icône de tri ![]({{assetsURL}}/img/guide/footer/swap_vert_FILL0_wght400_GRAD0_opsz24.svg) dans le titre de colonne;
-- afficher sur la carte l’emplacement de l’élément associé à une ligne donnée en cliquant sur l’icône de zoom ![]({{assetsURL}}/img/guide/datatable/zoom.svg).
+- Accéder à la vue modale détaillée d'un élément en cliquant sur l'icône de détails ![Une icône représentant la fonction "Détails"]({{assetsURL}}/img/guide/sidebar/details_30.svg).
+- Zoomer sur la carte à l'emplacement de l'élément en cliquant sur l'icône de zoom ![]({{assetsURL}}/img/guide/datatable/zoom.svg).
 
 Cliquez sur l’icône d’actions ![]({{assetsURL}}/img/guide/datatable/column_action.svg) à côté du titre de colonne pour voir le menu déroulant des actions de colonne :
 
@@ -508,8 +510,6 @@ Cliquez sur l’icône d’actions ![]({{assetsURL}}/img/guide/datatable/column_
 - Filtrer les colonnes par numéro, texte ou date (si la configuration le permet). Pour reporter ou non les changements apportés au tableau, il faut appliquer ou effacer les filtres sur la carte (_appliquer_: ![]({{assetsURL}}/img/guide/datatable/filter_toggle_25.svg), _masquer_: ![]({{assetsURL}}/img/guide/datatable/filter_clear_25.svg)).
 - Afficher ou masquer des colonnes en cliquant sur l’icône _Cacher colonne_ ![]({{assetsURL}}/img/guide/datatable/column_hide_25.svg).
 - Parcourir le tableau avec le clavier.
-
-Si vous cliquez sur une couche, le nombre d’éléments accessibles s’affichera sous le titre de la couche.
 
 =3!sortingAndReordering=
 
@@ -529,11 +529,11 @@ Les colonnes peuvent être triées en ordre croissant ou décroissant (pour les 
 
 #### Filtrer les données
 
-Les données peuvent être filtrées par colonne. Pour voir les filtres, cliquez sur l’icône pour afficher les filtres ![]({{assetsURL}}/img/guide/datatable/filter_toggle_25.svg). S’il y a un champ de saisie en dessous du titre de colonne, c’est que les données de celle-ci peuvent être filtrées.
+Les données peuvent être filtrées par colonne. Pour voir les filtres, utilisez l'interrupteur **Afficher/Masquer les filtres** dans les contrôles du tableau de données. S'il y a un champ de saisie en dessous du titre de colonne, c'est que les données de celle-ci peuvent être filtrées.
 
 Il y a trois types de filtres :
 
-- **Texte :** \*\*\*\*Champ de saisie de caractères.
+- **Texte :** Champ de saisie de caractères.
 - **Chiffre :** Champs de saisie n’acceptant que les chiffres.
   - Si un minimum et un maximum sont définis, le tri se fera selon une plage.
   - Si seulement un minimum est défini, le tri se fera selon l’opération _plus grand que_.
@@ -567,12 +567,12 @@ _**N.B. : Cliquez sur une couche pour afficher son curseur temporel dans la sect
 
 L’onglet **Curseur temporel** dans le pied de page se divise en deux sections. La liste des couches ayant un facteur temporel se trouve dans la section de gauche.
 
-Cette case à cocher ![]({{assetsURL}}/img/guide/layers/check.png) contrôle si le curseur temporel filtre les données.
+L'interrupteur **Filtrage temporel** contrôle si le curseur temporel filtre les données.
 
-- Lorsque la case est cochée, seules les données correspondant à la date sélectionnée sont affichées.
-- Lorsque la case est décochée, toutes les données, peu importe la date, sont affichées.
+- Lorsqu'il est activé, seules les données correspondant à la date sélectionnée sont affichées.
+- Lorsqu'il est désactivé, toutes les données, peu importe la date, sont affichées.
 
-Une barre de curseur s’affiche avec un ou deux points déplaçables. Pour les couches à facteur temporel ponctuel, il n’y a qu’un point déplaçable. Pour les couches à plage temporelle, il y a deux points déplaçables permettant de régler le début et la fin de la plage.
+Une barre de curseur s'affiche avec un ou deux points déplaçables. Pour les couches à facteur temporel ponctuel, il n'y a qu'un point déplaçable. Pour les couches à plage temporelle, il y a deux points déplaçables permettant de régler le début et la fin de la plage.
 
 Cliquez sur le point et déplacez-le sur la barre pour sélectionner les valeurs de filtre souhaitées ou un moment donné dans le temps. Pour une couche à plage temporelle, cliquez sur l’icône de cadenas ![]({{assetsURL}}/img/guide/footer/lock_30.svg) afin de verrouiller le point de début.
 

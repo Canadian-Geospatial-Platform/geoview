@@ -350,7 +350,7 @@
     "total": "total",
     "selectLayerAndScroll": "Show in Data Table panel",
     "accessAdvancedFunctions": "Access Data Table panel for advanced functions",
-    "filterToggle": "column filters"
+    "filterToggle": " filters"
   },
   "geoChart": {
     "noChartAvailable": "Click on the map on a layer with chart"
