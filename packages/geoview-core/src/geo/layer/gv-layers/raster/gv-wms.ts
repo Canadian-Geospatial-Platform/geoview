@@ -927,7 +927,7 @@ export class GVWMS extends AbstractGVRaster {
       layerConfig.setLayerFilter(filterValueToUse);
 
       const queryElements = filterValueToUse.split(/(?<=\b)\s*=/);
-      const dimension = queryElements[0].trim().replace('"', '');
+      const dimension = queryElements[0].trim().replaceAll('"', '');
       // If there's a specific filter
       if (queryElements.length > 1) {
         filterValueToUse = queryElements[1].trim();
