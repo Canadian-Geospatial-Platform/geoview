@@ -1,4 +1,4 @@
-export class LocalStorage {
+export abstract class LocalStorage {
   /**
    * Helper function to read a number in the local storage and if the
    * key can't be found or is invalid return the default value provided.
