@@ -48,8 +48,9 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: 
     },
   },
   mobileDropdown: {
+    marginLeft: '41px',
     maxWidth: '200px',
-    p: 6,
+    padding: '8px 0',
     '& .MuiInputBase-root': {
       borderRadius: '4px',
     },

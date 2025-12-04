@@ -1,6 +1,7 @@
 import type { ReactNode, Ref } from 'react';
 import { useState, useCallback, forwardRef, useImperativeHandle, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useMediaQuery } from '@mui/material';
 import type { SxProps } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
 import Markdown from 'markdown-to-jsx';
@@ -61,6 +62,7 @@ const ResponsiveGridLayout = forwardRef(
     const { t } = useTranslation<string>();
     const theme = useTheme();
     const isMapFullScreen = useAppFullscreenActive();
+    const isMobile = useMediaQuery( theme.breakpoints.down('sm') );
 
     // Ref for right panel
     const rightMainRef = useRef<HTMLDivElement>();
@@ -214,7 +216,7 @@ const ResponsiveGridLayout = forwardRef(
     }
 
     const renderEnlargeButton = (): JSX.Element | null => {
-      if (window.innerWidth <= theme.breakpoints.values.md) {
+      if (isMobile) {
         return null; // Return null if on small screens (down to md)
       }
 
@@ -237,7 +239,7 @@ const ResponsiveGridLayout = forwardRef(
     const renderCloseButton = (): JSX.Element | null => {
 
       // Check conditions for hiding the button
-      if ( (!toggleMode) && (window.innerWidth >= theme.breakpoints.values.sm || !isRightPanelVisible)) {
+      if ( (!toggleMode) && (!isMobile || !isRightPanelVisible)) {
         return null;
       }
 

@@ -1,10 +1,11 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Box, TextField, InputAdornment, IconButton } from '@/ui';
 import { SearchIcon, CloseIcon, KeyboardArrowUpIcon, KeyboardArrowDownIcon } from '@/ui/icons';
 import type { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from '@/core/utils/logger';
+import { getSxClasses } from './guide-style';
 
 // Protection pattern functions that return new regex instances
 const getProtectionPatterns = (): RegExp[] => [
@@ -33,6 +34,7 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
   // Hooks
   const { t } = useTranslation();
   const theme = useTheme();
+  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // State
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -411,7 +413,7 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
   );
 
   return (
-    <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider', width: '400px', maxWidth: '100%' }}>
+    <Box sx={sxClasses.guideSearch}>
       <TextField
         fullWidth
         size="small"
