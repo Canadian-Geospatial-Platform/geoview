@@ -50,7 +50,7 @@
     "rotation": {
       "rotation": "Rotation de la carte",
       "projection": "Projection",
-      "fixedNorth": "Fixer le Nord"
+      "fixedNorth": "Nord fixe"
     },
     "mouseposition": {
       "east": "E",
