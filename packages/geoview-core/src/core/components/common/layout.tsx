@@ -109,7 +109,7 @@ ref: Ref<LayoutExposedMethods>) => {
       ...TITLE_STYLES,
       fontSize: theme.palette.geoViewFontSize.lg,
       width: containerType === CONTAINER_TYPE.APP_BAR ? '100%' : 'auto',
-      ...(!toggleMode && { [theme.breakpoints.up('md')]: { display: 'none' } }),
+      ...(!toggleMode && { [theme.breakpoints.up('sm')]: { display: 'none' } }),
     };
 
     return (

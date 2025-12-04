@@ -19,7 +19,6 @@ interface ResponsiveGridPanelProps extends GridProps {
 
 // Constants outside component to prevent recreating every render
 const PADDING = '0 6px';
-const MOBILE_BREAKPOINT = 'md';
 
 // Panel size configurations
 // Define the base breakpoint sizes without xs since it's common
@@ -38,12 +37,12 @@ type PanelConfig = {
 const PANEL_SIZES = {
   default: { xs: 12 } as PanelSize,
   left: {
-    normal: { md: 4, lg: 4 },
-    enlarged: { md: 2, lg: 1.25 }
+    normal: { sm: 5, md: 4, lg: 4 },
+    enlarged: { sm: 5, md: 2, lg: 1.25 }
   } as PanelConfig,
   right: {
-    normal: { md: 8, lg: 8 },
-    enlarged: { md: 10, lg: 10.75 },
+    normal: { sm: 7, md: 8, lg: 8 },
+    enlarged: { sm: 7, md: 10, lg: 10.75 },
   } as PanelConfig,
 } as const;
 
@@ -130,7 +129,7 @@ const ResponsiveGridPanel = forwardRef(
 
     const displayStyles = useMemo(
       () => ({
-        [theme.breakpoints.down(MOBILE_BREAKPOINT)]: {
+        [theme.breakpoints.down('sm')]: {
           // eslint-disable-next-line no-nested-ternary
           display: isLeftPanel ? (isRightPanelVisible ? 'none' : 'block') : !isRightPanelVisible ? 'none' : 'flex',
         },

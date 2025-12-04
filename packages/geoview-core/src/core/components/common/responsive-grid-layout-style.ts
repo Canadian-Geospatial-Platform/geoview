@@ -29,6 +29,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     }
   },
   rightButtonsContainer: {
+    alignSelf: 'end',
     backgroundColor: theme.palette.geoViewColor.bgColor.light[300],
     display: 'flex',
     flexDirection: 'row',

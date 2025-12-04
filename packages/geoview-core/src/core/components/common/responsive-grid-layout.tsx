@@ -237,7 +237,7 @@ const ResponsiveGridLayout = forwardRef(
     const renderCloseButton = (): JSX.Element | null => {
 
       // Check conditions for hiding the button
-      if ( (!toggleMode) && (window.innerWidth >= theme.breakpoints.values.md || !isRightPanelVisible)) {
+      if ( (!toggleMode) && (window.innerWidth >= theme.breakpoints.values.sm || !isRightPanelVisible)) {
         return null;
       }
 
@@ -261,10 +261,6 @@ const ResponsiveGridLayout = forwardRef(
     };
 
     const renderGuideButton = (): JSX.Element | null => {
-      if (window.innerWidth <= theme.breakpoints.values.md) {
-        return null; // Return null if on small screens (down to md)
-      }
-
       return (
         <Button
           ref={guideToggleBtnRef}
@@ -413,10 +409,10 @@ const ResponsiveGridLayout = forwardRef(
                 alignItems: containerType === CONTAINER_TYPE.APP_BAR ? 'end' : 'center',
                 flexDirection: containerType === CONTAINER_TYPE.APP_BAR ? 'column' : 'row',
                 gap: containerType === CONTAINER_TYPE.APP_BAR ? '10px' : '0',
-                [theme.breakpoints.up('md')]: {
+                [theme.breakpoints.up('sm')]: {
                   justifyContent: containerType === CONTAINER_TYPE.APP_BAR ? 'space-between' : 'right',
                 },
-                [theme.breakpoints.down('md')]: {
+                [theme.breakpoints.down('sm')]: {
                   justifyContent: 'space-between',
                 },
                 width: '100%',

@@ -10,7 +10,7 @@ import {
   IconButton,
   Paper,
   Typography,
-  ZoomInSearchIcon
+  ZoomInSearchIcon,
 } from '@/ui';
 import { useDetailsCheckedFeatures, useDetailsStoreActions } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
