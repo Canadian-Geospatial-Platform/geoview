@@ -46,9 +46,24 @@ export function range(start: number, end: number, step: number = 1): number[] {
  * camelCase('Hello World'); // 'helloWorld'
  */
 export function camelCase(str: string): string {
-  return str
-    .replace(/[-_ ]+(\w)/g, (_, c) => c.toUpperCase()) // capitalize letters after -, _, or space
-    .replace(/^\w/, (c) => c.toLowerCase()); // lowercase first letter
+  let result = '';
+  let capitalize = false;
+
+  for (const ch of str) {
+    if (ch === '-' || ch === '_' || ch === ' ') {
+      // next character should be upper-cased
+      capitalize = true;
+    } else {
+      if (capitalize) {
+        result += ch.toUpperCase();
+        capitalize = false;
+      } else {
+        result += ch.toLowerCase();
+      }
+    }
+  }
+
+  return result;
 }
 
 /**
