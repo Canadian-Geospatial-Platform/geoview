@@ -139,13 +139,13 @@ export class WKB extends AbstractGeoViewVector {
         layerConfig.setLayerName(layerConfig.getLayerName() || layerMetadataFound.layerName || layerConfig.getLayerNameCascade());
 
         // eslint-disable-next-line no-param-reassign
-        layerConfig.source = deepMerge(layerConfig.source, layerMetadataFound.source);
+        layerConfig.source = deepMerge(layerMetadataFound.source, layerConfig.source);
 
         // Set the initial settings
-        layerConfig.setInitialSettings(deepMerge(layerConfig.getInitialSettings(), layerMetadataFound.initialSettings));
+        layerConfig.setInitialSettings(deepMerge(layerMetadataFound.initialSettings, layerConfig.getInitialSettings()));
 
         // Set the layer style
-        layerConfig.setLayerStyle(deepMerge(layerConfig.getLayerStyle()!, layerMetadataFound.layerStyle));
+        layerConfig.setLayerStyle(deepMerge(layerMetadataFound.layerStyle, layerConfig.getLayerStyle()!));
 
         // If max scale found in metadata
         if (layerMetadataFound.maxScale) {

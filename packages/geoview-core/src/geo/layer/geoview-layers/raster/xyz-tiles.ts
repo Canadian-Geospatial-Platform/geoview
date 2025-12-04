@@ -141,10 +141,10 @@ export class XYZTiles extends AbstractGeoViewRaster {
         layerConfig.setLayerMetadata(metadataLayerConfigFound);
 
         // eslint-disable-next-line no-param-reassign
-        layerConfig.source = deepMerge(layerConfig.source, metadataLayerConfigFound.source);
+        layerConfig.source = deepMerge(metadataLayerConfigFound.source, layerConfig.source);
 
         // Set the initial settings
-        layerConfig.setInitialSettings(deepMerge(layerConfig.getInitialSettings(), metadataLayerConfigFound.initialSettings));
+        layerConfig.setInitialSettings(deepMerge(metadataLayerConfigFound.initialSettings, layerConfig.getInitialSettings()));
 
         // Validate and update the extent initial settings
         layerConfig.validateUpdateInitialSettingsExtent();

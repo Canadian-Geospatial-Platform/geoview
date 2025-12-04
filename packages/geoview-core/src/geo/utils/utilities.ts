@@ -14,23 +14,21 @@ import TileLayer from 'ol/layer/Tile';
 import { LineString, Point, Polygon } from 'ol/geom';
 import type { Coordinate } from 'ol/coordinate';
 import type View from 'ol/View';
+import GML3 from 'ol/format/GML3';
 
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { Projection } from '@/geo/utils/projection';
-
 import type { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import type { TypeLayerStyleConfig, TypeOutfields, TypeStyleGeometry, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
 import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
 import type { TypeMetadataWMS, TypeMetadataWMSCapabilityLayer, TypeMetadataWMSRoot, TypeStylesWMS } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-
 import type { TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { NetworkError, NotSupportedError, ResponseEmptyError } from '@/core/exceptions/core-exceptions';
 import { xmlToJson } from '@/core/utils/utilities';
-import GML3 from 'ol/format/GML3';
 
 // available layer types
 export const layerTypes = CONST_LAYER_TYPES;
