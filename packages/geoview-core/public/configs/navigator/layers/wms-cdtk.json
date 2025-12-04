@@ -45,6 +45,7 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "completed",
+            "layerFilter": "\"project_cat_en\" in ( 'Agriculture' , 'Construction' , 'Energy' )",
             "layerStyle": {
               "Point": {
                 "type": "uniqueValue",
