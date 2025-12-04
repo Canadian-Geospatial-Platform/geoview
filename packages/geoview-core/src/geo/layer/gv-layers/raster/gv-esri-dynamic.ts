@@ -735,22 +735,22 @@ export class GVEsriDynamic extends AbstractGVRaster {
     layerConfig: EsriDynamicLayerEntryConfig | OgcWmsLayerEntryConfig,
     style: TypeLayerStyleConfig | undefined
   ): string | undefined {
+    // No style, no filter on style
+    if (!style) return undefined;
+
     const isWMS = layerConfig instanceof OgcWmsLayerEntryConfig;
     const defaultFilter = isWMS ? undefined : this.DEFAULT_FILTER_1EQUALS1;
     const layerFilter = layerConfig.getLayerFilter();
 
-    // No style, no filter on style
-    if (!style) return undefined;
-
     const styleSettings = layerConfig.getFirstStyleSettings();
-    if (!styleSettings) return this.#appendLayerFilter(defaultFilter, layerFilter);
+    if (!styleSettings) return this.#appendLayerFilter(defaultFilter, layerFilter, isWMS);
 
     // Get the outfields
     const outfields = layerConfig.getOutfields();
 
     switch (styleSettings.type) {
       case 'simple':
-        return this.#appendLayerFilter(defaultFilter, layerFilter);
+        return this.#appendLayerFilter(defaultFilter, layerFilter, isWMS);
 
       case 'uniqueValue': {
         // Check if any fields were retrieved
@@ -759,17 +759,17 @@ export class GVEsriDynamic extends AbstractGVRaster {
           logger.logWarning(
             'A style with filter capabilities was set on the layer, but no fields were read from vector data. Make sure source.featureInfo?.outfields has values.'
           );
-          return this.#appendLayerFilter(defaultFilter, layerFilter);
+          return this.#appendLayerFilter(defaultFilter, layerFilter, isWMS);
         }
 
         this.#normalizeVisibility(styleSettings);
-        if (this.#allFeaturesVisible(styleSettings.info)) return this.#appendLayerFilter(defaultFilter, layerFilter);
+        if (this.#allFeaturesVisible(styleSettings.info)) return this.#appendLayerFilter(defaultFilter, layerFilter, isWMS);
 
         const fieldCounts = this.#countFieldOfTheSameValue(styleSettings);
         const fieldOrder = this.#sortFieldOfTheSameValue(styleSettings, fieldCounts);
         const queryTree = this.#getQueryTree(styleSettings, fieldCounts, fieldOrder);
         const query = this.#buildQueryUniqueValue(queryTree, 0, fieldOrder, styleSettings, outfields, isWMS);
-        return this.#appendLayerFilter(query, layerFilter);
+        return this.#appendLayerFilter(query, layerFilter, isWMS);
       }
 
       case 'classBreaks': {
@@ -779,14 +779,14 @@ export class GVEsriDynamic extends AbstractGVRaster {
           logger.logWarning(
             'A style with filter capabilities was set on the layer, but no fields were read from vector data. Make sure source.featureInfo?.outfields has values.'
           );
-          return this.#appendLayerFilter(defaultFilter, layerFilter);
+          return this.#appendLayerFilter(defaultFilter, layerFilter, isWMS);
         }
 
         this.#normalizeVisibility(styleSettings);
-        if (this.#allFeaturesVisible(styleSettings.info)) return this.#appendLayerFilter(defaultFilter, layerFilter);
+        if (this.#allFeaturesVisible(styleSettings.info)) return this.#appendLayerFilter(defaultFilter, layerFilter, isWMS);
 
         const filterExpression = this.#buildQueryClassBreaksFilter(styleSettings, outfields);
-        return this.#appendLayerFilter(filterExpression, layerFilter);
+        return this.#appendLayerFilter(filterExpression, layerFilter, isWMS);
       }
 
       default:
@@ -820,15 +820,21 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Combines a base style-derived filter expression with an optional
    * layer-level filter, using the logical `AND` operator.
-   * @param {string | undefined} [baseFilter] - The base filter expression derived from style settings.
-   * @param {string | undefined} [layerFilter] - An optional additional filter to append.
+   * @param {string | undefined} baseFilter - The base filter expression derived from style settings.
+   * @param {string | undefined} layerFilter - An optional additional filter to append.
+   * @param {boolean} useExtraSpacingInFilter - Indicate if we need extra spaces around characters (WMS limitation).
    * @returns {string | undefined} The combined filter expression, or `undefined` if none apply.
    */
-  static #appendLayerFilter(baseFilter?: string, layerFilter?: string): string | undefined {
+  static #appendLayerFilter(
+    baseFilter: string | undefined,
+    layerFilter: string | undefined,
+    useExtraSpacingInFilter: boolean
+  ): string | undefined {
     if (!baseFilter && !layerFilter) return undefined;
     if (!baseFilter) return layerFilter!;
     if (!layerFilter) return baseFilter;
-    return `${baseFilter} and (${layerFilter})`;
+    const spacing = useExtraSpacingInFilter ? ' ' : '';
+    return `${baseFilter} and (${spacing}${layerFilter}${spacing})`;
   }
 
   /**
