@@ -10,7 +10,7 @@ import {
 } from '@/core/exceptions/core-exceptions';
 import { logger } from '@/core/utils/logger';
 
-export class Fetch {
+export abstract class Fetch {
   /**
    * Fetches a url for a json response.
    * @param {string} url - The url to fetch.
