@@ -680,7 +680,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     try {
       // Update the layer config information (not ideal to do this here at this stage...)
       layerConfig.setLayerFilter(filterValueToUse);
-      filterValueToUse = this.getFilterFromStyle(layerConfig, style)!;
+      filterValueToUse = this.getFilterFromStyle(layerConfig, style) || '';
 
       // Parse the filter value to use
       filterValueToUse = GVLayerUtilities.parseDateTimeValuesEsriDynamic(filterValueToUse, externalDateFragments);
