@@ -1460,7 +1460,7 @@ export class LayerTester extends GVAbstractTester {
    * @param {string} layerPath - The path or ID of the layer to verify.
    * @param {string} [checkIconImage] - Optional expected icon image.
    *   If provided, the function will additionally check that the legend contains a matching icon.
-   * @param {TypeLegendItem[]} [checkIconsList] - Optional list of expected legend icon items.
+   * @param {Partial<TypeLegendItem>[]} [checkIconsList] - Optional list of expected legend icon items.
    *   If provided, the function will additionally verify that the legend's icon list matches this array.
    * @static
    */
@@ -1498,7 +1498,7 @@ export class LayerTester extends GVAbstractTester {
    * @param {MapViewer} mapViewer - The map viewer instance containing the layer store.
    * @param {string} layerPath - The path or ID of the layer whose style icons are being verified.
    * @param {string} [checkIconImage] - Optional expected icon image to validate against the legend.
-   * @param {TypeLegendItem[]} [checkIconsList] - Optional expected list of legend icon items.
+   * @param {Partial<TypeLegendItem>[]} [checkIconsList] - Optional expected list of legend icon items.
    * @static
    */
   static helperStepAssertStyleApplied(
