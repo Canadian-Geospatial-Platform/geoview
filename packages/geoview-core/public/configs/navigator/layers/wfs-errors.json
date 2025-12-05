@@ -27,7 +27,7 @@
       {
         "geoviewLayerId": "wfsLYR2",
         "geoviewLayerName": "Error layerId",
-        "metadataAccessPath": "https://ahocevar.com/geoserver/wfs?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS",
+        "metadataAccessPath": "https://ahocevar.com/geoserver/wfs?REQUEST=GetCapabilities&VERSION=2.0.0",
         "geoviewLayerType": "ogcWfs",
         "listOfLayerEntryConfig": [
           {

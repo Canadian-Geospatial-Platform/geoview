@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { delay } from 'lodash';
 import { Box, FilterAltIcon } from '@/ui';
 import DataTable from './data-table';
 import {
@@ -97,7 +96,7 @@ export function Datapanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPan
 
   /**
    * Check if filtered are being set for each layer.
-   * @param {string} layerPath The path of the layer
+   * @param {string} layerPath - The path of the layer
    * @returns boolean
    */
   const isMapFilteredSelectedForLayer = useCallback(
@@ -112,7 +111,7 @@ export function Datapanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPan
 
   /**
    * Get number of features of a layer with filtered or selected layer or unknown when data table is loaded.
-   * @param {string} layerPath the path of the layer
+   * @param {string} layerPath - The path of the layer
    * @returns
    */
   const getFeaturesOfLayer = useCallback(
@@ -142,8 +141,8 @@ export function Datapanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPan
 
   /**
    * Create layer tooltip
-   * @param {string} layerName en/fr layer name
-   * @param {string} layerPath the path of the layer.
+   * @param {string} layerName - en/fr layer name
+   * @param {string} layerPath - The path of the layer.
    * @returns
    */
   const getLayerTooltip = useCallback(
@@ -186,7 +185,7 @@ export function Datapanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPan
     // Log
     logger.logTraceUseEffect('DATA-PANEL - isLoading', isLoading, selectedLayerPath);
 
-    const clearLoading = delay(() => {
+    const clearLoading = setTimeout(() => {
       setIsLoading(false);
     }, 100);
     return () => clearTimeout(clearLoading);

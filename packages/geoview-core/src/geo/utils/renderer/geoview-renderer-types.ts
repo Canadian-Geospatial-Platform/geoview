@@ -67,9 +67,9 @@ export const defaultColor = [
   '#ffdead',
 ];
 
-export type FillPaternLine = { moveTo: [number, number]; lineTo: [number, number] };
+export type FillPatternLine = { moveTo: [number, number]; lineTo: [number, number] };
 
-export type FillPaternSettings = Record<TypeFillStyle, FillPaternLine[] | []>;
+export type FillPatternSettings = Record<TypeFillStyle, FillPatternLine[] | []>;
 
 export enum NodeType {
   unprocessedNode,

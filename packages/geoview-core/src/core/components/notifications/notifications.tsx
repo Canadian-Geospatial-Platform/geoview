@@ -1,6 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import _ from 'lodash';
 import type { Theme } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
 import { ClickAwayListener } from '@mui/material';
@@ -201,7 +200,7 @@ export default memo(function Notifications(): JSX.Element {
   useEffect(() => {
     logger.logTraceUseEffect('Notifications - notifications list changed', notificationsCount, notifications);
 
-    const curNotificationCount = _.sumBy(notifications, (n) => n.count);
+    const curNotificationCount = notifications.reduce((sum, n) => sum + n.count, 0);
     if (curNotificationCount > notificationsCount) {
       if (timerRef.current) {
         clearTimeout(timerRef.current);

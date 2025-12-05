@@ -7,9 +7,189 @@ import { logger } from '@/core/utils/logger';
 import i18n from '@/core/translation/i18n';
 import type { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { Fetch } from '@/core/utils/fetch-helper';
+import type { TypeHTMLElement } from '@/core/types/global-types';
 
 /** The observers to monitor element removals from the DOM tree */
 const observers: Record<string, MutationObserver> = {};
+
+interface TypeDocument extends Document {
+  webkitExitFullscreen: () => void;
+  msExitFullscreen: () => void;
+  mozCancelFullScreen: () => void;
+}
+
+/**
+ * Generates an array of numbers from `start` (inclusive) to `end` (exclusive),
+ * incrementing by `step`.
+ * @param {number} start - The first number in the range.
+ * @param {number} end - The end of the range (exclusive).
+ * @param {number} [step=1] - The increment between numbers.
+ * @returns {number[]} An array of numbers from start to end with the given step.
+ * @example
+ * range(0, 5); // [0, 1, 2, 3, 4]
+ * range(50, 1000, 50); // [50, 100, 150, ..., 950]
+ */
+export function range(start: number, end: number, step: number = 1): number[] {
+  const out = [];
+  for (let i = start; i < end; i += step) out.push(i);
+  return out;
+}
+
+/**
+ * Converts a string to camelCase.
+ * Replaces hyphens (`-`), underscores (`_`), and spaces with capitalization
+ * of the following letter, and ensures the first character is lowercase.
+ * @param {string} str - The input string to convert.
+ * @returns {string} The camelCased version of the input string.
+ * @example
+ * camelCase('my_tab-name'); // 'myTabName'
+ * camelCase('Hello World'); // 'helloWorld'
+ */
+export function camelCase(str: string): string {
+  let result = '';
+  let capitalize = false;
+
+  for (const ch of str) {
+    if (ch === '-' || ch === '_' || ch === ' ') {
+      // next character should be upper-cased
+      capitalize = true;
+    } else {
+      if (capitalize) {
+        result += ch.toUpperCase();
+        capitalize = false;
+      } else {
+        result += ch.toLowerCase();
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Deeply compares two values (objects, arrays, or primitives) for equality.
+ * @param a - The first value to compare.
+ * @param b - The second value to compare.
+ * @returns `true` if the values are deeply equal, `false` otherwise.
+ * @example
+ * ```ts
+ * deepEqual({ x: 1, y: [2, 3] }, { x: 1, y: [2, 3] }); // true
+ * deepEqual([1, 2, 3], [1, 2, 4]); // false
+ * deepEqual(5, 5); // true
+ * ```
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function deepEqual(a: any, b: any): boolean {
+  if (a === b) return true;
+  if (typeof a !== typeof b) return false;
+  if (typeof a !== 'object' || a === null || b === null) return false;
+  const aKeys = Object.keys(a);
+  const bKeys = Object.keys(b);
+  if (aKeys.length !== bKeys.length) return false;
+  for (const key of aKeys) {
+    if (!deepEqual(a[key], b[key])) return false;
+  }
+  return true;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isPlainObject(obj: any): obj is Record<string, any> {
+  return obj !== null && typeof obj === 'object' && !Array.isArray(obj);
+}
+
+/**
+ * Deeply clones a value, preserving functions and non-cloneable types by reference.
+ * @param value The value to clone.
+ * @returns A deep copy of the value.
+ */
+export function deepClone<T>(value: T): T {
+  // Primitives (string, number, boolean, null, undefined, symbol, bigint) are returned as-is
+  if (value === null || typeof value !== 'object') return value;
+
+  // Preserve functions by reference
+  if (typeof value === 'function') return value;
+
+  // Handle arrays
+  if (Array.isArray(value)) {
+    return value.map(deepClone) as unknown as T;
+  }
+
+  // Handle Map
+  if (value instanceof Map) {
+    const copy = new Map();
+    for (const [k, v] of value.entries()) {
+      copy.set(deepClone(k), deepClone(v));
+    }
+    return copy as unknown as T;
+  }
+
+  // Handle Set
+  if (value instanceof Set) {
+    const copy = new Set();
+    for (const v of value.values()) {
+      copy.add(deepClone(v));
+    }
+    return copy as unknown as T;
+  }
+
+  // Handle Date
+  if (value instanceof Date) {
+    return new Date(value.getTime()) as unknown as T;
+  }
+
+  // Handle RegExp
+  if (value instanceof RegExp) {
+    return new RegExp(value.source, value.flags) as unknown as T;
+  }
+
+  // Handle plain objects
+  const copy: Record<string, unknown> = {};
+  for (const key in value) {
+    if (Object.prototype.hasOwnProperty.call(value, key)) {
+      copy[key] = deepClone(value[key]);
+    }
+  }
+  return copy as T;
+}
+
+/**
+ * Deeply merges two objects, filling in undefined or missing properties
+ * from the source object into the target object. Nested objects are merged recursively.
+ * Existing values in the target object are preserved.
+ * @param {S} base - The source object containing the default values.
+ * @param {T} target - The target object to merge values into.
+ * @returns The merged target object.
+ * @example
+ * ```ts
+ * const userSettings = { theme: { darkMode: true } };
+ * const defaultSettings = { theme: { darkMode: false, fontSize: 14 }, locale: 'en' };
+ * const merged = deepMerge(userSettings, defaultSettings);
+ * // merged: { theme: { darkMode: true, fontSize: 14 }, locale: 'en' }
+ * ```
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function deepMerge<S extends any, T extends any>(base: S, target: T): S & T {
+  if (!base) return target as T & S;
+  if (!target) return base as T & S;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const out: any = { ...target };
+
+  for (const key of Object.keys(base)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const srcVal = (base as any)[key];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const tgtVal = (target as any)[key];
+
+    if (isPlainObject(srcVal) && isPlainObject(tgtVal)) {
+      out[key] = deepMerge(srcVal, tgtVal); // recurse first on children
+    } else if (tgtVal === undefined) {
+      out[key] = srcVal; // only set if target doesn't have a value
+    }
+  }
+
+  return out;
+}
 
 /**
  * Take string like "My string is __param__" and replace parameters (__param__) from array of values
@@ -61,6 +241,15 @@ export function getLocalizedMessage(language: TypeDisplayLanguage, messageKey: s
 export function deepMergeObjects<T>(...objects: unknown[]): T {
   const deepCopyObjects = objects.map((object) => JSON.parse(JSON.stringify(object)));
   return deepCopyObjects.reduce((merged, current) => ({ ...merged, ...current }), {});
+}
+
+/**
+ * Check if a string is a number
+ * @param {string} str - The object to test
+ * @returns true if the object is numeric, false otherwise
+ */
+export function isNumeric(str: string): boolean {
+  return !Number.isNaN(Number(str));
 }
 
 /**
@@ -166,45 +355,87 @@ export function isJsonString(str: string): boolean {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function xmlToJson(xml: Document | Node | Element): any {
-  // Create the return object
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let obj: any = {};
+  const obj: any = {};
 
-  // check for node type if it's an element, attribute, text, comment...
-  if (xml.nodeType === 1) {
-    // if it's an element, check the element's attributes to convert to json
-    const element = xml as Element;
-    if (element.attributes) {
-      if (element.attributes.length > 0) {
+  switch (xml.nodeType) {
+    case 1: {
+      // ELEMENT_NODE
+      const element = xml as Element;
+      if (element.attributes?.length) {
         obj['@attributes'] = {};
-        for (let j = 0; j < element.attributes.length; j++) {
-          const attribute = element.attributes.item(j);
-          (obj['@attributes'][attribute!.nodeName] as string | null) = attribute!.nodeValue;
+        for (let i = 0; i < element.attributes.length; i++) {
+          const attr = element.attributes.item(i);
+          obj['@attributes'][attr!.nodeName] = attr!.nodeValue;
         }
       }
+      break;
     }
-  } else if (xml.nodeType === 3) {
-    // text
-    obj = xml.nodeValue;
+
+    case 3: // TEXT_NODE
+      return xml.nodeValue?.trim() || '';
+
+    case 4: // CDATA_SECTION_NODE
+      return xml.nodeValue || '';
   }
 
-  // do children
+  // Handle children
+  const textParts: string[] = []; // collect text + cdata
   if (xml.hasChildNodes()) {
     for (let i = 0; i < xml.childNodes.length; i++) {
-      const item = xml.childNodes.item(i);
-      const { nodeName } = item;
+      const child = xml.childNodes.item(i);
+
+      // extract value
+      const value = xmlToJson(child);
+
+      // ignore empty text
+      // eslint-disable-next-line no-continue
+      if (value === '' || value === null) continue;
+
+      // TEXT or CDATA: collect them
+      if (child.nodeType === 3 || child.nodeType === 4) {
+        textParts.push(value);
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+
+      // ELEMENT node
+      const { nodeName } = child;
       if (obj[nodeName] === undefined) {
-        obj[nodeName] = xmlToJson(item);
+        obj[nodeName] = value;
       } else {
-        if (obj[nodeName].push === undefined) {
+        if (!Array.isArray(obj[nodeName])) {
           obj[nodeName] = [obj[nodeName]];
         }
-        obj[nodeName].push(xmlToJson(item));
+        obj[nodeName].push(value);
       }
     }
+  }
+
+  // If the element contains ONLY text/CDATA
+  if (Object.keys(obj).length === 0 && textParts.length > 0) {
+    return textParts.join(' ').trim();
+  }
+
+  // If it has both attributes and text
+  if (textParts.length > 0) {
+    obj['#text'] = textParts.join(' ').trim();
   }
 
   return obj;
+}
+
+/**
+ * Parses a XML string into Json.
+ * @param {string} xmlContent - The XML string to parse.
+ * @returns {T} A json object
+ */
+export function parseXMLToJson<T>(xmlContent: string): T {
+  // Read the xml
+  const xml = new DOMParser().parseFromString(xmlContent, 'application/xml');
+
+  // Parse it using xmlToJson and return
+  return xmlToJson(xml);
 }
 
 /**
@@ -239,6 +470,8 @@ export function getXMLHttpRequest(url: string): Promise<string> {
   return request;
 }
 
+// #region UI HELPERS
+
 /**
  * Add a UI component to a custom div. Do not listen to event from here, pass in the props
  *
@@ -254,7 +487,7 @@ export function addUiComponent(targetDivId: string, component: React.ReactElemen
 }
 
 /**
- * Sanitize HTML to remove threat
+ * Sanitizes HTML to remove threat
  *
  * @param {string} contentHtml - HTML content to sanitize
  * @returns {string} Sanitized HTML or empty string if all dirty
@@ -265,25 +498,6 @@ export function sanitizeHtmlContent(contentHtml: string): string {
     allowedAttributes: { img: ['src'], a: ['href'] },
     allowedSchemes: ['data', 'http', 'https'],
   });
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function safeStringify(obj: any, space = 2): string {
-  const seen = new WeakSet();
-
-  return JSON.stringify(
-    obj,
-    (key, value) => {
-      if (typeof value === 'object' && value !== null) {
-        if (seen.has(value)) {
-          return '{Circular JSON}'; // Or return undefined to remove the property
-        }
-        seen.add(value);
-      }
-      return value;
-    },
-    space
-  );
 }
 
 /**
@@ -327,6 +541,88 @@ export function watchHtmlElementRemoval(key: string, element: HTMLElement, onHTM
   // Store and activate the observer
   observers[key] = observer;
   observer.observe(parent, { childList: true });
+}
+
+/**
+ * Attempts to place the given HTML element into fullscreen mode.
+ * This function handles browser compatibility by trying the standard
+ * `requestFullscreen()` API first, then falling back to vendor-prefixed
+ * versions for Safari, IE11, and Firefox.
+ * Any errors from the standard promise-based fullscreen request are caught
+ * and logged using `logger.logPromiseFailed`.
+ * @param {TypeHTMLElement} element - The element to display in fullscreen mode.
+ */
+export function requestFullscreen(element: TypeHTMLElement): void {
+  if (element.requestFullscreen) {
+    element.requestFullscreen().catch((error: unknown) => {
+      // Log
+      logger.logPromiseFailed('element.requestFullscreen', error);
+    });
+  } else if (element.webkitRequestFullscreen) {
+    /* Safari */
+    element.webkitRequestFullscreen();
+  } else if (element.msRequestFullscreen) {
+    /* IE11 */
+    element.msRequestFullscreen();
+  } else if (element.mozRequestFullScreen) {
+    /* Firefox */
+    element.mozRequestFullScreen();
+  }
+}
+
+/**
+ * Exits fullscreen mode if the document is currently in fullscreen.
+ * This function uses the standard `exitFullscreen()` API when available,
+ * and falls back to vendor-prefixed exit methods for Safari, IE11, and Firefox.
+ * Any errors from the standard promise-based exit request are caught
+ * and logged using `logger.logPromiseFailed`.
+ */
+export function exitFullscreen(): void {
+  if (document.exitFullscreen) {
+    document.exitFullscreen().catch((error: unknown) => {
+      // Log
+      logger.logPromiseFailed('document.exitFullscreen', error);
+    });
+  } else if ((document as TypeDocument).webkitExitFullscreen) {
+    /* Safari */
+    (document as TypeDocument).webkitExitFullscreen();
+  } else if ((document as TypeDocument).msExitFullscreen) {
+    /* IE11 */
+    (document as TypeDocument).msExitFullscreen();
+  } else if ((document as TypeDocument).mozCancelFullScreen) {
+    /* Firefox */
+    (document as TypeDocument).mozCancelFullScreen();
+  }
+}
+
+// #endregion UI HELPERS
+
+/**
+ * Safely converts a JavaScript value to a JSON string, handling circular references.
+ * Circular objects are replaced with the string `"{Circular JSON}"` to prevent
+ * `JSON.stringify` from throwing an error. The function also supports optional
+ * pretty-printing via the `space` parameter.
+ * @param {*} obj - The value to stringify.
+ * @param {number} [space=2] - Number of spaces to use for indentation in the resulting JSON string.
+ * @returns {string} The JSON string representation of the input value, with circular references handled.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function safeStringify(obj: any, space: number = 2): string {
+  const seen = new WeakSet();
+
+  return JSON.stringify(
+    obj,
+    (key, value) => {
+      if (typeof value === 'object' && value !== null) {
+        if (seen.has(value)) {
+          return '{Circular JSON}'; // Or return undefined to remove the property
+        }
+        seen.add(value);
+      }
+      return value;
+    },
+    space
+  );
 }
 
 /**
@@ -432,17 +728,19 @@ export function stringify(str: unknown): unknown | string {
   return str;
 }
 
+// #region TIMING HELPERS
+
 /**
  * Delay helper function.
  * @param {number} ms - The number of milliseconds to wait for.
  * @returns {Promise<void>} Promise which resolves when the delay timeout expires.
  */
-export const delay = (ms: number): Promise<void> => {
+export function delay(ms: number): Promise<void> {
   return new Promise((resolve) => {
     // Wait
     setTimeout(resolve, ms);
   });
-};
+}
 
 /**
  * Repeatedly invokes a callback function at a given interval until it returns `true` or until timeout is reached.
@@ -454,7 +752,7 @@ export const delay = (ms: number): Promise<void> => {
  *                              cleared after this duration, regardless of callback return value.
  * @returns {ReturnType<typeof setInterval>} The interval timer ID, which can be used to clear the interval manually if needed.
  */
-export const doUntil = <T>(callback: () => T, ms: number, timeout?: number): ReturnType<typeof setInterval> => {
+export function doUntil<T>(callback: () => T, ms: number, timeout?: number): ReturnType<typeof setInterval> {
   // Start a recurrent timer
   let done = false;
   const interval = setInterval(() => {
@@ -483,7 +781,7 @@ export const doUntil = <T>(callback: () => T, ms: number, timeout?: number): Ret
 
   // Return the interval timer
   return interval;
-};
+}
 
 /**
  * Repeatedly invokes a callback function at a specified interval until one of two conditions is met:
@@ -496,7 +794,7 @@ export const doUntil = <T>(callback: () => T, ms: number, timeout?: number): Ret
  * @param {number} ms - The interval duration in milliseconds.
  * @returns {ReturnType<typeof setInterval>} The interval timer, which can be cleared manually if needed.
  */
-export const doUntilPromises = <T>(callback: () => T, promises: Promise<unknown>[], ms: number): ReturnType<typeof setInterval> => {
+export function doUntilPromises<T>(callback: () => T, promises: Promise<unknown>[], ms: number): ReturnType<typeof setInterval> {
   // Start a recurrent timer
   const interval = doUntil(callback, ms);
 
@@ -506,7 +804,7 @@ export const doUntilPromises = <T>(callback: () => T, promises: Promise<unknown>
 
   // Return the interval timer
   return interval;
-};
+}
 
 /**
  * Internal function to work with async "whenThisThat"... methods.
@@ -598,6 +896,8 @@ export function whenThisThen<T>(checkCallback: () => T, timeout?: number, checkF
     whenThisThenThat(checkCallback, resolve, reject, timeout, checkFrequency);
   });
 }
+
+// #endregion TIMING HELPERS
 
 /**
  * Escape special characters from string

@@ -93,7 +93,6 @@
       {
         "regenerator": true
       }
-    ],
-    "lodash"
+    ]
   ]
 }

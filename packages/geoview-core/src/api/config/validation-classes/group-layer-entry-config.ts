@@ -60,6 +60,21 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
+   * Updates the service metadata for all layer entries in the configuration.
+   * This method overrides a base implementation to recursively apply the provided
+   * `metadata` to each entry in `listOfLayerEntryConfig`. It ensures that
+   * all nested or child layer entries also receive the updated metadata.
+   * @param {unknown} metadata - The new service metadata to be used.
+   */
+  protected override onSetServiceMetadata(metadata: unknown): void {
+    // Recursively change the service metadata for each layer entries
+    this.listOfLayerEntryConfig.forEach((layerEntry) => {
+      // Go recursive
+      layerEntry.setServiceMetadata(metadata);
+    });
+  }
+
+  /**
    * Updates the data access path for all layer entries in the configuration.
    * This method overrides a base implementation to recursively apply the provided
    * `dataAccessPath` to each entry in `listOfLayerEntryConfig`. It ensures that

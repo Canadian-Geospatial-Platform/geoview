@@ -333,6 +333,25 @@ export class BasemapLayerCreationError extends GeoViewError {
 }
 
 /**
+ * Error thrown when trying to get a primary key field for a layer and such a field doesn't exist.
+ */
+export class NoPrimaryKeyFieldError extends GeoViewError {
+  /**
+   * Creates an instance of NoPrimaryKeyFieldError.
+   * @param {string} layerPath - The path or identifier of the layer that caused the error.
+   */
+  constructor(layerPath: string) {
+    super('layers.errorNoPrimaryKeyField', [layerPath]);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'NoPrimaryKeyFieldError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, NoPrimaryKeyFieldError.prototype);
+  }
+}
+
+/**
  * Custom error class representing a failure to retrieve geographic bounds
  * for a specific map layer.
  * @extends {GeoViewError}
@@ -492,5 +511,24 @@ export class TestSuiteInitializationError extends GeoViewError {
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, TestSuiteInitializationError.prototype);
+  }
+}
+
+/**
+ * Error thrown when a Layer configuration couldn't be found.
+ */
+export class LayerConfigNotFoundError extends GeoViewError {
+  /**
+   * Creates an instance of LayerConfigNotFoundError.
+   * @param {string} layerPath - The layer path where the layer config couldn't be found.
+   */
+  constructor(layerPath: string) {
+    super('error.layer.layerConfigNotFound', [layerPath]);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'LayerConfigNotFoundError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerConfigNotFoundError.prototype);
   }
 }

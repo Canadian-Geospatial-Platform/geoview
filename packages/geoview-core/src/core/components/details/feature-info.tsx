@@ -17,7 +17,7 @@ import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-val
 import { useGeochartLayerDataArrayBatch, useGeochartStoreActions } from '@/core/stores/store-interface-and-intial-values/geochart-state';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 import { logger } from '@/core/utils/logger';
-import { bufferExtent } from '@/geo/utils/utilities';
+import { GeoUtilities } from '@/geo/utils/utilities';
 import type { TypeFeatureInfoEntry, TypeFieldEntry } from '@/api/types/map-schema-types';
 import { FeatureInfoTable } from './feature-info-table';
 import { getSxClasses } from './details-style';
@@ -224,7 +224,7 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
 
       // Buffer the extent to avoid zooming too close if it's a point
       const isPoint = featureData.geometry!.getType() === 'Point';
-      const zoomExtent = isPoint ? bufferExtent(featureData.extent, EXTENT_BUFFER) : featureData.extent;
+      const zoomExtent = isPoint ? GeoUtilities.bufferExtent(featureData.extent, EXTENT_BUFFER) : featureData.extent;
 
       // Zoom to extent and highlight the feature
       zoomToExtent(zoomExtent, { padding: ZOOM_PADDING, maxZoom: ZOOM_MAX_LEVEL })

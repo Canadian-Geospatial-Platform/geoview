@@ -83,7 +83,6 @@ export class GeoCore {
     }
 
     // In case of simplified geocoreConfig being provided, just update geoviewLayerName and the first layer
-    // TODO refactor: this is a terrible patch to get it to work the way OSDP wants, should be changed after refactor
     if (layerConfig?.geoviewLayerName) {
       response.layers[0].geoviewLayerName = layerConfig.geoviewLayerName;
       if (response.layers[0].listOfLayerEntryConfig.length === 1)

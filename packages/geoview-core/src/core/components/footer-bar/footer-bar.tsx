@@ -1,6 +1,5 @@
 import type { MutableRefObject, ReactNode } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { camelCase } from 'lodash';
 import { useTheme } from '@mui/material/styles';
 
 import type { TypeTabs } from '@/ui';
@@ -35,7 +34,7 @@ import { Guide } from '@/core/components/guide/guide';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { FooterPlugin } from '@/api/plugin/footer-plugin';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
-import { delay, scrollIfNotVisible } from '@/core/utils/utilities';
+import { camelCase, delay, scrollIfNotVisible } from '@/core/utils/utilities';
 
 interface Tab {
   icon: ReactNode;
@@ -392,13 +391,15 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     if (!tabsContainerRef?.current) return () => {};
 
     const handleClick = (): void => {
-      if (tabsContainerRef.current) {
-        // Need delay to allow tabs container to resize on expand/collapse
-        delay(25).then(
-          () => scrollIfNotVisible(tabsContainerRef.current!, 'end'),
-          (error: unknown) => logger.logPromiseFailed('Delay failed', error)
-        );
-      }
+      // Need delay to allow tabs container to resize on expand/collapse
+      delay(25).then(
+        () => {
+          if (tabsContainerRef.current) {
+            scrollIfNotVisible(tabsContainerRef.current, 'end');
+          }
+        },
+        (error: unknown) => logger.logPromiseFailed('Delay failed', error)
+      );
     };
 
     const header = tabsContainerRef.current.querySelector('#footerbar-header');
@@ -408,7 +409,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     return () => {
       header?.removeEventListener('click', handleClick);
     };
-  }, [tabsContainerRef]);
+  }, []);
 
   return memoFooterBarTabs.length > 0 ? (
     <Box

@@ -1,13 +1,10 @@
 import type { Options as SourceOptions } from 'ol/source/Vector';
 import { WKB as FormatWkb } from 'ol/format';
-import type { ReadOptions } from 'ol/format/Feature';
 import type { Vector as VectorSource } from 'ol/source';
 import type Feature from 'ol/Feature';
 
-import defaultsDeep from 'lodash/defaultsDeep';
-
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import type { TypeGeoviewLayerConfig, TypeBaseVectorSourceInitialConfig, TypeMetadataGeoJSON } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig, TypeMetadataGeoJSON } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
 import type { VectorLayerEntryConfig, VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
@@ -21,6 +18,7 @@ import { GVWKB } from '@/geo/layer/gv-layers/vector/gv-wkb';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
+import { deepMerge } from '@/core/utils/utilities';
 
 export interface TypeWkbLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WKB;
@@ -58,7 +56,7 @@ export class WKB extends AbstractGeoViewVector {
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T = TypeMetadataGeoJSON | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
-   * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    */
   protected override async onFetchServiceMetadata<T = TypeMetadataGeoJSON | undefined>(abortSignal?: AbortSignal): Promise<T> {
     // If metadataAccessPath ends with .meta or .json
@@ -141,13 +139,13 @@ export class WKB extends AbstractGeoViewVector {
         layerConfig.setLayerName(layerConfig.getLayerName() || layerMetadataFound.layerName || layerConfig.getLayerNameCascade());
 
         // eslint-disable-next-line no-param-reassign
-        layerConfig.source = defaultsDeep(layerConfig.source, layerMetadataFound.source);
+        layerConfig.source = deepMerge(layerMetadataFound.source, layerConfig.source);
 
         // Set the initial settings
-        layerConfig.setInitialSettings(defaultsDeep(layerConfig.getInitialSettings(), layerMetadataFound.initialSettings));
+        layerConfig.setInitialSettings(deepMerge(layerMetadataFound.initialSettings, layerConfig.getInitialSettings()));
 
         // Set the layer style
-        layerConfig.setLayerStyle(defaultsDeep(layerConfig.getLayerStyle(), layerMetadataFound.layerStyle));
+        layerConfig.setLayerStyle(deepMerge(layerMetadataFound.layerStyle, layerConfig.getLayerStyle()!));
 
         // If max scale found in metadata
         if (layerMetadataFound.maxScale) {
@@ -175,23 +173,20 @@ export class WKB extends AbstractGeoViewVector {
    * Overrides the creation of the source configuration for the vector layer.
    * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration.
    * @param {SourceOptions} sourceOptions - The source options.
-   * @param {ReadOptions} readOptions - The read options.
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
+   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    */
   protected override onCreateVectorSource(
     layerConfig: VectorLayerEntryConfig,
-    sourceOptions: SourceOptions<Feature>,
-    readOptions: ReadOptions
+    sourceOptions: SourceOptions<Feature>
   ): VectorSource<Feature> {
     // eslint-disable-next-line no-param-reassign
-    readOptions.dataProjection = (layerConfig.source as TypeBaseVectorSourceInitialConfig).dataProjection;
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = layerConfig.source!.dataAccessPath!;
+    sourceOptions.url = layerConfig.getDataAccessPath();
     // eslint-disable-next-line no-param-reassign
     sourceOptions.format = new FormatWkb();
 
     // Call parent
-    return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
+    return super.onCreateVectorSource(layerConfig, sourceOptions);
   }
 
   /**
@@ -231,10 +226,10 @@ export class WKB extends AbstractGeoViewVector {
   /**
    * Fetches the metadata for a typical GeoJson class.
    * @param {string} url - The url to query the metadata from.
-   * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
-   * @throws {RequestAbortedError} Error thrown when the request was aborted by the caller's signal.
-   * @throws {ResponseError} Error thrown when the response is not OK (non-2xx).
-   * @throws {ResponseEmptyError} Error thrown when the JSON response is empty.
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
+   * @throws {ResponseError} When the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} When the JSON response is empty.
    */
   static fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataGeoJSON> {
     // Return it
@@ -296,7 +291,7 @@ export class WKB extends AbstractGeoViewVector {
         layerName: `${layerEntry.layerName || layerEntry.id}`,
         source: {
           format: 'WKB',
-          dataAccessPath: layerEntry.source?.dataAccessPath || metadataAccessPath,
+          dataAccessPath: layerEntry.source?.dataAccessPath,
         },
       });
       return layerEntryConfig;

@@ -36,6 +36,18 @@
             "layerName": "Stations"
           }
         ]
+      },
+      {
+        "geoviewLayerId": "wfsLYR3-qgis",
+        "geoviewLayerName": "Inventory",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/iaac/assessment_inventory_en",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "completed",
+            "layerName": "Completed Inventory (fake data link)"
+          }
+        ]
       }
     ]
   },
@@ -143,6 +155,44 @@
                   {
                     "field": "location_emplacement",
                     "valueFrom": "Location Name"
+                  }
+                ]
+              }
+            },
+            "geochart": {
+              "xAxis": {
+                "type": "time",
+                "timeFormat": "MMM d, yyyy, HH:mm",
+                "property": "starttime_heuredebut_utc",
+                "label": "Start Time (UTC)"
+              },
+              "yAxis": {
+                "property": "value_valeur_nsvhr",
+                "label": "NSVHR Value"
+              }
+            },
+            "ui": {
+              "download": true
+            }
+          },
+          {
+            "layers": [
+              {
+                "layerId": "wfsLYR3-qgis/completed",
+                "propertyValue": "pk_lyr_id",
+                "propertyDisplay": "location_en"
+              }
+            ],
+            "chart": "line",
+            "title": "Line Chart with OGC Features",
+            "query": {
+              "type": "ogcAPIFeatures",
+              "url": "https://pygeoapi-stage.cdtk.geogc.ca/collections/ft::fpsn:fpsn_latest_90days_measure",
+              "queryOptions": {
+                "whereClauses": [
+                  {
+                    "field": "INVALID",
+                    "valueFrom": "location_en"
                   }
                 ]
               }

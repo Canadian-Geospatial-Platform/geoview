@@ -3,7 +3,6 @@ import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-l
 import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeSourceGeoJSONInitialConfig } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/geojson';
-import { Projection } from '@/geo/utils/projection';
 
 export interface GeoJSONLayerEntryConfigProps extends VectorLayerEntryConfigProps {
   /** Source settings to apply to the GeoView layer source at creation time. */
@@ -21,29 +20,25 @@ export class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
     super(layerConfig, CONST_LAYER_TYPES.GEOJSON);
 
     // Value for this.source.format can only be GeoJSON.
-    this.source ??= { format: 'GeoJSON' };
     this.source.format ??= 'GeoJSON';
-    this.source.dataProjection ??= Projection.PROJECTION_NAMES.LONLAT;
-    this.source.geojson ??= layerConfig.source?.geojson;
 
-    // If undefined, we assign the metadataAccessPath of the GeoView layer to dataAccessPath and place the layerId at the end of it.
-    if (!this.source.dataAccessPath) {
-      let accessPath = this.getMetadataAccessPath()!; // TODO: Check - TypeScript - Address the '!' here and handle the case when it's undefined
-      // Remove the metadata file name and keep only the path to the directory where the metadata resides
-      if (accessPath.toLowerCase().endsWith('.meta'))
-        accessPath = accessPath.split('/').length > 1 ? accessPath.split('/').slice(0, -1).join('/') : './';
-      this.source.dataAccessPath = accessPath;
-    }
+    // Remove the metadata file name and keep only the path to the directory where the metadata resides
+    let dataAccessPath = this.getDataAccessPath();
+    if (dataAccessPath.toLowerCase().endsWith('.meta'))
+      dataAccessPath = dataAccessPath.split('/').length > 1 ? dataAccessPath.split('/').slice(0, -1).join('/') : './';
+    this.setDataAccessPath(dataAccessPath);
 
     // If dataAccessPath doesn't already point to a file (blob, .json, .geojson, =json), append the layerId
-    const path = this.source.dataAccessPath;
+    const path = this.getDataAccessPath();
     const isBlob = path.startsWith('blob') && !path.endsWith('/');
     const endsWithJson = path.toUpperCase().endsWith('.JSON');
     const endsWithGeoJson = path.toUpperCase().endsWith('.GEOJSON');
     const endsWithEqualsJson = path.toUpperCase().endsWith('=JSON');
 
+    // If not a file name
     if (!isBlob && !endsWithJson && !endsWithGeoJson && !endsWithEqualsJson) {
-      this.source.dataAccessPath = path.endsWith('/') ? `${path}${this.layerId}` : `${path}/${this.layerId}`;
+      // Set it
+      this.setDataAccessPath(`${this.getDataAccessPath(true)}${this.layerId}`);
     }
   }
 

@@ -26,7 +26,6 @@ interface FeatureItemProps {
 
 interface FeatureRowProps {
   featureInfoItem: TypeFieldEntry;
-  index: number;
   onInitLightBox: (value: string, alias: string, index: number) => void;
 }
 
@@ -103,7 +102,7 @@ export const FeatureItem = memo(function FeatureItem({
 });
 
 // Extracted FeatureRow component
-export const FeatureRow = memo(function FeatureRow({ featureInfoItem, index, onInitLightBox }: FeatureRowProps): JSX.Element {
+export const FeatureRow = memo(function FeatureRow({ featureInfoItem, onInitLightBox }: FeatureRowProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const { alias, value } = featureInfoItem;
@@ -180,13 +179,8 @@ export const FeatureInfoTable = memo(function FeatureInfoTable({ featureInfoList
 
   return (
     <Box className="details-feature-info-table" sx={sxClasses.boxContainerFeatureInfo}>
-      {featureInfoList.map((featureInfoItem, index) => (
-        <FeatureRow
-          key={`${featureInfoItem.alias}_${generateId()}`}
-          featureInfoItem={featureInfoItem}
-          index={index}
-          onInitLightBox={initLightBox}
-        />
+      {featureInfoList.map((featureInfoItem) => (
+        <FeatureRow key={`${featureInfoItem.alias}_${generateId()}`} featureInfoItem={featureInfoItem} onInitLightBox={initLightBox} />
       ))}
       <LightBoxComponent />
     </Box>

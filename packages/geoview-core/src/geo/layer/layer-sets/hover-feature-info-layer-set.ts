@@ -2,13 +2,13 @@ import type { Coordinate } from 'ol/coordinate';
 import { logger } from '@/core/utils/logger';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import type { LayerApi } from '@/geo/layer/layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import type { TypeHoverResultSet, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
+import type { QueryType } from '@/api/types/map-schema-types';
 
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
@@ -17,6 +17,9 @@ import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
  * @class HoverFeatureInfoLayerSet
  */
 export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
+  /** The query type */
+  static QUERY_TYPE: QueryType = 'at_pixel';
+
   /** The resultSet object as existing in the base class, retyped here as a TypeHoverFeatureInfoResultSet */
   declare resultSet: TypeHoverResultSet;
 
@@ -50,12 +53,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    */
   protected override onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
     // Return if the layer is of queryable type and source is queryable
-    return (
-      super.onRegisterLayerCheck(layer) &&
-      AbstractLayerSet.isQueryableType(layer) &&
-      !(layer instanceof GVWMS) &&
-      AbstractLayerSet.isSourceQueryable(layer)
-    );
+    return super.onRegisterLayerCheck(layer) && AbstractLayerSet.isQueryableType(layer) && AbstractLayerSet.isSourceQueryable(layer);
   }
 
   /**
@@ -94,12 +92,10 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   /**
    * Queries the features at the provided coordinate for all the registered layers.
    * @param {Coordinate} pixelCoordinate - The pixel coordinate where to query the features
-   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
   queryLayers(pixelCoordinate: Coordinate): void {
     // FIXME: Watch out for code reentrancy between queries!
-    // Query types of what we're doing
-    const queryType = 'at_pixel';
 
     // Get the layer visible in order and filter orderedLayerPaths to only include paths that exist in resultSet
     const orderedLayerPaths = this.#getOrderedLayerPaths();
@@ -136,7 +132,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
         const promiseResult = AbstractLayerSet.queryLayerFeatures(
           this.layerApi.mapViewer.map,
           layer,
-          queryType,
+          HoverFeatureInfoLayerSet.QUERY_TYPE,
           pixelCoordinate,
           false,
           this.#abortControllers[layerPath]
@@ -146,7 +142,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
         promiseResult
           .then((arrayOfRecords) => {
             if (arrayOfRecords.length) {
-              const nameField = arrayOfRecords[0].nameField || (Object.entries(arrayOfRecords[0].fieldInfo)[0] as unknown as string);
+              const nameField = arrayOfRecords[0].nameField || Object.entries(arrayOfRecords[0].fieldInfo)[0]?.[0];
               const fieldInfo = arrayOfRecords[0].fieldInfo[nameField];
 
               this.resultSet[layerPath].feature = {

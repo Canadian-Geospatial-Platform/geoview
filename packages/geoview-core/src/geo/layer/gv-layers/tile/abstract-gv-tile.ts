@@ -8,6 +8,8 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
  * Abstract Geoview Layer managing an OpenLayer tile type layer.
  */
 export abstract class AbstractGVTile extends AbstractGVLayer {
+  // #region OVERRIDES
+
   /**
    * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
    * @override
@@ -21,4 +23,6 @@ export abstract class AbstractGVTile extends AbstractGVLayer {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return super.getOLLayer() as BaseTileLayer<TileSource, LayerRenderer<any>>;
   }
+
+  // #endregion OVERRIDES
 }

@@ -255,6 +255,24 @@ export class LayerEntryConfigLayerIdEsriMustBeNumberError extends LayerError {
 }
 
 /**
+ * Custom error class thrown when the GeoView layer configuration couldn't read the fields information from the vector metadata.
+ * @extends {LayerError}
+ */
+export class LayerEntryConfigFieldsNotFoundError extends LayerError {
+  /**
+   * Constructor to initialize the LayerEntryConfigFieldsNotFoundError.
+   * This error is thrown when the ESRI layer ID is not a number, which is required for proper layer configuration.
+   * @param {string} geoviewLayerId - The ID of the GeoView layer with invalid layer type.
+   */
+  constructor(geoviewLayerId: string, layerName: string | undefined) {
+    super(geoviewLayerId, 'validation.layer.fieldsNotFound', [layerName || geoviewLayerId]);
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerEntryConfigFieldsNotFoundError.prototype);
+  }
+}
+
+/**
  * Custom error class thrown when the ESRI feature layer has too many features.
  * @extends {LayerError}
  */
@@ -479,15 +497,32 @@ export class LayerNoGeographicDataInCSVError extends LayerError {
  * Error thrown when fields provided to update the feature fields are of different lengths.
  * @extends {LayerError}
  */
-export class LayerDifferingFieldLengths extends LayerError {
+export class LayerDifferingFieldLengthsError extends LayerError {
   /**
-   * Constructs a new LayerDifferingFieldLengths instance.
+   * Constructs a new LayerDifferingFieldLengthsError instance.
    * @param {string} layerPath - The path or identifier of the layer.
    */
   constructor(layerPath: string) {
     super(layerPath, 'error.layer.differingFieldLengths', [layerPath]);
 
     // Ensure correct inheritance (important for transpilation targets)
-    Object.setPrototypeOf(this, LayerDifferingFieldLengths.prototype);
+    Object.setPrototypeOf(this, LayerDifferingFieldLengthsError.prototype);
+  }
+}
+
+/**
+ * Error thrown when the layer config WFS is missing for a given WMS layer.
+ * @extends {LayerError}
+ */
+export class LayerConfigWFSMissingError extends LayerError {
+  /**
+   * Constructs a new LayerConfigWFSMissingError instance.
+   * @param {string} layerPath - The path or identifier of the layer.
+   */
+  constructor(layerPath: string) {
+    super(layerPath, 'error.layer.wfsConfigMissing', [layerPath]);
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerConfigWFSMissingError.prototype);
   }
 }

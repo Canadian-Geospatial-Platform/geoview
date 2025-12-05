@@ -66,8 +66,8 @@
               "settings": {
                 "type": "filledPolygon",
                 "color": "rgba(255,0,0,0.10)",
-                "paternSize": 10,
-                "paternWidth": 2,
+                "patternSize": 10,
+                "patternWidth": 2,
                 "fillStyle": "diagonalCross",
                 "stroke": {
                   "color": "rgba(255,0,0,1)",
@@ -82,8 +82,8 @@
               "settings": {
                 "type": "filledPolygon",
                 "color": "rgba(0,128,128,0.10)",
-                "paternSize": 10,
-                "paternWidth": 2,
+                "patternSize": 10,
+                "patternWidth": 2,
                 "fillStyle": "diagonalCross",
                 "stroke": {
                   "color": "rgba(0,128,128,1)",
@@ -98,8 +98,8 @@
               "settings": {
                 "type": "filledPolygon",
                 "color": "rgba(255,0,255,0.10)",
-                "paternSize": 10,
-                "paternWidth": 2,
+                "patternSize": 10,
+                "patternWidth": 2,
                 "fillStyle": "diagonalCross",
                 "stroke": {
                   "color": "rgba(255,0,255,1)",
@@ -114,8 +114,8 @@
               "settings": {
                 "type": "filledPolygon",
                 "color": "rgba(0,0,255,0.10)",
-                "paternSize": 10,
-                "paternWidth": 2,
+                "patternSize": 10,
+                "patternWidth": 2,
                 "fillStyle": "diagonalCross",
                 "stroke": {
                   "color": "rgba(0,0,255,1)",
