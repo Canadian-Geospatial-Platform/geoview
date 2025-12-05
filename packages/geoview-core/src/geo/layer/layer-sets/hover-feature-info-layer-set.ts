@@ -8,6 +8,7 @@ import type { LayerApi } from '@/geo/layer/layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import type { TypeHoverResultSet, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
+import type { QueryType } from '@/api/types/map-schema-types';
 
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
@@ -16,6 +17,9 @@ import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
  * @class HoverFeatureInfoLayerSet
  */
 export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
+  /** The query type */
+  static QUERY_TYPE: QueryType = 'at_pixel';
+
   /** The resultSet object as existing in the base class, retyped here as a TypeHoverFeatureInfoResultSet */
   declare resultSet: TypeHoverResultSet;
 
@@ -92,8 +96,6 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    */
   queryLayers(pixelCoordinate: Coordinate): void {
     // FIXME: Watch out for code reentrancy between queries!
-    // Query types of what we're doing
-    const queryType = 'at_pixel';
 
     // Get the layer visible in order and filter orderedLayerPaths to only include paths that exist in resultSet
     const orderedLayerPaths = this.#getOrderedLayerPaths();
@@ -130,7 +132,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
         const promiseResult = AbstractLayerSet.queryLayerFeatures(
           this.layerApi.mapViewer.map,
           layer,
-          queryType,
+          HoverFeatureInfoLayerSet.QUERY_TYPE,
           pixelCoordinate,
           false,
           this.#abortControllers[layerPath]

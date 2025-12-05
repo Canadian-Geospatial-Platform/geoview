@@ -355,45 +355,87 @@ export function isJsonString(str: string): boolean {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function xmlToJson(xml: Document | Node | Element): any {
-  // Create the return object
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let obj: any = {};
+  const obj: any = {};
 
-  // check for node type if it's an element, attribute, text, comment...
-  if (xml.nodeType === 1) {
-    // if it's an element, check the element's attributes to convert to json
-    const element = xml as Element;
-    if (element.attributes) {
-      if (element.attributes.length > 0) {
+  switch (xml.nodeType) {
+    case 1: {
+      // ELEMENT_NODE
+      const element = xml as Element;
+      if (element.attributes?.length) {
         obj['@attributes'] = {};
-        for (let j = 0; j < element.attributes.length; j++) {
-          const attribute = element.attributes.item(j);
-          (obj['@attributes'][attribute!.nodeName] as string | null) = attribute!.nodeValue;
+        for (let i = 0; i < element.attributes.length; i++) {
+          const attr = element.attributes.item(i);
+          obj['@attributes'][attr!.nodeName] = attr!.nodeValue;
         }
       }
+      break;
     }
-  } else if (xml.nodeType === 3) {
-    // text
-    obj = xml.nodeValue;
+
+    case 3: // TEXT_NODE
+      return xml.nodeValue?.trim() || '';
+
+    case 4: // CDATA_SECTION_NODE
+      return xml.nodeValue || '';
   }
 
-  // do children
+  // Handle children
+  const textParts: string[] = []; // collect text + cdata
   if (xml.hasChildNodes()) {
     for (let i = 0; i < xml.childNodes.length; i++) {
-      const item = xml.childNodes.item(i);
-      const { nodeName } = item;
+      const child = xml.childNodes.item(i);
+
+      // extract value
+      const value = xmlToJson(child);
+
+      // ignore empty text
+      // eslint-disable-next-line no-continue
+      if (value === '' || value === null) continue;
+
+      // TEXT or CDATA: collect them
+      if (child.nodeType === 3 || child.nodeType === 4) {
+        textParts.push(value);
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+
+      // ELEMENT node
+      const { nodeName } = child;
       if (obj[nodeName] === undefined) {
-        obj[nodeName] = xmlToJson(item);
+        obj[nodeName] = value;
       } else {
-        if (obj[nodeName].push === undefined) {
+        if (!Array.isArray(obj[nodeName])) {
           obj[nodeName] = [obj[nodeName]];
         }
-        obj[nodeName].push(xmlToJson(item));
+        obj[nodeName].push(value);
       }
     }
+  }
+
+  // If the element contains ONLY text/CDATA
+  if (Object.keys(obj).length === 0 && textParts.length > 0) {
+    return textParts.join(' ').trim();
+  }
+
+  // If it has both attributes and text
+  if (textParts.length > 0) {
+    obj['#text'] = textParts.join(' ').trim();
   }
 
   return obj;
+}
+
+/**
+ * Parses a XML string into Json.
+ * @param {string} xmlContent - The XML string to parse.
+ * @returns {T} A json object
+ */
+export function parseXMLToJson<T>(xmlContent: string): T {
+  // Read the xml
+  const xml = new DOMParser().parseFromString(xmlContent, 'application/xml');
+
+  // Parse it using xmlToJson and return
+  return xmlToJson(xml);
 }
 
 /**

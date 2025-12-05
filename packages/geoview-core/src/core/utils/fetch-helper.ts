@@ -1,4 +1,4 @@
-import { delay, readTextWithBestEncoding, xmlToJson } from '@/core/utils/utilities';
+import { delay, parseXMLToJson, readTextWithBestEncoding } from '@/core/utils/utilities';
 import {
   ResponseEmptyError,
   ResponseError,
@@ -310,16 +310,13 @@ export abstract class Fetch {
     // Fetch the text
     const text = await Fetch.fetchText(url, init, timeoutMs);
 
-    // Parse the text/xml to DOM
-    const xmlContent = new DOMParser().parseFromString(text, 'application/xml');
-
     // Parse it using xmlToJson
-    const responseJson = xmlToJson(xmlContent);
+    const responseJson = parseXMLToJson(text);
 
     // Check if the response is not an empty object
-    if (responseJson.constructor === Object && Object.keys(responseJson).length > 0) {
+    if (responseJson && typeof responseJson === 'object' && responseJson.constructor === Object && Object.keys(responseJson).length > 0) {
       // Return the value
-      return responseJson;
+      return responseJson as T;
     }
 
     // Throw empty response error

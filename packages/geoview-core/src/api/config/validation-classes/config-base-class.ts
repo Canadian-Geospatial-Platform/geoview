@@ -173,7 +173,10 @@ export abstract class ConfigBaseClass {
    * @param {string} layerName - The layer name.
    */
   setLayerName(layerName: string): void {
-    this.#layerName = layerName;
+    // Validate the input is indeed a string (it happened that this was garbage)
+    if (typeof layerName === 'string') {
+      this.#layerName = layerName;
+    } // else skip
   }
 
   /**

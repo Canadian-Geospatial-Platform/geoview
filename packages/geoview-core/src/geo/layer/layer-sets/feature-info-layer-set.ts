@@ -3,7 +3,7 @@ import { AppEventProcessor } from '@/api/event-processors/event-processor-childr
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
-import type { TypeFeatureInfoEntry, TypeResultSet } from '@/api/types/map-schema-types';
+import type { QueryType, TypeFeatureInfoEntry, TypeResultSet } from '@/api/types/map-schema-types';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
@@ -25,6 +25,9 @@ import { logger } from '@/core/utils/logger';
  * @class FeatureInfoLayerSet
  */
 export class FeatureInfoLayerSet extends AbstractLayerSet {
+  /** The query type */
+  static QUERY_TYPE: QueryType = 'at_lon_lat';
+
   /** The resultSet object as existing in the base class, retyped here as a TypeFeatureInfoResultSet */
   declare resultSet: TypeFeatureInfoResultSet;
 
@@ -109,9 +112,6 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // Prepare to hold all promises of features in the loop below
     const allPromises: Promise<TypeFeatureInfoEntry[]>[] = [];
 
-    // Query and event types of what we're doing
-    const queryType = 'at_lon_lat';
-
     // Reinitialize the resultSet
     // Loop on each layer path in the resultSet
     Object.keys(this.resultSet).forEach((layerPath) => {
@@ -146,7 +146,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         const promiseResult = AbstractLayerSet.queryLayerFeatures(
           this.layerApi.mapViewer.map,
           layer,
-          queryType,
+          FeatureInfoLayerSet.QUERY_TYPE,
           lonLatCoordinate,
           true,
           this.#abortControllers[layerPath]

@@ -1040,8 +1040,8 @@ export interface TypeMetadataWFSFeatureTypeListFeatureType {
 }
 
 export interface TypeMetadataWFSFeatureTypeListFeatureTypeBBox {
-  'ows:LowerCorner': TypeMetadataWFSTextOnly;
-  'ows:UpperCorner': TypeMetadataWFSTextOnly;
+  'ows:LowerCorner': string | TypeMetadataWFSTextOnly;
+  'ows:UpperCorner': string | TypeMetadataWFSTextOnly;
 }
 
 export interface TypeMetadataWFSTextOnly {
@@ -1065,7 +1065,7 @@ export interface TypeMetadataWFSOperationMetadataOperation {
 }
 
 export interface TypeMetadataWFSOperationMetadataOperationParameter {
-  'ows:Value': TypeMetadataWFSTextOnly;
+  'ows:Value': string | TypeMetadataWFSTextOnly;
 }
 
 export interface TypeMetadataGeoJSON {

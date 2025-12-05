@@ -32,7 +32,7 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { MapConfigError } from '@/core/exceptions/config-exceptions';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 
-import { isJsonString, isValidUUID, removeCommentsFromJSON } from '@/core/utils/utilities';
+import { isJsonString, isValidUUID, parseXMLToJson, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { GeoCore } from '@/api/config/geocore';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
@@ -433,7 +433,7 @@ export class ConfigApi {
    */
   static getStyleFromWMSRenderer(xmlContent: string): TypeLayerStyleConfig {
     // Read styles as json
-    const styles = GeoUtilities.parseXMLToJson<TypeStylesWMS>(xmlContent);
+    const styles = parseXMLToJson<TypeStylesWMS>(xmlContent);
 
     // Redirect
     // TODO: Send the geometry type to reflect the special case scenario, if we want that (experimental)
