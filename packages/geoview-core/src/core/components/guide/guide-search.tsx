@@ -1,21 +1,12 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
+import { renderToStaticMarkup } from 'react-dom/server';
+import Markdown from 'markdown-to-jsx';
 import { Box, TextField, InputAdornment, IconButton } from '@/ui';
 import { SearchIcon, CloseIcon, KeyboardArrowUpIcon, KeyboardArrowDownIcon } from '@/ui/icons';
 import type { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from '@/core/utils/logger';
-
-// Protection pattern functions that return new regex instances
-const getProtectionPatterns = (): RegExp[] => [
-  /!\[[^\]]*\]\([^)]+\)/gi, // ![alt](image-url) - markdown images (case-insensitive)
-  /\[[^\]]*\]\([^)]*\)/gi, // [text](url) - markdown links (case-insensitive)
-  /`[^`]+`/g, // `code`
-  /```[\s\S]*?```/g, // ```code blocks```
-  /<img\s+[^>]*>/gi, // <img> tags
-  /&lt;img\b[^&]*?&gt;/gi, // HTML-encoded <img> tags
-  /<[^>]+>/gi, // <html tags> (case-insensitive)
-];
 
 interface GuideSearchProps {
   guide: TypeGuideObject | undefined;
@@ -42,58 +33,92 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
 
   // #region Helper functions
   /**
+   * Normalizes text by removing accents/diacritics for accent-insensitive search
+   * GV IMPORTANT: Allows searching for "legende" to match "légende", and vice versa
+   * @param {string} text - Text to normalize
+   * @returns {string} Text with accents removed
+   */
+  const normalizeAccents = useCallback((text: string): string => {
+    return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }, []);
+
+  /**
    * Creates a regex pattern that allows proximity search with up to maxWords between keywords
    * @param {string} term - The search term
    * @param {number} maxWords - Maximum number of words allowed between keywords (default: 5)
    * @returns {RegExp} Regex pattern for proximity search
    */
-  const createProximitySearchPattern = useCallback((term: string, maxWords: number = 5): RegExp => {
-    // Split the term into individual words
-    const words = term.trim().split(/\s+/);
+  const createProximitySearchPattern = useCallback(
+    (term: string, maxWords: number = 5): RegExp => {
+      // Normalize accents in the search term
+      const normalizedTerm = normalizeAccents(term);
 
-    if (words.length === 1) {
-      // Single word search - match word with optional markdown around it, but only capture the word
-      const escapedWord = words[0].replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
-      return new RegExp(`[*_]*(${escapedWord})[*_]*`, 'gi');
-    }
+      // Split the term into individual words
+      const words = normalizedTerm.trim().split(/\s+/);
 
-    // Multi-word search - allow up to maxWords between each keyword
-    // Escape special regex characters in each word
-    const escapedWords = words.map((w) => w.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&'));
-
-    // Build pattern with markdown-aware word matching
-    const wordPatterns = escapedWords.map((w) => `[*_]*${w}[*_]*`);
-
-    // Pattern to match 0 to maxWords between keywords
-    const wordGap = `(?:\\s+\\S+){0,${maxWords}}\\s+`;
-
-    // Join words with the gap pattern and capture the whole phrase
-    const pattern = wordPatterns.join(wordGap);
-
-    return new RegExp(`(${pattern})`, 'gi');
-  }, []);
-
-  /**
-   * Gets ranges of protected content that should not be highlighted during search
-   * @param {string} content - The content to analyze
-   * @returns {Array<{start: number, end: number}>} Array of start/end positions for protected ranges
-   */
-  const getProtectedRanges = useCallback((content: string) => {
-    // Log
-    logger.logTraceUseCallback('GUIDE-SEARCH - getProtectedRanges');
-
-    const protectedRanges: Array<{ start: number; end: number }> = [];
-    getProtectionPatterns().forEach((pattern) => {
-      let match = pattern.exec(content);
-      while (match !== null) {
-        protectedRanges.push({ start: match.index, end: match.index + match[0].length });
-        match = pattern.exec(content);
+      if (words.length === 1) {
+        // Single word search - match word with optional markdown around it, but only capture the word
+        const escapedWord = words[0].replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
+        return new RegExp(`[*_]*(${escapedWord})[*_]*`, 'gi');
       }
-    });
-    return protectedRanges;
-  }, []);
+
+      // Multi-word search - allow up to maxWords between each keyword
+      // Escape special regex characters in each word
+      const escapedWords = words.map((w) => w.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&'));
+
+      // Build pattern with markdown-aware word matching
+      const wordPatterns = escapedWords.map((w) => `[*_]*${w}[*_]*`);
+
+      // Pattern to match 0 to maxWords between keywords
+      const wordGap = `(?:\\s+\\S+){0,${maxWords}}\\s+`;
+
+      // Join words with the gap pattern and capture the whole phrase
+      const pattern = wordPatterns.join(wordGap);
+
+      return new RegExp(`(${pattern})`, 'gi');
+    },
+    [normalizeAccents]
+  );
 
   // #endregion Helper functions
+
+  /**
+   * Recursively finds all text nodes in a DOM node, excluding certain elements
+   * GV IMPORTANT: This function processes HTML content after markdown conversion.
+   * GV When using anchor tags (<a href>) in markdown tables, they can break table rendering
+   * GV because the markdown-to-jsx parser applies HTML conversion before processing table syntax.
+   * GV To preserve table formatting, use plain text in table cells instead of anchor tags.
+   * @param {Node} node - The DOM node to search
+   * @param {Node[]} textNodes - Array to store found text nodes
+   * @param {Set<string>} skipTags - Set of tag names to skip
+   */
+  const findTextNodes = useCallback(
+    (node: Node, textNodes: Node[], skipTags: Set<string> = new Set(['SCRIPT', 'STYLE', 'CODE', 'PRE', 'IMG', 'A'])): void => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const textContent = node.textContent || '';
+        const parentTag = node.parentElement?.tagName || '';
+
+        // Skip if text contains GEOVIEW_PROTECTED placeholders
+        if (textContent.includes('__GEOVIEW_PROTECTED_')) {
+          return;
+        }
+
+        // Skip if parent is in skipTags (includes A, IMG, SCRIPT, STYLE, CODE, PRE)
+        if (!skipTags.has(parentTag)) {
+          textNodes.push(node);
+        }
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        const element = node as Element;
+        // If this element should be skipped entirely (like IMG, A), don't process it or its children
+        if (skipTags.has(element.tagName)) {
+          return;
+        }
+        // Otherwise, process all children
+        node.childNodes.forEach((child) => findTextNodes(child, textNodes, skipTags));
+      }
+    },
+    []
+  );
 
   /**
    * Finds all search matches across all guide sections
@@ -127,58 +152,35 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
           });
         }
 
-        const protectedRanges = getProtectedRanges(content);
+        // Convert markdown to HTML (same as guide.tsx) to properly parse structure
+        const markdownElement = <Markdown options={{ wrapper: 'article' }}>{content}</Markdown>;
+        const htmlString = renderToStaticMarkup(markdownElement);
 
-        // Only count matches that are not in protected ranges
+        // Parse HTML to properly exclude <img> and <a> tags
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlString;
+
+        // Collect all searchable text (excluding text inside img and a tags)
+        const searchableTextNodes: Node[] = [];
+        findTextNodes(tempDiv, searchableTextNodes);
+
+        // Combine all searchable text and normalize accents for matching
+        const searchableContent = normalizeAccents(searchableTextNodes.map((node) => node.textContent || '').join(' '));
+
+        // Only count matches in the searchable content
         regex.lastIndex = 0; // Reset regex state
-        let currentMatch = regex.exec(content);
+        let currentMatch = regex.exec(searchableContent);
 
         while (currentMatch !== null) {
-          const matchStart = currentMatch.index;
-          const isProtected = protectedRanges.some((range) => matchStart >= range.start && matchStart < range.end);
-
-          if (!isProtected) {
-            matches.push({ sectionIndex });
-          }
-          currentMatch = regex.exec(content);
+          matches.push({ sectionIndex });
+          currentMatch = regex.exec(searchableContent);
         }
       });
 
       setAllMatches(matches);
       setCurrentMatchIndex(-1);
     },
-    [guide, getProtectedRanges, createProximitySearchPattern]
-  );
-
-  /**
-   * Recursively finds all text nodes in a DOM node, excluding certain elements
-   * @param {Node} node - The DOM node to search
-   * @param {Node[]} textNodes - Array to store found text nodes
-   * @param {Set<string>} skipTags - Set of tag names to skip
-   */
-  const findTextNodes = useCallback(
-    (node: Node, textNodes: Node[], skipTags: Set<string> = new Set(['SCRIPT', 'STYLE', 'CODE', 'PRE', 'IMG'])): void => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        const parentTag = node.parentElement?.tagName || '';
-        // Skip if parent is in skipTags
-        if (!skipTags.has(parentTag)) {
-          // Special case: skip anchor tags that are inside table cells
-          if (parentTag === 'A') {
-            const grandparentTag = node.parentElement?.parentElement?.tagName || '';
-            if (grandparentTag === 'TD') {
-              return; // Skip anchor tags inside table cells
-            }
-          }
-          textNodes.push(node);
-        }
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        const element = node as Element;
-        if (!skipTags.has(element.tagName)) {
-          node.childNodes.forEach((child) => findTextNodes(child, textNodes, skipTags));
-        }
-      }
-    },
-    []
+    [guide, createProximitySearchPattern, findTextNodes, normalizeAccents]
   );
 
   /**
@@ -194,33 +196,9 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
 
       if (!searchTerm.trim() || searchTerm.trim().length < 3) return content;
 
-      // Step 1: Extract and remove markdown image patterns only (not HTML img tags)
-      const protectedPatterns: { placeholder: string; original: string }[] = [];
-      let contentWithoutProtected = content;
-
-      // Find markdown patterns
-      const patterns = [
-        /!\[[^\]]*\]\([^)]+\)/gi, // ![alt](url) - markdown images
-        /\[[^\]]*\]\([^)]*\)/g, // [text](url) - markdown links
-      ];
-
-      let index = 0;
-      patterns.forEach((patternTemplate) => {
-        // Create a new regex instance to avoid modifying the original
-        const pattern = new RegExp(patternTemplate.source, patternTemplate.flags);
-        const matches = Array.from(content.matchAll(pattern));
-        matches.forEach((match) => {
-          const placeholder = `__GEOVIEW_PROTECTED_${index}__`;
-          protectedPatterns.push({ placeholder, original: match[0] });
-          // Replace this specific occurrence
-          contentWithoutProtected = contentWithoutProtected.replace(match[0], placeholder);
-          index++;
-        });
-      });
-
-      // Step 2: Create a temporary DOM element to parse the HTML
+      // Parse HTML - anchor tags and images are automatically excluded by DOM structure
       const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = contentWithoutProtected;
+      tempDiv.innerHTML = content;
 
       const regex = createProximitySearchPattern(searchTerm, 5);
 
@@ -231,61 +209,136 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
         globalMatchCounter += previousSectionMatches.length;
       }
 
-      // Process all text nodes in document order and highlight matches
+      // Process all text nodes in document order
       const allTextNodes: Node[] = [];
       findTextNodes(tempDiv, allTextNodes);
 
-      allTextNodes.forEach((textNode) => {
-        const text = textNode.textContent || '';
-        const matches = Array.from(text.matchAll(regex));
+      // GV IMPORTANT: For multi-word searches with formatted text (e.g., **legend** panel),
+      // text nodes are split by HTML tags (<strong>, <em>, etc.). We need to search across
+      // the combined text to find matches, then highlight each text node that contains part of the match.
+      const words = searchTerm.trim().split(/\s+/);
 
-        if (matches.length > 0) {
-          const fragment = document.createDocumentFragment();
-          let lastIndex = 0;
+      if (words.length > 1) {
+        // Multi-word: combine all text to find matches that span across formatting tags
+        const combinedText = allTextNodes.map((node) => node.textContent || '').join(' ');
+        const normalizedCombinedText = normalizeAccents(combinedText);
+        const phraseMatches = Array.from(normalizedCombinedText.matchAll(regex));
 
-          matches.forEach((match) => {
-            const matchStart = match.index;
+        if (phraseMatches.length > 0) {
+          // Create a map of which characters in each text node should be highlighted
+          const highlightMap = new Map<Node, Array<{ start: number; end: number; isCurrent: boolean }>>();
+
+          phraseMatches.forEach((match) => {
+            const matchStart = match.index || 0;
             const matchEnd = matchStart + match[0].length;
-
-            // Add text before match
-            if (matchStart > lastIndex) {
-              fragment.appendChild(document.createTextNode(text.substring(lastIndex, matchStart)));
-            }
-
-            // Check if this is the current match
             const isThisMatchCurrent = globalMatchCounter === currentMatchIndex;
 
-            // Create highlighted span
-            const mark = document.createElement('mark');
-            mark.className = `search-highlight${isThisMatchCurrent ? ' current-match' : ''}`;
-            // Use captured group (match[1]) if available, otherwise use full match (match[0])
-            // This strips markdown characters from single-word searches
-            mark.textContent = match[1] || match[0];
-            fragment.appendChild(mark);
+            // Find which text nodes contain parts of this match
+            let pos = 0;
+            for (let i = 0; i < allTextNodes.length; i++) {
+              const node = allTextNodes[i];
+              const nodeText = node.textContent || '';
+              const nodeStart = pos;
+              const nodeEnd = pos + nodeText.length;
 
-            lastIndex = matchEnd;
+              // Check if this node overlaps with the match
+              if (matchStart < nodeEnd && matchEnd > nodeStart) {
+                const highlightStart = Math.max(0, matchStart - nodeStart);
+                const highlightEnd = Math.min(nodeText.length, matchEnd - nodeStart);
+
+                if (!highlightMap.has(node)) {
+                  highlightMap.set(node, []);
+                }
+                highlightMap.get(node)!.push({
+                  start: highlightStart,
+                  end: highlightEnd,
+                  isCurrent: isThisMatchCurrent,
+                });
+              }
+
+              pos = nodeEnd + 1; // +1 for the space between nodes
+              if (pos > matchEnd) break;
+            }
+
             globalMatchCounter++;
           });
 
-          // Add remaining text after last match
-          if (lastIndex < text.length) {
-            fragment.appendChild(document.createTextNode(text.substring(lastIndex)));
-          }
+          // Apply highlights to each text node based on the map
+          highlightMap.forEach((ranges, textNode) => {
+            const text = textNode.textContent || '';
+            const fragment = document.createDocumentFragment();
+            let lastIndex = 0;
 
-          // Replace text node with fragment
-          textNode.parentNode?.replaceChild(fragment, textNode);
+            ranges.forEach((range) => {
+              // Add text before highlight
+              if (range.start > lastIndex) {
+                fragment.appendChild(document.createTextNode(text.substring(lastIndex, range.start)));
+              }
+
+              // Add highlighted text
+              const mark = document.createElement('mark');
+              mark.className = `search-highlight${range.isCurrent ? ' current-match' : ''}`;
+              mark.textContent = text.substring(range.start, range.end);
+              fragment.appendChild(mark);
+
+              lastIndex = range.end;
+            });
+
+            // Add remaining text
+            if (lastIndex < text.length) {
+              fragment.appendChild(document.createTextNode(text.substring(lastIndex)));
+            }
+
+            textNode.parentNode?.replaceChild(fragment, textNode);
+          });
         }
-      });
+      } else {
+        // Single word: use original per-node approach
+        allTextNodes.forEach((textNode) => {
+          const text = textNode.textContent || '';
+          const normalizedText = normalizeAccents(text);
+          const matches = Array.from(normalizedText.matchAll(regex));
 
-      // Step 3: Restore all protected patterns
-      let finalHTML = tempDiv.innerHTML;
-      protectedPatterns.forEach(({ placeholder, original }) => {
-        finalHTML = finalHTML.replace(placeholder, original);
-      });
+          if (matches.length > 0) {
+            const fragment = document.createDocumentFragment();
+            let lastIndex = 0;
 
-      return finalHTML;
+            matches.forEach((match) => {
+              const matchStart = match.index || 0;
+              const matchEnd = matchStart + match[0].length;
+
+              // Add text before match
+              if (matchStart > lastIndex) {
+                fragment.appendChild(document.createTextNode(text.substring(lastIndex, matchStart)));
+              }
+
+              // Check if this is the current match
+              const isThisMatchCurrent = globalMatchCounter === currentMatchIndex;
+
+              // Create highlighted span with ORIGINAL text (preserving accents)
+              const mark = document.createElement('mark');
+              mark.className = `search-highlight${isThisMatchCurrent ? ' current-match' : ''}`;
+              mark.textContent = text.substring(matchStart, matchEnd);
+              fragment.appendChild(mark);
+
+              lastIndex = matchEnd;
+              globalMatchCounter++;
+            });
+
+            // Add remaining text after last match
+            if (lastIndex < text.length) {
+              fragment.appendChild(document.createTextNode(text.substring(lastIndex)));
+            }
+
+            // Replace text node with fragment
+            textNode.parentNode?.replaceChild(fragment, textNode);
+          }
+        });
+      }
+
+      return tempDiv.innerHTML;
     },
-    [searchTerm, allMatches, currentMatchIndex, findTextNodes, createProximitySearchPattern]
+    [searchTerm, allMatches, currentMatchIndex, findTextNodes, createProximitySearchPattern, normalizeAccents]
   );
 
   /**
