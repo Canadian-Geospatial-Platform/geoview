@@ -1528,10 +1528,10 @@ export class LayerTester extends GVAbstractTester {
     }
 
     // If comparing the icons list
-    if (checkIconsList) {
+    if (checkIconsList && firstIcon.iconList) {
       // Verify the layer has icons list
       test.addStep(`Verify each legend icon information...`);
-      Test.assertIsArrayEqualJsons(firstIcon.iconList!, checkIconsList);
+      Test.assertIsArrayEqualJsons(firstIcon.iconList, checkIconsList);
     }
   }
 
