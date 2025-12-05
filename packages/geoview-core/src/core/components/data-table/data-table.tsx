@@ -85,9 +85,9 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
   const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
 
   // #region PINNED Datatable columns
-  const iconColumn = { alias: t('dataTable.icon'), dataType: 'string', id: t('dataTable.icon') };
-  const zoomColumn = { alias: t('dataTable.zoom'), dataType: 'string', id: t('dataTable.zoom') };
-  const detailColumn = { alias: t('dataTable.details'), dataType: 'string', id: t('dataTable.details') };
+  const iconColumn = { alias: t('dataTable.icon'), dataType: 'string', id: 'icon' };
+  const zoomColumn = { alias: t('dataTable.zoom'), dataType: 'string', id: 'zoom' };
+  const detailColumn = { alias: t('dataTable.details'), dataType: 'string', id: 'details' };
   // #endregion
 
   // #region REACT CUSTOM HOOKS
@@ -228,6 +228,7 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
           return '';
         },
         header: value.alias,
+        visibleInShowHideMenu: value.id === 'icon' || value.id === 'zoom' || value.id === 'details' ? false : true,
         filterFn: 'contains',
         columnFilterModeOptions: ['contains', 'startsWith', 'endsWith', 'empty', 'notEmpty'],
         ...((value.dataType === 'number' || value.dataType === 'oid') && {
