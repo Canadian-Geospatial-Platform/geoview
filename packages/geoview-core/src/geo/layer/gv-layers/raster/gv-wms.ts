@@ -10,7 +10,7 @@ import { Polygon } from 'ol/geom';
 import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { xmlToJson } from '@/core/utils/utilities';
+import { parseXMLToJson } from '@/core/utils/utilities';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { logger } from '@/core/utils/logger';
@@ -766,7 +766,7 @@ export class GVWMS extends AbstractGVRaster {
 
     // TODO: WMS - Add support for application/vnd.ogc.gml GV issue #3134
 
-    // If the info format includes XML
+    // If the info format includes GEOJSON
     let featureMember: Record<string, unknown>[] | undefined;
     if (featureInfoFormat?.includes('application/geojson')) {
       try {
@@ -791,6 +791,7 @@ export class GVWMS extends AbstractGVRaster {
       }
     }
 
+    // If not found and format includes JSON
     if (!featureMember && featureInfoFormat?.includes('application/json')) {
       try {
         // Try to get the feature member using JSON format
@@ -814,7 +815,7 @@ export class GVWMS extends AbstractGVRaster {
       }
     }
 
-    // If the info format includes XML
+    // If not found and format includes XML
     if (!featureMember && featureInfoFormat?.includes('text/xml')) {
       try {
         // Try to get the feature member using XML format
@@ -837,7 +838,7 @@ export class GVWMS extends AbstractGVRaster {
       }
     }
 
-    // If not found anything and info format includes HTML
+    // If not found and format includes HTML
     if (!featureMember && featureInfoFormat?.includes('text/html')) {
       try {
         // Try to get the feature member using HTML format
@@ -1120,8 +1121,7 @@ export class GVWMS extends AbstractGVRaster {
     );
 
     // Read the response as json
-    const xmlDomResponse = new DOMParser().parseFromString(responseData, 'application/xml');
-    const jsonResponse = xmlToJson(xmlDomResponse);
+    const jsonResponse = parseXMLToJson(responseData);
 
     // Try to get the feature member
     let featureMember: Record<string, unknown> | undefined;

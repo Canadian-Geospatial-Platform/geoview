@@ -107,6 +107,7 @@ export class WFS extends AbstractGeoViewVector {
       entries = metadataLayerList.map((layerMetadata) => {
         let id = layerMetadata.Name as string;
         if (typeof layerMetadata.Name === 'object' && '#text' in layerMetadata.Name) id = layerMetadata.Name['#text'];
+
         let title = layerMetadata.Title as string;
         if (typeof layerMetadata.Title === 'object' && '#text' in layerMetadata.Title) title = layerMetadata.Title['#text'];
 
@@ -153,8 +154,12 @@ export class WFS extends AbstractGeoViewVector {
       if (!layerConfig.getInitialSettings()?.bounds && featureType['ows:WGS84BoundingBox']) {
         // TODO: Check - This additional processing seem valid, but is it at the right place? A bit confusing with the rest of the codebase.
         // TODO: Refactor - Layers refactoring. Validate if this code is still being executed after the layers migration. This code may easily have been forgotten.
-        const lowerCorner = featureType['ows:WGS84BoundingBox']['ows:LowerCorner']['#text'].split(' ');
-        const upperCorner = featureType['ows:WGS84BoundingBox']['ows:UpperCorner']['#text'].split(' ');
+        let lowerCornerRaw = featureType['ows:WGS84BoundingBox']['ows:LowerCorner'] as string;
+        if (typeof lowerCornerRaw === 'object' && '#text' in lowerCornerRaw) lowerCornerRaw = lowerCornerRaw['#text'];
+        let upperCornerRaw = featureType['ows:WGS84BoundingBox']['ows:UpperCorner'] as string;
+        if (typeof upperCornerRaw === 'object' && '#text' in upperCornerRaw) upperCornerRaw = upperCornerRaw['#text'];
+        const lowerCorner = lowerCornerRaw.split(' ');
+        const upperCorner = upperCornerRaw.split(' ');
         const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
 
         // Update the bounds initial settings
@@ -342,16 +347,29 @@ export class WFS extends AbstractGeoViewVector {
    */
   static extractDescribeFeatureOutputFormat(metadata: TypeMetadataWFS): string {
     const describeFeatureParams = metadata['ows:OperationsMetadata']['ows:Operation'][1]['ows:Parameter'];
+
     const values = findPropertyByRegexPath(describeFeatureParams, /(?:Value)/);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const normalize = (input: any): string => {
+      if (input === null) return '';
+      if (typeof input === 'string') return input.trim();
+      if (typeof input === 'object' && '#text' in input) return String(input['#text']).trim();
+      return '';
+    };
+
+    // Case 1: value is array (most common)
     if (Array.isArray(values)) {
-      return values[0]?.['#text'] ?? '';
-    } else if (Array.isArray(values?.['ows:Value'])) {
-      return values['ows:Value'][0]?.['#text'] ?? '';
-    } else {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (values as any)?.['ows:Value']?.['#text'] ?? '';
+      return normalize(values[0]);
     }
+
+    // Case 2: value is a struct containing an `ows:Value` array
+    if (values && Array.isArray(values['ows:Value'])) {
+      return normalize(values['ows:Value'][0]);
+    }
+
+    // Case 3: fallback
+    return normalize(values);
   }
 
   /**

@@ -391,13 +391,15 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     if (!tabsContainerRef?.current) return () => {};
 
     const handleClick = (): void => {
-      if (tabsContainerRef.current) {
-        // Need delay to allow tabs container to resize on expand/collapse
-        delay(25).then(
-          () => scrollIfNotVisible(tabsContainerRef.current!, 'end'),
-          (error: unknown) => logger.logPromiseFailed('Delay failed', error)
-        );
-      }
+      // Need delay to allow tabs container to resize on expand/collapse
+      delay(25).then(
+        () => {
+          if (tabsContainerRef.current) {
+            scrollIfNotVisible(tabsContainerRef.current, 'end');
+          }
+        },
+        (error: unknown) => logger.logPromiseFailed('Delay failed', error)
+      );
     };
 
     const header = tabsContainerRef.current.querySelector('#footerbar-header');
@@ -407,7 +409,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     return () => {
       header?.removeEventListener('click', handleClick);
     };
-  }, [tabsContainerRef]);
+  }, []);
 
   return memoFooterBarTabs.length > 0 ? (
     <Box

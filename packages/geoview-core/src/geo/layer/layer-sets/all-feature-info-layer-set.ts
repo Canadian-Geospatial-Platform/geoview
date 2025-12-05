@@ -1,6 +1,7 @@
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import type { QueryType, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
@@ -18,6 +19,9 @@ import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
  * @class AllFeatureInfoLayerSet
  */
 export class AllFeatureInfoLayerSet extends AbstractLayerSet {
+  /** The query type */
+  static QUERY_TYPE: QueryType = 'all';
+
   /** The resultSet object as existing in the base class, retyped here as a TypeAllFeatureInfoResultSet */
   declare resultSet: TypeAllFeatureInfoResultSet;
 
@@ -31,7 +35,17 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    */
   protected override onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
     // Return if the layer is of queryable type and source is queryable
-    return super.onRegisterLayerCheck(layer) && AbstractLayerSet.isQueryableType(layer) && AbstractLayerSet.isSourceQueryable(layer);
+    let isQueryable =
+      super.onRegisterLayerCheck(layer) && AbstractLayerSet.isQueryableType(layer) && AbstractLayerSet.isSourceQueryable(layer);
+
+    // In the case of a GVWMS, also check if we has a way to retrieve vector data
+    if (isQueryable && layer instanceof GVWMS) {
+      // If we have a WFS layer config associated with the WMS
+      isQueryable = layer.getLayerConfig().hasWfsLayerConfig();
+    }
+
+    // Return
+    return isQueryable;
   }
 
   /**
@@ -79,7 +93,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
   // TODO: (future development) The queryType is a door opened to allow the triggering using a bounding box or a polygon.
-  queryLayer(layerPath: string, queryType: QueryType = 'all'): Promise<TypeFeatureInfoEntry[] | void> {
+  queryLayer(layerPath: string, queryType: QueryType = AllFeatureInfoLayerSet.QUERY_TYPE): Promise<TypeFeatureInfoEntry[] | void> {
     // FIXME: Watch out for code reentrancy between queries!
     // FIX.MECONT: The AbortController and the 'isDisabled' flag help a lot, but there could be some minor timing issues left
     // FIX.MECONT: with the mutating this.resultSet.

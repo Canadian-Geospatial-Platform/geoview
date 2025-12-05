@@ -17,18 +17,18 @@ import type View from 'ol/View';
 import GML3 from 'ol/format/GML3';
 
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
+import { parseXMLToJson } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { Projection } from '@/geo/utils/projection';
 import type { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
-import type { TypeLayerStyleConfig, TypeOutfields, TypeStyleGeometry, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
 import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
-import type { TypeMetadataWMS, TypeMetadataWMSCapabilityLayer, TypeMetadataWMSRoot, TypeStylesWMS } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
+import type { TypeLayerStyleConfig, TypeOutfields, TypeStyleGeometry, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
+import type { TypeMetadataWMS, TypeMetadataWMSCapabilityLayer, TypeMetadataWMSRoot, TypeStylesWMS } from '@/api/types/layer-schema-types';
 import type { TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { NetworkError, NotSupportedError, ResponseEmptyError } from '@/core/exceptions/core-exceptions';
-import { xmlToJson } from '@/core/utils/utilities';
 
 // available layer types
 export const layerTypes = CONST_LAYER_TYPES;
@@ -36,64 +36,6 @@ export const layerTypes = CONST_LAYER_TYPES;
 // #region FETCH METADATA
 
 export abstract class GeoUtilities {
-  /**
-   * Parses a XML string into Json.
-   * @param {string} xmlContent - The XML string to parse.
-   * @returns {T} A json object
-   */
-  static parseXMLToJson<T>(xmlContent: string): T {
-    // Read the xml
-    const xml = new DOMParser().parseFromString(xmlContent, 'application/xml');
-
-    // Parse it using xmlToJson
-    const jsonObject = xmlToJson(xml);
-
-    // Simplify and return
-    return this.#simplifyXmlJson(jsonObject);
-  }
-
-  /**
-   * Recursively simplifies XML-to-JSON converted objects by removing wrapper
-   * structures such as `{ "#text": "value" }` and replacing them with the raw value.
-
-  * This is useful when working with XML parsers that represent text nodes using
-  * `#text` objects. For example:
-  * ```json
-  * { "title": { "#text": "Hello" } }
-  * ```
-  *
-  * becomes:
-  *
-  * ```json
-  * { "title": "Hello" }
-  * ```
-  *
-  * The function walks the object tree and:
-  *  - If a value is not an object, returns it unchanged.
-  *  - If an object contains only a `#text` property, returns the string inside it.
-  *  - Otherwise recurses into all properties.
-  * @template T
-  * @param {any} obj - The object generated from XML parsing to simplify.
-  * @returns {T} The simplified JSON structure with unnecessary XML wrappers removed.
-  */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static #simplifyXmlJson<T>(obj: any): T {
-    if (typeof obj !== 'object' || obj === null) return obj;
-
-    // If obj has only #text, replace it with the string
-    const keys = Object.keys(obj);
-    if (keys.length === 1 && keys[0] === '#text') return obj['#text'];
-
-    // Otherwise, recurse for each property
-    for (const key of keys) {
-      // eslint-disable-next-line no-param-reassign
-      obj[key] = this.#simplifyXmlJson(obj[key]);
-    }
-
-    // Return the simplified json object
-    return obj;
-  }
-
   /**
    * Extracts the base URL (origin + pathname) from a full URL string,
    * removing any query parameters, hash fragments, or authentication data.
@@ -309,7 +251,7 @@ export abstract class GeoUtilities {
     const metadataRaw = await this.getWMSServiceString(capUrl, callbackNewMetadataUrl, abortSignal);
 
     // Parse it
-    const metadataParsed = this.parseXMLToJson<TypeMetadataWMSRoot>(metadataRaw);
+    const metadataParsed = parseXMLToJson<TypeMetadataWMSRoot>(metadataRaw);
 
     // Result to be returned
     let metadataResult = metadataParsed.WMS_Capabilities || metadataParsed.WMT_MS_Capabilities;
@@ -594,7 +536,7 @@ export abstract class GeoUtilities {
     const responseXML = await this.getWMSServiceString(stylesUrl, callbackNewMetadataUrl, abortSignal);
 
     // Read the styles
-    return this.parseXMLToJson(responseXML);
+    return parseXMLToJson(responseXML);
   }
 
   /**
