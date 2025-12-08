@@ -855,9 +855,24 @@ export class MapEventProcessor extends AbstractEventProcessor {
     });
   }
 
+  /**
+   * Sets or toggles the visibility of a specific layer within a map.
+   * If the layer exists at the provided layer path for the given map, the method delegates
+   * the visibility change to the map viewer's layer API. If `newValue` is provided, the layer
+   * visibility is explicitly set to that value; otherwise, the visibility is toggled.
+   * @param {string} mapId - The identifier of the map containing the target layer.
+   * @param {string} layerPath - The path of the layer whose visibility is being changed.
+   * @param {boolean} [newValue] - Optional. The new visibility value. If omitted, the visibility is toggled.
+   * @returns {boolean} The resulting visibility state of the layer after the operation, or `false`
+   * if the layer does not exist at the given path.
+   */
   static setOrToggleMapLayerVisibility(mapId: string, layerPath: string, newValue?: boolean): boolean {
-    // Redirect to layerAPI
-    return this.getMapViewerLayerAPI(mapId).setOrToggleLayerVisibility(layerPath, newValue);
+    // If the GV layer exists at the layer path
+    if (this.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath)) {
+      // Redirect to layerAPI
+      return this.getMapViewerLayerAPI(mapId).setOrToggleLayerVisibility(layerPath, newValue);
+    }
+    return false;
   }
 
   /**
@@ -878,6 +893,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
   }
 
+  /**
+   * Sets the visibility of **all layers** in a given map.
+   * Iterates through all GeoView layers associated with the specified map ID and
+   * applies the provided visibility value. Only layers whose current visibility
+   * differs from the desired state will be updated.
+   * @param {string} mapId - The identifier of the map whose layers will be updated.
+   * @param {boolean} newVisibility - The visibility state to apply to all layers (`true` to show, `false` to hide).
+   */
   static setAllMapLayerVisibility(mapId: string, newVisibility: boolean): void {
     // Set the visibility for all layers
     const layerApi = this.getMapViewerLayerAPI(mapId);

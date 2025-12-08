@@ -159,7 +159,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     sourceOptions: SourceOptions<Feature>
   ): VectorSource<Feature> {
     // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = `${layerConfig.getDataAccessPath(true)}${layerConfig.layerId}/query?f=json&where=1%3D1&returnCountOnly=true`;
+    sourceOptions.url = `${layerConfig.getDataAccessPath(true)}${layerConfig.layerId}/query?f=json&where=1=1&returnCountOnly=true`;
     // eslint-disable-next-line no-param-reassign
     sourceOptions.format = new EsriJSON();
 

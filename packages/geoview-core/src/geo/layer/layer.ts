@@ -1323,7 +1323,7 @@ export class LayerApi {
   }
 
   /**
-   * Toggle visibility of an item.
+   * Toggles visibility of an item.
    * @param {string} layerPath - The layer path of the layer to change.
    * @param {TypeLegendItem} item - The item to change.
    * @param {boolean} visibility - The visibility to set.
@@ -1361,33 +1361,34 @@ export class LayerApi {
   }
 
   /**
-   * Set visibility of all geoview layers on the map
-   *
+   * Sets the visibility of all geoview layers on the map.
    * @param {boolean} newValue - The new visibility.
    */
   setAllLayersVisibility(newValue: boolean): void {
     this.getLayerEntryLayerPaths().forEach((layerPath) => {
-      // If the ordered layer info for a layer path doesn't exist or doesn't have visibility info
-      // (ex. the layer is in error or still loading), we want to continue with other layers.
-      try {
+      // If the layer path has a corresponding Geoview layer (it's possible that there's a layer entry config without necessarily a GV layer)
+      if (this.getGeoviewLayerIfExists(layerPath)) {
+        // There is a geoview layer at this layer path
         this.setOrToggleLayerVisibility(layerPath, newValue);
-      } catch (error) {
-        // Log
-        logger.logError(formatError(error));
       }
     });
   }
 
   /**
-   * Sets or toggles the visibility of a layer.
-   *
-   * @param {string} layerPath - The path of the layer.
-   * @param {boolean} newValue - The new value of visibility.
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+   * Sets or toggles the visibility of a layer within the current map.
+   * Retrieves the current visibility of the layer, determines the resulting visibility
+   * based on the optional `newValue`, and applies the change only if the visibility
+   * actually differs. If `newValue` is provided, the visibility is set explicitly;
+   * if omitted, the method toggles the current visibility.
+   * @param {string} layerPath - The path of the layer whose visibility is being updated.
+   * @param {boolean} [newValue] - Optional. The new visibility value to apply. If omitted, the current visibility is toggled.
+   * @returns {boolean} The resulting visibility state of the layer after the update.
+   * @throws {LayerNotFoundError} If the layer cannot be found at the given path.
    */
   setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean {
     // Apply some visibility logic
     const layerVisibility = MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(this.getMapId(), layerPath);
+
     // Determine the outcome of the new visibility based on parameters
     const newVisibility = newValue !== undefined ? newValue : !layerVisibility;
 

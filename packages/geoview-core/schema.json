@@ -845,12 +845,12 @@
               "$ref": "#/definitions/TypeStrokeSymbolConfig"
             },
             "patternSize": {
-              "description": "Distance between patern lines.",
+              "description": "Distance between pattern lines.",
               "type": "number",
               "default": 8
             },
             "patternWidth": {
-              "description": "Patern line width.",
+              "description": "Pattern line width.",
               "type": "number",
               "default": 1
             },
