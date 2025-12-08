@@ -15,7 +15,6 @@ import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geovie
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { Projection } from '@/geo/utils/projection';
 import { Fetch } from '@/core/utils/fetch-helper';
@@ -436,7 +435,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    */
   static #processFeatureMetadata(features: Feature[], layerConfig: VectorLayerEntryConfig): void {
     // Get the field name that uniquely identifies each feature (OID) from the layer configuration.
-    const oidField = AbstractGeoViewVector.#getEsriOidField(layerConfig);
+    // TODO: Check - OBJECTID should likely not be sent here by default for an abstract-geoview-vector class which
+    // TO.DOCONT: might very well not be Esri based (leaving it as it was for now, because #getEsriOidField was doing this).
+    const oidField = layerConfig.getOutfieldsPKNameOrDefault('OBJECTID');
 
     // Assign a unique ID to each feature using the OID field if available, otherwise fall back to OpenLayers' getUid().
     features.forEach((feature) => {
@@ -623,24 +624,5 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     // Vector layer only queryable if there are fields
     layerConfig.initQueryable(outfields.length > 0);
-  }
-
-  /**
-   * Gets the Object ID field name from the layer configuration
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration object
-   * @returns {string} The name of the OID field if found, otherwise returns 'OBJECTID' as default
-   * @description Extracts the Object ID field name from the layer configuration. An OID (Object ID) is a
-   * standardized identifier used to uniquely identify features in a layer. If no OID field is specified
-   * in the configuration, it defaults to 'OBJECTID'.
-   * @private
-   */
-  // TODO: We should have this function in abstract-base-layer to be called like layerConfig.getEsriOidField() - issue 2699
-  // TO.DOCONT: This should be renamed without the esri. The oid type should be mandatory and if not present, we should crate one.
-  // TO.DOCONT: We already create the internalGeoviewId but we should make this more officiel by assigning a type of oid
-  static #getEsriOidField(layerConfig: AbstractBaseLayerEntryConfig): string {
-    // Get outfields
-    const outfields = layerConfig.getOutfields();
-    const oidField = outfields?.find((field) => field.type === 'oid');
-    return oidField?.name ?? 'OBJECTID';
   }
 }

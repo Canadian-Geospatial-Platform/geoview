@@ -372,7 +372,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * @returns {boolean} True if the outfield representing the primary key exists, false otherwise.
    */
   hasOutfieldsPK(): boolean {
-    return !!this.getFeatureInfo().outfields?.find((outfield) => outfield.type === 'oid');
+    return !!this.getOutfields()?.find((outfield) => outfield.type === 'oid');
   }
 
   /**
@@ -382,7 +382,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    */
   getOutfieldsPK(): TypeOutfields {
     // Get the oid field
-    const outfieldOID = this.getFeatureInfo().outfields?.find((outfield) => outfield.type === 'oid');
+    const outfieldOID = this.getOutfields()?.find((outfield) => outfield.type === 'oid');
 
     // If not found
     if (!outfieldOID) throw new NoPrimaryKeyFieldError(this.layerPath);
@@ -392,9 +392,22 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
+   * Gets the field name representing the primary key or the provided default value.
+   * @returns {string} The field name representing the primary key or the provided default value.
+   */
+  getOutfieldsPKNameOrDefault(defaultField: string): string {
+    // Get the oid field if any
+    const outfieldOID = this.getOutfields()?.find((outfield) => outfield.type === 'oid');
+
+    // Return if found or the default
+    return outfieldOID?.name ?? defaultField;
+  }
+
+  /**
    * Initializes any outfield aliases that's undefined using the name property as default.
    */
   initOutfieldsAliases(): void {
+    // For each outfield
     this.getOutfields()?.forEach((outfield) => {
       // eslint-disable-next-line no-param-reassign
       outfield.alias ??= outfield.name;

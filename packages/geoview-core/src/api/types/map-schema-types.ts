@@ -93,7 +93,6 @@ export type TypeValidAppBarCoreProps =
   | 'export'
   | 'aoi-panel'
   | 'custom-legend'
-  | 'geochart'
   | 'guide'
   | 'legend'
   | 'details'
@@ -703,15 +702,6 @@ export interface TypePolygonVectorConfig extends TypeBaseVectorGeometryConfig {
   patternSize?: number;
   /** Pattern line width.default = 1. */
   patternWidth?: number;
-
-  /** Pattern line width.default = 1.
-   * @deprecated Remove it after the release, once files like metadata.data are fixed in the hosted website.
-   */
-  paternSize?: number;
-  /** Pattern line width.default = 1.
-   * @deprecated Remove it after the release, once files like metadata.data are fixed in the hosted website.
-   */
-  paternWidth?: number;
 
   /** Kind of filling  for vector features. Default = solid.  */
   fillStyle: TypeFillStyle;

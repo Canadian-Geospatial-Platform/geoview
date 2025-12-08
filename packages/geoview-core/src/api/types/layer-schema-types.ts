@@ -1083,11 +1083,22 @@ export interface TypeMetadataWFSOperationMetadata {
 }
 
 export interface TypeMetadataWFSOperationMetadataOperation {
+  '@attributes': TypeMetadataWFSAttribute;
   'ows:Parameter': TypeMetadataWFSOperationMetadataOperationParameter | TypeMetadataWFSOperationMetadataOperationParameter[];
 }
 
 export interface TypeMetadataWFSOperationMetadataOperationParameter {
-  'ows:Value': string | TypeMetadataWFSTextOnly;
+  '@attributes': TypeMetadataWFSAttribute;
+  'ows:AllowedValues'?: TypeMetadataWFSOperationMetadataOperationParameterValue | TypeMetadataWFSOperationMetadataOperationParameterValue[];
+  'ows:Value'?: string | string[] | TypeMetadataWFSTextOnly | TypeMetadataWFSTextOnly[];
+}
+
+export interface TypeMetadataWFSOperationMetadataOperationParameterValue {
+  'ows:Value': string | string[] | TypeMetadataWFSTextOnly | TypeMetadataWFSTextOnly[];
+}
+
+export interface TypeMetadataWFSAttribute {
+  name: string;
 }
 
 export interface TypeMetadataGeoJSON {

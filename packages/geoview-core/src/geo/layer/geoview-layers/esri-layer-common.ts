@@ -21,10 +21,10 @@ import { Fetch } from '@/core/utils/fetch-helper';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { EsriRelatedRecordsJsonResponse, EsriRelatedRecordsJsonResponseRelatedRecord } from '@/geo/layer/gv-layers/utils';
+import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { EsriRenderer } from '@/geo/utils/renderer/esri-renderer';
 import type { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import type { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
-import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import type { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import {
   LayerEntryConfigLayerIdEsriMustBeNumberError,
@@ -369,34 +369,39 @@ export class EsriUtilities {
   /**
    * Asynchronously queries an Esri feature layer given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
    * @param {string} url - An Esri url indicating a feature layer to query
-   * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
-   * @deprecated Doesn't seem to be called anywhere.
+   * @param {TypeStyleGeometry?} geometryType - The geometry type for the geometries in the layer being queried (used when geometries are returned)
+   * @param {boolean} parseFeatureInfoEntries - A boolean to indicate if we use the raw esri output or if we parse it, defaults to true.
+   * @returns {Promise<TypeFeatureInfoEntryPartial[]>} A promise of an array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
+   * @throws {ResponseError} When the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} When the JSON response is empty.
+   * @throws {ResponseTypeError} When the response from the service is not an object.
+   * @throws {ResponseContentError} When the response actually contains an error within it.
+   * @throws {NetworkError} When a network issue happened.
    */
-  static queryRecordsByUrl(url: string): Promise<TypeFeatureInfoEntryPartial[]> {
-    // Redirect
-    return this.esriQueryRecordsByUrl(url);
+  static async queryRecordsByUrl(
+    url: string,
+    geometryType?: TypeStyleGeometry,
+    parseFeatureInfoEntries: boolean = true
+  ): Promise<TypeFeatureInfoEntryPartial[]> {
+    // Query the data
+    const respJson = await Fetch.fetchEsriJson<EsriRelatedRecordsJsonResponse>(url);
+
+    // Return the array of TypeFeatureInfoEntryPartial or the raw response features array
+    return parseFeatureInfoEntries
+      ? this.esriParseFeatureInfoEntries(respJson.features, geometryType)
+      : ((respJson.features ?? []) as unknown as TypeFeatureInfoEntryPartial[]);
   }
 
   /**
    * Asynchronously queries an Esri relationship table given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
    * @param {string} url - An Esri url indicating a relationship table to query
    * @param {number} recordGroupIndex - The group index of the relationship layer on which to read the related records
-   * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
+   * @returns {Promise<TypeFeatureInfoEntryPartial[]>} A promise of an array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
    * @deprecated Doesn't seem to be called anywhere.
    */
-  static queryRelatedRecordsByUrl(url: string, recordGroupIndex: number): Promise<TypeFeatureInfoEntryPartial[]> {
-    // Redirect
-    return this.esriQueryRelatedRecordsByUrl(url, recordGroupIndex);
-  }
-
-  /**
-   * Asynchronously queries an Esri relationship table given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
-   * @param {string} url - An Esri url indicating a relationship table to query
-   * @param {number} recordGroupIndex - The group index of the relationship layer on which to read the related records
-   * @returns {Promise<TypeFeatureInfoEntryPartial[]>} A promise of an array of relared records of type TypeFeatureInfoEntryPartial.
-   * @deprecated Doesn't seem to be called anywhere.
-   */
-  static async esriQueryRelatedRecordsByUrl(url: string, recordGroupIndex: number): Promise<TypeFeatureInfoEntryPartial[]> {
+  static async queryRelatedRecordsByUrl(url: string, recordGroupIndex: number): Promise<TypeFeatureInfoEntryPartial[]> {
     // Query the data
     const respJson = await Fetch.fetchJson<EsriRelatedRecordsJsonResponse>(url);
 
@@ -405,31 +410,6 @@ export class EsriUtilities {
       // Return the array of TypeFeatureInfoEntryPartial
       return this.esriParseFeatureInfoEntries(respJson.relatedRecordGroups[recordGroupIndex].relatedRecords);
     return [];
-  }
-
-  /**
-   * Asynchronously queries an Esri feature layer given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
-   * @param {string} url - An Esri url indicating a feature layer to query
-   * @param {TypeStyleGeometry?} geometryType - The geometry type for the geometries in the layer being queried (used when geometries are returned)
-   * @param {boolean} parseFeatureInfoEntries - A boolean to indicate if we use the raw esri output or if we parse it, defaults to true.
-   * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
-   */
-  static async esriQueryRecordsByUrl(
-    url: string,
-    geometryType?: TypeStyleGeometry,
-    parseFeatureInfoEntries: boolean = true
-  ): Promise<TypeFeatureInfoEntryPartial[]> {
-    // TODO: Check if that esri function should be moved to esri-layer-common instead?
-    // TODO: Performance - Refactor - Suggestion to rework this function and the one in EsriDynamic.getFeatureInfoAtLonLat(), making
-    // TO.DO.CONT: the latter redirect to this one here and merge some logic between the 2 functions ideally making this
-    // TO.DO.CONT: one here return a TypeFeatureInfoEntry[] with options to have returnGeometry=true or false and such.
-    // Query the data
-    const respJson = await Fetch.fetchEsriJson<EsriRelatedRecordsJsonResponse>(url);
-
-    // Return the array of TypeFeatureInfoEntryPartial or the raw response features array
-    return parseFeatureInfoEntries
-      ? this.esriParseFeatureInfoEntries(respJson.features, geometryType)
-      : (respJson.features as unknown as TypeFeatureInfoEntryPartial[]);
   }
 
   /**
@@ -442,9 +422,9 @@ export class EsriUtilities {
    * @param {number} outSR - The spatial reference of the output geometries from the query
    * @param {number} maxOffset - The max allowable offset value to simplify geometry
    * @param {boolean} parseFeatureInfoEntries - A boolean to indicate if we use the raw esri output or if we parse it
-   * @returns {TypeFeatureInfoEntryPartial[] | null} An array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
+   * @returns {Promise<TypeFeatureInfoEntryPartial[]>} A promise of an array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
    */
-  static esriQueryRecordsByUrlObjectIds(
+  static queryRecordsByUrlObjectIds(
     layerUrl: string,
     geometryType: TypeStyleGeometry,
     objectIds: number[],
@@ -454,7 +434,6 @@ export class EsriUtilities {
     maxOffset?: number,
     parseFeatureInfoEntries: boolean = true
   ): Promise<TypeFeatureInfoEntryPartial[]> {
-    // TODO: Check if that esri function should be moved to esri-layer-common instead?
     // Offset
     const offset = maxOffset !== undefined ? `&maxAllowableOffset=${maxOffset}` : '';
 
@@ -463,7 +442,7 @@ export class EsriUtilities {
     const url = `${layerUrl}/query?&objectIds=${oids}&outFields=${fields}&returnGeometry=${geometry}&outSR=${outSR}&geometryPrecision=1${offset}&f=json`;
 
     // Redirect
-    return this.esriQueryRecordsByUrl(url, geometryType, parseFeatureInfoEntries);
+    return this.queryRecordsByUrl(url, geometryType, parseFeatureInfoEntries);
   }
 
   // #endregion QUERY METHODS
@@ -477,7 +456,6 @@ export class EsriUtilities {
    * @param {EsriRelatedRecordsJsonResponseRelatedRecord[]} records The records representing the data from Esri.
    * @param {TypeStyleGeometry?} geometryType - Optional, the geometry type.
    * @returns TypeFeatureInfoEntryPartial[] An array of relared records of type TypeFeatureInfoEntryPartial
-   * @deprecated Doesn't seem to be called anywhere.
    */
   static esriParseFeatureInfoEntries(
     records: EsriRelatedRecordsJsonResponseRelatedRecord[],
