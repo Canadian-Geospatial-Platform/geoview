@@ -9,7 +9,15 @@ import type { Projection as OLProjection } from 'ol/proj';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { type TypeOutfields, type TypeOutfieldsType } from '@/api/types/map-schema-types';
-import type { TypeGeoviewLayerConfig, WFSJsonResponse, TypeMetadataWFS, VectorStrategy } from '@/api/types/layer-schema-types';
+import type {
+  TypeGeoviewLayerConfig,
+  WFSJsonResponse,
+  TypeMetadataWFS,
+  VectorStrategy,
+  TypeMetadataWFSOperationMetadataOperationParameter,
+  TypeMetadataWFSOperationMetadataOperationParameterValue,
+  TypeMetadataWFSTextOnly,
+} from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { findPropertyByRegexPath } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
@@ -346,30 +354,56 @@ export class WFS extends AbstractGeoViewVector {
    * or an empty string if no suitable value is found.
    */
   static extractDescribeFeatureOutputFormat(metadata: TypeMetadataWFS): string {
-    const describeFeatureParams = metadata['ows:OperationsMetadata']['ows:Operation'][1]['ows:Parameter'];
+    // Find the operation for DescribeFeatureOutput
+    const describeFeatureOp = metadata['ows:OperationsMetadata']['ows:Operation'].find(
+      (op) => op['@attributes'].name === 'DescribeFeatureType'
+    );
 
-    const values = findPropertyByRegexPath(describeFeatureParams, /(?:Value)/);
+    // If found
+    if (describeFeatureOp) {
+      // Find the outputFormat parameter
+      let describeFeatureOperationParameter = describeFeatureOp['ows:Parameter'] as TypeMetadataWFSOperationMetadataOperationParameter[];
+      if (!Array.isArray(describeFeatureOperationParameter)) describeFeatureOperationParameter = [describeFeatureOperationParameter];
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const normalize = (input: any): string => {
-      if (input === null) return '';
-      if (typeof input === 'string') return input.trim();
-      if (typeof input === 'object' && '#text' in input) return String(input['#text']).trim();
-      return '';
-    };
+      // Now Parameter is an array, find the 'outputFormat' parameter
+      const describeOperationOutputFormat = describeFeatureOperationParameter.find((op) => op['@attributes'].name === 'outputFormat');
 
-    // Case 1: value is array (most common)
-    if (Array.isArray(values)) {
-      return normalize(values[0]);
+      // If found
+      if (describeOperationOutputFormat) {
+        // If there's an 'AllowedValues' property
+        let outputFormatValue;
+        if (typeof describeOperationOutputFormat === 'object' && 'ows:AllowedValues' in describeOperationOutputFormat) {
+          // GEO SERVER WAY
+          // Read
+          let values = describeOperationOutputFormat['ows:AllowedValues'] as TypeMetadataWFSOperationMetadataOperationParameterValue[];
+          if (!Array.isArray(values)) values = [values];
+
+          // Read first one
+          outputFormatValue = values?.[0]['ows:Value'] as (string | TypeMetadataWFSTextOnly)[];
+          if (!Array.isArray(outputFormatValue)) outputFormatValue = [outputFormatValue];
+        } else if (typeof describeOperationOutputFormat === 'object' && 'ows:Value' in describeOperationOutputFormat) {
+          // QGIS SERVER WAY
+          // Read
+          let values = describeOperationOutputFormat['ows:Value'] as (string | TypeMetadataWFSTextOnly)[];
+          if (!Array.isArray(values)) values = [values];
+
+          // Read first one
+          outputFormatValue = values?.[0];
+          if (!Array.isArray(outputFormatValue)) outputFormatValue = [outputFormatValue];
+        }
+
+        // Final read
+        let outputFormatValueFinal = outputFormatValue?.[0];
+        if (typeof outputFormatValueFinal === 'object' && '#text' in outputFormatValueFinal)
+          outputFormatValueFinal = outputFormatValueFinal['#text'];
+
+        // Return it
+        return outputFormatValueFinal || '';
+      }
     }
 
-    // Case 2: value is a struct containing an `ows:Value` array
-    if (values && Array.isArray(values['ows:Value'])) {
-      return normalize(values['ows:Value'][0]);
-    }
-
-    // Case 3: fallback
-    return normalize(values);
+    // Not found
+    return '';
   }
 
   /**

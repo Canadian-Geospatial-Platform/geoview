@@ -603,7 +603,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
 
     // Refresh the layer
-    layer?.refresh(MapEventProcessor.getMapViewer(mapId).getProjection());
+    layer.refresh(MapEventProcessor.getMapViewer(mapId).getProjection());
 
     // Get the layer config
     const layerConfig = layer.getLayerConfig();
@@ -665,6 +665,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   static setAllItemsVisibility(mapId: string, layerPath: string, visibility: boolean): void {
     // Set layer to visible
     MapEventProcessor.setOrToggleMapLayerVisibility(mapId, layerPath, true);
+
     // Get legend layers and legend layer to update
     const curLayers = this.getLayerState(mapId).legendLayers;
 

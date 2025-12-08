@@ -26,6 +26,7 @@ import type {
   TypeValidMapProjectionCodes,
   TypeIconSymbolVectorConfig,
   TypeOutfields,
+  TypeFeatureInfoEntryPartial,
 } from '@/api/types/map-schema-types';
 import type { TypeLayerMetadataEsriExtent } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
@@ -236,7 +237,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const layerEntryConfig = this.getLayerConfig();
 
     // Use the returnExtentOnly=true to get only the extent of ids and ask in the right projection right away
-    const idStringClause = `&objectIds=${objectIds.join('%2C')}`;
+    const idStringClause = `&objectIds=${objectIds.join(',')}`;
     const outfieldQueryClause = outfield ? `&outFields=${outfield}` : '';
     const outSrClause = `&outSR=${Projection.readEPSGNumber(outProjection)}`;
     const queryUrl = `${layerEntryConfig.getDataAccessPath(true)}${layerEntryConfig.layerId}/query?${idStringClause}${outfieldQueryClause}${outSrClause}&returnExtentOnly=true&f=json`;
@@ -529,6 +530,41 @@ export class GVEsriDynamic extends AbstractGVRaster {
   // #endregion OVERRIDES
 
   // #region METHODS
+
+  /**
+   * Retrieves feature records from the layer using their Object IDs (OIDs).
+   * This method queries the underlying layer for the specified object IDs and returns
+   * a Promise resolving to an array of partial feature info entries.
+   * The method automatically determines the geometry type and output fields from
+   * the layer configuration. If an output spatial reference (`outSR`) is provided,
+   * the geometries are projected accordingly.
+   * @param {number[]} objectIDs - An array of Object IDs to query.
+   * @param {number} [outSR] - Optional output spatial reference (WKID) for geometry projection.
+   * @returns {Promise<TypeFeatureInfoEntryPartial[]>} A promise resolving to an array of partial feature info entries.
+   */
+  getRecordsByOIDs(objectIDs: number[], outSR?: number | undefined): Promise<TypeFeatureInfoEntryPartial[]> {
+    // Get the layer config
+    const layerConfig = this.getLayerConfig();
+
+    // Get the geometry type
+    const [geometryType] = layerConfig.getTypeGeometries();
+
+    // Get the outfields
+    const outfields = layerConfig.getOutfields();
+
+    // Get oid field
+    const oidField = outfields?.find((field) => field.type === 'oid')?.name ?? 'OBJECTID';
+
+    // Query for the specific object ids
+    return EsriUtilities.queryRecordsByUrlObjectIds(
+      `${layerConfig.getDataAccessPath(true)}${layerConfig.layerId}`,
+      geometryType,
+      objectIDs,
+      oidField,
+      true,
+      outSR
+    );
+  }
 
   /**
    * Applies a view filter to an Esri Dynamic layer's source by updating the `layerDefs` parameter.

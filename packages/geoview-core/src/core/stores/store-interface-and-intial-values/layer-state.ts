@@ -12,12 +12,11 @@ import type { TypeFeatureInfoEntryPartial, TypeLayerStyleConfig, TypeResultSet, 
 import type { TimeDimension } from '@/core/utils/date-mgt';
 import type { TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import type { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
-import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
+import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { LayerNotEsriDynamicError } from '@/core/exceptions/layer-exceptions';
 import { NoBoundsError } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
@@ -126,47 +125,19 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        * Queries the EsriDynamic layer at the given layer path for a specific set of object ids
        * @param {string} layerPath - The layer path of the layer to query
        * @param {number[]} objectIDs - The object ids to filter the query on
-       * @returns A Promise of results of type TypeFeatureInfoEntryPartial
-       * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
-       * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
+       * @returns {Promise<TypeFeatureInfoEntryPartial[]>} A Promise of an array of TypeFeatureInfoEntryPartial records
+       * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
        * @throws {LayerNotEsriDynamicError} When the layer configuration isn't EsriDynamic.
        */
       queryLayerEsriDynamic: (layerPath: string, objectIDs: number[]): Promise<TypeFeatureInfoEntryPartial[]> => {
-        // Get the layer config
-        const layerConfig = MapEventProcessor.getMapViewerLayerAPI(get().mapId).getLayerEntryConfig(layerPath);
-
-        // TODO: Refactor - If this function is about querying EsriDynamic layer, and we don't hesitate to
-        // TO.DOCONT: grab the MapViewer.layer dependency here, I feel like there's code that should be shared between the
-        // TO.DOCONT: GVEsriDynamic call in GVEsriDynamic.onGetExtentFromFeatures and the layer-state call here. Both standardize and perform a '/query?objectIDs=' call.
-        // TO.DOCONT: Should we centralize all functions to a static reusable method like the one below esriQueryRecordsByUrlObjectIds?
-        // TO.DOCONT: Furthermore, there's also fetch-esri-worker-script.queryEsriFeatures that performs queries on Esri layers, but I think that one is
-        // TO.DOCONT: meant to be more independent from the framework and can stay as such.
+        // Get the layer
+        const layer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).getGeoviewLayer(layerPath);
 
         // If not EsriDynamic
-        if (!(layerConfig instanceof EsriDynamicLayerEntryConfig))
-          throw new LayerNotEsriDynamicError(layerPath, layerConfig.getLayerNameCascade());
+        if (!(layer instanceof GVEsriDynamic)) throw new LayerNotEsriDynamicError(layerPath, layer.getLayerName());
 
-        // Get the geometry type
-        const [geometryType] = layerConfig.getTypeGeometries();
-
-        // Get the outfields
-        const outfields = layerConfig.getOutfields();
-
-        // Get oid field
-        const oidField = outfields?.find((field) => field.type === 'oid')?.name ?? 'OBJECTID';
-
-        // Query for the specific object ids
-        // TODO: Put the server original projection in the config metadata (add a new optional param in source for esri)
-        // TO.DOCONT: When we get the projection we can get the projection in original server (will solve error trying to reproject https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/7 in 3857)
-        // TO.DOCONT: Then we need to modify the DownloadGeoJSON to use mapProjection for vector and original projection for dynamic.
-        return EsriUtilities.esriQueryRecordsByUrlObjectIds(
-          `${layerConfig.getDataAccessPath(true)}${layerConfig.layerId}`,
-          geometryType,
-          objectIDs,
-          oidField,
-          true,
-          MapEventProcessor.getMapState(get().mapId).currentProjection
-        );
+        // Perform the query
+        return layer.getRecordsByOIDs(objectIDs, MapEventProcessor.getMapState(get().mapId).currentProjection);
       },
 
       /**

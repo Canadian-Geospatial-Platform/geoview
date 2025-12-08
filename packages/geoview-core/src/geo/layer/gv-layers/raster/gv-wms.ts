@@ -684,20 +684,22 @@ export class GVWMS extends AbstractGVRaster {
     let gmlFilterAttribute;
     let gmlFilterSpatial;
     let fieldsToReturn = wfsLayerConfig.getOutfields();
+
+    // Build the filter from style if any
+    const classFilters = GVEsriDynamic.getFilterFromStyle(wmsLayerConfig, wmsLayerConfig.getLayerStyle());
+
+    // If any
+    if (classFilters) {
+      // Build a OGC Filter for the filter
+      gmlFilterAttribute = WfsRenderer.sqlToOlWfsFilterXml(
+        classFilters,
+        wfsLayerConfig.getVersion(),
+        wfsLayerConfig.getOutfields()?.[0]?.name
+      );
+    }
+
+    // If performing a query based on a clicked coordinate, we want to filter spatially
     if (clickCoordinate && viewResolution) {
-      // Build the filter from style if any
-      const classFilters = GVEsriDynamic.getFilterFromStyle(wmsLayerConfig, wmsLayerConfig.getLayerStyle());
-
-      // If any
-      if (classFilters) {
-        // Build a OGC Filter for the filter
-        gmlFilterAttribute = WfsRenderer.sqlToOlWfsFilterXml(
-          classFilters,
-          wfsLayerConfig.getVersion(),
-          wfsLayerConfig.getOutfields()?.[0]?.name
-        );
-      }
-
       // Get the geometry field name
       const geomFieldName = wfsLayerConfig.getGeometryField()?.name || 'geometry'; // default: geometry
 
@@ -1382,17 +1384,17 @@ export class GVWMS extends AbstractGVRaster {
         const fullFieldName = prefix ? `${prefix}.${fieldName}` : fieldName;
         const rawValue = obj[key];
         let value = rawValue as string;
-        if (typeof rawValue === 'object' && '#text' in rawValue) value = rawValue['#text'];
+        if (rawValue && typeof rawValue === 'object' && '#text' in rawValue) value = rawValue['#text'];
 
         // If value has to go recursive
-        if (typeof value === 'object') {
+        if (value && typeof value === 'object') {
           // Go recursive
           extractFields(value, fullFieldName);
         } else {
           // Compile it
           featureInfo.fieldInfo[fullFieldName] = {
             fieldKey: fieldKeyCounter++,
-            value: value,
+            value: value ?? '',
             dataType: 'string',
             alias: fullFieldName,
             domain: null,
