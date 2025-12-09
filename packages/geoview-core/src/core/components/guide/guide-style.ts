@@ -58,10 +58,6 @@ export const getSxClasses = (theme: Theme): SxStyles =>
           fontSize: theme.palette.geoViewFontSize.md,
           fontWeight: 600,
           borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[400]}`,
-          '& p': {
-            marginBottom: 'auto',
-            marginTop: 'auto',
-          },
           '& img': {
             height: '25px',
             verticalAlign: 'bottom',

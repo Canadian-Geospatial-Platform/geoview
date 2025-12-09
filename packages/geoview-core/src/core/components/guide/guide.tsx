@@ -181,11 +181,13 @@ export const Guide = memo(function GuidePanel({ containerType = CONTAINER_TYPE.F
   useEffect(() => {
     const container = document.querySelector('.guidebox-container')!.parentElement;
 
-    // Reset scroll position when content changes
+    // Reset scroll position when content changes - use requestAnimationFrame to ensure DOM is ready
     if (container) {
-      container.scrollTo({
-        top: 0,
-        behavior: 'smooth',
+      requestAnimationFrame(() => {
+        container.scrollTo({
+          top: 0,
+          behavior: 'instant',
+        });
       });
     }
 
@@ -215,7 +217,7 @@ export const Guide = memo(function GuidePanel({ containerType = CONTAINER_TYPE.F
     return () => {
       container?.removeEventListener('click', handleClick);
     };
-  }, [selectedLayerPath]);
+  }, [selectedLayerPath, guideItemIndex]);
 
   const ariaLabel = t('guide.title');
   return (
