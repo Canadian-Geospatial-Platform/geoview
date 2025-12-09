@@ -93,7 +93,7 @@ function PopoverUI({ open, children, ...props }: PopoverProps): JSX.Element {
   }, [open, theme.transitions.duration.shortest]);
 
   return (
-    <MaterialPopover open={open} {...props}>
+    <MaterialPopover open={open} disableScrollLock {...props}>
       <FocusTrap open={open} disableAutoFocus>
         {isValidElement(children) ? children : <span />}
       </FocusTrap>

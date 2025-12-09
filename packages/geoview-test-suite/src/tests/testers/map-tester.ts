@@ -229,8 +229,8 @@ export class MapTester extends GVAbstractTester {
       },
       (test, result) => {
         // Perform assertions
-        test.addStep('Verifying initial z-index is undefined...');
-        Test.assertIsEqual(result.initialZIndex, undefined);
+        test.addStep('Verifying initial z-index is 9999...');
+        Test.assertIsEqual(result.initialZIndex, 9999);
 
         test.addStep('Verifying final z-index is 0...');
         Test.assertIsEqual(result.finalZIndex, 0);

@@ -93,6 +93,11 @@ export class MapFeatureConfig {
     this.appBar = deepMerge(DEFAULT_MAP_FEATURE_CONFIG.appBar, userMapFeatureConfig.appBar);
     this.footerBar = deepMerge(DEFAULT_MAP_FEATURE_CONFIG.footerBar, userMapFeatureConfig.footerBar);
     this.overviewMap = deepMerge(DEFAULT_MAP_FEATURE_CONFIG.overviewMap, userMapFeatureConfig.overviewMap);
+
+    // Apply tabs from user config if exists, otherwise use default config tabs
+    this.appBar!.tabs.core = userMapFeatureConfig.appBar?.tabs.core ?? DEFAULT_MAP_FEATURE_CONFIG.appBar?.tabs.core ?? [];
+    this.footerBar!.tabs.core = userMapFeatureConfig.footerBar?.tabs.core ?? DEFAULT_MAP_FEATURE_CONFIG.footerBar?.tabs.core ?? [];
+
     this.components = [...(userMapFeatureConfig.components ?? DEFAULT_MAP_FEATURE_CONFIG.components ?? [])];
     this.corePackages = [...(userMapFeatureConfig.corePackages ?? DEFAULT_MAP_FEATURE_CONFIG.corePackages ?? [])];
     this.corePackagesConfig = [...(userMapFeatureConfig.corePackagesConfig ?? DEFAULT_MAP_FEATURE_CONFIG.corePackagesConfig ?? [])];

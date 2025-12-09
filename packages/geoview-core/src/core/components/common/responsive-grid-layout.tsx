@@ -7,6 +7,7 @@ import Markdown from 'markdown-to-jsx';
 import { Box, FullscreenIcon, ButtonGroup, Button, Typography, IconButton } from '@/ui';
 import { ResponsiveGrid } from './responsive-grid';
 import { getSxClasses } from './responsive-grid-layout-style';
+import { getSxClasses as getGuideSxClasses } from '@/core/components/guide/guide-style';
 import { FullScreenDialog } from './full-screen-dialog';
 import { logger } from '@/core/utils/logger';
 import { ArrowBackIcon, ArrowForwardIcon, CloseIcon, QuestionMarkIcon } from '@/ui/icons';
@@ -89,6 +90,7 @@ const ResponsiveGridLayout = forwardRef(
 
     // sxClasses
     const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+    const guideSxClasses = useMemo(() => getGuideSxClasses(theme), [theme]);
 
     // Expose imperative methods to parent component
     useImperativeHandle(
@@ -235,9 +237,8 @@ const ResponsiveGridLayout = forwardRef(
     };
 
     const renderCloseButton = (): JSX.Element | null => {
-
       // Check conditions for hiding the button
-      if ( (!toggleMode) && (window.innerWidth >= theme.breakpoints.values.sm || !isRightPanelVisible)) {
+      if (!toggleMode && (window.innerWidth >= theme.breakpoints.values.sm || !isRightPanelVisible)) {
         return null;
       }
 
@@ -330,7 +331,13 @@ const ResponsiveGridLayout = forwardRef(
 
       return (
         <Box ref={guideContainerRef} tabIndex={0}>
-          <Box className="guideBox">
+          <Box
+            className="guideBox"
+            sx={{
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              ...(guideSxClasses.guideContainer as any)?.['& .guideBox'],
+            }}
+          >
             {/* Close button, only shown WCAG is enabled and not fullScreen */}
             {isFocusTrap && !isFullScreen && (
               <IconButton

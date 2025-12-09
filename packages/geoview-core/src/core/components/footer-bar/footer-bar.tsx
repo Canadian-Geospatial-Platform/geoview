@@ -150,6 +150,9 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     // Log
     logger.logTraceUseMemo('FOOTER-BAR - memoFooterBarTabs', tabsList, memoTabs);
 
+    // Early return if no footer tab provided
+    if (!tabsList || Object.keys(tabsList).length === 0) return [];
+
     // Set the allTabs (union of all footer tabs) and get the needed keys
     const allTabs = { ...tabsList, ...memoTabs };
     const availableTabKeys: string[] = [...Object.keys(tabsList), 'guide'];

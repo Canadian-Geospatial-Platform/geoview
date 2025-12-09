@@ -277,7 +277,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
           layerList={memoLayersList}
           onLayerListClicked={handleLayerChange}
           onIsEnlargeClicked={handleIsEnlargeClicked}
-          guideContentIds={['chart', 'chart.children.chartTypes']}
+          guideContentIds={['chart', 'chart.children.chartTypes', 'chart.children.chartControls']}
         >
           {selectedLayerPath && (
             <Box sx={{ '& .MuiButtonGroup-groupedHorizontal.MuiButton-textSizeMedium': { fontSize: '0.9rem' } }}>

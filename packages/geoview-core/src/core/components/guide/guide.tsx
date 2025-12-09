@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { memo, useState, useMemo, useCallback, useEffect } from 'react';
 import Markdown from 'markdown-to-jsx';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Box } from '@/ui';
@@ -144,8 +145,22 @@ export const Guide = memo(function GuidePanel({ containerType = CONTAINER_TYPE.F
       });
     }
 
-    const highlightedContent = highlightFunction(content, guideItemIndex);
-    return <Markdown options={{ wrapper: 'article' }}>{highlightedContent}</Markdown>;
+    // Convert markdown to HTML React elements
+    const markdownElement = <Markdown>{content}</Markdown>;
+
+    // Convert React element to HTML string
+    const htmlString = renderToStaticMarkup(markdownElement);
+
+    // Apply highlighting to the HTML
+    const highlightedHTML = highlightFunction(htmlString, guideItemIndex);
+
+    // GV: dangerouslySetInnerHTML is safe here because:
+    // 1. Content originates from trusted markdown files in the codebase (guide.md)
+    // 2. Markdown is converted to HTML via markdown-to-jsx (sanitized React elements)
+    // 3. HTML is then processed to add <mark> tags for search highlighting
+    // 4. No user-generated content is involved in this process
+    // eslint-disable-next-line react/no-danger
+    return <article dangerouslySetInnerHTML={{ __html: highlightedHTML }} />;
   }, [layersList, guideItemIndex, guide, highlightFunction]);
 
   /**
@@ -166,11 +181,13 @@ export const Guide = memo(function GuidePanel({ containerType = CONTAINER_TYPE.F
   useEffect(() => {
     const container = document.querySelector('.guidebox-container')!.parentElement;
 
-    // Reset scroll position when content changes
+    // Reset scroll position when content changes - use requestAnimationFrame to ensure DOM is ready
     if (container) {
-      container.scrollTo({
-        top: 0,
-        behavior: 'smooth',
+      requestAnimationFrame(() => {
+        container.scrollTo({
+          top: 0,
+          behavior: 'instant',
+        });
       });
     }
 
@@ -200,7 +217,7 @@ export const Guide = memo(function GuidePanel({ containerType = CONTAINER_TYPE.F
     return () => {
       container?.removeEventListener('click', handleClick);
     };
-  }, [selectedLayerPath]);
+  }, [selectedLayerPath, guideItemIndex]);
 
   const ariaLabel = t('guide.title');
   return (

@@ -33,6 +33,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     '& .MuiToolbar-root ': {
       borderRadius: '6px',
     },
+    '& .layer-icon': {
+      marginRight: '0 !important',
+    },
   },
   filterMap: {
     '& .Mui-checked': {
@@ -46,7 +49,16 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   tableHead: {
     '& th:nth-of-type(-n+3)': {
-      justifyContent: 'end',
+      justifyContent: 'center',
+      padding: '0px',
+    },
+  },
+  pinnedColumn: {
+    justifyContent: 'center !important',
+    textAlign: 'center',
+    padding: '4px 6px 3px 6px !important',
+    '& > div': {
+      justifyContent: 'center',
     },
   },
   tableHeadCell: {

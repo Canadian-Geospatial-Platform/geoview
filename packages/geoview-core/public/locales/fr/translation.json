@@ -50,7 +50,7 @@
     "rotation": {
       "rotation": "Rotation de la carte",
       "projection": "Projection",
-      "fixedNorth": "Fixer le Nord"
+      "fixedNorth": "Nord fixe"
     },
     "mouseposition": {
       "east": "E",
@@ -350,7 +350,7 @@
     "total": "total",
     "selectLayerAndScroll": "Voir dans le panneau Données",
     "accessAdvancedFunctions": "Accéder au panneau Données pour les fonctions avancées",
-    "filterToggle": "les filtres de colonnes"
+    "filterToggle": "les filtres"
   },
   "geochart": {
     "noChartAvailable": "Cliquer sur une couche de la carte qui contient un graphique"

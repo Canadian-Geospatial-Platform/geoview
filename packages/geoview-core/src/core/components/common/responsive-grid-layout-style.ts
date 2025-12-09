@@ -19,14 +19,14 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       alignItems: 'end',
       '&.MuiGrid-grid-xs-auto': {
         width: '100%',
-      }
+      },
     },
     '& .responsive-layout-right-top': {
       alignItems: 'end',
       '&.MuiGrid-grid-xs-auto': {
         width: '100%',
-      }
-    }
+      },
+    },
   },
   rightButtonsContainer: {
     alignSelf: 'end',
@@ -91,12 +91,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         textAlign: 'left',
         paddingLeft: '15px',
       },
-      '& h3': {
-        '&:first-of-type': {
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.325rem',
-        },
+      '& h4': {
+        borderBottom: 'none',
       },
     },
     '&.fullscreen-mode': {
@@ -126,17 +122,17 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       '& .layer-panel': {
         width: '52px',
       },
-      '& .MuiListItemButton-root' : {
+      '& .MuiListItemButton-root': {
         justifyContent: 'center',
         padding: '0 8px',
         minHeight: '48px',
         '& .layer-count': {
-          display: 'block'
+          display: 'block',
         },
         '& .layerInfo': {
-          display: 'none'
-        }
-      }
-    }
+          display: 'none',
+        },
+      },
+    },
   },
 });
