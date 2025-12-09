@@ -14,7 +14,11 @@ import {
 } from '@/ui';
 import { useDetailsCheckedFeatures, useDetailsStoreActions } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useGeochartLayerDataArrayBatch, useGeochartStoreActions } from '@/core/stores/store-interface-and-intial-values/geochart-state';
+import {
+  useGeochartConfigs,
+  useGeochartLayerDataArrayBatch,
+  useGeochartStoreActions,
+} from '@/core/stores/store-interface-and-intial-values/geochart-state';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 import { logger } from '@/core/utils/logger';
 import { GeoUtilities } from '@/geo/utils/utilities';
@@ -159,12 +163,13 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
   const { addCheckedFeature, removeCheckedFeature } = useDetailsStoreActions();
   const { zoomToExtent, highlightBBox, addHighlightedFeature } = useMapStoreActions();
   const geochartLayerDataArrayBatch = useGeochartLayerDataArrayBatch();
-  const geochartActions = useGeochartStoreActions();
+  const { setSelectedLayerPath } = useGeochartStoreActions() ?? {};
+  const geochartConfigs = useGeochartConfigs();
 
   // Use navigate hook for geochart (only if geochart state exists)
   const navigateToGeochart = useNavigateToTab(
     'geochart',
-    geochartActions ? (layerPath: string) => geochartActions.setSelectedLayerPath(layerPath) : undefined
+    setSelectedLayerPath ? (layerPath: string) => setSelectedLayerPath(layerPath) : undefined
   );
 
   // Feature data processing
@@ -264,9 +269,10 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
   // Early return if no feature
   if (!featureData) return null;
 
-  // Check if layer has geochart data with features
+  // Check if layer has geochart config and data with features
   const hasGeochart =
-    geochartLayerDataArrayBatch?.some((entry) => entry.layerPath === feature.layerPath && (entry.features?.length ?? 0) > 0) ?? false;
+    !!geochartConfigs?.[feature.layerPath] &&
+    (geochartLayerDataArrayBatch?.some((entry) => entry.layerPath === feature.layerPath && (entry.features?.length ?? 0) > 0) ?? false);
 
   return (
     <Paper sx={PAPER_STYLES}>
