@@ -70,7 +70,7 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
   const isCollapsed = useUIFooterBarIsCollapsed();
   const activeAppBarTab = useUIActiveAppBarTab();
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
-  const { addHighlightedFeature, removeHighlightedFeature, isLayerHiddenOnMap } = useMapStoreActions();
+  const { addHighlightedFeature, removeHighlightedFeature, isLayerHiddenOnMap, getMapLayerParentHidden } = useMapStoreActions();
 
   // States
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
@@ -195,7 +195,12 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
 
     // Add layers with features that aren't already in the list (out-of-range layers with features)
     arrayOfLayerDataBatch.forEach((layer) => {
-      if ((layer.features?.length ?? 0) > 0 && !existingLayerPaths.has(layer.layerPath) && layer.layerPath !== 'coordinate-info') {
+      if (
+        (layer.features?.length ?? 0) > 0 &&
+        !existingLayerPaths.has(layer.layerPath) &&
+        layer.layerPath !== 'coordinate-info' &&
+        !getMapLayerParentHidden(layer.layerPath)
+      ) {
         layerListEntries.push({
           layerName: layer.layerName ?? '',
           layerPath: layer.layerPath,
@@ -244,7 +249,16 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
     }
 
     return orderedLayerListEntries;
-  }, [visibleInRangeLayers, arrayOfLayerDataBatch, coordinateInfoEnabled, isLayerHiddenOnMap, getNumFeaturesLabel, mapId, orderedLayers]);
+  }, [
+    visibleInRangeLayers,
+    arrayOfLayerDataBatch,
+    coordinateInfoEnabled,
+    isLayerHiddenOnMap,
+    getNumFeaturesLabel,
+    mapId,
+    getMapLayerParentHidden,
+    orderedLayers,
+  ]);
 
   /**
    * Memoizes the selected layer for the LayerList component.

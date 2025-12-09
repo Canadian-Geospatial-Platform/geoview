@@ -412,7 +412,8 @@
       "mapWrongCall": "Div avec identifiant __param__ a une classe 'geoview-map' et devrait être initialisé via un appel à 'cgpv.init()'.",
       "pluginError": "Une erreur majeure sur le Plugin '__param__' sur la carte '__param__' est survenue.",
       "pluginConfigNotFound": "La configuration pour le Plugin '__param__' sur la carte '__param__' au chemin d'accès '__param__' est introuvable.",
-      "pluginStateUninitialized": "L'état du Plugin '__param__' sur la carte '__param__' n'est pas initialisé."
+      "pluginStateUninitialized": "L'état du Plugin '__param__' sur la carte '__param__' n'est pas initialisé.",
+      "invalidZoomExtent": "Impossible de zoomer, l'étendue fournie est invalide."
     },
     "geocore": {
       "uuidNotFound": "L'identifiant de couche GeoCore '__param__' n'existe pas sur le serveur.",

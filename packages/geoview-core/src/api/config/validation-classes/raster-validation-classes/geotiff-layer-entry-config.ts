@@ -1,4 +1,9 @@
-import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeSourceGeoTIFFInitialConfig } from '@/api/types/layer-schema-types';
+import type {
+  ConfigClassOrType,
+  TypeGeoviewLayerConfig,
+  TypeMetadataGeoTIFF,
+  TypeSourceGeoTIFFInitialConfig,
+} from '@/api/types/layer-schema-types';
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
@@ -28,6 +33,15 @@ export class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfig {
       // Set it
       this.setDataAccessPath(`${this.getDataAccessPath(true)}${this.layerId}`);
     }
+  }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeMetadataGeoTIFF | undefined} The strongly-typed layer configuration specific to this layer entry config.
+   */
+  override getServiceMetadata(): TypeMetadataGeoTIFF | undefined {
+    return super.getServiceMetadata() as TypeMetadataGeoTIFF | undefined;
   }
 
   /**

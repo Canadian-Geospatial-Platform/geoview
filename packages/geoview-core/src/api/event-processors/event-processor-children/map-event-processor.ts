@@ -29,6 +29,7 @@ import type {
   TypeLayerInitialSettings,
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
+  TypeLayerStatus,
 } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { api } from '@/app';
@@ -315,6 +316,17 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return this.getMapStateProtected(mapId).orderedLayerInfo.map((orderedLayerInfo) => {
       return orderedLayerInfo.layerPath;
     });
+  }
+
+  /**
+   * Gets the status of a layer.
+   * @param {string} mapId - The map id.
+   * @param {string} layerPath - The layer path.
+   * @returns {TypeLayerStatus | undefined} The layer status
+   * @static
+   */
+  static getMapLayerStatus(mapId: string, layerPath: string): TypeLayerStatus | undefined {
+    return LegendEventProcessor.getLegendLayerInfo(mapId, layerPath)?.layerStatus;
   }
 
   static getMapState(mapId: string): TypeMapState {
@@ -1037,11 +1049,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Merge user options with defaults
     const mergedOptions: FitOptions = { ...DEFAULT_OL_FITOPTIONS, ...options };
 
-    // Validate the extent coordinates - need to make sure we aren't excluding zero with !number
+    // Validate the extent coordinates - need to make sure we aren't excluding zero with !number or using invalid extents
+    const validatedExtent = GeoUtilities.validateExtent(extent, `EPSG:${this.getMapStateProtected(mapId).currentProjection.toString()}`);
     if (
       !extent.some((number) => {
         return (!number && number !== 0) || Number.isNaN(number);
-      })
+      }) &&
+      JSON.stringify(extent) === JSON.stringify(validatedExtent)
     ) {
       // Store state will be updated by map event
       this.getMapViewer(mapId).getView().fit(extent, mergedOptions);
@@ -1051,6 +1065,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
 
     // Invalid extent
+    this.getMapViewer(mapId).notifications.showError('error.map.invalidZoomExtent', [], true);
     throw new InvalidExtentError(extent);
   }
 

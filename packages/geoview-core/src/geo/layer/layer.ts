@@ -1367,7 +1367,14 @@ export class LayerApi {
    */
   setAllLayersVisibility(newValue: boolean): void {
     this.getLayerEntryLayerPaths().forEach((layerPath) => {
-      this.setOrToggleLayerVisibility(layerPath, newValue);
+      // If the ordered layer info for a layer path doesn't exist or doesn't have visibility info
+      // (ex. the layer is in error or still loading), we want to continue with other layers.
+      try {
+        this.setOrToggleLayerVisibility(layerPath, newValue);
+      } catch (error) {
+        // Log
+        logger.logError(formatError(error));
+      }
     });
   }
 
