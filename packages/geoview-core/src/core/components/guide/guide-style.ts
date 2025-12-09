@@ -21,6 +21,8 @@ export const getSxClasses = (theme: Theme): SxStyles =>
       },
       // Scope all guide-specific styles under .guideBox to prevent collision with other components
       '& .guideBox': {
+        color: theme.palette.geoViewColor.grey.dark[800],
+        padding: '16px',
         '& td': {
           paddingTop: '5px',
           '& img': {

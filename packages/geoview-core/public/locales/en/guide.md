@@ -573,21 +573,21 @@ All charts are powered by [Chart.js](https://www.chartjs.org/docs/latest/).
 
 ### Chart Controls (when configured):
 
-**Steps Switcher** - Points on line charts can be changed to display as steps by selecting from the **Steps** dropdown. Available step types:
+**Steps Switcher**: Points on line charts can be changed to display as steps by selecting from the **Steps** dropdown. Available step types:
 
-- **before** - Step occurs before the data point
-- **after** - Step occurs after the data point
-- **middle** - Step is centered on the data point
+- **before**: Step occurs before the data point
+- **after**: Step occurs after the data point
+- **middle**: Step is centered on the data point
 
-**Scales Switcher** - The chart scale can be changed by selecting from the **Scale** dropdown. Available scale types depend on the chart data source configuration:
+**Scales Switcher**: The chart scale can be changed by selecting from the **Scale** dropdown. Available scale types depend on the chart data source configuration:
 
-- **linear** - Standard linear scale
-- **logarithmic** - Logarithmic scale for data spanning multiple orders of magnitude
-- **category** - Categorical scale for discrete values
-- **time** - Time-based scale for temporal data
-- **timeseries** - Time series scale with additional time-specific features
+- **linear**: Standard linear scale
+- **logarithmic**: Logarithmic scale for data spanning multiple orders of magnitude
+- **category**: Categorical scale for discrete values
+- **time**: Time-based scale for temporal data
+- **timeseries**: Time series scale with additional time-specific features
 
-**Lock/Unlock** - Locks the current chart settings (slider values, selected legend items) to prevent them from resetting when switching between charts. When locked, these settings persist across chart changes.
+**Lock/Unlock**: Locks the current chart settings (slider values, selected legend items) to prevent them from resetting when switching between charts. When locked, these settings persist across chart changes.
 
 _**Note:** If the newly selected chart doesn't contain data matching the locked values, the chart may appear empty. Lock is most useful when working with multiple charts that share common legend items, value ranges, and time frames._
 

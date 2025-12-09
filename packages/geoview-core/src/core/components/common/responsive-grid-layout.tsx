@@ -336,8 +336,6 @@ const ResponsiveGridLayout = forwardRef(
             sx={{
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               ...(guideSxClasses.guideContainer as any)?.['& .guideBox'],
-              color: `${theme.palette.geoViewColor.grey.dark[800]}  !important`,
-              padding: '16px',
             }}
           >
             {/* Close button, only shown WCAG is enabled and not fullScreen */}

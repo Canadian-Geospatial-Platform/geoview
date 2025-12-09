@@ -573,19 +573,19 @@ Tous les graphiques sont alimentés par [Chart.js](https://www.chartjs.org/docs/
 
 ### Commandes de graphique (si configurées) :
 
-**Sélecteur d'étapes** - Les points des graphiques linéaires peuvent être affichés sous forme de marches en sélectionnant dans le menu déroulant **Marches**. Types de marches disponibles :
+**Sélecteur de marches** : Les points des graphiques linéaires peuvent être affichés sous forme de marches en sélectionnant dans le menu déroulant **Marches**. Types de marches disponibles :
 
-- **before** (avant) - La marche se produit avant le point de données
-- **after** (après) - La marche se produit après le point de données
-- **middle** (milieu) - La marche est centrée sur le point de données
+- **before** (avant) : La marche se produit avant le point de données
+- **after** (après) : La marche se produit après le point de données
+- **middle** (milieu) : La marche est centrée sur le point de données
 
-**Sélecteur d'échelles** - L'échelle du graphique peut être modifiée en sélectionnant dans le menu déroulant **Échelle**. Les types d'échelles disponibles dépendent de la configuration de la source de données du graphique :
+**Sélecteur d'échelles** : L'échelle du graphique peut être modifiée en sélectionnant dans le menu déroulant **Échelle**. Les types d'échelles disponibles dépendent de la configuration de la source de données du graphique :
 
-- **linear** (linéaire) - Échelle linéaire standard
-- **logarithmic** (logarithmique) - Échelle logarithmique pour les données couvrant plusieurs ordres de grandeur
-- **category** (catégorie) - Échelle catégorique pour les valeurs discrètes
-- **time** (temps) - Échelle temporelle pour les données temporelles
-- **timeseries** (série chronologique) - Échelle de série chronologique avec des fonctionnalités temporelles supplémentaires
+- **linear** (linéaire) : Échelle linéaire standard
+- **logarithmic** (logarithmique) : Échelle logarithmique pour les données couvrant plusieurs ordres de grandeur
+- **category** (catégorie) : Échelle catégorique pour les valeurs discrètes
+- **time** (temps) : Échelle temporelle pour les données temporelles
+- **timeseries** (série chronologique) : Échelle de série chronologique avec des fonctionnalités temporelles supplémentaires
 
 **Verrouiller/Déverrouiller** - Verrouille les paramètres actuels du graphique (valeurs des curseurs, éléments de légende sélectionnés) pour éviter qu'ils ne soient réinitialisés lors du changement de graphique. Lorsqu'ils sont verrouillés, ces paramètres persistent lors des changements de graphique.
 

@@ -220,10 +220,13 @@ export function Datapanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPan
   // TODO Occasionally, setting the default selected layer can have unexpected behaviours.
   // TO.DOCONT e.g. Refresh the page, switch tabs in the browser, come back to tab when done. The layer isn't selected
   useEffect(() => {
-    if (isFirstLoad.current) {
-      isFirstLoad.current = false;
+    // Only trigger on first load when we have a selectedLayerPath
+    if (isFirstLoad.current && selectedLayerPath) {
+      // Check if the layer is now available in orderedLayerData
+      const foundLayer = orderedLayerData.find((lyr) => lyr.layerPath === selectedLayerPath);
 
-      if (selectedLayerPath && orderedLayerData.find((lyr) => lyr.layerPath === selectedLayerPath)) {
+      if (foundLayer) {
+        isFirstLoad.current = false;
         setIsLoading(true);
         triggerGetAllFeatureInfo(selectedLayerPath)
           .catch((error: unknown) => {

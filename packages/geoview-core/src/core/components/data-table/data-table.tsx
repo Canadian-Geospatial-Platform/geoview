@@ -279,14 +279,23 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
           ],
         }),
         ...([t('dataTable.icon'), t('dataTable.zoom'), t('dataTable.details')].includes(value.alias)
-          ? {
-              size: 70,
-              enableColumnFilter: false,
-              enableColumnActions: false,
-              enableSorting: false,
-              enableResizing: false,
-              enableGlobalFilter: false,
-            }
+          ? (() => {
+              return {
+                size: 60,
+                grow: false,
+                enableColumnFilter: false,
+                enableColumnActions: false,
+                enableSorting: false,
+                enableResizing: false,
+                enableGlobalFilter: false,
+                muiTableBodyCellProps: {
+                  sx: sxClasses.pinnedColumn,
+                },
+                muiTableHeadCellProps: {
+                  sx: sxClasses.pinnedColumn,
+                },
+              };
+            })()
           : {}),
       });
     });
@@ -405,19 +414,17 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
           </IconButton>
         ),
         DETAILS: (
-          <Box marginLeft="0.3rem">
-            <IconButton
-              color="primary"
-              aria-label={t('dataTable.details')}
-              tooltipPlacement="top"
-              onClick={() => {
-                setSelectedFeature(feature);
-                enableFocusTrap({ activeElementId: 'featureDetailDataTable', callbackElementId: 'table-details' });
-              }}
-            >
-              <InfoOutlinedIcon />
-            </IconButton>
-          </Box>
+          <IconButton
+            color="primary"
+            aria-label={t('dataTable.details')}
+            tooltipPlacement="top"
+            onClick={() => {
+              setSelectedFeature(feature);
+              enableFocusTrap({ activeElementId: 'featureDetailDataTable', callbackElementId: 'table-details' });
+            }}
+          >
+            <InfoOutlinedIcon />
+          </IconButton>
         ),
         ...feature.fieldInfo,
       };

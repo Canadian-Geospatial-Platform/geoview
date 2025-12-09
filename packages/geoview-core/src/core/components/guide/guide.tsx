@@ -146,7 +146,7 @@ export const Guide = memo(function GuidePanel({ containerType = CONTAINER_TYPE.F
     }
 
     // Convert markdown to HTML React elements
-    const markdownElement = <Markdown options={{ wrapper: 'article' }}>{content}</Markdown>;
+    const markdownElement = <Markdown>{content}</Markdown>;
 
     // Convert React element to HTML string
     const htmlString = renderToStaticMarkup(markdownElement);
