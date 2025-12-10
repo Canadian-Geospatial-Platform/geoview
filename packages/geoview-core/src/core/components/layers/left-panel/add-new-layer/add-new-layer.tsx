@@ -403,7 +403,7 @@ export function AddNewLayer(): JSX.Element {
         const geoviewLayerConfig = await ConfigApi.createInitConfigFromType(
           curlayerType,
           generateId(18),
-          'tempoName',
+          layerName,
           layerURL,
           language,
           mapId,
@@ -419,7 +419,11 @@ export function AddNewLayer(): JSX.Element {
         // Get the name and ID of the first entry before deleting the listOfLayerEntryConfig
         const idOfFirstLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0]?.layerId;
         const nameOfFirstLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0]?.getLayerName();
-        setLayerName(nameOfFirstLayerEntryConfig || geoviewLayerConfig.geoviewLayerName || idOfFirstLayerEntryConfig);
+        setLayerName(nameOfFirstLayerEntryConfig?.split('.')[0] || geoviewLayerConfig.geoviewLayerName || idOfFirstLayerEntryConfig);
+
+        // XYZ Tile layer generic name will be {x} here, so we replace it
+        if (layerName === '{x}' || layerName === '{X}') setLayerName(getLocalizedMessage(language, 'layers.serviceRasterTile'));
+
         setLayerTree(geoviewLayerConfig);
 
         // If there's more than 1 layer entry or 1 entry which is a group
@@ -449,8 +453,6 @@ export function AddNewLayer(): JSX.Element {
 
     let promise;
     if (layerType === SHAPEFILE || layerType === GEOPACKAGE) {
-      const filename = layerURL.split('/').pop()?.split('.')[0];
-      if (filename) setLayerName(filename);
       promise = Promise.resolve(true);
     } else if (
       layerType === WMS ||
@@ -685,7 +687,7 @@ export function AddNewLayer(): JSX.Element {
     setLayerURL(fileURL);
     setLayerType('');
     setLayerTree(undefined);
-    setLayerName(fileName);
+    setLayerName(fileName.split('/').pop()?.split('.')[0] || fileName.split('.')[0]);
     setLayerIdsToAdd([]);
     setStepButtonEnabled(true);
   };
@@ -702,7 +704,7 @@ export function AddNewLayer(): JSX.Element {
     setLayerURL(url);
     setLayerType('');
     setLayerTree(undefined);
-    setLayerName('');
+    setLayerName(url.split('/').pop()?.split('.')[0] || url.split('.')[0]);
     setLayerIdsToAdd([]);
   };
 

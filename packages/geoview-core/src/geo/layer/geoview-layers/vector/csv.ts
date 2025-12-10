@@ -150,7 +150,7 @@ export class CSV extends AbstractGeoViewVector {
       const layerEntryConfig = new CsvLayerEntryConfig({
         geoviewLayerConfig,
         layerId: `${layerEntry.id}`,
-        layerName: layerEntry.layerName || `${layerEntry.id}`,
+        layerName: layerEntries.length === 1 && !layerEntry.layerName ? geoviewLayerName : layerEntry.layerName || `${layerEntry.id}`,
       });
       return layerEntryConfig;
     });
