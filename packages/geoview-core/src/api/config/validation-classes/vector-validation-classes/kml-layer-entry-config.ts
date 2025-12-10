@@ -14,9 +14,6 @@ export class KmlLayerEntryConfig extends VectorLayerEntryConfig {
   constructor(layerConfig: KmlLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.KML);
 
-    // Value for this.source.format can only be KML.
-    this.source.format = 'KML';
-
     // If dataAccessPath doesn't already point to a file (blob, .kml), append the layerId
     const path = this.getDataAccessPath();
     const isBlob = path.startsWith('blob') && !path.endsWith('/');
