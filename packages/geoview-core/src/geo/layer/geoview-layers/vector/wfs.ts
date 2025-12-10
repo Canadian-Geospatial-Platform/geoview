@@ -160,8 +160,6 @@ export class WFS extends AbstractGeoViewVector {
 
       // If no bounds defined in the initial settings and an extent is defined in the metadata
       if (!layerConfig.getInitialSettings()?.bounds && featureType['ows:WGS84BoundingBox']) {
-        // TODO: Check - This additional processing seem valid, but is it at the right place? A bit confusing with the rest of the codebase.
-        // TODO: Refactor - Layers refactoring. Validate if this code is still being executed after the layers migration. This code may easily have been forgotten.
         let lowerCornerRaw = featureType['ows:WGS84BoundingBox']['ows:LowerCorner'] as string;
         if (typeof lowerCornerRaw === 'object' && '#text' in lowerCornerRaw) lowerCornerRaw = lowerCornerRaw['#text'];
         let upperCornerRaw = featureType['ows:WGS84BoundingBox']['ows:UpperCorner'] as string;

@@ -434,7 +434,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   static #processFeatureMetadata(features: Feature[], layerConfig: VectorLayerEntryConfig): void {
     // Get the field name that uniquely identifies each feature (OID) from the layer configuration.
     // TODO: Check - OBJECTID should likely not be sent here by default for an abstract-geoview-vector class which
-    // TO.DOCONT: might very well not be Esri based (leaving it as it was for now, because #getEsriOidField was doing this).
+    // TO.DOCONT: might very well not be Esri based (leaving it as it was for now, because #getEsriOidField (replaced) was doing this).
     const oidField = layerConfig.getOutfieldsPKNameOrDefault('OBJECTID');
 
     // Assign a unique ID to each feature using the OID field if available, otherwise fall back to OpenLayers' getUid().

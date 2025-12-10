@@ -357,22 +357,18 @@ export abstract class AbstractGeoViewLayer {
    */
   async #fetchAndSetServiceMetadata(abortSignal?: AbortSignal): Promise<void> {
     try {
-      // If there's a metadata access path
-      if (this.metadataAccessPath) {
-        // Log
-        logger.logTraceCore(`LAYERS - 2 - Fetching and setting service metadata for: ${this.geoviewLayerId}`, this.listOfLayerEntryConfig);
+      // If there's no metadata access path
+      // GV e.g.: CSV (csvLYR2) and some outlier demos, we want to skip those (not fail)
+      if (!this.metadataAccessPath) return;
 
-        // Start a timer to see if the layer metadata could be fetched after delay
-        this.#startMetadataFetchWatcher();
+      // Log
+      logger.logTraceCore(`LAYERS - 2 - Fetching and setting service metadata for: ${this.geoviewLayerId}`, this.listOfLayerEntryConfig);
 
-        // Process and, yes, keep the await here, because we want to make extra sure the onFetchAndSetServiceMetadata is
-        // executed asynchronously, even if the implementation of the overriden method is synchronous.
-        // All so that the try/catch works nicely here.
-        this.#metadata = await this.fetchServiceMetadata(abortSignal);
-      } else {
-        // GV It's possible there is no metadataAccessPath, e.g.: CSV (csvLYR2), we keep the if condition here
-        // Skip
-      }
+      // Start a timer to see if the layer metadata could be fetched after delay
+      this.#startMetadataFetchWatcher();
+
+      // Process and, yes, keep the await here, because we want the try/catch to work nicely here.
+      this.#metadata = await this.fetchServiceMetadata(abortSignal);
     } catch (error: unknown) {
       // Set the layer status to all layer entries to error (that logic was as-is in this refactor, leaving as-is for now)
       AbstractGeoViewLayer.#setStatusErrorAll(formatError(error), this.listOfLayerEntryConfig);
@@ -579,13 +575,7 @@ export abstract class AbstractGeoViewLayer {
     try {
       // If no errors already happened on the layer path being processed
       if (layerConfig.layerStatus !== 'error') {
-        // TODO: Check - Is this really the right place to set the ServiceMetadata? Isn't it already set by now?
-        // Set the service metadata in the entry config instance as we're about to process the layer metadata
-        layerConfig.setServiceMetadata(this.getMetadata());
-
-        // Process and, yes, keep the await here, because we want to make extra sure the onProcessLayerMetadata is
-        // executed asynchronously, even if the implementation of the overriden method is synchronous.
-        // All so that the try/catch works nicely here.
+        // Process and, yes, keep the await here, because we want the try/catch to work nicely here.
         return await this.onProcessLayerMetadata(layerConfig, abortSignal);
       }
 
@@ -923,8 +913,7 @@ export abstract class AbstractGeoViewLayer {
    * Emits an event to all handlers.
    * @param {LayerEntryRegisterInitEvent} event - The event to emit
    */
-  // TODO: Try to make this function private/protected. Public for now in this refactoring..
-  emitLayerEntryRegisterInit(event: LayerEntryRegisterInitEvent): void {
+  protected emitLayerEntryRegisterInit(event: LayerEntryRegisterInitEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLayerEntryRegisterInitHandlers, event);
   }
