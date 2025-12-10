@@ -47,6 +47,8 @@ export class VectorTiles extends AbstractGeoViewRaster {
     this.fallbackProjection = fallbackProjection;
   }
 
+  // #region OVERRIDES
+
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
@@ -168,6 +170,10 @@ export class VectorTiles extends AbstractGeoViewRaster {
     // Return it
     return gvLayer;
   }
+
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
 
   /**
    * Initializes a GeoView layer configuration for an Vector Tiles layer.
@@ -313,4 +319,6 @@ export class VectorTiles extends AbstractGeoViewRaster {
     // Return the fully configured VectorTileSource instance
     return new VectorTileSource(sourceOptions);
   }
+
+  // #endregion STATIC METHODS
 }

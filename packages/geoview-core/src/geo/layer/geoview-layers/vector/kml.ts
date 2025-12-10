@@ -32,6 +32,8 @@ export class KML extends AbstractGeoViewVector {
     super(layerConfig);
   }
 
+  // #region OVERRIDES
+
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
@@ -95,6 +97,10 @@ export class KML extends AbstractGeoViewVector {
     // Return it
     return gvLayer;
   }
+
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
 
   /**
    * Initializes a GeoView layer configuration for a KML layer.
@@ -199,4 +205,6 @@ export class KML extends AbstractGeoViewVector {
     // Process it
     return AbstractGeoViewVector.processConfig(myLayer);
   }
+
+  // #endregion STATIC METHODS
 }

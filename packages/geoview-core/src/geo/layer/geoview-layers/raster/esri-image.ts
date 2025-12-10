@@ -37,6 +37,8 @@ export class EsriImage extends AbstractGeoViewRaster {
     super(layerConfig);
   }
 
+  // #region OVERRIDES
+
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
@@ -80,6 +82,10 @@ export class EsriImage extends AbstractGeoViewRaster {
     // Return it
     return gvLayer;
   }
+
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
 
   /**
    * Initializes a GeoView layer configuration for an Esri Image layer.
@@ -247,4 +253,6 @@ export class EsriImage extends AbstractGeoViewRaster {
     // Return the source
     return olSource;
   }
+
+  // #endregion STATIC METHODS
 }
