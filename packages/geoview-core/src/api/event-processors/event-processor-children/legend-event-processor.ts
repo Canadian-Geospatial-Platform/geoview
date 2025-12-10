@@ -217,17 +217,16 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath - The path to the layer.
    * @returns {TimeDimension | undefined} - The temporal dimension information of the layer, or `undefined` if not available.
    * @description
-   * This method fetches the Geoview layer for the specified layer path and checks if it has a `getTimeDimension` method.
+   * This method fetches the Geoview layer for the specified layer path (if it exists) and checks if it has a `getTimeDimension` method.
    * If the method exists, it retrieves the temporal dimension information for the layer.
    * If the layer doesn't support temporal dimensions, the method returns `undefined`.
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
   static getLayerTimeDimension(mapId: string, layerPath: string): TimeDimension | undefined {
     // Get the layer api
     const layerApi = MapEventProcessor.getMapViewerLayerAPI(mapId);
 
     // Get the layer
-    const layer = layerApi.getGeoviewLayer(layerPath);
+    const layer = layerApi.getGeoviewLayerIfExists(layerPath);
 
     // Get the temporal dimension calling the GV Layer method, check if getTimeDimension exists and is a function
     if (layer instanceof AbstractGVLayer) return layer.getTimeDimension();
