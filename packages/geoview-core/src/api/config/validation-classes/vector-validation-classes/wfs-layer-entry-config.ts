@@ -21,9 +21,6 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
    */
   constructor(layerConfig: OgcWfsLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.WFS);
-
-    // Value for this.source.format can only be WFS.
-    this.source.format = 'WFS';
   }
 
   /**

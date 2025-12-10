@@ -28,9 +28,6 @@ export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
     super(layerConfig, CONST_LAYER_TYPES.CSV);
     this.valueSeparator = layerConfig.valueSeparator;
 
-    // Value for this.source.format can only be CSV.
-    this.source.format = 'CSV';
-
     // Write the default properties when not specified
     this.source.separator ??= ',';
 

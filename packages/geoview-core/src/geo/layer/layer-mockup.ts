@@ -1,10 +1,5 @@
 import type { TypeBaseVectorGeometryConfig, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
-import type {
-  TypeGeoviewLayerConfig,
-  TypeLayerEntryConfig,
-  TypeLayerEntryType,
-  TypeVectorSourceFormats,
-} from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerEntryType } from '@/api/types/layer-schema-types';
 import type { TimeDimension } from '@/core/utils/date-mgt';
 
 export abstract class LayerMockup {
@@ -71,7 +66,7 @@ export abstract class LayerMockup {
   static #getTop100FeatureLayerEntry(): TypeLayerEntryConfig {
     // Get metadata for Top100
     const metadata = this.configTop100Metadata();
-    const source = this.configTop100Source('EsriJSON');
+    const source = this.configTop100Source();
     const style = this.configTop100Style();
     return this.configLayerEntry('0', 'Top 100 Expl. Pro. (Feature)', 'vector', metadata, source, style);
   }
@@ -79,7 +74,7 @@ export abstract class LayerMockup {
   static #getTop100DynamicLayerEntry(): TypeLayerEntryConfig {
     // Get metadata for Top100
     const metadata = this.configTop100Metadata();
-    const source = this.configTop100Source(undefined);
+    const source = this.configTop100Source();
     const style = this.configTop100Style();
     return this.configLayerEntry('0', 'Top 100 Expl. Pro. (Dynamic)', 'raster-image', metadata, source, style);
   }
@@ -319,9 +314,8 @@ export abstract class LayerMockup {
     };
   }
 
-  static configTop100Source(format: TypeVectorSourceFormats | undefined): unknown {
+  static configTop100Source(): unknown {
     return {
-      format,
       featureInfo: {
         nameField: 'project_name',
         outfields: [
