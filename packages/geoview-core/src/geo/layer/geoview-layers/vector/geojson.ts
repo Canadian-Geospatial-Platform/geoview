@@ -160,21 +160,8 @@ export class GeoJSON extends AbstractGeoViewVector {
           layerConfig.setMinScale(Math.max(layerConfig.getMinScale() || 0, layerMetadataFound.minScale));
         }
 
-        // TODO: Check - DataAccessPath confusion... this guessing seems prone to bugging, can we review or get rid of this?
-        // When the dataAccessPath stored in the layerConfig.source object is equal to the root of the metadataAccessPath with a
-        // layerId ending, chances are that it was set by the config-validation because of an empty dataAcessPath value in the config.
-        // This situation means that we want to use the dataAccessPath found in the metadata if it is set, otherwise we will keep the
-        // config dataAccessPath value.
-        let metadataAccessPathRoot = layerConfig.getMetadataAccessPath();
-        if (metadataAccessPathRoot) {
-          metadataAccessPathRoot =
-            metadataAccessPathRoot.split('/').length > 1 ? metadataAccessPathRoot.split('/').slice(0, -1).join('/') : './';
-          const metadataAccessPathRootPlusLayerId = `${metadataAccessPathRoot}/${layerConfig.layerId}`;
-          if (metadataAccessPathRootPlusLayerId === layerConfig.source?.dataAccessPath && layerMetadataFound.source?.dataAccessPath) {
-            // eslint-disable-next-line no-param-reassign
-            layerConfig.source.dataAccessPath = layerMetadataFound.source.dataAccessPath;
-          }
-        }
+        // Verify the data access path when comparing it to the metadata found
+        layerConfig.verifyDataAccessPath(layerMetadataFound.source);
       }
 
       // Validate and update the extent initial settings
