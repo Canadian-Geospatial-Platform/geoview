@@ -68,9 +68,11 @@ export const Attribution = memo(function Attribution(): JSX.Element {
   // Callbacks
   // Popover state expand/collapse
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>): void => {
+    event.stopPropagation();
     setAnchorEl(event.currentTarget);
   }, []);
-  const handleClosePopover = useCallback(() => {
+  const handleClosePopover = useCallback((event: React.MouseEvent<HTMLButtonElement>): void => {
+    event.stopPropagation();
     setAnchorEl(null);
   }, []);
 

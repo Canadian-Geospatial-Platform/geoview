@@ -101,7 +101,8 @@ export const MousePosition = memo(function MousePosition({ expanded }: MousePosi
   }, [pointerPosition, t]);
 
   // Callbacks
-  const switchPositionMode = useCallback((): void => {
+  const switchPositionMode = useCallback((event: React.MouseEvent<HTMLButtonElement>): void => {
+    event.stopPropagation();
     setPositionMode((p) => (p + 1) % 3);
   }, []);
 

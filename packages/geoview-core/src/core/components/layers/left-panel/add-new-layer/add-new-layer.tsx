@@ -45,6 +45,7 @@ const { GEOCORE, GEOPACKAGE, SHAPEFILE } = CONST_LAYER_ENTRY_TYPES;
 interface FileUploadSectionProps {
   onFileSelected: (file: File, fileURL: string, fileName: string) => void;
   onUrlChanged: (url: string) => void;
+  onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void;
   displayURL: string;
   disabledLayerTypes: string[];
 }
@@ -59,7 +60,13 @@ interface FileUploadSectionProps {
  * @param {string[]} props.disabledLayerTypes - Array of layer types that are disabled
  * @returns {JSX.Element} The rendered component
  */
-function FileUploadSection({ onFileSelected, onUrlChanged, displayURL, disabledLayerTypes }: FileUploadSectionProps): JSX.Element {
+function FileUploadSection({
+  onFileSelected,
+  onUrlChanged,
+  onKeyDown,
+  displayURL,
+  disabledLayerTypes,
+}: FileUploadSectionProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/left-panel/add-new-layer/file-upload-section');
 
@@ -230,6 +237,7 @@ function FileUploadSection({ onFileSelected, onUrlChanged, displayURL, disabledL
         variant="standard"
         value={localDisplayURL}
         onChange={handleInput}
+        onKeyDown={onKeyDown}
         multiline
       />
     </Box>
@@ -403,7 +411,7 @@ export function AddNewLayer(): JSX.Element {
         const geoviewLayerConfig = await ConfigApi.createInitConfigFromType(
           curlayerType,
           generateId(18),
-          'tempoName',
+          layerName,
           layerURL,
           language,
           mapId,
@@ -419,7 +427,11 @@ export function AddNewLayer(): JSX.Element {
         // Get the name and ID of the first entry before deleting the listOfLayerEntryConfig
         const idOfFirstLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0]?.layerId;
         const nameOfFirstLayerEntryConfig = geoviewLayerConfig.listOfLayerEntryConfig[0]?.getLayerName();
-        setLayerName(nameOfFirstLayerEntryConfig || geoviewLayerConfig.geoviewLayerName || idOfFirstLayerEntryConfig);
+        setLayerName(nameOfFirstLayerEntryConfig?.split('.')[0] || geoviewLayerConfig.geoviewLayerName || idOfFirstLayerEntryConfig);
+
+        // XYZ Tile layer generic name will be {x} here, so we replace it
+        if (layerName === '{x}' || layerName === '{X}') setLayerName(getLocalizedMessage(language, 'layers.serviceRasterTile'));
+
         setLayerTree(geoviewLayerConfig);
 
         // If there's more than 1 layer entry or 1 entry which is a group
@@ -449,8 +461,6 @@ export function AddNewLayer(): JSX.Element {
 
     let promise;
     if (layerType === SHAPEFILE || layerType === GEOPACKAGE) {
-      const filename = layerURL.split('/').pop()?.split('.')[0];
-      if (filename) setLayerName(filename);
       promise = Promise.resolve(true);
     } else if (
       layerType === WMS ||
@@ -664,9 +674,35 @@ export function AddNewLayer(): JSX.Element {
    *
    * @param {KeyboardEvent<HTMLButtonElement>} event - Keyboard event
    */
-  const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>): void => {
+  const handleBackKeyDown = (event: KeyboardEvent<HTMLButtonElement>): void => {
     if (event.key === 'Enter') {
       handleBack();
+      event.preventDefault();
+    }
+  };
+
+  /**
+   * Handle keydowns on continue/finish button
+   * @param {KeyboardEvent<HTMLButtonElement>} event - Keyboard event
+   */
+  const handleNextKeyDown = (event: KeyboardEvent<HTMLButtonElement> | KeyboardEvent<HTMLDivElement>): void => {
+    if (event.key === 'Enter' && stepButtonEnabled) {
+      switch (activeStep) {
+        case 0:
+          handleStep1();
+          break;
+        case 1:
+          handleStep2();
+          break;
+        case 2:
+          isMultiple ? handleStep3() : handleStepLast();
+          break;
+        case 3:
+          handleStepLast();
+          break;
+        default:
+          break;
+      }
       event.preventDefault();
     }
   };
@@ -685,7 +721,7 @@ export function AddNewLayer(): JSX.Element {
     setLayerURL(fileURL);
     setLayerType('');
     setLayerTree(undefined);
-    setLayerName(fileName);
+    setLayerName(fileName.split('/').pop()?.split('.')[0] || fileName.split('.')[0]);
     setLayerIdsToAdd([]);
     setStepButtonEnabled(true);
   };
@@ -702,7 +738,7 @@ export function AddNewLayer(): JSX.Element {
     setLayerURL(url);
     setLayerType('');
     setLayerTree(undefined);
-    setLayerName('');
+    setLayerName(url.split('/').pop()?.split('.')[0] || url.split('.')[0]);
     setLayerIdsToAdd([]);
   };
 
@@ -759,12 +795,14 @@ export function AddNewLayer(): JSX.Element {
           </IconButton>
         ) : (
           <Button
+            id="nextButton"
             variant="contained"
             className="buttonOutlineFilled"
             size="small"
             type="text"
             disabled={isLast ? layerName === undefined || layerName === '' : !stepButtonEnabled}
             onClick={handleNext}
+            onKeyDown={handleNextKeyDown}
           >
             {isLast ? t('layers.finish') : t('layers.continue')}
           </Button>
@@ -776,7 +814,7 @@ export function AddNewLayer(): JSX.Element {
             size="small"
             type="text"
             onClick={handleBack}
-            onKeyDown={(e) => handleKeyDown(e)}
+            onKeyDown={handleBackKeyDown}
           >
             {t('layers.back')}
           </Button>
@@ -801,6 +839,7 @@ export function AddNewLayer(): JSX.Element {
                   <FileUploadSection
                     onFileSelected={handleFileSelected}
                     onUrlChanged={handleUrlChanged}
+                    onKeyDown={handleNextKeyDown}
                     displayURL={displayURL}
                     disabledLayerTypes={disabledLayerTypes}
                   />
@@ -860,6 +899,7 @@ export function AddNewLayer(): JSX.Element {
                       value={layerName}
                       onChange={handleNameLayer}
                       ref={isMultipleTextFieldRef}
+                      onKeyDown={handleNextKeyDown}
                     />
                   ) : (
                     layerTree && <AddLayerTree layerTree={layerTree} onSelectedItemsChange={setLayerIdsToAdd} />
@@ -884,6 +924,7 @@ export function AddNewLayer(): JSX.Element {
                         variant="standard"
                         value={layerName}
                         onChange={handleNameLayer}
+                        onKeyDown={handleNextKeyDown}
                       />
                       <br />
                       <NavButtons isLast handleNext={handleStepLast} />
