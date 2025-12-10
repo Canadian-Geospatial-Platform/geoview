@@ -344,9 +344,16 @@ export const VALID_MAP_CENTER: Record<TypeValidMapProjectionCodes, Record<string
   3978: { lat: [40, 90], long: [-140, -60] },
 };
 
-// extents and center for each projection
+// Map view extents for each projection
 export const MAP_EXTENTS: Record<TypeValidMapProjectionCodes, number[]> = {
   3857: [-180, 0, 80, 84],
+  // TODO: tighten these up for initial view now that we have a separate MAX_EXTENTS_RESTRICTION
+  3978: [-150, -10, -30, 90],
+};
+
+// Extent restrictions for each projection
+export const MAX_EXTENTS_RESTRICTION: Record<TypeValidMapProjectionCodes, number[]> = {
+  3857: [-180, -85.05112877980659, 180, 85.05112877980659],
   3978: [-150, -10, -30, 90],
 };
 
