@@ -350,6 +350,12 @@ export const MAP_EXTENTS: Record<TypeValidMapProjectionCodes, number[]> = {
   3978: [-150, -10, -30, 90],
 };
 
+// extents and center for each projection
+export const MAX_EXTENTS_RESTRICTION: Record<TypeValidMapProjectionCodes, number[]> = {
+  3857: [-180, -85.05112877980659, 180, 85.05112877980659],
+  3978: [-150, -10, -30, 90],
+};
+
 export const MAP_CENTER: Record<TypeValidMapProjectionCodes, [number, number]> = {
   3857: [-90, 65],
   3978: [-90, 60],
