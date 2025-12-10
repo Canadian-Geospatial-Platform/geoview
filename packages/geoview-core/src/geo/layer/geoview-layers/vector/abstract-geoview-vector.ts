@@ -231,9 +231,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     source: VectorSource<Feature>,
     featureProjection: ProjectionLike,
     extent: Extent
-  ): Promise<Feature[] | undefined> {
-    // TODO: Refactor - Consider changing the return type to Promise<Feature[]>
-
+  ): Promise<Feature[]> {
     // The read options
     const options = { dataProjection: layerConfig.source?.dataProjection, featureProjection, extent };
 
@@ -265,7 +263,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         // Read the data projection
         options.dataProjection ??= layerConfig.source?.dataProjection || 'EPSG:4326'; // default: 4326 because OpenLayers struggles to figure it out by itself for WKB here
 
-        // TODO: Add a WKB reader by using the code we have in GVWKB like: const features = new FormatWkb().readFeatures(wkbObject,
+        // If we have a feature package
         if ((layerConfig as WkbLayerEntryConfig).source.geoPackageFeatures?.length) {
           const { geoPackageFeatures } = (layerConfig as WkbLayerEntryConfig).source;
           const features = geoPackageFeatures!.map(({ geom, properties }) => {
@@ -462,7 +460,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {Feature[]} The array of features.
    * @private
    */
-  static #convertCsv(csvData: string, layerConfig: VectorLayerEntryConfig, outProjection: OLProjection): Feature[] | undefined {
+  static #convertCsv(csvData: string, layerConfig: VectorLayerEntryConfig, outProjection: OLProjection): Feature[] {
     // GV: This function and the below private static ones used to be in the CSV class directly, but something wasn't working with a 'Private element not accessible' error.
     // GV: After moving the code to the mother class, it worked. It'll remain here for now until the config refactoring can take care of it in its re-writing
 
