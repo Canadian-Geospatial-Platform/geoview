@@ -23,7 +23,7 @@ import type {
   TypeMapConfig,
   TypeMapFeaturesInstance,
 } from '@/api/types/map-schema-types';
-import { MAP_EXTENTS } from '@/api/types/map-schema-types';
+import { MAP_EXTENTS, MAX_EXTENTS_RESTRICTION } from '@/api/types/map-schema-types';
 import type {
   MapConfigLayerEntry,
   TypeLayerInitialSettings,
@@ -484,7 +484,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       ];
       const newProjection = projectionCode;
 
-      // If maxExtent was provided and un the native projection, apply
+      // If maxExtent was provided and in the native projection, apply
       // GV The extent is different between LCC and WM and switching from one to the other may introduce weird constraint.
       // GV We may have to keep extent as array for configuration file but, technically, user does not change projection often.
       // GV A wider LCC extent like [-125, 30, -60, 89] (minus -125) will introduce distortion on larger screen...
@@ -493,7 +493,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       const mapMaxExtent =
         viewSettings!.maxExtent && Number(newProjection) === Number(viewSettings!.projection)
           ? viewSettings?.maxExtent
-          : MAP_EXTENTS[newProjection];
+          : MAX_EXTENTS_RESTRICTION[newProjection];
 
       // create new view settings
       const newView: TypeViewSettings = {
@@ -1596,7 +1596,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         rotation: this.getMapStateProtected(mapId).rotation,
         minZoom: currentView.getMinZoom(),
         maxZoom: currentView.getMaxZoom(),
-        maxExtent: this.getGeoViewMapConfig(mapId)?.map.viewSettings.maxExtent ? MAP_EXTENTS[projection] : undefined,
+        maxExtent: this.getGeoViewMapConfig(mapId)?.map.viewSettings.maxExtent,
         projection,
       };
 

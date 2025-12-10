@@ -52,7 +52,10 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
 
     // Approximate width calculation (50px for empty tooltip)
     // Assuming average character width of 10px and adding padding/margins
-    const approximateWidth = 50 + String(hoverFeatureInfo.fieldInfo?.value).length * 10;
+    let approximateWidth = 25 + String(hoverFeatureInfo.fieldInfo?.value).length * 10;
+
+    // After a certain length, the string is cut off with ellipsis in the tooltip, so we have a max width.
+    if (approximateWidth > 370) approximateWidth = 370; // Cap to max width
 
     // Only get getBoundingClientRect if we don't have it stored
     if (!mapRectRef.current) mapRectRef.current = mapElem.getBoundingClientRect();
