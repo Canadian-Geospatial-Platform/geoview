@@ -306,7 +306,7 @@ export class GeoJSON extends AbstractGeoViewVector {
       const layerEntryConfig = new GeoJSONLayerEntryConfig({
         geoviewLayerConfig,
         layerId: `${layerEntry.id}`,
-        layerName: layerEntry.layerName || `${layerEntry.id}`,
+        layerName: layerEntry.layerName || (layerEntries.length === 1 ? geoviewLayerName : `${layerEntry.id}`),
       });
       return layerEntryConfig;
     });

@@ -87,7 +87,8 @@ export const Scale = memo(function Scale({ expanded }: ScaleProps): JSX.Element 
     },
     [scale.lineWidthMetric, scale.lineWidthImperial]
   );
-  const switchScale = useCallback((): void => {
+  const switchScale = useCallback((event: React.MouseEvent<HTMLButtonElement>): void => {
+    event.stopPropagation();
     setScaleMode((prev) => (prev + 1) % 3);
   }, []);
 

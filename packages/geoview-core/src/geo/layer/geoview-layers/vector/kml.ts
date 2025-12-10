@@ -148,7 +148,7 @@ export class KML extends AbstractGeoViewVector {
         schemaTag: CONST_LAYER_TYPES.KML,
         entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
         layerId: `${layerEntry.id}`,
-        layerName: `${layerEntry.layerName || layerEntry.id}`,
+        layerName: `${layerEntry.layerName || (layerEntries.length === 1 ? geoviewLayerName : layerEntry.id)}`,
         source: {
           format: 'KML',
           dataAccessPath: layerEntry.source?.dataAccessPath,
