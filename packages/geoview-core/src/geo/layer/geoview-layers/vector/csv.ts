@@ -6,16 +6,11 @@ import type Feature from 'ol/Feature';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import type { TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { CsvLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { GVCSV } from '@/geo/layer/gv-layers/vector/gv-csv';
-
-export interface TypeSourceCSVInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
-  format: 'CSV';
-  separator?: ',';
-}
 
 export interface TypeCSVLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.CSV;

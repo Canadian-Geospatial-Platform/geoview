@@ -1,17 +1,12 @@
 import type { VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeBaseVectorSourceInitialConfig } from '@/api/types/layer-schema-types';
+import type { ConfigClassOrType, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { TypeKmlLayerConfig } from '@/geo/layer/geoview-layers/vector/kml';
 
-export interface KmlLayerEntryConfigProps extends VectorLayerEntryConfigProps {
-  /** Source settings to apply to the GeoView layer source at creation time. */
-  source?: TypeBaseVectorSourceInitialConfig;
-}
+export interface KmlLayerEntryConfigProps extends VectorLayerEntryConfigProps {}
 
 export class KmlLayerEntryConfig extends VectorLayerEntryConfig {
-  declare source: TypeBaseVectorSourceInitialConfig;
-
   /**
    * The class constructor.
    * @param {KmlLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
@@ -20,7 +15,7 @@ export class KmlLayerEntryConfig extends VectorLayerEntryConfig {
     super(layerConfig, CONST_LAYER_TYPES.KML);
 
     // Value for this.source.format can only be KML.
-    this.source.format ??= 'KML';
+    this.source.format = 'KML';
 
     // If dataAccessPath doesn't already point to a file (blob, .kml), append the layerId
     const path = this.getDataAccessPath();

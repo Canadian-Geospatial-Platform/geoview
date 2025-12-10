@@ -61,7 +61,6 @@ export class ShapefileReader {
               layerStyle: AbstractBaseLayerEntryConfig.getClassOrTypeLayerStyle(matchingLayerEntryConfig),
               initialSettings: AbstractBaseLayerEntryConfig.getClassOrTypeInitialSettings(matchingLayerEntryConfig),
               source: {
-                format: 'GeoJSON',
                 geojson: JSON.stringify(layerGeojson),
               },
             });
@@ -83,7 +82,6 @@ export class ShapefileReader {
         layerStyle: AbstractBaseLayerEntryConfig.getClassOrTypeLayerStyle(passedLayerEntryConfig),
         initialSettings: ConfigBaseClass.getClassOrTypeInitialSettings(passedLayerEntryConfig),
         source: {
-          format: 'GeoJSON',
           geojson: JSON.stringify(geojson),
         },
       });
