@@ -3,6 +3,7 @@ import EventHelper from '@/api/events/event-helper';
 import type { Extent, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
 import type {
   ConfigClassOrType,
+  TypeBaseSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
   TypeLayerEntryType,
@@ -29,6 +30,7 @@ export interface ConfigBaseClassProps {
   layerPath?: string; // This property isn't necessary in the config, but we have it explicit here for the ConfigClassOrType thing.
   layerName?: string;
   initialSettings?: TypeLayerInitialSettings;
+  source?: TypeBaseSourceInitialConfig;
   minScale?: number;
   maxScale?: number;
   isMetadataLayerGroup?: boolean;

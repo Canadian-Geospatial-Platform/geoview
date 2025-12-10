@@ -103,14 +103,6 @@ export type ConfigAbstractBaseClassOrType = AbstractBaseLayerEntryConfig | Abstr
  * the configs being treated as types and class instances simultaneously in the code base. */
 export type ConfigVectorTilesClassOrType = VectorTilesLayerEntryConfig | VectorTilesLayerEntryConfigProps;
 
-export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
-  format: 'featureAPI';
-}
-
-export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
-  format: 'WFS';
-}
-
 /** Definition of the post settings type needed when the GeoView GeoJSON layers need to use a POST instead of a GET. */
 export type TypePostSettings = { header?: Record<string, string>; data: unknown };
 
@@ -245,24 +237,11 @@ export interface TypeBaseVectorSourceInitialConfig extends TypeBaseSourceInitial
   postSettings?: TypePostSettings; // TODO: refactor - from geo map schema types
 }
 
-/** Type from which we derive the source properties for all the Wfs leaf nodes in the layer tree. */
-export type TypeSourceWfsInitialConfig = TypeBaseVectorSourceInitialConfig;
-
-/** Initial settings to apply to the GeoView vector layer source at creation time. */
-export interface TypeVectorSourceInitialConfig extends TypeBaseVectorSourceInitialConfig {
-  /** The character used to separate columns of csv file. */
-  separator?: string;
-  /** The feature format used by the XHR feature loader when url is set. */
-  format?: TypeVectorSourceFormats; // TODO: refactor - from geo map schema type
-}
-
-export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
-  format: 'GeoJSON';
+export interface TypeSourceGeoJSONInitialConfig extends TypeBaseVectorSourceInitialConfig {
   geojson?: string;
 }
 
-export interface TypeSourceWkbVectorInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
-  format: 'WKB';
+export interface TypeSourceWkbVectorInitialConfig extends TypeBaseVectorSourceInitialConfig {
   geoPackageFeatures?: GeoPackageFeature[];
 }
 
@@ -294,7 +273,7 @@ export type TypeTileGrid = {
 };
 
 /** Type that defines the vector layer source formats. */
-export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | 'featureAPI' | 'CSV' | 'MVT' | 'WKB';
+export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | 'featureAPI' | 'CSV' | 'WKB';
 
 /** Type from which we derive the source properties for all the ESRI dynamic leaf nodes in the layer tree. */
 export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitialConfig {
@@ -317,6 +296,8 @@ export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitia
   forceServiceProjection?: boolean;
 }
 
+export interface TypeSourceEsriFeatureInitialConfig extends TypeBaseVectorSourceInitialConfig {}
+
 /** Type from which we derive the source properties for all the ESRI Image leaf nodes in the layer tree. */
 export interface TypeSourceEsriImageInitialConfig extends TypeBaseSourceInitialConfig {
   /** The format used by the image layer. */
@@ -324,6 +305,37 @@ export interface TypeSourceEsriImageInitialConfig extends TypeBaseSourceInitialC
   /**
    * If true, the image will be exported with the background color of the map set as its transparent color. Only the .png
    * and .gif formats support transparency.
+   */
+  transparent?: boolean;
+}
+
+export type TypeSourceImageInitialConfig =
+  | TypeSourceImageWmsInitialConfig
+  | TypeSourceImageEsriInitialConfig
+  | TypeSourceImageStaticInitialConfig;
+
+export interface TypeSourceImageStaticInitialConfig extends TypeBaseSourceInitialConfig {
+  /** Image extent */
+  extent: Extent;
+}
+
+export interface TypeSourceCSVInitialConfig extends TypeBaseVectorSourceInitialConfig {
+  separator?: ',';
+}
+
+export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceInitialConfig {
+  /** The type of the remote WMS server. The default value is mapserver. */
+  serverType?: TypeOfServer;
+  /** Style to apply. Default = '' */
+  wmsStyle?: string | string[];
+}
+
+export interface TypeSourceImageEsriInitialConfig extends TypeBaseSourceInitialConfig {
+  /** The format used by the image layer. */
+  format?: TypeEsriFormatParameter;
+  /**
+   * If true, the image will be exported with the background color of the map set as its transparent color. Only the .png and
+   * .gif formats support transparency. Default = true.
    */
   transparent?: boolean;
 }
@@ -616,37 +628,6 @@ export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLay
   // Return it
   return serializedGeoviewLayerConfig;
 };
-
-export type TypeSourceImageInitialConfig =
-  | TypeSourceImageWmsInitialConfig
-  | TypeSourceImageEsriInitialConfig
-  | TypeSourceImageStaticInitialConfig;
-
-export interface TypeSourceImageStaticInitialConfig extends Omit<TypeBaseSourceInitialConfig, 'featureInfo'> {
-  /** Definition of the feature information structure that will be used by the getFeatureInfo method. We only use queryable and
-   * it must be set to false if specified.
-   */
-  featureInfo?: { queryable: false };
-  /** Image extent */
-  extent: Extent;
-}
-
-export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceInitialConfig {
-  /** The type of the remote WMS server. The default value is mapserver. */
-  serverType?: TypeOfServer;
-  /** Style to apply. Default = '' */
-  wmsStyle?: string | string[];
-}
-
-export interface TypeSourceImageEsriInitialConfig extends TypeBaseSourceInitialConfig {
-  /** The format used by the image layer. */
-  format?: TypeEsriFormatParameter;
-  /**
-   * If true, the image will be exported with the background color of the map set as its transparent color. Only the .png and
-   * .gif formats support transparency. Default = true.
-   */
-  transparent?: boolean;
-}
 
 export interface TypeMetadataWMSRoot {
   WMS_Capabilities?: TypeMetadataWMS;

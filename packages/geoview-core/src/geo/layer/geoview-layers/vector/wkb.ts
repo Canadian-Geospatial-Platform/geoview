@@ -290,7 +290,6 @@ export class WKB extends AbstractGeoViewVector {
         layerId: `${layerEntry.id}`,
         layerName: `${layerEntry.layerName || layerEntry.id}`,
         source: {
-          format: 'WKB',
           dataAccessPath: layerEntry.source?.dataAccessPath,
         },
       });

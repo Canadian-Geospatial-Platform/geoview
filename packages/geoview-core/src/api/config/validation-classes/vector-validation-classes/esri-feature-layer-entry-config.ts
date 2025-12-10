@@ -1,8 +1,13 @@
-import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeLayerMetadataEsri } from '@/api/types/layer-schema-types';
+import type {
+  ConfigClassOrType,
+  TypeGeoviewLayerConfig,
+  TypeLayerMetadataEsri,
+  TypeSourceEsriFeatureInitialConfig,
+} from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import type { TypeEsriFeatureLayerConfig, TypeSourceEsriFeatureInitialConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import type { TypeEsriFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import type { TypeStyleGeometry } from '@/api/types/map-schema-types';
 
@@ -22,8 +27,8 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
     super(layerConfig, CONST_LAYER_TYPES.ESRI_FEATURE);
     this.maxRecordCount = layerConfig.maxRecordCount;
 
-    // Write the default properties when not specified
-    this.source.format ??= 'EsriJSON';
+    // Value for this.source.format can only be EsriJSON.
+    this.source.format = 'EsriJSON';
 
     // Trim any trailing '/'
     let path = this.getDataAccessPath();

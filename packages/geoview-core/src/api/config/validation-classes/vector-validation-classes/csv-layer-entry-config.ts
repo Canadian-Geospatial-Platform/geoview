@@ -1,7 +1,7 @@
 import type { VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import type { TypeCSVLayerConfig, TypeSourceCSVInitialConfig } from '@/geo/layer/geoview-layers/vector/csv';
-import type { ConfigClassOrType, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
+import type { TypeCSVLayerConfig } from '@/geo/layer/geoview-layers/vector/csv';
+import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeSourceCSVInitialConfig } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 export interface CsvLayerEntryConfigProps extends VectorLayerEntryConfigProps {
@@ -28,8 +28,10 @@ export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
     super(layerConfig, CONST_LAYER_TYPES.CSV);
     this.valueSeparator = layerConfig.valueSeparator;
 
+    // Value for this.source.format can only be CSV.
+    this.source.format = 'CSV';
+
     // Write the default properties when not specified
-    this.source.format ??= 'CSV';
     this.source.separator ??= ',';
 
     // Normalize dataAccessPath if needed

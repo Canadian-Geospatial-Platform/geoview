@@ -150,7 +150,6 @@ export class KML extends AbstractGeoViewVector {
         layerId: `${layerEntry.id}`,
         layerName: `${layerEntry.layerName || (layerEntries.length === 1 ? geoviewLayerName : layerEntry.id)}`,
         source: {
-          format: 'KML',
           dataAccessPath: layerEntry.source?.dataAccessPath,
         },
       });
