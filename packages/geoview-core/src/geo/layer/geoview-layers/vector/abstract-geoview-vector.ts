@@ -22,6 +22,7 @@ import { LayerNoGeographicDataInCSVError, LayerTooManyEsriFeatures } from '@/cor
 import { LayerEntryConfigVectorSourceURLNotDefinedError } from '@/core/exceptions/layer-entry-config-exceptions';
 import type { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
 import type { GeoJSONLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
+import type { CsvLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
 import { GeoUtilities } from '@/geo/utils/utilities';
 
 // Some constants
@@ -240,7 +241,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         // Attempt to convert CSV text to OpenLayers features
         return AbstractGeoViewVector.#convertCsv(
           responseData as string,
-          layerConfig,
+          layerConfig as CsvLayerEntryConfig,
           Projection.getProjectionFromString(featureProjection)
         );
 
@@ -455,12 +456,13 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
   /**
    * Converts csv text to feature array.
-   * @param {string} csvData The data from the .csv file.
-   * @param {VectorLayerEntryConfig} layerConfig The config of the layer.
+   * @param {string} csvData - The data from the .csv file.
+   * @param {CsvLayerEntryConfig} layerConfig - The config of the layer.
+   * @param {OLProjection} outProjection - The output projection for the features.
    * @returns {Feature[]} The array of features.
    * @private
    */
-  static #convertCsv(csvData: string, layerConfig: VectorLayerEntryConfig, outProjection: OLProjection): Feature[] {
+  static #convertCsv(csvData: string, layerConfig: CsvLayerEntryConfig, outProjection: OLProjection): Feature[] {
     // GV: This function and the below private static ones used to be in the CSV class directly, but something wasn't working with a 'Private element not accessible' error.
     // GV: After moving the code to the mother class, it worked. It'll remain here for now until the config refactoring can take care of it in its re-writing
 
