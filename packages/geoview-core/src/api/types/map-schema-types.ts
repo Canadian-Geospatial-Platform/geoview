@@ -456,7 +456,6 @@ export const DEFAULT_MAP_FEATURE_CONFIG = {
       rotation: 0,
       minZoom: VALID_ZOOM_LEVELS[0],
       maxZoom: VALID_ZOOM_LEVELS[1],
-      maxExtent: MAP_EXTENTS[3978],
       projection: 3978,
     },
     extraOptions: {},

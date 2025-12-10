@@ -15,7 +15,7 @@ import type {
   TypeExternalPackagesProps,
   TypeValidVersions,
 } from '@/api/types/map-schema-types';
-import { DEFAULT_MAP_FEATURE_CONFIG, MAP_EXTENTS, VALID_PROJECTION_CODES, MAP_CENTER, MAP_ZOOM_LEVEL } from '@/api/types/map-schema-types';
+import { DEFAULT_MAP_FEATURE_CONFIG, VALID_PROJECTION_CODES, MAP_CENTER, MAP_ZOOM_LEVEL } from '@/api/types/map-schema-types';
 import { deepMerge } from '@/core/utils/utilities';
 
 /**
@@ -121,7 +121,6 @@ export class MapFeatureConfig {
       projection && VALID_PROJECTION_CODES.includes(projection) ? projection : DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.projection;
 
     // Set values specific to projection
-    mapConfig.viewSettings.maxExtent = [...MAP_EXTENTS[proj]];
     mapConfig.viewSettings.initialView = { zoomAndCenter: [MAP_ZOOM_LEVEL[proj], MAP_CENTER[proj]] };
 
     // Return it
