@@ -8,6 +8,7 @@ import { logger } from '@/core/utils/logger';
 import type { TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/api/types/layer-schema-types';
 import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import { Tooltip } from '@/ui/tooltip/tooltip';
 
 export interface AddLayerTreeProps {
   layerTree: TypeGeoviewLayerConfig;
@@ -47,9 +48,11 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
 
     const curLayerId = `${parentId ? `${parentId}/` : ''}${layerId}`;
     return (
-      <TreeItem key={curLayerId} itemId={curLayerId} label={layerName} aria-label={layerName}>
-        {layer.listOfLayerEntryConfig?.map((subLayer) => renderTreeItem(subLayer, curLayerId))}
-      </TreeItem>
+      <Tooltip title={layerName} placement="top">
+        <TreeItem key={curLayerId} itemId={curLayerId} label={layerName} aria-label={layerName}>
+          {layer.listOfLayerEntryConfig?.map((subLayer) => renderTreeItem(subLayer, curLayerId))}
+        </TreeItem>
+      </Tooltip>
     );
   };
 
@@ -114,7 +117,16 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
 
   return (
     <SimpleTreeView
-      sx={{ fontSize: '0.8rem', '& .MuiTreeItem-label': { fontSize: '0.8rem !important', paddingTop: '3px', paddingBottom: '3px' } }}
+      sx={{
+        fontSize: '0.8rem',
+        '& .MuiTreeItem-label': {
+          fontSize: '0.8rem !important',
+          paddingTop: '3px',
+          paddingBottom: '3px',
+          textOverflow: 'ellipsis',
+          overflow: 'hidden',
+        },
+      }}
       multiSelect
       checkboxSelection
       selectedItems={selectedItems}

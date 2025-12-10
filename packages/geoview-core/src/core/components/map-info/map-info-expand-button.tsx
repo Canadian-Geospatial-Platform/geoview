@@ -47,9 +47,13 @@ export const MapInfoExpandButton = memo(function MapInfoExpandButton({ onExpand,
     color: theme.palette.geoViewColor.bgColor.light[800],
   };
 
-  const handleClick = useCallback(() => {
-    onExpand(!expanded);
-  }, [onExpand, expanded]);
+  const handleClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation();
+      onExpand(!expanded);
+    },
+    [onExpand, expanded]
+  );
 
   return (
     <Box sx={BOX_STYLES}>

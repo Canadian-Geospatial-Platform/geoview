@@ -142,7 +142,7 @@
                 "$ref": "#/definitions/TypeValidFooterBarTabsCoreProps"
               },
               "minItems": 1,
-              "default": ["legend", "layers", "details", "data-table"],
+              "default": ["layers", "data-table"],
               "uniqueItems": true
             },
             "custom": {
