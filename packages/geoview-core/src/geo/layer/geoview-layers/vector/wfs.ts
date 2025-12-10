@@ -619,7 +619,6 @@ export class WFS extends AbstractGeoViewVector {
         layerId: `${layerEntry.id}`,
         layerName: layerEntry.layerName || geoviewLayerName || `${layerEntry.id}`,
         source: {
-          format: 'WFS',
           strategy,
         },
       } as unknown as TypeLayerEntryShell;

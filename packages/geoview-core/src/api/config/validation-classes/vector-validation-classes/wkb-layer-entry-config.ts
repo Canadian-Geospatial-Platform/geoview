@@ -20,7 +20,7 @@ export class WkbLayerEntryConfig extends VectorLayerEntryConfig {
     super(layerConfig, CONST_LAYER_TYPES.WKB);
 
     // Value for this.source.format can only be WKB.
-    this.source.format ??= 'WKB';
+    this.source.format = 'WKB';
   }
 
   /**

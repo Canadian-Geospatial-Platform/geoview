@@ -20,7 +20,7 @@ export class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
     super(layerConfig, CONST_LAYER_TYPES.GEOJSON);
 
     // Value for this.source.format can only be GeoJSON.
-    this.source.format ??= 'GeoJSON';
+    this.source.format = 'GeoJSON';
 
     // Remove the metadata file name and keep only the path to the directory where the metadata resides
     let dataAccessPath = this.getDataAccessPath();

@@ -109,7 +109,6 @@ export class GeoPackageReader {
                   source: {
                     dataAccessPath: url,
                     dataProjection: matchingLayerData.dataProjection || Projection.PROJECTION_NAMES.LONLAT,
-                    format: 'WKB',
                     featureInfo:
                       layerEntryConfig.source?.featureInfo ||
                       GeoPackageReader.#processFeatureInfoConfig(matchingLayerData.geoPackageFeatures[0].properties),
@@ -139,7 +138,6 @@ export class GeoPackageReader {
                 source: {
                   dataAccessPath: url,
                   dataProjection: layerData.dataProjection || Projection.PROJECTION_NAMES.LONLAT,
-                  format: 'WKB',
                   featureInfo:
                     layerEntryConfig.source?.featureInfo ||
                     GeoPackageReader.#processFeatureInfoConfig(layerData.geoPackageFeatures[0].properties),
@@ -177,7 +175,6 @@ export class GeoPackageReader {
             source: {
               dataAccessPath: layerConfig.metadataAccessPath,
               dataProjection: layerData.dataProjection || Projection.PROJECTION_NAMES.LONLAT,
-              format: 'WKB',
               featureInfo: GeoPackageReader.#processFeatureInfoConfig(layerData.geoPackageFeatures[0].properties),
               geoPackageFeatures: layerData.geoPackageFeatures,
             },

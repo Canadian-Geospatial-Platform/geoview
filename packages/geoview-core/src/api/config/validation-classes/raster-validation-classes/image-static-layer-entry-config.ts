@@ -23,6 +23,9 @@ export class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   constructor(layerConfig: ImageStaticLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.IMAGE_STATIC, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
 
+    // Value for this.source.featureInfo.queryable can only be false.
+    this.setQueryable(false);
+
     // If not pointing to an image file directly
     if (
       !this.getDataAccessPath().toLowerCase().endsWith('.png') &&

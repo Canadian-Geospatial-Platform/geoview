@@ -1,11 +1,11 @@
-import type { TypeGeoviewLayerType, TypeLayerMetadataVector, TypeVectorSourceInitialConfig } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerType, TypeLayerMetadataVector, TypeBaseVectorSourceInitialConfig } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_ENTRY_TYPES } from '@/api/types/layer-schema-types';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 
 export interface VectorLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
   /** Source settings to apply to the GeoView layer source at creation time. */
-  source?: TypeVectorSourceInitialConfig;
+  source?: TypeBaseVectorSourceInitialConfig;
   /** Max number of records for query */
   maxRecordCount?: number;
 }
@@ -16,7 +16,7 @@ export interface VectorLayerEntryConfigProps extends AbstractBaseLayerEntryConfi
 // TODO: Refactor - This class should be named 'AbstractVectorLayerEntryConfig' to align with others
 export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /** Initial settings to apply to the GeoView vector layer source at creation time. */
-  declare source: TypeVectorSourceInitialConfig;
+  declare source: TypeBaseVectorSourceInitialConfig;
 
   /** Max number of records for query */
   maxRecordCount?: number;
