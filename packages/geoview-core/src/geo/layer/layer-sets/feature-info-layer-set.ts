@@ -6,7 +6,7 @@ import EventHelper from '@/api/events/event-helper';
 import type { QueryType, TypeFeatureInfoEntry, TypeResultSet } from '@/api/types/map-schema-types';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import type { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { EventType, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { GVKML } from '@/geo/layer/gv-layers/vector/gv-kml';
@@ -56,19 +56,19 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
-   * @param {AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseGVLayer} layer - The layer
    * @returns {boolean} True when the layer should be registered to this feature-info-layer-set.
    */
-  protected override onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
+  protected override onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean {
     // Return if the layer is of queryable type and source is queryable
     return super.onRegisterLayerCheck(layer) && AbstractLayerSet.isQueryableType(layer) && AbstractLayerSet.isSourceQueryable(layer);
   }
 
   /**
    * Overrides the behavior to apply when a feature-info-layer-set wants to register a layer in its set.
-   * @param {AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseGVLayer} layer - The layer
    */
-  protected override onRegisterLayer(layer: AbstractBaseLayer): void {
+  protected override onRegisterLayer(layer: AbstractBaseGVLayer): void {
     // Call parent
     super.onRegisterLayer(layer);
 

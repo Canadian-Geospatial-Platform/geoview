@@ -13,7 +13,7 @@ import type { StyleChangedDelegate, StyleChangedEvent } from '@/geo/layer/gv-lay
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { StyleAppliedDelegate, StyleAppliedEvent } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
-import type { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
@@ -59,12 +59,12 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when an all-feature-info-layer-set wants to check for condition to register a layer in its set.
-   * @param {AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseGVLayer} layer - The layer
    * @param {string} layerPath - The layer path
    * @returns {boolean} True when the layer should be registered to this legends-layer-set
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected override onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
+  protected override onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean {
     // Always register layers for the legends-layer-set, because we want 'the box' in the UI to show the layer status progression
     return true;
   }
@@ -83,9 +83,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a legends-layer-set wants to register a layer in its set.
-   * @param {AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseGVLayer} layer - The layer
    */
-  protected override onRegisterLayer(layer: AbstractBaseLayer): void {
+  protected override onRegisterLayer(layer: AbstractBaseGVLayer): void {
     // Call parent
     super.onRegisterLayer(layer);
 
@@ -207,11 +207,11 @@ export class LegendsLayerSet extends AbstractLayerSet {
   /**
    * Checks if the legend should be queried as part of the regular layer status progression and legend fetching.
    * Also performs a Type guard on the 'layer' parameter that must be AbstractGVLayer.
-   * @param {AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseGVLayer} layer - The layer
    * @param {ConfigBaseClass} layerConfig - The layer config
    * @param {boolean} forced - Flag to force a query to happen, even if the legendQueryStatus isn't 'init' or style isn't applied.
    */
-  #legendShouldBeQueried(layer: AbstractBaseLayer, layerConfig: ConfigBaseClass, forced: boolean): layer is AbstractGVLayer {
+  #legendShouldBeQueried(layer: AbstractBaseGVLayer, layerConfig: ConfigBaseClass, forced: boolean): layer is AbstractGVLayer {
     // A legend is ready to be queried if its status is > processed
     let shouldQueryLegend = layer instanceof AbstractGVLayer && !!layerConfig?.isGreaterThanOrEqualTo('processed');
 

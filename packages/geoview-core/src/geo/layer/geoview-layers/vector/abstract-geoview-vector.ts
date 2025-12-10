@@ -42,15 +42,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   /** The maximum delay to wait before we warn about the features fetch taking a long time */
   static readonly DEFAULT_WAIT_SLOW_FETCH_WARNING = 15 * 1000; // 15 seconds
 
-  /**
-   * Creates a VectorSource from a layer config.
-   * @param {VectorTilesLayerEntryConfig} layerConfig - Configuration object for the vector tile layer.
-   * @returns An initialized VectorSource ready for use in a layer.
-   */
-  createVectorSource(layerConfig: VectorLayerEntryConfig): VectorSource<Feature> {
-    // Redirect
-    return this.onCreateVectorSource(layerConfig, {});
-  }
+  // #region OVERRIDES
 
   /**
    * Overrides the way the metadata is fetched.
@@ -212,6 +204,56 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     return vectorSource;
   }
 
+  // #endregion OVERRIDES
+
+  // #region METHODS
+
+  /**
+   * Creates a VectorSource from a layer config.
+   * @param {VectorTilesLayerEntryConfig} layerConfig - Configuration object for the vector tile layer.
+   * @returns An initialized VectorSource ready for use in a layer.
+   */
+  createVectorSource(layerConfig: VectorLayerEntryConfig): VectorSource<Feature> {
+    // Redirect
+    return this.onCreateVectorSource(layerConfig, {});
+  }
+
+  /**
+   * Normalizes all date fields in the provided features to a standard millisecond timestamp format.
+   * @param {Feature[]} features - The features whose date fields should be normalized.
+   * @param {VectorLayerEntryConfig} layerConfig - The layer configuration containing metadata about the date fields.
+   * @private
+   */
+  #normalizeDateFields(features: Feature[], layerConfig: VectorLayerEntryConfig): void {
+    // Get all fields declared as type 'date' in the feature info config
+    const dateFields = layerConfig.getOutfields()?.filter((f) => f.type === 'date');
+    if (!dateFields?.length) return;
+
+    // Iterate over each feature to normalize its date fields
+    features.forEach((feature) => {
+      dateFields.forEach((field) => {
+        const value = feature.get(field.name);
+
+        // If the value is already a number, treat it as a timestamp and reformat
+        if (typeof value === 'number') {
+          const dateStr = DateMgt.applyInputDateFormat(DateMgt.convertMilisecondsToDate(value), this.serverDateFragmentsOrder);
+          feature.set(field.name, DateMgt.convertToMilliseconds(dateStr), true);
+        } else {
+          // If the value is a string, determine or reuse the date fragment order
+          if (!this.serverDateFragmentsOrder) {
+            this.serverDateFragmentsOrder = DateMgt.getDateFragmentsOrder(DateMgt.deduceDateFormat(value));
+          }
+          const dateStr = DateMgt.applyInputDateFormat(value, this.serverDateFragmentsOrder);
+          feature.set(field.name, DateMgt.convertToMilliseconds(dateStr), true);
+        }
+      });
+    });
+  }
+
+  // #endregion METHODS
+
+  // #region STATIC METHODS
+
   /**
    * Parses raw response text into OpenLayers features based on the layer's schema type.
    * Handles CSV, ESRI feature services, and default formats supported by the vector source.
@@ -308,38 +350,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         }
       }
     }
-  }
-
-  /**
-   * Normalizes all date fields in the provided features to a standard millisecond timestamp format.
-   * @param {Feature[]} features - The features whose date fields should be normalized.
-   * @param {VectorLayerEntryConfig} layerConfig - The layer configuration containing metadata about the date fields.
-   * @private
-   */
-  #normalizeDateFields(features: Feature[], layerConfig: VectorLayerEntryConfig): void {
-    // Get all fields declared as type 'date' in the feature info config
-    const dateFields = layerConfig.getOutfields()?.filter((f) => f.type === 'date');
-    if (!dateFields?.length) return;
-
-    // Iterate over each feature to normalize its date fields
-    features.forEach((feature) => {
-      dateFields.forEach((field) => {
-        const value = feature.get(field.name);
-
-        // If the value is already a number, treat it as a timestamp and reformat
-        if (typeof value === 'number') {
-          const dateStr = DateMgt.applyInputDateFormat(DateMgt.convertMilisecondsToDate(value), this.serverDateFragmentsOrder);
-          feature.set(field.name, DateMgt.convertToMilliseconds(dateStr), true);
-        } else {
-          // If the value is a string, determine or reuse the date fragment order
-          if (!this.serverDateFragmentsOrder) {
-            this.serverDateFragmentsOrder = DateMgt.getDateFragmentsOrder(DateMgt.deduceDateFormat(value));
-          }
-          const dateStr = DateMgt.applyInputDateFormat(value, this.serverDateFragmentsOrder);
-          feature.set(field.name, DateMgt.convertToMilliseconds(dateStr), true);
-        }
-      });
-    });
   }
 
   /**
@@ -625,4 +635,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // Vector layer only queryable if there are fields
     layerConfig.initQueryable(outfields.length > 0);
   }
+
+  // #endregion STATIC METHODS
 }

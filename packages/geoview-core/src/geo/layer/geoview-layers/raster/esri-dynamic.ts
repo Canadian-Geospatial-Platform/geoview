@@ -9,7 +9,6 @@ import type { TypeGeoviewLayerConfig, TypeMetadataEsriDynamic } from '@/api/type
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
-import { logger } from '@/core/utils/logger';
 import { deepMergeObjects } from '@/core/utils/utilities';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
@@ -47,6 +46,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     layerConfig.serviceDateFormat ??= 'DD/MM/YYYY HH:MM:SSZ';
     super(layerConfig);
   }
+
+  // #region OVERRIDES
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
@@ -129,18 +130,9 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     return gvLayer;
   }
 
-  /**
-   * Performs specific validation that can only be done by the child of the AbstractGeoViewEsriLayer class.
-   * @param {ConfigBaseClass} layerConfig - The layer config to check.
-   * @returns {boolean} true if an error is detected.
-   */
-  esriChildHasDetectedAnError(layerConfig: ConfigBaseClass): boolean {
-    if (this.getMetadata()?.supportsDynamicLayers === false) {
-      // Log a warning, but continue
-      logger.logWarning(`Layer ${layerConfig.layerPath} does not technically support dynamic layers per its metadata.`);
-    }
-    return false;
-  }
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
 
   /**
    * Initializes a GeoView layer configuration for an Esri Dynamic layer.
@@ -383,4 +375,6 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     // Return only root nodes (not referenced as subLayers)
     return entries.filter((entry) => !referenced.has(entry.layerId)).map((entry) => entryMap[entry.layerId]);
   }
+
+  // #endregion STATIC METHODS
 }

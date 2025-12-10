@@ -62,6 +62,8 @@ export class WMS extends AbstractGeoViewRaster {
     this.fullSubLayers = fullSubLayers;
   }
 
+  // #region OVERRIDES
+
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
@@ -69,34 +71,6 @@ export class WMS extends AbstractGeoViewRaster {
    */
   override getMetadata(): TypeMetadataWMS | undefined {
     return super.getMetadata() as TypeMetadataWMS | undefined;
-  }
-
-  /**
-   * Recursively gets the layer capability for a given layer id.
-   * @param {string} layerId - The layer identifier to get the capabilities for.
-   * @param {TypeMetadataWMSCapabilityLayer?} layer - The current layer entry from the capabilities that will be recursively searched.
-   * @returns {TypeMetadataWMSCapabilityLayer?} The found layer from the capabilities or undefined if not found.
-   */
-  getLayerCapabilities(
-    layerId: string,
-    layer: TypeMetadataWMSCapabilityLayer | undefined = this.getMetadata()?.Capability.Layer
-  ): TypeMetadataWMSCapabilityLayer | undefined {
-    if (!layer) return undefined;
-
-    // Direct match
-    if (layer.Name === layerId) return layer;
-
-    // Recurse into sublayers
-    const subLayers = layer.Layer;
-    if (!subLayers) return undefined;
-
-    // For each sub layer
-    for (const subLayer of subLayers) {
-      const match = this.getLayerCapabilities(layerId, subLayer);
-      if (match) return match;
-    }
-
-    return undefined;
   }
 
   /**
@@ -291,6 +265,38 @@ export class WMS extends AbstractGeoViewRaster {
     return gvLayer;
   }
 
+  // #endregion OVERRIDES
+
+  // #region PUBLIC METHODS
+
+  /**
+   * Recursively gets the layer capability for a given layer id.
+   * @param {string} layerId - The layer identifier to get the capabilities for.
+   * @param {TypeMetadataWMSCapabilityLayer?} layer - The current layer entry from the capabilities that will be recursively searched.
+   * @returns {TypeMetadataWMSCapabilityLayer?} The found layer from the capabilities or undefined if not found.
+   */
+  getLayerCapabilities(
+    layerId: string,
+    layer: TypeMetadataWMSCapabilityLayer | undefined = this.getMetadata()?.Capability.Layer
+  ): TypeMetadataWMSCapabilityLayer | undefined {
+    if (!layer) return undefined;
+
+    // Direct match
+    if (layer.Name === layerId) return layer;
+
+    // Recurse into sublayers
+    const subLayers = layer.Layer;
+    if (!subLayers) return undefined;
+
+    // For each sub layer
+    for (const subLayer of subLayers) {
+      const match = this.getLayerCapabilities(layerId, subLayer);
+      if (match) return match;
+    }
+
+    return undefined;
+  }
+
   /**
    * Creates an ImageWMS source from a layer config.
    * @param {OgcWmsLayerEntryConfig} layerConfig - The configuration for the WMS layer.
@@ -345,6 +351,10 @@ export class WMS extends AbstractGeoViewRaster {
     // Return the source
     return olSource;
   }
+
+  // #endregion PUBLIC METHODS
+
+  // #region PRIVATE METHODS
 
   /**
    * Fetches WMS service metadata using a single GetCapabilities request,
@@ -710,7 +720,9 @@ export class WMS extends AbstractGeoViewRaster {
     if (layer?.Layer !== undefined) layer.Layer.forEach((subLayer) => this.#processMetadataInheritance(subLayer, layer));
   }
 
-  // #region STATIC
+  // #endregion PRIVATE METHODS
+
+  // #region STATIC METHODS
 
   /**
    * Fetches the metadata for WMS Capabilities.
@@ -1168,7 +1180,7 @@ export class WMS extends AbstractGeoViewRaster {
     }
   }
 
-  // #endregion
+  // #endregion STATIC METHODS
 }
 
 /** Delegate type for the callback when processing group layers */

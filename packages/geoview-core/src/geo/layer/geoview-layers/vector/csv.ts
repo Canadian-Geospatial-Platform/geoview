@@ -34,6 +34,8 @@ export class CSV extends AbstractGeoViewVector {
     super(layerConfig);
   }
 
+  // #region OVERRIDES
+
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
@@ -94,6 +96,10 @@ export class CSV extends AbstractGeoViewVector {
     // Return it
     return gvLayer;
   }
+
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
 
   /**
    * Initializes a GeoView layer configuration for a CSV layer.
@@ -193,4 +199,6 @@ export class CSV extends AbstractGeoViewVector {
     // Process it
     return AbstractGeoViewLayer.processConfig(myLayer);
   }
+
+  // #endregion STATIC METHODS
 }

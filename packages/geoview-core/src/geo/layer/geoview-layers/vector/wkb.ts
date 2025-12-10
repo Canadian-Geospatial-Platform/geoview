@@ -42,6 +42,8 @@ export class WKB extends AbstractGeoViewVector {
     super(layerConfig);
   }
 
+  // #region OVERRIDES
+
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
@@ -107,7 +109,7 @@ export class WKB extends AbstractGeoViewVector {
    */
   protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     if (Array.isArray(this.getMetadata()?.listOfLayerEntryConfig)) {
-      const foundEntry = this.#recursiveSearch(layerConfig.layerId, this.getMetadata()?.listOfLayerEntryConfig || []);
+      const foundEntry = WKB.#recursiveSearch(layerConfig.layerId, this.getMetadata()?.listOfLayerEntryConfig || []);
       if (!foundEntry) {
         // Add a layer load error
         this.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
@@ -131,7 +133,7 @@ export class WKB extends AbstractGeoViewVector {
     // If metadata was previously found
     if (metadata) {
       // Search for the layer metadata
-      const layerMetadataFound = this.#recursiveSearch(layerConfig.layerId, metadata.listOfLayerEntryConfig) as VectorLayerEntryConfigProps;
+      const layerMetadataFound = WKB.#recursiveSearch(layerConfig.layerId, metadata.listOfLayerEntryConfig) as VectorLayerEntryConfigProps;
 
       // If the layer metadata was found
       if (layerMetadataFound) {
@@ -203,6 +205,10 @@ export class WKB extends AbstractGeoViewVector {
     return gvLayer;
   }
 
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
+
   /**
    * This method is used to do a recursive search in the array of layer entry config.
    *
@@ -211,8 +217,9 @@ export class WKB extends AbstractGeoViewVector {
    *
    * @returns {TypeLayerEntryShell | undefined} The found layer or undefined if not found.
    * @private
+   * @static
    */
-  #recursiveSearch(searchKey: string, metadataLayerList: TypeLayerEntryShell[]): TypeLayerEntryShell | undefined {
+  static #recursiveSearch(searchKey: string, metadataLayerList: TypeLayerEntryShell[]): TypeLayerEntryShell | undefined {
     for (const layerMetadata of metadataLayerList) {
       if (searchKey === layerMetadata.layerId) return layerMetadata;
       if ('isLayerGroup' in layerMetadata && (layerMetadata.isLayerGroup as boolean) && layerMetadata.listOfLayerEntryConfig) {
@@ -339,4 +346,6 @@ export class WKB extends AbstractGeoViewVector {
     // Process it
     return AbstractGeoViewVector.processConfig(myLayer);
   }
+
+  // #endregion STATIC METHODS
 }

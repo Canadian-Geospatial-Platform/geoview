@@ -38,6 +38,8 @@ export class ImageStatic extends AbstractGeoViewRaster {
     super(layerConfig);
   }
 
+  // #region OVERRIDES
+
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
@@ -85,6 +87,10 @@ export class ImageStatic extends AbstractGeoViewRaster {
     // Return it
     return gvLayer;
   }
+
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
 
   /**
    * Initializes a GeoView layer configuration for an Image Static layer.
@@ -224,4 +230,6 @@ export class ImageStatic extends AbstractGeoViewRaster {
 
     return new Static(sourceOptions);
   }
+
+  // #endregion STATIC METHODS
 }

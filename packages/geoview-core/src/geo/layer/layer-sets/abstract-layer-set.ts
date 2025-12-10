@@ -17,7 +17,7 @@ import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
-import type { AbstractBaseLayer, LayerNameChangedDelegate, LayerNameChangedEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { AbstractBaseGVLayer, LayerNameChangedDelegate, LayerNameChangedEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -39,7 +39,7 @@ export abstract class AbstractLayerSet {
   #defaultRegisterLayerConfigCheck = false;
 
   // The registered layers
-  #registeredLayers: AbstractBaseLayer[] = [];
+  #registeredLayers: AbstractBaseGVLayer[] = [];
 
   /** Keep all callback delegates references */
   #onLayerSetUpdatedHandlers: LayerSetUpdatedDelegate[] = [];
@@ -186,9 +186,9 @@ export abstract class AbstractLayerSet {
   /**
    * Registers the layer in the layer-set.
    * If the layer is already registered, the function returns immediately.
-   * @param {AbstractBaseLayer} layer - The layer to register
+   * @param {AbstractBaseGVLayer} layer - The layer to register
    */
-  async registerLayer(layer: AbstractBaseLayer): Promise<void> {
+  async registerLayer(layer: AbstractBaseGVLayer): Promise<void> {
     // If the layer is already registered, skip it, we don't register twice
     if (this.getRegisteredLayerPaths().includes(layer.getLayerPath())) return;
 
@@ -212,12 +212,12 @@ export abstract class AbstractLayerSet {
   /**
    * An overridable registration condition function for a layer-set to check if the registration
    * should happen for a specific geoview layer and layer path. By default, a layer-set always registers layers except when they are group layers.
-   * @param {AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseGVLayer} layer - The layer
    * @returns {boolean} True if the layer should be registered, false otherwise
    */
   // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  protected onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
+  protected onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean {
     // Override this function to perform registration condition logic in the inherited classes
     // By default, a layer-set always registers layers except when they are group layers
     if (layer.getLayerConfig()?.getEntryTypeIsGroup()) {
@@ -232,9 +232,9 @@ export abstract class AbstractLayerSet {
   /**
    * An overridable registration function for a layer-set that the registration process will use to
    * create a new entry in the layer set for a specific geoview layer and layer path.
-   * @param {AbstractBaseLayer} layer - The layer config
+   * @param {AbstractBaseGVLayer} layer - The layer config
    */
-  protected onRegisterLayer(layer: AbstractBaseLayer): void {
+  protected onRegisterLayer(layer: AbstractBaseGVLayer): void {
     // Get layer name
     const layerName = layer.getLayerName();
     const layerPath = layer.getLayerPath();
@@ -296,9 +296,9 @@ export abstract class AbstractLayerSet {
   /**
    * An overridable unregistration function for a layer-set that the registration process will use to
    * unregister a specific geoview layer.
-   * @param {AbstractBaseLayer | undefined} layer - The layer
+   * @param {AbstractBaseGVLayer | undefined} layer - The layer
    */
-  protected onUnregisterLayer(layer: AbstractBaseLayer | undefined): void {
+  protected onUnregisterLayer(layer: AbstractBaseGVLayer | undefined): void {
     // Unregister the layer name changed handler
     layer?.offLayerNameChanged(this.#boundedHandleLayerNameChanged);
   }
@@ -329,10 +329,10 @@ export abstract class AbstractLayerSet {
 
   /**
    * Handles when a layer status changed on a layer config.
-   * @param {AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseGVLayer} layer - The layer
    * @param {LayerNameChangedEvent} layerNameEvent - The new layer name
    */
-  #handleLayerNameChanged(layer: AbstractBaseLayer, layerNameEvent: LayerNameChangedEvent): void {
+  #handleLayerNameChanged(layer: AbstractBaseGVLayer, layerNameEvent: LayerNameChangedEvent): void {
     const layerPath = layer.getLayerPath();
 
     try {
@@ -411,19 +411,19 @@ export abstract class AbstractLayerSet {
 
   /**
    * Checks if the layer is of queryable type based on its class definition
-   * @param {AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseGVLayer} layer - The layer
    * @returns True if the layer is of queryable type
    */
-  protected static isQueryableType(layer: AbstractBaseLayer): boolean {
+  protected static isQueryableType(layer: AbstractBaseGVLayer): boolean {
     return layer instanceof AbstractGVVector || layer instanceof GVEsriDynamic || layer instanceof GVWMS;
   }
 
   /**
    * Checks if the layer config source is queryable.
-   * @param {AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseGVLayer} layer - The layer
    * @returns {boolean} True if the source is queryable or undefined
    */
-  protected static isSourceQueryable(layer: AbstractBaseLayer): boolean {
+  protected static isSourceQueryable(layer: AbstractBaseGVLayer): boolean {
     // Cast
     const layerConfigCasted = layer.getLayerConfig() as AbstractBaseLayerEntryConfig;
 

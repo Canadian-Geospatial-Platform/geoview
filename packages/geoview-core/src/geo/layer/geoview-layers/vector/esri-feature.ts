@@ -9,12 +9,11 @@ import type { TypeGeoviewLayerConfig, TypeMetadataEsriFeature } from '@/api/type
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
-import { LayerNotFeatureLayerError, LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
+import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 import { Fetch } from '@/core/utils/fetch-helper';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
 
 export interface TypeEsriFeatureLayerConfig extends TypeGeoviewLayerConfig {
@@ -38,6 +37,8 @@ export class EsriFeature extends AbstractGeoViewVector {
   constructor(layerConfig: TypeEsriFeatureLayerConfig) {
     super(layerConfig);
   }
+
+  // #region OVERRIDES
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
@@ -181,20 +182,9 @@ export class EsriFeature extends AbstractGeoViewVector {
     return gvLayer;
   }
 
-  /**
-   * Performs specific validation that can only be done by the child of the AbstractGeoViewEsriLayer class.
-   * @param {ConfigBaseClass} layerConfig - The layer config to check.
-   * @param {esriIndex} esriIndex - The esri layer index config to check.
-   * @returns {boolean} true if an error is detected.
-   */
-  esriChildHasDetectedAnError(layerConfig: ConfigBaseClass, esriIndex: number): boolean {
-    // If the metadata for the particular layer doesn't indicate 'Feature Layer' as the type
-    if (this.getMetadata()!.layers[esriIndex].type !== 'Feature Layer') {
-      // Log warning
-      GeoViewError.logWarning(new LayerNotFeatureLayerError(layerConfig.layerPath, layerConfig.getLayerNameCascade()));
-    }
-    return false;
-  }
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
 
   /**
    * Initializes a GeoView layer configuration for a Esri Feature layer.
@@ -294,4 +284,6 @@ export class EsriFeature extends AbstractGeoViewVector {
     // Process it
     return AbstractGeoViewRaster.processConfig(myLayer);
   }
+
+  // #endregion STATIC METHODS
 }
