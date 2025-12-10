@@ -47,7 +47,11 @@ export class EsriUtilities {
    * @param {EsriDynamic | EsriFeature} layer The ESRI layer instance pointer.
    * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
-  static commonValidateListOfLayerEntryConfig(layer: EsriDynamic | EsriFeature, listOfLayerEntryConfig: ConfigBaseClass[]): void {
+  static commonValidateListOfLayerEntryConfig(
+    layer: EsriDynamic | EsriFeature,
+    listOfLayerEntryConfig: ConfigBaseClass[],
+    callbackWhenRegisteringConfig: RegisterLayerEntryConfigDelegate
+  ): void {
     listOfLayerEntryConfig.forEach((layerConfig, i) => {
       if (layerConfig.layerStatus === 'error') return;
 
@@ -114,7 +118,7 @@ export class EsriUtilities {
 
           // TODO: Refactor: Do not do this on the fly here anymore with the new configs (quite unpredictable)...
           // Alert that we want to register new entry configs
-          layer.emitLayerEntryRegisterInit({ config: groupLayerConfig });
+          callbackWhenRegisteringConfig(groupLayerConfig);
 
           metadata.layers[esriIndex].subLayerIds.forEach((layerId) => {
             // Clone the layer props and tweak them
@@ -135,9 +139,9 @@ export class EsriUtilities {
             // Append the sub layer entry to the list
             groupLayerConfig.listOfLayerEntryConfig.push(subLayerEntryConfig);
 
-            // TODO: Refactor: Do not do this on the fly here anymore with the new configs (quite unpredictable)... (standardizing this call with the other one above for now)
+            // TODO: Refactor: Do not do this on the fly here anymore with the new configs (quite unpredictable)...
             // Alert that we want to register new entry configs
-            layer.emitLayerEntryRegisterInit({ config: subLayerEntryConfig });
+            callbackWhenRegisteringConfig(subLayerEntryConfig);
           });
 
           layer.validateListOfLayerEntryConfig(groupLayerConfig.listOfLayerEntryConfig);
@@ -526,3 +530,7 @@ export class EsriUtilities {
 
   // #endregion PARSING METHODS
 }
+
+export type RegisterLayerEntryConfigDelegate = (
+  config: EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | GroupLayerEntryConfig
+) => void;

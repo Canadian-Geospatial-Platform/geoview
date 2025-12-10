@@ -131,7 +131,11 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected override onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: ConfigBaseClass[]): void {
-    EsriUtilities.commonValidateListOfLayerEntryConfig(this, listOfLayerEntryConfig);
+    // Redirect and hook when a layer entry must be registered
+    EsriUtilities.commonValidateListOfLayerEntryConfig(this, listOfLayerEntryConfig, (config) => {
+      // Register the layer entry config
+      this.emitLayerEntryRegisterInit({ config });
+    });
   }
 
   /**
