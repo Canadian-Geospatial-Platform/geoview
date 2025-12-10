@@ -38,11 +38,11 @@ const PANEL_SIZES = {
   default: { xs: 12 } as PanelSize,
   left: {
     normal: { sm: 5, md: 4, lg: 4 },
-    enlarged: { sm: 5, md: 2, lg: 1.25 }
+    enlarged: { sm: 3, md: 2, lg: 1.25 }
   } as PanelConfig,
   right: {
     normal: { sm: 7, md: 8, lg: 8 },
-    enlarged: { sm: 7, md: 10, lg: 10.75 },
+    enlarged: { sm: 9, md: 10, lg: 10.75 },
   } as PanelConfig,
 } as const;
 

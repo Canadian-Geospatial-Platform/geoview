@@ -222,11 +222,11 @@ export const Guide = memo(function GuidePanel({ containerType = CONTAINER_TYPE.F
   const ariaLabel = t('guide.title');
   return (
     <Box sx={sxClasses.guideContainer}>
-      <GuideSearch guide={guide} onSectionChange={handleSectionChange} onSearchStateChange={handleSearchStateChange} />
       <Box sx={{ flex: 1, minHeight: 0 }}>
         <Layout
           containerType={containerType}
           selectedLayerPath={selectedLayerPath}
+          layoutSwitch={<GuideSearch guide={guide} onSectionChange={handleSectionChange} onSearchStateChange={handleSearchStateChange} />}
           layerList={layersList}
           onLayerListClicked={handleGuideItemClick}
           aria-label={ariaLabel}

@@ -126,4 +126,10 @@ export const getSxClasses = (theme: Theme): SxStyles =>
       marginTop: '30px',
       marginBottom: '12px',
     },
+    guideSearch: {
+      backgroundColor: theme.palette.geoViewColor.bgColor.light[600],
+      marginBottom: '10px',
+      width: '400px',
+      maxWidth: '100%',
+    },
   }) as const;

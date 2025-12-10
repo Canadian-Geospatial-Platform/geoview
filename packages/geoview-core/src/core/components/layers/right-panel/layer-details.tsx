@@ -5,21 +5,22 @@ import type { TypeLegendLayer, TypeLegendItem } from '@/core/components/layers/t
 import { getSxClasses } from './layer-details-style';
 import {
   Box,
+  BrowserNotSupportedIcon,
   CheckBoxIcon,
   CheckBoxOutlineBlankIcon,
-  IconButton,
-  Paper,
-  Typography,
-  ZoomInSearchIcon,
+  Divider,
   Grid,
-  RestartAltIcon,
+  HighlightIcon,
   HighlightOutlinedIcon,
+  IconButton,
+  List,
+  ListItem,
+  Paper,
+  RestartAltIcon,
   TableViewIcon,
   TimeSliderIcon,
-  BrowserNotSupportedIcon,
-  Divider,
-  ListItem,
-  List,
+  Typography,
+  ZoomInSearchIcon,
 } from '@/ui';
 import { useLayerHighlightedLayer, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
@@ -349,10 +350,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             key={`${item.name}/${layerDetails.items.indexOf(item)}`}
             alignItems="center"
             justifyItems="stretch"
-            sx={{ display: 'flex', flexWrap: 'nowrap' }}
+            sx={{ display: 'flex', flexWrap: 'nowrap', marginBottom: '5px' }}
           >
             <Grid size={{ xs: 'auto' }}>{renderItemCheckbox(item)}</Grid>
-            <Grid size={{ xs: 'auto' }} sx={{ display: 'flex' }}>
+            <Grid size={{ xs: 'grow' }} sx={{ display: 'flex' }}>
               {item.icon ? (
                 <Box component="img" sx={{ alignSelf: 'center', maxHeight: '26px', maxWidth: '26px' }} alt={item.name} src={item.icon} />
               ) : (
@@ -423,13 +424,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   function renderHighlightButton(): JSX.Element {
     if (isLayerHighlightCapable)
       return (
-        <IconButton
-          aria-label={t('legend.highlightLayer')}
-          onClick={handleHighlightLayer}
-          className={highlightedLayer === layerDetails.layerPath ? 'buttonOutline active' : 'buttonOutline'}
-          disabled={layerHidden}
-        >
-          <HighlightOutlinedIcon />
+        <IconButton aria-label={t('legend.highlightLayer')} onClick={handleHighlightLayer} className="buttonOutline" disabled={layerHidden}>
+          {highlightedLayer === layerDetails.layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
         </IconButton>
       );
     return <Box />;
@@ -625,10 +621,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
               justifyContent: 'space-between',
               width: '100%',
               alignItems: 'center',
-              paddingTop: '10px',
             }}
           >
-            <Box sx={{ textAlign: 'left', maxWidth: '70%', [theme.breakpoints.down('md')]: { display: 'none' } }}>
+            <Box sx={{ textAlign: 'left', maxWidth: '70%', [theme.breakpoints.down('sm')]: { display: 'none' } }}>
               <Typography sx={{ ...sxClasses.categoryTitle, ...(layerHidden && hiddenStyle) }} title={layerDetails.layerName}>
                 {layerDetails.layerName}
               </Typography>

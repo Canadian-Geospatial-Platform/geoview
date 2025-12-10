@@ -159,7 +159,6 @@ export default function MapRotation(): JSX.Element {
         justifyContent: 'center',
         transform: `rotate(${mapRotation}rad)`,
         transition: 'transform 0.3s ease-in-out',
-        color: '#000000',
       },
       children: createElement(ThreeSixtyIcon),
     }),
