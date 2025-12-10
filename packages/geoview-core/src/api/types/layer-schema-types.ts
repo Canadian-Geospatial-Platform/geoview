@@ -225,8 +225,6 @@ export interface TypeBaseVectorSourceInitialConfig extends TypeBaseSourceInitial
   maxRecordCount?: number; // TODO: refactor - remove ?
   /** Filter to apply on features of this layer. */
   layerFilter?: string;
-  /** The feature format used by the XHR feature loader when url is set. */
-  format?: TypeVectorSourceFormats;
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
   featureInfo?: TypeFeatureInfoLayerConfig;
   /** Loading strategy to use (all or bbox). */
@@ -272,9 +270,6 @@ export type TypeTileGrid = {
   tileSize?: [number, number];
 };
 
-/** Type that defines the vector layer source formats. */
-export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | 'featureAPI' | 'CSV' | 'WKB';
-
 /** Type from which we derive the source properties for all the ESRI dynamic leaf nodes in the layer tree. */
 export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitialConfig {
   /** Maximum number of records to fetch (default: 0). */
@@ -296,12 +291,10 @@ export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitia
   forceServiceProjection?: boolean;
 }
 
-export interface TypeSourceEsriFeatureInitialConfig extends TypeBaseVectorSourceInitialConfig {}
-
 /** Type from which we derive the source properties for all the ESRI Image leaf nodes in the layer tree. */
 export interface TypeSourceEsriImageInitialConfig extends TypeBaseSourceInitialConfig {
   /** The format used by the image layer. */
-  format: TypeEsriFormatParameter;
+  format: TypeEsriFormatParameter; // TODO: refactor - remove ?
   /**
    * If true, the image will be exported with the background color of the map set as its transparent color. Only the .png
    * and .gif formats support transparency.
@@ -316,7 +309,7 @@ export type TypeSourceImageInitialConfig =
 
 export interface TypeSourceImageStaticInitialConfig extends TypeBaseSourceInitialConfig {
   /** Image extent */
-  extent: Extent;
+  extent?: Extent;
 }
 
 export interface TypeSourceCSVInitialConfig extends TypeBaseVectorSourceInitialConfig {

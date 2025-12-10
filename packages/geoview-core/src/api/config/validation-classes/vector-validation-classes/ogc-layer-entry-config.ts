@@ -13,9 +13,6 @@ export class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
    */
   constructor(layerConfig: OgcFeatureLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.OGC_FEATURE);
-
-    // Value for this.source.format can only be featureAPI.
-    this.source.format = 'featureAPI';
   }
 
   /**
