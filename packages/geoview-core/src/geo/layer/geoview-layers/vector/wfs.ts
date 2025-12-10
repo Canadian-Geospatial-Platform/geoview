@@ -56,6 +56,8 @@ export class WFS extends AbstractGeoViewVector {
     super(layerConfig);
   }
 
+  // #region OVERRIDES
+
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
@@ -276,6 +278,10 @@ export class WFS extends AbstractGeoViewVector {
     // Return it
     return gvLayer;
   }
+
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
 
   /**
    * Fetches the metadata for a typical WFS class.
@@ -736,4 +742,6 @@ export class WFS extends AbstractGeoViewVector {
       }
     }
   }
+
+  // #endregion STATIC METHODS
 }

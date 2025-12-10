@@ -71,7 +71,7 @@ import {
 } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigError } from '@/core/exceptions/layer-entry-config-exceptions';
 import type {
-  AbstractBaseLayer,
+  AbstractBaseGVLayer,
   LayerOpacityChangedEvent,
   LayerOpacityChangedDelegate,
   VisibleChangedEvent,
@@ -174,7 +174,7 @@ export class LayerApi {
   #olLayers: { [layerPath: string]: BaseLayer } = {};
 
   /** Dictionary holding all the new GVLayers */
-  #gvLayers: { [layerPath: string]: AbstractBaseLayer } = {};
+  #gvLayers: { [layerPath: string]: AbstractBaseGVLayer } = {};
 
   /** Used to keep a reference of highlighted layer */
   #highlightedLayer: { layerPath?: string; originalOpacity?: number } = {
@@ -391,17 +391,17 @@ export class LayerApi {
    * Gets all GeoView Layers
    * @returns The list of new Geoview Layers
    */
-  getGeoviewLayers(): AbstractBaseLayer[] {
+  getGeoviewLayers(): AbstractBaseGVLayer[] {
     return Object.values(this.#gvLayers);
   }
 
   /**
    * Returns the GeoView instance associated to the layer path.
    * @param {string} layerPath - The layer path
-   * @returns {AbstractBaseLayer} The new Geoview Layer
+   * @returns {AbstractBaseGVLayer} The new Geoview Layer
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
-  getGeoviewLayer(layerPath: string): AbstractBaseLayer {
+  getGeoviewLayer(layerPath: string): AbstractBaseGVLayer {
     // Get the layer
     const layer = this.#gvLayers[layerPath];
 
@@ -415,9 +415,9 @@ export class LayerApi {
   /**
    * Returns the GeoView instance associated to the layer path.
    * @param {string} layerPath - The layer path
-   * @returns {AbstractBaseLayer | undefined} The new Geoview Layer or undefined when not found
+   * @returns {AbstractBaseGVLayer | undefined} The new Geoview Layer or undefined when not found
    */
-  getGeoviewLayerIfExists(layerPath: string): AbstractBaseLayer | undefined {
+  getGeoviewLayerIfExists(layerPath: string): AbstractBaseGVLayer | undefined {
     return this.#gvLayers[layerPath];
   }
 
@@ -1712,14 +1712,14 @@ export class LayerApi {
   /**
    * Attaches event handlers to a group layer
    * @private
-   * @param {AbstractBaseLayer} baseLayer - The layer instance to attach events to
+   * @param {AbstractBaseGVLayer} baseLayer - The layer instance to attach events to
    * @description
    * This method sets up the following event handlers:
    * - Layer opacity changed through onLayerOpacityChanged
    * - Layer visibility changed through onVisibleChanged
    * @private
    */
-  #registerGroupLayerHandlers(baseLayer: AbstractBaseLayer): void {
+  #registerGroupLayerHandlers(baseLayer: AbstractBaseGVLayer): void {
     // Register a hook when a layer opacity is changed
     baseLayer.onLayerOpacityChanged(this.#boundedHandleLayerOpacityChanged);
 
@@ -1729,10 +1729,10 @@ export class LayerApi {
 
   /**
    * Detaches the events registration on the group layer
-   * @param {AbstractBaseLayer} baseLayer - The layer to detach events registrations from.
+   * @param {AbstractBaseGVLayer} baseLayer - The layer to detach events registrations from.
    * @private
    */
-  #unregisterGroupLayerHandlers(baseLayer: AbstractBaseLayer): void {
+  #unregisterGroupLayerHandlers(baseLayer: AbstractBaseGVLayer): void {
     // Unregister handler on layer opacity change
     baseLayer.offLayerOpacityChanged(this.#boundedHandleLayerOpacityChanged);
 
@@ -1847,7 +1847,7 @@ export class LayerApi {
    * Handles when a layer opacity is changed on the map.
    * @param {LayerOpacityChangedEvent} event - The event containing the opacity change.
    */
-  #handleLayerOpacityChanged(layer: AbstractBaseLayer, event: LayerOpacityChangedEvent): void {
+  #handleLayerOpacityChanged(layer: AbstractBaseGVLayer, event: LayerOpacityChangedEvent): void {
     LegendEventProcessor.setOpacityInStore(this.getMapId(), event.layerPath, event.opacity);
   }
 
@@ -1856,7 +1856,7 @@ export class LayerApi {
    * @param {AbstractGVLayer} layer - The layer that's become changed.
    * @param {GVLayerErrorEvent} event - The event containing the visibility change.
    */
-  #handleLayerVisibleChanged(layer: AbstractBaseLayer, event: VisibleChangedEvent): void {
+  #handleLayerVisibleChanged(layer: AbstractBaseGVLayer, event: VisibleChangedEvent): void {
     MapEventProcessor.setMapLayerVisibilityInStore(this.getMapId(), layer.getLayerPath(), event.visible);
 
     // Emit event

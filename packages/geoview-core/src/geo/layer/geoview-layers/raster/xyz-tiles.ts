@@ -50,6 +50,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
     super(layerConfig);
   }
 
+  // #region OVERRIDES
+
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
@@ -190,6 +192,10 @@ export class XYZTiles extends AbstractGeoViewRaster {
     return gvLayer;
   }
 
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
+
   /**
    * Initializes a GeoView layer configuration for a XYZ Tiles layer.
    * This method creates a basic TypeGeoviewLayerConfig using the provided
@@ -316,4 +322,6 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
     return new XYZ(sourceOptions);
   }
+
+  // #endregion STATIC METHODS
 }

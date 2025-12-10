@@ -36,6 +36,8 @@ export class GeoTIFF extends AbstractGeoViewRaster {
     super(layerConfig);
   }
 
+  // #region OVERRIDES
+
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
@@ -115,20 +117,6 @@ export class GeoTIFF extends AbstractGeoViewRaster {
   }
 
   /**
-   * Creates a GeoTIFF source from a layer config.
-   * @param {GeoTIFFLayerEntryConfig} layerConfig - The configuration for the GeoTIFF layer.
-   * @returns A fully configured GeoTIFF source.
-   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
-   */
-  static createGeoTIFFSource(layerConfig: GeoTIFFLayerEntryConfig): GeoTIFFSource {
-    const sourceOptions: SourceOptions = {
-      sources: [{ url: layerConfig.getDataAccessPath(), overviews: layerConfig.source.overviews }],
-    };
-
-    return new GeoTIFFSource(sourceOptions);
-  }
-
-  /**
    * Overrides the creation of the GV Layer
    * @param {GeoTIFFLayerEntryConfig} layerConfig - The layer entry configuration.
    * @returns {GVGeoTIFF} The GV Layer
@@ -145,6 +133,24 @@ export class GeoTIFF extends AbstractGeoViewRaster {
 
     // Return the layer immediately
     return gvLayer;
+  }
+
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
+
+  /**
+   * Creates a GeoTIFF source from a layer config.
+   * @param {GeoTIFFLayerEntryConfig} layerConfig - The configuration for the GeoTIFF layer.
+   * @returns A fully configured GeoTIFF source.
+   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   */
+  static createGeoTIFFSource(layerConfig: GeoTIFFLayerEntryConfig): GeoTIFFSource {
+    const sourceOptions: SourceOptions = {
+      sources: [{ url: layerConfig.getDataAccessPath(), overviews: layerConfig.source.overviews }],
+    };
+
+    return new GeoTIFFSource(sourceOptions);
   }
 
   /**
@@ -286,4 +292,6 @@ export class GeoTIFF extends AbstractGeoViewRaster {
     // Process it
     return AbstractGeoViewLayer.processConfig(myLayer);
   }
+
+  // #endregion STATIC METHODS
 }

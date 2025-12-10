@@ -3,9 +3,11 @@ import type { Extent } from 'ol/extent';
 import { Projection } from '@/geo/utils/projection';
 import type { TimeDimensionESRI } from '@/core/utils/date-mgt';
 import { DateMgt } from '@/core/utils/date-mgt';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type {
   TypeFeatureInfoEntryPartial,
   TypeStyleGeometry,
@@ -23,11 +25,13 @@ import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-lay
 import type { EsriRelatedRecordsJsonResponse, EsriRelatedRecordsJsonResponseRelatedRecord } from '@/geo/layer/gv-layers/utils';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { EsriRenderer } from '@/geo/utils/renderer/esri-renderer';
-import type { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
-import type { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
+import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import type { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
 import {
   LayerEntryConfigLayerIdEsriMustBeNumberError,
+  LayerNotFeatureLayerError,
+  LayerNotSupportingDynamicLayersError,
   LayerServiceMetadataEmptyError,
   LayerServiceMetadataUnableToFetchError,
 } from '@/core/exceptions/layer-exceptions';
@@ -148,16 +152,50 @@ export class EsriUtilities {
           return;
         }
 
-        if (layer.esriChildHasDetectedAnError(layerConfig, esriIndex)) {
-          // Set the layer status to error
-          layerConfig.setLayerStatusError();
-          return;
-        }
+        // Check for warnings if any needs to be logged
+        this.#checkForWarningOnTheLayerMetadata(layer, layerConfig, esriIndex);
 
         // If no layer name
         if (!layerConfig.getLayerName()) layerConfig.setLayerName(metadata?.layers[esriIndex].name || 'No name / Sans nom');
       }
     });
+  }
+
+  /**
+   * Checks the ESRI layer metadata and logs warnings when unsupported or unexpected conditions are detected.
+   * This method does **not** throw errors; it only emits warnings to help developers diagnose configuration or
+   * server-side metadata inconsistencies. It checks two cases:
+   * 1. **EsriDynamic layers** — Logs a warning if the metadata explicitly indicates that dynamic layers
+   *    are *not* supported (`supportsDynamicLayers === false`).
+   * 2. **EsriFeature layers** — Logs a warning if the metadata for the child layer does not identify itself
+   *    as a `"Feature Layer"`, which may suggest a misconfiguration or unexpected server response.
+   * @param {EsriDynamic | EsriFeature} layer
+   *   The ESRI layer instance being evaluated.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig
+   *   The configuration object associated with the layer entry. Used to report contextual information
+   *   (layer path, user-friendly name, etc.) in warnings.
+   * @param {number} esriIndexForFeature
+   *   For feature layers, the index pointing to the corresponding entry inside the server metadata's
+   *   `layers[]` array. Ignored for dynamic layers.
+   */
+  static #checkForWarningOnTheLayerMetadata(
+    layer: EsriDynamic | EsriFeature,
+    layerConfig: AbstractBaseLayerEntryConfig,
+    esriIndexForFeature: number
+  ): void {
+    // If the layer is an EsriDynamic
+    if (layer instanceof EsriDynamic) {
+      if (layer.getMetadata()?.supportsDynamicLayers === false) {
+        // Log a warning, but continue
+        GeoViewError.logWarning(new LayerNotSupportingDynamicLayersError(layerConfig.layerPath, layerConfig.getLayerNameCascade()));
+      }
+    } else if (layer instanceof EsriFeature) {
+      // If the metadata for the particular layer doesn't indicate 'Feature Layer' as the type
+      if (layer.getMetadata()!.layers[esriIndexForFeature].type !== 'Feature Layer') {
+        // Log warning
+        GeoViewError.logWarning(new LayerNotFeatureLayerError(layerConfig.layerPath, layerConfig.getLayerNameCascade()));
+      }
+    }
   }
 
   /**

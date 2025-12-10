@@ -8,9 +8,9 @@ import EventHelper from '@/api/events/event-helper';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 
 /**
- * Abstract Base Layer managing an OpenLayer layer, including a layer group.
+ * Abstract Base GV Layer managing an OpenLayer layer, including a layer group.
  */
-export abstract class AbstractBaseLayer {
+export abstract class AbstractBaseGVLayer {
   /** Indicates if the layer has become in loaded status at least once already */
   loadedOnce: boolean = false;
 
@@ -363,7 +363,7 @@ export type LayerNameChangedEvent = {
 /**
  * Define a delegate for the event handler function signature.
  */
-export type LayerNameChangedDelegate = EventDelegateBase<AbstractBaseLayer, LayerNameChangedEvent, void>;
+export type LayerNameChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, LayerNameChangedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -375,12 +375,12 @@ export type VisibleChangedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-export type VisibleChangedDelegate = EventDelegateBase<AbstractBaseLayer, VisibleChangedEvent, void>;
+export type VisibleChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, VisibleChangedEvent, void>;
 
 /**
  * Define a delegate for the event handler function signature
  */
-export type LayerOpacityChangedDelegate = EventDelegateBase<AbstractBaseLayer, LayerOpacityChangedEvent, void>;
+export type LayerOpacityChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, LayerOpacityChangedEvent, void>;
 
 /**
  * Define an event for the delegate

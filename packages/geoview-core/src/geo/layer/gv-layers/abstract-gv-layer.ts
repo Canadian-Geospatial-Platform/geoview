@@ -40,7 +40,7 @@ import type {
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { SnackbarType } from '@/core/utils/notifications';
 import { NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { LayerNotQueryableError, LayerStatusErrorError } from '@/core/exceptions/layer-exceptions';
@@ -50,7 +50,7 @@ import { delay, whenThisThen } from '@/core/utils/utilities';
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
  */
-export abstract class AbstractGVLayer extends AbstractBaseLayer {
+export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   /** The default hit tolerance the query should be using */
   static readonly DEFAULT_HIT_TOLERANCE: number = 4;
 

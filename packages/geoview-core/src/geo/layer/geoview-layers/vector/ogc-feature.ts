@@ -47,6 +47,8 @@ export class OgcFeature extends AbstractGeoViewVector {
     super(layerConfig);
   }
 
+  // #region OVERRIDES
+
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
@@ -213,6 +215,10 @@ export class OgcFeature extends AbstractGeoViewVector {
     return gvLayer;
   }
 
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
+
   /**
    * This method sets the outfields and aliasFields of the source feature info.
    *
@@ -376,4 +382,6 @@ export class OgcFeature extends AbstractGeoViewVector {
     // Process it
     return AbstractGeoViewVector.processConfig(myLayer);
   }
+
+  // #endregion STATIC METHODS
 }
