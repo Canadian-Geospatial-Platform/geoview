@@ -181,14 +181,34 @@ export function deepMerge<S extends any, T extends any>(base: S, target: T): S &
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const tgtVal = (target as any)[key];
 
+    let newValue;
+
+    // ---- Case 1: both are plain objects → recursively merge ----
     if (isPlainObject(srcVal) && isPlainObject(tgtVal)) {
-      out[key] = deepMerge(srcVal, tgtVal); // recurse first on children
-    } else if (tgtVal === undefined) {
-      out[key] = srcVal; // only set if target doesn't have a value
+      newValue = deepMerge(srcVal, tgtVal);
+    }
+
+    // ---- Case 2: arrays → deep clone either source or target ----
+    else if (Array.isArray(srcVal)) {
+      if (Array.isArray(tgtVal)) {
+        newValue = tgtVal.map(deepClone);
+      } else {
+        newValue = srcVal.map(deepClone);
+      }
+    }
+
+    // ---- Case 3: target doesn't define the value → clone base's value ----
+    else if (tgtVal === undefined) {
+      newValue = deepClone(srcVal);
+    }
+
+    // ---- Apply newly computed value if any ----
+    if (newValue !== undefined) {
+      out[key] = newValue;
     }
   }
 
-  return out;
+  return out as S & T;
 }
 
 /**
