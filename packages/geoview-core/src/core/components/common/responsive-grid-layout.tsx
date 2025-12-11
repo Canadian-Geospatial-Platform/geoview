@@ -63,7 +63,7 @@ const ResponsiveGridLayout = forwardRef(
     const { t } = useTranslation<string>();
     const theme = useTheme();
     const isMapFullScreen = useAppFullscreenActive();
-    const isMobile = useMediaQuery( theme.breakpoints.down('sm') );
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     // Ref for right panel
     const rightMainRef = useRef<HTMLDivElement>();
@@ -326,8 +326,8 @@ const ResponsiveGridLayout = forwardRef(
         })
         .filter((item) => item !== undefined)
         .join('\n')
-        // Remove links
-        .replaceAll(/\[Top\]\(#.*?\)/g, '');
+        // Remove Top/Haut anchor links when rendering individual sections in tabs
+        .replace(/<a href="[^"]*">(Top|Haut de page)<\/a>/g, '');
 
       if (!content) return null;
 
