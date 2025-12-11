@@ -1073,7 +1073,7 @@ export class LayerApi {
     this.getLayerEntryLayerPaths().forEach((registeredLayerPath) => {
       if (registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) {
         // Remove feature highlight and result set for features from this layer
-        FeatureInfoEventProcessor.resetResultSet(this.getMapId(), registeredLayerPath, 'name');
+        FeatureInfoEventProcessor.resetResultSet(this.getMapId(), registeredLayerPath);
       }
     });
   }
@@ -1453,7 +1453,7 @@ export class LayerApi {
     }
 
     // Reset the feature info result set
-    FeatureInfoEventProcessor.resetResultSet(mapId, layerPath, 'name');
+    FeatureInfoEventProcessor.resetResultSet(mapId, layerPath);
 
     // Update feature info
     DataTableEventProcessor.triggerGetAllFeatureInfo(mapId, layerPath).catch((error: unknown) => {
