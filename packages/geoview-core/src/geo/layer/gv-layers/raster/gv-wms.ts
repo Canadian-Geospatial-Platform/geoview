@@ -196,9 +196,6 @@ export class GVWMS extends AbstractGVRaster {
     queryGeometry: boolean = true,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
-    // If the layer is invisible
-    if (!this.getVisible()) return [];
-
     // Get the layer config and its initial settings
     const wmsLayerConfig = this.getLayerConfig();
     let initialSettings = wmsLayerConfig.getInitialSettings();

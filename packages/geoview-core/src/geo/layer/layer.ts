@@ -396,6 +396,28 @@ export class LayerApi {
   }
 
   /**
+   * Gets all GeoView layers that are regular layers (not groups).
+   * This method filters the list returned by `getGeoviewLayers()` and
+   * returns only the layers that are instances of `AbstractGVLayer`.
+   * @returns {AbstractGVLayer[]} An array containing only the regular layers
+   *   from the current GeoView layer collection.
+   */
+  getGeoviewLayersRegulars(): AbstractGVLayer[] {
+    return this.getGeoviewLayers().filter((l) => l instanceof AbstractGVLayer);
+  }
+
+  /**
+   * Gets all GeoView layers that are group layers.
+   * This method filters the list returned by `getGeoviewLayers()` and
+   * returns only the layers that are instances of `GVGroupLayer`.
+   * @returns {GVGroupLayer[]} An array containing only the group layers
+   *   from the current GeoView layer collection.
+   */
+  getGeoviewLayersGroups(): GVGroupLayer[] {
+    return this.getGeoviewLayers().filter((l) => l instanceof GVGroupLayer);
+  }
+
+  /**
    * Returns the GeoView instance associated to the layer path.
    * @param {string} layerPath - The layer path
    * @returns {AbstractBaseGVLayer} The new Geoview Layer

@@ -130,7 +130,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
 
         // Process query on results data
         const promiseResult = AbstractLayerSet.queryLayerFeatures(
-          this.layerApi.mapViewer.map,
+          this.layerApi,
           layer,
           HoverFeatureInfoLayerSet.QUERY_TYPE,
           pixelCoordinate,
