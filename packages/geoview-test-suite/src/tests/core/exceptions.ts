@@ -171,6 +171,33 @@ export class AssertionValueNotAnArrayError extends AssertionError {
 }
 
 /**
+ * Custom error to indicate that a test was manually failed by the developer.
+ * @extends {AssertionError}
+ */
+export class AssertionManualFailError extends AssertionError {
+  /**
+   * Creates a new AssertionManualFailError.
+   * @param {string} message - Custom message explaining why the test was manually failed.
+   */
+  constructor(message: string = 'Test manually failed') {
+    // Call the base Error constructor with the provided message
+    super(message);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'AssertionManualFailError';
+
+    // Capture the stack trace (V8-specific, e.g., Chrome and Node.js)
+    // Omits the constructor call from the trace for cleaner debugging
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, AssertionManualFailError);
+    }
+
+    // Ensure the prototype chain is correct (required in some transpilation targets)
+    Object.setPrototypeOf(this, AssertionManualFailError.prototype);
+  }
+}
+
+/**
  * Custom error to indicate that a value was unexpectedly undefined.
  * @extends {AssertionError}
  */

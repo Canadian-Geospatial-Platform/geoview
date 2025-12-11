@@ -421,7 +421,7 @@ function testSuiteAddOrUpdateTestResultRow(plugin, testSuite, testTester, test, 
     '<font class="test-title" style="color:' +
     color +
     ';" onclick="' +
-    `this.closest('tr').classList.toggle('expanded'); this.closest('tr').classList.toggle('collapsed');">` +
+    `event.stopPropagation(); this.closest('tr').classList.toggle('expanded'); this.closest('tr').classList.toggle('collapsed');">` +
     test.getTitle() +
     '</font><br/>';
 
