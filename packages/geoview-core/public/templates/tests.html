@@ -104,47 +104,107 @@
       <div class="back-to-main">
         <a href="./index.html?tab=testing">← Back to Main</a>
       </div>
+    </div>
 
-      <div class="demo-section">
-        <h4>Functional Testing</h4>
-        <p>Quick links to test sections:</p>
-        <ul class="demo-list">
-          <li><a href="#HEVNT1">1. Tests map 1 (EPSG: 3978)</a></li>
-          <li><a href="#HEVNT2">2. Tests map 2 (EPSG: 3978)</a></li>
-          <li><a href="#HEVNT3">3. Tests map 3 (EPSG: 3857)</a></li>
-          <li><a href="#HEVNT4">4. Tests map 4 (EPSG: 3978)</a></li>
-          <li><a href="#HEVNT5">5. Tests map 5 (EPSG: 3978)</a></li>
-        </ul>
+    <!-- Tabs Navigation -->
+    <div class="tabs">
+      <button class="tab-button active" onclick="openTab(event, 'run-all')">Run All Tests</button>
+      <button class="tab-button" onclick="openTab(event, 'map1-test')">Map 1 (EPSG: 3978)</button>
+      <button class="tab-button" onclick="openTab(event, 'map2-test')">Map 2 (EPSG: 3978)</button>
+      <button class="tab-button" onclick="openTab(event, 'map3-test')">Map 3 (EPSG: 3857)</button>
+      <button class="tab-button" onclick="openTab(event, 'map4-test')">Map 4 (EPSG: 3978)</button>
+      <button class="tab-button" onclick="openTab(event, 'map5-test')">Map 5 (EPSG: 3978)</button>
+      <button class="tab-button" onclick="openTab(event, 'map6-test')">Map 6 (EPSG: 3978)</button>
+    </div>
+
+    <!-- Run All Tests Tab -->
+    <div id="run-all" class="tab-content active">
+      <h3>Overall Test Summary</h3>
+      <div style="text-align: right">
+        <span id="allSuitesCheck"></span>
+      </div>
+      <div style="text-align: right">Suites: <span id="allSuitesCompleted">0</span>/<span id="allSuitesTotal">0</span></div>
+      <div style="text-align: right">
+        Running: <span id="allSuitesTestsRunning">0</span> | Done success:
+        <span id="allSuitesTestsDoneSuccess" style="color: green">0</span> | Done failed:
+        <span id="allSuitesTestsDoneFailed" style="color: red">0</span> | Done: <span id="allSuitesTestsDone">0</span>/<span
+          id="allSuitesTestsTotal"
+          >0</span
+        >
+      </div>
+      <button class="btnLaunchTests" onclick="launchTestsAll()">LAUNCH TESTS ALL MAPS!</button>
+
+      <h3 style="margin-top: 30px">Test Results by Map</h3>
+
+      <!-- Map 1 Results -->
+      <button id="collapsibleMap1" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 1 - Config Tests (EPSG: 3978)</span>
+        <span id="statsMap1" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Done success: 0 | Done failed: 0 | Done: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAllMap1Results"></div>
+      </div>
+
+      <!-- Map 2 Results -->
+      <button id="collapsibleMap2" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 2 - Layer Tests (EPSG: 3978)</span>
+        <span id="statsMap2" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Done success: 0 | Done failed: 0 | Done: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAllMap2Results"></div>
+      </div>
+
+      <!-- Map 3 Results -->
+      <button id="collapsibleMap3" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 3 - Layer Tests (EPSG: 3857)</span>
+        <span id="statsMap3" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Done success: 0 | Done failed: 0 | Done: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAllMap3Results"></div>
+      </div>
+
+      <!-- Map 4 Results -->
+      <button id="collapsibleMap4" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 4 - Map Tests (EPSG: 3978)</span>
+        <span id="statsMap4" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Done success: 0 | Done failed: 0 | Done: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAllMap4Results"></div>
+      </div>
+
+      <!-- Map 5 Results -->
+      <button id="collapsibleMap5" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 5 - Geochart Tests (EPSG: 3978)</span>
+        <span id="statsMap5" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Done success: 0 | Done failed: 0 | Done: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAllMap5Results"></div>
+      </div>
+
+      <!-- Map 6 Results -->
+      <button id="collapsibleMap6" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 6 - Map Config Tests (EPSG: 3978)</span>
+        <span id="statsMap6" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Done success: 0 | Done failed: 0 | Done: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAllMap6Results"></div>
       </div>
     </div>
 
-    <div style="text-align: right">
-      <span id="allSuitesCheck"></span>
-    </div>
-    <div style="text-align: right">Suites: <span id="allSuitesCompleted">0</span>/<span id="allSuitesTotal">0</span></div>
-    <div style="text-align: right">
-      Running: <span id="allSuitesTestsRunning">0</span> | Done success:
-      <span id="allSuitesTestsDoneSuccess" style="color: green">0</span> | Done failed:
-      <span id="allSuitesTestsDoneFailed" style="color: red">0</span> | Done: <span id="allSuitesTestsDone">0</span>/<span
-        id="allSuitesTestsTotal"
-        >0</span
-      >
-    </div>
-    <button class="btnLaunchTests" onclick="launchTestsAll()">LAUNCH TESTS ALL MAPS!</button>
+    <!-- Map 1 Tab -->
+    <div id="map1-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT1">1. Tests on map 1 (EPSG: 3978)</h4>
+        <a class="ref-link" href="#top">Top</a>
+      </div>
 
-    <!-- REGION MAP 1 -->
-    <div class="map-title-holder">
-      <h4 id="HEVNT1">1. Tests on map 1 (EPSG: 3978)</h4>
-      <a class="ref-link" href="#top">Top</a>
-    </div>
-
-    <div id="testSuiteTable-map1"></div>
-    <br />
-    <div
-      id="map1"
-      class="geoview-map"
-      data-lang="en"
-      data-config="{
+      <div id="testSuiteTable-map1"></div>
+      <br />
+      <div
+        id="map1"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'interaction': 'dynamic',
             'viewSettings': {
@@ -174,22 +234,23 @@
             }
           }
         }"
-    ></div>
-    <!-- END REGION MAP 1 -->
-
-    <!-- REGION MAP 2 -->
-    <div class="map-title-holder">
-      <h4 id="HEVNT2">2. Tests on map 2 (EPSG: 3978)</h4>
-      <a class="ref-link" href="#top">Top</a>
+      ></div>
     </div>
 
-    <div id="testSuiteTable-map2"></div>
-    <br />
-    <div
-      id="map2"
-      class="geoview-map"
-      data-lang="en"
-      data-config="{
+    <!-- Map 2 Tab -->
+    <div id="map2-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT2">2. Tests on map 2 (EPSG: 3978)</h4>
+        <a class="ref-link" href="#top">Top</a>
+      </div>
+
+      <div id="testSuiteTable-map2"></div>
+      <br />
+      <div
+        id="map2"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'interaction': 'dynamic',
             'viewSettings': {
@@ -220,22 +281,23 @@
             }
           }
         }"
-    ></div>
-    <!-- END REGION MAP 2 -->
-
-    <!-- REGION MAP 3 -->
-    <div class="map-title-holder">
-      <h4 id="HEVNT3">3. Tests on map 3 (EPSG: 3857)</h4>
-      <a class="ref-link" href="#top">Top</a>
+      ></div>>
     </div>
 
-    <div id="testSuiteTable-map3"></div>
-    <br />
-    <div
-      id="map3"
-      class="geoview-map"
-      data-lang="en"
-      data-config="{
+    <!-- Map 3 Tab -->
+    <div id="map3-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT3">3. Tests on map 3 (EPSG: 3857)</h4>
+        <a class="ref-link" href="#top">Top</a>
+      </div>
+
+      <div id="testSuiteTable-map3"></div>
+      <br />
+      <div
+        id="map3"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'interaction': 'dynamic',
             'viewSettings': {
@@ -266,22 +328,24 @@
             }
           }
         }"
-    ></div>
-    <!-- END REGION MAP 3 -->
-
-    <!-- REGION MAP 4 -->
-    <div class="map-title-holder">
-      <h4 id="HEVNT4">4. Tests on map 4 (EPSG: 3978)</h4>
-      <a class="ref-link" href="#top">Top</a>
+      ></div>
     </div>
 
-    <div id="testSuiteTable-map4"></div>
-    <br />
-    <div
-      id="map4"
-      class="geoview-map"
-      data-lang="en"
-      data-config="{
+    <!-- Map 4 Tab -->
+    <div id="map4-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT4">4. Tests on map 4 (EPSG: 3978)</h4>
+        <a class="ref-link" href="#top">Top</a>
+      </div>
+
+      <div id="testSuiteTable-map4"></div>
+      <br />
+      <div
+        id="map4"
+        style="width: 1000px; margin: auto"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'interaction': 'dynamic',
             'viewSettings': {
@@ -325,22 +389,23 @@
             }
           }
         }"
-    ></div>
-    <!-- END REGION MAP 4 -->
-
-    <!-- REGION MAP 5 -->
-    <div class="map-title-holder">
-      <h4 id="HEVNT5">5. Tests on map 5 (EPSG: 4326)</h4>
-      <a class="ref-link" href="#top">Top</a>
+      ></div>
     </div>
 
-    <div id="testSuiteTable-map5"></div>
-    <br />
-    <div
-      id="map5"
-      class="geoview-map"
-      data-lang="en"
-      data-config="{
+    <!-- Map 5 Tab -->
+    <div id="map5-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT5">5. Tests on map 5 (EPSG: 4326)</h4>
+        <a class="ref-link" href="#top">Top</a>
+      </div>
+
+      <div id="testSuiteTable-map5"></div>
+      <br />
+      <div
+        id="map5"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'interaction': 'dynamic',
             'viewSettings': {
@@ -450,12 +515,110 @@
             }
           }
         }"
-    ></div>
-    <!-- END REGION MAP 5 -->
+      ></div>
+    </div>
+
+      <!-- Map 6 Tab -->
+      <div id="map6-test" class="tab-content">
+        <div class="map-title-holder">
+          <h4 id="HEVNT6">6. Tests on map 6 (EPSG: 3857)</h4>
+          <a class="ref-link" href="#top">Top</a>
+        </div>
+
+        <div id="testSuiteTable-map6"></div>
+        <br />
+        <div
+          id="map6"
+          class="geoview-map"
+          data-lang="en"
+          data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'projection': 3857
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': []
+          },
+          'components': [],
+          'corePackages': ['test-suite'],
+          'corePackagesConfig': [
+            {
+              'test-suite': { 'suites': ['suite-map-config'] }
+            }
+          ],
+          'theme': 'geo.ca',
+          'footerBar': {
+            'tabs': {
+              'core': []
+            }
+          }
+        }"
+        ></div>
+      </div>
+    </div>
 
     <script>
       insertPageHeader();
 
+      let mapsInitialized = false;
+
+      function openTab(evt, tabName) {
+        // For "Run All Tests", make all tab contents visible so maps can initialize
+        if (tabName === 'runAllTestsTab') {
+          // Show all tabs temporarily for map initialization
+          var allTabContents = document.getElementsByClassName('tab-content');
+          for (var i = 0; i < allTabContents.length; i++) {
+            allTabContents[i].classList.add('active');
+          }
+          mapsInitialized = true;
+
+          // After maps initialize, hide all except Run All Tests
+          setTimeout(function () {
+            var tabContents = document.getElementsByClassName('tab-content');
+            for (var i = 0; i < tabContents.length; i++) {
+              if (tabContents[i].id !== tabName) {
+                tabContents[i].classList.remove('active');
+              }
+            }
+          }, 2000);
+        } else {
+          // Normal tab switching - hide all tab contents
+          var tabContents = document.getElementsByClassName('tab-content');
+          for (var i = 0; i < tabContents.length; i++) {
+            tabContents[i].classList.remove('active');
+          }
+
+          // Show the current tab
+          document.getElementById(tabName).classList.add('active');
+        }
+
+        // Remove active class from all tab buttons
+        var tabButtons = document.getElementsByClassName('tab-button');
+        for (var i = 0; i < tabButtons.length; i++) {
+          tabButtons[i].classList.remove('active');
+        }
+
+        // Mark button as active
+        evt.currentTarget.classList.add('active');
+      }
+
+      function toggleCollapsible(element) {
+        element.classList.toggle('active');
+        var panel = element.nextElementSibling;
+        if (panel.style.display === 'block') {
+          panel.style.display = 'none';
+        } else {
+          panel.style.display = 'block';
+        }
+      }
+    </script>
+
+    <script>
       // The test suites plugins (1 plugin per map)
       const testSuitesPlugins = {};
 
@@ -470,19 +633,142 @@
         // Create the table html
         const htmlSection = testSuiteCreateTable(plugin);
 
-        // Create the table html
+        // Create the table html for individual map tab
         document.getElementById('testSuiteTable-' + plugin.mapViewer.mapId).appendChild(htmlSection);
 
-        // Hook the test update
+        // Create a second table for the "Run All Tests" tab with modified IDs
+        const htmlSectionClone = testSuiteCreateTable(plugin);
+
+        // Modify all IDs in the clone to avoid conflicts
+        const tempDiv = document.createElement('div');
+        tempDiv.appendChild(htmlSectionClone);
+        const elementsWithId = tempDiv.querySelectorAll('[id]');
+        elementsWithId.forEach((element) => {
+          element.id = 'runAll-' + element.id;
+        });
+
+        // Remove the launch button from the clone
+        const launchButton = tempDiv.querySelector('.btnLaunchTests');
+        if (launchButton) {
+          launchButton.remove();
+        }
+
+        // Append to the "Run All Tests" collapsible section
+        const runAllResultsId = 'runAll' + plugin.mapViewer.mapId.charAt(0).toUpperCase() + plugin.mapViewer.mapId.slice(1) + 'Results';
+        const runAllContainer = document.getElementById(runAllResultsId);
+        if (runAllContainer) {
+          runAllContainer.appendChild(htmlSectionClone);
+        }
+
+        // Hook the test update to update BOTH tables
         plugin.onTestUpdated((sender, event) => {
-          // Add a row to the table
+          // Add a row to the INDIVIDUAL map tab table
           testSuiteAddOrUpdateTestResultRow(plugin, event.suite, event.tester, event.test, event.test.getError()?.message);
 
-          // Update
+          // Add a row to the "RUN ALL TESTS" tab table (with 'runAll' prefix)
+          testSuiteAddOrUpdateTestResultRow(plugin, event.suite, event.tester, event.test, event.test.getError()?.message, 'runAll');
+
+          // Update totals in both tables
           testSuiteUpdateTotals(plugin);
+          testSuiteUpdateTotals(plugin, 'runAll');
           testSuiteUpdateGrandTotal(testSuitesPlugins);
+
+          // Update global stats
+          updateGlobalStats();
         });
       });
+
+      // Function to update the global statistics in "Run All Tests" tab
+      function updateGlobalStats() {
+        let totalRunning = 0;
+        let totalDoneSuccess = 0;
+        let totalDoneFailed = 0;
+        let totalDone = 0;
+        let totalTests = 0;
+        let totalSuitesCompleted = 0;
+        let totalSuites = 0;
+
+        // Sum up stats from all maps
+        Object.keys(testSuitesPlugins).forEach((mapId) => {
+          const plugin = testSuitesPlugins[mapId];
+          totalRunning += plugin.getTestsRunning();
+          totalDoneSuccess += plugin.getTestsDoneSuccess();
+          totalDoneFailed += plugin.getTestsDoneFailed();
+          totalDone += plugin.getTestsDone();
+          totalTests += plugin.getTestsTotal();
+          totalSuitesCompleted += plugin.getSuitesCompleted();
+          totalSuites += plugin.getSuitesTotal();
+
+          // Update the collapsible button stats for each map
+          const mapNumber = mapId.replace('map', '');
+          const statsSpan = document.getElementById('statsMap' + mapNumber);
+          if (statsSpan) {
+            const running = plugin.getTestsRunning();
+            const doneSuccess = plugin.getTestsDoneSuccess();
+            const doneFailed = plugin.getTestsDoneFailed();
+            const done = plugin.getTestsDone();
+            const total = plugin.getTestsTotal();
+
+            statsSpan.innerHTML = `Running: <span style="color: ${running > 0 ? 'orange' : '#666'};">${running}</span> | Done success: <span style="color: #28a745;">${doneSuccess}</span> | Done failed: <span style="color: #dc3545;">${doneFailed}</span> | Done: ${done}/${total}`;
+          }
+        });
+
+        // Update the display
+        const runningSpan = document.getElementById('allSuitesTestsRunning');
+        if (runningSpan) runningSpan.textContent = totalRunning;
+
+        const doneSuccessSpan = document.getElementById('allSuitesTestsDoneSuccess');
+        if (doneSuccessSpan) doneSuccessSpan.textContent = totalDoneSuccess;
+
+        const doneFailedSpan = document.getElementById('allSuitesTestsDoneFailed');
+        if (doneFailedSpan) doneFailedSpan.textContent = totalDoneFailed;
+
+        const doneSpan = document.getElementById('allSuitesTestsDone');
+        if (doneSpan) doneSpan.textContent = totalDone;
+
+        const totalSpan = document.getElementById('allSuitesTestsTotal');
+        if (totalSpan) totalSpan.textContent = totalTests;
+
+        const suitesCompletedSpan = document.getElementById('allSuitesCompleted');
+        if (suitesCompletedSpan) suitesCompletedSpan.textContent = totalSuitesCompleted;
+
+        const suitesTotalSpan = document.getElementById('allSuitesTotal');
+        if (suitesTotalSpan) suitesTotalSpan.textContent = totalSuites;
+
+        // Update button states based on running tests
+        updateButtonStates();
+      }
+
+      // Function to update button states based on running tests
+      function updateButtonStates() {
+        // Check if any tests are running
+        let anyTestsRunning = false;
+
+        Object.keys(testSuitesPlugins).forEach((mapId) => {
+          const plugin = testSuitesPlugins[mapId];
+          if (plugin.getTestsRunning() > 0) {
+            anyTestsRunning = true;
+          }
+        });
+
+        // Disable "Launch All Tests" button if any test is running
+        const launchAllButton = document.querySelector('button[onclick="launchTestsAll()"]');
+        if (launchAllButton) {
+          launchAllButton.disabled = anyTestsRunning;
+          launchAllButton.style.opacity = anyTestsRunning ? '0.5' : '1';
+          launchAllButton.style.cursor = anyTestsRunning ? 'not-allowed' : 'pointer';
+        }
+
+        // Disable individual map buttons if any test is running
+        Object.keys(testSuitesPlugins).forEach((mapId) => {
+          const button = document.querySelector(`button[onclick="launchTests('${mapId}')"]`);
+          if (button) {
+            button.disabled = anyTestsRunning;
+            button.style.opacity = anyTestsRunning ? '0.5' : '1';
+            button.style.cursor = anyTestsRunning ? 'not-allowed' : 'pointer';
+          }
+        });
+      }
 
       // initialize cgpv
       cgpv.init();

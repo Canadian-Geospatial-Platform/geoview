@@ -10,6 +10,7 @@ import { GVTestSuiteMapVaria } from './tests/suites/suite-map-varia';
 import { GVTestSuiteConfig } from './tests/suites/suite-config';
 import { GVTestSuiteGeochart } from './tests/suites/suite-geochart';
 import { GVTestSuiteLayer } from './tests/suites/suite-layer';
+import { GVTestSuiteMapConfig } from './tests/suites/suite-map-config';
 
 /**
  * Create a class for the plugin instance
@@ -90,6 +91,9 @@ class TestSuitePlugin extends AbstractPlugin {
       } else if (suite === 'suite-geochart') {
         // Instanciate the GeoView Test Suite
         this.addTestSuite(new GVTestSuiteGeochart(window.cgpv.api, this.mapViewer));
+      } else if (suite === 'suite-map-config') {
+        // Instanciate the GeoView Test Suite
+        this.addTestSuite(new GVTestSuiteMapConfig(window.cgpv.api, this.mapViewer));
       } else {
         // Throw
         throw new TestSuiteInitializationError(suite, this.mapViewer.mapId);
