@@ -1,5 +1,3 @@
-import type { Map as OLMap } from 'ol';
-
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import type { QueryType, TypeFeatureInfoEntry, TypeLocation, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
@@ -398,15 +396,18 @@ export abstract class AbstractLayerSet {
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise resolving to the query results
    */
   protected static queryLayerFeatures(
-    map: OLMap,
+    layerApi: LayerApi,
     geoviewLayer: AbstractGVLayer,
     queryType: QueryType,
     location: TypeLocation,
     queryGeometry: boolean = true,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
+    // If the layer is invisible (or any of its parent(s) is invisible)
+    if (!geoviewLayer.getVisibleIncludingParents(layerApi.getGeoviewLayersGroups())) return Promise.resolve([]);
+
     // Get Feature Info
-    return geoviewLayer.getFeatureInfo(map, queryType, location, queryGeometry, abortController);
+    return geoviewLayer.getFeatureInfo(layerApi.mapViewer.map, queryType, location, queryGeometry, abortController);
   }
 
   /**
@@ -562,11 +563,7 @@ export abstract class AbstractLayerSet {
   }
 }
 
-// TODO: Rename this type to something like 'store-container-type' as it is now mostly used to indicate in which store to propagate the result set
-// TO.DOCONT: Be mindful if you rename the eventType property in the event payload to the outside! Because lots of templates expect an 'eventType' in the payload.
-// TO.DOCONT: Ideally, get rid of it completely. The templates should be self aware of the layer-set that responded to their request now.
-export type EventType = 'click' | 'hover' | 'all-features' | 'name';
-
+/** The propagation type, notably for the store */
 export type PropagationType = 'config-registration' | 'layer-registration' | 'layerStatus' | 'layerName';
 
 /**

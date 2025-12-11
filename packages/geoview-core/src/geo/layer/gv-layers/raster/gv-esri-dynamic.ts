@@ -389,9 +389,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
     queryGeometry: boolean = true,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
-    // If invisible
-    if (!this.getVisible()) return [];
-
     // Get the layer config in a loaded phase
     const layerConfig = this.getLayerConfig();
 
