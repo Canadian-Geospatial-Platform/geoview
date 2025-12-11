@@ -11,7 +11,7 @@ html {
 
 body {
   margin: 0;
-  padding: 0px 50px;
+  padding: 0px 20px;
   background-color: #ffffff !important;
 }
 
@@ -268,7 +268,7 @@ table.state {
 
 @media only screen and (max-width: 767px) {
   body {
-    padding: 2px; /* Adjust the value as needed */
+    padding: 20px; /* Adjust the value as needed */
   }
 
   img.header-logo {

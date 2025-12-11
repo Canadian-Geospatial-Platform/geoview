@@ -14,6 +14,7 @@ import {
   AssertionNoErrorThrownError,
   AssertionValueNotAnArrayError,
   AssertionArraysNotEqualError,
+  AssertionManualFailError,
 } from './exceptions';
 import type { TestStepLevel } from './test-step';
 import { TestStep } from './test-step';
@@ -284,6 +285,19 @@ export class Test<T = unknown> {
 
     // Throw
     throw new AssertionWrongErrorInstanceError(actualError, expectedType);
+  }
+
+  /**
+   * Manually fails a test with a custom message.
+   * This is useful when you need to explicitly fail a test based on custom logic or conditions
+   * that cannot be expressed with the other assertion methods.
+   * @param {string} message - Custom message explaining why the test is being manually failed.
+   * @throws {AssertionManualFailError} Always throws to fail the test.
+   * @static
+   */
+  static assertFail(message: string = 'Test manually failed'): never {
+    // Throw the manual fail error
+    throw new AssertionManualFailError(message);
   }
 
   // #endregion PRIMITIVES
