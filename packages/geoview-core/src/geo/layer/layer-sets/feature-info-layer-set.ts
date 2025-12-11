@@ -7,7 +7,7 @@ import type { QueryType, TypeFeatureInfoEntry, TypeResultSet } from '@/api/types
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import type { EventType, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
+import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { GVKML } from '@/geo/layer/gv-layers/vector/gv-kml';
 import type { LayerApi } from '@/geo/layer/layer';
@@ -152,7 +152,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
         // Process query on results data
         const promiseResult = AbstractLayerSet.queryLayerFeatures(
-          this.layerApi.mapViewer.map,
+          this.layerApi,
           layer,
           FeatureInfoLayerSet.QUERY_TYPE,
           lonLatCoordinate,
@@ -220,7 +220,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     await Promise.allSettled(allPromises);
 
     // Emit the query layers has ended
-    this.#emitQueryEnded({ coordinate: lonLatCoordinate, resultSet: this.resultSet, eventType: 'click' });
+    this.#emitQueryEnded({ coordinate: lonLatCoordinate, resultSet: this.resultSet });
 
     // Return the results
     return this.resultSet;
@@ -385,5 +385,4 @@ type QueryEndedDelegate = EventDelegateBase<FeatureInfoLayerSet, QueryEndedEvent
 export type QueryEndedEvent = {
   coordinate: Coordinate;
   resultSet: TypeResultSet;
-  eventType: EventType;
 };

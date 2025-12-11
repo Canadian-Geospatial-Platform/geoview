@@ -131,7 +131,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
         // Process query on results data
         const promiseResult = AbstractLayerSet.queryLayerFeatures(
-          this.layerApi.mapViewer.map,
+          this.layerApi,
           layer,
           queryType,
           layerPath,
