@@ -209,24 +209,22 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
-   * The TypeStyleGeometries associated with the style as could be read from the layer config metadata.
-   * @returns {TypeStyleGeometry[]} The array of TypeStyleGeometry
-   */
-  getTypeGeometries(): TypeStyleGeometry[] {
-    return Object.keys(this.#layerStyle || {}) as TypeStyleGeometry[];
-  }
-
-  /**
    * The first TypeStyleSetting associated with the TypeStyleGeometry associated with the style as could be read from the layer config metadata.
    * @returns {TypeStyleSettings[]} The array of TypeStyleSettings
    */
   getFirstStyleSettings(): TypeLayerStyleSettings | undefined {
     // Get the type geometries
-    const styles = this.getTypeGeometries();
+    const styles = this.getLayerStyle();
 
-    // If at least one, get the first one
-    if (styles.length > 0) {
-      return this.#layerStyle![styles[0]];
+    // If any styles
+    if (styles) {
+      // Get the keys
+      const keys = Object.keys(styles) as TypeStyleGeometry[];
+
+      // Get the first one
+      if (keys.length > 0) {
+        return styles[keys[0]];
+      }
     }
 
     // None
