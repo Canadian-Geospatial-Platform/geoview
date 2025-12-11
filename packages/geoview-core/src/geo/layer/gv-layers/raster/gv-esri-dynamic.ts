@@ -53,6 +53,7 @@ import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-v
  * @class GVEsriDynamic
  */
 export class GVEsriDynamic extends AbstractGVRaster {
+  /** The worker pool used when fetching records */
   #fetchWorkerPool: FetchEsriWorkerPool;
 
   // The default hit tolerance the query should be using
@@ -423,11 +424,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // If no features identified return []
     if (identifyJsonResponse.results.length === 0) return [];
 
-    // Get the outfields
-    const outfields = layerConfig.getOutfields();
-
     // Extract OBJECTIDs
-    const oidField = outfields?.find((field) => field.type === 'oid')?.name ?? 'OBJECTID';
+    const oidField = layerConfig.getOutfieldsPKNameOrDefault('OBJECTID');
     const objectIds = identifyJsonResponse.results.map((result) => String(result.attributes[oidField]).replace(',', ''));
 
     // Get meters per pixel to set the maxAllowableOffset to simplify return geometry
@@ -497,8 +495,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
             //   featureProjection: `EPSG:${mapViewer.getMapState().currentProjection}`,
             // }) as Feature<Geometry>;
 
-            // TODO: Performance - Relying on style to get geometry is not good. We should extract it from metadata and keep it in dedicated attribute
-            const geomType = layerConfig?.getTypeGeometries() || [];
+            // Get the geometry type
+            const geomType = layerConfig?.getGeometryType();
 
             // Get coordinates in right format and create geometry
             const coordinates = (feat.geometry?.points ||
@@ -507,8 +505,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
               feat.geometry?.rings || [feat.geometry?.x, feat.geometry?.y]) as any; // MultiPoint or Line or Polygon or Point schema
 
             // Create the geometry from the (first?) type
-            const newGeom: Geometry | undefined =
-              geomType.length > 0 ? GeometryApi.createGeometryFromType(geomType[0], coordinates) : undefined;
+            const newGeom: Geometry | undefined = geomType ? GeometryApi.createGeometryFromType(geomType, coordinates) : undefined;
 
             // TODO: Performance - We will need a trigger to refresh the higight and details panel (for zoom button) when extent and
             // TO.DOCONT: is applied. Sometimes the delay is too big so we need to change tab or layer in layer list to trigger the refresh
@@ -547,13 +544,10 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const layerConfig = this.getLayerConfig();
 
     // Get the geometry type
-    const [geometryType] = layerConfig.getTypeGeometries();
-
-    // Get the outfields
-    const outfields = layerConfig.getOutfields();
+    const geometryType = layerConfig.getGeometryType();
 
     // Get oid field
-    const oidField = outfields?.find((field) => field.type === 'oid')?.name ?? 'OBJECTID';
+    const oidField = layerConfig.getOutfieldsPKNameOrDefault('OBJECTID');
 
     // Query for the specific object ids
     return EsriUtilities.queryRecordsByUrlObjectIds(
@@ -1124,7 +1118,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const spacing = useExtraSpacingInFilter ? ' ' : '';
     const withQuotes = useExtraSpacingInFilter ? '"' : '';
 
-    // TODO The below commented code was previously causing the classes to be reversed by adding a 'not' to the query
+    // TODO CLEANUP - The below commented code was previously causing the classes to be reversed by adding a 'not' to the query
     // TO.DO Need to confirm that the 'not' is no longer needed
     // TO.DO Changed on 2025-05-29 in PR 2916
     // let queryString = styleSettings.info[styleSettings.info.length - 1].visible !== false && !level ? 'not (' : '(';
