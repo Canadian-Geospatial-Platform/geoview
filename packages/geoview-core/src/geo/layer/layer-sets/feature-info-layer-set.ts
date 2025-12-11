@@ -85,7 +85,15 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    */
   protected override onPropagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry, type: PropagationType): void {
     // Redirect - Add layer to the list after registration
-    this.#propagateToStore(resultSetEntry, type !== 'layerStatus' ? 'name' : 'click');
+    switch (type) {
+      case 'layerStatus':
+        this.#propagateToStoreClick(resultSetEntry);
+        break;
+
+      default:
+        this.#propagateToStoreName(resultSetEntry);
+        break;
+    }
   }
 
   /**
@@ -131,7 +139,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         this.resultSet[layerPath].queryStatus = 'processing';
 
         // Propagate to store
-        this.#propagateToStore(this.resultSet[layerPath]);
+        this.#propagateToStoreClick(this.resultSet[layerPath]);
 
         // If the layer path has an abort controller
         if (Object.keys(this.#abortControllers).includes(layerPath)) {
@@ -196,7 +204,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
           })
           .finally(() => {
             // Propagate to store
-            this.#propagateToStore(this.resultSet[layerPath]);
+            this.#propagateToStoreClick(this.resultSet[layerPath]);
           });
       } else {
         // Error
@@ -204,7 +212,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         this.resultSet[layerPath].queryStatus = 'error';
 
         // Propagate to store
-        this.#propagateToStore(this.resultSet[layerPath]);
+        this.#propagateToStoreClick(this.resultSet[layerPath]);
       }
     });
 
@@ -314,7 +322,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     this.resultSet[layerPath].features = [];
 
     // Propagate to store
-    this.#propagateToStore(this.resultSet[layerPath], 'name');
+    this.#propagateToStoreName(this.resultSet[layerPath]);
   }
 
   /**
@@ -322,12 +330,19 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate to the store
    * @private
    */
-  #propagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry, eventType: EventType = 'click'): void {
+  #propagateToStoreClick(resultSetEntry: TypeFeatureInfoResultSetEntry): void {
     // Propagate
-    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.getMapId(), eventType, resultSetEntry).catch((error: unknown) => {
-      // Log
-      logger.logPromiseFailed('FeatureInfoEventProcessor.propagateToStore in FeatureInfoLayerSet', error);
-    });
+    FeatureInfoEventProcessor.propagateFeatureInfoClickToStore(this.getMapId(), resultSetEntry);
+  }
+
+  /**
+   * Propagates the resultSetEntry to the store
+   * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate to the store
+   * @private
+   */
+  #propagateToStoreName(resultSetEntry: TypeFeatureInfoResultSetEntry): void {
+    // Propagate
+    FeatureInfoEventProcessor.propagateFeatureInfoNameToStore(this.getMapId(), resultSetEntry);
   }
 
   /**

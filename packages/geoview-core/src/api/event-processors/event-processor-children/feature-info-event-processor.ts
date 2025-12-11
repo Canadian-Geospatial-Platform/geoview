@@ -1,5 +1,4 @@
 import { logger } from '@/core/utils/logger';
-import type { EventType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { Projection } from '@/geo/utils/projection';
 
@@ -142,16 +141,12 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * removing the higlight and the click marker if selected layer path is the reset path
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path to delete features from resultSet
-   * @param {EventType} eventType - The event that triggered the reset.
    */
-  static resetResultSet(mapId: string, layerPath: string, eventType: EventType = 'click'): void {
+  static resetResultSet(mapId: string, layerPath: string): void {
     const { resultSet } = MapEventProcessor.getMapViewerLayerAPI(mapId).featureInfoLayerSet;
     if (resultSet[layerPath]) {
       resultSet[layerPath].features = [];
-      this.propagateFeatureInfoToStore(mapId, eventType, resultSet[layerPath]).catch((error: unknown) =>
-        // Log error
-        logger.logPromiseFailed('Not able to reset resultSet', error, layerPath)
-      );
+      this.propagateFeatureInfoNameToStore(mapId, resultSet[layerPath]);
     }
 
     // Remove highlighted features and marker if it is the selected layer path
@@ -220,11 +215,9 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * Propagates feature info layer sets to the store. The update of the array will also trigger an update in a batched manner.
    *
    * @param {string} mapId - The map identifier of the modified result set.
-   * @param {EventType} eventType - The event type that triggered the layer set update.
    * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry being propagated.
-   * @returns {Promise<void>}
    */
-  static propagateFeatureInfoToStore(mapId: string, eventType: EventType, resultSetEntry: TypeFeatureInfoResultSetEntry): Promise<void> {
+  static propagateFeatureInfoClickToStore(mapId: string, resultSetEntry: TypeFeatureInfoResultSetEntry): void {
     // The feature info state
     const featureInfoState = this.getFeatureInfoState(mapId);
 
@@ -232,31 +225,40 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
     const layerDataArray = [...featureInfoState.layerDataArray];
     if (!layerDataArray.find((layerEntry) => layerEntry.layerPath === resultSetEntry.layerPath)) layerDataArray.push(resultSetEntry);
 
-    // Depending on the event type
-    if (eventType === 'click') {
-      // Show details panel as soon as there is a click on the map
-      // If the current tab is not 'details' nor 'geochart', switch to details
-      if (
-        UIEventProcessor.getActiveFooterBarTab(mapId) === undefined ||
-        (!['details', 'geochart'].includes(UIEventProcessor.getActiveFooterBarTab(mapId)!) &&
-          UIEventProcessor.getFooterBarComponents(mapId).includes('details'))
-      ) {
-        UIEventProcessor.setActiveFooterBarTab(mapId, 'details');
-      }
-      // Open details appbar tab when user clicked on map layer.
-      if (UIEventProcessor.getAppBarComponents(mapId).includes('details')) {
-        UIEventProcessor.setActiveAppBarTab(mapId, 'details', true, true);
-      }
-
-      // Update the layer data array in the store, all the time, for all statuses
-      featureInfoState.setterActions.setLayerDataArray(layerDataArray);
-    } else if (eventType === 'name') {
-      // Update the layer data array in the store, all the time, for all statuses
-      featureInfoState.setterActions.setLayerDataArray(layerDataArray);
+    // Show details panel as soon as there is a click on the map
+    // If the current tab is not 'details' nor 'geochart', switch to details
+    if (
+      UIEventProcessor.getActiveFooterBarTab(mapId) === undefined ||
+      (!['details', 'geochart'].includes(UIEventProcessor.getActiveFooterBarTab(mapId)!) &&
+        UIEventProcessor.getFooterBarComponents(mapId).includes('details'))
+    ) {
+      UIEventProcessor.setActiveFooterBarTab(mapId, 'details');
+    }
+    // Open details appbar tab when user clicked on map layer.
+    if (UIEventProcessor.getAppBarComponents(mapId).includes('details')) {
+      UIEventProcessor.setActiveAppBarTab(mapId, 'details', true, true);
     }
 
-    // Nothing to do
-    return Promise.resolve();
+    // Update the layer data array in the store, all the time, for all statuses
+    featureInfoState.setterActions.setLayerDataArray(layerDataArray);
+  }
+
+  /**
+   * Propagates feature info layer sets to the store. The update of the array will also trigger an update in a batched manner.
+   *
+   * @param {string} mapId - The map identifier of the modified result set.
+   * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry being propagated.
+   */
+  static propagateFeatureInfoNameToStore(mapId: string, resultSetEntry: TypeFeatureInfoResultSetEntry): void {
+    // The feature info state
+    const featureInfoState = this.getFeatureInfoState(mapId);
+
+    // Create a details object for each layer which is then used to render layers in details panel.
+    const layerDataArray = [...featureInfoState.layerDataArray];
+    if (!layerDataArray.find((layerEntry) => layerEntry.layerPath === resultSetEntry.layerPath)) layerDataArray.push(resultSetEntry);
+
+    // Update the layer data array in the store, all the time, for all statuses
+    featureInfoState.setterActions.setLayerDataArray(layerDataArray);
   }
 
   /**
