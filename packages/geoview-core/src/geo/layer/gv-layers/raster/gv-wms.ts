@@ -54,6 +54,9 @@ export class GVWMS extends AbstractGVRaster {
   /** The Get Feature Info tolerance to use for QGIS Server services which are more picky by default (really needs to be zoomed in to get results, by default) */
   #getFeatureInfoTolerance: number = GVWMS.DEFAULT_GET_FEATURE_INFO_TOLERANCE;
 
+  /** The feature out put format for the WMS that we know have worked */
+  #featureOutputFormatWMSWorked?: string;
+
   /** Keep all callback delegates references */
   #onImageLoadRescueHandlers: ImageLoadRescueDelegate[] = [];
 
@@ -543,7 +546,7 @@ export class GVWMS extends AbstractGVRaster {
    * @param {string} wmsStyleId - The style identifier to be used.
    */
   setWmsStyle(wmsStyleId: string): void {
-    // TODO: Verify if we can apply more than one style at the same time since the parameter name is STYLES
+    // TODO: STYLES - Verify if we can apply more than one style at the same time since the parameter name is STYLES
     this.getOLSource()?.updateParams({ STYLES: wmsStyleId });
   }
 
@@ -759,12 +762,13 @@ export class GVWMS extends AbstractGVRaster {
     const wmsSource = this.getOLSource();
 
     // Get the supported info formats
-    const featureInfoFormat = wmsLayerConfig.getServiceMetadata()?.Capability?.Request?.GetFeatureInfo?.Format;
+    let featureInfoFormat = wmsLayerConfig.getServiceMetadata()?.Capability?.Request?.GetFeatureInfo?.Format;
+
+    // If any output format has worked in the past
+    if (this.#featureOutputFormatWMSWorked) featureInfoFormat = [this.#featureOutputFormatWMSWorked];
 
     // Log the various info format supported for the layer, keeping the line commented, useful for debugging
     // logger.logDebug(layerConfig.getLayerNameCascade(), featureInfoFormat);
-
-    // TODO: Performance - Think of a way to not recall all types when we know which type is the best to answer based on previous calls
 
     // TODO: WMS - Add support for application/vnd.ogc.gml GV issue #3134
 
@@ -784,6 +788,9 @@ export class GVWMS extends AbstractGVRaster {
           this.getGetFeatureInfoFeatureCount(),
           abortController
         );
+
+        // Keep in mind, this output format works
+        this.#featureOutputFormatWMSWorked = 'application/geojson';
       } catch (error: unknown) {
         // Failed to retrieve featureMember using GeoJSON, eat the error, we'll try with another format
         logger.logError(
@@ -808,6 +815,9 @@ export class GVWMS extends AbstractGVRaster {
           this.getGetFeatureInfoFeatureCount(),
           abortController
         );
+
+        // Keep in mind, this output format works
+        this.#featureOutputFormatWMSWorked = 'application/json';
       } catch (error: unknown) {
         // Failed to retrieve featureMember using Json, eat the error, we'll try with another format
         logger.logError(
@@ -831,6 +841,9 @@ export class GVWMS extends AbstractGVRaster {
           abortController
         );
         featureMember = [featMember];
+
+        // Keep in mind, this output format works
+        this.#featureOutputFormatWMSWorked = 'text/xml';
       } catch (error: unknown) {
         // Failed to retrieve featureMember using XML, eat the error, we'll try with another format
         logger.logError(
