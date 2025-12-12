@@ -769,7 +769,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const defaultFilter = isWMS ? undefined : this.DEFAULT_FILTER_1EQUALS1;
     const layerFilter = layerConfig.getLayerFilter();
 
-    const styleSettings = layerConfig.getFirstStyleSettings();
+    const styleSettings = layerConfig.getLayerStyleSettings();
     if (!styleSettings) return this.#appendLayerFilter(defaultFilter, layerFilter, isWMS);
 
     // Get the outfields
