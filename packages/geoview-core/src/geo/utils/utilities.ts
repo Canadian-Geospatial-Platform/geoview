@@ -185,7 +185,7 @@ export abstract class GeoUtilities {
   /**
    * Fetch the json response from the XML response of a WMS getCapabilities request.
    * @param {string} url - The url the url of the WMS server.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
    * @returns {Promise<TypeMetadataWMS>} A json promise containing the result of the query.
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
@@ -230,7 +230,7 @@ export abstract class GeoUtilities {
    * Fetch the json response from the XML response of a WMS getCapabilities request.
    * @param {string} url - The url the url of the WMS server.
    * @param {string} layers - The layers to query separate by.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
    * @returns {Promise<TypeMetadataWMS>} A json promise containing the result of the query.
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
@@ -515,7 +515,7 @@ export abstract class GeoUtilities {
    * Fetch the json response from the XML response of a WMS getCapabilities request.
    * @param {string} url - The url the url of the WMS server.
    * @param {string} layers - The layers to query separate by.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
    * @returns {Promise<TypeStylesWMS>} A json promise containing the result of the query.
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
