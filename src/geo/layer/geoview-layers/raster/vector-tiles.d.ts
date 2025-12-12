@@ -100,7 +100,7 @@ export declare class VectorTiles extends AbstractGeoViewRaster {
      * @param {VectorTilesLayerEntryConfig} layerConfig - Configuration object for the vector tile layer.
      * @param {ProjectionLike} fallbackProjection - Fallback projection if none is provided in the config.
      * @returns An initialized VectorTileSource ready for use in a layer.
-     * @throws If required config fields like dataAccessPath are missing.
+     * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
      */
     static createVectorTileSource(layerConfig: VectorTilesLayerEntryConfig, fallbackProjection: ProjectionLike): VectorTileSource;
 }

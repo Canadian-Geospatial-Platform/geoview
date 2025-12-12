@@ -12,7 +12,7 @@ export interface VectorLayerEntryConfigProps extends AbstractBaseLayerEntryConfi
  */
 export declare abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     /** Initial settings to apply to the GeoView vector layer source at creation time. */
-    source?: TypeVectorSourceInitialConfig;
+    source: TypeVectorSourceInitialConfig;
     /** Max number of records for query */
     maxRecordCount?: number;
     /**

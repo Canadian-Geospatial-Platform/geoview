@@ -19,7 +19,7 @@ export interface ILayerState {
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
     actions: {
         deleteLayer: (layerPath: string) => void;
-        getExtentFromFeatures: (layerPath: string, featureIds: string[], outfield?: string) => Promise<Extent>;
+        getExtentFromFeatures: (layerPath: string, featureIds: number[], outfield?: string) => Promise<Extent>;
         queryLayerEsriDynamic: (layerPath: string, objectIDs: number[]) => Promise<TypeFeatureInfoEntryPartial[]>;
         getLayer: (layerPath: string) => TypeLegendLayer | undefined;
         getLayerBounds: (layerPath: string) => number[] | undefined;
@@ -66,8 +66,8 @@ export type TypeLegendResultInfo = {
 export type LegendQueryStatus = 'init' | 'querying' | 'queried' | 'error';
 export type TypeLegend = {
     type: TypeGeoviewLayerType;
-    styleConfig?: TypeLayerStyleConfig | null;
     legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
+    styleConfig?: TypeLayerStyleConfig | null;
 };
 export type TypeLegendResultSetEntry = TypeResultSetEntry & TypeLegendResultInfo;
 export type TypeLegendResultSet = TypeResultSet<TypeLegendResultSetEntry>;

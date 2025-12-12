@@ -159,6 +159,30 @@ export declare abstract class AbstractLayerSet {
      */
     protected static alignRecordsWithOutFields(layerEntryConfig: AbstractBaseLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): void;
     /**
+     * Determines whether the retrieved feature info records contain real attribute fields
+     * (i.e., key–value properties) or whether they were returned in a fallback
+     * HTML/plain-text form, which commonly occurs with WMS `GetFeatureInfo` responses.
+     * This is used primarily to detect when a WMS service cannot return structured
+     * feature attributes and instead provides the feature data as a single HTML or
+     * plain-text block.
+     * **Logic summary:**
+     * - For WMS layers (`OgcWmsLayerEntryConfig`):
+     *   - If the first record contains exactly one property and that property is
+     *     either `html` or `plain_text`, the method considers the response *not*
+     *     to contain actual fields.
+     * - For all other cases, the method assumes records contain valid structured attributes.
+     * @param {AbstractBaseLayerEntryConfig} layerConfig
+     *   The layer configuration used to determine whether special WMS handling applies.
+     * @param {TypeFeatureInfoEntry[]} arrayOfRecords
+     *   The retrieved feature info entries representing attributes or raw text content.
+     * @returns {boolean}
+     *   `true` if the feature info records contain real attribute fields;
+     *   `false` if they consist only of fallback HTML or plain-text content.
+     * @protected
+     * @static
+     */
+    protected static recordsContainActualFields(layerConfig: AbstractBaseLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): boolean;
+    /**
      * Registers a callback to be executed whenever the layer set is updated.
      * @param {LayerSetUpdatedDelegate} callback - The callback function
      */

@@ -184,7 +184,7 @@ export declare const useMapSelectorIsLayerHiddenOnMap: (layerPath: string) => bo
 export declare const useMapSelectorLayerLegendCollapsed: (layerPath: string) => boolean;
 export declare const useMapAllLayersVisibleToggle: () => boolean;
 export declare const useMapHasCollapsibleLayersToggle: () => boolean;
-export declare const useMapllLayersCollapsedToggle: () => boolean;
+export declare const useMapAllLayersCollapsedToggle: () => boolean;
 export declare const useMapStoreActions: () => MapActions;
 export {};
 //# sourceMappingURL=map-state.d.ts.map

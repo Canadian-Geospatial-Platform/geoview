@@ -11,7 +11,6 @@ interface FeatureItemProps {
 }
 interface FeatureRowProps {
     featureInfoItem: TypeFieldEntry;
-    index: number;
     onInitLightBox: (value: string, alias: string, index: number) => void;
 }
 export declare const FeatureItem: import("react").NamedExoticComponent<FeatureItemProps>;

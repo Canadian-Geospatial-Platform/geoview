@@ -62,6 +62,23 @@ export declare class ConfigApi {
      */
     static getStyleFromESRIRenderer(rendererAsString: string): TypeLayerStyleConfig | undefined;
     /**
+     * Fetches and returns the WMS Styles content (SLD or XML) for the specified layer(s)
+     * from a given WMS service URL.
+     * This function ensures that the request URL is properly formatted
+     * as a valid WMS `GetStyles` request before fetching the style definition.
+     * @param {string} wmsUrl - The base WMS service URL.
+     * @param {string} layers - A comma-separated list of WMS layer names to request styles for.
+     * @returns {Promise<string>} A promise that resolves to the style definition
+     * (typically an XML or SLD string) retrieved from the WMS service.
+     */
+    static fetchStyleFromWMS(wmsUrl: string, layers: string): Promise<string>;
+    /**
+     * Converts a WMS XML Styles renderer into a GeoView-compatible layer style configuration.
+     * @param {string} xmlContent - An XML representation of the WMS renderer.
+     * @returns {TypeLayerStyleConfig} The corresponding layer style configuration, or `undefined` if parsing or conversion fails.
+     */
+    static getStyleFromWMSRenderer(xmlContent: string): TypeLayerStyleConfig;
+    /**
      * Creates and initializes a GeoView layer configuration based on the specified layer type.
      * This method dynamically selects the appropriate layer class (e.g., EsriDynamic, WMS, GeoJSON, etc.)
      * based on the provided `layerType`, and calls its `initGeoviewLayerConfig` method using the

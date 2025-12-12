@@ -1,7 +1,6 @@
 import Feature from 'ol/Feature';
 import { Vector as VectorSource } from 'ol/source';
 import type { Options as SourceOptions } from 'ol/source/Vector';
-import type { ReadOptions } from 'ol/format/Feature';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 /**
@@ -27,9 +26,8 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
      * Overridable function to create a source configuration for the vector layer.
      * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration.
      * @param {SourceOptions} sourceOptions - The source options (default: { strategy: all }).
-     * @param {ReadOptions} readOptions - The read options (default: {}).
      * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
      */
-    protected onCreateVectorSource(layerConfig: VectorLayerEntryConfig, sourceOptions: SourceOptions<Feature>, readOptions: ReadOptions): VectorSource<Feature>;
+    protected onCreateVectorSource(layerConfig: VectorLayerEntryConfig, sourceOptions: SourceOptions<Feature>): VectorSource<Feature>;
 }
 //# sourceMappingURL=abstract-geoview-vector.d.ts.map

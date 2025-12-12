@@ -17,6 +17,9 @@ interface DialogPropsExtend extends Omit<DialogProps, 'title'> {
     contentTextClassName?: string;
     contentTextStyle?: CSSProperties;
     actions?: ReactNode;
+    onClose?: () => void;
+    width?: string | number;
+    height?: string | number;
     container?: Element;
     open: boolean;
     fullScreen?: boolean;

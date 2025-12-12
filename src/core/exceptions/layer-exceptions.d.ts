@@ -163,6 +163,18 @@ export declare class LayerEntryConfigLayerIdEsriMustBeNumberError extends LayerE
     constructor(geoviewLayerId: string, badNumber: string, layerName: string | undefined);
 }
 /**
+ * Custom error class thrown when the GeoView layer configuration couldn't read the fields information from the vector metadata.
+ * @extends {LayerError}
+ */
+export declare class LayerEntryConfigFieldsNotFoundError extends LayerError {
+    /**
+     * Constructor to initialize the LayerEntryConfigFieldsNotFoundError.
+     * This error is thrown when the ESRI layer ID is not a number, which is required for proper layer configuration.
+     * @param {string} geoviewLayerId - The ID of the GeoView layer with invalid layer type.
+     */
+    constructor(geoviewLayerId: string, layerName: string | undefined);
+}
+/**
  * Custom error class thrown when the ESRI feature layer has too many features.
  * @extends {LayerError}
  */
@@ -320,9 +332,20 @@ export declare class LayerNoGeographicDataInCSVError extends LayerError {
  * Error thrown when fields provided to update the feature fields are of different lengths.
  * @extends {LayerError}
  */
-export declare class LayerDifferingFieldLengths extends LayerError {
+export declare class LayerDifferingFieldLengthsError extends LayerError {
     /**
-     * Constructs a new LayerDifferingFieldLengths instance.
+     * Constructs a new LayerDifferingFieldLengthsError instance.
+     * @param {string} layerPath - The path or identifier of the layer.
+     */
+    constructor(layerPath: string);
+}
+/**
+ * Error thrown when the layer config WFS is missing for a given WMS layer.
+ * @extends {LayerError}
+ */
+export declare class LayerConfigWFSMissingError extends LayerError {
+    /**
+     * Constructs a new LayerConfigWFSMissingError instance.
      * @param {string} layerPath - The path or identifier of the layer.
      */
     constructor(layerPath: string);

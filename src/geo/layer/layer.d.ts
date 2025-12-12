@@ -16,6 +16,8 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { MapViewer } from '@/geo/map/map-viewer';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { TypeLegendItem } from '@/core/components/layers/types';
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
@@ -58,6 +60,51 @@ export declare class LayerApi {
      */
     getGeoviewLayerIds(): string[];
     /**
+     * Verifies if a layer is registered. Returns true if registered.
+     * @param {string} layerPath - The layer path to check.
+     * @returns {boolean} Returns true if the layer configuration is registered.
+     */
+    isLayerEntryConfigRegistered(layerPath: string): boolean;
+    /**
+     * Gets the Layer Entry layer paths
+     * @returns {string[]} The GeoView Layer Paths
+     */
+    getLayerEntryLayerPaths(): string[];
+    /**
+     * Gets the Layer Entry Configs
+     * @returns {string[]} The GeoView Layer Entry Configs
+     */
+    getLayerEntryConfigs(): ConfigBaseClass[];
+    /**
+     * Gets the layer configuration of the specified layer path.
+     * @param {string} layerPath - The layer path.
+     * @returns {ConfigBaseClass} The layer configuration.
+     * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
+     */
+    getLayerEntryConfig(layerPath: string): ConfigBaseClass;
+    /**
+     * Gets the layer configuration of a regular layer (not a group) at the specified layer path.
+     * @param {string} layerPath - The layer path.
+     * @returns {AbstractBaseLayerEntryConfig} The layer configuration.
+     * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
+     * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
+     */
+    getLayerEntryConfigRegular(layerPath: string): AbstractBaseLayerEntryConfig;
+    /**
+     * Gets the layer configuration of a group layer (not a regular) at the specified layer path.
+     * @param {string} layerPath - The layer path.
+     * @returns {AbstractBaseLayerEntryConfig} The layer configuration.
+     * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
+     * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
+     */
+    getLayerEntryConfigGroup(layerPath: string): GroupLayerEntryConfig;
+    /**
+     * Gets the layer configuration of the specified layer path.
+     * @param {string} layerPath - The layer path.
+     * @returns {ConfigBaseClass | undefined} The layer configuration or undefined if not found.
+     */
+    getLayerEntryConfigIfExists(layerPath: string): ConfigBaseClass | undefined;
+    /**
      * Gets the GeoView Layer Paths.
      * @returns The layer paths of the GV Layers
      */
@@ -71,7 +118,7 @@ export declare class LayerApi {
      * Returns the GeoView instance associated to the layer path.
      * @param {string} layerPath - The layer path
      * @returns {AbstractBaseLayer} The new Geoview Layer
-     * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
      */
     getGeoviewLayer(layerPath: string): AbstractBaseLayer;
     /**
@@ -81,38 +128,10 @@ export declare class LayerApi {
      */
     getGeoviewLayerIfExists(layerPath: string): AbstractBaseLayer | undefined;
     /**
-     * Verifies if a layer is registered. Returns true if registered.
-     * @param {string} layerPath - The layer path to check.
-     * @returns {boolean} Returns true if the layer configuration is registered.
-     */
-    isLayerEntryConfigRegistered(layerPath: string): boolean;
-    /**
-     * Gets the Layer Entry Config Ids
-     * @returns {string[]} The GeoView Layer Ids
-     */
-    getLayerEntryConfigIds(): string[];
-    /**
-     * Gets the Layer Entry Configs
-     * @returns {string[]} The GeoView Layer Entry Configs
-     */
-    getLayerEntryConfigs(): ConfigBaseClass[];
-    /**
-     * Gets the layer configuration of the specified layer path.
-     * @param {string} layerPath The layer path.
-     * @returns {ConfigBaseClass | undefined} The layer configuration or undefined if not found.
-     */
-    getLayerEntryConfig(layerPath: string): ConfigBaseClass | undefined;
-    /**
-     * Gets the layer configuration of the specified layer path.
-     * @param {string} layerPath The layer path.
-     * @returns {ConfigBaseClass | undefined} The layer configuration or undefined if not found.
-     */
-    getLayerEntryConfigIfExists(layerPath: string): ConfigBaseClass | undefined;
-    /**
      * Returns the OpenLayer instance associated with the layer path.
      * @param {string} layerPath - The layer path to the layer's configuration.
      * @returns {BaseLayer} Returns the geoview instance associated to the layer path.
-     * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
      */
     getOLLayer(layerPath: string): BaseLayer;
     /**
@@ -243,7 +262,7 @@ export declare class LayerApi {
      *
      * @param {string} layerPath - The path of the layer.
      * @param {boolean} newValue - The new value of visibility.
-     * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
      */
     setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean;
     /**
@@ -251,7 +270,7 @@ export declare class LayerApi {
      *
      * @param {string} layerPath - The path of the layer.
      * @param {string} name - The new name to use.
-     * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
      */
     setLayerName(layerPath: string, name: string): void;
     /**
@@ -260,7 +279,7 @@ export declare class LayerApi {
      * @param {string} layerPath - The path of the layer.
      * @param {number} opacity - The new opacity to use.
      * @param {boolean} emitOpacityChange - Whether to emit the event or not (false to avoid updating the legend layers)
-     * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
      */
     setLayerOpacity(layerPath: string, opacity: number, emitOpacityChange?: boolean): void;
     /**
@@ -268,15 +287,19 @@ export declare class LayerApi {
      *
      * @param {string} layerPath - The path of the layer.
      * @param {GeoJSONObject | string} geojson - The new geoJSON.
-     * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
-     * @throws {LayerNotGeoJsonError} Error thrown when the layer is not a GeoJson layer.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+     * @throws {LayerNotGeoJsonError} When the layer is not a GeoJson layer.
      */
-    setGeojsonSource(layerPath: string, geojson: GeoJSONObject | string): void;
+    setGeojsonSource(layerPath: string, geojson: GeoJSONObject | string): Promise<void>;
     /**
      * Redefine feature info fields.
      * @param {string} layerPath - The path of the layer.
      * @param {string[]} fieldNames - The new field names to use.
      * @param {'alias' | 'name'} fields - The fields to change.
+     * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
+     * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
+     * @throws {LayerDifferingFieldLengthsError} When the layer configuration has different field lengths.
+     * @throws {LayerNotQueryableError} When the layer configuration is not queryable.
      */
     redefineFeatureFields(layerPath: string, fieldNames: string[], fields: 'alias' | 'name'): void;
     /**
@@ -285,6 +308,10 @@ export declare class LayerApi {
      * @param {string[]} types - The new field types (TypeOutfieldsType) to use.
      * @param {string[]} fieldNames - The new field names to use.
      * @param {string[]} fieldAliases - The new field aliases to use.
+     * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
+     * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
+     * @throws {LayerDifferingFieldLengthsError} When the layer configuration has different field lengths.
+     * @throws {LayerNotQueryableError} When the layer configuration is not queryable.
      */
     replaceFeatureOutfields(layerPath: string, types: TypeOutfieldsType[], fieldNames: string[], fieldAliases?: string[]): void;
     /**
@@ -311,6 +338,10 @@ export declare class LayerApi {
      * and resets their override CRS to `undefined`, allowing them to use the default projection behavior.
      */
     clearWMSLayersWithOverrideCRS(): void;
+    /**
+     * Clears all vector features from every layer in the All Feature Info Layer Set.
+     */
+    clearVectorFeaturesFromAllFeatureInfoLayerSet(): void;
     /**
      * Registers a layer config error event handler.
      * @param {LayerConfigErrorDelegate} callback - The callback to be executed whenever the event is emitted

@@ -11,6 +11,8 @@ import type { TypeAllFeatureInfoResultSet, TypeAllFeatureInfoResultSetEntry } fr
  */
 export declare class AllFeatureInfoLayerSet extends AbstractLayerSet {
     #private;
+    /** The query type */
+    static QUERY_TYPE: QueryType;
     /** The resultSet object as existing in the base class, retyped here as a TypeAllFeatureInfoResultSet */
     resultSet: TypeAllFeatureInfoResultSet;
     /**
@@ -39,8 +41,18 @@ export declare class AllFeatureInfoLayerSet extends AbstractLayerSet {
      * @param {string} layerPath - The layerPath that will be queried
      * @param {QueryType} queryType - The query's type to perform
      * @returns {Promise<TypeFeatureInfoEntry[] | void>} A promise which will hold the result of the query
-     * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
      */
     queryLayer(layerPath: string, queryType?: QueryType): Promise<TypeFeatureInfoEntry[] | void>;
+    /**
+     * Clears all stored features for a specific layer in the Feature Info result set.
+     * If the given `layerPath` exists in the internal `resultSet`, this method:
+     * - Sets its `features` property to `null`, effectively removing all features.
+     * - Propagates the updated layer result to the external store.
+     * If the layer path does not exist in the result set, the method does nothing.
+     * @param {string} layerPath - The unique path identifying the layer to clear.
+     * @returns {void}
+     */
+    clearLayerFeatures(layerPath: string): void;
 }
 //# sourceMappingURL=all-feature-info-layer-set.d.ts.map

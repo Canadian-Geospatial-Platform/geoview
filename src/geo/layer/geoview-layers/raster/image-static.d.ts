@@ -90,7 +90,9 @@ export declare class ImageStatic extends AbstractGeoViewRaster {
      * Creates a StaticImage source from a layer config.
      * @param {ImageStaticLayerEntryConfig} layerConfig - Configuration for the image static layer.
      * @returns A configured ol/source/ImageStatic instance.
-     * @throws If required config fields like dataAccessPath, extent, or projection are missing.
+     * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+     * @throws {LayerEntryConfigParameterExtentNotDefinedInSourceError} When the source extent isn't defined.
+     * @throws {LayerEntryConfigParameterProjectionNotDefinedInSourceError} When the source projection isn't defined.
      */
     static createImageStaticSource(layerConfig: ImageStaticLayerEntryConfig): Static;
 }

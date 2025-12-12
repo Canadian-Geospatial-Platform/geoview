@@ -20,6 +20,8 @@ export interface ConfigBaseClassProps {
     bounds?: number[];
     timeDimension?: TimeDimension;
     layerStyle?: TypeLayerStyleConfig;
+    wmsLayerId?: string;
+    wfsLayerId?: string;
 }
 /**
  * Base type used to define a GeoView layer to display on the map. Unless specified,its properties are not part of the schema.
@@ -35,6 +37,16 @@ export declare abstract class ConfigBaseClass {
      * @param {ConfigClassOrType} layerConfig - The layer configuration we want to instanciate.
      */
     protected constructor(layerConfig: ConfigClassOrType, schemaTag: TypeGeoviewLayerType, entryType: TypeLayerEntryType);
+    /**
+     * Overridable method to apply the service metadata to this layer entry and its children.
+     * Subclasses should override this method to implement the logic needed
+     * to update the service metadata on the current layer entry, including
+     * any recursive behavior for child entries or associated sources.
+     * @param {unknown} metadata - The service metadata to set.
+     * @protected
+     * @abstract
+     */
+    protected abstract onSetServiceMetadata(metadata: unknown): void;
     /**
      * Overridable method to apply the data access path to this layer entry and its children.
      * Subclasses should override this method to implement the logic needed
@@ -73,9 +85,9 @@ export declare abstract class ConfigBaseClass {
     setLayerName(layerName: string): void;
     /**
      * Gets the schema tag for the layer entry config.
-     * @returns {TypeGeoviewLayerType | undefined } The layer entry type (or undefined, e.g. groups).
+     * @returns {TypeGeoviewLayerType} The layer entry type (or undefined, e.g. groups).
      */
-    getSchemaTag(): TypeGeoviewLayerType | undefined;
+    getSchemaTag(): TypeGeoviewLayerType;
     /**
      * Sets the schema tag for the layer entry config.
      * @param {TypeGeoviewLayerType} schemaTag - The schema tag.
@@ -145,6 +157,33 @@ export declare abstract class ConfigBaseClass {
      * @returns {boolean} True if this is a AbstractBaseLayerEntryConfig.
      */
     getEntryTypeIsRegular(): this is AbstractBaseLayerEntryConfig;
+    /**
+     * Gets the service date format as specified by the config.
+     * @returns {string | undefined} The Date Format
+     */
+    getServiceDateFormat(): string | undefined;
+    /**
+     * Gets the service date fragments order as specified by the config.
+     * @returns {TypeDateFragments} The Date Fragments
+     */
+    getServiceDateFragmentsOrder(): TypeDateFragments | undefined;
+    /**
+     * Gets the external date format as specified by the config.
+     * @returns {string | undefined} The Date Format
+     */
+    getExternalDateFormat(): string | undefined;
+    /**
+     * Gets the external fragments order if specified by the config, defaults to ISO_UTC.
+     * Date format object used to translate internal UTC ISO format to the external format.
+     * @returns {TypeDateFragments} The Date Fragments
+     */
+    getExternalFragmentsOrder(): TypeDateFragments | undefined;
+    /**
+     * Gets the external fragments order if specified by the config, defaults to ISO_UTC.
+     * Date format object used to translate internal UTC ISO format to the external format.
+     * @returns {TypeDateFragments} The Date Fragments
+     */
+    getExternalFragmentsOrderOrDefault(): TypeDateFragments;
     /**
      * Gets the layer min scale if any.
      * @returns {number | undefined} The layer min scale if any.
@@ -240,10 +279,13 @@ export declare abstract class ConfigBaseClass {
      */
     getSiblings(includeGroups?: boolean): ConfigBaseClass[];
     /**
-     * Gets the external fragments order if specified by the config, defaults to ISO_UTC.
-     * @returns {TypeDateFragments} The Date Fragments
+     * Sets the service metadata for this layer entry.
+     * This is the public entry point for updating the service metadata.
+     * Internally, it delegates the behavior to the `onSetServiceMetadata` method,
+     * which can be overridden by subclasses to implement custom logic.
+     * @param {unknown} metadata - The new service metadata to be used.
      */
-    getExternalFragmentsOrder(): TypeDateFragments;
+    setServiceMetadata(metadata: unknown): void;
     /**
      * Sets the data access path for this layer entry.
      * This is the public entry point for updating the data access path.
@@ -509,6 +551,8 @@ export type TypeLayerEntryShell = {
     subLayers?: TypeLayerEntryShell[];
     source?: TypeLayerEntryShellSource;
     geoviewLayerConfig?: TypeGeoviewLayerConfig;
+    wmsLayerId?: string;
+    wfsLayerId?: string;
     listOfLayerEntryConfig?: TypeLayerEntryShell[];
 };
 export type TypeLayerEntryShellSource = {

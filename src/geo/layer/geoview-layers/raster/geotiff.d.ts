@@ -1,7 +1,7 @@
 import GeoTIFFSource from 'ol/source/GeoTIFF';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import type { TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig, TypeMetadataGeoTIFF } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { GeoTIFFLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/geotiff-layer-entry-config';
 import { GVGeoTIFF } from '@/geo/layer/gv-layers/tile/gv-geotiff';
@@ -22,11 +22,19 @@ export declare class GeoTIFF extends AbstractGeoViewRaster {
      */
     constructor(layerConfig: TypeGeoTIFFLayerConfig);
     /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {TypeMetadataGeoTIFF | undefined} The strongly-typed layer configuration specific to this layer.
+     */
+    getMetadata(): TypeMetadataGeoTIFF | undefined;
+    /**
      * Overrides the way the metadata is fetched.
      * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-     * @returns {Promise<T>} A promise with the metadata or undefined when no metadata for the particular layer type.
+     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+     * @returns {Promise<T = TypeMetadataGeoTIFF | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
+     * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
      */
-    protected onFetchServiceMetadata<T>(): Promise<T>;
+    protected onFetchServiceMetadata<T = TypeMetadataGeoTIFF | undefined>(abortSignal?: AbortSignal): Promise<T>;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
      * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
@@ -42,7 +50,7 @@ export declare class GeoTIFF extends AbstractGeoViewRaster {
      * Creates a GeoTIFF source from a layer config.
      * @param {GeoTIFFLayerEntryConfig} layerConfig - The configuration for the GeoTIFF layer.
      * @returns A fully configured GeoTIFF source.
-     * @throws If required config fields like dataAccessPath are missing.
+     * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
      */
     static createGeoTIFFSource(layerConfig: GeoTIFFLayerEntryConfig): GeoTIFFSource;
     /**

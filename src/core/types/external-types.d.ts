@@ -1,6 +1,5 @@
 export * from 'zustand';
 export { getGeoViewStore } from '@/core/stores/stores-managers';
-export { isEqual } from 'lodash';
 export type { MutableRefObject, RefObject, Dispatch, SetStateAction } from 'react';
 export type { SelectChangeEvent } from '@mui/material';
 export type { Coordinate } from 'ol/coordinate';

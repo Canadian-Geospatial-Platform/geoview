@@ -5,7 +5,7 @@
  * @param {RequestInit} [init={}] - The optional initialization parameters for the fetch.
  * @param {number} [timeoutMs=7000] - Timeout in milliseconds before the request is aborted
  * @returns {Promise<T>} A promise that resolves with the parsed JSON response
- * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration
+ * @throws {RequestTimeoutError} When the request exceeds the timeout duration
  * @throws {Error} When the response is not OK (status outside 200-299)
  *
  * @example

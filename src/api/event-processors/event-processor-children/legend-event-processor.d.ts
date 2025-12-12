@@ -7,7 +7,7 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
     #private;
     /**
      * Shortcut to get the Layer state for a given map id
-     * @param {string} mapId The mapId
+     * @param {string} mapId - The mapId
      * @returns {ILayerState} The Layer state
      */
     protected static getLayerState(mapId: string): ILayerState;
@@ -82,12 +82,12 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      * Gets the extent of a feature or group of features
      * @param {string} mapId - The map identifier
      * @param {string} layerPath - The layer path
-     * @param {string[]} objectIds - The IDs of features to get extents from.
+     * @param {number[]} objectIds - The IDs of features to get extents from.
      * @param {string} outfield - ID field to return for services that require a value in outfields.
      * @returns {Promise<Extent>} The extent of the feature, if available
-     * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
      */
-    static getExtentFromFeatures(mapId: string, layerPath: string, objectIds: string[], outfield?: string): Promise<Extent>;
+    static getExtentFromFeatures(mapId: string, layerPath: string, objectIds: number[], outfield?: string): Promise<Extent>;
     /**
      * Retrieves the time dimension information for a specific layer.
      *
@@ -98,15 +98,15 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      * This method fetches the Geoview layer for the specified layer path and checks if it has a `getTimeDimension` method.
      * If the method exists, it retrieves the temporal dimension information for the layer.
      * If the layer doesn't support temporal dimensions, the method returns `undefined`.
-     * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
      */
     static getLayerTimeDimension(mapId: string, layerPath: string): TimeDimension | undefined;
-    static getLayerIconImage(layerLegend: TypeLegend | null): TypeLegendLayerItem[] | undefined;
+    static getLayerIconImage(layerLegend: TypeLegend | null | undefined): TypeLegendLayerItem[] | undefined;
     /**
      * This method propagates the information stored in the legend layer set to the store.
      *
-     * @param {string} mapId The map identifier.
-     * @param {TypeLegendResultSetEntry} legendResultSetEntry The legend result set that triggered the propagation.
+     * @param {string} mapId - The map identifier.
+     * @param {TypeLegendResultSetEntry} legendResultSetEntry - The legend result set that triggered the propagation.
      */
     static propagateLegendToStore(mapId: string, legendResultSetEntry: TypeLegendResultSetEntry): void;
     /**
@@ -144,7 +144,7 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      * Refresh layer and reset states.
      * @param {string} mapId - The ID of the map.
      * @param {string} layerPath - The layer path of the layer to refresh.
-     * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
      */
     static refreshLayer(mapId: string, layerPath: string): void;
     /**

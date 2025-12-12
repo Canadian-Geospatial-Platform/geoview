@@ -4,6 +4,7 @@ import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set'
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import type { LayerApi } from '@/geo/layer/layer';
 import type { TypeHoverResultSet, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import type { QueryType } from '@/api/types/map-schema-types';
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
  * events happening on them (in this case when the user hovers on the map) with a store
@@ -12,6 +13,8 @@ import type { TypeHoverResultSet, TypeHoverResultSetEntry } from '@/core/stores/
  */
 export declare class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     #private;
+    /** The query type */
+    static QUERY_TYPE: QueryType;
     /** The resultSet object as existing in the base class, retyped here as a TypeHoverFeatureInfoResultSet */
     resultSet: TypeHoverResultSet;
     /**
@@ -43,7 +46,7 @@ export declare class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     /**
      * Queries the features at the provided coordinate for all the registered layers.
      * @param {Coordinate} pixelCoordinate - The pixel coordinate where to query the features
-     * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
      */
     queryLayers(pixelCoordinate: Coordinate): void;
     /**

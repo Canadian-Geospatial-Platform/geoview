@@ -1,10 +1,10 @@
 import type { TypeFillStyle } from '@/api/types/map-schema-types';
 export declare const defaultColor: string[];
-export type FillPaternLine = {
+export type FillPatternLine = {
     moveTo: [number, number];
     lineTo: [number, number];
 };
-export type FillPaternSettings = Record<TypeFillStyle, FillPaternLine[] | []>;
+export type FillPatternSettings = Record<TypeFillStyle, FillPatternLine[] | []>;
 export declare enum NodeType {
     unprocessedNode = 0,
     keyword = 1,

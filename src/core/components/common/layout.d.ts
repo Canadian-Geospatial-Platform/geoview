@@ -7,12 +7,19 @@ interface LayoutProps {
     guideContentIds?: string[];
     layerList: LayerListEntry[];
     selectedLayerPath: string | undefined;
-    fullWidth?: boolean;
-    containerType?: TypeContainerBox;
     onLayerListClicked: (layer: LayerListEntry) => void;
     onIsEnlargeClicked?: (isEnlarge: boolean) => void;
     onGuideIsOpen?: (isGuideOpen: boolean) => void;
+    onRightPanelClosed?: () => void;
+    onRightPanelVisibilityChanged?: (isVisible: boolean) => void;
+    containerType?: TypeContainerBox;
+    hideEnlargeBtn?: boolean;
+    toggleMode?: boolean;
 }
-export declare function Layout({ children, layoutSwitch, guideContentIds, layerList, selectedLayerPath, onLayerListClicked, onIsEnlargeClicked, fullWidth, onGuideIsOpen, containerType, }: LayoutProps): JSX.Element;
-export {};
+interface LayoutExposedMethods {
+    showRightPanel: (visible: boolean) => void;
+}
+declare const Layout: import("react").ForwardRefExoticComponent<LayoutProps & import("react").RefAttributes<LayoutExposedMethods>>;
+export { Layout };
+export type { LayoutExposedMethods };
 //# sourceMappingURL=layout.d.ts.map

@@ -8,8 +8,8 @@ interface ResponsiveGridPanelProps extends GridProps {
     isRightPanelVisible: boolean;
     sxProps?: SxProps;
     isEnlarged: boolean;
-    fullWidth?: boolean;
     className?: string;
+    toggleMode?: boolean;
 }
 export declare const ResponsiveGrid: {
     Root: import("react").ForwardRefExoticComponent<Omit<ResponsiveGridProps, "ref"> & import("react").RefAttributes<unknown>>;

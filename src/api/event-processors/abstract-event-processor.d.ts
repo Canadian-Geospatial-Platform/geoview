@@ -14,14 +14,14 @@ export declare abstract class AbstractEventProcessor {
     /**
      * Shortcut to get the store state for a given map id
      *
-     * @param {string} mapId the map id to retreive the state for
+     * @param {string} mapId - The map id to retreive the state for
      * @returns {IGeoviewState} the store state
      */
     protected static getState(mapId: string): IGeoviewState;
     /**
      * Shortcut to get the store state for a given map id
      *
-     * @param {string} mapId the map id to retreive the state for
+     * @param {string} mapId - The map id to retreive the state for
      * @returns {IGeoviewState} the store state
      */
     protected static getStateAsync(mapId: string): Promise<IGeoviewState>;
@@ -41,14 +41,14 @@ export declare abstract class AbstractEventProcessor {
      * Helper method to propagate in the layerDataArray in a batched manner.
      * The propagation can be bypassed using 'layerPathBypass' parameter which tells the process to
      * immediately batch out the array in the store for faster triggering of the state, for faster updating of the UI.
-     * @param {string} mapId The map id
-     * @param {T[]} layerDataArray The layer data array to hold in buffer during the batch
-     * @param {BatchedPropagationLayerDataArrayByMap<T>} batchPropagationObject A reference to the BatchedPropagationLayerDataArrayByMap object used to hold all the layer data arrays in the buffer
-     * @param {number} timeDelayBetweenPropagations The delay between actual propagations in the store
-     * @param {(layerDataArray: T[]) => void} onSetLayerDataArray The store action callback used to store the layerDataArray in the actual store
-     * @param {string} traceProcessorIndication? Simple parameter for logging purposes
-     * @param {string} layerPathBypass? Indicates a layer path which, when processed, should bypass the buffer period and immediately trigger an update to the store
-     * @param {(layerPath: string) => void} onResetBypass? The store action callback used to reset the layerPathBypass value in the store.
+     * @param {string} mapId - The map id
+     * @param {T[]} layerDataArray - The layer data array to hold in buffer during the batch
+     * @param {BatchedPropagationLayerDataArrayByMap<T>} batchPropagationObject - A reference to the BatchedPropagationLayerDataArrayByMap object used to hold all the layer data arrays in the buffer
+     * @param {number} timeDelayBetweenPropagations - The delay between actual propagations in the store
+     * @param {(layerDataArray: T[]) => void} onSetLayerDataArray - The store action callback used to store the layerDataArray in the actual store
+     * @param {string} traceProcessorIndication? - Simple parameter for logging purposes
+     * @param {string} layerPathBypass? - Indicates a layer path which, when processed, should bypass the buffer period and immediately trigger an update to the store
+     * @param {(layerPath: string) => void} onResetBypass? - The store action callback used to reset the layerPathBypass value in the store.
      *                                                     This is used so that when the bypass occurred once, it's not occuring again for all subsequent checks in the period of batch propagations.
      *                                                     It's up to the components to re-initialize the layerPathBypass at a certain time.
      *                                                     When no onResetBypass is specified, once the bypass occurs, all subsequent propagations happen immediately.

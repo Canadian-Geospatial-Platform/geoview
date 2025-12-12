@@ -94,7 +94,7 @@ export declare class XYZTiles extends AbstractGeoViewRaster {
      * Creates an XYZ source from a layer config.
      * @param {XYZTilesLayerEntryConfig} layerConfig - The configuration for the XYZ layer.
      * @returns A fully configured XYZ source.
-     * @throws If required config fields like dataAccessPath are missing.
+     * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
      */
     static createXYZSource(layerConfig: XYZTilesLayerEntryConfig): XYZ;
 }

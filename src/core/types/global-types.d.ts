@@ -84,4 +84,25 @@ export interface TypeHTMLElement extends HTMLElement {
  *  Definition of an Container where components are rendered.
  */
 export type TypeContainerBox = 'appBar' | 'footerBar';
+/**
+ * Represents a constructor type that returns an instance of `T`.
+ * This is useful when you need to pass around classes (constructors) generically,
+ * such as for type assertions, factories, dependency injection, or reflection.
+ * @template T - The type of the instance the constructor produces.
+ */
+type RegularClassType<T> = new (...args: any[]) => T;
+/**
+ * Represents an abstract constructor type that returns an instance of `T`.
+ * This is useful when you need to pass around classes (constructors) generically,
+ * such as for type assertions, factories, dependency injection, or reflection.
+ * @template T - The type of the instance the constructor produces.
+ */
+type AbstractClassType<T> = abstract new (...args: any[]) => T;
+/**
+ * Represents a constructor type that returns an instance of `T`.
+ * This is useful when you need to pass around classes (constructors) generically,
+ * such as for type assertions, factories, dependency injection, or reflection.
+ * @template T - The type of the instance the constructor produces.
+ */
+export type ClassType<T> = RegularClassType<T> | AbstractClassType<T>;
 //# sourceMappingURL=global-types.d.ts.map
