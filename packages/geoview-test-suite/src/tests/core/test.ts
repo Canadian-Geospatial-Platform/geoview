@@ -305,13 +305,30 @@ export class Test<T = unknown> {
   // #region ARRAYS
 
   /**
+   * Asserts that a value is an array.
+   * @param {unknown} actualValue - The object to check.
+   * @throws {AssertionValueNotAnArrayError} If the value is not an array.
+   * @static
+   */
+  static assertIsArray(actualValue: unknown | unknown[] | undefined): asserts actualValue is unknown[] {
+    if (Array.isArray(actualValue)) return;
+
+    // Throw
+    throw new AssertionValueNotAnArrayError(actualValue);
+  }
+
+  /**
    * Asserts that a length of a given array is equal to the expected length.
    * @param {unknown[] | undefined} array - The array to check the length.
    * @param {number} expectedValue - The expected length of the array.
    * @throws {AssertionArrayLengthError} If the values are not strictly equal.
+   * @throws {AssertionValueNotAnArrayError} If the value is not an array.
    * @static
    */
   static assertIsArrayLengthEqual(array: unknown[] | undefined, expectedValue: number): void {
+    // Test if it is an array
+    Test.assertIsArray(array);
+
     if (array?.length === expectedValue) return;
 
     // Throw
@@ -323,9 +340,13 @@ export class Test<T = unknown> {
    * @param {unknown[] | undefined} array - The array to check the length.
    * @param {number} expectedMinimumLength - The expected minimum length of the array.
    * @throws {AssertionArrayLengthMinimalError} If the values are not strictly equal.
+   * @throws {AssertionValueNotAnArrayError} If the value is not an array.
    * @static
    */
   static assertIsArrayLengthMinimal(array: unknown[] | undefined, expectedMinimumLength: number): void {
+    // Test if it is an array
+    Test.assertIsArray(array);
+
     if (array?.length ?? 0 >= expectedMinimumLength) return;
 
     // Throw
@@ -338,8 +359,13 @@ export class Test<T = unknown> {
    * @param {T[]} array - The array to search.
    * @param {T} expectedValue - The value expected to be included in the array.
    * @throws {AssertionArrayNotIncludingError} Throws if the expected value is not found in the array.
+   * @throws {AssertionValueNotAnArrayError} If the value is not an array.
+   * @static
    */
   static assertArrayIncludes<T = unknown>(array: T[], expectedValue: T): void {
+    // Test if it is an array
+    Test.assertIsArray(array);
+
     if (array.includes(expectedValue)) return;
 
     // Throw
@@ -352,8 +378,13 @@ export class Test<T = unknown> {
    * @param {T[]} array - The array to search.
    * @param {T} expectedValue - The value expected to be included in the array.
    * @throws {AssertionArrayNotIncludingError} Throws if the expected value is not found in the array.
+   * @throws {AssertionValueNotAnArrayError} If the value is not an array.
+   * @static
    */
   static assertArrayExcludes<T = unknown>(array: T[], expectedValue: T): void {
+    // Test if it is an array
+    Test.assertIsArray(array);
+
     if (!array.includes(expectedValue)) return;
 
     // Throw
@@ -415,12 +446,8 @@ export class Test<T = unknown> {
    */
   static assertIsArrayEqualComparer<T = unknown>(actualValue: T[], expectedValue: T[], comparer: ComparerDelegate<T>): void {
     // Check if both are arrays
-    if (!Array.isArray(actualValue)) {
-      throw new AssertionValueNotAnArrayError(actualValue);
-    }
-    if (!Array.isArray(expectedValue)) {
-      throw new AssertionValueNotAnArrayError(expectedValue);
-    }
+    Test.assertIsArray(actualValue);
+    Test.assertIsArray(expectedValue);
 
     // Check if lengths are equal
     if (actualValue.length !== expectedValue.length) {
