@@ -127,6 +127,7 @@ const NotificationHeader = memo(function NotificationHeader({
           {t('general.removeAll')}
         </Button>
         <IconButton
+          id="notification-close-button"
           tooltip={t('general.close')}
           aria-label={t('appbar.closeNotificationsDialog')}
           size="small"
@@ -280,7 +281,7 @@ export default memo(function Notifications(): JSX.Element {
           placement="right-end"
           onClose={handleClickAway}
           container={mapElem}
-          focusSelector="h3 + div button:last-child"
+          focusSelector="#notification-close-button"
           focusTrap={activeTrapGeoView}
           modifiers={[
             {

@@ -15,11 +15,11 @@ interface GeolocatorBarProps {
   onReset: () => void;
   /** Loading state to disable search while fetching */
   isLoading: boolean;
+  /** Ref for the search input element */
+  inputRef?: React.RefObject<HTMLInputElement>;
 }
 
-// TODO: WCAG Issue #3114 #3115 Contrast issues with geolocator icons/text
-
-export function GeolocatorBar({ searchValue, onChange, onSearch, onReset, isLoading }: GeolocatorBarProps): JSX.Element {
+export function GeolocatorBar({ searchValue, onChange, onSearch, onReset, isLoading, inputRef }: GeolocatorBarProps): JSX.Element {
   logger.logTraceRender('components/geolocator/geolocator-bar');
 
   // Hooks
@@ -43,9 +43,9 @@ export function GeolocatorBar({ searchValue, onChange, onSearch, onReset, isLoad
               'aria-controls': 'geolocator-results-region',
             }}
             placeholder={t('geolocator.search')!}
-            autoFocus
             onChange={onChange}
             value={searchValue}
+            inputRef={inputRef}
           />
           <Box sx={{ display: 'flex', marginLeft: 'auto', alignItems: 'center' }}>
             <IconButton edge="end" aria-label={t('geolocator.searchClose')} size="small" sx={{ mr: 2, ml: 4 }} onClick={onReset}>

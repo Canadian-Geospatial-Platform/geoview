@@ -321,6 +321,7 @@
   },
   "geolocator": {
     "title": "Géolocalisation",
+    "panelTitle": "Panneau de géolocalisation",
     "searchFormLabel": "Recherche de géolocalisation",
     "searchInputLabel": "Entrer le(s) mot(s)-clé(s) (au moins trois caractères)",
     "search": "Texte à rechercher",
@@ -384,7 +385,8 @@
   },
   "footerBar": {
     "resizeTooltip": "Redimensionner",
-    "noTab": "Pas d'onglet"
+    "noTab": "Pas d'onglet",
+    "tabsLabel": "Onglets du panneau de pied de page"
   },
   "toggleAll": {
     "show": "Afficher tout",
