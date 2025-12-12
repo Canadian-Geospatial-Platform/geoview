@@ -715,25 +715,8 @@ export class LayerApi {
     });
 
     // Register a callback when the layer entry config wants to register extra configs
-    layerBeingAdded.onLayerEntryRegisterInit((geoviewLayer: AbstractGeoViewLayer, event: LayerEntryRegisterInitEvent) => {
-      // Log
-      logger.logTraceCore(
-        `LAYERS - 1.5 - Registering an extra layer entry config ${event.config.layerPath} on map ${this.getMapId()}`,
-        event.config
-      );
+    layerBeingAdded.onLayerEntryRegisterInit(this.#handleLayerEntryRegisterInit.bind(this));
 
-      // If already existing
-      const alreadyExisting = this.getLayerEntryConfigIfExists(event.config.layerPath);
-      if (alreadyExisting) {
-        // Unregister the old one
-        this.unregisterLayerConfig(alreadyExisting, false);
-      }
-
-      // Register it
-      this.registerLayerConfigInit(event.config);
-    });
-
-    // TODO: if we keep geoview layers, regroup the event like what we do for gv layers
     // Register a callback when layer wants to send a message
     layerBeingAdded.onLayerMessage(this.#handleLayerMessage.bind(this));
 
@@ -760,74 +743,25 @@ export class LayerApi {
     // });
 
     // Register a callback when a Group Layer has been created
-    layerBeingAdded.onLayerGroupCreated((geoviewLayer: AbstractGeoViewLayer, event: LayerGroupCreatedEvent) => {
-      // Get the Group Layer and the config
-      const groupLayer = event.layer;
-      const layerConfig = groupLayer.getLayerConfig();
-
-      // Log
-      logger.logTraceCore(
-        `LAYERS - 7 - Group Layer created for ${layerConfig.layerPath} on map ${this.getMapId()}`,
-        layerConfig.layerStatus,
-        layerConfig
-      );
-
-      // Keep track
-      this.#gvLayers[layerConfig.layerPath] = groupLayer;
-      this.#olLayers[layerConfig.layerPath] = groupLayer.getOLLayer();
-
-      // Register events handler for the layer
-      this.#registerGroupLayerHandlers(groupLayer);
-
-      // Set in visible range property for all newly added layers
-      this.#setLayerInVisibleRange(groupLayer);
-    });
+    layerBeingAdded.onLayerGroupCreated(this.#handleLayerGroupCreated.bind(this));
 
     // Register a callback when a GV Layer has been created
-    layerBeingAdded.onLayerGVCreated((geoviewLayer: AbstractGeoViewLayer, event: LayerGVCreatedEvent) => {
-      // Get the GV Layer and the config
-      const gvLayer = event.layer;
-      const layerConfig = gvLayer.getLayerConfig();
+    layerBeingAdded.onLayerGVCreated(this.#handleLayerGVCreated.bind(this));
 
-      // Log
-      logger.logTraceCore(
-        `LAYERS - 9 - GV Layer created for ${layerConfig.layerPath} on map ${this.getMapId()}`,
-        layerConfig.layerStatus,
-        layerConfig
-      );
-
-      // Keep track
-      this.#gvLayers[layerConfig.layerPath] = gvLayer;
-      this.#olLayers[layerConfig.layerPath] = gvLayer.getOLLayer();
-
-      // Register events handler for the layer
-      this.#registerLayerHandlers(gvLayer);
-
-      // Emit about its creation so that one can attach events on it right away if necessary
-      this.#emitLayerCreated({ layer: gvLayer });
-
-      // Init it
-      gvLayer.init();
-    });
-
-    // Create a promise about the layer will be on the map
+    // Create a promise that the layer will be added on the map
     const promiseLayer = new Promise<void>((resolve, reject) => {
       // Continue the addition process
       layerBeingAdded
         .createGeoViewLayers(abortSignal)
         .then(() => {
           // Add the layer on the map
-          this.#addToMap(layerBeingAdded);
+          this.#addToMap(layerBeingAdded, geoviewLayerConfig);
 
           // Resolve, done
           resolve();
 
           // Emit
           this.#emitLayerConfigAdded({ layer: layerBeingAdded });
-
-          // GV: KML currently has no style or symbology associated with it, so we warn the user
-          if (geoviewLayerConfig.geoviewLayerType === CONST_LAYER_TYPES.KML)
-            this.mapViewer.notifications.showWarning('warning.layer.kmlLayerWarning', [], true);
         })
         .catch((error: unknown) => {
           // Log error
@@ -1162,7 +1096,6 @@ export class LayerApi {
           delete this.#geoviewLayers[layerPathNodes[0]];
           const { mapFeaturesConfig } = this.mapViewer;
 
-          // TODO: refactor - remove cast
           if (mapFeaturesConfig.map.listOfGeoviewLayerConfig)
             mapFeaturesConfig.map.listOfGeoviewLayerConfig = mapFeaturesConfig.map.listOfGeoviewLayerConfig.filter(
               (geoviewLayerConfig) => geoviewLayerConfig.geoviewLayerId !== layerPath
@@ -1776,6 +1709,123 @@ export class LayerApi {
   }
 
   /**
+   * Handles the initialization of a layer-entry registration event.
+   * This method is triggered when an additional layer-entry configuration
+   * (typically created dynamically) needs to be registered in the map's
+   * layer configuration system.
+   * Behavior:
+   *  1. Checks whether a configuration for the given `layerPath` already exists.
+   *  2. If it exists, unregisters the old configuration (without triggering
+   *     cleanup actions tied to removal).
+   *  3. Registers the new layer-entry configuration using `registerLayerConfigInit`.
+   * @param {AbstractGeoViewLayer} geoviewLayer - The GeoView layer associated
+   *   with this registration event.
+   * @param {LayerEntryRegisterInitEvent} event - The event containing the
+   *   layer-entry configuration to be registered.
+   * @private
+   */
+  #handleLayerEntryRegisterInit(geoviewLayer: AbstractGeoViewLayer, event: LayerEntryRegisterInitEvent): void {
+    // Log
+    logger.logTraceCore(
+      `LAYERS - 1.5 - Registering an extra layer entry config ${event.config.layerPath} on map ${this.getMapId()}`,
+      event.config
+    );
+
+    // If already existing
+    const alreadyExisting = this.getLayerEntryConfigIfExists(event.config.layerPath);
+    if (alreadyExisting) {
+      // Unregister the old one
+      this.unregisterLayerConfig(alreadyExisting, false);
+    }
+
+    // Register it
+    this.registerLayerConfigInit(event.config);
+  }
+
+  /**
+   * Handles the creation of a GeoView layer (`GVLayer`) after its underlying
+   * OL layer and configuration have been fully initialized.
+   * This method is triggered once a layer has completed its construction,
+   * allowing the system to register it, attach handlers, and notify any
+   * listeners that the layer is now ready for interaction.
+   * Behavior:
+   *  1. Stores references to the GV layer and the underlying OL layer,
+   *     indexed by their `layerPath`.
+   *  2. Registers internal event handlers for the new layer.
+   *  3. Emits a "layer created" event so external code can bind to it immediately.
+   *  4. Calls the layer’s `init()` method to finalize initialization.
+   * @param {AbstractGeoViewLayer} geoviewLayer - The parent or context
+   *   GeoView layer associated with this creation event.
+   * @param {LayerGVCreatedEvent} event - The event containing the newly
+   *   created GV layer instance and its configuration.
+   * @private
+   */
+  #handleLayerGVCreated(geoviewLayer: AbstractGeoViewLayer, event: LayerGVCreatedEvent): void {
+    // Get the GV Layer and the config
+    const gvLayer = event.layer;
+    const layerConfig = gvLayer.getLayerConfig();
+
+    // Log
+    logger.logTraceCore(
+      `LAYERS - 9 - GV Layer created for ${layerConfig.layerPath} on map ${this.getMapId()}`,
+      layerConfig.layerStatus,
+      layerConfig
+    );
+
+    // Keep track
+    this.#gvLayers[layerConfig.layerPath] = gvLayer;
+    this.#olLayers[layerConfig.layerPath] = gvLayer.getOLLayer();
+
+    // Register events handler for the layer
+    this.#registerLayerHandlers(gvLayer);
+
+    // Emit about its creation so that one can attach events on it right away if necessary
+    this.#emitLayerCreated({ layer: gvLayer });
+
+    // Init it
+    gvLayer.init();
+  }
+
+  /**
+   * Handles the creation of a GeoView group layer (`GVGroupLayer`).
+   * This method is invoked once a group layer has been fully instantiated,
+   * allowing the system to register it, attach handlers, and initialize its
+   * visibility constraints.
+   * Behavior:
+   *  1. Stores references to the GV group layer and its corresponding
+   *     OpenLayers layer, indexed by `layerPath`.
+   *  2. Registers internal event handlers specific to group layers.
+   *  3. Computes and stores the layer's initial "in visible range" state.
+   * @param {AbstractGeoViewLayer} geoviewLayer - The parent or context layer
+   *   associated with this creation event.
+   * @param {LayerGroupCreatedEvent} event - The event containing the newly
+   *   created group layer instance and its configuration.
+   * @private
+   */
+  #handleLayerGroupCreated(geoviewLayer: AbstractGeoViewLayer, event: LayerGroupCreatedEvent): void {
+    // Get the Group Layer and the config
+    const groupLayer = event.layer;
+    const layerConfig = groupLayer.getLayerConfig();
+
+    // Log
+    logger.logTraceCore(
+      `LAYERS - 7 - Group Layer created for ${layerConfig.layerPath} on map ${this.getMapId()}`,
+      layerConfig.layerStatus,
+      layerConfig
+    );
+
+    // Keep track
+    this.#gvLayers[layerConfig.layerPath] = groupLayer;
+    this.#olLayers[layerConfig.layerPath] = groupLayer.getOLLayer();
+
+    // Register events handler for the layer
+    this.#registerGroupLayerHandlers(groupLayer);
+
+    // Set in visible range property for all newly added layers
+    this.#setLayerInVisibleRange(groupLayer);
+  }
+
+  /**
    * Handles layer-specific messages and displays them through the map viewer's notification system
    * @param {AbstractGVLayer} layer - The layer instance that triggered the message
    * @param {LayerMessageEvent} layerMessageEvent - The message event containing notification details
@@ -2055,7 +2105,7 @@ export class LayerApi {
    * @param {AbstractGeoViewLayer} geoviewLayer - The layer
    * @private
    */
-  #addToMap(geoviewLayer: AbstractGeoViewLayer): void {
+  #addToMap(geoviewLayer: AbstractGeoViewLayer, geoviewLayerConfig: TypeGeoviewLayerConfig): void {
     // If no root layer is set, forget about it
     if (!geoviewLayer.olRootLayer) return;
 
@@ -2063,13 +2113,17 @@ export class LayerApi {
     if (!geoviewLayer.allLayerStatusAreGreaterThanOrEqualTo('error')) {
       // Add the OpenLayers layer to the map officially
       this.mapViewer.map.addLayer(geoviewLayer.olRootLayer);
+
+      // Log
+      logger.logInfo(`GeoView Layer ${geoviewLayer.geoviewLayerId} added to map ${this.getMapId()}`, geoviewLayer);
+
+      // GV: KML currently has no style or symbology associated with it, so we warn the user
+      if (geoviewLayerConfig.geoviewLayerType === CONST_LAYER_TYPES.KML)
+        this.mapViewer.notifications.showWarning('warning.layer.kmlLayerWarning', [], true);
+
+      // Set the layer z indices
+      MapEventProcessor.setLayerZIndices(this.getMapId());
     }
-
-    // Log
-    logger.logInfo(`GeoView Layer ${geoviewLayer.geoviewLayerId} added to map ${this.getMapId()}`, geoviewLayer);
-
-    // Set the layer z indices
-    MapEventProcessor.setLayerZIndices(this.getMapId());
   }
 
   /**
@@ -2634,10 +2688,12 @@ export class LayerApi {
       const settings = ConfigBaseClass.getClassOrTypeInitialSettings(layerEntryConfig);
       const featureInfo = layerEntryConfig.source?.featureInfo;
 
+      const isQueryable = featureInfo?.queryable === false ? false : (settings?.states?.queryable ?? featureInfo?.queryable ?? true); // default: true
+
       const layerInfo: TypeOrderedLayerInfo = {
         layerPath: subLayerPath,
         visible: settings?.states?.visible ?? true, // default: true
-        queryable: featureInfo?.queryable ?? true, // default: true
+        queryable: isQueryable,
         hoverable: settings?.states?.hoverable ?? true, // default: true
         legendCollapsed: settings?.states?.legendCollapsed ?? false, // default: false
         inVisibleRange: true,
