@@ -625,12 +625,11 @@ export class LayerApi {
       const response = await GeoCore.createLayerConfigFromUUID(uuid, this.mapViewer.getDisplayLanguage(), this.getMapId(), optionalConfig);
       const geoviewLayerConfig = response.config;
 
-      // TODO: Refactor - Move this logic inside addGeoviewLayer. Anyways for now here is better than when it was in createLayerConfigFromUUID.
       // If a Geochart is initialized
       if (GeochartEventProcessor.isGeochartInitialized(this.getMapId())) {
-        // For each layer path
+        // For each geocharts configuration
         Object.entries(response.geocharts).forEach(([layerPath, geochartConfig]) => {
-          // Add a GeoChart
+          // Add a GeoChart configuration on-the-fly
           GeochartEventProcessor.addGeochartChart(this.getMapId(), layerPath, geochartConfig);
         });
       }
@@ -659,36 +658,35 @@ export class LayerApi {
    * The result contains the instanciated GeoViewLayer along with a promise that will resolve when the layer will be officially on the map.
    */
   addGeoviewLayer(geoviewLayerConfig: TypeGeoviewLayerConfig, abortSignal?: AbortSignal): GeoViewLayerAddedResult {
-    // TODO: Refactor - This should be dealt with the config classes and this line commented out
-    // eslint-disable-next-line no-param-reassign
-    geoviewLayerConfig.geoviewLayerId ||= generateId(18);
+    // TODO: CLEANUP - Remove this line as it shouldn't be done here, commented on 2025-12-11
+    // geoviewLayerConfig.geoviewLayerId ||= generateId(18);
 
-    // TODO: Refactor - This should be dealt with the config classes and this line commented out.
+    // TODO: REFACTOR - This should be dealt with the config classes and this line commented out.
     // TO.DOCONT: Right now, this function is called when the configuration is first read and schema checked and everything and then again here when we're adding a geoviewLayerConfig.
     // TO.DOCONT: Commenting the function from here would remove an redundancy call and it seems to be working in our templates when the line is commented. However, commenting it would
     // TO.DOCONT: probably cause issues when this 'addGeoviewLayer' function is called by external?
     // TO.DOCONT: PS: GeoCore also calls this 'validateListOfGeoviewLayerConfig' function from within 'createLayerConfigFromUUID'.
     ConfigValidation.validateListOfGeoviewLayerConfig([geoviewLayerConfig]);
 
-    // TODO: Refactor - This should be dealt with the config classes and this line commented out, therefore, content of addGeoviewLayerStep2 becomes this addGeoviewLayer function.
+    // If the geoviewlayerid already exists, throw
     if (this.getGeoviewLayerIds().includes(geoviewLayerConfig.geoviewLayerId)) {
       // Throw that the geoview layer id was already created
       throw new LayerCreatedTwiceError(geoviewLayerConfig.geoviewLayerId, geoviewLayerConfig.geoviewLayerName);
-    } else {
-      // Process the addition of the layer
-      const result: GeoViewLayerAddedResult = this.#addGeoviewLayerStep2(geoviewLayerConfig, abortSignal);
-
-      // If any errors happened during the processing, we want to show them in the notifications
-      result.promiseLayer.catch((error: unknown) => {
-        // GV This is the major catcher of many possible layer processing issues
-
-        // Show the error(s).
-        this.showLayerError(error, geoviewLayerConfig.geoviewLayerId);
-      });
-
-      // Return the result
-      return result;
     }
+
+    // Process the addition of the layer
+    const result: GeoViewLayerAddedResult = this.#addGeoviewLayerStep2(geoviewLayerConfig, abortSignal);
+
+    // If any errors happened during the processing, we want to show them in the notifications
+    result.promiseLayer.catch((error: unknown) => {
+      // GV This is the major catcher of many possible layer processing issues
+
+      // Show the error(s).
+      this.showLayerError(error, geoviewLayerConfig.geoviewLayerId);
+    });
+
+    // Return the result
+    return result;
   }
 
   /**
@@ -884,7 +882,7 @@ export class LayerApi {
                 sender.removeLayerUsingPath(childPath);
               }
             });
-            // TODO: Bound this 'removeChildLayers' function (like other ones) instead of creating a new handler on each 'forEach'
+            // TODO: MINOR - Bound this 'removeChildLayers' function (like other ones) instead of creating a new handler on each 'forEach'
             sender.offLayerConfigAdded(removeChildLayers);
           }
           this.onLayerConfigAdded(removeChildLayers);
@@ -898,7 +896,7 @@ export class LayerApi {
             if (layerInfo.layerPath === layerPath) {
               const { visible } = originalMapOrderedLayerInfo.filter((info) => info.layerPath === layerPath)[0];
               event.layer?.setVisible(visible);
-              // TODO: Bound this 'setLayerVisibility' function (like other ones) instead of creating a new handler on each 'forEach'
+              // TODO: MINOR - Bound this 'setLayerVisibility' function (like other ones) instead of creating a new handler on each 'forEach'
               sender.offLayerFirstLoaded(setLayerVisibility);
             }
           }
@@ -1115,13 +1113,8 @@ export class LayerApi {
     // Get the layer entry config to remove
     const layerEntryConfig = this.getLayerEntryConfigIfExists(layerPath);
 
-    //TODO: There's an issue with the useEffect in single-layer.tsx triggering twice on layers added through add layers,
-    //TO.DOCONT: The error was always triggering and crashing the map, so it is replaced with the logError here.
-    // Throw if not found
-    // if (!layerEntryConfig) throw new LayerNotFoundError(layerPath);
-
-    if (!layerEntryConfig) logger.logError('Layer not found');
-    else {
+    // If the layer config was found
+    if (layerEntryConfig) {
       // initialize these two constant now because we will delete the information used to get their values.
       const indexToDelete = layerEntryConfig
         ? layerEntryConfig.getParentLayerConfig()?.listOfLayerEntryConfig.findIndex((layerConfig) => layerConfig === layerEntryConfig)
@@ -1322,9 +1315,12 @@ export class LayerApi {
           // Get the bounds for the layer path
           const layerBounds = LegendEventProcessor.getLayerBounds(this.getMapId(), layerPath);
 
-          // If bounds has not yet been defined, set to this layers bounds.
-          if (!bounds.length && layerBounds) bounds = layerBounds;
-          else if (layerBounds) bounds = GeoUtilities.getExtentUnion(bounds, layerBounds)!;
+          // If layer bounds were found
+          if (layerBounds) {
+            // If bounds has not yet been defined, set to this layers bounds.
+            if (!bounds.length) bounds = layerBounds;
+            else bounds = GeoUtilities.getExtentUnion(bounds, layerBounds)!;
+          }
         });
       }
     });
@@ -1840,7 +1836,9 @@ export class LayerApi {
 
     // Ensure that the layer bounds are set when the layer is loaded
     const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(this.getMapId(), layer.getLayerPath());
-    if (legendLayerInfo && !legendLayerInfo.bounds) LegendEventProcessor.getLayerBounds(this.getMapId(), layer.getLayerPath());
+    if (legendLayerInfo && !legendLayerInfo.bounds) {
+      LegendEventProcessor.calculateLayerBoundsAndSaveToStore(this.getMapId(), layer.getLayerPath());
+    }
 
     // Emit about it
     this.#emitLayerFirstLoaded({ layer });
