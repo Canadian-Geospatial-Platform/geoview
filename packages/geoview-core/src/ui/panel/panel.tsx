@@ -18,6 +18,7 @@ import { getSxClasses } from '@/ui/panel/panel-style';
 import { FocusTrapContainer } from '@/core/components/common';
 import { delay } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 /**
  * Interface for panel properties
@@ -58,6 +59,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const panelWidth = panel?.width ?? 100; //percentage
   const sxClasses = useMemo(() => getSxClasses(theme, open, panelWidth), [theme, open, panelWidth]);
+  const mapId = useGeoViewMapId();
 
   useEffect(() => {
     logger.logTraceUseEffect('UI.PANEL - open');
@@ -91,13 +93,14 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
   return (
     <Box
       component="section"
+      role="dialog"
       aria-label={`${t(panel.title)} panel`}
       sx={{
         ...sxClasses.panelContainer,
         ...(panelStyles?.panelContainer && { ...panelStyles.panelContainer }),
       }}
       ref={panelContainerRef}
-      id={`appbar-panel-${panel.panelId || ''}`}
+      id={`appbar-panel-${panel.panelId || ''}-${mapId}`}
       className={`appbar-panel appbar-panel-${panelId}`}
     >
       <FocusTrapContainer open={isFocusTrapped} id="app-bar-focus-trap">

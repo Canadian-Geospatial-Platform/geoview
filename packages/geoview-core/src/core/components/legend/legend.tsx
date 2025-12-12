@@ -2,7 +2,7 @@ import { useTheme } from '@mui/material';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ToggleAll } from '../toggle-all/toggle-all';
-import { Box, Typography } from '@/ui';
+import { Box, List, Typography } from '@/ui';
 import { useGeoViewMapId, useUIActiveAppBarTab, useUIActiveFooterBarTabId, useLayerLegendLayers } from '@/core/stores/';
 import { logger } from '@/core/utils/logger';
 
@@ -24,9 +24,6 @@ const styles = {
     width: '100%',
     textAlign: 'center',
     height: 'fit-content',
-  },
-  layerBox: {
-    paddingRight: '0.65rem',
   },
   flexContainer: {
     display: 'flex',
@@ -148,7 +145,8 @@ export function Legend({ containerType = CONTAINER_TYPE.FOOTER_BAR }: LegendType
         </Typography>
       </Box>
     );
-  }, [sxClasses, t]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sxClasses is memoized from theme which is stable
+  }, [t]);
 
   // Memoize the rendered content based on whether there are legend layers
   const content = useMemo(() => {
@@ -160,17 +158,21 @@ export function Legend({ containerType = CONTAINER_TYPE.FOOTER_BAR }: LegendType
     }
 
     return formattedLegendLayerList.map((layers, idx) => (
-      <Box
+      <List
+        className="legendList"
         // eslint-disable-next-line react/no-array-index-key
         key={`${idx}`}
-        width={containerType === CONTAINER_TYPE.APP_BAR ? responsiveWidths.full : responsiveWidths.responsive}
-        sx={styles.layerBox}
+        sx={{
+          width: containerType === CONTAINER_TYPE.APP_BAR ? responsiveWidths.full : responsiveWidths.responsive,
+          ...sxClasses.legendList,
+        }}
       >
         {layers.map((layer) => (
           <LegendLayer layerPath={layer.layerPath} key={layer.layerPath} />
         ))}
-      </Box>
+      </List>
     ));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sxClasses is memoized from theme which is stable
   }, [formattedLegendLayerList, noLayersContent, containerType]);
 
   // Early return with empty fragment if not the active tab

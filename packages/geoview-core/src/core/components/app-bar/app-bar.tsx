@@ -343,8 +343,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
           return (
             <ListItem key={buttonPanel.button.id}>
               <IconButton
-                id={`${buttonPanel.button.id}-panel-btn`}
-                aria-controls={`appbar-panel-${buttonPanel.button.id}`}
+                id={`${buttonPanel.button.id}-panel-btn-${mapId}`}
+                aria-controls={`appbar-panel-${buttonPanel.button.id}-${mapId}`}
                 aria-label={t(buttonPanel.button['aria-label'])}
                 aria-expanded={tabId === buttonPanel.button.id && isOpen ? 'true' : 'false'}
                 tooltipPlacement="right"
@@ -410,7 +410,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
               onOpen={buttonPanel.onOpen}
               onClose={hideClickMarker}
               onKeyDown={(event: KeyboardEvent) =>
-                handleEscapeKey(event.key, tabId, isFocusTrapped, () => {
+                handleEscapeKey(event.key, `${tabId}-panel-btn-${mapId}`, isFocusTrapped, () => {
                   handleGeneralCloseClicked(buttonPanel.button?.id ?? '');
                 })
               }
