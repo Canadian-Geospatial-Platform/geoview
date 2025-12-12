@@ -779,9 +779,8 @@ export class LayerApi {
       // Register events handler for the layer
       this.#registerGroupLayerHandlers(groupLayer);
 
-      // TODO: Check - Do we need this line here? And if so, why only for Group Layers?
       // Set in visible range property for all newly added layers
-      this.#setLayerInVisibleRange(groupLayer, layerConfig);
+      this.#setLayerInVisibleRange(groupLayer);
     });
 
     // Register a callback when a GV Layer has been created
@@ -1830,7 +1829,7 @@ export class LayerApi {
    */
   #handleLayerFirstLoaded(layer: AbstractGVLayer): void {
     // Set in visible range property for all newly added layers
-    this.#setLayerInVisibleRange(layer, layer.getLayerConfig());
+    this.#setLayerInVisibleRange(layer);
 
     // Ensure that the layer bounds are set when the layer is loaded
     const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(this.getMapId(), layer.getLayerPath());
@@ -2006,7 +2005,26 @@ export class LayerApi {
     return parentLayerEntryConfig.getLayerPathsAll();
   }
 
-  #setLayerInVisibleRange(gvLayer: AbstractGVLayer | GVGroupLayer, layerConfig: TypeLayerEntryConfig): void {
+  /**
+   * Updates the visible-range settings (min/max zoom) of a GeoView layer and
+   * stores whether the layer is currently within the visible range based on
+   * the map's zoom level.
+   * Behavior:
+   *  - Reads the layer's configuration to determine min/max zoom or min/max scale.
+   *  - Converts scale-based limits into zoom levels when necessary.
+   *  - Applies calculated `minZoom` and `maxZoom` to non-group layers only.
+   *    (Group layers are skipped because their children already inherit the
+   *     correct configuration and visibility is handled elsewhere.)
+   *  - Computes whether the layer is currently in visible range and updates
+   *    the store via `MapEventProcessor`.
+   * @param {AbstractGVLayer | GVGroupLayer} gvLayer - The layer whose visibility
+   *   range should be recalculated and stored.
+   * @private
+   */
+  #setLayerInVisibleRange(gvLayer: AbstractGVLayer | GVGroupLayer): void {
+    // Get the layer config
+    const layerConfig = gvLayer.getLayerConfig();
+
     // Set the final maxZoom and minZoom values
     // Skip the GVGroupLayers since we don't want to prevent the children from loading if they aren't initially
     // in visible range. Inheritance has already been passed in the config and the group layer visibility will
