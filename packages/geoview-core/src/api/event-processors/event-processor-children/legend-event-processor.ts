@@ -93,12 +93,33 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     // Find the layer for the given layer path
     const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
     const layer = this.findLayerByPath(layers, layerPath);
+    return layer?.bounds;
+  }
 
-    // If layer bounds are not set, or have infinity (can be due to setting before features load), recalculate
-    if (layer && (!layer.bounds || layer.bounds?.includes(Infinity))) {
-      const newBounds = MapEventProcessor.getMapViewerLayerAPI(mapId).calculateBounds(layerPath);
+  /**
+   * Calculates the geographic bounds of a layer identified by its layer path
+   * and stores the result in the layer's state within the legend.
+   * This method:
+   *  1. Calls the MapViewer API to compute the layer's bounds.
+   *  2. Validates that the computed bounds are finite.
+   *  3. Locates the corresponding legend layer by its path.
+   *  4. Updates the layer's `bounds` property.
+   *  5. Persists the updated legend state.
+   * @param {string} mapId - Identifier of the map instance containing the layer.
+   * @param {string} layerPath - The unique hierarchical path of the layer whose
+   *   bounds should be calculated and stored.
+   */
+  static calculateLayerBoundsAndSaveToStore(mapId: string, layerPath: string): void {
+    // Calculate the bounds of the layer at the given layerPath
+    const newBounds = MapEventProcessor.getMapViewerLayerAPI(mapId).calculateBounds(layerPath);
 
-      if (newBounds && (!newBounds.includes(Infinity) || !layer.bounds)) {
+    // If calculated successfully
+    if (newBounds && !newBounds.includes(Infinity)) {
+      const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
+      const layer = this.findLayerByPath(layers, layerPath);
+
+      // If found
+      if (layer) {
         // Set layer bounds
         layer.bounds = newBounds;
 
@@ -106,14 +127,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         this.getLayerState(mapId).setterActions.setLegendLayers(layers);
       }
     }
-
-    // If found and bounds found
-    if (layer && layer.bounds) {
-      return layer.bounds;
-    }
-
-    // No bounds found
-    return undefined;
   }
 
   /**
@@ -802,7 +815,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   static getFeatureVisibleFromClassVibility(mapId: string, layerPath: string, features: TypeFeatureInfoEntry[]): TypeFeatureInfoEntry[] {
     // Get the layer config and geometry type
     const layerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfigRegular(layerPath);
-    const [geometryType] = layerConfig.getTypeGeometries();
+    const geometryType = layerConfig.getGeometryType();
 
     // Get the style
     const layerStyle = layerConfig.getLayerStyle()?.[geometryType];

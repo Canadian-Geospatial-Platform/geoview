@@ -809,8 +809,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // Get bounds and highlight a bounding box for the layer
     const bounds = LegendEventProcessor.getLayerBounds(mapId, layerPath);
-
-    if (bounds && bounds[0] !== Infinity) this.getMapStateProtected(mapId).actions.highlightBBox(bounds, true);
+    if (bounds) this.getMapStateProtected(mapId).actions.highlightBBox(bounds, true);
 
     return layerPath;
   }
