@@ -1,6 +1,6 @@
 {
   "name": "geoview-aoi-panel",
-  "version": "2.0.2",
+  "version": "1.0.0",
   "description": "A area of interest panel for the geoview project",
   "main": "src/index.tsx",
   "keywords": [
