@@ -150,7 +150,7 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Must override method to read the service metadata from the metadataAccessPath.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T>} A promise resolved once the metadata has been fetched.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    */
@@ -165,7 +165,7 @@ export abstract class AbstractGeoViewLayer {
   /**
    * Must override method to process a layer entry and return a Promise of an Open Layer Base Layer object.
    * @param {AbstractBaseLayerEntryConfig} layerConfig - Information needed to create the GeoView layer.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
    * @returns {Promise<AbstractBaseLayerEntryConfig>} The Promise that the config metadata has been processed.
    */
   protected abstract onProcessLayerMetadata(
@@ -305,7 +305,7 @@ export abstract class AbstractGeoViewLayer {
    * is queryable, it will subscribe to the details-panel and every time the user clicks on the map, the panel will ask the layer
    * to return the descriptive information of all the features in a tolerance radius. This information will be used to populate
    * the details-panel.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
    * @returns {Promise<ConfigBaseClass[]>} A promise of the config base classes created.
    */
   async createGeoViewLayers(abortSignal?: AbortSignal): Promise<ConfigBaseClass[]> {
@@ -369,7 +369,7 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Fetches the metadata by calling onFetchServiceMetadata.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T>} Returns a Promise of a metadata
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities) (WMS/WFS layers).
@@ -535,7 +535,7 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * This method reads the service metadata from the metadataAccessPath and stores it in the 'metadata' property.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
    * @returns {Promise<void>} A promise resolved once the metadata has been fetched and assigned to the 'metadata' property.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    * @throws {LayerServiceMetadataEmptyError} When the metadata fetch return empty metadata.
@@ -579,7 +579,7 @@ export abstract class AbstractGeoViewLayer {
   /**
    * Recursively processes the metadata of each layer in the "layer list" configuration.
    * @param {ConfigBaseClass[]} listOfLayerEntryConfig - The list of layers to process.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
    * @returns {Promise<void>} A promise that the execution is completed.
    * @private
    */
@@ -645,7 +645,7 @@ export abstract class AbstractGeoViewLayer {
    * Recursively gathers all the promises of layer metadata for all the layer entry configs.
    * @param listOfLayerEntryConfig - The list of layer entry config currently being processed.
    * @param promisesEntryMetadata - The gathered promises as the recursive function is called.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
    * @private
    */
   #processLayerMetadataRec(
@@ -673,7 +673,7 @@ export abstract class AbstractGeoViewLayer {
    * Processes the layer metadata. It will fill the empty outfields and aliasFields properties of the
    * layer configuration when applicable.
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
    * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the AbstractBaseLayerEntryConfig has its metadata processed.
                                                       When the promise fails, the reason is wrapped in a PromiseRejectErrorWrapper
                                                       to attach the layerConfig with it.

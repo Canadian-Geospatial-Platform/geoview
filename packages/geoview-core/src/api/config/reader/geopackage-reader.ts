@@ -53,7 +53,7 @@ export class GeoPackageReader {
   /**
    * Generates a WKB layer config from a GeoPackage.
    * @param {GeoPackageLayerConfig} layerConfig - the config to convert
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
    * @returns {Promise<TypeWkbLayerConfig>} A WKB layer config
    */
   static async createLayerConfigFromGeoPackage(layerConfig: GeoPackageLayerConfig, abortSignal?: AbortSignal): Promise<TypeWkbLayerConfig> {
@@ -190,7 +190,7 @@ export class GeoPackageReader {
   /**
    * Fetches a GeoPackage and creates layer data from it.
    * @param {string} url - The URL of the GeoPackage.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
    * @returns {Promise<LayerData[]>} Promise of the layer data.
    * @private
    */
