@@ -16,7 +16,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       fontWeight: '600',
     },
     '& .MuiListItem-root': {
-      height: '100%',
       '& .MuiListItemButton-root': {
         padding: '0 2px 0 16px',
         height: '100%',
@@ -39,6 +38,17 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
       },
+    },
+  },
+  listItemButton: {
+    width: '100%',
+    borderRadius: '5px',
+    marginBottom: '10px',
+    '&.Mui-selected:hover': {
+      backgroundColor: 'inherit',
+    },
+    '&.Mui-selected.Mui-focusVisible': {
+      backgroundColor: 'inherit',
     },
   },
   listPrimaryText: {
@@ -87,6 +97,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
   progressBar: {
+    display: 'block',
     width: '100%',
     position: 'absolute',
     bottom: 0,
@@ -104,6 +115,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     display: 'none',
     position: 'absolute',
     right: '12px',
-    top: '12px'
-  }
+    top: '12px',
+  },
 });

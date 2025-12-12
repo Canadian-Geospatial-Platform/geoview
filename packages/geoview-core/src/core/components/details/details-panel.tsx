@@ -641,6 +641,47 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
     return () => arrayOfLayerDataBatch?.every((layer) => layer.queryStatus === FEATURE_INFO_STATUS.PROCESSED);
   }, [arrayOfLayerDataBatch]);
 
+  /**
+   * Automatically show the guide when panel opens and all layers have no features
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DETAILS-PANEL - check for auto-guide display', activeAppBarTab, selectedTab, arrayOfLayerDataBatch);
+
+    // Check if details panel just opened (from AppBar or Footer)
+    const isDetailsActive =
+      (containerType === CONTAINER_TYPE.FOOTER_BAR && selectedTab === TABS.DETAILS && !isCollapsed) ||
+      (containerType === CONTAINER_TYPE.APP_BAR && activeAppBarTab.tabId === 'details' && activeAppBarTab.isOpen);
+
+    // Only run when details is active
+    if (isDetailsActive && arrayOfLayerDataBatch && arrayOfLayerDataBatch.length > 0) {
+      // Check if all layers have no features (excluding coordinate-info)
+      const allLayersHaveNoFeatures = arrayOfLayerDataBatch.every(
+        (layer) => layer.layerPath === 'coordinate-info' || !layer.features || layer.features.length === 0
+      );
+
+      // If all layers have no features and queries are processed
+      if (allLayersHaveNoFeatures && memoIsAllLayersQueryStatusProcessed()) {
+        logger.logTraceUseEffect('DETAILS-PANEL - All layers have no features, showing right panel with guide');
+        // Clear selection to show the guide
+        setSelectedLayerPath('');
+        // Make sure the right panel is visible
+        if (!isRightPanelVisible) {
+          layoutRef.current?.showRightPanel(true);
+        }
+      }
+    }
+  }, [
+    activeAppBarTab,
+    selectedTab,
+    isCollapsed,
+    containerType,
+    arrayOfLayerDataBatch,
+    memoIsAllLayersQueryStatusProcessed,
+    setSelectedLayerPath,
+    isRightPanelVisible,
+  ]);
+
   // #endregion
 
   /**
@@ -677,30 +718,33 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
                   .replace('{total}', `${memoSelectedLayerDataFeatures?.length}`)}
               </Box>
             </Grid>
-            <Grid size={{ xs: 6 }}>
-              <Box sx={{ textAlign: 'right' }}>
-                <IconButton
-                  aria-label={t('details.previousFeatureBtn')}
-                  tooltipPlacement="top"
-                  onClick={() => handleFeatureNavigateChange(-1)}
-                  disabled={currentFeatureIndex <= 0}
-                  className="buttonOutline"
-                >
-                  <ArrowBackIosOutlinedIcon />
-                </IconButton>
-                <IconButton
-                  sx={{ marginLeft: '16px' }}
-                  aria-label={t('details.nextFeatureBtn')}
-                  tooltipPlacement="top"
-                  onClick={() => handleFeatureNavigateChange(1)}
-                  disabled={!memoSelectedLayerData?.features || currentFeatureIndex + 1 >= memoSelectedLayerData.features.length}
-                  className="buttonOutline"
-                >
-                  <ArrowForwardIosOutlinedIcon />
-                </IconButton>
-              </Box>
-            </Grid>
+            {memoSelectedLayerData?.features && memoSelectedLayerData.features.length > 1 && (
+              <Grid size={{ xs: 6 }} className="buttonGroup">
+                <Box sx={{ textAlign: 'right' }}>
+                  <IconButton
+                    aria-label={t('details.previousFeatureBtn')}
+                    tooltipPlacement="top"
+                    onClick={() => handleFeatureNavigateChange(-1)}
+                    disabled={currentFeatureIndex <= 0}
+                    className="buttonOutline"
+                  >
+                    <ArrowBackIosOutlinedIcon />
+                  </IconButton>
+                  <IconButton
+                    sx={{ marginLeft: '16px' }}
+                    aria-label={t('details.nextFeatureBtn')}
+                    tooltipPlacement="top"
+                    onClick={() => handleFeatureNavigateChange(1)}
+                    disabled={!memoSelectedLayerData?.features || currentFeatureIndex + 1 >= memoSelectedLayerData.features.length}
+                    className="buttonOutline"
+                  >
+                    <ArrowForwardIosOutlinedIcon />
+                  </IconButton>
+                </Box>
+              </Grid>
+            )}
           </Grid>
+
           <FeatureInfo key={`${currentFeature?.uid}-${currentFeature?.geometry ? 'with-geo' : 'no-geo'}`} feature={currentFeature} />
         </Box>
       );
