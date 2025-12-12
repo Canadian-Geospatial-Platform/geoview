@@ -17,7 +17,7 @@ export class ShapefileReader {
   /**
    * Generates GeoJson layer config from a shapefile.
    * @param {TypeShapefileLayerConfig} layerConfig - The config to convert.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
    * @returns {Promise<TypeGeoJSONLayerConfig>} A geojson layer config
    */
   static async convertShapefileConfigToGeoJson(
