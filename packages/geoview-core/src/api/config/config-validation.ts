@@ -169,6 +169,7 @@ export class ConfigValidation {
 
   /**
    * Validate and adjust the list of GeoView layer configuration.
+   * Errors, when expected, are logged and not thrown so that each MapConfigLayerEntry can be processed independently.
    * @param {MapConfigLayerEntry[]} listOfMapConfigLayerEntry - The list of GeoView layer configuration to adjust and
    * validate.
    */
@@ -177,6 +178,7 @@ export class ConfigValidation {
       // Track only valid entries
       const validConfigs: typeof listOfMapConfigLayerEntry = [];
 
+      // Loop on each geoview layer config
       listOfMapConfigLayerEntry.forEach((geoviewLayerConfig) => {
         if (
           mapConfigLayerEntryIsGeoCore(geoviewLayerConfig) ||
@@ -188,23 +190,8 @@ export class ConfigValidation {
           validConfigs.push(geoviewLayerConfig);
         } else {
           try {
-            // Validate the geoview layer id
-            ConfigValidation.#geoviewLayerIdIsMandatory(geoviewLayerConfig);
-
-            // Depending on the geoview layer type
-            switch (geoviewLayerConfig.geoviewLayerType) {
-              case CONST_LAYER_TYPES.ESRI_DYNAMIC:
-              case CONST_LAYER_TYPES.ESRI_FEATURE:
-              case CONST_LAYER_TYPES.ESRI_IMAGE:
-              case CONST_LAYER_TYPES.OGC_FEATURE:
-              case CONST_LAYER_TYPES.WFS:
-              case CONST_LAYER_TYPES.WMS:
-                ConfigValidation.#metadataAccessPathIsMandatory(geoviewLayerConfig);
-                break;
-              default:
-                // All good
-                break;
-            }
+            // Validate the geoview layer config, will throw an exception when invalid
+            ConfigValidation.#validateGeoviewLayerConfig(geoviewLayerConfig);
 
             // Process the layer entry config
             ConfigValidation.#processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
@@ -224,28 +211,45 @@ export class ConfigValidation {
   }
 
   /**
-   * Verify that the metadataAccessPath has a value.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration to validate.
+   * Validates a GeoView layer configuration object and throws descriptive
+   * errors when required properties are missing or invalid.
+   * Validation rules:
+   *  - `geoviewLayerId` must always be defined.
+   *  - For specific layer types (ESRI Dynamic, ESRI Feature, ESRI Image,
+   *    OGC Feature, WFS, WMS), the `metadataAccessPath` property is mandatory.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer
+   *   configuration object to validate.
+   * @throws {LayerMissingGeoviewLayerIdError} When `geoviewLayerId` is missing.
+   * @throws {LayerMetadataAccessPathMandatoryError} When `metadataAccessPath` is missing.
    * @private
+   * @static
    */
-  static #metadataAccessPathIsMandatory(geoviewLayerConfig: TypeGeoviewLayerConfig): void {
-    if (!geoviewLayerConfig.metadataAccessPath) {
-      throw new LayerMetadataAccessPathMandatoryError(
-        geoviewLayerConfig.geoviewLayerId,
-        geoviewLayerConfig.geoviewLayerType,
-        geoviewLayerConfig.geoviewLayerName
-      );
-    }
-  }
-
-  /**
-   * Verify that the geoviewLayerId has a value.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration to validate.
-   * @private
-   */
-  static #geoviewLayerIdIsMandatory(geoviewLayerConfig: TypeGeoviewLayerConfig): void {
+  static #validateGeoviewLayerConfig(geoviewLayerConfig: TypeGeoviewLayerConfig): void {
+    // Validate the geoview layer id
     if (!geoviewLayerConfig.geoviewLayerId) {
       throw new LayerMissingGeoviewLayerIdError(geoviewLayerConfig.geoviewLayerType);
+    }
+
+    // Depending on the geoview layer type
+    switch (geoviewLayerConfig.geoviewLayerType) {
+      case CONST_LAYER_TYPES.ESRI_DYNAMIC:
+      case CONST_LAYER_TYPES.ESRI_FEATURE:
+      case CONST_LAYER_TYPES.ESRI_IMAGE:
+      case CONST_LAYER_TYPES.OGC_FEATURE:
+      case CONST_LAYER_TYPES.WFS:
+      case CONST_LAYER_TYPES.WMS:
+        // Validate the metadata access path
+        if (!geoviewLayerConfig.metadataAccessPath) {
+          throw new LayerMetadataAccessPathMandatoryError(
+            geoviewLayerConfig.geoviewLayerId,
+            geoviewLayerConfig.geoviewLayerType,
+            geoviewLayerConfig.geoviewLayerName
+          );
+        }
+        break;
+      default:
+        // All good
+        break;
     }
   }
 

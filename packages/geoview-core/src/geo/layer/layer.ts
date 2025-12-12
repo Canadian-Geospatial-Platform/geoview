@@ -655,12 +655,10 @@ export class LayerApi {
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The geoview layer configuration to add.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {GeoViewLayerAddedResult} The result of the addition of the geoview layer.
+   * @throws {LayerCreatedTwiceError} When there already is a layer on the map with the provided geoviewLayerId.
    * The result contains the instanciated GeoViewLayer along with a promise that will resolve when the layer will be officially on the map.
    */
   addGeoviewLayer(geoviewLayerConfig: TypeGeoviewLayerConfig, abortSignal?: AbortSignal): GeoViewLayerAddedResult {
-    // TODO: CLEANUP - Remove this line as it shouldn't be done here, commented on 2025-12-11
-    // geoviewLayerConfig.geoviewLayerId ||= generateId(18);
-
     // TODO: REFACTOR - This should be dealt with the config classes and this line commented out.
     // TO.DOCONT: Right now, this function is called when the configuration is first read and schema checked and everything and then again here when we're adding a geoviewLayerConfig.
     // TO.DOCONT: Commenting the function from here would remove an redundancy call and it seems to be working in our templates when the line is commented. However, commenting it would
@@ -739,7 +737,7 @@ export class LayerApi {
     // Register a callback when layer wants to send a message
     layerBeingAdded.onLayerMessage(this.#handleLayerMessage.bind(this));
 
-    // TODO: Cleanup - Remove commented code
+    // TODO: CLEANUP - Remove commented code 2025-11-21
     // GV Commenting this out as I don't think it's useful anymore, let's see after a couple rounds of testing (2025-11-21)
     // // Register a callback when layer entry config has become processed (catching on-the-fly layer entry configs as they are further processed)
     // layerBeingAdded.onLayerEntryProcessed((geoviewLayer: AbstractGeoViewLayer, event: LayerEntryProcessedEvent) => {
