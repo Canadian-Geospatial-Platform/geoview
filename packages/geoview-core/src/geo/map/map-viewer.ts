@@ -1490,10 +1490,10 @@ export class MapViewer {
       const zoom = this.getView().getZoom();
       if (!zoom) return;
 
-      // Get new inVisibleRange values for all layers
-      const newOrderedLayerInfo = this.getMapLayerOrderInfo();
+      // Save in the store
+      MapEventProcessor.setZoom(this.mapId, zoom);
 
-      const visibleRangeLayers: string[] = [];
+      // Get all layers
       const allLayers = this.layer.getGeoviewLayers();
 
       // Get the inVisibleRange property based on the layer's minZoom and maxZoom values
@@ -1514,16 +1514,9 @@ export class MapViewer {
           inVisibleRange = childLayers.some((childLayer) => childLayer.inVisibleRange(zoom));
         }
 
-        const foundLayer = newOrderedLayerInfo.find((info) => info.layerPath === layerPath);
-        if (foundLayer) foundLayer.inVisibleRange = inVisibleRange;
-        if (inVisibleRange) {
-          visibleRangeLayers.push(layerPath);
-        }
+        // Save in the store
+        MapEventProcessor.setLayerInVisibleRange(this.mapId, layerPath, inVisibleRange);
       });
-
-      // Save in the store
-      MapEventProcessor.setZoom(this.mapId, zoom);
-      MapEventProcessor.setMapOrderedLayerInfo(this.mapId, newOrderedLayerInfo);
 
       // Emit to the outside
       this.#emitMapZoomEnd({ zoom });
