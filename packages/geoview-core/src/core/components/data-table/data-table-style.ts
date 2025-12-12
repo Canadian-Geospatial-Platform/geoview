@@ -17,6 +17,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     linHeight: 1.43,
     letterSpacing: '0.01071em',
     display: 'flex',
+    margin: '0px',
     padding: '6px',
     alignItems: 'center',
   },

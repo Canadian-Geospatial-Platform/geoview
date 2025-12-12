@@ -70,16 +70,27 @@ interface TopToolbarProps<TData extends ColumnsType> {
 function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
   const { sxClasses, datatableSettings, layerPath, t, globalFilter, useTable, columns, data, table } = props;
   return (
-    <Box display="flex" sx={{ justifyContent: 'space-between', borderBottom: '1px solid #9e9e9e' }} p={4}>
+    <Box
+      className="data-table-top-toolbar"
+      role="region"
+      display="flex"
+      aria-label={t('dataTable.tableControls')}
+      sx={{ justifyContent: 'space-between', borderBottom: '1px solid #9e9e9e' }}
+      p={4}
+    >
       <Box display="flex" sx={{ flexDirection: 'column', justifyContent: 'space-evenly' }}>
-        <Box sx={sxClasses.selectedRows}>{datatableSettings[layerPath].toolbarRowSelectedMessageRecord}</Box>
+        <Box component="p" role="status" className="filter-results-summary" sx={sxClasses.selectedRows} aria-live="polite">
+          {datatableSettings[layerPath].toolbarRowSelectedMessageRecord}
+        </Box>
         <Box display="flex">
           <FilterMap layerPath={layerPath} isGlobalFilterOn={!!globalFilter?.length} />
         </Box>
       </Box>
       <Box display="flex" sx={{ flexDirection: 'column' }}>
         <Box sx={{ float: 'right', marginLeft: 'auto', maxWidth: '15rem' }}>
-          <MRTGlobalFilterTextField className="buttonOutline" table={table} />
+          <form role="search" onSubmit={(e) => e.preventDefault()} aria-label={t('dataTable.searchInputLabel')}>
+            <MRTGlobalFilterTextField className="buttonOutline" table={table} />
+          </form>
         </Box>
         <Box display="flex" sx={{ justifyContent: 'space-around' }}>
           <Switch

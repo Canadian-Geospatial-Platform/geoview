@@ -108,6 +108,8 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
 
   const AnimatedPaper = animated(Paper);
 
+  // TODO: WCAG Issue #3118 generates invalid HTML (improper nesting)
+
   return (
     <AnimatedPaper className={containerClass}>
       <Tooltip title={layer.tooltip} placement="top" arrow>
@@ -175,6 +177,7 @@ export const LayerList = memo(function LayerList({ layerList, selectedLayerPath,
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
+  // TODO: WCAG Issue #3119 Place in a landmark region (nav)
   return (
     <List sx={sxClasses.list}>
       {!!layerList.length &&

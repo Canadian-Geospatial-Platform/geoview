@@ -1,6 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Theme } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
 import { ClickAwayListener } from '@mui/material';
 import { animated } from '@react-spring/web';
@@ -19,6 +18,7 @@ import {
   Popper,
   Paper,
   Button,
+  List,
 } from '@/ui';
 import { getSxClasses } from './notifications-style';
 import { useAppNotifications, useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -44,15 +44,13 @@ export type NotificationType = 'success' | 'error' | 'info' | 'warning';
 const NotificationItem = memo(function NotificationItem({
   notification,
   onRemove,
-  theme,
   sxClasses,
   t,
 }: {
   notification: NotificationDetailsType;
   onRemove: (key: string) => void;
-  theme: Theme;
   sxClasses: SxStyles;
-  t: (key: string) => string;
+  t: (key: string, options?: Record<string, unknown>) => string;
 }) {
   const handleRemove = useCallback(() => {
     logger.logTraceUseCallback('NOTIFICATION - remove', notification.key);
@@ -72,24 +70,25 @@ const NotificationItem = memo(function NotificationItem({
     }
   })();
 
+  // TODO: WCAG Issue #3114 - Review button contrast
   return (
-    <Box sx={sxClasses.notificationItem}>
-      <Box>{icon}</Box>
-      <Box
-        sx={{
-          flexGrow: 1,
-          fontSize: theme.palette.geoViewFontSize.sm,
-          color: theme.palette.geoViewColor.textColor.light[250],
-        }}
-      >
-        <Box component="span">{notification.message}</Box>
+    <Box sx={sxClasses.notificationItem} component="li">
+      {icon}
+      <Box component="p" id={notification.key} sx={sxClasses.notificationsItemMsg}>
+        {notification.message}
+        {notification.count > 1 && (
+          <Box component="span" aria-label={t('appbar.repeatedNotificationTimes', { count: notification.count })}>
+            {notification.count}
+          </Box>
+        )}
       </Box>
-      {notification.count > 1 && (
-        <Box>
-          <Box sx={sxClasses.notificationsCount}>{notification.count}</Box>
-        </Box>
-      )}
-      <IconButton aria-label={t('general.close')} size="small" onClick={handleRemove}>
+      <IconButton
+        tooltip={t('general.remove')}
+        aria-label={t('appbar.removeNotification')}
+        aria-describedby={notification.key}
+        size="small"
+        onClick={handleRemove}
+      >
         <CloseIcon />
       </IconButton>
     </Box>
@@ -112,8 +111,8 @@ const NotificationHeader = memo(function NotificationHeader({
   sxClasses: SxStyles;
 }) {
   return (
-    <Box sx={sxClasses.notificationsHeader}>
-      <Typography component="h3" sx={sxClasses.notificationsTitle}>
+    <Box component="header" sx={sxClasses.notificationsHeader}>
+      <Typography component="h2" sx={sxClasses.notificationsTitle} id="notification-title">
         {t('appbar.notifications')}
       </Typography>
       <Box>
@@ -125,9 +124,15 @@ const NotificationHeader = memo(function NotificationHeader({
           onClick={onRemoveAll}
           aria-label={t('appbar.removeAllNotifications')}
         >
-          {t('appbar.removeAllNotifications')}
+          {t('general.removeAll')}
         </Button>
-        <IconButton aria-label={t('general.close')} size="small" sx={{ ml: '0.25rem' }} onClick={onClose}>
+        <IconButton
+          tooltip={t('general.close')}
+          aria-label={t('appbar.closeNotificationsDialog')}
+          size="small"
+          sx={{ ml: '0.25rem' }}
+          onClick={onClose}
+        >
           <CloseIcon />
         </IconButton>
       </Box>
@@ -231,22 +236,22 @@ export default memo(function Notifications(): JSX.Element {
           key={notification.key}
           notification={notification}
           onRemove={handleRemoveNotification}
-          theme={theme}
           sxClasses={sxClasses}
           t={t}
         />
       )),
-    [notifications, handleRemoveNotification, theme, sxClasses, t]
+    [notifications, handleRemoveNotification, sxClasses, t]
   );
 
-  // TODO: WCAG Issue #3154 - add aria-controls to notifications <IconButton>. Needs id of the modal to be passed as a prop.
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
       <Box sx={{ padding: interaction === 'dynamic' ? 'none' : '5px' }}>
         <IconButton
-          id="notification"
+          id="notification-button"
+          aria-controls={open ? 'notification-dialog' : undefined}
+          aria-expanded={open ? 'true' : 'false'}
           aria-label={t('appbar.notifications')}
-          aria-expanded={open}
+          aria-haspopup="dialog"
           tooltipPlacement="right"
           onClick={handleOpenPopover}
           className={`${interaction === 'dynamic' ? 'buttonFilled' : 'style4'} ${open ? 'active' : ''}`}
@@ -266,6 +271,10 @@ export default memo(function Notifications(): JSX.Element {
         </IconButton>
 
         <Popper
+          role="dialog"
+          id="notification-dialog"
+          aria-labelledby="notification-title"
+          aria-modal="true"
           open={open}
           anchorEl={anchorEl}
           placement="right-end"
@@ -286,7 +295,7 @@ export default memo(function Notifications(): JSX.Element {
           }}
           handleKeyDown={(key, callBackFn) => handleEscapeKey(key, '', false, callBackFn)}
         >
-          <Paper sx={sxClasses.notificationPanel}>
+          <Paper component="section" sx={sxClasses.notificationPanel}>
             <NotificationHeader
               onClose={handleClickAway}
               onRemoveAll={removeAllNotifications}
@@ -294,15 +303,15 @@ export default memo(function Notifications(): JSX.Element {
               t={t}
               sxClasses={sxClasses}
             />
-            <Box sx={sxClasses.notificationsList}>
+            <List sx={sxClasses.notificationsList} aria-live="polite" aria-relevant="all">
               {notifications.length > 0 ? (
                 notificationsList
               ) : (
-                <Typography component="div" sx={{ padding: '10px 0' }}>
+                <Typography component="p" sx={{ padding: '10px 0' }}>
                   {t('appbar.noNotificationsAvailable')}
                 </Typography>
               )}
-            </Box>
+            </List>
           </Paper>
         </Popper>
       </Box>

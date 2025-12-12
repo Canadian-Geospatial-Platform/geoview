@@ -7,6 +7,7 @@
     "exit": "Sortir",
     "open": "Ouvrir",
     "remove": "Retirer",
+    "removeAll": "Retirer tout",
     "view": "Vue",
     "failed": "a échoué",
     "started": "démarré",
@@ -19,7 +20,8 @@
     "clickEnlarge": "Cliquer pour agrandir",
     "show": "Afficher",
     "hide": "Masquer",
-    "none": "Aucun"
+    "none": "Aucun",
+    "clearSearch": "Effacer la recherche"
   },
   "mapnav": {
     "arianavbar": "Groupe de buttons vertical pour navigation sur la carte",
@@ -73,13 +75,17 @@
   },
   "appbar": {
     "export": "Télécharger la carte",
-    "notifications": "Notification",
+    "notifications": "Notifications",
     "noNotificationsAvailable": "Aucune notification disponible",
     "layers": "Couches",
     "share": "Partager",
     "version": "À propos de GéoView",
+    "closeVersionsDialog": "Fermer la boîte de dialogue À propos de GéoView",
     "repoLink": "Github",
-    "removeAllNotifications": "Effacer tout",
+    "removeNotification": "Supprimer la notification",
+    "removeAllNotifications": "Effacer toutes les notifications",
+    "repeatedNotificationTimes": "répété {{count}} fois",
+    "closeNotificationsDialog": "Fermer la boîte de dialogue des notifications",
     "navLabel": "Contrôles principaux de la carte"
   },
   "legend": {
@@ -315,8 +321,14 @@
   },
   "geolocator": {
     "title": "Géolocalisation",
+    "searchFormLabel": "Recherche de géolocalisation",
+    "searchInputLabel": "Entrer le(s) mot(s)-clé(s) (au moins trois caractères)",
     "search": "Texte à rechercher",
+    "searchClose": "Fermer la recherche",
+    "searchSubmit": "Soumettre la recherche",
+    "searchResults": "Résultats de la recherche",
     "noResult": "Aucun résultat correspondant à",
+    "resultsFound": "{{count}} résultat(s) trouvé(s) pour '{{searchTerm}}'",
     "province": "Province",
     "category": "Catégorie",
     "clearFilters": "Effacer les filtres",
@@ -350,7 +362,10 @@
     "total": "total",
     "selectLayerAndScroll": "Voir dans le panneau Données",
     "accessAdvancedFunctions": "Accéder au panneau Données pour les fonctions avancées",
-    "filterToggle": "les filtres"
+    "filterToggle": "les filtres",
+    "searchInputLabel": "Rechercher dans les colonnes du tableau",
+    "tableControls": "Contrôles du tableau de données",
+    "tableAriaLabelWithLayer": "Tableau de données {{layerName}}"
   },
   "geochart": {
     "noChartAvailable": "Cliquer sur une couche de la carte qui contient un graphique"
@@ -361,6 +376,8 @@
   "guide": {
     "title": "Guide",
     "search": "Rechercher dans le guide...",
+    "searchFormLabel": "Rechercher dans le guide",
+    "searchInputLabel": "Entrer le(s) mot(s)-clé(s)",
     "errorMessage": "Désolé, impossible de trouver le document d'aide!",
     "arrowUp": "Correspondance précédente",
     "arrowDown": "Correspondance suivante"
