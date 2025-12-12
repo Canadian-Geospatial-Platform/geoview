@@ -173,7 +173,7 @@ Permet de rechercher des endroits au Canada. Si vous cliquez sur l'icône de gé
 
 ### Filtres de recherche géographique
 
-Les résultats d'une recherche d'emplacement s'affichent dans un panneau sous le champ de recherche. Le panneau de résultats comprend deux menus déroulants permettant de filtrer les résultats par **province** et par **catégorie** (lac, village, rivière, etc.). Un bouton <img src="{{assetsURL}}/img/guide/geosearch/clear.svg" alt="Une icône représentant la fonction 'Effacer'" /> se trouve à droite des menus, qui, lorsqu'on clique dessus, efface les options de filtre sélectionnées.
+Les résultats d'une recherche d'emplacement s'affichent dans un panneau sous le champ de recherche. Le panneau de résultats comprend deux menus déroulants permettant de filtrer les résultats par **province** et par **catégorie** (lac, village, rivière, etc.). Un bouton <img src="{{assetsURL}}/img/guide/geosearch/clear.svg" alt="Une icône représentant la fonction Effacer" /> se trouve à droite des menus, qui, lorsqu'on clique dessus, efface les options de filtre sélectionnées.
 
 =2!export=
 
@@ -229,9 +229,9 @@ _N.B. : Certains onglets dans la barre latérale se trouvent aussi sous forme d�
 
 L'onglet **Légende** présente les symboles des couches affichées sur la carte.
 
-Chaque couche a ses symboles. Pour les couches à éléments simples, il n'y a qu'une seule icône <img src="{{assetsURL}}/img/guide/footer/icon_single.png" alt="Une icône représentant une couche 'Simple'" /> à côté du nom de la couche.
+Chaque couche a ses symboles. Pour les couches à éléments simples, il n'y a qu'une seule icône <img src="{{assetsURL}}/img/guide/footer/icon_single.png" alt="Une icône représentant une couche Simple" /> à côté du nom de la couche.
 
-Pour celles à éléments complexes (plusieurs symboles par couche), les icônes prennent la forme d'une pile <img src="{{assetsURL}}/img/guide/footer/icon_multiple.png" alt="Une icône représentant une 'Pile' de couches" /> (placez votre pointeur sur la pile pour voir les icônes).
+Pour celles à éléments complexes (plusieurs symboles par couche), les icônes prennent la forme d'une pile <img src="{{assetsURL}}/img/guide/footer/icon_multiple.png" alt="Une icône représentant une Pile de couches" /> (placez votre pointeur sur la pile pour voir les icônes).
 
 Vous pouvez développer ou réduire la liste des symboles d'une couche sous son nom. Certaines couches ont parfois une légende graphique; le cas échéant, elle sera de la même manière.
 
@@ -267,7 +267,7 @@ L’onglet **Couches** comprend les sous-menus suivants :
 _**N.B. : Cliquez sur une couche pour afficher ses information dans la section de droite.**_
 
 **Information importante**  
-Si l'icône de visibilité (œil) d'une couche est désactivée (grisée) <img src="{{assetsURL}}/img/guide/footer/eye_disabled.svg" alt="Une icône représentant la fonction 'Œil désactivé'" /> et que l'icône Zoom sur l'échelle visible <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg" alt="Icône zoom sur l'échelle visible" /> est visible, cela signifie que la couche n'est pas visible au niveau de zoom actuel de la carte.
+Si l'icône de visibilité (œil) d'une couche est désactivée (grisée) <img src="{{assetsURL}}/img/guide/footer/eye_disabled.svg" alt="Une icône représentant la fonction Œil désactivé" /> et que l'icône Zoom sur l'échelle visible <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg" alt="Icône zoom sur l'échelle visible" /> est visible, cela signifie que la couche n'est pas visible au niveau de zoom actuel de la carte.
 
 - En cliquant sur le bouton Zoom sur l'échelle visible, la carte sera ajustée au niveau de zoom approprié, ce qui rendra la couche visible.
 - Cependant, après avoir effectué un zoom, il se peut que vous ne voyiez pas immédiatement les éléments s'il n'y a pas de données dans la zone de visualisation actuelle.
@@ -277,19 +277,19 @@ Le sous-menu **Vue** de l’onglet **Couches** se divise en deux sections. La se
 
 **Icônes de couche**
 
-Chaque couche a ses symboles. Pour les couches à éléments simples, il n'y a qu'une seule icône <img src="{{assetsURL}}/img/guide/footer/icon_single.png" alt="Une icône représentant une couche 'Simple'" /> à côté du nom de la couche. Pour celles à éléments complexes (plusieurs symboles par couche), les icônes prennent la forme d'une pile (placez votre pointeur sur la pile pour voir les icônes <img src="{{assetsURL}}/img/guide/footer/icon_multiple.png" alt="Une icône représentant une 'Pile' de couches" />).
+Chaque couche a ses symboles. Pour les couches à éléments simples, il n'y a qu'une seule icône <img src="{{assetsURL}}/img/guide/footer/icon_single.png" alt="Une icône représentant une couche Simple" /> à côté du nom de la couche. Pour celles à éléments complexes (plusieurs symboles par couche), les icônes prennent la forme d'une pile (placez votre pointeur sur la pile pour voir les icônes <img src="{{assetsURL}}/img/guide/footer/icon_multiple.png" alt="Une icône représentant une Pile de couches" />).
 
 **Groupe de couches**
 
-L'icône de groupe <img src="{{assetsURL}}/img/guide/layers/group.svg" alt="Une icône représentant la fonction 'Groupe'" /> indique un groupe de couches. Cliquez sur le groupe pour voir la liste des sous-couches. Les sous-couches peuvent elles aussi être des groupes de couches.
+L'icône de groupe <img src="{{assetsURL}}/img/guide/layers/group.svg" alt="Une icône représentant la fonction Groupe" /> indique un groupe de couches. Cliquez sur le groupe pour voir la liste des sous-couches. Les sous-couches peuvent elles aussi être des groupes de couches.
 
 **Affichage des couches**
 
-Cliquez sur l'icône d'œil à côté de chaque couche pour afficher <img src="{{assetsURL}}/img/guide/footer/eye.svg" alt="Une icône représentant la fonction 'Œil visible'" /> ou masquer <img src="{{assetsURL}}/img/guide/footer/eye_not_visible.svg" alt="Une icône représentant la fonction 'Œil non visible'" /> la couche sur la carte.
+Cliquez sur l'icône d'œil à côté de chaque couche pour afficher <img src="{{assetsURL}}/img/guide/footer/eye.svg" alt="Une icône représentant la fonction Œil visible" /> ou masquer <img src="{{assetsURL}}/img/guide/footer/eye_not_visible.svg" alt="Une icône représentant la fonction Œil non visible" /> la couche sur la carte.
 
 Les couches qui ne sont pas actuellement affichées sur la carte sont grisées et leur texte est en italique.
 
-Si une couche est toujours visible, ou pour les couches dont le couche parent est caché, l'icône d'affichage (œil) est désactivée (grisée) <img src="{{assetsURL}}/img/guide/footer/eye_disabled.svg" alt="Une icône représentant la fonction 'Œil désactivé'" />.
+Si une couche est toujours visible, ou pour les couches dont le couche parent est caché, l'icône d'affichage (œil) est désactivée (grisée) <img src="{{assetsURL}}/img/guide/footer/eye_disabled.svg" alt="Une icône représentant la fonction Œil désactivé" />.
 
 **Types de couches pris en charge**
 
@@ -373,7 +373,7 @@ Pour trier les couches, vous n’avez qu’à utiliser les flèches vers le haut
 
 ### <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt="Icône retirer" /> Retirer
 
-Pour retirer une couche, cliquez sur l'icône de suppression <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt="Une icône représentant la fonction 'Retirer'" /> à droite de celle-ci dans le sous-menu **Retirer**.
+Pour retirer une couche, cliquez sur l'icône de suppression <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt="Une icône représentant la fonction Retirer" /> à droite de celle-ci dans le sous-menu **Retirer**.
 
 =2!details=
 
@@ -396,7 +396,7 @@ L'onglet **Détails** se divise en deux sections : une liste de couches à gauch
 
 ### Effacer toutes les surbrillances
 
-Le bouton <img src="{{assetsURL}}/img/guide/layers/clear_highlight_30.svg" alt="Une icône représentant la fonction 'Effacer les surbrillances'" /> permet d'affacer toutes les surbrillances. Il est situé dans le coin supérieur droit au-dessus de la liste des couches. Cliquez sur ce bouton pour supprimer toutes les surbrillances d'éléments de la carte.
+Le bouton <img src="{{assetsURL}}/img/guide/layers/clear_highlight_30.svg" alt="Une icône représentant la fonction Effacer les surbrillances" /> permet d'affacer toutes les surbrillances. Il est situé dans le coin supérieur droit au-dessus de la liste des couches. Cliquez sur ce bouton pour supprimer toutes les surbrillances d'éléments de la carte.
 
 ### Section des détails des éléments (droite)
 
@@ -462,14 +462,14 @@ Les trois premières colonnes du tableau de données sont **Icône**, **Zoom** e
 
 En plus de parcourir les données, vous pouvez :
 
-- Accéder à la vue modale détaillée d'un élément en cliquant sur l'icône de détails <img src="{{assetsURL}}/img/guide/sidebar/details_30.svg" alt="Une icône représentant la fonction 'Détails'" />.
-- Zoomer sur la carte à l'emplacement de l'élément en cliquant sur l'icône de zoom <img src="{{assetsURL}}/img/guide/datatable/zoom.svg" alt="Une icône représentant la fonction 'Zoom'" />.
+- Accéder à la vue modale détaillée d'un élément en cliquant sur l'icône de détails <img src="{{assetsURL}}/img/guide/sidebar/details_30.svg" alt="Une icône représentant la fonction Détails" />.
+- Zoomer sur la carte à l'emplacement de l'élément en cliquant sur l'icône de zoom <img src="{{assetsURL}}/img/guide/datatable/zoom.svg" alt="Une icône représentant la fonction Zoom" />.
 
-Cliquez sur l'icône d'actions <img src="{{assetsURL}}/img/guide/datatable/column_action.svg" alt="Une icône représentant la fonction 'Actions de colonne'" /> à côté du titre de colonne pour voir le menu déroulant des actions de colonne :
+Cliquez sur l'icône d'actions <img src="{{assetsURL}}/img/guide/datatable/column_action.svg" alt="Une icône représentant la fonction Actions de colonne" /> à côté du titre de colonne pour voir le menu déroulant des actions de colonne :
 
-- Épingler des colonnes à gauche <img src="{{assetsURL}}/img/guide/datatable/pin_left_25.svg" alt="Une icône représentant la fonction 'Épingler à gauche'" /> ou à droite <img src="{{assetsURL}}/img/guide/datatable/pin_right_25.svg" alt="Une icône représentant la fonction 'Épingler à droite'" /> du tableau.
-- Filtrer les colonnes par numéro, texte ou date (si la configuration le permet). Pour effacer les filtres, utiliser <img src="{{assetsURL}}/img/guide/datatable/filter_clear.svg" alt="Une icône représentant la fonction 'Effacer les filters'" />.
-- Afficher ou masquer des colonnes en cliquant sur l'icône _Cacher colonne_ <img src="{{assetsURL}}/img/guide/datatable/column_hide_25.svg" alt="Une icône représentant la fonction 'Cacher colonne'" />.
+- Épingler des colonnes à gauche <img src="{{assetsURL}}/img/guide/datatable/pin_left_25.svg" alt="Une icône représentant la fonction Épingler à gauche" /> ou à droite <img src="{{assetsURL}}/img/guide/datatable/pin_right_25.svg" alt="Une icône représentant la fonction Épingler à droite" /> du tableau.
+- Filtrer les colonnes par numéro, texte ou date (si la configuration le permet). Pour effacer les filtres, utiliser <img src="{{assetsURL}}/img/guide/datatable/filter_clear.svg" alt="Une icône représentant la fonction Effacer les filters" />.
+- Afficher ou masquer des colonnes en cliquant sur l'icône _Cacher colonne_ <img src="{{assetsURL}}/img/guide/datatable/column_hide_25.svg" alt="Une icône représentant la fonction Cacher colonne" />.
 - Parcourir le tableau avec le clavier.
 
 =3!sortingAndReordering=
@@ -480,8 +480,8 @@ Les colonnes du tableau de données peuvent être accompagnées de deux flèches
 
 **Trier une colonne :** Cliquez sur le titre d’une colonne pour trier les données qu’elle contient.
 
-- Une flèche vers le haut <img src="{{assetsURL}}/img/guide/navigation/up_arrow_20.svg" alt="Une icône représentant la fonction 'Flèche vers le haut'" /> à côté du titre de colonne indique que les données sont triées par ordre croissant ou alphabétique.
-- Une flèche vers le bas <img src="{{assetsURL}}/img/guide/navigation/down_arrow_20.svg" alt="Une icône représentant la fonction 'Flèche vers le bas'" /> à côté du titre de colonne indique que les données sont triées par ordre décroissant ou alphabétique inverse.
+- Une flèche vers le haut <img src="{{assetsURL}}/img/guide/navigation/up_arrow_20.svg" alt="Une icône représentant la fonction Flèche vers le haut" /> à côté du titre de colonne indique que les données sont triées par ordre croissant ou alphabétique.
+- Une flèche vers le bas <img src="{{assetsURL}}/img/guide/navigation/down_arrow_20.svg" alt="Une icône représentant la fonction Flèche vers le bas" /> à côté du titre de colonne indique que les données sont triées par ordre décroissant ou alphabétique inverse.
 - L’absence de flèche à côté du titre de colonne signifie qu’aucun tri n’est appliqué à la colonne.
 
 Les colonnes peuvent être triées en ordre croissant ou décroissant (pour les données numériques) et en ordre alphabétique (pour les données textuelles).
@@ -500,7 +500,7 @@ Il y a trois types de filtres :
   - Si seulement un minimum est défini, le tri se fera selon l’opération _plus grand que_.
 - **Date :** Semblable au champ pour les chiffres, mais pour les dates.
 
-Pour accéder à d'autres filtres (en fonction du type de données dans la colonne), cliquez sur l'icône d'actions <img src="{{assetsURL}}/img/guide/datatable/column_action.svg" alt="Une icône représentant la fonction 'Actions de colonne'" /> à côté du titre de la colonne, puis sur **Filtrer par**.
+Pour accéder à d'autres filtres (en fonction du type de données dans la colonne), cliquez sur l'icône d'actions <img src="{{assetsURL}}/img/guide/datatable/column_action.svg" alt="Une icône représentant la fonction Actions de colonne" /> à côté du titre de la colonne, puis sur **Filtrer par**.
 
 =3!keyboardNavigation=
 
@@ -533,11 +533,11 @@ L'interrupteur **Filtrage temporel** contrôle si le curseur temporel filtre les
 
 Une barre de curseur s'affiche avec un ou deux points déplaçables. Pour les couches à facteur temporel ponctuel, il n'y a qu'un point déplaçable. Pour les couches à plage temporelle, il y a deux points déplaçables permettant de régler le début et la fin de la plage.
 
-Cliquez sur le point et déplacez-le sur la barre pour sélectionner les valeurs de filtre souhaitées ou un moment donné dans le temps. Pour une couche à plage temporelle, cliquez sur l'icône de cadenas <img src="{{assetsURL}}/img/guide/footer/lock_30.svg" alt="Une icône représentant la fonction 'Cadenas'" /> afin de verrouiller le point de début.
+Cliquez sur le point et déplacez-le sur la barre pour sélectionner les valeurs de filtre souhaitées ou un moment donné dans le temps. Pour une couche à plage temporelle, cliquez sur l'icône de cadenas <img src="{{assetsURL}}/img/guide/footer/lock_30.svg" alt="Une icône représentant la fonction Cadenas" /> afin de verrouiller le point de début.
 
-Appuyez sur l'icône de lecture <img src="{{assetsURL}}/img/guide/footer/play_arrow_30.svg" alt="Une icône représentant la fonction 'Lecture'" /> pour voir les résultats dans le temps. Cliquez sur l'icône de changement de direction <img src="{{assetsURL}}/img/guide/footer/direction_arrow_30.svg" alt="Une icône représentant la fonction 'Changement de direction'" /> pour avancer ou reculer dans le temps.
+Appuyez sur l'icône de lecture <img src="{{assetsURL}}/img/guide/footer/play_arrow_30.svg" alt="Une icône représentant la fonction Lecture" /> pour voir les résultats dans le temps. Cliquez sur l'icône de changement de direction <img src="{{assetsURL}}/img/guide/footer/direction_arrow_30.svg" alt="Une icône représentant la fonction Changement de direction" /> pour avancer ou reculer dans le temps.
 
-Cliquez sur l'icône de marche arrière <img src="{{assetsURL}}/img/guide/footer/back_arrow_30.svg" alt="Une icône représentant la fonction 'Flèche arrière'" /> ou avant <img src="{{assetsURL}}/img/guide/footer/forward_arrow_30.svg" alt="Une icône représentant la fonction 'Flèche avant'" /> pour reculer ou avancer d'une étape dans le temps.
+Cliquez sur l'icône de marche arrière <img src="{{assetsURL}}/img/guide/footer/back_arrow_30.svg" alt="Une icône représentant la fonction Flèche arrière" /> ou avant <img src="{{assetsURL}}/img/guide/footer/forward_arrow_30.svg" alt="Une icône représentant la fonction Flèche avant" /> pour reculer ou avancer d'une étape dans le temps.
 
 Ouvrez le menu déroulant du délai pour choisir le délai d’animation du curseur. Certaines couches peuvent avoir besoin d’un délai plus important pour s’afficher correctement sur la carte.
 
@@ -555,7 +555,7 @@ L’onglet **Graphique** dans le pied de page se divise en deux sections. La lis
 
 Le menu déroulant **Élément** (en haut à gauche de la section du graphique) permet également de sélectionner un élément. Il s’agit d’une fonction pratique lorsque plusieurs éléments sont rapprochés sur la carte et qu’il est difficile de sélectionner celui voulu.
 
-Vous pouvez cocher ou décocher les cases <img src="{{assetsURL}}/img/guide/layers/check.png" alt="Une icône représentant la fonction 'Case à cocher'" /> des données au-dessus du graphique pour déterminer le contenu de celui-ci (seulement pour les couches comportant plusieurs éléments de données).
+Vous pouvez cocher ou décocher les cases <img src="{{assetsURL}}/img/guide/layers/check.png" alt="Une icône représentant la fonction Case à cocher" /> des données au-dessus du graphique pour déterminer le contenu de celui-ci (seulement pour les couches comportant plusieurs éléments de données).
 
 Ouvrez le menu déroulant de **téléchargement** (en haut à droite de la section du graphique) pour télécharger les données du graphique en format JSON. Cliquez sur **Télécharger tout** ou **Télécharger visible** selon que vous voulez télécharger toutes les données ou seulement celles actuellement visibles sur le graphique.
 

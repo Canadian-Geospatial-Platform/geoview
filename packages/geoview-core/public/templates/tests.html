@@ -115,6 +115,7 @@
       <button class="tab-button" onclick="openTab(event, 'map4-test')">Map 4 (EPSG: 3978)</button>
       <button class="tab-button" onclick="openTab(event, 'map5-test')">Map 5 (EPSG: 3978)</button>
       <button class="tab-button" onclick="openTab(event, 'map6-test')">Map 6 (EPSG: 3978)</button>
+      <button class="tab-button" onclick="openTab(event, 'map7-test')">Map 7 (EPSG: 3978)</button>
     </div>
 
     <!-- Run All Tests Tab -->
@@ -188,6 +189,15 @@
       </button>
       <div class="panel">
         <div id="runAllMap6Results"></div>
+      </div>
+
+      <!-- Map 7 Results -->
+      <button id="collapsibleMap7" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 7 - UI Tests (EPSG: 3978)</span>
+        <span id="statsMap7" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Done success: 0 | Done failed: 0 | Done: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAllMap7Results"></div>
       </div>
     </div>
 
@@ -555,6 +565,53 @@
           'footerBar': {
             'tabs': {
               'core': []
+            }
+          }
+        }"
+        ></div>
+      </div>
+
+      <!-- Map 7 Tab -->
+      <div id="map7-test" class="tab-content">
+        <div class="map-title-holder">
+          <h4 id="HEVNT7">7. Tests on map 7 (EPSG: 3978)</h4>
+          <a class="ref-link" href="#top">Top</a>
+        </div>
+
+        <div id="testSuiteTable-map7"></div>
+        <br />
+        <div
+          id="map7"
+          class="geoview-map"
+          data-lang="en"
+          data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'projection': 3978
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': true,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': []
+          },
+          'components': [],
+          'corePackages': ['test-suite'],
+          'corePackagesConfig': [
+            {
+              'test-suite': { 'suites': ['suite-ui'] }
+            }
+          ],
+          'theme': 'geo.ca',
+          'footerBar': {
+            'tabs': {
+              'core': [
+                'legend',
+                'layers',
+                'details'
+              ]
             }
           }
         }"

@@ -1,9 +1,11 @@
 import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
+import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import { delay } from 'geoview-core/core/utils/utilities';
 import { UIEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/ui-event-processor';
 import { DataTableEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/data-table-event-processor';
+import { LegendEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/legend-event-processor';
+import { delay } from 'geoview-core/core/utils/utilities';
 
 /**
  * Main Map Config testing class.
@@ -34,10 +36,8 @@ export class MapConfigTester extends GVAbstractTester {
         test.addStep('Deleting current map...');
         await this.getApi().deleteMapViewer(mapId, false);
 
-        // Wait for cleanup
-        await delay(500);
-
         // Create new config with data-table selected and a layer pre-loaded
+        test.addStep('Creating map with layer pre-loaded and data-table selected...');
         const newConfig = JSON.stringify({
           map: {
             interaction: 'dynamic',
@@ -75,13 +75,19 @@ export class MapConfigTester extends GVAbstractTester {
           },
         });
 
-        // Recreate map with new config
-        test.addStep('Creating map with layer pre-loaded and data-table selected...');
-        const newMapViewer = await this.getApi().createMapFromConfig(mapId, newConfig, 500);
-
         // Wait for layer to load and data table to initialize
         test.addStep('Waiting for layer to load and data table to initialize...');
-        await delay(5000);
+        const newMapViewer = await this.getApi()
+          .createMapFromConfig(mapId, newConfig, 500)
+          .then(
+            (mapViewer) =>
+              new Promise<MapViewer>((resolve) => {
+                mapViewer.onMapLayersLoaded(() => {
+                  test.addStep('Layers loaded');
+                  resolve(mapViewer);
+                });
+              })
+          );
 
         return newMapViewer;
       },
@@ -97,13 +103,18 @@ export class MapConfigTester extends GVAbstractTester {
         Test.assertIsEqual(selectedLayerPath, 'geojsonLYR5/polygons.json');
 
         // Verify that layer data exists (table was created)
-        test.addStep('Verifying data table has layer data...');
+        test.addStep('Verifying data table is defined...');
         const allFeaturesData = DataTableEventProcessor.getSingleDataTableState(mapId, 'allFeaturesDataArray');
         Test.assertIsDefined('allFeaturesDataArray', allFeaturesData);
 
+        // Verify if there is an array of data tables with content
+        test.addStep('Verifying if there is a data-table array with a table inside...');
+        Test.assertIsArray(allFeaturesData);
+        Test.assertIsArrayLengthMinimal(allFeaturesData, 1);
+
         // Verify the number of features in the data table
         test.addStep('Verifying number of features in data table...');
-        if (Array.isArray(allFeaturesData) && allFeaturesData.length > 0 && allFeaturesData[0] && 'features' in allFeaturesData[0]) {
+        if ('features' in allFeaturesData[0]) {
           Test.assertIsArrayLengthMinimal(allFeaturesData[0].features as unknown[], 4);
         } else {
           Test.assertFail('No data table OR features data found in data table.');
@@ -128,10 +139,8 @@ export class MapConfigTester extends GVAbstractTester {
         test.addStep('Deleting current map...');
         await this.getApi().deleteMapViewer(mapId, false);
 
-        // Wait for cleanup
-        await delay(500);
-
         // Create new config with data-table in app bar and a layer pre-loaded
+        test.addStep('Creating map with data-table in app bar...');
         const newConfig = JSON.stringify({
           map: {
             interaction: 'dynamic',
@@ -174,13 +183,19 @@ export class MapConfigTester extends GVAbstractTester {
           },
         });
 
-        // Recreate map with new config
-        test.addStep('Creating map with data-table in app bar...');
-        const newMapViewer = await this.getApi().createMapFromConfig(mapId, newConfig, 500);
-
         // Wait for layer to load and data table to initialize
         test.addStep('Waiting for layer to load and app bar to initialize...');
-        await delay(5000);
+        const newMapViewer = await this.getApi()
+          .createMapFromConfig(mapId, newConfig, 500)
+          .then(
+            (mapViewer) =>
+              new Promise<MapViewer>((resolve) => {
+                mapViewer.onMapLayersLoaded(() => {
+                  test.addStep('Layers loaded');
+                  resolve(mapViewer);
+                });
+              })
+          );
 
         return newMapViewer;
       },
@@ -196,13 +211,18 @@ export class MapConfigTester extends GVAbstractTester {
         Test.assertIsEqual(selectedLayerPath, 'geojsonLYR5/polygons.json');
 
         // Verify that layer data exists (table was created)
-        test.addStep('Verifying data table has layer data...');
+        test.addStep('Verifying data table is defined...');
         const allFeaturesData = DataTableEventProcessor.getSingleDataTableState(mapId, 'allFeaturesDataArray');
         Test.assertIsDefined('allFeaturesDataArray', allFeaturesData);
 
+        // Verify if there is an array of data tables with content
+        test.addStep('Verifying if there si a data-table array with a table inside...');
+        Test.assertIsArray(allFeaturesData);
+        Test.assertIsArrayLengthMinimal(allFeaturesData, 1);
+
         // Verify the number of features in the data table
         test.addStep('Verifying number of features in data table...');
-        if (Array.isArray(allFeaturesData) && allFeaturesData.length > 0 && allFeaturesData[0] && 'features' in allFeaturesData[0]) {
+        if ('features' in allFeaturesData[0]) {
           Test.assertIsArrayLengthMinimal(allFeaturesData[0].features as unknown[], 4);
         } else {
           Test.assertFail('No data table OR features data found in data table.');
@@ -227,10 +247,8 @@ export class MapConfigTester extends GVAbstractTester {
         test.addStep('Deleting current map...');
         await this.getApi().deleteMapViewer(mapId, false);
 
-        // Wait for cleanup
-        await delay(500);
-
         // Create new config WITHOUT footerBar object
+        test.addStep('Creating map without footerBar or appBar configuration...');
         const newConfig = JSON.stringify({
           map: {
             interaction: 'dynamic',
@@ -248,13 +266,19 @@ export class MapConfigTester extends GVAbstractTester {
           // No footerBar or appBar specified - should get defaults
         });
 
-        // Recreate map with new config
-        test.addStep('Creating map without footerBar or appBar configuration...');
-        const newMapViewer = await this.getApi().createMapFromConfig(mapId, newConfig, 500);
-
         // Wait for map to initialize
         test.addStep('Waiting for map to initialize...');
-        await delay(3000);
+        const newMapViewer = await this.getApi()
+          .createMapFromConfig(mapId, newConfig, 500)
+          .then(
+            (mapViewer) =>
+              new Promise<MapViewer>((resolve) => {
+                mapViewer.onMapLayersLoaded(() => {
+                  test.addStep('Layers loaded');
+                  resolve(mapViewer);
+                });
+              })
+          );
 
         return newMapViewer;
       },
@@ -295,10 +319,8 @@ export class MapConfigTester extends GVAbstractTester {
         test.addStep('Deleting current map...');
         await this.getApi().deleteMapViewer(mapId, false);
 
-        // Wait for cleanup
-        await delay(500);
-
         // Create new config with empty footerBar tabs
+        test.addStep('Creating map with empty footerBar and appBar tabs...');
         const newConfig = JSON.stringify({
           map: {
             interaction: 'dynamic',
@@ -325,13 +347,19 @@ export class MapConfigTester extends GVAbstractTester {
           },
         });
 
-        // Recreate map with new config
-        test.addStep('Creating map with empty footerBar and appBar tabs...');
-        const newMapViewer = await this.getApi().createMapFromConfig(mapId, newConfig, 500);
-
         // Wait for map to initialize
         test.addStep('Waiting for map to initialize...');
-        await delay(3000);
+        const newMapViewer = await this.getApi()
+          .createMapFromConfig(mapId, newConfig, 500)
+          .then(
+            (mapViewer) =>
+              new Promise<MapViewer>((resolve) => {
+                mapViewer.onMapLayersLoaded(() => {
+                  test.addStep('Layers loaded');
+                  resolve(mapViewer);
+                });
+              })
+          );
 
         return newMapViewer;
       },
@@ -357,17 +385,15 @@ export class MapConfigTester extends GVAbstractTester {
     const mapId = this.getMapId();
 
     // Test
-    return this.test(
+    return this.test<MapViewer>(
       'Test initial view with layerIds sets map extent to layer extent',
       async (test) => {
         // Delete current map
         test.addStep('Deleting current map...');
         await this.getApi().deleteMapViewer(mapId, false);
 
-        // Wait for cleanup
-        await delay(500);
-
         // Create new config with initial view layerIds
+        test.addStep('Creating map with initial view layerIds...');
         const newConfig = JSON.stringify({
           map: {
             interaction: 'dynamic',
@@ -410,54 +436,50 @@ export class MapConfigTester extends GVAbstractTester {
         });
 
         // Recreate map with new config
-        test.addStep('Creating map with initial view layerIds...');
-        const newMapViewer = await this.getApi().createMapFromConfig(mapId, newConfig, 500);
-
-        // Wait for layer to load and extent to be set
-        test.addStep('Waiting for layer to load and extent to be applied...');
-        await delay(5000);
+        test.addStep('Waiting for map to initialize...');
+        const newMapViewer = await this.getApi()
+          .createMapFromConfig(mapId, newConfig, 500)
+          .then(
+            (mapViewer) =>
+              new Promise<MapViewer>((resolve) => {
+                mapViewer.onMapLayersLoaded(() => {
+                  test.addStep('Layers loaded');
+                  resolve(mapViewer);
+                });
+              })
+          );
 
         return newMapViewer;
       },
-      (test) => {
+      async (test, newMapViewer) => {
         // Get the map extent
-        test.addStep('Getting map extent...' + this.getMapViewer().layer.getGeoviewLayers());
-        const mapExtent = this.getMapViewer().getView().calculateExtent();
+        test.addStep('Getting map extent...');
+        const mapExtent = newMapViewer.getView().calculateExtent();
         Test.assertIsDefined('mapExtent', mapExtent);
 
-        // // Get the layer
-        // test.addStep('Getting layer...');
-        // const layerPath = 'geojsonLYR5/polygons.json';
-        // const geoviewLayer = this.getMapViewer().layer.getGeoviewLayerIfExists(layerPath);
-        // Test.assertIsDefined('geoviewLayer', geoviewLayer);
+        // Get the layer bounds
+        test.addStep('Getting layer bound extent...');
+        const geoviewLayer = newMapViewer.layer.getGeoviewLayer('geojsonLYR5/polygons.json');
+        Test.assertIsDefined('geoviewLayer', geoviewLayer);
+        const layerExtent = LegendEventProcessor.getLayerBounds(this.getMapId(), 'geojsonLYR5/polygons.json');
+        Test.assertIsArray(layerExtent);
 
-        // // Verify layer is loaded
-        // test.addStep('Verifying layer is loaded...');
-        // const layerStatus = geoviewLayer?.getLayerStatus();
-        // Test.assertIsEqual(layerStatus, 'loaded');
+        await delay(2000);
 
-        // // Get layer OL layer and source extent
-        // test.addStep('Getting layer source extent...');
-        // const olLayer = geoviewLayer?.getOLLayer();
-        // Test.assertIsDefined('olLayer', olLayer);
+        test.addStep('Getting map extent after zoom...');
+        const mapExtentLayer = newMapViewer.getView().calculateExtent();
+        Test.assertIsDefined('mapExtent', mapExtentLayer);
 
-        // // Cast to layer with source
-        // // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        // const vectorLayer = olLayer as any;
-        // const source = vectorLayer?.getSource?.();
-        // Test.assertIsDefined('source', source);
-
-        // const layerExtent = source?.getExtent?.();
-        // Test.assertIsDefined('layerExtent', layerExtent);
-
-        // // Verify map extent is approximately equal to layer extent
-        // test.addStep('Verifying map extent matches layer extent...');
-        // // Allow for small differences due to padding/rounding
-        // const tolerance = 1000; // meters
-        // Test.assertIsEqual(Math.abs(mapExtent[0] - layerExtent[0]) < tolerance, true);
-        // Test.assertIsEqual(Math.abs(mapExtent[1] - layerExtent[1]) < tolerance, true);
-        // Test.assertIsEqual(Math.abs(mapExtent[2] - layerExtent[2]) < tolerance, true);
-        // Test.assertIsEqual(Math.abs(mapExtent[3] - layerExtent[3]) < tolerance, true);
+        // Verify map extent is approximately equal to layer extent
+        test.addStep('Verifying map extent matches layer extent east-west and north-south delta are equal...');
+        Test.assertIsEqual<Number>(
+          Math.round(Math.abs(mapExtentLayer[0] - layerExtent[0])),
+          Math.round(Math.abs(mapExtentLayer[2] - layerExtent[2]))
+        );
+        Test.assertIsEqual<Number>(
+          Math.round(Math.abs(mapExtentLayer[1] - layerExtent[1])),
+          Math.round(Math.abs(mapExtentLayer[3] - layerExtent[3]))
+        );
       }
     );
   }
