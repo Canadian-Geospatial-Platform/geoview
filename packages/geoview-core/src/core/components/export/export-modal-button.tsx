@@ -23,7 +23,6 @@ interface ExportProps {
  * @returns {JSX.Element} the export button
  */
 
-// TODO: WCAG Issue #3154 - add aria-controls to <IconButton>. Needs id of the modal to be passed as a prop.
 export default function ExportButton({ className = '', sxDetails, ariaExpanded = false }: ExportProps): JSX.Element {
   // Hooks
   const theme = useTheme();
@@ -36,11 +35,12 @@ export default function ExportButton({ className = '', sxDetails, ariaExpanded =
 
   return (
     <IconButton
-      id={`${mapId}-export-btn`}
+      id={`export-btn-${mapId}`}
+      aria-controls="export-modal"
       aria-label={t('appbar.export')}
       aria-expanded={ariaExpanded}
       tooltipPlacement="right"
-      onClick={() => enableFocusTrap({ activeElementId: 'export', callbackElementId: `${mapId}-export-btn` })}
+      onClick={() => enableFocusTrap({ activeElementId: 'export', callbackElementId: `export-btn-${mapId}` })}
       sx={{ [theme.breakpoints.down('md')]: { display: 'none' }, ...sxDetails }}
       className={className}
       disabled={layersAreLoading}

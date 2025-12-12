@@ -51,62 +51,18 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
       width: '33.33%',
     },
   },
-  legendLayerListItem: {
+  legendList: {
+    paddingRight: '0.65rem',
+  },
+  legendListItem: {
     padding: '6px 4px',
-    '& .layerTitle': {
-      fontSize: theme.palette.geoViewFontSize.md,
-      fontWeight: '600',
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
-      overflow: 'hidden',
-      '>p': {
-        margin: 0,
-        color: theme.palette.geoViewColor.textColor.light[400],
-        fontSize: theme.palette.geoViewFontSize.sm,
-        lineHeight: 1.43,
-      },
-      '>div': {
-        whiteSpace: 'normal',
-        display: '-webkit-box',
-        WebkitLineClamp: '3',
-        WebkitBoxOrient: 'vertical',
-        overflow: 'hidden',
-      },
-    },
-
-    '& .layerTitle > .MuiListItemText-secondary': {
-      color: theme.palette.geoViewColor.textColor.light[400],
-    },
-
-    '& .MuiListItemText-root': {
-      marginLeft: '12px',
-    },
-
+    flexDirection: 'column',
+    alignItems: 'flex-start',
     '& .MuiCollapse-vertical': {
       marginLeft: '6px',
-
-      '& ul': {
-        marginTop: 0,
-        padding: 0,
-      },
-      '& li': {
-        paddingLeft: '6px',
-        marginBottom: '3px',
-        fontWeight: '400',
-
-        '&.unchecked': {
-          borderLeft: `5px solid ${theme.palette.geoViewColor.bgColor.dark[200]}`,
-          fontStyle: 'italic',
-          color: theme.palette.geoViewColor.textColor.light[600],
-        },
-
-        '&.checked': {
-          borderLeft: `5px solid ${theme.palette.geoViewColor.bgColor.dark[600]}`,
-        },
-      },
     },
     '& .outOfRange': {
-      '& .layerTitle': {
+      '& .legendTitle': {
         color: `${theme.palette.grey[700]}`,
         fontStyle: 'italic',
       },
@@ -115,6 +71,82 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
       display: 'none',
     },
   },
+  legendListItemHeader: {
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[100]}`,
+  },
+  legendTitle: {
+    marginLeft: '12px',
+    fontSize: theme.palette.geoViewFontSize.md,
+    fontWeight: '600',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    '>p': {
+      margin: 0,
+      color: theme.palette.geoViewColor.textColor.light[400],
+      fontSize: theme.palette.geoViewFontSize.sm,
+      lineHeight: 1.43,
+    },
+    '>div': {
+      whiteSpace: 'normal',
+      display: '-webkit-box',
+      WebkitLineClamp: '3',
+      WebkitBoxOrient: 'vertical',
+      overflow: 'hidden',
+    },
+    '& .MuiListItemText-secondary': {
+      color: theme.palette.geoViewColor.textColor.light[400],
+    },
+  },
+  layerList: {
+    marginTop: 0,
+    padding: 0,
+    width: '100%',
+    '& .MuiListItemIcon-root': {
+      minWidth: '1rem',
+    },
+    '& img': {
+      maxWidth: '1.5rem',
+    },
+  },
+  layerListItem: {
+    paddingLeft: '6px',
+    marginBottom: '3px',
+    fontWeight: '400',
+    '& .MuiListItemText-root': {
+      marginLeft: '12px',
+    },
+  },
+  layerListItemButton: {
+    padding: '0 0 0 6px',
+    '&:hover': {
+      backgroundColor: 'transparent',
+    },
+    '&.unchecked': {
+      fontStyle: 'italic',
+      color: theme.palette.geoViewColor.textColor.light[600],
+      borderLeft: `5px solid ${theme.palette.geoViewColor.bgColor.dark[200]}`,
+    },
+    '&.unchecked:focus, &.unchecked.keyboard-focused': {
+      borderLeft: `5px solid ${theme.palette.geoViewColor.bgColor.dark[200]} !important`,
+    },
+    '&.unchecked.Mui-focusVisible': {
+      borderLeft: `5px solid ${theme.palette.geoViewColor.bgColor.dark[200]} !important`,
+    },
+    '&.checked': {
+      borderLeft: `5px solid ${theme.palette.geoViewColor.bgColor.dark[600]}`,
+    },
+    '&.checked:focus, &.checked.keyboard-focused': {
+      borderLeft: `5px solid ${theme.palette.geoViewColor.bgColor.dark[600]} !important`,
+    },
+    '&.checked.Mui-focusVisible': {
+      borderLeft: `5px solid ${theme.palette.geoViewColor.bgColor.dark[600]} !important`,
+    },
+  },
+
   collapsibleContainer: {
     width: '100%',
     padding: '10px 0',
@@ -128,15 +160,6 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
   legendInstructionsBody: {
     fontSize: theme.palette.geoViewFontSize.default,
   },
-  subList: {
-    width: '100%',
-    '& .MuiListItemIcon-root': {
-      minWidth: '1rem',
-    },
-    '& img': {
-      maxWidth: '1.5rem',
-    },
-  },
   layerStackIcons: {
     flexWrap: 'wrap',
     '& button': {
@@ -147,9 +170,6 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
         height: '1.25rem',
       },
     },
-  },
-  toggleableItem: {
-    cursor: 'pointer',
   },
   toggleBar: {
     borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[100]}`,
