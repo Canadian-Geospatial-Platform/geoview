@@ -280,7 +280,7 @@ export default memo(function Notifications(): JSX.Element {
           placement="right-end"
           onClose={handleClickAway}
           container={mapElem}
-          focusSelector="h3 + div button:last-child"
+          focusSelector="h2 + div button:last-child"
           focusTrap={activeTrapGeoView}
           modifiers={[
             {

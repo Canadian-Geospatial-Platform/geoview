@@ -67,7 +67,7 @@ export default function ExportModal(): JSX.Element {
   // Store
   const mapId = useGeoViewMapId();
   const mapElement = useAppGeoviewHTMLElement();
-  const { disableFocusTrap, setActiveAppBarTab } = useUIStoreActions();
+  const { disableFocusTrap } = useUIStoreActions();
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const shellContainer = useAppShellContainer();
 
@@ -86,8 +86,8 @@ export default function ExportModal(): JSX.Element {
   const [jpegQuality, setJpegQuality] = useState(90); // Default 90%
   const [qualityMenuOpen, setQualityMenuOpen] = useState(false);
   const [qualityAnchorEl, setQualityAnchorEl] = useState<null | HTMLElement>(null);
-  const dialogRef = useRef(null) as RefObject<HTMLDivElement>;
   const [pngPreviewUrls, setPngPreviewUrls] = useState<string[]>([]);
+  const dialogRef = useRef(null) as RefObject<HTMLDivElement>;
 
   const fileExportDefaultPrefixName = t('exportModal.fileExportDefaultPrefixName');
 
@@ -146,20 +146,9 @@ export default function ExportModal(): JSX.Element {
       logger.logError(`Error exporting ${exportFormat.toUpperCase()}`, error);
     } finally {
       setIsMapExporting(false);
-      setActiveAppBarTab('legend', false, false);
       disableFocusTrap();
     }
-  }, [
-    disableFocusTrap,
-    exportFormat,
-    exportMapResolution,
-    exportTitle,
-    fileExportDefaultPrefixName,
-    jpegQuality,
-    mapId,
-    setActiveAppBarTab,
-    t,
-  ]);
+  }, [disableFocusTrap, exportFormat, exportMapResolution, exportTitle, fileExportDefaultPrefixName, jpegQuality, mapId, t]);
 
   // Use Effect to generate the image preview on load
   useEffect(() => {
@@ -183,17 +172,31 @@ export default function ExportModal(): JSX.Element {
     };
   }, [activeModalId, generatePreview, mapElement]);
 
+  // Auto focus on title input when modal opens. Delay to allow Dialog to render first.
+  useEffect(() => {
+    if (activeModalId === 'export') {
+      setTimeout(() => {
+        const titleInput = document.querySelector('#export-title-input') as HTMLInputElement;
+        if (titleInput) {
+          titleInput.focus();
+        }
+      }, 500);
+    }
+  }, [activeModalId]);
+
   // #region HANDLERS
 
   const handleCloseModal = useCallback(() => {
     logger.logTraceUseCallback('EXPORT-MODAL - handleCloseModal');
-    setActiveAppBarTab('legend', false, false);
-    disableFocusTrap();
+    // Defer focus return to let Dialog's focus trap release first. Ensures export button in the appbar gets re-focused.
+    setTimeout(() => {
+      disableFocusTrap();
+    }, 0);
     // Clear preview content so skeleton shows on next open
     setPngPreviewUrls([]);
     setIsMapLoading(false);
     setIsLegendLoading(false);
-  }, [setActiveAppBarTab, disableFocusTrap]);
+  }, [disableFocusTrap]);
 
   const handleExport = useCallback(() => {
     logger.logTraceUseCallback('EXPORT-MODAL - handleExport');
@@ -263,12 +266,21 @@ export default function ExportModal(): JSX.Element {
   // #endregion HANDLERS
 
   return (
-    <Dialog open={activeModalId === 'export'} onClose={handleCloseModal} fullWidth maxWidth="xl" container={shellContainer}>
+    <Dialog
+      role="dialog"
+      id="export-modal"
+      open={activeModalId === 'export'}
+      onClose={handleCloseModal}
+      fullWidth
+      maxWidth="xl"
+      container={shellContainer}
+    >
       <DialogTitle>{t('exportModal.title')}</DialogTitle>
       <DialogContent dividers ref={dialogRef}>
         {/* Title input */}
         <Box sx={sxClasses.title}>
           <TextField
+            id="export-title-input"
             label={t('exportModal.exportTitle')}
             variant="standard"
             value={exportTitle}

@@ -49,7 +49,7 @@ export const helpClosePanelById = (
   const buttonElement = buttonId && document.getElementById(mapId)?.querySelector(`#${buttonId}`);
   if (buttonElement) {
     // put back focus on calling button
-    document.getElementById(buttonId)?.focus();
+    document.getElementById(buttonId + '-panel-btn')?.focus();
   } else {
     // Nothing to put focus on, callback
     focusWhenNoElementCallback?.();

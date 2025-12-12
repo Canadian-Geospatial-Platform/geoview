@@ -2,8 +2,7 @@ import type { ReactNode } from 'react';
 import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
-import { animated } from '@react-spring/web';
-import { Badge, Box, List, ListItem, ListItemButton, Paper, Tooltip, Typography, ProgressBar, LocationSearchingIcon } from '@/ui';
+import { Badge, Box, List, ListItem, ListItemButton, Tooltip, Typography, ProgressBar, LocationSearchingIcon } from '@/ui';
 
 import type { TypeFeatureInfoEntry, TypeQueryStatus } from '@/api/types/map-schema-types';
 import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
@@ -106,57 +105,49 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
     [isDisabled, onListItemClick]
   );
 
-  const AnimatedPaper = animated(Paper);
-
-  // TODO: WCAG Issue #3118 generates invalid HTML (improper nesting)
+  // TODO: WCAG Issue #3116 Finish implementing button styles to match upstream version
 
   return (
-    <AnimatedPaper className={containerClass}>
-      <Tooltip title={layer.tooltip} placement="top" arrow>
-        <Box>
-          <ListItem
-            disablePadding
-            onKeyDown={(e) => handleLayerKeyDown(e, layer)}
-            onClick={() => onListItemClick(layer)}
-            tabIndex={0}
-            id={id}
-          >
-            <ListItemButton
-              tabIndex={-1}
-              selected={isSelected}
-              // disable when layer features has null value.
-              disabled={isDisabled || isLoading}
-              aria-label={layer.layerName}
-            >
-              {layer.layerPath === 'coordinate-info' ? (
-                // Treat
-                <LocationSearchingIcon />
-              ) : (
-                layer.layerPath && !layer.content && <LayerIcon layerPath={layer.layerPath} />
-              )}
-              <Box sx={sxClasses.listPrimaryText} className="layerInfo">
-                <Typography component="div" className="layerTitle">
-                  {layer.layerName}
-                </Typography>
-                <Box display="flex" alignContent="center">
-                  <Typography component="div" variant="subtitle1" noWrap display="block">
-                    {getLayerStatus()}
-                  </Typography>
-                </Box>
-              </Box>
-              {layer.layerPath !== 'coordinate-info' && (layer.numOffeatures ?? 0 ) > 0 &&  (
-                <Badge badgeContent={layer.numOffeatures} max={99} color="info" sx={sxClasses.layerCount} className="layer-count"></Badge>
-              )}
-            </ListItemButton>
-            {layerStatus === 'loading' && (
-              <Box sx={sxClasses.progressBar}>
-                <ProgressBar />
-              </Box>
-            )}
-          </ListItem>
-        </Box>
-      </Tooltip>
-    </AnimatedPaper>
+    <Tooltip title={layer.tooltip} placement="top" arrow>
+      <ListItem id={id} disablePadding>
+        <ListItemButton
+          component="button"
+          sx={sxClasses.listItemButton}
+          className={containerClass}
+          onKeyDown={(e) => handleLayerKeyDown(e, layer)}
+          onClick={() => onListItemClick(layer)}
+          selected={isSelected}
+          // disable when layer features has null value.
+          disabled={isDisabled || isLoading}
+          aria-disabled={isDisabled || isLoading}
+        >
+          {layer.layerPath === 'coordinate-info' ? (
+            // Treat
+            <LocationSearchingIcon />
+          ) : (
+            layer.layerPath && !layer.content && <LayerIcon layerPath={layer.layerPath} />
+          )}
+          <Box component="span" sx={sxClasses.listPrimaryText} className="layerInfo">
+            <Typography component="span" className="layerTitle">
+              {layer.layerName}
+            </Typography>
+            <Box component="span" display="flex" alignContent="center">
+              <Typography component="span" variant="subtitle1" noWrap display="block">
+                {getLayerStatus()}
+              </Typography>
+            </Box>
+          </Box>
+          {layer.layerPath !== 'coordinate-info' && (layer.numOffeatures ?? 0) > 0 && (
+            <Badge badgeContent={layer.numOffeatures} max={99} color="info" sx={sxClasses.layerCount} className="layer-count"></Badge>
+          )}
+        </ListItemButton>
+        {layerStatus === 'loading' && (
+          <Box component="span" sx={sxClasses.progressBar}>
+            <ProgressBar />
+          </Box>
+        )}
+      </ListItem>
+    </Tooltip>
   );
 });
 
@@ -166,7 +157,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
  * @param {boolean} isEnlarged Boolean value if right panel is enlarged or not.
  * @param {number} selectedLayerIndex  Current index of list item selected.
  * @param {string} selectedLayerPath  Selected path of the layer.
- * @param {Function} onListItemClick  Callback function excecuted when list item is clicked.
+ * @param {Function} onListItemClick  Callback function executed when list item is clicked.
  * @returns {JSX.Element}
  */
 // Memoizes entire component, preventing re-renders if props haven't changed

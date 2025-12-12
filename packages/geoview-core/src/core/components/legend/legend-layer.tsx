@@ -33,13 +33,14 @@ interface LegendLayerHeaderProps {
   layerPath: string;
   tooltip: string;
   onExpandClick: (event: React.MouseEvent) => void;
+  sxClasses: ReturnType<typeof getSxClasses>;
 }
 
 // Length at which the tooltip should be shown
 const CONST_NAME_LENGTH_TOOLTIP = 50;
 
 // Extracted Header Component
-const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick }: LegendLayerHeaderProps): JSX.Element => {
+const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick, sxClasses }: LegendLayerHeaderProps): JSX.Element => {
   // Log
   logger.logTraceUseMemo('components/legend/legend-layer - LegendLayerHeader', layerPath);
 
@@ -57,7 +58,11 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick }: LegendLay
 
   // Return the ui
   return (
-    <ListItem key={layerPath} divider className={layerHidden || layerStatus === 'error' ? 'outOfRange' : ''}>
+    <Box
+      key={layerPath}
+      sx={sxClasses.legendListItemHeader}
+      className={`legendListItemHeader${layerHidden || layerStatus === 'error' ? ' outOfRange' : ''}`}
+    >
       <LayerIcon layerPath={layerPath} />
       <ListItemText
         primary={
@@ -65,7 +70,8 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick }: LegendLay
             <Box>{layerName}</Box>
           </Tooltip>
         }
-        className="layerTitle"
+        sx={sxClasses.legendTitle}
+        className="legendTitle"
         disableTypography
         secondary={<SecondaryControls layerPath={layerPath} />}
       />
@@ -88,7 +94,7 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick }: LegendLay
           <ProgressBar />
         </Box>
       )}
-    </ListItem>
+    </Box>
   );
 });
 
@@ -120,12 +126,15 @@ export function LegendLayer({ layerPath }: LegendLayerProps): JSX.Element {
   );
 
   return (
-    <>
-      <Box sx={sxClasses.legendLayerListItem}>
-        <LegendLayerHeader layerPath={layerPath} tooltip={t('layers.toggleCollapse')} onExpandClick={handleExpandGroupClick} />
-        <CollapsibleContent layerPath={layerPath} initLightBox={initLightBox} LegendLayerComponent={LegendLayer} />
-      </Box>
+    <ListItem className="legendListItem" sx={sxClasses.legendListItem} key={layerPath}>
+      <LegendLayerHeader
+        layerPath={layerPath}
+        tooltip={t('layers.toggleCollapse')}
+        onExpandClick={handleExpandGroupClick}
+        sxClasses={sxClasses}
+      />
+      <CollapsibleContent layerPath={layerPath} initLightBox={initLightBox} LegendLayerComponent={LegendLayer} />
       <LightBoxComponent />
-    </>
+    </ListItem>
   );
 }

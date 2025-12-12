@@ -91,6 +91,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
   return (
     <Box
       component="section"
+      role="dialog"
       aria-label={`${t(panel.title)} panel`}
       sx={{
         ...sxClasses.panelContainer,
