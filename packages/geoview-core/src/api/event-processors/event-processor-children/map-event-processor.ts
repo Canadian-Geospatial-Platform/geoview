@@ -189,6 +189,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - map Id
    * @returns {MapViewer} The Map viewer instance
    */
+  // TODO: REFACTOR EVENT PROCESSOR MAJOR - Turn this function deprecated and redesign the flow. It's the only place left in the code where we still import api from '@/app'.
   static getMapViewer(mapId: string): MapViewer {
     return api.getMapViewer(mapId);
   }
@@ -199,6 +200,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - map Id
    * @returns {LayerApi} The Map viewer layer API instance
    */
+  // TODO: REFACTOR EVENT PROCESSOR MAJOR - Turn this function deprecated and redesign the flow. It's the only place left in the code where we still import api from '@/app'.
   static getMapViewerLayerAPI(mapId: string): LayerApi {
     return api.getMapViewer(mapId).layer;
   }
@@ -209,6 +211,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - map Id
    * @returns {PluginsContainer} The map plugins container
    */
+  // TODO: REFACTOR EVENT PROCESSOR MAJOR - Turn this function deprecated and redesign the flow. It's the only place left in the code where we still import api from '@/app'.
   static async getMapViewerPlugins(mapId: string): Promise<PluginsContainer> {
     // TODO: Check - Remove the try/catch here to force explicit case-by-case handling instead of via shared function.
     await whenThisThen(() => api && api.hasMapViewer(mapId));
@@ -910,6 +913,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     });
   }
 
+  // TODO: REFACTOR EVENT PROCESSOR MAJOR - Turn this function deprecated and redesign the flow. It's the only place left in the code where we still import api from '@/app'.
   static reorderLayer(mapId: string, layerPath: string, move: number): void {
     // Redirect to state API
     api.getMapViewer(mapId).stateApi.reorderLayers(mapId, layerPath, move);
@@ -1333,7 +1337,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         visible: orderedLayerInfo.visible,
         opacity: legendLayerInfo.opacity,
         legendCollapsed: orderedLayerInfo.legendCollapsed,
-        queryable: orderedLayerInfo.queryable,
+        queryable: orderedLayerInfo.queryableState,
         hoverable: orderedLayerInfo.hoverable,
       },
       controls: legendLayerInfo.controls,

@@ -212,6 +212,67 @@ export function deepMerge<S extends any, T extends any>(base: S, target: T): S &
 }
 
 /**
+ * Performs a shallow equality check between two objects.
+ * Compares the objects' own enumerable keys and values using `Object.is`.
+ * Returns true if both objects have the same keys and corresponding values, false otherwise.
+ * Note: This is a **shallow** comparison. Nested objects or arrays are compared by reference.
+ * @param {Record<string, any>} a - The first object to compare.
+ * @param {Record<string, any>} b - The second object to compare.
+ * @returns {boolean} True if the objects are shallowly equal, false otherwise.
+ * @example
+ * const obj1 = { foo: 1, bar: 2 };
+ * const obj2 = { foo: 1, bar: 2 };
+ * const obj3 = { foo: 1, bar: 3 };
+ * shallowObjectEqual(obj1, obj2); // true
+ * shallowObjectEqual(obj1, obj3); // false
+ */
+export function shallowObjectEqual<T>(a: T, b: T): boolean {
+  if (a === b) return true;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const aKeys = Object.keys(a as any);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const bKeys = Object.keys(b as any);
+
+  if (aKeys.length !== bKeys.length) return false;
+
+  for (const key of aKeys) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (!Object.is((a as Record<string, any>)[key], (b as Record<string, any>)[key])) return false;
+  }
+
+  return true;
+}
+
+/**
+ * Performs a shallow equality check between two arrays.
+ * Compares each element using `Object.is`. Returns true if both arrays
+ * have the same length and all corresponding elements are strictly equal,
+ * false otherwise.
+ * Note: This is a **shallow** comparison. Nested objects or arrays are compared by reference.
+ * @template T - The type of elements in the arrays.
+ * @param {T[]} a - The first array to compare.
+ * @param {T[]} b - The second array to compare.
+ * @returns {boolean} True if the arrays are shallowly equal, false otherwise.
+ * @example
+ * const arr1 = [1, 2, 3];
+ * const arr2 = [1, 2, 3];
+ * const arr3 = [1, 2, 4];
+ * shallowArrayEqual(arr1, arr2); // true
+ * shallowArrayEqual(arr1, arr3); // false
+ */
+export function shallowArrayEqual<T>(a: T[], b: T[]): boolean {
+  if (a === b) return true;
+  if (a.length !== b.length) return false;
+
+  for (let i = 0; i < a.length; i++) {
+    if (!Object.is(a[i], b[i])) return false;
+  }
+
+  return true;
+}
+
+/**
  * Take string like "My string is __param__" and replace parameters (__param__) from array of values
  *
  * @param {unknown[]} params - An array of parameters to replace, i.e. ['short']

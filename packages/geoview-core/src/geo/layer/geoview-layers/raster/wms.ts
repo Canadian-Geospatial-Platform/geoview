@@ -205,7 +205,7 @@ export class WMS extends AbstractGeoViewRaster {
       const queryable = raw === '1' || raw === true;
 
       // Initialize the queryable
-      layerConfig.initQueryable(queryable);
+      layerConfig.initQueryableSource(queryable);
 
       // Set Min/Max Scale Limits (MaxScale should be set to the largest and MinScale should be set to the smallest)
       // Example: If MinScaleDenominator is 100,000 and maxScale is 50,000, then 100,000 should be used. This is because

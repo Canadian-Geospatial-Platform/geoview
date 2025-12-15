@@ -66,7 +66,6 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
 
     // Update the resultSet data
     const layerPath = layer.getLayerPath();
-    this.resultSet[layerPath].eventListenerEnabled = layer.getLayerConfig().getInitialSettings().states?.hoverable ?? true;
     this.resultSet[layerPath].queryStatus = 'processed';
     this.resultSet[layerPath].feature = undefined;
   }

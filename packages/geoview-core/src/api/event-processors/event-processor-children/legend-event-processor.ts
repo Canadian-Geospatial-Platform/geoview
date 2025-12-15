@@ -191,6 +191,43 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Sets the layer queryable capacity.
+   * @param {string} mapId - The ID of the map.
+   * @param {string} layerPath - The layer path of the layer to change.
+   * @param {boolean} queryable - The queryable state to set.
+   */
+  // TODO: REFACTOR EVENT PROCESSOR - The 'EventProcessor' classes could use some rethinking, especially when they end up calling the layer api to execute something like
+  // TO.DOCONT: here and in multiple other places. This TODO considers also the next function here 'setLayerQueryableInStore' which saves the state to the store.
+  // TO.DOCONT: Is there a big benefit to having this function here which simply redirect the call to the layer api - which is basically hiding the coupling to the 'api'?
+  // TO.DOCONT: It seems a bit convoluted that the event processor would both perform the action via layer api AND be responsible to update the store (which is a function also called by the layer api).
+  // TO.DOCONT: Why not explicitely couple the layer api with the code needing it instead of hiding it via a jump to the event processor which
+  static setLayerQueryable(mapId: string, layerPath: string, queryable: boolean): void {
+    MapEventProcessor.getMapViewerLayerAPI(mapId).setLayerQueryable(layerPath, queryable);
+  }
+
+  /**
+   * Updates the "queryable" state of a layer in the store for a given map.
+   * Finds the layer by its `layerPath` in the legend layers of the specified `mapId`.
+   * If the layer exists, updates its `queryable` property and writes the updated
+   * legend layers back to the store.
+   * @param {string} mapId - The ID of the map whose layer state should be updated.
+   * @param {string} layerPath - The unique path/identifier of the layer to update.
+   * @param {boolean} queryable - The new queryable state to set for the layer.
+   */
+  static setLayerQueryableInStore(mapId: string, layerPath: string, queryable: boolean): void {
+    // Find the layer for the given layer path
+    const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
+    const layer = this.findLayerByPath(layers, layerPath);
+
+    if (layer) {
+      // Set layer queryable
+      layer.queryable = queryable;
+      // Set updated legend layers
+      this.getLayerState(mapId).setterActions.setLegendLayers(layers);
+    }
+  }
+
+  /**
    * Sets the layersAreLoading flag in the store
    * @param {string} mapId - The map id
    * @param {boolean} areLoading - Indicator if any layer is currently loading
@@ -435,8 +472,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           type: legendResultSetEntry.data?.type || layerConfig.getSchemaTag(),
           canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
           opacity: layerConfig.getInitialSettings()?.states?.opacity ?? 1, // default: 1
-          hoverable: layerConfig.getInitialSettings()?.states?.hoverable, // TODO: Check - Should it be default: true here?
-          queryable: layerConfig.getInitialSettings()?.states?.queryable, // TODO: Check - Should it be default: true here?
+          hoverable: layerConfig.getInitialSettings()?.states?.hoverable, // default: true
+          queryable: layerConfig.getInitialSettings()?.states?.queryable, // default: true
           items: [] as TypeLegendItem[],
           children: [] as TypeLegendLayer[],
           icons: icons || [],
@@ -752,6 +789,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {boolean} updateLegendLayers - Whether to update the legend layers or not
    */
   static setLayerOpacity(mapId: string, layerPath: string, opacity: number, updateLegendLayers?: boolean): void {
+    // Redirect
     MapEventProcessor.getMapViewerLayerAPI(mapId).setLayerOpacity(layerPath, opacity, updateLegendLayers);
   }
 
@@ -770,26 +808,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     // TO.DOCONT: and then return curLayers—making it appear unchanged when reading the code. This behavior needs careful review.
     const curLayers = this.getLayerState(mapId).legendLayers;
     this.getLegendLayerInfo(mapId, layerPath)!.hoverable = hoverable;
-
-    // Set updated legend layers
-    this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);
-  }
-
-  /**
-   * Sets the layer queryable capacity.
-   * @param {string} mapId - The ID of the map.
-   * @param {string} layerPath - The layer path of the layer to change.
-   * @param {boolean} queryable - The queryable state to set.
-   */
-  static setLayerQueryable(mapId: string, layerPath: string, queryable: boolean): void {
-    if (queryable) MapEventProcessor.getMapViewerLayerAPI(mapId).featureInfoLayerSet.enableClickListener(layerPath);
-    else MapEventProcessor.getMapViewerLayerAPI(mapId).featureInfoLayerSet.disableClickListener(layerPath);
-
-    // ! Wrong pattern, need to be look at...
-    // TODO: These setters take curLayers, modify an object indirectly (which happens to affect an object inside curLayers!),
-    // TO.DOCONT: and then return curLayers—making it appear unchanged when reading the code. This behavior needs careful review.
-    const curLayers = this.getLayerState(mapId).legendLayers;
-    this.getLegendLayerInfo(mapId, layerPath)!.queryable = queryable;
 
     // Set updated legend layers
     this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);
@@ -857,7 +875,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const visibleValues = new Set(styleUnique.filter((style) => style.visible).map((style) => style.values.join(';')));
     const unvisibleValues = new Set(styleUnique.filter((style) => !style.visible).map((style) => style.values.join(';')));
 
-    // TODO: Cleanup - This seems to be unnecessary now, commenting it for testing (2025-11-24)
+    // TODO: COMMENTED CODE - This seems to be unnecessary now, commenting it for testing (2025-11-24)
     // // GV: Some esri layer has uniqueValue renderer but there is no field define in their metadata (i.e. e2424b6c-db0c-4996-9bc0-2ca2e6714d71).
     // // TODO: The fields contain undefined, it should be empty. Check in new config api
     // // TODO: This is a workaround
