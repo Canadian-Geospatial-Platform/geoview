@@ -2,6 +2,7 @@ import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeLayerMetadataEsri, 
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { TypeEsriDynamicLayerConfig } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
+import type { TypeStyleGeometry } from '@/api/types/map-schema-types';
 export interface EsriDynamicLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
     /** Source settings to apply to the GeoView layer source at creation time. */
     source?: TypeSourceEsriDynamicInitialConfig;
@@ -33,6 +34,12 @@ export declare class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryC
      * @returns {TypeLayerMetadataEsri | undefined} The strongly-typed layer metadata specific to this layer entry config.
      */
     getLayerMetadata(): TypeLayerMetadataEsri | undefined;
+    /**
+     * Overrides the get geometry type to interpret the esri type name.
+     * @returns {TypeStyleGeometry} The geometry type.
+     * @throws {NotSupportedError} When the geometry type is not supported.
+     */
+    protected onGetGeometryType(): TypeStyleGeometry;
     /**
      * Type guard that checks whether the given configuration (class instance or plain object)
      * represents an Esri Dynamic layer type.

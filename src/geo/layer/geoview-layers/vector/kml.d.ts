@@ -1,5 +1,4 @@
 import type { Options as SourceOptions } from 'ol/source/Vector';
-import type { ReadOptions } from 'ol/format/Feature';
 import type { Vector as VectorSource } from 'ol/source';
 import type Feature from 'ol/Feature';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
@@ -39,10 +38,10 @@ export declare class KML extends AbstractGeoViewVector {
      * Overrides the creation of the source configuration for the vector layer.
      * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration.
      * @param {SourceOptions} sourceOptions - The source options.
-     * @param {ReadOptions} readOptions - The read options.
      * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
+     * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
      */
-    protected onCreateVectorSource(layerConfig: VectorLayerEntryConfig, sourceOptions: SourceOptions<Feature>, readOptions: ReadOptions): VectorSource<Feature>;
+    protected onCreateVectorSource(layerConfig: VectorLayerEntryConfig, sourceOptions: SourceOptions<Feature>): VectorSource<Feature>;
     /**
      * Overrides the creation of the GV Layer
      * @param {KmlLayerEntryConfig} layerConfig - The layer entry configuration.

@@ -92,7 +92,7 @@ export declare class EsriImage extends AbstractGeoViewRaster {
      * Creates an ImageArcGISRest source from a layer config.
      * @param {EsriImageLayerEntryConfig} layerConfig - The configuration for the EsriImage layer.
      * @returns A fully configured ImageArcGISRest source.
-     * @throws If required config fields like dataAccessPath are missing.
+     * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
      */
     static createEsriImageSource(layerConfig: EsriImageLayerEntryConfig): ImageArcGISRest;
 }

@@ -8,6 +8,7 @@ import type { Extent } from 'ol/extent';
  * @class Projection
  */
 export declare abstract class Projection {
+    #private;
     /**
      * constant used for the available projection names
      */
@@ -29,6 +30,7 @@ export declare abstract class Projection {
      * @param {number} stops - Optional number of stops per side used for the transform. The default value is 25.
      *
      * @returns The densified extent transformed in the destination projection.
+     * @static
      */
     static transformAndDensifyExtent(extent: Extent, source: OLProjection, destination: OLProjection, stops?: number): Coordinate[];
     /**
@@ -41,6 +43,7 @@ export declare abstract class Projection {
      * @param {number?} stops - Optional number of stops per side used for the transform. By default only the corners are used.
      *
      * @returns The new extent transformed in the destination projection.
+     * @static
      */
     static transformExtentFromObj(extent: Extent, projection: TypeProjection | undefined, destination: OLProjection, stops?: number | undefined): Extent;
     /**
@@ -53,6 +56,7 @@ export declare abstract class Projection {
      * @param {number?} stops - Optional number of stops per side used for the transform. By default only the corners are used.
      *
      * @returns The new extent transformed in the destination projection.
+     * @static
      */
     static transformExtentFromWKID(extent: Extent, wkid: number, destination: OLProjection, stops?: number | undefined): Extent;
     /**
@@ -65,6 +69,7 @@ export declare abstract class Projection {
      * @param {number?} stops - Optional number of stops per side used for the transform. By default only the corners are used.
      *
      * @returns The new extent transformed in the destination projection.
+     * @static
      */
     static transformExtentFromWKT(extent: Extent, customWKT: string, destination: OLProjection, stops?: number | undefined): Extent;
     /**
@@ -77,6 +82,7 @@ export declare abstract class Projection {
      * @param {number?} stops - Optional number of stops per side used for the transform. By default only the corners are used.
      *
      * @returns The new extent transformed in the destination projection.
+     * @static
      */
     static transformExtentFromProj(extent: Extent, source: OLProjection, destination: OLProjection, stops?: number | undefined): Extent;
     /**
@@ -84,6 +90,7 @@ export declare abstract class Projection {
      * @param {Coordinate[]} points - Array of passed in points to convert
      * @param {string} fromProj - Projection to be converted from
      * @param {string} toProj - Projection to be converted to
+     * @static
      */
     static transformPoints(points: Coordinate[], fromProj: string, toProj: string): Array<Array<number>>;
     /**
@@ -92,6 +99,7 @@ export declare abstract class Projection {
      * @param {OLProjection} inProjection - Actual projection of the coordinate
      * @param {OLProjection} outProjection - Desired projection of the coordinate
      * @return {Coordinate} Coordinate as projected
+     * @static
      */
     static transform(coordinate: Coordinate, inProjection: OLProjection, outProjection: OLProjection): Coordinate;
     /**
@@ -99,6 +107,7 @@ export declare abstract class Projection {
      * @param {Coordinate} coordinate - Longitude/latitude coordinate
      * @param {OLProjection} projection - Projection to project the coordinate
      * @return {Coordinate} Coordinate as projected
+     * @static
      */
     static transformFromLonLat(coordinate: Coordinate, projection: OLProjection): Coordinate;
     /**
@@ -106,6 +115,7 @@ export declare abstract class Projection {
      * @param {Coordinate} coordinate - Projected coordinate
      * @param {OLProjection} projection - Projection of the coordinate
      * @return {Coordinate} Coordinate as longitude and latitude, i.e. an array with longitude as 1st and latitude as 2nd element.
+     * @static
      */
     static transformToLonLat(coordinate: Coordinate, projection: OLProjection): Coordinate;
     /**
@@ -113,34 +123,52 @@ export declare abstract class Projection {
      * @param {Coordinate} coordinate - The coordinate to be converted
      * @param {string} utmZone - The utm zone the return coordinates will be in
      * @returns {Coordinate} The returned coordinates in UTM Northing / Easting
+     * @static
      */
     static transformToUTMNorthingEasting(coordinate: Coordinate, utmZone: string): Coordinate;
     /**
      * Fetches definitions for unsupported projections and adds them.
      * @param {TypeProjection} projection - Object containing wkid and possibly latestWkid from service metadata.
+     * @static
      */
     static addProjection(projection: TypeProjection): Promise<void>;
+    /**
+     * Fetches definitions for unsupported projections and adds them.
+     * @param {number} code - Projection code number.
+     * @static
+     */
+    static addProjectionCode(code: number): Promise<void>;
+    /**
+     * Checks if a projection exists for GeoView and if not it adds it on-the-fly using the provided projection string information.
+     * @param {string | undefined} projection - The projection string to check if existing and to add when not existing.
+     * @static
+     */
+    static addProjectionIfMissing(projection: TypeProjection | ProjectionLike | undefined): Promise<void>;
     /**
      * Wrapper around OpenLayers get function that fetches a Projection object for the code specified.
      * @param {TypeProjection | undefined} projectionObj - A projection object with properties such as latestWkid, wkid, or wkt.
      * @return {OLProjection | undefined} — Projection object, or undefined if not in list.
+     * @static
      */
     static getProjectionFromObj(projectionObj: TypeProjection | undefined): OLProjection | undefined;
     /**
      * Wrapper around OpenLayers get function that fetches a Projection object for the code specified.
      * @param {string} customWKT - A code string which is a combination of authority and identifier such as "EPSG:4326".
      * @return {OLProjection | undefined} Projection object, or undefined if not in list.
+     * @static
      */
     static getProjectionFromWKT(customWKT: string): OLProjection;
     /**
      * Wrapper around OpenLayers get function that fetches a Projection object for the code specified.
      * @param {string} projection - A code string which is a combination of authority and identifier such as "EPSG:4326".
      * @return {OLProjection | undefined} Projection object, or undefined if not found.
+     * @static
      */
-    static getProjectionFromString(projection: string | ProjectionLike): OLProjection;
+    static getProjectionFromString(projection: ProjectionLike): OLProjection;
     /**
      * Gets the projection representing a LonLat projection.
      * @return {OLProjection} Projection object representing LonLat.
+     * @static
      */
     static getProjectionLonLat(): OLProjection;
     /**
@@ -148,14 +176,30 @@ export declare abstract class Projection {
      * @param {string} projection - The projection code
      * @param {Coordinate} center - Map center
      * @returns The point resolution for map center
+     * @static
      */
     static getResolution(projection: string, center: Coordinate): number;
+    /**
+     * Reads the numeric EPSG code from a projection string.
+     * Supports case-insensitive formats such as:
+     * - `"EPSG:4326"`
+     * - `"epsg:3857"`
+     * - `"EpSg: 1234"`
+     * The function trims whitespace and validates that the string matches a proper
+     * `EPSG:<number>` pattern. Returns `undefined` if the format is invalid or the
+     * numeric part is not a valid number.
+     * @param {ProjectionLike} projection - The projection like identifier containing the EPSG code.
+     * @returns {number | undefined} The extracted EPSG numeric code, or `undefined` if invalid.
+     * @static
+     */
+    static readEPSGNumber(projection: ProjectionLike): number | undefined;
     /**
      * Reads an extent and verifies if it might be reversed (ymin,xmin,ymax,ymin) and when
      * so puts it back in order (xmin,ymin,xmax,ymax).
      * @param {string} projection - The projection the extent is in
      * @param {Extent} extent - The extent to check
      * @returns {Extent} The extent in order (xmin,ymin,xmax,ymax).
+     * @static
      */
     static readExtentCarefully(projection: string, extent: Extent): Extent;
     /**
@@ -166,6 +210,7 @@ export declare abstract class Projection {
      * @param {string} endProjection - The transformed projection of the coordinates.
      *   Note: the value should include 'EPSG:' then the projection  number.
      * @returns {Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined} The transformed coordinates
+     * @static
      */
     static transformCoordinates(coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined, startProjection: string, endProjection: string): Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][] | undefined;
 }

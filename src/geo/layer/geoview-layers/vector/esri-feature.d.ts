@@ -1,6 +1,5 @@
 import type { Vector as VectorSource } from 'ol/source';
 import type { Options as SourceOptions } from 'ol/source/Vector';
-import type { ReadOptions } from 'ol/format/Feature';
 import type Feature from 'ol/Feature';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
@@ -38,14 +37,14 @@ export declare class EsriFeature extends AbstractGeoViewVector {
      * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
      * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * @returns {Promise<T = TypeMetadataEsriFeature | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
-     * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
+     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
      */
     protected onFetchServiceMetadata<T = TypeMetadataEsriFeature | undefined>(abortSignal?: AbortSignal): Promise<T>;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
      * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
-     * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
+     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
      */
     protected onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig>;
     /**
@@ -65,10 +64,10 @@ export declare class EsriFeature extends AbstractGeoViewVector {
      * Overrides the creation of the source configuration for the vector layer.
      * @param {EsriFeatureLayerEntryConfig} layerConfig - The layer entry configuration.
      * @param {SourceOptions} sourceOptions - The source options.
-     * @param {ReadOptions} readOptions - The read options.
      * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
+     * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
      */
-    protected onCreateVectorSource(layerConfig: EsriFeatureLayerEntryConfig, sourceOptions: SourceOptions<Feature>, readOptions: ReadOptions): VectorSource<Feature>;
+    protected onCreateVectorSource(layerConfig: EsriFeatureLayerEntryConfig, sourceOptions: SourceOptions<Feature>): VectorSource<Feature>;
     /**
      * Overrides the creation of the GV Layer
      * @param {EsriFeatureLayerEntryConfig} layerConfig - The layer entry configuration.

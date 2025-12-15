@@ -53,10 +53,11 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
     protected onGetFieldType(fieldName: string): TypeOutfieldsType;
     /**
      * Overrides the get all feature information for all the features stored in the layer.
+     * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
      * @param {AbortController?} abortController - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getAllFeatureInfo(abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
+    protected getAllFeatureInfo(map: OLMap, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overrides the return of feature information at a given pixel location.
      * @param {OLMap} map - The Map where to get Feature Info At Pixel from.
@@ -83,11 +84,6 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      */
     protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
-     * Applies a view filter to a Vector layer's configuration by updating the layerConfig.filterEquation parameter.
-     * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
-     */
-    applyViewFilter(filter?: string | undefined): void;
-    /**
      * Overrides the way to get the bounds for this layer type.
      * @param {OLProjection} projection - The projection to get the bounds into.
      * @param {number} stops - The number of stops to use to generate the extent.
@@ -97,13 +93,19 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
     onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
     /**
      * Gets the extent of an array of features.
-     * @param {string[]} objectIds - The uids of the features to calculate the extent from.
+     * @param {number[] | string[]} objectIds - The uids of the features to calculate the extent from.
      * @param {OLProjection} outProjection - The output projection for the extent.
      * @param {string?} outfield - ID field to return for services that require a value in outfields.
      * @override
      * @returns {Promise<Extent>} The extent of the features, if available.
+     * @deprecated Seems like this is not used anymore, not called anywhere and unsure how it'd work with adhoc vector layers without 'ids' (objectids) necessarily.
      */
-    onGetExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
+    onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
+    /**
+     * Applies a view filter to a Vector layer's configuration by updating the layerConfig.filterEquation parameter.
+     * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
+     */
+    applyViewFilter(filter?: string | undefined): void;
     /**
      * Sets the style applied flag indicating when a style has been applied for the AbstractGVVector via the style callback function.
      * @param {boolean} styleApplied - Indicates if the style has been applied on the AbstractGVVector.

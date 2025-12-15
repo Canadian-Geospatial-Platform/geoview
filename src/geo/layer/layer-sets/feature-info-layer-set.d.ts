@@ -1,6 +1,6 @@
 import type { Coordinate } from 'ol/coordinate';
 import type { EventDelegateBase } from '@/api/events/event-helper';
-import type { TypeResultSet } from '@/api/types/map-schema-types';
+import type { QueryType, TypeResultSet } from '@/api/types/map-schema-types';
 import type { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { EventType, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
@@ -14,6 +14,8 @@ import type { TypeFeatureInfoResultSet, TypeFeatureInfoResultSetEntry } from '@/
  */
 export declare class FeatureInfoLayerSet extends AbstractLayerSet {
     #private;
+    /** The query type */
+    static QUERY_TYPE: QueryType;
     /** The resultSet object as existing in the base class, retyped here as a TypeFeatureInfoResultSet */
     resultSet: TypeFeatureInfoResultSet;
     /**
@@ -46,7 +48,7 @@ export declare class FeatureInfoLayerSet extends AbstractLayerSet {
      * Queries the features at the provided coordinate for all the registered layers.
      * @param {Coordinate} lonLatCoordinate - The longitude/latitude coordinate where to query the features
      * @returns {Promise<TypeFeatureInfoResultSet>} A promise which will hold the result of the query
-     * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
      */
     queryLayers(lonLatCoordinate: Coordinate): Promise<TypeFeatureInfoResultSet>;
     /**

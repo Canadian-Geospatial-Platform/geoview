@@ -1,6 +1,65 @@
 import type { Root } from 'react-dom/client';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import type { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
+import type { TypeHTMLElement } from '@/core/types/global-types';
+/**
+ * Generates an array of numbers from `start` (inclusive) to `end` (exclusive),
+ * incrementing by `step`.
+ * @param {number} start - The first number in the range.
+ * @param {number} end - The end of the range (exclusive).
+ * @param {number} [step=1] - The increment between numbers.
+ * @returns {number[]} An array of numbers from start to end with the given step.
+ * @example
+ * range(0, 5); // [0, 1, 2, 3, 4]
+ * range(50, 1000, 50); // [50, 100, 150, ..., 950]
+ */
+export declare function range(start: number, end: number, step?: number): number[];
+/**
+ * Converts a string to camelCase.
+ * Replaces hyphens (`-`), underscores (`_`), and spaces with capitalization
+ * of the following letter, and ensures the first character is lowercase.
+ * @param {string} str - The input string to convert.
+ * @returns {string} The camelCased version of the input string.
+ * @example
+ * camelCase('my_tab-name'); // 'myTabName'
+ * camelCase('Hello World'); // 'helloWorld'
+ */
+export declare function camelCase(str: string): string;
+/**
+ * Deeply compares two values (objects, arrays, or primitives) for equality.
+ * @param a - The first value to compare.
+ * @param b - The second value to compare.
+ * @returns `true` if the values are deeply equal, `false` otherwise.
+ * @example
+ * ```ts
+ * deepEqual({ x: 1, y: [2, 3] }, { x: 1, y: [2, 3] }); // true
+ * deepEqual([1, 2, 3], [1, 2, 4]); // false
+ * deepEqual(5, 5); // true
+ * ```
+ */
+export declare function deepEqual(a: any, b: any): boolean;
+/**
+ * Deeply clones a value, preserving functions and non-cloneable types by reference.
+ * @param value The value to clone.
+ * @returns A deep copy of the value.
+ */
+export declare function deepClone<T>(value: T): T;
+/**
+ * Deeply merges two objects, filling in undefined or missing properties
+ * from the source object into the target object. Nested objects are merged recursively.
+ * Existing values in the target object are preserved.
+ * @param {S} base - The source object containing the default values.
+ * @param {T} target - The target object to merge values into.
+ * @returns The merged target object.
+ * @example
+ * ```ts
+ * const userSettings = { theme: { darkMode: true } };
+ * const defaultSettings = { theme: { darkMode: false, fontSize: 14 }, locale: 'en' };
+ * const merged = deepMerge(userSettings, defaultSettings);
+ * // merged: { theme: { darkMode: true, fontSize: 14 }, locale: 'en' }
+ * ```
+ */
+export declare function deepMerge<S extends any, T extends any>(base: S, target: T): S & T;
 /**
  * Take string like "My string is __param__" and replace parameters (__param__) from array of values
  *
@@ -25,6 +84,12 @@ export declare function getLocalizedMessage(language: TypeDisplayLanguage, messa
  * @returns {T} The merged object
  */
 export declare function deepMergeObjects<T>(...objects: unknown[]): T;
+/**
+ * Check if a string is a number
+ * @param {string} str - The object to test
+ * @returns true if the object is numeric, false otherwise
+ */
+export declare function isNumeric(str: string): boolean;
 /**
  * Check if an object is empty
  * @param {object} obj - The object to test
@@ -69,6 +134,12 @@ export declare function isJsonString(str: string): boolean;
  */
 export declare function xmlToJson(xml: Document | Node | Element): any;
 /**
+ * Parses a XML string into Json.
+ * @param {string} xmlContent - The XML string to parse.
+ * @returns {T} A json object
+ */
+export declare function parseXMLToJson<T>(xmlContent: string): T;
+/**
  * Execute a XMLHttpRequest
  * @param {string} url - The url to request
  * @returns {Promise<string>} The return value, return is '{}' if request failed
@@ -85,13 +156,12 @@ export declare function getXMLHttpRequest(url: string): Promise<string>;
  */
 export declare function addUiComponent(targetDivId: string, component: React.ReactElement): Root;
 /**
- * Sanitize HTML to remove threat
+ * Sanitizes HTML to remove threat
  *
  * @param {string} contentHtml - HTML content to sanitize
  * @returns {string} Sanitized HTML or empty string if all dirty
  */
 export declare function sanitizeHtmlContent(contentHtml: string): string;
-export declare function safeStringify(obj: any, space?: number): string;
 /**
  * Sets up a MutationObserver to monitor when a specific DOM element (e.g., a div container)
  * is removed from the document. When the element is removed, it triggers a cleanup callback
@@ -101,6 +171,34 @@ export declare function safeStringify(obj: any, space?: number): string;
  * @param {(key: string) => void} onHtmlElementRemoved - The callback executed once the given DOM element gets removed from the DOM tree.
  */
 export declare function watchHtmlElementRemoval(key: string, element: HTMLElement, onHTMLElementRemoved: (key: string) => void): void;
+/**
+ * Attempts to place the given HTML element into fullscreen mode.
+ * This function handles browser compatibility by trying the standard
+ * `requestFullscreen()` API first, then falling back to vendor-prefixed
+ * versions for Safari, IE11, and Firefox.
+ * Any errors from the standard promise-based fullscreen request are caught
+ * and logged using `logger.logPromiseFailed`.
+ * @param {TypeHTMLElement} element - The element to display in fullscreen mode.
+ */
+export declare function requestFullscreen(element: TypeHTMLElement): void;
+/**
+ * Exits fullscreen mode if the document is currently in fullscreen.
+ * This function uses the standard `exitFullscreen()` API when available,
+ * and falls back to vendor-prefixed exit methods for Safari, IE11, and Firefox.
+ * Any errors from the standard promise-based exit request are caught
+ * and logged using `logger.logPromiseFailed`.
+ */
+export declare function exitFullscreen(): void;
+/**
+ * Safely converts a JavaScript value to a JSON string, handling circular references.
+ * Circular objects are replaced with the string `"{Circular JSON}"` to prevent
+ * `JSON.stringify` from throwing an error. The function also supports optional
+ * pretty-printing via the `space` parameter.
+ * @param {*} obj - The value to stringify.
+ * @param {number} [space=2] - Number of spaces to use for indentation in the resulting JSON string.
+ * @returns {string} The JSON string representation of the input value, with circular references handled.
+ */
+export declare function safeStringify(obj: any, space?: number): string;
 /**
  * Removes comments from JSON config
  *
@@ -148,7 +246,7 @@ export declare function stringify(str: unknown): unknown | string;
  * @param {number} ms - The number of milliseconds to wait for.
  * @returns {Promise<void>} Promise which resolves when the delay timeout expires.
  */
-export declare const delay: (ms: number) => Promise<void>;
+export declare function delay(ms: number): Promise<void>;
 /**
  * Repeatedly invokes a callback function at a given interval until it returns `true` or until timeout is reached.
  * Once the callback returns `true` or the timeout expires, the interval is cleared and the polling stops.
@@ -159,7 +257,7 @@ export declare const delay: (ms: number) => Promise<void>;
  *                              cleared after this duration, regardless of callback return value.
  * @returns {ReturnType<typeof setInterval>} The interval timer ID, which can be used to clear the interval manually if needed.
  */
-export declare const doUntil: <T>(callback: () => T, ms: number, timeout?: number) => ReturnType<typeof setInterval>;
+export declare function doUntil<T>(callback: () => T, ms: number, timeout?: number): ReturnType<typeof setInterval>;
 /**
  * Repeatedly invokes a callback function at a specified interval until one of two conditions is met:
  * - The callback function explicitly returns `true`, indicating the interval should be cleared.
@@ -171,7 +269,7 @@ export declare const doUntil: <T>(callback: () => T, ms: number, timeout?: numbe
  * @param {number} ms - The interval duration in milliseconds.
  * @returns {ReturnType<typeof setInterval>} The interval timer, which can be cleared manually if needed.
  */
-export declare const doUntilPromises: <T>(callback: () => T, promises: Promise<unknown>[], ms: number) => ReturnType<typeof setInterval>;
+export declare function doUntilPromises<T>(callback: () => T, promises: Promise<unknown>[], ms: number): ReturnType<typeof setInterval>;
 /**
  * This generic function checks for a validity of something via the checkCallback() until it's found or until the timer runs out.
  * When the check callback returns true (or some found object), the doCallback() function is called with the found information.
@@ -239,6 +337,12 @@ export declare function isElementInViewport(el: Element): boolean;
  * @param {number} offset - Offset in pixels for 'start' (top gap) and 'end' (bottom gap) positions (default: 100)
  */
 export declare function scrollIfNotVisible(el: HTMLElement, blockValue: ScrollLogicalPosition, offset?: number): void;
+/**
+ * Scrolls a list item into view within its scrollable container only, without scrolling the page.
+ * Adds a 20px gap for better visibility when scrolling.
+ * @param {HTMLElement} listItem - The list item element to scroll into view
+ */
+export declare function scrollListItemIntoView(listItem: HTMLElement): void;
 /**
  * Checks whether the current environment is running on localhost port 8080.
  *

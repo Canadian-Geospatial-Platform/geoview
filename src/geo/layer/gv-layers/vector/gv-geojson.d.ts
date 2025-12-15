@@ -34,11 +34,11 @@ export declare class GVGeoJSON extends AbstractGVVector {
      * @param {GeoJSONObject | string} geojson - The geoJSON object.
      * @param {OLProjection} projection - The output projection.
      */
-    setGeojsonSource(geojson: GeoJSONObject | string, projection: OLProjection): void;
+    setGeojsonSource(geojson: GeoJSONObject | string, projection: OLProjection): Promise<void>;
     /**
      * Updates the Geojson object, if any, to reproject the features into the new provided projection.
      * @param {OLProjection} projection - The projection to project the geojson source features into.
      */
-    updateGeojsonSource(projection: OLProjection): void;
+    updateGeojsonSource(projection: OLProjection): Promise<void>;
 }
 //# sourceMappingURL=gv-geojson.d.ts.map

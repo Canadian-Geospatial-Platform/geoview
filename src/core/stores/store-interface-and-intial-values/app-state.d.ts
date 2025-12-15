@@ -69,6 +69,7 @@ export declare const useAppGeoviewAssetsURL: () => string;
 export declare const useAppGuide: () => TypeGuideObject | undefined;
 export declare const useAppNotifications: () => NotificationDetailsType[];
 export declare const useAppShowUnsymbolizedFeatures: () => boolean;
+export declare const useAppShellContainer: () => HTMLElement;
 export declare const useAppDisplayLanguageById: (mapId: string) => TypeDisplayLanguage;
 export declare const useAppDisplayThemeById: (mapId: string) => TypeDisplayTheme;
 export declare const getAppCrosshairsActive: (mapId: string) => boolean;

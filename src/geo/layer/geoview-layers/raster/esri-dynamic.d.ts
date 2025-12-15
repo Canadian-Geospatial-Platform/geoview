@@ -104,7 +104,7 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      * Creates an ImageArcGISRest source from a layer config.
      * @param {EsriDynamicLayerEntryConfig} layerConfig - The configuration for the EsriDynamic layer.
      * @returns {ImageArcGISRest} A fully configured ImageArcGISRest source.
-     * @throws If required config fields like dataAccessPath are missing.
+     * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
      */
     static createEsriDynamicSource(layerConfig: EsriDynamicLayerEntryConfig): ImageArcGISRest;
     /**

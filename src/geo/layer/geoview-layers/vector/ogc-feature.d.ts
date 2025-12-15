@@ -1,5 +1,4 @@
 import type { Options as SourceOptions } from 'ol/source/Vector';
-import type { ReadOptions } from 'ol/format/Feature';
 import type { Vector as VectorSource } from 'ol/source';
 import type Feature from 'ol/Feature';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
@@ -37,13 +36,13 @@ export declare class OgcFeature extends AbstractGeoViewVector {
      * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
      * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * @returns {Promise<T = TypeMetadataOGCFeature>} A promise with the metadata or undefined when no metadata for the particular layer type.
-     * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
+     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
      */
     protected onFetchServiceMetadata<T = TypeMetadataOGCFeature>(abortSignal?: AbortSignal): Promise<T>;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
      * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
-     * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
+     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
      */
     protected onInitLayerEntries(): Promise<TypeGeoviewLayerConfig>;
     /**
@@ -62,10 +61,10 @@ export declare class OgcFeature extends AbstractGeoViewVector {
      * Overrides the creation of the source configuration for the vector layer.
      * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration.
      * @param {SourceOptions} sourceOptions - The source options.
-     * @param {ReadOptions} readOptions - The read options.
      * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
+     * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
      */
-    protected onCreateVectorSource(layerConfig: VectorLayerEntryConfig, sourceOptions: SourceOptions<Feature>, readOptions: ReadOptions): VectorSource<Feature>;
+    protected onCreateVectorSource(layerConfig: VectorLayerEntryConfig, sourceOptions: SourceOptions<Feature>): VectorSource<Feature>;
     /**
      * Overrides the creation of the GV Layer
      * @param {OgcFeatureLayerEntryConfig} layerConfig - The layer entry configuration.
@@ -76,10 +75,10 @@ export declare class OgcFeature extends AbstractGeoViewVector {
      * Fetches the metadata for a typical OGCFeature class.
      * @param {string} url - The url to query the metadata from.
      * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
-     * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
-     * @throws {RequestAbortedError} Error thrown when the request was aborted by the caller's signal.
-     * @throws {ResponseError} Error thrown when the response is not OK (non-2xx).
-     * @throws {ResponseEmptyError} Error thrown when the JSON response is empty.
+     * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
+     * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
+     * @throws {ResponseError} When the response is not OK (non-2xx).
+     * @throws {ResponseEmptyError} When the JSON response is empty.
      */
     static fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataOGCFeature>;
     /**

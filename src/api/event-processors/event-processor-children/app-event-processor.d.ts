@@ -7,7 +7,7 @@ import type { SnackbarType } from '@/core/utils/notifications';
 export declare class AppEventProcessor extends AbstractEventProcessor {
     /**
      * Shortcut to get the App state for a given map id
-     * @param {string} mapId The mapId
+     * @param {string} mapId - The mapId
      * @returns {IAppState} The App state.
      */
     protected static getAppState(mapId: string): IAppState;

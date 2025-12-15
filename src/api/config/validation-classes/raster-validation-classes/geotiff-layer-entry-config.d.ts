@@ -1,4 +1,4 @@
-import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeSourceGeoTIFFInitialConfig } from '@/api/types/layer-schema-types';
+import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeMetadataGeoTIFF, TypeSourceGeoTIFFInitialConfig } from '@/api/types/layer-schema-types';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { TypeGeoTIFFLayerConfig } from '@/geo/layer/geoview-layers/raster/geotiff';
@@ -17,6 +17,12 @@ export declare class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfi
      * @param {GeoTIFFLayerEntryConfigProps} layerConfig -  The layer configuration we want to instanciate.
      */
     constructor(layerConfig: GeoTIFFLayerEntryConfigProps);
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {TypeMetadataGeoTIFF | undefined} The strongly-typed layer configuration specific to this layer entry config.
+     */
+    getServiceMetadata(): TypeMetadataGeoTIFF | undefined;
     /**
      * Type guard that checks whether the given configuration (class instance or plain object) represents an GeoTIFF layer type.
      * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).

@@ -4,8 +4,8 @@ export declare const GEO_URL_TEXT: {
     url: string;
     text: string;
 };
-export declare const OL_ZOOM_DURATION = 500;
-export declare const OL_ZOOM_MAXZOOM = 13;
+export declare const OL_ZOOM_DURATION: number;
+export declare const OL_ZOOM_MAXZOOM: number;
 export declare const OL_ZOOM_PADDING: [number, number, number, number];
 export declare const DEFAULT_OL_FITOPTIONS: FitOptions;
 export declare const NORTH_POLE_POSITION: [number, number];

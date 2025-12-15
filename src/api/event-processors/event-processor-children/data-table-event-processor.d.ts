@@ -45,12 +45,18 @@ export declare class DataTableEventProcessor extends AbstractEventProcessor {
      */
     static addOrUpdateTableFilter(mapId: string, layerPath: string, filter: string): void;
     /**
-     * Shortcut to get the DataTable state for a given map id
+     * Shortcut to get the DataTable state for a given map id and layer path
      * @param {string} mapId - Id of the map.
-     * @param {string} layerPath - Layer path to apply filter.
+     * @param {string} layerPath - Layer path to query the features.
      * @returns {Promise<TypeFeatureInfoEntry[] | void>}
      */
     static triggerGetAllFeatureInfo(mapId: string, layerPath: string): Promise<TypeFeatureInfoEntry[] | void>;
+    /**
+     * Shortcut to reset the DataTable features given map id and layer path
+     * @param {string} mapId - Id of the map.
+     * @param {string} layerPath - Layer path to reset the features.
+     */
+    static triggerResetFeatureInfo(mapId: string, layerPath: string): void;
     /**
      * Propagates feature info layer sets to the store.
      * The propagation actually happens only if it wasn't already there. Otherwise, no update is propagated.

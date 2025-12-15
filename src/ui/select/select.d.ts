@@ -1,4 +1,4 @@
-import type { InputLabelProps, FormControlProps, SelectChangeEvent } from '@mui/material';
+import type { InputLabelProps, FormControlProps, SelectChangeEvent, MenuProps } from '@mui/material';
 /**
  * Custom MUI Select properties
  */
@@ -14,6 +14,14 @@ type TypeSelectProps = {
     menuItems: TypeMenuItemProps[];
     disabled?: boolean;
     variant?: 'standard' | 'outlined' | 'filled';
+    /**
+     * Props applied to the Menu component.
+     * Use this to specify a container element for the menu dropdown.
+     * This is particularly important when the Select is inside a fullscreen element,
+     * to ensure the menu renders within the fullscreen container.
+     * Example: MenuProps={{ container: shellContainer }}
+     */
+    MenuProps?: Partial<MenuProps>;
 };
 /**
  * Menu Item properties

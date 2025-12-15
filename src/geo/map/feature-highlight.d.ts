@@ -1,7 +1,7 @@
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import type { Extent } from 'ol/extent';
-import type { TypeHighlightColors, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
+import { type TypeHighlightColors, type TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { PointMarkers } from './point-markers';
 /**

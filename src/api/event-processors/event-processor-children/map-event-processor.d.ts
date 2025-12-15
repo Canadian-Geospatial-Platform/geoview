@@ -6,7 +6,7 @@ import type { Coordinate } from 'ol/coordinate';
 import type { Size } from 'ol/size';
 import type { Pixel } from 'ol/pixel';
 import type { TypeBasemapOptions, TypeInteraction, TypeValidMapProjectionCodes, TypePointMarker, TypeHighlightColors, TypeMapViewSettings, TypeFeatureInfoEntry, TypeMapFeaturesInstance } from '@/api/types/map-schema-types';
-import type { TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { LayerApi } from '@/geo/layer/layer';
 import type { TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { MapViewer } from '@/geo/map/map-viewer';
@@ -60,7 +60,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static getScaleInfoFromDomElement(mapId: string): TypeScaleInfo;
     /**
      * Shortcut to get the Map config for a given map id
-     * @param {string} mapId the map id to retrieve the config for
+     * @param {string} mapId - The map id to retrieve the config for
      * @returns {TypeMapFeaturesConfig | undefined} the map config or undefined if there is no config for this map id
      */
     static getGeoViewMapConfig(mapId: string): TypeMapFeaturesConfig | undefined;
@@ -90,6 +90,14 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      * @returns {string[]} The ordered layer paths
      */
     static getMapLayerOrder(mapId: string): string[];
+    /**
+     * Gets the status of a layer.
+     * @param {string} mapId - The map id.
+     * @param {string} layerPath - The layer path.
+     * @returns {TypeLayerStatus | undefined} The layer status
+     * @static
+     */
+    static getMapLayerStatus(mapId: string, layerPath: string): TypeLayerStatus | undefined;
     static getMapState(mapId: string): TypeMapState;
     /**
      * Gets the map state information for creating the export layout
@@ -119,7 +127,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      */
     static setHomeButtonView(mapId: string, view: TypeMapViewSettings): void;
     static rotate(mapId: string, rotation: number): void;
-    static zoom(mapId: string, zoom: number, duration?: number): Promise<void>;
+    static zoomMap(mapId: string, zoom: number, duration?: number): Promise<void>;
     /**
      * Gets the ordered layer info.
      * @param {string} mapId - The map id
@@ -224,8 +232,8 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      * Remove a layer from the orderedLayerInfo array.
      *
      * @param {string} mapId The ID of the map to remove the layer from.
-     * @param {string} layerPath The path of the layer to remove.
-     * @param {boolean} removeSublayers Should sublayers be removed.
+     * @param {string} layerPath - The path of the layer to remove.
+     * @param {boolean} removeSublayers - Should sublayers be removed.
      * @return {void}
      */
     static removeOrderedLayerInfo(mapId: string, layerPath: string, removeSublayers?: boolean): void;
@@ -245,9 +253,9 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     /**
      * Zoom to the specified extent.
      *
-     * @param {string} mapId The map id.
-     * @param {Extent} extent The extent to zoom to.
-     * @param {FitOptions} options The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 }).
+     * @param {string} mapId - The map id.
+     * @param {Extent} extent - The extent to zoom to.
+     * @param {FitOptions} options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 }).
      * @returns Promise<void>
      */
     static zoomToExtent(mapId: string, extent: Extent, options?: FitOptions): Promise<void>;
@@ -272,7 +280,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      *
      * @param {string} mapId - ID of map to zoom on
      * @param {string} layerPath - Path of layer to zoom to.
-     * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
      */
     static zoomToLayerVisibleScale(mapId: string, layerPath: string): void;
     /**
@@ -286,15 +294,15 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     /**
      * Get all active filters for layer.
      *
-     * @param {string} mapId The map id.
-     * @param {string} layerPath The path for the layer to get filters from.
+     * @param {string} mapId - The map id.
+     * @param {string} layerPath - The path for the layer to get filters from.
      */
     static getActiveVectorFilters(mapId: string, layerPath: string): (string | undefined)[] | undefined;
     /**
      * Apply all available filters to layer.
      *
-     * @param {string} mapId The map id.
-     * @param {string} layerPath The path of the layer to apply filters to.
+     * @param {string} mapId - The map id.
+     * @param {string} layerPath - The path of the layer to apply filters to.
      */
     static applyLayerFilters(mapId: string, layerPath: string): void;
     /**

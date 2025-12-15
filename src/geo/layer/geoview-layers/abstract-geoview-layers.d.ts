@@ -1,6 +1,6 @@
 import type BaseLayer from 'ol/layer/Base';
 import type { TypeDateFragments } from '@/core/utils/date-mgt';
-import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { TypeStyleGeometry } from '@/api/types/map-schema-types';
@@ -50,8 +50,6 @@ export declare abstract class AbstractGeoViewLayer {
      * configuration does not provide a value, we use an empty array instead of an undefined attribute.
      */
     listOfLayerEntryConfig: TypeLayerEntryConfig[];
-    /** List of errors for the layers that did not load. */
-    layerLoadError: Error[];
     /** The OpenLayer root layer representing this GeoView Layer. */
     olRootLayer?: BaseLayer;
     /** Date format object used to translate server to ISO format and ISO to server format */
@@ -65,7 +63,7 @@ export declare abstract class AbstractGeoViewLayer {
      * Must override method to read the service metadata from the metadataAccessPath.
      * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * @returns {Promise<T>} A promise resolved once the metadata has been fetched.
-     * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
+     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
      */
     protected abstract onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T>;
     /**
@@ -135,8 +133,8 @@ export declare abstract class AbstractGeoViewLayer {
      * Fetches the metadata by calling onFetchServiceMetadata.
      * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
      * @returns {Promise<T>} Returns a Promise of a metadata
-     * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
-     * @throws {LayerNoCapabilitiesError} Error thrown when the metadata is empty (no Capabilities) (WMS/WFS layers).
+     * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+     * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities) (WMS/WFS layers).
      */
     fetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T>;
     /**
@@ -203,19 +201,6 @@ export declare abstract class AbstractGeoViewLayer {
      * @param {ConfigBaseClass | undefined} layerConfig - Optional layer config
      */
     addLayerLoadError(error: Error, layerConfig: ConfigBaseClass | undefined): void;
-    /**
-     * Gets if the layer processing has generated errors.
-     * @returns {boolean} True when the layer processing has generated errors in the 'layerLoadError' list.
-     */
-    hasLayerLoadedErrors(): boolean;
-    /**
-     * Aggregates the errors that might have happened during processing and that are stored in layerLoadError, if any.
-     */
-    aggregateLayerLoadErrors(): AggregateError | undefined;
-    /**
-     * Throws an aggregate error based on the 'layerLoadError' list, if any.
-     */
-    throwAggregatedLayerLoadErrors(): void;
     /**
      * Recursively processes the list of layer entries to see if all of them are greater than or equal to the provided layer status.
      * @param {TypeLayerStatus} layerStatus The layer status to compare with the internal value of the config.
@@ -388,15 +373,14 @@ export type LayerMessageEvent = {
     messageType: SnackbarType;
     notification: boolean;
 };
-export interface TypeWmsLegend extends Omit<TypeLegend, 'styleConfig'> {
-    legend: HTMLCanvasElement | null;
-    styles?: TypeWmsLegendStyle[];
-}
 export interface TypeImageStaticLegend extends Omit<TypeLegend, 'styleConfig'> {
     legend: HTMLCanvasElement | null;
 }
 export interface TypeVectorLegend extends TypeLegend {
     legend: TypeVectorLayerStyles;
+}
+export interface TypeGeoTIFFLegend extends Omit<TypeLegend, 'styleConfig'> {
+    legend: HTMLCanvasElement | null;
 }
 export type TypeStyleRepresentation = {
     /** The defaultCanvas property is used by Simple styles and default styles when defined in unique value and class
@@ -417,15 +401,6 @@ export type TypeVectorLayerStyles = Partial<Record<TypeStyleGeometry, TypeStyleR
  */
 export declare const isVectorLegend: (verifyIfLegend: TypeLegend) => verifyIfLegend is TypeVectorLegend;
 /**
- * type guard function that redefines a TypeLegend as a TypeWmsLegend
- * if the event attribute of the verifyIfPayload parameter is valid. The type ascention
- * applies only to the true block of the if clause.
- *
- * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export declare const isWmsLegend: (verifyIfLegend: TypeLegend) => verifyIfLegend is TypeWmsLegend;
-/**
  * type guard function that redefines a TypeLegend as a TypeImageStaticLegend
  * if the type attribute of the verifyIfLegend parameter is valid. The type ascention
  * applies only to the true block of the if clause.
@@ -434,5 +409,14 @@ export declare const isWmsLegend: (verifyIfLegend: TypeLegend) => verifyIfLegend
  * @returns {boolean} returns true if the payload is valid
  */
 export declare const isImageStaticLegend: (verifyIfLegend: TypeLegend) => verifyIfLegend is TypeImageStaticLegend;
+/**
+ * type guard function that redefines a TypeLegend as a TypeGeoTIFFLegend
+ * if the type attribute of the verifyIfLegend parameter is valid. The type ascention
+ * applies only to the true block of the if clause.
+ *
+ * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
+ * @returns {boolean} returns true if the payload is valid
+ */
+export declare const isGeoTIFFLegend: (verifyIfLegend: TypeLegend) => verifyIfLegend is TypeGeoTIFFLegend;
 export {};
 //# sourceMappingURL=abstract-geoview-layers.d.ts.map

@@ -5,12 +5,14 @@ import type { Projection as OLProjection } from 'ol/proj';
 import type { GeoTIFFLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/geotiff-layer-entry-config';
 import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
 import type { TypeOutfieldsType } from '@/api/types/map-schema-types';
+import { type TypeLegend } from '@/index';
 /**
  * Manages a GeoTIFF layer.
  * @exports
  * @class GVGeoTIFF
  */
 export declare class GVGeoTIFF extends AbstractGVTile {
+    #private;
     /**
      * Constructs a GVGeoTIFF layer to manage an OpenLayer layer.
      * @param {GeoTIFFSource} olSource - The OpenLayer source.
@@ -48,5 +50,11 @@ export declare class GVGeoTIFF extends AbstractGVTile {
      * @returns {Extent | undefined} The layer bounding box.
      */
     onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
+    /**
+     * Overrides the fetching of the legend for a static image layer.
+     * @override
+     * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
+     */
+    onFetchLegend(): Promise<TypeLegend | null>;
 }
 //# sourceMappingURL=gv-geotiff.d.ts.map

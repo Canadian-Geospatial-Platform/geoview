@@ -49,7 +49,7 @@ export type TypeDisplayTheme = 'dark' | 'light' | 'geo.ca';
 /** Array of valid geoview themes. */
 export declare const VALID_DISPLAY_THEME: TypeDisplayTheme[];
 /** Valid values for the navBar array. */
-export type TypeValidNavBarProps = 'zoom' | 'fullscreen' | 'home' | 'location' | 'basemap-select' | 'projection' | 'drawer';
+export type TypeValidNavBarProps = 'zoom' | 'fullscreen' | 'home' | 'location' | 'basemap-select' | 'projection' | 'drawer' | 'map-rotation';
 /** Supported footer bar tabs */
 export type TypeValidFooterBarTabsCoreProps = 'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart' | 'guide';
 /** Default tabs order */
@@ -268,10 +268,12 @@ export declare const BASEMAP_SHADED: Record<TypeValidMapProjectionCodes, boolean
 export declare const BASEMAP_LABEL: Record<TypeValidMapProjectionCodes, boolean[]>;
 export declare const VALID_MAP_CENTER: Record<TypeValidMapProjectionCodes, Record<string, number[]>>;
 export declare const MAP_EXTENTS: Record<TypeValidMapProjectionCodes, number[]>;
+export declare const MAX_EXTENTS_RESTRICTION: Record<TypeValidMapProjectionCodes, number[]>;
 export declare const MAP_CENTER: Record<TypeValidMapProjectionCodes, [number, number]>;
 export declare const MAP_ZOOM_LEVEL: Record<TypeValidMapProjectionCodes, number>;
 /** Type used to define valid highlight colors. */
-export type TypeHighlightColors = 'black' | 'white' | 'red' | 'green';
+export type TypeHighlightColors = 'aqua' | 'black' | 'white' | 'red' | 'green';
+export declare const DEFAULT_HIGHLIGHT_COLOR: TypeHighlightColors;
 /** Type used to define overlay objects. */
 export type TypeOverlayObjects = {
     /** Non interactive markers */
@@ -332,8 +334,9 @@ export declare const DEFAULT_APPBAR_CORE: {
     readonly DATA_TABLE: "data-table";
     readonly LAYERS: "layers";
 };
+export declare const STYLE_GEOMETRY_TYPES: readonly ["Point", "MultiPoint", "LineString", "MultiLineString", "Polygon", "MultiPolygon"];
 /** Valid keys for the geometryType property. */
-export type TypeStyleGeometry = 'Point' | 'MultiPoint' | 'LineString' | 'MultiLineString' | 'Polygon' | 'MultiPolygon';
+export type TypeStyleGeometry = (typeof STYLE_GEOMETRY_TYPES)[number];
 export type SerializedGeometry = {
     type: TypeStyleGeometry;
     coordinates: Coordinate | Coordinate[] | Coordinate[][] | Coordinate[][][];
@@ -352,7 +355,7 @@ export type TypeOutfields = {
     name: string;
     alias: string;
     type: TypeOutfieldsType;
-    domain: null | codedValueType | rangeDomainType;
+    domain?: null | codedValueType | rangeDomainType;
 };
 /** The types supported by the outfields object. */
 export type TypeOutfieldsType = 'string' | 'date' | 'number' | 'url' | 'oid';
@@ -401,15 +404,25 @@ export type TypeLayerStyleConfigInfo = {
      * type has two entries (index 0 for min and index 1 for max).
      */
     values: (string | number)[];
+    /** For class breaks rendering optionally indicate if the value is to be considered greater/greaterOrEqual/lesser/lesserOrEqual */
+    valuesConditions?: TypeLayerStyleValueCondition[];
     /** The geometry settings. */
     settings: TypeBaseVectorGeometryConfig;
 };
+/** Valid value comparisons for class breaks rendering */
+export type TypeLayerStyleValueCondition = '>' | '>=' | '<' | '<=';
 /** Valid keys for the type property of style configurations. */
 export type TypeLayerStyleConfigType = 'simple' | 'uniqueValue' | 'classBreaks';
 /** Definition of the line symbol vector settings type. */
 export type TypeBaseVectorGeometryConfig = {
     /** Type of vector config. */
     type: TypeBaseVectorType;
+    /** The mime type when the symbol is an image */
+    mimeType?: string;
+    /** Opacity for the stroke */
+    opacity?: number;
+    /** Rotation if any */
+    rotation?: number;
 };
 /** Valid values for the type property of the base vector settingd. */
 export type TypeBaseVectorType = 'lineString' | 'filledPolygon' | 'simpleSymbol' | 'iconSymbol';
@@ -421,6 +434,16 @@ export interface TypeLineStringVectorConfig extends TypeBaseVectorGeometryConfig
     type: 'lineString';
     /** Line stroke symbology */
     stroke: TypeStrokeSymbolConfig;
+    /** The additional graphic stroke symbology for special strokes */
+    graphicStrokes?: GraphicStrokeWithPlacement[];
+}
+export interface GraphicStrokeWithPlacement {
+    placement?: string;
+    settings: unknown;
+}
+export interface GraphicFillWithPattern {
+    pattern?: string;
+    settings: any;
 }
 /** Stroke style for vector features. */
 export type TypeStrokeSymbolConfig = {
@@ -447,15 +470,25 @@ export interface TypePolygonVectorConfig extends TypeBaseVectorGeometryConfig {
     color?: string;
     /** Line stroke symbology */
     stroke: TypeStrokeSymbolConfig;
-    /** Distance between patern lines. Default = 8. */
+    /** Distance between pattern lines. Default = 8. */
+    patternSize?: number;
+    /** Pattern line width.default = 1. */
+    patternWidth?: number;
+    /** Pattern line width.default = 1.
+     * @deprecated Remove it after the release, once files like metadata.data are fixed in the hosted website.
+     */
     paternSize?: number;
-    /** Patern line width.default = 1. */
+    /** Pattern line width.default = 1.
+     * @deprecated Remove it after the release, once files like metadata.data are fixed in the hosted website.
+     */
     paternWidth?: number;
     /** Kind of filling  for vector features. Default = solid.  */
     fillStyle: TypeFillStyle;
+    /** The additional graphic fills symbology for special fills */
+    graphicFills?: GraphicFillWithPattern[];
 }
 /** Valid values to specify fill styles. */
-export type TypeFillStyle = 'null' | 'solid' | 'backwardDiagonal' | 'cross' | 'diagonalCross' | 'forwardDiagonal' | 'horizontal' | 'vertical';
+export type TypeFillStyle = 'null' | 'solid' | 'backwardDiagonal' | 'cross' | 'diagonalCross' | 'forwardDiagonal' | 'horizontal' | 'vertical' | 'dot';
 /** Definition of the circle symbol vector settings type. */
 export interface TypeSimpleSymbolVectorConfig extends TypeBaseVectorGeometryConfig {
     /** Type of vector config */
@@ -493,6 +526,8 @@ export interface TypeIconSymbolVectorConfig extends TypeBaseVectorGeometryConfig
     opacity?: number;
     /** Ofset of the icon. */
     offset?: [number, number];
+    /** Scale of the icon */
+    scale?: number;
     /**
      * The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data
      * with the Canvas renderer.
@@ -513,6 +548,7 @@ export type TypeResultSet<T extends TypeResultSetEntry = TypeResultSetEntry> = {
 export type TypeFeatureInfoEntry = {
     featureKey: number;
     geoviewLayerType: TypeGeoviewLayerType;
+    supportZoomTo: boolean;
     uid?: string;
     feature?: Feature<Geometry>;
     geometry?: Geometry;

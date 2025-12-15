@@ -11,6 +11,7 @@ import type { GeometryJson } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeDateFragments } from '@/core/utils/date-mgt';
+import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 /**
  * Manages an Esri Dynamic layer.
  *
@@ -49,13 +50,21 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
     onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
     /**
      * Sends a query to get ESRI Dynamic feature geometries and calculates an extent from them.
-     * @param {string[]} objectIds - The IDs of the features to calculate the extent from.
+     * @param {number[] | string[]} objectIds - The IDs of the features to calculate the extent from.
      * @param {OLProjection} outProjection - The output projection for the extent.
      * @param {string?} outfield - ID field to return for services that require a value in outfields.
      * @override
      * @returns {Promise<Extent>} The extent of the features, if available.
+     * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+     * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
+     * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
+     * @throws {ResponseError} When the response is not OK (non-2xx).
+     * @throws {ResponseEmptyError} When the JSON response is empty.
+     * @throws {ResponseTypeError} When the response from the service is not an object.
+     * @throws {ResponseContentError} When the response actually contains an error within it.
+     * @throws {NetworkError} When a network issue happened.
      */
-    onGetExtentFromFeatures(objectIds: string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
+    onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
     /**
      * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
      * @override
@@ -94,10 +103,11 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
     protected onGetFieldDomain(fieldName: string): null | codedValueType | rangeDomainType;
     /**
      * Overrides the get all feature information for all the features stored in the layer.
+     * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
      * @param {AbortController?} abortController - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getAllFeatureInfo(abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
+    protected getAllFeatureInfo(map: OLMap, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overrides the return of feature information at a given coordinate.
      * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.
@@ -114,6 +124,7 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
      * @param {AbortController?} abortController - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+     * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
      */
     protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
@@ -136,11 +147,16 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
      */
     static applyViewFilterOnSource(layerConfig: EsriDynamicLayerEntryConfig, source: ImageArcGISRest, style: TypeLayerStyleConfig | undefined, externalDateFragments: TypeDateFragments | undefined, layer: GVEsriDynamic | undefined, filter?: string | undefined, callbackWhenUpdated?: ((filterToUse: string) => void) | undefined): void;
     /**
-     * Gets the layer view filter. The filter is derived from the uniqueValue or the classBreak visibility flags and a layerFilter
-     * associated to the layer.
-     * @returns {string} The filter associated to the layer
+     * Builds a filter string (SQL-like or OGC-compliant) for a given layer and style configuration.
+     * This method supports:
+     * - **simple styles** → returns the base layer filter or a default `(1=1)` condition.
+     * - **unique value styles** → builds an optimized filter for visible categories.
+     * - **class breaks styles** → builds numeric range filters based on visibility flags.
+     * @param {EsriDynamicLayerEntryConfig | OgcWmsLayerEntryConfig} layerConfig - The layer configuration.
+     * @param {TypeLayerStyleConfig | undefined} style - The style configuration (optional).
+     * @returns {string | undefined} The filter expression, or `undefined` if not applicable.
      */
-    static getViewFilter(layerConfig: EsriDynamicLayerEntryConfig, style: TypeLayerStyleConfig | undefined): string;
+    static getFilterFromStyle(layerConfig: EsriDynamicLayerEntryConfig | OgcWmsLayerEntryConfig, style: TypeLayerStyleConfig | undefined): string | undefined;
 }
 export type EsriQueryJsonResponse = {
     extent: TypeLayerMetadataEsriExtent;

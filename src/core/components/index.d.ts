@@ -15,7 +15,6 @@ export * from './details/details-panel';
 export * from './export/export-modal-button';
 export * from './export/export-modal';
 export * from './map-info/map-info-expand-button';
-export * from './map-info/map-info-fixnorth-switch';
 export * from './map-info/map-info-rotation-button';
 export * from './map-info/map-info';
 export * from './footer-bar/footer-bar-api';

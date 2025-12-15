@@ -6,11 +6,13 @@ interface ResponsiveGridLayoutProps {
     rightTop?: ReactNode;
     guideContentIds?: string[];
     rightMain: ReactNode;
-    fullWidth?: boolean;
     onIsEnlargeClicked?: (isEnlarge: boolean) => void;
     onGuideIsOpen?: (isGuideOpen: boolean) => void;
+    onRightPanelClosed?: () => void;
+    onRightPanelVisibilityChanged?: (isVisible: boolean) => void;
     hideEnlargeBtn?: boolean;
     containerType?: TypeContainerBox;
+    toggleMode?: boolean;
 }
 interface ResponsiveGridLayoutExposedMethods {
     setIsRightPanelVisible: (isVisible: boolean) => void;

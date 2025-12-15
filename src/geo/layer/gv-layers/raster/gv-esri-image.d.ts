@@ -49,14 +49,6 @@ export declare class GVEsriImage extends AbstractGVRaster {
      */
     onSetStyleAccordingToLegend(legend: TypeLegend): void;
     /**
-     * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter paramater is used alone to display
-     * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
-     * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
-     * is done.
-     * @param {string} filter - An optional filter to be used in place of the getViewFilter value.
-     */
-    applyViewFilter(filter?: string | undefined): void;
-    /**
      * Overrides the way to get the bounds for this layer type.
      * @param {OLProjection} projection - The projection to get the bounds into.
      * @param {number} stops - The number of stops to use to generate the extent.
@@ -64,6 +56,14 @@ export declare class GVEsriImage extends AbstractGVRaster {
      * @returns {Extent | undefined} The layer bounding box.
      */
     onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
+    /**
+     * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter parameter is used alone to display
+     * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
+     * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
+     * is done.
+     * @param {string} filter - An optional filter to be used in place of the getViewFilter value.
+     */
+    applyViewFilter(filter?: string | undefined): void;
 }
 export type TypeEsriImageLayerLegend = {
     layers: TypeEsriImageLayerLegendLayer[];

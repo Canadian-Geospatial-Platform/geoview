@@ -1,4 +1,3 @@
-import type { Size } from 'ol/size';
 import type { TabsProps, TabProps, BoxProps } from '@mui/material';
 import type { TypeContainerBox } from '@/core/types/global-types';
 /**
@@ -37,7 +36,6 @@ export interface TypeTabsProps {
     onOpenKeyboard?: (uiFocus: FocusItemProps) => void;
     onCloseKeyboard?: () => void;
     containerType?: TypeContainerBox;
-    sideAppSize: Size;
     appHeight: number;
     hiddenTabs: string[];
     isFullScreen: boolean;

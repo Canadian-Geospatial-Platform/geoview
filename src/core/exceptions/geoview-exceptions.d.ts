@@ -159,6 +159,16 @@ export declare class BasemapLayerCreationError extends GeoViewError {
     constructor(basemapType: string);
 }
 /**
+ * Error thrown when trying to get a primary key field for a layer and such a field doesn't exist.
+ */
+export declare class NoPrimaryKeyFieldError extends GeoViewError {
+    /**
+     * Creates an instance of NoPrimaryKeyFieldError.
+     * @param {string} layerPath - The path or identifier of the layer that caused the error.
+     */
+    constructor(layerPath: string);
+}
+/**
  * Custom error class representing a failure to retrieve geographic bounds
  * for a specific map layer.
  * @extends {GeoViewError}
@@ -248,5 +258,15 @@ export declare class TestSuiteInitializationError extends GeoViewError {
      * @param {string} mapId - The map id
      */
     constructor(testSuite: string, mapId: string);
+}
+/**
+ * Error thrown when a Layer configuration couldn't be found.
+ */
+export declare class LayerConfigNotFoundError extends GeoViewError {
+    /**
+     * Creates an instance of LayerConfigNotFoundError.
+     * @param {string} layerPath - The layer path where the layer config couldn't be found.
+     */
+    constructor(layerPath: string);
 }
 //# sourceMappingURL=geoview-exceptions.d.ts.map
