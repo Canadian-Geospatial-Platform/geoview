@@ -735,6 +735,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @throws {ResponseError} When the response is not OK (non-2xx).
    * @throws {ResponseEmptyError} When the JSON response is empty.
    * @throws {NetworkError} When a network issue happened.
+   * @static
    */
   static fetchMetadataWMS(
     url: string,
@@ -756,6 +757,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @throws {ResponseError} When the response is not OK (non-2xx).
    * @throws {ResponseEmptyError} When the JSON response is empty.
    * @throws {NetworkError} When a network issue happened.
+   * @static
    */
   static fetchMetadataWMSForLayer(
     url: string,
@@ -776,6 +778,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @throws {ResponseError} When the response is not OK (non-2xx).
    * @throws {ResponseEmptyError} When the JSON response is empty.
    * @throws {NetworkError} When a network issue happened.
+   * @static
    */
   static fetchStylesForLayer(url: string, layers: string): Promise<TypeStylesWMS> {
     // Redirect
@@ -825,6 +828,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   * @static
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -850,6 +854,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {boolean} fullSubLayers - If false, will simulate legacy behavior and skip deeper layers after the first.
    * @param {unknown} [customGeocoreLayerConfig={}] - Optional custom layer configuration to merge into leaf layers.
    * @returns {TypeWMSLayerConfig} The fully constructed WMS layer configuration object.
+   * @static
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -953,6 +958,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
    * @param {boolean} isTimeAware - Indicates if the layer is time aware.
    * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
+   * @static
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -988,6 +994,8 @@ export class WMS extends AbstractGeoViewRaster {
    * the WMS GetCapabilities convention.
    * @param {string} path - The metadata URL to check.
    * @returns {boolean} `true` if the URL ends with `.xml`, otherwise `false`.
+   * @private
+   * @static
    */
   static #isXmlMetadata(path: string): boolean {
     // Normalize case and check for '.xml' suffix

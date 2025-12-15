@@ -144,6 +144,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
    * @param {GeoTIFFLayerEntryConfig} layerConfig - The configuration for the GeoTIFF layer.
    * @returns A fully configured GeoTIFF source.
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   * @static
    */
   static createGeoTIFFSource(layerConfig: GeoTIFFLayerEntryConfig): GeoTIFFSource {
     const sourceOptions: SourceOptions = {
@@ -157,6 +158,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
    * Initializes monitoring for the GeoTIFF source (async)
    * @param {GeoTIFFSource} source - The GeoTIFF source
    * @param {GeoTIFFLayerEntryConfig} layerConfig - The layer config
+   * @static
    * @private
    */
   static async #initializeSourceProjection(source: GeoTIFFSource, layerConfig: GeoTIFFLayerEntryConfig): Promise<void> {
@@ -185,6 +187,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   * @static
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -211,6 +214,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeGeoTIFFConfig} The constructed configuration object for the GeoTIFF layer.
+   * @static
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -267,6 +271,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
    * @param {boolean} isTimeAware - Indicates if the layer is time aware.
    * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
    * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
+   * @static
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,

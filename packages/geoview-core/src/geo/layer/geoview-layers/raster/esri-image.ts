@@ -96,6 +96,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   * @static
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -116,6 +117,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {string} metadataAccessPath - The URL or path to access metadata.
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @returns {TypeEsriImageLayerConfig} The constructed configuration object for the Esri Image layer.
+   * @static
    */
   static createGeoviewLayerConfigSimple(
     geoviewLayerId: string,
@@ -158,6 +160,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeEsriImageLayerConfig} The constructed configuration object for the Esri Image layer.
+   * @static
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -201,6 +204,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {string} url - The URL of the service endpoint.
    * @param {boolean} isTimeAware - Indicates if the layer is time aware.
    * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
+   * @static
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -223,6 +227,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {EsriImageLayerEntryConfig} layerConfig - The configuration for the EsriImage layer.
    * @returns A fully configured ImageArcGISRest source.
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   * @static
    */
   static createEsriImageSource(layerConfig: EsriImageLayerEntryConfig): ImageArcGISRest {
     const sourceOptions: SourceOptions = {

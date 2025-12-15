@@ -143,6 +143,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   * @static
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -165,6 +166,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @param {unknown} customGeocoreLayerConfig - An optional layer config from Geocore.
    * @returns {TypeEsriDynamicLayerConfig} The constructed configuration object for the Esri Dynamic layer.
+   * @static
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -208,6 +210,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
    * @param {boolean} isTimeAware - Indicates if the layer is time aware.
    * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
+   * @static
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -246,6 +249,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {TypeLayerEntryShell[]} layerEntries - An array representing the tree structure of the layer entries (may include groups or leaves).
    * @param {unknown} [customGeocoreLayerConfig={}] - Optional GeoCore-specific configuration overrides to apply to each entry.
    * @returns {(GroupLayerEntryConfig | EsriDynamicLayerEntryConfig)[]} An array of fully-formed layer entry configuration instances.
+   * @static
    */
   static #convertTreeToLayerConfigs(
     geoviewLayerConfig: TypeEsriDynamicLayerConfig,
@@ -287,6 +291,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {EsriDynamicLayerEntryConfig} layerConfig - The configuration for the EsriDynamic layer.
    * @returns {ImageArcGISRest} A fully configured ImageArcGISRest source.
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   * @static
    */
   static createEsriDynamicSource(layerConfig: EsriDynamicLayerEntryConfig): ImageArcGISRest {
     const sourceOptions: SourceOptions = {
@@ -347,6 +352,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * - Only root-level entries (those not referenced as sublayers) are returned at the top level of the tree.
    * @param {{ layerId: number; subLayerIds: number[] }[]} entries - A flat array of layer entry objects, each potentially referencing sublayers by ID.
    * @returns {TypeLayerEntryShell[]} A nested array representing the hierarchical layer structure with `subLayers` assigned to parents.
+   * @static
    */
   static buildLayerEntriesTree(entries: { layerId: number; subLayerIds: number[] }[]): TypeLayerEntryShell[] {
     // Create a lookup map of all entries by layerId

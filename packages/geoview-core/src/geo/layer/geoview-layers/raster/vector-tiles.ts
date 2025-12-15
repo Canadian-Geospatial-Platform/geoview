@@ -184,6 +184,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   * @static
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -205,6 +206,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeVectorTilesConfig} The constructed configuration object for the XYZTiles layer.
+   * @static
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -248,6 +250,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @param {boolean} isTimeAware - Indicates if the layer is time aware.
    * @param {ProjectionLike} fallbackProjection - Indicates the projection that should be used in case not set.
    * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
+   * @static
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -282,6 +285,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @param {ProjectionLike} fallbackProjection - Fallback projection if none is provided in the config.
    * @returns An initialized VectorTileSource ready for use in a layer.
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   * @static
    */
   static createVectorTileSource(layerConfig: VectorTilesLayerEntryConfig, fallbackProjection: ProjectionLike): VectorTileSource {
     // Create the source options
