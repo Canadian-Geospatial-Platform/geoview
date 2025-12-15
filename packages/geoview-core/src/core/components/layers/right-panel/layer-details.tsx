@@ -281,7 +281,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     // No checkbox for simple style layers
     if (layerDetails.styleConfig[item.geometryType]?.type === 'simple') return null;
 
-    // GV: Some esri layer has uniqueValue renderer but there is no field define in their metadata (i.e. e2424b6c-db0c-4996-9bc0-2ca2e6714d71).
+    // GV: Some esri layer has uniqueValue renderer but there is no field defined in their metadata (i.e. e2424b6c-db0c-4996-9bc0-2ca2e6714d71).
     // For these layers, we need to disable checkboxes
     if (layerDetails.styleConfig[item.geometryType]?.fields[0] === undefined) return null;
 
@@ -642,16 +642,17 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             {renderLayerButtons()}
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap-reverse' }}>
-            {layerDetails.items.length > 1 && (
-              <Grid container direction="row" alignItems="center" justifyItems="stretch">
-                <Grid size={{ xs: 'auto' }}>{renderHeaderCheckbox()}</Grid>
-                <Grid size={{ xs: 'auto' }}>
-                  <Box component="span" sx={{ fontWeight: 'bold', ...(layerHidden && hiddenStyle) }}>
-                    {t('layers.toggleItemsVisibility')}
-                  </Box>
+            {layerDetails.items.length > 1 &&
+              layerDetails.items.some((item) => layerDetails.styleConfig?.[item.geometryType]?.fields[0] !== undefined) && (
+                <Grid container direction="row" alignItems="center" justifyItems="stretch">
+                  <Grid size={{ xs: 'auto' }}>{renderHeaderCheckbox()}</Grid>
+                  <Grid size={{ xs: 'auto' }}>
+                    <Box component="span" sx={{ fontWeight: 'bold', ...(layerHidden && hiddenStyle) }}>
+                      {t('layers.toggleItemsVisibility')}
+                    </Box>
+                  </Grid>
                 </Grid>
-              </Grid>
-            )}
+              )}
             {layerDetails.children.length > 0 && (
               <Grid container direction="row" alignItems="center" justifyItems="stretch">
                 <Grid size={{ xs: 'auto' }}>
