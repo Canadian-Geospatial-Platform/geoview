@@ -57,7 +57,46 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
     // Test geometry z-index
     const pZIndex = this.#mapTester.testGeometryGroupZIndex();
 
+    // Test zoom to extent
+    const pZoomToExtent = this.#mapTester.testZoomToExtent();
+    await pZoomToExtent;
+
+    // Test zoom to coordinate
+    const pZoomToCoordinate = this.#mapTester.testZoomToCoordinate();
+    await pZoomToCoordinate;
+
+    // Test footer bar select tab
+    const pFooterBarSelectTab = this.#mapTester.testFooterBarSelectTab();
+    await pFooterBarSelectTab;
+
+    // Test app bar select tab
+    const pAppBarSelectTab = this.#mapTester.testAppBarSelectTab();
+    await pAppBarSelectTab;
+
+    // Test set language
+    const pSetLanguage = this.#mapTester.testSetLanguage();
+    await pSetLanguage;
+
+    // Test footer bar create tab
+    // const pFooterBarCreateTab = this.#mapTester.testFooterBarCreateTab();
+
+    // Test create and set basemap
+    const pCreateAndSetBasemap = this.#mapTester.testCreateAndSetBasemap();
+    await pCreateAndSetBasemap;
+
     // Resolve when all
-    return Promise.all([pmapState, pZoom, pProjection, pZIndex]);
+    return Promise.all([
+      pmapState,
+      pZoom,
+      pProjection,
+      pZIndex,
+      pZoomToExtent,
+      pZoomToCoordinate,
+      pFooterBarSelectTab,
+      pAppBarSelectTab,
+      pSetLanguage,
+      // pFooterBarCreateTab,
+      pCreateAndSetBasemap,
+    ]);
   }
 }

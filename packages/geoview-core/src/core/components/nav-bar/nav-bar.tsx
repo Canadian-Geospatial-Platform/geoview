@@ -45,9 +45,6 @@ const defaultNavbar: Record<DefaultNavbar, JSX.Element> = {
   zoomOut: <ZoomOut />,
   mapRotation: <MapRotation />,
 };
-const defaultButtonGroups: NavButtonGroups = {
-  zoom: { zoomIn: 'zoomIn', zoomOut: 'zoomOut', mapRotation: 'mapRotation' },
-};
 
 /**
  * Create a nav-bar with buttons that can call functions or open custom panels
@@ -74,12 +71,20 @@ export function NavBar(props: NavBarProps): JSX.Element {
   const mapViewer = MapEventProcessor.getMapViewer(mapId);
 
   // State
-  const [buttonPanelGroups, setButtonPanelGroups] = useState<NavButtonGroups>(defaultButtonGroups);
+  const [buttonPanelGroups, setButtonPanelGroups] = useState<NavButtonGroups>({});
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('navBarComponents store value changed');
+
+    let zoomRotateButtons: NavbarButtonGroup = {};
+    if (navBarComponents.includes('zoom')) {
+      zoomRotateButtons = { ...zoomRotateButtons, zoomIn: 'zoomIn', zoomOut: 'zoomOut' };
+    }
+    if (navBarComponents.includes('rotation')) {
+      zoomRotateButtons = { ...zoomRotateButtons, mapRotation: 'mapRotation' };
+    }
 
     let displayButtons: NavbarButtonGroup = {};
     if (navBarComponents.includes('fullscreen')) {
@@ -102,12 +107,12 @@ export function NavBar(props: NavBarProps): JSX.Element {
       displayButtons = { ...displayButtons, projection: 'projection' };
     }
 
-    setButtonPanelGroups({
-      ...{ display: displayButtons },
-      ...buttonPanelGroups,
-    });
+    setButtonPanelGroups((prevState) => ({
+      ...(Object.keys(zoomRotateButtons).length > 0 && { zoom: zoomRotateButtons }),
+      ...(Object.keys(displayButtons).length > 0 && { display: displayButtons }),
+      ...prevState,
+    }));
     // If buttonPanelGroups is in the dependencies, it triggers endless rerenders
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navBarComponents]);
 
   const handleNavApiAddButtonPanel = useCallback((sender: NavBarApi, event: NavBarCreatedEvent) => {
@@ -115,7 +120,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
     logger.logTraceUseCallback('NAV-BAR - addButtonPanel');
 
     setButtonPanelGroups((prevState) => {
-      const existingGroup = prevState[event.group] || {};
+      const existingGroup = prevState?.[event.group] || {};
 
       return {
         ...prevState,
