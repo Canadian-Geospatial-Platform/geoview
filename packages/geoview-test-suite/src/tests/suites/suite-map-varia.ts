@@ -53,6 +53,7 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
 
     // Test projection switch and zoom to initial extent
     const pProjection = this.#mapTester.testSwitchProjectionAndExtent(3978, 3857, 1);
+    await pProjection;
 
     // Test geometry z-index
     const pZIndex = this.#mapTester.testGeometryGroupZIndex();
@@ -73,16 +74,20 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
     const pAppBarSelectTab = this.#mapTester.testAppBarSelectTab();
     await pAppBarSelectTab;
 
+    // Test footer bar create tab
+    const pFooterBarCreateTab = this.#mapTester.testFooterBarCreateTab();
+    await pFooterBarCreateTab;
+
     // Test set language
     const pSetLanguage = this.#mapTester.testSetLanguage();
     await pSetLanguage;
 
-    // Test footer bar create tab
-    // const pFooterBarCreateTab = this.#mapTester.testFooterBarCreateTab();
-
     // Test create and set basemap
     const pCreateAndSetBasemap = this.#mapTester.testCreateAndSetBasemap();
     await pCreateAndSetBasemap;
+
+    // Test north arrow rotation in LCC projection for BC
+    const pNorthArrowRotationLCC = this.#mapTester.testNorthArrowRotationLCC();
 
     // Resolve when all
     return Promise.all([
@@ -94,9 +99,10 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
       pZoomToCoordinate,
       pFooterBarSelectTab,
       pAppBarSelectTab,
+      pFooterBarCreateTab,
       pSetLanguage,
-      // pFooterBarCreateTab,
       pCreateAndSetBasemap,
+      pNorthArrowRotationLCC,
     ]);
   }
 }
