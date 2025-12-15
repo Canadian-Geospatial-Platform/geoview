@@ -389,10 +389,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
     queryGeometry: boolean = true,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
-    // If the layer is not queryable return []
-    // TODO: CHECK - Is this the right return to do?
-    if (!this.getQueryable()) return [];
-
     // Get the layer config in a loaded phase
     const layerConfig = this.getLayerConfig();
 

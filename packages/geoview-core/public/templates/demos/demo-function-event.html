@@ -108,8 +108,8 @@
         <li>
           <button class="btn btn-primary" id="Disable-hover">Disable hover query for Top 100</button>
           <button class="btn btn-primary" id="Enable-hover">Enable hover query for Top 100</button><br />
-          <code>cgpv.api.getMapViewer('map1').layer.hoverFeatureInfoLayerSet.disableHoverListener('esriFeatureLYR5/0')</code>
-          <code>cgpv.api.getMapViewer('map1').layer.hoverFeatureInfoLayerSet.enableHoverListener('esriFeatureLYR5/0')</code>
+          <code>cgpv.api.getMapViewer('map1').layer.setLayerHoverable('esriFeatureLYR5/0', false)</code>
+          <code>cgpv.api.getMapViewer('map1').layer.setLayerHoverable('esriFeatureLYR5/0', true)</code>
         </li>
         <li>
           <button class="btn btn-primary" id="Disable-feature-info">Disable feature query for Top 100</button>
@@ -617,7 +617,7 @@
 
       // add an event listener when a button is clicked
       disableHoverButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer(mapId).layer.hoverFeatureInfoLayerSet.disableHoverListener(LYR_PATH_FEATURE);
+        cgpv.api.getMapViewer(mapId).layer.setLayerHoverable(LYR_PATH_FEATURE, false);
       });
 
       // Enable hover Button========================================================================================================
@@ -626,7 +626,7 @@
 
       // add an event listener when a button is clicked
       enableHoverButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer(mapId).layer.hoverFeatureInfoLayerSet.enableHoverListener(LYR_PATH_FEATURE);
+        cgpv.api.getMapViewer(mapId).layer.setLayerHoverable(LYR_PATH_FEATURE, true);
       });
 
       // Disable feature info Button=================================================================================================

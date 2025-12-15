@@ -201,7 +201,6 @@ export type TypeHoverFeatureInfo =
   | null;
 
 export type TypeHoverSetEntry = {
-  eventListenerEnabled: boolean;
   queryStatus: TypeQueryStatus;
   feature: TypeHoverFeatureInfo;
 };

@@ -103,18 +103,14 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     // Reinitialize the resultSet
     // Loop on each layer path in the resultSet were there is a layer to query
     layersToQuery.forEach((layerPath) => {
-      // If event listener is disabled
-      if (!this.resultSet[layerPath].eventListenerEnabled) return;
-
-      // Get the layer config and layer associated with the layer path
+      // Get the layer associated with the layer path
       const layer = this.layerApi.getGeoviewLayer(layerPath);
-
-      // Flag processing
-      this.resultSet[layerPath].feature = undefined;
-      this.resultSet[layerPath].queryStatus = 'error';
 
       // If layer was found and of right type
       if (layer instanceof AbstractGVLayer) {
+        // If the layer is not hoverable, skip it
+        if (!layer.getHoverable()) return;
+
         // Flag processing
         this.resultSet[layerPath].queryStatus = 'init';
 
@@ -195,49 +191,6 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Function used to enable listening of hover events. When a layer path is not provided,
-   * hover events listening is enabled for all layers.
-   * @param {string} layerPath - Optional parameter used to enable only one layer
-   */
-  enableHoverListener(layerPath?: string): void {
-    if (layerPath) this.resultSet[layerPath].eventListenerEnabled = true;
-    else
-      Object.keys(this.resultSet).forEach((key: string) => {
-        this.resultSet[key].eventListenerEnabled = true;
-      });
-  }
-
-  /**
-   * Function used to disable listening of hover events. When a layer path is not provided,
-   * hover events listening is disable for all layers.
-   * @param {string} layerPath - Optional parameter used to disable only one layer
-   */
-  disableHoverListener(layerPath?: string): void {
-    if (layerPath) this.resultSet[layerPath].eventListenerEnabled = false;
-    else
-      Object.keys(this.resultSet).forEach((key: string) => {
-        this.resultSet[key].eventListenerEnabled = false;
-      });
-  }
-
-  /**
-   * Function used to determine whether hover events are disabled for a layer. When a layer path is not provided,
-   * the value returned is undefined if the map flags are a mixture of true and false values.
-   * @param {string} layerPath - Optional parameter used to get the flag value of a layer.
-   * @returns {boolean | undefined} The flag value for the map or layer.
-   */
-  isHoverListenerEnabled(layerPath?: string): boolean | undefined {
-    if (layerPath) return !!this.resultSet?.[layerPath]?.eventListenerEnabled;
-
-    let returnValue: boolean | undefined;
-    Object.keys(this.resultSet).forEach((key: string, i) => {
-      if (i === 0) returnValue = this.resultSet[key].eventListenerEnabled;
-      if (returnValue !== this.resultSet[key].eventListenerEnabled) returnValue = undefined;
-    });
-    return returnValue;
-  }
-
-  /**
    * Get the ordered layer paths to query
    * @returns {string[]} The ordered layer paths to query
    */
@@ -247,8 +200,6 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     const resultSetLayers = new Set(Object.keys(this.resultSet));
 
     // Filter and order the layers that are in our resultSet
-    return mapLayerOrder
-      .map((layer) => layer.layerPath)
-      .filter((layerPath) => resultSetLayers.has(layerPath) && this.resultSet[layerPath].eventListenerEnabled);
+    return mapLayerOrder.map((layer) => layer.layerPath).filter((layerPath) => resultSetLayers.has(layerPath));
   }
 }
