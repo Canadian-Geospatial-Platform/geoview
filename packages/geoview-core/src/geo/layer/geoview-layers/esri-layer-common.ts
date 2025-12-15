@@ -274,8 +274,8 @@ export class EsriUtilities {
     const isGroupLayer = layerMetadata.type === 'Group Layer';
     const isMetadataGroup = layerConfig.getIsMetadataLayerGroup();
 
-    // Initialize the queryable
-    layerConfig.initQueryable(queryable && hasFields && !isGroupLayer && !isMetadataGroup);
+    // Initialize the queryable source
+    layerConfig.initQueryableSource(queryable && hasFields && !isGroupLayer && !isMetadataGroup);
 
     // Initialize the outfields
     // dynamic group layer doesn't have fields definition

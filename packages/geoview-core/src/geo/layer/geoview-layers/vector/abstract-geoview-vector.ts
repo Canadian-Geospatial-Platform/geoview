@@ -633,7 +633,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     }
 
     // Vector layer only queryable if there are fields
-    layerConfig.initQueryable(outfields.length > 0);
+    layerConfig.initQueryableSource(outfields.length > 0);
   }
 
   // #endregion STATIC METHODS

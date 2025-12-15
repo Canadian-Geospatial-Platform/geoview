@@ -406,6 +406,9 @@ export abstract class AbstractLayerSet {
     // If the layer is invisible (or any of its parent(s) is invisible)
     if (!geoviewLayer.getVisibleIncludingParents(layerApi.getGeoviewLayersGroups())) return Promise.resolve([]);
 
+    // If is not in visible range
+    if (!geoviewLayer.getInVisibleRange(layerApi.mapViewer.getView().getZoom())) return Promise.resolve([]);
+
     // Get Feature Info
     return geoviewLayer.getFeatureInfo(layerApi.mapViewer.map, queryType, location, queryGeometry, abortController);
   }
@@ -429,18 +432,7 @@ export abstract class AbstractLayerSet {
     const layerConfigCasted = layer.getLayerConfig() as AbstractBaseLayerEntryConfig;
 
     // Get if the source is queryable
-    return layerConfigCasted.getQueryableDefaulted();
-  }
-
-  /**
-   * Checks if the layer is in visible range.
-   * @param {AbstractGVLayer} layer - The layer
-   * @param {number | undefined} currentZoom - The map current zoom level
-   * @returns {boolean} True if the state is queryable or undefined
-   */
-  protected static isInVisibleRange(layer: AbstractGVLayer, currentZoom: number | undefined): boolean {
-    // Return false when false or undefined
-    return layer.getInVisibleRange(currentZoom);
+    return layerConfigCasted.getQueryableSourceDefaulted();
   }
 
   /**

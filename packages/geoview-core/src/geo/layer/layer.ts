@@ -83,6 +83,8 @@ import type {
   LayerErrorDelegate as GVLayerErrorDelegate,
   LayerMessageDelegate,
   LayerMessageEvent,
+  LayerQueryableChangedEvent,
+  LayerQueryableChangedDelegate,
 } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractGVVector } from './gv-layers/vector/abstract-gv-vector';
@@ -236,11 +238,14 @@ export class LayerApi {
   /** Keep a bounded reference to the handle layer error */
   #boundedHandleLayerError: GVLayerErrorDelegate;
 
-  /** Keep a bounded reference to the handle layer loaded */
+  /** Keep a bounded reference to the handle layer opacity changed */
   #boundedHandleLayerOpacityChanged: LayerOpacityChangedDelegate;
 
-  /** Keep a bounded reference to the handle layer error */
+  /** Keep a bounded reference to the handle layer visible changed */
   #boundedHandleLayerVisibleChanged: VisibleChangedDelegate;
+
+  /** Keep a bounded reference to the handle layer queryable changed */
+  #boundedHandleLayerQueryableChanged: LayerQueryableChangedDelegate;
 
   /** Keep a bounded reference to the handle WMS Layer Image Load Callbacks */
   #boundedHandleLayerWMSImageLoadRescue: ImageLoadRescueDelegate;
@@ -269,6 +274,7 @@ export class LayerApi {
     this.#boundedHandleLayerError = this.#handleLayerError.bind(this);
     this.#boundedHandleLayerOpacityChanged = this.#handleLayerOpacityChanged.bind(this);
     this.#boundedHandleLayerVisibleChanged = this.#handleLayerVisibleChanged.bind(this);
+    this.#boundedHandleLayerQueryableChanged = this.#handleLayerQueryableChanged.bind(this);
     this.#boundedHandleLayerWMSImageLoadRescue = this.#handleLayerWMSImageLoadRescue.bind(this);
   }
 
@@ -581,7 +587,7 @@ export class LayerApi {
     const layerInfo: TypeOrderedLayerInfo = {
       layerPath: uuid,
       visible: true,
-      queryable: true,
+      queryableState: true,
       hoverable: true,
       legendCollapsed: false,
       inVisibleRange: true,
@@ -1374,6 +1380,24 @@ export class LayerApi {
   }
 
   /**
+   * Sets queryable state for a layer.
+   * @param {string} layerPath - The path of the layer.
+   * @param {boolean} queryable - The new queryable state for the layer.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+   * @throws {LayerWrongTypeError} When the layer was of wrong type
+   */
+  setLayerQueryable(layerPath: string, queryable: boolean): void {
+    // Get the layer
+    const layer = this.getGeoviewLayer(layerPath);
+
+    // Check if wrong type
+    if (!(layer instanceof AbstractGVLayer)) throw new LayerWrongTypeError(layerPath, layer.getLayerName());
+
+    // Redirect
+    layer.setQueryable(queryable);
+  }
+
+  /**
    * Changes a GeoJson Source of a GeoJSON layer at the given layer path.
    *
    * @param {string} layerPath - The path of the layer.
@@ -1428,7 +1452,7 @@ export class LayerApi {
     const outfields = layerConfig.getOutfields();
 
     // If has fields and queryable
-    if (!!outfields?.length && layerConfig.getQueryableDefaulted()) {
+    if (!!outfields?.length && layerConfig.getQueryableSourceDefaulted()) {
       // Convert the provided field names to an array so we can index
       if (outfields.length === fieldNames.length)
         // Override existing values in each outfield with provided field name
@@ -1459,7 +1483,7 @@ export class LayerApi {
     const outfields = layerConfig.getOutfields();
 
     // If has fields and queryable
-    if (!!outfields?.length && layerConfig.getQueryableDefaulted()) {
+    if (!!outfields?.length && layerConfig.getQueryableSourceDefaulted()) {
       // Ensure same number of all items are provided
       if (fieldNames.length === types.length) {
         // Convert to array of outfields
@@ -1622,6 +1646,9 @@ export class LayerApi {
     // Register a hook when a layer visibility is changed
     gvLayer.onVisibleChanged(this.#boundedHandleLayerVisibleChanged);
 
+    // Register a hook when a layer queryable is changed
+    gvLayer.onLayerQueryableChanged(this.#boundedHandleLayerQueryableChanged);
+
     // For a WMS, register a hook when the image fails to load so that we can try to rescue it
     if (gvLayer instanceof GVWMS) gvLayer.onImageLoadRescue(this.#boundedHandleLayerWMSImageLoadRescue);
   }
@@ -1649,6 +1676,9 @@ export class LayerApi {
 
     // Unregister handler on layer opacity change
     gvLayer.offLayerOpacityChanged(this.#boundedHandleLayerOpacityChanged);
+
+    // Unregister handler on layer queryable changed
+    gvLayer.offLayerQueryableChanged(this.#boundedHandleLayerQueryableChanged);
 
     // Unregister handler on layer visibility change
     gvLayer.offVisibleChanged(this.#boundedHandleLayerVisibleChanged);
@@ -1915,7 +1945,7 @@ export class LayerApi {
    * @param {LayerOpacityChangedEvent} event - The event containing the opacity change.
    */
   #handleLayerOpacityChanged(layer: AbstractBaseGVLayer, event: LayerOpacityChangedEvent): void {
-    LegendEventProcessor.setOpacityInStore(this.getMapId(), event.layerPath, event.opacity);
+    LegendEventProcessor.setOpacityInStore(this.getMapId(), layer.getLayerPath(), event.opacity);
   }
 
   /**
@@ -1928,6 +1958,26 @@ export class LayerApi {
 
     // Emit event
     this.#emitLayerVisibilityToggled({ layerPath: layer.getLayerPath(), visibility: event.visible });
+  }
+
+  /**
+   * Handles when a layer queryable state is changed on the map.
+   * @param {AbstractGVLayer} layer - The layer that's become changed.
+   * @param {GVLayerErrorEvent} event - The event containing the queryable state change.
+   */
+  #handleLayerQueryableChanged(layer: AbstractBaseGVLayer, event: LayerQueryableChangedEvent): void {
+    // Redirect
+    MapEventProcessor.setMapLayerQueryable(this.getMapId(), layer.getLayerPath(), event.queryable);
+    LegendEventProcessor.setLayerQueryableInStore(this.getMapId(), layer.getLayerPath(), event.queryable);
+
+    // If not queryable
+    if (!event.queryable) {
+      // Clear the results when turning the queryable to false
+      this.featureInfoLayerSet.clearResults(layer.getLayerPath());
+    }
+
+    // TODO: MINOR - Emit event here?
+    // this.#emitLayerQueryableToggled({ layerPath: layer.getLayerPath(), queryable: event.queryable });
   }
 
   /**
@@ -2688,12 +2738,11 @@ export class LayerApi {
       const settings = ConfigBaseClass.getClassOrTypeInitialSettings(layerEntryConfig);
       const featureInfo = layerEntryConfig.source?.featureInfo;
 
-      const isQueryable = featureInfo?.queryable === false ? false : (settings?.states?.queryable ?? featureInfo?.queryable ?? true); // default: true
-
       const layerInfo: TypeOrderedLayerInfo = {
         layerPath: subLayerPath,
         visible: settings?.states?.visible ?? true, // default: true
-        queryable: isQueryable,
+        queryableSource: featureInfo?.queryable ?? true, // default: true
+        queryableState: settings?.states?.queryable ?? true, // default: true
         hoverable: settings?.states?.hoverable ?? true, // default: true
         legendCollapsed: settings?.states?.legendCollapsed ?? false, // default: false
         inVisibleRange: true,

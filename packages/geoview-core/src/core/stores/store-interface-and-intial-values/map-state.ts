@@ -20,7 +20,7 @@ import type {
 } from '@/api/types/map-schema-types';
 import { DEFAULT_HIGHLIGHT_COLOR, MAP_CENTER, MAP_ZOOM_LEVEL } from '@/api/types/map-schema-types';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
-import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
+import { type TypeSetStore, type TypeGetStore, useStableSelector } from '@/core/stores/geoview-store';
 import { Projection } from '@/geo/utils/projection';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
@@ -28,6 +28,7 @@ import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import type { TypeHoverFeatureInfo } from './feature-info-state';
+import { shallowObjectEqual } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with MapEventProcessor vs MapState
@@ -1025,7 +1026,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         const curLayerInfo = get().mapState.orderedLayerInfo;
         const layerInfo = curLayerInfo.find((info) => info.layerPath === layerPath);
         if (layerInfo) {
-          layerInfo.queryable = queryable;
+          layerInfo.queryableState = queryable;
           if (queryable) layerInfo.hoverable = queryable;
 
           // Redirect
@@ -1073,9 +1074,10 @@ export interface TypeNorthArrow {
 }
 
 export interface TypeOrderedLayerInfo {
-  hoverable?: boolean;
   layerPath: string;
-  queryable?: boolean;
+  hoverable?: boolean;
+  queryableSource?: boolean;
+  queryableState?: boolean;
   visible: boolean;
   inVisibleRange: boolean;
   legendCollapsed: boolean;
@@ -1166,6 +1168,23 @@ export const useMapSelectorLayerLegendCollapsed = (layerPath: string): boolean =
     useGeoViewStore(),
     (state) =>
       MapEventProcessor.findMapLayerFromOrderedInfo(state.mapId, layerPath, state.mapState.orderedLayerInfo)?.legendCollapsed || false
+  );
+};
+export const useMapSelectorLayerQueryable = (layerPaths: string[]): Record<string, boolean> => {
+  // Hook
+  return useStableSelector(
+    useGeoViewStore(),
+    (state) => {
+      const result: Record<string, boolean> = {};
+
+      for (const layerPath of layerPaths) {
+        result[layerPath] =
+          MapEventProcessor.findMapLayerFromOrderedInfo(state.mapId, layerPath, state.mapState.orderedLayerInfo)?.queryableState || false;
+      }
+
+      return result;
+    },
+    shallowObjectEqual
   );
 };
 

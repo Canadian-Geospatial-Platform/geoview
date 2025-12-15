@@ -416,7 +416,7 @@ export abstract class ConfigBaseClass {
    * Ensures that the `minZoom` is not decreased unintentionally by keeping the more restrictive (higher) value
    * between the existing `minZoom` and the provided `minZoomToValidate`.
    * This uses a shallow update via `updateInitialSettings()` and supports method chaining by returning the instance.
-   * @param {boolean} visible - The candidate `minZoom` value to validate against the current setting.
+   * @param {boolean} visible - If the layer state is visible.
    * @returns The current instance (for chaining).
    */
   updateInitialSettingsStateVisible(visible: boolean): this {
