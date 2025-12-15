@@ -205,6 +205,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   * @static
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -224,7 +225,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata.
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included
+   * @staticin the configuration.
    * @returns {TypeXYZTilesConfig} The constructed configuration object for the XYZTiles layer.
    */
   static createGeoviewLayerConfig(
@@ -269,6 +271,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
    * @param {boolean} isTimeAware - Indicates if the layer is time aware.
    * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
+   * @static
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -300,6 +303,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param {XYZTilesLayerEntryConfig} layerConfig - The configuration for the XYZ layer.
    * @returns A fully configured XYZ source.
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   * @static
    */
   static createXYZSource(layerConfig: XYZTilesLayerEntryConfig): XYZ {
     const sourceOptions: SourceOptions = {

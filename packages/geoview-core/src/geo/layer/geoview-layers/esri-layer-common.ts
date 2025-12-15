@@ -50,6 +50,7 @@ export class EsriUtilities {
    * with a numeric layerId and creates a group entry when a layer is a group.
    * @param {EsriDynamic | EsriFeature} layer The ESRI layer instance pointer.
    * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
+   * @static
    */
   static commonValidateListOfLayerEntryConfig(
     layer: EsriDynamic | EsriFeature,
@@ -177,6 +178,7 @@ export class EsriUtilities {
    * @param {number} esriIndexForFeature
    *   For feature layers, the index pointing to the corresponding entry inside the server metadata's
    *   `layers[]` array. Ignored for dynamic layers.
+   * @static
    */
   static #checkForWarningOnTheLayerMetadata(
     layer: EsriDynamic | EsriFeature,
@@ -206,6 +208,7 @@ export class EsriUtilities {
    * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+   * @static
    */
   static async commonProcessLayerMetadata<
     T extends EsriDynamic | EsriFeature | EsriImage,
@@ -258,6 +261,8 @@ export class EsriUtilities {
   /**
    * This method verifies if the layer is queryable and sets the outfields and aliasFields of the source feature info.
    * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig - The layer entry to configure.
+   * @private
+   * @static
    */
   static #commonProcessFeatureInfoConfig(
     layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
@@ -329,6 +334,8 @@ export class EsriUtilities {
   /**
    * This method set the initial settings based on the service metadata. Priority is given to the layer configuration.
    * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig - The layer entry to configure.
+   * @static
+   * @private
    */
   static #commonProcessInitialSettings(
     layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
@@ -391,6 +398,7 @@ export class EsriUtilities {
    * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig - The layer entry to configure
    * @param {TimeDimensionESRI} esriTimeDimension - The ESRI time dimension object
    * @param {boolean} singleHandle - True for ESRI Image
+   * @static
    */
   // TODO: Issue #2139 - There is a bug with the temporal dimension returned by service URL:
   // TO.DOCONT:  https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_fr/MapServer/0
@@ -421,6 +429,7 @@ export class EsriUtilities {
    * @throws {ResponseTypeError} When the response from the service is not an object.
    * @throws {ResponseContentError} When the response actually contains an error within it.
    * @throws {NetworkError} When a network issue happened.
+   * @static
    */
   static async queryRecordsByUrl(
     url: string,
@@ -441,6 +450,7 @@ export class EsriUtilities {
    * @param {string} url - An Esri url indicating a relationship table to query
    * @param {number} recordGroupIndex - The group index of the relationship layer on which to read the related records
    * @returns {Promise<TypeFeatureInfoEntryPartial[]>} A promise of an array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
+   * @static
    * @deprecated Doesn't seem to be called anywhere.
    */
   static async queryRelatedRecordsByUrl(url: string, recordGroupIndex: number): Promise<TypeFeatureInfoEntryPartial[]> {
@@ -465,6 +475,7 @@ export class EsriUtilities {
    * @param {number} maxOffset - The max allowable offset value to simplify geometry
    * @param {boolean} parseFeatureInfoEntries - A boolean to indicate if we use the raw esri output or if we parse it
    * @returns {Promise<TypeFeatureInfoEntryPartial[]>} A promise of an array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
+   * @static
    */
   static queryRecordsByUrlObjectIds(
     layerUrl: string,
@@ -498,6 +509,7 @@ export class EsriUtilities {
    * @param {EsriRelatedRecordsJsonResponseRelatedRecord[]} records The records representing the data from Esri.
    * @param {TypeStyleGeometry?} geometryType - Optional, the geometry type.
    * @returns TypeFeatureInfoEntryPartial[] An array of relared records of type TypeFeatureInfoEntryPartial
+   * @static
    */
   static esriParseFeatureInfoEntries(
     records: EsriRelatedRecordsJsonResponseRelatedRecord[],
@@ -529,6 +541,7 @@ export class EsriUtilities {
    * @param {EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig The ESRI layer config
    * @param {string} fieldName field name for which we want to get the type.
    * @returns {TypeOutfieldsType} The type of the field.
+   * @static
    */
   static esriGetFieldType(
     layerConfig: EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig,
@@ -554,6 +567,7 @@ export class EsriUtilities {
    * @param {EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig The ESRI layer config
    * @param {string} fieldName field name for which we want to get the domain.
    * @returns {codedValueType | rangeDomainType | null} The domain of the field.
+   * @static
    */
   // TODO: ESRI domains are translated to GeoView domains in the configuration. Any GeoView layer that support geoview domains can
   // TO.DOCONT: call a method getFieldDomain that use config.source.featureInfo.outfields to find a field domain.
