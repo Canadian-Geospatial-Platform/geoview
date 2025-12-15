@@ -6,6 +6,7 @@ import { UIEventProcessor } from 'geoview-core/api/event-processors/event-proces
 import { DataTableEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/data-table-event-processor';
 import { LegendEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/legend-event-processor';
 import { delay } from 'geoview-core/core/utils/utilities';
+import { MapEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/map-event-processor';
 
 /**
  * Main Map Config testing class.
@@ -32,64 +33,15 @@ export class MapConfigTester extends GVAbstractTester {
     return this.test(
       'Test DataTable in footer bar with selectedDataTableLayerPath',
       async (test) => {
-        // Delete current map
-        test.addStep('Deleting current map...');
-        await this.getApi().deleteMapViewer(mapId, false);
+        // Create the mapViewer with footer bar config overrides
+        const footerBarConfig = {
+          tabs: { core: ['data-table'] },
+          selectedTab: 'data-table',
+          selectedDataTableLayerPath: 'geojsonLYR5/polygons.json',
+        };
 
-        // Create new config with data-table selected and a layer pre-loaded
-        test.addStep('Creating map with layer pre-loaded and data-table selected...');
-        const newConfig = JSON.stringify({
-          map: {
-            interaction: 'dynamic',
-            viewSettings: { projection: 3978 },
-            basemapOptions: { basemapId: 'transport', shaded: true, labeled: true },
-            listOfGeoviewLayerConfig: [
-              {
-                geoviewLayerId: 'geojsonLYR5',
-                geoviewLayerName: 'GeoJSON Sample',
-                metadataAccessPath: GVAbstractTester.GEOJSON_METADATA_META,
-                geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
-                listOfLayerEntryConfig: [
-                  {
-                    layerId: 'polygons.json',
-                    layerName: 'Polygons',
-                  },
-                ],
-              },
-            ],
-          },
-          components: [],
-          corePackages: ['test-suite'],
-          corePackagesConfig: [
-            {
-              'test-suite': { suites: ['suite-map-config'] },
-            },
-          ],
-          theme: 'geo.ca',
-          footerBar: {
-            tabs: {
-              core: ['legend', 'layers', 'details', 'data-table'],
-            },
-            selectedTab: 'data-table',
-            selectedDataTableLayerPath: 'geojsonLYR5/polygons.json',
-          },
-        });
-
-        // Wait for layer to load and data table to initialize
-        test.addStep('Waiting for layer to load and data table to initialize...');
-        const newMapViewer = await this.getApi()
-          .createMapFromConfig(mapId, newConfig, 500)
-          .then(
-            (mapViewer) =>
-              new Promise<MapViewer>((resolve) => {
-                mapViewer.onMapLayersLoaded(() => {
-                  test.addStep('Layers loaded');
-                  resolve(mapViewer);
-                });
-              })
-          );
-
-        return newMapViewer;
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['footerBar', footerBarConfig]]);
+        return mapViewer;
       },
       (test) => {
         // Verify the footer bar tab is selected
@@ -135,69 +87,15 @@ export class MapConfigTester extends GVAbstractTester {
     return this.test(
       'Test DataTable in app bar with selectedDataTableLayerPath',
       async (test) => {
-        // Delete current map
-        test.addStep('Deleting current map...');
-        await this.getApi().deleteMapViewer(mapId, false);
+        // Create the mapViewer with app bar config overrides
+        const appBarConfig = {
+          tabs: { core: ['data-table'] },
+          selectedTab: 'data-table',
+          selectedDataTableLayerPath: 'geojsonLYR5/polygons.json',
+        };
 
-        // Create new config with data-table in app bar and a layer pre-loaded
-        test.addStep('Creating map with data-table in app bar...');
-        const newConfig = JSON.stringify({
-          map: {
-            interaction: 'dynamic',
-            viewSettings: { projection: 3978 },
-            basemapOptions: { basemapId: 'transport', shaded: true, labeled: true },
-            listOfGeoviewLayerConfig: [
-              {
-                geoviewLayerId: 'geojsonLYR5',
-                geoviewLayerName: 'GeoJSON Sample',
-                metadataAccessPath: GVAbstractTester.GEOJSON_METADATA_META,
-                geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
-                listOfLayerEntryConfig: [
-                  {
-                    layerId: 'polygons.json',
-                    layerName: 'Polygons',
-                  },
-                ],
-              },
-            ],
-          },
-          components: [],
-          corePackages: ['test-suite'],
-          corePackagesConfig: [
-            {
-              'test-suite': { suites: ['suite-map-config'] },
-            },
-          ],
-          theme: 'geo.ca',
-          appBar: {
-            tabs: {
-              core: ['data-table'],
-            },
-            selectedTab: 'data-table',
-            selectedDataTableLayerPath: 'geojsonLYR5/polygons.json',
-          },
-          footerBar: {
-            tabs: {
-              core: [],
-            },
-          },
-        });
-
-        // Wait for layer to load and data table to initialize
-        test.addStep('Waiting for layer to load and app bar to initialize...');
-        const newMapViewer = await this.getApi()
-          .createMapFromConfig(mapId, newConfig, 500)
-          .then(
-            (mapViewer) =>
-              new Promise<MapViewer>((resolve) => {
-                mapViewer.onMapLayersLoaded(() => {
-                  test.addStep('Layers loaded');
-                  resolve(mapViewer);
-                });
-              })
-          );
-
-        return newMapViewer;
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['appBar', appBarConfig]]);
+        return mapViewer;
       },
       (test) => {
         // Verify that data-table is not in footer tabs
@@ -243,44 +141,13 @@ export class MapConfigTester extends GVAbstractTester {
     return this.test(
       'Test no footerBar or app bar config creates default tabs (layers, data-table) and (geolocator, legend, details, export)',
       async (test) => {
-        // Delete current map
-        test.addStep('Deleting current map...');
-        await this.getApi().deleteMapViewer(mapId, false);
+        // Create the mapViewer with footerBar and appBar removed
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [
+          ['footerBar', null],
+          ['appBar', null],
+        ]);
 
-        // Create new config WITHOUT footerBar object
-        test.addStep('Creating map without footerBar or appBar configuration...');
-        const newConfig = JSON.stringify({
-          map: {
-            interaction: 'dynamic',
-            viewSettings: { projection: 3978 },
-            basemapOptions: { basemapId: 'transport', shaded: true, labeled: true },
-          },
-          components: [],
-          corePackages: ['test-suite'],
-          corePackagesConfig: [
-            {
-              'test-suite': { suites: ['suite-map-config'] },
-            },
-          ],
-          theme: 'geo.ca',
-          // No footerBar or appBar specified - should get defaults
-        });
-
-        // Wait for map to initialize
-        test.addStep('Waiting for map to initialize...');
-        const newMapViewer = await this.getApi()
-          .createMapFromConfig(mapId, newConfig, 500)
-          .then(
-            (mapViewer) =>
-              new Promise<MapViewer>((resolve) => {
-                mapViewer.onMapLayersLoaded(() => {
-                  test.addStep('Layers loaded');
-                  resolve(mapViewer);
-                });
-              })
-          );
-
-        return newMapViewer;
+        return mapViewer;
       },
       (test) => {
         // Verify that footer bar exists with default tabs
@@ -315,53 +182,14 @@ export class MapConfigTester extends GVAbstractTester {
     return this.test(
       'Test footerBar with empty tabs array has no footer bar',
       async (test) => {
-        // Delete current map
-        test.addStep('Deleting current map...');
-        await this.getApi().deleteMapViewer(mapId, false);
+        // Create the mapViewer with empty tabs arrays
+        const emptyTabsConfig = { tabs: { core: [] } };
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [
+          ['footerBar', emptyTabsConfig],
+          ['appBar', emptyTabsConfig],
+        ]);
 
-        // Create new config with empty footerBar tabs
-        test.addStep('Creating map with empty footerBar and appBar tabs...');
-        const newConfig = JSON.stringify({
-          map: {
-            interaction: 'dynamic',
-            viewSettings: { projection: 3978 },
-            basemapOptions: { basemapId: 'transport', shaded: true, labeled: true },
-          },
-          components: [],
-          corePackages: ['test-suite'],
-          corePackagesConfig: [
-            {
-              'test-suite': { suites: ['suite-map-config'] },
-            },
-          ],
-          theme: 'geo.ca',
-          footerBar: {
-            tabs: {
-              core: [],
-            },
-          },
-          appBar: {
-            tabs: {
-              core: [],
-            },
-          },
-        });
-
-        // Wait for map to initialize
-        test.addStep('Waiting for map to initialize...');
-        const newMapViewer = await this.getApi()
-          .createMapFromConfig(mapId, newConfig, 500)
-          .then(
-            (mapViewer) =>
-              new Promise<MapViewer>((resolve) => {
-                mapViewer.onMapLayersLoaded(() => {
-                  test.addStep('Layers loaded');
-                  resolve(mapViewer);
-                });
-              })
-          );
-
-        return newMapViewer;
+        return mapViewer;
       },
       (test) => {
         // Verify that footer bar has no tabs
@@ -378,6 +206,64 @@ export class MapConfigTester extends GVAbstractTester {
   }
 
   /**
+   * Test that no navBar config value results in default navigation controls
+   * @returns {Promise<Test>} A Promise that resolves when the test completes successfully.
+   */
+  testNoNavBarHasDefaults(): Promise<Test> {
+    const mapId = this.getMapId();
+
+    // Test
+    return this.test(
+      'Test no navBar config value creates default navigation controls',
+      async (test) => {
+        // Create the mapViewer with navBar removed (null)
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['navBar', null]]);
+
+        return mapViewer;
+      },
+      (test) => {
+        // Verify that navBar exists with default controls
+        test.addStep('Verifying navBar has default controls...');
+        const navBarComponents = UIEventProcessor.getNavBarComponents(mapId);
+        Test.assertIsDefined('navBarComponents', navBarComponents);
+
+        // Verify default controls are present
+        test.addStep('Verifying default controls exist in navBar...');
+        Test.assertIsArrayEqual(navBarComponents, ['zoom', 'rotation', 'fullscreen', 'home', 'basemap-select']);
+      }
+    );
+  }
+
+  /**
+   * Test that navBar with empty array results in only zoom and rotate controls
+   * @returns {Promise<Test>} A Promise that resolves when the test completes successfully.
+   */
+  testEmptyNavBarHasZoomRotate(): Promise<Test> {
+    const mapId = this.getMapId();
+
+    // Test
+    return this.test(
+      'Test navBar with empty array has only zoom and rotate',
+      async (test) => {
+        // Create the mapViewer with empty navBar array
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['navBar', []]]);
+
+        return mapViewer;
+      },
+      (test) => {
+        // Verify that navBar exists
+        test.addStep('Verifying navBar exists...');
+        const navBarComponents = UIEventProcessor.getNavBarComponents(mapId);
+        Test.assertIsDefined('navBarComponents', navBarComponents);
+
+        // Verify no buttons are present
+        test.addStep('Verifying navBar has empty controls array...');
+        Test.assertIsArrayEqual(navBarComponents, []);
+      }
+    );
+  }
+
+  /**
    * Test that initial view with layerIds sets map extent to layer extent
    * @returns {Promise<Test>} A Promise that resolves when the test completes successfully.
    */
@@ -388,68 +274,11 @@ export class MapConfigTester extends GVAbstractTester {
     return this.test<MapViewer>(
       'Test initial view with layerIds sets map extent to layer extent',
       async (test) => {
-        // Delete current map
-        test.addStep('Deleting current map...');
-        await this.getApi().deleteMapViewer(mapId, false);
+        // Replace initialView with layerIds only
+        const initialViewConfig = { layerIds: ['geojsonLYR5/polygons.json'] };
 
-        // Create new config with initial view layerIds
-        test.addStep('Creating map with initial view layerIds...');
-        const newConfig = JSON.stringify({
-          map: {
-            interaction: 'dynamic',
-            viewSettings: {
-              projection: 3978,
-              initialView: {
-                zoomAndCenter: [4, [0, 0]],
-                layerIds: ['geojsonLYR5/polygons.json'],
-              },
-            },
-            basemapOptions: { basemapId: 'transport', shaded: true, labeled: true },
-            listOfGeoviewLayerConfig: [
-              {
-                geoviewLayerId: 'geojsonLYR5',
-                geoviewLayerName: 'GeoJSON Sample',
-                metadataAccessPath: GVAbstractTester.GEOJSON_METADATA_META,
-                geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
-                listOfLayerEntryConfig: [
-                  {
-                    layerId: 'polygons.json',
-                    layerName: 'Polygons',
-                  },
-                ],
-              },
-            ],
-          },
-          components: [],
-          corePackages: ['test-suite'],
-          corePackagesConfig: [
-            {
-              'test-suite': { suites: ['suite-map-config'] },
-            },
-          ],
-          theme: 'geo.ca',
-          footerBar: {
-            tabs: {
-              core: ['legend', 'layers', 'details'],
-            },
-          },
-        });
-
-        // Recreate map with new config
-        test.addStep('Waiting for map to initialize...');
-        const newMapViewer = await this.getApi()
-          .createMapFromConfig(mapId, newConfig, 500)
-          .then(
-            (mapViewer) =>
-              new Promise<MapViewer>((resolve) => {
-                mapViewer.onMapLayersLoaded(() => {
-                  test.addStep('Layers loaded');
-                  resolve(mapViewer);
-                });
-              })
-          );
-
-        return newMapViewer;
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['map.viewSettings.initialView', initialViewConfig]]);
+        return mapViewer;
       },
       async (test, newMapViewer) => {
         // Get the map extent
@@ -482,5 +311,224 @@ export class MapConfigTester extends GVAbstractTester {
         );
       }
     );
+  }
+
+  /**
+   * Test that overlayObjects with pointMarkers are created on the map
+   * @returns {Promise<Test>} A Promise that resolves when the test completes successfully.
+   */
+  testOverlayObjectsPointMarkers(): Promise<Test> {
+    const mapId = this.getMapId();
+
+    // Test
+    return this.test<MapViewer>(
+      'Test overlayObjects with pointMarkers are created',
+      async (test) => {
+        // Create overlay objects configuration
+        const overlayObjectsConfig = {
+          pointMarkers: {
+            cities: [
+              {
+                id: 'ottawa',
+                coordinate: [-75.6972, 45.4215],
+                color: '#FF0000',
+                opacity: 0.8,
+              },
+              {
+                id: 'toronto',
+                coordinate: [-79.3832, 43.6532],
+                color: '#0000FF',
+                opacity: 0.8,
+              },
+            ],
+          },
+        };
+
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['map.overlayObjects', overlayObjectsConfig]]);
+        return mapViewer;
+      },
+      (test) => {
+        // Verify that overlay pointsMMarkers objects exist
+        test.addStep('Verifying pointMarkers objects are defined...');
+        const pointsMMarkers = MapEventProcessor.getPointMarkers(mapId);
+        Test.assertIsDefined('pointMarkers', pointsMMarkers);
+
+        // Verify cities group exists
+        test.addStep('Verifying cities pointMarkers group exists...');
+        const cities = pointsMMarkers?.cities;
+        Test.assertIsDefined('cities', pointsMMarkers.cities);
+
+        // Verify Ottawa marker
+        test.addStep('Verifying Ottawa marker exists...');
+        const ottawaMarker = cities?.find((marker: { id: string }) => marker.id === 'ottawa');
+        Test.assertIsDefined('ottawaMarker', ottawaMarker);
+
+        // Verify Toronto marker
+        test.addStep('Verifying Toronto marker exists...');
+        const torontoMarker = cities?.find((marker: { id: string }) => marker.id === 'toronto');
+        Test.assertIsDefined('torontoMarker', torontoMarker);
+
+        // Verify number of markers
+        test.addStep('Verifying there are 2 city markers...');
+        Test.assertIsArrayLengthEqual(cities, 2);
+      }
+    );
+  }
+
+  /**
+   * Test that viewSettings minZoom and maxZoom constraints are enforced
+   * @returns {Promise<Test>} A Promise that resolves when the test completes successfully.
+   */
+  testViewSettingsZoomConstraints(): Promise<Test> {
+    const mapId = this.getMapId();
+
+    // Test
+    return this.test<MapViewer>(
+      'Test viewSettings minZoom and maxZoom constraints',
+      async (test) => {
+        // Create view settings configuration with zoom constraints
+        const viewSettingsConfig = {
+          minZoom: 6,
+          maxZoom: 8,
+          projection: 3978,
+        };
+
+        const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['map.viewSettings', viewSettingsConfig]]);
+        return mapViewer;
+      },
+      async (test, mapViewer) => {
+        // Get the map view
+        const view = mapViewer.getView();
+
+        // Test zooming to minimum allowed zoom (6)
+        test.addStep('Testing zoom to minimum allowed level (6)...');
+        mapViewer.setZoomLevel(6);
+        await delay(500);
+        const zoomAt6 = view.getZoom();
+        Test.assertIsEqual(zoomAt6, 6);
+
+        // Test zooming below minimum (4) - should be constrained to minZoom
+        test.addStep('Testing zoom below minimum level (4) - should be constrained...');
+        mapViewer.setZoomLevel(4);
+        await delay(500);
+        const zoomAt4 = view.getZoom();
+        Test.assertIsEqual(zoomAt4, 6); // Should be constrained to minZoom
+
+        // Test zooming to maximum allowed zoom (8)
+        test.addStep('Testing zoom to maximum allowed level (8)...');
+        mapViewer.setZoomLevel(8);
+        await delay(500);
+        const zoomAt8 = view.getZoom();
+        Test.assertIsEqual(zoomAt8, 8);
+
+        // Test zooming above maximum (10) - should be constrained to maxZoom
+        test.addStep('Testing zoom above maximum level (10) - should be constrained...');
+        mapViewer.setZoomLevel(10);
+        await delay(500);
+        const zoomAt10 = view.getZoom();
+        Test.assertIsEqual(zoomAt10, 8); // Should be constrained to maxZoom
+      }
+    );
+  }
+
+  /**
+   * Helper function to create a basic map configuration with optional overrides.
+   * @param {[string, unknown][] | [string, unknown]} overrides - Can be:
+   *   - Array of [path, value] pairs:
+   *     [['footerBar', { tabs: { core: ['data-table'] }, selectedTab: 'data-table' }]]
+   *   - Single [path, value] pair:
+   *     ['map.viewSettings.initialView', { layerIds: ['geojsonLYR5/polygons.json'] }]
+   * @returns {Promise<MapViewer>} The created map viewer
+   * @private
+   */
+  async #helperCreateMapConfig(test: Test, mapId: string, overrides: [string, unknown][] | [string, unknown] = []): Promise<MapViewer> {
+    const baseConfig = {
+      map: {
+        interaction: 'dynamic',
+        viewSettings: { projection: 3978, initialView: { zoomAndCenter: [4.5, [-90, 60]] } },
+        basemapOptions: { basemapId: 'transport', shaded: true, labeled: true },
+        listOfGeoviewLayerConfig: [
+          {
+            geoviewLayerId: 'geojsonLYR5',
+            geoviewLayerName: 'GeoJSON Sample',
+            metadataAccessPath: GVAbstractTester.GEOJSON_METADATA_META,
+            geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
+            listOfLayerEntryConfig: [
+              {
+                layerId: 'polygons.json',
+                layerName: 'Polygons',
+              },
+            ],
+          },
+        ],
+      },
+      components: [],
+      corePackages: ['test-suite'],
+      navBar: ['zoom', 'rotation', 'fullscreen', 'home', 'basemap-select'],
+      corePackagesConfig: [
+        {
+          'test-suite': { suites: ['suite-map-config'] },
+        },
+      ],
+      theme: 'geo.ca',
+      footerBar: {
+        tabs: {
+          core: ['layers', 'data-table'],
+        },
+      },
+      appBar: {
+        tabs: {
+          core: ['geolocator', 'legend', 'details', 'export'],
+        },
+      },
+    };
+
+    // Apply overrides - normalize to array format then apply each path-value pair
+    const overridesArray = Array.isArray(overrides[0]) ? (overrides as [string, unknown][]) : [overrides as [string, unknown]];
+    overridesArray.forEach(([path, value]) => {
+      MapConfigTester.#setValueByPath(baseConfig, path, value);
+    });
+
+    // Delete current map
+    test.addStep('Deleting current map...');
+    await this.getApi().deleteMapViewer(mapId, false);
+
+    // Wait for layer to load and data table to initialize
+    test.addStep('Waiting for layer to load and data table to initialize...');
+    const mapViewer = await this.getApi().createMapFromConfig(mapId, JSON.stringify(baseConfig), 500);
+    await mapViewer.waitForLayersLoaded();
+
+    test.addStep('Layers loaded');
+    return mapViewer;
+  }
+
+  /**
+   * Sets a value in an object using a dot-notation path. If value is null or undefined, removes the key.
+   * @param {Record<string, unknown>} obj - The object to modify
+   * @param {string} path - Dot-notation path like 'map.viewSettings.initialView'
+   * @param {unknown} value - The value to set, or null/undefined to remove
+   * @private
+   */
+  static #setValueByPath(obj: Record<string, unknown>, path: string, value: unknown): void {
+    const keys = path.split('.');
+    let current = obj;
+
+    // Navigate to the parent of the final key
+    for (let i = 0; i < keys.length - 1; i++) {
+      const key = keys[i];
+      if (!(key in current) || typeof current[key] !== 'object' || current[key] === null) {
+        current[key] = {};
+      }
+      current = current[key] as Record<string, unknown>;
+    }
+
+    const finalKey = keys[keys.length - 1];
+
+    // If value is null or undefined, remove the key
+    if (value === null || value === undefined) {
+      delete current[finalKey];
+    } else {
+      current[finalKey] = value;
+    }
   }
 }
