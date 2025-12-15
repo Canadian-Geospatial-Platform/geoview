@@ -85,6 +85,8 @@ import type {
   LayerMessageEvent,
   LayerQueryableChangedEvent,
   LayerQueryableChangedDelegate,
+  LayerHoverableChangedDelegate,
+  LayerHoverableChangedEvent,
 } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractGVVector } from './gv-layers/vector/abstract-gv-vector';
@@ -247,6 +249,9 @@ export class LayerApi {
   /** Keep a bounded reference to the handle layer queryable changed */
   #boundedHandleLayerQueryableChanged: LayerQueryableChangedDelegate;
 
+  /** Keep a bounded reference to the handle layer hoverable changed */
+  #boundedHandleLayerHoverableChanged: LayerHoverableChangedDelegate;
+
   /** Keep a bounded reference to the handle WMS Layer Image Load Callbacks */
   #boundedHandleLayerWMSImageLoadRescue: ImageLoadRescueDelegate;
 
@@ -275,6 +280,7 @@ export class LayerApi {
     this.#boundedHandleLayerOpacityChanged = this.#handleLayerOpacityChanged.bind(this);
     this.#boundedHandleLayerVisibleChanged = this.#handleLayerVisibleChanged.bind(this);
     this.#boundedHandleLayerQueryableChanged = this.#handleLayerQueryableChanged.bind(this);
+    this.#boundedHandleLayerHoverableChanged = this.#handleLayerHoverableChanged.bind(this);
     this.#boundedHandleLayerWMSImageLoadRescue = this.#handleLayerWMSImageLoadRescue.bind(this);
   }
 
@@ -1398,6 +1404,24 @@ export class LayerApi {
   }
 
   /**
+   * Sets hoverable state for a layer.
+   * @param {string} layerPath - The path of the layer.
+   * @param {boolean} hoverable - The new hoverable state for the layer.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+   * @throws {LayerWrongTypeError} When the layer was of wrong type
+   */
+  setLayerHoverable(layerPath: string, hoverable: boolean): void {
+    // Get the layer
+    const layer = this.getGeoviewLayer(layerPath);
+
+    // Check if wrong type
+    if (!(layer instanceof AbstractGVLayer)) throw new LayerWrongTypeError(layerPath, layer.getLayerName());
+
+    // Redirect
+    layer.setHoverable(hoverable);
+  }
+
+  /**
    * Changes a GeoJson Source of a GeoJSON layer at the given layer path.
    *
    * @param {string} layerPath - The path of the layer.
@@ -1649,6 +1673,9 @@ export class LayerApi {
     // Register a hook when a layer queryable is changed
     gvLayer.onLayerQueryableChanged(this.#boundedHandleLayerQueryableChanged);
 
+    // Register a hook when a layer hoverable is changed
+    gvLayer.onLayerHoverableChanged(this.#boundedHandleLayerHoverableChanged);
+
     // For a WMS, register a hook when the image fails to load so that we can try to rescue it
     if (gvLayer instanceof GVWMS) gvLayer.onImageLoadRescue(this.#boundedHandleLayerWMSImageLoadRescue);
   }
@@ -1679,6 +1706,9 @@ export class LayerApi {
 
     // Unregister handler on layer queryable changed
     gvLayer.offLayerQueryableChanged(this.#boundedHandleLayerQueryableChanged);
+
+    // Unregister handler on layer hoverable changed
+    gvLayer.offLayerHoverableChanged(this.#boundedHandleLayerHoverableChanged);
 
     // Unregister handler on layer visibility change
     gvLayer.offVisibleChanged(this.#boundedHandleLayerVisibleChanged);
@@ -1942,6 +1972,7 @@ export class LayerApi {
 
   /**
    * Handles when a layer opacity is changed on the map.
+   * @param {AbstractBaseGVLayer} layer - The layer that's become changed.
    * @param {LayerOpacityChangedEvent} event - The event containing the opacity change.
    */
   #handleLayerOpacityChanged(layer: AbstractBaseGVLayer, event: LayerOpacityChangedEvent): void {
@@ -1950,8 +1981,8 @@ export class LayerApi {
 
   /**
    * Handles when a layer visibility is changed on the map.
-   * @param {AbstractGVLayer} layer - The layer that's become changed.
-   * @param {GVLayerErrorEvent} event - The event containing the visibility change.
+   * @param {AbstractBaseGVLayer} layer - The layer that's become changed.
+   * @param {VisibleChangedEvent} event - The event containing the visibility change.
    */
   #handleLayerVisibleChanged(layer: AbstractBaseGVLayer, event: VisibleChangedEvent): void {
     MapEventProcessor.setMapLayerVisibilityInStore(this.getMapId(), layer.getLayerPath(), event.visible);
@@ -1962,8 +1993,8 @@ export class LayerApi {
 
   /**
    * Handles when a layer queryable state is changed on the map.
-   * @param {AbstractGVLayer} layer - The layer that's become changed.
-   * @param {GVLayerErrorEvent} event - The event containing the queryable state change.
+   * @param {AbstractBaseGVLayer} layer - The layer that's become changed.
+   * @param {LayerQueryableChangedEvent} event - The event containing the queryable state change.
    */
   #handleLayerQueryableChanged(layer: AbstractBaseGVLayer, event: LayerQueryableChangedEvent): void {
     // Redirect
@@ -1978,6 +2009,17 @@ export class LayerApi {
 
     // TODO: MINOR - Emit event here?
     // this.#emitLayerQueryableToggled({ layerPath: layer.getLayerPath(), queryable: event.queryable });
+  }
+
+  /**
+   * Handles when a layer hoverable state is changed on the map.
+   * @param {AbstractBaseGVLayer} layer - The layer that's become changed.
+   * @param {LayerHoverableChangedEvent} event - The event containing the hoverable state change.
+   */
+  #handleLayerHoverableChanged(layer: AbstractBaseGVLayer, event: LayerHoverableChangedEvent): void {
+    // Redirect
+    MapEventProcessor.setMapLayerHoverable(this.getMapId(), layer.getLayerPath(), event.hoverable);
+    LegendEventProcessor.setLayerHoverableInStore(this.getMapId(), layer.getLayerPath(), event.hoverable);
   }
 
   /**
