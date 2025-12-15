@@ -48,6 +48,7 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
    * @throws {ResponseError} When the response is not OK (non-2xx).
    * @throws {ResponseEmptyError} When the JSON response is empty.
+   * @static
    */
   static fetchMetadata<T>(url: string, abortSignal?: AbortSignal): Promise<T> {
     // The url
@@ -63,6 +64,7 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
    * @param {string | undefined} layerName - The layer name
    * @param {any} metadata - The metadata to check
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+   * @static
    */
   // GV The metadata structure can be anything, we only care to check if there's an error inside of it
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -441,6 +441,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {Feature[]} features - The array of vector features to process.
    * @param {VectorLayerEntryConfig} layerConfig - The configuration object for the vector layer.
    * @private
+   * @static
    */
   static #processFeatureMetadata(features: Feature[], layerConfig: VectorLayerEntryConfig): void {
     // Get the field name that uniquely identifies each feature (OID) from the layer configuration.
@@ -471,6 +472,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {OLProjection} outProjection - The output projection for the features.
    * @returns {Feature[]} The array of features.
    * @private
+   * @static
    */
   static #convertCsv(csvData: string, layerConfig: CsvLayerEntryConfig, outProjection: OLProjection): Feature[] {
     // GV: This function and the below private static ones used to be in the CSV class directly, but something wasn't working with a 'Private element not accessible' error.
@@ -531,6 +533,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    *
    * @returns {string[][]} An array of the rows of the csv, split by separator.
    * @private
+   * @static
    */
   static #csvStringToArray(csvData: string, separator: string): string[][] {
     const regex = new RegExp(`(\\${separator}|\\r?\\n|\\r|^)(?:"([^"]*(?:""[^"]*)*)"|([^\\${separator}\\r\\n]*))`, 'gi');
@@ -572,6 +575,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @param {string[]} excludedHeaders - The headers to exclude from feature info.
    * @param {VectorLayerEntryConfig} layerConfig The vector layer entry to configure.
    * @private
+   * @static
    */
   static #processFeatureInfoConfig(
     headers: string[],

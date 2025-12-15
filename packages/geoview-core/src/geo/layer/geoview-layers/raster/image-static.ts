@@ -101,6 +101,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   * @static
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -122,6 +123,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeImageStaticLayerConfig} The constructed configuration object for the Static Image layer.
+   * @static
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -175,6 +177,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @param {Extent} sourceExtent - Indicates the extent where the static image should be.
    * @param {number} sourceProjection - Indicates the projection used for the sourceExtent.
    * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
+   * @static
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -210,6 +213,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    * @throws {LayerEntryConfigParameterExtentNotDefinedInSourceError} When the source extent isn't defined.
    * @throws {LayerEntryConfigParameterProjectionNotDefinedInSourceError} When the source projection isn't defined.
+   * @static
    */
   static createImageStaticSource(layerConfig: ImageStaticLayerEntryConfig): Static {
     if (!layerConfig.source.extent) {
