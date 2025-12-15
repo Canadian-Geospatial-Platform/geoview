@@ -114,8 +114,8 @@
         <li>
           <button class="btn btn-primary" id="Disable-feature-info">Disable feature query for Top 100</button>
           <button class="btn btn-primary" id="Enable-feature-info">Enable feature query for Top 100</button><br />
-          <code>cgpv.api.getMapViewer('map1').layer.featureInfoLayerSet.disableClickListener('esriFeatureLYR5/0')</code>
-          <code>cgpv.api.getMapViewer('map1').layer.featureInfoLayerSet.enableClickListener('esriFeatureLYR5/0')</code>
+          <code>cgpv.api.getMapViewer('map1').layer.setLayerQueryable('esriFeatureLYR5/0', false)</code>
+          <code>cgpv.api.getMapViewer('map1').layer.setLayerQueryable('esriFeatureLYR5/0', true)</code>
         </li>
         <li>
           <button class="btn btn-primary" id="Show-collapsed-state">Show collapsed legend state for IAAC</button><br />
@@ -635,7 +635,7 @@
 
       // add an event listener when a button is clicked
       disableFeatureInfoButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer(mapId).layer.featureInfoLayerSet.disableClickListener(LYR_PATH_FEATURE);
+        cgpv.api.getMapViewer(mapId).layer.setLayerQueryable(LYR_PATH_FEATURE, false);
       });
 
       // Enable feature info Button==================================================================================================
@@ -644,7 +644,7 @@
 
       // add an event listener when a button is clicked
       enableFeatureInfoButton.addEventListener('click', async () => {
-        cgpv.api.getMapViewer(mapId).layer.featureInfoLayerSet.enableClickListener(LYR_PATH_FEATURE);
+        cgpv.api.getMapViewer(mapId).layer.setLayerQueryable(LYR_PATH_FEATURE, true);
       });
 
       // Enable show collapsed state Button==========================================================================================

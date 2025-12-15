@@ -74,7 +74,6 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
     // Update the resultSet data
     const layerPath = layer.getLayerPath();
-    this.resultSet[layerPath].eventListenerEnabled = layer.getLayerConfig().getInitialSettings().states?.queryable ?? true; // default: true
     this.resultSet[layerPath].queryStatus = 'processed';
     this.resultSet[layerPath].features = [];
   }
@@ -123,16 +122,13 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // Reinitialize the resultSet
     // Loop on each layer path in the resultSet
     Object.keys(this.resultSet).forEach((layerPath) => {
-      // If event listener is disabled
-      if (!this.resultSet[layerPath].eventListenerEnabled) return;
-
       // Get the layer config and layer associated with the layer path
       const layer = this.layerApi.getGeoviewLayer(layerPath);
 
       // If layer was found and of right type
       if (layer instanceof AbstractGVLayer) {
-        // If state is not in visible range
-        if (!AbstractLayerSet.isInVisibleRange(layer, this.layerApi.mapViewer.getView().getZoom())) return;
+        // If the layer is not queryable, skip it
+        if (!layer.getQueryable()) return;
 
         // Flag processing
         this.resultSet[layerPath].features = undefined;
@@ -227,46 +223,15 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Function used to enable listening of click events. When a layer path is not provided,
-   * click events listening is enabled for all layers
-   * @param {string} layerPath - Optional parameter used to enable only one layer
+   * Clears the results for the provided layer path.
+   * @param {string} layerPath - The layer path
    */
-  enableClickListener(layerPath?: string): void {
-    if (layerPath) this.#processListenerStatusChanged(layerPath, true);
-    else
-      Object.keys(this.resultSet).forEach((key: string) => {
-        this.#processListenerStatusChanged(key, true);
-      });
-  }
+  clearResults(layerPath: string): void {
+    // Edit the result set
+    this.resultSet[layerPath].features = [];
 
-  /**
-   * Function used to disable listening of click events. When a layer path is not provided,
-   * click events listening is disable for all layers
-   * @param {string} layerPath - Optional parameter used to disable only one layer
-   */
-  disableClickListener(layerPath?: string): void {
-    if (layerPath) this.#processListenerStatusChanged(layerPath, false);
-    else
-      Object.keys(this.resultSet).forEach((key: string) => {
-        this.#processListenerStatusChanged(key, false);
-      });
-  }
-
-  /**
-   * Function used to determine whether click events are disabled for a layer. When a layer path is not provided,
-   * the value returned is undefined if the map flags are a mixture of true and false values.
-   * @param {string} layerPath - Optional parameter used to get the flag value of a layer.
-   * @returns {boolean | undefined} The flag value for the map or layer.
-   */
-  isClickListenerEnabled(layerPath?: string): boolean | undefined {
-    if (layerPath) return !!this.resultSet?.[layerPath]?.eventListenerEnabled;
-
-    let returnValue: boolean | undefined;
-    Object.keys(this.resultSet).forEach((key: string, i) => {
-      if (i === 0) returnValue = this.resultSet[key].eventListenerEnabled;
-      if (returnValue !== this.resultSet[key].eventListenerEnabled) returnValue = undefined;
-    });
-    return returnValue;
+    // Propagate to store
+    this.#propagateToStoreName(this.resultSet[layerPath]);
   }
 
   /**
@@ -308,21 +273,6 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
     // Set the nameField if not already defined
     layerConfig.initNameField(outfields?.[0]?.name);
-  }
-
-  /**
-   * Apply status to item in results set reference by the layer path and propagate to store
-   * @param {string} layerPath - The layer path
-   * @param {boolean} isEnable - Status to apply
-   * @private
-   */
-  #processListenerStatusChanged(layerPath: string, isEnable: boolean): void {
-    // Edit the result set
-    this.resultSet[layerPath].eventListenerEnabled = isEnable;
-    this.resultSet[layerPath].features = [];
-
-    // Propagate to store
-    this.#propagateToStoreName(this.resultSet[layerPath]);
   }
 
   /**

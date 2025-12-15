@@ -58,7 +58,6 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
     // Update the resultSet data
     const layerPath = layer.getLayerPath();
-    this.resultSet[layerPath].eventListenerEnabled = true;
     this.resultSet[layerPath].queryStatus = 'processed';
     this.resultSet[layerPath].features = undefined;
 
@@ -101,9 +100,6 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
     // If valid layer path
     if (this.resultSet[layerPath]) {
-      // If event listener is disabled
-      if (!this.resultSet[layerPath].eventListenerEnabled) return Promise.resolve();
-
       // Get the layer config and layer associated with the layer path
       const layer = this.layerApi.getGeoviewLayer(layerPath);
 

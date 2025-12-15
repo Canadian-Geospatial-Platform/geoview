@@ -22,6 +22,7 @@ import {
   useMapHideCoordinateInfoSwitch,
   useMapAllVisibleandInRangeLayers,
   useMapOrderedLayers,
+  useMapSelectorLayerQueryable,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { doUntil } from '@/core/utils/utilities';
@@ -69,6 +70,7 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
   const selectedTab = useUIActiveFooterBarTabId();
   const isCollapsed = useUIFooterBarIsCollapsed();
   const activeAppBarTab = useUIActiveAppBarTab();
+  const queryableByLayerPath = useMapSelectorLayerQueryable(visibleInRangeLayers);
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
   const { addHighlightedFeature, removeHighlightedFeature, isLayerHiddenOnMap, getMapLayerParentHidden } = useMapStoreActions();
 
@@ -175,7 +177,7 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
     const layerListEntries = visibleInRangeLayers
       .map((layerPath) => arrayOfLayerDataBatch.find((layerData) => layerData.layerPath === layerPath))
       .filter((layer) => layer && !isLayerHiddenOnMap(layer.layerPath))
-      .filter((layer) => layer && layer.eventListenerEnabled)
+      .filter((layer) => layer && queryableByLayerPath[layer.layerPath])
       .map(
         (layer) =>
           ({
@@ -254,6 +256,7 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
     arrayOfLayerDataBatch,
     coordinateInfoEnabled,
     isLayerHiddenOnMap,
+    queryableByLayerPath,
     getNumFeaturesLabel,
     mapId,
     getMapLayerParentHidden,

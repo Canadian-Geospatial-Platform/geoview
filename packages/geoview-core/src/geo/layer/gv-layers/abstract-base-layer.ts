@@ -198,7 +198,7 @@ export abstract class AbstractBaseGVLayer {
    */
   setOpacity(layerOpacity: number, emitOpacityChange: boolean = true): void {
     this.getOLLayer().setOpacity(layerOpacity);
-    if (emitOpacityChange) this.#emitLayerOpacityChanged({ layerPath: this.getLayerPath(), opacity: layerOpacity });
+    if (emitOpacityChange) this.#emitLayerOpacityChanged({ opacity: layerOpacity });
   }
 
   /**
@@ -482,16 +482,14 @@ export type VisibleChangedEvent = {
 export type VisibleChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, VisibleChangedEvent, void>;
 
 /**
- * Define a delegate for the event handler function signature
- */
-export type LayerOpacityChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, LayerOpacityChangedEvent, void>;
-
-/**
  * Define an event for the delegate
  */
 export type LayerOpacityChangedEvent = {
-  // The layer path of the affected layer
-  layerPath: string;
   // The filter
   opacity: number;
 };
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type LayerOpacityChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, LayerOpacityChangedEvent, void>;

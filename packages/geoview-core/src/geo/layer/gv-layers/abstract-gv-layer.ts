@@ -76,6 +76,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   /** Boolean indicating if the layer should be included in time awareness functions such as the Time Slider. True by default. */
   #isTimeAware: boolean;
 
+  /** Indicates if the layer is currently queryable */
+  #queryable: boolean;
+
   /** Keep all callback delegate references */
   #onLayerStyleChangedHandlers: StyleChangedDelegate[] = [];
 
@@ -103,6 +106,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   /** Keep all callback delegate references */
   #onLayerMessageHandlers: LayerMessageDelegate[] = [];
 
+  /** Keep all callback delegate references */
+  #onLayerQueryableChangedHandlers: LayerQueryableChangedDelegate[] = [];
+
   /**
    * Constructs a GeoView layer to manage an OpenLayer layer.
    * @param {Source} olSource - The OpenLayer Source.
@@ -115,6 +121,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     // TODO: Get rid of this #isTimeAware attribute and use layerConfig.getIsTimeAware() instead (like getExternalFragmentsOrder, etc)
     // Boolean indicating if the layer should be included in time awareness functions such as the Time Slider.
     this.#isTimeAware = layerConfig.getGeoviewLayerConfig()?.isTimeAware ?? true; // default: true
+
+    // Copy the queryable flag, we'll work with this and the config remains static
+    this.#queryable = layerConfig.getInitialSettings()?.states?.queryable ?? true;
 
     // If there is a layer style in the config, set it in the layer
     const style = layerConfig.getLayerStyle();
@@ -617,6 +626,30 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   }
 
   /**
+   * Indicates if the layer is currently queryable.
+   * @returns {boolean} The currently queryable flag.
+   */
+  getQueryable(): boolean {
+    return this.#queryable;
+  }
+
+  /**
+   * Sets if the layer is currently queryable.
+   * @param {boolean} queryable - The queryable value.
+   */
+  setQueryable(queryable: boolean): void {
+    // Get the layer config
+    const layerConfig = this.getLayerConfig();
+
+    // If the source is not queryable
+    if (!layerConfig.getQueryableSourceDefaulted()) throw new LayerNotQueryableError(layerConfig.layerPath, this.getLayerName());
+
+    // Go for it
+    this.#queryable = queryable;
+    this.#emitLayerQueryableChanged({ queryable });
+  }
+
+  /**
    * Gets the extent of an array of features.
    * @param {number[] | string[]} objectIds - The IDs of the features to calculate the extent from.
    * @param {OLProjection} outProjection - The output projection for the extent.
@@ -668,7 +701,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     const layerConfig = this.getLayerConfig();
 
     // If the layer is not queryable
-    if (!layerConfig.getQueryableDefaulted()) {
+    if (!this.getQueryable()) {
       // Throw error
       throw new LayerNotQueryableError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
     }
@@ -1190,6 +1223,34 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     EventHelper.offEvent(this.#onLayerMessageHandlers, callback);
   }
 
+  /**
+   * Emits queryable changed event.
+   * @param {LayerQueryableChangedEvent} event - The event to emit
+   * @private
+   */
+  #emitLayerQueryableChanged(event: LayerQueryableChangedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerQueryableChangedHandlers, event);
+  }
+
+  /**
+   * Registers an queryable changed event handler.
+   * @param {LayerQueryableChangedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerQueryableChanged(callback: LayerQueryableChangedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerQueryableChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters an queryable changed event handler.
+   * @param {LayerQueryableChangedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerQueryableChanged(callback: LayerQueryableChangedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerQueryableChangedHandlers, callback);
+  }
+
   // #endregion EVENTS
 
   // #region STATIC
@@ -1647,5 +1708,18 @@ export type LayerMessageEvent = {
  * Define a delegate for the event handler function signature
  */
 export type LayerMessageDelegate = EventDelegateBase<AbstractGVLayer, LayerMessageEvent, void>;
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type LayerQueryableChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, LayerQueryableChangedEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerQueryableChangedEvent = {
+  // The filter
+  queryable: boolean;
+};
 
 // #endregion EVENT TYPES

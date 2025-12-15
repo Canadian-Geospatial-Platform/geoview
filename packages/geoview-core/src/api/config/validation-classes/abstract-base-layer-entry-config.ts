@@ -465,7 +465,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * Gets the source queryable value.
    * @returns {boolean | undefined} The source queryable value.
    */
-  getQueryable(): boolean | undefined {
+  getQueryableSource(): boolean | undefined {
     return this.getFeatureInfo().queryable;
   }
 
@@ -473,7 +473,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * Gets the source queryable value. Defaults to true when couldn't be determined.
    * @returns {boolean} The source queryable value, defaulted if necessary.
    */
-  getQueryableDefaulted(): boolean {
+  getQueryableSourceDefaulted(): boolean {
     return this.getFeatureInfo().queryable ?? true; // default: true
   }
 
@@ -481,7 +481,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * Sets the source queryable in the source object. The source.featureInfo object must already exist.
    * @param {boolean | undefined} queryable - The source queryable value.
    */
-  setQueryable(queryable: boolean | undefined): void {
+  setQueryableSource(queryable: boolean | undefined): void {
     this.source.featureInfo!.queryable = queryable;
   }
 
@@ -489,7 +489,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * Sets the source queryable in the source object only if it's not already set. The source.featureInfo object must already exist.
    * @param {boolean} queryable - The source queryable value.
    */
-  initQueryable(queryable: boolean | undefined): void {
+  initQueryableSource(queryable: boolean | undefined): void {
     this.source.featureInfo!.queryable ??= queryable;
   }
 

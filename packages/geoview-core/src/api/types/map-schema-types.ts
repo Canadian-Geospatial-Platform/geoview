@@ -820,7 +820,6 @@ export type TypeFeatureInfoEntryPartial = Pick<TypeFeatureInfoEntry, 'fieldInfo'
 // TODO: Refactor - Check if this type is still used and replace it with something like TypeAllFeatureInfoResultSetEntry?
 // TO.DOCONT:  Still use in data-table-state and detail.tsx
 export type TypeLayerData = {
-  eventListenerEnabled: boolean;
   // When property features is undefined, we are waiting for the query result.
   // when Array.isArray(features) is true, the features property contains the query result.
   // when property features is null, the query ended with an error.
