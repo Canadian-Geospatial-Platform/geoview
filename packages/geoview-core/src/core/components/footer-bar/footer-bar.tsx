@@ -153,7 +153,8 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
 
     // Set the allTabs (union of all footer tabs) and get the needed keys
     const allTabs = { ...tabsList, ...memoTabs };
-    const availableTabKeys: string[] = [...Object.keys(tabsList), 'guide'];
+    const tabsListKeys = Object.keys(tabsList);
+    const availableTabKeys: string[] = tabsListKeys.includes('guide') ? tabsListKeys : [...tabsListKeys, 'guide'];
 
     // Custom tabs first, then core tabs in DEFAULT_FOOTER_TABS_ORDER ... last guide
     const customTabKeys = availableTabKeys.filter((tabKey) => !DEFAULT_FOOTER_TABS_ORDER.includes(tabKey));

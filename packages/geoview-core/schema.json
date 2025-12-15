@@ -141,7 +141,7 @@
               "items": {
                 "$ref": "#/definitions/TypeValidFooterBarTabsCoreProps"
               },
-              "minItems": 1,
+              "minItems": 0,
               "default": ["layers", "data-table"],
               "uniqueItems": true
             },
