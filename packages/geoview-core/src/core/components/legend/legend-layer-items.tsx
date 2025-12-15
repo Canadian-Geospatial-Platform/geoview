@@ -29,7 +29,8 @@ const LegendListItem = memo(
     showVisibilityTooltip: { show: boolean; value: string };
     showNameTooltip: boolean;
   }): JSX.Element => (
-    <ListItem className={!isVisible || !layerVisible ? 'unchecked' : 'checked'}>
+    // eslint-disable-next-line no-nested-ternary
+    <ListItem className={!show ? undefined : !isVisible || !layerVisible ? 'unchecked' : 'checked'}>
       <ListItemIcon>
         <Tooltip title={show ? value : ''} key={`Tooltip-${name}-${icon}1`} placement="left" disableHoverListener={!show}>
           <Box sx={{ display: 'flex', padding: '0 18px 0 18px', margin: '0 -18px 0 -18px' }}>
@@ -60,7 +61,8 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
   const { toggleItemVisibility, getLayer } = useLayerStoreActions();
   const layerControls = useLayerSelectorControls(layerPath);
   const layerHidden = useMapSelectorIsLayerHiddenOnMap(layerPath);
-  const canToggleItemVisibility = getLayer(layerPath)?.canToggle && layerControls?.visibility !== false;
+  const legendLayer = getLayer(layerPath);
+  const canToggleItemVisibility = legendLayer?.canToggle && layerControls?.visibility !== false;
 
   /**
    * Handles toggling of class visibility when the legend item is clicked.
@@ -88,7 +90,7 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
           item,
           layerVisible: !layerHidden,
           showVisibilityTooltip: {
-            show: Boolean(canToggleItemVisibility && !layerHidden),
+            show: Boolean(canToggleItemVisibility && !layerHidden && legendLayer.styleConfig?.[item.geometryType]?.fields[0] !== undefined),
             value: t('layers.toggleItemVisibility'),
           },
           showNameTooltip: item.name.length > CONST_NAME_LENGTH_TOOLTIP,
@@ -96,7 +98,7 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
 
         // If classes can be toggled, wrap the component in a Box to handle click events
         const listItem = <LegendListItem key={`${item.name}-${item.isVisible}-${item.icon}`} {...commonProps} />;
-        return canToggleItemVisibility && !layerHidden ? (
+        return commonProps.showVisibilityTooltip.show ? (
           <Box key={`Box-${item.name}-${item.icon}`} onClick={() => handleToggleItemVisibility(item)} sx={sxClasses.toggleableItem}>
             {listItem}
           </Box>
