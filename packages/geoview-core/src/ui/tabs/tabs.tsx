@@ -314,7 +314,8 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
             <TabPanel
               value={value as number}
               index={index}
-              key={tab.id}
+              // eslint-disable-next-line react/no-array-index-key
+              key={`${tab.id}-${index}`}
               id={`${shellContainer?.id ?? ''}-${tab.id}`}
               tabId={tab.id}
               containerType={containerType}

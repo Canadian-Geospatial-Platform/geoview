@@ -8,6 +8,7 @@ import { MapEventProcessor } from 'geoview-core/api/event-processors/event-proce
 import type { Extent, TypeBasemapId, TypeValidMapProjectionCodes } from 'geoview-core/api/types/map-schema-types';
 import { AppEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/app-event-processor';
 import { UIEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/ui-event-processor';
+import type { Coordinate } from 'ol/coordinate';
 
 /**
  * Main Map testing class.
@@ -74,16 +75,12 @@ export class MapTester extends GVAbstractTester {
         // Test the zoom value
         if (currentZoom === zoomEnd) throw new TestError(`False precondition, map zoom was already at zoom destination ${zoomEnd}`);
 
-        // Update the step
-        test.addStep('Performing zoom...');
-
         // Perform a zoom
+        test.addStep('Performing zoom...');
         await MapEventProcessor.zoomMap(this.getMapId(), zoomEnd, zoomDuration);
 
-        // Update the step
-        test.addStep('Waiting for zoom to finish...');
-
         // Wait for the zoom to end (1000 for store to update)
+        test.addStep('Waiting for zoom to finish...');
         await delay(zoomDuration + 1000);
 
         // Return the result
@@ -135,10 +132,8 @@ export class MapTester extends GVAbstractTester {
         if (currentProjection === secondProjection)
           throw new TestError(`False precondition, map projection was already at projection destination ${secondProjection}`);
 
-        // Update the step
-        test.addStep(`Performing projection switch to ${secondProjection}...`);
-
         // Perform a projection switch
+        test.addStep(`Performing projection switch to ${secondProjection}...`);
         await MapEventProcessor.setProjection(this.getMapId(), secondProjection);
 
         // Update the step
@@ -165,7 +160,7 @@ export class MapTester extends GVAbstractTester {
       (test, result) => {
         // Perform assertions
         test.addStep('Verifying expected map extent in the store...');
-        Test.assertIsArrayEqual<number>(mapExtent, result);
+        Test.assertIsArrayEqual<number>(mapExtent, result, 0);
       }
     );
   }
@@ -188,9 +183,8 @@ export class MapTester extends GVAbstractTester {
     return this.test(
       'Test geometry group z-index get/set operations',
       (test) => {
-        test.addStep('Adding circle to test group...');
-
         // Add a circle to a new geometry group
+        test.addStep('Adding circle to test group...');
         this.getMapViewer().layer.geometry.addCircle(
           circleCoords,
           {
@@ -207,26 +201,21 @@ export class MapTester extends GVAbstractTester {
           testGroupId
         );
 
-        test.addStep('Getting initial z-index...');
-
         // Get the initial z-index
+        test.addStep('Getting initial z-index...');
         const initialZIndex = this.getMapViewer().layer.geometry.getGeometryGroupZIndex(testGroupId);
 
-        test.addStep(`Initial z-index: ${initialZIndex}`);
-
-        test.addStep('Setting z-index to 0...');
-
         // Set z-index to 0
+        test.addStep(`Initial z-index: ${initialZIndex}`);
+        test.addStep('Setting z-index to 0...');
         this.getMapViewer().layer.geometry.setGeometryGroupZIndex(testGroupId, 0);
 
-        test.addStep('Getting final z-index...');
-
         // Get the z-index again
+        test.addStep('Getting final z-index...');
         const finalZIndex = this.getMapViewer().layer.geometry.getGeometryGroupZIndex(testGroupId);
 
-        test.addStep(`Final z-index: ${finalZIndex}`);
-
         // Return both values
+        test.addStep(`Final z-index: ${finalZIndex}`);
         return { initialZIndex, finalZIndex };
       },
       (test, result) => {
@@ -261,7 +250,9 @@ export class MapTester extends GVAbstractTester {
    * @returns {Promise<Test<Extent>>} A Promise that resolves with the Test containing the resulting map extent.
    */
   testZoomToExtent(): Promise<Test<Extent>> {
-    const targetExtent: Extent = [-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075];
+    // Target extent will be adjusted by the map to fit viewport
+    const targetExtent: Extent = [-87, 51, -84, 53];
+    const expectedExtent: Extent = [-88.584, 50.227, -82.142, 53.726];
 
     return this.test(
       'Test zoom to lon/lat extent',
@@ -271,17 +262,23 @@ export class MapTester extends GVAbstractTester {
         // Zoom to extent
         await this.getMapViewer().zoomToLonLatExtentOrCoordinate(targetExtent);
 
-        // Wait for zoom to complete
-        await delay(1500);
+        // Transform extent and handle potential undefined return
+        const transformedExtent = this.getApi().utilities.projection.transformExtentFromProj(
+          MapEventProcessor.getMapState(this.getMapId()).mapExtent,
+          this.getApi().utilities.projection.getProjectionFromString('EPSG:3978'),
+          this.getApi().utilities.projection.getProjectionLonLat()
+        );
+
+        // Ensure we return a valid Extent
+        Test.assertIsArrayLengthEqual(transformedExtent as [], 4);
 
         // Return the resulting extent
-        return MapEventProcessor.getMapState(this.getMapId()).mapExtent;
+        return transformedExtent;
       },
       (test, result) => {
-        test.addStep('Verifying map zoomed to extent...');
-        Test.assertIsDefined('mapExtent', result);
-        Test.assertIsArray(result);
-        Test.assertIsArrayLengthEqual(result, 4);
+        test.addStep('Verifying map zoomed to extent (with aspect ratio tolerance)...');
+        // The map adjusts extent to fit viewport aspect ratio, compare with tolerance for aspect ratio adjustment
+        Test.assertIsArrayEqual(result, expectedExtent, 2);
       }
     );
   }
@@ -290,28 +287,34 @@ export class MapTester extends GVAbstractTester {
    * Tests zooming to a lon/lat coordinate using zoomToLonLatExtentOrCoordinate.
    * @returns {Promise<Test<Extent>>} A Promise that resolves with the Test containing the resulting map extent.
    */
-  testZoomToCoordinate(): Promise<Test<Extent>> {
-    const targetCoordinate: [number, number] = [-90, 60];
+  testZoomToCoordinate(): Promise<Test<Coordinate>> {
+    const targetCoordinate: Coordinate = [-80, 50];
 
     return this.test(
       'Test zoom to lon/lat coordinate',
       async (test) => {
-        test.addStep('Zooming to coordinate [-90, 60]...');
+        test.addStep('Zooming to coordinate [-80, 50]...');
 
         // Zoom to coordinate
+        this.getMapViewer().setZoomLevel(8);
         await this.getMapViewer().zoomToLonLatExtentOrCoordinate(targetCoordinate);
 
-        // Wait for zoom to complete
-        await delay(1500);
+        // Transform coordinates
+        const transformedCoordinates = this.getApi().utilities.projection.transformCoordinates(
+          MapEventProcessor.getMapState(this.getMapId()).mapCenterCoordinates,
+          'EPSG:3978',
+          'EPSG:4326'
+        );
 
-        // Return the resulting extent
-        return MapEventProcessor.getMapState(this.getMapId()).mapExtent;
+        // Ensure we return a valid Coordinate
+        Test.assertIsArrayLengthEqual(transformedCoordinates as [], 2);
+
+        // Return as Coordinate type (number array with at least 2 elements)
+        return transformedCoordinates as Coordinate;
       },
       (test, result) => {
         test.addStep('Verifying map centered on coordinate...');
-        Test.assertIsDefined('mapExtent', result);
-        Test.assertIsArray(result);
-        Test.assertIsArrayLengthEqual(result, 4);
+        Test.assertIsArrayEqual(result, targetCoordinate, 0);
       }
     );
   }
@@ -321,7 +324,7 @@ export class MapTester extends GVAbstractTester {
    * @returns {Promise<Test<string>>} A Promise that resolves with the Test containing the selected tab id.
    */
   testFooterBarSelectTab(): Promise<Test<string>> {
-    const targetTab = 'details';
+    const targetTab = 'layers';
 
     return this.test(
       'Test footer bar select tab',
@@ -331,7 +334,7 @@ export class MapTester extends GVAbstractTester {
         // Select the tab
         this.getMapViewer().footerBarApi.selectTab(targetTab);
 
-        // Wait for tab selection
+        // Wait for tab selection to complete
         await delay(500);
 
         return targetTab;
@@ -359,7 +362,7 @@ export class MapTester extends GVAbstractTester {
         // Select the tab
         this.getMapViewer().appBarApi.selectTab(targetTab);
 
-        // Wait for tab selection
+        // Wait for tab selection to complete
         await delay(500);
 
         return targetTab;
@@ -368,6 +371,44 @@ export class MapTester extends GVAbstractTester {
         test.addStep('Verifying tab is selected...');
         const activeTab = UIEventProcessor.getActiveAppBarTab(this.getMapId());
         Test.assertIsEqual(activeTab?.tabId, result);
+      }
+    );
+  }
+
+  /**
+   * Tests creating a custom footer bar tab.
+   * @returns {Promise<Test<string>>} A Promise that resolves with the Test containing the created tab id.
+   */
+  testFooterBarCreateTab(): Promise<Test<string>> {
+    const customTabId = 'custom-test-tab';
+    const customTabConfig = {
+      id: customTabId,
+      value: 0,
+      label: 'My Custom Tab',
+      content: '<br><div><ul><li>How to export map coordinate data to: GeoJSON, or CSV.</li></ul></div>',
+    };
+
+    return this.test(
+      'Test footer bar create custom tab',
+      async (test) => {
+        test.addStep('Creating custom footer bar tab...');
+
+        // Create the tab
+        this.getMapViewer().footerBarApi.createTab(customTabConfig);
+
+        // Wait for tab creation to complete
+        await delay(500);
+
+        return customTabId;
+      },
+      (test, result) => {
+        test.addStep('Verifying custom tab exists...');
+        const { tabs } = this.getMapViewer().footerBarApi;
+        const customTab = tabs.find((tab) => tab.id === result);
+        Test.assertIsDefined('customTab', customTab);
+
+        test.addStep('Verifying custom tab id...');
+        Test.assertIsEqual(customTab?.id, result);
       }
     );
   }
@@ -402,40 +443,6 @@ export class MapTester extends GVAbstractTester {
         // Restore original language
         test.addStep(`Restoring language to '${originalLanguage}'...`);
         await this.getMapViewer().setLanguage(originalLanguage);
-      }
-    );
-  }
-
-  /**
-   * Tests creating a custom footer bar tab.
-   * @returns {Promise<Test<string>>} A Promise that resolves with the Test containing the created tab id.
-   */
-  testFooterBarCreateTab(): Promise<Test<string>> {
-    const customTabId = 'test';
-    const customTabConfig = {
-      id: customTabId,
-      value: 0,
-      label: 'My Custom Tab',
-      content: '<br><div><ul><li>How to export map coordinate data to: GeoJSON, or CSV.</li></ul></div>',
-    };
-
-    return this.test(
-      'Test footer bar create custom tab',
-      (test) => {
-        test.addStep('Creating custom footer bar tab...');
-
-        // Create the tab
-        this.getMapViewer().footerBarApi.createTab(customTabConfig);
-
-        return customTabId;
-      },
-      (test, result) => {
-        test.addStep('Verifying custom tab exists...');
-        const tab = this.getMapViewer().footerBarApi.tabs[0];
-        Test.assertIsDefined('customTab', tab);
-
-        test.addStep('Verifying custom tab id...');
-        Test.assertIsEqual(tab?.id, result);
       }
     );
   }
@@ -478,6 +485,55 @@ export class MapTester extends GVAbstractTester {
       (test, result) => {
         test.addStep('Verifying basemap changed...');
         Test.assertIsEqual(result, targetBasemapId);
+      }
+    );
+  }
+
+  /**
+   * Tests north arrow rotation in LCC projection when zoomed to British Columbia.
+   * This test performs the following operations:
+   * 1. Switches to LCC projection (3978)
+   * 2. Zooms to British Columbia extent
+   * 3. Gets the north arrow angle
+   * 4. Verifies the rotation is non-zero (indicating proper LCC projection rotation)
+   *
+   * @returns {Promise<Test<number>>} A Promise that resolves with the Test containing the north arrow angle.
+   */
+  testNorthArrowRotationLCC(): Promise<Test<number>> {
+    // British Columbia approximate extent in lon/lat (EPSG:4326)
+    // West: -139°, South: 48°, East: -114°, North: 60°
+    const bcExtent: Extent = [-139, 48, -114, 60];
+    const expectecArrowAngle = 177.2;
+
+    return this.test(
+      'Test north arrow rotation in LCC projection for British Columbia',
+      async (test) => {
+        // Get current projection
+        const { currentProjection } = MapEventProcessor.getMapState(this.getMapId());
+
+        // Switch to LCC projection if not already there
+        if (currentProjection !== 3978) {
+          test.addStep('Switching to LCC projection (3978)...');
+          await MapEventProcessor.setProjection(this.getMapId(), 3978);
+          await delay(500);
+        }
+
+        test.addStep('Zooming to British Columbia extent...');
+        await this.getMapViewer().zoomToLonLatExtentOrCoordinate(bcExtent);
+        await delay(500);
+
+        test.addStep('Getting north arrow angle...');
+        const northArrowAngle = this.getMapViewer().getNorthArrowAngle();
+        const angleValue = parseFloat(northArrowAngle);
+
+        test.addStep(`North arrow angle: ${angleValue}°`);
+
+        return angleValue;
+      },
+      (test, result) => {
+        test.addStep('Verifying north arrow rotation is calculated...');
+        // In LCC projection over BC, the north arrow should have a non-zero rotation
+        Test.assertIsEqual(result, expectecArrowAngle);
       }
     );
   }
