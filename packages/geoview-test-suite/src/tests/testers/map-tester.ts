@@ -5,7 +5,9 @@ import { delay } from 'geoview-core/core/utils/utilities';
 import type { TypeMapState } from 'geoview-core/geo/map/map-viewer';
 import type { TypeMapFeaturesConfig } from 'geoview-core/core/types/global-types';
 import { MapEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/map-event-processor';
-import type { Extent, TypeValidMapProjectionCodes } from 'geoview-core/api/types/map-schema-types';
+import type { Extent, TypeBasemapId, TypeValidMapProjectionCodes } from 'geoview-core/api/types/map-schema-types';
+import { AppEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/app-event-processor';
+import { UIEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/ui-event-processor';
 
 /**
  * Main Map testing class.
@@ -252,5 +254,231 @@ export class MapTester extends GVAbstractTester {
     const mapConfig = MapEventProcessor.getGeoViewMapConfig(this.getMapId());
     if (!mapConfig) throw new TestError(`Map config for map id ${this.getMapId()} couldn't be read from store`);
     return mapConfig;
+  }
+
+  /**
+   * Tests zooming to a lon/lat extent using zoomToLonLatExtentOrCoordinate.
+   * @returns {Promise<Test<Extent>>} A Promise that resolves with the Test containing the resulting map extent.
+   */
+  testZoomToExtent(): Promise<Test<Extent>> {
+    const targetExtent: Extent = [-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075];
+
+    return this.test(
+      'Test zoom to lon/lat extent',
+      async (test) => {
+        test.addStep('Zooming to extent...');
+
+        // Zoom to extent
+        await this.getMapViewer().zoomToLonLatExtentOrCoordinate(targetExtent);
+
+        // Wait for zoom to complete
+        await delay(1500);
+
+        // Return the resulting extent
+        return MapEventProcessor.getMapState(this.getMapId()).mapExtent;
+      },
+      (test, result) => {
+        test.addStep('Verifying map zoomed to extent...');
+        Test.assertIsDefined('mapExtent', result);
+        Test.assertIsArray(result);
+        Test.assertIsArrayLengthEqual(result, 4);
+      }
+    );
+  }
+
+  /**
+   * Tests zooming to a lon/lat coordinate using zoomToLonLatExtentOrCoordinate.
+   * @returns {Promise<Test<Extent>>} A Promise that resolves with the Test containing the resulting map extent.
+   */
+  testZoomToCoordinate(): Promise<Test<Extent>> {
+    const targetCoordinate: [number, number] = [-90, 60];
+
+    return this.test(
+      'Test zoom to lon/lat coordinate',
+      async (test) => {
+        test.addStep('Zooming to coordinate [-90, 60]...');
+
+        // Zoom to coordinate
+        await this.getMapViewer().zoomToLonLatExtentOrCoordinate(targetCoordinate);
+
+        // Wait for zoom to complete
+        await delay(1500);
+
+        // Return the resulting extent
+        return MapEventProcessor.getMapState(this.getMapId()).mapExtent;
+      },
+      (test, result) => {
+        test.addStep('Verifying map centered on coordinate...');
+        Test.assertIsDefined('mapExtent', result);
+        Test.assertIsArray(result);
+        Test.assertIsArrayLengthEqual(result, 4);
+      }
+    );
+  }
+
+  /**
+   * Tests selecting a footer bar tab.
+   * @returns {Promise<Test<string>>} A Promise that resolves with the Test containing the selected tab id.
+   */
+  testFooterBarSelectTab(): Promise<Test<string>> {
+    const targetTab = 'details';
+
+    return this.test(
+      'Test footer bar select tab',
+      async (test) => {
+        test.addStep(`Selecting footer bar tab '${targetTab}'...`);
+
+        // Select the tab
+        this.getMapViewer().footerBarApi.selectTab(targetTab);
+
+        // Wait for tab selection
+        await delay(500);
+
+        return targetTab;
+      },
+      (test, result) => {
+        test.addStep('Verifying tab is selected...');
+        const activeTab = UIEventProcessor.getActiveFooterBarTab(this.getMapId());
+        Test.assertIsEqual(activeTab, result);
+      }
+    );
+  }
+
+  /**
+   * Tests selecting an app bar tab.
+   * @returns {Promise<Test<string>>} A Promise that resolves with the Test containing the selected tab id.
+   */
+  testAppBarSelectTab(): Promise<Test<string>> {
+    const targetTab = 'geolocator';
+
+    return this.test(
+      'Test app bar select tab',
+      async (test) => {
+        test.addStep(`Selecting app bar tab '${targetTab}'...`);
+
+        // Select the tab
+        this.getMapViewer().appBarApi.selectTab(targetTab);
+
+        // Wait for tab selection
+        await delay(500);
+
+        return targetTab;
+      },
+      (test, result) => {
+        test.addStep('Verifying tab is selected...');
+        const activeTab = UIEventProcessor.getActiveAppBarTab(this.getMapId());
+        Test.assertIsEqual(activeTab?.tabId, result);
+      }
+    );
+  }
+
+  /**
+   * Tests changing the language.
+   * @returns {Promise<Test<string>>} A Promise that resolves with the Test containing the new language.
+   */
+  testSetLanguage(): Promise<Test<string>> {
+    const targetLanguage = 'fr';
+    const originalLanguage = 'en';
+
+    return this.test(
+      'Test set language to French',
+      async (test) => {
+        test.addStep(`Changing language to '${targetLanguage}'...`);
+
+        if (AppEventProcessor.getDisplayLanguage(this.getMapId()) === 'fr') {
+          throw new TestError(`False precondition, language is already set to '${targetLanguage}'`);
+        }
+
+        // Set language
+        await this.getMapViewer().setLanguage(targetLanguage);
+
+        return AppEventProcessor.getDisplayLanguage(this.getMapId());
+      },
+      (test, result) => {
+        test.addStep('Verifying language changed...');
+        Test.assertIsEqual(result, targetLanguage);
+      },
+      async (test) => {
+        // Restore original language
+        test.addStep(`Restoring language to '${originalLanguage}'...`);
+        await this.getMapViewer().setLanguage(originalLanguage);
+      }
+    );
+  }
+
+  /**
+   * Tests creating a custom footer bar tab.
+   * @returns {Promise<Test<string>>} A Promise that resolves with the Test containing the created tab id.
+   */
+  testFooterBarCreateTab(): Promise<Test<string>> {
+    const customTabId = 'test';
+    const customTabConfig = {
+      id: customTabId,
+      value: 0,
+      label: 'My Custom Tab',
+      content: '<br><div><ul><li>How to export map coordinate data to: GeoJSON, or CSV.</li></ul></div>',
+    };
+
+    return this.test(
+      'Test footer bar create custom tab',
+      (test) => {
+        test.addStep('Creating custom footer bar tab...');
+
+        // Create the tab
+        this.getMapViewer().footerBarApi.createTab(customTabConfig);
+
+        return customTabId;
+      },
+      (test, result) => {
+        test.addStep('Verifying custom tab exists...');
+        const tab = this.getMapViewer().footerBarApi.tabs[0];
+        Test.assertIsDefined('customTab', tab);
+
+        test.addStep('Verifying custom tab id...');
+        Test.assertIsEqual(tab?.id, result);
+      }
+    );
+  }
+
+  /**
+   * Tests creating and setting a basemap.
+   * @returns {Promise<Test<string>>} A Promise that resolves with the Test containing the basemap id.
+   */
+  testCreateAndSetBasemap(): Promise<Test<string>> {
+    const targetBasemapId: TypeBasemapId = 'simple';
+    const originalBasemap = this.getMapViewer().basemap.activeBasemap;
+
+    return this.test(
+      'Test create and set basemap',
+      async (test) => {
+        test.addStep(`Creating basemap with id '${targetBasemapId}'...`);
+
+        if (originalBasemap?.basemapId === targetBasemapId) {
+          throw new TestError(`False precondition, basemap is already set to '${targetBasemapId}'`);
+        }
+
+        // Create the basemap
+        const basemapOptions = { basemapId: targetBasemapId, shaded: false, labeled: false };
+        const basemap = await this.getMapViewer().basemap.createCoreBasemap(basemapOptions);
+
+        test.addStep('Setting the new basemap...');
+
+        // Set the basemap
+        this.getMapViewer().basemap.setBasemap(basemap);
+
+        // Wait for basemap change
+        await delay(1000);
+
+        const activeBasemapId = this.getMapViewer().basemap.activeBasemap?.basemapId;
+        if (!activeBasemapId) {
+          throw new TestError('Failed to get active basemap ID after setting basemap');
+        }
+        return activeBasemapId;
+      },
+      (test, result) => {
+        test.addStep('Verifying basemap changed...');
+        Test.assertIsEqual(result, targetBasemapId);
+      }
+    );
   }
 }

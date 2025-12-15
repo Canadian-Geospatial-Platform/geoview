@@ -1915,6 +1915,16 @@ export class MapViewer {
   }
 
   /**
+   * Waits for the map layers loaded event to be emitted.
+   * @returns {Promise<MapViewer>} Promise resolved when the map layers loaded event is emitted
+   */
+  waitForLayersLoaded(): Promise<MapViewer> {
+    return new Promise((resolve) => {
+      this.onMapLayersLoaded(resolve);
+    });
+  }
+
+  /**
    * Unregisters a map layers loaded event callback.
    * @param {MapLayersLoadedDelegate} callback - The callback to stop being called whenever the event is emitted
    */

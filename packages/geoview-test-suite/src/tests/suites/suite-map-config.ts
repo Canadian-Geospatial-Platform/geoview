@@ -60,9 +60,25 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
     const pEmptyFooterBarAppBar = this.#mapConfigTester.testEmptyFooterBarAppBarTabsHasNoFooter();
     await pEmptyFooterBarAppBar;
 
+    // Test navBar with null has defaults
+    const pNoNavBarDefaults = this.#mapConfigTester.testNoNavBarHasDefaults();
+    await pNoNavBarDefaults;
+
+    // Test navBar with empty components has zoom and rotate
+    const pEmptyNavBarZoomRotate = this.#mapConfigTester.testEmptyNavBarHasZoomRotate();
+    await pEmptyNavBarZoomRotate;
+
     // Test initial view with layerIds sets extent
     const pInitialViewLayerIds = this.#mapConfigTester.testInitialViewLayerIdsSetExtent();
     await pInitialViewLayerIds;
+
+    // Test overlay objects with point markers
+    const pOverlayObjectsPointMarkers = this.#mapConfigTester.testOverlayObjectsPointMarkers();
+    await pOverlayObjectsPointMarkers;
+
+    // Test view settings zoom constraints
+    const pViewSettingsZoomConstraints = this.#mapConfigTester.testViewSettingsZoomConstraints();
+    await pViewSettingsZoomConstraints;
 
     // Resolve when all
     return Promise.all([
@@ -70,7 +86,11 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
       pDataTableInAppBar,
       pNoFooterBarAppBarDefaults,
       pEmptyFooterBarAppBar,
+      pNoNavBarDefaults,
+      pEmptyNavBarZoomRotate,
       pInitialViewLayerIds,
+      pOverlayObjectsPointMarkers,
+      pViewSettingsZoomConstraints,
     ]);
   }
 }
