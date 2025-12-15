@@ -1133,7 +1133,7 @@ export abstract class AbstractGeoViewLayer {
    * Processes a Layer Config by calling 'createGeoViewLayers' on the provided layer.
    * @param {AbstractGeoViewLayer} layer - The layer to use to process the configuration
    * @returns {Promise<ConfigBaseClass>} The promise of a generated ConfigBaseClass.
-   * @private
+   * @protected
    * @static
    */
   protected static processConfig(layer: AbstractGeoViewLayer): Promise<ConfigBaseClass[]> {

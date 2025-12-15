@@ -79,6 +79,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   /** Indicates if the layer is currently queryable */
   #queryable: boolean;
 
+  /** Indicates if the layer is currently hoverable */
+  #hoverable: boolean;
+
   /** Keep all callback delegate references */
   #onLayerStyleChangedHandlers: StyleChangedDelegate[] = [];
 
@@ -109,6 +112,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   /** Keep all callback delegate references */
   #onLayerQueryableChangedHandlers: LayerQueryableChangedDelegate[] = [];
 
+  /** Keep all callback delegate references */
+  #onLayerHoverableChangedHandlers: LayerHoverableChangedDelegate[] = [];
+
   /**
    * Constructs a GeoView layer to manage an OpenLayer layer.
    * @param {Source} olSource - The OpenLayer Source.
@@ -124,6 +130,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
     // Copy the queryable flag, we'll work with this and the config remains static
     this.#queryable = layerConfig.getInitialSettings()?.states?.queryable ?? true;
+    this.#hoverable = layerConfig.getInitialSettings()?.states?.hoverable ?? true;
 
     // If there is a layer style in the config, set it in the layer
     const style = layerConfig.getLayerStyle();
@@ -650,6 +657,24 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   }
 
   /**
+   * Indicates if the layer is currently hoverable.
+   * @returns {boolean} The currently hoverable flag.
+   */
+  getHoverable(): boolean {
+    return this.#hoverable;
+  }
+
+  /**
+   * Sets if the layer is currently hoverable.
+   * @param {boolean} hoverable - The hoverable value.
+   */
+  setHoverable(hoverable: boolean): void {
+    // Go for it
+    this.#hoverable = hoverable;
+    this.#emitLayerHoverableChanged({ hoverable });
+  }
+
+  /**
    * Gets the extent of an array of features.
    * @param {number[] | string[]} objectIds - The IDs of the features to calculate the extent from.
    * @param {OLProjection} outProjection - The output projection for the extent.
@@ -697,15 +722,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     queryGeometry: boolean = true,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
-    // Get the layer config
-    const layerConfig = this.getLayerConfig();
-
-    // If the layer is not queryable
-    if (!this.getQueryable()) {
-      // Throw error
-      throw new LayerNotQueryableError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
-    }
-
     // Log
     logger.logTraceCore('ABSTRACT-GV-LAYERS - getFeatureInfo', queryType);
     const logMarkerKey = `${queryType}`;
@@ -1251,6 +1267,34 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     EventHelper.offEvent(this.#onLayerQueryableChangedHandlers, callback);
   }
 
+  /**
+   * Emits hoverable changed event.
+   * @param {LayerHoverableChangedEvent} event - The event to emit
+   * @private
+   */
+  #emitLayerHoverableChanged(event: LayerHoverableChangedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerHoverableChangedHandlers, event);
+  }
+
+  /**
+   * Registers an hoverable changed event handler.
+   * @param {LayerHoverableChangedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerHoverableChanged(callback: LayerHoverableChangedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerHoverableChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters an hoverable changed event handler.
+   * @param {LayerHoverableChangedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerHoverableChanged(callback: LayerHoverableChangedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerHoverableChangedHandlers, callback);
+  }
+
   // #endregion EVENTS
 
   // #region STATIC
@@ -1710,6 +1754,14 @@ export type LayerMessageEvent = {
 export type LayerMessageDelegate = EventDelegateBase<AbstractGVLayer, LayerMessageEvent, void>;
 
 /**
+ * Define an event for the delegate
+ */
+export type LayerQueryableChangedEvent = {
+  // The flag
+  queryable: boolean;
+};
+
+/**
  * Define a delegate for the event handler function signature
  */
 export type LayerQueryableChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, LayerQueryableChangedEvent, void>;
@@ -1717,9 +1769,14 @@ export type LayerQueryableChangedDelegate = EventDelegateBase<AbstractBaseGVLaye
 /**
  * Define an event for the delegate
  */
-export type LayerQueryableChangedEvent = {
-  // The filter
-  queryable: boolean;
+export type LayerHoverableChangedEvent = {
+  // The flag
+  hoverable: boolean;
 };
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type LayerHoverableChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, LayerHoverableChangedEvent, void>;
 
 // #endregion EVENT TYPES

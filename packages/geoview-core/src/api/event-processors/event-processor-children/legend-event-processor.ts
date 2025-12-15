@@ -191,7 +191,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Sets the layer queryable capacity.
+   * Sets the layer queryable.
    * @param {string} mapId - The ID of the map.
    * @param {string} layerPath - The layer path of the layer to change.
    * @param {boolean} queryable - The queryable state to set.
@@ -222,6 +222,38 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     if (layer) {
       // Set layer queryable
       layer.queryable = queryable;
+      // Set updated legend layers
+      this.getLayerState(mapId).setterActions.setLegendLayers(layers);
+    }
+  }
+
+  /**
+   * Sets the layer hoverable.
+   * @param {string} mapId - The ID of the map.
+   * @param {string} layerPath - The layer path of the layer to change.
+   * @param {boolean} queryable - The queryable state to set.
+   */
+  static setLayerHoverable(mapId: string, layerPath: string, queryable: boolean): void {
+    MapEventProcessor.getMapViewerLayerAPI(mapId).setLayerHoverable(layerPath, queryable);
+  }
+
+  /**
+   * Updates the "hoverable" state of a layer in the store for a given map.
+   * Finds the layer by its `layerPath` in the legend layers of the specified `mapId`.
+   * If the layer exists, updates its `hoverable` property and writes the updated
+   * legend layers back to the store.
+   * @param {string} mapId - The ID of the map whose layer state should be updated.
+   * @param {string} layerPath - The unique path/identifier of the layer to update.
+   * @param {boolean} hoverable - The new hoverable state to set for the layer.
+   */
+  static setLayerHoverableInStore(mapId: string, layerPath: string, hoverable: boolean): void {
+    // Find the layer for the given layer path
+    const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
+    const layer = this.findLayerByPath(layers, layerPath);
+
+    if (layer) {
+      // Set layer queryable
+      layer.hoverable = hoverable;
       // Set updated legend layers
       this.getLayerState(mapId).setterActions.setLegendLayers(layers);
     }
@@ -791,26 +823,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   static setLayerOpacity(mapId: string, layerPath: string, opacity: number, updateLegendLayers?: boolean): void {
     // Redirect
     MapEventProcessor.getMapViewerLayerAPI(mapId).setLayerOpacity(layerPath, opacity, updateLegendLayers);
-  }
-
-  /**
-   * Sets the layer hoverable capacity.
-   * @param {string} mapId - The ID of the map.
-   * @param {string} layerPath - The layer path of the layer to change.
-   * @param {boolean} hoverable - The hoverable state to set.
-   */
-  static setLayerHoverable(mapId: string, layerPath: string, hoverable: boolean): void {
-    if (hoverable) MapEventProcessor.getMapViewerLayerAPI(mapId).hoverFeatureInfoLayerSet.enableHoverListener(layerPath);
-    else MapEventProcessor.getMapViewerLayerAPI(mapId).hoverFeatureInfoLayerSet.disableHoverListener(layerPath);
-
-    // ! Wrong pattern, need to be look at...
-    // TODO: These setters take curLayers, modify an object indirectly (which happens to affect an object inside curLayers!),
-    // TO.DOCONT: and then return curLayers—making it appear unchanged when reading the code. This behavior needs careful review.
-    const curLayers = this.getLayerState(mapId).legendLayers;
-    this.getLegendLayerInfo(mapId, layerPath)!.hoverable = hoverable;
-
-    // Set updated legend layers
-    this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);
   }
 
   /**
