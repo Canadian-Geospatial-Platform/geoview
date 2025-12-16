@@ -74,9 +74,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   /** Style to apply to the vector layer. */
   #layerStyle?: TypeLayerStyleConfig;
 
-  /** Boolean indicating if the layer should be included in time awareness functions such as the Time Slider. True by default. */
-  #isTimeAware: boolean;
-
   /** Indicates if the layer is currently queryable */
   #queryable: boolean;
 
@@ -124,10 +121,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   protected constructor(olSource: Source, layerConfig: AbstractBaseLayerEntryConfig) {
     super(layerConfig);
     this.#olSource = olSource;
-
-    // TODO: Get rid of this #isTimeAware attribute and use layerConfig.getIsTimeAware() instead (like getExternalFragmentsOrder, etc)
-    // Boolean indicating if the layer should be included in time awareness functions such as the Time Slider.
-    this.#isTimeAware = layerConfig.getGeoviewLayerConfig()?.isTimeAware ?? true; // default: true
 
     // Copy the queryable flag, we'll work with this and the config remains static
     this.#queryable = layerConfig.getInitialSettings()?.states?.queryable ?? true;
@@ -657,7 +650,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @returns {boolean} The flag indicating if the layer should be included in time awareness functions such as the Time Slider. True by default.
    */
   getIsTimeAware(): boolean {
-    return this.#isTimeAware;
+    return this.getLayerConfig().getGeoviewLayerConfig()?.isTimeAware ?? true;
   }
 
   /**
