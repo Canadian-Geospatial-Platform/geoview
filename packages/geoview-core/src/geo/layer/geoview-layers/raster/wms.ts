@@ -88,21 +88,21 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected override onFetchServiceMetadata<T = TypeMetadataWMS | undefined>(abortSignal?: AbortSignal): Promise<T> {
     // If metadata is in XML format (not WMS GetCapabilities)
-    const isXml = WMS.#isXmlMetadata(this.metadataAccessPath);
+    const isXml = WMS.#isXmlMetadata(this.getMetadataAccessPath());
     if (isXml) {
       // Fetch the XML
       return this.#fetchXmlServiceMetadata(
-        this.metadataAccessPath,
+        this.getMetadataAccessPath(),
         (proxyUsed) => {
           // Update the access path to use the proxy if one was required
-          this.metadataAccessPath = `${proxyUsed}${this.metadataAccessPath}`;
+          this.setMetadataAccessPath(`${proxyUsed}${this.getMetadataAccessPath()}`);
         },
         abortSignal
       ) as Promise<T>;
     }
 
     // Construct a proper WMS GetCapabilities URL
-    const url = this.metadataAccessPath;
+    const url = this.getMetadataAccessPath();
 
     // Get the layer entries we need to query
     const layerConfigsToQuery = this.#getLayersToQuery();
@@ -133,13 +133,12 @@ export class WMS extends AbstractGeoViewRaster {
     const entries = WMS.#buildLayerTree(layers);
 
     // Redirect
-    // TODO: Check - Config init - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
     return WMS.createGeoviewLayerConfig(
-      this.geoviewLayerId,
-      metadata?.Capability.Layer.Title || this.geoviewLayerName,
-      this.metadataAccessPath,
+      this.getGeoviewLayerId(),
+      metadata?.Capability.Layer.Title || this.getGeoviewLayerName(),
+      this.getMetadataAccessPath(),
       undefined,
-      false,
+      this.getGeoviewLayerConfig().isTimeAware,
       entries || [],
       true // We want all sub layers when we're initializing the layer entries (different than when we're processing)
     );
@@ -310,7 +309,7 @@ export class WMS extends AbstractGeoViewRaster {
     // Validate capabilities exist for the layer
     if (!layerCapabilities) {
       // Throw sub layer not found
-      throw new LayerEntryConfigWMSSubLayerNotFoundError(layerConfig, this.geoviewLayerId);
+      throw new LayerEntryConfigWMSSubLayerNotFoundError(layerConfig, this.getGeoviewLayerId());
     }
 
     // Create the source params
@@ -375,17 +374,21 @@ export class WMS extends AbstractGeoViewRaster {
       // Fetch the WMS GetCapabilities document from the given URL
       metadata = await WMS.fetchMetadataWMS(url, (proxyUsed) => {
         // If a proxy was used, update the metadata access path accordingly
-        this.metadataAccessPath = `${proxyUsed}${this.metadataAccessPath}`;
+        this.setMetadataAccessPath(`${proxyUsed}${this.getMetadataAccessPath()}`);
       });
     } catch (error: unknown) {
       // Throw
-      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName(), formatError(error));
+      throw new LayerServiceMetadataUnableToFetchError(
+        this.getGeoviewLayerId(),
+        this.getLayerEntryNameOrGeoviewLayerName(),
+        formatError(error)
+      );
     }
 
     // Validate the metadata response
     if (!metadata.Capability) {
       // Throw
-      throw new LayerNoCapabilitiesError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName());
+      throw new LayerNoCapabilitiesError(this.getGeoviewLayerId(), this.getLayerEntryNameOrGeoviewLayerName());
     }
 
     // Apply metadata inheritance to ensure nested layer structures are properly populated
@@ -470,7 +473,7 @@ export class WMS extends AbstractGeoViewRaster {
           // Perform the actual metadata fetch
           WMS.fetchMetadataWMSForLayer(url, layerConfig.layerId, (proxyUsed) => {
             // If a proxy was used, update the layer's data access path
-            layerConfig.setDataAccessPath(`${proxyUsed}${this.metadataAccessPath}`);
+            layerConfig.setDataAccessPath(`${proxyUsed}${this.getMetadataAccessPath()}`);
           })
             .then((metadata) => {
               if (metadata.Capability) {
@@ -530,14 +533,18 @@ export class WMS extends AbstractGeoViewRaster {
       metadata = await WMS.fetchMetadataWMS(metadataUrl, callbackNewMetadataUrl, abortSignal);
     } catch (error: unknown) {
       // Throw
-      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName(), formatError(error));
+      throw new LayerServiceMetadataUnableToFetchError(
+        this.getGeoviewLayerId(),
+        this.getLayerEntryNameOrGeoviewLayerName(),
+        formatError(error)
+      );
     }
 
     // Validate the metadata response
     if (!metadata.Capability) {
       // Throw
       throw new LayerServiceMetadataUnableToFetchError(
-        this.geoviewLayerId,
+        this.getGeoviewLayerId(),
         this.getLayerEntryNameOrGeoviewLayerName(),
         formatError('Invalid Capability response')
       );
@@ -547,12 +554,12 @@ export class WMS extends AbstractGeoViewRaster {
     this.#processMetadataInheritance(metadata.Capability.Layer);
 
     // Set the metadata access path
-    this.metadataAccessPath = metadata?.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource['@attributes']['xlink:href'];
+    this.setMetadataAccessPath(metadata.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource['@attributes']['xlink:href']);
 
     // Propagate the metadata access path to all data access path of the layers underneath
     this.listOfLayerEntryConfig.forEach((layerEntry) => {
       // Set the data access path, when a layer entry is a group, this goes recursive
-      layerEntry.setDataAccessPath(this.metadataAccessPath);
+      layerEntry.setDataAccessPath(this.getMetadataAccessPath());
     });
 
     // Return the metadata
@@ -827,6 +834,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerId - A unique identifier for the layer.
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
    * @static
    */
@@ -834,10 +842,11 @@ export class WMS extends AbstractGeoViewRaster {
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
+    isTimeAware: boolean | undefined,
     fullSubLayers: boolean
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const myLayer = new WMS({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeWMSLayerConfig, fullSubLayers);
+    const myLayer = new WMS({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeWMSLayerConfig, fullSubLayers);
     return myLayer.initGeoViewLayerEntries();
   }
 
@@ -849,7 +858,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerName - The human-readable name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path used to access the layer's metadata.
    * @param {TypeOfServer | undefined} serverType - The type of WMS server (e.g., 'geoserver', 'mapserver').
-   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering or animation.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @param {TypeLayerEntryShell[]} layerEntries - The root array of parsed layer entries (may include nested groups).
    * @param {boolean} fullSubLayers - If false, will simulate legacy behavior and skip deeper layers after the first.
    * @param {unknown} [customGeocoreLayerConfig={}] - Optional custom layer configuration to merge into leaf layers.
@@ -861,7 +870,7 @@ export class WMS extends AbstractGeoViewRaster {
     geoviewLayerName: string,
     metadataAccessPath: string,
     serverType: TypeOfServer | undefined,
-    isTimeAware: boolean,
+    isTimeAware: boolean | undefined,
     layerEntries: TypeLayerEntryShell[],
     fullSubLayers: boolean,
     customGeocoreLayerConfig: unknown = {}

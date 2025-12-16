@@ -57,8 +57,13 @@ export class ImageStatic extends AbstractGeoViewRaster {
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Redirect
     return Promise.resolve(
-      // TODO: Check - Config init - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
-      ImageStatic.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false, [])
+      ImageStatic.createGeoviewLayerConfig(
+        this.getGeoviewLayerId(),
+        this.getGeoviewLayerName(),
+        this.getMetadataAccessPathIfExists(),
+        this.getGeoviewLayerConfig().isTimeAware,
+        []
+      )
     );
   }
 
@@ -100,16 +105,18 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerId - A unique identifier for the layer.
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
    * @static
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
-    metadataAccessPath: string
+    metadataAccessPath: string,
+    isTimeAware: boolean | undefined
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const myLayer = new ImageStatic({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeImageStaticLayerConfig);
+    const myLayer = new ImageStatic({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeImageStaticLayerConfig);
     return myLayer.initGeoViewLayerEntries();
   }
 
@@ -119,8 +126,8 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * and its associated entry configurations based on the provided parameters.
    * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
-   * @param {string} metadataAccessPath - The URL or path to access metadata.
-   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {string | undefined} metadataAccessPath - The URL or path to access metadata.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeImageStaticLayerConfig} The constructed configuration object for the Static Image layer.
    * @static
@@ -128,8 +135,8 @@ export class ImageStatic extends AbstractGeoViewRaster {
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
-    metadataAccessPath: string,
-    isTimeAware: boolean,
+    metadataAccessPath: string | undefined,
+    isTimeAware: boolean | undefined,
     layerEntries: TypeLayerEntryShell[]
   ): TypeImageStaticLayerConfig {
     const geoviewLayerConfig: TypeImageStaticLayerConfig = {

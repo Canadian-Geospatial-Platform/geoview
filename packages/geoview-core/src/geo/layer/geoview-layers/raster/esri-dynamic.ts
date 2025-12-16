@@ -85,8 +85,13 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     const entriesTree = EsriDynamic.buildLayerEntriesTree(entries);
 
     // Redirect
-    // TODO: Check - Config init - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
-    return EsriDynamic.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false, entriesTree);
+    return EsriDynamic.createGeoviewLayerConfig(
+      this.getGeoviewLayerId(),
+      this.getGeoviewLayerName(),
+      this.getMetadataAccessPath(),
+      this.getGeoviewLayerConfig().isTimeAware,
+      entriesTree
+    );
   }
 
   /**
@@ -142,16 +147,18 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerId - A unique identifier for the layer.
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
    * @static
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
-    metadataAccessPath: string
+    metadataAccessPath: string,
+    isTimeAware: boolean | undefined
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const myLayer = new EsriDynamic({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeEsriDynamicLayerConfig);
+    const myLayer = new EsriDynamic({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeEsriDynamicLayerConfig);
     return myLayer.initGeoViewLayerEntries();
   }
 
@@ -162,7 +169,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata.
-   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @param {unknown} customGeocoreLayerConfig - An optional layer config from Geocore.
    * @returns {TypeEsriDynamicLayerConfig} The constructed configuration object for the Esri Dynamic layer.
@@ -172,7 +179,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
-    isTimeAware: boolean,
+    isTimeAware: boolean | undefined,
     layerEntries: TypeLayerEntryShell[],
     customGeocoreLayerConfig: unknown = {}
   ): TypeEsriDynamicLayerConfig {

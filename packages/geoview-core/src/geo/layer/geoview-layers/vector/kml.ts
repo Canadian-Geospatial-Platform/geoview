@@ -40,15 +40,15 @@ export class KML extends AbstractGeoViewVector {
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Get the folder url
-    const idx = this.metadataAccessPath.lastIndexOf('/');
-    const rootUrl = this.metadataAccessPath.substring(0, idx);
-    const id = this.metadataAccessPath.substring(idx + 1);
+    const idx = this.getMetadataAccessPath().lastIndexOf('/');
+    const rootUrl = this.getMetadataAccessPath().substring(0, idx);
+    const id = this.getMetadataAccessPath().substring(idx + 1);
 
     // Attempt a fetch of the metadata
     await this.onFetchServiceMetadata();
 
     // Redirect
-    return Promise.resolve(KML.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, [{ id }]));
+    return Promise.resolve(KML.createGeoviewLayerConfig(this.getGeoviewLayerId(), this.getGeoviewLayerName(), rootUrl, false, [{ id }]));
   }
 
   /**
@@ -110,16 +110,18 @@ export class KML extends AbstractGeoViewVector {
    * @param {string} geoviewLayerId - A unique identifier for the layer.
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
    * @static
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
-    metadataAccessPath: string
+    metadataAccessPath: string,
+    isTimeAware: boolean | undefined
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const myLayer = new KML({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeKmlLayerConfig);
+    const myLayer = new KML({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeKmlLayerConfig);
     return myLayer.initGeoViewLayerEntries();
   }
 
@@ -130,7 +132,7 @@ export class KML extends AbstractGeoViewVector {
    * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata or feature data.
-   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeKmlLayerConfig} The constructed configuration object for the KML Feature layer.
    * @static
@@ -139,7 +141,7 @@ export class KML extends AbstractGeoViewVector {
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
-    isTimeAware: boolean,
+    isTimeAware: boolean | undefined,
     layerEntries: TypeLayerEntryShell[]
   ): TypeKmlLayerConfig {
     const geoviewLayerConfig: TypeKmlLayerConfig = {

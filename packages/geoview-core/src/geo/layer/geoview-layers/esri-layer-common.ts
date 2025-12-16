@@ -218,7 +218,7 @@ export class EsriUtilities {
     if (layerConfig.getEntryTypeIsGroup() && !layerConfig.getIsMetadataLayerGroup()) return layerConfig;
 
     // The url
-    let queryUrl = layer.metadataAccessPath;
+    let queryUrl = layer.getMetadataAccessPath();
 
     if (layerConfig.getSchemaTag() !== CONST_LAYER_TYPES.ESRI_IMAGE)
       queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
