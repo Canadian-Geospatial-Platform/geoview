@@ -31,8 +31,6 @@ export abstract class LayerMockup {
       geoviewLayerType: 'esriFeature',
       geoviewLayerName: 'My custom default label for creation',
       metadataAccessPath: 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/900A_and_top_100_en/MapServer',
-      serviceDateFormat: 'DD/MM/YYYY HH:MM:SSZ',
-      externalDateFormat: 'DD/MM/YYYY HH:MM:SSZ',
       listOfLayerEntryConfig: [
         {
           layerId: 'myCustomGroup',
