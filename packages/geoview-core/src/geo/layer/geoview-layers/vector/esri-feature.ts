@@ -60,14 +60,18 @@ export class EsriFeature extends AbstractGeoViewVector {
     let responseJson;
     try {
       // Query
-      responseJson = await Fetch.fetchJson<T>(`${this.metadataAccessPath}?f=json`, { signal: abortSignal });
+      responseJson = await Fetch.fetchJson<T>(`${this.getMetadataAccessPath()}?f=json`, { signal: abortSignal });
     } catch (error: unknown) {
       // Throw
-      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName(), formatError(error));
+      throw new LayerServiceMetadataUnableToFetchError(
+        this.getGeoviewLayerId(),
+        this.getLayerEntryNameOrGeoviewLayerName(),
+        formatError(error)
+      );
     }
 
     // Validate the metadata response
-    AbstractGeoViewRaster.throwIfMetatadaHasError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName(), responseJson);
+    AbstractGeoViewRaster.throwIfMetatadaHasError(this.getGeoviewLayerId(), this.getLayerEntryNameOrGeoviewLayerName(), responseJson);
 
     // Return it
     return responseJson as T;
@@ -85,15 +89,15 @@ export class EsriFeature extends AbstractGeoViewVector {
 
     // If metadata was fetched successfully
     const entries = [];
-    let finalUrl = this.metadataAccessPath;
+    let finalUrl = this.getMetadataAccessPath();
     if (metadata) {
       // If MapServer url
       let sep = '/mapserver';
-      let idx = this.metadataAccessPath.toLowerCase().lastIndexOf(sep);
+      let idx = this.getMetadataAccessPath().toLowerCase().lastIndexOf(sep);
 
       if (idx > 0) {
         // The layer id is in the metadata at root
-        finalUrl = this.metadataAccessPath.substring(0, idx + sep.length);
+        finalUrl = this.getMetadataAccessPath().substring(0, idx + sep.length);
         entries.push({
           id: Number(metadata.id),
           index: Number(metadata.id),
@@ -103,7 +107,7 @@ export class EsriFeature extends AbstractGeoViewVector {
       } else {
         // If FeatureServer url, the metadata is in the first layer
         sep = '/featureserver';
-        idx = this.metadataAccessPath.toLowerCase().lastIndexOf(sep);
+        idx = this.getMetadataAccessPath().toLowerCase().lastIndexOf(sep);
         if (idx > 0) {
           // The layer metadata is in the first layer of the metadata
           const layer = metadata.layers[0];
@@ -118,8 +122,13 @@ export class EsriFeature extends AbstractGeoViewVector {
     }
 
     // Redirect
-    // TODO: Check - Config init - a way to better determine the isTimeAware flag, defaults to false, how is it used here?
-    return EsriFeature.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, finalUrl, false, entries);
+    return EsriFeature.createGeoviewLayerConfig(
+      this.getGeoviewLayerId(),
+      this.getGeoviewLayerName(),
+      finalUrl,
+      this.getGeoviewLayerConfig().isTimeAware,
+      entries
+    );
   }
 
   /**
@@ -194,16 +203,18 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {string} geoviewLayerId - A unique identifier for the layer.
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
    * @static
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
-    metadataAccessPath: string
+    metadataAccessPath: string,
+    isTimeAware: boolean | undefined
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const myLayer = new EsriFeature({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeEsriFeatureLayerConfig);
+    const myLayer = new EsriFeature({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeEsriFeatureLayerConfig);
     return myLayer.initGeoViewLayerEntries();
   }
 
@@ -214,7 +225,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata or feature data.
-   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeEsriFeatureLayerConfig} The constructed configuration object for the Esri Feature layer.
    * @static
@@ -223,7 +234,7 @@ export class EsriFeature extends AbstractGeoViewVector {
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
-    isTimeAware: boolean,
+    isTimeAware: boolean | undefined,
     layerEntries: TypeLayerEntryShell[]
   ): TypeEsriFeatureLayerConfig {
     const geoviewLayerConfig: TypeEsriFeatureLayerConfig = {

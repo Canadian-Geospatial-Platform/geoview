@@ -20,14 +20,18 @@ export abstract class AbstractGeoViewRaster extends AbstractGeoViewLayer {
     let responseJson;
     try {
       // Fetch it
-      responseJson = await AbstractGeoViewRaster.fetchMetadata<T>(this.metadataAccessPath, abortSignal);
+      responseJson = await AbstractGeoViewRaster.fetchMetadata<T>(this.getMetadataAccessPath(), abortSignal);
     } catch (error: unknown) {
       // Throw
-      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName(), formatError(error));
+      throw new LayerServiceMetadataUnableToFetchError(
+        this.getGeoviewLayerId(),
+        this.getLayerEntryNameOrGeoviewLayerName(),
+        formatError(error)
+      );
     }
 
     // Validate the metadata response
-    AbstractGeoViewRaster.throwIfMetatadaHasError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName(), responseJson);
+    AbstractGeoViewRaster.throwIfMetatadaHasError(this.getGeoviewLayerId(), this.getLayerEntryNameOrGeoviewLayerName(), responseJson);
 
     // Return it
     return responseJson;

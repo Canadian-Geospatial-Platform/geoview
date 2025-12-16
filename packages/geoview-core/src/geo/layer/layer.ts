@@ -712,7 +712,7 @@ export class LayerApi {
     const layerBeingAdded = this.createLayerConfigFromType(geoviewLayerConfig);
 
     // Add in the geoviewLayers set
-    this.#geoviewLayers[layerBeingAdded.geoviewLayerId] = layerBeingAdded;
+    this.#geoviewLayers[layerBeingAdded.getGeoviewLayerId()] = layerBeingAdded;
 
     // For each layer entry config in the geoview layer
     layerBeingAdded.getAllLayerEntryConfigs().forEach((layerConfig) => {
@@ -2198,7 +2198,7 @@ export class LayerApi {
       this.mapViewer.map.addLayer(geoviewLayer.olRootLayer);
 
       // Log
-      logger.logInfo(`GeoView Layer ${geoviewLayer.geoviewLayerId} added to map ${this.getMapId()}`, geoviewLayer);
+      logger.logInfo(`GeoView Layer ${geoviewLayer.getGeoviewLayerId()} added to map ${this.getMapId()}`, geoviewLayer);
 
       // GV: KML currently has no style or symbology associated with it, so we warn the user
       if (geoviewLayerConfig.geoviewLayerType === CONST_LAYER_TYPES.KML)

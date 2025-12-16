@@ -48,9 +48,13 @@ export class EsriImage extends AbstractGeoViewRaster {
     await this.onFetchServiceMetadata();
 
     // Redirect
-    // TODO: Check - Config init - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
     return Promise.resolve(
-      EsriImage.createGeoviewLayerConfigSimple(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false)
+      EsriImage.createGeoviewLayerConfigSimple(
+        this.getGeoviewLayerId(),
+        this.getGeoviewLayerName(),
+        this.getMetadataAccessPath(),
+        this.getGeoviewLayerConfig().isTimeAware
+      )
     );
   }
 
@@ -95,16 +99,18 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerId - A unique identifier for the layer.
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
    * @static
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
-    metadataAccessPath: string
+    metadataAccessPath: string,
+    isTimeAware: boolean | undefined
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const myLayer = new EsriImage({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeEsriImageLayerConfig);
+    const myLayer = new EsriImage({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeEsriImageLayerConfig);
     return myLayer.initGeoViewLayerEntries();
   }
 
@@ -115,7 +121,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata.
-   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @returns {TypeEsriImageLayerConfig} The constructed configuration object for the Esri Image layer.
    * @static
    */
@@ -123,7 +129,7 @@ export class EsriImage extends AbstractGeoViewRaster {
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
-    isTimeAware: boolean
+    isTimeAware: boolean | undefined
   ): TypeEsriImageLayerConfig {
     const geoviewLayerConfig: TypeEsriImageLayerConfig = {
       geoviewLayerId,
@@ -157,7 +163,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata.
-   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeEsriImageLayerConfig} The constructed configuration object for the Esri Image layer.
    * @static
@@ -166,7 +172,7 @@ export class EsriImage extends AbstractGeoViewRaster {
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
-    isTimeAware: boolean,
+    isTimeAware: boolean | undefined,
     layerEntries: TypeLayerEntryShell[]
   ): TypeEsriImageLayerConfig {
     const geoviewLayerConfig: TypeEsriImageLayerConfig = {

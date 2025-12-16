@@ -338,6 +338,10 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     return this.source;
   }
 
+  hasDataAccessPath(): boolean {
+    return !!this.getSource().dataAccessPath;
+  }
+
   /**
    * Gets the source data access path from the source object.
    * @param {boolean} endsWithSlash - Indicates if the dataAccessPath received should end with a '/', because it's going to be dynamically used to create a url path.

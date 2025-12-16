@@ -62,14 +62,17 @@ export class WKB extends AbstractGeoViewVector {
    */
   protected override async onFetchServiceMetadata<T = TypeMetadataGeoJSON | undefined>(abortSignal?: AbortSignal): Promise<T> {
     // If metadataAccessPath ends with .meta or .json
-    if (this.metadataAccessPath.toLowerCase().endsWith('.meta') || this.metadataAccessPath.toLowerCase().endsWith('.json')) {
+    if (
+      this.getMetadataAccessPathIfExists()?.toLowerCase().endsWith('.meta') ||
+      this.getMetadataAccessPathIfExists()?.toLowerCase().endsWith('.json')
+    ) {
       try {
         // Fetch it
-        return (await WKB.fetchMetadata(this.metadataAccessPath, abortSignal)) as T;
+        return (await WKB.fetchMetadata(this.getMetadataAccessPath(), abortSignal)) as T;
       } catch (error: unknown) {
         // Throw
         throw new LayerServiceMetadataUnableToFetchError(
-          this.geoviewLayerId,
+          this.getGeoviewLayerId(),
           this.getLayerEntryNameOrGeoviewLayerName(),
           formatError(error)
         );
@@ -78,7 +81,7 @@ export class WKB extends AbstractGeoViewVector {
 
     // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
     logger.logWarning(
-      `The metadataAccessPath '${this.metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped`
+      `The metadataAccessPath '${this.getMetadataAccessPathIfExists()}' didn't seem like it was containing actual metadata, so it was skipped`
     );
 
     // None
@@ -91,16 +94,23 @@ export class WKB extends AbstractGeoViewVector {
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Get the folder url
-    const idx = this.metadataAccessPath.lastIndexOf('/');
-    const rootUrl = this.metadataAccessPath.substring(0, idx);
-    const id = this.metadataAccessPath.substring(idx + 1);
+    const idx = this.getMetadataAccessPath().lastIndexOf('/');
+    const rootUrl = this.getMetadataAccessPath().substring(0, idx);
+    const id = this.getMetadataAccessPath().substring(idx + 1);
 
     // Attempt a fetch of the metadata
     await this.onFetchServiceMetadata();
 
     // Redirect
-    // TODO: Check - Config init - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
-    return Promise.resolve(WKB.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, [{ id }]));
+    return Promise.resolve(
+      WKB.createGeoviewLayerConfig(
+        this.getGeoviewLayerId(),
+        this.getGeoviewLayerName(),
+        rootUrl,
+        this.getGeoviewLayerConfig().isTimeAware,
+        [{ id }]
+      )
+    );
   }
 
   /**
@@ -252,16 +262,18 @@ export class WKB extends AbstractGeoViewVector {
    * @param {string} geoviewLayerId - A unique identifier for the layer.
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
    * @static
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
-    metadataAccessPath: string
+    metadataAccessPath: string,
+    isTimeAware: boolean | undefined
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const myLayer = new WKB({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeWkbLayerConfig);
+    const myLayer = new WKB({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeWkbLayerConfig);
     return myLayer.initGeoViewLayerEntries();
   }
 
@@ -272,7 +284,7 @@ export class WKB extends AbstractGeoViewVector {
    * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata or feature data.
-   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeWkbLayerConfig} The constructed configuration object for the WKB Feature layer.
    * @static
@@ -281,7 +293,7 @@ export class WKB extends AbstractGeoViewVector {
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
-    isTimeAware: boolean,
+    isTimeAware: boolean | undefined,
     layerEntries: TypeLayerEntryShell[]
   ): TypeWkbLayerConfig {
     const geoviewLayerConfig: TypeWkbLayerConfig = {
