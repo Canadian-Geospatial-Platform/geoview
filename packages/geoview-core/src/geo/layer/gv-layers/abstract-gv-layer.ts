@@ -37,6 +37,7 @@ import type {
   TypeLayerMetadataVector,
   TypeGeoviewLayerType,
 } from '@/api/types/layer-schema-types';
+import type { TypeLegendItem } from '@/core/components/layers/types';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -593,6 +594,43 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   setStyle(style: TypeLayerStyleConfig): void {
     this.#layerStyle = style;
     this.#emitLayerStyleChanged({ style });
+  }
+
+  /**
+   * Gets the style item visibility on the layer.
+   * @param {TypeLegendItem} item - The style item to toggle visibility on
+   * @returns {boolean} The visibility of the style item
+   */
+  getStyleItemVisibility(item: TypeLegendItem): boolean {
+    // Assign value to registered layer. This is use by applyFilter function to set visibility
+    const geometryStyleConfig = this.getStyle()![item.geometryType];
+
+    // Get all styles with the label matching the name of the clicked item and update their visibility
+    const styleInfos = geometryStyleConfig?.info.filter((styleInfo) => styleInfo.label === item.name);
+    const styleInfosVisible = styleInfos?.filter((styleInfo) => styleInfo.visible ?? false);
+
+    // Return if all visible
+    return styleInfosVisible?.length === styleInfos?.length;
+  }
+
+  /**
+   * Sets the style item visibility on the layer and refresh it.
+   * @param {TypeLegendItem} item - The style item to toggle visibility on
+   * @param {boolean} visibility - The visibility of the style item
+   */
+  setStyleItemVisibility(item: TypeLegendItem, visibility: boolean): void {
+    // Assign value to registered layer. This is use by applyFilter function to set visibility
+    const geometryStyleConfig = this.getStyle()![item.geometryType];
+
+    // Get all styles with the label matching the name of the clicked item and update their visibility
+    const styleInfos = geometryStyleConfig?.info.filter((styleInfo) => styleInfo.label === item.name);
+    styleInfos?.forEach((styleInfo) => {
+      // eslint-disable-next-line no-param-reassign
+      styleInfo.visible = visibility;
+    });
+
+    // Force a re-render of the layer source (this is required if there are classes)
+    this.getOLLayer().changed();
   }
 
   /**
