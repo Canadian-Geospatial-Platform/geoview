@@ -82,26 +82,26 @@ export abstract class AbstractGeoViewLayer {
   /** The default hit tolerance */
   hitTolerance: number = AbstractGeoViewLayer.DEFAULT_HIT_TOLERANCE;
 
-  /** The Geoview Layer Config used to create the class */
-  #geoviewLayerConfig: TypeGeoviewLayerConfig;
-
   /**
    * An array of layer settings. In the schema, this attribute is optional. However, we define it as mandatory and if the
    * configuration does not provide a value, we use an empty array instead of an undefined attribute.
    */
   listOfLayerEntryConfig: TypeLayerEntryConfig[] = [];
 
-  /** List of errors for the layers that did not load. */
-  #layerLoadError: Error[] = [];
-
   /** The OpenLayer root layer representing this GeoView Layer. */
   olRootLayer?: BaseLayer;
+
+  /** The Geoview Layer Config used to create the class */
+  #geoviewLayerConfig: TypeGeoviewLayerConfig;
+
+  /** List of errors for the layers that did not load. */
+  #layerLoadError: Error[] = [];
 
   /** The service metadata. */
   #metadata?: unknown;
 
   /** Date format object used to translate server to ISO format and ISO to server format */
-  serverDateFragmentsOrder?: TypeDateFragments;
+  #serverDateFragmentsOrder?: TypeDateFragments;
 
   /** Keep all callback delegate references */
   #onLayerEntryRegisterInitHandlers: LayerEntryRegisterInitDelegate[] = [];
@@ -129,12 +129,13 @@ export abstract class AbstractGeoViewLayer {
     // Keep it internally
     this.#geoviewLayerConfig = geoviewLayerConfig;
 
-    // TODO: ALEX - CLEAN THIS UP
+    // Set the Date Fragments Order if it's specified in the config
+    if (geoviewLayerConfig.serviceDateFormat) {
+      this.setServerDateFragmentsOrder(DateMgt.getDateFragmentsOrder(geoviewLayerConfig.serviceDateFormat));
+    }
 
-    this.serverDateFragmentsOrder = geoviewLayerConfig.serviceDateFormat
-      ? DateMgt.getDateFragmentsOrder(geoviewLayerConfig.serviceDateFormat)
-      : undefined;
-    this.#setListOfLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
+    // Initialize the layer entry configs
+    this.#initListOfLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
   }
 
   // #region OVERRIDES
@@ -325,6 +326,45 @@ export abstract class AbstractGeoViewLayer {
       if (layerEntryName) return layerEntryName;
     }
     return this.getGeoviewLayerName() || this.getGeoviewLayerId();
+  }
+
+  /**
+   * Gets the current server date fragments order.
+   * The date fragments order describes how date components (e.g. day, month, year,
+   * time fragments) are arranged in server-provided date strings.
+   * @returns {TypeDateFragments | undefined} The server date fragments order,
+   * or `undefined` if it has not been initialized.
+   */
+  getServerDateFragmentsOrder(): TypeDateFragments | undefined {
+    return this.#serverDateFragmentsOrder;
+  }
+
+  /**
+   * Sets the server date fragments order.
+   * This value is typically derived from a service date format and cached
+   * for reuse when parsing or formatting server dates.
+   * @param {TypeDateFragments | undefined} serverDateFragmentsOrder -
+   * The date fragments order to store. Use `undefined` to reset the value.
+   */
+  setServerDateFragmentsOrder(serverDateFragmentsOrder: TypeDateFragments | undefined): void {
+    this.#serverDateFragmentsOrder = serverDateFragmentsOrder;
+  }
+
+  /**
+   * Initializes the server date fragments order from a service date format string.
+   * If the date fragments order has not already been set, this method derives it
+   * from the provided date format using {@link DateMgt.getDateFragmentsOrder}
+   * and stores it for later use.
+   * @param {string} [dateFormat='DD/MM/YYYY HH:MM:SSZ'] -
+   * The date format string provided by the service, used to determine
+   * the order of date fragments.
+   */
+  initServerDateFragmentsOrderFromServiceDateFormat(dateFormat: string = 'DD/MM/YYYY HH:MM:SSZ'): void {
+    // If any not already set and have a service date format provided
+    if (!this.getServerDateFragmentsOrder()) {
+      // Set it
+      this.setServerDateFragmentsOrder(DateMgt.getDateFragmentsOrder(dateFormat));
+    }
   }
 
   /**
@@ -553,13 +593,12 @@ export abstract class AbstractGeoViewLayer {
   // #region PRIVATE METHODS
 
   /**
-   * Set the list of layer entry configuration and initialize the registered layer object and register all layers to layer sets.
-   *
+   * Initializes the layer entry configurations.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration options.
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer's configuration
    * @private
    */
-  #setListOfLayerEntryConfig(geoviewLayerConfig: TypeGeoviewLayerConfig, listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
+  #initListOfLayerEntryConfig(geoviewLayerConfig: TypeGeoviewLayerConfig, listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     if (!listOfLayerEntryConfig) return;
     if (listOfLayerEntryConfig.length === 0) return;
     if (listOfLayerEntryConfig.length === 1) {
