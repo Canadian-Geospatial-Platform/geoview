@@ -94,7 +94,7 @@ export class MapViewer {
   // The default densification number when forming layer extents, to make ture to compensate for earth curvature
   static DEFAULT_STOPS: number = 25;
 
-  // TODO: refactor UI - If we do not put a high timeout, ui start but the function getMapCoordinateFromPixel
+  // TODO: REFACTOR UI - If we do not put a high timeout, ui start but the function getMapCoordinateFromPixel
   // TD.CONT: AND scale component return null and fails. To patch, we add an higher time out for promise.
   // TD.CONT: This solves for now the issue where the page start to load and user switch to another page and came back.
   // Timeout value when map init to avoid when use the map is not ready, the UI will not start
@@ -906,7 +906,7 @@ export class MapViewer {
    * @returns {Promise<void>} A promise that resolves when the zoom operation completes.
    */
   zoomToExtent(extent: Extent, options?: FitOptions): Promise<void> {
-    // TODO: Discussion - Where is the line between a function using MapEventProcessor in MapViewer vs in MapState action?
+    // TODO: DISCUSSION - Where is the line between a function using MapEventProcessor in MapViewer vs in MapState action?
     // TO.DOCONT: This function (and there are many others in this class) redirects to the MapEventProcessor, should it be in MapState with the others or do we keep some in MapViewer and some in MapState?
     // TO.DOCONT: If we keep some here, we should maybe add a fourth call-stack possibility in the MapEventProcessor paradigm documentation which goes like so:
     // - 4th paradigm: MapViewer ---calls---> MapEventProcessor ---calls---> MapViewer ---calls/emits events---> MapState.setterActions.
