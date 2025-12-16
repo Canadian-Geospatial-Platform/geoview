@@ -20,11 +20,9 @@ import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { parseXMLToJson } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { Projection } from '@/geo/utils/projection';
-import type { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-import type { TypeLayerStyleConfig, TypeOutfields, TypeStyleGeometry, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
+import type { TypeOutfields, TypeStyleGeometry, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
 import type { TypeMetadataWMS, TypeMetadataWMSCapabilityLayer, TypeMetadataWMSRoot, TypeStylesWMS } from '@/api/types/layer-schema-types';
 import type { TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
@@ -805,16 +803,6 @@ export abstract class GeoUtilities {
   }
 
   /**
-   * This method gets the legend styles used by the the layer as specified by the style configuration.
-   * @param {TypeLayerStyleConfig} styleConfig - Layer style configuration.
-   * @returns {Promise<TypeVectorLayerStyles>} A promise that the layer styles are processed.
-   */
-  // TODO: Cleanup - This function doesn't seem to be used anywhere?
-  static getLegendStylesFromConfig(styleConfig: TypeLayerStyleConfig): Promise<TypeVectorLayerStyles> {
-    return GeoviewRenderer.getLegendStyles(styleConfig);
-  }
-
-  /**
    * Format the coordinates for degrees - minutes - seconds (lat, long)
    * @param {number} value the value to format
    * @returns {string} the formatted value
@@ -834,9 +822,6 @@ export abstract class GeoUtilities {
    * @returns an Open Layers styling for drawing on a map or undefined
    */
   static convertTypeFeatureStyleToOpenLayersStyle(style?: TypeFeatureStyle): Style {
-    // TODO: Refactor - This function could also be used by vector class when it works with the styling
-    // GV So I'm putting it in this utilities class so that it eventually becomes shared between vector
-    // GV class and interactions classes.
     // Redirect
     return this.getDefaultDrawingStyle(style?.strokeColor, style?.strokeWidth, style?.fillColor);
   }
@@ -1082,38 +1067,6 @@ export abstract class GeoUtilities {
     const targetResolution = targetScale / (mpu * 39.37 * dpi);
 
     return view.getZoomForResolution(targetResolution) || undefined;
-  }
-
-  /**
-   * Converts a map scale to zoom level
-   * @param view The view for converting the zoom
-   * @param zoom The desired zoom (e.g. 50000 for 1:50,000)
-   * @returns number representing the closest scale for the given zoom number
-   */
-  // TODO: Cleanup - This function doesn't seem to be used anywhere?
-  static getScaleFromZoom(view: View, zoom: number): number | undefined {
-    const projection = view.getProjection();
-    const mpu = projection.getMetersPerUnit();
-    if (!mpu) return undefined;
-
-    const dpi = 25.4 / 0.28; // OpenLayers default DPI
-
-    // Get resolution for zoom level
-    const resolution = view.getResolutionForZoom(zoom);
-
-    // Calculate scale from resolution
-    // Scale = Resolution * metersPerUnit * inchesPerMeter * DPI
-    return resolution * mpu * 39.37 * dpi;
-  }
-
-  /**
-   * Gets map scale for Web Mercator or Lambert Conformal Conic projections
-   * @param view The view to get the current scale from
-   * @returns number representing scale (e.g. 50000 for 1:50,000)
-   */
-  // TODO: Cleanup - This function doesn't seem to be used anywhere?
-  static getMapScale(view: View): number | undefined {
-    return this.getScaleFromZoom(view, view.getZoom() || 0);
   }
 
   /**
