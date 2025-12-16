@@ -109,7 +109,7 @@ export class CSV extends AbstractGeoViewVector {
    * @param {string} geoviewLayerId - A unique identifier for the layer.
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
-   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {boolean?} [isTimeAware] - Indicates whether the layer supports time-based filtering.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
    * @static
    */
@@ -117,7 +117,7 @@ export class CSV extends AbstractGeoViewVector {
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
-    isTimeAware: boolean | undefined
+    isTimeAware?: boolean
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
     const myLayer = new CSV({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeCSVLayerConfig);
