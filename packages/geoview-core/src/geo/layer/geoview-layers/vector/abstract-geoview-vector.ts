@@ -236,14 +236,12 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
         // If the value is already a number, treat it as a timestamp and reformat
         if (typeof value === 'number') {
-          const dateStr = DateMgt.applyInputDateFormat(DateMgt.convertMilisecondsToDate(value), this.serverDateFragmentsOrder);
+          const dateStr = DateMgt.applyInputDateFormat(DateMgt.convertMilisecondsToDate(value), this.getServerDateFragmentsOrder());
           feature.set(field.name, DateMgt.convertToMilliseconds(dateStr), true);
         } else {
           // If the value is a string, determine or reuse the date fragment order
-          if (!this.serverDateFragmentsOrder) {
-            this.serverDateFragmentsOrder = DateMgt.getDateFragmentsOrder(DateMgt.deduceDateFormat(value));
-          }
-          const dateStr = DateMgt.applyInputDateFormat(value, this.serverDateFragmentsOrder);
+          this.initServerDateFragmentsOrderFromServiceDateFormat(DateMgt.deduceDateFormat(value));
+          const dateStr = DateMgt.applyInputDateFormat(value, this.getServerDateFragmentsOrder());
           feature.set(field.name, DateMgt.convertToMilliseconds(dateStr), true);
         }
       });
