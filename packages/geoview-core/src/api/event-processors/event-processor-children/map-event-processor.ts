@@ -213,7 +213,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
    */
   // TODO: REFACTOR EVENT PROCESSOR MAJOR - Turn this function deprecated and redesign the flow. It's the only place left in the code where we still import api from '@/app'.
   static async getMapViewerPlugins(mapId: string): Promise<PluginsContainer> {
-    // TODO: Check - Remove the try/catch here to force explicit case-by-case handling instead of via shared function.
     await whenThisThen(() => api && api.hasMapViewer(mapId));
     return api.getMapViewer(mapId).plugins;
   }
