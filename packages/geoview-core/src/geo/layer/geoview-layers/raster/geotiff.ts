@@ -55,11 +55,13 @@ export class GeoTIFF extends AbstractGeoViewRaster {
    * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
    */
   protected override async onFetchServiceMetadata<T = TypeMetadataGeoTIFF | undefined>(abortSignal?: AbortSignal): Promise<T> {
+    // If metadataAccessPath does not point to a .tif file, we try to fetch metadata
+    const metadataAccessPath = this.getMetadataAccessPath();
+
     try {
-      // If metadataAccessPath does not point to a .tif file, we try to fetch metadata
       // GV: This is currently only for datacube sources that provide a JSON metadata file
-      if (this.metadataAccessPath && !this.metadataAccessPath.endsWith('.tif')) {
-        const url = this.metadataAccessPath.endsWith('/') ? this.metadataAccessPath.slice(0, -1) : this.metadataAccessPath;
+      if (metadataAccessPath && !metadataAccessPath.endsWith('.tif')) {
+        const url = metadataAccessPath.endsWith('/') ? metadataAccessPath.slice(0, -1) : metadataAccessPath;
 
         // Fetch it
         return (await Fetch.fetchJson<T>(url, { signal: abortSignal })) as T;
@@ -67,7 +69,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
 
       // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
       logger.logWarning(
-        `The metadataAccessPath '${this.metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped`
+        `The metadataAccessPath '${metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped`
       );
 
       // None
@@ -75,7 +77,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
     } catch (error: unknown) {
       // Error likely means there is no metadata to fetch
       logger.logWarning(
-        `The metadataAccessPath '${this.metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped. Error: ${error}`
+        `The metadataAccessPath '${metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped. Error: ${error}`
       );
       return Promise.resolve(undefined) as Promise<T>;
     }
@@ -88,8 +90,13 @@ export class GeoTIFF extends AbstractGeoViewRaster {
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Redirect
     return Promise.resolve(
-      // TODO: Check - Config init - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
-      GeoTIFF.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false, [])
+      GeoTIFF.createGeoviewLayerConfig(
+        this.getGeoviewLayerId(),
+        this.getGeoviewLayerName(),
+        this.getMetadataAccessPathIfExists(),
+        this.getGeoviewLayerConfig().isTimeAware,
+        []
+      )
     );
   }
 
@@ -103,14 +110,17 @@ export class GeoTIFF extends AbstractGeoViewRaster {
     if (metadata) {
       // Set the metadata
       layerConfig.setServiceMetadata(metadata);
+
       // If the data access path points to the layerId, and there's a classification asset, use that as data access path
       if (
-        layerConfig.source.dataAccessPath?.endsWith(layerConfig.layerId) &&
-        layerConfig.source.dataAccessPath.startsWith(this.metadataAccessPath) &&
+        layerConfig.hasDataAccessPath() &&
+        layerConfig.getDataAccessPath().endsWith(layerConfig.layerId) &&
+        layerConfig.getDataAccessPath().startsWith(this.getMetadataAccessPath()) &&
         metadata.assets?.[layerConfig.layerId]?.href
-      )
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.source.dataAccessPath = metadata.assets[layerConfig.layerId].href;
+      ) {
+        // Update the data access path
+        layerConfig.setDataAccessPath(metadata.assets[layerConfig.layerId].href);
+      }
     }
 
     return Promise.resolve(layerConfig);
@@ -186,13 +196,15 @@ export class GeoTIFF extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerId - A unique identifier for the layer.
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
    * @static
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
-    metadataAccessPath: string
+    metadataAccessPath: string,
+    isTimeAware: boolean | undefined
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
     const myLayer = new GeoTIFF({
@@ -200,6 +212,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
       geoviewLayerName:
         geoviewLayerName === 'tempoName' || !geoviewLayerName ? metadataAccessPath.split('/').pop()?.split('.')[0] : geoviewLayerName,
       metadataAccessPath,
+      isTimeAware,
     } as TypeGeoTIFFLayerConfig);
     return myLayer.initGeoViewLayerEntries();
   }
@@ -210,8 +223,8 @@ export class GeoTIFF extends AbstractGeoViewRaster {
    * and its associated entry configurations based on the provided parameters.
    * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
-   * @param {string} metadataAccessPath - The URL or path to access metadata.
-   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {string | undefined} metadataAccessPath - The URL or path to access metadata.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeGeoTIFFConfig} The constructed configuration object for the GeoTIFF layer.
    * @static
@@ -219,8 +232,8 @@ export class GeoTIFF extends AbstractGeoViewRaster {
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
-    metadataAccessPath: string,
-    isTimeAware: boolean,
+    metadataAccessPath: string | undefined,
+    isTimeAware: boolean | undefined,
     layerEntries: TypeLayerEntryShell[]
   ): TypeGeoTIFFLayerConfig {
     const geoviewLayerConfig: TypeGeoTIFFLayerConfig = {
@@ -248,7 +261,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
           geoviewLayerConfig,
           schemaTag: CONST_LAYER_TYPES.GEOTIFF,
           entryType: CONST_LAYER_ENTRY_TYPES.RASTER_TILE,
-          layerId: metadataAccessPath.split('/').pop() || generateId(18),
+          layerId: metadataAccessPath?.split('/').pop() || generateId(18),
           layerName: geoviewLayerName,
         }),
       ];

@@ -460,6 +460,7 @@ export class ConfigApi {
     geoviewLayerId: string,
     geoviewLayerName: string,
     layerURL: string,
+    isTimeAware?: boolean,
     language?: TypeDisplayLanguage,
     mapId?: string,
     abortSignal: AbortSignal | undefined = undefined
@@ -479,6 +480,7 @@ export class ConfigApi {
         layerConfigFromGeocore.geoviewLayerId,
         layerConfigFromGeocore.geoviewLayerName!,
         layerConfigFromGeocore.metadataAccessPath!,
+        layerConfigFromGeocore.isTimeAware,
         language,
         mapId,
         abortSignal
@@ -507,33 +509,33 @@ export class ConfigApi {
     // Depending on the type
     switch (layerType) {
       case 'esriDynamic':
-        return EsriDynamic.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return EsriDynamic.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'esriImage':
-        return EsriImage.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return EsriImage.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'imageStatic':
-        return ImageStatic.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return ImageStatic.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'GeoTIFF':
-        return GeoTIFF.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return GeoTIFF.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'vectorTiles':
-        return VectorTiles.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return VectorTiles.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'ogcWms':
-        return WMS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, false);
+        return WMS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware, false);
       case 'xyzTiles':
-        return XYZTiles.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return XYZTiles.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'CSV':
-        return CSV.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return CSV.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'esriFeature':
-        return EsriFeature.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return EsriFeature.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'GeoJSON':
-        return GeoJSON.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return GeoJSON.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'KML':
-        return KML.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return KML.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'WKB':
-        return WKB.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return WKB.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'ogcFeature':
-        return OgcFeature.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return OgcFeature.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'ogcWfs':
-        return WFS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return WFS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'GeoPackage':
         // For GeoPackage, we build a WKB config
         return await GeoPackageReader.createLayerConfigFromGeoPackage(

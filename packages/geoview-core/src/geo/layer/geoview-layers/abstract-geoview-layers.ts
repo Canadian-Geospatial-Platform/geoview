@@ -3,7 +3,7 @@ import Collection from 'ol/Collection';
 import type { Options as LayerGroupOptions } from 'ol/layer/Group';
 import LayerGroup from 'ol/layer/Group';
 
-import { delay, generateId } from '@/core/utils/utilities';
+import { delay } from '@/core/utils/utilities';
 import type { TypeDateFragments } from '@/core/utils/date-mgt';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
@@ -21,6 +21,7 @@ import type {
 } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES, validVectorLayerLegendTypes } from '@/api/types/layer-schema-types';
 import {
+  LayerMetadataAccessPathMandatoryError,
   LayerNoCapabilitiesError,
   LayerServiceMetadataEmptyError,
   LayerServiceMetadataUnableToFetchError,
@@ -81,18 +82,8 @@ export abstract class AbstractGeoViewLayer {
   /** The default hit tolerance */
   hitTolerance: number = AbstractGeoViewLayer.DEFAULT_HIT_TOLERANCE;
 
-  /** The unique identifier for the GeoView layer. The value of this attribute is extracted from the mapLayerConfig parameter.
-   * If its value is undefined, a unique value is generated.
-   */
-  geoviewLayerId: string;
-
-  /** The GeoView layer name. The value of this attribute is extracted from the mapLayerConfig parameter. If its value is
-   * undefined, a default value is generated.
-   */
-  geoviewLayerName: string;
-
-  /** The GeoView layer metadataAccessPath. The name attribute is optional */
-  metadataAccessPath: string;
+  /** The Geoview Layer Config used to create the class */
+  #geoviewLayerConfig: TypeGeoviewLayerConfig;
 
   /**
    * An array of layer settings. In the schema, this attribute is optional. However, we define it as mandatory and if the
@@ -135,11 +126,11 @@ export abstract class AbstractGeoViewLayer {
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration options.
    */
   constructor(geoviewLayerConfig: TypeGeoviewLayerConfig) {
-    this.geoviewLayerId = geoviewLayerConfig.geoviewLayerId || generateId(18);
-    this.geoviewLayerName = geoviewLayerConfig?.geoviewLayerName
-      ? geoviewLayerConfig.geoviewLayerName
-      : DEFAULT_LAYER_NAMES[geoviewLayerConfig.geoviewLayerType];
-    this.metadataAccessPath = geoviewLayerConfig.metadataAccessPath?.trim() || '';
+    // Keep it internally
+    this.#geoviewLayerConfig = geoviewLayerConfig;
+
+    // TODO: ALEX - CLEAN THIS UP
+
     this.serverDateFragmentsOrder = geoviewLayerConfig.serviceDateFormat
       ? DateMgt.getDateFragmentsOrder(geoviewLayerConfig.serviceDateFormat)
       : undefined;
@@ -259,6 +250,71 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
+   * Gets the Geoview layer id.
+   * @returns {string} The geoview layer id
+   */
+  getGeoviewLayerConfig(): TypeGeoviewLayerConfig {
+    return this.#geoviewLayerConfig;
+  }
+
+  /**
+   * Gets the Geoview layer id.
+   * @returns {string} The geoview layer id
+   */
+  getGeoviewLayerId(): string {
+    return this.getGeoviewLayerConfig().geoviewLayerId;
+  }
+
+  /**
+   * Returns the display name of the GeoView layer, if defined.
+   * @returns {string} The GeoView layer name.
+   */
+  getGeoviewLayerName(): string {
+    return this.getGeoviewLayerConfig().geoviewLayerName || DEFAULT_LAYER_NAMES[this.getGeoviewLayerConfig().geoviewLayerType];
+  }
+
+  /**
+   * Indicates if the metadata access path is defined in the config.
+   * @returns {boolean} True if the configuration has a metadata access path.
+   */
+  hasMetadataAccessPath(): boolean {
+    // Check if there's a metadataAccessPath
+    return !!this.getGeoviewLayerConfig().metadataAccessPath;
+  }
+
+  getMetadataAccessPathIfExists(): string | undefined {
+    return this.getGeoviewLayerConfig().metadataAccessPath?.trim();
+  }
+
+  /**
+   * Retrieves the metadata access path used by this GeoView layer, if any.
+   * @returns {string} The metadata access path.
+   */
+  getMetadataAccessPath(): string {
+    // Get the metadata access path
+    const { metadataAccessPath } = this.getGeoviewLayerConfig();
+
+    // If undefined
+    if (!metadataAccessPath)
+      throw new LayerMetadataAccessPathMandatoryError(
+        this.getGeoviewLayerId(),
+        this.getGeoviewLayerConfig().geoviewLayerType,
+        this.getGeoviewLayerName()
+      );
+
+    // Return it
+    return metadataAccessPath.trim();
+  }
+
+  /**
+   * Sets the metadata access path used by this GeoView layer.
+   * @param {string} metadataAccessPath - The metadata access path to set.
+   */
+  setMetadataAccessPath(metadataAccessPath: string): void {
+    this.getGeoviewLayerConfig().metadataAccessPath = metadataAccessPath.trim();
+  }
+
+  /**
    * Gets the first layer entry name if any sub-layers exist or else gets the geoviewLayerName or even the geoviewLayerId.
    * @returns {string} The layer entry name if any sub-layers exist or the geoviewLayerName or even the geoviewLayerId.
    */
@@ -268,15 +324,7 @@ export abstract class AbstractGeoViewLayer {
       const layerEntryName = ConfigBaseClass.getClassOrTypeLayerName(this.listOfLayerEntryConfig[0]);
       if (layerEntryName) return layerEntryName;
     }
-    return this.geoviewLayerName || this.geoviewLayerId;
-  }
-
-  /**
-   * Gets the Geoview layer id.
-   * @returns {string} The geoview layer id
-   */
-  getGeoviewLayerId(): string {
-    return this.geoviewLayerId;
+    return this.getGeoviewLayerName() || this.getGeoviewLayerId();
   }
 
   /**
@@ -313,7 +361,7 @@ export abstract class AbstractGeoViewLayer {
     logger.logTraceCore('ABSTRACT-GEOVIEW-LAYERS - createGeoViewLayers', this.listOfLayerEntryConfig);
 
     // Try to get a key for logging timings
-    const logTimingsKey = this.geoviewLayerId;
+    const logTimingsKey = this.getGeoviewLayerId();
 
     // Log
     logger.logMarkerStart(logTimingsKey);
@@ -385,7 +433,10 @@ export abstract class AbstractGeoViewLayer {
    */
   validateListOfLayerEntryConfig(listOfLayerEntryConfig: ConfigBaseClass[]): void {
     // Log
-    logger.logTraceCore(`LAYERS - 3 - Validating list of layer entry configs for: ${this.geoviewLayerId}`, this.listOfLayerEntryConfig);
+    logger.logTraceCore(
+      `LAYERS - 3 - Validating list of layer entry configs for: ${this.getGeoviewLayerId()}`,
+      this.listOfLayerEntryConfig
+    );
 
     // When no metadata is provided, there's no validation to be done.
     if (!this.#metadata) return;
@@ -519,7 +570,7 @@ export abstract class AbstractGeoViewLayer {
       const layerGroup = new GroupLayerEntryConfig({
         geoviewLayerConfig,
         layerId: 'base-group',
-        layerName: this.geoviewLayerName,
+        layerName: this.getGeoviewLayerName(),
         isMetadataLayerGroup: false,
         initialSettings: geoviewLayerConfig.initialSettings,
         listOfLayerEntryConfig,
@@ -545,10 +596,13 @@ export abstract class AbstractGeoViewLayer {
     try {
       // If there's no metadata access path
       // GV e.g.: CSV (csvLYR2) and some outlier demos, we want to skip those (not fail)
-      if (!this.metadataAccessPath) return;
+      if (!this.hasMetadataAccessPath()) return;
 
       // Log
-      logger.logTraceCore(`LAYERS - 2 - Fetching and setting service metadata for: ${this.geoviewLayerId}`, this.listOfLayerEntryConfig);
+      logger.logTraceCore(
+        `LAYERS - 2 - Fetching and setting service metadata for: ${this.getGeoviewLayerId()}`,
+        this.listOfLayerEntryConfig
+      );
 
       // Start a timer to see if the layer metadata could be fetched after delay
       this.#startMetadataFetchWatcher();
@@ -564,7 +618,7 @@ export abstract class AbstractGeoViewLayer {
         // If the inner cause is a ResponseEmptyError,
         if (error.cause instanceof ResponseEmptyError) {
           // Throw higher
-          throw new LayerServiceMetadataEmptyError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName());
+          throw new LayerServiceMetadataEmptyError(this.getGeoviewLayerId(), this.getLayerEntryNameOrGeoviewLayerName());
         }
 
         // Throw as-is
@@ -572,7 +626,11 @@ export abstract class AbstractGeoViewLayer {
       }
 
       // Throw higher
-      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName(), formatError(error));
+      throw new LayerServiceMetadataUnableToFetchError(
+        this.getGeoviewLayerId(),
+        this.getLayerEntryNameOrGeoviewLayerName(),
+        formatError(error)
+      );
     }
   }
 
@@ -590,7 +648,7 @@ export abstract class AbstractGeoViewLayer {
   ): Promise<void> {
     // Log
     logger.logTraceCore(
-      `LAYERS - 4 - Processing list of layer entry metadata, building promises, for: ${this.geoviewLayerId}}`,
+      `LAYERS - 4 - Processing list of layer entry metadata, building promises, for: ${this.getGeoviewLayerId()}}`,
       listOfLayerEntryConfig
     );
 
@@ -603,7 +661,7 @@ export abstract class AbstractGeoViewLayer {
 
     // Log
     logger.logTraceCore(
-      `LAYERS - 5 - Processing list of layer entry metadata, promises done, for: ${this.geoviewLayerId}`,
+      `LAYERS - 5 - Processing list of layer entry metadata, promises done, for: ${this.getGeoviewLayerId()}`,
       listOfLayerEntryConfig
     );
 
@@ -708,7 +766,10 @@ export abstract class AbstractGeoViewLayer {
     layerGroup?: GVGroupLayer
   ): Promise<AbstractBaseGVLayer | undefined> {
     // Log
-    logger.logTraceCore(`LAYERS - 8 - Loading list of layer entry for the Open Layer, for: ${this.geoviewLayerId}`, listOfLayerEntryConfig);
+    logger.logTraceCore(
+      `LAYERS - 8 - Loading list of layer entry for the Open Layer, for: ${this.getGeoviewLayerId()}`,
+      listOfLayerEntryConfig
+    );
 
     try {
       // No entries → nothing to load

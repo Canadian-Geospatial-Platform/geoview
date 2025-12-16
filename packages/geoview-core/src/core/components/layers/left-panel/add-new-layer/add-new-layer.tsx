@@ -413,6 +413,7 @@ export function AddNewLayer(): JSX.Element {
           generateId(18),
           layerName,
           layerURL,
+          true, // isTimeAware true by default
           language,
           mapId,
           abortController.signal

@@ -79,14 +79,18 @@ export class WFS extends AbstractGeoViewVector {
     let metadata;
     try {
       // Fetch it
-      metadata = await WFS.fetchMetadata(this.metadataAccessPath, abortSignal);
+      metadata = await WFS.fetchMetadata(this.getMetadataAccessPath(), abortSignal);
     } catch (error: unknown) {
       // Throw
-      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName(), formatError(error));
+      throw new LayerServiceMetadataUnableToFetchError(
+        this.getGeoviewLayerId(),
+        this.getLayerEntryNameOrGeoviewLayerName(),
+        formatError(error)
+      );
     }
 
     // If not found
-    if (!metadata) throw new LayerNoCapabilitiesError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName());
+    if (!metadata) throw new LayerNoCapabilitiesError(this.getGeoviewLayerId(), this.getLayerEntryNameOrGeoviewLayerName());
 
     // Return it
     return metadata as T;
@@ -101,7 +105,7 @@ export class WFS extends AbstractGeoViewVector {
    */
   protected override async onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig> {
     // Fetch metadata
-    const rootUrl = this.metadataAccessPath;
+    const rootUrl = this.getMetadataAccessPath();
     const metadata = await this.onFetchServiceMetadata(abortSignal);
 
     // The entries
@@ -130,9 +134,15 @@ export class WFS extends AbstractGeoViewVector {
     }
 
     // Redirect
-    // TODO: Check - Config init - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
     // TODO: Check - Config init - Check if there's a way to better determine the vector strategy flag, defaults to 'all', how is it used here?
-    return WFS.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, 'all', entries);
+    return WFS.createGeoviewLayerConfig(
+      this.getGeoviewLayerId(),
+      this.getGeoviewLayerName(),
+      rootUrl,
+      this.getGeoviewLayerConfig().isTimeAware,
+      'all',
+      entries
+    );
   }
 
   /**
@@ -337,16 +347,18 @@ export class WFS extends AbstractGeoViewVector {
    * @param {string} geoviewLayerId - A unique identifier for the layer.
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
    * @static
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
-    metadataAccessPath: string
+    metadataAccessPath: string,
+    isTimeAware: boolean | undefined
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const myLayer = new WFS({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeWFSLayerConfig);
+    const myLayer = new WFS({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeWFSLayerConfig);
     return myLayer.initGeoViewLayerEntries();
   }
 
@@ -610,7 +622,7 @@ export class WFS extends AbstractGeoViewVector {
    * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata or feature data.
-   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @param {VectorStrategy} strategy - Indicates the strategy to use to fetch vector data.
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeWFSLayerConfig} The constructed configuration object for the WFS Feature layer.
@@ -620,7 +632,7 @@ export class WFS extends AbstractGeoViewVector {
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
-    isTimeAware: boolean,
+    isTimeAware: boolean | undefined,
     strategy: VectorStrategy,
     layerEntries: TypeLayerEntryShell[] // TODO: ALEX: Change this (and in all siblings) to receive a OgcWfsLayerEntryConfigProps[]
   ): TypeWFSLayerConfig {

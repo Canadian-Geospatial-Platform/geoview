@@ -68,10 +68,14 @@ export class OgcFeature extends AbstractGeoViewVector {
   protected override async onFetchServiceMetadata<T = TypeMetadataOGCFeature>(abortSignal?: AbortSignal): Promise<T> {
     try {
       // Fetch it
-      return (await OgcFeature.fetchMetadata(this.metadataAccessPath, abortSignal)) as T;
+      return (await OgcFeature.fetchMetadata(this.getMetadataAccessPath(), abortSignal)) as T;
     } catch (error: unknown) {
       // Throw
-      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName(), formatError(error));
+      throw new LayerServiceMetadataUnableToFetchError(
+        this.getGeoviewLayerId(),
+        this.getLayerEntryNameOrGeoviewLayerName(),
+        formatError(error)
+      );
     }
   }
 
@@ -83,13 +87,13 @@ export class OgcFeature extends AbstractGeoViewVector {
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Get the folder url
     const sep = '/collections/';
-    const idx = this.metadataAccessPath.lastIndexOf(sep);
-    let rootUrl = this.metadataAccessPath;
+    const idx = this.getMetadataAccessPath().lastIndexOf(sep);
+    let rootUrl = this.getMetadataAccessPath();
     let id: string | undefined;
     let entries: TypeLayerEntryShell[] = [];
     if (idx > 0) {
-      rootUrl = this.metadataAccessPath.substring(0, idx);
-      id = this.metadataAccessPath.substring(idx + sep.length);
+      rootUrl = this.getMetadataAccessPath().substring(0, idx);
+      id = this.getMetadataAccessPath().substring(idx + sep.length);
       entries = [{ id }];
     }
 
@@ -105,8 +109,13 @@ export class OgcFeature extends AbstractGeoViewVector {
     }
 
     // Redirect
-    // TODO: Check - Config init - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
-    return OgcFeature.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, entries);
+    return OgcFeature.createGeoviewLayerConfig(
+      this.getGeoviewLayerId(),
+      this.getGeoviewLayerName(),
+      rootUrl,
+      this.getGeoviewLayerConfig().isTimeAware,
+      entries
+    );
   }
 
   /**
@@ -165,7 +174,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     layerConfig: VectorLayerEntryConfig,
     abortSignal?: AbortSignal
   ): Promise<VectorLayerEntryConfig> {
-    const metadataUrl = this.metadataAccessPath;
+    const metadataUrl = this.getMetadataAccessPath();
     if (metadataUrl) {
       const queryUrl = metadataUrl.endsWith('/')
         ? `${metadataUrl}collections/${layerConfig.layerId}/queryables?f=json`
@@ -294,16 +303,18 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @param {string} geoviewLayerId - A unique identifier for the layer.
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
    * @static
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
-    metadataAccessPath: string
+    metadataAccessPath: string,
+    isTimeAware: boolean | undefined
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const myLayer = new OgcFeature({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeOgcFeatureLayerConfig);
+    const myLayer = new OgcFeature({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeOgcFeatureLayerConfig);
     return myLayer.onInitLayerEntries();
   }
 
@@ -314,7 +325,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata or feature data.
-   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeOgcFeatureLayerConfig} The constructed configuration object for the OGC Feature layer.
    * @static
@@ -323,7 +334,7 @@ export class OgcFeature extends AbstractGeoViewVector {
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
-    isTimeAware: boolean,
+    isTimeAware: boolean | undefined,
     layerEntries: TypeLayerEntryShell[]
   ): TypeOgcFeatureLayerConfig {
     const geoviewLayerConfig: TypeOgcFeatureLayerConfig = {
