@@ -1291,25 +1291,16 @@ export class LayerApi {
    */
   setItemVisibility(layerPath: string, item: TypeLegendItem, visibility: boolean, updateLegendLayers: boolean = true): void {
     // Get registered layer config
-    const layer = this.getGeoviewLayerIfExists(layerPath);
+    const layer = this.getGeoviewLayer(layerPath);
 
-    // If the layer is a regular layer (not a group)
-    if (layer instanceof AbstractGVLayer) {
-      // Assign value to registered layer. This is use by applyFilter function to set visibility
-      // TODO: check if we need to refactor to centralize attribute setting....
-      const geometryStyleConfig = layer.getStyle()![item.geometryType];
+    // Check if wrong type
+    if (!(layer instanceof AbstractGVLayer)) throw new LayerWrongTypeError(layerPath, layer.getLayerName());
 
-      // Get all styles with the label matching the name of the clicked item and update their visibility
-      const toggledStyleInfos = geometryStyleConfig?.info.filter((styleInfo) => styleInfo.label === item.name);
-      toggledStyleInfos?.forEach((toggledStyleInfo) => {
-        // eslint-disable-next-line no-param-reassign
-        if (toggledStyleInfo) toggledStyleInfo.visible = visibility;
-      });
+    // Set it
+    layer.setStyleItemVisibility(item, visibility);
 
-      // Force a re-render of the layer source (this is required if there are classes)
-      layer.getOLLayer().changed();
-    }
-
+    // TODO: REFACTOR - This function should probably end here and the setting of the store happen in an event hook on the
+    // TO.DOCONT: style item visibility. Refer to pattern of setLayerName, setLayerOpacity, setLayerQueryable, etc
     // Update the legend layers if necessary
     if (updateLegendLayers) LegendEventProcessor.setItemVisibility(this.getMapId(), layerPath, item, visibility);
 
