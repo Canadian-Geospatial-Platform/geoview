@@ -9,6 +9,8 @@ import type { Extent, TypeBasemapId, TypeValidMapProjectionCodes } from 'geoview
 import { AppEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/app-event-processor';
 import { UIEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/ui-event-processor';
 import type { Coordinate } from 'ol/coordinate';
+import { FeatureInfoEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/feature-info-event-processor';
+import type { TypeFeatureInfoResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/feature-info-state';
 
 /**
  * Main Map testing class.
@@ -324,7 +326,7 @@ export class MapTester extends GVAbstractTester {
    * @returns {Promise<Test<string>>} A Promise that resolves with the Test containing the selected tab id.
    */
   testFooterBarSelectTab(): Promise<Test<string>> {
-    const targetTab = 'layers';
+    const targetTab = 'data-table';
 
     return this.test(
       'Test footer bar select tab',
@@ -494,8 +496,8 @@ export class MapTester extends GVAbstractTester {
    * This test performs the following operations:
    * 1. Switches to LCC projection (3978)
    * 2. Zooms to British Columbia extent
-   * 3. Gets the north arrow angle
-   * 4. Verifies the rotation is non-zero (indicating proper LCC projection rotation)
+   * 3. Gets the north arrow rotation from DOM element
+   * 4. Verifies the rotation matches expected value
    *
    * @returns {Promise<Test<number>>} A Promise that resolves with the Test containing the north arrow angle.
    */
@@ -503,7 +505,7 @@ export class MapTester extends GVAbstractTester {
     // British Columbia approximate extent in lon/lat (EPSG:4326)
     // West: -139°, South: 48°, East: -114°, North: 60°
     const bcExtent: Extent = [-139, 48, -114, 60];
-    const expectecArrowAngle = 177.2;
+    const expectedArrowAngle = 25; // Expected north arrow angle over BC in LCC
 
     return this.test(
       'Test north arrow rotation in LCC projection for British Columbia',
@@ -522,18 +524,110 @@ export class MapTester extends GVAbstractTester {
         await this.getMapViewer().zoomToLonLatExtentOrCoordinate(bcExtent);
         await delay(500);
 
-        test.addStep('Getting north arrow angle...');
-        const northArrowAngle = this.getMapViewer().getNorthArrowAngle();
-        const angleValue = parseFloat(northArrowAngle);
+        test.addStep('Getting north arrow rotation from DOM element...');
+        const rotationElement = document.querySelector(`.map-info-rotation-${this.getMapId()}`) as HTMLElement;
 
-        test.addStep(`North arrow angle: ${angleValue}°`);
+        if (!rotationElement) {
+          throw new TestError(`North arrow rotation element not found for map ${this.getMapId()}`);
+        }
+
+        // Extract rotation angle from transform style (e.g., "rotate(45deg)")
+        const transformStyle = window.getComputedStyle(rotationElement).transform;
+        let angleValue = 0;
+
+        if (transformStyle && transformStyle !== 'none') {
+          // Parse matrix transform to get rotation angle
+          const values = transformStyle.match(/matrix\(([^)]+)\)/);
+          if (values && values[1]) {
+            const matrixValues = values[1].split(', ');
+            const a = parseFloat(matrixValues[0]);
+            const b = parseFloat(matrixValues[1]);
+            angleValue = Math.round(Math.atan2(b, a) * (180 / Math.PI) * 10) / 10;
+          }
+        }
+
+        test.addStep(`North arrow rotation: ${angleValue}°`);
 
         return angleValue;
       },
       (test, result) => {
         test.addStep('Verifying north arrow rotation is calculated...');
-        // In LCC projection over BC, the north arrow should have a non-zero rotation
-        Test.assertIsEqual(result, expectecArrowAngle);
+        // In LCC projection over BC, the north arrow should match expected rotation
+        Test.assertIsEqual(result, expectedArrowAngle, 0);
+      }
+    );
+  }
+
+  /**
+   * Tests that non-queryable layers do not appear in details state when clicking on the map.
+   * This test performs the following operations:
+   * 1. Gets the first layer from the map
+   * 2. Sets the layer as non-queryable
+   * 3. Simulates a map click
+   * 4. Verifies that the layer does not appear in the details state
+   *
+   * @returns {Promise<Test<number>>} A Promise that resolves with the Test containing the number of layers in details state.
+   */
+  testNonQueryableLayerNotInDetails(layerPath: string, lonlat: Coordinate): Promise<Test<TypeFeatureInfoResultSetEntry[]>> {
+    return this.test(
+      'Test non-queryable layer not in details after map click',
+      async (test) => {
+        // Check if the layer exists in the feature info layer set
+        const { featureInfoLayerSet } = this.getMapViewer().layer;
+        if (!featureInfoLayerSet.resultSet[layerPath]) {
+          throw new TestError(
+            `Layer '${layerPath}' not found in featureInfoLayerSet. Available layers: ${Object.keys(featureInfoLayerSet.resultSet).join(', ')}`
+          );
+        }
+
+        // If listener not enabled, enable it
+        test.addStep(`Enabling click listener for layer '${layerPath}'...`);
+        if (!featureInfoLayerSet.isClickListenerEnabled(layerPath)) {
+          featureInfoLayerSet.enableClickListener(layerPath);
+        }
+
+        // Perform a map click using the feature info layer set
+        // GV: The layer needs to be visible (in viewport) for the query to work
+        test.addStep(`Perform query operation at given coordinates...`);
+        await MapEventProcessor.zoomToInitialExtent(this.getMapId());
+        await featureInfoLayerSet.queryLayers(lonlat);
+
+        // Check if there is feature selected from the layer
+        test.addStep(`Checking for features from layer '${layerPath}'...`);
+        const layerDataOnTemp = FeatureInfoEventProcessor.findLayerDataFromLayerDataArray(this.getMapId(), layerPath);
+
+        // Store a deep copy of the data before clearing to preserve it
+        const layerDataOn = layerDataOnTemp ? { ...layerDataOnTemp } : undefined;
+
+        // Clear result set then set layer non queryable
+        test.addStep(`Clearing feature info results and setting layer '${layerPath}' as non-queryable...`);
+        FeatureInfoEventProcessor.resetResultSet(this.getMapId(), layerPath);
+        featureInfoLayerSet.disableClickListener(layerPath);
+
+        // Perform a map click using the feature info layer set
+        test.addStep(`Perform query operation at given coordinates...`);
+        await featureInfoLayerSet.queryLayers(lonlat);
+
+        // Check if there is feature selected from the layer
+        test.addStep(`Checking for features from layer '${layerPath}'...`);
+        const layerDataOff = FeatureInfoEventProcessor.findLayerDataFromLayerDataArray(this.getMapId(), layerPath);
+
+        return [layerDataOn!, layerDataOff!];
+      },
+      (test, result) => {
+        const [layerDataOn, layerDataOff] = result;
+
+        test.addStep('Verifying layer data features when queryable...');
+        Test.assertIsArray(layerDataOn.features);
+        Test.assertIsArrayLengthEqual(layerDataOn.features, 2);
+
+        test.addStep('Verifying no layer data features when non-queryable...');
+        Test.assertIsArray(layerDataOff.features);
+        Test.assertIsArrayLengthEqual(layerDataOff.features, 0);
+
+        // Set back the enable state on layer
+        test.addStep(`Enabling click listener for layer '${layerPath}'...`);
+        this.getMapViewer().layer.featureInfoLayerSet.enableClickListener(layerPath);
       }
     );
   }

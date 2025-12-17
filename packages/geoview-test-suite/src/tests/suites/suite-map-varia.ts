@@ -88,6 +88,10 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
 
     // Test north arrow rotation in LCC projection for BC
     const pNorthArrowRotationLCC = this.#mapTester.testNorthArrowRotationLCC();
+    await pNorthArrowRotationLCC;
+
+    // Test non-queryable layer not in details
+    const pNonQueryableLayerNotInDetails = this.#mapTester.testNonQueryableLayerNotInDetails('geojsonLYR5/polygons.json', [-88, 52]);
 
     // Resolve when all
     return Promise.all([
@@ -103,6 +107,7 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
       pSetLanguage,
       pCreateAndSetBasemap,
       pNorthArrowRotationLCC,
+      pNonQueryableLayerNotInDetails,
     ]);
   }
 }
