@@ -124,6 +124,23 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * GSt the selectedLayerPath value
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The layer path to select
+   */
+  static setSelectedLayerPath(mapId: string, layerPath: string): void {
+    // The feature info state
+    const featureInfoState = this.getFeatureInfoState(mapId);
+
+    if (FeatureInfoEventProcessor.findLayerDataFromLayerDataArray(mapId, layerPath) === undefined) {
+      logger.logWarning(`Trying to set selected layer path to '${layerPath}' which is not in the layer data array for mapId '${mapId}'`);
+    }
+
+    // Set the selected layer path
+    featureInfoState.setterActions.setSelectedLayerPath(layerPath);
+  }
+
+  /**
    * Gets the layer data array for one layer.
    * @param {string} mapId - The map id.
    * @param {string} layerPath - The path of the layer to get.

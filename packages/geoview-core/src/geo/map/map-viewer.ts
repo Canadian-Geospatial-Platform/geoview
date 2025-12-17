@@ -805,11 +805,17 @@ export class MapViewer {
   }
 
   /**
-   * Emits a map single click event.
+   * Emits a map single click event and updates the store with click coordinates.
+   * This fully simulates a map click including store updates and event emission.
    * @param {MapSingleClickEvent} clickCoordinates - The clicked coordinates to emit.
    */
   emitMapSingleClick(clickCoordinates: MapSingleClickEvent): void {
-    // Emit the event
+    // Save in the store (same as real map click)
+    // TODO: Circular reference for setClickCoodinates... it works but it may be set more then once
+    // TC.CONT: We can remove the emit from here but it look for WCAG in processor and will fail console call...
+    MapEventProcessor.setClickCoordinates(this.mapId, clickCoordinates);
+
+    // Emit the event is done
     this.#emitMapSingleClick(clickCoordinates);
   }
 
