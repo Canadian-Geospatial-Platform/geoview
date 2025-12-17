@@ -886,6 +886,16 @@ export class MapViewer {
   }
 
   /**
+   * Zoom to the initial extent defined in the map configuration.
+   *
+   * @returns {Promise<void>} A promise that resolves when the zoom operation completes.
+   */
+  zoomToInitialExtent(): Promise<void> {
+    // Redirect to processor
+    return MapEventProcessor.zoomToInitialExtent(this.mapId);
+  }
+
+  /**
    * Update nav bar home button view settings.
    * @param {TypeMapViewSettings} view - The new view settings.
    */

@@ -7,6 +7,7 @@ import { NorthArrowIcon } from '@/core/components/north-arrow/north-arrow-icon';
 import { useMapRotation } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useManageArrow } from '@/core/components/north-arrow/hooks/useManageArrow';
 import { logger } from '@/core/utils/logger';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 /**
  * Map Information Rotation Indicator component
@@ -23,6 +24,7 @@ export const MapInfoRotationButton = memo(function MapInfoRotationButton(): JSX.
   const theme = useTheme();
 
   // Store
+  const mapId = useGeoViewMapId();
   const mapRotation = useMapRotation();
   const { rotationAngle } = useManageArrow();
 
@@ -55,6 +57,7 @@ export const MapInfoRotationButton = memo(function MapInfoRotationButton(): JSX.
     <Tooltip title={tooltipText} placement="top">
       <Box sx={containerStyles}>
         <Box
+          className={`map-info-rotation-${mapId}`}
           sx={{
             transform: `rotate(${rotationAngle.angle}deg)`,
             transition: 'transform 0.3s ease-in-out',
