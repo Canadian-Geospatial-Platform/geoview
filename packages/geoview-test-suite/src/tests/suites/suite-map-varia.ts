@@ -93,6 +93,14 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
     // Test non-queryable layer not in details
     const pNonQueryableLayerNotInDetails = this.#mapTester.testNonQueryableLayerNotInDetails('geojsonLYR5/polygons.json', [-88, 52]);
 
+    // Test layer hoverable state
+    const pLayerHoverableState = this.#mapTester.testLayerHoverableState('geojsonLYR5/polygons.json');
+    await pLayerHoverableState;
+
+    // Test details layer selection persistence
+    const pDetailsLayerSelectionPersistence = this.#mapTester.testDetailsLayerSelectionPersistence();
+    await pDetailsLayerSelectionPersistence;
+
     // Resolve when all
     return Promise.all([
       pmapState,
@@ -108,6 +116,8 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
       pCreateAndSetBasemap,
       pNorthArrowRotationLCC,
       pNonQueryableLayerNotInDetails,
+      pLayerHoverableState,
+      pDetailsLayerSelectionPersistence,
     ]);
   }
 }
