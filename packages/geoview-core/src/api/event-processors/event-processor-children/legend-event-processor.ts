@@ -845,15 +845,20 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   static getFeatureVisibleFromClassVibility(mapId: string, layerPath: string, features: TypeFeatureInfoEntry[]): TypeFeatureInfoEntry[] {
     // Get the layer config and geometry type
     const layerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfigRegular(layerPath);
+
+    // Get the geometry type
     const geometryType = layerConfig.getGeometryType();
 
-    // Get the style
-    const layerStyle = layerConfig.getLayerStyle()?.[geometryType];
+    // If has geometry field
     let filteredFeatures = features;
-    if (layerStyle && layerStyle.type === 'uniqueValue') {
-      filteredFeatures = this.#processClassVisibilityUniqueValue(layerStyle, features);
-    } else if (layerStyle && layerStyle.type === 'classBreaks') {
-      filteredFeatures = this.#processClassVisibilityClassBreak(layerStyle, features);
+    if (geometryType) {
+      // Get the style
+      const layerStyle = layerConfig.getLayerStyle()?.[geometryType];
+      if (layerStyle && layerStyle.type === 'uniqueValue') {
+        filteredFeatures = this.#processClassVisibilityUniqueValue(layerStyle, features);
+      } else if (layerStyle && layerStyle.type === 'classBreaks') {
+        filteredFeatures = this.#processClassVisibilityClassBreak(layerStyle, features);
+      }
     }
 
     return filteredFeatures;
