@@ -120,12 +120,21 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Overridable function get the geometry type based on the geometry field type.
    * It uses the WFS/WMS OGC standard (GML) to interpret the geometry type.
-   * @returns {TypeStyleGeometry} The geometry type.
+   * @returns {TypeStyleGeometry | undefined} The geometry type, if it could be determined
    * @throws {NotSupportedError} When the geometry type is not supported.
    */
-  protected onGetGeometryType(): TypeStyleGeometry {
-    // Default behavior is to get the geometry type using WFS/WMS OGC standard (GML)
-    return GeoUtilities.wfsConvertGeometryTypeToOLGeometryType(this.getGeometryField()?.type);
+  protected onGetGeometryType(): TypeStyleGeometry | undefined {
+    // Get the geometry field
+    const geometryField = this.getGeometryField();
+
+    // If found
+    if (geometryField) {
+      // Check the geometry type using WFS/WMS OGC standard (GML)
+      return GeoUtilities.wfsConvertGeometryTypeToOLGeometryType(geometryField.type);
+    }
+
+    // None
+    return undefined;
   }
 
   /**
@@ -543,9 +552,9 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Returns the OpenLayers-compatible geometry type of this layer's geometry field.
-   * @returns {TypeStyleGeometry} The OpenLayers geometry type (e.g., 'Point', 'LineString', 'Polygon')
+   * @returns {TypeStyleGeometry | undefined} The OpenLayers geometry type (e.g., 'Point', 'LineString', 'Polygon'), if it could be determined.
    */
-  getGeometryType(): TypeStyleGeometry {
+  getGeometryType(): TypeStyleGeometry | undefined {
     return this.onGetGeometryType();
   }
 

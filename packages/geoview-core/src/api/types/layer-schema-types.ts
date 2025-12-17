@@ -1045,7 +1045,7 @@ export interface TypeMetadataWFSTextOnly {
 }
 
 export interface TypeMetadataWFSFeatureTypeListFeatureOutputFormat {
-  Format: (string | TypeMetadataWFSTextOnly)[];
+  Format?: string | (string | TypeMetadataWFSTextOnly)[];
 }
 
 export interface TypeMetadataWFSAttributes {
