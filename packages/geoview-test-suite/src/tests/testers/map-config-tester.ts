@@ -513,10 +513,16 @@ export class MapConfigTester extends GVAbstractTester {
     const keys = path.split('.');
     let current = obj;
 
+    // Validate against prototype pollution
+    const dangerousKeys = ['__proto__', 'constructor', 'prototype'];
+    if (keys.some((key) => dangerousKeys.includes(key))) {
+      throw new Error(`Invalid path: "${path}" contains dangerous keys that could lead to prototype pollution`);
+    }
+
     // Navigate to the parent of the final key
     for (let i = 0; i < keys.length - 1; i++) {
       const key = keys[i];
-      if (!(key in current) || typeof current[key] !== 'object' || current[key] === null) {
+      if (!Object.prototype.hasOwnProperty.call(current, key) || typeof current[key] !== 'object' || current[key] === null) {
         current[key] = {};
       }
       current = current[key] as Record<string, unknown>;

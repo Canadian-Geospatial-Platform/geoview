@@ -636,24 +636,7 @@
 
       function openTab(evt, tabName) {
         // For "Run All Tests", make all tab contents visible so maps can initialize
-        if (tabName === 'runAllTestsTab') {
-          // Show all tabs temporarily for map initialization
-          var allTabContents = document.getElementsByClassName('tab-content');
-          for (var i = 0; i < allTabContents.length; i++) {
-            allTabContents[i].classList.add('active');
-          }
-          mapsInitialized = true;
-
-          // After maps initialize, hide all except Run All Tests
-          setTimeout(function () {
-            var tabContents = document.getElementsByClassName('tab-content');
-            for (var i = 0; i < tabContents.length; i++) {
-              if (tabContents[i].id !== tabName) {
-                tabContents[i].classList.remove('active');
-              }
-            }
-          }, 2000);
-        } else {
+        if (tabName !== 'runAllTestsTab') {
           // Normal tab switching - hide all tab contents
           var tabContents = document.getElementsByClassName('tab-content');
           for (var i = 0; i < tabContents.length; i++) {
@@ -747,26 +730,9 @@
 
       // Function to update the global statistics in "Run All Tests" tab
       function updateGlobalStats() {
-        let totalRunning = 0;
-        let totalDoneSuccess = 0;
-        let totalDoneFailed = 0;
-        let totalDone = 0;
-        let totalTests = 0;
-        let totalSuitesCompleted = 0;
-        let totalSuites = 0;
-
-        // Sum up stats from all maps
+        // Update the collapsible button stats for each map
         Object.keys(testSuitesPlugins).forEach((mapId) => {
           const plugin = testSuitesPlugins[mapId];
-          totalRunning += plugin.getTestsRunning();
-          totalDoneSuccess += plugin.getTestsDoneSuccess();
-          totalDoneFailed += plugin.getTestsDoneFailed();
-          totalDone += plugin.getTestsDone();
-          totalTests += plugin.getTestsTotal();
-          totalSuitesCompleted += plugin.getSuitesCompleted();
-          totalSuites += plugin.getSuitesTotal();
-
-          // Update the collapsible button stats for each map
           const mapNumber = mapId.replace('map', '');
           const statsSpan = document.getElementById('statsMap' + mapNumber);
           if (statsSpan) {
@@ -779,28 +745,6 @@
             statsSpan.innerHTML = `Running: <span style="color: ${running > 0 ? 'orange' : '#666'};">${running}</span> | Done success: <span style="color: #28a745;">${doneSuccess}</span> | Done failed: <span style="color: #dc3545;">${doneFailed}</span> | Done: ${done}/${total}`;
           }
         });
-
-        // Update the display
-        const runningSpan = document.getElementById('allSuitesTestsRunning');
-        if (runningSpan) runningSpan.textContent = totalRunning;
-
-        const doneSuccessSpan = document.getElementById('allSuitesTestsDoneSuccess');
-        if (doneSuccessSpan) doneSuccessSpan.textContent = totalDoneSuccess;
-
-        const doneFailedSpan = document.getElementById('allSuitesTestsDoneFailed');
-        if (doneFailedSpan) doneFailedSpan.textContent = totalDoneFailed;
-
-        const doneSpan = document.getElementById('allSuitesTestsDone');
-        if (doneSpan) doneSpan.textContent = totalDone;
-
-        const totalSpan = document.getElementById('allSuitesTestsTotal');
-        if (totalSpan) totalSpan.textContent = totalTests;
-
-        const suitesCompletedSpan = document.getElementById('allSuitesCompleted');
-        if (suitesCompletedSpan) suitesCompletedSpan.textContent = totalSuitesCompleted;
-
-        const suitesTotalSpan = document.getElementById('allSuitesTotal');
-        if (suitesTotalSpan) suitesTotalSpan.textContent = totalSuites;
 
         // Update button states based on running tests
         updateButtonStates();
