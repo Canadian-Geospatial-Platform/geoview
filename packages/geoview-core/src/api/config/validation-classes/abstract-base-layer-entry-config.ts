@@ -392,11 +392,8 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     // If the source dataAccessPath doesn't exist
     if (!metadataSource?.dataAccessPath) return;
 
-    // If the dataAccessPath was not determined by the configuration (we're only interpreting it based on the metadataAccessPath)
-    if (!this.layerEntryProps.source?.dataAccessPath) {
-      // Favor the metadata source dataAccessPath over the automatically generated dataAccessPath
-      this.setDataAccessPath(metadataSource.dataAccessPath);
-    }
+    // Favor the metadata source dataAccessPath over the automatically generated dataAccessPath
+    this.setDataAccessPath(metadataSource.dataAccessPath);
   }
 
   /**
