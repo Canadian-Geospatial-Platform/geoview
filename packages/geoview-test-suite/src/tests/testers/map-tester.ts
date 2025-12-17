@@ -11,6 +11,7 @@ import { UIEventProcessor } from 'geoview-core/api/event-processors/event-proces
 import type { Coordinate } from 'ol/coordinate';
 import { FeatureInfoEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/feature-info-event-processor';
 import type { TypeFeatureInfoResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/feature-info-state';
+import { Projection } from 'geoview-core/geo/utils/projection';
 
 /**
  * Main Map testing class.
@@ -628,6 +629,148 @@ export class MapTester extends GVAbstractTester {
         // Set back the enable state on layer
         test.addStep(`Enabling click listener for layer '${layerPath}'...`);
         this.getMapViewer().layer.featureInfoLayerSet.enableClickListener(layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests that layer hoverable state is properly reflected in hoverFeatureInfoLayerSet.
+   * This test performs the following operations:
+   * 1. Verifies the layer is hoverable in the hoverFeatureInfoLayerSet
+   * 2. Disables hoverable on the layer
+   * 3. Verifies the layer is now disabled in the hoverFeatureInfoLayerSet resultSet
+   *
+   * @param {string} layerPath - The layer path to test
+   * @returns {Promise<Test<{enabledBefore: boolean | undefined, enabledAfter: boolean | undefined}>>} A Promise that resolves with the Test containing the hover states.
+   */
+  testLayerHoverableState(layerPath: string): Promise<Test<{ enabledBefore: boolean | undefined; enabledAfter: boolean | undefined }>> {
+    return this.test(
+      'Test layer hoverable state in hoverFeatureInfoLayerSet',
+      (test) => {
+        // Check if the layer exists in the hover feature info layer set
+        const { hoverFeatureInfoLayerSet } = this.getMapViewer().layer;
+        if (!hoverFeatureInfoLayerSet.resultSet[layerPath]) {
+          throw new TestError(
+            `Layer '${layerPath}' not found in hoverFeatureInfoLayerSet. Available layers: ${Object.keys(hoverFeatureInfoLayerSet.resultSet).join(', ')}`
+          );
+        }
+
+        // If listener not enabled, enable it
+        test.addStep(`Enabling hover listener for layer '${layerPath}'...`);
+        if (!hoverFeatureInfoLayerSet.isHoverListenerEnabled(layerPath)) {
+          hoverFeatureInfoLayerSet.enableHoverListener(layerPath);
+        }
+
+        // Get initial hoverable state from result set
+        test.addStep(`Checking initial hoverable state for layer '${layerPath}'...`);
+        const enabledBefore = hoverFeatureInfoLayerSet.resultSet[layerPath].eventListenerEnabled;
+        test.addStep(`Layer hoverable state before: ${enabledBefore}`);
+
+        // Disable hoverable on the layer
+        test.addStep(`Disabling hoverable for layer '${layerPath}'...`);
+        hoverFeatureInfoLayerSet.disableHoverListener(layerPath);
+
+        // Get hoverable state after disabling
+        test.addStep(`Checking hoverable state after disabling for layer '${layerPath}'...`);
+        const enabledAfter = hoverFeatureInfoLayerSet.resultSet[layerPath].eventListenerEnabled;
+        test.addStep(`Layer hoverable state after: ${enabledAfter}`);
+
+        return { enabledBefore, enabledAfter };
+      },
+      async (test, result) => {
+        test.addStep('Verifying layer was initially hoverable...');
+        Test.assertIsEqual(result.enabledBefore, true);
+
+        test.addStep('Verifying layer is now not hoverable...');
+        Test.assertIsEqual(result.enabledAfter, false);
+
+        // GV: Need to wait before calling next test or the first map click return empty features
+        await delay(2000);
+      }
+    );
+  }
+
+  /**
+   * Tests that the selected layer in details persists correctly when clicking on different map locations.
+   * This test performs the following operations:
+   * 1. Clicks on the map and verifies the first layer (polygons) is auto-selected
+   * 2. Manually selects a different layer (Top Projects)
+   * 3. Clicks on a different location
+   * 4. Verifies the manually selected layer remains selected with the correct feature count
+   *
+   * @returns {Promise<Test<{firstLayerPath: string, firstFeatureCount: number, secondLayerPath: string, secondFeatureCount: number}>>}
+   */
+  testDetailsLayerSelectionPersistence(): Promise<Test<{ firstLayerPath: string; secondLayerPath: string; secondFeatureCount: number }>> {
+    const firstClickCoords: Coordinate = [-87.4, 52.9];
+    const secondClickCoords: Coordinate = [-73.9, 46.5];
+    const expectedFirstLayer = 'geojsonLYR5/polygons.json';
+    const expectedSecondLayer = 'esriFeatureLYR5/0';
+
+    return this.test(
+      'Test details layer selection persistence across map clicks',
+      async (test) => {
+        // Helper function to simulate a complete map click
+        // TODO: This should return a Promise and be awaited. emitMapSingleClick AND MapEventProcess setMapSingleCLcik should be Promisses waiting on queryLayers
+        const simulateMapClick = (coords: Coordinate): void => {
+          // Transform lonlat to map projection
+          const projCode = this.getMapViewer().getProjection().getCode();
+          const projected = Projection.transformPoints([coords], Projection.PROJECTION_NAMES.LONLAT, projCode)[0];
+
+          // emitMapSingleClick now handles both store update and event emission
+          this.getMapViewer().emitMapSingleClick({
+            lonlat: coords,
+            pixel: [0, 0],
+            projected,
+            dragging: false,
+          });
+        };
+
+        // First click
+        test.addStep(`Performing first map click at [${firstClickCoords.join(', ')}]...`);
+        // await delay(2000);
+        simulateMapClick(firstClickCoords);
+        await delay(1000);
+
+        // Check which layer is selected after first click
+        test.addStep('Checking selected layer after first click...');
+        const firstSelectedLayerPath = FeatureInfoEventProcessor.getSelectedLayerPath(this.getMapId());
+        test.addStep(`First selected layer: ${firstSelectedLayerPath}`);
+
+        // Manually select the second layer (Top Projects)
+        test.addStep(`Manually selecting layer '${expectedSecondLayer}'...`);
+        FeatureInfoEventProcessor.setSelectedLayerPath(this.getMapId(), expectedSecondLayer);
+        await delay(1000);
+
+        // Second click at different location
+        test.addStep(`Performing second map click at [${secondClickCoords.join(', ')}]...`);
+        simulateMapClick(secondClickCoords);
+        await delay(1000);
+
+        // Check which layer is still selected after second click
+        test.addStep('Checking selected layer after second click...');
+        const secondSelectedLayerPath = FeatureInfoEventProcessor.getSelectedLayerPath(this.getMapId());
+        test.addStep(`Second selected layer: ${secondSelectedLayerPath}`);
+
+        // Get feature count   for second layer
+        const secondLayerData = FeatureInfoEventProcessor.findLayerDataFromLayerDataArray(this.getMapId(), secondSelectedLayerPath);
+        const secondFeatureCount = secondLayerData?.features?.length || 0;
+        test.addStep(`Second layer feature count: ${secondFeatureCount}`);
+
+        return {
+          firstLayerPath: firstSelectedLayerPath,
+          secondLayerPath: secondSelectedLayerPath,
+          secondFeatureCount,
+        };
+      },
+      (test, result) => {
+        test.addStep('Verifying first selected layer is polygons...');
+        Test.assertIsEqual(result.firstLayerPath, expectedFirstLayer);
+
+        test.addStep('Verifying second selected layer is still Top Projects...');
+        Test.assertIsEqual(result.secondLayerPath, expectedSecondLayer);
+
+        test.addStep('Verifying second layer has exactly 1 feature...');
+        Test.assertIsEqual(result.secondFeatureCount, 1);
       }
     );
   }
