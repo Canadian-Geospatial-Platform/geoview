@@ -1,6 +1,5 @@
 import type { Feature, MapBrowserEvent } from 'ol';
-import { WKT, GeoJSON } from 'ol/format';
-import { WKB as FormatWkb } from 'ol/format';
+import { WKB, WKT, GeoJSON, EsriJSON, KML, WFS } from 'ol/format';
 import type { ReadOptions } from 'ol/format/Feature';
 import type Geometry from 'ol/geom/Geometry';
 import { Style, Stroke, Fill, Circle } from 'ol/style';
@@ -728,6 +727,17 @@ export abstract class GeoUtilities {
   }
 
   /**
+   * Reads OpenLayers features from an Esri features object.
+   * @param {unknown} features - The Features data to read.
+   * @param {import('ol/format/Feature').ReadOptions} [options] - Optional read options such as projection or extent.
+   * @returns {import('ol/Feature').default[]} An array of parsed OpenLayers Feature instances.
+   */
+  static readFeaturesFromEsriJSON(features: unknown, options: ReadOptions | undefined): Feature<Geometry>[] {
+    // Read the features
+    return new EsriJSON().readFeatures(features, options);
+  }
+
+  /**
    * Reads OpenLayers features from a GeoJSON object.
    * @param {unknown} geojson - The GeoJSON data to read.
    * @param {import('ol/format/Feature').ReadOptions} [options] - Optional read options such as projection or extent.
@@ -739,14 +749,39 @@ export abstract class GeoUtilities {
   }
 
   /**
-   * Reads OpenLayers features from a WKBObject object.
-   * @param {unknown} wkbObject - The WKBObject data to read.
+   * Reads OpenLayers features from an WFS features object.
+   * @param {unknown} features - The Features data to read.
    * @param {import('ol/format/Feature').ReadOptions} [options] - Optional read options such as projection or extent.
    * @returns {import('ol/Feature').default[]} An array of parsed OpenLayers Feature instances.
    */
-  static readFeaturesFromWKB(wkbObject: unknown, options: ReadOptions | undefined): Feature<Geometry>[] {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return new FormatWkb().readFeatures(wkbObject as any, options);
+  static readFeaturesFromWFS(features: unknown, version: string, options: ReadOptions | undefined): Feature<Geometry>[] {
+    // Read the features
+    return new WFS({
+      version,
+    }).readFeatures(features, options);
+  }
+
+  /**
+   * Reads OpenLayers features from a WKBObject object.
+   * @param {string | ArrayBuffer | ArrayBufferView<ArrayBufferLike>} wkbObject - The WKBObject data to read.
+   * @param {import('ol/format/Feature').ReadOptions} [options] - Optional read options such as projection or extent.
+   * @returns {import('ol/Feature').default[]} An array of parsed OpenLayers Feature instances.
+   */
+  static readFeaturesFromWKB(
+    wkbObject: string | ArrayBuffer | ArrayBufferView<ArrayBufferLike>,
+    options: ReadOptions | undefined
+  ): Feature<Geometry>[] {
+    return new WKB().readFeatures(wkbObject, options);
+  }
+
+  /**
+   * Reads OpenLayers features from a KML object.
+   * @param {unknown} kmlObject - The KML data to read.
+   * @param {import('ol/format/Feature').ReadOptions} [options] - Optional read options such as projection or extent.
+   * @returns {import('ol/Feature').default[]} An array of parsed OpenLayers Feature instances.
+   */
+  static readFeaturesFromKML(kmlObject: unknown, options: ReadOptions | undefined): Feature<Geometry>[] {
+    return new KML().readFeatures(kmlObject, options);
   }
 
   /**
@@ -1157,7 +1192,7 @@ export abstract class GeoUtilities {
    * @returns {TypeStyleGeometry} The corresponding TypeStyleGeometry
    * @throws {NotSupportedError} When the geometry type is not supported.
    */
-  static wfsConvertGeometryTypeToOLGeometryType(wfsGeometryType: string | undefined): TypeStyleGeometry {
+  static wfsConvertGeometryTypeToOLGeometryType(wfsGeometryType: string): TypeStyleGeometry {
     switch (wfsGeometryType) {
       case 'gml:PointPropertyType':
         return 'Point';

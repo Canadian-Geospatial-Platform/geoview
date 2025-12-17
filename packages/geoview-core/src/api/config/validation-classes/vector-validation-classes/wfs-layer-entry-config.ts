@@ -3,6 +3,7 @@ import type {
   TypeGeoviewLayerConfig,
   TypeMetadataWFS,
   TypeMetadataWFSFeatureTypeListFeatureType,
+  TypeMetadataWFSTextOnly,
 } from '@/api/types/layer-schema-types';
 import type { TypeOutfields } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
@@ -118,8 +119,11 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
     // Get the feature type
     const featureType = this.getFeatureType();
 
+    let formats = featureType.OutputFormats?.Format as (string | TypeMetadataWFSTextOnly)[];
+    if (typeof featureType.OutputFormats?.Format === 'string') formats = [featureType.OutputFormats?.Format];
+
     // Return the output formats supported
-    const supportedFormats = featureType.OutputFormats?.Format.map((formatItem) => {
+    const supportedFormats = formats?.map((formatItem) => {
       if (typeof formatItem === 'object' && '#text' in formatItem) {
         return formatItem['#text'];
       }

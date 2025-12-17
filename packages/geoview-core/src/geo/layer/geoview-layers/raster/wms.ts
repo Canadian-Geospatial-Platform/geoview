@@ -808,7 +808,7 @@ export class WMS extends AbstractGeoViewRaster {
   static async createStylesFromWMS(
     url: string,
     layers: string,
-    geomType: TypeStyleGeometry
+    geomType: TypeStyleGeometry | undefined
   ): Promise<Record<TypeStyleGeometry, TypeLayerStyleSettings>> {
     // Fetch styles using the WMS url associated with the WFS
     const styles = await WMS.fetchStylesForLayer(url, layers);
@@ -1035,13 +1035,8 @@ export class WMS extends AbstractGeoViewRaster {
     fullSubLayers: boolean,
     callbackGroupLayerCreated?: GroupLayerCreatedDelegate
   ): void {
-    // TODO: Refactor - createGroup is the same thing for all the layers type? group is a geoview structure.
-    // TO.DOCONT: Should it be handle upper in abstract class to loop in structure and launch the creation of a leaf?
-    // TODO: The answer is no. Even if the final structure is the same, the input structure is different for each geoview layer types.
-    const newListOfLayerEntryConfig: ConfigBaseClass[] = [];
-
     // GV Special WMS group layer case situation...
-    // TODO: Bug - fullSubLayers - There was an issue with the layer configuration for a long time ('Private element not on object') which
+    // TODO: WMS fullSubLayers - There was an issue with the layer configuration for a long time ('Private element not on object') which
     // TO.DOCONT: was causing the loop below to fail before finishing the first loop (midway deep into 'registerLayerConfigInit()').
     // TO.DOCONT: The fact that an exception was raised was actually provoking the behavior that we want with the UI display of
     // TO.DOCONT: the WMS group layers (between Layers and Details tabs).
@@ -1051,6 +1046,7 @@ export class WMS extends AbstractGeoViewRaster {
     // TO.DOCONT: the behavior the same as before..
 
     // Loop on the sub layers
+    const newListOfLayerEntryConfig: ConfigBaseClass[] = [];
     layer.forEach((subLayer) => {
       // Check if subLayer is a group (has children)
       const isGroup = Array.isArray(subLayer.listOfLayerEntryConfig) && subLayer.listOfLayerEntryConfig.length > 0;
@@ -1093,7 +1089,7 @@ export class WMS extends AbstractGeoViewRaster {
       }
     });
 
-    // TODO: Bug - fullSubLayers - Continuation of the TODO Bug above.. Purposely don't do this anymore (the throw will cause skipping of this)
+    // TODO: WMS fullSubLayers - Continuation of the TODO Bug above.. Purposely don't do this anymore (the throw will cause skipping of this)
     // TO.DOCONT: in order to reproduce the old behavior now that the 'Private element' bug is fixed..
     // TO.DOCONT: Leaving the code there, uncommented, so that if/when we remove the throw of the
     // TO.DOCONT: 'Processing cancelled' this gets executed as would be expected

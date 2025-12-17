@@ -433,7 +433,7 @@ export class EsriUtilities {
    */
   static async queryRecordsByUrl(
     url: string,
-    geometryType?: TypeStyleGeometry,
+    geometryType: TypeStyleGeometry | undefined,
     parseFeatureInfoEntries: boolean = true
   ): Promise<TypeFeatureInfoEntryPartial[]> {
     // Query the data
@@ -479,7 +479,7 @@ export class EsriUtilities {
    */
   static queryRecordsByUrlObjectIds(
     layerUrl: string,
-    geometryType: TypeStyleGeometry,
+    geometryType: TypeStyleGeometry | undefined,
     objectIds: number[],
     fields: string,
     geometry: boolean,
