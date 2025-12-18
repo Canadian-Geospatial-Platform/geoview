@@ -278,28 +278,23 @@ export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitia
   layerFilter?: string;
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
   featureInfo?: TypeFeatureInfoLayerConfig;
-  /** The format used by the image layer. */
+
+  /** The format used by the image layer.
+   * @deprecated Seems not used anymore?
+   */
   format?: TypeEsriFormatParameter; // TODO: refactor - remove ?
+
   /**
    * If true, the image will be exported with the background color of the map set as its transparent color. Only the .png
    * and .gif formats support transparency.
+   * @deprecated Seems not used anymore?
    */
   transparent?: boolean;
+
   /**
    * If true, the layer will call the service using its native SRID so that OpenLayers take charge of the reprojection on the map.
    */
   forceServiceProjection?: boolean;
-}
-
-/** Type from which we derive the source properties for all the ESRI Image leaf nodes in the layer tree. */
-export interface TypeSourceEsriImageInitialConfig extends TypeBaseSourceInitialConfig {
-  /** The format used by the image layer. */
-  format: TypeEsriFormatParameter; // TODO: refactor - remove ?
-  /**
-   * If true, the image will be exported with the background color of the map set as its transparent color. Only the .png
-   * and .gif formats support transparency.
-   */
-  transparent?: boolean;
 }
 
 export type TypeSourceImageInitialConfig =
@@ -324,11 +319,14 @@ export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceInitialCo
 }
 
 export interface TypeSourceImageEsriInitialConfig extends TypeBaseSourceInitialConfig {
-  /** The format used by the image layer. */
+  /** The format used by the image layer.
+   * @deprecated Seems not used anymore?
+   */
   format?: TypeEsriFormatParameter;
   /**
    * If true, the image will be exported with the background color of the map set as its transparent color. Only the .png and
    * .gif formats support transparency. Default = true.
+   * @deprecated Seems not used anymore?
    */
   transparent?: boolean;
 }
