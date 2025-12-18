@@ -66,7 +66,7 @@ Functions for getting and setting the state of the map.
 - [setLanguage](#setlanguage)
 - [setProjection](#setprojection)
 - [setTheme](#settheme)
-- [setZoomLevel](#setzoomlevel)
+- [setMapZoomLevel](#setMapzoomlevel)
 - [setExtent](#setextent)
 
 <a id="getdisplaylanguage"></a>
@@ -241,9 +241,9 @@ mapViewer.setProjection(3857);
 mapViewer.setTheme("dark");
 ```
 
-<a id="setzoomlevel"></a>
+<a id="setMapzoomlevel"></a>
 
-#### setZoomLevel
+#### setMapZoomLevel
 
 ```typescript
 /**
@@ -251,7 +251,7 @@ mapViewer.setTheme("dark");
  *
  * @param {number} zoom - New zoom level
  */
-mapViewer.setZoomLevel(10);
+mapViewer.setMapZoomLevel(10);
 ```
 
 <a id="setextent"></a>

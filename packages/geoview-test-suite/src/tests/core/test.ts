@@ -429,15 +429,13 @@ export class Test<T = unknown> {
   static assertIsArrayEqual<T = unknown>(actualValue: T[], expectedValue: T[], roundToPrecision?: number): void {
     // Redirect using a primitive comparer with optional rounding
     this.assertIsArrayEqualComparer(actualValue, expectedValue, (value1: T, value2: T): boolean => {
-      // If rounding is specified and both values are numbers, round them first
-      if (roundToPrecision !== undefined && typeof value1 === 'number' && typeof value2 === 'number') {
-        const roundedValue1 = this.#roundToPrecision(value1, roundToPrecision);
-        const roundedValue2 = this.#roundToPrecision(value2, roundToPrecision);
-        return roundedValue1 === roundedValue2;
+      // Reuse assertIsEqual which already handles rounding logic
+      try {
+        this.assertIsEqual(value1, value2, roundToPrecision);
+        return true;
+      } catch {
+        return false;
       }
-
-      // Use primitive === comparer
-      return value1 === value2;
     });
 
     // If we get here, arrays have equal primitive values and in the same order
