@@ -8,11 +8,10 @@ type SxClasses = Record<string, object>;
  */
 export const getSxClassesMain = (): SxClasses => ({
   container: {
-    padding: '20px',
-    paddingBottom: '40px', // For map info bar
+    padding: '16px',
     display: 'flex',
     flexDirection: 'column',
-    height: '100%',
+    height: 'calc(100% - 47px)', // 47px is the height of the div containing the show/hide toggles
     overflowY: 'auto',
     overflowX: 'hidden',
   },
@@ -156,5 +155,21 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[100]}`,
     paddingTop: '8px',
     paddingLeft: '8px',
+  },
+  buttonDivider: {
+    display: 'flex',
+    alignItems: 'center',
+    marginRight: 2,
+    paddingRight: 2,
+    position: 'relative',
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      right: 0,
+      top: '15%',
+      bottom: '15%',
+      width: '1px',
+      backgroundColor: theme.palette.geoViewColor.bgColor.dark[300],
+    },
   },
 });

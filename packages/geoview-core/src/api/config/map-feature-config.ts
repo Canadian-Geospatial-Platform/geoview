@@ -1,6 +1,3 @@
-import cloneDeep from 'lodash/cloneDeep';
-import defaultsDeep from 'lodash/defaultsDeep';
-
 import type {
   TypeAppBarProps,
   TypeDisplayTheme,
@@ -18,7 +15,14 @@ import type {
   TypeExternalPackagesProps,
   TypeValidVersions,
 } from '@/api/types/map-schema-types';
-import { DEFAULT_MAP_FEATURE_CONFIG, MAP_EXTENTS, VALID_PROJECTION_CODES, MAP_CENTER, MAP_ZOOM_LEVEL } from '@/api/types/map-schema-types';
+import {
+  DEFAULT_MAP_FEATURE_CONFIG,
+  VALID_PROJECTION_CODES,
+  MAP_CENTER,
+  MAP_ZOOM_LEVEL,
+  MAX_EXTENTS_RESTRICTION,
+} from '@/api/types/map-schema-types';
+import { deepMerge } from '@/core/utils/utilities';
 
 /**
  * The map feature configuration class.
@@ -77,24 +81,29 @@ export class MapFeatureConfig {
    */
   constructor(userMapFeatureConfig: TypeMapFeaturesInstance) {
     // Clone the map config as received by the user
-    const gvMapFromUser = cloneDeep(userMapFeatureConfig.map);
+    const gvMapFromUser = structuredClone(userMapFeatureConfig.map);
 
     // Get a cloned copy of a default map config for a given projection
     const gvMapDefault = MapFeatureConfig.#getDefaultMapConfig(gvMapFromUser?.viewSettings?.projection);
 
     // Combine the default values.
-    this.map = defaultsDeep(gvMapFromUser, gvMapDefault);
+    this.map = deepMerge(gvMapDefault, gvMapFromUser);
 
     // Above code will add default zoomAndCenter, remove if other initial view is provided
     if (this.map.viewSettings.initialView?.extent || this.map.viewSettings.initialView?.layerIds)
       delete this.map.viewSettings.initialView.zoomAndCenter;
 
-    this.serviceUrls = defaultsDeep(userMapFeatureConfig.serviceUrls, DEFAULT_MAP_FEATURE_CONFIG.serviceUrls);
+    this.serviceUrls = deepMerge(DEFAULT_MAP_FEATURE_CONFIG.serviceUrls, userMapFeatureConfig.serviceUrls);
     this.theme = userMapFeatureConfig.theme || DEFAULT_MAP_FEATURE_CONFIG.theme;
     this.navBar = [...(userMapFeatureConfig.navBar ?? DEFAULT_MAP_FEATURE_CONFIG.navBar ?? [])];
-    this.appBar = defaultsDeep(userMapFeatureConfig.appBar, DEFAULT_MAP_FEATURE_CONFIG.appBar);
-    this.footerBar = defaultsDeep(userMapFeatureConfig.footerBar, DEFAULT_MAP_FEATURE_CONFIG.footerBar);
-    this.overviewMap = defaultsDeep(userMapFeatureConfig.overviewMap, DEFAULT_MAP_FEATURE_CONFIG.overviewMap);
+    this.appBar = deepMerge(DEFAULT_MAP_FEATURE_CONFIG.appBar, userMapFeatureConfig.appBar);
+    this.footerBar = deepMerge(DEFAULT_MAP_FEATURE_CONFIG.footerBar, userMapFeatureConfig.footerBar);
+    this.overviewMap = deepMerge(DEFAULT_MAP_FEATURE_CONFIG.overviewMap, userMapFeatureConfig.overviewMap);
+
+    // Apply tabs from user config if exists, otherwise use default config tabs
+    this.appBar!.tabs.core = userMapFeatureConfig.appBar?.tabs.core ?? DEFAULT_MAP_FEATURE_CONFIG.appBar?.tabs.core ?? [];
+    this.footerBar!.tabs.core = userMapFeatureConfig.footerBar?.tabs.core ?? DEFAULT_MAP_FEATURE_CONFIG.footerBar?.tabs.core ?? [];
+
     this.components = [...(userMapFeatureConfig.components ?? DEFAULT_MAP_FEATURE_CONFIG.components ?? [])];
     this.corePackages = [...(userMapFeatureConfig.corePackages ?? DEFAULT_MAP_FEATURE_CONFIG.corePackages ?? [])];
     this.corePackagesConfig = [...(userMapFeatureConfig.corePackagesConfig ?? DEFAULT_MAP_FEATURE_CONFIG.corePackagesConfig ?? [])];
@@ -111,14 +120,14 @@ export class MapFeatureConfig {
    */
   static #getDefaultMapConfig(projection?: TypeValidMapProjectionCodes): TypeMapConfig {
     // Clone the default config, because we want to start from it and modify it
-    const mapConfig = cloneDeep(DEFAULT_MAP_FEATURE_CONFIG.map);
+    const mapConfig = structuredClone(DEFAULT_MAP_FEATURE_CONFIG.map);
 
     // Get the projection for the map config we want
     const proj =
       projection && VALID_PROJECTION_CODES.includes(projection) ? projection : DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.projection;
 
     // Set values specific to projection
-    mapConfig.viewSettings.maxExtent = [...MAP_EXTENTS[proj]];
+    mapConfig.viewSettings.maxExtent = MAX_EXTENTS_RESTRICTION[proj];
     mapConfig.viewSettings.initialView = { zoomAndCenter: [MAP_ZOOM_LEVEL[proj], MAP_CENTER[proj]] };
 
     // Return it

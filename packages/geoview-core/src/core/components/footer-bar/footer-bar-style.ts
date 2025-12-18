@@ -17,9 +17,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     boxShadow: 2,
     width: '100%',
     transition: 'height 0.2s ease-out',
-    '& .MuiGrid-container': {
-      background: theme.palette.geoViewColor.bgColor.main,
-    },
     '& .MuiTab-root': {
       minHeight: '40px',
     },

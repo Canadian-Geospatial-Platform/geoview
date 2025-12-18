@@ -16,7 +16,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     textOverflow: 'ellipsis',
   },
   layerDetails: {
-    padding: '20px',
+    padding: '16px',
   },
   buttonDescriptionContainer: {
     display: 'flex',
@@ -51,7 +51,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     fontSize: theme.palette.geoViewFontSize.default,
     marginLeft: '20px',
     alignSelf: 'center',
-    whiteSpace: 'nowrap',
   },
   wmsImage: {
     maxWidth: '100%',
@@ -73,5 +72,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         minWidth: 0,
       },
     },
+  },
+  verticalDivider: {
+    width: '1px',
+    height: '30px',
+    backgroundColor: theme.palette.geoViewColor.bgColor.dark[300],
   },
 });

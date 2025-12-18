@@ -58,7 +58,7 @@ export abstract class AppBarPlugin extends AbstractPlugin {
     return {
       title: 'Some title',
       icon: '<i class="material-icons">map</i>',
-      width: '80vw',
+      width: 100,
       status: this.getConfig().isOpen,
     };
   }

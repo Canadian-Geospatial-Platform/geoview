@@ -170,7 +170,7 @@ export class GeoPackageReader {
           new WkbLayerEntryConfig({
             geoviewLayerConfig,
             layerId: layerData.name,
-            layerName: layerData.name,
+            layerName: layersData.length === 1 ? geoviewLayerConfig.geoviewLayerName || layerData.name : layerData.name,
             layerStyle: layerData.styleSld ? GeoPackageReader.#processGeopackageStyle(layerData.styleSld) : undefined,
             schemaTag: CONST_LAYER_TYPES.WKB,
             entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
@@ -361,8 +361,8 @@ export class GeoPackageReader {
             type: 'filledPolygon',
             color,
             stroke,
-            paternSize: graphicSize || 8,
-            paternWidth: patternWidth || 1,
+            patternSize: graphicSize || 8,
+            patternWidth: patternWidth || 1,
             fillStyle: fillStyle || 'solid',
           };
 

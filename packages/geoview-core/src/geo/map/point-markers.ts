@@ -4,7 +4,7 @@ import Point from 'ol/geom/Point';
 import { Icon, Style } from 'ol/style';
 import type { Extent } from 'ol/extent';
 import { Projection } from '@/geo/utils/projection';
-import { getExtentUnion } from '@/geo/utils/utilities';
+import { GeoUtilities } from '@/geo/utils/utilities';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import type { FeatureHighlight } from '@/geo/map/feature-highlight';
 import { getScriptAndAssetURL } from '@/core/utils/utilities';
@@ -178,7 +178,7 @@ export class PointMarkers {
       if (coordinates.length) {
         let extent = coordinates[0] as number[];
         for (let i = 1; i < coordinates.length; i++) {
-          extent = getExtentUnion(extent, coordinates[i])!;
+          extent = GeoUtilities.getExtentUnion(extent, coordinates[i])!;
         }
 
         return extent;

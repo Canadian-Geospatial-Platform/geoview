@@ -33,6 +33,8 @@ export class GVGroupLayer extends AbstractBaseLayer {
     });
   }
 
+  // #region OVERRIDES
+
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
@@ -82,6 +84,10 @@ export class GVGroupLayer extends AbstractBaseLayer {
     });
   }
 
+  // #endregion OVERRIDES
+
+  // #region METHODS
+
   /**
    * Gets the layers in the group.
    * @returns {AbstractBaseLayer[]} The layers in the group.
@@ -119,4 +125,6 @@ export class GVGroupLayer extends AbstractBaseLayer {
     // Remove it from our list
     this.#layers.splice(idx, 1);
   }
+
+  // #endregion METHODS
 }

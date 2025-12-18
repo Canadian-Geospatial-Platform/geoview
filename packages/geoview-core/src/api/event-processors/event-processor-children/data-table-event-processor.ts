@@ -98,13 +98,26 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Shortcut to get the DataTable state for a given map id
+   * Shortcut to get the DataTable state for a given map id and layer path
    * @param {string} mapId - Id of the map.
-   * @param {string} layerPath - Layer path to apply filter.
+   * @param {string} layerPath - Layer path to query the features.
    * @returns {Promise<TypeFeatureInfoEntry[] | void>}
    */
   static triggerGetAllFeatureInfo(mapId: string, layerPath: string): Promise<TypeFeatureInfoEntry[] | void> {
-    return MapEventProcessor.getMapViewerLayerAPI(mapId).allFeatureInfoLayerSet.queryLayer(layerPath, 'all');
+    return MapEventProcessor.getMapViewerLayerAPI(mapId).allFeatureInfoLayerSet.queryLayer(layerPath);
+  }
+
+  /**
+   * Shortcut to reset the DataTable features given map id and layer path
+   * @param {string} mapId - Id of the map.
+   * @param {string} layerPath - Layer path to reset the features.
+   */
+  static triggerResetFeatureInfo(mapId: string, layerPath: string): void {
+    // Clear
+    MapEventProcessor.getMapViewerLayerAPI(mapId).allFeatureInfoLayerSet.clearLayerFeatures(layerPath);
+
+    // Update the layer data array in the store, all the time
+    this.getDataTableState(mapId).setterActions.setSelectedLayerPath('');
   }
 
   /**

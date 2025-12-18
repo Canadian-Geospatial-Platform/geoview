@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, memo, isValidElement, type ReactNode } from 'react';
 
 import { useTranslation } from 'react-i18next';
-import debounce from 'lodash/debounce';
 
 import { getCenter } from 'ol/extent';
 
@@ -31,6 +30,7 @@ import {
   ZoomInSearchIcon,
   InfoOutlinedIcon,
   BrowserNotSupportedIcon,
+  ClearFiltersIcon,
 } from '@/ui';
 
 import TopToolbar from './top-toolbar';
@@ -41,10 +41,10 @@ import { useAppDisplayLanguage, useAppShowUnsymbolizedFeatures } from '@/core/st
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { isImage, delay } from '@/core/utils/utilities';
+import { debounce } from '@/core/utils/debounce';
 import { logger } from '@/core/utils/logger';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { VALID_DISPLAY_LANGUAGE } from '@/api/types/map-schema-types';
-import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { useFilterRows, useToolbarActionMessage, useGlobalFilter } from './hooks';
 import { getSxClasses } from './data-table-style';
 import { useLightBox } from '@/core/components/common';
@@ -85,9 +85,9 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
   const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
 
   // #region PINNED Datatable columns
-  const iconColumn = { alias: t('dataTable.icon'), dataType: 'string', id: t('dataTable.icon') };
-  const zoomColumn = { alias: t('dataTable.zoom'), dataType: 'string', id: t('dataTable.zoom') };
-  const detailColumn = { alias: t('dataTable.details'), dataType: 'string', id: t('dataTable.details') };
+  const iconColumn = { alias: t('dataTable.icon'), dataType: 'string', id: 'icon' };
+  const zoomColumn = { alias: t('dataTable.zoom'), dataType: 'string', id: 'zoom' };
+  const detailColumn = { alias: t('dataTable.details'), dataType: 'string', id: 'details' };
   // #endregion
 
   // #region REACT CUSTOM HOOKS
@@ -117,7 +117,8 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
     logger.logTraceUseCallback('DATA-TABLE - getTableHeader');
 
     return (
-      <Tooltip title={header} placement="top" arrow>
+      // Tooltip allows long titles to be fully visible on hover
+      <Tooltip title={header} placement="top" arrow disableInteractive>
         <Box component="span" sx={{ whiteSpace: 'nowrap', justifyContent: 'end' }}>
           {header}
         </Box>
@@ -173,12 +174,12 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
 
       return typeof cellValue === 'string' || typeof cellValue === 'number' ? (
         <Tooltip title={cellValue} placement="top" arrow>
-          <Box component="span" sx={density === 'compact' ? sxClasses.tableCell : {}}>
+          <Box component="div" sx={density === 'compact' ? sxClasses.tableCell : {}}>
             {createLightBoxButton(cellValue, cellId)}
           </Box>
         </Tooltip>
       ) : (
-        <Box component="span" sx={density === 'compact' ? sxClasses.tableCell : {}}>
+        <Box component="div" sx={density === 'compact' ? sxClasses.tableCell : {}}>
           {cellValue}
         </Box>
       );
@@ -208,6 +209,9 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
    *
    * @param {object} data.fieldAliases object values transformed into required key value property of material react data table
    */
+
+  // TODO: WCAG Issue #3114 Contrast is low on sort and action icons in header.
+  // TODO: WCAG Issue #3116 At times generates empty table headings.
   const columns = useMemo<MRTColumnDef<ColumnsType>[]>(() => {
     // Log
     logger.logTraceUseMemo('DATA-TABLE - columns', density);
@@ -228,6 +232,7 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
           return '';
         },
         header: value.alias,
+        visibleInShowHideMenu: value.id === 'icon' || value.id === 'zoom' || value.id === 'details' ? false : true,
         filterFn: 'contains',
         columnFilterModeOptions: ['contains', 'startsWith', 'endsWith', 'empty', 'notEmpty'],
         ...((value.dataType === 'number' || value.dataType === 'oid') && {
@@ -278,14 +283,23 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
           ],
         }),
         ...([t('dataTable.icon'), t('dataTable.zoom'), t('dataTable.details')].includes(value.alias)
-          ? {
-              size: 70,
-              enableColumnFilter: false,
-              enableColumnActions: false,
-              enableSorting: false,
-              enableResizing: false,
-              enableGlobalFilter: false,
-            }
+          ? (() => {
+              return {
+                size: 60,
+                grow: false,
+                enableColumnFilter: false,
+                enableColumnActions: false,
+                enableSorting: false,
+                enableResizing: false,
+                enableGlobalFilter: false,
+                muiTableBodyCellProps: {
+                  sx: sxClasses.pinnedColumn,
+                },
+                muiTableHeadCellProps: {
+                  sx: sxClasses.pinnedColumn,
+                },
+              };
+            })()
           : {}),
       });
     });
@@ -304,16 +318,16 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
       let { extent } = feature;
 
       // Get oid field
-      const oidField =
-        feature && feature.fieldInfo
-          ? Object.keys(feature.fieldInfo).find((key) => feature.fieldInfo[key]!.dataType === 'oid') || undefined
-          : undefined;
+      let oidField: string | undefined;
+      if (feature && feature.fieldInfo) {
+        oidField = Object.keys(feature.fieldInfo).find((key) => feature.fieldInfo[key]?.dataType === 'oid');
+      }
 
-      // If there is no extent, but there's an OID field (ESRI Dynamic layer?)
-      if (!extent && oidField !== undefined) {
+      // If there is no extent, but there's an OID field (ESRI Dynamic layer / WMS with associated WFS) ?
+      if (!extent && oidField) {
         try {
           // Get the feature extent using its oid field
-          extent = await getExtentFromFeatures(layerPath, [feature.fieldInfo[oidField]!.value as string], oidField);
+          extent = await getExtentFromFeatures(layerPath, [feature.fieldInfo[oidField]!.value as number], oidField);
         } catch (error: unknown) {
           // Log error
           logger.logError(error);
@@ -344,6 +358,9 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
             // Log
             logger.logPromiseFailed('zoomToExtent in handleZoomIn in FeatureInfoNew', error);
           });
+      } else {
+        // Log error
+        logger.logError('Cannot zoom to feature, no extent found.');
       }
     },
     [
@@ -395,25 +412,23 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
             onClick={() => {
               handleZoomIn(feature).catch((error) => logger.logError('Zoom failed:', error));
             }}
-            disabled={!feature.extent && feature.geoviewLayerType !== CONST_LAYER_TYPES.ESRI_DYNAMIC}
+            disabled={!feature.supportZoomTo}
           >
             <ZoomInSearchIcon />
           </IconButton>
         ),
         DETAILS: (
-          <Box marginLeft="0.3rem">
-            <IconButton
-              color="primary"
-              aria-label={t('dataTable.details')}
-              tooltipPlacement="top"
-              onClick={() => {
-                setSelectedFeature(feature);
-                enableFocusTrap({ activeElementId: 'featureDetailDataTable', callbackElementId: 'table-details' });
-              }}
-            >
-              <InfoOutlinedIcon />
-            </IconButton>
-          </Box>
+          <IconButton
+            color="primary"
+            aria-label={t('dataTable.details')}
+            tooltipPlacement="top"
+            onClick={() => {
+              setSelectedFeature(feature);
+              enableFocusTrap({ activeElementId: 'featureDetailDataTable', callbackElementId: 'table-details' });
+            }}
+          >
+            <InfoOutlinedIcon />
+          </IconButton>
         ),
         ...feature.fieldInfo,
       };
@@ -459,6 +474,9 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
       columnPinning: { left: ['ICON', 'ZOOM', 'DETAILS'] },
       globalFilter,
     },
+    icons: {
+      FilterListOffIcon: ClearFiltersIcon,
+    },
     enableColumnFilterModes: true,
     // NOTE: enable column pinning so that icon, zoom, details can be pinned to left
     enableColumnPinning: true,
@@ -492,6 +510,7 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
       sx: {
         maxHeight: 'calc(100% - 97px)', // 97px is the height of the data table header. Setting max height prevents the containing columns scrollbars from triggering
       },
+      className: 'data-table-container',
     },
     rowVirtualizerInstanceRef,
     columnVirtualizerInstanceRef,
@@ -531,6 +550,17 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
           backgroundColor: `${theme.palette.secondary.light} !important`,
         },
       }),
+    },
+    // Improve global filter accessibility
+    muiSearchTextFieldProps: {
+      inputProps: {
+        type: 'search',
+        'aria-label': t('dataTable.searchInputLabel')!,
+      },
+    },
+    // Improve table accessibility
+    muiTableProps: {
+      'aria-label': t('dataTable.tableAriaLabelWithLayer', { layerName: data.layerName })!,
     },
   });
 

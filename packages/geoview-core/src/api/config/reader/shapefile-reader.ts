@@ -57,7 +57,7 @@ export class ShapefileReader {
             return new GeoJSONLayerEntryConfig({
               geoviewLayerConfig,
               layerId: layerGeojson.fileName || generateId(),
-              layerName: layerGeojson.fileName,
+              layerName: geojson.length === 1 ? layerConfig.geoviewLayerName || layerGeojson.fileName : layerGeojson.fileName,
               layerStyle: AbstractBaseLayerEntryConfig.getClassOrTypeLayerStyle(matchingLayerEntryConfig),
               initialSettings: AbstractBaseLayerEntryConfig.getClassOrTypeInitialSettings(matchingLayerEntryConfig),
               source: {

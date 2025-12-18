@@ -1,4 +1,3 @@
-import cloneDeep from 'lodash/cloneDeep';
 import Ajv from 'ajv';
 import addErrors from 'ajv-errors';
 
@@ -27,12 +26,13 @@ import type {
   TypeGeoviewLayerConfig,
   TypeInitialGeoviewLayerType,
   TypeLayerEntryConfig,
+  TypeStylesWMS,
 } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { MapConfigError } from '@/core/exceptions/config-exceptions';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 
-import { isJsonString, isValidUUID, removeCommentsFromJSON } from '@/core/utils/utilities';
+import { isJsonString, isValidUUID, parseXMLToJson, removeCommentsFromJSON } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { GeoCore } from '@/api/config/geocore';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
@@ -41,7 +41,9 @@ import { GeoPackageReader } from '@/api/config/reader/geopackage-reader';
 import { ShapefileReader } from '@/api/config/reader/shapefile-reader';
 
 import { LayerApi } from '@/geo/layer/layer';
-import { getStyleFromEsriRenderer } from '@/geo/utils/renderer/esri-renderer';
+import { GeoUtilities } from '@/geo/utils/utilities';
+import { EsriRenderer } from '@/geo/utils/renderer/esri-renderer';
+import { WfsRenderer } from '@/geo/utils/renderer/wfs-renderer';
 import { CSV } from '@/geo/layer/geoview-layers/vector/csv';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
@@ -403,7 +405,39 @@ export class ConfigApi {
    */
   static getStyleFromESRIRenderer(rendererAsString: string): TypeLayerStyleConfig | undefined {
     // Redirect
-    return getStyleFromEsriRenderer(JSON.parse(rendererAsString));
+    return EsriRenderer.getStyleFromEsriRenderer(JSON.parse(rendererAsString));
+  }
+
+  /**
+   * Fetches and returns the WMS Styles content (SLD or XML) for the specified layer(s)
+   * from a given WMS service URL.
+   * This function ensures that the request URL is properly formatted
+   * as a valid WMS `GetStyles` request before fetching the style definition.
+   * @param {string} wmsUrl - The base WMS service URL.
+   * @param {string} layers - A comma-separated list of WMS layer names to request styles for.
+   * @returns {Promise<string>} A promise that resolves to the style definition
+   * (typically an XML or SLD string) retrieved from the WMS service.
+   */
+  static fetchStyleFromWMS(wmsUrl: string, layers: string): Promise<string> {
+    // Make sure the URL has necessary information
+    const stylesUrl = GeoUtilities.ensureServiceRequestUrlGetStyles(wmsUrl, layers);
+
+    // Redirect
+    return GeoUtilities.getWMSServiceString(stylesUrl);
+  }
+
+  /**
+   * Converts a WMS XML Styles renderer into a GeoView-compatible layer style configuration.
+   * @param {string} xmlContent - An XML representation of the WMS renderer.
+   * @returns {TypeLayerStyleConfig} The corresponding layer style configuration, or `undefined` if parsing or conversion fails.
+   */
+  static getStyleFromWMSRenderer(xmlContent: string): TypeLayerStyleConfig {
+    // Read styles as json
+    const styles = parseXMLToJson<TypeStylesWMS>(xmlContent);
+
+    // Redirect
+    // TODO: Send the geometry type to reflect the special case scenario, if we want that (experimental)
+    return WfsRenderer.buildLayerStyleInfo(styles, undefined);
   }
 
   /**
@@ -564,14 +598,12 @@ export class ConfigApi {
         // TODO: Check - Config init - Check if there's a way to better determine the projection to send, defaults to 'EPSG:3978'
         return VectorTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false, 'EPSG:3978');
       case 'ogcWms':
-        // TODO: Check - Config init - Check if there's a way to better determine the typeOfServer to send, defaults to 'mapserver'
         return WMS.processGeoviewLayerConfig(
           geoviewLayerId,
           geoviewLayerName,
           layerURL,
           layerIds as number[],
           false,
-          'mapserver',
           LayerApi.DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS
         );
       case 'xyzTiles':
@@ -590,7 +622,7 @@ export class ConfigApi {
         return OgcFeature.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false);
       case 'ogcWfs':
         // TODO: Check - Config init - Check if there's a way to better determine the typeOfServer to send, defaults to 'all'
-        return WFS.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false, 'all');
+        return WFS.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false, 'all', true);
       default:
         // Unsupported
         throw new NotSupportedError(`Unsupported layer type ${layerType}`);
@@ -604,7 +636,7 @@ export class ConfigApi {
    */
   static serializeGeoviewLayerConfig(geoviewLayerConfig: TypeGeoviewLayerConfig): string {
     // Clone the object
-    const cloneConfig = cloneDeep(geoviewLayerConfig);
+    const cloneConfig = structuredClone(geoviewLayerConfig);
 
     // For each entry
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

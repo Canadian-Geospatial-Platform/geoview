@@ -9,7 +9,7 @@ import { geoviewStoreDefinitionWithSubscribeSelector } from './geoview-store';
 import { MapContext } from '@/core/app-start';
 import { whenThisThen, isLocalhost } from '@/core/utils/utilities';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { getItemAsNumber } from '@/core/utils/localStorage';
+import { LocalStorage } from '@/core/utils/localStorage';
 
 export interface StoresManagerState {
   stores: Record<string, GeoviewStoreType>;
@@ -21,7 +21,7 @@ export const useStoresManager = createStore<StoresManagerState>(() => ({
 
 // Check if running in dev or if the key is set in the local storage
 const LOCAL_STORAGE_KEY_DEVTOOLS = 'GEOVIEW_DEVTOOLS';
-const DEVTOOLS_ACTIVE = isLocalhost() || !!getItemAsNumber(LOCAL_STORAGE_KEY_DEVTOOLS);
+const DEVTOOLS_ACTIVE = isLocalhost() || !!LocalStorage.getItemAsNumber(LOCAL_STORAGE_KEY_DEVTOOLS);
 
 /**
  * Mounts Zustand DevTools for a specific store instance.

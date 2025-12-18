@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
-import { Box, CircularProgressBase, ErrorIcon, GroupWorkOutlinedIcon, Icon, BrowserNotSupportedIcon } from '@/ui';
+import { Box, CircularProgressBase, ErrorIcon, Icon, BrowserNotSupportedIcon, LayerGroupIcon } from '@/ui';
 
 import { getSxClasses } from '@/core/components/common/layer-icon-style';
 import {
@@ -158,7 +158,25 @@ export function LayerIcon({ layerPath }: LayerIconProps): JSX.Element {
     );
   }
 
-  if (hasChildren) return <GroupWorkOutlinedIcon color="primary" />;
+  if (hasChildren) {
+    return (
+      <Box
+        sx={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '30px',
+          height: '30px',
+          backgroundColor: 'white',
+          border: '1px solid',
+          borderColor: 'primary.main',
+          borderRadius: '4px',
+        }}
+      >
+        <LayerGroupIcon sx={{ transform: 'scaleX(-1)' }} />
+      </Box>
+    );
+  }
 
   return <IconStack layerPath={layerPath} />;
 }

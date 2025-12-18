@@ -3,7 +3,6 @@
  * See examples across the code base for examples of how to implement this.
  */
 export default class EventHelper {
-  // TODO: Document - Add how we use that EventHandler to create class-event in the documentation.
   /**
    * Emits an event to all handlers.
    * @param {T} sender - The object emitting the event

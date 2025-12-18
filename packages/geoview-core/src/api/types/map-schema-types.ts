@@ -344,9 +344,16 @@ export const VALID_MAP_CENTER: Record<TypeValidMapProjectionCodes, Record<string
   3978: { lat: [40, 90], long: [-140, -60] },
 };
 
-// extents and center for each projection
+// Map view extents for each projection
 export const MAP_EXTENTS: Record<TypeValidMapProjectionCodes, number[]> = {
   3857: [-180, 0, 80, 84],
+  // TODO: tighten these up for initial view now that we have a separate MAX_EXTENTS_RESTRICTION
+  3978: [-150, -10, -30, 90],
+};
+
+// Extent restrictions for each projection
+export const MAX_EXTENTS_RESTRICTION: Record<TypeValidMapProjectionCodes, number[]> = {
+  3857: [-180, -85.05112877980659, 180, 85.05112877980659],
   3978: [-150, -10, -30, 90],
 };
 
@@ -515,8 +522,10 @@ export const DEFAULT_APPBAR_CORE = {
 
 // #region SUB LAYERS
 
+export const STYLE_GEOMETRY_TYPES = ['Point', 'MultiPoint', 'LineString', 'MultiLineString', 'Polygon', 'MultiPolygon'] as const;
+
 /** Valid keys for the geometryType property. */
-export type TypeStyleGeometry = 'Point' | 'MultiPoint' | 'LineString' | 'MultiLineString' | 'Polygon' | 'MultiPolygon';
+export type TypeStyleGeometry = (typeof STYLE_GEOMETRY_TYPES)[number];
 
 export type SerializedGeometry = {
   type: TypeStyleGeometry;
@@ -542,7 +551,7 @@ export type TypeOutfields = {
   name: string;
   alias: string;
   type: TypeOutfieldsType;
-  domain: null | codedValueType | rangeDomainType;
+  domain?: null | codedValueType | rangeDomainType;
 };
 
 /** The types supported by the outfields object. */
@@ -602,9 +611,16 @@ export type TypeLayerStyleConfigInfo = {
    * type has two entries (index 0 for min and index 1 for max).
    */
   values: (string | number)[];
+
+  /** For class breaks rendering optionally indicate if the value is to be considered greater/greaterOrEqual/lesser/lesserOrEqual */
+  valuesConditions?: TypeLayerStyleValueCondition[];
+
   /** The geometry settings. */
   settings: TypeBaseVectorGeometryConfig;
 };
+
+/** Valid value comparisons for class breaks rendering */
+export type TypeLayerStyleValueCondition = '>' | '>=' | '<' | '<=';
 
 /** Valid keys for the type property of style configurations. */
 export type TypeLayerStyleConfigType = 'simple' | 'uniqueValue' | 'classBreaks';
@@ -613,6 +629,12 @@ export type TypeLayerStyleConfigType = 'simple' | 'uniqueValue' | 'classBreaks';
 export type TypeBaseVectorGeometryConfig = {
   /** Type of vector config. */
   type: TypeBaseVectorType;
+  /** The mime type when the symbol is an image */
+  mimeType?: string;
+  /** Opacity for the stroke */
+  opacity?: number;
+  /** Rotation if any */
+  rotation?: number;
 };
 
 /** Valid values for the type property of the base vector settingd. */
@@ -632,6 +654,19 @@ export interface TypeLineStringVectorConfig extends TypeBaseVectorGeometryConfig
   type: 'lineString';
   /** Line stroke symbology */
   stroke: TypeStrokeSymbolConfig;
+  /** The additional graphic stroke symbology for special strokes */
+  graphicStrokes?: GraphicStrokeWithPlacement[]; // TODO: Remove this?
+}
+
+export interface GraphicStrokeWithPlacement {
+  placement?: string; // associated placement if any
+  settings: unknown; // the graphic stroke settings
+}
+
+export interface GraphicFillWithPattern {
+  pattern?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  settings: any;
 }
 
 /** Stroke style for vector features. */
@@ -672,12 +707,24 @@ export interface TypePolygonVectorConfig extends TypeBaseVectorGeometryConfig {
   color?: string;
   /** Line stroke symbology */
   stroke: TypeStrokeSymbolConfig;
-  /** Distance between patern lines. Default = 8. */
+  /** Distance between pattern lines. Default = 8. */
+  patternSize?: number;
+  /** Pattern line width.default = 1. */
+  patternWidth?: number;
+
+  /** Pattern line width.default = 1.
+   * @deprecated Remove it after the release, once files like metadata.data are fixed in the hosted website.
+   */
   paternSize?: number;
-  /** Patern line width.default = 1. */
+  /** Pattern line width.default = 1.
+   * @deprecated Remove it after the release, once files like metadata.data are fixed in the hosted website.
+   */
   paternWidth?: number;
+
   /** Kind of filling  for vector features. Default = solid.  */
   fillStyle: TypeFillStyle;
+  /** The additional graphic fills symbology for special fills */
+  graphicFills?: GraphicFillWithPattern[]; // TODO: Remove this?
 }
 
 /** Valid values to specify fill styles. */
@@ -689,7 +736,8 @@ export type TypeFillStyle =
   | 'diagonalCross'
   | 'forwardDiagonal'
   | 'horizontal'
-  | 'vertical';
+  | 'vertical'
+  | 'dot';
 
 /** Definition of the circle symbol vector settings type. */
 export interface TypeSimpleSymbolVectorConfig extends TypeBaseVectorGeometryConfig {
@@ -730,6 +778,8 @@ export interface TypeIconSymbolVectorConfig extends TypeBaseVectorGeometryConfig
   opacity?: number;
   /** Ofset of the icon. */
   offset?: [number, number];
+  /** Scale of the icon */
+  scale?: number;
   /**
    * The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data
    * with the Canvas renderer.
@@ -759,6 +809,7 @@ export type TypeResultSet<T extends TypeResultSetEntry = TypeResultSetEntry> = {
 export type TypeFeatureInfoEntry = {
   featureKey: number;
   geoviewLayerType: TypeGeoviewLayerType;
+  supportZoomTo: boolean;
   uid?: string;
   feature?: Feature<Geometry>;
   geometry?: Geometry;

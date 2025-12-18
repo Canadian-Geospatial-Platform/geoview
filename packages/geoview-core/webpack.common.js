@@ -4,7 +4,6 @@ const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const LodashWebpackPlugin = require('lodash-webpack-plugin');
 const { globSync } = require('glob');
 const childProcess = require('child_process');
 const packageJSON = require('./package.json');
@@ -139,7 +138,7 @@ const config = {
           {
             loader: 'babel-loader',
             options: {
-              plugins: ['lodash', '@babel/transform-runtime'],
+              plugins: ['@babel/transform-runtime'],
               presets: ['@babel/preset-env', ['@babel/preset-react', { runtime: 'automatic' }], '@babel/preset-typescript'],
             },
           },
@@ -151,7 +150,7 @@ const config = {
           {
             loader: 'babel-loader',
             options: {
-              plugins: ['lodash', '@babel/transform-runtime'],
+              plugins: ['@babel/transform-runtime'],
               presets: ['@babel/preset-env', ['@babel/preset-react', { runtime: 'automatic' }], '@babel/preset-typescript'],
             },
           },
@@ -175,7 +174,7 @@ const config = {
           {
             loader: 'babel-loader',
             options: {
-              plugins: ['lodash', '@babel/transform-runtime'],
+              plugins: ['@babel/transform-runtime'],
               presets: ['@babel/preset-env', '@babel/preset-typescript'],
             },
           },
@@ -185,7 +184,6 @@ const config = {
     ],
   },
   plugins: [
-    new LodashWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: './public/index.html',
       title: 'Canadian Geospatial Platform Viewer',
@@ -200,6 +198,7 @@ const config = {
         { from: './public/configs', to: 'configs' },
         { from: './public/locales', to: 'locales', noErrorOnMissing: true },
         { from: './public/css', to: 'css' },
+        { from: './public/js', to: 'js' },
         { from: './public/markers', to: 'markers' },
         { from: './public/datasets/geojson', to: 'datasets/geojson' },
         { from: './public/datasets/csv-files', to: 'datasets/csv-files' },
@@ -229,6 +228,11 @@ const config = {
     .concat(multipleHtmlPluginsSamples)
     .concat(multipleHtmlPluginsDemos)
     .concat(multipleHtmlPluginsOutliers),
+
+  performance: {
+    maxEntrypointSize: 7 * 1024 * 1024, // 7 MiB
+    maxAssetSize: 40 * 1024 * 1024 // 40 MiB, because of big files, notably datasets/geojson/historical_flood_0.geojson (35.1 MiB)
+  },
 };
 
 module.exports = config;

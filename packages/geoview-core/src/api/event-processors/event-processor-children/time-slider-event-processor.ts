@@ -187,8 +187,8 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The id of the map
    * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer path of the layer to add to the state
    * @returns {TimeSliderLayer | undefined}
-   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} Error thrown when the specified layer is of wrong type.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+   * @throws {LayerWrongTypeError} When the specified layer is of wrong type.
    * @static
    */
   static getInitialTimeSliderValues(
@@ -244,9 +244,8 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
 
     // If the field type has an alias, use that as a label
     let fieldAlias = field;
-    const featureInfo = layerConfig.source?.featureInfo;
-    if (featureInfo) {
-      const { outfields } = featureInfo;
+    const outfields = layerConfig.getOutfields();
+    if (outfields) {
       const timeOutfield = outfields ? outfields.find((outfield) => outfield.name === field) : undefined;
       if (timeOutfield) fieldAlias = timeOutfield.alias;
     }

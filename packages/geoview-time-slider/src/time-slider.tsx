@@ -11,6 +11,7 @@ import { logger } from 'geoview-core/core/utils/logger';
 
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';
 import { getSxClasses } from './time-slider-style';
+import { Switch } from 'geoview-core/ui/switch/switch';
 
 interface TimeSliderProps {
   layerPath: string;
@@ -35,7 +36,6 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     Grid,
     Slider,
     Typography,
-    Checkbox,
     Tooltip,
     IconButton,
     LockIcon,
@@ -63,7 +63,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
   // Get actions and states from store
   // TODO: evaluate best option to set value by layer path.... through a getter?
-  const { setValues, setLocked, setReversed, setDelay, setStep, setFiltering } = useTimeSliderStoreActions();
+  const { setValues, setLocked, setReversed, setDelay, setStep, setFiltering } = useTimeSliderStoreActions()!; // TODO: This should be handle higher up...  timeSliderStoreActions will always have a value here, ! to ignore possibility of undefined
   const displayLanguage = useAppDisplayLanguage();
 
   // TODO: check performance as we should technically have one selector by constant
@@ -353,25 +353,30 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   return (
     <Grid>
       <Box sx={{ padding: '10px 10px' }}>
-        <Grid container sx={{ ...sxClasses.rightPanelBtnHolder, flexWrap: 'nowrap' }}>
+        <Grid container sx={{ ...sxClasses.rightPanelBtnHolder, flexWrap: 'nowrap', alignItems: 'center' }}>
           <Grid size={{ xs: 9 }}>
-            <Typography component="div" sx={{ ...sxClasses.panelHeaders, paddingLeft: '20px', paddingTop: '10px' }}>
+            <Typography component="div" sx={{ ...sxClasses.panelHeaders, paddingLeft: '20px' }}>
               {displayTitle}
               {displayPattern[0] === undefined && ` (${DateMgt.formatDate(DateMgt.formatDateToISO(values[0]), 'YYYY-MM-DD')})`}
             </Typography>
           </Grid>
           <Grid size={{ xs: 3 }}>
-            <Box sx={{ textAlign: 'right', marginRight: '25px' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: '10px' }}>
               <Tooltip
                 title={
                   filtering
                     ? getLocalizedMessage(displayLanguage, 'timeSlider.slider.disableFilter')
                     : getLocalizedMessage(displayLanguage, 'timeSlider.slider.enableFilter')
                 }
-                placement="top"
-                enterDelay={1000}
               >
-                <Checkbox checked={filtering} onChange={handleCheckbox} />
+                <span>
+                  <Switch
+                    size="small"
+                    checked={filtering}
+                    onChange={handleCheckbox}
+                    label={getLocalizedMessage(displayLanguage, 'timeSlider.slider.filter')}
+                  />
+                </span>
               </Tooltip>
             </Box>
           </Grid>
@@ -500,14 +505,13 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
             )}
           </Box>
         </Grid>
-        {description ||
-          (title !== combinedNames && (
-            <Grid size={{ xs: 12 }}>
-              <Typography component="div" sx={{ px: '20px', py: '5px' }}>
-                {description || combinedNames}
-              </Typography>
-            </Grid>
-          ))}
+        {(description || additionalNames?.length) && (
+          <Grid size={{ xs: 12 }}>
+            <Typography component="div" sx={{ px: '20px', py: '5px', paddingTop: '15px', fontSize: '0.875rem' }}>
+              {description || combinedNames}
+            </Typography>
+          </Grid>
+        )}
       </Box>
     </Grid>
   );

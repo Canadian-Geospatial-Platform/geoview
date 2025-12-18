@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { delay } from 'lodash';
 import { Box, FilterAltIcon } from '@/ui';
 import DataTable from './data-table';
 import {
@@ -29,7 +28,6 @@ import type { TypeContainerBox } from '@/core/types/global-types';
 import DataSkeleton from './data-skeleton';
 
 interface DataPanelType {
-  fullWidth?: boolean;
   containerType?: TypeContainerBox;
 }
 /**
@@ -37,7 +35,7 @@ interface DataPanelType {
  * @returns {JSX.Element} Data table as react element.
  */
 
-export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPanelType): JSX.Element {
+export function Datapanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPanelType): JSX.Element {
   // Log
   logger.logTraceRender('components/data-table/data-panel');
 
@@ -98,7 +96,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
 
   /**
    * Check if filtered are being set for each layer.
-   * @param {string} layerPath The path of the layer
+   * @param {string} layerPath - The path of the layer
    * @returns boolean
    */
   const isMapFilteredSelectedForLayer = useCallback(
@@ -113,7 +111,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
 
   /**
    * Get number of features of a layer with filtered or selected layer or unknown when data table is loaded.
-   * @param {string} layerPath the path of the layer
+   * @param {string} layerPath - The path of the layer
    * @returns
    */
   const getFeaturesOfLayer = useCallback(
@@ -143,8 +141,8 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
 
   /**
    * Create layer tooltip
-   * @param {string} layerName en/fr layer name
-   * @param {string} layerPath the path of the layer.
+   * @param {string} layerName - en/fr layer name
+   * @param {string} layerPath - The path of the layer.
    * @returns
    */
   const getLayerTooltip = useCallback(
@@ -187,7 +185,7 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
     // Log
     logger.logTraceUseEffect('DATA-PANEL - isLoading', isLoading, selectedLayerPath);
 
-    const clearLoading = delay(() => {
+    const clearLoading = setTimeout(() => {
       setIsLoading(false);
     }, 100);
     return () => clearTimeout(clearLoading);
@@ -222,10 +220,13 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
   // TODO Occasionally, setting the default selected layer can have unexpected behaviours.
   // TO.DOCONT e.g. Refresh the page, switch tabs in the browser, come back to tab when done. The layer isn't selected
   useEffect(() => {
-    if (isFirstLoad.current) {
-      isFirstLoad.current = false;
+    // Only trigger on first load when we have a selectedLayerPath
+    if (isFirstLoad.current && selectedLayerPath) {
+      // Check if the layer is now available in orderedLayerData
+      const foundLayer = orderedLayerData.find((lyr) => lyr.layerPath === selectedLayerPath);
 
-      if (selectedLayerPath && orderedLayerData.find((lyr) => lyr.layerPath === selectedLayerPath)) {
+      if (foundLayer) {
+        isFirstLoad.current = false;
         setIsLoading(true);
         triggerGetAllFeatureInfo(selectedLayerPath)
           .catch((error: unknown) => {
@@ -297,7 +298,6 @@ export function Datapanel({ fullWidth = false, containerType = CONTAINER_TYPE.FO
       selectedLayerPath={selectedLayerPath}
       layerList={memoLayerList}
       onLayerListClicked={handleLayerChange}
-      fullWidth={fullWidth}
       guideContentIds={[
         'dataTable',
         'dataTable.children.filterData',

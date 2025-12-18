@@ -4,15 +4,6 @@
   "description": "Schema for configuring a custom legend in GeoView",
   "type": "object",
   "properties": {
-    "id": {
-      "type": "string",
-      "description": "Unique identifier for the legend component"
-    },
-    "enabled": {
-      "type": "boolean",
-      "description": "Whether the legend is enabled",
-      "default": true
-    },
     "isOpen": {
       "type": "boolean",
       "description": "Whether the legend panel is open by default",
@@ -28,10 +19,6 @@
       "items": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string",
-            "description": "Unique identifier for the legend item"
-          },
           "name": {
             "type": "string",
             "description": "Display name for the legend item"
@@ -104,95 +91,180 @@
           "layerId": {
             "type": "string",
             "description": "ID of the layer this legend item is associated with (if any)"
-          },
-          "filter": {
-            "type": "object",
-            "description": "Filter configuration for the legend item",
-            "properties": {
-              "property": {
-                "type": "string",
-                "description": "Property to filter on"
-              },
-              "value": {
-                "type": ["string", "number", "boolean"],
-                "description": "Value to filter by"
-              },
-              "operator": {
-                "type": "string",
-                "enum": ["=", "!=", ">", "<", ">=", "<=", "contains", "startsWith", "endsWith"],
-                "description": "Comparison operator",
-                "default": "="
-              }
-            }
           }
         },
-        "required": ["id", "name"]
-      }
-    },
-    "display": {
-      "type": "object",
-      "description": "Display configuration for the legend",
-      "properties": {
-        "orientation": {
-          "type": "string",
-          "enum": ["vertical", "horizontal"],
-          "description": "Orientation of the legend items",
-          "default": "vertical"
-        },
-        "showTitle": {
-          "type": "boolean",
-          "description": "Whether to show the legend title",
-          "default": true
-        },
-        "showToggle": {
-          "type": "boolean",
-          "description": "Whether to show the expand/collapse toggle",
-          "default": true
-        },
-        "symbolSize": {
-          "type": "object",
-          "description": "Default size for symbols",
-          "properties": {
-            "width": {
-              "type": "number",
-              "description": "Default width for symbols in pixels",
-              "default": 20
-            },
-            "height": {
-              "type": "number",
-              "description": "Default height for symbols in pixels",
-              "default": 20
-            }
-          }
-        },
-        "text": {
-          "type": "object",
-          "description": "Text styling",
-          "properties": {
-            "size": {
-              "type": "number",
-              "description": "Font size in pixels",
-              "default": 12
-            },
-            "color": {
-              "type": "string",
-              "description": "Text color",
-              "default": "#333333"
-            },
-            "fontFamily": {
-              "type": "string",
-              "description": "Font family",
-              "default": "Arial, sans-serif"
-            }
-          }
-        }
+        "required": ["name"]
       }
     },
     "version": {
       "type": "string",
       "enum": ["1.0.0"],
       "description": "Schema version"
+    },
+    "entry": {
+      "type": "object",
+      "description": "Entry component configuration for individual legend items",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name for the entry"
+        },
+        "symbol": {
+          "type": "object",
+          "description": "Symbol configuration for the entry",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["image", "color", "line", "point", "polygon"],
+              "description": "Type of symbol"
+            },
+            "url": {
+              "type": "string",
+              "description": "URL to an image symbol (if type is 'image')"
+            },
+            "color": {
+              "type": "string",
+              "description": "Color value for the symbol"
+            },
+            "size": {
+              "type": "number",
+              "description": "Size of the symbol",
+              "minimum": 1
+            }
+          }
+        },
+        "visible": {
+          "type": "boolean",
+          "description": "Whether the entry is visible",
+          "default": true
+        }
+      },
+      "required": ["name"]
+    },
+    "entryGroup": {
+      "type": "object",
+      "description": "Entry group component for organizing related legend entries",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name for the entry group"
+        },
+        "entries": {
+          "type": "array",
+          "description": "Array of entry objects in this group",
+          "items": {
+            "$ref": "#/properties/entry"
+          }
+        },
+        "expanded": {
+          "type": "boolean",
+          "description": "Whether the group is expanded by default",
+          "default": true
+        },
+        "visible": {
+          "type": "boolean",
+          "description": "Whether the entry group is visible",
+          "default": true
+        }
+      },
+      "required": ["name", "entries"]
+    },
+    "infoSection": {
+      "type": "object",
+      "description": "Info section component for displaying additional legend information",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Title for the info section"
+        },
+        "content": {
+          "type": "string",
+          "description": "Content text for the info section"
+        },
+        "position": {
+          "type": "string",
+          "enum": ["top", "bottom", "left", "right"],
+          "description": "Position of the info section relative to the legend",
+          "default": "bottom"
+        },
+        "visible": {
+          "type": "boolean",
+          "description": "Whether the info section is visible",
+          "default": true
+        }
+      },
+      "required": ["title", "content"]
+    },
+    "unboundLayer": {
+      "type": "object",
+      "description": "Unbound layer component for layers not tied to specific data sources",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name for the unbound layer"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["basemap", "overlay", "annotation", "reference"],
+          "description": "Type of unbound layer",
+          "default": "overlay"
+        },
+        "symbol": {
+          "type": "object",
+          "description": "Symbol configuration for the unbound layer",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["image", "color", "line", "point", "polygon"],
+              "description": "Type of symbol"
+            },
+            "url": {
+              "type": "string",
+              "description": "URL to an image symbol (if type is 'image')"
+            },
+            "color": {
+              "type": "string",
+              "description": "Color value for the symbol"
+            }
+          }
+        },
+        "visible": {
+          "type": "boolean",
+          "description": "Whether the unbound layer is visible",
+          "default": true
+        }
+      },
+      "required": ["name", "type"]
+    },
+    "visibilitySet": {
+      "type": "object",
+      "description": "Visibility set component for managing visibility states of legend items",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name for the visibility set"
+        },
+        "items": {
+          "type": "array",
+          "description": "Array of item IDs in this visibility set",
+          "items": {
+            "type": "string"
+          }
+        },
+        "visible": {
+          "type": "boolean",
+          "description": "Whether all items in the set are visible",
+          "default": true
+        },
+        "toggleMode": {
+          "type": "string",
+          "enum": ["all", "individual", "exclusive"],
+          "description": "How visibility toggles work for this set",
+          "default": "individual"
+        }
+      },
+      "required": ["name", "items"]
     }
   },
-  "required": ["id", "legendList"]
+  "required": ["legendList"]
 }

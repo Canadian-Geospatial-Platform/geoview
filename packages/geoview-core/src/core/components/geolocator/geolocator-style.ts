@@ -33,6 +33,15 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       },
     },
   },
+  geolocatorResultsStatus: {
+    padding: 10,
+    position: 'absolute',
+    left: -10000,
+    top: 'auto',
+    width: 1,
+    height: 1,
+    overflow: 'hidden',
+  },
   progressBar: {
     position: 'relative',
     zIndex: 1100,
@@ -46,6 +55,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     alignItems: 'end',
     padding: 6,
     paddingTop: 2,
+    borderBottom: `1px solid ${theme.palette.divider}`,
     '& .MuiInputLabel-formControl': {
       fontSize: theme.palette.geoViewFontSize.default,
       marginTop: 0,

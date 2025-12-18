@@ -12,6 +12,7 @@ import {
   VisibilityOffOutlinedIcon,
   HighlightIcon,
   CenterFocusScaleIcon,
+  LayersIcon,
 } from '@/ui';
 import {
   useLayerHighlightedLayer,
@@ -22,6 +23,7 @@ import {
   useLayerSelectorControls,
   useLayerSelectorStatus,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useUIFooterBarComponents, useUIAppbarComponents } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
 import {
   useMapStoreActions,
@@ -31,6 +33,7 @@ import {
 } from '@/core/stores/';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
+import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 
 // TODO: WCAG Issue #3108 - Check all icon buttons for aria-label clarity and translations
 // TODO: WCAG Issue #3108 - Check all icon buttons for "state related" aria values (i.e aria-checked, aria-disabled, etc.)
@@ -45,11 +48,6 @@ type ControlActions = {
   handleHighlightLayer: (event: React.MouseEvent) => void;
   handleZoomTo: (event: React.MouseEvent) => void;
 };
-
-// Constant style outside of render
-const styles = {
-  btnMargin: { marginTop: '-0.3125rem' },
-} as const;
 
 // Custom hook for control actions
 const useControlActions = (layerPath: string): ControlActions => {
@@ -105,6 +103,17 @@ const useSubtitle = (layerPath: string, children: TypeLegendLayer[], items: Type
 
 // SecondaryControls component (no memo to force re render from layers panel modifications)
 export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.Element {
+  // Add store actions for selecting layer and UI
+  const { setSelectedLayerPath } = useLayerStoreActions();
+  const footerBarComponents = useUIFooterBarComponents();
+  const appBarComponents = useUIAppbarComponents();
+  const hasFooterLayersTab = footerBarComponents.includes('layers');
+  const hasAppBarLayersTab = appBarComponents.includes('layers');
+  const hasLayersTab = hasFooterLayersTab || hasAppBarLayersTab;
+
+  // Use navigate hook
+  const navigateToLayers = useNavigateToTab('layers', setSelectedLayerPath);
+
   // Log
   logger.logTraceRender('components/legend/legend-layer-ctrl', layerPath);
 
@@ -141,7 +150,23 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
   return (
     <Stack direction="row" alignItems="center" sx={sxClasses.layerStackIcons}>
       {!!subTitle.length && <Typography fontSize={14}>{subTitle}</Typography>}
-      <Box sx={sxClasses.subtitle}>
+      <Box sx={{ ...sxClasses.subtitle, display: 'flex', alignItems: 'center' }}>
+        {/* Button to select layer in panel and scroll to footer */}
+        {hasLayersTab && (
+          <Box sx={sxClasses.buttonDivider}>
+            <IconButton
+              aria-label={t('legend.selectLayerAndScroll')}
+              className="buttonOutline"
+              onClick={(event) => {
+                // Stop propagation to prevent AppBar's onScrollShellIntoView from firing
+                event.stopPropagation();
+                navigateToLayers({ layerPath });
+              }}
+            >
+              <LayersIcon />
+            </IconButton>
+          </Box>
+        )}
         <IconButton
           edge="end"
           aria-label={t('layers.zoomVisibleScale')}
@@ -164,7 +189,6 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
         {isLayerHighlightCapable && (
           <IconButton
             aria-label={t('legend.highlightLayer')}
-            sx={styles.btnMargin}
             className="buttonOutline"
             onClick={controls.handleHighlightLayer}
             disabled={!isInVisibleRange || parentHidden || !isVisible || layerStatus === 'error'}

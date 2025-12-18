@@ -60,8 +60,8 @@ export class Config {
     // TODO: refactor - return only the layers
     const validLayers = ConfigValidation.validateLayersConfigAgainstSchema(listOfGeoviewLayerConfig, onErrorCallback);
 
-    // Log
-    logger.logDebug('CONFIG-LAYERS-VALIDATED', validLayers);
+    // Log (leave the line commented, for quick debug when needed)
+    // logger.logDebug('CONFIG-LAYERS-VALIDATED', validLayers);
 
     // Return the valid layers
     return validLayers;

@@ -3,7 +3,6 @@ import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-l
 import type { TypeCSVLayerConfig, TypeSourceCSVInitialConfig } from '@/geo/layer/geoview-layers/vector/csv';
 import type { ConfigClassOrType, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-import { Projection } from '@/geo/utils/projection';
 
 export interface CsvLayerEntryConfigProps extends VectorLayerEntryConfigProps {
   // TODO: Think of using a TypeSourceCSVInitialConfigProps, because it can be different properties than the resulting 'source' object stored.
@@ -30,14 +29,11 @@ export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
     this.valueSeparator = layerConfig.valueSeparator;
 
     // Write the default properties when not specified
-    this.source ??= { format: 'CSV', separator: ',' };
     this.source.format ??= 'CSV';
     this.source.separator ??= ',';
-    this.source.dataProjection ??= Projection.PROJECTION_NAMES.LONLAT;
-    this.source.dataAccessPath ??= layerConfig.source?.dataAccessPath ?? this.getMetadataAccessPath();
 
     // Normalize dataAccessPath if needed
-    const path = this.source.dataAccessPath!;
+    const path = this.getDataAccessPath();
     const isBlob = path.startsWith('blob') && !path.endsWith('/');
     const isCsvFile = path.toUpperCase().endsWith('.CSV');
     const hasCsvQuery = path.toUpperCase().includes('.CSV?');
@@ -49,7 +45,7 @@ export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
       if (!normalizedPath.toUpperCase().endsWith('.CSV')) {
         normalizedPath += '.csv';
       }
-      this.source.dataAccessPath = normalizedPath;
+      this.setDataAccessPath(normalizedPath);
     }
   }
 

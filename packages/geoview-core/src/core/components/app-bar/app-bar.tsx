@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { ReactNode, KeyboardEvent } from 'react';
 import { useState, useEffect, useCallback, Fragment, useMemo } from 'react';
-import { camelCase } from 'lodash';
 import { useTheme } from '@mui/material/styles';
 import type { IconButtonPropsExtend } from '@/ui';
 import {
@@ -28,7 +27,7 @@ import {
   useUIStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapInteraction, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useAppFullscreenActive, useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import type { AppBarApi, AppBarCreatedEvent, AppBarRemovedEvent } from '@/core/components';
@@ -41,7 +40,7 @@ import { enforceArrayOrder, helpClosePanelById, helpOpenPanelById } from './app-
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import type { TypeValidAppBarCoreProps } from '@/api/types/map-schema-types';
 import { DEFAULT_APPBAR_CORE, DEFAULT_APPBAR_TABS_ORDER } from '@/api/types/map-schema-types';
-import { handleEscapeKey } from '@/core/utils/utilities';
+import { camelCase, handleEscapeKey } from '@/core/utils/utilities';
 import { IconButton } from '@/ui/icon-button/icon-button';
 
 interface GroupPanelType {
@@ -84,8 +83,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const { tabId, isOpen, isFocusTrapped } = useUIActiveAppBarTab();
   const { hideClickMarker } = useMapStoreActions();
 
-  const isMapFullScreen = useAppFullscreenActive();
-
   const geoviewElement = useAppGeoviewHTMLElement().querySelector('[id^="mapTargetElement-"]') as HTMLElement;
 
   const { setActiveAppBarTab } = useUIStoreActions();
@@ -107,8 +104,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
     return {
       geolocator: { icon: <SearchIcon />, content: <Geolocator key="geolocator" /> },
       guide: { icon: <QuestionMarkIcon />, content: <Guide containerType={CONTAINER_TYPE.APP_BAR} /> },
-      details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
-      legend: { icon: <LegendIcon />, content: <Legend fullWidth containerType={CONTAINER_TYPE.APP_BAR} /> },
+      details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel containerType={CONTAINER_TYPE.APP_BAR} /> },
+      legend: { icon: <LegendIcon />, content: <Legend containerType={CONTAINER_TYPE.APP_BAR} /> },
       layers: { icon: <LayersOutlinedIcon />, content: <LayersPanel containerType={CONTAINER_TYPE.APP_BAR} /> },
       'data-table': { icon: <StorageIcon />, content: <Datapanel containerType={CONTAINER_TYPE.APP_BAR} /> },
     } as Record<string, GroupPanelType>;
@@ -203,28 +200,21 @@ export function AppBar(props: AppBarProps): JSX.Element {
   );
 
   /**
-   * Get panel width based on window screen for data table and default for other panels
-   * @param {string} tab tab which open the panel.
+   * Panels default to a 100% width of the map container, legend and details panels are set to be slimmer
+   *
+   * @param {string} tab - The id of the panel
+   * @returns {number} The width for the panel
    */
-  const getPanelWidth = useCallback(
-    (tab: string): number => {
-      let width = 400;
-      if (
-        (tab === DEFAULT_APPBAR_CORE.DATA_TABLE || tab === DEFAULT_APPBAR_CORE.LAYERS || tab === DEFAULT_APPBAR_CORE.GUIDE) &&
-        isMapFullScreen
-      ) {
-        width = window.screen.width - 65;
-      }
-      if (
-        (tab === DEFAULT_APPBAR_CORE.DATA_TABLE || tab === DEFAULT_APPBAR_CORE.LAYERS || tab === DEFAULT_APPBAR_CORE.GUIDE) &&
-        !isMapFullScreen
-      ) {
-        width = geoviewElement?.clientWidth ?? 0;
-      }
-      return width;
-    },
-    [geoviewElement, isMapFullScreen]
-  );
+  const getPanelWidth = useCallback((tab: string): number => {
+    let width = 100;
+
+    // set these panels to be slimmer
+    if (tab === DEFAULT_APPBAR_CORE.LEGEND || tab === DEFAULT_APPBAR_CORE.DETAILS) {
+      width = 30;
+    }
+
+    return width;
+  }, []);
 
   useEffect(() => {
     // Log
@@ -342,7 +332,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
    * @param {string[]} panelNames tab that will be rendered in appbar.
    * @returns JSX.Element
    */
-  // TODO: WCAG Issue #3154 - add aria-controls to <IconButton>. Needs id of the corresponding panel.
   const renderButtonPanel = (panelNames: string[]): ReactNode => {
     // Map through panel names and create ListItems for visible buttons
     const visibleButtons = panelNames
@@ -354,7 +343,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
           return (
             <ListItem key={buttonPanel.button.id}>
               <IconButton
-                id={buttonPanel.button.id}
+                id={`${buttonPanel.button.id}-panel-btn`}
+                aria-controls={`appbar-panel-${buttonPanel.button.id}`}
                 aria-label={t(buttonPanel.button['aria-label'])}
                 aria-expanded={tabId === buttonPanel.button.id && isOpen ? 'true' : 'false'}
                 tooltipPlacement="right"

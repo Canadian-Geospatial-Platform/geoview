@@ -5,7 +5,7 @@ import { useTheme } from '@mui/material/styles';
 import { Box, Button, CheckIcon } from '@/ui';
 
 import { useMapPointerPosition } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { coordFormatDMS } from '@/geo/utils/utilities';
+import { GeoUtilities } from '@/geo/utils/utilities';
 import { getSxClasses } from './mouse-position-style';
 
 interface MousePositionProps {
@@ -60,8 +60,8 @@ const formatCoordinates = (lonlat: Coordinate, DMS: boolean, t: (key: string) =>
   const labelX = lonlat[0] < 0 ? t('mapctrl.mouseposition.west') : t('mapctrl.mouseposition.east');
   const labelY = lonlat[1] < 0 ? t('mapctrl.mouseposition.south') : t('mapctrl.mouseposition.north');
 
-  const lng = `${DMS ? coordFormatDMS(lonlat[0]) : Math.abs(lonlat[0]).toFixed(4)} ${labelX}`;
-  const lat = `${DMS ? coordFormatDMS(lonlat[1]) : Math.abs(lonlat[1]).toFixed(4)} ${labelY}`;
+  const lng = `${DMS ? GeoUtilities.coordFormatDMS(lonlat[0]) : Math.abs(lonlat[0]).toFixed(4)} ${labelX}`;
+  const lat = `${DMS ? GeoUtilities.coordFormatDMS(lonlat[1]) : Math.abs(lonlat[1]).toFixed(4)} ${labelY}`;
 
   return { lng, lat };
 };
@@ -101,7 +101,8 @@ export const MousePosition = memo(function MousePosition({ expanded }: MousePosi
   }, [pointerPosition, t]);
 
   // Callbacks
-  const switchPositionMode = useCallback((): void => {
+  const switchPositionMode = useCallback((event: React.MouseEvent<HTMLButtonElement>): void => {
+    event.stopPropagation();
     setPositionMode((p) => (p + 1) % 3);
   }, []);
 

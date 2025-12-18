@@ -5,25 +5,23 @@ import { useTheme } from '@mui/material/styles';
 import { MRT_Localization_FR as MRTLocalizationFR } from 'material-react-table/locales/fr';
 import { MRT_Localization_EN as MRTLocalizationEN } from 'material-react-table/locales/en';
 
+import { Modal, MRTTable as Table, type MRT_ColumnDef as MRTColumnDef, Box, CircularProgress, Button } from '@/ui';
 import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogTitle,
-  DialogContent,
-  MRTTable as Table,
-  type MRT_ColumnDef as MRTColumnDef,
-  Box,
-  CircularProgress,
-} from '@/ui';
-import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+  useUIActiveFocusItem,
+  useUIStoreActions,
+  useUIFooterBarComponents,
+  useUIAppbarComponents,
+} from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useLayerSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useDataTableStoreActions } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { getSxClasses } from './data-table-style';
 import { logger } from '@/core/utils/logger';
 import { useDataTableAllFeaturesDataArray } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useFeatureFieldInfos } from './hooks';
 import type { TypeFieldEntry } from '@/api/types/map-schema-types';
 import { useAppDisplayLanguage, useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { TableViewIcon } from '@/ui/icons';
+import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 
 /**
  * Open lighweight version (no function) of data table in a modal window
@@ -48,8 +46,19 @@ export default function DataTableModal(): JSX.Element {
   const layersData = useDataTableAllFeaturesDataArray();
   const language = useAppDisplayLanguage();
   const shellContainer = useAppShellContainer();
+  const footerBarComponents = useUIFooterBarComponents();
+  const appBarComponents = useUIAppbarComponents();
+  const { setSelectedLayerPath: setDataTableSelectedLayerPath } = useDataTableStoreActions();
 
   const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
+
+  // Check if data-table tab exists in footer or appBar
+  const hasFooterDataTableTab = footerBarComponents.includes('data-table');
+  const hasAppBarDataTableTab = appBarComponents.includes('data-table');
+  const hasDataTableTab = hasFooterDataTableTab || hasAppBarDataTableTab;
+
+  // Use navigate hook with scrollToFooter disabled since modal closes
+  const navigateToDataTable = useNavigateToTab('data-table', setDataTableSelectedLayerPath);
 
   // Create columns for data table.
   const mappedLayerData = useFeatureFieldInfos(layersData);
@@ -156,51 +165,79 @@ export default function DataTableModal(): JSX.Element {
     } else setIsLoading(false);
   }, [layersData, selectedLayer]);
 
+  // Handle navigation to advanced data table
+  const handleNavigateToDataTable = useCallback(() => {
+    // Close modal first
+    disableFocusTrap();
+    // Navigate to data-table tab with selected layer
+    navigateToDataTable({ layerPath: selectedLayer! });
+  }, [disableFocusTrap, navigateToDataTable, selectedLayer]);
+
   return (
-    <Dialog open={activeModalId === 'layerDataTable'} onClose={() => disableFocusTrap()} maxWidth="xl" container={shellContainer}>
-      <DialogTitle>{`${t('legend.tableDetails')} ${layer?.layerName ?? selectedLayer}`}</DialogTitle>
-      <DialogContent sx={{ overflow: 'hidden' }}>
-        {isLoading && (
-          <Box sx={{ minHeight: '300px', minWidth: '450px', position: 'relative' }}>
-            <CircularProgress
-              isLoaded={!isLoading}
-              style={{
-                backgroundColor: 'inherit',
-              }}
-            />
-          </Box>
-        )}
-        {!isLoading && (
-          <Table
-            columns={columns}
-            data={rows}
-            enableColumnActions={false}
-            enablePagination={(layer?.features?.length ?? 0) > 50}
-            enableBottomToolbar={(layer?.features?.length ?? 0) > 50}
-            initialState={{ density: 'compact', pagination: { pageSize: 50, pageIndex: 0 } }}
-            muiPaginationProps={{
-              rowsPerPageOptions: [50, 100],
-            }}
-            muiTableContainerProps={{ sx: { maxHeight: '60vh' } }}
-            enableStickyHeader
-            enableSorting
-            positionToolbarAlertBanner="none" // hide existing row count
-            localization={dataTableLocalization}
-            enableGlobalFilter={false}
-            enableColumnFilters={false}
-            enableDensityToggle={false}
-            enableFilters={false}
-            enableFullScreenToggle={false}
-            enableHiding={false}
-            enableTopToolbar={false}
-          />
-        )}
-      </DialogContent>
-      <DialogActions>
-        <Button fullWidth variant="contained" className="buttonOutlineFilled" onClick={() => disableFocusTrap()} type="text" autoFocus>
-          {t('general.close')}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <Modal
+      modalId="layerDataTable"
+      open={activeModalId === 'layerDataTable'}
+      onClose={() => disableFocusTrap()}
+      title={`${t('legend.tableDetails')} ${layer?.layerName ?? selectedLayer}`}
+      container={shellContainer}
+      width="90vw"
+      contentModal={
+        <>
+          {isLoading && (
+            <Box sx={{ minHeight: '300px', minWidth: '450px', position: 'relative' }}>
+              <CircularProgress
+                isLoaded={!isLoading}
+                style={{
+                  backgroundColor: 'inherit',
+                }}
+              />
+            </Box>
+          )}
+          {!isLoading && (
+            <>
+              {hasDataTableTab && selectedLayer && (
+                <Box sx={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 2 }}>
+                  <Button
+                    variant="outlined"
+                    className="buttonOutline"
+                    onClick={handleNavigateToDataTable}
+                    type="text"
+                    size="small"
+                    startIcon={<TableViewIcon />}
+                  >
+                    {t('dataTable.accessAdvancedFunctions')}
+                  </Button>
+                </Box>
+              )}
+              <Table
+                columns={columns}
+                data={rows}
+                enableColumnActions={false}
+                enablePagination={(layer?.features?.length ?? 0) > 50}
+                enableBottomToolbar={(layer?.features?.length ?? 0) > 50}
+                initialState={{ density: 'compact', pagination: { pageSize: 50, pageIndex: 0 } }}
+                muiPaginationProps={{
+                  rowsPerPageOptions: [50, 100],
+                }}
+                muiTableContainerProps={{ sx: { maxHeight: 'calc(90vh - 200px)' } }}
+                enableStickyHeader
+                enableSorting
+                positionToolbarAlertBanner="none"
+                localization={dataTableLocalization}
+                enableGlobalFilter={false}
+                enableColumnFilters={false}
+                enableDensityToggle={false}
+                enableFilters={false}
+                enableFullScreenToggle={false}
+                enableHiding={false}
+                enableTopToolbar={false}
+              />
+            </>
+          )}
+        </>
+      }
+      contentStyle={{ overflow: 'hidden', height: '100%', display: 'flex', flexDirection: 'column' }}
+      contentTextStyle={{ padding: 0, flex: 1, display: 'flex', flexDirection: 'column' }}
+    />
   );
 }

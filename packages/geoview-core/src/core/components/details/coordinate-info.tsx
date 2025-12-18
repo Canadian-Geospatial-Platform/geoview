@@ -9,12 +9,8 @@ import {
   useDetailsCoordinateInfoEnabled,
   useDetailsStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { coordFormatDMS } from '@/geo/utils/utilities';
+import { GeoUtilities } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
-
-type TypeCoordinateInfoProps = {
-  fullWidth: boolean;
-};
 
 type CoordinateData = {
   lat: number;
@@ -64,7 +60,7 @@ export function CoordinateInfoSwitch(): JSX.Element {
  * @param {TypeCoordinateInfoProps} props - The properties passed to CoordinateInfo
  * @returns {JSX.Element} The coordinate info panel
  */
-export function CoordinateInfo({ fullWidth }: TypeCoordinateInfoProps): JSX.Element {
+export function CoordinateInfo(): JSX.Element {
   const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
@@ -96,14 +92,14 @@ export function CoordinateInfo({ fullWidth }: TypeCoordinateInfoProps): JSX.Elem
   const { lat, lng, utmZone, easting, northing, ntsMapsheet, elevation } = coordinateData;
 
   return (
-    <Box sx={fullWidth ? sxClasses.rightPanelContainer : sxClasses.rightPanelContainer}>
+    <Box sx={sxClasses.rightPanelContainer}>
       <Box sx={sxClasses.coordinateInfoContainer}>
         <Typography variant="h6" sx={sxClasses.coordinateInfoTitle}>
           {t('details.coordinateInfoTitle')}
         </Typography>
 
         <List>
-          <ListItem sx={sxClasses.coordinateInfoSection}>
+          <ListItem sx={sxClasses.coordinateInfoSection} disablePadding>
             <Typography variant="subtitle1" sx={sxClasses.coordinateInfoSectionTitle}>
               {t('details.geographicCoordinates')}
             </Typography>
@@ -120,17 +116,17 @@ export function CoordinateInfo({ fullWidth }: TypeCoordinateInfoProps): JSX.Elem
               <Typography>{t('details.degreesMinutesSeconds')}:</Typography>
               <Box sx={sxClasses.coordinateInfoSubContent}>
                 <Typography>
-                  {t('details.latitude')}: {coordFormatDMS(lat)}
+                  {t('details.latitude')}: {GeoUtilities.coordFormatDMS(lat)}
                 </Typography>
                 <Typography>
-                  {t('details.longitude')}: {coordFormatDMS(lng)}
+                  {t('details.longitude')}: {GeoUtilities.coordFormatDMS(lng)}
                 </Typography>
               </Box>
             </Box>
           </ListItem>
 
           {utmZone && (
-            <ListItem sx={sxClasses.coordinateInfoSection}>
+            <ListItem sx={sxClasses.coordinateInfoSection} disablePadding>
               <Typography variant="subtitle1" sx={sxClasses.coordinateInfoSectionTitle}>
                 {t('details.utmCoordinates')}
               </Typography>
@@ -149,7 +145,7 @@ export function CoordinateInfo({ fullWidth }: TypeCoordinateInfoProps): JSX.Elem
           )}
 
           {ntsMapsheet && (
-            <ListItem sx={sxClasses.coordinateInfoSection}>
+            <ListItem sx={sxClasses.coordinateInfoSection} disablePadding>
               <Typography variant="subtitle1" sx={sxClasses.coordinateInfoSectionTitle}>
                 {t('details.ntsMapsheet')}
               </Typography>
@@ -162,7 +158,7 @@ export function CoordinateInfo({ fullWidth }: TypeCoordinateInfoProps): JSX.Elem
           )}
 
           {elevation && (
-            <ListItem sx={sxClasses.coordinateInfoSection}>
+            <ListItem sx={sxClasses.coordinateInfoSection} disablePadding>
               <Typography variant="subtitle1" sx={sxClasses.coordinateInfoSectionTitle}>
                 {t('details.elevation')}
               </Typography>

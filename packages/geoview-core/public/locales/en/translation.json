@@ -7,6 +7,7 @@
     "name": "Name",
     "open": "Open",
     "remove": "Remove",
+    "removeAll": "Remove all",
     "view": "View",
     "failed": "failed",
     "started": "started",
@@ -16,7 +17,11 @@
     "guide": "Guide",
     "fullScreen": "Full screen",
     "processing": "Processing __param__ element(s) of __param__",
-    "clickEnlarge": "Click to enlarge"
+    "clickEnlarge": "Click to enlarge",
+    "show": "Show",
+    "hide": "Hide",
+    "none": "No",
+    "clearSearch": "Clear search"
   },
   "mapnav": {
     "arianavbar": "Vertical button group for map navigation",
@@ -45,10 +50,9 @@
   },
   "mapctrl": {
     "rotation": {
-      "resetRotation": "Reset map rotation",
-      "fixedNorth": "Fix North",
       "rotation": "Map rotation",
-      "projection": "Projection"
+      "projection": "Projection",
+      "fixedNorth": "Fix North"
     },
     "mouseposition": {
       "east": "E",
@@ -71,13 +75,17 @@
   },
   "appbar": {
     "export": "Download map",
-    "notifications": "Notification",
+    "notifications": "Notifications",
     "noNotificationsAvailable": "No notifications available",
     "layers": "Layers",
     "share": "Share",
     "version": "About GeoView",
+    "closeVersionsDialog": "Close About GeoView dialog",
     "repoLink": "Github",
-    "removeAllNotifications": "Remove all",
+    "removeNotification": "Remove notification",
+    "removeAllNotifications": "Remove all notifications",
+    "repeatedNotificationTimes": "repeated {{count}} times",
+    "closeNotificationsDialog": "Close notifications dialog",
     "navLabel": "Main map controls"
   },
   "legend": {
@@ -96,7 +104,8 @@
     "itemsCount": "{count} of {totalCount} classes",
     "legendInstructions": "Legend Instructions",
     "noLayersAdded": "No layers added to the map",
-    "noLayersAddedDescription": "Add layers to the map by clicking on the 'Layers' button and adding the layers you want to display."
+    "noLayersAddedDescription": "Add layers to the map by clicking on the 'Layers' button and adding the layers you want to display.",
+    "selectLayerAndScroll": "Show in Layers panel"
   },
   "layers": {
     "title": "Layers",
@@ -151,6 +160,7 @@
     "errorImageLoad": "An error occured with source image for layer '__param__'.",
     "errorProj": "Projection '__param__' invalid.",
     "errorResponseNoFeaturesProperty": "The response from the service didn't provide a 'features' property.",
+    "errorNoPrimaryKeyField": "No primary key field found for layer '__param__'.",
     "errorNoBounds": "Couldn't find bounds for layer '__param__'.",
     "errorNoExtent": "No extent for layer '__param__'.",
     "errorInvalidExtent": "Invalid extent '__param__'.",
@@ -194,7 +204,8 @@
     "tableViewNone": "Table (unavailable)",
     "moveLayerUp": "Move layer up",
     "moveLayerDown": "Move layer down",
-    "layerControls": "Layers controls"
+    "layerControls": "Layers controls",
+    "selectLayerAndScrollTimeSlider": "Show in Time Slider panel"
   },
   "details": {
     "title": "Details",
@@ -203,6 +214,7 @@
     "closeSelection": "Close selection",
     "externalLink": "External Link",
     "feature": "feature",
+    "selected": "selected",
     "clickOnMap": "Click on map",
     "nextFeatureBtn": "Next feature",
     "previousFeatureBtn": "Previous feature",
@@ -213,7 +225,7 @@
     "notSymbolized": "Not symbolized",
     "nullValue": "Null",
     "toggleCoordinateInfo": "Toggle coordinate info tool",
-    "showCoordinateInfo": "Show coord info",
+    "showCoordinateInfo": "Show coordinate info",
     "noCoordinateInfo": "No Coordinate Info",
     "coordinateInfoTitle": "Coordinate Info",
     "geographicCoordinates": "Geographic Coordinates",
@@ -227,7 +239,8 @@
     "northing": "Northing",
     "ntsMapsheet": "NTS Mapsheet",
     "elevation": "Elevation",
-    "guideControls": "Guide controls"
+    "guideControls": "Guide controls",
+    "selectLayerAndScrollChart": "Show in Chart panel"
   },
   "lightbox": {
     "next": "Next",
@@ -253,6 +266,7 @@
       "loadfailed": "Layer '__param__' failed to load on map.",
       "layerIdNotFound": "Layer id '__param__' not found for layer '__param__'.",
       "layerIdMustBeNumber": "ESRI layer id must be a number, was '__param__' for layer '__param__'.",
+      "fieldsNotFound": "The fields information couldn't be read from the vector metadata for layer '__param__'.",
       "createtwice": "Can not execute the createGeoViewRasterLayers method twice for the layer '__param__'.",
       "usedtwice": "Duplicate use of layer identifier __param__.",
       "multipleUUID": "GeoCore layers may only have one GeoCore id per layer.",
@@ -268,7 +282,7 @@
       "invalidLayerFilter": "Layer '__param__' has an invalid layer filter.\nfilter = '__param__'\ninternal filter = '__param__'.",
       "failedToCreateLayer": "Failed to create the layer '__param__'.",
       "noCapabilitiesOrEmpty": "No capabilities (or empty) found for layer '__param__'.",
-      "wmsServiceFormatParameter": "Parameter 'Format' of GetFeatureInfo only support text/xml, text/html and text/plain for WMS services, '__param__'.",
+      "wmsServiceFormatParameter": "Parameter 'Format' of GetFeatureInfo not supported for WMS services, '__param__'.",
       "wmsSubLayerNotfound": "The sublayer __param__ of the layer __param__ does not exist on the server.",
       "csvNoGeographicData": "Could not find geographic data in the CSV '__param__'.",
       "invalidMetadata": "Invalid metadata (listOfLayerEntryConfig) preventing load of layer '__param__'.",
@@ -307,8 +321,14 @@
   },
   "geolocator": {
     "title": "Geolocator",
+    "searchFormLabel": "Geolocator search",
+    "searchInputLabel": "Enter keyword(s) (minimum 3 characters)",
     "search": "Search",
+    "searchClose": "Close search",
+    "searchSubmit": "Submit search",
+    "searchResults": "Search results",
     "noResult": "No matches found for",
+    "resultsFound": "{{count}} result(s) found for '{{searchTerm}}'",
     "province": "Province",
     "category": "Category",
     "clearFilters": "Clear filters",
@@ -339,7 +359,13 @@
     "close": "Close",
     "noFeatures": "unknown...",
     "showing": "showing",
-    "total": "total"
+    "total": "total",
+    "selectLayerAndScroll": "Show in Data Table panel",
+    "accessAdvancedFunctions": "Access Data Table panel for advanced functions",
+    "filterToggle": "filters",
+    "searchInputLabel": "Search data table columns",
+    "tableControls": "Data table controls",
+    "tableAriaLabelWithLayer": "{{layerName}} data table"
   },
   "geoChart": {
     "noChartAvailable": "Click on the map on a layer with chart"
@@ -350,6 +376,8 @@
   "guide": {
     "title": "Guide",
     "search": "Search guide...",
+    "searchFormLabel": "Search guide",
+    "searchInputLabel": "Search keyword(s)",
     "errorMessage": "Sorry, unable to find the help document!",
     "arrowUp": "Previous match",
     "arrowDown": "Next match"
@@ -381,7 +409,9 @@
     "generic": "An error happened, contact us or view console for details.",
     "layer": {
       "differingFieldLengths": "Length of provided fields do not match.",
+      "layerConfigNotFound": "Layer Configuration at layer path '__param__' not found.",
       "layerNotFound": "Layer at layer path '__param__' not found.",
+      "wfsConfigMissing": "The vector layer configuration is missing for layer path '__param__'.",
       "wrongType": "Layer '__param__' isn't of the expected type.",
       "statusWasError": "Layer '__param__' status was 'error'.",
       "notAGeoJsonLayer": "Not a GeoJson layer for layer '__param__'.",
@@ -399,7 +429,8 @@
       "mapWrongCall": "Div with id __param__ has a class 'geoview-map' and should be initialized via a 'cgpv.init()' call.",
       "pluginError": "A major error on Plugin '__param__' on map '__param__' has happened.",
       "pluginConfigNotFound": "The Plugin configuration '__param__' on map '__param__' at path '__param__' couldn't be found.",
-      "pluginStateUninitialized": "The Plugin state for '__param__' on map '__param__' is uninitialized."
+      "pluginStateUninitialized": "The Plugin state for '__param__' on map '__param__' is uninitialized.",
+      "invalidZoomExtent": "Unable to zoom, the provided extent is invalid."
     },
     "geocore": {
       "uuidNotFound": "GeoCore layer identifier '__param__' does not exist on the server.",
