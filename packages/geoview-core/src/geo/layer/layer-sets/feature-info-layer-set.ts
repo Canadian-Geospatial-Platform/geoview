@@ -4,7 +4,6 @@ import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processo
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import type { QueryType, TypeFeatureInfoEntry, TypeResultSet } from '@/api/types/map-schema-types';
-import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
@@ -167,8 +166,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
             // If the response contain actual fields
             if (AbstractLayerSet.recordsContainActualFields(layerConfig, arrayOfRecords)) {
-              // Use the response to patch and align arrayOfRecords fields with layerConfig fields
-              FeatureInfoLayerSet.#patchMissingOutfieldsIfNecessary(layerConfig, arrayOfRecords);
+              // Align fields with layerConfig fields
               AbstractLayerSet.alignRecordsWithOutFields(layerConfig, arrayOfRecords);
             }
 
@@ -232,47 +230,6 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
     // Propagate to store
     this.#propagateToStoreName(this.resultSet[layerPath]);
-  }
-
-  /**
-   * Updates outfields and aliases from query result if those weren't set already.
-   * @param {string} layerConfig - The layer config to possibly update.
-   * @param {TypeFeatureInfoEntry[]} records - Feature info to parse.
-   * @private
-   */
-  static #patchMissingOutfieldsIfNecessary(layerConfig: AbstractBaseLayerEntryConfig, records: TypeFeatureInfoEntry[]): void {
-    // If no records
-    if (!records.length) return;
-
-    // Take the first one
-    const record = records[0];
-
-    // Get the outfields
-    let outfields = layerConfig.getOutfields();
-
-    // Process undefined outfields or aliasFields
-    if (!outfields?.length) {
-      // Create it
-      outfields = [];
-
-      // Loop
-      Object.keys(record.fieldInfo).forEach((fieldName) => {
-        const newOutfield = {
-          name: fieldName,
-          alias: record.fieldInfo[fieldName]?.alias || fieldName,
-          type: record.fieldInfo[fieldName]?.dataType || 'string',
-          domain: null,
-        };
-
-        outfields!.push(newOutfield);
-      });
-
-      // Set it
-      layerConfig.setOutfields(outfields);
-    }
-
-    // Set the nameField if not already defined
-    layerConfig.initNameField(outfields?.[0]?.name);
   }
 
   /**
