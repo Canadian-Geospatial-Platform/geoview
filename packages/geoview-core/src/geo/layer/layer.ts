@@ -732,7 +732,7 @@ export class LayerApi {
     // Register a callback when layer wants to send a message
     layerBeingAdded.onLayerMessage(this.#handleLayerMessage.bind(this));
 
-    // TODO: CLEANUP - Remove commented code 2025-11-21
+    // TODO: COMMENTED CODE - Remove it 2025-11-21
     // GV Commenting this out as I don't think it's useful anymore, let's see after a couple rounds of testing (2025-11-21)
     // // Register a callback when layer entry config has become processed (catching on-the-fly layer entry configs as they are further processed)
     // layerBeingAdded.onLayerEntryProcessed((geoviewLayer: AbstractGeoViewLayer, event: LayerEntryProcessedEvent) => {
@@ -1299,7 +1299,7 @@ export class LayerApi {
     // Set it
     layer.setStyleItemVisibility(item, visibility);
 
-    // TODO: REFACTOR - This function should probably end here and the setting of the store happen in an event hook on the
+    // TODO: REFACTOR - This current function should probably end here and the setting of the store happen in an event hook on the
     // TO.DOCONT: style item visibility. Refer to pattern of setLayerName, setLayerOpacity, setLayerQueryable, etc
     // Update the legend layers if necessary
     if (updateLegendLayers) LegendEventProcessor.setItemVisibility(this.getMapId(), layerPath, item, visibility);
@@ -1998,7 +1998,7 @@ export class LayerApi {
       this.featureInfoLayerSet.clearResults(layer.getLayerPath());
     }
 
-    // TODO: MINOR - Emit event here?
+    // TODO: MINOR - Emit LayerQueryableToggled event here?
     // this.#emitLayerQueryableToggled({ layerPath: layer.getLayerPath(), queryable: event.queryable });
   }
 
@@ -2011,6 +2011,9 @@ export class LayerApi {
     // Redirect
     MapEventProcessor.setMapLayerHoverable(this.getMapId(), layer.getLayerPath(), event.hoverable);
     LegendEventProcessor.setLayerHoverableInStore(this.getMapId(), layer.getLayerPath(), event.hoverable);
+
+    // TODO: MINOR - Emit LayerHoverableToggled event here?
+    // this.#emitLayerHoverableToggled({ layerPath: layer.getLayerPath(), hoverable: event.hoverable });
   }
 
   /**

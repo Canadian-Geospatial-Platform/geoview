@@ -918,7 +918,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     });
   }
 
-  // TODO: REFACTOR EVENT PROCESSOR MAJOR - Turn this function deprecated and redesign the flow. It's the only place left in the code where we still import api from '@/app'.
+  // TODO: REFACTOR? - These functions are the only place in the code where we still import api from '@/app'.
   static reorderLayer(mapId: string, layerPath: string, move: number): void {
     // Redirect to state API
     api.getMapViewer(mapId).stateApi.reorderLayers(mapId, layerPath, move);

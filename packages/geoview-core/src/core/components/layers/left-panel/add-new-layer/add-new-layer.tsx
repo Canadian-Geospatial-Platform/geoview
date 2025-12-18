@@ -537,7 +537,7 @@ export function AddNewLayer(): JSX.Element {
     // Create new abort controller to handle canceling of this step.
     setAbortController(new AbortController());
 
-    // TODO: CLEANUP - Remove commented code 2025-12-18
+    // TODO: COMMENTED CODE - Remove it 2025-12-18
     // // Remove unwanted items from sources before proceeding
     // if (newGeoViewLayer.listOfLayerEntryConfig?.length)
     //   newGeoViewLayer.listOfLayerEntryConfig.forEach((layerEntryConfig) => {
