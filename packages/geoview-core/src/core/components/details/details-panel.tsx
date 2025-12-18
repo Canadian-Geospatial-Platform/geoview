@@ -188,7 +188,7 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
             numOffeatures: layer!.features?.length ?? 0,
             layerFeatures: getNumFeaturesLabel(layer!),
             tooltip: `${layer!.layerName}, ${getNumFeaturesLabel(layer!)}`,
-            layerUniqueId: `${mapId}-${TABS.DETAILS}-${layer?.layerPath ?? ''}`,
+            layerUniqueId: `${mapId}-${TABS.DETAILS}-${layer?.layerPath}`,
           }) as LayerListEntry
       );
 
@@ -618,7 +618,7 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
       shouldClear = selectedTab !== TABS.DETAILS || isCollapsed;
     } else if (containerType === CONTAINER_TYPE.APP_BAR) {
       // For app bar: clear when details panel is closed (tabId === 'details' and isOpen === false)
-      shouldClear = activeAppBarTab.tabId === 'details' && !activeAppBarTab.isOpen;
+      shouldClear = activeAppBarTab.tabId === TABS.DETAILS && !activeAppBarTab.isOpen;
     }
 
     if (shouldClear) {
