@@ -717,7 +717,7 @@ export class MapTester extends GVAbstractTester {
             this.getMapViewer().layer.featureInfoLayerSet.onQueryEnded(handleQueryEnded);
 
             // emitMapSingleClick now handles both store update and event emission
-            this.getMapViewer().emitMapSingleClick({
+            this.getMapViewer().simulateMapClick({
               lonlat: coords,
               pixel: [0, 0],
               projected,
@@ -726,13 +726,13 @@ export class MapTester extends GVAbstractTester {
           });
         };
 
-        // GV: Need to wait before calling the first map click return empty features
+        // TODO: Need to wait before calling the first map click return empty features
         await delay(2000);
 
         // First click
         test.addStep(`Performing first map click at [${firstClickCoords.join(', ')}]...`);
         await simulateMapClick(firstClickCoords);
-        await delay(1000); // GV: Something weird with the first test, even with the click awai ti does not work
+        await delay(1000); // TODO: Something weird with the first test, even with the click await it does not work
 
         // Check which layer is selected after first click
         test.addStep('Checking selected layer after first click...');
