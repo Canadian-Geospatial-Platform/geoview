@@ -189,7 +189,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - map Id
    * @returns {MapViewer} The Map viewer instance
    */
-  // TODO: REFACTOR EVENT PROCESSOR MAJOR - Turn this function deprecated and redesign the flow. It's the only place left in the code where we still import api from '@/app'.
+  // TODO: REFACTOR? - These functions are the only place in the code where we still import api from '@/app'.
   static getMapViewer(mapId: string): MapViewer {
     return api.getMapViewer(mapId);
   }
@@ -200,7 +200,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - map Id
    * @returns {LayerApi} The Map viewer layer API instance
    */
-  // TODO: REFACTOR EVENT PROCESSOR MAJOR - Turn this function deprecated and redesign the flow. It's the only place left in the code where we still import api from '@/app'.
+  // TODO: REFACTOR? - These functions are the only place in the code where we still import api from '@/app'.
   static getMapViewerLayerAPI(mapId: string): LayerApi {
     return api.getMapViewer(mapId).layer;
   }
@@ -211,7 +211,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - map Id
    * @returns {PluginsContainer} The map plugins container
    */
-  // TODO: REFACTOR EVENT PROCESSOR MAJOR - Turn this function deprecated and redesign the flow. It's the only place left in the code where we still import api from '@/app'.
+  // TODO: REFACTOR? - These functions are the only place in the code where we still import api from '@/app'.
   static async getMapViewerPlugins(mapId: string): Promise<PluginsContainer> {
     await whenThisThen(() => api && api.hasMapViewer(mapId));
     return api.getMapViewer(mapId).plugins;
@@ -508,6 +508,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
       // use store action to set projection value in store and apply new view to the map
       this.getMapStateProtected(mapId).setterActions.setProjection(projectionCode);
+
+      // Clear the WMS layers that had an override CRS
+      this.getMapViewerLayerAPI(mapId).clearWMSLayersWithOverrideCRS();
+
+      // Clear any loaded vector features in the data table
+      this.getMapViewerLayerAPI(mapId).clearVectorFeaturesFromAllFeatureInfoLayerSet();
 
       // Before changing the view, clear the basemaps right away to prevent a moment where a
       // vector tile basemap might, momentarily, be in different projection than the view.

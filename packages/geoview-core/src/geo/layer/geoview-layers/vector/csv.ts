@@ -1,7 +1,8 @@
+import { Feature } from 'ol';
+import { Point } from 'ol/geom';
+import type { ReadOptions } from 'ol/format/Feature';
+import type { Projection as OLProjection, ProjectionLike } from 'ol/proj';
 import type { Options as SourceOptions } from 'ol/source/Vector';
-import { GeoJSON as FormatGeoJSON } from 'ol/format';
-import type { Vector as VectorSource } from 'ol/source';
-import type Feature from 'ol/Feature';
 
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -11,6 +12,9 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { CsvLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { GVCSV } from '@/geo/layer/gv-layers/vector/gv-csv';
+import { Projection } from '@/geo/utils/projection';
+import { LayerNoGeographicDataInCSVError } from '@/core/exceptions/layer-exceptions';
+import { logger } from '@/core/utils/logger';
 
 export interface TypeCSVLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.CSV;
@@ -64,23 +68,32 @@ export class CSV extends AbstractGeoViewVector {
   }
 
   /**
-   * Overrides the creation of the source configuration for the vector layer
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration.
-   * @param {SourceOptions} sourceOptions - The source options.
-   * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
-   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   * Overrides the loading of the vector features for the layer by fetching CSV data and converting it
+   * into OpenLayers {@link Feature} feature instances.
+   * @param {VectorLayerEntryConfig} layerConfig -
+   * The configuration object for the vector layer, containing source and
+   * data access information.
+   * @param {SourceOptions<Feature>} sourceOptions -
+   * The OpenLayers vector source options associated with the layer. This may be
+   * used by implementations to customize loading behavior or source configuration.
+   * @param {ReadOptions} readOptions -
+   * Options controlling how features are read, including the target
+   * `featureProjection`.
+   * @returns {Promise<Feature[]>}
+   * A promise that resolves to an array of OpenLayers features.
+   * @protected
+   * @override
    */
-  protected override onCreateVectorSource(
+  protected override async onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
-    sourceOptions: SourceOptions<Feature>
-  ): VectorSource<Feature> {
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = layerConfig.getDataAccessPath();
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.format = new FormatGeoJSON();
+    sourceOptions: SourceOptions<Feature>,
+    readOptions: ReadOptions
+  ): Promise<Feature[]> {
+    // Query
+    const responseData = await AbstractGeoViewVector.fetchText(layerConfig.getDataAccessPath(false), layerConfig.source?.postSettings);
 
-    // Call parent
-    return super.onCreateVectorSource(layerConfig, sourceOptions);
+    // Attempt to convert CSV text to OpenLayers features
+    return CSV.convertCsv(responseData, layerConfig as CsvLayerEntryConfig, readOptions.featureProjection);
   }
 
   /**
@@ -203,6 +216,107 @@ export class CSV extends AbstractGeoViewVector {
 
     // Process it
     return AbstractGeoViewLayer.processConfig(myLayer);
+  }
+
+  /**
+   * Converts csv text to feature array.
+   * @param {string} csvData - The data from the .csv file.
+   * @param {CsvLayerEntryConfig} layerConfig - The config of the layer.
+   * @param {ProjectionLike} outProjection - The output projection for the features.
+   * @returns {Feature[]} The array of features.
+   * @private
+   * @static
+   */
+  static convertCsv(csvData: string, layerConfig: CsvLayerEntryConfig, outProjection: ProjectionLike): Feature[] {
+    // GV: This function and the below private static ones used to be in the CSV class directly, but something wasn't working with a 'Private element not accessible' error.
+    // GV: After moving the code to the mother class, it worked. It'll remain here for now until the config refactoring can take care of it in its re-writing
+
+    const inProjection: string = layerConfig.source.dataProjection || Projection.PROJECTION_NAMES.LONLAT; // default: LONLAT
+    const inProjectionConv: OLProjection = Projection.getProjectionFromString(inProjection);
+    const outProjectionConv: OLProjection = Projection.getProjectionFromString(outProjection);
+
+    const features: Feature[] = [];
+    let latIndex: number | undefined;
+    let lonIndex: number | undefined;
+    const csvRows = this.#csvStringToArray(csvData, layerConfig.source.separator || ',');
+    const headers: string[] = csvRows[0];
+    for (let i = 0; i < headers.length; i++) {
+      if (this.EXCLUDED_HEADERS_LAT.includes(headers[i].toLowerCase())) latIndex = i;
+      if (this.EXCLUDED_HEADERS_LNG.includes(headers[i].toLowerCase())) lonIndex = i;
+    }
+
+    if (latIndex === undefined || lonIndex === undefined) {
+      // Failed
+      throw new LayerNoGeographicDataInCSVError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
+    }
+
+    this.processFeatureInfoConfig(headers, csvRows[1], this.EXCLUDED_HEADERS, layerConfig);
+
+    for (let i = 1; i < csvRows.length; i++) {
+      const currentRow = csvRows[i];
+      const properties: { [key: string]: string | number } = {};
+      for (let j = 0; j < headers.length; j++) {
+        if (j !== latIndex && j !== lonIndex && currentRow[j]) {
+          properties[headers[j]] = currentRow[j] !== '' && Number(currentRow[j]) ? Number(currentRow[j]) : currentRow[j];
+        }
+      }
+
+      const lon = currentRow[lonIndex] ? Number(currentRow[lonIndex]) : Infinity;
+      const lat = currentRow[latIndex] ? Number(currentRow[latIndex]) : Infinity;
+      if (Number.isFinite(lon) && Number.isFinite(lat)) {
+        const coordinates =
+          inProjectionConv.getCode() !== outProjectionConv.getCode()
+            ? Projection.transform([lon, lat], inProjectionConv, outProjectionConv)
+            : [lon, lat];
+        const feature = new Feature({
+          geometry: new Point(coordinates),
+          ...properties,
+        });
+        features.push(feature);
+      }
+    }
+
+    return features;
+  }
+
+  /**
+   * Converts csv to array of rows of separated values.
+   * @param {string} csvData The raw csv text.
+   * @param {string} separator The character used to separate the values.
+   * @returns {string[][]} An array of the rows of the csv, split by separator.
+   * @private
+   * @static
+   */
+  static #csvStringToArray(csvData: string, separator: string): string[][] {
+    const regex = new RegExp(`(\\${separator}|\\r?\\n|\\r|^)(?:"([^"]*(?:""[^"]*)*)"|([^\\${separator}\\r\\n]*))`, 'gi');
+    let matches;
+    const parsedData: string[][] = [[]];
+
+    // eslint-disable-next-line no-cond-assign
+    while ((matches = regex.exec(csvData))) {
+      if (matches[1].length && matches[1] !== separator) parsedData.push([]);
+      parsedData[parsedData.length - 1].push(matches[2] !== undefined ? matches[2].replace(/""/g, '"') : matches[3]);
+    }
+
+    // These characters are removed from the headers as they break the data table filtering (Issue #2693).
+    parsedData[0].forEach((header, i) => {
+      if (header.includes("'")) logger.logWarning("Header included illegal character (') replaced with (_)");
+      parsedData[0][i] = header.replaceAll("'", '_');
+      if (header.includes('/')) logger.logWarning('Header included illegal character (/) replaced with (|)');
+      parsedData[0][i] = parsedData[0][i].replaceAll('/', '|');
+      if (header.includes('+')) logger.logWarning('Header included illegal character (+) replaced with (plus)');
+      parsedData[0][i] = parsedData[0][i].replaceAll('+', 'plus');
+      if (header.includes('-')) logger.logWarning('Header included illegal character (-) replaced with (_)');
+      parsedData[0][i] = parsedData[0][i].replaceAll('-', '_');
+      if (header.includes('*')) logger.logWarning('Header included illegal character (*) replaced with (x)');
+      parsedData[0][i] = parsedData[0][i].replaceAll('*', 'x');
+      if (header.includes('(')) logger.logWarning('Header included illegal character (() replaced with ([)');
+      parsedData[0][i] = parsedData[0][i].replaceAll('(', '[');
+      if (header.includes(')')) logger.logWarning('Header included illegal character ()) replaced with (])');
+      parsedData[0][i] = parsedData[0][i].replaceAll(')', ']');
+    });
+
+    return parsedData;
   }
 
   // #endregion STATIC METHODS

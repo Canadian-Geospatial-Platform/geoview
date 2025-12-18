@@ -304,7 +304,7 @@ export class LayerTester extends GVAbstractTester {
   // #region ESRI IMAGE
 
   /**
-   * Tests adding an Esri Feature Forest Industry layer on the map.
+   * Tests adding an EsriImage with Elevationlayer on the map.
    * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
    */
   testAddEsriImageWithElevation(): Promise<Test<AbstractGVLayer>> {
@@ -343,7 +343,7 @@ export class LayerTester extends GVAbstractTester {
   }
 
   /**
-   * Tests adding an Esri Feature Forest Industry layer on the map.
+   * Tests adding an EsriImage with USA layer on the map.
    * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
    */
   testAddEsriImageWithUSA(): Promise<Test<AbstractGVLayer>> {
@@ -436,7 +436,7 @@ export class LayerTester extends GVAbstractTester {
   // #region WMS
 
   /**
-   * Tests adding an Esri Feature Forest Industry layer on the map.
+   * Tests adding a WMS Layer from OWS Mundialis on the map.
    * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
    */
   testAddWMSLayerWithOWSMundialis(): Promise<Test<AbstractGVLayer>> {
@@ -754,7 +754,7 @@ export class LayerTester extends GVAbstractTester {
 
   // #endregion WFS
 
-  // #region GeoJSON
+  // #region GEOJSON
 
   /**
    * Tests adding a GeoJSON with Polygons layer on the map.
@@ -847,9 +847,9 @@ export class LayerTester extends GVAbstractTester {
     );
   }
 
-  // #endregion GeoJSON
+  // #endregion GEOJSON
 
-  // #region GeoTIFF
+  // #region GEOTIFF
 
   /**
    * Tests adding a GeoTIFF layer on the map.
@@ -936,7 +936,7 @@ export class LayerTester extends GVAbstractTester {
     );
   }
 
-  // #endregion GeoTIFF
+  // #endregion GEOTIFF
 
   // #region CSV
 
@@ -1287,7 +1287,7 @@ export class LayerTester extends GVAbstractTester {
 
   // #endregion KML
 
-  // #region Settings
+  // #region SETTINGS
 
   /**
    * Tests initial settings properly cascading to sub layers.
@@ -1341,7 +1341,7 @@ export class LayerTester extends GVAbstractTester {
     );
   }
 
-  // #endregion Settings
+  // #endregion SETTINGS
 
   // #region HELPERS
 

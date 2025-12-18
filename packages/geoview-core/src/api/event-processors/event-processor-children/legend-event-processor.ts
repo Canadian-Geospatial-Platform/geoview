@@ -846,18 +846,35 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     // Get the layer config and geometry type
     const layerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfigRegular(layerPath);
 
-    // Get the geometry type
-    const geometryType = layerConfig.getGeometryType();
+    // Get the layer style
+    const layerStyle = layerConfig.getLayerStyle();
 
     // If has geometry field
     let filteredFeatures = features;
-    if (geometryType) {
-      // Get the style
-      const layerStyle = layerConfig.getLayerStyle()?.[geometryType];
-      if (layerStyle && layerStyle.type === 'uniqueValue') {
-        filteredFeatures = this.#processClassVisibilityUniqueValue(layerStyle, features);
-      } else if (layerStyle && layerStyle.type === 'classBreaks') {
-        filteredFeatures = this.#processClassVisibilityClassBreak(layerStyle, features);
+    if (layerStyle) {
+      // If only one style
+      let layerStyleForGeom;
+      if (Object.keys(layerStyle).length === 1) {
+        // Take the only one
+        layerStyleForGeom = Object.values(layerStyle)[0];
+      } else {
+        // Take the geometry type
+        const geometryType = layerConfig.getGeometryType();
+
+        // If any
+        if (geometryType) {
+          // Take the style based on the geometry type
+          layerStyleForGeom = layerStyle?.[geometryType];
+        }
+      }
+
+      // If has style for the geometry
+      if (layerStyleForGeom) {
+        if (layerStyleForGeom && layerStyleForGeom.type === 'uniqueValue') {
+          filteredFeatures = this.#processClassVisibilityUniqueValue(layerStyleForGeom, features);
+        } else if (layerStyleForGeom && layerStyleForGeom.type === 'classBreaks') {
+          filteredFeatures = this.#processClassVisibilityClassBreak(layerStyleForGeom, features);
+        }
       }
     }
 

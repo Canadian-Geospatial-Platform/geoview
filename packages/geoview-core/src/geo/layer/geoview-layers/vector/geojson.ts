@@ -1,7 +1,6 @@
+import type { Feature } from 'ol';
+import type { ReadOptions } from 'ol/format/Feature';
 import type { Options as SourceOptions } from 'ol/source/Vector';
-import { GeoJSON as FormatGeoJSON } from 'ol/format';
-import type { Vector as VectorSource } from 'ol/source';
-import type Feature from 'ol/Feature';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import type { TypeGeoviewLayerConfig, TypeMetadataGeoJSON } from '@/api/types/layer-schema-types';
@@ -19,6 +18,8 @@ import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validati
 import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { deepMerge } from '@/core/utils/utilities';
+import { Projection } from '@/geo/utils/projection';
+import { GeoUtilities } from '@/geo/utils/utilities';
 
 export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.GEOJSON;
@@ -69,7 +70,10 @@ export class GeoJSON extends AbstractGeoViewVector {
         this.getMetadataAccessPathIfExists()?.toLowerCase().endsWith('.geojson')
       ) {
         // Fetch it
-        return (await GeoJSON.fetchMetadata(this.getMetadataAccessPath(), abortSignal)) as T;
+        const metadata = await GeoJSON.fetchMetadata(this.getMetadataAccessPath(), abortSignal);
+
+        // Return it
+        return metadata as T;
       }
 
       // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
@@ -192,23 +196,53 @@ export class GeoJSON extends AbstractGeoViewVector {
   }
 
   /**
-   * Overrides the creation of the source configuration for the vector layer.
-   * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration.
-   * @param {SourceOptions} sourceOptions - The source options.
-   * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
-   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   * Overrides the loading of the vector features for the layer by fetching GeoJSON data and converting it
+   * into OpenLayers {@link Feature} feature instances.
+   * @param {VectorLayerEntryConfig} layerConfig -
+   * The configuration object for the vector layer, containing source and
+   * data access information.
+   * @param {SourceOptions<Feature>} sourceOptions -
+   * The OpenLayers vector source options associated with the layer. This may be
+   * used by implementations to customize loading behavior or source configuration.
+   * @param {ReadOptions} readOptions -
+   * Options controlling how features are read, including the target
+   * `featureProjection`.
+   * @returns {Promise<Feature[]>}
+   * A promise that resolves to an array of OpenLayers features.
+   * @protected
+   * @override
    */
-  protected override onCreateVectorSource(
+  protected override async onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
-    sourceOptions: SourceOptions<Feature>
-  ): VectorSource<Feature> {
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = layerConfig.getDataAccessPath();
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.format = new FormatGeoJSON();
+    sourceOptions: SourceOptions<Feature>,
+    readOptions: ReadOptions
+  ): Promise<Feature[]> {
+    // Cast it to a GeoJson layer type
+    const layerConfigGeoJSON = layerConfig as GeoJSONLayerEntryConfig;
 
-    // Call parent
-    return super.onCreateVectorSource(layerConfig, sourceOptions);
+    // If GeoJson is present
+    let responseData;
+    if (layerConfigGeoJSON.source?.geojson) {
+      // As-is
+      responseData = layerConfigGeoJSON.source.geojson;
+    } else {
+      // Query
+      responseData = await AbstractGeoViewVector.fetchJson(layerConfig.getDataAccessPath(false), layerConfig.source?.postSettings);
+    }
+
+    // Read the EPSG from the data
+    const dataEPSG = GeoUtilities.readEPSGOfGeoJSON(responseData);
+
+    // Check if we have it in Projection and try adding it if we're missing it
+    await Projection.addProjectionIfMissing(dataEPSG);
+
+    // Assign the data projection reading options best we can, otherwise use the config, otherwise leave it undefined to let OpenLayers figure it out by itself using the GeoJSON parser later
+    // https://openlayers.org/en/latest/apidoc/module-ol_format_GeoJSON-GeoJSON.html
+    // eslint-disable-next-line no-param-reassign
+    readOptions.dataProjection = dataEPSG || layerConfig.source?.dataProjection;
+
+    // Read the features
+    return GeoUtilities.readFeaturesFromGeoJSON(responseData, readOptions);
   }
 
   /**

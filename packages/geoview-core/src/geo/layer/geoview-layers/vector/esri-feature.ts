@@ -1,20 +1,21 @@
-import type { Vector as VectorSource } from 'ol/source';
+import type { Feature } from 'ol';
+import type { ReadOptions } from 'ol/format/Feature';
 import type { Options as SourceOptions } from 'ol/source/Vector';
-import { EsriJSON } from 'ol/format';
-import type Feature from 'ol/Feature';
 
+import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
+import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import type { TypeGeoviewLayerConfig, TypeMetadataEsriFeature } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
-import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
+import { LayerServiceMetadataUnableToFetchError, LayerTooManyEsriFeatures } from '@/core/exceptions/layer-exceptions';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 import { Fetch } from '@/core/utils/fetch-helper';
-import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { formatError } from '@/core/exceptions/core-exceptions';
+import { GeoUtilities } from '@/geo/utils/utilities';
 
 export interface TypeEsriFeatureLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_FEATURE;
@@ -149,6 +150,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {EsriFeatureLayerEntryConfig} layerConfig - The layer entry configuration to process.
    * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
    * @returns {Promise<EsriFeatureLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   * @throws {LayerTooManyEsriFeatures} When the layer has too many Esri features.
    */
   protected override onProcessLayerMetadata(
     layerConfig: EsriFeatureLayerEntryConfig,
@@ -158,23 +160,50 @@ export class EsriFeature extends AbstractGeoViewVector {
   }
 
   /**
-   * Overrides the creation of the source configuration for the vector layer.
-   * @param {EsriFeatureLayerEntryConfig} layerConfig - The layer entry configuration.
-   * @param {SourceOptions} sourceOptions - The source options.
-   * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
-   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   * Overrides the loading of the vector features for the layer by fetching EsriFeature data and converting it
+   * into OpenLayers {@link Feature} feature instances.
+   * @param {VectorLayerEntryConfig} layerConfig -
+   * The configuration object for the vector layer, containing source and
+   * data access information.
+   * @param {SourceOptions<Feature>} sourceOptions -
+   * The OpenLayers vector source options associated with the layer. This may be
+   * used by implementations to customize loading behavior or source configuration.
+   * @param {ReadOptions} readOptions -
+   * Options controlling how features are read, including the target
+   * `featureProjection`.
+   * @returns {Promise<Feature[]>}
+   * A promise that resolves to an array of OpenLayers features.
+   * @protected
+   * @override
    */
-  protected override onCreateVectorSource(
-    layerConfig: EsriFeatureLayerEntryConfig,
-    sourceOptions: SourceOptions<Feature>
-  ): VectorSource<Feature> {
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = `${layerConfig.getDataAccessPath(true)}${layerConfig.layerId}/query?f=json&where=1=1&returnCountOnly=true`;
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.format = new EsriJSON();
+  protected override async onCreateVectorSourceLoadFeatures(
+    layerConfig: VectorLayerEntryConfig,
+    sourceOptions: SourceOptions<Feature>,
+    readOptions: ReadOptions
+  ): Promise<Feature[]> {
+    // Use the basic fetch
+    const responseDataCount = await Fetch.fetchEsriJson<{ count: number }>(
+      `${layerConfig.getDataAccessPath(true)}${layerConfig.layerId}/query?f=json&where=1=1&returnCountOnly=true`
+    );
 
-    // Call parent
-    return super.onCreateVectorSource(layerConfig, sourceOptions);
+    // Check if feature count is too large
+    if (responseDataCount.count > AbstractGeoViewVector.MAX_ESRI_FEATURES) {
+      // Throw
+      throw new LayerTooManyEsriFeatures(layerConfig.layerId, layerConfig.getLayerNameCascade(), responseDataCount.count);
+    }
+
+    // Determine the maximum number of records allowed
+    const maxRecords = layerConfig.getLayerMetadataCasted()?.maxRecordCount;
+
+    // Retrieve the full ESRI feature data
+    const responseData = await EsriFeature.#fetchEsriFeaturesByChunk(
+      `${layerConfig.getDataAccessPath(true)}${layerConfig.layerId}/query?f=json&where=1=1&outfields=*&geometryPrecision=1&maxAllowableOffset=5`,
+      responseDataCount.count,
+      maxRecords
+    );
+
+    // Convert each ESRI response chunk to features and flatten the result
+    return responseData.flatMap((json) => GeoUtilities.readFeaturesFromEsriJSON(json, readOptions));
   }
 
   /**
@@ -297,6 +326,41 @@ export class EsriFeature extends AbstractGeoViewVector {
 
     // Process it
     return AbstractGeoViewRaster.processConfig(myLayer);
+  }
+
+  /**
+   * Fetches features from ESRI Feature services with query and feature limits.
+   * @param {string} url - The base url for the service.
+   * @param {number} featureCount - The number of features in the layer.
+   * @param {number} maxRecordCount - The max features per query from the service.
+   * @param {number} featureLimit - The maximum number of features to fetch per query.
+   * @returns {Promise<unknown[]>} An array of the response text for the features.
+   * @static
+   * @private
+   */
+  // GV: featureLimit ideal amount varies with the service and with maxAllowableOffset.
+  // TODO: Add options for featureLimit to config
+  static #fetchEsriFeaturesByChunk(
+    url: string,
+    featureCount: number,
+    maxRecordCount?: number,
+    featureLimit: number = 1000
+  ): Promise<unknown[]> {
+    // Update url
+    const featureFetchLimit = maxRecordCount && maxRecordCount < featureLimit ? maxRecordCount : featureLimit;
+
+    // GV: Web worker does not improve the performance of this fetching
+    // Create array of url's to call
+    const urlArray: string[] = [];
+    for (let i = 0; i < featureCount; i += featureFetchLimit) {
+      urlArray.push(`${url}&resultOffset=${i}&resultRecordCount=${featureFetchLimit}`);
+    }
+
+    // Get array of all the promises
+    const promises = urlArray.map((featureUrl) => Fetch.fetchEsriJson(featureUrl));
+
+    // Return the all promise
+    return Promise.all(promises);
   }
 
   // #endregion STATIC METHODS

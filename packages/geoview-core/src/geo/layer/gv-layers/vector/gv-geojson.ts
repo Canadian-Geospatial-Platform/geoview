@@ -79,7 +79,7 @@ export class GVGeoJSON extends AbstractGVVector {
     // Read the EPSG from the data
     const dataEPSG = GeoUtilities.readEPSGOfGeoJSON(geojsonObject);
 
-    // If found, check if we have it in Projection and try adding it if we're missing it
+    // Check if we have it in Projection and try adding it if we're missing it
     await Projection.addProjectionIfMissing(dataEPSG);
 
     // Read the features (dataProjection can remain undefined here to let OpenLayers guess it via the GeoJSON reader)
