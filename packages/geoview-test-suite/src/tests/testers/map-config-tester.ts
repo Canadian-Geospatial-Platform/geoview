@@ -402,29 +402,25 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Test zooming to minimum allowed zoom (6)
         test.addStep('Testing zoom to minimum allowed level (6)...');
-        mapViewer.setZoomLevel(6);
-        await delay(500);
+        await mapViewer.setMapZoomLevel(6);
         const zoomAt6 = view.getZoom();
         Test.assertIsEqual(zoomAt6, 6);
 
         // Test zooming below minimum (4) - should be constrained to minZoom
         test.addStep('Testing zoom below minimum level (4) - should be constrained...');
-        mapViewer.setZoomLevel(4);
-        await delay(500);
+        await mapViewer.setMapZoomLevel(4);
         const zoomAt4 = view.getZoom();
         Test.assertIsEqual(zoomAt4, 6); // Should be constrained to minZoom
 
         // Test zooming to maximum allowed zoom (8)
         test.addStep('Testing zoom to maximum allowed level (8)...');
-        mapViewer.setZoomLevel(8);
-        await delay(500);
+        await mapViewer.setMapZoomLevel(8);
         const zoomAt8 = view.getZoom();
         Test.assertIsEqual(zoomAt8, 8);
 
         // Test zooming above maximum (10) - should be constrained to maxZoom
         test.addStep('Testing zoom above maximum level (10) - should be constrained...');
-        mapViewer.setZoomLevel(10);
-        await delay(500);
+        await mapViewer.setMapZoomLevel(10);
         const zoomAt10 = view.getZoom();
         Test.assertIsEqual(zoomAt10, 8); // Should be constrained to maxZoom
       }
