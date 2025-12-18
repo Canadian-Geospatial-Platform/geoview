@@ -3,7 +3,7 @@ import { memo, useCallback, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { animated } from '@react-spring/web';
-import { Box, List, ListItem, ListItemButton, Paper, Tooltip, Typography, ProgressBar, LocationSearchingIcon } from '@/ui';
+import { Badge, Box, List, ListItem, ListItemButton, Paper, Tooltip, Typography, ProgressBar, LocationSearchingIcon } from '@/ui';
 
 import type { TypeFeatureInfoEntry, TypeQueryStatus } from '@/api/types/map-schema-types';
 import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
@@ -108,6 +108,8 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
 
   const AnimatedPaper = animated(Paper);
 
+  // TODO: WCAG Issue #3118 generates invalid HTML (improper nesting)
+
   return (
     <AnimatedPaper className={containerClass}>
       <Tooltip title={layer.tooltip} placement="top" arrow>
@@ -132,7 +134,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
               ) : (
                 layer.layerPath && !layer.content && <LayerIcon layerPath={layer.layerPath} />
               )}
-              <Box sx={sxClasses.listPrimaryText}>
+              <Box sx={sxClasses.listPrimaryText} className="layerInfo">
                 <Typography component="div" className="layerTitle">
                   {layer.layerName}
                 </Typography>
@@ -142,6 +144,9 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
                   </Typography>
                 </Box>
               </Box>
+              {layer.layerPath !== 'coordinate-info' && (layer.numOffeatures ?? 0 ) > 0 &&  (
+                <Badge badgeContent={layer.numOffeatures} max={99} color="info" sx={sxClasses.layerCount} className="layer-count"></Badge>
+              )}
             </ListItemButton>
             {layerStatus === 'loading' && (
               <Box sx={sxClasses.progressBar}>
@@ -172,6 +177,7 @@ export const LayerList = memo(function LayerList({ layerList, selectedLayerPath,
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
+  // TODO: WCAG Issue #3119 Place in a landmark region (nav)
   return (
     <List sx={sxClasses.list}>
       {!!layerList.length &&

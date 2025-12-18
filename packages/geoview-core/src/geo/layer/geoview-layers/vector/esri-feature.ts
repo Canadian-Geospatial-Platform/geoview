@@ -1,7 +1,6 @@
 import type { Vector as VectorSource } from 'ol/source';
 import type { Options as SourceOptions } from 'ol/source/Vector';
 import { EsriJSON } from 'ol/format';
-import type { ReadOptions } from 'ol/format/Feature';
 import type Feature from 'ol/Feature';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
@@ -9,7 +8,7 @@ import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vec
 import type { TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, TypeMetadataEsriFeature } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
-import { commonProcessLayerMetadata, commonValidateListOfLayerEntryConfig } from '@/geo/layer/geoview-layers/esri-layer-common';
+import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { LayerNotFeatureLayerError, LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
@@ -58,7 +57,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T = TypeMetadataEsriFeature | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
-   * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    */
   protected override async onFetchServiceMetadata<T = TypeMetadataEsriFeature | undefined>(abortSignal?: AbortSignal): Promise<T> {
     let responseJson;
@@ -81,7 +80,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * Overrides the way a geoview layer config initializes its layer entries.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
-   * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    */
   protected override async onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig> {
     // Fetch metadata
@@ -132,7 +131,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected override onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: ConfigBaseClass[]): void {
-    commonValidateListOfLayerEntryConfig(this, listOfLayerEntryConfig);
+    EsriUtilities.commonValidateListOfLayerEntryConfig(this, listOfLayerEntryConfig);
   }
 
   /**
@@ -145,30 +144,27 @@ export class EsriFeature extends AbstractGeoViewVector {
     layerConfig: EsriFeatureLayerEntryConfig,
     abortSignal?: AbortSignal
   ): Promise<EsriFeatureLayerEntryConfig> {
-    return commonProcessLayerMetadata(this, layerConfig, abortSignal);
+    return EsriUtilities.commonProcessLayerMetadata(this, layerConfig, abortSignal);
   }
 
   /**
    * Overrides the creation of the source configuration for the vector layer.
    * @param {EsriFeatureLayerEntryConfig} layerConfig - The layer entry configuration.
    * @param {SourceOptions} sourceOptions - The source options.
-   * @param {ReadOptions} readOptions - The read options.
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
+   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    */
   protected override onCreateVectorSource(
     layerConfig: EsriFeatureLayerEntryConfig,
-    sourceOptions: SourceOptions<Feature>,
-    readOptions: ReadOptions
+    sourceOptions: SourceOptions<Feature>
   ): VectorSource<Feature> {
     // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = layerConfig.source.dataAccessPath!;
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = `${sourceOptions.url}${layerConfig.layerId}/query?f=json&where=1%3D1&returnCountOnly=true`;
+    sourceOptions.url = `${layerConfig.getDataAccessPath(true)}${layerConfig.layerId}/query?f=json&where=1%3D1&returnCountOnly=true`;
     // eslint-disable-next-line no-param-reassign
     sourceOptions.format = new EsriJSON();
 
     // Call parent
-    return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
+    return super.onCreateVectorSource(layerConfig, sourceOptions);
   }
 
   /**

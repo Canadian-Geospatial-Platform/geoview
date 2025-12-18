@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useDataTableSelectedFeature } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { Dialog, DialogTitle, DialogContent, DialogActions, List, Button, Box, Typography, BrowserNotSupportedIcon } from '@/ui';
+import { Modal, List, Box, Typography, BrowserNotSupportedIcon } from '@/ui';
 import { getSxClasses } from './details-style';
 import { FeatureInfoTable } from './feature-info-table';
 import type { TypeFieldEntry } from '@/api/types/map-schema-types';
@@ -59,44 +59,32 @@ export default function FeatureDetailModal(): JSX.Element {
   }, [feature]);
 
   return (
-    <Dialog
+    <Modal
+      modalId="featureDetailDataTable"
       open={activeModalId === 'featureDetailDataTable' && !!feature}
       onClose={() => disableFocusTrap()}
-      maxWidth="lg"
+      title={t('details.featureDetailModalTitle')}
       container={shellContainer}
-      sx={sxClasses.featureDetailModal}
-    >
-      <DialogTitle>{t('details.featureDetailModalTitle')}</DialogTitle>
-      <DialogContent>
-        <Box display="flex" flexDirection="row" alignItems="center" pb={10}>
-          {feature.featureIcon ? (
-            <Box component="img" alt={feature?.nameField ?? ''} src={feature.featureIcon} className="layer-icon" />
-          ) : (
-            <Box component="div" aria-label={feature?.nameField ?? ''} className="layer-icon">
-              <BrowserNotSupportedIcon />
-            </Box>
-          )}
-          <Typography sx={{ display: 'inline-block' }} component="div">
-            {nameFieldValue}
-          </Typography>
-        </Box>
-        <List sx={sxClasses.featureDetailListContainer}>
-          <FeatureInfoTable featureInfoList={featureInfoList} />
-        </List>
-      </DialogContent>
-      <DialogActions>
-        <Button
-          fullWidth
-          variant="contained"
-          className="buttonOutlineFilled"
-          onClick={() => disableFocusTrap()}
-          type="text"
-          size="small"
-          autoFocus
-        >
-          {t('general.close')}
-        </Button>
-      </DialogActions>
-    </Dialog>
+      width="90vw"
+      contentModal={
+        <>
+          <Box display="flex" flexDirection="row" alignItems="center" pb={10}>
+            {feature.featureIcon ? (
+              <Box component="img" alt={feature?.nameField ?? ''} src={feature.featureIcon} className="layer-icon" />
+            ) : (
+              <Box component="div" aria-label={feature?.nameField ?? ''} className="layer-icon">
+                <BrowserNotSupportedIcon />
+              </Box>
+            )}
+            <Typography sx={{ display: 'inline-block' }} component="div">
+              {nameFieldValue}
+            </Typography>
+          </Box>
+          <List sx={sxClasses.featureDetailListContainer}>
+            <FeatureInfoTable featureInfoList={featureInfoList} />
+          </List>
+        </>
+      }
+    />
   );
 }

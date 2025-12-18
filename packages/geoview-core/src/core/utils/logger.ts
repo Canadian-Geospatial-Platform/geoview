@@ -1,6 +1,5 @@
-import { isArray } from 'lodash';
 import { isLocalhost } from './utilities';
-import { getItemAsNumber, getItemAsNumberOrNumberArraySetValue } from './localStorage';
+import { LocalStorage } from './localStorage';
 
 // The log levels.
 // The most detailed messages. Disabled by default. Only shows if actually running in dev environment, never shown otherwise.
@@ -39,10 +38,10 @@ const LOCAL_STORAGE_KEY_ACTIVE = 'GEOVIEW_LOG_ACTIVE';
 const LOCAL_STORAGE_KEY_LEVEL = 'GEOVIEW_LOG_LEVEL';
 
 // Check if running in dev or if the key is set in the local storage
-const LOG_ACTIVE = isLocalhost() || !!getItemAsNumber(LOCAL_STORAGE_KEY_ACTIVE);
+const LOG_ACTIVE = isLocalhost() || !!LocalStorage.getItemAsNumber(LOCAL_STORAGE_KEY_ACTIVE);
 
 // Check the logging level and set it to LOG_DEBUG if not found
-const LOG_LEVEL = getItemAsNumberOrNumberArraySetValue(LOCAL_STORAGE_KEY_LEVEL, LOG_DEBUG);
+const LOG_LEVEL = LocalStorage.getItemAsNumberOrNumberArraySetValue(LOCAL_STORAGE_KEY_LEVEL, LOG_DEBUG);
 
 /**
  * A Console Logger to help out logging information with levels of details.
@@ -380,7 +379,7 @@ export class ConsoleLogger {
    */
   #checkLevel(level: number): boolean {
     // If regular number
-    if (!isArray(this.loggingLevel)) return this.loggingLevel <= level;
+    if (!Array.isArray(this.loggingLevel)) return this.loggingLevel <= level;
     // Is an array. We want the log to show DEBUG and higher and whatever levels (<20) are included in the array
     return level >= LOG_DEBUG || this.loggingLevel.includes(level);
   }

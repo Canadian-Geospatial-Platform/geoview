@@ -76,7 +76,7 @@ export class MapTester extends GVAbstractTester {
         test.addStep('Performing zoom...');
 
         // Perform a zoom
-        await MapEventProcessor.zoom(this.getMapId(), zoomEnd, zoomDuration);
+        await MapEventProcessor.zoomMap(this.getMapId(), zoomEnd, zoomDuration);
 
         // Update the step
         test.addStep('Waiting for zoom to finish...');
@@ -95,7 +95,7 @@ export class MapTester extends GVAbstractTester {
       async (test) => {
         // Unzooms to original position
         test.addStep('Unzooms to the original zoom...');
-        await MapEventProcessor.zoom(this.getMapId(), currentZoom, zoomDuration);
+        await MapEventProcessor.zoomMap(this.getMapId(), currentZoom, zoomDuration);
       }
     );
   }
@@ -143,7 +143,7 @@ export class MapTester extends GVAbstractTester {
         test.addStep(`Performing zoom to level ${zoomLevel}...`);
 
         // Perform a zoom
-        await MapEventProcessor.zoom(this.getMapId(), zoomLevel, 1000);
+        await MapEventProcessor.zoomMap(this.getMapId(), zoomLevel, 1000);
 
         // Update the step
         test.addStep('Performing projection switch to original...');
@@ -229,8 +229,8 @@ export class MapTester extends GVAbstractTester {
       },
       (test, result) => {
         // Perform assertions
-        test.addStep('Verifying initial z-index is undefined...');
-        Test.assertIsEqual(result.initialZIndex, undefined);
+        test.addStep('Verifying initial z-index is 9999...');
+        Test.assertIsEqual(result.initialZIndex, 9999);
 
         test.addStep('Verifying final z-index is 0...');
         Test.assertIsEqual(result.finalZIndex, 0);

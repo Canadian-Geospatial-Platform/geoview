@@ -38,7 +38,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   navBtnGroup: {
     borderRadius: theme.spacing(5),
     backgroundColor: theme.palette.geoViewColor.bgColor.light[500],
-
+    overflow: 'hidden',
     '& .MuiButtonGroup-grouped:not(:last-child)': {
       borderColor: theme.palette.geoViewColor.bgColor.light[900],
     },
@@ -46,7 +46,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   navButton: {
     backgroundColor: theme.palette.geoViewColor.bgColor.light[500],
     color: theme.palette.geoViewColor.bgColor.dark[900],
-    borderRadius: theme.spacing(5),
+    borderRadius: 0,
     width: '44px',
     height: '44px',
     maxWidth: '44px',
@@ -79,6 +79,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     fontSize: theme.palette.geoViewFontSize.default,
     fontWeight: '700',
     color: theme.palette.geoViewColor.textColor.main,
-    borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[100]}}`,
+    borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[100]}`,
   },
 });

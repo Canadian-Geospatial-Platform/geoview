@@ -3,7 +3,7 @@ import { useTheme, useMediaQuery } from '@mui/material';
 import { useCallback } from 'react';
 import { Box, Switch, Tooltip } from '@/ui';
 import {
-  useMapllLayersCollapsedToggle,
+  useMapAllLayersCollapsedToggle,
   useMapAllLayersVisibleToggle,
   useMapHasCollapsibleLayersToggle,
   useMapStoreActions,
@@ -34,7 +34,7 @@ export function ToggleAll({ source = 'legend' }: ToggleAllProps): JSX.Element {
 
   const displayState = useLayerDisplayState();
   const allLayersVisible = useMapAllLayersVisibleToggle();
-  const allLayersCollapsed = useMapllLayersCollapsedToggle();
+  const allLayersCollapsed = useMapAllLayersCollapsedToggle();
   const layersAreLoading = useLayerAreLayersLoading();
   const hasCollapsibleLayers = useMapHasCollapsibleLayersToggle();
   const { setAllLayersVisibility, setAllLayersCollapsed } = useMapStoreActions();

@@ -26,7 +26,6 @@ interface FeatureItemProps {
 
 interface FeatureRowProps {
   featureInfoItem: TypeFieldEntry;
-  index: number;
   onInitLightBox: (value: string, alias: string, index: number) => void;
 }
 
@@ -103,7 +102,7 @@ export const FeatureItem = memo(function FeatureItem({
 });
 
 // Extracted FeatureRow component
-export const FeatureRow = memo(function FeatureRow({ featureInfoItem, index, onInitLightBox }: FeatureRowProps): JSX.Element {
+export const FeatureRow = memo(function FeatureRow({ featureInfoItem, onInitLightBox }: FeatureRowProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const { alias, value } = featureInfoItem;
@@ -128,19 +127,7 @@ export const FeatureRow = memo(function FeatureRow({ featureInfoItem, index, onI
   const itemIds = useMemo(() => stringValues.map(() => generateId()), [stringValues]);
 
   return (
-    <Grid
-      container
-      spacing={5}
-      className="feature-info-row"
-      style={
-        {
-          '--row-bg-color': index % 2 > 0 ? theme.palette.geoViewColor.bgColor.darken(0.1) : 'transparent',
-        } as React.CSSProperties
-      }
-      sx={{
-        ...sxClasses.featureInfoRow,
-      }}
-    >
+    <Grid container spacing={5} className="feature-info-row" sx={sxClasses.featureInfoRow}>
       {featureInfoItem.alias !== 'html' && (
         <Grid
           sx={{
@@ -192,13 +179,8 @@ export const FeatureInfoTable = memo(function FeatureInfoTable({ featureInfoList
 
   return (
     <Box className="details-feature-info-table" sx={sxClasses.boxContainerFeatureInfo}>
-      {featureInfoList.map((featureInfoItem, index) => (
-        <FeatureRow
-          key={`${featureInfoItem.alias}_${generateId()}`}
-          featureInfoItem={featureInfoItem}
-          index={index}
-          onInitLightBox={initLightBox}
-        />
+      {featureInfoList.map((featureInfoItem) => (
+        <FeatureRow key={`${featureInfoItem.alias}_${generateId()}`} featureInfoItem={featureInfoItem} onInitLightBox={initLightBox} />
       ))}
       <LightBoxComponent />
     </Box>

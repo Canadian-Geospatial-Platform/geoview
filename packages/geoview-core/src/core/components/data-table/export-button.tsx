@@ -113,10 +113,17 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
 
   return (
     <>
-      <IconButton onClick={handleClick} aria-label={t('dataTable.exportBtn')} className="buttonOutline">
+      <IconButton
+        onClick={handleClick}
+        aria-controls={open ? 'data-table-export-menu' : undefined}
+        aria-expanded={open ? 'true' : 'false'}
+        aria-haspopup="true"
+        aria-label={t('dataTable.exportBtn')}
+        className="buttonOutline"
+      >
         <DownloadIcon />
       </IconButton>
-      <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+      <Menu id="data-table-export-menu" anchorEl={anchorEl} open={open} onClose={handleClose}>
         <MenuItem onClick={handleExportData}>{t('dataTable.downloadAsCSV')}</MenuItem>
         {children}
       </Menu>

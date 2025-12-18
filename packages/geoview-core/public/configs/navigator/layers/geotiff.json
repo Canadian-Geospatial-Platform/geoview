@@ -26,12 +26,12 @@
       },
       {
         "geoviewLayerId": "datacube-vegetation",
-        "geoviewLayerName": "Datacube Vegetation - 2020 fCover",
-        "metadataAccessPath": "https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/eo4ce/vegetation/vegetation-2020-fCOVER.tif",
+        "geoviewLayerName": "Datacube Vegetation - Github Issue #3166",
+        "metadataAccessPath": "https://datacube.services.geo.ca/stac/api/collections/vegetation/items/vegetation-2020",
         "geoviewLayerType": "GeoTIFF",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "datacube1"
+            "layerId": "fCOVER"
           }
         ]
       },
@@ -45,6 +45,17 @@
             "layerId": "TCI.tif"
           }
         ]
+      },
+      {
+        "geoviewLayerId": "datacube-landcover",
+        "geoviewLayerName": "Landcover 2020 - Github Issue #3166",
+        "metadataAccessPath": "https://datacube.services.geo.ca/stac/api/collections/landcover/items/landcover-2020/",
+        "geoviewLayerType": "GeoTIFF",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "classification"
+          }
+        ]
       }
     ]
   },
@@ -54,14 +65,14 @@
   },
   "footerBar": {
     "tabs": {
-      "core": ["legend", "layers", "details", "data-table"]
+      "core": ["layers", "data-table"]
     }
   },
   "corePackages": [],
   "theme": "geo.ca",
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "export"]
+      "core": ["geolocator", "legend", "details", "export"]
     }
   }
 }

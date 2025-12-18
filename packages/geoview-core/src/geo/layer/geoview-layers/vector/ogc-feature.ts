@@ -1,6 +1,5 @@
 import type { Options as SourceOptions } from 'ol/source/Vector';
 import { GeoJSON as FormatGeoJSON } from 'ol/format';
-import type { ReadOptions } from 'ol/format/Feature';
 import type { Vector as VectorSource } from 'ol/source';
 import type Feature from 'ol/Feature';
 
@@ -62,7 +61,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<T = TypeMetadataOGCFeature>} A promise with the metadata or undefined when no metadata for the particular layer type.
-   * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    */
   protected override async onFetchServiceMetadata<T = TypeMetadataOGCFeature>(abortSignal?: AbortSignal): Promise<T> {
     try {
@@ -77,7 +76,7 @@ export class OgcFeature extends AbstractGeoViewVector {
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
-   * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Get the folder url
@@ -184,23 +183,20 @@ export class OgcFeature extends AbstractGeoViewVector {
    * Overrides the creation of the source configuration for the vector layer.
    * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration.
    * @param {SourceOptions} sourceOptions - The source options.
-   * @param {ReadOptions} readOptions - The read options.
    * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
+   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    */
   protected override onCreateVectorSource(
     layerConfig: VectorLayerEntryConfig,
-    sourceOptions: SourceOptions<Feature>,
-    readOptions: ReadOptions
+    sourceOptions: SourceOptions<Feature>
   ): VectorSource<Feature> {
     // eslint-disable-next-line no-param-reassign
-    readOptions.dataProjection = layerConfig.source?.dataProjection;
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = `${layerConfig.source!.dataAccessPath}/collections/${layerConfig.layerId}/items?f=json`;
+    sourceOptions.url = `${layerConfig.getDataAccessPath(true)}collections/${layerConfig.layerId}/items?f=json`;
     // eslint-disable-next-line no-param-reassign
     sourceOptions.format = new FormatGeoJSON();
 
     // Call parent
-    return super.onCreateVectorSource(layerConfig, sourceOptions, readOptions);
+    return super.onCreateVectorSource(layerConfig, sourceOptions);
   }
 
   /**
@@ -225,16 +221,15 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @private
    */
   static #processFeatureInfoConfig(fields: TypeLayerMetadataOGC, layerConfig: VectorLayerEntryConfig): void {
-    // eslint-disable-next-line no-param-reassign
-    if (!layerConfig.source) layerConfig.source = {};
-    // eslint-disable-next-line no-param-reassign
-    if (!layerConfig.source.featureInfo) layerConfig.source.featureInfo = { queryable: true };
+    // Get the outfields
+    let outfields = layerConfig.getOutfields();
 
     // Process undefined outfields or aliasFields
-    if (!layerConfig.source.featureInfo.outfields?.length) {
-      // eslint-disable-next-line no-param-reassign
-      if (!layerConfig.source.featureInfo.outfields) layerConfig.source.featureInfo.outfields = [];
+    if (!outfields?.length) {
+      // Create it
+      outfields = [];
 
+      // Loop
       Object.keys(fields).forEach((fieldEntryKey) => {
         if (fields[fieldEntryKey].type === 'Geometry') return;
 
@@ -252,30 +247,28 @@ export class OgcFeature extends AbstractGeoViewVector {
           type: fieldType as 'string' | 'number' | 'date',
           domain: null,
         };
-        layerConfig.source!.featureInfo!.outfields!.push(newOutfield);
+        outfields!.push(newOutfield);
       });
+
+      // Set it
+      layerConfig.setOutfields(outfields);
     }
 
-    layerConfig.source.featureInfo.outfields.forEach((outfield) => {
-      // eslint-disable-next-line no-param-reassign
-      if (!outfield.alias) outfield.alias = outfield.name;
-    });
+    // Initialize the aliases
+    layerConfig.initOutfieldsAliases();
 
-    // Set name field to first value
-    if (!layerConfig.source.featureInfo.nameField) {
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.source.featureInfo.nameField = layerConfig.source.featureInfo.outfields[0].name;
-    }
+    // Initialize the name field
+    layerConfig.initNameField(outfields?.[0]?.name);
   }
 
   /**
    * Fetches the metadata for a typical OGCFeature class.
    * @param {string} url - The url to query the metadata from.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
-   * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
-   * @throws {RequestAbortedError} Error thrown when the request was aborted by the caller's signal.
-   * @throws {ResponseError} Error thrown when the response is not OK (non-2xx).
-   * @throws {ResponseEmptyError} Error thrown when the JSON response is empty.
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
+   * @throws {ResponseError} When the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} When the JSON response is empty.
    */
   static fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataOGCFeature> {
     // The url

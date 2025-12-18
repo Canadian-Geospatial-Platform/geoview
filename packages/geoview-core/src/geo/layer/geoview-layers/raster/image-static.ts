@@ -13,11 +13,7 @@ import {
   LayerEntryConfigParameterExtentNotDefinedInSourceError,
   LayerEntryConfigParameterProjectionNotDefinedInSourceError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
-import {
-  LayerDataAccessPathMandatoryError,
-  LayerMissingSourceExtentError,
-  LayerMissingSourceProjectionError,
-} from '@/core/exceptions/layer-exceptions';
+import { LayerMissingSourceExtentError, LayerMissingSourceProjectionError } from '@/core/exceptions/layer-exceptions';
 import { GVImageStatic } from '@/geo/layer/gv-layers/raster/gv-image-static';
 
 export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
@@ -205,30 +201,25 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * Creates a StaticImage source from a layer config.
    * @param {ImageStaticLayerEntryConfig} layerConfig - Configuration for the image static layer.
    * @returns A configured ol/source/ImageStatic instance.
-   * @throws If required config fields like dataAccessPath, extent, or projection are missing.
+   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   * @throws {LayerEntryConfigParameterExtentNotDefinedInSourceError} When the source extent isn't defined.
+   * @throws {LayerEntryConfigParameterProjectionNotDefinedInSourceError} When the source projection isn't defined.
    */
   static createImageStaticSource(layerConfig: ImageStaticLayerEntryConfig): Static {
-    const { source } = layerConfig;
-
-    // Validate required properties
-    if (!source?.dataAccessPath) {
-      throw new LayerDataAccessPathMandatoryError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
-    }
-
-    if (!source.extent) {
+    if (!layerConfig.source.extent) {
       throw new LayerEntryConfigParameterExtentNotDefinedInSourceError(layerConfig);
     }
 
-    if (!source.projection) {
+    if (!layerConfig.source.projection) {
       throw new LayerEntryConfigParameterProjectionNotDefinedInSourceError(layerConfig);
     }
 
     // Assemble the source options
     const sourceOptions: SourceOptions = {
-      url: source.dataAccessPath,
-      imageExtent: source.extent,
-      projection: `EPSG:${source.projection}`,
-      crossOrigin: source.crossOrigin ?? 'Anonymous',
+      url: layerConfig.getDataAccessPath(),
+      imageExtent: layerConfig.source.extent,
+      projection: `EPSG:${layerConfig.source.projection}`,
+      crossOrigin: layerConfig.source.crossOrigin ?? 'Anonymous',
     };
 
     return new Static(sourceOptions);

@@ -5,6 +5,7 @@ import { useTheme } from '@mui/material/styles';
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { DownloadIcon } from '@/ui/icons/index';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useLayerAreLayersLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 /**
@@ -31,6 +32,7 @@ export default function ExportButton({ className = '', sxDetails, ariaExpanded =
   // get store function
   const mapId = useGeoViewMapId();
   const { enableFocusTrap } = useUIStoreActions();
+  const layersAreLoading = useLayerAreLayersLoading();
 
   return (
     <IconButton
@@ -41,6 +43,7 @@ export default function ExportButton({ className = '', sxDetails, ariaExpanded =
       onClick={() => enableFocusTrap({ activeElementId: 'export', callbackElementId: `${mapId}-export-btn` })}
       sx={{ [theme.breakpoints.down('md')]: { display: 'none' }, ...sxDetails }}
       className={className}
+      disabled={layersAreLoading}
     >
       <DownloadIcon />
     </IconButton>

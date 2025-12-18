@@ -1,6 +1,5 @@
 import type { MutableRefObject, ReactNode } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { camelCase } from 'lodash';
 import { useTheme } from '@mui/material/styles';
 
 import type { TypeTabs } from '@/ui';
@@ -18,7 +17,6 @@ import {
   useUIFooterBarIsCollapsed,
   useUIHiddenTabs,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 import type { FooterBarApi, FooterTabCreatedEvent, FooterTabRemovedEvent } from '@/core/components';
 import { DEFAULT_FOOTER_TABS_ORDER } from '@/api/types/map-schema-types';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
@@ -35,7 +33,7 @@ import { Guide } from '@/core/components/guide/guide';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { FooterPlugin } from '@/api/plugin/footer-plugin';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
-import { delay, scrollIfNotVisible } from '@/core/utils/utilities';
+import { camelCase, delay, scrollIfNotVisible } from '@/core/utils/utilities';
 
 interface Tab {
   icon: ReactNode;
@@ -76,7 +74,6 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const isCollapsed = useUIFooterBarIsCollapsed();
   const shellContainer = useAppShellContainer();
   const { setActiveFooterBarTab, enableFocusTrap, disableFocusTrap, setFooterBarIsCollapsed } = useUIStoreActions();
-  const mapSize = useMapSize() || [200, 200]; // Default in case the map isn't rendered yet and the Footer tries to render
   const appHeight: number = useAppHeight();
   const hiddenTabs: string[] = useUIHiddenTabs();
 
@@ -150,6 +147,9 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const memoFooterBarTabs = useMemo(() => {
     // Log
     logger.logTraceUseMemo('FOOTER-BAR - memoFooterBarTabs', tabsList, memoTabs);
+
+    // Early return if no footer tab provided
+    if (!tabsList || Object.keys(tabsList).length === 0) return [];
 
     // Set the allTabs (union of all footer tabs) and get the needed keys
     const allTabs = { ...tabsList, ...memoTabs };
@@ -392,13 +392,15 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     if (!tabsContainerRef?.current) return () => {};
 
     const handleClick = (): void => {
-      if (tabsContainerRef.current) {
-        // Need delay to allow tabs container to resize on expand/collapse
-        delay(25).then(
-          () => scrollIfNotVisible(tabsContainerRef.current!, 'end'),
-          (error: unknown) => logger.logPromiseFailed('Delay failed', error)
-        );
-      }
+      // Need delay to allow tabs container to resize on expand/collapse
+      delay(25).then(
+        () => {
+          if (tabsContainerRef.current) {
+            scrollIfNotVisible(tabsContainerRef.current, 'end');
+          }
+        },
+        (error: unknown) => logger.logPromiseFailed('Delay failed', error)
+      );
     };
 
     const header = tabsContainerRef.current.querySelector('#footerbar-header');
@@ -408,7 +410,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     return () => {
       header?.removeEventListener('click', handleClick);
     };
-  }, [tabsContainerRef]);
+  }, []);
 
   return memoFooterBarTabs.length > 0 ? (
     <Box
@@ -431,7 +433,6 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         TabContentVisibilty={!isCollapsed ? 'visible' : 'hidden'}
         containerType={CONTAINER_TYPE.FOOTER_BAR}
         rightButtons={!isCollapsed && isMapFullScreen && <ResizeFooterPanel />}
-        sideAppSize={mapSize}
         appHeight={appHeight}
         hiddenTabs={hiddenTabs}
         isFullScreen={isMapFullScreen}

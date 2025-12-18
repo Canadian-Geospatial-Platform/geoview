@@ -7,7 +7,6 @@ export type TypeLayersViewDisplayState = 'remove' | 'add' | 'order' | 'view';
 
 export type TypeLegendLayerItem = {
   geometryType?: TypeStyleGeometry;
-  iconType?: 'simple' | 'list';
   name?: string;
   iconImage?: string | null;
   iconImageStacked?: string | null;

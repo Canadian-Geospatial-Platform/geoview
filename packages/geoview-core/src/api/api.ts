@@ -9,7 +9,7 @@ import * as Utilities from '@/core/utils/utilities';
 
 import { Projection } from '@/geo/utils/projection';
 import type { MapViewer } from '@/geo/map/map-viewer';
-import * as GeoUtilities from '@/geo/utils/utilities';
+import { GeoUtilities } from '@/geo/utils/utilities';
 import { LayerApi } from '@/geo/layer/layer';
 
 import { initMapDivFromFunctionCall, unmountMap } from '@/app';

@@ -1,23 +1,27 @@
 import { useCallback, useEffect, useState, useMemo, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-
 import {
-  List,
-  ZoomInSearchIcon,
-  Tooltip,
-  IconButton,
-  Paper,
   Box,
-  Typography,
   BrowserNotSupportedIcon,
+  ChartIcon,
   HighlightIcon,
   HighlightOutlinedIcon,
+  IconButton,
+  Paper,
+  Typography,
+  ZoomInSearchIcon,
 } from '@/ui';
 import { useDetailsCheckedFeatures, useDetailsStoreActions } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import {
+  useGeochartConfigs,
+  useGeochartLayerDataArrayBatch,
+  useGeochartStoreActions,
+} from '@/core/stores/store-interface-and-intial-values/geochart-state';
+import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 import { logger } from '@/core/utils/logger';
-import { bufferExtent } from '@/geo/utils/utilities';
+import { GeoUtilities } from '@/geo/utils/utilities';
 import type { TypeFeatureInfoEntry, TypeFieldEntry } from '@/api/types/map-schema-types';
 import { FeatureInfoTable } from './feature-info-table';
 import { getSxClasses } from './details-style';
@@ -30,15 +34,17 @@ interface FeatureHeaderProps {
   iconSrc: string | undefined;
   name: string;
   hasGeometry: boolean;
+  hasGeochart: boolean;
   checked: boolean;
   onCheckChange: (event: React.MouseEvent<HTMLButtonElement>) => void;
   onZoomIn: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  onGeochart: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 // Constants outside component to prevent recreating every render
 const HEADER_STYLES = {
   container: {
-    p: '0 20px 10px 20px',
+    p: '0 16px 10px 16px',
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -60,7 +66,16 @@ const ZOOM_MAX_LEVEL = 17;
 const EXTENT_BUFFER = 1000;
 
 // Extracted Header Component
-const FeatureHeader = memo(function FeatureHeader({ iconSrc, name, hasGeometry, checked, onCheckChange, onZoomIn }: FeatureHeaderProps) {
+const FeatureHeader = memo(function FeatureHeader({
+  iconSrc,
+  name,
+  hasGeometry,
+  hasGeochart,
+  checked,
+  onCheckChange,
+  onZoomIn,
+  onGeochart,
+}: FeatureHeaderProps) {
   // Hooks
   const { t } = useTranslation();
   const theme = useTheme();
@@ -95,17 +110,28 @@ const FeatureHeader = memo(function FeatureHeader({ iconSrc, name, hasGeometry, 
           [theme.breakpoints.down('sm')]: { display: 'none' },
         }}
       >
-        <Tooltip title={t('details.keepFeatureSelected')} placement="top" enterDelay={1000}>
+        {hasGeochart && (
           <IconButton
-            aria-label={t('details.keepFeatureSelected')}
+            color="primary"
+            aria-label={t('details.selectLayerAndScrollChart')}
             tooltipPlacement="top"
-            disabled={!hasGeometry}
-            onClick={onCheckChange}
-            sx={sxClasses.selectFeatureCheckbox}
+            onClick={onGeochart}
+            className="buttonOutline"
+            size="small"
           >
-            {checked ? <HighlightIcon /> : <HighlightOutlinedIcon />}
+            <ChartIcon />
           </IconButton>
-        </Tooltip>
+        )}
+        <IconButton
+          aria-label={t('details.keepFeatureSelected')}
+          tooltipPlacement="top"
+          disabled={!hasGeometry}
+          onClick={onCheckChange}
+          className="buttonOutline"
+          size="small"
+        >
+          {checked ? <HighlightIcon /> : <HighlightOutlinedIcon />}
+        </IconButton>
         <IconButton
           color="primary"
           aria-label={t('details.zoomTo')}
@@ -113,6 +139,7 @@ const FeatureHeader = memo(function FeatureHeader({ iconSrc, name, hasGeometry, 
           disabled={!hasGeometry}
           onClick={onZoomIn}
           className="buttonOutline"
+          size="small"
         >
           <ZoomInSearchIcon />
         </IconButton>
@@ -135,6 +162,15 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
   const checkedFeatures = useDetailsCheckedFeatures();
   const { addCheckedFeature, removeCheckedFeature } = useDetailsStoreActions();
   const { zoomToExtent, highlightBBox, addHighlightedFeature } = useMapStoreActions();
+  const geochartLayerDataArrayBatch = useGeochartLayerDataArrayBatch();
+  const { setSelectedLayerPath } = useGeochartStoreActions() ?? {};
+  const geochartConfigs = useGeochartConfigs();
+
+  // Use navigate hook for geochart (only if geochart state exists)
+  const navigateToGeochart = useNavigateToTab(
+    'geochart',
+    setSelectedLayerPath ? (layerPath: string) => setSelectedLayerPath(layerPath) : undefined
+  );
 
   // Feature data processing
   const featureData = useMemo(() => {
@@ -193,7 +229,7 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
 
       // Buffer the extent to avoid zooming too close if it's a point
       const isPoint = featureData.geometry!.getType() === 'Point';
-      const zoomExtent = isPoint ? bufferExtent(featureData.extent, EXTENT_BUFFER) : featureData.extent;
+      const zoomExtent = isPoint ? GeoUtilities.bufferExtent(featureData.extent, EXTENT_BUFFER) : featureData.extent;
 
       // Zoom to extent and highlight the feature
       zoomToExtent(zoomExtent, { padding: ZOOM_PADDING, maxZoom: ZOOM_MAX_LEVEL })
@@ -212,6 +248,15 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
     [featureData, feature, zoomToExtent, highlightBBox, addHighlightedFeature]
   );
 
+  const handleGeochart = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
+      event.stopPropagation();
+      if (!feature) return;
+      navigateToGeochart({ layerPath: feature.layerPath });
+    },
+    [feature, navigateToGeochart]
+  );
+
   // Effects
   useEffect(() => {
     logger.logTraceUseEffect('FEATURE-INFO - checkedFeatures', checkedFeatures);
@@ -224,20 +269,27 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
   // Early return if no feature
   if (!featureData) return null;
 
+  // Check if layer has geochart config and data with features
+  const hasGeochart =
+    !!geochartConfigs?.[feature.layerPath] &&
+    (geochartLayerDataArrayBatch?.some((entry) => entry.layerPath === feature.layerPath && (entry.features?.length ?? 0) > 0) ?? false);
+
   return (
     <Paper sx={PAPER_STYLES}>
       <FeatureHeader
         iconSrc={featureData.iconSrc}
         name={featureData.name}
         hasGeometry={!!featureData.geometry && !!featureData.extent && !featureData.extent.includes(Infinity)}
+        hasGeochart={hasGeochart}
         checked={checked}
         onCheckChange={handleFeatureSelectedChange}
         onZoomIn={handleZoomIn}
+        onGeochart={handleGeochart}
       />
 
-      <List sx={sxClasses.featureInfoListContainer}>
+      <Box sx={sxClasses.featureInfoListContainer}>
         <FeatureInfoTable featureInfoList={featureInfoList} />
-      </List>
+      </Box>
     </Paper>
   );
 }

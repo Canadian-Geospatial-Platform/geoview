@@ -13,7 +13,6 @@
       {
         "geoviewLayerId": "0a309f2c-4f11-4ddb-bce1-e7ba6f8c20cf",
         "geoviewLayerName": "Stories from the land: Indigenous Place Names in Canada",
-        "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {
@@ -31,7 +30,6 @@
       {
         "geoviewLayerId": "44cebdbe-a3a5-4f02-9f1d-66af8dbf76f1",
         "geoviewLayerName": "Recognizing Women with Canadian Place Names",
-        "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {
@@ -49,7 +47,6 @@
       {
         "geoviewLayerId": "66909604-f685-4f1b-a3d8-447996e6b41b",
         "geoviewLayerName": "Majority (%) mother tongue by census division, 2016",
-        "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {

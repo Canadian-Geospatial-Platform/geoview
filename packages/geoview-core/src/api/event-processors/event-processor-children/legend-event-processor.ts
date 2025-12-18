@@ -3,12 +3,10 @@ import type { TimeDimension } from '@/core/utils/date-mgt';
 import type { TypeGeoviewLayerType, TypeLayerControls } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
-import type { TypeWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { isImageStaticLegend, isVectorLegend, isWmsLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { isGeoTIFFLegend, isImageStaticLegend, isVectorLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { LayerWrongTypeError } from '@/core/exceptions/layer-exceptions';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -27,7 +25,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Shortcut to get the Layer state for a given map id
-   * @param {string} mapId The mapId
+   * @param {string} mapId - The mapId
    * @returns {ILayerState} The Layer state
    */
   protected static getLayerState(mapId: string): ILayerState {
@@ -130,7 +128,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * If the property exists, its value is returned; otherwise, `undefined` is returned.
    */
   static getLayerEntryConfigDefaultFilter(mapId: string, layerPath: string): string | undefined {
-    const entryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath) as AbstractBaseLayerEntryConfig;
+    const entryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfigIfExists(layerPath);
 
     // Check if entryConfig exists and has layerFilter property
     return entryConfig && 'layerFilter' in entryConfig ? (entryConfig.layerFilter as string) : undefined;
@@ -193,12 +191,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * Gets the extent of a feature or group of features
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path
-   * @param {string[]} objectIds - The IDs of features to get extents from.
+   * @param {number[]} objectIds - The IDs of features to get extents from.
    * @param {string} outfield - ID field to return for services that require a value in outfields.
    * @returns {Promise<Extent>} The extent of the feature, if available
-   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
-  static getExtentFromFeatures(mapId: string, layerPath: string, objectIds: string[], outfield?: string): Promise<Extent> {
+  static getExtentFromFeatures(mapId: string, layerPath: string, objectIds: number[], outfield?: string): Promise<Extent> {
     // Get the layer api
     const layerApi = MapEventProcessor.getMapViewerLayerAPI(mapId);
 
@@ -222,7 +220,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * This method fetches the Geoview layer for the specified layer path and checks if it has a `getTimeDimension` method.
    * If the method exists, it retrieves the temporal dimension information for the layer.
    * If the layer doesn't support temporal dimensions, the method returns `undefined`.
-   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
   static getLayerTimeDimension(mapId: string, layerPath: string): TimeDimension | undefined {
     // Get the layer api
@@ -236,23 +234,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     return undefined;
   }
 
-  static getLayerIconImage(layerLegend: TypeLegend | null): TypeLegendLayerItem[] | undefined {
+  static getLayerIconImage(layerLegend: TypeLegend | null | undefined): TypeLegendLayerItem[] | undefined {
     // TODO: Refactor - Move this function to a utility class instead of at the 'processor' level so it's safer to call from a layer framework level class
     const iconDetails: TypeLegendLayerItem[] = [];
     if (layerLegend) {
-      if (isWmsLegend(layerLegend) || isImageStaticLegend(layerLegend)) {
-        const iconDetailsEntry: TypeLegendLayerItem = {};
-        iconDetailsEntry.iconType = 'simple';
-        // Use icon image if available
-        if (layerLegend.legend) iconDetailsEntry.iconImage = layerLegend.legend.toDataURL();
-        // Otherwise use image from first style
-        else if ((layerLegend as TypeWmsLegend).styles && (layerLegend as TypeWmsLegend).styles![0].legend)
-          iconDetailsEntry.iconImage = (layerLegend as TypeWmsLegend).styles![0].legend!.toDataURL();
-        // No styles or image, no icon
-        else iconDetailsEntry.iconImage = 'no data';
-        iconDetails.push(iconDetailsEntry);
-      } else if (layerLegend.legend === null || Object.keys(layerLegend.legend).length === 0) iconDetails[0] = { iconImage: 'no data' };
-      else if (isVectorLegend(layerLegend)) {
+      if (isVectorLegend(layerLegend)) {
         Object.entries(layerLegend.legend).forEach(([key, styleRepresentation]) => {
           const geometryType = key as TypeStyleGeometry;
           const styleSettings = layerLegend.styleConfig![geometryType]!;
@@ -260,7 +246,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           iconDetailsEntry.geometryType = geometryType;
 
           if (styleSettings.type === 'simple') {
-            iconDetailsEntry.iconType = 'simple';
             iconDetailsEntry.iconImage = (styleRepresentation.defaultCanvas as HTMLCanvasElement).toDataURL();
             iconDetailsEntry.name = styleSettings.info[0].label;
 
@@ -274,7 +259,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             iconDetailsEntry.iconList = [legendLayerListItem];
             iconDetails.push(iconDetailsEntry);
           } else {
-            iconDetailsEntry.iconType = 'list';
             iconDetailsEntry.iconList = [];
             styleRepresentation.arrayOfCanvas!.forEach((canvas, i) => {
               // Check if there is already an entry for this label before adding it.
@@ -303,6 +287,17 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             iconDetails.push(iconDetailsEntry);
           }
         });
+      } else {
+        const iconDetailsEntry: TypeLegendLayerItem = {};
+        // Use html canvas if available
+        const htmlElement = layerLegend.legend as HTMLCanvasElement | undefined;
+        if (htmlElement?.toDataURL) {
+          iconDetailsEntry.iconImage = htmlElement.toDataURL();
+        } else {
+          // No styles or image, no icon
+          iconDetailsEntry.iconImage = 'no data';
+        }
+        iconDetails.push(iconDetailsEntry);
       }
 
       return iconDetails;
@@ -313,8 +308,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   /**
    * This method propagates the information stored in the legend layer set to the store.
    *
-   * @param {string} mapId The map identifier.
-   * @param {TypeLegendResultSetEntry} legendResultSetEntry The legend result set that triggered the propagation.
+   * @param {string} mapId - The map identifier.
+   * @param {TypeLegendResultSetEntry} legendResultSetEntry - The legend result set that triggered the propagation.
    */
   static propagateLegendToStore(mapId: string, legendResultSetEntry: TypeLegendResultSetEntry): void {
     const { layerPath } = legendResultSetEntry;
@@ -340,7 +335,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     };
 
     // TODO: refactor - avoid nested function relying on outside parameter like layerPathNodes
-    // TODO.CONT: The layerId set by this array has the map identifier in front... remove
+    // TO.DOCONT: The layerId set by this array has the map identifier in front... remove
     const createNewLegendEntries = (currentLevel: number, existingEntries: TypeLegendLayer[]): void => {
       // If outside of range of layer paths, stop
       if (layerPathNodes.length < currentLevel) return;
@@ -349,7 +344,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       const entryLayerPath = suffix.join('/');
 
       // Get the layer config
-      const layerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(entryLayerPath);
+      const layerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfigIfExists(entryLayerPath);
 
       // If not found, skip
       if (!layerConfig) return;
@@ -412,7 +407,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         }
 
         // Read the icons
-        const icons = LegendEventProcessor.getLayerIconImage(legendResultSetEntry.data!);
+        const icons = LegendEventProcessor.getLayerIconImage(legendResultSetEntry.data);
 
         const controls: TypeLayerControls = setLayerControls(layerConfig, currentLevel > 2);
         const legendLayerEntry: TypeLegendLayer = {
@@ -446,6 +441,16 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
         // Also take care of image static by storing the iconImage into the icon property on-the-fly
         if (isImageStaticLegend(legendResultSetEntry.data!) && icons && icons.length > 0) {
+          legendLayerEntry.items.push({
+            geometryType: 'Point',
+            name: 'image',
+            icon: icons[0].iconImage || null,
+            isVisible: true,
+          });
+        }
+
+        // Also take care of GeoTIFF by storing the iconImage into the icon property on-the-fly
+        if (isGeoTIFFLegend(legendResultSetEntry.data!) && icons && icons.length > 0) {
           legendLayerEntry.items.push({
             geometryType: 'Point',
             name: 'image',
@@ -591,7 +596,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * Refresh layer and reset states.
    * @param {string} mapId - The ID of the map.
    * @param {string} layerPath - The layer path of the layer to refresh.
-   * @throws {LayerNotFoundError} Error thrown when the layer couldn't be found at the given layer path.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
   static refreshLayer(mapId: string, layerPath: string): void {
     // Get the layer through layer API
@@ -600,12 +605,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     // Refresh the layer
     layer?.refresh(MapEventProcessor.getMapViewer(mapId).getProjection());
 
-    // TODO Update after refactor, layerEntryConfig will not know initial settings
-    const layerEntryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath);
+    // Get the layer config
+    const layerConfig = layer.getLayerConfig();
 
     // Reset layer states to original values
-    const opacity = layerEntryConfig?.getInitialSettings().states?.opacity ?? 1; // default: 1
-    const visibility = layerEntryConfig?.getInitialSettings().states?.visible ?? true; // default: true
+    const opacity = layerConfig.getInitialSettings().states?.opacity ?? 1; // default: 1
+    const visibility = layerConfig.getInitialSettings().states?.visible ?? true; // default: true
     LegendEventProcessor.setLayerOpacity(mapId, layerPath, opacity);
     MapEventProcessor.setOrToggleMapLayerVisibility(mapId, layerPath, visibility);
 
@@ -749,7 +754,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
     // ! Wrong pattern, need to be look at...
     // TODO: These setters take curLayers, modify an object indirectly (which happens to affect an object inside curLayers!),
-    // TODO.CONT: and then return curLayers—making it appear unchanged when reading the code. This behavior needs careful review.
+    // TO.DOCONT: and then return curLayers—making it appear unchanged when reading the code. This behavior needs careful review.
     const curLayers = this.getLayerState(mapId).legendLayers;
     this.getLegendLayerInfo(mapId, layerPath)!.hoverable = hoverable;
 
@@ -769,7 +774,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
     // ! Wrong pattern, need to be look at...
     // TODO: These setters take curLayers, modify an object indirectly (which happens to affect an object inside curLayers!),
-    // TODO.CONT: and then return curLayers—making it appear unchanged when reading the code. This behavior needs careful review.
+    // TO.DOCONT: and then return curLayers—making it appear unchanged when reading the code. This behavior needs careful review.
     const curLayers = this.getLayerState(mapId).legendLayers;
     this.getLegendLayerInfo(mapId, layerPath)!.queryable = queryable;
 
@@ -796,7 +801,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    */
   static getFeatureVisibleFromClassVibility(mapId: string, layerPath: string, features: TypeFeatureInfoEntry[]): TypeFeatureInfoEntry[] {
     // Get the layer config and geometry type
-    const layerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath) as AbstractBaseLayerEntryConfig;
+    const layerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfigRegular(layerPath);
     const [geometryType] = layerConfig.getTypeGeometries();
 
     // Get the style
@@ -839,10 +844,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const visibleValues = new Set(styleUnique.filter((style) => style.visible).map((style) => style.values.join(';')));
     const unvisibleValues = new Set(styleUnique.filter((style) => !style.visible).map((style) => style.values.join(';')));
 
-    // GV: Some esri layer has uniqueValue renderer but there is no field define in their metadata (i.e. e2424b6c-db0c-4996-9bc0-2ca2e6714d71).
-    // TODO: The fields contain undefined, it should be empty. Check in new config api
-    // TODO: This is a workaround
-    if (uniqueValueStyle.fields[0] === undefined) uniqueValueStyle.fields.pop();
+    // TODO: Cleanup - This seems to be unnecessary now, commenting it for testing (2025-11-24)
+    // // GV: Some esri layer has uniqueValue renderer but there is no field define in their metadata (i.e. e2424b6c-db0c-4996-9bc0-2ca2e6714d71).
+    // // TODO: The fields contain undefined, it should be empty. Check in new config api
+    // // TODO: This is a workaround
+    // if (uniqueValueStyle.fields[0] === undefined) uniqueValueStyle.fields.pop();
 
     // Filter features based on visibility
     return features.filter((feature) => {

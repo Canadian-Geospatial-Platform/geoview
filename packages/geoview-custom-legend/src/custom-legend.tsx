@@ -177,12 +177,25 @@ export function CustomLegendPanel(props: CustomLegendPanelProps): JSX.Element {
 
     return (
       <Box key={id} sx={{ marginLeft: level * 2, marginBottom: 1 }}>
-        <Box className="legend-item-container" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box className="legend-item-container" sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
           {renderSymbol(legendItem.symbol)}
-          <div className="legend-text">
-            <span className="legend-title">{name}</span>
-            {description && <span className="legend-description">{description}</span>}
-          </div>
+          <Box className="legend-text" sx={{ flex: 1 }}>
+            <Box className="legend-title" sx={{ fontSize: config.display?.text?.size || 12, fontWeight: 'normal' }}>
+              {name}
+            </Box>
+            {description && (
+              <Box
+                className="legend-description"
+                sx={{
+                  fontSize: (config.display?.text?.size || 12) * 0.88,
+                  color: theme.palette.geoViewColor.textColor.light[600],
+                  marginTop: 0.5,
+                }}
+              >
+                {description}
+              </Box>
+            )}
+          </Box>
         </Box>
       </Box>
     );

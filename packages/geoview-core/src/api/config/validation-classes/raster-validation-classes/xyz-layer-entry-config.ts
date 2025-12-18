@@ -31,14 +31,11 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
     this.minScaleDenominator = layerConfig.minScaleDenominator || 0;
     this.maxScaleDenominator = layerConfig.maxScaleDenominator || 0;
 
-    this.source ??= {};
-    this.source.dataAccessPath ??= layerConfig.source?.dataAccessPath ?? this.getMetadataAccessPath();
-
-    // Format the dataAccessPath correctly
-    if (!this.source.dataAccessPath!.includes('{z}/{y}/{x}'))
-      this.source.dataAccessPath = this.source.dataAccessPath!.endsWith('/')
-        ? `${this.source.dataAccessPath}tile/{z}/{y}/{x}`
-        : `${this.source.dataAccessPath}/tile/{z}/{y}/{x}`;
+    // If pointing to something else than {z}/{y}/{x}
+    if (!this.getDataAccessPath().includes('{z}/{y}/{x}')) {
+      // Set it
+      this.setDataAccessPath(`${this.getDataAccessPath(true)}tile/{z}/{y}/{x}`);
+    }
   }
 
   /**

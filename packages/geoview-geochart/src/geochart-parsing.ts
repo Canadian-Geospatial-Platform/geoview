@@ -44,7 +44,7 @@ export class GeoChartParsing {
           // If found a corresponding layer config
           if (foundConfigChartLyr) {
             // Grab the layer entry config associated with the layer path
-            foundLayerEntry = layerApi.getLayerEntryConfig(layerData.layerPath);
+            foundLayerEntry = layerApi.getLayerEntryConfigIfExists(layerData.layerPath);
 
             // Grab the working data and this will exit the loop
             foundData = layerData.features;

@@ -85,6 +85,11 @@
     "selectedTab": "data-table",
     "selectedDataTableLayerPath": "uniqueValueId/1"
   },
+  "footerBar": {
+    "tabs": {
+      "core": []
+    }
+  },
   "navBar": ["zoom", "fullscreen", "home", "location"],
   "components": ["north-arrow", "overview-map"],
   "corePackages": [],

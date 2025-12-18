@@ -1,3 +1,4 @@
+import type { ClassType } from 'geoview-core/core/types/global-types';
 import {
   TestError,
   AssertionJSONObjectError,
@@ -202,6 +203,8 @@ export class Test<T = unknown> {
 
   // #region STATIC
 
+  // #region PRIMITIVES
+
   /**
    * Asserts that two values are strictly equal (`===`).
    * @param {T} actualValue - The actual value being checked.
@@ -215,38 +218,6 @@ export class Test<T = unknown> {
 
     // Throw
     throw new AssertionValueError(actualValue, expectedValue);
-  }
-
-  /**
-   * Asserts that two arrays have equal values and in the same order (deep comparison).
-   * @param {T[]} actualValue - The actual array being checked.
-   * @param {T[]} expectedValue - The expected array to compare against.
-   * @throws {AssertionError} If the arrays are not equal.
-   * @static
-   */
-  static assertIsArrayEqual<T = unknown>(actualValue: T[], expectedValue: T[]): void {
-    // Check if both are arrays
-    if (!Array.isArray(actualValue)) {
-      throw new AssertionValueNotAnArrayError(actualValue);
-    }
-    if (!Array.isArray(expectedValue)) {
-      throw new AssertionValueNotAnArrayError(expectedValue);
-    }
-
-    // Check if lengths are equal
-    if (actualValue.length !== expectedValue.length) {
-      throw new AssertionArrayLengthError(actualValue.length, expectedValue.length);
-    }
-
-    // Compare each element
-    for (let i = 0; i < actualValue.length; i++) {
-      if (actualValue[i] !== expectedValue[i]) {
-        throw new AssertionArraysNotEqualError(actualValue, expectedValue, i, expectedValue[i], actualValue[i]);
-      }
-    }
-
-    // If we get here, arrays are equal
-    return;
   }
 
   /**
@@ -315,6 +286,10 @@ export class Test<T = unknown> {
     throw new AssertionWrongErrorInstanceError(actualError, expectedType);
   }
 
+  // #endregion PRIMITIVES
+
+  // #region ARRAYS
+
   /**
    * Asserts that a length of a given array is equal to the expected length.
    * @param {unknown[] | undefined} array - The array to check the length.
@@ -370,6 +345,88 @@ export class Test<T = unknown> {
     // Throw
     throw new AssertionArrayExcludingError(array, expectedValue);
   }
+
+  /**
+   * Asserts that two arrays have equal values and in the same order (primitive comparison).
+   * @param {T[]} actualValue - The actual array being checked.
+   * @param {T[]} expectedValue - The expected array to compare against.
+   * @throws {AssertionValueNotAnArrayError} If one value isn't an array.
+   * @throws {AssertionArrayLengthError} If the lengths aren't the same between the 2 arrays.
+   * @throws {AssertionArraysNotEqualError} If one object isn't the same as the other object in the other array based on the primitive `===` comparer.
+   * @static
+   */
+  static assertIsArrayEqual<T = unknown>(actualValue: T[], expectedValue: T[]): void {
+    // Redirect using a primitive comparer
+    this.assertIsArrayEqualComparer(actualValue, expectedValue, (value1: T, value2: T): boolean => {
+      // Use primitive === comparer
+      return value1 === value2;
+    });
+
+    // If we get here, arrays have equal primitive values and in the same order
+    return;
+  }
+
+  /**
+   * Asserts that calls `assertJsonObject` for each object of the first array against each object of the second array, in the same order.
+   * @param {T[]} actualValue - The actual array being checked.
+   * @param {T[]} expectedValue - The expected array to compare against.
+   * @throws {AssertionValueNotAnArrayError} If one value isn't an array.
+   * @throws {AssertionArrayLengthError} If the lengths aren't the same between the 2 arrays.
+   * @throws {AssertionArraysNotEqualError} If one object isn't the same as the other object in the other array based on the `assertJsonObject` comparer.
+   * @throws {AssertionJSONObjectError} If one object isn't the same as the other object in the other array based on the `assertJsonObject` comparer.
+   * @static
+   */
+  static assertIsArrayEqualJsons<T = unknown>(actualValue: T[], expectedValue: T[]): void {
+    // Redirect using a json comparer
+    this.assertIsArrayEqualComparer(actualValue, expectedValue, (value1: T, value2: T): boolean => {
+      // Use complex assertJsonObject comparer
+      // A 'AssertionJSONObjectError' is thrown if `assertJsonObject` is not equal which provides
+      // useful information on the json object comparer error - use that exception instead of creating another one.
+      this.assertJsonObject(value1, value2);
+      return true;
+    });
+
+    // If we get here, arrays have equal json object assertions and in the same order
+    return;
+  }
+
+  /**
+   * Asserts that two arrays have equal values and in the same order (deep comparison).
+   * @param {T[]} actualValue - The actual array being checked.
+   * @param {T[]} expectedValue - The expected array to compare against.
+   * @throws {AssertionValueNotAnArrayError} If one value isn't an array.
+   * @throws {AssertionArrayLengthError} If the lengths aren't the same between the 2 arrays.
+   * @throws {AssertionArraysNotEqualError} If one object isn't the same as the other object in the other array based on the provided comparer mechanism.
+   * @static
+   */
+  static assertIsArrayEqualComparer<T = unknown>(actualValue: T[], expectedValue: T[], comparer: ComparerDelegate<T>): void {
+    // Check if both are arrays
+    if (!Array.isArray(actualValue)) {
+      throw new AssertionValueNotAnArrayError(actualValue);
+    }
+    if (!Array.isArray(expectedValue)) {
+      throw new AssertionValueNotAnArrayError(expectedValue);
+    }
+
+    // Check if lengths are equal
+    if (actualValue.length !== expectedValue.length) {
+      throw new AssertionArrayLengthError(actualValue.length, expectedValue.length);
+    }
+
+    // Compare each element in the same order
+    for (let i = 0; i < actualValue.length; i++) {
+      if (!comparer(actualValue[i], expectedValue[i])) {
+        throw new AssertionArraysNotEqualError(actualValue, expectedValue, i, expectedValue[i], actualValue[i]);
+      }
+    }
+
+    // If we get here, arrays are equal
+    return;
+  }
+
+  // #endregion ARRAYS
+
+  // #region JSON
 
   /**
    * Asserts that a JSON object has at least all the properties/values of the expected JSON object.
@@ -511,6 +568,8 @@ export class Test<T = unknown> {
     };
   }
 
+  // #endregion JSON
+
   // #endregion
 
   // #region EVENTS
@@ -575,15 +634,6 @@ export class Test<T = unknown> {
 }
 
 /**
- * Represents a constructor type that returns an instance of `T`.
- * This is useful when you need to pass around classes (constructors) generically,
- * such as for type assertions, factories, dependency injection, or reflection.
- * @template T - The type of the instance the constructor produces.
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ClassType<T = unknown> = new (...args: any[]) => T;
-
-/**
  * Define a type for the result of a JSON object assertion check
  */
 export type ObjectAssertionResult = { ok: boolean; mismatches: string[] };
@@ -621,3 +671,8 @@ export type TestType = 'regular' | 'true-negative';
  * The test statuses
  */
 export type TestStatus = 'new' | 'running' | 'verifying' | 'success' | 'failed';
+
+/**
+ * A comparer delegate to compare 2 objects and determine if they are equal.
+ */
+export type ComparerDelegate<T> = (array1: T, array2: T) => boolean;

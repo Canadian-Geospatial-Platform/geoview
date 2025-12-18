@@ -1,25 +1,26 @@
 import { Fragment, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import _ from 'lodash';
 import type { TypeLegendLayer, TypeLegendItem } from '@/core/components/layers/types';
 import { getSxClasses } from './layer-details-style';
 import {
   Box,
+  BrowserNotSupportedIcon,
   CheckBoxIcon,
   CheckBoxOutlineBlankIcon,
+  Divider,
+  Grid,
+  HighlightIcon,
+  HighlightOutlinedIcon,
   IconButton,
+  List,
+  ListItem,
   Paper,
+  RestartAltIcon,
+  TableViewIcon,
+  TimeSliderIcon,
   Typography,
   ZoomInSearchIcon,
-  Grid,
-  RestartAltIcon,
-  HighlightOutlinedIcon,
-  TableViewIcon,
-  BrowserNotSupportedIcon,
-  Divider,
-  ListItem,
-  List,
 } from '@/ui';
 import { useLayerHighlightedLayer, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
@@ -47,6 +48,8 @@ import {
   useMapStoreActions,
   useMapSelectorLayerParentHidden,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useTimeSliderLayers, useTimeSliderStoreActions } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 
 // TODO: WCAG Issue #3108 - Fix layers.moreInfo button (button nested within a button)
 // TODO: WCAG Issue #3108 - Check all disabled buttons. They may need special treatment. Need to find instance in UI first)
@@ -146,6 +149,14 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const layerVisible = useMapSelectorLayerVisibility(layerDetails.layerPath);
   const parentHidden = useMapSelectorLayerParentHidden(layerDetails.layerPath);
   const layerHidden = useMapSelectorIsLayerHiddenOnMap(layerDetails.layerPath);
+  const timeSliderLayers = useTimeSliderLayers();
+  const timeSliderActions = useTimeSliderStoreActions();
+
+  // Use navigate hook for time slider (only if time slider state exists)
+  const navigateToTimeSlider = useNavigateToTab(
+    'time-slider',
+    timeSliderActions ? (layerPath: string) => timeSliderActions.setSelectedLayerPath(layerPath) : undefined
+  );
 
   // Is highlight button disabled?
   const isLayerHighlightCapable = layerDetails.controls?.highlight;
@@ -258,7 +269,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   }, [allSublayersVisible, layerDetails, setVisibilityForAllSublayers]);
 
   const allItemsChecked = (): boolean => {
-    return _.every(layerDetails.items, (i) => i.isVisible !== false);
+    return layerDetails.items.every((i) => i.isVisible !== false);
   };
 
   function renderItemCheckbox(item: TypeLegendItem): JSX.Element | null {
@@ -270,7 +281,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     // No checkbox for simple style layers
     if (layerDetails.styleConfig[item.geometryType]?.type === 'simple') return null;
 
-    // GV: Some esri layer has uniqueValue renderer but there is no field define in their metadata (i.e. e2424b6c-db0c-4996-9bc0-2ca2e6714d71).
+    // GV: Some esri layer has uniqueValue renderer but there is no field defined in their metadata (i.e. e2424b6c-db0c-4996-9bc0-2ca2e6714d71).
     // For these layers, we need to disable checkboxes
     if (layerDetails.styleConfig[item.geometryType]?.fields[0] === undefined) return null;
 
@@ -339,10 +350,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             key={`${item.name}/${layerDetails.items.indexOf(item)}`}
             alignItems="center"
             justifyItems="stretch"
-            sx={{ display: 'flex', flexWrap: 'nowrap' }}
+            sx={{ display: 'flex', flexWrap: 'nowrap', marginBottom: '5px' }}
           >
             <Grid size={{ xs: 'auto' }}>{renderItemCheckbox(item)}</Grid>
-            <Grid size={{ xs: 'auto' }} sx={{ display: 'flex' }}>
+            <Grid size={{ xs: 'grow' }} sx={{ display: 'flex' }}>
               {item.icon ? (
                 <Box component="img" sx={{ alignSelf: 'center', maxHeight: '26px', maxWidth: '26px' }} alt={item.name} src={item.icon} />
               ) : (
@@ -372,29 +383,49 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   }
 
   function renderDetailsButton(): JSX.Element {
-    if (layerDetails.controls?.table !== false)
-      return (
-        <IconButton id="table-details" aria-label={t('legend.tableDetails')} className="buttonOutline" onClick={handleOpenTable}>
-          <TableViewIcon />
-        </IconButton>
-      );
+    const isDisabled = layerDetails.controls?.table === false || layerHidden || parentHidden;
+
     return (
-      <IconButton aria-label={t('layers.tableViewNone')} id="table-details" className="buttonOutline" disabled>
-        <TableViewIcon color="disabled" />
+      <IconButton
+        id="table-details"
+        aria-label={isDisabled ? t('layers.tableViewNone') : t('legend.tableDetails')}
+        className="buttonOutline"
+        onClick={handleOpenTable}
+        disabled={isDisabled}
+      >
+        <TableViewIcon color={isDisabled ? 'disabled' : 'inherit'} />
       </IconButton>
     );
+  }
+
+  function renderTimeSliderButton(): JSX.Element | null {
+    // Check if layer is in time slider
+    const isLayerInTimeSlider = timeSliderLayers && timeSliderLayers[layerDetails.layerPath];
+    const isDisabled = layerHidden || parentHidden;
+
+    if (isLayerInTimeSlider) {
+      return (
+        <IconButton
+          aria-label={t('layers.selectLayerAndScrollTimeSlider')}
+          className="buttonOutline"
+          onClick={(event) => {
+            event.stopPropagation();
+            navigateToTimeSlider({ layerPath: layerDetails.layerPath });
+          }}
+          disabled={isDisabled}
+        >
+          <TimeSliderIcon color={isDisabled ? 'disabled' : 'inherit'} />
+        </IconButton>
+      );
+    }
+    return null;
   }
 
   function renderHighlightButton(): JSX.Element {
     if (isLayerHighlightCapable)
       return (
-        <IconButton
-          aria-label={t('legend.highlightLayer')}
-          onClick={handleHighlightLayer}
-          className={highlightedLayer === layerDetails.layerPath ? 'buttonOutline active' : 'buttonOutline'}
-          disabled={layerHidden}
-        >
-          <HighlightOutlinedIcon />
+        <IconButton aria-label={t('legend.highlightLayer')} onClick={handleHighlightLayer} className="buttonOutline" disabled={layerHidden}>
+          {highlightedLayer === layerDetails.layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
         </IconButton>
       );
     return <Box />;
@@ -416,9 +447,15 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   }
 
   function renderLayerButtons(): JSX.Element {
+    const timeSliderButton = renderTimeSliderButton();
+    const hasDataTable = datatableSettings[layerDetails.layerPath];
+    const showDivider = hasDataTable || timeSliderButton;
+
     return (
       <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px', marginLeft: 'auto' }}>
-        {datatableSettings[layerDetails.layerPath] && renderDetailsButton()}
+        {hasDataTable && renderDetailsButton()}
+        {timeSliderButton}
+        {showDivider && <Box sx={sxClasses.verticalDivider} />}
         <IconButton aria-label={t('legend.refreshLayer')} className="buttonOutline" onClick={handleRefreshLayer}>
           <RestartAltIcon />
         </IconButton>
@@ -584,10 +621,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
               justifyContent: 'space-between',
               width: '100%',
               alignItems: 'center',
-              paddingTop: '10px',
             }}
           >
-            <Box sx={{ textAlign: 'left', maxWidth: '70%', [theme.breakpoints.down('md')]: { display: 'none' } }}>
+            <Box sx={{ textAlign: 'left', maxWidth: '70%', [theme.breakpoints.down('sm')]: { display: 'none' } }}>
               <Typography sx={{ ...sxClasses.categoryTitle, ...(layerHidden && hiddenStyle) }} title={layerDetails.layerName}>
                 {layerDetails.layerName}
               </Typography>
@@ -606,16 +642,17 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             {renderLayerButtons()}
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap-reverse' }}>
-            {layerDetails.items.length > 1 && (
-              <Grid container direction="row" alignItems="center" justifyItems="stretch">
-                <Grid size={{ xs: 'auto' }}>{renderHeaderCheckbox()}</Grid>
-                <Grid size={{ xs: 'auto' }}>
-                  <Box component="span" sx={{ fontWeight: 'bold', ...(layerHidden && hiddenStyle) }}>
-                    {t('layers.toggleItemsVisibility')}
-                  </Box>
+            {layerDetails.items.length > 1 &&
+              layerDetails.items.some((item) => layerDetails.styleConfig?.[item.geometryType]?.fields[0] !== undefined) && (
+                <Grid container direction="row" alignItems="center" justifyItems="stretch">
+                  <Grid size={{ xs: 'auto' }}>{renderHeaderCheckbox()}</Grid>
+                  <Grid size={{ xs: 'auto' }}>
+                    <Box component="span" sx={{ fontWeight: 'bold', ...(layerHidden && hiddenStyle) }}>
+                      {t('layers.toggleItemsVisibility')}
+                    </Box>
+                  </Grid>
                 </Grid>
-              </Grid>
-            )}
+              )}
             {layerDetails.children.length > 0 && (
               <Grid container direction="row" alignItems="center" justifyItems="stretch">
                 <Grid size={{ xs: 'auto' }}>

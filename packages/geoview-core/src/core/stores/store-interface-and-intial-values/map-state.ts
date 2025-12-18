@@ -468,7 +468,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
        */
       setZoom: (zoom: number, duration?: number): void => {
         // Redirect to processor
-        MapEventProcessor.zoom(get().mapId, zoom, duration).catch((error: unknown) => {
+        MapEventProcessor.zoomMap(get().mapId, zoom, duration).catch((error: unknown) => {
           logger.logError('Map-State Failed to set zoom', error);
         });
       },
@@ -1171,10 +1171,14 @@ export const useMapSelectorLayerLegendCollapsed = (layerPath: string): boolean =
 
 // For toggle-all component
 export const useMapAllLayersVisibleToggle = (): boolean =>
-  useStore(useGeoViewStore(), (state) => state.mapState.orderedLayerInfo.every((layer) => layer.visible));
+  useStore(useGeoViewStore(), (state) =>
+    state.mapState.orderedLayerInfo.every(
+      (layer) => layer.visible || MapEventProcessor.getMapLayerStatus(state.mapId, layer.layerPath) === 'error'
+    )
+  );
 export const useMapHasCollapsibleLayersToggle = (): boolean =>
   useStore(useGeoViewStore(), (state) => MapEventProcessor.getLegendCollapsibleLayers(state.mapId).length > 0);
-export const useMapllLayersCollapsedToggle = (): boolean =>
+export const useMapAllLayersCollapsedToggle = (): boolean =>
   useStore(useGeoViewStore(), (state) => MapEventProcessor.getAllLegendLayersCollapsed(state.mapId));
 
 // Store Actions

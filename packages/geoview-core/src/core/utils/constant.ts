@@ -10,8 +10,8 @@ export const GEO_URL_TEXT = {
 };
 
 // OpenLayer constants
-export const OL_ZOOM_DURATION = 500;
-export const OL_ZOOM_MAXZOOM = 13;
+export const OL_ZOOM_DURATION: number = 500;
+export const OL_ZOOM_MAXZOOM: number = 13;
 export const OL_ZOOM_PADDING: [number, number, number, number] = [100, 100, 100, 100];
 export const DEFAULT_OL_FITOPTIONS: FitOptions = {
   padding: OL_ZOOM_PADDING,

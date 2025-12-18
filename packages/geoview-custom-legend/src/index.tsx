@@ -74,7 +74,7 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
     return {
       title: 'CustomLegend.title',
       icon: <LegendIcon />,
-      width: 350,
+      width: 15,
       status: this.getConfig().isOpen,
     };
   }

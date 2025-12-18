@@ -1024,8 +1024,8 @@ export abstract class LayerMockup {
               settings: {
                 type: 'filledPolygon',
                 color: 'rgba(0,128,128,0.5)',
-                paternSize: 10,
-                paternWidth: 2,
+                patternSize: 10,
+                patternWidth: 2,
                 fillStyle: 'diagonalCross',
                 stroke: {
                   color: 'rgba(128,128,0,1)',
@@ -1040,8 +1040,8 @@ export abstract class LayerMockup {
               settings: {
                 type: 'filledPolygon',
                 color: 'rgba(255,0,255,0.5)',
-                paternSize: 10,
-                paternWidth: 2,
+                patternSize: 10,
+                patternWidth: 2,
                 fillStyle: 'diagonalCross',
                 stroke: {
                   color: 'rgba(128,0,128,1)',
@@ -1056,8 +1056,8 @@ export abstract class LayerMockup {
               settings: {
                 type: 'filledPolygon',
                 color: 'rgba(255,0,255,0.5)',
-                paternSize: 10,
-                paternWidth: 2,
+                patternSize: 10,
+                patternWidth: 2,
                 fillStyle: 'diagonalCross',
                 stroke: {
                   color: 'rgba(128,0,128,1)',
