@@ -82,10 +82,6 @@ export class MapTester extends GVAbstractTester {
         test.addStep('Performing zoom...');
         await MapEventProcessor.zoomMap(this.getMapId(), zoomEnd, zoomDuration);
 
-        // Wait for the zoom to end (1000 for store to update)
-        test.addStep('Waiting for zoom to finish...');
-        await delay(zoomDuration + 1000);
-
         // Return the result
         return zoomEnd;
       },
@@ -299,7 +295,7 @@ export class MapTester extends GVAbstractTester {
         test.addStep('Zooming to coordinate [-80, 50]...');
 
         // Zoom to coordinate
-        this.getMapViewer().setZoomLevel(8);
+        await this.getMapViewer().setMapZoomLevel(8);
         await this.getMapViewer().zoomToLonLatExtentOrCoordinate(targetCoordinate);
 
         // Transform coordinates
@@ -476,9 +472,6 @@ export class MapTester extends GVAbstractTester {
         // Set the basemap
         this.getMapViewer().basemap.setBasemap(basemap);
 
-        // Wait for basemap change
-        await delay(1000);
-
         const activeBasemapId = this.getMapViewer().basemap.activeBasemap?.basemapId;
         if (!activeBasemapId) {
           throw new TestError('Failed to get active basemap ID after setting basemap');
@@ -518,14 +511,13 @@ export class MapTester extends GVAbstractTester {
         if (currentProjection !== 3978) {
           test.addStep('Switching to LCC projection (3978)...');
           await MapEventProcessor.setProjection(this.getMapId(), 3978);
-          await delay(500);
         }
 
         test.addStep('Zooming to British Columbia extent...');
         await this.getMapViewer().zoomToLonLatExtentOrCoordinate(bcExtent);
-        await delay(500);
 
         test.addStep('Getting north arrow rotation from DOM element...');
+        await delay(500); // Wait for DOM to update
         const rotationElement = document.querySelector(`.map-info-rotation-${this.getMapId()}`) as HTMLElement;
 
         if (!rotationElement) {
@@ -677,15 +669,12 @@ export class MapTester extends GVAbstractTester {
 
         return { enabledBefore, enabledAfter };
       },
-      async (test, result) => {
+      (test, result) => {
         test.addStep('Verifying layer was initially hoverable...');
         Test.assertIsEqual(result.enabledBefore, true);
 
         test.addStep('Verifying layer is now not hoverable...');
         Test.assertIsEqual(result.enabledAfter, false);
-
-        // GV: Need to wait before calling next test or the first map click return empty features
-        await delay(2000);
       }
     );
   }
@@ -709,27 +698,41 @@ export class MapTester extends GVAbstractTester {
     return this.test(
       'Test details layer selection persistence across map clicks',
       async (test) => {
-        // Helper function to simulate a complete map click
+        // Helper function to simulate a complete map click and wait for query completion
         // TODO: This should return a Promise and be awaited. emitMapSingleClick AND MapEventProcess setMapSingleCLcik should be Promisses waiting on queryLayers
-        const simulateMapClick = (coords: Coordinate): void => {
-          // Transform lonlat to map projection
-          const projCode = this.getMapViewer().getProjection().getCode();
-          const projected = Projection.transformPoints([coords], Projection.PROJECTION_NAMES.LONLAT, projCode)[0];
+        const simulateMapClick = (coords: Coordinate): Promise<void> => {
+          return new Promise((resolve) => {
+            // Transform lonlat to map projection
+            const projCode = this.getMapViewer().getProjection().getCode();
+            const projected = Projection.transformPoints([coords], Projection.PROJECTION_NAMES.LONLAT, projCode)[0];
 
-          // emitMapSingleClick now handles both store update and event emission
-          this.getMapViewer().emitMapSingleClick({
-            lonlat: coords,
-            pixel: [0, 0],
-            projected,
-            dragging: false,
+            // Register one-time listener for query completion
+            const handleQueryEnded = (): void => {
+              // Cleanup - unregister the handler
+              this.getMapViewer().layer.featureInfoLayerSet.offQueryEnded(handleQueryEnded);
+              resolve();
+            };
+
+            // Register the handler before clicking
+            this.getMapViewer().layer.featureInfoLayerSet.onQueryEnded(handleQueryEnded);
+
+            // emitMapSingleClick now handles both store update and event emission
+            this.getMapViewer().emitMapSingleClick({
+              lonlat: coords,
+              pixel: [0, 0],
+              projected,
+              dragging: false,
+            });
           });
         };
 
+        // GV: Need to wait before calling the first map click return empty features
+        await delay(2000);
+
         // First click
         test.addStep(`Performing first map click at [${firstClickCoords.join(', ')}]...`);
-        // await delay(2000);
-        simulateMapClick(firstClickCoords);
-        await delay(1000);
+        await simulateMapClick(firstClickCoords);
+        await delay(1000); // GV: Something weird with the first test, even with the click awai ti does not work
 
         // Check which layer is selected after first click
         test.addStep('Checking selected layer after first click...');
@@ -739,12 +742,10 @@ export class MapTester extends GVAbstractTester {
         // Manually select the second layer (Top Projects)
         test.addStep(`Manually selecting layer '${expectedSecondLayer}'...`);
         FeatureInfoEventProcessor.setSelectedLayerPath(this.getMapId(), expectedSecondLayer);
-        await delay(1000);
 
         // Second click at different location
         test.addStep(`Performing second map click at [${secondClickCoords.join(', ')}]...`);
-        simulateMapClick(secondClickCoords);
-        await delay(1000);
+        await simulateMapClick(secondClickCoords);
 
         // Check which layer is still selected after second click
         test.addStep('Checking selected layer after second click...');
