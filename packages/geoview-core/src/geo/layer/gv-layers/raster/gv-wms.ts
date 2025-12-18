@@ -583,6 +583,12 @@ export class GVWMS extends AbstractGVRaster {
     // Call the GetFeature
     const responseData = await Fetch.fetchJson(urlWithOutputJson, abortController);
 
+    // Read the EPSG from the data
+    const dataEPSG = GeoUtilities.readEPSGOfGeoJSON(responseData);
+
+    // Check if we have it in Projection and try adding it if we're missing it
+    await Projection.addProjectionIfMissing(dataEPSG);
+
     // Read the features
     const features = GeoUtilities.readFeaturesFromGeoJSON(responseData, undefined);
 
