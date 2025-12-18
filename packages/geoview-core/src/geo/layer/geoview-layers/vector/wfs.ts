@@ -1,10 +1,7 @@
+import type { Feature } from 'ol';
+import type { ReadOptions } from 'ol/format/Feature';
 import type { Options as SourceOptions } from 'ol/source/Vector';
-import { WFS as FormatWFS } from 'ol/format';
-import type { Vector as VectorSource } from 'ol/source';
-import type Feature from 'ol/Feature';
 import { bbox } from 'ol/loadingstrategy';
-import type { Extent } from 'ol/extent';
-import type { Projection as OLProjection } from 'ol/proj';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
@@ -31,6 +28,7 @@ import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { GeoUtilities } from '@/geo/utils/utilities';
+import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
 
 export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geoviewLayerType'> {
@@ -233,46 +231,92 @@ export class WFS extends AbstractGeoViewVector {
   }
 
   /**
-   * Overrides the creation of the source configuration for the vector layer
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration.
-   * @param {SourceOptions} sourceOptions - The source options.
-   * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
-   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   * Overrides the loading of the vector features for the layer by fetching WFS data and converting it
+   * into OpenLayers {@link Feature} feature instances.
+   * @param {VectorLayerEntryConfig} layerConfig -
+   * The configuration object for the vector layer, containing source and
+   * data access information.
+   * @param {SourceOptions<Feature>} sourceOptions -
+   * The OpenLayers vector source options associated with the layer. This may be
+   * used by implementations to customize loading behavior or source configuration.
+   * @param {ReadOptions} readOptions -
+   * Options controlling how features are read, including the target
+   * `featureProjection`.
+   * @returns {Promise<Feature[]>}
+   * A promise that resolves to an array of OpenLayers features.
+   * @protected
+   * @override
    */
-  protected override onCreateVectorSource(
+  protected override async onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
-    sourceOptions: SourceOptions<Feature>
-  ): VectorSource<Feature> {
-    // Cast it
+    sourceOptions: SourceOptions<Feature>,
+    readOptions: ReadOptions
+  ): Promise<Feature[]> {
+    // Cast it to a GeoJson layer type
     const layerConfigWFS = layerConfig as OgcWfsLayerEntryConfig;
 
+    // Get the supported info formats
+    const featureInfoFormat = layerConfigWFS.getSupportedFormats('application/json'); // application/json by default (QGIS Server doesn't seem to provide the metadata for the output formats, use application/json)
+
+    // If one of those contain application/json, use that format to get features
+    let outputFormat = featureInfoFormat.find((format) => format.toLowerCase().includes('application/json'));
+
+    // TODO: WMS - Add support for other formats. Not quite the GV issue #3134, but similar
+
+    // TODO: ALEX - FIX THIS EXCEPTION - Exception, the geo.weather.gc.ca/geomet service says it supports application/json, but it doesn't in reality
+    if (layerConfig.getDataAccessPath().includes('//geo.weather.gc.ca/geomet')) outputFormat = undefined;
+
+    // Check if url contains metadata parameters for the getCapabilities request and reformat the urls
+    let wfsUrl = GeoUtilities.ensureServiceRequestUrlGetFeature(
+      layerConfig.getDataAccessPath(),
+      layerConfig.layerId,
+      layerConfigWFS.getVersion(),
+      outputFormat,
+      undefined,
+      undefined,
+      undefined
+    );
+
+    // if an extent is provided, use it in the url
+    if (sourceOptions.strategy === bbox && Number.isFinite(readOptions.extent?.[0])) {
+      wfsUrl = `${wfsUrl}&bbox=${readOptions.extent},${Projection.getProjectionFromString(readOptions.featureProjection)?.getCode()}`;
+    }
+
+    // If output format is json
+    let responseData;
+    if (outputFormat) {
+      // Query and read Json
+      responseData = await AbstractGeoViewVector.fetchJson(wfsUrl, layerConfig.source?.postSettings);
+    } else {
+      // Query and read text
+      responseData = await AbstractGeoViewVector.fetchText(wfsUrl, layerConfig.source?.postSettings);
+    }
+
+    // Check if the data is GeoJSON
+    if (GeoUtilities.isGeoJSONObject(responseData)) {
+      // Read the EPSG from the data
+      const dataEPSG = GeoUtilities.readEPSGOfGeoJSON(responseData);
+
+      // Check if we have it in Projection and try adding it if we're missing it
+      await Projection.addProjectionIfMissing(dataEPSG);
+
+      // Read the features
+      return GeoUtilities.readFeaturesFromGeoJSON(responseData, readOptions);
+    }
+
+    // Here, the output isn't GeoJSON, probably XML/GML
+
+    // Use the features response to determine the EPSG of the data, otherwise use the config otherwise force it to 4326, because OpenLayers struggles to figure it out by itself here
+    const dataEPSG = GeoUtilities.readEPSGOfGML(responseData);
+
+    // Check if we have it in Projection and try adding it if we're missing it
+    await Projection.addProjectionIfMissing(dataEPSG);
+
     // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = (extent: Extent, resolution: number, projection: OLProjection): string => {
-      // check if url contains metadata parameters for the getCapabilities request and reformat the urls
-      let sourceUrl = GeoUtilities.ensureServiceRequestUrlGetFeature(
-        layerConfig.getDataAccessPath(),
-        layerConfig.layerId,
-        layerConfigWFS.getVersion(),
-        undefined,
-        undefined,
-        undefined,
-        undefined
-      );
+    readOptions.dataProjection = dataEPSG || 'EPSG:4326'; // default: 4326
 
-      // if an extent is provided, use it in the url
-      if (sourceOptions.strategy === bbox && Number.isFinite(extent[0])) {
-        sourceUrl = `${sourceUrl}&bbox=${extent},${projection.getCode()}`;
-      }
-      return sourceUrl;
-    };
-
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.format = new FormatWFS({
-      version: layerConfigWFS.getVersion(),
-    });
-
-    // Call parent
-    return super.onCreateVectorSource(layerConfig, sourceOptions);
+    // Read the features
+    return GeoUtilities.readFeaturesFromWFS(responseData, layerConfigWFS.getVersion(), readOptions);
   }
 
   /**

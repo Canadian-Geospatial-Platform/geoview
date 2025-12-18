@@ -1,7 +1,6 @@
+import type { Feature } from 'ol';
+import type { ReadOptions } from 'ol/format/Feature';
 import type { Options as SourceOptions } from 'ol/source/Vector';
-import { WKB as FormatWkb } from 'ol/format';
-import type { Vector as VectorSource } from 'ol/source';
-import type Feature from 'ol/Feature';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import type { TypeGeoviewLayerConfig, TypeMetadataGeoJSON } from '@/api/types/layer-schema-types';
@@ -19,6 +18,8 @@ import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validati
 import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { deepMerge } from '@/core/utils/utilities';
+import { GeoUtilities } from '@/geo/utils/utilities';
+import { Projection } from '@/geo/utils/projection';
 
 export interface TypeWkbLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WKB;
@@ -182,23 +183,53 @@ export class WKB extends AbstractGeoViewVector {
   }
 
   /**
-   * Overrides the creation of the source configuration for the vector layer.
-   * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration.
-   * @param {SourceOptions} sourceOptions - The source options.
-   * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
-   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   * Overrides the loading of the vector features for the layer by reading WKB data and converting it
+   * into OpenLayers {@link Feature} feature instances.
+   * @param {VectorLayerEntryConfig} layerConfig -
+   * The configuration object for the vector layer, containing source and
+   * data access information.
+   * @param {SourceOptions<Feature>} sourceOptions -
+   * The OpenLayers vector source options associated with the layer. This may be
+   * used by implementations to customize loading behavior or source configuration.
+   * @param {ReadOptions} readOptions -
+   * Options controlling how features are read, including the target
+   * `featureProjection`.
+   * @returns {Promise<Feature[]>}
+   * A promise that resolves to an array of OpenLayers features.
+   * @protected
+   * @override
    */
-  protected override onCreateVectorSource(
+  protected override async onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
-    sourceOptions: SourceOptions<Feature>
-  ): VectorSource<Feature> {
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = layerConfig.getDataAccessPath();
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.format = new FormatWkb();
+    sourceOptions: SourceOptions<Feature>,
+    readOptions: ReadOptions
+  ): Promise<Feature[]> {
+    // Is WKB format
+    const responseData = layerConfig.getDataAccessPath();
 
-    // Call parent
-    return super.onCreateVectorSource(layerConfig, sourceOptions);
+    // Check if we have it in Projection and try adding it if we're missing it (should already be done?)
+    await Projection.addProjectionIfMissing(layerConfig.source?.dataProjection);
+
+    // Read the data projection
+    // eslint-disable-next-line no-param-reassign
+    readOptions.dataProjection ??= layerConfig.source?.dataProjection || 'EPSG:4326'; // default: 4326 because OpenLayers struggles to figure it out by itself for WKB here
+
+    // If we have a feature package
+    let features = [];
+    if ((layerConfig as WkbLayerEntryConfig).source.geoPackageFeatures?.length) {
+      const { geoPackageFeatures } = (layerConfig as WkbLayerEntryConfig).source;
+      features = geoPackageFeatures!.map(({ geom, properties }) => {
+        const feature = GeoUtilities.readFeaturesFromWKB(geom, readOptions)[0];
+        if (properties) feature.setProperties(properties);
+        return feature;
+      });
+    } else {
+      // Fallback to using default read method
+      features = GeoUtilities.readFeaturesFromWKB(responseData, readOptions);
+    }
+
+    // Return them
+    return Promise.resolve(features);
   }
 
   /**

@@ -37,6 +37,7 @@ import type {
   TypeLayerMetadataVector,
   TypeGeoviewLayerType,
 } from '@/api/types/layer-schema-types';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import type { TypeLegendItem } from '@/core/components/layers/types';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
@@ -46,6 +47,7 @@ import type { SnackbarType } from '@/core/utils/notifications';
 import { NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { LayerNotQueryableError, LayerStatusErrorError } from '@/core/exceptions/layer-exceptions';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
+import { GVVectorSource } from '@/geo/layer/source/vector-source';
 import { delay, whenThisThen } from '@/core/utils/utilities';
 
 /**
@@ -309,7 +311,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       this.getLayerConfig().updateLayerStatusParent();
 
       // Emit about the error
-      this.emitMessage('layers.errorNotLoaded', [this.getLayerName()], 'error', true);
+      this.#emitError(event, 'layers.errorNotLoaded');
     } else {
       // We've already emitted an error to the user about the layer being in error, skip so that we don't spam
     }
@@ -338,7 +340,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       this.getLayerConfig().updateLayerStatusParent();
 
       // Emit about the error
-      this.emitMessage('layers.errorImageLoad', [this.getLayerName()], 'error', true);
+      this.#emitError(event, 'layers.errorImageLoad');
     } else {
       // We've already emitted an error to the user about the layer being in error, skip
     }
@@ -1016,6 +1018,41 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       },
       (error: unknown) => logger.logPromiseFailed('Delay in #startLoadingPeriodWatcher failed', error)
     );
+  }
+
+  /**
+   * Emits a user-facing error message for a source loading error.
+   * This method attempts to extract a {@link GeoViewError} from the event target
+   * when the source is a {@link GVVectorSource}. If a GeoViewError is found, its
+   * localized message key and parameters are emitted. Otherwise, a default
+   * error message is emitted using the provided fallback message key.
+   * @param {Event} event -
+   * The load error event emitted by the vector source. The event target is
+   * expected to be the source that triggered the error.
+   * @param {string} defaultErrorMessageKey -
+   * The localization key to use when no {@link GeoViewError} is available
+   * on the source.
+   */
+  #emitError(event: Event, defaultErrorMessageKey: string): void {
+    // Get the error
+    const layerSource = event.target;
+
+    // If the source is GVVectorSource and the error inside is a GeoViewError
+    let emitted: boolean = false;
+    if (layerSource instanceof GVVectorSource) {
+      const loaderError = layerSource.getLoaderError();
+      if (loaderError instanceof GeoViewError) {
+        // Emit about the error
+        this.emitMessage(loaderError.messageKey, (loaderError.messageParams as string[]) || [], 'error', true);
+        emitted = true;
+      }
+    }
+
+    // If not emitted
+    if (!emitted) {
+      // Emit about the error
+      this.emitMessage(defaultErrorMessageKey, [this.getLayerName()], 'error', true);
+    }
   }
 
   // #endregion METHODS
