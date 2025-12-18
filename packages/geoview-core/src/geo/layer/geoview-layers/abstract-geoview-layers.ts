@@ -283,13 +283,18 @@ export abstract class AbstractGeoViewLayer {
     return !!this.getGeoviewLayerConfig().metadataAccessPath;
   }
 
+  /**
+   * Gets the metadata access path if it exists.
+   * @returns {string | undefined} The trimmed metadata access path, or `undefined` if not defined.
+   */
   getMetadataAccessPathIfExists(): string | undefined {
     return this.getGeoviewLayerConfig().metadataAccessPath?.trim();
   }
 
   /**
-   * Retrieves the metadata access path used by this GeoView layer, if any.
+   * Retrieves the metadata access path used by this GeoView layer.
    * @returns {string} The metadata access path.
+   * @throws {LayerMetadataAccessPathMandatoryError} When the metadataAccessPath is undefined.
    */
   getMetadataAccessPath(): string {
     // Get the metadata access path
