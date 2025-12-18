@@ -828,7 +828,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   /**
    * Filters features based on their visibility settings defined in the layer's unique value or class break style configuration.
    *
-   * @static
    * @param {string} mapId - The unique identifier of the map instance
    * @param {string} layerPath - The path to the layer in the map configuration
    * @param {TypeFeatureInfoEntry[]} features - Array of features to filter
@@ -841,43 +840,26 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * - Features matching visible styles are included
    * - Features matching invisible styles are excluded
    * - Features with no matching style follow the defaultVisible setting
+   * @static
    */
-  static getFeatureVisibleFromClassVibility(mapId: string, layerPath: string, features: TypeFeatureInfoEntry[]): TypeFeatureInfoEntry[] {
+  static processClassVisibility(mapId: string, layerPath: string, features: TypeFeatureInfoEntry[]): TypeFeatureInfoEntry[] {
     // Get the layer config and geometry type
     const layerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfigRegular(layerPath);
 
-    // Get the layer style
-    const layerStyle = layerConfig.getLayerStyle();
+    // Get the layer style settings
+    const layerStyleSettings = layerConfig.getLayerStyleSettings();
 
     // If has geometry field
     let filteredFeatures = features;
-    if (layerStyle) {
-      // If only one style
-      let layerStyleForGeom;
-      if (Object.keys(layerStyle).length === 1) {
-        // Take the only one
-        layerStyleForGeom = Object.values(layerStyle)[0];
-      } else {
-        // Take the geometry type
-        const geometryType = layerConfig.getGeometryType();
-
-        // If any
-        if (geometryType) {
-          // Take the style based on the geometry type
-          layerStyleForGeom = layerStyle?.[geometryType];
-        }
-      }
-
-      // If has style for the geometry
-      if (layerStyleForGeom) {
-        if (layerStyleForGeom && layerStyleForGeom.type === 'uniqueValue') {
-          filteredFeatures = this.#processClassVisibilityUniqueValue(layerStyleForGeom, features);
-        } else if (layerStyleForGeom && layerStyleForGeom.type === 'classBreaks') {
-          filteredFeatures = this.#processClassVisibilityClassBreak(layerStyleForGeom, features);
-        }
+    if (layerStyleSettings) {
+      if (layerStyleSettings.type === 'uniqueValue') {
+        filteredFeatures = this.#processClassVisibilityUniqueValue(layerStyleSettings, features);
+      } else if (layerStyleSettings.type === 'classBreaks') {
+        filteredFeatures = this.#processClassVisibilityClassBreak(layerStyleSettings, features);
       }
     }
 
+    // Return the filtered features
     return filteredFeatures;
   }
 
