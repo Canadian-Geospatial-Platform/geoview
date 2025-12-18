@@ -13,7 +13,6 @@
       {
         "geoviewLayerId": "6c343726-1e92-451a-876a-76e17d398a1c",
         "geoviewLayerName": "Base de données canadienne sur les aires protégées et de conservation (BDCAPC)",
-        "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {
@@ -25,7 +24,6 @@
       {
         "geoviewLayerId": "91219d24-e877-4c8a-8bd2-b2b662e573e0",
         "geoviewLayerName": "Lieux prioritaires pour les espèces en péril (terrestres) : projets",
-        "metadataAccessPath": "",
         "geoviewLayerType": "geoCore",
         "listOfLayerEntryConfig": [
           {

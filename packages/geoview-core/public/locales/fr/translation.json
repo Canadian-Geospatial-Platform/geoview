@@ -7,6 +7,7 @@
     "exit": "Sortir",
     "open": "Ouvrir",
     "remove": "Retirer",
+    "removeAll": "Retirer tout",
     "view": "Vue",
     "failed": "a échoué",
     "started": "démarré",
@@ -16,7 +17,11 @@
     "guide": "Guide",
     "fullScreen": "Plein écran",
     "processing": "Traitement de __param__ element(s) sur __param__",
-    "clickEnlarge": "Cliquer pour agrandir"
+    "clickEnlarge": "Cliquer pour agrandir",
+    "show": "Afficher",
+    "hide": "Masquer",
+    "none": "Aucun",
+    "clearSearch": "Effacer la recherche"
   },
   "mapnav": {
     "arianavbar": "Groupe de buttons vertical pour navigation sur la carte",
@@ -45,10 +50,9 @@
   },
   "mapctrl": {
     "rotation": {
-      "resetRotation": "Réinitialiser la rotation de la carte",
-      "fixedNorth": "Nord fixe",
       "rotation": "Rotation de la carte",
-      "projection": "Projection"
+      "projection": "Projection",
+      "fixedNorth": "Nord fixe"
     },
     "mouseposition": {
       "east": "E",
@@ -71,13 +75,17 @@
   },
   "appbar": {
     "export": "Télécharger la carte",
-    "notifications": "Notification",
+    "notifications": "Notifications",
     "noNotificationsAvailable": "Aucune notification disponible",
     "layers": "Couches",
     "share": "Partager",
     "version": "À propos de GéoView",
+    "closeVersionsDialog": "Fermer la boîte de dialogue À propos de GéoView",
     "repoLink": "Github",
-    "removeAllNotifications": "Effacer tout",
+    "removeNotification": "Supprimer la notification",
+    "removeAllNotifications": "Effacer toutes les notifications",
+    "repeatedNotificationTimes": "répété {{count}} fois",
+    "closeNotificationsDialog": "Fermer la boîte de dialogue des notifications",
     "navLabel": "Contrôles principaux de la carte"
   },
   "legend": {
@@ -96,7 +104,8 @@
     "itemsCount": "{count} sur {totalCount} classes",
     "legendInstructions": "Legend Instructions",
     "noLayersAdded": "Aucune couche ajoutée",
-    "noLayersAddedDescription": "Ajoutez des couches à la carte en cliquant sur le bouton 'Couches' et en sélectionnant les couches que vous souhaitez afficher."
+    "noLayersAddedDescription": "Ajoutez des couches à la carte en cliquant sur le bouton 'Couches' et en sélectionnant les couches que vous souhaitez afficher.",
+    "selectLayerAndScroll": "Voir dans le panneau Couches"
   },
   "layers": {
     "title": "Couches",
@@ -151,6 +160,7 @@
     "errorImageLoad": "Une erreur est survenue avec l'image source pour la couche '__param__'.",
     "errorProj": "Projection __param__ invalide.",
     "errorResponseNoFeaturesProperty": "La réponse du service ne contient pas de propriété 'features'.",
+    "errorNoPrimaryKeyField": "Aucun champ de clé primaire trouvé pour la couche '__param__'.",
     "errorNoBounds": "Impossible de trouver les limites pour la couche '__param__'.",
     "errorNoExtent": "Aucune étendue définie pour la couche '__param__'.",
     "errorInvalidExtent": "Étendue invalide '__param__'.",
@@ -194,7 +204,8 @@
     "tableViewNone": "Tableau (indisponible)",
     "moveLayerUp": "Déplacer la couche vers le haut",
     "moveLayerDown": "Déplacer la couche vers le bas",
-    "layerControls": "Commandes des couches"
+    "layerControls": "Commandes des couches",
+    "selectLayerAndScrollTimeSlider": "Voir dans le panneau Curseur Temporel"
   },
   "details": {
     "title": "Détails",
@@ -203,6 +214,7 @@
     "closeSelection": "Fermer la sélection",
     "externalLink": "Lien externe",
     "feature": "élément",
+    "selected": "sélectionné",
     "clickOnMap": "Cliquer sur la carte",
     "nextFeatureBtn": "Élément suivant",
     "previousFeatureBtn": "Élément précédent",
@@ -227,7 +239,8 @@
     "northing": "Northing",
     "ntsMapsheet": "Carte SNRC",
     "elevation": "Élévation",
-    "guideControls": "Commandes du guide"
+    "guideControls": "Commandes du guide",
+    "selectLayerAndScrollChart": "Voir dans le panneau Graphique"
   },
   "lightbox": {
     "next": "Prochaine",
@@ -253,6 +266,7 @@
       "loadfailed": "Le chargement de la couche '__param__' a échoué sur la carte.",
       "layerIdNotFound": "L'identifiant '__param__' de la couche '__param__' est introuvable .",
       "layerIdMustBeNumber": "L'identifiant de la couche ESRI doit être un nombre, mais était '__param__' pour la couche '__param__'.",
+      "fieldsNotFound": "Les informations sur les champs n'ont pu être obtenus à partir des métadonnées vectorielles pour la couche '__param__'.",
       "createtwice": "On ne peut exécuter deux fois la méthode createGeoViewRasterLayers pour la couche '__param__'.",
       "usedtwice": "Utilisation en double de l'identifiant de couche '__param__'.",
       "multipleUUID": "Les couches GeoCore ne peuvent avoir qu'un seul identifiant GeoCore par couche.",
@@ -268,7 +282,7 @@
       "invalidLayerFilter": "La couche '__param__' contient un filtre invalide.\nfiltre = '__param__'\nfiltre interne = '__param__'.",
       "failedToCreateLayer": "Échec de la création de la couche '__param__'.",
       "noCapabilitiesOrEmpty": "Aucune capacité trouvée (ou vide) pour la couche '__param__'.",
-      "wmsServiceFormatParameter": "Le paramètre 'Format' de GetFeatureInfo ne supporte que text/xml, text/html et text/plain pour les services WMS, '__param__'.",
+      "wmsServiceFormatParameter": "Le paramètre 'Format' de GetFeatureInfo n'est pas supporté pour les services WMS, '__param__'.",
       "wmsSubLayerNotfound": "La sous-couche '__param__' de la couche '__param__' n'existe pas sur le serveur.",
       "csvNoGeographicData": "Aucune donnée géographique trouvée dans le fichier CSV '__param__'.",
       "invalidMetadata": "Métadonnées invalides (listOfLayerEntryConfig) empêchant le chargement de la couche '__param__'.",
@@ -307,8 +321,14 @@
   },
   "geolocator": {
     "title": "Géolocalisation",
+    "searchFormLabel": "Recherche de géolocalisation",
+    "searchInputLabel": "Entrer le(s) mot(s)-clé(s) (au moins trois caractères)",
     "search": "Texte à rechercher",
+    "searchClose": "Fermer la recherche",
+    "searchSubmit": "Soumettre la recherche",
+    "searchResults": "Résultats de la recherche",
     "noResult": "Aucun résultat correspondant à",
+    "resultsFound": "{{count}} résultat(s) trouvé(s) pour '{{searchTerm}}'",
     "province": "Province",
     "category": "Catégorie",
     "clearFilters": "Effacer les filtres",
@@ -339,7 +359,13 @@
     "close": "Fermer",
     "noFeatures": "inconnue...",
     "showing": "affiché(s)",
-    "total": "total"
+    "total": "total",
+    "selectLayerAndScroll": "Voir dans le panneau Données",
+    "accessAdvancedFunctions": "Accéder au panneau Données pour les fonctions avancées",
+    "filterToggle": "les filtres",
+    "searchInputLabel": "Rechercher dans les colonnes du tableau",
+    "tableControls": "Contrôles du tableau de données",
+    "tableAriaLabelWithLayer": "Tableau de données {{layerName}}"
   },
   "geochart": {
     "noChartAvailable": "Cliquer sur une couche de la carte qui contient un graphique"
@@ -350,6 +376,8 @@
   "guide": {
     "title": "Guide",
     "search": "Rechercher dans le guide...",
+    "searchFormLabel": "Rechercher dans le guide",
+    "searchInputLabel": "Entrer le(s) mot(s)-clé(s)",
     "errorMessage": "Désolé, impossible de trouver le document d'aide!",
     "arrowUp": "Correspondance précédente",
     "arrowDown": "Correspondance suivante"
@@ -381,7 +409,9 @@
     "generic": "Une erreur est survenue, contactez nous ou regardez dans la console pour plus de détails.",
     "layer": {
       "differingFieldLengths": "La longueur des champs fournis ne correspond pas.",
+      "layerConfigNotFound": "La configuration de la couche à l'emplacement '__param__' est introuvable.",
       "layerNotFound": "La couche à l'emplacement '__param__' est introuvable.",
+      "wfsConfigMissing": "La configuration de la couche vectorielle est manquante pour la couche à l'emplacement '__param__'.",
       "wrongType": "La couche '__param__' n'est pas du type attendu.",
       "statusWasError": "Le statut de la couche '__param__' était en 'erreur'.",
       "notAGeoJsonLayer": "Ce n'est pas une couche GeoJSON pour la couche '__param__'.",
@@ -399,7 +429,8 @@
       "mapWrongCall": "Div avec identifiant __param__ a une classe 'geoview-map' et devrait être initialisé via un appel à 'cgpv.init()'.",
       "pluginError": "Une erreur majeure sur le Plugin '__param__' sur la carte '__param__' est survenue.",
       "pluginConfigNotFound": "La configuration pour le Plugin '__param__' sur la carte '__param__' au chemin d'accès '__param__' est introuvable.",
-      "pluginStateUninitialized": "L'état du Plugin '__param__' sur la carte '__param__' n'est pas initialisé."
+      "pluginStateUninitialized": "L'état du Plugin '__param__' sur la carte '__param__' n'est pas initialisé.",
+      "invalidZoomExtent": "Impossible de zoomer, l'étendue fournie est invalide."
     },
     "geocore": {
       "uuidNotFound": "L'identifiant de couche GeoCore '__param__' n'existe pas sur le serveur.",

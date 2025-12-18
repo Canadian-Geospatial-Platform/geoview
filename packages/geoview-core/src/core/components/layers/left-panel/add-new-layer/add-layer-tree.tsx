@@ -4,11 +4,11 @@
 import { useEffect, useState } from 'react';
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView';
 import { TreeItem } from '@mui/x-tree-view/TreeItem';
-import _ from 'lodash';
 import { logger } from '@/core/utils/logger';
 import type { TypeGeoviewLayerConfig, TypeLayerEntryConfig } from '@/api/types/layer-schema-types';
 import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import { Tooltip } from '@/ui/tooltip/tooltip';
 
 export interface AddLayerTreeProps {
   layerTree: TypeGeoviewLayerConfig;
@@ -48,9 +48,11 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
 
     const curLayerId = `${parentId ? `${parentId}/` : ''}${layerId}`;
     return (
-      <TreeItem key={curLayerId} itemId={curLayerId} label={layerName} aria-label={layerName}>
-        {layer.listOfLayerEntryConfig?.map((subLayer) => renderTreeItem(subLayer, curLayerId))}
-      </TreeItem>
+      <Tooltip title={layerName} placement="top">
+        <TreeItem key={curLayerId} itemId={curLayerId} label={layerName} aria-label={layerName}>
+          {layer.listOfLayerEntryConfig?.map((subLayer) => renderTreeItem(subLayer, curLayerId))}
+        </TreeItem>
+      </Tooltip>
     );
   };
 
@@ -84,7 +86,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
     }
     if (origLayerId) populateLayerChildren(origLayerId, parentLayerId);
 
-    return _.uniq(result).sort();
+    return [...new Set(result)].sort();
   };
 
   const handleItemSelectionToggle = (event: React.SyntheticEvent, itemId: string, isSelected: boolean): void => {
@@ -95,7 +97,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
     const parentId = splitId.join('/');
 
     if (isSelected) {
-      setSelectedItems(_.uniq([...selectedItems, ...toAddOrRemove]).sort());
+      setSelectedItems([...new Set([...selectedItems, ...toAddOrRemove])].sort());
     } else if (parentId && !selectedItems.find((selectedItem) => selectedItem.startsWith(`${parentId}/`) && selectedItem !== itemId))
       setSelectedItems(selectedItems.filter((item) => item !== parentId && item !== itemId));
     else setSelectedItems(selectedItems.filter((item) => !toAddOrRemove.includes(item)));
@@ -115,7 +117,16 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
 
   return (
     <SimpleTreeView
-      sx={{ fontSize: '0.8rem', '& .MuiTreeItem-label': { fontSize: '0.8rem !important', paddingTop: '3px', paddingBottom: '3px' } }}
+      sx={{
+        fontSize: '0.8rem',
+        '& .MuiTreeItem-label': {
+          fontSize: '0.8rem !important',
+          paddingTop: '3px',
+          paddingBottom: '3px',
+          textOverflow: 'ellipsis',
+          overflow: 'hidden',
+        },
+      }}
       multiSelect
       checkboxSelection
       selectedItems={selectedItems}

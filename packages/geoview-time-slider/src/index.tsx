@@ -63,6 +63,7 @@ class TimeSliderPlugin extends FooterPlugin {
             unlockLeft: 'Unlock left handle',
             lockRight: 'Lock right handle',
             lockLeft: 'Lock left handle',
+            filter: 'Time Filtering',
             disableFilter: 'Disable Time Filtering',
             enableFilter: 'Enable Time Filtering',
             pauseAnimation: 'Pause animation',
@@ -91,6 +92,7 @@ class TimeSliderPlugin extends FooterPlugin {
             unlockLeft: 'Déverrouiller la poignée gauche',
             lockRight: 'Verrouiller la poignée droite',
             lockLeft: 'Verrouiller la poignée gauche',
+            filter: 'Filtrage temporel',
             disableFilter: 'Désactiver le filtrage temporel',
             enableFilter: 'Activer le filtrage temporel',
             pauseAnimation: `Pause de l'animation`,
@@ -157,7 +159,7 @@ class TimeSliderPlugin extends FooterPlugin {
    */
   initTimeSliderPlugin(): void {
     // Now the layerTimeDimension should be good on the layers
-    const orderedLayerPaths = this.mapViewer.layer.getLayerEntryConfigIds();
+    const orderedLayerPaths = this.mapViewer.layer.getLayerEntryLayerPaths();
     const initialTimeSliderLayerPaths = this.#filterTimeSliderLayers(orderedLayerPaths);
     if (initialTimeSliderLayerPaths) {
       initialTimeSliderLayerPaths.forEach((layerPath) => {

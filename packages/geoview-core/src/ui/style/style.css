@@ -44,16 +44,11 @@ Hold viewer specific css not inside theme
   will-change: transform;
 }
 
-/* override default MUI grid style */
-.responsive-layout-right-main-content.MuiGrid-container,
-.responsive-layout-right-main-content .MuiGrid-container {
-  background: unset !important;
-}
+/*
+TODO Issue #3069: Is this needed? MuiGrid-container does not have a border by default
+If this is to override a specific element it should be done there and not placed globally
+the use of !important should also be used sparingly
+ */
 .MuiGrid-container:first-of-type {
   border: none !important;
-}
-
-/* Zebra striping for feature info rows - applies to both panel and modal */
-.details-feature-info-table .feature-info-row.MuiGrid-container {
-  background: var(--row-bg-color, transparent) !important;
 }

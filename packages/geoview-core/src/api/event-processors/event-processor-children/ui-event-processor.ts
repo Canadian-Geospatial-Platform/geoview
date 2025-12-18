@@ -14,7 +14,7 @@ export class UIEventProcessor extends AbstractEventProcessor {
 
   /**
    * Shortcut to get the UI state for a given map id
-   * @param {string} mapId The mapId
+   * @param {string} mapId - The mapId
    * @returns {IUIState} The UI state.
    */
   protected static getUIStateProtected(mapId: string): IUIState {

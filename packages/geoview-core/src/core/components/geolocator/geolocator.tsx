@@ -1,6 +1,6 @@
 import type { ChangeEvent } from 'react';
 import { useCallback, useEffect, useMemo } from 'react';
-import debounce from 'lodash/debounce';
+import { debounce } from '@/core/utils/debounce';
 import { useTheme } from '@mui/material';
 import { Box, ProgressBar } from '@/ui';
 import { useUIActiveAppBarTab, useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
@@ -84,12 +84,14 @@ export function Geolocator(): JSX.Element {
   }, [debouncedRequest]);
 
   return (
-    <FocusTrapContainer open={tabId === DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen && activeTrapGeoView} id="geolocator-focus-trap">
-      <Box
-        sx={sxClasses.root}
-        visibility={tabId === DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen ? 'visible' : 'hidden'}
-        id="geolocator-search"
-      >
+    <Box
+      component="section"
+      sx={sxClasses.root}
+      visibility={tabId === DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen ? 'visible' : 'hidden'}
+      className="appbar-panel-geolocator-search"
+      id="geolocator-search"
+    >
+      <FocusTrapContainer open={tabId === DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen && activeTrapGeoView} id="geolocator-focus-trap">
         <Box sx={sxClasses.geolocator}>
           <GeolocatorBar
             searchValue={searchValue}
@@ -111,7 +113,7 @@ export function Geolocator(): JSX.Element {
             <GeolocatorResult geoLocationData={!data ? [] : data} searchValue={searchValue} error={error} />
           </Box>
         )}
-      </Box>
-    </FocusTrapContainer>
+      </FocusTrapContainer>
+    </Box>
   );
 }

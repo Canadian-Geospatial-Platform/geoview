@@ -30,7 +30,7 @@
             "name": "Urban Areas",
             "symbol": {
               "type": "image",
-              "url": "https://raw.githubusercontent.com/CanFrenchGIS/sample-assets/main/legend/urban.png",
+              "url": "https://img.icons8.com/color/48/city.png",
               "width": 24,
               "height": 24
             },
@@ -41,7 +41,7 @@
             "name": "Water Bodies",
             "symbol": {
               "type": "image",
-              "url": "https://raw.githubusercontent.com/CanFrenchGIS/sample-assets/main/legend/water.png",
+              "url": "https://img.icons8.com/color/48/water.png",
               "width": 24,
               "height": 24
             },
@@ -52,7 +52,7 @@
             "name": "Forest",
             "symbol": {
               "type": "image",
-              "url": "https://raw.githubusercontent.com/CanFrenchGIS/sample-assets/main/legend/forest.png",
+              "url": "https://img.icons8.com/color/48/forest.png",
               "width": 24,
               "height": 24
             }

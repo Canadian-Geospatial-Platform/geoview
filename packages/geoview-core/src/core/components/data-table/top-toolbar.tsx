@@ -4,19 +4,18 @@ import { memo } from 'react';
 import type { MRT_TableInstance as MRTTableInstance, MRT_ColumnDef } from 'material-react-table';
 import {
   MRT_GlobalFilterTextField as MRTGlobalFilterTextField,
-  MRT_ToggleFiltersButton as MRTToggleFiltersButton,
   MRT_ShowHideColumnsButton as MRTShowHideColumnsButton,
   MRT_ToggleDensePaddingButton as MRTToggleDensePaddingButton,
 } from 'material-react-table';
-import ClearFiltersIcon from '@mui/icons-material/ClearAll';
 
-import { Box, IconButton } from '@/ui';
+import { Box, IconButton, Switch } from '@/ui';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
 import type { ColumnsType } from './data-table-types';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import type { SxStyles } from '@/ui/style/types';
+import { ClearFiltersIcon } from '@/ui/icons';
 
 // GV: Disabled prop-types for this to work. From the react 19 ugprade guide it seems that prop-types are deprecated.
 interface TopToolbarProps<TData extends ColumnsType> {
@@ -71,20 +70,40 @@ interface TopToolbarProps<TData extends ColumnsType> {
 function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
   const { sxClasses, datatableSettings, layerPath, t, globalFilter, useTable, columns, data, table } = props;
   return (
-    <Box display="flex" sx={{ justifyContent: 'space-between', borderBottom: '1px solid #9e9e9e' }} p={4}>
+    <Box
+      className="data-table-top-toolbar"
+      role="region"
+      display="flex"
+      aria-label={t('dataTable.tableControls')}
+      sx={{ justifyContent: 'space-between', borderBottom: '1px solid #9e9e9e' }}
+      p={4}
+    >
       <Box display="flex" sx={{ flexDirection: 'column', justifyContent: 'space-evenly' }}>
-        <Box sx={sxClasses.selectedRows}>{datatableSettings[layerPath].toolbarRowSelectedMessageRecord}</Box>
+        <Box component="p" role="status" className="filter-results-summary" sx={sxClasses.selectedRows} aria-live="polite">
+          {datatableSettings[layerPath].toolbarRowSelectedMessageRecord}
+        </Box>
         <Box display="flex">
-          <Box sx={sxClasses.selectedRows}>{t('dataTable.filterMap')}</Box>
           <FilterMap layerPath={layerPath} isGlobalFilterOn={!!globalFilter?.length} />
         </Box>
       </Box>
       <Box display="flex" sx={{ flexDirection: 'column' }}>
         <Box sx={{ float: 'right', marginLeft: 'auto', maxWidth: '15rem' }}>
-          <MRTGlobalFilterTextField className="buttonOutline" table={table} />
+          <form role="search" onSubmit={(e) => e.preventDefault()} aria-label={t('dataTable.searchInputLabel')}>
+            <MRTGlobalFilterTextField className="buttonOutline" table={table} />
+          </form>
         </Box>
         <Box display="flex" sx={{ justifyContent: 'space-around' }}>
-          <MRTToggleFiltersButton className="buttonOutline" table={table} />
+          <Switch
+            checked={table.getState().showColumnFilters}
+            onChange={() => table.setShowColumnFilters(!table.getState().showColumnFilters)}
+            size="small"
+            label={
+              table.getState().showColumnFilters
+                ? `${t('general.hide')} ${t('dataTable.filterToggle')}`
+                : `${t('general.show')} ${t('dataTable.filterToggle')}`
+            }
+            sx={sxClasses.filterMap}
+          />
 
           <IconButton
             className="buttonOutline"

@@ -13,8 +13,8 @@ import type {
   TypeLayerStyleSettings,
 } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-import { validateExtent } from '@/geo/utils/utilities';
-import { getLegendStyles } from '@/geo/utils/renderer/geoview-renderer';
+import { GeoUtilities } from '@/geo/utils/utilities';
+import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { Projection } from '@/geo/utils/projection';
@@ -48,6 +48,8 @@ export class GVEsriImage extends AbstractGVRaster {
     // Create and set the OpenLayer layer
     this.setOLLayer(new ImageLayer(imageLayerOptions));
   }
+
+  // #region OVERRIDES
 
   /**
    * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
@@ -133,7 +135,7 @@ export class GVEsriImage extends AbstractGVRaster {
       const legend: TypeLegend = {
         type: CONST_LAYER_TYPES.ESRI_IMAGE,
         styleConfig,
-        legend: await getLegendStyles(styleConfig),
+        legend: await GeoviewRenderer.getLegendStyles(styleConfig),
       };
 
       return legend;
@@ -154,33 +156,6 @@ export class GVEsriImage extends AbstractGVRaster {
   }
 
   /**
-   * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter paramater is used alone to display
-   * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
-   * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
-   * is done.
-   * @param {string} filter - An optional filter to be used in place of the getViewFilter value.
-   */
-  applyViewFilter(filter: string | undefined = ''): void {
-    // Log
-    logger.logTraceCore('GV-ESRI-IMAGE - applyViewFilter', this.getLayerPath());
-
-    // Process the layer filtering using the static method shared between EsriImage and WMS
-    GVWMS.applyViewFilterOnSource(
-      this.getLayerConfig(),
-      this.getOLSource(),
-      this.getExternalFragmentsOrder(),
-      this,
-      filter,
-      (filterToUse: string) => {
-        // Emit event
-        this.emitLayerFilterApplied({
-          filter: filterToUse,
-        });
-      }
-    );
-  }
-
-  /**
    * Overrides the way to get the bounds for this layer type.
    * @param {OLProjection} projection - The projection to get the bounds into.
    * @param {number} stops - The number of stops to use to generate the extent.
@@ -198,12 +173,46 @@ export class GVEsriImage extends AbstractGVRaster {
     if (metadataExtent && metadataProjection) {
       // Transform extent to given projection
       metadataExtent = Projection.transformExtentFromProj(metadataExtent, metadataProjection, projection, stops);
-      metadataExtent = validateExtent(metadataExtent, projection.getCode());
+      metadataExtent = GeoUtilities.validateExtent(metadataExtent, projection.getCode());
     }
 
     // Return the calculated layer bounds
     return metadataExtent;
   }
+
+  // #endregion OVERRIDES
+
+  // #region METHODS
+
+  /**
+   * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter parameter is used alone to display
+   * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
+   * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
+   * is done.
+   * @param {string} filter - An optional filter to be used in place of the getViewFilter value.
+   */
+  applyViewFilter(filter: string | undefined = ''): void {
+    // Log
+    logger.logTraceCore('GV-ESRI-IMAGE - applyViewFilter', this.getLayerPath());
+
+    // Process the layer filtering using the static method shared between EsriImage and WMS
+    GVWMS.applyViewFilterOnSource(
+      this.getLayerConfig(),
+      this.getOLSource(),
+      undefined,
+      this.getLayerConfig().getExternalFragmentsOrder(),
+      this,
+      filter,
+      (filterToUse: string) => {
+        // Emit event
+        this.emitLayerFilterApplied({
+          filter: filterToUse,
+        });
+      }
+    );
+  }
+
+  // #endregion METHODS
 }
 
 // Exported for use in ESRI Dynamic raster layers

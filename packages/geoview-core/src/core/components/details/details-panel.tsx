@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
-import { IconButton, Grid, ArrowForwardIosOutlinedIcon, ArrowBackIosOutlinedIcon, LayersClearOutlinedIcon, Box } from '@/ui';
+import { IconButton, Grid, ArrowForwardIosOutlinedIcon, ArrowBackIosOutlinedIcon, ClearHighlightIcon, Box } from '@/ui';
 import {
   useDetailsStoreActions,
   useDetailsCheckedFeatures,
@@ -28,7 +28,7 @@ import { doUntil } from '@/core/utils/utilities';
 import type { TypeFeatureInfoEntry, TypeLayerData } from '@/api/types/map-schema-types';
 import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 
-import type { LayerListEntry } from '@/core/components/common';
+import type { LayerListEntry, LayoutExposedMethods } from '@/core/components/common';
 import { Layout } from '@/core/components/common';
 import { checkSelectedLayerPathList } from '@/core/components/common/comp-common';
 import { getSxClasses } from './details-style';
@@ -39,7 +39,6 @@ import { CoordinateInfo, CoordinateInfoSwitch } from './coordinate-info';
 import type { TypeContainerBox } from '@/core/types/global-types';
 
 interface DetailsPanelType {
-  fullWidth?: boolean;
   containerType?: TypeContainerBox;
 }
 
@@ -49,7 +48,7 @@ interface DetailsPanelType {
  * @param {DetailsPanelProps} props The properties passed to LayersListFooter
  * @returns {JSX.Element} the layers list
  */
-export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE.FOOTER_BAR }: DetailsPanelType): JSX.Element {
+export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: DetailsPanelType): JSX.Element {
   logger.logTraceRender('components/details/details-panel');
 
   // Hooks
@@ -71,17 +70,19 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
   const isCollapsed = useUIFooterBarIsCollapsed();
   const activeAppBarTab = useUIActiveAppBarTab();
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
-  const { addHighlightedFeature, removeHighlightedFeature, isLayerHiddenOnMap } = useMapStoreActions();
+  const { addHighlightedFeature, removeHighlightedFeature, isLayerHiddenOnMap, getMapLayerParentHidden } = useMapStoreActions();
 
   // States
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
   const [selectedLayerPathLocal, setSelectedLayerPathLocal] = useState<string>(selectedLayerPath);
   const [arrayOfLayerListLocal, setArrayOfLayerListLocal] = useState<LayerListEntry[]>([]);
   const [geometryLoaded, setGeometryLoaded] = useState<number>(0); // Counter to force re-render when geometry loads
+  const [isRightPanelVisible, setIsRightPanelVisible] = useState<boolean>(false);
   const prevLayerSelected = useRef<TypeLayerData>();
   const prevLayerFeatures = useRef<TypeFeatureInfoEntry[] | undefined | null>();
   const prevFeatureIndex = useRef<number>(0); // 0 because that's the default index for the features
   const prevMapClickCoordinates = useRef<TypeMapMouseInfo | undefined>(mapClickCoordinates);
+  const layoutRef = useRef<LayoutExposedMethods>(null);
 
   // #region MAIN HOOKS SECTION ***************************************************************************************
 
@@ -132,7 +133,11 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
       logger.logTraceUseCallback('DETAILS-PANEL - getNumFeaturesLabel');
 
       const numOfFeatures = layer.features?.length ?? 0;
-      return `${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`;
+      const label =
+        numOfFeatures === 0
+          ? `${t('general.none')} ${t('details.feature')} ${t('details.selected')}`
+          : `${numOfFeatures} ${t('details.feature')}${numOfFeatures > 1 ? 's' : ''}`;
+      return label;
     },
     [t]
   );
@@ -151,13 +156,13 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
    */
   const isPanelOpen = useMemo(() => {
     if (containerType === CONTAINER_TYPE.FOOTER_BAR) {
-      return selectedTab === TABS.DETAILS && !isCollapsed;
+      return selectedTab === TABS.DETAILS && !isCollapsed && isRightPanelVisible;
     }
     if (containerType === CONTAINER_TYPE.APP_BAR) {
-      return activeAppBarTab.tabId === 'details' && activeAppBarTab.isOpen;
+      return activeAppBarTab.tabId === 'details' && activeAppBarTab.isOpen && isRightPanelVisible;
     }
     return false;
-  }, [containerType, selectedTab, isCollapsed, activeAppBarTab]);
+  }, [containerType, selectedTab, isCollapsed, activeAppBarTab, isRightPanelVisible]);
 
   /**
    * Memoizes the layers list for the LayerList component and centralizing indexing purposes.
@@ -190,7 +195,12 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
 
     // Add layers with features that aren't already in the list (out-of-range layers with features)
     arrayOfLayerDataBatch.forEach((layer) => {
-      if ((layer.features?.length ?? 0) > 0 && !existingLayerPaths.has(layer.layerPath) && layer.layerPath !== 'coordinate-info') {
+      if (
+        (layer.features?.length ?? 0) > 0 &&
+        !existingLayerPaths.has(layer.layerPath) &&
+        layer.layerPath !== 'coordinate-info' &&
+        !getMapLayerParentHidden(layer.layerPath)
+      ) {
         layerListEntries.push({
           layerName: layer.layerName ?? '',
           layerPath: layer.layerPath,
@@ -239,7 +249,16 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
     }
 
     return orderedLayerListEntries;
-  }, [visibleInRangeLayers, arrayOfLayerDataBatch, coordinateInfoEnabled, isLayerHiddenOnMap, getNumFeaturesLabel, mapId, orderedLayers]);
+  }, [
+    visibleInRangeLayers,
+    arrayOfLayerDataBatch,
+    coordinateInfoEnabled,
+    isLayerHiddenOnMap,
+    getNumFeaturesLabel,
+    mapId,
+    getMapLayerParentHidden,
+    orderedLayers,
+  ]);
 
   /**
    * Memoizes the selected layer for the LayerList component.
@@ -434,6 +453,31 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
   };
 
   /**
+   * Handles when the right panel is closed in responsive layout.
+   * Removes the currently selected feature highlight (but keeps checked features).
+   */
+  const handleRightPanelClosed = useCallback((): void => {
+    // Log
+    logger.logTraceUseCallback('DETAILS-PANEL - handleRightPanelClosed');
+
+    // Only remove the current selected feature highlight if it's not checked
+    const currentFeature = memoSelectedLayerData?.features?.[currentFeatureIndex];
+    if (currentFeature && !isFeatureInCheckedFeatures(currentFeature)) {
+      removeHighlightedFeature(currentFeature);
+    }
+  }, [removeHighlightedFeature, memoSelectedLayerData, currentFeatureIndex, isFeatureInCheckedFeatures]);
+
+  /**
+   * Handles when the right panel visibility changes in responsive layout.
+   * Updates the local state to track panel visibility.
+   */
+  const handleRightPanelVisibilityChanged = useCallback((isVisible: boolean): void => {
+    // Log
+    logger.logTraceUseCallback('DETAILS-PANEL - handleRightPanelVisibilityChanged', isVisible);
+    setIsRightPanelVisible(isVisible);
+  }, []);
+
+  /**
    * Handles clicks to forward and back arrows in right panel.
    * Removes previous feature from selectedFeatures store if it is not checked, and adds new feature.
    *
@@ -464,8 +508,18 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
       logger.logTraceUseCallback('DETAILS-PANEL - handleLayerChange', layerEntry.layerPath);
       // Set the selected layer path in the store which will in turn trigger the store listeners on this component
       setSelectedLayerPath(layerEntry.layerPath);
+
+      // Re-highlight the current feature when panel becomes visible (layer selection makes panel visible)
+      // Use setTimeout to ensure the layer data is updated first
+      setTimeout(() => {
+        const layerData = arrayOfLayerDataBatch.find((layer) => layer.layerPath === layerEntry.layerPath);
+        const featureToHighlight = layerData?.features?.[0]; // Will be index 0 after layer change
+        if (featureToHighlight && hasValidGeometry(featureToHighlight)) {
+          addHighlightedFeature(featureToHighlight);
+        }
+      }, 0);
     },
-    [setSelectedLayerPath]
+    [setSelectedLayerPath, arrayOfLayerDataBatch, hasValidGeometry, addHighlightedFeature]
   );
   // #endregion
 
@@ -509,9 +563,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
     resetCurrentIndex();
   }
 
-  /**
-   * Select a layer after a map click happened on the map.
-   */
+  // Select a layer after a map click happened on the map.
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('DETAILS-PANEL- mapClickCoordinates', mapClickCoordinates);
@@ -520,11 +572,18 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
     const coordinatesChanged =
       mapClickCoordinates && JSON.stringify(mapClickCoordinates) !== JSON.stringify(prevMapClickCoordinates.current);
 
-    // If nothing was previously selected at all
-    if (mapClickCoordinates && memoLayersList?.length && !selectedLayerPath.length) {
-      const selectedLayer = memoLayersList.find((layer) => !!layer.numOffeatures);
-      // Select the first layer that has features
-      setSelectedLayerPath(selectedLayer?.layerPath ?? '');
+    // Show the details for a feature on map click
+    if (mapClickCoordinates && memoLayersList?.length) {
+      // if we don't have a selected layer path with features select the first layer path with features
+      if (!selectedLayerPath.length) {
+        const selectedLayer = memoLayersList.find((layer) => !!layer.numOffeatures);
+        setSelectedLayerPath(selectedLayer?.layerPath ?? '');
+      }
+
+      // make sure the right panel is visible
+      if (!isRightPanelVisible) {
+        layoutRef.current?.showRightPanel(true);
+      }
     }
 
     // On new map click (coordinates changed), clear all highlights, checked features, and layer features
@@ -540,7 +599,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
       prevMapClickCoordinates.current = mapClickCoordinates;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapClickCoordinates, memoLayersList, setSelectedLayerPath]);
+  }, [mapClickCoordinates, memoLayersList, setSelectedLayerPath, coordinateInfoEnabled]);
 
   /**
    * Clear highlights and checked features when the details panel is closed
@@ -591,7 +650,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
    */
   const renderContent = (): JSX.Element | null => {
     if (selectedLayerPath === 'coordinate-info') {
-      return <CoordinateInfo fullWidth={fullWidth} />;
+      return <CoordinateInfo />;
     }
 
     // If there is no layer, return null for the guide to show
@@ -609,17 +668,17 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
       const currentFeature = memoSelectedLayerDataFeatures[currentFeatureIndex];
 
       return (
-        <Box sx={fullWidth ? sxClasses.rightPanelContainer : { ...sxClasses.rightPanelContainer }}>
+        <Box sx={sxClasses.rightPanelContainer}>
           <Grid container sx={sxClasses.rightPanelBtnHolder}>
-            <Grid size={{ xs: 6 }}>
-              <Box style={{ marginLeft: '1.375rem' }}>
+            <Grid size={{ xs: 6 }} sx={{ alignSelf: 'center' }}>
+              <Box>
                 {t('details.featureDetailsTitle')
                   .replace('{count}', `${currentFeatureIndex + 1}`)
                   .replace('{total}', `${memoSelectedLayerDataFeatures?.length}`)}
               </Box>
             </Grid>
             <Grid size={{ xs: 6 }}>
-              <Box sx={{ textAlign: 'right', marginRight: '1.625rem' }}>
+              <Box sx={{ textAlign: 'right' }}>
                 <IconButton
                   aria-label={t('details.previousFeatureBtn')}
                   tooltipPlacement="top"
@@ -630,7 +689,7 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
                   <ArrowBackIosOutlinedIcon />
                 </IconButton>
                 <IconButton
-                  sx={{ marginLeft: '1.25rem' }}
+                  sx={{ marginLeft: '16px' }}
                   aria-label={t('details.nextFeatureBtn')}
                   tooltipPlacement="top"
                   onClick={() => handleFeatureNavigateChange(1)}
@@ -653,11 +712,11 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
 
   return (
     <Layout
+      ref={layoutRef}
       containerType={containerType}
       layoutSwitch={
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Box sx={{ maxWidth: '80%', flexShrink: 1 }}>{!hideCoordinateInfoSwitch && <CoordinateInfoSwitch />}</Box>
-          <Box sx={{ flexGrow: 1 }} />
+        <Box sx={sxClasses.layoutSwitch}>
+          {!hideCoordinateInfoSwitch && <CoordinateInfoSwitch />}
           <IconButton
             aria-label={t('details.clearAllfeatures')}
             tooltipPlacement="top"
@@ -665,15 +724,20 @@ export function DetailsPanel({ fullWidth = false, containerType = CONTAINER_TYPE
             className="buttonOutline"
             disabled={checkedFeatures.length === 0}
           >
-            <LayersClearOutlinedIcon />
+            <Box sx={{ display: 'flex', alignItems: 'center', height: 24 }}>
+              <ClearHighlightIcon sx={{ fontSize: 24 }} />
+            </Box>
           </IconButton>
         </Box>
       }
       selectedLayerPath={selectedLayerPath}
       layerList={memoLayersList}
       onLayerListClicked={(layerEntry) => handleLayerChange(layerEntry)}
-      fullWidth={fullWidth}
+      onRightPanelClosed={handleRightPanelClosed}
+      onRightPanelVisibilityChanged={handleRightPanelVisibilityChanged}
       guideContentIds={['details']}
+      hideEnlargeBtn={containerType === CONTAINER_TYPE.APP_BAR}
+      toggleMode={containerType === CONTAINER_TYPE.APP_BAR}
     >
       {renderContent()}
     </Layout>

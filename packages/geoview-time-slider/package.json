@@ -1,6 +1,6 @@
 {
   "name": "geoview-time-slider",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "A time slider for the geoview project",
   "main": "src/index.tsx",
   "keywords": [

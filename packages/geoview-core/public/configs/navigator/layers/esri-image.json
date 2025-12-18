@@ -12,30 +12,50 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "ESRIImageLYR1",
-        "geoviewLayerName": "Max Temp",
+        "geoviewLayerName": "Dry Spell",
         "geoviewLayerType": "esriImage",
-        "metadataAccessPath": "https://www5.agr.gc.ca/atlas/rest/services/app_agclimate_agclimat/agclimate_tx/ImageServer",
+        "metadataAccessPath": "https://agriculture.canada.ca/imagery-images/rest/services/agclimate/dry_spell/ImageServer",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "agclimate_tx",
-            "layerName": "Max Temperature"
+            "layerId": "dry_spell"
           }
         ]
       },
       {
         "geoviewLayerId": "ESRIImageLYR2",
-        "geoviewLayerName": "Max Temp",
+        "geoviewLayerName": "Precipitation Percentile",
         "geoviewLayerType": "esriImage",
-        "metadataAccessPath": "https://www5.agr.gc.ca/atlas/rest/services/imageservices/annual_crop_inventory_2022/ImageServer",
+        "metadataAccessPath": "https://agriculture.canada.ca/imagery-images/rest/services/agclimate/precipitation_percentile/ImageServer",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "annual_crop_inventory_2022",
-            "layerName": "Crop Inventory 2022"
+            "layerId": "precipitation_percentile"
           }
         ]
       },
       {
         "geoviewLayerId": "ESRIImageLYR3",
+        "geoviewLayerName": "Heat Wave",
+        "geoviewLayerType": "esriImage",
+        "metadataAccessPath": "https://agriculture.canada.ca/imagery-images/rest/services/agclimate/heat_wave/ImageServer",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "heat_wave"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "ESRIImageLYR4",
+        "geoviewLayerName": "Climate Normals",
+        "geoviewLayerType": "esriImage",
+        "metadataAccessPath": "https://agriculture.canada.ca/imagery-images/rest/services/climate_normals/ImageServer",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "climate_normals"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "ESRIImageLYR5",
         "geoviewLayerName": "USA",
         "geoviewLayerType": "esriImage",
         "metadataAccessPath": "https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/USA/MapServer",

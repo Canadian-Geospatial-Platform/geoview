@@ -41,6 +41,8 @@ export abstract class AbstractBaseLayer {
     this.#layerName = layerConfig.getLayerName();
   }
 
+  // #region OVERRIDES
+
   /**
    * Must override method to get the layer attributions
    * @returns {string[]} The layer attributions
@@ -52,6 +54,10 @@ export abstract class AbstractBaseLayer {
    * @param {OLProjection | undefined} projection - Optional, the projection to refresh to.
    */
   protected abstract onRefresh(projection: OLProjection | undefined): void;
+
+  // #endregion OVERRIDES
+
+  // #region METHODS
 
   /**
    * Gets the attributions for the layer by calling the overridable function 'onGetAttributions'.
@@ -255,6 +261,10 @@ export abstract class AbstractBaseLayer {
     return (!minZoom || zoom > minZoom) && (!maxZoom || zoom <= maxZoom);
   }
 
+  // #endregion METHODS
+
+  // #region EVENTS
+
   /**
    * Emits an event to all handlers.
    * @param {LayerNameChangedEvent} event - The event to emit
@@ -338,6 +348,8 @@ export abstract class AbstractBaseLayer {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerOpacityChangedHandlers, callback);
   }
+
+  // #endregion EVENTS
 }
 
 /**

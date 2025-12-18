@@ -1,10 +1,9 @@
 import type { SyntheticEvent, ReactNode, MouseEvent } from 'react';
 import { useState, useEffect, useMemo, useCallback, useRef, memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Size } from 'ol/size';
 
 import type { TabsProps, TabProps, BoxProps, SelectChangeEvent, TabScrollButtonProps } from '@mui/material';
-import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, Box, TabScrollButton } from '@mui/material';
+import { Grid, Tab as MaterialTab, Tabs as MaterialTabs, Box, TabScrollButton, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { logger } from '@/core/utils/logger';
@@ -38,7 +37,6 @@ type FocusItemProps = {
 /**
  * Tabs ui properties
  */
-
 export interface TypeTabsProps {
   shellContainer?: HTMLElement;
   tabs: TypeTabs[];
@@ -55,7 +53,6 @@ export interface TypeTabsProps {
   onOpenKeyboard?: (uiFocus: FocusItemProps) => void;
   onCloseKeyboard?: () => void;
   containerType?: TypeContainerBox;
-  sideAppSize: Size;
   appHeight: number;
   hiddenTabs: string[];
   isFullScreen: boolean;
@@ -98,7 +95,6 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
     tabProps = {},
     containerType,
     isCollapsed,
-    sideAppSize,
     appHeight,
     hiddenTabs,
     isFullScreen,
@@ -107,18 +103,14 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   // State
   // boolean value in state reflects when tabs will be collapsed state, then value needs to false.
   const [value, setValue] = useState<number | boolean>(0);
   const [tabPanels, setTabPanels] = useState([tabs[0]]);
   const tabPanelRef = useRef<HTMLDivElement | null>(null);
-
   const sxClasses = useMemo(() => getSxClasses(theme, isFullScreen, appHeight), [theme, isFullScreen, appHeight]);
-
-  // show/hide dropdown based on map size
-  const initMobileDropdown = sideAppSize[0] !== 0 ? sideAppSize[0] < theme.breakpoints.values.sm : false;
-  const [showMobileDropdown, setShowMobileDropdown] = useState(initMobileDropdown);
 
   /**
    * Update Tab panel when value change from tabs and dropdown.
@@ -218,17 +210,6 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
   }, [tabs, t]);
 
   useEffect(() => {
-    logger.logTraceUseEffect('UI.TABS - mapSize', sideAppSize);
-
-    // show/hide mobile dropdown when screen size change.
-    if (sideAppSize[0] < theme.breakpoints.values.sm) {
-      setShowMobileDropdown(true);
-    } else {
-      setShowMobileDropdown(false);
-    }
-  }, [sideAppSize, theme.breakpoints.values.sm]);
-
-  useEffect(() => {
     logger.logTraceUseEffect('UI.TABS - isCollapsed', isCollapsed);
 
     const tabPanel = tabPanelRef?.current;
@@ -276,7 +257,7 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
         }}
       >
         <Grid size={{ xs: 7, sm: 10 }}>
-          {!showMobileDropdown ? (
+          {!isMobile ? (
             <MaterialTabs
               variant="scrollable"
               scrollButtons

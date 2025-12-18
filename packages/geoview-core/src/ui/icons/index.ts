@@ -24,7 +24,6 @@ export {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
   Circle as CircleIcon,
-  ClearAll as ClearFiltersIcon,
   Close as CloseIcon,
   Copyright as CopyrightIcon,
   CropOriginal as AoiIcon,
@@ -43,17 +42,16 @@ export {
   Expand as ExpandIcon,
   ExpandLess as ExpandLessIcon,
   ExpandMore as ExpandMoreIcon,
+  DynamicFeed as LayerGroupIcon,
   FileUpload as FileUploadIcon,
   FilterAlt as FilterAltIcon,
-  FilterAltOff as FilterAltOffIcon,
+  FilterAltOff as ClearFiltersIcon,
+  FilterList as FilterListIcon,
   FormatBold as FormatBoldIcon,
   FormatItalic as FormatItalicIcon,
   Fullscreen as FullscreenIcon,
   FullscreenExit as FullscreenExitIcon,
   GitHub as GitHubIcon,
-  Group as GroupIcon,
-  GroupWork as GroupWorkIcon,
-  GroupWorkOutlined as GroupWorkOutlinedIcon,
   Help as HelpIcon,
   Hexagon as HexagonIcon,
   HighlightOutlined as HighlightOutlinedIcon,
@@ -129,4 +127,4 @@ export {
   ZoomOut as ZoomOutSearchIcon,
 } from '@mui/icons-material';
 
-export { LegendIcon } from '@/ui/svg/svg-icon';
+export { LegendIcon, ClearHighlightIcon } from '@/ui/svg/svg-icon';

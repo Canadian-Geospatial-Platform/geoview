@@ -1,16 +1,32 @@
 import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
 
+// offset values
+const appBarWidth = 50;
+
 /**
  * Get custom sx classes for the MUI panel
  *
  * @param {Theme} theme the theme object
  * @returns {Object} the sx classes object
  */
-export const getSxClasses = (theme: Theme): SxStyles => ({
+export const getSxClasses = (theme: Theme, open: boolean, panelWidth: string | number): SxStyles => ({
   panelContainer: {
+    height: `calc(100%  - 40px)`,
+    width: open ? `calc(${panelWidth}% - ${appBarWidth}px)` : 0,
+    [theme.breakpoints.up('sm')]: {
+      minWidth: open ? '420px' : 0,
+    },
+    [theme.breakpoints.down('sm')]: {
+      width: open ? `calc(100% - ${appBarWidth}px)` : 0,
+    },
+    transition: `${theme.transitions.duration.standard}ms ease`,
+    position: 'absolute',
+    left: `${appBarWidth}px`,
+  },
+  panelCard: {
     backgroundColor: theme.palette.geoViewColor?.bgColor.main,
-    height: 'calc(100%)',
+    height: '100%',
     borderRadius: 0,
     flexDirection: 'column',
     [theme.breakpoints.down('sm')]: {
@@ -26,7 +42,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
     '& .MuiCardHeader-title': {
       fontSize: theme.palette.geoViewFontSize.default,
-      paddingTop: 8,
+      lineHeight: 1.25,
+      paddingTop: 0,
       textTransform: 'uppercase',
       opacity: 0,
       animation: 'fadein 500ms ease-in-out forwards',
@@ -60,7 +77,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       },
     },
   },
-  panelContentContainer: {
+  panelCardContent: {
     position: 'relative',
     overflow: 'hidden',
     '&:last-child': {

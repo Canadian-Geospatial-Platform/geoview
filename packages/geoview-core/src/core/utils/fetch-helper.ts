@@ -1,4 +1,4 @@
-import { delay, readTextWithBestEncoding, xmlToJson } from '@/core/utils/utilities';
+import { delay, parseXMLToJson, readTextWithBestEncoding } from '@/core/utils/utilities';
 import {
   ResponseEmptyError,
   ResponseError,
@@ -10,7 +10,7 @@ import {
 } from '@/core/exceptions/core-exceptions';
 import { logger } from '@/core/utils/logger';
 
-export class Fetch {
+export abstract class Fetch {
   /**
    * Fetches a url for a json response.
    * @param {string} url - The url to fetch.
@@ -18,11 +18,11 @@ export class Fetch {
    * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
    * @param {number?} delayMs - The option delay before performing the actual fetch command (mostly for testing purposes).
    * @returns {Promise<T>} The fetched json response.
-   * @throws {ResponseError} Error thrown when the response is not OK (non-2xx).
-   * @throws {ResponseEmptyError} Error thrown when the JSON response is empty.
-   * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
-   * @throws {RequestAbortedError} Error thrown when the request was aborted by the caller's signal.
-   * @throws {NetworkError} Errow thrown when a network issue happened.
+   * @throws {ResponseError} When the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} When the JSON response is empty.
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
+   * @throws {NetworkError} When a network issue happened.
    */
   static async fetchJson<T>(url: string, init?: RequestInit, timeoutMs?: number, delayMs?: number): Promise<T> {
     // The original signal if any
@@ -83,13 +83,13 @@ export class Fetch {
    * @param {RequestInit?} init - The optional initialization parameters for the fetch.
    * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
    * @returns {Promise<T>} The fetched json response.
-   * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
-   * @throws {RequestAbortedError} Error thrown when the request was aborted by the caller's signal.
-   * @throws {ResponseError} Error thrown when the response is not OK (non-2xx).
-   * @throws {ResponseEmptyError} Error thrown when the JSON response is empty.
-   * @throws {ResponseTypeError} Errow thrown when the response from the service is not an object.
-   * @throws {ResponseContentError} Error thrown when the response actually contains an error within it.
-   * @throws {NetworkError} Errow thrown when a network issue happened.
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
+   * @throws {ResponseError} When the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} When the JSON response is empty.
+   * @throws {ResponseTypeError} When the response from the service is not an object.
+   * @throws {ResponseContentError} When the response actually contains an error within it.
+   * @throws {NetworkError} When a network issue happened.
    */
   static async fetchEsriJson<T>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T> {
     // Redirect
@@ -109,12 +109,12 @@ export class Fetch {
    * @param {RequestInit?} init - The optional initialization parameters for the fetch.
    * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
    * @returns {Promise<T[]>} The fetched json response.
-   * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
-   * @throws {RequestAbortedError} Error thrown when the request was aborted by the caller's signal.
-   * @throws {ResponseError} Error thrown when the response is not OK (non-2xx).
-   * @throws {ResponseEmptyError} Error thrown when the JSON response is empty.
-   * @throws {ResponseTypeError} Error thrown when the response from the service is not an array.
-   * @throws {NetworkError} Errow thrown when a network issue happened.
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
+   * @throws {ResponseError} When the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} When the JSON response is empty.
+   * @throws {ResponseTypeError} When the response from the service is not an array.
+   * @throws {NetworkError} When a network issue happened.
    */
   static async fetchJsonAsArray<T>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T[]> {
     // Redirect
@@ -135,11 +135,11 @@ export class Fetch {
    * @param {RequestInit?} init - The optional initialization parameters for the fetch.
    * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
    * @returns {Promise<string>} The fetched text response.
-   * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
-   * @throws {RequestAbortedError} Error thrown when the request was aborted by the caller's signal.
-   * @throws {ResponseError} Error thrown when the response is not OK (non-2xx).
-   * @throws {ResponseEmptyError} Error thrown when the JSON response is empty.
-   * @throws {NetworkError} Errow thrown when a network issue happened.
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
+   * @throws {ResponseError} When the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} When the JSON response is empty.
+   * @throws {NetworkError} When a network issue happened.
    */
   static async fetchText(url: string, init?: RequestInit, timeoutMs?: number): Promise<string> {
     // Get the buffer array of the response
@@ -165,10 +165,10 @@ export class Fetch {
    * @param {RequestInit?} init - The optional initialization parameters for the fetch.
    * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
    * @returns {Promise<ArrayBuffer>} The fetched array buffer response.
-   * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
-   * @throws {RequestAbortedError} Error thrown when the request was aborted by the caller's signal.
-   * @throws {ResponseError} Error thrown when the response is not OK (non-2xx).
-   * @throws {NetworkError} Errow thrown when a network issue happened.
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
+   * @throws {ResponseError} When the response is not OK (non-2xx).
+   * @throws {NetworkError} When a network issue happened.
    */
   static async fetchArrayBuffer(url: string, init?: RequestInit, timeoutMs?: number): Promise<ArrayBuffer> {
     // The original signal if any
@@ -218,11 +218,11 @@ export class Fetch {
    * @param {RequestInit?} init - The optional initialization parameters for the fetch.
    * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
    * @returns {Promise<string | ArrayBuffer | null>} The image as a base64 string or ArrayBuffer, or null on failure.
-   * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
-   * @throws {RequestAbortedError} Error thrown when the request was aborted by the caller's signal.
-   * @throws {ResponseError} Error thrown when the response is not OK (non-2xx).
-   * @throws {ResponseContentError} Error thrown when the fetched blob is of type 'text/xml', indicating an unexpected server error.
-   * @throws {NetworkError} Errow thrown when a network issue happened.
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
+   * @throws {ResponseError} When the response is not OK (non-2xx).
+   * @throws {ResponseContentError} When the fetched blob is of type 'text/xml', indicating an unexpected server error.
+   * @throws {NetworkError} When a network issue happened.
    */
   static async fetchBlobImage(url: string, init?: RequestInit, timeoutMs?: number): Promise<string | ArrayBuffer | null> {
     // Fetch the blob
@@ -249,10 +249,10 @@ export class Fetch {
    * @param {RequestInit?} init - The optional initialization parameters for the fetch.
    * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
    * @returns {Promise<Blob>} The fetched blob response.
-   * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
-   * @throws {RequestAbortedError} Error thrown when the request was aborted by the caller's signal.
-   * @throws {ResponseError} Error thrown when the response is not OK (non-2xx).
-   * @throws {NetworkError} Errow thrown when a network issue happened.
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
+   * @throws {ResponseError} When the response is not OK (non-2xx).
+   * @throws {NetworkError} When a network issue happened.
    */
   static async fetchBlob(url: string, init?: RequestInit, timeoutMs?: number): Promise<Blob> {
     // The original signal if any
@@ -300,26 +300,23 @@ export class Fetch {
    * @param {RequestInit?} init - The optional initialization parameters for the fetch.
    * @param {number?} timeoutMs - The optional maximum timeout period to wait for an answer before throwing a RequestTimeoutError.
    * @returns {Promise<T = Record<string, unknown>>} The fetched json response.
-   * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
-   * @throws {RequestAbortedError} Error thrown when the request was aborted by the caller's signal.
-   * @throws {ResponseError} Error thrown when the response is not OK (non-2xx).
-   * @throws {ResponseEmptyError} Error thrown when the JSON response is empty.
-   * @throws {NetworkError} Errow thrown when a network issue happened.
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
+   * @throws {ResponseError} When the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} When the JSON response is empty.
+   * @throws {NetworkError} When a network issue happened.
    */
   static async fetchXMLToJson<T = Record<string, unknown>>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T> {
     // Fetch the text
     const text = await Fetch.fetchText(url, init, timeoutMs);
 
-    // Parse the text/xml to DOM
-    const xmlDOMCapabilities = new DOMParser().parseFromString(text, 'text/xml');
-
     // Parse it using xmlToJson
-    const responseJson = xmlToJson(xmlDOMCapabilities);
+    const responseJson = parseXMLToJson(text);
 
     // Check if the response is not an empty object
-    if (responseJson.constructor === Object && Object.keys(responseJson).length > 0) {
+    if (responseJson && typeof responseJson === 'object' && responseJson.constructor === Object && Object.keys(responseJson).length > 0) {
       // Return the value
-      return responseJson;
+      return responseJson as T;
     }
 
     // Throw empty response error
@@ -333,11 +330,11 @@ export class Fetch {
    * @param {RequestInit?} init - The optional initialization parameters for the fetch.
    * @param {number?} timeoutMs - Timeout in milliseconds before the request is aborted, defaults to 7 seconds
    * @returns {Promise<T>} A promise that resolves with the parsed JSON response
-   * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
-   * @throws {RequestAbortedError} Error thrown when the request was aborted by the caller's signal.
-   * @throws {ResponseError} Error thrown when the response is not OK (non-2xx).
-   * @throws {ResponseEmptyError} Error thrown when the JSON response is empty.
-   * @throws {NetworkError} Errow thrown when a network issue happened.
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
+   * @throws {ResponseError} When the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} When the JSON response is empty.
+   * @throws {NetworkError} When a network issue happened.
    *
    * @example
    * try {
@@ -355,7 +352,7 @@ export class Fetch {
    * Throws an error if the provided response content contains an embedded error.
    * Internally uses {@link Fetch.checkResponseForEmbeddedErrors} to validate the content.
    * @param {unknown} content - The content to inspect.
-   * @throws {ResponseContentError} Error thrown when the response contains an embedded error.
+   * @throws {ResponseContentError} When the response contains an embedded error.
    */
   static throwIfResponseHasEmbeddedError(content: unknown): void {
     // Check for the response content
@@ -474,9 +471,9 @@ export class Fetch {
    * @param {AbortSignal | undefined} originalSignal - The external abort signal passed by the caller (e.g. user cancellation).
    * @param {AbortSignal | undefined} timeoutSignal - The internal abort signal used for enforcing a timeout.
    * @param {number | undefined} timeoutMs - The timeout duration used for the operation (required for timeout error reporting).
-   * @throws {RequestTimeoutError} Error thrown when the request exceeds the timeout duration.
-   * @throws {RequestAbortedError} Error thrown when the request was aborted by the caller's signal.
-   * @throws {NetworkError} Errow thrown when a network issue happened.
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
+   * @throws {NetworkError} When a network issue happened.
    * @private
    */
   static #throwWhatWeKnow(

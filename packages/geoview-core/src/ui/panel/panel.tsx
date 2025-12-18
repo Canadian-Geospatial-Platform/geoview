@@ -15,8 +15,6 @@ import { CloseIcon } from '@/ui/icons/index';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { getSxClasses } from '@/ui/panel/panel-style';
-import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';
 import { FocusTrapContainer } from '@/core/components/common';
 import { delay } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
@@ -49,38 +47,17 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
 
   // Get constant from props
   const { panel, button, onOpen, onClose, onGeneralClose, onKeyDown, ...rest } = props;
-  const { status: open = false, isFocusTrapped = false, panelStyles, panelGroupName } = panel;
+  const { status: open = false, isFocusTrapped = false, panelStyles, panelId } = panel;
 
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
-  const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-
-  // TODO: should the mapSize pass as props to remove link with store
-  // Store
-  const mapSize = useMapSize();
-
-  // State
   const panelContainerRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLButtonElement>(null);
   const panelHeader = useRef<HTMLButtonElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
-  const panelWidth = panel?.width ?? 400;
-
-  // TODO: style - manage style in the sx classes, regroup height and width management
-  const panelContainerStyles = {
-    ...(panelStyles?.panelContainer && { ...panelStyles.panelContainer }),
-    width: open ? panelWidth : 0,
-    height: `calc(100%  - 40px)`,
-    maxWidth: panel?.width ?? 400,
-    [theme.breakpoints.down('sm')]: {
-      width: 'calc(100% - 50px)',
-      maxWidth: 'calc(100% - 50px)',
-    },
-    transition: `${theme.transitions.duration.standard}ms ease`,
-    position: 'absolute',
-    left: '50px',
-  };
+  const panelWidth = panel?.width ?? 100; //percentage
+  const sxClasses = useMemo(() => getSxClasses(theme, open, panelWidth), [theme, open, panelWidth]);
 
   useEffect(() => {
     logger.logTraceUseEffect('UI.PANEL - open');
@@ -111,40 +88,33 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
     }
   }, [open, theme.transitions.duration.standard, onOpen, onClose]);
 
-  /**
-   * Update the width of data table and layers panel when window is resize based on mapsize
-   */
-  useEffect(() => {
-    logger.logTraceUseEffect('UI.PANEL - update width');
-
-    // TODO: style - panel type or even width should be pass as props to remove dependency
-    if (
-      (panelGroupName === DEFAULT_APPBAR_CORE.DATA_TABLE || panelGroupName === DEFAULT_APPBAR_CORE.LAYERS) &&
-      panelContainerRef.current &&
-      open
-    ) {
-      panelContainerRef.current.style.width = `${mapSize[0]}px`;
-      panelContainerRef.current.style.maxWidth = `${mapSize[0]}px`;
-    } else {
-      panelContainerRef.current?.removeAttribute('style');
-    }
-  }, [mapSize, panelGroupName, open]);
-
   return (
-    <Box sx={panelContainerStyles} ref={panelContainerRef} className={`appbar-panel-${panelGroupName}`}>
+    <Box
+      component="section"
+      aria-label={`${t(panel.title)} panel`}
+      sx={{
+        ...sxClasses.panelContainer,
+        ...(panelStyles?.panelContainer && { ...panelStyles.panelContainer }),
+      }}
+      ref={panelContainerRef}
+      id={`appbar-panel-${panel.panelId || ''}`}
+      className={`appbar-panel appbar-panel-${panelId}`}
+    >
       <FocusTrapContainer open={isFocusTrapped} id="app-bar-focus-trap">
         <Card
           sx={{
-            ...sxClasses.panelContainer,
+            ...sxClasses.panelCard,
             display: open ? 'block' : 'none',
             ...(panelStyles?.panelCard && { ...panelStyles.panelCard }),
           }}
           ref={panelRef as React.MutableRefObject<null>}
           onKeyDown={(event: KeyboardEvent) => onKeyDown?.(event)}
           {...{ 'data-id': button.id }}
+          className="panel-card"
           {...rest}
         >
           <CardHeader
+            component="header"
             sx={panelStyles?.panelCardHeader ? { ...panelStyles.panelCardHeader } : {}}
             ref={panelHeader}
             title={t(panel.title)}
@@ -169,7 +139,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
             }
           />
 
-          <CardContent sx={{ ...sxClasses.panelContentContainer, ...(panelStyles ? panelStyles.panelCardContent : {}) }}>
+          <CardContent sx={{ ...sxClasses.panelCardContent, ...(panelStyles ? panelStyles.panelCardContent : {}) }}>
             {typeof panel.content === 'string' ? <UseHtmlToReact htmlContent={panel.content} /> : panel.content}
           </CardContent>
         </Card>

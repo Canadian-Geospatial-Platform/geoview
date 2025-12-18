@@ -1,5 +1,5 @@
 import { GVAbstractTester } from './abstract-gv-tester';
-import type { ClassType } from '../core/test';
+import type { ClassType } from 'geoview-core/core/types/global-types';
 import { Test } from '../core/test';
 import type { MapConfigLayerEntry, TypeGeoviewLayerConfig, TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
 import { LayerNoCapabilitiesError, LayerServiceMetadataUnableToFetchError } from 'geoview-core/core/exceptions/layer-exceptions';
@@ -19,7 +19,7 @@ import { EsriFeatureLayerEntryConfig } from 'geoview-core/api/config/validation-
 import { EsriDynamicLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { GroupLayerEntryConfig } from 'geoview-core/api/config/validation-classes/group-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import { WfsLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
+import { OgcWfsLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { GeoJSONLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/geojson-layer-entry-config';
 import { CsvLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
 import { OgcFeatureLayerEntryConfig } from 'geoview-core/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
@@ -97,7 +97,7 @@ export class ConfigTester extends GVAbstractTester {
     testName: string,
     url: string,
     expectedConfig: Record<string, unknown>,
-    expectedTypeFirstLayerEntry: ClassType
+    expectedTypeFirstLayerEntry: ClassType<GroupLayerEntryConfig | EsriDynamicLayerEntryConfig>
   ): Promise<Test<TypeGeoviewLayerConfig>> {
     // Dummy names
     const gvLayerId: string = 'gvLayerId';
@@ -485,7 +485,7 @@ export class ConfigTester extends GVAbstractTester {
     const urlBad: string = GVAbstractTester.BAD_URL;
 
     // Test
-    return this.testError(`Test a WMS config with a bad url...`, LayerNoCapabilitiesError, async (test) => {
+    return this.testError(`Test a WMS config with a bad url...`, LayerServiceMetadataUnableToFetchError, async (test) => {
       // Creating the configuration
       test.addStep('Creating the GeoView Layer Configuration...');
 
@@ -546,7 +546,7 @@ export class ConfigTester extends GVAbstractTester {
 
         // Check it's the right type
         test.addStep('Verifying layer entry is of the right type...');
-        Test.assertIsInstance(foundLayerEntry, WfsLayerEntryConfig);
+        Test.assertIsInstance(foundLayerEntry, OgcWfsLayerEntryConfig);
       }
     );
   }
