@@ -71,6 +71,7 @@ export abstract class GeoviewRenderer {
    *
    * @returns {string} The current default color string.
    */
+  // TODO: MINOR - Create a mechanism to have one counter by map if needed with a small class who reuse the static function
   static getDefaultColor(alpha: number, increment: boolean = false): string {
     // get color then increment if needed
     const color = asString(setAlphaColor(asArray(defaultColor[colorCount]), alpha));
