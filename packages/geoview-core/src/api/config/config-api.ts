@@ -449,8 +449,9 @@ export class ConfigApi {
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {TypeInitialGeoviewLayerType} layerType - The type of GeoView layer to initialize (e.g., 'esriDynamic', 'ogcWms', 'GeoJSON', etc.).
    * @param {string} layerURL - The URL endpoint associated with the layer (e.g., service URL, file path).
-   * @param {TypeDisplayLanguage} language - The language, used for the geocore layer types to know which language to use when extracting layer information.
-   * @param {string} mapId - The map id, used for the geocore layer types, to determine the layer id.
+   * @param {boolean?} [isTimeAware] - Indicates whether the layer supports time-based filtering.
+   * @param {TypeDisplayLanguage} [language] - The language, used for the geocore layer types to know which language to use when extracting layer information.
+   * @param {string} [mapId] - The map id, used for the geocore layer types, to determine the layer id.
    * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
    * @returns {Promise<TypeGeoviewLayerConfig>} A Promise of a fully initialized `TypeGeoviewLayerConfig`.
    * @throws {NotSupportedError} If the provided layer type is not recognized or supported.
@@ -463,7 +464,7 @@ export class ConfigApi {
     isTimeAware?: boolean,
     language?: TypeDisplayLanguage,
     mapId?: string,
-    abortSignal: AbortSignal | undefined = undefined
+    abortSignal?: AbortSignal
   ): Promise<TypeGeoviewLayerConfig> {
     // If working with geoCore
     if (layerType === 'geoCore') {

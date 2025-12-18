@@ -322,6 +322,17 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @static
    */
   static #processFeatureMetadata(features: Feature[], layerConfig: VectorLayerEntryConfig): void {
+    // Process feature info from config using the first feature properties.
+    // GV This is essentially a second attempt to fill the outFields and various feature info
+    // GV information in case those weren't initialized with the metadata and are still missing
+    if (features.length > 0) {
+      const sample = features[0];
+      const props = sample.getProperties();
+
+      // Use the sample feature's keys and values to infer featureInfo configuration, excluding any blacklisted headers.
+      this.processFeatureInfoConfig(Object.keys(props), Object.values(props), this.EXCLUDED_HEADERS, layerConfig);
+    }
+
     // Get the field name that uniquely identifies each feature (OID) from the layer configuration.
     // TODO: Check - OBJECTID should likely not be sent here by default for an abstract-geoview-vector class which
     // TO.DOCONT: might very well not be Esri based (leaving it as it was for now, because #getEsriOidField (replaced) was doing this).
@@ -332,15 +343,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
       const id = feature.get(oidField) ?? getUid(feature);
       feature.setId(id);
     });
-
-    // If the featureInfo config is not defined, generate it from the first feature's properties.
-    if (!layerConfig.source?.featureInfo && features.length > 0) {
-      const sample = features[0];
-      const props = sample.getProperties();
-
-      // Use the sample feature's keys and values to infer featureInfo configuration, excluding any blacklisted headers.
-      this.processFeatureInfoConfig(Object.keys(props), Object.values(props), this.EXCLUDED_HEADERS, layerConfig);
-    }
   }
 
   // #endregion STATIC METHODS

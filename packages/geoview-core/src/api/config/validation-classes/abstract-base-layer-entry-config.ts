@@ -222,17 +222,24 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * @returns {TypeStyleSettings[]} The array of TypeStyleSettings
    */
   getLayerStyleSettings(): TypeLayerStyleSettings | undefined {
-    // Get the type geometries
-    const styles = this.getLayerStyle();
+    // Get the layer style
+    const layerStyle = this.getLayerStyle();
 
-    // If any styles
-    if (styles) {
-      // Get the keys
-      const keys = Object.keys(styles) as TypeStyleGeometry[];
+    // If has a layer style
+    if (layerStyle) {
+      // If only one style
+      if (Object.keys(layerStyle).length === 1) {
+        // Take the only one
+        return Object.values(layerStyle)[0];
+      } else {
+        // Take the geometry type
+        const geometryType = this.getGeometryType();
 
-      // Get the first one
-      if (keys.length > 0) {
-        return styles[keys[0]];
+        // If any
+        if (geometryType) {
+          // Take the style based on the geometry type
+          return layerStyle?.[geometryType];
+        }
       }
     }
 
@@ -347,6 +354,10 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     return this.source;
   }
 
+  /**
+   * Indicates whether the source has a data access path defined.
+   * @returns {boolean} `true` if a data access path is present; otherwise, `false`.
+   */
   hasDataAccessPath(): boolean {
     return !!this.getSource().dataAccessPath;
   }
@@ -453,8 +464,10 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
-   * Gets the field name representing the primary key or the provided default value.
-   * @returns {string} The field name representing the primary key or the provided default value.
+   * Gets the field name representing the primary key (OID) if available,
+   * otherwise returns the provided default field name.
+   * @param {string} defaultField - The field name to return if no OID field is found.
+   * @returns {string} The primary key (OID) field name or the provided default value.
    */
   getOutfieldsPKNameOrDefault(defaultField: string): string {
     // Get the oid field if any
