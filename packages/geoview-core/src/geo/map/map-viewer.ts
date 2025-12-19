@@ -710,7 +710,12 @@ export class MapViewer {
    * @returns {Promise<void>} A promise that resolves when the zoom operation completes.
    */
   setMapZoomLevel(zoom: number): Promise<void> {
-    this.getView().setZoom(zoom);
+    // If zoom level is already set at this value, just resolve the promise
+    if (this.getView().getZoom() === zoom) {
+      return Promise.resolve();
+    } else {
+      this.getView().setZoom(zoom);
+    }
 
     return new Promise((resolve) => {
       this.map.once('rendercomplete', () => {
