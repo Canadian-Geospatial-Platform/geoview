@@ -28,6 +28,12 @@ export declare class FeatureInfoEventProcessor extends AbstractEventProcessor {
      */
     static getSelectedLayerPath(mapId: string): string;
     /**
+     * GSt the selectedLayerPath value
+     * @param {string} mapId - The map identifier
+     * @param {string} layerPath - The layer path to select
+     */
+    static setSelectedLayerPath(mapId: string, layerPath: string): void;
+    /**
      * Gets the layer data array for one layer.
      * @param {string} mapId - The map id.
      * @param {string} layerPath - The path of the layer to get.

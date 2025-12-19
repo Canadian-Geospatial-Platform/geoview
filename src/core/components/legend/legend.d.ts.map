@@ -1,1 +1,1 @@
-{"version":3,"file":"legend.d.ts","sourceRoot":"","sources":["../../../../../src/core/components/legend/legend.tsx"],"names":[],"mappings":"AAcA,UAAU,UAAU;IAClB,aAAa,CAAC,EAAE,QAAQ,GAAG,WAAW,CAAC;CACxC;AAiCD,wBAAgB,MAAM,CAAC,EAAE,aAAyC,EAAE,EAAE,UAAU,GAAG,GAAG,CAAC,OAAO,GAAG,IAAI,CA8IpG"}
+{"version":3,"file":"legend.d.ts","sourceRoot":"","sources":["../../../../../src/core/components/legend/legend.tsx"],"names":[],"mappings":"AAcA,UAAU,UAAU;IAClB,aAAa,CAAC,EAAE,QAAQ,GAAG,WAAW,CAAC;CACxC;AA8BD,wBAAgB,MAAM,CAAC,EAAE,aAAyC,EAAE,EAAE,UAAU,GAAG,GAAG,CAAC,OAAO,GAAG,IAAI,CAmJpG"}

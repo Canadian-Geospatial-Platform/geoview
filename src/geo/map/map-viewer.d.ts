@@ -210,8 +210,9 @@ export declare class MapViewer {
      * Set the map zoom level.
      *
      * @param {number} zoom - New zoom level
+     * @returns {Promise<void>} A promise that resolves when the zoom operation completes.
      */
-    setZoomLevel(zoom: number): void;
+    setMapZoomLevel(zoom: number): Promise<void>;
     /**
      * Set the minimum map zoom level.
      *
@@ -259,9 +260,15 @@ export declare class MapViewer {
     addLocalizeRessourceBundle(language: TypeDisplayLanguage, translations: Record<string, unknown>): void;
     /**
      * Emits a map single click event.
+     * NOTE: This Does not update the store, only emit the click
      * @param {MapSingleClickEvent} clickCoordinates - The clicked coordinates to emit.
      */
     emitMapSingleClick(clickCoordinates: MapSingleClickEvent): void;
+    /**
+     * Simulate a map click eith store and ui update
+     * @param {MapSingleClickEvent} clickCoordinates - The clicked coordinates to simulate.
+     */
+    simulateMapClick(clickCoordinates: MapSingleClickEvent): void;
     /**
      * Loops through all geoview layers and refresh their respective source.
      * Use this function on projection change or other viewer modification which may affect rendering.
@@ -290,6 +297,12 @@ export declare class MapViewer {
      * @returns {Promise<void>} A promise that resolves when the zoom operation completes.
      */
     zoomToExtent(extent: Extent, options?: FitOptions): Promise<void>;
+    /**
+     * Zoom to the initial extent defined in the map configuration.
+     *
+     * @returns {Promise<void>} A promise that resolves when the zoom operation completes.
+     */
+    zoomToInitialExtent(): Promise<void>;
     /**
      * Update nav bar home button view settings.
      * @param {TypeMapViewSettings} view - The new view settings.
@@ -481,6 +494,11 @@ export declare class MapViewer {
      * @param {MapLayersLoadedDelegate} callback - The callback to be executed whenever the event is emitted
      */
     onMapLayersLoaded(callback: MapLayersLoadedDelegate): void;
+    /**
+     * Waits for the map layers loaded event to be emitted.
+     * @returns {Promise<MapViewer>} Promise resolved when the map layers loaded event is emitted
+     */
+    waitForLayersLoaded(): Promise<MapViewer>;
     /**
      * Unregisters a map layers loaded event callback.
      * @param {MapLayersLoadedDelegate} callback - The callback to stop being called whenever the event is emitted
