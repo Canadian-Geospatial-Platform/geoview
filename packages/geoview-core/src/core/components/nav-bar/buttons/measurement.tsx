@@ -52,13 +52,6 @@ const LABEL_STYLE_CONFIG = {
 const LABEL_TEXT_FILL = new Fill({ color: LABEL_STYLE_CONFIG.textColor });
 const LABEL_BACKGROUND_FILL = new Fill({ color: LABEL_STYLE_CONFIG.backgroundColor });
 
-const LABEL_OFFSET = {
-  line: { perpendicular: 20 }, // Distance perpendicular to line segment
-  polygon: { distance: 50 },
-} as const;
-
-const POLYGON_LABEL_THRESHOLD = 0.3; // Show labels for segments > 30% of average length
-
 const TOOLTIP_STYLE = {
   backgroundColor: 'rgba(0, 0, 0, 0.7)',
   color: 'white',
@@ -88,41 +81,6 @@ export default function Measurement(): JSX.Element {
   const [measureOverlays, setMeasureOverlays] = useState<Overlay[]>([]);
   const [showSegmentLabels, setShowSegmentLabels] = useState<boolean>(true);
   const [measurementFeatures, setMeasurementFeatures] = useState<any[]>([]);
-
-  /**
-   * Calculates average segment length for polygon filtering
-   */
-  const getAverageSegmentLength = (coordinates: number[][]): number => {
-    const totalSegments = coordinates.length - 1;
-    let totalLength = 0;
-    for (let i = 0; i < totalSegments; i++) {
-      const segment = new LineString([coordinates[i], coordinates[i + 1]]);
-      totalLength += GeoUtilities.getLength(segment);
-    }
-    return totalLength / totalSegments;
-  };
-
-  /**
-   * Calculates perpendicular offset for polygon labels pointing outward
-   */
-  const calculatePolygonLabelOffset = (midpoint: number[], angle: number, centroid: number[]): { offsetX: number; offsetY: number } => {
-    const toCentroidX = centroid[0] - midpoint[0];
-    const toCentroidY = centroid[1] - midpoint[1];
-
-    let perpAngle = angle + Math.PI / 2;
-    const testX = Math.cos(perpAngle);
-    const testY = Math.sin(perpAngle);
-
-    const dotProduct = testX * toCentroidX + testY * toCentroidY;
-    if (dotProduct > 0) {
-      perpAngle = angle - Math.PI / 2;
-    }
-
-    return {
-      offsetX: Math.cos(perpAngle) * LABEL_OFFSET.polygon.distance,
-      offsetY: Math.sin(perpAngle) * LABEL_OFFSET.polygon.distance,
-    };
-  };
 
   /**
    * Creates a style function that shows segment lengths
@@ -167,46 +125,19 @@ export default function Measurement(): JSX.Element {
           return styles;
         }
 
-        // Calculate average length once for polygons
-        const avgLength = geometry instanceof Polygon ? getAverageSegmentLength(coordinates) : 0;
-
         // Create labels for each segment with smart positioning
         for (let i = 0; i < coordinates.length - 1; i++) {
           const segment = new LineString([coordinates[i], coordinates[i + 1]]);
           const segmentLength = GeoUtilities.getLength(segment);
-
-          // For polygons, skip labels on very short segments to reduce clutter
-          const shouldShowLabel = !(geometry instanceof Polygon && segmentLength < avgLength * POLYGON_LABEL_THRESHOLD && i % 2 !== 0);
-
-          if (!shouldShowLabel) {
-            // eslint-disable-next-line no-continue
-            continue;
-          }
-
           const segmentLabel = formatLength(segmentLength, displayLanguage);
 
           // Get midpoint of segment for label placement
           const midpoint = [(coordinates[i][0] + coordinates[i + 1][0]) / 2, (coordinates[i][1] + coordinates[i + 1][1]) / 2];
 
-          // Calculate segment angle to position labels perpendicular to the line
-          const dx = coordinates[i + 1][0] - coordinates[i][0];
-          const dy = coordinates[i + 1][1] - coordinates[i][1];
-          const angle = Math.atan2(dy, dx);
-
-          // For polygons, position labels outside; for lines, alternate above/below
-          let offsetX = 0;
-          let offsetY: number;
+          // Center labels on segment for both lines and polygons
+          const offsetX = 0;
+          const offsetY = 0;
           const textBaseline: 'top' | 'middle' | 'bottom' = 'middle';
-
-          if (geometry instanceof Polygon) {
-            const centroid = geometry.getInteriorPoint().getCoordinates();
-            ({ offsetX, offsetY } = calculatePolygonLabelOffset(midpoint, angle, centroid));
-          } else {
-            // For lines, position perpendicular to the segment (upward)
-            const perpAngle = angle + Math.PI / 2;
-            offsetX = Math.cos(perpAngle) * LABEL_OFFSET.line.perpendicular;
-            offsetY = Math.sin(perpAngle) * LABEL_OFFSET.line.perpendicular;
-          }
 
           styles.push(
             new Style({
