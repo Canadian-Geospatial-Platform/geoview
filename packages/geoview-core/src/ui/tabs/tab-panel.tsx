@@ -61,7 +61,7 @@ function TabPanelUI(props: TypeTabPanelProps, ref: Ref<HTMLDivElement>): JSX.Ele
   const { children, value, index, id, containerType, tabId, ...other } = props;
 
   return (
-    <Box role="tabpanel" hidden={value !== index} id={id} aria-labelledby={`${tabId} layers`} {...other} ref={ref}>
+    <Box component="section" role="tabpanel" hidden={value !== index} id={id} aria-labelledby={`${tabId} layers`} {...other} ref={ref}>
       <FocusTrapContainer id={tabId} containerType={containerType}>
         {children}
       </FocusTrapContainer>

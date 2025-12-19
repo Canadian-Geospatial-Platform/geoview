@@ -102,17 +102,18 @@ const NotificationHeader = memo(function NotificationHeader({
   hasNotifications,
   t,
   sxClasses,
+  mapId,
 }: {
   onClose: () => void;
   onRemoveAll: () => void;
   hasNotifications: boolean;
-
   t: (key: string) => string;
   sxClasses: SxStyles;
+  mapId: string;
 }) {
   return (
     <Box component="header" sx={sxClasses.notificationsHeader}>
-      <Typography component="h2" sx={sxClasses.notificationsTitle} id="notification-title">
+      <Typography component="h2" sx={sxClasses.notificationsTitle} id={`notification-title-${mapId}`}>
         {t('appbar.notifications')}
       </Typography>
       <Box>
@@ -127,6 +128,7 @@ const NotificationHeader = memo(function NotificationHeader({
           {t('general.removeAll')}
         </Button>
         <IconButton
+          id={`notification-close-button-${mapId}`}
           tooltip={t('general.close')}
           aria-label={t('appbar.closeNotificationsDialog')}
           size="small"
@@ -247,8 +249,8 @@ export default memo(function Notifications(): JSX.Element {
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
       <Box sx={{ padding: interaction === 'dynamic' ? 'none' : '5px' }}>
         <IconButton
-          id="notification-button"
-          aria-controls={open ? 'notification-dialog' : undefined}
+          id={`notification-button-${mapId}`}
+          aria-controls={open ? `notification-dialog-${mapId}` : undefined}
           aria-expanded={open ? 'true' : 'false'}
           aria-label={t('appbar.notifications')}
           aria-haspopup="dialog"
@@ -272,15 +274,15 @@ export default memo(function Notifications(): JSX.Element {
 
         <Popper
           role="dialog"
-          id="notification-dialog"
-          aria-labelledby="notification-title"
+          id={`notification-dialog-${mapId}`}
+          aria-labelledby={`notification-title-${mapId}`}
           aria-modal="true"
           open={open}
           anchorEl={anchorEl}
           placement="right-end"
           onClose={handleClickAway}
           container={mapElem}
-          focusSelector="h3 + div button:last-child"
+          focusSelector={`#notification-close-button-${mapId}`}
           focusTrap={activeTrapGeoView}
           modifiers={[
             {
@@ -302,6 +304,7 @@ export default memo(function Notifications(): JSX.Element {
               hasNotifications={notifications.length > 0}
               t={t}
               sxClasses={sxClasses}
+              mapId={mapId}
             />
             <List sx={sxClasses.notificationsList} aria-live="polite" aria-relevant="all">
               {notifications.length > 0 ? (
