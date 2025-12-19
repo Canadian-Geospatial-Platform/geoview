@@ -711,11 +711,10 @@ export class MapViewer {
    */
   setMapZoomLevel(zoom: number): Promise<void> {
     // If zoom level is already set at this value, just resolve the promise
-    if (this.getView().getZoom() === zoom) {
-      return Promise.resolve();
-    } else {
-      this.getView().setZoom(zoom);
-    }
+    if (this.getView().getZoom() === zoom) return Promise.resolve();
+
+    // Set zoom level
+    this.getView().setZoom(zoom);
 
     return new Promise((resolve) => {
       this.map.once('rendercomplete', () => {
@@ -831,10 +830,10 @@ export class MapViewer {
    * @param {MapSingleClickEvent} clickCoordinates - The clicked coordinates to simulate.
    */
   simulateMapClick(clickCoordinates: MapSingleClickEvent): void {
-    // Update store... this will emit the event
+    // Update store... this will not emit the event becaus only when WCAG mode is enable
     MapEventProcessor.setClickCoordinates(this.mapId, clickCoordinates);
 
-    // Emit the event is done
+    // Emit the event is done here, not from the processor to avoid circular references
     this.#emitMapSingleClick(clickCoordinates);
   }
 
