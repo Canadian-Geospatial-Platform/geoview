@@ -21,7 +21,9 @@
     "show": "Show",
     "hide": "Hide",
     "none": "No",
-    "clearSearch": "Clear search"
+    "clearSearch": "Clear search",
+    "enable": "Enable",
+    "disable": "Disable"
   },
   "mapnav": {
     "arianavbar": "Vertical button group for map navigation",
@@ -42,10 +44,10 @@
     }
   },
   "measurement": {
-    "title": "Measure on Map",
-    "line": "Measure Distance",
-    "area": "Measure Area",
-    "clear": "Clear Measurements"
+    "title": "Measure",
+    "line": "Distance",
+    "area": "Area",
+    "clear": "Clear"
   },
   "basemaps": {
     "select": "Select a basemap",
