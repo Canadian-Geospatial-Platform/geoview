@@ -216,10 +216,10 @@ export abstract class GeoUtilities {
 
         // Return it
         return capabilitiesString;
-      } else {
-        // Unknown error, throw it
-        throw error;
       }
+
+      // Unknown error, throw it higher
+      throw error;
     }
   }
 
