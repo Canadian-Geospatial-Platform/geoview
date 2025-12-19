@@ -5,7 +5,9 @@ import { useTranslation } from 'react-i18next';
 import { LineString, Polygon } from 'ol/geom';
 import { Overlay } from 'ol';
 import type { DrawEvent as OLDrawEvent } from 'ol/interaction/Draw';
-import { Style, Stroke, Fill } from 'ol/style';
+import { Style, Stroke, Fill, Text } from 'ol/style';
+import type { StyleFunction } from 'ol/style/Style';
+import type { FeatureLike } from 'ol/Feature';
 
 import { ToggleButtonGroup, ToggleButton } from '@mui/material';
 
@@ -26,6 +28,46 @@ import { AppEventProcessor } from '@/api/event-processors/event-processor-childr
 
 const MEASURE_GROUP_KEY = 'geoview-measurement';
 
+// Style constants
+const STROKE_COLORS = {
+  drawing: '#ff0000',
+  completed: '#FF1493',
+} as const;
+
+const FILL_COLORS = {
+  drawing: 'rgba(255, 0, 0, 0.2)',
+  completed: 'rgba(255, 20, 147, 0.2)',
+} as const;
+
+const STROKE_WIDTH = 2;
+
+const LABEL_STYLE_CONFIG = {
+  font: '12px sans-serif',
+  textColor: '#fff',
+  backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  padding: [2, 4, 2, 4] as [number, number, number, number],
+} as const;
+
+// Reusable Fill objects for labels
+const LABEL_TEXT_FILL = new Fill({ color: LABEL_STYLE_CONFIG.textColor });
+const LABEL_BACKGROUND_FILL = new Fill({ color: LABEL_STYLE_CONFIG.backgroundColor });
+
+const LABEL_OFFSET = {
+  line: { perpendicular: 20 }, // Distance perpendicular to line segment
+  polygon: { distance: 50 },
+} as const;
+
+const POLYGON_LABEL_THRESHOLD = 0.3; // Show labels for segments > 30% of average length
+
+const TOOLTIP_STYLE = {
+  backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  color: 'white',
+  padding: '2px 4px',
+  borderRadius: '4px',
+  fontSize: '12px',
+  whiteSpace: 'nowrap',
+} as const;
+
 type MeasureType = 'line' | 'area' | null;
 
 /**
@@ -44,6 +86,152 @@ export default function Measurement(): JSX.Element {
   const [activeMeasurement, setActiveMeasurement] = useState<MeasureType>(null);
   const [drawInstance, setDrawInstance] = useState<Draw | null>(null);
   const [measureOverlays, setMeasureOverlays] = useState<Overlay[]>([]);
+  const [showSegmentLabels, setShowSegmentLabels] = useState<boolean>(true);
+  const [measurementFeatures, setMeasurementFeatures] = useState<any[]>([]);
+
+  /**
+   * Calculates average segment length for polygon filtering
+   */
+  const getAverageSegmentLength = (coordinates: number[][]): number => {
+    const totalSegments = coordinates.length - 1;
+    let totalLength = 0;
+    for (let i = 0; i < totalSegments; i++) {
+      const segment = new LineString([coordinates[i], coordinates[i + 1]]);
+      totalLength += GeoUtilities.getLength(segment);
+    }
+    return totalLength / totalSegments;
+  };
+
+  /**
+   * Calculates perpendicular offset for polygon labels pointing outward
+   */
+  const calculatePolygonLabelOffset = (midpoint: number[], angle: number, centroid: number[]): { offsetX: number; offsetY: number } => {
+    const toCentroidX = centroid[0] - midpoint[0];
+    const toCentroidY = centroid[1] - midpoint[1];
+
+    let perpAngle = angle + Math.PI / 2;
+    const testX = Math.cos(perpAngle);
+    const testY = Math.sin(perpAngle);
+
+    const dotProduct = testX * toCentroidX + testY * toCentroidY;
+    if (dotProduct > 0) {
+      perpAngle = angle - Math.PI / 2;
+    }
+
+    return {
+      offsetX: Math.cos(perpAngle) * LABEL_OFFSET.polygon.distance,
+      offsetY: Math.sin(perpAngle) * LABEL_OFFSET.polygon.distance,
+    };
+  };
+
+  /**
+   * Creates a style function that shows segment lengths
+   */
+  const createSegmentStyle = useCallback(
+    (isDrawing: boolean = false, includeSegmentLabels: boolean = true): StyleFunction => {
+      return (feature: FeatureLike) => {
+        const displayLanguage = AppEventProcessor.getDisplayLanguage(mapId);
+        const styles: Style[] = [];
+        const geometry = feature.getGeometry();
+
+        if (!geometry) return styles;
+
+        // Base stroke style
+        const stroke = new Stroke({
+          color: isDrawing ? STROKE_COLORS.drawing : STROKE_COLORS.completed,
+          width: STROKE_WIDTH,
+        });
+
+        // Add base geometry style
+        if (geometry instanceof Polygon) {
+          const fill = new Fill({
+            color: isDrawing ? FILL_COLORS.drawing : FILL_COLORS.completed,
+          });
+          styles.push(new Style({ stroke, fill }));
+        } else {
+          styles.push(new Style({ stroke }));
+        }
+
+        // Add segment labels
+        let coordinates: number[][];
+        if (geometry instanceof LineString) {
+          coordinates = geometry.getCoordinates();
+        } else if (geometry instanceof Polygon) {
+          coordinates = geometry.getCoordinates()[0];
+        } else {
+          return styles;
+        }
+
+        // Skip segment labels if disabled
+        if (!includeSegmentLabels) {
+          return styles;
+        }
+
+        // Calculate average length once for polygons
+        const avgLength = geometry instanceof Polygon ? getAverageSegmentLength(coordinates) : 0;
+
+        // Create labels for each segment with smart positioning
+        for (let i = 0; i < coordinates.length - 1; i++) {
+          const segment = new LineString([coordinates[i], coordinates[i + 1]]);
+          const segmentLength = GeoUtilities.getLength(segment);
+
+          // For polygons, skip labels on very short segments to reduce clutter
+          const shouldShowLabel = !(geometry instanceof Polygon && segmentLength < avgLength * POLYGON_LABEL_THRESHOLD && i % 2 !== 0);
+
+          if (!shouldShowLabel) {
+            // eslint-disable-next-line no-continue
+            continue;
+          }
+
+          const segmentLabel = formatLength(segmentLength, displayLanguage);
+
+          // Get midpoint of segment for label placement
+          const midpoint = [(coordinates[i][0] + coordinates[i + 1][0]) / 2, (coordinates[i][1] + coordinates[i + 1][1]) / 2];
+
+          // Calculate segment angle to position labels perpendicular to the line
+          const dx = coordinates[i + 1][0] - coordinates[i][0];
+          const dy = coordinates[i + 1][1] - coordinates[i][1];
+          const angle = Math.atan2(dy, dx);
+
+          // For polygons, position labels outside; for lines, alternate above/below
+          let offsetX = 0;
+          let offsetY: number;
+          const textBaseline: 'top' | 'middle' | 'bottom' = 'middle';
+
+          if (geometry instanceof Polygon) {
+            const centroid = geometry.getInteriorPoint().getCoordinates();
+            ({ offsetX, offsetY } = calculatePolygonLabelOffset(midpoint, angle, centroid));
+          } else {
+            // For lines, position perpendicular to the segment (upward)
+            const perpAngle = angle + Math.PI / 2;
+            offsetX = Math.cos(perpAngle) * LABEL_OFFSET.line.perpendicular;
+            offsetY = Math.sin(perpAngle) * LABEL_OFFSET.line.perpendicular;
+          }
+
+          styles.push(
+            new Style({
+              geometry: new LineString([midpoint]),
+              text: new Text({
+                text: segmentLabel,
+                font: LABEL_STYLE_CONFIG.font,
+                fill: LABEL_TEXT_FILL,
+                backgroundFill: LABEL_BACKGROUND_FILL,
+                padding: LABEL_STYLE_CONFIG.padding,
+                offsetY,
+                offsetX,
+                textAlign: 'center',
+                textBaseline,
+                overflow: true,
+              }),
+            })
+          );
+        }
+
+        return styles;
+      };
+    },
+    [mapId]
+  );
 
   /**
    * Creates a measurement tooltip overlay
@@ -53,17 +241,12 @@ export default function Measurement(): JSX.Element {
       const displayLanguage = AppEventProcessor.getDisplayLanguage(mapId);
       const measureTooltipElement = document.createElement('div');
       measureTooltipElement.className = 'measurement-tooltip';
-      measureTooltipElement.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-      measureTooltipElement.style.color = 'white';
-      measureTooltipElement.style.padding = '4px 8px';
-      measureTooltipElement.style.borderRadius = '4px';
-      measureTooltipElement.style.fontSize = '12px';
-      measureTooltipElement.style.whiteSpace = 'nowrap';
+      Object.assign(measureTooltipElement.style, TOOLTIP_STYLE);
 
       let output = '';
       if (geometry instanceof LineString) {
         const length = GeoUtilities.getLength(geometry);
-        output = formatLength(length, displayLanguage);
+        output = `Total: ${formatLength(length, displayLanguage)}`;
       } else if (geometry instanceof Polygon) {
         const area = GeoUtilities.getArea(geometry);
         const length = GeoUtilities.getLength(geometry);
@@ -110,9 +293,9 @@ export default function Measurement(): JSX.Element {
       // Start drawing interaction
       const geomType = type === 'line' ? 'LineString' : 'Polygon';
       const draw = viewer.initDrawInteractions(MEASURE_GROUP_KEY, geomType, {
-        strokeColor: '#ff0000',
-        strokeWidth: 2,
-        fillColor: 'rgba(255, 0, 0, 0.2)',
+        strokeColor: STROKE_COLORS.drawing,
+        strokeWidth: STROKE_WIDTH,
+        fillColor: FILL_COLORS.drawing,
       });
 
       // Handle draw end
@@ -121,22 +304,11 @@ export default function Measurement(): JSX.Element {
         const geometry = feature.getGeometry();
 
         if (geometry && (geometry instanceof LineString || geometry instanceof Polygon)) {
-          // Apply final style with flashy magenta stroke and width 2
-          const stroke = new Stroke({
-            color: '#FF1493',
-            width: 2,
-          });
+          // Apply final style with segment labels
+          feature.setStyle(createSegmentStyle(false, showSegmentLabels));
 
-          const fill = new Fill({
-            color: 'rgba(255, 20, 147, 0.2)',
-          });
-
-          feature.setStyle(
-            new Style({
-              stroke,
-              fill: geometry instanceof Polygon ? fill : undefined,
-            })
-          );
+          // Store feature reference
+          setMeasurementFeatures((prev) => [...prev, feature]);
 
           let tooltipCoord: number[];
 
@@ -162,7 +334,7 @@ export default function Measurement(): JSX.Element {
         mapElement.focus();
       }
     },
-    [mapId, drawInstance, createMeasureTooltip]
+    [mapId, drawInstance, createMeasureTooltip, createSegmentStyle, showSegmentLabels]
   );
 
   /**
@@ -193,6 +365,9 @@ export default function Measurement(): JSX.Element {
     });
     setMeasureOverlays([]);
 
+    // Clear stored feature references
+    setMeasurementFeatures([]);
+
     // Delete all geometries from the group
     if (viewer.layer.geometry.hasGeometryGroup(MEASURE_GROUP_KEY)) {
       viewer.layer.geometry.deleteGeometriesFromGroup(MEASURE_GROUP_KEY);
@@ -217,6 +392,26 @@ export default function Measurement(): JSX.Element {
       }
     },
     [startMeasurement, stopMeasurement]
+  );
+
+  /**
+   * Handles segment labels visibility toggle
+   */
+  const handleSegmentLabelsToggle = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>): void => {
+      logger.logTraceUseCallback('MEASUREMENT, handleSegmentLabelsToggle', event.target.checked);
+      setShowSegmentLabels(event.target.checked);
+
+      // Update all stored measurement features
+      measurementFeatures.forEach((feature) => {
+        feature.setStyle(createSegmentStyle(false, event.target.checked));
+      });
+
+      // Force map to re-render
+      const viewer = MapEventProcessor.getMapViewer(mapId);
+      viewer.map.render();
+    },
+    [mapId, createSegmentStyle, measurementFeatures]
   );
 
   /**
@@ -256,13 +451,21 @@ export default function Measurement(): JSX.Element {
           onChange={handleMeasurementToggle}
           size="small"
         />
+        {/* Segment Labels Toggle */}
+        <Switch
+          label={t('measurement.segmentLabels') || 'Segment labels'}
+          checked={showSegmentLabels}
+          onChange={handleSegmentLabelsToggle}
+          size="small"
+          disabled={!isMeasurementActive}
+        />
         {/* Line/Polygon Selection */}
         <Box>
           <ToggleButtonGroup
             value={activeMeasurement}
             exclusive
             onChange={handleTypeChange}
-            aria-label={t('measurement.title')}
+            aria-label={t('measurement.title') || 'Measurement'}
             fullWidth
             size="small"
             disabled={!isMeasurementActive}
@@ -276,11 +479,11 @@ export default function Measurement(): JSX.Element {
               },
             }}
           >
-            <ToggleButton value="line" aria-label={t('measurement.line')}>
+            <ToggleButton value="line" aria-label={t('measurement.line') || 'Line'}>
               <ShowChartIcon fontSize="small" />
               {t('measurement.line')}
             </ToggleButton>
-            <ToggleButton value="area" aria-label={t('measurement.area')}>
+            <ToggleButton value="area" aria-label={t('measurement.area') || 'Area'}>
               <HexagonOutlinedIcon fontSize="small" />
               {t('measurement.area')}
             </ToggleButton>
