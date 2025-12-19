@@ -935,23 +935,23 @@ export class WMS extends AbstractGeoViewRaster {
 
       // Return the group layer
       return groupLayer;
-    } else {
-      // Leaf layer
-      const layerEntryConfig: OgcWmsLayerEntryConfigProps = {
-        geoviewLayerConfig,
-        layerId: `${layerEntry.id}`,
-        layerName: layerEntry.layerName || `${layerEntry.id}`,
-        source: {
-          serverType,
-        },
-      };
-
-      // Merge with custom config if provided
-      const mergedConfig = deepMergeObjects<OgcWmsLayerEntryConfigProps>(layerEntryConfig, customGeocoreLayerConfig);
-
-      // Construct and return layer entry
-      return new OgcWmsLayerEntryConfig(mergedConfig);
     }
+
+    // Leaf layer
+    const layerEntryConfig: OgcWmsLayerEntryConfigProps = {
+      geoviewLayerConfig,
+      layerId: `${layerEntry.id}`,
+      layerName: layerEntry.layerName || `${layerEntry.id}`,
+      source: {
+        serverType,
+      },
+    };
+
+    // Merge with custom config if provided
+    const mergedConfig = deepMergeObjects<OgcWmsLayerEntryConfigProps>(layerEntryConfig, customGeocoreLayerConfig);
+
+    // Construct and return layer entry
+    return new OgcWmsLayerEntryConfig(mergedConfig);
   }
 
   /**

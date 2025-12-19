@@ -317,10 +317,10 @@ export abstract class Projection {
       if (typeof projection === 'object' && 'wkid' in projection) {
         // Redirect
         return this.#addProjectionIfMissingUsingObj(projection);
-      } else {
-        // Redirect
-        return this.#addProjectionIfMissingUsingString(projection);
       }
+
+      // Redirect
+      return this.#addProjectionIfMissingUsingString(projection);
     }
 
     // Nothing to do
