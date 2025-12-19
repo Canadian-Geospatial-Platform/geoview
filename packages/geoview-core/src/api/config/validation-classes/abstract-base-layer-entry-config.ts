@@ -60,7 +60,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   #filterEquation?: FilterNodeType[];
 
   /** Indicates if filter is on/off
-   * @deprecated This attribute doesn't seem to be used (it's always false and there's no setter)
+   * @deprecated This attribute doesn't seem to be used (it's always false and doesn't change)
    */
   #legendFilterIsOff: boolean = false;
 
@@ -313,10 +313,10 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Gets the layer legend filter is off flag
    * @returns {boolean} The legend filter is off flag
-   * @deprecated This getter doesn't seem to be used (it's always false as there is no setter)
+   * @deprecated This getter doesn't seem to be used as its corresponding attribute is always false and there's no setters
    */
   getLegendFilterIsOff(): boolean {
-    return this.#legendFilterIsOff || false;
+    return this.#legendFilterIsOff;
   }
 
   /**

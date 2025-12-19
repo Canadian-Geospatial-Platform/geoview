@@ -832,7 +832,7 @@ export abstract class AbstractGeoViewLayer {
         // If this entry is a GROUP
         // -------------------------------------------------------------------
         if (layerConfig.getEntryTypeIsGroup()) {
-          const newLayerGroup = this.#createLayerGroup(layerConfig, layerConfig.getInitialSettings());
+          const newLayerGroup = this.#createLayerGroup(layerConfig, layerConfig.cloneInitialSettings());
 
           // Recursively process children of the group
           const groupReturned = await this.#processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig, newLayerGroup);
@@ -871,14 +871,14 @@ export abstract class AbstractGeoViewLayer {
       if (!layerGroup) {
         const parentConfig = listOfLayerEntryConfig[0].getParentLayerConfig()!;
         // eslint-disable-next-line no-param-reassign
-        layerGroup = this.#createLayerGroup(parentConfig, listOfLayerEntryConfig[0].getInitialSettings());
+        layerGroup = this.#createLayerGroup(parentConfig, listOfLayerEntryConfig[0].cloneInitialSettings());
       }
 
       // Process all entries in parallel
       const creationPromises: Promise<AbstractBaseGVLayer | undefined>[] = listOfLayerEntryConfig.map(async (layerConfig) => {
         // GROUP entry
         if (layerConfig.getEntryTypeIsGroup()) {
-          const newLayerGroup = this.#createLayerGroup(layerConfig, layerConfig.getInitialSettings());
+          const newLayerGroup = this.#createLayerGroup(layerConfig, layerConfig.cloneInitialSettings());
           return this.#processListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig, newLayerGroup);
         }
 

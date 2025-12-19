@@ -690,8 +690,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const layerConfig = layer.getLayerConfig();
 
     // Reset layer states to original values
-    const opacity = layerConfig.getInitialSettings().states?.opacity ?? 1; // default: 1
-    const visibility = layerConfig.getInitialSettings().states?.visible ?? true; // default: true
+    const opacity = layerConfig.getInitialSettings()?.states?.opacity ?? 1; // default: 1
+    const visibility = layerConfig.getInitialSettings()?.states?.visible ?? true; // default: true
     LegendEventProcessor.setLayerOpacity(mapId, layerPath, opacity);
     MapEventProcessor.setOrToggleMapLayerVisibility(mapId, layerPath, visibility);
 

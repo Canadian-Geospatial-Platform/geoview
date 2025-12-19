@@ -40,7 +40,7 @@ import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-lay
 import { LayerMetadataAccessPathMandatoryError, LayerMissingGeoviewLayerIdError } from '@/core/exceptions/layer-exceptions';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
-import { deepMerge } from '@/core/utils/utilities';
+import { deepClone, deepMerge } from '@/core/utils/utilities';
 
 /**
  * A class to define the default values of a GeoView map configuration and validation methods for the map config attributes.
@@ -274,56 +274,52 @@ export class ConfigValidation {
       ConfigBaseClass.setClassOrTypeParentLayerConfig(layerConfig, parentLayerConfig);
 
       // layerConfig.initialSettings attributes that are not defined inherits parent layer settings that are defined.
-      let initialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(layerConfig);
+      const initialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(layerConfig);
 
       // Get the parent initial settings
-      const parentInitialSettings = parentLayerConfig
-        ? ConfigBaseClass.getClassOrTypeInitialSettings(parentLayerConfig)
-        : geoviewLayerConfig.initialSettings;
+      const parentInitialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(parentLayerConfig);
 
-      // Make sure visible is set so it is not overridden by parent layer
-      if (!initialSettings) initialSettings = { states: { visible: true } };
-      if (!initialSettings.states) initialSettings = { ...initialSettings, states: { visible: true } };
-      if (initialSettings.states!.visible !== false) initialSettings.states!.visible = true;
-
-      // Handle minZoom before default merge of settings
-      if (initialSettings?.minZoom) {
+      // If the minZoom is set, validate it with the parent
+      if (initialSettings?.minZoom !== undefined) {
         // Validate the minZoom value
-        const minZoom = Math.max(initialSettings.minZoom, parentInitialSettings?.minZoom || 0);
-
-        // Update the minZoom initial settings
-        ConfigBaseClass.setClassOrTypeInitialSettings(layerConfig, { ...initialSettings, minZoom });
-        // Reget it to make sure the chain of updates works
-        initialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(layerConfig);
+        initialSettings.minZoom = Math.max(initialSettings.minZoom, parentInitialSettings?.minZoom || 0);
       }
 
-      // Handle maxZoom before default merge of settings
-      if (initialSettings?.maxZoom) {
+      // If the maxZoom is set, validate it with the parent
+      if (initialSettings?.maxZoom !== undefined) {
         // Validate the maxZoom value
-        const maxZoom = Math.min(initialSettings.maxZoom, parentInitialSettings?.maxZoom || 23);
-
-        // Update the maxZoom initial settings
-        ConfigBaseClass.setClassOrTypeInitialSettings(layerConfig, { ...initialSettings, maxZoom });
-        // Reget it to make sure the chain of updates works
-        initialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(layerConfig);
+        initialSettings.maxZoom = Math.min(initialSettings.maxZoom, parentInitialSettings?.maxZoom || 23);
       }
 
-      // If there's a parent
-      if (parentInitialSettings) {
-        // Merge the rest of parent and child settings
-        ConfigBaseClass.setClassOrTypeInitialSettings(layerConfig, deepMerge(parentInitialSettings, initialSettings));
-      }
-
+      // If the minScale is set, validate it with the parent
       const minScale = ConfigBaseClass.getClassOrTypeMinScale(layerConfig);
-      if (minScale) {
+      if (minScale !== undefined) {
         // Set the min scale
-        ConfigBaseClass.setClassOrTypeMinScale(layerConfig, Math.min(minScale, parentLayerConfig?.getMinScale() || Infinity));
+        ConfigBaseClass.setClassOrTypeMinScale(
+          layerConfig,
+          Math.min(minScale, ConfigBaseClass.getClassOrTypeMinScale(parentLayerConfig) || Infinity)
+        );
       }
 
+      // If the minScale is set, validate it with the parent
       const maxScale = ConfigBaseClass.getClassOrTypeMaxScale(layerConfig);
-      if (maxScale) {
+      if (maxScale !== undefined) {
         // Set the max scale
-        ConfigBaseClass.setClassOrTypeMaxScale(layerConfig, Math.max(maxScale, parentLayerConfig?.getMaxScale() || 0));
+        ConfigBaseClass.setClassOrTypeMaxScale(
+          layerConfig,
+          Math.max(maxScale, ConfigBaseClass.getClassOrTypeMaxScale(parentLayerConfig) || 0)
+        );
+      }
+
+      // If there's a parent initial settings
+      if (parentInitialSettings) {
+        // Clone the parent properties
+        const parentInitialSettingsClone = deepClone(parentInitialSettings);
+        // Delete the visible property, because we don't want it to interfere with the layer initial settings when we merge
+        delete parentInitialSettingsClone.states?.visible;
+
+        // Merge the rest of parent and child settings
+        ConfigBaseClass.setClassOrTypeInitialSettings(layerConfig, deepMerge(parentInitialSettingsClone, initialSettings));
       }
 
       // Get the properties to be able to create the config object
