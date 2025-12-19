@@ -44,14 +44,14 @@ Depending on the viewer configuration, the map's bottom right corner contains th
 
 | Symbol                                                                                                                      | Name              | Description                                                                                                                                                                                                                               |
 | --------------------------------------------------------------------------------------------------------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="{{assetsURL}}/img/guide/navigation/fullscreen.svg" alt="An icon representing the "Fullscreen" function" />        | Fullscreen        | Full screen presents map content using the entire page. Full screen toggles between the entire page and the initial size of the map.                                                                                                      |
-| <img src="{{assetsURL}}/img/guide/navigation/plus.svg" alt="An icon representing the "Zoom in" function" />                 | Zoom in           | Zoom in one level on the map to see more detailed content - bound to Plus key (+).                                                                                                                                                        |
-| <img src="{{assetsURL}}/img/guide/navigation/minus.svg" alt="An icon representing the "Zoom out" function" />               | Zoom out          | Zoom out one level on the map to see less detailed content - bound to Minus key (-).                                                                                                                                                      |
-| <img src="{{assetsURL}}/img/guide/navigation/360.svg" alt="An icon representing the "Map Rotation" function" />             | Map Rotation      | Control map rotation with a slider from -180° to +180°. The panel includes a **Fix North** toggle (available for LCC projection) to keep the map oriented with north at the top, and a reset button to return to the initial orientation. |
-| <img src="{{assetsURL}}/img/guide/navigation/geolocation.svg" alt="An icon representing the "Geolocation" function" />      | Geolocation       | Zoom and pan to your current geographical location.                                                                                                                                                                                       |
-| <img src="{{assetsURL}}/img/guide/navigation/home.svg" alt="An icon representing the "Initial extent" function" />          | Initial extent    | Zoom and pan map such that initial extent is visible.                                                                                                                                                                                     |
-| <img src="{{assetsURL}}/img/guide/navigation/basemapSelect.svg" alt="An icon representing the "Change Basemap" function" /> | Change Basemap    | Change the basemap.                                                                                                                                                                                                                       |
-| <img src="{{assetsURL}}/img/guide/navigation/projection.svg" alt="An icon representing the "Change Projection" function" /> | Change Projection | Change the map projection between Web Mercator and LCC.                                                                                                                                                                                   |
+| <img src="{{assetsURL}}/img/guide/navigation/fullscreen.svg" alt="An icon representing the Fullscreen function" />        | Fullscreen        | Full screen presents map content using the entire page. Full screen toggles between the entire page and the initial size of the map.                                                                                                      |
+| <img src="{{assetsURL}}/img/guide/navigation/plus.svg" alt="An icon representing the Zoom in function" />                 | Zoom in           | Zoom in one level on the map to see more detailed content - bound to Plus key (+).                                                                                                                                                        |
+| <img src="{{assetsURL}}/img/guide/navigation/minus.svg" alt="An icon representing the Zoom out function" />               | Zoom out          | Zoom out one level on the map to see less detailed content - bound to Minus key (-).                                                                                                                                                      |
+| <img src="{{assetsURL}}/img/guide/navigation/360.svg" alt="An icon representing the Map Rotation function" />             | Map Rotation      | Control map rotation with a slider from -180° to +180°. The panel includes a **Fix North** toggle (available for LCC projection) to keep the map oriented with north at the top, and a reset button to return to the initial orientation. |
+| <img src="{{assetsURL}}/img/guide/navigation/geolocation.svg" alt="An icon representing the Geolocation function" />      | Geolocation       | Zoom and pan to your current geographical location.                                                                                                                                                                                       |
+| <img src="{{assetsURL}}/img/guide/navigation/home.svg" alt="An icon representing the Initial extent function" />          | Initial extent    | Zoom and pan map such that initial extent is visible.                                                                                                                                                                                     |
+| <img src="{{assetsURL}}/img/guide/navigation/basemapSelect.svg" alt="An icon representing the Change Basemap function" /> | Change Basemap    | Change the basemap.                                                                                                                                                                                                                       |
+| <img src="{{assetsURL}}/img/guide/navigation/projection.svg" alt="An icon representing the Change Projection function" /> | Change Projection | Change the map projection between Web Mercator and LCC.                                                                                                                                                                                   |
 
 You can also pan the map by using your left, right, up and down arrow keys, or by click-holding on the map and dragging. Using the mouse scroll wheel while hovering over the map will zoom the map in/out.
 
@@ -105,10 +105,10 @@ The following navigation details and functionalities are accessible in the Map I
 
 | Symbol                                                                                                                        | Name                    | Description                                                                                                                                                                                                                                                              |
 | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| <img src="{{assetsURL}}/img/guide/navigation/attribute.svg" alt="An icon representing the "Attributes" function" />           | Attributes              | Copyright and other map attributes.                                                                                                                                                                                                                                      |
+| <img src="{{assetsURL}}/img/guide/navigation/attribute.svg" alt="An icon representing the Attributes function" />           | Attributes              | Copyright and other map attributes.                                                                                                                                                                                                                                      |
 |                                                                                                                               | Positioning coordinates | Click on the positioning coordinates to toggle between degrees minutes seconds (DMS), decimal degrees or projected coordinates.                                                                                                                                          |
 |                                                                                                                               | Map scale               | Click on the map scale to toggle between scale and resolution.                                                                                                                                                                                                           |
-| <img src="{{assetsURL}}/img/guide/navigation/north_arrow.svg" alt="An icon representing the "Rotation indicator" function" /> | Rotation indicator      | Displays current map rotation angle. Hover over the north arrow icon to see a tooltip showing the map rotation and projection-based rotation component. This is an informational display; use the **Map Rotation** button in the navigation controls to adjust rotation. |
+| <img src="{{assetsURL}}/img/guide/navigation/north_arrow.svg" alt="An icon representing the Rotation indicator function" /> | Rotation indicator      | Displays current map rotation angle. Hover over the north arrow icon to see a tooltip showing the map rotation and projection-based rotation component. This is an informational display; use the **Map Rotation** button in the navigation controls to adjust rotation. |
 
 =1!sidebar=
 
@@ -122,15 +122,15 @@ _Note: Some tools in the Side Bar are also available as tabs in the Footer Bar, 
 
 | Symbol                                                                                                                  | Name          | Description                                                                              |
 | ----------------------------------------------------------------------------------------------------------------------- | ------------- | ---------------------------------------------------------------------------------------- |
-| <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" alt="An icon representing the "Geolocator" function" />     | Geolocator    | Click the geolocator icon and an input field for search keywords will appear on the map. |
-| <img src="{{assetsURL}}/img/guide/sidebar/legend.svg" alt="An icon representing the "Legend" function" />               | Legend        | Legend of map icons (_see Footer Bar section for help_).                                 |
-| <img src="{{assetsURL}}/img/guide/footer/layers_30.svg" alt="An icon representing the "Layers" function" />             | Layers        | Tools to interact with layers (_see Footer Bar section for help_).                       |
-| <img src="{{assetsURL}}/img/guide/sidebar/details.svg" alt="An icon representing the "Details" function" />             | Details       | Details for selected features (_see Footer Bar section for help_).                       |
-| <img src="{{assetsURL}}/img/guide/footer/data_table.svg" alt="An icon representing the "Data" function" />              | Data          | Table of all features (_see Footer Bar section for help_).                               |
-| <img src="{{assetsURL}}/img/guide/sidebar/guide.svg" alt="An icon representing the "Guide" function" />                 | Guide         | Help guide.                                                                              |
-| <img src="{{assetsURL}}/img/guide/sidebar/export.svg" alt="An icon representing the "Download" function" />             | Download      | Download the map as PNG, JPEG, or PDF. Disabled while layers are loading.                |
-| <img src="{{assetsURL}}/img/guide/sidebar/notifications.svg" alt="An icon representing the "Notifications" function" /> | Notifications | Display messages and notifications for the map.                                          |
-| <img src="{{assetsURL}}/img/guide/sidebar/about.svg" alt="An icon representing the "About Geoview" function" />         | About Geoview | Display information about Geoview viewer.                                                |
+| <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" alt="An icon representing the Geolocator function" />     | Geolocator    | Click the geolocator icon and an input field for search keywords will appear on the map. |
+| <img src="{{assetsURL}}/img/guide/sidebar/legend.svg" alt="An icon representing the Legend function" />               | Legend        | Legend of map icons (_see Footer Bar section for help_).                                 |
+| <img src="{{assetsURL}}/img/guide/footer/layers_30.svg" alt="An icon representing the Layers function" />             | Layers        | Tools to interact with layers (_see Footer Bar section for help_).                       |
+| <img src="{{assetsURL}}/img/guide/sidebar/details.svg" alt="An icon representing the Details function" />             | Details       | Details for selected features (_see Footer Bar section for help_).                       |
+| <img src="{{assetsURL}}/img/guide/footer/data_table.svg" alt="An icon representing the Data function" />              | Data          | Table of all features (_see Footer Bar section for help_).                               |
+| <img src="{{assetsURL}}/img/guide/sidebar/guide.svg" alt="An icon representing the Guide function" />                 | Guide         | Help guide.                                                                              |
+| <img src="{{assetsURL}}/img/guide/sidebar/export.svg" alt="An icon representing the Download function" />             | Download      | Download the map as PNG, JPEG, or PDF. Disabled while layers are loading.                |
+| <img src="{{assetsURL}}/img/guide/sidebar/notifications.svg" alt="An icon representing the Notifications function" /> | Notifications | Display messages and notifications for the map.                                          |
+| <img src="{{assetsURL}}/img/guide/sidebar/about.svg" alt="An icon representing the About Geoview function" />         | About Geoview | Display information about Geoview viewer.                                                |
 
 =2!geolocator=
 
@@ -173,7 +173,7 @@ The geolocator component functions to allow users to search for places in Canada
 
 ### Geosearch Filtering
 
-When searching for a location, a results panel will appear below the search box. This results panel contains two dropdown boxes that allow you to filter the search results by their **province** and by their **category** (lake, town, river, etc.). To the right of these two boxes is a <img src="{{assetsURL}}/img/guide/geosearch/clear.svg" alt="An icon representing the 'Clear' function" /> button, which when clicked clears the selected filter options.
+When searching for a location, a results panel will appear below the search box. This results panel contains two dropdown boxes that allow you to filter the search results by their **province** and by their **category** (lake, town, river, etc.). To the right of these two boxes is a <img src="{{assetsURL}}/img/guide/geosearch/clear.svg" alt="An icon representing the Clear function" /> button, which when clicked clears the selected filter options.
 
 =2!export=
 
@@ -229,9 +229,9 @@ _Note: Some tabs in the Footer Bar are also available as tools in the Side Bar, 
 
 The **Legend** tab displays the symbology associated with the layers displayed on the map.
 
-Each layer has some symbology associated with it. For simple feature layers a single icon <img src="{{assetsURL}}/img/guide/footer/icon_single.png" alt="An icon representing a 'Single' layer" /> will be present next to the layer name.
+Each layer has some symbology associated with it. For simple feature layers a single icon <img src="{{assetsURL}}/img/guide/footer/icon_single.png" alt="An icon representing a Single layer" /> will be present next to the layer name.
 
-For complex feature layers (i.e. those with multiple symbols used per layer) the icon will show as a stack <img src="{{assetsURL}}/img/guide/footer/icon_multiple.png" alt="An icon representing a "Stack" of layers" /> (hover to reveal more than one icon).
+For complex feature layers (i.e. those with multiple symbols used per layer) the icon will show as a stack <img src="{{assetsURL}}/img/guide/footer/icon_multiple.png" alt="An icon representing a Stack of layers" /> (hover to reveal more than one icon).
 
 The symbology for the layer can be toggled open and closed which is expanded beneath the layer name. Some layers may optionally have a graphical legend defined, if one is present it will be displayed in the same drop down manner.
 
@@ -239,11 +239,11 @@ When a layer has multiple symbols, you can toggle visibility for individual item
 
 | Symbol                                                                                                                        | Name                   | Description                                                                                                                                   |
 | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="{{assetsURL}}/img/guide/footer/layers_30.svg" alt="An icon representing the "Link to layer" function" />            | Show in Layers panel   | Navigate to the corresponding layer in the Layers panel.                                                                                      |
-| <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg" alt="An icon representing the "Zoom to visible scale" function" /> | Zoom to visibile scale | Zoom to the visible scale of the layer, moving the map may be necessary to locate features. _Note: Only available when layer is out of zoom_. |
-| <img src="{{assetsURL}}/img/guide/footer/view_25.svg" alt="An icon representing the "Toggle visibility" function" />          | Toggle visibiity       | Toggle the layer visibility.                                                                                                                  |
-| <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" alt="An icon representing the "Highlight" function" />             | Highlight              | Brings layer to the top, decreases opacity of other layers and displays layer boundary.                                                       |
-| <img src="{{assetsURL}}/img/guide/layers/zoom_60.svg" alt="An icon representing the "Zoom to layer boundary" function" />     | Zoom to layer boundary | Pans and zooms the map so that the layer boundary is in view.                                                                                 |
+| <img src="{{assetsURL}}/img/guide/footer/layers_30.svg" alt="An icon representing the Link to layer function" />            | Show in Layers panel   | Navigate to the corresponding layer in the Layers panel.                                                                                      |
+| <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg" alt="An icon representing the Zoom to visible scale function" /> | Zoom to visibile scale | Zoom to the visible scale of the layer, moving the map may be necessary to locate features. _Note: Only available when layer is out of zoom_. |
+| <img src="{{assetsURL}}/img/guide/footer/view_25.svg" alt="An icon representing the Toggle visibility function" />          | Toggle visibiity       | Toggle the layer visibility.                                                                                                                  |
+| <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" alt="An icon representing the Highlight function" />             | Highlight              | Brings layer to the top, decreases opacity of other layers and displays layer boundary.                                                       |
+| <img src="{{assetsURL}}/img/guide/layers/zoom_60.svg" alt="An icon representing the Zoom to layer boundary function" />     | Zoom to layer boundary | Pans and zooms the map so that the layer boundary is in view.                                                                                 |
 
 _Note: When the layer is hidden, functions affecting the layer on the map will be disabled, and the layer text will be grey and in italics._
 
@@ -267,7 +267,7 @@ The **Layers** tab has the following submenu options:
 _**Note: Click on a layer to display its Layer information in the right section.**_
 
 **Important Information**  
-If a layer's visibility (eye) icon is disabled (greyed out) <img src="{{assetsURL}}/img/guide/footer/eye_disabled.svg" alt="An icon representing the 'Eye disabled' function" /> and the Zoom to Visible Scale icon <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg" alt="Zoom to visible scale icon" /> is visible, this means the layer is not visible at the current map zoom level.
+If a layer's visibility (eye) icon is disabled (greyed out) <img src="{{assetsURL}}/img/guide/footer/eye_disabled.svg" alt="An icon representing the Eye disabled function" /> and the Zoom to Visible Scale icon <img src="{{assetsURL}}/img/guide/layers/scaleVisible.svg" alt="Zoom to visible scale icon" /> is visible, this means the layer is not visible at the current map zoom level.
 
 - Clicking the Zoom to Visible Scale button will adjust the map to the appropriate zoom level, making the layer visible.
 - However, after zooming, you may not immediately see any features if there is no data within the current view extent.
@@ -277,19 +277,19 @@ The _View_ submenu option under the _Layers_ tab consists of two sections. The l
 
 **Layer Icons**
 
-Each layer has some symbology associated with it. For simple feature layers a single icon <img src="{{assetsURL}}/img/guide/footer/icon_single.png" alt="An icon representing a 'Single' layer" /> will be present next to the layer name. For complex feature layers (i.e. those with multiple symbols used per layer) the icon will show as a stack (hover to reveal more than one icon <img src="{{assetsURL}}/img/guide/footer/icon_multiple.png" alt="An icon representing a 'Stack' of layers" />).
+Each layer has some symbology associated with it. For simple feature layers a single icon <img src="{{assetsURL}}/img/guide/footer/icon_single.png" alt="An icon representing a Single layer" /> will be present next to the layer name. For complex feature layers (i.e. those with multiple symbols used per layer) the icon will show as a stack (hover to reveal more than one icon <img src="{{assetsURL}}/img/guide/footer/icon_multiple.png" alt="An icon representing a Stack of layers" />).
 
 **Group Layers**
 
-The group layer icon <img src="{{assetsURL}}/img/guide/layers/group.svg" alt="An icon representing the 'Group' function" /> denotes a group of layers. Click on the group layer to expand the list of sublayers. Sublayers may also be group layers.
+The group layer icon <img src="{{assetsURL}}/img/guide/layers/group.svg" alt="An icon representing the Group function" /> denotes a group of layers. Click on the group layer to expand the list of sublayers. Sublayers may also be group layers.
 
 **Layer Visibility**
 
-Select the eye icon, next to each layer, to toggle visibililty on <img src="{{assetsURL}}/img/guide/footer/eye.svg" alt="An icon representing the 'Eye visible' function" /> or off <img src="{{assetsURL}}/img/guide/footer/eye_not_visible.svg" alt="An icon representing the 'Eye not visible' function" />.
+Select the eye icon, next to each layer, to toggle visibililty on <img src="{{assetsURL}}/img/guide/footer/eye.svg" alt="An icon representing the Eye visible function" /> or off <img src="{{assetsURL}}/img/guide/footer/eye_not_visible.svg" alt="An icon representing the Eye not visible function" />.
 
 Layers that are not currently displayed on the map will be greyed out and their text will be in italics.
 
-For layers that are always displayed, or for layers whose parent layer is hidden, the visibility (eye) icon is disabled (greyed out) <img src="{{assetsURL}}/img/guide/footer/eye_disabled.svg" alt="An icon representing the 'Eye disabled' function" />.
+For layers that are always displayed, or for layers whose parent layer is hidden, the visibility (eye) icon is disabled (greyed out) <img src="{{assetsURL}}/img/guide/footer/eye_disabled.svg" alt="An icon representing the Eye disabled function" />.
 
 **Supported Layer Types**
 
@@ -316,11 +316,11 @@ _Note: Some settings may not be available depending on various factors such as l
 
 | Symbol                                                                                                                  | Name                      | Description                                                                                                                                                                              |
 | ----------------------------------------------------------------------------------------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="{{assetsURL}}/img/guide/layers/table_view_60.svg" alt="An icon representing the "Table details" function" />  | Table details             | Opens a basic table view with simplified functionality. For the full-featured advanced table, if available, access the Data Table panel directly or open it from within the basic table. |
-| <img src="{{assetsURL}}/img/guide/layers/time_slider_30.svg" alt="An icon representing the "Time Slider" function" />   | Show in Time Slider panel | Opens the Time Slider panel for this layer, allowing you to visualize temporal data.                                                                                                     |
-| <img src="{{assetsURL}}/img/guide/layers/refresh_60.svg" alt="An icon representing the "Reset layer" function" />       | Reset layer               | Reset the layer to its initial state.                                                                                                                                                    |
-| <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" alt="An icon representing the "Highlight layer" function" /> | Highlight layer           | Brings layer to the top, decreases opacity of other layers and displays layer boundary.                                                                                                  |
-| <img src="{{assetsURL}}/img/guide/layers/zoom_60.svg" alt="An icon representing the "Zoom to layer" function" />        | Zoom to layer             | Pans and zooms the map so that the layer boundary is in view.                                                                                                                            |
+| <img src="{{assetsURL}}/img/guide/layers/table_view_60.svg" alt="An icon representing the Table details function" />  | Table details             | Opens a basic table view with simplified functionality. For the full-featured advanced table, if available, access the Data Table panel directly or open it from within the basic table. |
+| <img src="{{assetsURL}}/img/guide/layers/time_slider_30.svg" alt="An icon representing the Time Slider function" />   | Show in Time Slider panel | Opens the Time Slider panel for this layer, allowing you to visualize temporal data.                                                                                                     |
+| <img src="{{assetsURL}}/img/guide/layers/refresh_60.svg" alt="An icon representing the Reset layer function" />       | Reset layer               | Reset the layer to its initial state.                                                                                                                                                    |
+| <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" alt="An icon representing the Highlight layer function" /> | Highlight layer           | Brings layer to the top, decreases opacity of other layers and displays layer boundary.                                                                                                  |
+| <img src="{{assetsURL}}/img/guide/layers/zoom_60.svg" alt="An icon representing the Zoom to layer function" />        | Zoom to layer             | Pans and zooms the map so that the layer boundary is in view.                                                                                                                            |
 | Slider                                                                                                                  | Opacity                   | Slider to increase/decrease layer opacity.                                                                                                                                               |
 
 _Note: When the layer is hidden, functions affecting the layer on the map will be disabled._
@@ -373,7 +373,7 @@ To sort the layers you can simply click the up or down arrows on each layer pane
 
 ### <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt="Remove icon" /> Remove
 
-To remove a layer, click on the delete icon <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt="An icon representing the 'Remove' function" /> to the right of the layer after selecting the 'Remove' submenu.
+To remove a layer, click on the delete icon <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt="An icon representing the Remove function" /> to the right of the layer after selecting the 'Remove' submenu.
 
 =2!details=
 
@@ -396,7 +396,7 @@ The **Details** tab has two sections: a layer list on the left and feature detai
 
 ### Clear All Highlights
 
-The clear all higlights button <img src="{{assetsURL}}/img/guide/layers/clear_highlight_30.svg" alt="An icon representing the 'Clear highlights' function" /> is located in the upper right corner above the layer list. Click this button to remove all feature highlights from the map.
+The clear all higlights button <img src="{{assetsURL}}/img/guide/layers/clear_highlight_30.svg" alt="An icon representing the Clear highlights function" /> is located in the upper right corner above the layer list. Click this button to remove all feature highlights from the map.
 
 ### Feature Details Section (Right)
 
@@ -405,9 +405,9 @@ The feature details section displays information for the selected feature and pr
 | Symbol                                                                                                                  | Name                     | Description                                                                            |
 | ----------------------------------------------------------------------------------------------------------------------- | ------------------------ | -------------------------------------------------------------------------------------- |
 | Arrows (← →)                                                                                                            | Feature navigation       | Browse through multiple features for the selected layer.                               |
-| <img src="{{assetsURL}}/img/guide/footer/chart_30.svg" alt="An icon representing the "Show in Chart panel" function" /> | Show in Chart panel      | Opens the Chart panel for this feature (only available if chart data is configured).   |
-| <img src="{{assetsURL}}/img/guide/layers/highlight_30.svg" alt="An icon representing the "Highlight" function" />       | Keep feature highlighted | Keep the feature highlighted on the map. When selected, the icon is filled with color. |
-| <img src="{{assetsURL}}/img/guide/datatable/zoom.svg" alt="An icon representing the "Zoom" function" />                 | Zoom to feature          | Zoom the map to the extent of the selected feature.                                    |
+| <img src="{{assetsURL}}/img/guide/footer/chart_30.svg" alt="An icon representing the Show in Chart panel function" /> | Show in Chart panel      | Opens the Chart panel for this feature (only available if chart data is configured).   |
+| <img src="{{assetsURL}}/img/guide/layers/highlight_30.svg" alt="An icon representing the Highlight function" />       | Keep feature highlighted | Keep the feature highlighted on the map. When selected, the icon is filled with color. |
+| <img src="{{assetsURL}}/img/guide/datatable/zoom.svg" alt="An icon representing the Zoom function" />                 | Zoom to feature          | Zoom the map to the extent of the selected feature.                                    |
 
 The number of features for the selected layer is shown in the upper left of the details section.
 
@@ -453,23 +453,23 @@ _Note: Some options may not be available or are preselected depending on various
 | ------------------------------------------------------------------------------------------------------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------- |
 | Switch                                                                                                                    | Filter map        | Apply filters to the map.                                                                                            |
 | Switch                                                                                                                    | Show/Hide filters | Toggle to show or hide columns filters.                                                                              |
-| <img src="{{assetsURL}}/img/guide/datatable/filter_clear.svg" alt="An icon representing the "Clear Filters" function" />  | Clear filters     | Clear all data table columns filters.                                                                                |
-| <img src="{{assetsURL}}/img/guide/datatable/column_show.svg" alt="An icon representing the "Display Columns" function" /> | Show/Hide columns | Allows you to choose which columns you want visible and to pin columns to the left or right of the table.            |
-| <img src="{{assetsURL}}/img/guide/datatable/density.svg" alt="An icon representing the "Density" function" />             | Toggle density    | Toggle the height of the rows in the data table.                                                                     |
-| <img src="{{assetsURL}}/img/guide/datatable/export.svg" alt="An icon representing the "Download" function" />             | Download          | Download data table as CSV or GeoJSON. May not work as intended on mobile due to limitations with downloading files. |
+| <img src="{{assetsURL}}/img/guide/datatable/filter_clear.svg" alt="An icon representing the Clear Filters function" />  | Clear filters     | Clear all data table columns filters.                                                                                |
+| <img src="{{assetsURL}}/img/guide/datatable/column_show.svg" alt="An icon representing the Display Columns function" /> | Show/Hide columns | Allows you to choose which columns you want visible and to pin columns to the left or right of the table.            |
+| <img src="{{assetsURL}}/img/guide/datatable/density.svg" alt="An icon representing the Density function" />             | Toggle density    | Toggle the height of the rows in the data table.                                                                     |
+| <img src="{{assetsURL}}/img/guide/datatable/export.svg" alt="An icon representing the Download function" />             | Download          | Download data table as CSV or GeoJSON. May not work as intended on mobile due to limitations with downloading files. |
 
 The first three columns of the data table are Icon, Zoom and Details. The remaining columns vary depending on the layer selected.
 
 In addition to scrolling data, it is possible to:
 
-- Access the detailed modal view for a feature by clicking the details icon <img src="{{assetsURL}}/img/guide/sidebar/details_30.svg" alt="An icon representing the 'Details' function" />
-- Zoom the map view to the location of the feature corresponding to a given row by selecting the zoom icon <img src="{{assetsURL}}/img/guide/datatable/zoom.svg" alt="An icon representing the 'Zoom' function" />
+- Access the detailed modal view for a feature by clicking the details icon <img src="{{assetsURL}}/img/guide/sidebar/details_30.svg" alt="An icon representing the Details function" />
+- Zoom the map view to the location of the feature corresponding to a given row by selecting the zoom icon <img src="{{assetsURL}}/img/guide/datatable/zoom.svg" alt="An icon representing the Zoom function" />
 
-Click the action icon <img src="{{assetsURL}}/img/guide/datatable/column_action.svg" alt="An icon representing the 'Column action' function" /> beside the column header to show the column action dropdown:
+Click the action icon <img src="{{assetsURL}}/img/guide/datatable/column_action.svg" alt="An icon representing the Column action function" /> beside the column header to show the column action dropdown:
 
-- Pin columns to the left <img src="{{assetsURL}}/img/guide/datatable/pin_left_25.svg" alt="An icon representing the 'Pin left' function" /> or right <img src="{{assetsURL}}/img/guide/datatable/pin_right_25.svg" alt="An icon representing the 'Pin right' function" /> of the table
-- Filter the columns by numerical range, text or date (if the configuration allows it). Clear the filter with <img src="{{assetsURL}}/img/guide/datatable/filter_clear.svg" alt="An icon representing the 'Clear Filters' function" />.
-- Show and/or hide columns by clicking on the _Hide Columns_ icon <img src="{{assetsURL}}/img/guide/datatable/column_hide_25.svg" alt="An icon representing the 'Column hide' function" />
+- Pin columns to the left <img src="{{assetsURL}}/img/guide/datatable/pin_left_25.svg" alt="An icon representing the Pin left function" /> or right <img src="{{assetsURL}}/img/guide/datatable/pin_right_25.svg" alt="An icon representing the Pin right function" /> of the table
+- Filter the columns by numerical range, text or date (if the configuration allows it). Clear the filter with <img src="{{assetsURL}}/img/guide/datatable/filter_clear.svg" alt="An icon representing the Clear Filters function" />.
+- Show and/or hide columns by clicking on the _Hide Columns_ icon <img src="{{assetsURL}}/img/guide/datatable/column_hide_25.svg" alt="An icon representing the Column hide function" />
 - Navigate the table using a keyboard
 
 =3!sortingAndReordering=
@@ -480,8 +480,8 @@ For each column in the data table, there may be a set of arrows associated with 
 
 **Column Sort**: Click on the column title to sort the columns.
 
-- an upward arrow <img src="{{assetsURL}}/img/guide/navigation/up_arrow_20.svg" alt="An icon representing the 'Up arrow' function" /> next to the column title indicates that the column data is being sorted in ascending order or alphabetical order
-- a downward arrow <img src="{{assetsURL}}/img/guide/navigation/down_arrow_20.svg" alt="An icon representing the 'Down arrow' function" /> next to the column title indicates that the column data is being sorted in descending order or reverse alphabetical order
+- an upward arrow <img src="{{assetsURL}}/img/guide/navigation/up_arrow_20.svg" alt="An icon representing the Up arrow function" /> next to the column title indicates that the column data is being sorted in ascending order or alphabetical order
+- a downward arrow <img src="{{assetsURL}}/img/guide/navigation/down_arrow_20.svg" alt="An icon representing the Down arrow function" /> next to the column title indicates that the column data is being sorted in descending order or reverse alphabetical order
 - no arrow next to the column title means that there is no sort applied to current column
 
 Columns can be sorted in ascending/descending order (for numerical data) and alphabetical order (for text data).
@@ -500,7 +500,7 @@ There are 3 types of filters:
   - If, for example, only a minimum is defined, it will perform the operation _greater than_
 - **Date**: Similar to the numeric field but uses dates
 
-Additional filters (varying by column data type) may be found by clicking the action icon <img src="{{assetsURL}}/img/guide/datatable/column_action.svg" alt="An icon representing the 'Column action' function" /> beside the column heading, and clicking on **Filter by ...**
+Additional filters (varying by column data type) may be found by clicking the action icon <img src="{{assetsURL}}/img/guide/datatable/column_action.svg" alt="An icon representing the Column action function" /> beside the column heading, and clicking on **Filter by ...**
 
 =3!keyboardNavigation=
 
@@ -533,11 +533,11 @@ The **Time filtering** switch controls whether the time slider filters the data.
 - When enabled, only the data matching the selected time is shown.
 - When disabled, all data from all dates is displayed, regardless of the slider's position.
 
-Click hold and drag the handle on the slider bar to set the desired filter values or select a point in time. For a time period layer, click the lock icon <img src="{{assetsURL}}/img/guide/footer/lock_30.svg" alt="An icon representing the 'Lock' function" /> to lock the start time handle in place.
+Click hold and drag the handle on the slider bar to set the desired filter values or select a point in time. For a time period layer, click the lock icon <img src="{{assetsURL}}/img/guide/footer/lock_30.svg" alt="An icon representing the Lock function" /> to lock the start time handle in place.
 
-Click the play icon <img src="{{assetsURL}}/img/guide/footer/play_arrow_30.svg" alt="An icon representing the 'Play' function" /> to animate the filter results through time. Click the change direction icon <img src="{{assetsURL}}/img/guide/footer/direction_arrow_30.svg" alt="An icon representing the 'Direction arrow' function" /> to toggle forward or backward in time.
+Click the play icon <img src="{{assetsURL}}/img/guide/footer/play_arrow_30.svg" alt="An icon representing the Play function" /> to animate the filter results through time. Click the change direction icon <img src="{{assetsURL}}/img/guide/footer/direction_arrow_30.svg" alt="An icon representing the Direction arrow function" /> to toggle forward or backward in time.
 
-Click the back icon <img src="{{assetsURL}}/img/guide/footer/back_arrow_30.svg" alt="An icon representing the 'Back arrow' function" /> or forward icon <img src="{{assetsURL}}/img/guide/footer/forward_arrow_30.svg" alt="An icon representing the 'Forward arrow' function" /> to progress one step back or forward in time.
+Click the back icon <img src="{{assetsURL}}/img/guide/footer/back_arrow_30.svg" alt="An icon representing the Back arrow function" /> or forward icon <img src="{{assetsURL}}/img/guide/footer/forward_arrow_30.svg" alt="An icon representing the Forward arrow function" /> to progress one step back or forward in time.
 
 Click the time delay dropdown to choose the slider animation time delay. Some layers may require a longer delay time to properly display on the map.
 
@@ -555,7 +555,7 @@ The **Chart** tab on the Footer Bar has two sections. Layers with a chart are li
 
 The Feature dropdown (upper left of the chart section), can be used to select a feature. This is useful when features are close together on the map, making it difficult to click on the desired one.
 
-The visibility of data displayed on the chart can be toggled by clicking the checkbox <img src="{{assetsURL}}/img/guide/layers/check.png" alt="An icon representing the 'Checkbox' function" /> next to the data name shown above the chart (only for layers with multiple data items).
+The visibility of data displayed on the chart can be toggled by clicking the checkbox <img src="{{assetsURL}}/img/guide/layers/check.png" alt="An icon representing the Checkbox function" /> next to the data name shown above the chart (only for layers with multiple data items).
 
 Select from the Download dropdown (upper right of chart section) to download chart data in JSON format. Select Download All for all data and Download Visible for only data currently visible on the chart.
 

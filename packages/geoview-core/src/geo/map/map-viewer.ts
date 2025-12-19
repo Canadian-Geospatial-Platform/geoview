@@ -707,9 +707,25 @@ export class MapViewer {
    * Set the map zoom level.
    *
    * @param {number} zoom - New zoom level
+   * @returns {Promise<void>} A promise that resolves when the zoom operation completes.
    */
-  setZoomLevel(zoom: number): void {
+  setMapZoomLevel(zoom: number): Promise<void> {
+    // If zoom level is already set at this value, just resolve the promise
+    const view = this.getView();
+    const isSameZoom = view.getZoom() === zoom;
+    const belowMin = zoom < view.getMinZoom();
+    const aboveMax = zoom > view.getMaxZoom();
+
+    if (isSameZoom || belowMin || aboveMax) return Promise.resolve();
+
+    // Set zoom level
     this.getView().setZoom(zoom);
+
+    return new Promise((resolve) => {
+      this.map.once('rendercomplete', () => {
+        resolve();
+      });
+    });
   }
 
   /**
@@ -806,10 +822,23 @@ export class MapViewer {
 
   /**
    * Emits a map single click event.
+   * NOTE: This Does not update the store, only emit the click
    * @param {MapSingleClickEvent} clickCoordinates - The clicked coordinates to emit.
    */
   emitMapSingleClick(clickCoordinates: MapSingleClickEvent): void {
-    // Emit the event
+    // Emit the event is done
+    this.#emitMapSingleClick(clickCoordinates);
+  }
+
+  /**
+   * Simulate a map click eith store and ui update
+   * @param {MapSingleClickEvent} clickCoordinates - The clicked coordinates to simulate.
+   */
+  simulateMapClick(clickCoordinates: MapSingleClickEvent): void {
+    // Update store... this will not emit the event becaus only when WCAG mode is enable
+    MapEventProcessor.setClickCoordinates(this.mapId, clickCoordinates);
+
+    // Emit the event is done here, not from the processor to avoid circular references
     this.#emitMapSingleClick(clickCoordinates);
   }
 
@@ -883,6 +912,16 @@ export class MapViewer {
     // - 4th paradigm: MapViewer ---calls---> MapEventProcessor ---calls---> MapViewer ---calls/emits events---> MapState.setterActions.
     // Redirect to the processor
     return MapEventProcessor.zoomToExtent(this.mapId, extent, options);
+  }
+
+  /**
+   * Zoom to the initial extent defined in the map configuration.
+   *
+   * @returns {Promise<void>} A promise that resolves when the zoom operation completes.
+   */
+  zoomToInitialExtent(): Promise<void> {
+    // Redirect to processor
+    return MapEventProcessor.zoomToInitialExtent(this.mapId);
   }
 
   /**
@@ -1912,6 +1951,16 @@ export class MapViewer {
   onMapLayersLoaded(callback: MapLayersLoadedDelegate): void {
     // Register the event handler
     EventHelper.onEvent(this.#onMapLayersLoadedHandlers, callback);
+  }
+
+  /**
+   * Waits for the map layers loaded event to be emitted.
+   * @returns {Promise<MapViewer>} Promise resolved when the map layers loaded event is emitted
+   */
+  waitForLayersLoaded(): Promise<MapViewer> {
+    return new Promise((resolve) => {
+      this.onMapLayersLoaded(resolve);
+    });
   }
 
   /**

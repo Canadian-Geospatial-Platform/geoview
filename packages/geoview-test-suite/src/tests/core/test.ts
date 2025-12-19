@@ -14,6 +14,7 @@ import {
   AssertionNoErrorThrownError,
   AssertionValueNotAnArrayError,
   AssertionArraysNotEqualError,
+  AssertionManualFailError,
 } from './exceptions';
 import type { TestStepLevel } from './test-step';
 import { TestStep } from './test-step';
@@ -206,13 +207,38 @@ export class Test<T = unknown> {
   // #region PRIMITIVES
 
   /**
+   * Rounds a number to the specified precision.
+   * @param {number} value - The number to round.
+   * @param {number} precision - The number of decimal places.
+   * @returns {number} The rounded value.
+   * @private
+   * @static
+   */
+  static #roundToPrecision(value: number, precision: number): number {
+    const multiplier = Math.pow(10, precision);
+    return Math.round(value * multiplier) / multiplier;
+  }
+
+  /**
    * Asserts that two values are strictly equal (`===`).
    * @param {T} actualValue - The actual value being checked.
    * @param {T} expectedValue - The expected value to compare against.
+   * @param {number} [roundToPrecision] - Optional number of decimal places to round to before comparing (for numbers only).
    * @throws {AssertionError} If the values are not strictly equal.
    * @static
    */
-  static assertIsEqual<T = unknown>(actualValue: T, expectedValue: T): asserts actualValue is T {
+  static assertIsEqual<T = unknown>(actualValue: T, expectedValue: T, roundToPrecision?: number): asserts actualValue is T {
+    // If rounding is specified and both values are numbers, round them first
+    if (roundToPrecision !== undefined && typeof actualValue === 'number' && typeof expectedValue === 'number') {
+      const roundedActual = this.#roundToPrecision(actualValue, roundToPrecision);
+      const roundedExpected = this.#roundToPrecision(expectedValue, roundToPrecision);
+
+      if (roundedActual === roundedExpected) return;
+
+      // Throw with rounded values
+      throw new AssertionValueError(roundedActual as T, roundedExpected as T);
+    }
+
     // Checks if the result value is the same as the value provided
     if (actualValue === expectedValue) return;
 
@@ -286,18 +312,48 @@ export class Test<T = unknown> {
     throw new AssertionWrongErrorInstanceError(actualError, expectedType);
   }
 
+  /**
+   * Manually fails a test with a custom message.
+   * This is useful when you need to explicitly fail a test based on custom logic or conditions
+   * that cannot be expressed with the other assertion methods.
+   * @param {string} message - Custom message explaining why the test is being manually failed.
+   * @throws {AssertionManualFailError} Always throws to fail the test.
+   * @static
+   */
+  static assertFail(message: string = 'Test manually failed'): never {
+    // Throw the manual fail error
+    throw new AssertionManualFailError(message);
+  }
+
   // #endregion PRIMITIVES
 
   // #region ARRAYS
+
+  /**
+   * Asserts that a value is an array.
+   * @param {unknown} actualValue - The object to check.
+   * @throws {AssertionValueNotAnArrayError} If the value is not an array.
+   * @static
+   */
+  static assertIsArray(actualValue: unknown | unknown[] | undefined): asserts actualValue is unknown[] {
+    if (Array.isArray(actualValue)) return;
+
+    // Throw
+    throw new AssertionValueNotAnArrayError(actualValue);
+  }
 
   /**
    * Asserts that a length of a given array is equal to the expected length.
    * @param {unknown[] | undefined} array - The array to check the length.
    * @param {number} expectedValue - The expected length of the array.
    * @throws {AssertionArrayLengthError} If the values are not strictly equal.
+   * @throws {AssertionValueNotAnArrayError} If the value is not an array.
    * @static
    */
   static assertIsArrayLengthEqual(array: unknown[] | undefined, expectedValue: number): void {
+    // Test if it is an array
+    Test.assertIsArray(array);
+
     if (array?.length === expectedValue) return;
 
     // Throw
@@ -309,9 +365,13 @@ export class Test<T = unknown> {
    * @param {unknown[] | undefined} array - The array to check the length.
    * @param {number} expectedMinimumLength - The expected minimum length of the array.
    * @throws {AssertionArrayLengthMinimalError} If the values are not strictly equal.
+   * @throws {AssertionValueNotAnArrayError} If the value is not an array.
    * @static
    */
   static assertIsArrayLengthMinimal(array: unknown[] | undefined, expectedMinimumLength: number): void {
+    // Test if it is an array
+    Test.assertIsArray(array);
+
     if (array?.length ?? 0 >= expectedMinimumLength) return;
 
     // Throw
@@ -324,8 +384,13 @@ export class Test<T = unknown> {
    * @param {T[]} array - The array to search.
    * @param {T} expectedValue - The value expected to be included in the array.
    * @throws {AssertionArrayNotIncludingError} Throws if the expected value is not found in the array.
+   * @throws {AssertionValueNotAnArrayError} If the value is not an array.
+   * @static
    */
   static assertArrayIncludes<T = unknown>(array: T[], expectedValue: T): void {
+    // Test if it is an array
+    Test.assertIsArray(array);
+
     if (array.includes(expectedValue)) return;
 
     // Throw
@@ -338,8 +403,13 @@ export class Test<T = unknown> {
    * @param {T[]} array - The array to search.
    * @param {T} expectedValue - The value expected to be included in the array.
    * @throws {AssertionArrayNotIncludingError} Throws if the expected value is not found in the array.
+   * @throws {AssertionValueNotAnArrayError} If the value is not an array.
+   * @static
    */
   static assertArrayExcludes<T = unknown>(array: T[], expectedValue: T): void {
+    // Test if it is an array
+    Test.assertIsArray(array);
+
     if (!array.includes(expectedValue)) return;
 
     // Throw
@@ -350,16 +420,22 @@ export class Test<T = unknown> {
    * Asserts that two arrays have equal values and in the same order (primitive comparison).
    * @param {T[]} actualValue - The actual array being checked.
    * @param {T[]} expectedValue - The expected array to compare against.
+   * @param {number} [roundToPrecision] - Optional number of decimal places to round to before comparing (for number arrays only).
    * @throws {AssertionValueNotAnArrayError} If one value isn't an array.
    * @throws {AssertionArrayLengthError} If the lengths aren't the same between the 2 arrays.
    * @throws {AssertionArraysNotEqualError} If one object isn't the same as the other object in the other array based on the primitive `===` comparer.
    * @static
    */
-  static assertIsArrayEqual<T = unknown>(actualValue: T[], expectedValue: T[]): void {
-    // Redirect using a primitive comparer
+  static assertIsArrayEqual<T = unknown>(actualValue: T[], expectedValue: T[], roundToPrecision?: number): void {
+    // Redirect using a primitive comparer with optional rounding
     this.assertIsArrayEqualComparer(actualValue, expectedValue, (value1: T, value2: T): boolean => {
-      // Use primitive === comparer
-      return value1 === value2;
+      // Reuse assertIsEqual which already handles rounding logic
+      try {
+        this.assertIsEqual(value1, value2, roundToPrecision);
+        return true;
+      } catch {
+        return false;
+      }
     });
 
     // If we get here, arrays have equal primitive values and in the same order
@@ -401,12 +477,8 @@ export class Test<T = unknown> {
    */
   static assertIsArrayEqualComparer<T = unknown>(actualValue: T[], expectedValue: T[], comparer: ComparerDelegate<T>): void {
     // Check if both are arrays
-    if (!Array.isArray(actualValue)) {
-      throw new AssertionValueNotAnArrayError(actualValue);
-    }
-    if (!Array.isArray(expectedValue)) {
-      throw new AssertionValueNotAnArrayError(expectedValue);
-    }
+    Test.assertIsArray(actualValue);
+    Test.assertIsArray(expectedValue);
 
     // Check if lengths are equal
     if (actualValue.length !== expectedValue.length) {
