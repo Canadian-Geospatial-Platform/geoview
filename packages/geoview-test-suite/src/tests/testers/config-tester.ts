@@ -1156,8 +1156,8 @@ export class ConfigTester extends GVAbstractTester {
     // Expected config
     const expectedResults = {
       geoviewLayer: { highlight: false, zoom: false },
-      group: { highlight: false, remove: false, zoom: false },
-      child: { highlight: true, remove: false, zoom: false },
+      group: { remove: false },
+      child: { highlight: true, remove: false },
     };
 
     // Perform the test

@@ -1344,7 +1344,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         queryable: orderedLayerInfo.queryableState,
         hoverable: orderedLayerInfo.hoverable,
       },
-      controls: legendLayerInfo.controls,
+      controls: layerEntryConfig.getInitialSettings()?.controls,
       bounds: layerEntryConfig.getInitialSettings()?.bounds,
       className: layerEntryConfig.getInitialSettings()?.className,
       extent: layerEntryConfig.getInitialSettings()?.extent,
