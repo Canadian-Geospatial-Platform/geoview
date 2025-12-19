@@ -47,7 +47,8 @@
     "title": "Measure",
     "line": "Distance",
     "area": "Area",
-    "clear": "Clear"
+    "clear": "Clear",
+    "segmentLabels": "Show segment labels"
   },
   "basemaps": {
     "select": "Select a basemap",
