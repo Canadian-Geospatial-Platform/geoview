@@ -2774,7 +2774,7 @@ export class LayerApi {
       const subLayerPath = layerPath.endsWith(`/${layerEntryConfig.layerId}`) ? layerPath : `${layerPath}/${layerEntryConfig.layerId}`;
 
       const settings = ConfigBaseClass.getClassOrTypeInitialSettings(layerEntryConfig);
-      const featureInfo = layerEntryConfig.source?.featureInfo;
+      const featureInfo = AbstractBaseLayerEntryConfig.getClassOrTypeFeatureInfo(layerEntryConfig);
 
       const layerInfo: TypeOrderedLayerInfo = {
         layerPath: subLayerPath,

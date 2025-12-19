@@ -96,7 +96,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
 
     // Set loading strategy option
     // eslint-disable-next-line no-param-reassign
-    sourceOptions.strategy = layerConfig.source?.strategy === 'bbox' ? bbox : all;
+    sourceOptions.strategy = layerConfig.getSource().strategy === 'bbox' ? bbox : all;
 
     // ESlint override about misused-promises, because we're using async in the loader callback instead of returning void, no worries in the end.
     // eslint-disable-next-line no-param-reassign, @typescript-eslint/no-misused-promises
@@ -106,7 +106,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         vectorSource.clearLoaderError();
 
         // The read options
-        const options: ReadOptions = { dataProjection: layerConfig.source?.dataProjection, featureProjection: projection, extent };
+        const options: ReadOptions = { dataProjection: layerConfig.getSource().dataProjection, featureProjection: projection, extent };
 
         // Grab the features to load in the source
         const features = await this.onCreateVectorSourceLoadFeatures(layerConfig, sourceOptions, options);

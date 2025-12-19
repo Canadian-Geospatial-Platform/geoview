@@ -21,6 +21,7 @@ import type { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
 import { DateMgt } from '@/core/utils/date-mgt';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GeoUtilities } from '@/geo/utils/utilities';
+import { deepMerge } from '@/core/utils/utilities';
 
 export interface ConfigBaseClassProps {
   layerId: string;
@@ -385,7 +386,7 @@ export abstract class ConfigBaseClass {
    * @returns {Readonly<TypeLayerInitialSettings>} The initial settings.
    */
   getInitialSettings(): Readonly<TypeLayerInitialSettings> {
-    return { ...this.#initialSettings };
+    return { ...this.#initialSettings }; // TODO: CHECK - Try to remove the spreading here to solidify the framework
   }
 
   /**
@@ -393,7 +394,15 @@ export abstract class ConfigBaseClass {
    * @param {TypeLayerInitialSettings} newSettings - The new initial settings.
    */
   setInitialSettings(newSettings: TypeLayerInitialSettings): void {
-    this.#initialSettings = { ...newSettings };
+    this.#initialSettings = { ...newSettings }; // TODO: CHECK - Try to remove the spreading here to solidify the framework
+  }
+
+  /**
+   * Initializes the initial settings configuration by filling the blanks in our config with the information from the metadata
+   * @param {TypeLayerInitialSettings | undefined} initialSettingsMetadata - The initialSettings metadata to use to help fill the blanks in our initialSettings config.
+   */
+  initInitialSettings(initialSettingsMetadata: TypeLayerInitialSettings | undefined): void {
+    this.#initialSettings = deepMerge(initialSettingsMetadata, this.#initialSettings);
   }
 
   /**

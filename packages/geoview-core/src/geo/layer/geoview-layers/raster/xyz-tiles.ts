@@ -15,7 +15,6 @@ import {
 import { GVXYZTiles } from '@/geo/layer/gv-layers/tile/gv-xyz-tiles';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { deepMerge } from '@/core/utils/utilities';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.
 // TODO: Implement method to validate XYZ tile service
@@ -147,11 +146,11 @@ export class XYZTiles extends AbstractGeoViewRaster {
         // Set the layer metadata. metadataLayerConfigFound can't be undefined because we have already validated the config exist
         layerConfig.setLayerMetadata(metadataLayerConfigFound);
 
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.source = deepMerge(metadataLayerConfigFound.source, layerConfig.source);
+        // Initialize the source by filling the blanks with the information from the metadata
+        layerConfig.initSource(metadataLayerConfigFound.source);
 
-        // Set the initial settings
-        layerConfig.setInitialSettings(deepMerge(metadataLayerConfigFound.initialSettings, layerConfig.getInitialSettings()));
+        // Initialize the initial settings by filling the blanks with the information from the metadata
+        layerConfig.initInitialSettings(metadataLayerConfigFound.initialSettings);
 
         // Validate and update the extent initial settings
         layerConfig.validateUpdateInitialSettingsExtent();
@@ -316,21 +315,28 @@ export class XYZTiles extends AbstractGeoViewRaster {
     const sourceOptions: SourceOptions = {
       url: layerConfig.getDataAccessPath(),
       attributions: layerConfig.getAttributions(),
-      crossOrigin: layerConfig.source.crossOrigin ?? 'Anonymous',
-      projection: layerConfig.source.projection ? `EPSG:${layerConfig.source.projection}` : undefined,
+      crossOrigin: layerConfig.getSource().crossOrigin ?? 'Anonymous',
+      projection: layerConfig.getSource().projection ? `EPSG:${layerConfig.getSource().projection}` : undefined,
     };
 
-    if (layerConfig.source.tileGrid) {
+    // Get the tile grid
+    const { tileGrid } = layerConfig.getSource();
+
+    // If a tile grid is specified
+    if (tileGrid) {
+      // If tileGrid configuration exists
       const tileGridOptions: TileGridOptions = {
-        origin: layerConfig.source.tileGrid.origin,
-        resolutions: layerConfig.source.tileGrid.resolutions,
-        tileSize: layerConfig.source.tileGrid.tileSize,
-        extent: layerConfig.source.tileGrid.extent,
+        origin: tileGrid?.origin,
+        resolutions: tileGrid.resolutions, // TODO: ADD - Add a validation about the 'resolutions' property always existing?
+        tileSize: tileGrid?.tileSize,
+        extent: tileGrid?.extent,
       };
 
+      // Assign the tile grid
       sourceOptions.tileGrid = new TileGrid(tileGridOptions);
     }
 
+    // Return the fully configured XYZ instance
     return new XYZ(sourceOptions);
   }
 

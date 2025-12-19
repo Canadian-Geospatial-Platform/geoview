@@ -94,7 +94,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
       };
 
       // eslint-disable-next-line no-param-reassign
-      layerConfig.source.tileGrid = newTileGrid;
+      layerConfig.getSource().tileGrid = newTileGrid;
 
       // Get the spatial reference from the metadata
       const projectionMetadata = metadata.tileInfo?.spatialReference?.wkid;
@@ -103,7 +103,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
       if (projectionMetadata) {
         // Make sure the projection is set on the source config
         // eslint-disable-next-line no-param-reassign
-        layerConfig.source.projection ??= projectionMetadata as unknown as TypeValidSourceProjectionCodes;
+        layerConfig.getSource().projection ??= projectionMetadata as unknown as TypeValidSourceProjectionCodes;
       }
 
       // Validate and update the extent initial settings
@@ -303,8 +303,11 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @static
    */
   static createVectorTileSource(layerConfig: VectorTilesLayerEntryConfig): VectorTileSource {
+    // Get the projection from the source config
+    const sourceProjection = layerConfig.getSource().projection;
+
     // If no projection for the layer
-    if (!layerConfig.source.projection) {
+    if (!sourceProjection) {
       throw new LayerEntryConfigParameterProjectionNotDefinedInSourceError(layerConfig);
     }
 
@@ -312,19 +315,22 @@ export class VectorTiles extends AbstractGeoViewRaster {
     const sourceOptions: SourceOptions = {
       url: layerConfig.getDataAccessPath(),
       format: new MVT(),
-      projection: `EPSG:${layerConfig.source.projection}`,
+      projection: `EPSG:${sourceProjection}`,
     };
 
-    // If tileGrid configuration exists, construct and assign an ol/tilegrid/TileGrid
-    if (layerConfig.source.tileGrid) {
-      const tileGridOptions: TileGridOptions = {
-        origin: layerConfig.source.tileGrid.origin,
-        resolutions: layerConfig.source.tileGrid.resolutions,
-        tileSize: layerConfig.source.tileGrid.tileSize,
-        extent: layerConfig.source.tileGrid.extent,
-      };
-      sourceOptions.tileGrid = new TileGrid(tileGridOptions);
-    }
+    // Get the tile grid
+    const { tileGrid } = layerConfig.getSource();
+
+    // Create the tile grid options
+    const tileGridOptions: TileGridOptions = {
+      origin: tileGrid?.origin,
+      resolutions: tileGrid!.resolutions, // TODO: ADD - Add a validation about the 'resolutions' property always existing?
+      tileSize: tileGrid?.tileSize,
+      extent: tileGrid?.extent,
+    };
+
+    // Assign the tile grid
+    sourceOptions.tileGrid = new TileGrid(tileGridOptions);
 
     // Return the fully configured VectorTileSource instance
     return new VectorTileSource(sourceOptions);

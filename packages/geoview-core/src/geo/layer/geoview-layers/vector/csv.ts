@@ -90,7 +90,7 @@ export class CSV extends AbstractGeoViewVector {
     readOptions: ReadOptions
   ): Promise<Feature[]> {
     // Query
-    const responseData = await AbstractGeoViewVector.fetchText(layerConfig.getDataAccessPath(false), layerConfig.source?.postSettings);
+    const responseData = await AbstractGeoViewVector.fetchText(layerConfig.getDataAccessPath(false), layerConfig.getSource().postSettings);
 
     // Attempt to convert CSV text to OpenLayers features
     return CSV.convertCsv(responseData, layerConfig as CsvLayerEntryConfig, readOptions.featureProjection);
@@ -231,14 +231,14 @@ export class CSV extends AbstractGeoViewVector {
     // GV: This function and the below private static ones used to be in the CSV class directly, but something wasn't working with a 'Private element not accessible' error.
     // GV: After moving the code to the mother class, it worked. It'll remain here for now until the config refactoring can take care of it in its re-writing
 
-    const inProjection: string = layerConfig.source.dataProjection || Projection.PROJECTION_NAMES.LONLAT; // default: LONLAT
+    const inProjection: string = layerConfig.getSource().dataProjection || Projection.PROJECTION_NAMES.LONLAT; // default: LONLAT
     const inProjectionConv: OLProjection = Projection.getProjectionFromString(inProjection);
     const outProjectionConv: OLProjection = Projection.getProjectionFromString(outProjection);
 
     const features: Feature[] = [];
     let latIndex: number | undefined;
     let lonIndex: number | undefined;
-    const csvRows = this.#csvStringToArray(csvData, layerConfig.source.separator || ',');
+    const csvRows = this.#csvStringToArray(csvData, layerConfig.getSource().separator || ',');
     const headers: string[] = csvRows[0];
     for (let i = 0; i < headers.length; i++) {
       if (this.EXCLUDED_HEADERS_LAT.includes(headers[i].toLowerCase())) latIndex = i;

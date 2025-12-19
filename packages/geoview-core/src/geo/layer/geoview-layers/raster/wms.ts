@@ -326,12 +326,12 @@ export class WMS extends AbstractGeoViewRaster {
       params: sourceParams,
       attributions: layerConfig.getAttributions(),
       serverType: layerConfig.getServerType() ?? 'mapserver', // default: mapserver
-      crossOrigin: layerConfig.source.crossOrigin ?? 'Anonymous',
+      crossOrigin: layerConfig.getSource().crossOrigin ?? 'Anonymous',
     };
 
     // Optional projection override
-    if (layerConfig.source.projection) {
-      sourceOptions.projection = `EPSG:${layerConfig.source.projection}`;
+    if (layerConfig.getSource().projection) {
+      sourceOptions.projection = `EPSG:${layerConfig.getSource().projection}`;
     }
 
     // Create the source
