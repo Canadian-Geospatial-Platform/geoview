@@ -21,7 +21,7 @@ import type { Transform } from '@/geo/interaction/transform';
 import type { TransformDeleteFeatureEvent, TransformEvent, TransformSelectionEvent } from '@/geo/interaction/transform/transform-events';
 import type { IDrawerState, StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
 import { DEFAULT_TEXT_VALUES } from '@/core/stores/store-interface-and-intial-values/drawer-state';
-import { generateId } from '@/core/utils/utilities';
+import { generateId, formatLength, formatArea } from '@/core/utils/utilities';
 import type { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
@@ -238,48 +238,6 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Formats a numeric value according to the display language
-   * @param {number} value - The value to format
-   * @param {string} displayLanguage - The display language ('en' or 'fr')
-   * @returns {string} The formatted value
-   */
-  static #formatValue(value: number, displayLanguage: string): string {
-    return displayLanguage === 'fr'
-      ? value.toLocaleString('fr-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-      : value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  }
-
-  /**
-   * Takes a length and converts it to a string to be used in the overlays
-   * @param {number} length - The length to be converted
-   * @param {string} displayLanguage - The display language
-   * @returns {string} The string of text describing the length
-   */
-  static #getLengthText(length: number, displayLanguage: string): string {
-    if (length > 100) {
-      const value = Math.round((length / 1000) * 100) / 100;
-      return `${this.#formatValue(value, displayLanguage)} km`;
-    }
-    const value = Math.round(length * 100) / 100;
-    return `${this.#formatValue(value, displayLanguage)} m`;
-  }
-
-  /**
-   * Takes an area and converts it to a string to be used in the overlays
-   * @param {number} area - The area to be converted
-   * @param {string} displayLanguage - The display language
-   * @returns {string} The string of text describing the area
-   */
-  static #getAreaText(area: number, displayLanguage: string): string {
-    if (area > 10000) {
-      const value = Math.round((area / 1000000) * 100) / 100;
-      return `${this.#formatValue(value, displayLanguage)} km<sup>2</sup>`;
-    }
-    const value = Math.round(area * 100) / 100;
-    return `${this.#formatValue(value, displayLanguage)} m<sup>2</sup>`;
-  }
-
-  /**
    * Calculates measurements for a geometry feature
    * @param {Geometry} geom - The geometry to measure
    * @param {string} displayLanguage - The display language
@@ -294,15 +252,15 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
     if (geom instanceof LineString) {
       const length = getLength(geom);
-      output = this.#getLengthText(length, displayLanguage);
+      output = formatLength(length, displayLanguage);
 
       tooltipCoord = geom.getLastCoordinate();
     } else if (geom instanceof Polygon) {
       const length = getLength(geom);
-      output = this.#getLengthText(length, displayLanguage);
+      output = formatLength(length, displayLanguage);
 
       const area = getArea(geom);
-      output += `<br>${this.#getAreaText(area, displayLanguage)}`;
+      output += `<br>${formatArea(area, displayLanguage)}`;
 
       tooltipCoord = geom.getInteriorPoint().getCoordinates();
       tooltipCoord.pop();
@@ -310,10 +268,10 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       // For Circle geometries, calculate area using π*r²
       const radius = geom.getRadius();
       const length = 2 * Math.PI * radius;
-      output = this.#getLengthText(length, displayLanguage);
+      output = formatLength(length, displayLanguage);
 
       const area = Math.PI * radius * radius;
-      output += `<br>${this.#getAreaText(area, displayLanguage)}`;
+      output += `<br>${formatArea(area, displayLanguage)}`;
 
       tooltipCoord = geom.getCenter();
     }
