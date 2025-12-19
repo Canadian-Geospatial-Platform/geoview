@@ -33,12 +33,19 @@
     "coordinates": "Basculer le format des coordonnées",
     "scale": "Basculer entre l'échelle et la résolution",
     "location": "Zoom sur ma position",
+    "measurement": "Mesurer sur la carte",
     "projection": "Changer la projection de la carte",
     "rotation": {
       "title": "Rotation de la carte",
       "degrees": "Degrés",
       "reset": "Réinitialiser"
     }
+  },
+  "measurement": {
+    "title": "Mesurer sur la carte",
+    "line": "Mesurer la distance",
+    "area": "Mesurer la surface",
+    "clear": "Effacer les mesures"
   },
   "basemaps": {
     "select": "Choisir une carte de base",
