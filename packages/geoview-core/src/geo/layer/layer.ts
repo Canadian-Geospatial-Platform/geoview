@@ -709,7 +709,7 @@ export class LayerApi {
    */
   #addGeoviewLayerStep2(geoviewLayerConfig: TypeGeoviewLayerConfig, abortSignal?: AbortSignal): GeoViewLayerAddedResult {
     // Create the layer for the processing
-    const layerBeingAdded = this.createLayerConfigFromType(geoviewLayerConfig);
+    const layerBeingAdded = LayerApi.createLayerConfigFromType(geoviewLayerConfig);
 
     // Add in the geoviewLayers set
     this.#geoviewLayers[layerBeingAdded.getGeoviewLayerId()] = layerBeingAdded;
@@ -2703,6 +2703,7 @@ export class LayerApi {
    * @param {MapConfigLayerEntry} entry - The array of layer entry to convert.
    * @param {(mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void} errorCallback - Callback invoked when an error occurs during layer processing.
    * @returns {Promise<TypeGeoviewLayerConfig>} The promise resolving to a `TypeGeoviewLayerConfig` object.
+   * @static
    */
   static convertMapConfigToGeoviewLayerConfig(
     mapId: string,
@@ -2746,6 +2747,7 @@ export class LayerApi {
    * @param {MapConfigLayerEntry[]} mapConfigLayerEntries - The array of layer entries to convert.
    * @param {(mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void} errorCallback - Callback invoked when an error occurs during layer processing.
    * @returns {Promise<TypeGeoviewLayerConfig[]>[]} An array of promises, each resolving to an array of `TypeGeoviewLayerConfig` objects.
+   * @static
    */
   static convertMapConfigsToGeoviewLayerConfig(
     mapId: string,
@@ -2840,9 +2842,10 @@ export class LayerApi {
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The configuration object for the GeoView layer.
    * @returns {AbstractGeoViewLayer} An instance of the corresponding `AbstractGeoViewLayer` subclass.
    * @throws {NotSupportedError} If the configuration does not match any supported layer type.
+   * @static
    */
-  createLayerConfigFromType(geoviewLayerConfig: TypeGeoviewLayerConfig): AbstractGeoViewLayer {
-    // TODO: Refactor - Here the function should use the structure created by validation config with the metadata fetch and no need to pass the validation.
+  static createLayerConfigFromType(geoviewLayerConfig: TypeGeoviewLayerConfig): AbstractGeoViewLayer {
+    // Depending on the layer type of config
     if (CsvLayerEntryConfig.isClassOrTypeCSV(geoviewLayerConfig)) {
       return new CSV(geoviewLayerConfig);
     }
@@ -2871,7 +2874,7 @@ export class LayerApi {
       return new OgcFeature(geoviewLayerConfig);
     }
     if (VectorTilesLayerEntryConfig.isClassOrTypeVectorTiles(geoviewLayerConfig)) {
-      return new VectorTiles(geoviewLayerConfig, this.mapViewer.getProjection().getCode());
+      return new VectorTiles(geoviewLayerConfig);
     }
     if (OgcWfsLayerEntryConfig.isClassOrTypeWFSLayer(geoviewLayerConfig)) {
       return new WFS(geoviewLayerConfig);

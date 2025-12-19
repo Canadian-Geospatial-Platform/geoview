@@ -231,15 +231,15 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
       if (Object.keys(layerStyle).length === 1) {
         // Take the only one
         return Object.values(layerStyle)[0];
-      } else {
-        // Take the geometry type
-        const geometryType = this.getGeometryType();
+      }
 
-        // If any
-        if (geometryType) {
-          // Take the style based on the geometry type
-          return layerStyle?.[geometryType];
-        }
+      // Take the geometry type
+      const geometryType = this.getGeometryType();
+
+      // If any
+      if (geometryType) {
+        // Take the style based on the geometry type
+        return layerStyle?.[geometryType];
       }
     }
 

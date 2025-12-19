@@ -2,20 +2,24 @@ import type { Options as SourceOptions } from 'ol/source/VectorTile';
 import VectorTileSource from 'ol/source/VectorTile';
 import type { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
 import TileGrid from 'ol/tilegrid/TileGrid';
-import type { ProjectionLike } from 'ol/proj';
 
 import { applyStyle } from 'ol-mapbox-style';
 
 import { MVT } from 'ol/format';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import type { TypeGeoviewLayerConfig, TypeTileGrid, TypeMetadataVectorTiles } from '@/api/types/layer-schema-types';
+import type {
+  TypeGeoviewLayerConfig,
+  TypeTileGrid,
+  TypeMetadataVectorTiles,
+  TypeValidSourceProjectionCodes,
+} from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { Projection } from '@/geo/utils/projection';
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
-import { LayerEntryNotSupportingProjectionError } from '@/core/exceptions/layer-entry-config-exceptions';
+import { LayerEntryConfigParameterProjectionNotDefinedInSourceError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { GVVectorTiles } from '@/geo/layer/gv-layers/vector/gv-vector-tiles';
 
 // TODO: Implement method to validate Vector Tiles service
@@ -33,18 +37,14 @@ export interface TypeVectorTilesConfig extends Omit<TypeGeoviewLayerConfig, 'lis
  * @class VectorTiles
  */
 export class VectorTiles extends AbstractGeoViewRaster {
-  // TODO: Refactor - Review the purpose of this property
-  /** Fallback projection (the map projection) */
-  fallbackProjection: ProjectionLike;
-
   /**
    * Constructs a VectorTiles Layer configuration processor.
    * @param {TypeVectorTilesConfig} layerConfig - The layer configuration
    * @param {ProjectionLike} fallbackProjection - The map projection when this layer is being created, for validation purposes.
    */
-  constructor(layerConfig: TypeVectorTilesConfig, fallbackProjection: ProjectionLike) {
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
+  constructor(layerConfig: TypeVectorTilesConfig) {
     super(layerConfig);
-    this.fallbackProjection = fallbackProjection;
   }
 
   // #region OVERRIDES
@@ -95,6 +95,16 @@ export class VectorTiles extends AbstractGeoViewRaster {
 
       // eslint-disable-next-line no-param-reassign
       layerConfig.source.tileGrid = newTileGrid;
+
+      // Get the spatial reference from the metadata
+      const projectionMetadata = metadata.tileInfo?.spatialReference?.wkid;
+
+      // If a spatial reference is specified in the metadata
+      if (projectionMetadata) {
+        // Make sure the projection is set on the source config
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.source.projection ??= projectionMetadata as unknown as TypeValidSourceProjectionCodes;
+      }
 
       // Validate and update the extent initial settings
       layerConfig.validateUpdateInitialSettingsExtent();
@@ -167,7 +177,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    */
   protected override onCreateGVLayer(layerConfig: VectorTilesLayerEntryConfig): GVVectorTiles {
     // Create the source
-    const source = VectorTiles.createVectorTileSource(layerConfig, this.fallbackProjection);
+    const source = VectorTiles.createVectorTileSource(layerConfig);
 
     // Create the GV Layer
     const gvLayer = new GVVectorTiles(source, layerConfig);
@@ -199,10 +209,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     isTimeAware?: boolean
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const myLayer = new VectorTiles(
-      { geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeVectorTilesConfig,
-      'EPSG:4326' // Dummy projection just to be able to initialize it.
-    );
+    const myLayer = new VectorTiles({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeVectorTilesConfig);
     return myLayer.initGeoViewLayerEntries();
   }
 
@@ -258,7 +265,6 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @param {string} url - The URL of the service endpoint.
    * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
    * @param {boolean} isTimeAware - Indicates if the layer is time aware.
-   * @param {ProjectionLike} fallbackProjection - Indicates the projection that should be used in case not set.
    * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
    * @static
    */
@@ -267,8 +273,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     geoviewLayerName: string,
     url: string,
     layerIds: string[],
-    isTimeAware: boolean,
-    fallbackProjection: ProjectionLike
+    isTimeAware: boolean
   ): Promise<ConfigBaseClass[]> {
     // Create the Layer config
     const layerConfig = VectorTiles.createGeoviewLayerConfig(
@@ -282,7 +287,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     );
 
     // Create the class from geoview-layers package
-    const myLayer = new VectorTiles(layerConfig, fallbackProjection);
+    const myLayer = new VectorTiles(layerConfig);
 
     // Process it
     return AbstractGeoViewLayer.processConfig(myLayer);
@@ -292,32 +297,23 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * Creates a VectorTileSource from a layer config.
    * This encapsulates projection, tileGrid, and format setup.
    * @param {VectorTilesLayerEntryConfig} layerConfig - Configuration object for the vector tile layer.
-   * @param {ProjectionLike} fallbackProjection - Fallback projection if none is provided in the config.
    * @returns An initialized VectorTileSource ready for use in a layer.
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   * @throws {LayerEntryConfigParameterProjectionNotDefinedInSourceError} When the source projection isn't defined.
    * @static
    */
-  static createVectorTileSource(layerConfig: VectorTilesLayerEntryConfig, fallbackProjection: ProjectionLike): VectorTileSource {
+  static createVectorTileSource(layerConfig: VectorTilesLayerEntryConfig): VectorTileSource {
+    // If no projection for the layer
+    if (!layerConfig.source.projection) {
+      throw new LayerEntryConfigParameterProjectionNotDefinedInSourceError(layerConfig);
+    }
+
     // Create the source options
     const sourceOptions: SourceOptions = {
       url: layerConfig.getDataAccessPath(),
       format: new MVT(),
+      projection: `EPSG:${layerConfig.source.projection}`,
     };
-
-    // Assign projection from config if present, otherwise use fallback (e.g., map's current projection)
-    sourceOptions.projection = layerConfig.source.projection ? `EPSG:${layerConfig.source.projection}` : `${fallbackProjection}`;
-
-    // Validate the spatial reference in the tileInfo (if set) is the same as the source
-    if (
-      layerConfig.getServiceMetadata()?.tileInfo?.spatialReference?.wkid &&
-      sourceOptions.projection.replace('EPSG:', '') !== layerConfig.getServiceMetadata()!.tileInfo.spatialReference.wkid.toString()
-    ) {
-      // Set the layer status to error
-      layerConfig.setLayerStatusError();
-
-      // Raise error
-      throw new LayerEntryNotSupportingProjectionError(fallbackProjection as string, layerConfig);
-    }
 
     // If tileGrid configuration exists, construct and assign an ol/tilegrid/TileGrid
     if (layerConfig.source.tileGrid) {
