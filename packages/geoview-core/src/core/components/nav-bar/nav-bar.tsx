@@ -7,6 +7,7 @@ import { useTheme } from '@mui/material/styles';
 import { Plugin } from '@/api/plugin/plugin';
 
 import BasemapSelect from './buttons/basemap-select';
+import Measurement from './buttons/measurement';
 import ZoomIn from './buttons/zoom-in';
 import ZoomOut from './buttons/zoom-out';
 import Fullscreen from './buttons/fullscreen';
@@ -30,7 +31,16 @@ type NavBarProps = {
   api: NavBarApi;
 };
 
-type DefaultNavbar = 'fullScreen' | 'location' | 'home' | 'zoomIn' | 'zoomOut' | 'basemapSelect' | 'projection' | 'mapRotation';
+type DefaultNavbar =
+  | 'fullScreen'
+  | 'location'
+  | 'home'
+  | 'zoomIn'
+  | 'zoomOut'
+  | 'basemapSelect'
+  | 'measurement'
+  | 'projection'
+  | 'mapRotation';
 type NavbarButtonGroup = Record<string, TypeButtonPanel | DefaultNavbar>;
 type NavButtonGroups = Record<string, NavbarButtonGroup>;
 
@@ -39,6 +49,7 @@ const defaultNavbar: Record<DefaultNavbar, JSX.Element> = {
   location: <Location />,
   home: <Home />,
   basemapSelect: <BasemapSelect />,
+  measurement: <Measurement />,
   projection: <Projection />,
   zoomIn: <ZoomIn />,
   zoomOut: <ZoomOut />,
@@ -97,6 +108,10 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
     if (navBarComponents.includes('basemap-select')) {
       displayButtons = { ...displayButtons, basemapSelect: 'basemapSelect' };
+    }
+
+    if (navBarComponents.includes('measurement')) {
+      displayButtons = { ...displayButtons, measurement: 'measurement' };
     }
 
     if (navBarComponents.includes('projection')) {

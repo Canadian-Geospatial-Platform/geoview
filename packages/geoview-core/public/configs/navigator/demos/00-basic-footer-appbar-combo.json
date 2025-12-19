@@ -261,7 +261,7 @@
     },
     "selectedTab": "legend"
   },
-  "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select"],
+  "navBar": ["zoom", "fullscreen", "home", "location", "measurement", "basemap-select"],
   "components": ["north-arrow", "overview-map"],
   "corePackages": [],
   "externalPackages": []

@@ -10,6 +10,7 @@
       "labeled": true
     }
   },
+  "navBar": ["measurement"],
   "components": ["overview-map", "north-arrow"],
   "corePackages": [],
   "theme": "geo.ca"

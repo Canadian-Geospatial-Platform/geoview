@@ -33,12 +33,19 @@
     "coordinates": "Toggle coordinates format",
     "scale": "Toggle between scale and resolution",
     "location": "Zoom to my location",
+    "measurement": "Measure on map",
     "projection": "Change map projection",
     "rotation": {
       "title": "Map Rotation",
       "degrees": "Degrees",
       "reset": "Reset"
     }
+  },
+  "measurement": {
+    "title": "Measure on Map",
+    "line": "Measure Distance",
+    "area": "Measure Area",
+    "clear": "Clear Measurements"
   },
   "basemaps": {
     "select": "Select a basemap",

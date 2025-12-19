@@ -59,7 +59,7 @@ export type TypeDisplayTheme = 'dark' | 'light' | 'geo.ca';
 export const VALID_DISPLAY_THEME: TypeDisplayTheme[] = ['dark', 'light', 'geo.ca'];
 
 /** Valid values for the navBar array. */
-export type TypeValidNavBarProps = 'zoom' | 'rotation' | 'fullscreen' | 'home' | 'location' | 'basemap-select' | 'projection' | 'drawer';
+export type TypeValidNavBarProps = 'zoom' | 'rotation' | 'fullscreen' | 'home' | 'location' | 'basemap-select' | 'measurement' | 'projection' | 'drawer';
 
 /** Supported footer bar tabs */
 export type TypeValidFooterBarTabsCoreProps = 'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart' | 'guide';
