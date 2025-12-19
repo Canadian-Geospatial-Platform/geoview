@@ -49,7 +49,7 @@ export type TypeDisplayTheme = 'dark' | 'light' | 'geo.ca';
 /** Array of valid geoview themes. */
 export declare const VALID_DISPLAY_THEME: TypeDisplayTheme[];
 /** Valid values for the navBar array. */
-export type TypeValidNavBarProps = 'zoom' | 'fullscreen' | 'home' | 'location' | 'basemap-select' | 'projection' | 'drawer' | 'map-rotation';
+export type TypeValidNavBarProps = 'zoom' | 'rotation' | 'fullscreen' | 'home' | 'location' | 'basemap-select' | 'projection' | 'drawer';
 /** Supported footer bar tabs */
 export type TypeValidFooterBarTabsCoreProps = 'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart' | 'guide';
 /** Default tabs order */

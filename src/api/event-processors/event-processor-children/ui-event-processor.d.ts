@@ -1,4 +1,4 @@
-import type { TypeValidAppBarCoreProps, TypeValidFooterBarTabsCoreProps, TypeValidMapCorePackageProps } from '@/api/types/map-schema-types';
+import type { TypeValidAppBarCoreProps, TypeValidFooterBarTabsCoreProps, TypeValidMapCorePackageProps, TypeValidNavBarProps } from '@/api/types/map-schema-types';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import type { IUIState, ActiveAppBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
 export declare class UIEventProcessor extends AbstractEventProcessor {
@@ -11,6 +11,7 @@ export declare class UIEventProcessor extends AbstractEventProcessor {
     static getActiveFooterBarTab(mapId: string): string | undefined;
     static getFooterBarComponents(mapId: string): TypeValidFooterBarTabsCoreProps[];
     static getAppBarComponents(mapId: string): TypeValidAppBarCoreProps[];
+    static getNavBarComponents(mapId: string): TypeValidNavBarProps[];
     static getCorePackageComponents(mapId: string): TypeValidMapCorePackageProps[];
     static getFooterBarIsCollapsed(mapId: string): boolean;
     static hideTab(mapId: string, tab: string): void;

@@ -33,7 +33,7 @@ export declare const LayerListItem: import("react").NamedExoticComponent<LayerLi
  * @param {boolean} isEnlarged Boolean value if right panel is enlarged or not.
  * @param {number} selectedLayerIndex  Current index of list item selected.
  * @param {string} selectedLayerPath  Selected path of the layer.
- * @param {Function} onListItemClick  Callback function excecuted when list item is clicked.
+ * @param {Function} onListItemClick  Callback function executed when list item is clicked.
  * @returns {JSX.Element}
  */
 export declare const LayerList: import("react").NamedExoticComponent<LayerListProps>;
