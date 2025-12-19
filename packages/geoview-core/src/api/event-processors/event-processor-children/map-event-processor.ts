@@ -1345,11 +1345,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
         hoverable: orderedLayerInfo.hoverable,
       },
       controls: legendLayerInfo.controls,
-      bounds: layerEntryConfig.getInitialSettings().bounds,
-      className: layerEntryConfig.getInitialSettings().className,
-      extent: layerEntryConfig.getInitialSettings().extent,
-      minZoom: layerEntryConfig.getInitialSettings().minZoom,
-      maxZoom: layerEntryConfig.getInitialSettings().maxZoom,
+      bounds: layerEntryConfig.getInitialSettings()?.bounds,
+      className: layerEntryConfig.getInitialSettings()?.className,
+      extent: layerEntryConfig.getInitialSettings()?.extent,
+      minZoom: layerEntryConfig.getInitialSettings()?.minZoom,
+      maxZoom: layerEntryConfig.getInitialSettings()?.maxZoom,
     };
   }
 

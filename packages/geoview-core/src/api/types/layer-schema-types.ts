@@ -335,7 +335,7 @@ export interface TypeSourceImageEsriInitialConfig extends TypeBaseSourceInitialC
 export type TypeLayerInitialSettings = {
   /** Settings for availablity of controls */
   controls?: TypeLayerControls;
-  /** The geographic bounding box that contains all the layer's features. */
+  /** The geographic bounding box that contains all the layer's features. The bounds are always in latlon EPSG:4326 */
   bounds?: Extent;
   /** The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates. */
   extent?: Extent;

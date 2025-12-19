@@ -2166,17 +2166,17 @@ export class LayerApi {
     // in visible range. Inheritance has already been passed in the config and the group layer visibility will
     // be handled in the map-viewer's handleMapZoomEnd by checking the children visibility
     const mapView = this.mapViewer.getView();
-    if ((layerConfig.getInitialSettings().maxZoom || layerConfig.getMaxScale()) && !(gvLayer instanceof GVGroupLayer)) {
+    if ((layerConfig.getInitialSettings()?.maxZoom || layerConfig.getMaxScale()) && !(gvLayer instanceof GVGroupLayer)) {
       let maxScaleZoomLevel = GeoUtilities.getZoomFromScale(mapView, layerConfig.getMaxScale());
       maxScaleZoomLevel = maxScaleZoomLevel ? Math.ceil(maxScaleZoomLevel * 100) / 100 : undefined;
-      const maxZoom = Math.min(layerConfig.getInitialSettings().maxZoom ?? Infinity, maxScaleZoomLevel ?? Infinity);
+      const maxZoom = Math.min(layerConfig.getInitialSettings()?.maxZoom ?? Infinity, maxScaleZoomLevel ?? Infinity);
       gvLayer.setMaxZoom(maxZoom);
     }
 
-    if ((layerConfig.getInitialSettings().minZoom || layerConfig.getMinScale()) && !(gvLayer instanceof GVGroupLayer)) {
+    if ((layerConfig.getInitialSettings()?.minZoom || layerConfig.getMinScale()) && !(gvLayer instanceof GVGroupLayer)) {
       let minScaleZoomLevel = GeoUtilities.getZoomFromScale(mapView, layerConfig.getMinScale());
       minScaleZoomLevel = minScaleZoomLevel ? Math.ceil(minScaleZoomLevel * 100) / 100 : undefined;
-      const minZoom = Math.max(layerConfig.getInitialSettings().minZoom ?? -Infinity, minScaleZoomLevel ?? -Infinity);
+      const minZoom = Math.max(layerConfig.getInitialSettings()?.minZoom ?? -Infinity, minScaleZoomLevel ?? -Infinity);
       gvLayer.setMinZoom(minZoom);
     }
 

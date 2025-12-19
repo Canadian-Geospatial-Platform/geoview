@@ -166,24 +166,22 @@ export class WFS extends AbstractGeoViewVector {
       }
 
       // Validate and update the extent initial settings
-      layerConfig.validateUpdateInitialSettingsExtent();
+      layerConfig.initInitialSettingsExtent(layerConfig.getInitialSettings()?.extent);
 
       // If no bounds defined in the initial settings and an extent is defined in the metadata
-      if (!layerConfig.getInitialSettings()?.bounds && featureType['ows:WGS84BoundingBox']) {
+      let bounds = layerConfig.getInitialSettings()?.bounds;
+      if (!bounds && featureType['ows:WGS84BoundingBox']) {
         let lowerCornerRaw = featureType['ows:WGS84BoundingBox']['ows:LowerCorner'] as string;
         if (typeof lowerCornerRaw === 'object' && '#text' in lowerCornerRaw) lowerCornerRaw = lowerCornerRaw['#text'];
         let upperCornerRaw = featureType['ows:WGS84BoundingBox']['ows:UpperCorner'] as string;
         if (typeof upperCornerRaw === 'object' && '#text' in upperCornerRaw) upperCornerRaw = upperCornerRaw['#text'];
         const lowerCorner = lowerCornerRaw.split(' ');
         const upperCorner = upperCornerRaw.split(' ');
-        const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
-
-        // Update the bounds initial settings
-        layerConfig.updateInitialSettings({ bounds: bounds });
+        bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
       }
 
       // Validate and update the bounds initial settings
-      layerConfig.validateUpdateInitialSettingsBounds();
+      layerConfig.initInitialSettingsBounds(bounds);
     } catch (error: unknown) {
       // Add a layer load error
       this.addLayerLoadError(formatError(error), layerConfig);

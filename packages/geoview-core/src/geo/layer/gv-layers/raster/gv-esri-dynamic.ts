@@ -145,7 +145,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       legendInfo.forEach((info) => {
         const styleInfo: TypeLayerStyleConfigInfo = {
           label: info.label,
-          visible: layerConfig.getInitialSettings().states?.visible ?? true, // default: true,
+          visible: layerConfig.getInitialSettings()?.states?.visible ?? true, // default: true,
           values: info.label.split(','),
           settings: {
             type: 'iconSymbol',

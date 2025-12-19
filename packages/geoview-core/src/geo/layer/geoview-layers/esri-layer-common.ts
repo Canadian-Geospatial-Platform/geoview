@@ -343,11 +343,8 @@ export class EsriUtilities {
     // Get the layer metadata
     const layerMetadata = layerConfig.getLayerMetadata();
 
-    // If no visibility by default has been configured and there's a defaultVisibility found in the layer metadata, apply the latter
-    if (layerConfig.getInitialSettings()?.states?.visible === undefined && layerMetadata?.defaultVisibility) {
-      // Update the states initial settings
-      layerConfig.updateInitialSettingsStateVisible(!!layerMetadata.defaultVisibility);
-    }
+    // Validate and update the visible initial settings
+    layerConfig.initInitialSettingsStatesVisible(layerMetadata?.defaultVisibility);
 
     // Update Max / Min Scales with value if service doesn't allow the configured value for proper UI functionality
     if (layerMetadata?.minScale) {
@@ -365,10 +362,11 @@ export class EsriUtilities {
     }
 
     // Validate and update the extent initial settings
-    layerConfig.validateUpdateInitialSettingsExtent();
+    layerConfig.initInitialSettingsExtent(layerConfig.getInitialSettings()?.extent);
 
     // If no bounds defined in the initial settings and an extent is defined in the metadata
-    if (!layerConfig.getInitialSettings()?.bounds && layerMetadata?.extent) {
+    let bounds = layerConfig.getInitialSettings()?.bounds;
+    if (!bounds && layerMetadata?.extent) {
       const layerExtent = [
         layerMetadata.extent.xmin,
         layerMetadata.extent.ymin,
@@ -377,20 +375,11 @@ export class EsriUtilities {
       ] as Extent;
 
       // Transform to latlon extent
-      if (layerExtent) {
-        const lonlatExtent = Projection.transformExtentFromObj(
-          layerExtent,
-          layerMetadata.extent.spatialReference,
-          Projection.getProjectionLonLat()
-        );
-
-        // Update the bounds initial settings
-        layerConfig.updateInitialSettings({ bounds: lonlatExtent });
-      }
+      bounds = Projection.transformExtentFromObj(layerExtent, layerMetadata.extent.spatialReference, Projection.getProjectionLonLat());
     }
 
     // Validate and update the bounds initial settings
-    layerConfig.validateUpdateInitialSettingsBounds();
+    layerConfig.initInitialSettingsBounds(bounds);
   }
 
   /**

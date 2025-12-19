@@ -153,7 +153,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
         layerConfig.initInitialSettings(metadataLayerConfigFound.initialSettings);
 
         // Validate and update the extent initial settings
-        layerConfig.validateUpdateInitialSettingsExtent();
+        layerConfig.initInitialSettingsExtent(layerConfig.getInitialSettings()?.extent);
 
         // Set zoom limits for max / min zooms
         const maxScale = metadataLayerConfigFound?.maxScale;
