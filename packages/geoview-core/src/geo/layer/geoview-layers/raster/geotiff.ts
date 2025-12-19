@@ -158,7 +158,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
    */
   static createGeoTIFFSource(layerConfig: GeoTIFFLayerEntryConfig): GeoTIFFSource {
     const sourceOptions: SourceOptions = {
-      sources: [{ url: layerConfig.getDataAccessPath(), overviews: layerConfig.source.overviews }],
+      sources: [{ url: layerConfig.getDataAccessPath(), overviews: layerConfig.getSource().overviews }],
     };
 
     return new GeoTIFFSource(sourceOptions);

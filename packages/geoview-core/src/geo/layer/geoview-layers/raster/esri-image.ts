@@ -239,11 +239,11 @@ export class EsriImage extends AbstractGeoViewRaster {
       attributions: layerConfig.getAttributions(),
       params: {
         LAYERS: `show:${layerConfig.layerId}`,
-        ...(layerConfig.source.transparent !== undefined && { transparent: layerConfig.source.transparent }),
-        ...(layerConfig.source.format && { format: layerConfig.source.format }),
+        ...(layerConfig.getSource().transparent !== undefined && { transparent: layerConfig.getSource().transparent }),
+        ...(layerConfig.getSource().format && { format: layerConfig.getSource().format }),
       },
-      crossOrigin: layerConfig.source.crossOrigin ?? 'Anonymous',
-      projection: layerConfig.source.projection ? `EPSG:${layerConfig.source.projection}` : undefined,
+      crossOrigin: layerConfig.getSource().crossOrigin ?? 'Anonymous',
+      projection: layerConfig.getSource().projection ? `EPSG:${layerConfig.getSource().projection}` : undefined,
     };
 
     // Create the source

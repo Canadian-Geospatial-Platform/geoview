@@ -304,14 +304,14 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       attributions: layerConfig.getAttributions(),
       params: {
         LAYERS: `show:${layerConfig.layerId}`,
-        ...(layerConfig.source.transparent !== undefined && { transparent: layerConfig.source.transparent }),
-        ...(layerConfig.source.format && { format: layerConfig.source.format }),
+        ...(layerConfig.getSource().transparent !== undefined && { transparent: layerConfig.getSource().transparent }),
+        ...(layerConfig.getSource().format && { format: layerConfig.getSource().format }),
       },
-      crossOrigin: layerConfig.source.crossOrigin ?? 'Anonymous',
+      crossOrigin: layerConfig.getSource().crossOrigin ?? 'Anonymous',
     };
 
     // If forcing service projection so that OpenLayers takes care of reprojecting locally on the map
-    if (layerConfig.source.forceServiceProjection) {
+    if (layerConfig.getSource().forceServiceProjection) {
       // Find the SRID from the layer metadata
       const srid =
         layerConfig.getLayerMetadata()?.sourceSpatialReference?.latestWkid || layerConfig.getLayerMetadata()?.sourceSpatialReference?.wkid;

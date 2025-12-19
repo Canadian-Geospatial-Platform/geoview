@@ -15,6 +15,7 @@ import type {
   TypeStrokeSymbolConfig,
 } from '@/api/types/map-schema-types';
 import type { TypeWkbLayerConfig } from '@/geo/layer/geoview-layers/vector/wkb';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { Fetch } from '@/core/utils/fetch-helper';
@@ -73,7 +74,7 @@ export class GeoPackageReader {
         const layerEntryConfig = layerConfig.listOfLayerEntryConfig[i];
 
         // Base for URL
-        let url = layerEntryConfig.source?.dataAccessPath || layerConfig.metadataAccessPath;
+        let url = AbstractBaseLayerEntryConfig.getClassOrTypeSource(layerEntryConfig)?.dataAccessPath || layerConfig.metadataAccessPath;
 
         // Append layerId to URL if not pointing to blob or .gpkg
         const isBlob = url.startsWith('blob') && !url.endsWith('/');
@@ -110,7 +111,7 @@ export class GeoPackageReader {
                     dataAccessPath: url,
                     dataProjection: matchingLayerData.dataProjection || Projection.PROJECTION_NAMES.LONLAT,
                     featureInfo:
-                      layerEntryConfig.source?.featureInfo ||
+                      AbstractBaseLayerEntryConfig.getClassOrTypeFeatureInfo(layerEntryConfig) ||
                       GeoPackageReader.#processFeatureInfoConfig(matchingLayerData.geoPackageFeatures[0].properties),
                     geoPackageFeatures: matchingLayerData.geoPackageFeatures,
                   },
@@ -139,7 +140,7 @@ export class GeoPackageReader {
                   dataAccessPath: url,
                   dataProjection: layerData.dataProjection || Projection.PROJECTION_NAMES.LONLAT,
                   featureInfo:
-                    layerEntryConfig.source?.featureInfo ||
+                    AbstractBaseLayerEntryConfig.getClassOrTypeFeatureInfo(layerEntryConfig) ||
                     GeoPackageReader.#processFeatureInfoConfig(layerData.geoPackageFeatures[0].properties),
                   geoPackageFeatures: layerData.geoPackageFeatures,
                 },

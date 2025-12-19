@@ -252,7 +252,7 @@ export class WFS extends AbstractGeoViewVector {
     sourceOptions: SourceOptions<Feature>,
     readOptions: ReadOptions
   ): Promise<Feature[]> {
-    // Cast it to a GeoJson layer type
+    // Cast it to a WFS layer config
     const layerConfigWFS = layerConfig as OgcWfsLayerEntryConfig;
 
     // Get the supported info formats
@@ -286,10 +286,10 @@ export class WFS extends AbstractGeoViewVector {
     let responseData;
     if (outputFormat) {
       // Query and read Json
-      responseData = await AbstractGeoViewVector.fetchJson(wfsUrl, layerConfig.source?.postSettings);
+      responseData = await AbstractGeoViewVector.fetchJson(wfsUrl, layerConfig.getSource().postSettings);
     } else {
       // Query and read text
-      responseData = await AbstractGeoViewVector.fetchText(wfsUrl, layerConfig.source?.postSettings);
+      responseData = await AbstractGeoViewVector.fetchText(wfsUrl, layerConfig.getSource().postSettings);
     }
 
     // Check if the data is GeoJSON

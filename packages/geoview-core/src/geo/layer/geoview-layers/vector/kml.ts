@@ -88,7 +88,7 @@ export class KML extends AbstractGeoViewVector {
     readOptions: ReadOptions
   ): Promise<Feature[]> {
     // Query
-    const responseData = await AbstractGeoViewVector.fetchText(layerConfig.getDataAccessPath(false), layerConfig.source?.postSettings);
+    const responseData = await AbstractGeoViewVector.fetchText(layerConfig.getDataAccessPath(false), layerConfig.getSource().postSettings);
 
     // Use the features response to determine the EPSG of the data, otherwise use the config otherwise force it to 4326, because OpenLayers struggles to figure it out by itself here
     const dataEPSG = GeoUtilities.readEPSGOfGML(responseData);
@@ -97,7 +97,7 @@ export class KML extends AbstractGeoViewVector {
     await Projection.addProjectionIfMissing(dataEPSG);
 
     // eslint-disable-next-line no-param-reassign
-    readOptions.dataProjection = dataEPSG || layerConfig.source?.dataProjection || 'EPSG:4326'; // default: 4326
+    readOptions.dataProjection = dataEPSG || layerConfig.getSource().dataProjection || 'EPSG:4326'; // default: 4326
 
     // Read the features
     return GeoUtilities.readFeaturesFromKML(responseData, readOptions);

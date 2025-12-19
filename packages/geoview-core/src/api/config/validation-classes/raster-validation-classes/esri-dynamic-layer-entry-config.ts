@@ -23,9 +23,6 @@ export interface EsriDynamicLayerEntryConfigProps extends AbstractBaseLayerEntry
  * Type used to define a GeoView image layer to display on the map.
  */
 export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
-  /** Source settings to apply to the GeoView image layer source at creation time. */
-  declare source: TypeSourceEsriDynamicInitialConfig;
-
   /** Max number of records for query */
   maxRecordCount?: number;
 
@@ -36,6 +33,17 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   constructor(layerConfig: EsriDynamicLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.ESRI_DYNAMIC, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
     this.maxRecordCount = layerConfig.maxRecordCount;
+  }
+
+  // #region OVERRIDES
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeSourceEsriDynamicInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   */
+  override getSource(): TypeSourceEsriDynamicInitialConfig {
+    return super.getSource();
   }
 
   /**
@@ -75,6 +83,10 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     return undefined;
   }
 
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
+
   /**
    * Type guard that checks whether the given configuration (class instance or plain object)
    * represents an Esri Dynamic layer type.
@@ -87,4 +99,6 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     // Redirect
     return this.isClassOrTypeSchemaTag(layerConfig, CONST_LAYER_TYPES.ESRI_DYNAMIC);
   }
+
+  // #endregion STATIC METHODS
 }
