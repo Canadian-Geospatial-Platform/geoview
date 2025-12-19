@@ -21,7 +21,9 @@
     "show": "Afficher",
     "hide": "Masquer",
     "none": "Aucun",
-    "clearSearch": "Effacer la recherche"
+    "clearSearch": "Effacer la recherche",
+    "enable": "Activer",
+    "disable": "Désactiver"
   },
   "mapnav": {
     "arianavbar": "Groupe de buttons vertical pour navigation sur la carte",
@@ -42,10 +44,10 @@
     }
   },
   "measurement": {
-    "title": "Mesurer sur la carte",
-    "line": "Mesurer la distance",
-    "area": "Mesurer la surface",
-    "clear": "Effacer les mesures"
+    "title": "Mesurer",
+    "line": "Distance",
+    "area": "Surface",
+    "clear": "Effacer"
   },
   "basemaps": {
     "select": "Choisir une carte de base",
