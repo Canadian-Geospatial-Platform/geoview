@@ -223,20 +223,26 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @static
    */
   static createImageStaticSource(layerConfig: ImageStaticLayerEntryConfig): Static {
-    if (!layerConfig.source.extent) {
+    // Get the source extent
+    const sourceExtent = layerConfig.getSource().extent;
+
+    if (!sourceExtent) {
       throw new LayerEntryConfigParameterExtentNotDefinedInSourceError(layerConfig);
     }
 
-    if (!layerConfig.source.projection) {
+    // Get the source projection
+    const sourceProjection = layerConfig.getSource().projection;
+
+    if (!sourceProjection) {
       throw new LayerEntryConfigParameterProjectionNotDefinedInSourceError(layerConfig);
     }
 
     // Assemble the source options
     const sourceOptions: SourceOptions = {
       url: layerConfig.getDataAccessPath(),
-      imageExtent: layerConfig.source.extent,
-      projection: `EPSG:${layerConfig.source.projection}`,
-      crossOrigin: layerConfig.source.crossOrigin ?? 'Anonymous',
+      imageExtent: sourceExtent,
+      projection: `EPSG:${sourceProjection}`,
+      crossOrigin: layerConfig.getSource().crossOrigin ?? 'Anonymous',
     };
 
     return new Static(sourceOptions);

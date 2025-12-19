@@ -58,7 +58,6 @@ import type { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stor
 import { getAppCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import type { TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
-import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
@@ -1410,13 +1409,16 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Get initial settings
     const initialSettings = this.#getInitialSettings(layerEntryConfig, orderedLayerInfo!, legendLayerInfo!);
 
-    const source = (layerEntryConfig as VectorLayerEntryConfig).source
-      ? { ...(layerEntryConfig as VectorLayerEntryConfig).source }
-      : undefined;
+    // Clone the source object
+    let source;
+    if (layerEntryConfig instanceof AbstractBaseLayerEntryConfig) {
+      source = layerEntryConfig.cloneSource();
+    }
 
     // Only use feature info specified in original config, not drawn from services
     if (source?.featureInfo) delete source?.featureInfo;
-    if (configLayerEntryConfig?.source?.featureInfo && source) source.featureInfo = configLayerEntryConfig.source.featureInfo;
+    const configLayerEntryConfigFeatureInfo = AbstractBaseLayerEntryConfig.getClassOrTypeFeatureInfo(configLayerEntryConfig);
+    if (source && configLayerEntryConfigFeatureInfo) source.featureInfo = configLayerEntryConfigFeatureInfo;
 
     if (source?.dataAccessPath && isGeocore && overrideGeocoreServiceNames !== true) source.dataAccessPath = undefined;
 

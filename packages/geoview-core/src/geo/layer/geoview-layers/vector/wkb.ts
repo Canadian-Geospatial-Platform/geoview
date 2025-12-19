@@ -17,7 +17,6 @@ import { GVWKB } from '@/geo/layer/gv-layers/vector/gv-wkb';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
-import { deepMerge } from '@/core/utils/utilities';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 
@@ -151,14 +150,14 @@ export class WKB extends AbstractGeoViewVector {
         // Set the layer name
         layerConfig.setLayerName(layerConfig.getLayerName() || layerMetadataFound.layerName || layerConfig.getLayerNameCascade());
 
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.source = deepMerge(layerMetadataFound.source, layerConfig.source);
+        // Initialize the source by filling the blanks with the information from the metadata
+        layerConfig.initSource(layerMetadataFound.source);
 
-        // Set the initial settings
-        layerConfig.setInitialSettings(deepMerge(layerMetadataFound.initialSettings, layerConfig.getInitialSettings()));
+        // Initialize the initial settings by filling the blanks with the information from the metadata
+        layerConfig.initInitialSettings(layerMetadataFound.initialSettings);
 
-        // Set the layer style
-        layerConfig.setLayerStyle(deepMerge(layerMetadataFound.layerStyle, layerConfig.getLayerStyle()!));
+        // Initialize the layer style by filling the blanks with the information from the metadata
+        layerConfig.initLayerStyle(layerMetadataFound.layerStyle);
 
         // If max scale found in metadata
         if (layerMetadataFound.maxScale) {
@@ -204,20 +203,23 @@ export class WKB extends AbstractGeoViewVector {
     sourceOptions: SourceOptions<Feature>,
     readOptions: ReadOptions
   ): Promise<Feature[]> {
+    // Cast the layer config
+    const layerConfigWKB = layerConfig as WkbLayerEntryConfig;
+
     // Is WKB format
     const responseData = layerConfig.getDataAccessPath();
 
     // Check if we have it in Projection and try adding it if we're missing it (should already be done?)
-    await Projection.addProjectionIfMissing(layerConfig.source?.dataProjection);
+    await Projection.addProjectionIfMissing(layerConfig.getSource().dataProjection);
 
     // Read the data projection
     // eslint-disable-next-line no-param-reassign
-    readOptions.dataProjection ??= layerConfig.source?.dataProjection || 'EPSG:4326'; // default: 4326 because OpenLayers struggles to figure it out by itself for WKB here
+    readOptions.dataProjection ??= layerConfig.getSource().dataProjection || 'EPSG:4326'; // default: 4326 because OpenLayers struggles to figure it out by itself for WKB here
 
     // If we have a feature package
     let features = [];
-    if ((layerConfig as WkbLayerEntryConfig).source.geoPackageFeatures?.length) {
-      const { geoPackageFeatures } = (layerConfig as WkbLayerEntryConfig).source;
+    if (layerConfigWKB.getSource().geoPackageFeatures?.length) {
+      const { geoPackageFeatures } = layerConfigWKB.getSource();
       features = geoPackageFeatures!.map(({ geom, properties }) => {
         const feature = GeoUtilities.readFeaturesFromWKB(geom, readOptions)[0];
         if (properties) feature.setProperties(properties);

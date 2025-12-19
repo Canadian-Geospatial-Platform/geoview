@@ -17,7 +17,6 @@ import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
-import { deepMerge } from '@/core/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { GeoUtilities } from '@/geo/utils/utilities';
 
@@ -158,17 +157,17 @@ export class GeoJSON extends AbstractGeoViewVector {
 
       // If the layer metadata was found
       if (layerMetadataFound) {
-        // If no name
-        if (!layerConfig.getLayerName()) layerConfig.setLayerName(layerMetadataFound.layerName || layerConfig.getLayerNameCascade());
+        // Set the layer name
+        layerConfig.setLayerName(layerConfig.getLayerName() || layerMetadataFound.layerName || layerConfig.getLayerNameCascade());
 
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.source = deepMerge(layerMetadataFound.source, layerConfig.source);
+        // Initialize the source by filling the blanks with the information from the metadata
+        layerConfig.initSource(layerMetadataFound.source);
 
-        // Set the initial settings
-        layerConfig.setInitialSettings(deepMerge(layerMetadataFound.initialSettings, layerConfig.getInitialSettings()));
+        // Initialize the initial settings by filling the blanks with the information from the metadata
+        layerConfig.initInitialSettings(layerMetadataFound.initialSettings);
 
-        // Set the layer style
-        layerConfig.setLayerStyle(deepMerge(layerMetadataFound.layerStyle, layerConfig.getLayerStyle()!));
+        // Initialize the layer style by filling the blanks with the information from the metadata
+        layerConfig.initLayerStyle(layerMetadataFound.layerStyle);
 
         // If max scale found in metadata
         if (layerMetadataFound.maxScale) {
@@ -222,12 +221,12 @@ export class GeoJSON extends AbstractGeoViewVector {
 
     // If GeoJson is present
     let responseData;
-    if (layerConfigGeoJSON.source?.geojson) {
+    if (layerConfigGeoJSON.getSource().geojson) {
       // As-is
-      responseData = layerConfigGeoJSON.source.geojson;
+      responseData = layerConfigGeoJSON.getSource().geojson;
     } else {
       // Query
-      responseData = await AbstractGeoViewVector.fetchJson(layerConfig.getDataAccessPath(false), layerConfig.source?.postSettings);
+      responseData = await AbstractGeoViewVector.fetchJson(layerConfig.getDataAccessPath(false), layerConfig.getSource().postSettings);
     }
 
     // Read the EPSG from the data
@@ -239,7 +238,7 @@ export class GeoJSON extends AbstractGeoViewVector {
     // Assign the data projection reading options best we can, otherwise use the config, otherwise leave it undefined to let OpenLayers figure it out by itself using the GeoJSON parser later
     // https://openlayers.org/en/latest/apidoc/module-ol_format_GeoJSON-GeoJSON.html
     // eslint-disable-next-line no-param-reassign
-    readOptions.dataProjection = dataEPSG || layerConfig.source?.dataProjection;
+    readOptions.dataProjection = dataEPSG || layerConfig.getSource().dataProjection;
 
     // Read the features
     return GeoUtilities.readFeaturesFromGeoJSON(responseData, readOptions);
