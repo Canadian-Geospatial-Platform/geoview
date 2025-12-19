@@ -711,7 +711,12 @@ export class MapViewer {
    */
   setMapZoomLevel(zoom: number): Promise<void> {
     // If zoom level is already set at this value, just resolve the promise
-    if (this.getView().getZoom() === zoom) return Promise.resolve();
+    const view = this.getView();
+    const isSameZoom = view.getZoom() === zoom;
+    const belowMin = zoom < view.getMinZoom();
+    const aboveMax = zoom > view.getMaxZoom();
+
+    if (isSameZoom || belowMin || aboveMax) return Promise.resolve();
 
     // Set zoom level
     this.getView().setZoom(zoom);
