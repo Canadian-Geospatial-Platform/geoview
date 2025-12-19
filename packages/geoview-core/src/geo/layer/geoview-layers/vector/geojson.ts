@@ -184,7 +184,7 @@ export class GeoJSON extends AbstractGeoViewVector {
       }
 
       // Validate and update the extent initial settings
-      layerConfig.validateUpdateInitialSettingsExtent();
+      layerConfig.initInitialSettingsExtent(layerConfig.getInitialSettings()?.extent);
     }
 
     // Setting the layer metadata now with the updated config values. Setting the layer metadata with the config, directly, like it's done in CSV

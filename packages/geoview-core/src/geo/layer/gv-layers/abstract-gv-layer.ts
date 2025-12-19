@@ -1381,16 +1381,16 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
     // If a className is defined in the initial settings, set it in the layer options
     // eslint-disable-next-line no-param-reassign
-    if (layerConfig.getInitialSettings()?.className !== undefined) layerOptions.className = layerConfig.getInitialSettings().className;
+    if (layerConfig.getInitialSettings()?.className !== undefined) layerOptions.className = layerConfig.getInitialSettings()?.className;
 
     // If an extent is defined in the initial settings, set it in the layer options
     // eslint-disable-next-line no-param-reassign
-    if (layerConfig.getInitialSettings()?.extent !== undefined) layerOptions.extent = layerConfig.getInitialSettings().extent;
+    if (layerConfig.getInitialSettings()?.extent !== undefined) layerOptions.extent = layerConfig.getInitialSettings()?.extent;
 
     // If an opacity is defined in the initial settings, set it in the layer options
     if (layerConfig.getInitialSettings()?.states?.opacity !== undefined)
       // eslint-disable-next-line no-param-reassign
-      layerOptions.opacity = layerConfig.getInitialSettings().states!.opacity;
+      layerOptions.opacity = layerConfig.getInitialSettings()?.states!.opacity;
   }
 
   /**

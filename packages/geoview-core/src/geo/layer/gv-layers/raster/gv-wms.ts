@@ -26,7 +26,6 @@ import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import type { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { Projection } from '@/geo/utils/projection';
 import { LayerInvalidFeatureInfoFormatWMSError, LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
-import { MapViewer } from '@/geo/map/map-viewer';
 import { formatError, NetworkError, ResponseContentError } from '@/core/exceptions/core-exceptions';
 import { type TypeDateFragments } from '@/core/utils/date-mgt';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -198,37 +197,26 @@ export class GVWMS extends AbstractGVRaster {
   ): Promise<TypeFeatureInfoEntry[]> {
     // Get the layer config and its initial settings
     const wmsLayerConfig = this.getLayerConfig();
-    let initialSettings = wmsLayerConfig.getInitialSettings();
+    const initialSettingsBounds = wmsLayerConfig.getInitialSettings()?.bounds;
 
-    // Ensure bounds are available in the settings
-    if (!initialSettings.bounds) {
-      const projection = map.getView().getProjection();
-      const computedBounds = this.getBounds(projection, MapViewer.DEFAULT_STOPS);
+    // TODO: CHECK - Do we want that kind of check for EsriDynamic as well?
+    // If the initial settings bounds are set, validate the queried location vs the bounds
+    if (initialSettingsBounds) {
+      // Check if the clicked lon/lat is within the bounds
+      const [lon, lat] = lonlat;
+      const [minX, minY, maxX, maxY] = initialSettingsBounds;
 
-      // If no computed bounds, return
-      if (!computedBounds) return [];
-
-      const transformedBounds = Projection.transformExtentFromProj(computedBounds, projection, Projection.getProjectionLonLat());
-
-      // Update initial settings with computed bounds
-      wmsLayerConfig.updateInitialSettings({ bounds: transformedBounds });
-
-      // Re-fetch settings after the update to ensure consistency
-      initialSettings = wmsLayerConfig.getInitialSettings();
-    }
-
-    // If bounds still not set, return
-    if (!initialSettings.bounds) return [];
-
-    // Check if the clicked lon/lat is within the bounds
-    const [lon, lat] = lonlat;
-    const [minX, minY, maxX, maxY] = initialSettings.bounds;
-
-    // If out of bounds, don't bother and return
-    if (lon < minX || lon > maxX || lat < minY || lat > maxY) {
+      // If out of bounds, don't bother and return
+      if (lon < minX || lon > maxX || lat < minY || lat > maxY) {
+        // Log warning
+        logger.logWarning(`Coordinates were out-of-bounds for layer ${wmsLayerConfig.layerPath}, query was aborted.`);
+        return [];
+      }
+    } else {
       // Log warning
-      logger.logWarning(`Coordinates for the bounds were out-of-bounds for layer ${wmsLayerConfig.layerPath}`);
-      return [];
+      logger.logWarning(
+        `Bounds were not set for layer ${wmsLayerConfig.layerPath}, therefore no validation was performed at the queried location.`
+      );
     }
 
     // Project the lon/lat to the map's projection
@@ -238,37 +226,29 @@ export class GVWMS extends AbstractGVRaster {
     const viewResolution = map.getView().getResolution()!;
     const projectionCode = map.getView().getProjection().getCode();
 
-    try {
-      // If the layer has a WFS associated
-      if (wmsLayerConfig.hasWfsLayerConfig()) {
-        try {
-          // Get the Geoview Layer Config WFS equivalent
-          const wfsLayerConfig = wmsLayerConfig.getWfsLayerConfig();
+    // If the layer has a WFS associated
+    if (wmsLayerConfig.hasWfsLayerConfig()) {
+      try {
+        // Get the Geoview Layer Config WFS equivalent
+        const wfsLayerConfig = wmsLayerConfig.getWfsLayerConfig();
 
-          // We're going to try performing a GetFeature using the WFS query instead of WMS, better chance to retrieve the geometry that way
-          return await this.#getFeatureInfoUsingWFS(
-            wmsLayerConfig,
-            wfsLayerConfig,
-            clickCoordinate,
-            viewResolution,
-            projectionCode,
-            abortController
-          );
-        } catch (error: unknown) {
-          // Failed to get feature info using WFS, continue with WMS
-          logger.logDebug(`Failed to getFeatureInfoUsingWFS for '${wmsLayerConfig.layerPath}'`, error);
-        }
+        // We're going to try performing a GetFeature using the WFS query instead of WMS, better chance to retrieve the geometry that way
+        return await this.#getFeatureInfoUsingWFS(
+          wmsLayerConfig,
+          wfsLayerConfig,
+          clickCoordinate,
+          viewResolution,
+          projectionCode,
+          abortController
+        );
+      } catch (error: unknown) {
+        // Failed to get feature info using WFS, continue with WMS
+        logger.logDebug(`Failed to getFeatureInfoUsingWFS for '${wmsLayerConfig.layerPath}'`, error);
       }
-
-      // Try various info formats patterns to get feature info
-      return await this.#getFeatureInfoUsingWMS(wmsLayerConfig, clickCoordinate, viewResolution, projectionCode, abortController);
-    } catch (error: unknown) {
-      // Eat the error, we failed
-      logger.logDebug(`Eating error, we failed for '${wmsLayerConfig.layerPath}'`, error);
     }
 
-    // Failed
-    return [];
+    // Try various info formats patterns to get feature info
+    return this.#getFeatureInfoUsingWMS(wmsLayerConfig, clickCoordinate, viewResolution, projectionCode, abortController);
   }
 
   /**
