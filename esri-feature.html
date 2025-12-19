@@ -1,0 +1,264 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>ESRI Feature Layers - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>ESRI Feature Layers</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a><br/>&nbsp;&nbsp;&nbsp;&nbsp;<a href="./type-of-layers.html">Type Of Layers</a><br/></td></tr><tr><td><p>This page is used to showcase how the viewer may show ESRI Feature layer types</p></td></tr><tr><td><a href="#HLYR1">1. Many ESRI Feature Layers with legend settings from the metadata</a><br/><a href="#HLYR2">2. Date filtering using time zone change and non ISO date format</a><br/><a href="#HLYR3">3. Date filtering using ISO UTC dates</a><br/></td></tr></tbody></table></div><div class="map-title-holder"><h4 id="HLYR1">1. Many Esri Feature Layers</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible active">Map Status Flags</button><pre id="HLYR1-state" class="panel map-title-holder"></pre><div id="LYR1" class="geoview-map" data-lang="en" data-config="{
+          'map': {
+            'interaction': 'dynamic',
+            'viewSettings': {
+              'projection': 3857
+            },
+            'basemapOptions': {
+              'basemapId': 'transport',
+              'shaded': false,
+              'labeled': true
+            },
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'uniqueValueId',
+                'geoviewLayerName': 'uniqueValue',
+                'metadataAccessPath': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/',
+                'geoviewLayerType': 'esriFeature',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': '1',
+                    'layerFilter': 'E_Province = \'Alberta\' or E_Province = \'Manitoba\''
+                  }
+                ]
+              },
+              {
+                'geoviewLayerId': 'esriFeatureLYR1',
+                'geoviewLayerName': 'Temporal_Test_Bed_en',
+                'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_en/MapServer/',
+                'geoviewLayerType': 'esriFeature',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': '0',
+                    'layerFilter': 'Date <= date \'2020-09-01T00:00:00Z\''
+                  }
+                ]
+              },
+              {
+                'geoviewLayerId': 'classBreaksId',
+                'geoviewLayerName': 'classBreaks',
+                'metadataAccessPath': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/CSO_volume/MapServer/',
+                'geoviewLayerType': 'esriFeature',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': '8',
+                    'layerFilter': 'Total_CSO_Volume > 5000000',
+                    'source': { 'featureInfo': { 'queryable': true } }
+                  }
+                ]
+              }
+            ]
+          },
+          'components': ['overview-map', 'north-arrow'],
+          'corePackages': [],
+          'theme': 'geo.ca'
+        }"></div><button type="button" class="collapsible">Visibility and filters</button><pre id="layer1-buttons-pre" class="panel"></pre><button class="collapsible">Get Legend</button><pre id="LegendsId1-table-pre" class="panel"></pre><button type="button" class="collapsible">Get Feature Info</button><pre id="ResultSetId1-click" class="panel">Click on feature on the map</pre><button type="button" class="collapsible" id="AllFeatureInfo1">Get All Feature Info</button><pre class="panel">
+    <select name="dropdown1" id="dropdown1"></select>
+    <div id="ResultSetId1-all-features"></div>
+  </pre><hr/><p>This map has a wms layer added from configuration.</p><button type="button" class="collapsible">Configuration Snippet</button><pre id="LYR1CS" class="panel"></pre><div class="map-title-holder"><h4 id="HLYR2">2. Date filtering using time zone changed and non ISO date format</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible active">Map Status Flags</button><pre id="HLYR2-state" class="panel map-title-holder"></pre><div id="LYR2" class="geoview-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3857
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': true,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'historical-flood',
+              'geoviewLayerName': 'Historical Flood Events (HFE)',
+              'externalDateFormat': 'mm/dd/yyyy hh:mm:ss-05:00',
+              'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer',
+              'geoviewLayerType': 'esriFeature',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0',
+                  'layerFilter': 'year >= date \'01/01/2018 05:00:00\' and year <= date \'12/31/2019 19:00:00-05:00\''
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['overview-map', 'north-arrow'],
+        'corePackages': [],
+        'theme': 'geo.ca'
+      }"></div><pre id="layer2-buttons-pre"></pre><button class="collapsible">Get Legend</button><pre id="LegendsId2-table-pre" class="panel"></pre><button type="button" class="collapsible">Get Feature Info</button><pre id="ResultSetId2-click" class="panel">Click on feature on the map</pre><button type="button" class="collapsible" id="AllFeatureInfo2">Get All Feature Info (historical-flood/0)</button><pre id="ResultSetId2-all-features" class="panel"></pre><hr/><button type="button" class="collapsible">Configuration Snippet</button><pre id="LYR2CS" class="panel"></pre><div class="map-title-holder"><h4 id="HLYR3">3. Date filtering using ISO UTC dates</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible active">Map Status Flags</button><pre id="HLYR3-state" class="panel map-title-holder"></pre><div id="LYR3" class="geoview-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3857
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': true,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'historical-flood',
+              'geoviewLayerName': 'Historical Flood Events (HFE)',
+              'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer',
+              'geoviewLayerType': 'esriFeature',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0',
+                  'layerFilter': 'year >= date \'2018-01-01T00:00:00\' and year <= date \'2019-01-01T00:00:00\''
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['overview-map', 'north-arrow'],
+        'corePackages': [],
+        'theme': 'geo.ca'
+      }"></div><pre id="layer3-buttons-pre"></pre><button class="collapsible">Get Legend</button><pre id="LegendsId3-table-pre" class="panel"></pre><button type="button" class="collapsible">Get Feature Info</button><pre id="ResultSetId3-click" class="panel">Click on feature on the map</pre><button type="button" class="collapsible" id="AllFeatureInfo3">Get All Feature Info (historical-flood/0)</button><pre id="ResultSetId3-all-features" class="panel"></pre><hr/><button type="button" class="collapsible">Configuration Snippet</button><pre id="LYR3CS" class="panel"></pre><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script src="layerlib.js"></script><script>// initialize cgpv and api events, a callback is optional, used if calling api's after the rendering is ready
+    cgpv.init((mapId) => {
+      if (mapId === 'LYR1') {
+        // Wire a handle when all queries done after a map click
+        cgpv.api.maps['LYR1'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
+          const { coordinate, resultSet, eventType } = payload;
+          createInfoTable('LYR1', 'ResultSetId1', resultSet, eventType);
+        });
+        cgpv.api.maps['LYR1'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+          const { resultSet } = payload;
+          displayLegend('LegendsId1', resultSet);
+        });
+        listenToLegendLayerSetChanges('HLYR1-state', 'LYR1');
+
+      } else if (mapId === 'LYR2') {
+        // Wire a handle when all queries done after a map click
+        cgpv.api.maps['LYR2'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
+          const { coordinate, resultSet, eventType } = payload;
+          createInfoTable('LYR2', 'ResultSetId2', resultSet, eventType);
+        });
+        cgpv.api.maps['LYR2'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+          const { resultSet } = payload;
+          displayLegend('LegendsId2', resultSet);
+        });
+        listenToLegendLayerSetChanges('HLYR2-state', 'LYR2');
+
+      } else if (mapId === 'LYR3') {
+        // Wire a handle when all queries done after a map click
+        cgpv.api.maps['LYR3'].layer.featureInfoLayerSet.onQueryEnded((sender, payload) => {
+          const { coordinate, resultSet, eventType } = payload;
+          createInfoTable('LYR3', 'ResultSetId3', resultSet, eventType);
+        });
+        cgpv.api.maps['LYR3'].layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+          const { resultSet } = payload;
+          displayLegend('LegendsId3', resultSet);
+        });
+        listenToLegendLayerSetChanges('HLYR3-state', 'LYR3');
+      }
+    }, (mapId) => {
+      if (mapId === 'LYR1') {
+        createTableOfFilter('LYR1');
+
+        if (cgpv.api.maps.LYR1.layer.getLayerEntryConfig('esriFeatureLYR1/0').layerStatus === 'loaded') {
+          let k = 0;
+          window.setInterval(() => {
+            const input = document.getElementById('filter-input-LYR1-esriFeatureLYR1');
+            if (input) {
+              const checkbox = document.getElementById('checkbox-LYR1-esriFeatureLYR1');
+              const temporalData = cgpv.api.maps.LYR1.layer.getGeoviewLayerHybrid('esriFeatureLYR1/0').getTemporalDimension('esriFeatureLYR1/0');
+              cgpv.api.maps.LYR1.layer.getGeoviewLayerHybrid('esriFeatureLYR1/0').applyViewFilter('esriFeatureLYR1/0',
+                `Date < date '${temporalData.range.range[k]}'`,
+                checkbox.value !== 'true'
+              );
+              input.value = `Date < date '${temporalData.range.range[k]}'`;
+              if (++k === temporalData.range.range.length) k = 0;
+            }
+          }, 1000)
+        }
+
+        const dropDownContent = document.getElementById('dropdown1');
+        var element = document.createElement('option');
+        element.value = '';
+        element.innerText = 'Select a layer';
+        dropDownContent.appendChild(element);
+
+        const getAllFeatureInfo2 = document.getElementById('AllFeatureInfo2');
+        getAllFeatureInfo2.addEventListener('click', async () => {
+          const resultSet = await cgpv.api.maps['LYR2'].layer.allFeatureInfoLayerSet.queryLayer('historical-flood/0');
+          createInfoTable('LYR2', 'ResultSetId2', resultSet, 'all-features');
+        });
+
+        const lyr1RegisteredLayers = cgpv.api.maps.LYR1.layer.getLayerEntryConfigIds();
+        lyr1RegisteredLayers.forEach((layerPath) => {
+          const layerConfig = cgpv.api.maps.LYR1.layer.getLayerEntryConfig(layerPath);
+
+          if (layerConfig.layerStatus === 'loaded') {
+            const layerName = layerConfig.layerName;
+            element = document.createElement('option');
+            element.value = layerPath;
+            element.innerText = layerName ? layerName : layerConfig.layerId;
+            dropDownContent.appendChild(element);
+          }
+        });
+        dropDownContent.addEventListener('change', async (e) => {
+          if (e.currentTarget.value) {
+            const resultSet = await cgpv.api.maps['LYR1'].layer.allFeatureInfoLayerSet.queryLayer(e.currentTarget.value);
+            createInfoTable('LYR1', 'ResultSetId1', resultSet, 'all-features');
+          }
+        });
+      } else if (mapId === 'LYR2') {
+        createTableOfFilter('LYR2');
+
+        if (cgpv.api.maps?.LYR2?.layer?.getLayerEntryConfig('historical-flood/0')?.layerStatus === 'loaded') {
+          const field2 = cgpv.api.maps.LYR2.layer.getGeoviewLayerHybrid('historical-flood/0').getTemporalDimension('historical-flood/0').field;
+          const LYR2_FILTERS = [`${field2} >= date '01/01/2018 05:00:00' and ${field2} <= date '12/31/2019 19:00:00-05:00'`,
+          `${field2} > date '01/01/2018 05:00:00' and ${field2} <= date '01/01/2020 05:00:00Z'`,
+          `${field2} >= date '01/01/2018 05:00:00' and ${field2} < date '01/01/2020 00:00:00+05:00'`];
+          let i = 0;
+          window.setInterval(() => {
+            const input = document.getElementById('filter-input-LYR2-historical-flood');
+            if (input) {
+              input.value = LYR2_FILTERS[i];
+              const checkbox = document.getElementById('checkbox-LYR2-historical-flood');
+              cgpv.api.maps.LYR2.layer.getGeoviewLayerHybrid('historical-flood/0').applyViewFilter('historical-flood/0',
+                LYR2_FILTERS[i],
+                checkbox.value !== 'true'
+              );
+              if (++i === LYR2_FILTERS.length) i = 0;
+            }
+          }, 3000)
+        }
+
+      } else if (mapId === 'LYR3') {
+        createTableOfFilter('LYR3');
+
+        if (cgpv.api.maps?.LYR3?.layer?.getLayerEntryConfig('historical-flood/0')?.layerStatus === 'loaded') {
+          const field3 = cgpv.api.maps.LYR3.layer.getGeoviewLayerHybrid('historical-flood/0').getTemporalDimension('historical-flood/0').field;
+          const LYR3_FILTERS = [`${field3} >= date '2018-01-01T00:00:00' and ${field3} <= date '2020-01-01T00:00:00'`,
+          `${field3} > date '2018-01-01T00:00:00' and ${field3} <= date '2020-01-01T00:00:00'`,
+          `${field3} >= date '2018-01-01T00:00:00' and ${field3} < date '2020-01-01T00:00:00'`];
+          let j = 0;
+          window.setInterval(() => {
+            const input = document.getElementById('filter-input-LYR3-historical-flood');
+            if (input) {
+              input.value = LYR3_FILTERS[j];
+              const checkbox = document.getElementById('checkbox-LYR3-historical-flood');
+              cgpv.api.maps.LYR3.layer.getGeoviewLayerHybrid('historical-flood/0').applyViewFilter('historical-flood/0',
+                LYR3_FILTERS[j],
+                checkbox.value !== 'true'
+              );
+              if (++j === LYR3_FILTERS.length) j = 0;
+            }
+          }, 3000)
+        }
+
+        const getAllFeatureInfo3 = document.getElementById('AllFeatureInfo3');
+        getAllFeatureInfo3.addEventListener('click', async () => {
+          const resultSet = await cgpv.api.maps['LYR3'].layer.allFeatureInfoLayerSet.queryLayer('historical-flood/0');
+          createInfoTable('LYR3', 'ResultSetId3', resultSet, 'all-features');
+        });
+      }
+    });
+
+    // create snippets
+    window.addEventListener('load', () => {
+      createCodeSnippet();
+      createConfigSnippet();
+    });</script></body></html>

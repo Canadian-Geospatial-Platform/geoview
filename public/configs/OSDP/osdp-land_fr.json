@@ -1,0 +1,79 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "initialView": {
+        "zoomAndCenter": [9, [-113.376, 57.86]]
+      },
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "0a309f2c-4f11-4ddb-bce1-e7ba6f8c20cf",
+        "geoviewLayerName": "Récits du territoire : noms de lieux autochtones au Canada",
+        "geoviewLayerType": "geoCore",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "Noms de lieux autochtones"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "4e615eae-b90c-420b-adee-2ca35896caf6",
+        "geoviewLayerName": "Couverture des terres du Canada 2015",
+        "geoviewLayerType": "geoCore",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "landcover-2015",
+            "layerName": "Couverture des terres du Canada 2015"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "c688b87f-e85f-4842-b0e1-a8f79ebf1133",
+        "geoviewLayerType": "geoCore",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "landcover-2010",
+            "layerName": "Couverture des terres du Canada 2010",
+            "initialSettings": {
+              "states": {
+                "legendCollapsed": true,
+                "visible": false
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["north-arrow", "overview-map"],
+  "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select"],
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "legend", "details", "export"]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": ["layers", "data-table"]
+    }
+  },
+  "corePackages": ["swiper"],
+  "theme": "geo.ca",
+  "corePackagesConfig": [
+    {
+      "swiper": {
+        "orientation": "vertical",
+        "keyboardOffset": 10,
+        "layers": ["4e615eae-b90c-420b-adee-2ca35896caf6"]
+      }
+    }
+  ]
+}

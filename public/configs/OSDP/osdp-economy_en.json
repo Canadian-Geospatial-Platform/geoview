@@ -1,0 +1,85 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "f5f2db55-31e4-42fb-8c73-23e1c44de9b2",
+        "geoviewLayerName": "Major Projects Inventory",
+        "geoviewLayerType": "geoCore",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "Major Projects Inventory [point]"
+          },
+          {
+            "layerId": "1",
+            "layerName": "Major Projects Inventory [line]"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "65d3db23-b83c-4f49-ab93-65c59ee0e6aa",
+        "geoviewLayerName": "Clean power generating stations by type in megawatts (MW)",
+        "geoviewLayerType": "geoCore",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "Clean power generating stations by type in megawatts (MW)",
+            "entryType": "group",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "1",
+                "layerName": "Biomass generating Station (MW)"
+              },
+              {
+                "layerId": "2",
+                "layerName": "Hydro generating Station (MW)"
+              },
+              {
+                "layerId": "3",
+                "layerName": "Nuclear generating Station (MW)"
+              },
+              {
+                "layerId": "4",
+                "layerName": "Solar generating Station (MW)"
+              },
+              {
+                "layerId": "5",
+                "layerName": "Tidal generating Station (MW)"
+              },
+              {
+                "layerId": "6",
+                "layerName": "Wind generating Station (MW)"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["north-arrow", "overview-map"],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select"],
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "legend", "details", "export"]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": ["layers", "data-table"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

@@ -1,0 +1,20 @@
+{
+  "map": {
+    "interaction": "static",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": []
+  },
+  "components": ["north-arrow", "overview-map"],
+  "overviewMap": {
+    "hideOnZoom": 6
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}
