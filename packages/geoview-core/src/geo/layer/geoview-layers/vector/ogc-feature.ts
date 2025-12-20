@@ -140,22 +140,21 @@ export class OgcFeature extends AbstractGeoViewVector {
       // If found description, replace the name
       if (foundCollection.description) layerConfig.setLayerName(foundCollection.description);
 
-      // Validate and update the extent initial settings
-      layerConfig.initInitialSettingsExtent(layerConfig.getInitialSettings()?.extent);
-
       // If no bounds defined in the initial settings and an extent is defined in the metadata
-      let bounds = layerConfig.getInitialSettings()?.bounds;
-      if (!layerConfig.getInitialSettings()?.bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
+      let bounds = layerConfig.getInitialSettingsBounds();
+      if (!bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
         // Project the latlong
         bounds = Projection.transformExtentFromProj(
           foundCollection.extent.spatial.bbox[0],
           Projection.getProjectionFromString(foundCollection.extent.spatial.crs),
           Projection.getProjectionLonLat()
         );
+
+        // Validate and update the bounds initial settings
+        layerConfig.initInitialSettingsBoundsFromMetadata(bounds);
       }
 
-      // Validate and update the bounds initial settings
-      layerConfig.initInitialSettingsBounds(bounds);
+      // Done
       return;
     }
 

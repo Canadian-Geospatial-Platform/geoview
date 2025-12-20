@@ -165,11 +165,8 @@ export class WFS extends AbstractGeoViewVector {
         if (foundTitle) layerConfig.setLayerName(foundTitle);
       }
 
-      // Validate and update the extent initial settings
-      layerConfig.initInitialSettingsExtent(layerConfig.getInitialSettings()?.extent);
-
       // If no bounds defined in the initial settings and an extent is defined in the metadata
-      let bounds = layerConfig.getInitialSettings()?.bounds;
+      let bounds = layerConfig.getInitialSettingsBounds();
       if (!bounds && featureType['ows:WGS84BoundingBox']) {
         let lowerCornerRaw = featureType['ows:WGS84BoundingBox']['ows:LowerCorner'] as string;
         if (typeof lowerCornerRaw === 'object' && '#text' in lowerCornerRaw) lowerCornerRaw = lowerCornerRaw['#text'];
@@ -178,10 +175,10 @@ export class WFS extends AbstractGeoViewVector {
         const lowerCorner = lowerCornerRaw.split(' ');
         const upperCorner = upperCornerRaw.split(' ');
         bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
-      }
 
-      // Validate and update the bounds initial settings
-      layerConfig.initInitialSettingsBounds(bounds);
+        // Validate and update the bounds initial settings
+        layerConfig.initInitialSettingsBoundsFromMetadata(bounds);
+      }
     } catch (error: unknown) {
       // Add a layer load error
       this.addLayerLoadError(formatError(error), layerConfig);

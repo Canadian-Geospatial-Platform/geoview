@@ -217,13 +217,10 @@ export class WMS extends AbstractGeoViewRaster {
         layerConfig.setMinScale(Math.min(layerConfig.getMinScale() ?? Infinity, layerCapabilities.MaxScaleDenominator));
       }
 
-      // Validate and update the extent initial settings
-      layerConfig.initInitialSettingsExtent(layerConfig.getInitialSettings()?.extent);
-
       // If no bounds defined in the initial settings and an extent is defined in the layer capabilities metadata
-      if (!layerConfig.getInitialSettings()?.bounds && layerCapabilities.EX_GeographicBoundingBox?.extent) {
+      if (!layerConfig.getInitialSettingsBounds() && layerCapabilities.EX_GeographicBoundingBox?.extent) {
         // Validate and update the bounds initial settings
-        layerConfig.initInitialSettingsBounds(layerCapabilities.EX_GeographicBoundingBox.extent);
+        layerConfig.initInitialSettingsBoundsFromMetadata(layerCapabilities.EX_GeographicBoundingBox.extent);
       }
 
       // If there's a dimension
