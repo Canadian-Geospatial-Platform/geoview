@@ -28,6 +28,22 @@ import { logger } from '@/core/utils/logger';
  */
 export abstract class EsriRenderer {
   /**
+   * Creates the GeoView style from the provided Esri renderer.
+   * @param {EsriBaseRenderer | undefined} renderer - ESRI renderer to convert.
+   * @returns {TypeStyleConfig | undefined} The Geoview style or undefined if it can not be created.
+   */
+  static createStylesFromEsriRenderer(renderer: EsriBaseRenderer | undefined): TypeLayerStyleConfig | undefined {
+    if (!renderer) return undefined;
+    if (this.esriRendererIsUniqueValue(renderer)) return this.#processUniqueValueRenderer(renderer);
+    if (this.esriRendererIsSimple(renderer)) return this.#processSimpleRenderer(renderer);
+    if (this.esriRendererIsClassBreaks(renderer)) return this.#processClassBreakRenderer(renderer);
+    logger.logInfo(`Handling of ESRI renderer '${renderer.type}' is not coded, default GeoView settings will be used instead.`);
+    return undefined;
+  }
+
+  // #region CHECK "IS" FUNCTIONS
+
+  /**
    * type guard function that redefines an EsriBaseRenderer as an EsriUniqueValueRenderer if the type attribute of the
    * verifyIfRenderer parameter is 'uniqueValue'. The type ascention applies only to the true block of the if clause that use
    * this function.
@@ -35,6 +51,7 @@ export abstract class EsriRenderer {
    * @param {EsriBaseRenderer} verifyIfRenderer - Polymorphic object to test in order to determine if the type ascention is valid.
    *
    * @returns {boolean} true if the type ascention is valid.
+   * @static
    */
   static esriRendererIsUniqueValue = (verifyIfRenderer: EsriBaseRenderer): verifyIfRenderer is EsriUniqueValueRenderer => {
     return verifyIfRenderer?.type === 'uniqueValue';
@@ -47,6 +64,7 @@ export abstract class EsriRenderer {
    * @param {EsriBaseSymbol} verifyIfSymbol - Polymorphic object to test in order to determine if the type ascention is valid.
    *
    * @returns {boolean} true if the type ascention is valid.
+   * @static
    */
   static isSimpleMarkerSymbol = (verifyIfSymbol: EsriBaseSymbol): verifyIfSymbol is EsriSimpleMarkerSymbol => {
     return verifyIfSymbol?.type === 'esriSMS';
@@ -59,6 +77,7 @@ export abstract class EsriRenderer {
    * @param {EsriBaseSymbol} verifyIfSymbol - Polymorphic object to test in order to determine if the type ascention is valid.
    *
    * @returns {boolean} true if the type ascention is valid.
+   * @static
    */
   static isEsriSimpleFillSymbol = (verifyIfSymbol: EsriBaseSymbol): verifyIfSymbol is EsriSimpleFillSymbol => {
     return verifyIfSymbol?.type === 'esriSFS';
@@ -71,6 +90,7 @@ export abstract class EsriRenderer {
    * @param {EsriBaseSymbol} verifyIfSymbol - Polymorphic object to test in order to determine if the type ascention is valid.
    *
    * @returns {boolean} true if the type ascention is valid.
+   * @static
    */
   static isSimpleLineSymbol = (verifyIfSymbol: EsriBaseSymbol): verifyIfSymbol is EsriSimpleLineSymbol => {
     return verifyIfSymbol?.type === 'esriSLS';
@@ -83,6 +103,7 @@ export abstract class EsriRenderer {
    * @param {EsriBaseSymbol} verifyIfSymbol - Polymorphic object to test in order to determine if the type ascention is valid.
    *
    * @returns {boolean} true if the type ascention is valid.
+   * @static
    */
   static isPictureMarkerSymbol = (verifyIfSymbol: EsriBaseSymbol): verifyIfSymbol is EsriPictureMarkerSymbol => {
     return verifyIfSymbol?.type === 'esriPMS';
@@ -95,6 +116,7 @@ export abstract class EsriRenderer {
    * @param {EsriBaseRenderer} verifyIfRenderer - Polymorphic object to test in order to determine if the type ascention is valid.
    *
    * @returns {boolean} true if the type ascention is valid.
+   * @static
    */
   static esriRendererIsSimple = (verifyIfRenderer: EsriBaseRenderer): verifyIfRenderer is EsriSimpleRenderer => {
     return verifyIfRenderer?.type === 'simple';
@@ -108,19 +130,23 @@ export abstract class EsriRenderer {
    * @param {EsriBaseRenderer} verifyIfRenderer - Polymorphic object to test in order to determine if the type ascention is valid.
    *
    * @returns {boolean} true if the type ascention is valid.
+   * @static
    */
   static esriRendererIsClassBreaks = (verifyIfRenderer: EsriBaseRenderer): verifyIfRenderer is EsriClassBreakRenderer => {
     return verifyIfRenderer?.type === 'classBreaks';
   };
+
   // #endregion CHECK "IS" FUNCTIONS
 
   // #region CONVERSION FUNCTIONS
+
   /**
    * Convert the ESRI line style to the GeoView line style.
    *
    * @param {EsriLineStyle} lineStyle - ESRI line style to convert.
    *
    * @returns {TypeLineStyle} The Geoview line style associated to the ESRI line style.
+   * @static
    */
   static convertLineStyle(lineStyle: EsriLineStyle): TypeLineStyle {
     switch (lineStyle) {
@@ -161,6 +187,7 @@ export abstract class EsriRenderer {
    * @param {EsriFillStyle} fillStyle - ESRI fill style to convert.
    *
    * @returns {TypeFillStyle} The Geoview fill style associated to the ESRI fill style.
+   * @static
    */
   static convertFillStyle(fillStyle: EsriFillStyle): TypeFillStyle {
     switch (fillStyle) {
@@ -193,6 +220,7 @@ export abstract class EsriRenderer {
    * @param {EsriSymbolStyle} symbolStyle - ESRI symbol style to convert.
    *
    * @returns {TypeSymbol} The Geoview symbol style associated to the ESRI symbol style.
+   * @static
    */
   static convertSymbolStyle(symbolStyle: EsriSymbolStyle): TypeSymbol {
     switch (symbolStyle) {
@@ -221,6 +249,7 @@ export abstract class EsriRenderer {
    * @param {TypeEsriColor} color - ESRI color to convert.
    *
    * @returns {string} The Geoview color corresponding to the ESRI color.
+   * @static
    */
   static convertEsriColor(color: TypeEsriColor): string {
     if (color) return asString([color[0], color[1], color[2], color[3] / 255]);
@@ -234,6 +263,7 @@ export abstract class EsriRenderer {
    *
    * @returns {TypeKindOfVectorSettings | undefined} The Geoview symbol corresponding to the ESRI symbol or undefined if
    * ESRI symbol is not handled.
+   * @static
    */
   static convertSymbol(symbol: EsriSymbol): TypeKindOfVectorSettings | undefined {
     if (symbol) {
@@ -300,7 +330,6 @@ export abstract class EsriRenderer {
     }
     return undefined;
   }
-  // #endregion CONVERSION FUNCTIONS
 
   /**
    * Get the configuration key of the style.
@@ -308,6 +337,7 @@ export abstract class EsriRenderer {
    * @param {TypeKindOfVectorSettings} settings - GeoView settings.
    *
    * @returns {TypeStyleGeometry | undefined} The Geoview style key or undefined if it can not be determined.
+   * @static
    */
   static getStyleGeometry(settings: TypeKindOfVectorSettings): TypeStyleGeometry | undefined {
     if (isIconSymbolVectorConfig(settings) || isSimpleSymbolVectorConfig(settings)) return 'Point';
@@ -316,14 +346,20 @@ export abstract class EsriRenderer {
     return undefined;
   }
 
+  // #endregion CONVERSION FUNCTIONS
+
+  // #region PRIVATE METHODS
+
   /**
    * Process ESRI unique value renderer and convert it to a GeoView style.
    *
    * @param {EsriUniqueValueRenderer} renderer - ESRI renderer to convert.
    *
    * @returns {TypeLayerStyleConfig | undefined} The Geoview style or undefined if it can not be created.
+   * @private
+   * @static
    */
-  static processUniqueValueRenderer(renderer: EsriUniqueValueRenderer): TypeLayerStyleConfig | undefined {
+  static #processUniqueValueRenderer(renderer: EsriUniqueValueRenderer): TypeLayerStyleConfig | undefined {
     const style: TypeLayerStyleConfig = {};
     const fields = [];
     if (renderer.field1) fields.push(renderer.field1);
@@ -385,8 +421,10 @@ export abstract class EsriRenderer {
    * @param {EsriSimpleRenderer} renderer - ESRI renderer to convert.
    *
    * @returns {TypeLayerStyleConfig | undefined} The Geoview style or undefined if it can not be created.
+   * @private
+   * @static
    */
-  static processSimpleRenderer(renderer: EsriSimpleRenderer): TypeLayerStyleConfig | undefined {
+  static #processSimpleRenderer(renderer: EsriSimpleRenderer): TypeLayerStyleConfig | undefined {
     const style: TypeLayerStyleConfig = {};
     const { label } = renderer;
     const settings = this.convertSymbol(renderer.symbol);
@@ -415,8 +453,10 @@ export abstract class EsriRenderer {
    * @param {EsriClassBreakRenderer} renderer - ESRI renderer to convert.
    *
    * @returns {TypeLayerStyleConfig | undefined} The Geoview style or undefined if it can not be created.
+   * @private
+   * @static
    */
-  static processClassBreakRenderer(renderer: EsriClassBreakRenderer): TypeLayerStyleConfig | undefined {
+  static #processClassBreakRenderer(renderer: EsriClassBreakRenderer): TypeLayerStyleConfig | undefined {
     const { field } = renderer;
     const style: TypeLayerStyleConfig = {};
     const classBreakStyleInfo: TypeLayerStyleConfigInfo[] = [];
@@ -473,36 +513,7 @@ export abstract class EsriRenderer {
     return undefined;
   }
 
-  /**
-   * Get GeoView style from Esri renderer.
-   *
-   * @param {EsriBaseRenderer | undefined} renderer - ESRI renderer to convert.
-   *
-   * @returns {TypeStyleConfig | undefined} The Geoview style or undefined if it can not be created.
-   */
-  static getStyleFromEsriRenderer(renderer: EsriBaseRenderer | undefined): TypeLayerStyleConfig | undefined {
-    if (!renderer) return undefined;
-    if (this.esriRendererIsUniqueValue(renderer)) return this.processUniqueValueRenderer(renderer);
-    if (this.esriRendererIsSimple(renderer)) return this.processSimpleRenderer(renderer);
-    if (this.esriRendererIsClassBreaks(renderer)) return this.processClassBreakRenderer(renderer);
-    logger.logInfo(`Handling of ESRI renderer '${renderer.type}' is not coded, default GeoView settings will be used instead.`);
-    return undefined;
-  }
-
-  /** *****************************************************************************************************************************
-   * Parse the GeoView style using the Esri renderer.
-   *
-   * @param {EsriBaseRenderer} renderer - ESRI renderer to convert.
-   *
-   * @returns {TypeLayerStyleSettings | undefined} The Geoview style or undefined if it can not be created.
-   */
-  static createStyleUsingEsriRenderer(renderer: EsriBaseRenderer): TypeLayerStyleConfig | undefined {
-    if (this.esriRendererIsUniqueValue(renderer)) return this.processUniqueValueRenderer(renderer);
-    if (this.esriRendererIsSimple(renderer)) return this.processSimpleRenderer(renderer);
-    if (this.esriRendererIsClassBreaks(renderer)) return this.processClassBreakRenderer(renderer);
-    logger.logWarning(`Handling of ESRI renderer '${renderer.type}' is not coded, default GeoView settings will be used instead.`);
-    return undefined;
-  }
+  // #endregion PRIVATE METHODS
 }
 
 // #region TYPE & INTERFACE

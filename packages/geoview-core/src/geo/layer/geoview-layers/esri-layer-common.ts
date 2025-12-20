@@ -248,10 +248,11 @@ export class EsriUtilities {
 
     // The following line allow the type ascention of the type guard functions on the second line below
     if (layerConfig instanceof EsriDynamicLayerEntryConfig || layerConfig instanceof EsriFeatureLayerEntryConfig) {
-      if (!layerConfig.getLayerStyle()) {
-        const styleFromRenderer = EsriRenderer.getStyleFromEsriRenderer(responseJson.drawingInfo?.renderer);
-        if (styleFromRenderer) layerConfig.setLayerStyle(styleFromRenderer);
-      }
+      // Get the style from the Esri Renderer
+      const styleFromRenderer = EsriRenderer.createStylesFromEsriRenderer(responseJson.drawingInfo?.renderer);
+
+      // Initialize the layer style by filling the blanks with the information from the metadata
+      layerConfig.initLayerStyleFromMetadata(styleFromRenderer);
     }
 
     // Check if we support that projection and if not add it on-the-fly

@@ -5,7 +5,12 @@ import { bbox } from 'ol/loadingstrategy';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
-import { type TypeOutfields, type TypeOutfieldsType } from '@/api/types/map-schema-types';
+import {
+  type TypeLayerStyleSettings,
+  type TypeOutfields,
+  type TypeOutfieldsType,
+  type TypeStyleGeometry,
+} from '@/api/types/map-schema-types';
 import type {
   TypeGeoviewLayerConfig,
   WFSJsonResponse,
@@ -219,7 +224,10 @@ export class WFS extends AbstractGeoViewVector {
     }
 
     // Try
-    await WFS.#tryProcessLayerStylingInformationIfAny(layerConfigWFS);
+    const layerStyle = await WFS.#tryProcessLayerStylingInformationIfAny(layerConfigWFS);
+
+    // Initialize the layer style by filling the blanks with the information from the metadata
+    layerConfig.initLayerStyleFromMetadata(layerStyle);
 
     // Return the layer config
     return layerConfig;
@@ -783,9 +791,11 @@ export class WFS extends AbstractGeoViewVector {
    * @static
    * @async
    */
-  static async #tryProcessLayerStylingInformationIfAny(layerConfig: OgcWfsLayerEntryConfig): Promise<void> {
-    // If no layer style defined and should fetch styles from the WMS (default)
-    if (!layerConfig.getLayerStyle() && layerConfig.getShouldFetchStylesFromWMS()) {
+  static async #tryProcessLayerStylingInformationIfAny(
+    layerConfig: OgcWfsLayerEntryConfig
+  ): Promise<Record<TypeStyleGeometry, TypeLayerStyleSettings> | undefined> {
+    // If should fetch styles from the WMS (default)
+    if (layerConfig.getShouldFetchStylesFromWMS()) {
       try {
         // Get the layer id equivalent for the WMS
         const wmsLayerId = layerConfig.getWmsStylesLayerId();
@@ -793,19 +803,16 @@ export class WFS extends AbstractGeoViewVector {
         // Tweak the url, all the time, typical wms/wfs url
         const tweakedUrl = layerConfig.getDataAccessPath().replaceAll('cgi-bin/wfs', 'cgi-bin/wms');
 
-        // Create the layer style
-        const layerStyle = await WMS.createStylesFromWMS(tweakedUrl, wmsLayerId, layerConfig.getGeometryType());
-
-        // If style was generated
-        if (layerStyle) {
-          // Set the layer style
-          layerConfig.setLayerStyle(layerStyle);
-        }
+        // Create the layer style and return
+        return await WMS.createStylesFromWMS(tweakedUrl, wmsLayerId, layerConfig.getGeometryType());
       } catch (error: unknown) {
         // Log warning
         logger.logWarning(`Failed to create a dynamic layer style for the WFS using the WMS styles for ${layerConfig.layerPath}`, error);
       }
     }
+
+    // None
+    return undefined;
   }
 
   // #endregion STATIC METHODS

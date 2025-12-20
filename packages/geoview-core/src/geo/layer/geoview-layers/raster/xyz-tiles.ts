@@ -229,8 +229,9 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param {string} metadataAccessPath - The URL or path to access metadata.
    * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included
-   * @staticin the configuration.
+   * in the configuration.
    * @returns {TypeXYZTilesConfig} The constructed configuration object for the XYZTiles layer.
+   * @static
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
