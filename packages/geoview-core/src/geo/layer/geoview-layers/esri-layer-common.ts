@@ -57,6 +57,9 @@ export class EsriUtilities {
     listOfLayerEntryConfig: ConfigBaseClass[],
     callbackWhenRegisteringConfig: RegisterLayerEntryConfigDelegate
   ): void {
+    // TODO: REFACTOR - Send this function to ChatGPT for a complete rewrite..
+
+    // For each layer entry config
     listOfLayerEntryConfig.forEach((layerConfig, i) => {
       if (layerConfig.layerStatus === 'error') return;
 
@@ -71,6 +74,7 @@ export class EsriUtilities {
           );
         }
 
+        // Indirect recursion
         layer.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig);
 
         if (!layerConfig.listOfLayerEntryConfig.length) {
@@ -84,6 +88,9 @@ export class EsriUtilities {
       if (layerConfig.getEntryTypeIsRegular()) {
         // Set the layer status to processing
         layerConfig.setLayerStatusProcessing();
+
+        // Validate and update the extent initial settings
+        layerConfig.initInitialSettingsExtentAndBoundsFromConfig();
 
         let esriIndex = Number(layerConfig.layerId);
 
@@ -149,6 +156,7 @@ export class EsriUtilities {
             callbackWhenRegisteringConfig(subLayerEntryConfig);
           });
 
+          // Indirect recursion
           layer.validateListOfLayerEntryConfig(groupLayerConfig.listOfLayerEntryConfig);
           return;
         }
@@ -344,7 +352,7 @@ export class EsriUtilities {
     const layerMetadata = layerConfig.getLayerMetadata();
 
     // Validate and update the visible initial settings
-    layerConfig.initInitialSettingsStatesVisible(layerMetadata?.defaultVisibility);
+    layerConfig.initInitialSettingsStatesVisibleFromMetadata(layerMetadata?.defaultVisibility);
 
     // Update Max / Min Scales with value if service doesn't allow the configured value for proper UI functionality
     if (layerMetadata?.minScale) {
@@ -361,11 +369,8 @@ export class EsriUtilities {
       layerConfig.maxRecordCount = layerMetadata?.maxRecordCount || 0;
     }
 
-    // Validate and update the extent initial settings
-    layerConfig.initInitialSettingsExtent(layerConfig.getInitialSettings()?.extent);
-
     // If no bounds defined in the initial settings and an extent is defined in the metadata
-    let bounds = layerConfig.getInitialSettings()?.bounds;
+    let bounds = layerConfig.getInitialSettingsBounds();
     if (!bounds && layerMetadata?.extent) {
       const layerExtent = [
         layerMetadata.extent.xmin,
@@ -376,10 +381,10 @@ export class EsriUtilities {
 
       // Transform to latlon extent
       bounds = Projection.transformExtentFromObj(layerExtent, layerMetadata.extent.spatialReference, Projection.getProjectionLonLat());
-    }
 
-    // Validate and update the bounds initial settings
-    layerConfig.initInitialSettingsBounds(bounds);
+      // Validate and update the bounds initial settings
+      layerConfig.initInitialSettingsBoundsFromMetadata(bounds);
+    }
   }
 
   /**

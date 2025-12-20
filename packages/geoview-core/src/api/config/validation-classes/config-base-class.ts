@@ -398,18 +398,42 @@ export abstract class ConfigBaseClass {
   }
 
   /**
-   * Initializes the initial settings configuration by filling the blanks in our config with the information from the metadata
-   * @param {TypeLayerInitialSettings | undefined} initialSettingsMetadata - The initialSettings metadata to use to help fill the blanks in our initialSettings config.
+   * Gets the the initial settings extend, if any
+   * @returns {Extent  | undefined} The initial settings extend, if any.
    */
-  initInitialSettings(initialSettingsMetadata: TypeLayerInitialSettings | undefined): void {
+  getInitialSettingsExtent(): Extent | undefined {
+    return this.#initialSettings?.extent;
+  }
+
+  /**
+   * Gets the the initial settings bounds, if any
+   * @returns {Extent  | undefined} The initial settings bounds, if any.
+   */
+  getInitialSettingsBounds(): Extent | undefined {
+    return this.#initialSettings?.bounds;
+  }
+
+  /**
+   * Gets the the initial settings className, if any
+   * @returns {string  | undefined} The initial settings className, if any.
+   */
+  getInitialSettingsClassName(): string | undefined {
+    return this.#initialSettings?.className;
+  }
+
+  /**
+   * Initializes the initial settings configuration by filling the blanks in our config with the information from the metadata, if necessary.
+   * @param {TypeLayerInitialSettings | undefined} initialSettingsMetadata - The initialSettings metadata to use to help fill the blanks in our initialSettings config, if any.
+   */
+  initInitialSettingsFromMetadata(initialSettingsMetadata: TypeLayerInitialSettings | undefined): void {
     this.#initialSettings = deepMerge(initialSettingsMetadata, this.#initialSettings);
   }
 
   /**
    * Validates and initializes the `visible` value in the `initialSettings` object, if necessary.
-   * @param {number | undefined} visible - The candidate `visible` value to validate against the current setting.
+   * @param {number | undefined} visible - The candidate `visible` value to validate against the current setting, if any.
    */
-  initInitialSettingsStatesVisible(visible: boolean | undefined): void {
+  initInitialSettingsStatesVisibleFromMetadata(visible: boolean | undefined): void {
     // If the setting isn't already set and we have something to update it with
     if (this.#initialSettings?.states?.visible === undefined && visible !== undefined) {
       // Validate and update the extent initial settings
@@ -420,55 +444,49 @@ export abstract class ConfigBaseClass {
   }
 
   /**
-   * Validates and initializes the `minZoom` value in the `initialSettings` object, if necessary.
-   * Ensures that the `minZoom` is not decreased unintentionally by keeping the more restrictive (higher) value
-   * between the existing `minZoom` and the provided `minZoomToValidate`.
-   * @param {number | undefined} minZoomToValidate - The candidate `minZoom` value to validate against the current setting.
+   * Initializes the minimum zoom level in the initial settings using metadata.
+   * @param {number | undefined} minZoomMetadata - The minimum zoom value from metadata, if any.
    */
-  initInitialSettingsMinZoom(minZoomToValidate: number | undefined): void {
-    // If we have something to update it with
-    if (minZoomToValidate) {
-      this.#initialSettings ??= {};
-      this.#initialSettings.minZoom = Math.max(this.#initialSettings.minZoom ?? -Infinity, minZoomToValidate);
-    }
+  initInitialSettingsMinZoomFromMetadata(minZoomMetadata: number | undefined): void {
+    // Redirect
+    this.#initInitialSettingsMinZoom(minZoomMetadata);
   }
 
   /**
-   * Validates and initializes the `maxZoom` value in the `initialSettings` object, if necessary.
-   * Ensures that the `maxZoom` is not increased unintentionally by keeping the more restrictive (lower) value
-   * between the existing `maxZoom` and the provided `maxZoomToValidate`.
-   * @param {number | undefined} maxZoomToValidate - The candidate `maxZoom` value to validate against the current setting.
+   * Initializes the maximum zoom level in the initial settings using metadata.
+   * @param {number | undefined} maxZoomMetadata - The maximum zoom value from metadata, if any.
    */
-  initInitialSettingsMaxZoom(maxZoomToValidate: number | undefined): void {
-    // If we have something to update it with
-    if (maxZoomToValidate) {
-      this.#initialSettings ??= {};
-      this.#initialSettings.maxZoom = Math.min(this.#initialSettings.maxZoom ?? Infinity, maxZoomToValidate);
-    }
+  initInitialSettingsMaxZoomFromMetadata(maxZoomMetadata: number | undefined): void {
+    // Redirect
+    this.#initInitialSettingsMaxZoom(maxZoomMetadata);
   }
 
   /**
-   * Validates and initializes the `extent` in the `initialSettings` object, if necessary.
-   * If no extent is explicitly provided, the current `initialSettings.extent` is used by default.
-   * The provided extent (or existing one) is passed to `validateExtentWhenDefined()` to apply any required corrections.
-   * @param {Extent | undefined} extentToValidate - The extent to validate and apply. If omitted, defaults to the current `initialSettings.extent`.
+   * Initializes the extent in the initial settings using the layer configuration, if any.
    */
-  initInitialSettingsExtent(extentToValidate: Extent | undefined): void {
-    // Validate and update the extent initial settings
-    this.#initialSettings ??= {};
-    this.#initialSettings.extent = GeoUtilities.validateExtentWhenDefined(extentToValidate);
+  initInitialSettingsExtentAndBoundsFromConfig(): void {
+    // Redirect
+    this.#initInitialSettingsExtent(this.#initialSettings?.extent);
+    this.#initInitialSettingsBounds(this.#initialSettings?.bounds);
   }
 
   /**
-   * Validates and initializes the `bounds` in the `initialSettings` object, if necessary.
-   * If no bounds is explicitly provided, the current `initialSettings.bounds` is used by default.
-   * The provided bounds (or existing one) is passed to `validateExtentWhenDefined()` to apply any required corrections.
-   * @param {Extent | undefined} boundsToValidate - The bounds to validate and apply. If omitted, defaults to the current `initialSettings.bounds`.
+   * Initializes the extent in the initial settings using metadata.
+   * @param {Extent | undefined} extentToValidate - The extent from metadata to validate and apply, if any.
    */
-  initInitialSettingsBounds(boundsToValidate: Extent | undefined): void {
-    // Validate and update the bounds initial settings
-    this.#initialSettings ??= {};
-    this.#initialSettings.bounds = GeoUtilities.validateExtentWhenDefined(boundsToValidate);
+  // TODO: CHECK - This function isn't called, but I feel like it should be... What's the relationship between extent and bounds?
+  initInitialSettingsExtentFromMetadata(extentToValidate: Extent | undefined): void {
+    // Redirect
+    this.#initInitialSettingsExtent(extentToValidate);
+  }
+
+  /**
+   * Initializes the bounds in the initial settings using metadata.
+   * @param {Extent | undefined} extentToValidate - The bounds from metadata to validate and apply, if any.
+   */
+  initInitialSettingsBoundsFromMetadata(extentToValidate: Extent | undefined): void {
+    // Redirect
+    this.#initInitialSettingsBounds(extentToValidate);
   }
 
   /**
@@ -653,6 +671,64 @@ export abstract class ConfigBaseClass {
   }
 
   // #region PROTECTED/PRIVATE METHODS
+
+  /**
+   * Validates and initializes the `minZoom` value in the `initialSettings` object, if necessary.
+   * Ensures that the `minZoom` is not decreased unintentionally by keeping the more restrictive (higher) value
+   * between the existing `minZoom` and the provided `minZoomToValidate`.
+   * @param {number | undefined} minZoomToValidate - The candidate `minZoom` value to validate against the current setting, if any.
+   */
+  #initInitialSettingsMinZoom(minZoomToValidate: number | undefined): void {
+    // If we have something to update it with
+    if (minZoomToValidate) {
+      this.#initialSettings ??= {};
+      this.#initialSettings.minZoom = Math.max(this.#initialSettings.minZoom ?? -Infinity, minZoomToValidate);
+    }
+  }
+
+  /**
+   * Validates and initializes the `maxZoom` value in the `initialSettings` object, if necessary.
+   * Ensures that the `maxZoom` is not increased unintentionally by keeping the more restrictive (lower) value
+   * between the existing `maxZoom` and the provided `maxZoomToValidate`.
+   * @param {number | undefined} maxZoomToValidate - The candidate `maxZoom` value to validate against the current setting, if any.
+   */
+  #initInitialSettingsMaxZoom(maxZoomToValidate: number | undefined): void {
+    // If we have something to update it with
+    if (maxZoomToValidate) {
+      this.#initialSettings ??= {};
+      this.#initialSettings.maxZoom = Math.min(this.#initialSettings.maxZoom ?? Infinity, maxZoomToValidate);
+    }
+  }
+
+  /**
+   * Validates and initializes the `extent` in the `initialSettings` object, if necessary.
+   * If no extent is explicitly provided, the current `initialSettings.extent` is used by default.
+   * The provided extent (or existing one) is passed to `validateExtentWhenDefined()` to apply any required corrections.
+   * @param {Extent | undefined} extentToValidate - The extent to validate and apply, if any.
+   */
+  #initInitialSettingsExtent(extentToValidate: Extent | undefined): void {
+    // If we have something to update it with
+    if (extentToValidate) {
+      // Validate and update the extent initial settings
+      this.#initialSettings ??= {};
+      this.#initialSettings.extent = GeoUtilities.validateExtentWhenDefined(extentToValidate);
+    }
+  }
+
+  /**
+   * Validates and initializes the `bounds` in the `initialSettings` object, if necessary.
+   * If no bounds is explicitly provided, the current `initialSettings.bounds` is used by default.
+   * The provided bounds (or existing one) is passed to `validateExtentWhenDefined()` to apply any required corrections.
+   * @param {Extent | undefined} boundsToValidate - The bounds to validate and apply, if any.
+   */
+  #initInitialSettingsBounds(boundsToValidate: Extent | undefined): void {
+    // If we have something to update it with
+    if (boundsToValidate) {
+      // Validate and update the bounds initial settings
+      this.#initialSettings ??= {};
+      this.#initialSettings.bounds = GeoUtilities.validateExtentWhenDefined(boundsToValidate);
+    }
+  }
 
   /**
    * Overridable function to create and return a deep clone of the layer entry configuration properties.

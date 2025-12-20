@@ -504,6 +504,9 @@ export abstract class AbstractGeoViewLayer {
     // Set the layer status to processing
     layerConfig.setLayerStatusProcessing();
 
+    // Validate and update the extent initial settings
+    layerConfig.initInitialSettingsExtentAndBoundsFromConfig();
+
     // Redirect to overridable method
     this.onValidateLayerEntryConfig(layerConfig);
   }

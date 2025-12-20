@@ -106,9 +106,6 @@ export class VectorTiles extends AbstractGeoViewRaster {
         layerConfig.getSource().projection ??= projectionMetadata as unknown as TypeValidSourceProjectionCodes;
       }
 
-      // Validate and update the extent initial settings
-      layerConfig.initInitialSettingsExtent(layerConfig.getInitialSettings()?.extent);
-
       // Check if we support that projection and if not add it on-the-fly
       await Projection.addProjectionIfMissing(fullExtent.spatialReference);
 
@@ -125,8 +122,8 @@ export class VectorTiles extends AbstractGeoViewRaster {
 
       // Second, set the min/max zoom levels based on the service / config.
       // GV Vector tiles should always have a minZoom and maxZoom, so -Infinity or Infinity should never be set as a value
-      layerConfig.initInitialSettingsMinZoom(minZoom);
-      layerConfig.initInitialSettingsMaxZoom(maxZoom);
+      layerConfig.initInitialSettingsMinZoomFromMetadata(minZoom);
+      layerConfig.initInitialSettingsMaxZoomFromMetadata(maxZoom);
     }
 
     // Return the layer config

@@ -197,7 +197,7 @@ export class GVWMS extends AbstractGVRaster {
   ): Promise<TypeFeatureInfoEntry[]> {
     // Get the layer config and its initial settings
     const wmsLayerConfig = this.getLayerConfig();
-    const initialSettingsBounds = wmsLayerConfig.getInitialSettings()?.bounds;
+    const initialSettingsBounds = wmsLayerConfig.getInitialSettingsBounds();
 
     // TODO: CHECK - Do we want that kind of check for EsriDynamic as well?
     // If the initial settings bounds are set, validate the queried location vs the bounds
@@ -360,7 +360,7 @@ export class GVWMS extends AbstractGVRaster {
     const layerConfig = this.getLayerConfig();
 
     // Get the layer config bounds
-    let layerConfigBounds = layerConfig?.getInitialSettings()?.bounds;
+    let layerConfigBounds = layerConfig?.getInitialSettingsBounds();
 
     // If layer bounds were found, project
     if (layerConfigBounds) {

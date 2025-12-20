@@ -164,7 +164,7 @@ export class GeoJSON extends AbstractGeoViewVector {
         layerConfig.initSource(layerMetadataFound.source);
 
         // Initialize the initial settings by filling the blanks with the information from the metadata
-        layerConfig.initInitialSettings(layerMetadataFound.initialSettings);
+        layerConfig.initInitialSettingsFromMetadata(layerMetadataFound.initialSettings);
 
         // Initialize the layer style by filling the blanks with the information from the metadata
         layerConfig.initLayerStyle(layerMetadataFound.layerStyle);
@@ -182,9 +182,6 @@ export class GeoJSON extends AbstractGeoViewVector {
         // Verify the data access path when comparing it to the metadata found
         layerConfig.verifyDataAccessPath(layerMetadataFound.source);
       }
-
-      // Validate and update the extent initial settings
-      layerConfig.initInitialSettingsExtent(layerConfig.getInitialSettings()?.extent);
     }
 
     // Setting the layer metadata now with the updated config values. Setting the layer metadata with the config, directly, like it's done in CSV

@@ -154,7 +154,7 @@ export class WKB extends AbstractGeoViewVector {
         layerConfig.initSource(layerMetadataFound.source);
 
         // Initialize the initial settings by filling the blanks with the information from the metadata
-        layerConfig.initInitialSettings(layerMetadataFound.initialSettings);
+        layerConfig.initInitialSettingsFromMetadata(layerMetadataFound.initialSettings);
 
         // Initialize the layer style by filling the blanks with the information from the metadata
         layerConfig.initLayerStyle(layerMetadataFound.layerStyle);
@@ -169,9 +169,6 @@ export class WKB extends AbstractGeoViewVector {
           layerConfig.setMinScale(Math.max(layerConfig.getMinScale() || 0, layerMetadataFound.minScale));
         }
       }
-
-      // Validate and update the extent initial settings
-      layerConfig.initInitialSettingsExtent(layerConfig.getInitialSettings()?.extent);
     }
 
     // Setting the layer metadata now with the updated config values. Setting the layer metadata with the config, directly, like it's done in CSV
