@@ -205,7 +205,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * Initializes the layer style configuration by filling the blanks in our config with the information from the metadata
    * @param {TypeLayerStyleConfig} layerStyleMetadata - The layer style metadata to use to help fill the blanks in our layer style config.
    */
-  initLayerStyle(layerStyleMetadata: TypeLayerStyleConfig | undefined): void {
+  initLayerStyleFromMetadata(layerStyleMetadata: TypeLayerStyleConfig | undefined): void {
     this.#layerStyle = deepMerge(layerStyleMetadata, this.#layerStyle);
   }
 
@@ -404,20 +404,12 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
-   * Verifies and applies the appropriate `dataAccessPath` for the layer based on metadata.
-   * This method handles cases where the layer's `dataAccessPath` was not explicitly defined
-   * in the configuration and is therefore expected to be inferred from the metadataAccessPath or the metadata itself.
-   * Behavior:
-   * - If the metadata does not define a `dataAccessPath`, nothing is changed.
-   * - If the layer's own `dataAccessPath` is missing or undefined, the method sets it to the
-   *   `dataAccessPath` provided in the metadata.
-   * This ensures that metadata-provided values take precedence over any automatically inferred
-   * or placeholder paths created during configuration validation.
+   * Overrides the data access path using the value provided by metadata.
+   * If the metadata source does not define a data access path, no action is taken.
    * @param {TypeBaseSourceInitialConfig | undefined} metadataSource
-   *   The metadata object that may contain an authoritative `dataAccessPath`. If undefined or
-   *   missing the field, no changes are made.
+   * The metadata source configuration containing a data access path.
    */
-  verifyDataAccessPath(metadataSource: TypeBaseSourceInitialConfig | undefined): void {
+  overrideDataAccessPathFromMetadata(metadataSource: TypeBaseSourceInitialConfig | undefined): void {
     // If the source dataAccessPath doesn't exist
     if (!metadataSource?.dataAccessPath) return;
 

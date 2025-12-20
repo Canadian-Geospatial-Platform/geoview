@@ -238,7 +238,10 @@ export class WMS extends AbstractGeoViewRaster {
       }
 
       // Try processing vectorial information on the WMS, if any
-      await WMS.#tryProcessLayerVectorialInformationIfAny(layerConfig);
+      const layerStyle = await WMS.#tryProcessLayerVectorialInformationIfAny(layerConfig);
+
+      // Initialize the layer style by filling the blanks with the information from the metadata
+      layerConfig.initLayerStyleFromMetadata(layerStyle);
     }
 
     // Return the layer config
@@ -1147,7 +1150,9 @@ export class WMS extends AbstractGeoViewRaster {
    * @static
    * @async
    */
-  static async #tryProcessLayerVectorialInformationIfAny(layerConfig: OgcWmsLayerEntryConfig): Promise<void> {
+  static async #tryProcessLayerVectorialInformationIfAny(
+    layerConfig: OgcWmsLayerEntryConfig
+  ): Promise<Record<TypeStyleGeometry, TypeLayerStyleSettings> | undefined> {
     // If should fetch vectorial information from WFS
     if (layerConfig.getShouldFetchVectorInformationFromWFS()) {
       try {
@@ -1172,23 +1177,20 @@ export class WMS extends AbstractGeoViewRaster {
           // If the service metadata offers GetStyles
           if (layerConfig.getSupportsGetStyles()) {
             // Try to create dynamic style from the WMS GetStyles metadata
-            const layerStyle = await WMS.createStylesFromWMS(baseUrl, layerConfig.layerId, wfsLayerConfig.getGeometryType());
-
-            // If style was generated
-            if (layerStyle) {
-              // Set the layer style
-              layerConfig.setLayerStyle(layerStyle);
-            }
-          } else {
-            // Log
-            logger.logWarning(`WMS service ${layerConfig.layerPath} doesn't support vectorial styles via a 'GetStyles' request.`);
+            return await WMS.createStylesFromWMS(baseUrl, layerConfig.layerId, wfsLayerConfig.getGeometryType());
           }
+
+          // Log
+          logger.logWarning(`WMS service ${layerConfig.layerPath} doesn't support vectorial styles via a 'GetStyles' request.`);
         }
       } catch (error: unknown) {
         // Log
         logger.logWarning(`Failed to find a vectorial representation of the WMS ${layerConfig.layerPath}`, error);
       }
     }
+
+    // None
+    return undefined;
   }
 
   // #endregion STATIC METHODS

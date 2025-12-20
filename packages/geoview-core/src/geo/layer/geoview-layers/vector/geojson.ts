@@ -62,14 +62,17 @@ export class GeoJSON extends AbstractGeoViewVector {
    */
   protected override async onFetchServiceMetadata<T = TypeMetadataGeoJSON | undefined>(abortSignal?: AbortSignal): Promise<T> {
     try {
+      // Get the metadataAccessPath if it exists
+      const metadataAccessPath = this.getMetadataAccessPathIfExists();
+
       // If metadataAccessPath ends with .meta, .json or .geojson
       if (
-        this.getMetadataAccessPathIfExists()?.toLowerCase().endsWith('.meta') ||
-        this.getMetadataAccessPathIfExists()?.toLowerCase().endsWith('.json') ||
-        this.getMetadataAccessPathIfExists()?.toLowerCase().endsWith('.geojson')
+        metadataAccessPath?.toLowerCase().endsWith('.meta') ||
+        metadataAccessPath?.toLowerCase().endsWith('.json') ||
+        metadataAccessPath?.toLowerCase().endsWith('.geojson')
       ) {
         // Fetch it
-        const metadata = await GeoJSON.fetchMetadata(this.getMetadataAccessPath(), abortSignal);
+        const metadata = await GeoJSON.fetchMetadata(metadataAccessPath, abortSignal);
 
         // Return it
         return metadata as T;
@@ -77,7 +80,7 @@ export class GeoJSON extends AbstractGeoViewVector {
 
       // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
       logger.logWarning(
-        `The metadataAccessPath '${this.getMetadataAccessPathIfExists()}' didn't seem like it was containing actual metadata, so it was skipped`
+        `The metadataAccessPath '${metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped`
       );
 
       // None
@@ -167,7 +170,7 @@ export class GeoJSON extends AbstractGeoViewVector {
         layerConfig.initInitialSettingsFromMetadata(layerMetadataFound.initialSettings);
 
         // Initialize the layer style by filling the blanks with the information from the metadata
-        layerConfig.initLayerStyle(layerMetadataFound.layerStyle);
+        layerConfig.initLayerStyleFromMetadata(layerMetadataFound.layerStyle);
 
         // If max scale found in metadata
         if (layerMetadataFound.maxScale) {
@@ -180,7 +183,7 @@ export class GeoJSON extends AbstractGeoViewVector {
         }
 
         // Verify the data access path when comparing it to the metadata found
-        layerConfig.verifyDataAccessPath(layerMetadataFound.source);
+        layerConfig.overrideDataAccessPathFromMetadata(layerMetadataFound.source);
       }
     }
 

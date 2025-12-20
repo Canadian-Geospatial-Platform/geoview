@@ -157,7 +157,7 @@ export class WKB extends AbstractGeoViewVector {
         layerConfig.initInitialSettingsFromMetadata(layerMetadataFound.initialSettings);
 
         // Initialize the layer style by filling the blanks with the information from the metadata
-        layerConfig.initLayerStyle(layerMetadataFound.layerStyle);
+        layerConfig.initLayerStyleFromMetadata(layerMetadataFound.layerStyle);
 
         // If max scale found in metadata
         if (layerMetadataFound.maxScale) {

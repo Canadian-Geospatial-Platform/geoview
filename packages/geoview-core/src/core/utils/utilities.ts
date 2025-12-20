@@ -153,17 +153,17 @@ export function deepClone<T>(value: T): T {
 }
 
 /**
- * Deeply merges two objects, filling in undefined or missing properties
- * from the source object into the target object. Nested objects are merged recursively.
- * Existing values in the target object are preserved.
- * @param {S} base - The source object containing the default values.
- * @param {T} target - The target object to merge values into.
- * @returns The merged target object.
+ * Deeply merges two objects, using the base object as defaults and
+ * preserving existing values from the target object.
+ * Nested plain objects are merged recursively.
+ * @param {S} base - The base object providing default values.
+ * @param {T} target - The target object whose defined values take precedence.
+ * @returns {S & T} A new object containing the merged result.
  * @example
  * ```ts
- * const userSettings = { theme: { darkMode: true } };
  * const defaultSettings = { theme: { darkMode: false, fontSize: 14 }, locale: 'en' };
- * const merged = deepMerge(userSettings, defaultSettings);
+ * const userSettings = { theme: { darkMode: true } };
+ * const merged = deepMerge(defaultSettings, userSettings);
  * // merged: { theme: { darkMode: true, fontSize: 14 }, locale: 'en' }
  * ```
  */
