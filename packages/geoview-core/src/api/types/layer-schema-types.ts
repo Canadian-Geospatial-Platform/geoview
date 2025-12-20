@@ -335,10 +335,10 @@ export interface TypeSourceImageEsriInitialConfig extends TypeBaseSourceInitialC
 export type TypeLayerInitialSettings = {
   /** Settings for availablity of controls */
   controls?: TypeLayerControls;
-  /** The geographic bounding box that contains all the layer's features. The bounds are always in latlon EPSG:4326 */
+  /** The geographic bounding box that contains all the layer's features. The bounds are always stored in latlon EPSG:4326 */
   bounds?: Extent;
-  /** The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates. */
-  extent?: Extent;
+  /** The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates. The extent is always stored in latlon EPSG:4326 */
+  extent?: Extent; // TODO: CHECK - Is this property even used or is everything basically relying on 'bounds'? Seems deprecated when browsing its utility? Delete?
   /** The minimum view zoom level (exclusive) above which this layer will be visible. */
   minZoom?: number;
   /** The maximum view zoom level (inclusive) below which this layer will be visible. */

@@ -1345,9 +1345,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
         hoverable: orderedLayerInfo.hoverable,
       },
       controls: layerEntryConfig.getInitialSettings()?.controls,
-      bounds: layerEntryConfig.getInitialSettings()?.bounds,
-      className: layerEntryConfig.getInitialSettings()?.className,
-      extent: layerEntryConfig.getInitialSettings()?.extent,
+      bounds: layerEntryConfig.getInitialSettingsBounds(),
+      className: layerEntryConfig.getInitialSettingsClassName(),
+      extent: layerEntryConfig.getInitialSettingsExtent(),
       minZoom: layerEntryConfig.getInitialSettings()?.minZoom,
       maxZoom: layerEntryConfig.getInitialSettings()?.maxZoom,
     };

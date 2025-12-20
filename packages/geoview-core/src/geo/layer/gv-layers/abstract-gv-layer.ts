@@ -636,6 +636,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    */
   getBounds(projection: OLProjection, stops: number): Extent | undefined {
     // Redirect to overridable method
+    // TODO: REFACTOR - ALEX - Review all onGetBounds() to see how they can be optimized now that the initialSettings extent and bounds have been clarified
     return this.onGetBounds(projection, stops);
   }
 
@@ -1381,11 +1382,11 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
     // If a className is defined in the initial settings, set it in the layer options
     // eslint-disable-next-line no-param-reassign
-    if (layerConfig.getInitialSettings()?.className !== undefined) layerOptions.className = layerConfig.getInitialSettings()?.className;
+    if (layerConfig.getInitialSettingsClassName() !== undefined) layerOptions.className = layerConfig.getInitialSettingsClassName();
 
     // If an extent is defined in the initial settings, set it in the layer options
     // eslint-disable-next-line no-param-reassign
-    if (layerConfig.getInitialSettings()?.extent !== undefined) layerOptions.extent = layerConfig.getInitialSettings()?.extent;
+    if (layerConfig.getInitialSettingsExtent() !== undefined) layerOptions.extent = layerConfig.getInitialSettingsExtent();
 
     // If an opacity is defined in the initial settings, set it in the layer options
     if (layerConfig.getInitialSettings()?.states?.opacity !== undefined)
