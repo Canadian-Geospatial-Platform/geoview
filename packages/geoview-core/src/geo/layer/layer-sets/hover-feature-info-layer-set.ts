@@ -1,5 +1,5 @@
 import type { Coordinate } from 'ol/coordinate';
-import { logger } from '@/core/utils/logger';
+import type { QueryType, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
@@ -8,7 +8,7 @@ import type { LayerApi } from '@/geo/layer/layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import type { TypeHoverResultSet, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
-import type { QueryType } from '@/api/types/map-schema-types';
+import { logger } from '@/core/utils/logger';
 
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
@@ -42,7 +42,10 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     // Register a handler when the map pointer stops
     layerApi.mapViewer.onMapPointerStop((mapViewer, payload) => {
       // Query
-      this.queryLayers(payload.pixel);
+      this.queryLayerss(payload.pixel).catch((error: unknown) => {
+        // Log
+        logger.logPromiseFailed('queryLayers in onMapPointerStop in HoverFeatureInfoLayerSet', error);
+      });
     });
   }
 
@@ -91,14 +94,19 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   /**
    * Queries the features at the provided coordinate for all the registered layers.
    * @param {Coordinate} pixelCoordinate - The pixel coordinate where to query the features
+   * @returns {Promise<TypeHoverResultSet>} The hover result set results.
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+   * @async
    */
-  queryLayers(pixelCoordinate: Coordinate): void {
+  async queryLayerss(pixelCoordinate: Coordinate): Promise<TypeHoverResultSet> {
     // FIXME: Watch out for code reentrancy between queries!
 
     // Get the layer visible in order and filter orderedLayerPaths to only include paths that exist in resultSet
     const orderedLayerPaths = this.#getOrderedLayerPaths();
     const layersToQuery = orderedLayerPaths.filter((path) => path in this.resultSet);
+
+    // Prepare to hold all promises of features in the loop below
+    const allPromises: Promise<TypeFeatureInfoEntry[]>[] = [];
 
     // Reinitialize the resultSet
     // Loop on each layer path in the resultSet were there is a layer to query
@@ -132,6 +140,9 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
           false,
           this.#abortControllers[layerPath]
         );
+
+        // Add the promise
+        allPromises.push(promiseResult);
 
         // When the promise is done, propagate to store
         promiseResult
@@ -188,6 +199,12 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
           });
       }
     });
+
+    // Await for the promises to settle
+    await Promise.allSettled(allPromises);
+
+    // Return the results
+    return this.resultSet;
   }
 
   /**
