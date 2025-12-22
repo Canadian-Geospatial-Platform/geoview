@@ -850,6 +850,25 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   }
 
   /**
+   * Utility function allowing to wait for the layer to be loaded at least once.
+   * @param {number} timeout - A timeout for the period to wait for. Defaults to 30,000 ms.
+   * @returns {Promise<boolean>} A Promise that resolves when the layer has been loaded at least once.
+   */
+  waitLoadedStatus(timeout: number = 30000): Promise<boolean> {
+    // Create a promise and wait until the layer is first loaded
+    return whenThisThen(() => {
+      // If the layer is in error, abort the waiting
+      if (this.getLayerStatus() === 'error') {
+        // The layer is in error, throw error
+        throw new LayerStatusErrorError(this.getGeoviewLayerId(), this.getLayerName());
+      }
+
+      // If the layer status is loaded
+      return this.getLayerStatus() === 'loaded';
+    }, timeout);
+  }
+
+  /**
    * Utility function allowing to wait for the layer legend to be fetched.
    * @param {number} timeout - A timeout for the period to wait for. Defaults to 30,000 ms.
    * @returns {Promise<TypeLegend>} A Promise that resolves when the layer legend has been fetched.

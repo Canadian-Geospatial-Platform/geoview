@@ -101,7 +101,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   // The time delay between propagations in the batch layer data array.
   // The longer the delay, the more the layers will have a chance to get in a loaded state before changing the layerDataArray.
   // The longer the delay, the longer it'll take to update the UI. The delay can be bypassed using the layer path bypass method.
-  static #timeDelayBetweenPropagationsForBatch = 1000;
+  static TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH = 1000;
 
   /**
    * Shortcut to get the Feature Info state for a given map id
@@ -303,7 +303,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       mapId,
       layerDataArray,
       this.#batchedPropagationLayerDataArray,
-      this.#timeDelayBetweenPropagationsForBatch,
+      this.TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH,
       featureInfoState.setterActions.setLayerDataArrayBatch,
       'feature-info-processor',
       featureInfoState.layerDataArrayBatchLayerPathBypass,

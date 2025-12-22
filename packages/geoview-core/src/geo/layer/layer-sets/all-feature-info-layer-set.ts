@@ -87,7 +87,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
   /**
    * Helper function used to launch the query on a layer to get all of its feature information.
    * @param {string} layerPath - The layerPath that will be queried
-   * @param {QueryType} queryType - The query's type to perform
+   * @param {QueryType} queryType - The query type, default: AllFeatureInfoLayerSet.QUERY_TYPE.
    * @returns {Promise<TypeFeatureInfoEntry[] | void>} A promise which will hold the result of the query
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */

@@ -144,6 +144,33 @@ export class AssertionValueError extends AssertionError {
 }
 
 /**
+ * Custom error to indicate that a value wasn't as expected.
+ * @extends {AssertionError}
+ */
+export class AssertionValueDifferentError extends AssertionError {
+  /**
+   * Creates a new AssertionValueError.
+   * @param {unknown} actual - Actual value.
+   */
+  constructor(actual: unknown) {
+    // Call the base Error constructor with the provided message
+    super(`Value is '${actual}', and was expected to be different.`, actual, actual);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'AssertionValueDifferentError';
+
+    // Capture the stack trace (V8-specific, e.g., Chrome and Node.js)
+    // Omits the constructor call from the trace for cleaner debugging
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, AssertionValueDifferentError);
+    }
+
+    // Ensure the prototype chain is correct (required in some transpilation targets)
+    Object.setPrototypeOf(this, AssertionValueDifferentError.prototype);
+  }
+}
+
+/**
  * Custom error to indicate that a value is not an array when expected to be.
  * @extends {AssertionError}
  */

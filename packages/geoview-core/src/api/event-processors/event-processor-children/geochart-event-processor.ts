@@ -72,7 +72,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
   // The time delay between propagations in the batch layer data array.
   // The longer the delay, the more the layers will have a chance to get in a loaded state before changing the layerDataArray.
   // The longer the delay, the longer it'll take to update the UI. The delay can be bypassed using the layer path bypass method.
-  static #timeDelayBetweenPropagationsForBatch = 2000;
+  static TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH = 1000;
 
   /**
    * Checks if the Geochart plugin is iniitialized for the given map.
@@ -274,7 +274,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
       mapId,
       layerDataArray,
       this.#batchedPropagationLayerDataArray,
-      this.#timeDelayBetweenPropagationsForBatch,
+      this.TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH,
       geochartState.setterActions.setLayerDataArrayBatch,
       'geochart-processor',
       geochartState.layerDataArrayBatchLayerPathBypass,

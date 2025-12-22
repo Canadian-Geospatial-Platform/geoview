@@ -830,7 +830,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.getMapStateProtected(mapId).setterActions.setCurrentBasemapOptions(basemapOptions);
   }
 
-  static getMapHoverFeatureInfo(mapId: string): TypeHoverFeatureInfo {
+  static getMapHoverFeatureInfo(mapId: string): TypeHoverFeatureInfo | undefined | null {
     return this.getMapStateProtected(mapId).hoverFeatureInfo;
   }
 

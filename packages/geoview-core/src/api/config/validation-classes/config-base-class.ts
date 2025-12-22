@@ -434,13 +434,10 @@ export abstract class ConfigBaseClass {
    * @param {number | undefined} visible - The candidate `visible` value to validate against the current setting, if any.
    */
   initInitialSettingsStatesVisibleFromMetadata(visible: boolean | undefined): void {
-    // If the setting isn't already set and we have something to update it with
-    if (this.#initialSettings?.states?.visible === undefined && visible !== undefined) {
-      // Validate and update the extent initial settings
-      this.#initialSettings ??= {};
-      this.#initialSettings.states ??= {};
-      this.#initialSettings.states.visible ??= visible;
-    }
+    // Validate and update the extent initial settings
+    this.#initialSettings ??= {};
+    this.#initialSettings.states ??= {};
+    this.#initialSettings.states.visible ??= visible;
   }
 
   /**
