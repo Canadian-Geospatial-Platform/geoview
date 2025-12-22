@@ -106,7 +106,7 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly FOREST_INDUSTRY_ICON_LIST: TypeLegendItem[] = [
     {
       geometryType: 'Point',
-      icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAgUlEQVR4AZyOwQ1AQBBFRQcUJCEuDm4U46AADehB4iiO1CCOehAFOHg7sZvhJDb/7cz++dld3/u4fgdTHhhvEqqTvtGEOibZTU+NQaSDFU4IVgFNCyIdPMV5bps96mCDuYPVQVODSAcnnAIGMP+LqAuIdNAYM1sOJazg9A66wbu5AAAA//+f041kAAAABklEQVQDAMXcEBVUfU+0AAAAAElFTkSuQmCC',
+      icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAeklEQVR4AZyPQQ5FQBBE5/87OBFW4iysWbPmLGKFEzkEr0hLRyyE1NPd1TVk/uHl8zlY8oMJZijgkv+iFhWbBGKoQQcpIfhgjhOBSX1mgw9uZrr6s94HR8wVTOoHG3yww2xgAV2mpfZwyAdlaKHLpAw6SDl1D57uw3sHAAD//6HK3mIAAAAGSURBVAMAWeIPFUBE16wAAAAASUVORK5CYII=',
       name: 'Mills',
       isVisible: true,
     },
