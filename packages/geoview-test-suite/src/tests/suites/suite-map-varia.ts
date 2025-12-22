@@ -94,7 +94,7 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
     const pNonQueryableLayerNotInDetails = this.#mapTester.testNonQueryableLayerNotInDetails('geojsonLYR5/polygons.json', [-88, 52]);
 
     // Test layer hoverable state
-    const pLayerHoverableState = this.#mapTester.testLayerHoverableState('geojsonLYR5/polygons.json');
+    const pLayerHoverableState = this.#mapTester.testLayerHoverableState('geojsonLYR5/polygons.json', [-88, 52]);
     await pLayerHoverableState;
 
     // Test details layer selection persistence
