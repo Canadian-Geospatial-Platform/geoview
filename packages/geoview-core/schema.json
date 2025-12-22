@@ -93,7 +93,7 @@
     "TypeValidNavBarProps": {
       "description": "Valid values for the navBar array.",
       "additionalProperties": false,
-      "enum": ["zoom", "fullscreen", "home", "location", "basemap-select", "projection", "drawer"]
+      "enum": ["zoom", "rotation", "fullscreen", "home", "location", "basemap-select", "projection", "drawer"]
     },
     "TypeNavBarProps": {
       "description": "Controls available on the navigation bar.",
@@ -103,7 +103,7 @@
       "items": {
         "$ref": "#/definitions/TypeValidNavBarProps"
       },
-      "default": ["zoom", "fullscreen", "home", "basemap-select"],
+      "default": ["zoom", "rotation", "fullscreen", "home", "basemap-select"],
       "minItems": 0
     },
     "TypeValidFooterBarTabsCoreProps": {
@@ -141,7 +141,7 @@
               "items": {
                 "$ref": "#/definitions/TypeValidFooterBarTabsCoreProps"
               },
-              "minItems": 1,
+              "minItems": 0,
               "default": ["layers", "data-table"],
               "uniqueItems": true
             },

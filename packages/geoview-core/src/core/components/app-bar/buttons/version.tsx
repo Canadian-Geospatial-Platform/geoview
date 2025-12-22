@@ -117,8 +117,8 @@ export default function Version(): JSX.Element {
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
       <Box sx={{ padding: interaction === 'dynamic' ? 'none' : '5px' }}>
         <IconButton
-          id="version-button"
-          aria-controls={open ? `${mapId}-version-dialog` : undefined}
+          id={`version-button-${mapId}`}
+          aria-controls={open ? `version-dialog-${mapId}` : undefined}
           aria-expanded={open ? 'true' : 'false'}
           aria-haspopup="dialog"
           aria-label={t('appbar.version')}
@@ -133,7 +133,7 @@ export default function Version(): JSX.Element {
 
         <Popper
           role="dialog"
-          id={`${mapId}-version-dialog`}
+          id={`version-dialog-${mapId}`}
           aria-labelledby="version-info-title"
           aria-modal="true"
           open={open}

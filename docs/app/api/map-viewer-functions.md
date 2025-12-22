@@ -35,7 +35,7 @@ Below is a comprehensive list of all public functions available on a MapViewer i
 - `setProjection(projectionCode)` - Sets the display projection of the map
 - `rotate(degree)` - Rotates the view to align it at the given degrees
 - `setTheme(displayTheme)` - Sets the display theme of the map
-- `setZoomLevel(zoom)` - Sets the map zoom level
+- `setMapZoomLevel(zoom)` - Sets the map zoom level
 - `setMinZoomLevel(zoom)` - Sets the minimum map zoom level
 - `setMaxZoomLevel(zoom)` - Sets the maximum map zoom level
 - `setExtent(extent)` - Sets map extent

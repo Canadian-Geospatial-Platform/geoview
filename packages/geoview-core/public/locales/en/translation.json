@@ -321,6 +321,7 @@
   },
   "geolocator": {
     "title": "Geolocator",
+    "panelTitle": "Geolocator panel",
     "searchFormLabel": "Geolocator search",
     "searchInputLabel": "Enter keyword(s) (minimum 3 characters)",
     "search": "Search",
@@ -384,7 +385,8 @@
   },
   "footerBar": {
     "resizeTooltip": "Resize",
-    "noTab": "No tab"
+    "noTab": "No tab",
+    "tabsLabel": "Footer panel tabs"
   },
   "toggleAll": {
     "show": "Show All",
