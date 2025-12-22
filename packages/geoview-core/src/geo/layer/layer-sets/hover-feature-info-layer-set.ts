@@ -6,7 +6,11 @@ import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set'
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import type { LayerApi } from '@/geo/layer/layer';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import type { TypeHoverResultSet, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import type {
+  TypeHoverFeatureInfo,
+  TypeHoverResultSet,
+  TypeHoverResultSetEntry,
+} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { logger } from '@/core/utils/logger';
 
@@ -36,13 +40,13 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     // Register a handler when the map pointer moves
     layerApi.mapViewer.onMapPointerMove(() => {
       // This will execute immediately on every pointer move to clear the HoverFeatureInfo
-      MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), null);
+      this.#propagateToStore(null);
     });
 
     // Register a handler when the map pointer stops
     layerApi.mapViewer.onMapPointerStop((mapViewer, payload) => {
       // Query
-      this.queryLayerss(payload.pixel).catch((error: unknown) => {
+      this.queryLayers(payload.pixel).catch((error: unknown) => {
         // Log
         logger.logPromiseFailed('queryLayers in onMapPointerStop in HoverFeatureInfoLayerSet', error);
       });
@@ -93,12 +97,13 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Queries the features at the provided coordinate for all the registered layers.
-   * @param {Coordinate} pixelCoordinate - The pixel coordinate where to query the features
+   * @param {Coordinate} coordinate - The pixel coordinate where to query the features when the queryType is 'at_pixel' or the map coordinate otherwise.
+   * @param {QueryType} queryType - The query type, default: HoverFeatureInfoLayerSet.QUERY_TYPE.
    * @returns {Promise<TypeHoverResultSet>} The hover result set results.
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    * @async
    */
-  async queryLayerss(pixelCoordinate: Coordinate): Promise<TypeHoverResultSet> {
+  async queryLayers(coordinate: Coordinate, queryType: QueryType = HoverFeatureInfoLayerSet.QUERY_TYPE): Promise<TypeHoverResultSet> {
     // FIXME: Watch out for code reentrancy between queries!
 
     // Get the layer visible in order and filter orderedLayerPaths to only include paths that exist in resultSet
@@ -135,8 +140,8 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
         const promiseResult = AbstractLayerSet.queryLayerFeatures(
           this.layerApi,
           layer,
-          HoverFeatureInfoLayerSet.QUERY_TYPE,
-          pixelCoordinate,
+          queryType,
+          coordinate,
           false,
           this.#abortControllers[layerPath]
         );
@@ -177,7 +182,8 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
 
             // If it should update and there is a feature to propagate
             if (shouldUpdate && this.resultSet[layerPath].queryStatus === 'processed' && this.resultSet[layerPath].feature) {
-              MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), this.resultSet[layerPath].feature);
+              // Propagate to the store
+              this.#propagateToStore(this.resultSet[layerPath].feature);
             }
           })
           .catch((error: unknown) => {
@@ -205,6 +211,28 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
 
     // Return the results
     return this.resultSet;
+  }
+
+  /**
+   * Clears the results for the provided layer path.
+   * @param {string} layerPath - The layer path
+   */
+  clearResults(layerPath: string): void {
+    // Edit the result set
+    this.resultSet[layerPath].feature = undefined;
+
+    // Propagate to store
+    this.#propagateToStore(this.resultSet[layerPath].feature);
+  }
+
+  /**
+   * Propagates the resultSetEntry to the store
+   * @param {TypeHoverFeatureInfo} hoverFeatureInfo - The hover info to propagate to the store
+   * @private
+   */
+  #propagateToStore(hoverFeatureInfo: TypeHoverFeatureInfo | undefined): void {
+    // Propagate
+    MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), hoverFeatureInfo);
   }
 
   /**

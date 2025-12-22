@@ -2012,6 +2012,12 @@ export class LayerApi {
     MapEventProcessor.setMapLayerHoverable(this.getMapId(), layer.getLayerPath(), event.hoverable);
     LegendEventProcessor.setLayerHoverableInStore(this.getMapId(), layer.getLayerPath(), event.hoverable);
 
+    // If not hoverable
+    if (!event.hoverable) {
+      // Clear the results when turning the hoverable to false
+      this.hoverFeatureInfoLayerSet.clearResults(layer.getLayerPath());
+    }
+
     // TODO: MINOR - Emit LayerHoverableToggled event here?
     // this.#emitLayerHoverableToggled({ layerPath: layer.getLayerPath(), hoverable: event.hoverable });
   }

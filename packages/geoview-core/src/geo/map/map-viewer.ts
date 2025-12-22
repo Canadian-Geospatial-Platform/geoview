@@ -67,6 +67,7 @@ import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 import type { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
@@ -825,15 +826,64 @@ export class MapViewer {
   }
 
   /**
-   * Simulate a map click eith store and ui update
-   * @param {MapSingleClickEvent} clickCoordinates - The clicked coordinates to simulate.
+   * Simulate a map click and return promises of store update and ui update.
+   * @param {Coordinate} lonlat - The lonlat coordinates to simulate.
    */
-  simulateMapClick(clickCoordinates: MapSingleClickEvent): void {
+  simulateMapClick(lonlat: Coordinate): SimulatedMapClick {
+    // Transform lonlat to map projection
+    const projCode = this.getProjection().getCode();
+    const projected = Projection.transformPoints([lonlat], Projection.PROJECTION_NAMES.LONLAT, projCode)[0];
+
+    // Create the clickCoordinates object
+    const clickCoordinates = {
+      lonlat: lonlat,
+      pixel: [0, 0],
+      projected,
+      dragging: false,
+    };
+
     // Update store... this will not emit the event becaus only when WCAG mode is enable
     MapEventProcessor.setClickCoordinates(this.mapId, clickCoordinates);
 
+    // The resolve of the query
+    let resolveQuery: () => void;
+    const promiseQuery = new Promise<void>((resolve) => {
+      resolveQuery = resolve;
+    });
+
+    // The resolve of the query once batched
+    let resolveQueryBatched: () => void;
+    const promiseQueryBatched = new Promise<void>((resolve) => {
+      resolveQueryBatched = resolve;
+    });
+
+    // Register one-time listener for query completion
+    const handleQueryEnded = (): void => {
+      // Unregister the listener immediately
+      this.layer.featureInfoLayerSet.offQueryEnded(handleQueryEnded);
+
+      // Resolve the promise about the completion of the query
+      resolveQuery();
+
+      // Wait for UI batch propagation
+      delay(FeatureInfoEventProcessor.TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH)
+        .then(() => {
+          // Now resolve the promise about the completion of the query and batched through the UI
+          resolveQueryBatched();
+        })
+        .catch((error: unknown) => {
+          logger.logPromiseFailed('in delay in simulateMapClick in testDetailsLayerSelectionPersistence', error);
+        });
+    };
+
+    // Register the handler before clicking
+    this.layer.featureInfoLayerSet.onQueryEnded(handleQueryEnded);
+
     // Emit the event is done here, not from the processor to avoid circular references
     this.#emitMapSingleClick(clickCoordinates);
+
+    // Return the simulated map click information
+    return { promiseQuery, promiseQueryBatched };
   }
 
   /**
@@ -2438,3 +2488,11 @@ export type MapLanguageChangedEvent = {
  * Define a delegate for the event handler function signature
  */
 export type MapLanguageChangedDelegate = EventDelegateBase<MapViewer, MapLanguageChangedEvent, void>;
+
+/**
+ * Define a return type for a map click simulation to be able to await on different promises.
+ */
+export type SimulatedMapClick = {
+  promiseQuery: Promise<void>;
+  promiseQueryBatched: Promise<void>;
+};
