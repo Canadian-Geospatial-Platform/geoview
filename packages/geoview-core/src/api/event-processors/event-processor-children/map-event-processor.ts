@@ -166,10 +166,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.setInteraction(mapId, store.getState().mapState.interaction);
   }
 
-  // **********************************************************
-  // Static functions for Typescript files to access store actions
-  // **********************************************************
-
   // #region
   /**
    * Shortcut to get the Map state for a given map id
