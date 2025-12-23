@@ -33,9 +33,9 @@ export abstract class Projection {
     LCC: 'EPSG:3978',
     3979: 'EPSG:3979',
     42101: 'EPSG:42101',
-    102100: 'EPSG:102100', // TODO: Minor - The official name of this projection is ESRI:102100 (not EPSG:102100). However, for the purpose of simplification in GeoView code base, we name it with EPSG prefix.
-    102184: 'EPSG:102184', // TODO: Minor - The official name of this projection is ESRI:102184 (not EPSG:102184). However, for the purpose of simplification in GeoView code base, we name it with EPSG prefix.
-    102190: 'EPSG:102190', // TODO: Minor - The official name of this projection is ESRI:102190 (not EPSG:102190). However, for the purpose of simplification in GeoView code base, we name it with EPSG prefix.
+    102100: 'EPSG:102100', // TODO: MINOR - The official name of this projection is ESRI:102100 (not EPSG:102100). However, for the purpose of simplification in GeoView code base, we name it with EPSG prefix.
+    102184: 'EPSG:102184', // TODO: MINOR - The official name of this projection is ESRI:102184 (not EPSG:102184). However, for the purpose of simplification in GeoView code base, we name it with EPSG prefix.
+    102190: 'EPSG:102190', // TODO: MINOR - The official name of this projection is ESRI:102190 (not EPSG:102190). However, for the purpose of simplification in GeoView code base, we name it with EPSG prefix.
     WM: 'EPSG:3857',
     3857: 'EPSG:3857',
     4269: 'EPSG:4269',
@@ -168,11 +168,6 @@ export abstract class Projection {
    * @static
    */
   static transformExtentFromProj(extent: Extent, source: OLProjection, destination: OLProjection, stops?: number | undefined): Extent {
-    // This is included for certain outliers.
-    // TODO Refactor: invalid extents should be handled before this point, test and remove - 5a65ad7c-561a-466a-8375-8d876624df9d
-    if (typeof extent[0] !== 'number')
-      return olTransformExtent([-180, 90, 180, 90], Projection.PROJECTION_NAMES.LONLAT, destination, stops);
-
     // If different projections
     if (source.getCode() !== destination.getCode()) {
       // Project
@@ -322,10 +317,10 @@ export abstract class Projection {
       if (typeof projection === 'object' && 'wkid' in projection) {
         // Redirect
         return this.#addProjectionIfMissingUsingObj(projection);
-      } else {
-        // Redirect
-        return this.#addProjectionIfMissingUsingString(projection);
       }
+
+      // Redirect
+      return this.#addProjectionIfMissingUsingString(projection);
     }
 
     // Nothing to do

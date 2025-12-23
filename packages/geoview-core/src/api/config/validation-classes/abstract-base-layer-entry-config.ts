@@ -13,6 +13,7 @@ import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { NoPrimaryKeyFieldError } from '@/core/exceptions/geoview-exceptions';
 import { GeoUtilities } from '@/geo/utils/utilities';
+import { deepMerge } from '@/core/utils/utilities';
 
 export interface AbstractBaseLayerEntryConfigProps extends ConfigBaseClassProps {
   /** Source settings to apply to the GeoView layer source at creation time. */
@@ -27,14 +28,12 @@ export interface AbstractBaseLayerEntryConfigProps extends ConfigBaseClassProps 
  * Base type used to define a GeoView layer to display on the map.
  */
 export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
-  // TODO: This source attribute is responsible for problems. Change to a getSource() and setSource().
-  // TO.DOCONT: However, to do so, we must fix the other major issue with TypeGeoviewLayerConfig and TypeLayerEntryConfig and the classes being created with 'fake classes' in their constructors.
-  /** Source settings to apply to the GeoView layer source at creation time. */
-  source: TypeBaseSourceInitialConfig;
-
   /** The listOfLayerEntryConfig attribute is not used by child of AbstractBaseLayerEntryConfig. */
   // TODO: Refactor - This attribute should be removed and logic applied using OO pattern once the constructor is cleaned up.
   declare listOfLayerEntryConfig: never;
+
+  /** Source settings to apply to the GeoView layer source at creation time. */
+  #source: TypeBaseSourceInitialConfig;
 
   /** The metadata associated with the service */
   #serviceMetadata?: unknown;
@@ -60,8 +59,9 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /** The calculated filter equation */
   #filterEquation?: FilterNodeType[];
 
-  /** Indicates if filter is on/off */
-  // TODO: Cleanup - Get rid of this attribute as it doesn't seem to be used (always false as the setLegendFilterIsOff is never called)
+  /** Indicates if filter is on/off
+   * @deprecated This attribute doesn't seem to be used (it's always false and doesn't change)
+   */
   #legendFilterIsOff: boolean = false;
 
   /**
@@ -76,14 +76,14 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     super(layerConfig, schemaTag, entryType);
 
     // Keep attribute properties
-    this.source = layerConfig.source || {};
-    this.source.featureInfo = layerConfig.source?.featureInfo || {};
+    this.#source = AbstractBaseLayerEntryConfig.getClassOrTypeSource(layerConfig) || {};
+    this.#source.featureInfo = AbstractBaseLayerEntryConfig.getClassOrTypeFeatureInfo(layerConfig) || {};
     this.#layerStyle = AbstractBaseLayerEntryConfig.getClassOrTypeLayerStyle(layerConfig);
     this.#layerFilter = AbstractBaseLayerEntryConfig.getClassOrTypeLayerFilter(layerConfig);
     this.#attributions = AbstractBaseLayerEntryConfig.getClassOrTypeLayerAttributions(layerConfig);
 
     // Initialize the dataAccessPath
-    this.source.dataAccessPath ??= this.layerEntryProps.geoviewLayerConfig.metadataAccessPath;
+    this.#source.dataAccessPath ??= this.layerEntryProps.geoviewLayerConfig.metadataAccessPath;
   }
 
   // #region OVERRIDES
@@ -102,18 +102,27 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * @param {string} dataAccessPath - The path string used to access data.
    */
   protected override onSetDataAccessPath(dataAccessPath: string): void {
-    this.source.dataAccessPath = dataAccessPath;
+    this.#source.dataAccessPath = dataAccessPath;
   }
 
   /**
    * Overridable function get the geometry type based on the geometry field type.
    * It uses the WFS/WMS OGC standard (GML) to interpret the geometry type.
-   * @returns {TypeStyleGeometry} The geometry type.
+   * @returns {TypeStyleGeometry | undefined} The geometry type, if it could be determined
    * @throws {NotSupportedError} When the geometry type is not supported.
    */
-  protected onGetGeometryType(): TypeStyleGeometry {
-    // Default behavior is to get the geometry type using WFS/WMS OGC standard (GML)
-    return GeoUtilities.wfsConvertGeometryTypeToOLGeometryType(this.getGeometryField()?.type);
+  protected onGetGeometryType(): TypeStyleGeometry | undefined {
+    // Get the geometry field
+    const geometryField = this.getGeometryField();
+
+    // If found
+    if (geometryField) {
+      // Check the geometry type using WFS/WMS OGC standard (GML)
+      return GeoUtilities.wfsConvertGeometryTypeToOLGeometryType(geometryField.type);
+    }
+
+    // None
+    return undefined;
   }
 
   /**
@@ -130,7 +139,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     // Copy values
     serialized.initialSettings = this.getInitialSettings();
     serialized.attributions = this.getAttributions();
-    serialized.source = this.source;
+    serialized.source = this.getSource();
 
     // Return it
     return serialized;
@@ -181,24 +190,37 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
-   * The TypeStyleGeometries associated with the style as could be read from the layer config metadata.
-   * @returns {TypeStyleGeometry[]} The array of TypeStyleGeometry
+   * Initializes the layer style configuration by filling the blanks in our config with the information from the metadata
+   * @param {TypeLayerStyleConfig} layerStyleMetadata - The layer style metadata to use to help fill the blanks in our layer style config.
    */
-  getTypeGeometries(): TypeStyleGeometry[] {
-    return Object.keys(this.#layerStyle || {}) as TypeStyleGeometry[];
+  initLayerStyleFromMetadata(layerStyleMetadata: TypeLayerStyleConfig | undefined): void {
+    this.#layerStyle = deepMerge(layerStyleMetadata, this.#layerStyle);
   }
 
   /**
-   * The first TypeStyleSetting associated with the TypeStyleGeometry associated with the style as could be read from the layer config metadata.
-   * @returns {TypeStyleSettings[]} The array of TypeStyleSettings
+   * The TypeLayerStyleSettings associated with the TypeStyleGeometry as could be read from the layer config metadata.
+   * @returns {TypeLayerStyleSettings | undefined} The layer style setting associated with the geometry type
    */
-  getFirstStyleSettings(): TypeLayerStyleSettings | undefined {
-    // Get the type geometries
-    const styles = this.getTypeGeometries();
+  getLayerStyleSettings(): TypeLayerStyleSettings | undefined {
+    // Get the layer style
+    const layerStyle = this.getLayerStyle();
 
-    // If at least one, get the first one
-    if (styles.length > 0) {
-      return this.#layerStyle![styles[0]];
+    // If has a layer style
+    if (layerStyle) {
+      // If only one style
+      if (Object.keys(layerStyle).length === 1) {
+        // Take the only one
+        return Object.values(layerStyle)[0];
+      }
+
+      // Take the geometry type
+      const geometryType = this.getGeometryType();
+
+      // If any
+      if (geometryType) {
+        // Take the style based on the geometry type
+        return layerStyle?.[geometryType];
+      }
     }
 
     // None
@@ -291,17 +313,10 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Gets the layer legend filter is off flag
    * @returns {boolean} The legend filter is off flag
+   * @deprecated This getter doesn't seem to be used as its corresponding attribute is always false and there's no setters
    */
   getLegendFilterIsOff(): boolean {
-    return this.#legendFilterIsOff || false;
-  }
-
-  /**
-   * Sets the layer legend filter is off flag
-   * @param {boolean} legendFilterIsOff - The legend filter is off flag
-   */
-  setLegendFilterIsOff(legendFilterIsOff: boolean): void {
-    this.#legendFilterIsOff = legendFilterIsOff;
+    return this.#legendFilterIsOff;
   }
 
   /**
@@ -309,7 +324,32 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * @returns {TypeBaseSourceInitialConfig} The source.
    */
   getSource(): TypeBaseSourceInitialConfig {
-    return this.source;
+    return this.#source;
+  }
+
+  /**
+   * Initializes the source configuration by filling the blanks in our config with the information from the metadata
+   * @param {TypeBaseSourceInitialConfig | undefined} sourceMetadata - The source metadata to use to help fill the blanks in our source config.
+   */
+  initSource(sourceMetadata: TypeBaseSourceInitialConfig | undefined): void {
+    this.#source = deepMerge(sourceMetadata, this.#source);
+  }
+
+  /**
+   * Returns a shallow-copy of the source object.
+   * @returns {TypeBaseSourceInitialConfig} The shallow-copy of the source object.
+   */
+  cloneSource(): TypeBaseSourceInitialConfig {
+    // Clone the source object
+    return { ...this.getSource() };
+  }
+
+  /**
+   * Indicates whether the source has a data access path defined.
+   * @returns {boolean} `true` if a data access path is present; otherwise, `false`.
+   */
+  hasDataAccessPath(): boolean {
+    return !!this.getSource().dataAccessPath;
   }
 
   /**
@@ -336,19 +376,25 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
+   * Overrides the data access path using the value provided by metadata.
+   * If the metadata source does not define a data access path, no action is taken.
+   * @param {TypeBaseSourceInitialConfig | undefined} metadataSource
+   * The metadata source configuration containing a data access path.
+   */
+  overrideDataAccessPathFromMetadata(metadataSource: TypeBaseSourceInitialConfig | undefined): void {
+    // If the source dataAccessPath doesn't exist
+    if (!metadataSource?.dataAccessPath) return;
+
+    // Favor the metadata source dataAccessPath over the automatically generated dataAccessPath
+    this.setDataAccessPath(metadataSource.dataAccessPath);
+  }
+
+  /**
    * Gets the source feature info object.
    * @returns {TypeFeatureInfoLayerConfig} The feature info.
    */
   getFeatureInfo(): TypeFeatureInfoLayerConfig {
     return this.getSource().featureInfo!;
-  }
-
-  /**
-   * Sets the source feature info object.
-   * @param {TypeFeatureInfoLayerConfig} featureInfo - The feature info.
-   */
-  setFeatureInfo(featureInfo: TypeFeatureInfoLayerConfig): void {
-    this.source.featureInfo = featureInfo;
   }
 
   /**
@@ -364,7 +410,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * @param {TypeOutfields[]} outfields - The outfields.
    */
   setOutfields(outfields: TypeOutfields[]): void {
-    this.source.featureInfo!.outfields = outfields;
+    this.getFeatureInfo().outfields = outfields;
   }
 
   /**
@@ -372,7 +418,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * @returns {boolean} True if the outfield representing the primary key exists, false otherwise.
    */
   hasOutfieldsPK(): boolean {
-    return !!this.getFeatureInfo().outfields?.find((outfield) => outfield.type === 'oid');
+    return !!this.getOutfields()?.find((outfield) => outfield.type === 'oid');
   }
 
   /**
@@ -382,7 +428,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    */
   getOutfieldsPK(): TypeOutfields {
     // Get the oid field
-    const outfieldOID = this.getFeatureInfo().outfields?.find((outfield) => outfield.type === 'oid');
+    const outfieldOID = this.getOutfields()?.find((outfield) => outfield.type === 'oid');
 
     // If not found
     if (!outfieldOID) throw new NoPrimaryKeyFieldError(this.layerPath);
@@ -392,9 +438,24 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
+   * Gets the field name representing the primary key (OID) if available,
+   * otherwise returns the provided default field name.
+   * @param {string} defaultField - The field name to return if no OID field is found.
+   * @returns {string} The primary key (OID) field name or the provided default value.
+   */
+  getOutfieldsPKNameOrDefault(defaultField: string): string {
+    // Get the oid field if any
+    const outfieldOID = this.getOutfields()?.find((outfield) => outfield.type === 'oid');
+
+    // Return if found or the default
+    return outfieldOID?.name ?? defaultField;
+  }
+
+  /**
    * Initializes any outfield aliases that's undefined using the name property as default.
    */
   initOutfieldsAliases(): void {
+    // For each outfield
     this.getOutfields()?.forEach((outfield) => {
       // eslint-disable-next-line no-param-reassign
       outfield.alias ??= outfield.name;
@@ -414,7 +475,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * @param {string | undefined} nameField - The name field.
    */
   setNameField(nameField: string | undefined): void {
-    this.source.featureInfo!.nameField = nameField;
+    this.getFeatureInfo().nameField = nameField;
   }
 
   /**
@@ -422,14 +483,14 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * @param {string | undefined} nameField - The name field.
    */
   initNameField(nameField: string | undefined): void {
-    this.source.featureInfo!.nameField ??= nameField;
+    this.getFeatureInfo().nameField ??= nameField;
   }
 
   /**
    * Gets the source queryable value.
    * @returns {boolean | undefined} The source queryable value.
    */
-  getQueryable(): boolean | undefined {
+  getQueryableSource(): boolean | undefined {
     return this.getFeatureInfo().queryable;
   }
 
@@ -437,7 +498,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * Gets the source queryable value. Defaults to true when couldn't be determined.
    * @returns {boolean} The source queryable value, defaulted if necessary.
    */
-  getQueryableDefaulted(): boolean {
+  getQueryableSourceDefaulted(): boolean {
     return this.getFeatureInfo().queryable ?? true; // default: true
   }
 
@@ -445,16 +506,16 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * Sets the source queryable in the source object. The source.featureInfo object must already exist.
    * @param {boolean | undefined} queryable - The source queryable value.
    */
-  setQueryable(queryable: boolean | undefined): void {
-    this.source.featureInfo!.queryable = queryable;
+  setQueryableSource(queryable: boolean | undefined): void {
+    this.getFeatureInfo().queryable = queryable;
   }
 
   /**
    * Sets the source queryable in the source object only if it's not already set. The source.featureInfo object must already exist.
    * @param {boolean} queryable - The source queryable value.
    */
-  initQueryable(queryable: boolean | undefined): void {
-    this.source.featureInfo!.queryable ??= queryable;
+  initQueryableSource(queryable: boolean | undefined): void {
+    this.getFeatureInfo().queryable ??= queryable;
   }
 
   /**
@@ -475,15 +536,41 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Returns the OpenLayers-compatible geometry type of this layer's geometry field.
-   * @returns {TypeStyleGeometry} The OpenLayers geometry type (e.g., 'Point', 'LineString', 'Polygon')
+   * @returns {TypeStyleGeometry | undefined} The OpenLayers geometry type (e.g., 'Point', 'LineString', 'Polygon'), if it could be determined.
    */
-  getGeometryType(): TypeStyleGeometry {
+  getGeometryType(): TypeStyleGeometry | undefined {
     return this.onGetGeometryType();
   }
 
   // #endregion METHODS
 
   // #region STATIC METHODS
+
+  /**
+   * Helper function to support when a layerConfig is either a class instance or a regular json object.
+   * @param {ConfigAbstractBaseClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
+   * @returns {string | undefined} The source or undefined.
+   */
+  static getClassOrTypeSource(layerConfig: ConfigClassOrType | undefined): TypeBaseSourceInitialConfig | undefined {
+    if (layerConfig instanceof AbstractBaseLayerEntryConfig) {
+      return layerConfig.getSource();
+    }
+    // Try to narrow the type and return, worst case it will be undefined
+    return (layerConfig as AbstractBaseLayerEntryConfigProps)?.source;
+  }
+
+  /**
+   * Helper function to support when a layerConfig is either a class instance or a regular json object.
+   * @param {ConfigAbstractBaseClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
+   * @returns {string | undefined} The feature info or undefined.
+   */
+  static getClassOrTypeFeatureInfo(layerConfig: ConfigClassOrType | undefined): TypeFeatureInfoLayerConfig | undefined {
+    if (layerConfig instanceof AbstractBaseLayerEntryConfig) {
+      return layerConfig.getFeatureInfo();
+    }
+    // Try to narrow the type and return, worst case it will be undefined
+    return (layerConfig as AbstractBaseLayerEntryConfigProps)?.source?.featureInfo;
+  }
 
   /**
    * Helper function to support when a layerConfig is either a class instance or a regular json object.

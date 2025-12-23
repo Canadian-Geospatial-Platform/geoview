@@ -166,6 +166,7 @@ export default [
       'no-plusplus': 'off',
       'no-param-reassign': ['error', { props: true }],
       'no-nested-ternary': 'error',
+      "no-else-return": "error",
       'max-classes-per-file': ['error', 1],
       'no-underscore-dangle': ['error', { enforceInMethodNames: true }],
       'func-names': ['error', 'as-needed'],

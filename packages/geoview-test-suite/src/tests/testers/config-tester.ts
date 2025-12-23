@@ -1156,8 +1156,8 @@ export class ConfigTester extends GVAbstractTester {
     // Expected config
     const expectedResults = {
       geoviewLayer: { highlight: false, zoom: false },
-      group: { highlight: false, remove: false, zoom: false },
-      child: { highlight: true, remove: false, zoom: false },
+      group: { remove: false },
+      child: { highlight: true, remove: false },
     };
 
     // Perform the test
@@ -1192,11 +1192,11 @@ export class ConfigTester extends GVAbstractTester {
         Test.assertJsonObject(result.initialSettings?.controls, expectedResults.geoviewLayer);
 
         test.addStep('Verifying group layer controls...');
-        Test.assertJsonObject(result.listOfLayerEntryConfig?.[0].getInitialSettings().controls, expectedResults.group);
+        Test.assertJsonObject(result.listOfLayerEntryConfig?.[0].getInitialSettings()?.controls, expectedResults.group);
 
         test.addStep('Verifying child layer controls...');
         Test.assertJsonObject(
-          result.listOfLayerEntryConfig?.[0].listOfLayerEntryConfig?.[0].getInitialSettings().controls,
+          result.listOfLayerEntryConfig?.[0].listOfLayerEntryConfig?.[0].getInitialSettings()?.controls,
           expectedResults.child
         );
       }

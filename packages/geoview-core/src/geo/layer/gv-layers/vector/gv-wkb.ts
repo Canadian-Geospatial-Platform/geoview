@@ -6,6 +6,7 @@ import type { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { Projection } from '@/geo/utils/projection';
 import { GeoUtilities } from '@/geo/utils/utilities';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Manages a WKB layer.
@@ -52,7 +53,10 @@ export class GVWKB extends AbstractGVVector {
     // If projection is defined
     if (projection) {
       // After a refresh, reload the WKB Source if any
-      this.updateWkbSource(projection);
+      this.updateWkbSource(projection).catch((error: unknown) => {
+        // Log promise failed
+        logger.logPromiseFailed('in updateWkbSource in GV-WKB.onRefresh()', error);
+      });
     }
   }
 
@@ -65,7 +69,7 @@ export class GVWKB extends AbstractGVVector {
    * @param {WkbObject | string} wkb - The WKB object.
    * @param {OLProjection} projection - The output projection.
    */
-  setWkbSource(wkb: WKBObject | string, projection: OLProjection): void {
+  async setWkbSource(wkb: WKBObject | string, projection: OLProjection): Promise<void> {
     // Convert string to JSON if necessary
     const wkbObject = typeof wkb === 'string' ? JSON.parse(wkb) : wkb;
 
@@ -74,6 +78,9 @@ export class GVWKB extends AbstractGVVector {
 
     // Read the EPSG
     const dataEPSG = GeoUtilities.readEPSGOfGeoJSON(wkbObject) || Projection.PROJECTION_NAMES.LONLAT; // default: read the features as LONLAT
+
+    // Check if we have it in Projection and try adding it if we're missing it
+    await Projection.addProjectionIfMissing(dataEPSG);
 
     // Read the features
     const features = GeoUtilities.readFeaturesFromWKB(wkbObject, {
@@ -100,12 +107,15 @@ export class GVWKB extends AbstractGVVector {
    * Updates the WKB object, if any, to reproject the features into the new provided projection.
    * @param {OLProjection} projection - The projection to project the wkb source features into.
    */
-  updateWkbSource(projection: OLProjection): void {
+  updateWkbSource(projection: OLProjection): Promise<void> {
     // If a custom geojson is defined
     if (this.#wkbSource) {
       // Redirect
-      this.setWkbSource(this.#wkbSource, projection);
+      return this.setWkbSource(this.#wkbSource, projection);
     }
+
+    // Nothing to do
+    return Promise.resolve();
   }
 
   // #endregion METHODS

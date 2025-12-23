@@ -10,8 +10,12 @@ import { AppEventProcessor } from 'geoview-core/api/event-processors/event-proce
 import { UIEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/ui-event-processor';
 import type { Coordinate } from 'ol/coordinate';
 import { FeatureInfoEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/feature-info-event-processor';
-import type { TypeFeatureInfoResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/feature-info-state';
-import { Projection } from 'geoview-core/geo/utils/projection';
+import type {
+  TypeFeatureInfoResultSetEntry,
+  TypeHoverFeatureInfo,
+} from 'geoview-core/core/stores/store-interface-and-intial-values/feature-info-state';
+import { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
+import { LayerWrongTypeError } from 'geoview-core/core/exceptions/layer-exceptions';
 
 /**
  * Main Map testing class.
@@ -30,7 +34,7 @@ export class MapTester extends GVAbstractTester {
    * Tests the map state upon initial loading.
    * @returns {Promise<Test<TypeMapState>>} A Promise that resolves with the Test containing the map state.
    */
-  testMapState(): Promise<Test<TypeMapState>> {
+  testInitialMapState(): Promise<Test<TypeMapState>> {
     // Get the projection
     const { projection } = this.#getMapConfigFromStore().map.viewSettings;
 
@@ -38,13 +42,6 @@ export class MapTester extends GVAbstractTester {
     const expectedConfig: Record<string, unknown> = {
       currentProjection: projection,
     };
-
-    // GV Hard to test the zoom, because of other factors like view extent and such affecting the zoom compared to the config.
-    // // If the initial view had a specific zoom
-    // const zoom = this.getMapConfigFromStore().map.viewSettings.initialView?.zoomAndCenter?.[0];
-    // if (zoom) {
-    //   expectedConfig.currentZoom = zoom;
-    // }
 
     // Test the map state
     return this.test(
@@ -557,33 +554,30 @@ export class MapTester extends GVAbstractTester {
    * 1. Gets the first layer from the map
    * 2. Sets the layer as non-queryable
    * 3. Simulates a map click
-   * 4. Verifies that the layer does not appear in the details state
-   *
-   * @returns {Promise<Test<number>>} A Promise that resolves with the Test containing the number of layers in details state.
+   * 4. Verifies that the layer results does not appear in the details state
+   * @returns {Promise<Test<LayerWithBeforeAfterFeature<AbstractGVLayer>>>} A Promise that resolves with the Test containing the number of layers in details state.
    */
-  testNonQueryableLayerNotInDetails(layerPath: string, lonlat: Coordinate): Promise<Test<TypeFeatureInfoResultSetEntry[]>> {
+  testNonQueryableLayerNotInDetails(layerPath: string, lonlat: Coordinate): Promise<Test<LayerWithBeforeAfterFeature<AbstractGVLayer>>> {
     return this.test(
       'Test non-queryable layer not in details after map click',
       async (test) => {
-        // Check if the layer exists in the feature info layer set
-        const { featureInfoLayerSet } = this.getMapViewer().layer;
-        if (!featureInfoLayerSet.resultSet[layerPath]) {
-          throw new TestError(
-            `Layer '${layerPath}' not found in featureInfoLayerSet. Available layers: ${Object.keys(featureInfoLayerSet.resultSet).join(', ')}`
-          );
-        }
+        // Get the layer
+        const layer = this.getLayerApi().getGeoviewLayer(layerPath);
 
-        // If listener not enabled, enable it
-        test.addStep(`Enabling click listener for layer '${layerPath}'...`);
-        if (!featureInfoLayerSet.isClickListenerEnabled(layerPath)) {
-          featureInfoLayerSet.enableClickListener(layerPath);
-        }
+        // If not an AbstractGVLayer (regular layer)
+        if (!(layer instanceof AbstractGVLayer)) throw new LayerWrongTypeError(layerPath, layer.getLayerName());
+
+        // The layer should be initially queryable
+        if (!layer.getQueryable()) throw new TestError(`False precondition, the layer ${layerPath} wasn't initially queryable.`);
+
+        // Make sure the map is at initial extent
+        // GV: The layer needs to be visible (in viewport) for the query to work
+        test.addStep(`Make sure the map is at initial extent...`);
+        await MapEventProcessor.zoomToInitialExtent(this.getMapId());
 
         // Perform a map click using the feature info layer set
-        // GV: The layer needs to be visible (in viewport) for the query to work
         test.addStep(`Perform query operation at given coordinates...`);
-        await MapEventProcessor.zoomToInitialExtent(this.getMapId());
-        await featureInfoLayerSet.queryLayers(lonlat);
+        await this.getLayerApi().featureInfoLayerSet.queryLayers(lonlat);
 
         // Check if there is feature selected from the layer
         test.addStep(`Checking for features from layer '${layerPath}'...`);
@@ -592,89 +586,144 @@ export class MapTester extends GVAbstractTester {
         // Store a deep copy of the data before clearing to preserve it
         const layerDataOn = layerDataOnTemp ? { ...layerDataOnTemp } : undefined;
 
-        // Clear result set then set layer non queryable
-        test.addStep(`Clearing feature info results and setting layer '${layerPath}' as non-queryable...`);
-        FeatureInfoEventProcessor.resetResultSet(this.getMapId(), layerPath);
-        featureInfoLayerSet.disableClickListener(layerPath);
+        // Set layer non queryable, this will also clear the result set automatically
+        test.addStep(`Setting layer '${layerPath}' as non-queryable...`);
+        layer.setQueryable(false);
 
         // Perform a map click using the feature info layer set
         test.addStep(`Perform query operation at given coordinates...`);
-        await featureInfoLayerSet.queryLayers(lonlat);
+        await this.getLayerApi().featureInfoLayerSet.queryLayers(lonlat);
 
         // Check if there is feature selected from the layer
         test.addStep(`Checking for features from layer '${layerPath}'...`);
-        const layerDataOff = FeatureInfoEventProcessor.findLayerDataFromLayerDataArray(this.getMapId(), layerPath);
+        const layerDataOffTemp = FeatureInfoEventProcessor.findLayerDataFromLayerDataArray(this.getMapId(), layerPath);
 
-        return [layerDataOn!, layerDataOff!];
+        // Store a deep copy of the data before clearing to preserve it
+        const layerDataOff = layerDataOffTemp ? { ...layerDataOffTemp } : undefined;
+
+        // Set layer queryable again
+        test.addStep(`Setting layer '${layerPath}' as queryable again...`);
+        layer.setQueryable(true);
+
+        // Perform a map click using the feature info layer set
+        test.addStep(`Perform query operation at given coordinates...`);
+        await this.getLayerApi().featureInfoLayerSet.queryLayers(lonlat);
+
+        // Check if there is feature selected from the layer
+        test.addStep(`Checking for features from layer '${layerPath}'...`);
+        const layerDataOn2Temp = FeatureInfoEventProcessor.findLayerDataFromLayerDataArray(this.getMapId(), layerPath);
+
+        // Store a deep copy of the data before clearing to preserve it
+        const layerDataOn2 = layerDataOn2Temp ? { ...layerDataOn2Temp } : undefined;
+
+        // Return the test results
+        return { layer, results: [layerDataOn, layerDataOff, layerDataOn2] };
       },
       (test, result) => {
-        const [layerDataOn, layerDataOff] = result;
-
         test.addStep('Verifying layer data features when queryable...');
-        Test.assertIsArray(layerDataOn.features);
-        Test.assertIsArrayLengthEqual(layerDataOn.features, 2);
+        Test.assertIsArray(result.results[0]?.features);
+        Test.assertIsArrayLengthEqual(result.results[0].features, 2);
 
         test.addStep('Verifying no layer data features when non-queryable...');
-        Test.assertIsArray(layerDataOff.features);
-        Test.assertIsArrayLengthEqual(layerDataOff.features, 0);
+        Test.assertIsArray(result.results[1]?.features);
+        Test.assertIsArrayLengthEqual(result.results[1].features, 0);
 
-        // Set back the enable state on layer
-        test.addStep(`Enabling click listener for layer '${layerPath}'...`);
-        this.getMapViewer().layer.featureInfoLayerSet.enableClickListener(layerPath);
+        test.addStep('Verifying layer data features when queryable again...');
+        Test.assertIsArray(result.results[2]?.features);
+        Test.assertIsArrayLengthEqual(result.results[2].features, 2);
+      },
+      (test, result) => {
+        // Make sure to turn it back to queryable
+        result.layer.setQueryable(true);
       }
     );
   }
 
   /**
-   * Tests that layer hoverable state is properly reflected in hoverFeatureInfoLayerSet.
+   * Tests that non-hoverable layers do not appear in hover state when hovering on the map.
    * This test performs the following operations:
-   * 1. Verifies the layer is hoverable in the hoverFeatureInfoLayerSet
-   * 2. Disables hoverable on the layer
-   * 3. Verifies the layer is now disabled in the hoverFeatureInfoLayerSet resultSet
-   *
+   * 1. Gets the first layer from the map
+   * 2. Sets the layer as non-hoverable
+   * 3. Simulates a map hover
+   * 4. Verifies that the layer results does not appear in the hover state
    * @param {string} layerPath - The layer path to test
-   * @returns {Promise<Test<{enabledBefore: boolean | undefined, enabledAfter: boolean | undefined}>>} A Promise that resolves with the Test containing the hover states.
+   * @returns {Promise<Test<LayerWithBeforeAfterHover<AbstractGVLayer>>>} A Promise that resolves with the Test containing the hover states.
    */
-  testLayerHoverableState(layerPath: string): Promise<Test<{ enabledBefore: boolean | undefined; enabledAfter: boolean | undefined }>> {
+  testLayerHoverableState(layerPath: string, lonlat: Coordinate): Promise<Test<LayerWithBeforeAfterHover<AbstractGVLayer>>> {
     return this.test(
       'Test layer hoverable state in hoverFeatureInfoLayerSet',
-      (test) => {
-        // Check if the layer exists in the hover feature info layer set
-        const { hoverFeatureInfoLayerSet } = this.getMapViewer().layer;
-        if (!hoverFeatureInfoLayerSet.resultSet[layerPath]) {
-          throw new TestError(
-            `Layer '${layerPath}' not found in hoverFeatureInfoLayerSet. Available layers: ${Object.keys(hoverFeatureInfoLayerSet.resultSet).join(', ')}`
-          );
-        }
+      async (test) => {
+        // Get the layer
+        const layer = this.getLayerApi().getGeoviewLayer(layerPath);
 
-        // If listener not enabled, enable it
-        test.addStep(`Enabling hover listener for layer '${layerPath}'...`);
-        if (!hoverFeatureInfoLayerSet.isHoverListenerEnabled(layerPath)) {
-          hoverFeatureInfoLayerSet.enableHoverListener(layerPath);
-        }
+        // If not an AbstractGVLayer (regular layer)
+        if (!(layer instanceof AbstractGVLayer)) throw new LayerWrongTypeError(layerPath, layer.getLayerName());
 
-        // Get initial hoverable state from result set
-        test.addStep(`Checking initial hoverable state for layer '${layerPath}'...`);
-        const enabledBefore = hoverFeatureInfoLayerSet.resultSet[layerPath].eventListenerEnabled;
-        test.addStep(`Layer hoverable state before: ${enabledBefore}`);
+        // The layer should be initially hoverable
+        if (!layer.getHoverable()) throw new TestError(`False precondition, the layer ${layerPath} wasn't initially hoverable.`);
 
-        // Disable hoverable on the layer
-        test.addStep(`Disabling hoverable for layer '${layerPath}'...`);
-        hoverFeatureInfoLayerSet.disableHoverListener(layerPath);
+        // Make sure the map is at initial extent
+        // GV: The layer needs to be visible (in viewport) for the query to work
+        test.addStep(`Make sure the map is at initial extent...`);
+        await MapEventProcessor.zoomToInitialExtent(this.getMapId());
 
-        // Get hoverable state after disabling
-        test.addStep(`Checking hoverable state after disabling for layer '${layerPath}'...`);
-        const enabledAfter = hoverFeatureInfoLayerSet.resultSet[layerPath].eventListenerEnabled;
-        test.addStep(`Layer hoverable state after: ${enabledAfter}`);
+        // Perform a hover query using the hover feature info layer set
+        test.addStep(`Perform query operation at given coordinates...`);
+        await this.getLayerApi().hoverFeatureInfoLayerSet.queryLayers(lonlat, 'at_lon_lat');
 
-        return { enabledBefore, enabledAfter };
+        // Check if there is feature selected from the layer
+        test.addStep(`Checking for features from layer '${layerPath}'...`);
+        const layerDataOnTemp = MapEventProcessor.getMapHoverFeatureInfo(this.getMapId());
+
+        // Store a deep copy of the data before clearing to preserve it
+        const layerDataOn = layerDataOnTemp ? { ...layerDataOnTemp } : undefined;
+
+        // Set layer non queryable, this will also clear the result set automatically
+        test.addStep(`Setting layer '${layerPath}' as non-hoverable...`);
+        layer.setHoverable(false);
+
+        // Perform a hover query using the feature info layer set
+        test.addStep(`Perform query operation at given coordinates...`);
+        await this.getLayerApi().hoverFeatureInfoLayerSet.queryLayers(lonlat, 'at_lon_lat');
+
+        // Check if there is feature selected from the layer
+        test.addStep(`Checking for features from layer '${layerPath}'...`);
+        const layerDataOffTemp = MapEventProcessor.getMapHoverFeatureInfo(this.getMapId());
+
+        // Store a deep copy of the data before clearing to preserve it
+        const layerDataOff = layerDataOffTemp ? { ...layerDataOffTemp } : undefined;
+
+        // Set layer hoverable again
+        test.addStep(`Setting layer '${layerPath}' as hoverable again...`);
+        layer.setHoverable(true);
+
+        // Perform a hover query using the feature info layer set
+        test.addStep(`Perform query operation at given coordinates...`);
+        await this.getLayerApi().hoverFeatureInfoLayerSet.queryLayers(lonlat, 'at_lon_lat');
+
+        // Check if there is feature selected from the layer
+        test.addStep(`Checking for features from layer '${layerPath}'...`);
+        const layerDataOn2Temp = MapEventProcessor.getMapHoverFeatureInfo(this.getMapId());
+
+        // Store a deep copy of the data before clearing to preserve it
+        const layerDataOn2 = layerDataOn2Temp ? { ...layerDataOn2Temp } : undefined;
+
+        // Return the test results
+        return { layer, results: [layerDataOn, layerDataOff, layerDataOn2] };
       },
       (test, result) => {
-        test.addStep('Verifying layer was initially hoverable...');
-        Test.assertIsEqual(result.enabledBefore, true);
+        test.addStep('Verifying layer data features when hoverable...');
+        Test.assertJsonObject(result.results[0], { fieldInfo: { value: 'Ontario' } });
 
-        test.addStep('Verifying layer is now not hoverable...');
-        Test.assertIsEqual(result.enabledAfter, false);
+        test.addStep('Verifying layer data features when not hoverable...');
+        Test.assertIsUndefined('result.after', result.results[1]);
+
+        test.addStep('Verifying layer data features when hoverable again...');
+        Test.assertJsonObject(result.results[2], { fieldInfo: { value: 'Ontario' } });
+      },
+      (test, result) => {
+        // Make sure to turn it back to hoverable
+        result.layer.setHoverable(true);
       }
     );
   }
@@ -687,65 +736,44 @@ export class MapTester extends GVAbstractTester {
    * 3. Clicks on a different location
    * 4. Verifies the manually selected layer remains selected with the correct feature count
    *
-   * @returns {Promise<Test<{firstLayerPath: string, firstFeatureCount: number, secondLayerPath: string, secondFeatureCount: number}>>}
+   * @returns {Promise<Test<LayerDetails>>}
    */
-  testDetailsLayerSelectionPersistence(): Promise<Test<{ firstLayerPath: string; secondLayerPath: string; secondFeatureCount: number }>> {
+  testDetailsLayerSelectionPersistence(): Promise<Test<LayerDetails>> {
     const firstClickCoords: Coordinate = [-87.4, 52.9];
     const secondClickCoords: Coordinate = [-73.9, 46.5];
-    const expectedFirstLayer = 'geojsonLYR5/polygons.json';
-    const expectedSecondLayer = 'esriFeatureLYR5/0';
+    const layerPolygon = 'geojsonLYR5/polygons.json';
+    const layerProjects = 'esriFeatureLYR5/0';
+    let originalLayer: string;
+    let alternateLayer: string;
 
     return this.test(
       'Test details layer selection persistence across map clicks',
       async (test) => {
-        // Helper function to simulate a complete map click and wait for query completion
-        // TODO: This should return a Promise and be awaited. emitMapSingleClick AND MapEventProcess setMapSingleCLcik should be Promisses waiting on queryLayers
-        const simulateMapClick = (coords: Coordinate): Promise<void> => {
-          return new Promise((resolve) => {
-            // Transform lonlat to map projection
-            const projCode = this.getMapViewer().getProjection().getCode();
-            const projected = Projection.transformPoints([coords], Projection.PROJECTION_NAMES.LONLAT, projCode)[0];
-
-            // Register one-time listener for query completion
-            const handleQueryEnded = (): void => {
-              // Cleanup - unregister the handler
-              this.getMapViewer().layer.featureInfoLayerSet.offQueryEnded(handleQueryEnded);
-              resolve();
-            };
-
-            // Register the handler before clicking
-            this.getMapViewer().layer.featureInfoLayerSet.onQueryEnded(handleQueryEnded);
-
-            // emitMapSingleClick now handles both store update and event emission
-            this.getMapViewer().simulateMapClick({
-              lonlat: coords,
-              pixel: [0, 0],
-              projected,
-              dragging: false,
-            });
-          });
-        };
-
-        // TODO: Need to wait before calling the first map click return empty features
-        await delay(2000);
-
-        // First click
+        // Simulate a map click at first location
         test.addStep(`Performing first map click at [${firstClickCoords.join(', ')}]...`);
-        await simulateMapClick(firstClickCoords);
-        await delay(1000); // TODO: Something weird with the first test, even with the click await it does not work
+        const simulatedMapClick1 = this.getMapViewer().simulateMapClick(firstClickCoords);
+
+        // Wait for the UI to be updated
+        await simulatedMapClick1.promiseQueryBatched;
 
         // Check which layer is selected after first click
         test.addStep('Checking selected layer after first click...');
-        const firstSelectedLayerPath = FeatureInfoEventProcessor.getSelectedLayerPath(this.getMapId());
-        test.addStep(`First selected layer: ${firstSelectedLayerPath}`);
+        originalLayer = FeatureInfoEventProcessor.getSelectedLayerPath(this.getMapId());
+        test.addStep(`First selected layer: ${originalLayer}`);
 
-        // Manually select the second layer (Top Projects)
-        test.addStep(`Manually selecting layer '${expectedSecondLayer}'...`);
-        FeatureInfoEventProcessor.setSelectedLayerPath(this.getMapId(), expectedSecondLayer);
+        // The alternate layer
+        alternateLayer = originalLayer === layerPolygon ? layerProjects : layerPolygon;
 
-        // Second click at different location
+        // Manually select the alternate layer
+        test.addStep(`Manually selecting the other layer '${alternateLayer}'...`);
+        FeatureInfoEventProcessor.setSelectedLayerPath(this.getMapId(), alternateLayer);
+
+        // Simulate a map click at second location
         test.addStep(`Performing second map click at [${secondClickCoords.join(', ')}]...`);
-        await simulateMapClick(secondClickCoords);
+        const simulatedMapClick2 = this.getMapViewer().simulateMapClick(secondClickCoords);
+
+        // Wait for the UI to be updated
+        await simulatedMapClick2.promiseQueryBatched;
 
         // Check which layer is still selected after second click
         test.addStep('Checking selected layer after second click...');
@@ -758,17 +786,17 @@ export class MapTester extends GVAbstractTester {
         test.addStep(`Second layer feature count: ${secondFeatureCount}`);
 
         return {
-          firstLayerPath: firstSelectedLayerPath,
-          secondLayerPath: secondSelectedLayerPath,
+          originalLayerPath: originalLayer,
+          alternateLayerPath: secondSelectedLayerPath,
           secondFeatureCount,
         };
       },
       (test, result) => {
-        test.addStep('Verifying first selected layer is polygons...');
-        Test.assertIsEqual(result.firstLayerPath, expectedFirstLayer);
+        test.addStep('Verifying first and second layers were different...');
+        Test.assertIsNotEqual(result.originalLayerPath, result.alternateLayerPath);
 
-        test.addStep('Verifying second selected layer is still Top Projects...');
-        Test.assertIsEqual(result.secondLayerPath, expectedSecondLayer);
+        test.addStep('Verifying second selected layer is the alternate layer...');
+        Test.assertIsEqual(result.alternateLayerPath, alternateLayer);
 
         test.addStep('Verifying second layer has exactly 1 feature...');
         Test.assertIsEqual(result.secondFeatureCount, 1);
@@ -776,3 +804,18 @@ export class MapTester extends GVAbstractTester {
     );
   }
 }
+
+type LayerWithBeforeAfterFeature<T> = LayerWithResults<T, (TypeFeatureInfoResultSetEntry | undefined)[]>;
+
+type LayerWithBeforeAfterHover<T> = LayerWithResults<T, (TypeHoverFeatureInfo | undefined)[]>;
+
+type LayerWithResults<T, U> = {
+  layer: T;
+  results: U;
+};
+
+type LayerDetails = {
+  originalLayerPath: string;
+  alternateLayerPath: string;
+  secondFeatureCount: number;
+};

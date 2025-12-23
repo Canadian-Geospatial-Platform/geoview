@@ -23,9 +23,6 @@ export interface EsriDynamicLayerEntryConfigProps extends AbstractBaseLayerEntry
  * Type used to define a GeoView image layer to display on the map.
  */
 export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
-  /** Source settings to apply to the GeoView image layer source at creation time. */
-  declare source: TypeSourceEsriDynamicInitialConfig;
-
   /** Max number of records for query */
   maxRecordCount?: number;
 
@@ -36,6 +33,17 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   constructor(layerConfig: EsriDynamicLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.ESRI_DYNAMIC, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
     this.maxRecordCount = layerConfig.maxRecordCount;
+  }
+
+  // #region OVERRIDES
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeSourceEsriDynamicInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   */
+  override getSource(): TypeSourceEsriDynamicInitialConfig {
+    return super.getSource();
   }
 
   /**
@@ -58,13 +66,26 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the get geometry type to interpret the esri type name.
-   * @returns {TypeStyleGeometry} The geometry type.
+   * @returns {TypeStyleGeometry | undefined} The geometry type, if it could be determined.
    * @throws {NotSupportedError} When the geometry type is not supported.
    */
-  protected override onGetGeometryType(): TypeStyleGeometry {
-    // Check the geometry type based on the Esri type name
-    return GeoUtilities.esriConvertEsriGeometryTypeToOLGeometryType(this.getGeometryField()!.type);
+  protected override onGetGeometryType(): TypeStyleGeometry | undefined {
+    // Get the geometry field
+    const geometryField = this.getGeometryField();
+
+    // If found
+    if (geometryField) {
+      // Check the geometry type based on the Esri name
+      return GeoUtilities.esriConvertEsriGeometryTypeToOLGeometryType(geometryField.type);
+    }
+
+    // None
+    return undefined;
   }
+
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
 
   /**
    * Type guard that checks whether the given configuration (class instance or plain object)
@@ -78,4 +99,6 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     // Redirect
     return this.isClassOrTypeSchemaTag(layerConfig, CONST_LAYER_TYPES.ESRI_DYNAMIC);
   }
+
+  // #endregion STATIC METHODS
 }

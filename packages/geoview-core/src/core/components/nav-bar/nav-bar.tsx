@@ -25,7 +25,6 @@ import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from './nav-bar-panel-button';
 
 import type { TypeValidNavBarProps } from '@/api/types/map-schema-types';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 type NavBarProps = {
   api: NavBarApi;
@@ -66,9 +65,6 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
   // Ref
   const navBarRef = useRef<HTMLDivElement>(null);
-
-  // The MapViewer
-  const mapViewer = MapEventProcessor.getMapViewer(mapId);
 
   // State
   const [buttonPanelGroups, setButtonPanelGroups] = useState<NavButtonGroups>({});
@@ -171,7 +167,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
     // Process drawer plugin if it's in the navBar
     processPlugin('drawer');
-  }, [navBarComponents, mapId, mapViewer]);
+  }, [navBarComponents, mapId]);
 
   useEffect(() => {
     // Log

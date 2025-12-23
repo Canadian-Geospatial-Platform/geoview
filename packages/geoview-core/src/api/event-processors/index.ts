@@ -24,6 +24,22 @@ const geochartEventProcessor = new GeochartEventProcessor();
 const swiperEventProcessor = new SwiperEventProcessor();
 const drawerEventProcessor = new DrawerEventProcessor();
 
+export function hasTimeSliderPlugin(store: GeoviewStoreType): boolean {
+  return store.getState().mapConfig!.footerBar?.tabs.core.includes('time-slider') ?? false;
+}
+
+export function hasGeochartPlugin(store: GeoviewStoreType): boolean {
+  return store.getState().mapConfig!.footerBar?.tabs.core.includes('geochart') ?? false;
+}
+
+export function hasSwiperPlugin(store: GeoviewStoreType): boolean {
+  return store.getState().mapConfig!.corePackages?.includes('swiper') ?? false;
+}
+
+export function hasDrawerPlugin(store: GeoviewStoreType): boolean {
+  return store.getState().mapConfig!.navBar?.includes('drawer') ?? false;
+}
+
 export function initializeEventProcessors(store: GeoviewStoreType): void {
   // core stores
   appEventProcessor.initialize(store);
@@ -34,11 +50,10 @@ export function initializeEventProcessors(store: GeoviewStoreType): void {
   dataTableEventProcessor.initialize(store);
 
   // package stores, only create if needed
-  // TODO: Change this check for something more generic that checks in appBar too
-  if (store.getState().mapConfig!.footerBar?.tabs.core.includes('time-slider')) timeSliderEventProcessor.initialize(store);
-  if (store.getState().mapConfig!.footerBar?.tabs.core.includes('geochart')) geochartEventProcessor.initialize(store);
-  if (store.getState().mapConfig!.corePackages?.includes('swiper')) swiperEventProcessor.initialize(store);
-  if (store.getState().mapConfig!.navBar?.includes('drawer')) drawerEventProcessor.initialize(store);
+  if (hasTimeSliderPlugin(store)) timeSliderEventProcessor.initialize(store);
+  if (hasGeochartPlugin(store)) geochartEventProcessor.initialize(store);
+  if (hasSwiperPlugin(store)) swiperEventProcessor.initialize(store);
+  if (hasDrawerPlugin(store)) drawerEventProcessor.initialize(store);
 }
 
 export function destroyEventProcessors(store: GeoviewStoreType): void {
@@ -51,9 +66,8 @@ export function destroyEventProcessors(store: GeoviewStoreType): void {
   dataTableEventProcessor.destroy();
 
   // package stores, only destroy if created
-  // TODO: Change this check for something more generic that checks in appBar too
-  if (store.getState().mapConfig!.footerBar?.tabs.core.includes('time-slider')) timeSliderEventProcessor.destroy();
-  if (store.getState().mapConfig!.footerBar?.tabs.core.includes('geochart')) geochartEventProcessor.destroy();
-  if (store.getState().mapConfig!.corePackages?.includes('swiper')) swiperEventProcessor.destroy();
-  if (store.getState().mapConfig!.navBar?.includes('drawer')) drawerEventProcessor.destroy();
+  if (hasTimeSliderPlugin(store)) timeSliderEventProcessor.destroy();
+  if (hasGeochartPlugin(store)) geochartEventProcessor.destroy();
+  if (hasSwiperPlugin(store)) swiperEventProcessor.destroy();
+  if (hasDrawerPlugin(store)) drawerEventProcessor.destroy();
 }

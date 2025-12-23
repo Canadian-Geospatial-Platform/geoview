@@ -69,17 +69,35 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   // GV Some action does state modifications AND map actions.
   // GV ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
 
-  /**
-   * Shortcut to get the Drawer state for a given map id
-   * @param {string} mapId - The mapId
-   * @returns {IDrawerState | undefined} The Drawer state. Forcing the return to also be 'undefined', because
-   *                                       there will be no drawerState if the Drawer plugin isn't active.
-   *                                       This helps the developers making sure the existence is checked.
-   */
-  protected static getDrawerState(mapId: string): IDrawerState | undefined {
-    // Return the drawer state when it exists
-    return super.getState(mapId).drawerState;
-  }
+  /** History stack for undo/redo functionality */
+  static #drawerHistory: Map<string, DrawerHistoryAction[]> = new Map();
+
+  /** Track features that were selected and their original geometries */
+  // GV The Map was because the transform COULD select multiple features
+  // GV It may not be necessary as I'm not sure we should support that
+  static #selectedFeatureState: Map<
+    string,
+    {
+      feature: Feature;
+      originalGeometry: Geometry;
+      originalStyle?: StyleLike | undefined;
+      originalStyleStored?: boolean;
+    }
+  > = new Map();
+
+  /** Current position in history stack for each map */
+  static #historyIndex: Map<string, number> = new Map();
+
+  /** Maximum history size */
+  static #maxHistorySize = 50;
+
+  /** Keyboard event handlers for each map */
+  static #keyboardHandlers: Map<string, (event: KeyboardEvent) => void> = new Map();
+
+  /** Keep track of the temporary transform instances for new text drawings */
+  static #tempTransformInstances = new Map<string, Transform>();
+
+  // #region OVERRIDES
 
   /**
    * Initializes the event processor and sets up subscriptions
@@ -116,35 +134,21 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     return [languageUnsubscribe, projectionUnsubscribe];
   }
 
-  /** History stack for undo/redo functionality */
-  static #drawerHistory: Map<string, DrawerHistoryAction[]> = new Map();
+  // #endregion OVERRIDES
 
-  /** Track features that were selected and their original geometries */
-  // GV The Map was because the transform COULD select multiple features
-  // GV It may not be necessary as I'm not sure we should support that
-  static #selectedFeatureState: Map<
-    string,
-    {
-      feature: Feature;
-      originalGeometry: Geometry;
-      originalStyle?: StyleLike | undefined;
-      originalStyleStored?: boolean;
-    }
-  > = new Map();
+  // #region STATIC METHODS
 
-  /** Current position in history stack for each map */
-  static #historyIndex: Map<string, number> = new Map();
-
-  /** Maximum history size */
-  static #maxHistorySize = 50;
-
-  /** Keyboard event handlers for each map */
-  static #keyboardHandlers: Map<string, (event: KeyboardEvent) => void> = new Map();
-
-  /** Keep track of the temporary transform instances for new text drawings */
-  static #tempTransformInstances = new Map<string, Transform>();
-
-  // #region Helpers
+  /**
+   * Shortcut to get the Drawer state for a given map id
+   * @param {string} mapId - The mapId
+   * @returns {IDrawerState | undefined} The Drawer state. Forcing the return to also be 'undefined', because
+   *                                       there will be no drawerState if the Drawer plugin isn't active.
+   *                                       This helps the developers making sure the existence is checked.
+   */
+  protected static getDrawerState(mapId: string): IDrawerState | undefined {
+    // Return the drawer state when it exists
+    return super.getState(mapId).drawerState;
+  }
 
   /**
    * Function for handling map projection changes to reproject the drawings
@@ -580,7 +584,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     }
   }
 
-  // #endregion
+  // #endregion STATIC METHODS
 
   // #region Drawing Actions
 

@@ -553,130 +553,176 @@ export abstract class DateMgt {
   }
 
   /**
-   * Get the date fragments order. Normaly, the order is year followed by month followed by day.
-   * @param dateFormat {string} The date format to be analyzed.
-   * @returns {TypeDateFragments} array of index indicating the field position in the format. index 0 is for
-   * year, 1 for month, 2 for day and 4 for time. A value of -1 indicates theat the fragment is missing.
+   * Returns the input/output fragment order and separators for a given date format.
+   * Supports formats like "YYYY-MM-DD", "YYYY-MM-DDTHH:MM:SS", or "YYYY-MM-DDZ".
+   *
+   * @param {string} [dateFormat] - Optional date format string to analyze.
+   * @returns {TypeDateFragments} The input/output fragment positions and separators.
+   *
+   * @throws {Error} When the provided date format is invalid.
    */
   static getDateFragmentsOrder(dateFormat?: string): TypeDateFragments {
-    /*
-      The structure of the date fragments is:
-        index 0 for the input format;
-        index 1 for the output format;
-        index 2 for the date separators and the time zone extracted from the dateFormat parameter. These values are
-        used to format the output dates. Input dates are converted to UTC ISO format.
-        The meaning of the dateFragmentsOrder elements are as follow:
-        [
-          [year position, month position, day position, time position], <- input format
-          [fist date element position, second date element position, third date element position, time position], <- output format
-          [first date separator, second date separator, time separator, time zone separator, absolute value of time zone]
-        ]
-        Date separator are '/' or '-', time separator is either ' ' or 'T' and time zone separator is the sign ('+' or '-')
-        to apply to the absolute value of time zone. Note that inputFragments (dateFragmentsOrder[0]) is only used for
-        internal formatting and outputFragments (dateFragmentsOrder[1]) for output formatting.
-    */
-    const inputFragments = [-1, -1, -1, -1];
+    if (!dateFormat) return ISO_UTC_DATE_FRAGMENTS_ORDER;
+
+    // Prepare
+    const inputFragments = [-1, -1, -1, -1]; // [year, month, day, time]
     const outputFragments = [-1, -1, -1, -1];
-    const separators: string[] = [];
-    const dateFragmentsOrder: TypeDateFragments = [inputFragments, outputFragments, separators];
+    const separators: string[] = []; // [dateSep1, dateSep2, timeSep, tzSign, tzValue]
+    const upperFormat = dateFormat.toUpperCase().trim();
 
-    if (dateFormat) {
-      const upperCaseDateFormat = dateFormat.toUpperCase().replace(/Z/, '+00:00');
-      let formatToAnalyze = upperCaseDateFormat;
-      // Vallid date time formats match one of the following regular expression.
-      const numberOfBrackets = [...formatToAnalyze.matchAll(/[[\]]/g)];
-      if (!(formatToAnalyze.startsWith('Y') ? [0, 2] : [0, 2, 4]).includes(numberOfBrackets.length))
-        throw new Error(`The string "${dateFormat}" is an invalid date format.`);
-      formatToAnalyze = formatToAnalyze.replace(/YYYY\[?[-/]MM\[?[-/]DD\[?[\sT]HH:MM:SS\[?[+-]\d\d:\d\d]?/, '');
-      formatToAnalyze = formatToAnalyze.replace(/\[?DD[-/]]?MM[-/]]?YYYY\[?[\sT]HH:MM:SS\[?[+-]\d\d:\d\d]?/, '');
-      formatToAnalyze = formatToAnalyze.replace(
-        /MM[-/]DD[-/]YYYY\[?[\sT]HH:MM:SS[+-]\d\d:\d\d]?|(\[MM[-/]DD[-/]]|MM[-/]\[DD[-/]])YYYY\[[T\s]HH:MM:SS[+-]\d\d:\d\d]/,
-        ''
-      );
-      if (formatToAnalyze) throw new Error(`The string "${dateFormat}" is an invalid date format.`);
+    // Replace trailing 'Z' with '+00:00' for parsing
+    const normalizedFormat = upperFormat.endsWith('Z') ? upperFormat.replace(/Z$/, '+00:00') : upperFormat;
 
-      formatToAnalyze = upperCaseDateFormat;
-      for (let i = 0; i < formatToAnalyze.length; i++) {
-        if (['/', '-', ' ', 'T', '+'].includes(formatToAnalyze[i])) separators.push(formatToAnalyze[i]);
-      }
-
-      if (separators[DATE] !== separators[DATE + 1]) throw new Error(`The string "${dateFormat}" is an invalid date format.`);
-
-      const [dateString, timeString] = formatToAnalyze.replace(/[[\]]/g, '').replaceAll(' ', 'T').replaceAll('/', '-').split('T');
-      const dateFragments = dateString.split('-');
-      ['Y', 'M', 'D'].forEach((fragmentType, i) => {
-        inputFragments[i] = dateFragments.findIndex((fragment) => fragment[0] === fragmentType);
-        if (inputFragments[i] >= 0) outputFragments[inputFragments[i]] = i;
-      });
-
-      if (timeString) {
-        inputFragments[TIME] = 3;
-        outputFragments[TIME] = 3;
-        // Get time zone.
-        separators[TIME_ZONE] = timeString.split(/[+-]/)[1];
-      }
-
-      const outputFields = upperCaseDateFormat.replace(/\[[YMDHMS\d\-+/\sT:]*\]|\[[\sTHMS:]*\]/g, '').split(/-|\/|\s|T|\+/g);
-      for (let i = outputFields.length; i < 4; i++) outputFragments[inputFragments[i]] = -1;
-      return dateFragmentsOrder;
+    // Extract separators
+    for (const char of normalizedFormat) {
+      if (['-', '/', 'T', ' ', '+'].includes(char)) separators.push(char);
     }
-    return ISO_UTC_DATE_FRAGMENTS_ORDER;
+
+    // Split date and time
+    const [datePart, timePart] = normalizedFormat.split(/[T ]/);
+    const dateFragments = datePart.split(/[-/]/);
+
+    // Map input fragments
+    dateFragments.forEach((frag, i) => {
+      if (frag.startsWith('Y')) inputFragments[0] = i;
+      else if (frag.startsWith('M')) inputFragments[1] = i;
+      else if (frag.startsWith('D')) inputFragments[2] = i;
+    });
+
+    // Map output fragments in the same order
+    inputFragments.forEach((pos, i) => {
+      if (pos >= 0) outputFragments[pos] = i;
+    });
+
+    // Handle time
+    if (timePart) {
+      inputFragments[3] = 3;
+      outputFragments[3] = 3;
+
+      // Time zone value
+      const tzMatch = timePart.match(/[+-](\d{2}:\d{2})/);
+      if (tzMatch) separators[4] = tzMatch[1];
+    }
+
+    // Ensure consistent date separator
+    if (separators[0] !== separators[1]) {
+      throw new Error(`Invalid date format: inconsistent date separators in "${dateFormat}"`);
+    }
+
+    return [inputFragments, outputFragments, separators];
   }
 
   /**
-   * Reorder the date to the ISO UTC format using the input section (index = 0) of the date fragments order provided.
-   * This routine is used to convert the dates returned by the server to the internal ISO UTC format. It is also used
-   * to convert the date constants (date '...') found in the layer filter string using a reverse time zone to return
-   * the date to the same time zone the server use since the filter string will be sent to the server to perform the
-   * query.
-   *
-   * @param date {string} The date to format.
-   * @param dateFragmentsOrder {TypeDateFragments} The date fragments order (obtained with getDateFragmentsOrder).
-   * @param reverseTimeZone {boolean} Flag indicating that we must change the time zone sign before the conversion.
-   * @returns {string} The reformatted date string.
+   * Converts and normalizes a date string into a standard ISO8601 UTC-based format.
+   * This function supports a variety of input formats:
+   * - Partial dates: "YYYY", "YYYY-MM", "YYYY-MM-DD"
+   * - Dates with or without time: "YYYY-MM-DD", "YYYY-MM-DDTHH:mm", etc.
+   * - UTC "Z" suffix: "1988-09-13Z"
+   * - Flexible separators: "/" → "-", space → "T"
+   * It applies defaults for missing components:
+   * - Missing month/day defaults to "01"
+   * - Missing time defaults to "00:00:00"
+   * - Missing timezone defaults to the configured separator and offset (typically "+00:00")
+   * Optional features:
+   * - reverseTimeZone: flips the sign of the timezone offset if provided
+   * @param {string} date - The input date string to normalize.
+   * @param {TypeDateFragments} [dateFragmentsOrder=ISO_UTC_DATE_FRAGMENTS_ORDER] - Configuration array
+   *   defining the index order of year, month, day, and separator characters.
+   * @param {boolean} [reverseTimeZone=false] - If true, reverses the sign of the timezone offset.
+   * @returns {string} The normalized ISO8601 date string, e.g., "1988-09-13T00:00:00Z".
+   * @throws {Error} Throws an error if the input cannot be parsed or normalized into a valid ISO date.
+   * @example
+   * applyInputDateFormat("1988-09-13Z");
+   * // returns "1988-09-13T00:00:00Z"
+   * @example
+   * applyInputDateFormat("1988-9-3 14:5");
+   * // returns "1988-09-03T14:05:00+00:00" (assuming default separators)
+   * @example
+   * applyInputDateFormat("1988-09", ISO_UTC_DATE_FRAGMENTS_ORDER, true);
+   * // returns "1988-09-01T00:00:00+00:00" (timezone reversed if needed)
    */
-  static applyInputDateFormat(date: string, dateFragmentsOrder = ISO_UTC_DATE_FRAGMENTS_ORDER, reverseTimeZone = false): string {
+  static applyInputDateFormat(
+    date: string,
+    dateFragmentsOrder: TypeDateFragments = ISO_UTC_DATE_FRAGMENTS_ORDER,
+    reverseTimeZone: boolean = false
+  ): string {
     if (!date) return date;
+
+    // Index mapping from config
     const index = dateFragmentsOrder[0];
+    const year = index[0] ?? YEAR;
+    const month = index[1] ?? MONTH;
+    const day = index[2] ?? DAY;
     const separators = dateFragmentsOrder[2];
 
-    // eslint-disable-next-line prefer-const
-    let [dateString, timeString] = date.toUpperCase().replace('Z', '+00:00').replaceAll(' ', 'T').split('T');
-    if (!timeString) timeString = '00:00:00';
+    const trimmedDate = date.trim().toUpperCase();
+    const originalEndsWithZ = trimmedDate.endsWith('Z');
 
-    const dateFragments = dateString
-      .replaceAll('/', '-')
-      .toUpperCase()
-      .split('-')
-      .map((fragment) => {
-        return fragment.length === 1 ? `0${fragment}` : fragment;
-      });
+    // Normalize separators: "/" → "-", " " → "T"
+    const normalized = trimmedDate.replaceAll('/', '-').replace(' ', 'T');
 
-    let outputDateFragments: string[] = [];
-    if (dateFragments.length === 3) outputDateFragments = dateFragments;
-    else {
-      // We assume the smallest date value are the year alone or the year with the month
-      if (dateFragments[FIRST_DATE_ELEMENT].length < 3) outputDateFragments[index[MONTH]] = dateFragments[FIRST_DATE_ELEMENT];
-      else outputDateFragments[index[YEAR]] = dateFragments[FIRST_DATE_ELEMENT];
-      if (!dateFragments[SECOND_DATE_ELEMENT]) outputDateFragments[index[MONTH]] = '01';
-      else if (dateFragments[SECOND_DATE_ELEMENT].length < 3) outputDateFragments[index[MONTH]] = dateFragments[SECOND_DATE_ELEMENT];
-      else outputDateFragments[index[YEAR]] = dateFragments[SECOND_DATE_ELEMENT];
-      outputDateFragments[index[DAY]] = '01';
+    // Split into date + time components
+    const rawSplit = normalized.split('T');
+    let rawDate = rawSplit[0];
+    const rawTime = rawSplit[1];
+
+    // Strip trailing Z from date fragment only (string operation instead of regex)
+    if (rawDate.endsWith('Z')) rawDate = rawDate.slice(0, -1);
+
+    // Split date fragments and pad single digits
+    const fragments = rawDate.split('-').map((f) => f.padStart(2, '0'));
+
+    // Assign fragments with defaults
+    let yyyy = '0000',
+      mm = '01',
+      dd = '01';
+    if (fragments.length === 3) {
+      yyyy = fragments[year];
+      mm = fragments[month];
+      dd = fragments[day];
+    } else if (fragments.length === 2) {
+      if (fragments[0].length === 4) {
+        yyyy = fragments[0];
+        mm = fragments[1];
+      } else {
+        mm = fragments[0];
+        yyyy = fragments[1];
+      }
+    } else if (fragments.length === 1) {
+      yyyy = fragments[0];
     }
 
-    let returnValue = `${outputDateFragments[index[YEAR]]}-${outputDateFragments[index[MONTH]]}-${
-      outputDateFragments[index[DAY]]
-    }T${timeString}`;
+    // Normalize time: default to 00:00:00
+    let time = rawTime || '00:00:00';
+    // Convert HH:mm to HH:mm:00 using string check instead of regex
+    if (time.length === 5 && time[2] === ':') time += ':00';
 
-    if (returnValue.length === 19) returnValue = `${returnValue}${separators[TIME_ZONE_SEPARATOR]}${separators[TIME_ZONE]}`;
-    if (returnValue.endsWith('+00:00')) {
-      if (date.slice(-1).toUpperCase() === 'Z') returnValue = returnValue.replace('+00:00', 'Z');
-    } else {
-      if (reverseTimeZone)
-        returnValue = `${returnValue.slice(0, 19)}${returnValue.slice(19, 20) === '+' ? '-' : '+'}${returnValue.slice(20)}`;
-      returnValue = this.convertToUTC(returnValue);
+    // Build ISO string
+    let iso = `${yyyy}-${mm}-${dd}T${time}`;
+
+    // Add default timezone if missing (check last char instead of regex)
+    const lastChar = iso[iso.length - 1];
+    const hasTZ = lastChar === 'Z' || iso.includes('+') || iso.includes('-');
+    if (!hasTZ) iso += `${separators[3]}${separators[4]}`;
+
+    // Restore Z if original input ended with Z
+    if (originalEndsWithZ && iso.endsWith('+00:00')) iso = iso.slice(0, -6) + 'Z';
+
+    // Optional reverse timezone
+    if (!originalEndsWithZ && reverseTimeZone) {
+      const signIndex = iso.search(/[+-]\d{2}:\d{2}$/);
+      if (signIndex >= 0) {
+        const sign = iso[signIndex];
+        iso = iso.slice(0, signIndex) + (sign === '+' ? '-' : '+') + iso.slice(signIndex + 1);
+      }
     }
-    return returnValue;
+
+    // Convert to UTC unless already Z
+    if (!iso.endsWith('Z')) iso = this.convertToUTC(iso);
+
+    if (!iso) throw new Error(`Failed to process date '${date}'`);
+
+    return iso;
   }
 
   /**

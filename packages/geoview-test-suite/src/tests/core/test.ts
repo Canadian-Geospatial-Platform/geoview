@@ -15,6 +15,7 @@ import {
   AssertionValueNotAnArrayError,
   AssertionArraysNotEqualError,
   AssertionManualFailError,
+  AssertionValueDifferentError,
 } from './exceptions';
 import type { TestStepLevel } from './test-step';
 import { TestStep } from './test-step';
@@ -228,22 +229,54 @@ export class Test<T = unknown> {
    * @static
    */
   static assertIsEqual<T = unknown>(actualValue: T, expectedValue: T, roundToPrecision?: number): asserts actualValue is T {
+    // Redirect
+    const equalResult = this.#checkValuesEqual(actualValue, expectedValue, roundToPrecision);
+
+    // If equal
+    if (equalResult.equal) return;
+
+    // Throw
+    throw new AssertionValueError(equalResult.actualValue, equalResult.expectedValue);
+  }
+
+  /**
+   * Asserts that two values are not equal (`!==`).
+   * @param {T} actualValue - The actual value being checked.
+   * @param {T} expectedValue - The expected value to compare against.
+   * @param {number} [roundToPrecision] - Optional number of decimal places to round to before comparing (for numbers only).
+   * @throws {AssertionValueDifferentError} If the values are equal.
+   * @static
+   */
+  static assertIsNotEqual<T = unknown>(actualValue: T, expectedValue: T, roundToPrecision?: number): asserts actualValue is T {
+    // Redirect
+    const equalResult = this.#checkValuesEqual(actualValue, expectedValue, roundToPrecision);
+
+    // If not equal
+    if (!equalResult.equal) return;
+
+    // Throw
+    throw new AssertionValueDifferentError(equalResult.actualValue);
+  }
+
+  /**
+   * Compares two values for strict equality, with optional numeric rounding.
+   * If `roundToPrecision` is provided and both values are numbers, the values are
+   * rounded to the given precision before comparison.
+   * @param {T} actualValue - The actual value to compare.
+   * @param {T} expectedValue - The expected value to compare against.
+   * @param {number?} [roundToPrecision] - Optional number of decimal places to round numeric values to.
+   * @returns An object describing whether the values are equal and the values used for comparison.
+   */
+  static #checkValuesEqual<T = unknown>(actualValue: T, expectedValue: T, roundToPrecision?: number): EqualHelper<T> {
     // If rounding is specified and both values are numbers, round them first
     if (roundToPrecision !== undefined && typeof actualValue === 'number' && typeof expectedValue === 'number') {
       const roundedActual = this.#roundToPrecision(actualValue, roundToPrecision);
       const roundedExpected = this.#roundToPrecision(expectedValue, roundToPrecision);
-
-      if (roundedActual === roundedExpected) return;
-
-      // Throw with rounded values
-      throw new AssertionValueError(roundedActual as T, roundedExpected as T);
+      return { equal: roundedActual === roundedExpected, actualValue: roundedActual as T, expectedValue: roundedExpected as T };
     }
 
     // Checks if the result value is the same as the value provided
-    if (actualValue === expectedValue) return;
-
-    // Throw
-    throw new AssertionValueError(actualValue, expectedValue);
+    return { equal: actualValue === expectedValue, actualValue, expectedValue };
   }
 
   /**
@@ -428,7 +461,7 @@ export class Test<T = unknown> {
    */
   static assertIsArrayEqual<T = unknown>(actualValue: T[], expectedValue: T[], roundToPrecision?: number): void {
     // Redirect using a primitive comparer with optional rounding
-    this.assertIsArrayEqualComparer(actualValue, expectedValue, (value1: T, value2: T): boolean => {
+    this.#assertIsArrayEqualComparer(actualValue, expectedValue, (value1: T, value2: T): boolean => {
       // Reuse assertIsEqual which already handles rounding logic
       try {
         this.assertIsEqual(value1, value2, roundToPrecision);
@@ -454,7 +487,7 @@ export class Test<T = unknown> {
    */
   static assertIsArrayEqualJsons<T = unknown>(actualValue: T[], expectedValue: T[]): void {
     // Redirect using a json comparer
-    this.assertIsArrayEqualComparer(actualValue, expectedValue, (value1: T, value2: T): boolean => {
+    this.#assertIsArrayEqualComparer(actualValue, expectedValue, (value1: T, value2: T): boolean => {
       // Use complex assertJsonObject comparer
       // A 'AssertionJSONObjectError' is thrown if `assertJsonObject` is not equal which provides
       // useful information on the json object comparer error - use that exception instead of creating another one.
@@ -474,8 +507,9 @@ export class Test<T = unknown> {
    * @throws {AssertionArrayLengthError} If the lengths aren't the same between the 2 arrays.
    * @throws {AssertionArraysNotEqualError} If one object isn't the same as the other object in the other array based on the provided comparer mechanism.
    * @static
+   * @private
    */
-  static assertIsArrayEqualComparer<T = unknown>(actualValue: T[], expectedValue: T[], comparer: ComparerDelegate<T>): void {
+  static #assertIsArrayEqualComparer<T = unknown>(actualValue: T[], expectedValue: T[], comparer: ComparerDelegate<T>): void {
     // Check if both are arrays
     Test.assertIsArray(actualValue);
     Test.assertIsArray(expectedValue);
@@ -748,3 +782,5 @@ export type TestStatus = 'new' | 'running' | 'verifying' | 'success' | 'failed';
  * A comparer delegate to compare 2 objects and determine if they are equal.
  */
 export type ComparerDelegate<T> = (array1: T, array2: T) => boolean;
+
+type EqualHelper<T> = { equal: boolean; actualValue: T; expectedValue: T };

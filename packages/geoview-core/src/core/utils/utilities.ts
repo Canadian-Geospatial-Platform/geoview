@@ -153,17 +153,17 @@ export function deepClone<T>(value: T): T {
 }
 
 /**
- * Deeply merges two objects, filling in undefined or missing properties
- * from the source object into the target object. Nested objects are merged recursively.
- * Existing values in the target object are preserved.
- * @param {S} base - The source object containing the default values.
- * @param {T} target - The target object to merge values into.
- * @returns The merged target object.
+ * Deeply merges two objects, using the base object as defaults and
+ * preserving existing values from the target object.
+ * Nested plain objects are merged recursively.
+ * @param {S} base - The base object providing default values.
+ * @param {T} target - The target object whose defined values take precedence.
+ * @returns {S & T} A new object containing the merged result.
  * @example
  * ```ts
- * const userSettings = { theme: { darkMode: true } };
  * const defaultSettings = { theme: { darkMode: false, fontSize: 14 }, locale: 'en' };
- * const merged = deepMerge(userSettings, defaultSettings);
+ * const userSettings = { theme: { darkMode: true } };
+ * const merged = deepMerge(defaultSettings, userSettings);
  * // merged: { theme: { darkMode: true, fontSize: 14 }, locale: 'en' }
  * ```
  */
@@ -181,14 +181,95 @@ export function deepMerge<S extends any, T extends any>(base: S, target: T): S &
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const tgtVal = (target as any)[key];
 
+    let newValue;
+
+    // ---- Case 1: both are plain objects → recursively merge ----
     if (isPlainObject(srcVal) && isPlainObject(tgtVal)) {
-      out[key] = deepMerge(srcVal, tgtVal); // recurse first on children
-    } else if (tgtVal === undefined) {
-      out[key] = srcVal; // only set if target doesn't have a value
+      newValue = deepMerge(srcVal, tgtVal);
+    }
+
+    // ---- Case 2: arrays → deep clone either source or target ----
+    else if (Array.isArray(srcVal)) {
+      if (Array.isArray(tgtVal)) {
+        newValue = tgtVal.map(deepClone);
+      } else {
+        newValue = srcVal.map(deepClone);
+      }
+    }
+
+    // ---- Case 3: target doesn't define the value → clone base's value ----
+    else if (tgtVal === undefined) {
+      newValue = deepClone(srcVal);
+    }
+
+    // ---- Apply newly computed value if any ----
+    if (newValue !== undefined) {
+      out[key] = newValue;
     }
   }
 
-  return out;
+  return out as S & T;
+}
+
+/**
+ * Performs a shallow equality check between two objects.
+ * Compares the objects' own enumerable keys and values using `Object.is`.
+ * Returns true if both objects have the same keys and corresponding values, false otherwise.
+ * Note: This is a **shallow** comparison. Nested objects or arrays are compared by reference.
+ * @param {Record<string, any>} a - The first object to compare.
+ * @param {Record<string, any>} b - The second object to compare.
+ * @returns {boolean} True if the objects are shallowly equal, false otherwise.
+ * @example
+ * const obj1 = { foo: 1, bar: 2 };
+ * const obj2 = { foo: 1, bar: 2 };
+ * const obj3 = { foo: 1, bar: 3 };
+ * shallowObjectEqual(obj1, obj2); // true
+ * shallowObjectEqual(obj1, obj3); // false
+ */
+export function shallowObjectEqual<T>(a: T, b: T): boolean {
+  if (a === b) return true;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const aKeys = Object.keys(a as any);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const bKeys = Object.keys(b as any);
+
+  if (aKeys.length !== bKeys.length) return false;
+
+  for (const key of aKeys) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if (!Object.is((a as Record<string, any>)[key], (b as Record<string, any>)[key])) return false;
+  }
+
+  return true;
+}
+
+/**
+ * Performs a shallow equality check between two arrays.
+ * Compares each element using `Object.is`. Returns true if both arrays
+ * have the same length and all corresponding elements are strictly equal,
+ * false otherwise.
+ * Note: This is a **shallow** comparison. Nested objects or arrays are compared by reference.
+ * @template T - The type of elements in the arrays.
+ * @param {T[]} a - The first array to compare.
+ * @param {T[]} b - The second array to compare.
+ * @returns {boolean} True if the arrays are shallowly equal, false otherwise.
+ * @example
+ * const arr1 = [1, 2, 3];
+ * const arr2 = [1, 2, 3];
+ * const arr3 = [1, 2, 4];
+ * shallowArrayEqual(arr1, arr2); // true
+ * shallowArrayEqual(arr1, arr3); // false
+ */
+export function shallowArrayEqual<T>(a: T[], b: T[]): boolean {
+  if (a === b) return true;
+  if (a.length !== b.length) return false;
+
+  for (let i = 0; i < a.length; i++) {
+    if (!Object.is(a[i], b[i])) return false;
+  }
+
+  return true;
 }
 
 /**

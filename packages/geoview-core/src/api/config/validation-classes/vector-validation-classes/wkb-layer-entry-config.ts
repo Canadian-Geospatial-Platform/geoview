@@ -10,18 +10,28 @@ export interface WkbLayerEntryConfigProps extends VectorLayerEntryConfigProps {
 }
 
 export class WkbLayerEntryConfig extends VectorLayerEntryConfig {
-  declare source: TypeSourceWkbVectorInitialConfig;
-
   /**
    * The class constructor.
    * @param {WkbLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: WkbLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.WKB);
-
-    // Value for this.source.format can only be WKB.
-    this.source.format ??= 'WKB';
   }
+
+  // #region OVERRIDES
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeSourceWkbVectorInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   */
+  override getSource(): TypeSourceWkbVectorInitialConfig {
+    return super.getSource();
+  }
+
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
 
   /**
    * Type guard that checks whether the given configuration (class instance or plain object)
@@ -35,4 +45,6 @@ export class WkbLayerEntryConfig extends VectorLayerEntryConfig {
     // Redirect
     return this.isClassOrTypeSchemaTag(layerConfig, CONST_LAYER_TYPES.WKB);
   }
+
+  // #endregion STATIC METHODS
 }

@@ -3,7 +3,7 @@ import type {
   TypeGeoviewLayerConfig,
   TypeMetadataWFS,
   TypeMetadataWFSFeatureTypeListFeatureType,
-  TypeSourceWFSVectorInitialConfig,
+  TypeMetadataWFSTextOnly,
 } from '@/api/types/layer-schema-types';
 import type { TypeOutfields } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
@@ -13,23 +13,15 @@ import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-l
 import { LayerEntryConfigLayerIdNotFoundError } from '@/core/exceptions/layer-entry-config-exceptions';
 import { LayerServiceMetadataEmptyError } from '@/core/exceptions/layer-exceptions';
 
-export interface OgcWfsLayerEntryConfigProps extends VectorLayerEntryConfigProps {
-  /** Source settings to apply to the GeoView layer source at creation time. */
-  source?: TypeSourceWFSVectorInitialConfig;
-}
+export interface OgcWfsLayerEntryConfigProps extends VectorLayerEntryConfigProps {}
 
 export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
-  declare source: TypeSourceWFSVectorInitialConfig;
-
   /**
    * The class constructor.
    * @param {OgcWfsLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: OgcWfsLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.WFS);
-
-    // Value for this.source.format can only be WFS.
-    this.source.format ??= 'WFS';
   }
 
   /**
@@ -127,8 +119,11 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
     // Get the feature type
     const featureType = this.getFeatureType();
 
+    let formats = featureType.OutputFormats?.Format as (string | TypeMetadataWFSTextOnly)[];
+    if (typeof featureType.OutputFormats?.Format === 'string') formats = [featureType.OutputFormats?.Format];
+
     // Return the output formats supported
-    const supportedFormats = featureType.OutputFormats?.Format.map((formatItem) => {
+    const supportedFormats = formats?.map((formatItem) => {
       if (typeof formatItem === 'object' && '#text' in formatItem) {
         return formatItem['#text'];
       }

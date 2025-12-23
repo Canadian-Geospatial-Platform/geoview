@@ -3,7 +3,7 @@ import type { Projection as OLProjection } from 'ol/proj';
 
 import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import { LayerNotFoundError } from '@/core/exceptions/layer-exceptions';
-import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 
 /**
  * Manages a Group Layer.
@@ -11,9 +11,9 @@ import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
  * @exports
  * @class GVGroupLayer
  */
-export class GVGroupLayer extends AbstractBaseLayer {
+export class GVGroupLayer extends AbstractBaseGVLayer {
   /** The layers in the group */
-  #layers: AbstractBaseLayer[] = [];
+  #layers: AbstractBaseGVLayer[] = [];
 
   /**
    * Constructs a Group layer to manage an OpenLayer Group Layer.
@@ -90,17 +90,17 @@ export class GVGroupLayer extends AbstractBaseLayer {
 
   /**
    * Gets the layers in the group.
-   * @returns {AbstractBaseLayer[]} The layers in the group.
+   * @returns {AbstractBaseGVLayer[]} The layers in the group.
    */
-  getLayers(): AbstractBaseLayer[] {
+  getLayers(): AbstractBaseGVLayer[] {
     return this.#layers;
   }
 
   /**
    * Adds a layer to the group layer.
-   * @param {AbstractBaseLayer} layer - The layer to add.
+   * @param {AbstractBaseGVLayer} layer - The layer to add.
    */
-  addLayer(layer: AbstractBaseLayer): void {
+  addLayer(layer: AbstractBaseGVLayer): void {
     // Officially add it to the OL object
     this.getOLLayer().getLayers().push(layer.getOLLayer());
 
@@ -110,9 +110,9 @@ export class GVGroupLayer extends AbstractBaseLayer {
 
   /**
    * Removes a layer from the group layer.
-   * @param {AbstractBaseLayer} layer - The layer to remove.
+   * @param {AbstractBaseGVLayer} layer - The layer to remove.
    */
-  removeLayer(layer: AbstractBaseLayer): void {
+  removeLayer(layer: AbstractBaseGVLayer): void {
     // Try to find it
     const idx = this.#layers.findIndex((lyr) => lyr === layer);
 

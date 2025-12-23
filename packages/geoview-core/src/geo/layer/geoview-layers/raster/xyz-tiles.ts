@@ -15,7 +15,6 @@ import {
 import { GVXYZTiles } from '@/geo/layer/gv-layers/tile/gv-xyz-tiles';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { deepMerge } from '@/core/utils/utilities';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.
 // TODO: Implement method to validate XYZ tile service
@@ -50,6 +49,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
     super(layerConfig);
   }
 
+  // #region OVERRIDES
+
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
@@ -66,8 +67,13 @@ export class XYZTiles extends AbstractGeoViewRaster {
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Redirect
     return Promise.resolve(
-      // TODO: Check - Config init - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
-      XYZTiles.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false, [])
+      XYZTiles.createGeoviewLayerConfig(
+        this.getGeoviewLayerId(),
+        this.getGeoviewLayerName(),
+        this.getMetadataAccessPath(),
+        this.getGeoviewLayerConfig().isTimeAware,
+        []
+      )
     );
   }
 
@@ -140,14 +146,11 @@ export class XYZTiles extends AbstractGeoViewRaster {
         // Set the layer metadata. metadataLayerConfigFound can't be undefined because we have already validated the config exist
         layerConfig.setLayerMetadata(metadataLayerConfigFound);
 
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.source = deepMerge(metadataLayerConfigFound.source, layerConfig.source);
+        // Initialize the source by filling the blanks with the information from the metadata
+        layerConfig.initSource(metadataLayerConfigFound.source);
 
-        // Set the initial settings
-        layerConfig.setInitialSettings(deepMerge(metadataLayerConfigFound.initialSettings, layerConfig.getInitialSettings()));
-
-        // Validate and update the extent initial settings
-        layerConfig.validateUpdateInitialSettingsExtent();
+        // Initialize the initial settings by filling the blanks with the information from the metadata
+        layerConfig.initInitialSettingsFromMetadata(metadataLayerConfigFound.initialSettings);
 
         // Set zoom limits for max / min zooms
         const maxScale = metadataLayerConfigFound?.maxScale;
@@ -190,6 +193,10 @@ export class XYZTiles extends AbstractGeoViewRaster {
     return gvLayer;
   }
 
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
+
   /**
    * Initializes a GeoView layer configuration for a XYZ Tiles layer.
    * This method creates a basic TypeGeoviewLayerConfig using the provided
@@ -198,15 +205,18 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerId - A unique identifier for the layer.
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @param {boolean?} [isTimeAware] - Indicates whether the layer supports time-based filtering.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   * @static
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
-    metadataAccessPath: string
+    metadataAccessPath: string,
+    isTimeAware?: boolean
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const myLayer = new XYZTiles({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeXYZTilesConfig);
+    const myLayer = new XYZTiles({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeXYZTilesConfig);
     return myLayer.initGeoViewLayerEntries();
   }
 
@@ -217,15 +227,17 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata.
-   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included
+   * in the configuration.
    * @returns {TypeXYZTilesConfig} The constructed configuration object for the XYZTiles layer.
+   * @static
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
-    isTimeAware: boolean,
+    isTimeAware: boolean | undefined,
     layerEntries: TypeLayerEntryShell[]
   ): TypeXYZTilesConfig {
     const geoviewLayerConfig: TypeXYZTilesConfig = {
@@ -263,6 +275,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
    * @param {boolean} isTimeAware - Indicates if the layer is time aware.
    * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
+   * @static
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -294,26 +307,36 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param {XYZTilesLayerEntryConfig} layerConfig - The configuration for the XYZ layer.
    * @returns A fully configured XYZ source.
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   * @static
    */
   static createXYZSource(layerConfig: XYZTilesLayerEntryConfig): XYZ {
     const sourceOptions: SourceOptions = {
       url: layerConfig.getDataAccessPath(),
       attributions: layerConfig.getAttributions(),
-      crossOrigin: layerConfig.source.crossOrigin ?? 'Anonymous',
-      projection: layerConfig.source.projection ? `EPSG:${layerConfig.source.projection}` : undefined,
+      crossOrigin: layerConfig.getSource().crossOrigin ?? 'Anonymous',
+      projection: layerConfig.getSource().projection ? `EPSG:${layerConfig.getSource().projection}` : undefined,
     };
 
-    if (layerConfig.source.tileGrid) {
+    // Get the tile grid
+    const { tileGrid } = layerConfig.getSource();
+
+    // If a tile grid is specified
+    if (tileGrid) {
+      // If tileGrid configuration exists
       const tileGridOptions: TileGridOptions = {
-        origin: layerConfig.source.tileGrid.origin,
-        resolutions: layerConfig.source.tileGrid.resolutions,
-        tileSize: layerConfig.source.tileGrid.tileSize,
-        extent: layerConfig.source.tileGrid.extent,
+        origin: tileGrid?.origin,
+        resolutions: tileGrid.resolutions, // TODO: ADD - Add a validation about the 'resolutions' property always existing?
+        tileSize: tileGrid?.tileSize,
+        extent: tileGrid?.extent,
       };
 
+      // Assign the tile grid
       sourceOptions.tileGrid = new TileGrid(tileGridOptions);
     }
 
+    // Return the fully configured XYZ instance
     return new XYZ(sourceOptions);
   }
+
+  // #endregion STATIC METHODS
 }

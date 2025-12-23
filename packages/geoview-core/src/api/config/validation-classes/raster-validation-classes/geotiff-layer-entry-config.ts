@@ -18,9 +18,6 @@ export interface GeoTIFFLayerEntryConfigProps extends AbstractBaseLayerEntryConf
  * Type used to define a GeoTIFF layer to display on the map.
  */
 export class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfig {
-  /** Source settings to apply to the GeoTIFF layer source at creation time. */
-  declare source: TypeSourceGeoTIFFInitialConfig;
-
   /**
    * The class constructor.
    * @param {GeoTIFFLayerEntryConfigProps} layerConfig -  The layer configuration we want to instanciate.
@@ -35,6 +32,17 @@ export class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     }
   }
 
+  // #region OVERRIDES
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeSourceGeoTIFFInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   */
+  override getSource(): TypeSourceGeoTIFFInitialConfig {
+    return super.getSource();
+  }
+
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
@@ -43,6 +51,10 @@ export class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   override getServiceMetadata(): TypeMetadataGeoTIFF | undefined {
     return super.getServiceMetadata() as TypeMetadataGeoTIFF | undefined;
   }
+
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
 
   /**
    * Type guard that checks whether the given configuration (class instance or plain object) represents an GeoTIFF layer type.
@@ -55,4 +67,6 @@ export class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     // Redirect
     return this.isClassOrTypeSchemaTag(layerConfig, CONST_LAYER_TYPES.GEOTIFF);
   }
+
+  // #endregion STATIC METHODS
 }

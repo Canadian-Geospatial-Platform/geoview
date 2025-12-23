@@ -13,15 +13,15 @@ export interface ImageStaticLayerEntryConfigProps extends AbstractBaseLayerEntry
  * Type used to define a GeoView image layer to display on the map.
  */
 export class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
-  /** Source settings to apply to the GeoView image layer source at creation time. */
-  declare source: TypeSourceImageStaticInitialConfig;
-
   /**
    * The class constructor.
    * @param {ImageStaticLayerEntryConfigProps} layerConfig -  The layer configuration we want to instanciate.
    */
   constructor(layerConfig: ImageStaticLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.IMAGE_STATIC, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
+
+    // Value for this.source.featureInfo.queryable can only be false.
+    this.setQueryableSource(false);
 
     // If not pointing to an image file directly
     if (
@@ -33,6 +33,21 @@ export class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
       this.setDataAccessPath(`${this.getDataAccessPath(true)}${this.layerId}`);
     }
   }
+
+  // #region OVERRIDES
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeSourceImageStaticInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   */
+  override getSource(): TypeSourceImageStaticInitialConfig {
+    return super.getSource();
+  }
+
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
 
   /**
    * Type guard that checks whether the given configuration (class instance or plain object)
@@ -46,4 +61,6 @@ export class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     // Redirect
     return this.isClassOrTypeSchemaTag(layerConfig, CONST_LAYER_TYPES.IMAGE_STATIC);
   }
+
+  // #endregion STATIC METHODS
 }

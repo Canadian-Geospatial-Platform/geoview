@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import type { UseBoundStore, Mutate, StoreApi } from 'zustand';
 import { useStore } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
@@ -25,6 +26,7 @@ import type { IUIState } from '@/core/stores/store-interface-and-intial-values/u
 import { initializeUIState } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { shallowObjectEqual } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { serializeTypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 
@@ -124,3 +126,44 @@ export type GeoviewStoreType = UseBoundStore<Mutate<StoreApi<IGeoviewState>, Sub
 // **********************************************************
 export const useGeoViewMapId = (): string => useStore(useGeoViewStore(), (state) => state.mapId);
 export const useGeoViewConfig = (): TypeMapFeaturesConfig | undefined => useStore(useGeoViewStore(), (state) => state.mapConfig);
+
+/** To be able to compare objects for hooks */
+type EqualityFn<T> = (prev: T, next: T) => boolean;
+
+/**
+ * A React hook that wraps a Zustand store selector and preserves the previous reference
+ * if the selected value is equal to the previous one, preventing unnecessary re-renders.
+ * This is useful when the store returns a new object or array on every update,
+ * but you want to avoid infinite render loops or excessive component updates.
+ * @template T - The type of the selected state slice.
+ * @param {GeoviewStoreType} store - The Zustand store instance to subscribe to.
+ * @param {(state: IGeoviewState) => T} selector - A function that selects a piece of state from the store.
+ * @param {(prev: T, next: T) => boolean} [isEqual] - A function that compares the previous and next selector results.
+ *                                                    Should return true if they are equal and reference can be reused.
+ * @returns {T} The selected state slice. Returns the previous reference if `isEqual(prev, next)` is true.
+ * @example
+ * const queryableLayers = useStableSelector(
+ *   store,
+ *   (state) => state.layers.reduce((acc, layer) => ({ ...acc, [layer.id]: layer.queryable }), {}),
+ *   shallowObjectEqual
+ * );
+ */
+export function useStableSelector<T>(
+  store: GeoviewStoreType,
+  selector: (state: IGeoviewState) => T,
+  isEqual: EqualityFn<T> = shallowObjectEqual
+): T {
+  const previousRef = useRef<T | null>(null);
+
+  // Hook
+  return useStore(store, (state) => {
+    const next = selector(state);
+
+    if (previousRef.current !== null && isEqual(previousRef.current, next)) {
+      return previousRef.current;
+    }
+
+    previousRef.current = next;
+    return next;
+  });
+}

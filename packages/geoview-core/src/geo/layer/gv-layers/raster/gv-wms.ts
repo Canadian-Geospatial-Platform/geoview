@@ -26,7 +26,6 @@ import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import type { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { Projection } from '@/geo/utils/projection';
 import { LayerInvalidFeatureInfoFormatWMSError, LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
-import { MapViewer } from '@/geo/map/map-viewer';
 import { formatError, NetworkError, ResponseContentError } from '@/core/exceptions/core-exceptions';
 import { type TypeDateFragments } from '@/core/utils/date-mgt';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -53,6 +52,9 @@ export class GVWMS extends AbstractGVRaster {
 
   /** The Get Feature Info tolerance to use for QGIS Server services which are more picky by default (really needs to be zoomed in to get results, by default) */
   #getFeatureInfoTolerance: number = GVWMS.DEFAULT_GET_FEATURE_INFO_TOLERANCE;
+
+  /** The feature out put format for the WMS that we know have worked */
+  #featureOutputFormatWMSWorked?: string;
 
   /** Keep all callback delegates references */
   #onImageLoadRescueHandlers: ImageLoadRescueDelegate[] = [];
@@ -193,42 +195,28 @@ export class GVWMS extends AbstractGVRaster {
     queryGeometry: boolean = true,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
-    // If the layer is invisible
-    if (!this.getVisible()) return [];
-
     // Get the layer config and its initial settings
     const wmsLayerConfig = this.getLayerConfig();
-    let initialSettings = wmsLayerConfig.getInitialSettings();
+    const initialSettingsBounds = wmsLayerConfig.getInitialSettingsBounds();
 
-    // Ensure bounds are available in the settings
-    if (!initialSettings.bounds) {
-      const projection = map.getView().getProjection();
-      const computedBounds = this.getBounds(projection, MapViewer.DEFAULT_STOPS);
+    // TODO: CHECK - Do we want that kind of check for EsriDynamic as well?
+    // If the initial settings bounds are set, validate the queried location vs the bounds
+    if (initialSettingsBounds) {
+      // Check if the clicked lon/lat is within the bounds
+      const [lon, lat] = lonlat;
+      const [minX, minY, maxX, maxY] = initialSettingsBounds;
 
-      // If no computed bounds, return
-      if (!computedBounds) return [];
-
-      const transformedBounds = Projection.transformExtentFromProj(computedBounds, projection, Projection.getProjectionLonLat());
-
-      // Update initial settings with computed bounds
-      wmsLayerConfig.updateInitialSettings({ bounds: transformedBounds });
-
-      // Re-fetch settings after the update to ensure consistency
-      initialSettings = wmsLayerConfig.getInitialSettings();
-    }
-
-    // If bounds still not set, return
-    if (!initialSettings.bounds) return [];
-
-    // Check if the clicked lon/lat is within the bounds
-    const [lon, lat] = lonlat;
-    const [minX, minY, maxX, maxY] = initialSettings.bounds;
-
-    // If out of bounds, don't bother and return
-    if (lon < minX || lon > maxX || lat < minY || lat > maxY) {
+      // If out of bounds, don't bother and return
+      if (lon < minX || lon > maxX || lat < minY || lat > maxY) {
+        // Log warning
+        logger.logWarning(`Coordinates were out-of-bounds for layer ${wmsLayerConfig.layerPath}, query was aborted.`);
+        return [];
+      }
+    } else {
       // Log warning
-      logger.logWarning(`Coordinates for the bounds were out-of-bounds for layer ${wmsLayerConfig.layerPath}`);
-      return [];
+      logger.logWarning(
+        `Bounds were not set for layer ${wmsLayerConfig.layerPath}, therefore no validation was performed at the queried location.`
+      );
     }
 
     // Project the lon/lat to the map's projection
@@ -238,37 +226,29 @@ export class GVWMS extends AbstractGVRaster {
     const viewResolution = map.getView().getResolution()!;
     const projectionCode = map.getView().getProjection().getCode();
 
-    try {
-      // If the layer has a WFS associated
-      if (wmsLayerConfig.hasWfsLayerConfig()) {
-        try {
-          // Get the Geoview Layer Config WFS equivalent
-          const wfsLayerConfig = wmsLayerConfig.getWfsLayerConfig();
+    // If the layer has a WFS associated
+    if (wmsLayerConfig.hasWfsLayerConfig()) {
+      try {
+        // Get the Geoview Layer Config WFS equivalent
+        const wfsLayerConfig = wmsLayerConfig.getWfsLayerConfig();
 
-          // We're going to try performing a GetFeature using the WFS query instead of WMS, better chance to retrieve the geometry that way
-          return await this.#getFeatureInfoUsingWFS(
-            wmsLayerConfig,
-            wfsLayerConfig,
-            clickCoordinate,
-            viewResolution,
-            projectionCode,
-            abortController
-          );
-        } catch (error: unknown) {
-          // Failed to get feature info using WFS, continue with WMS
-          logger.logDebug(`Failed to getFeatureInfoUsingWFS for '${wmsLayerConfig.layerPath}'`, error);
-        }
+        // We're going to try performing a GetFeature using the WFS query instead of WMS, better chance to retrieve the geometry that way
+        return await this.#getFeatureInfoUsingWFS(
+          wmsLayerConfig,
+          wfsLayerConfig,
+          clickCoordinate,
+          viewResolution,
+          projectionCode,
+          abortController
+        );
+      } catch (error: unknown) {
+        // Failed to get feature info using WFS, continue with WMS
+        logger.logDebug(`Failed to getFeatureInfoUsingWFS for '${wmsLayerConfig.layerPath}'`, error);
       }
-
-      // Try various info formats patterns to get feature info
-      return await this.#getFeatureInfoUsingWMS(wmsLayerConfig, clickCoordinate, viewResolution, projectionCode, abortController);
-    } catch (error: unknown) {
-      // Eat the error, we failed
-      logger.logDebug(`Eating error, we failed for '${wmsLayerConfig.layerPath}'`, error);
     }
 
-    // Failed
-    return [];
+    // Try various info formats patterns to get feature info
+    return this.#getFeatureInfoUsingWMS(wmsLayerConfig, clickCoordinate, viewResolution, projectionCode, abortController);
   }
 
   /**
@@ -380,7 +360,7 @@ export class GVWMS extends AbstractGVRaster {
     const layerConfig = this.getLayerConfig();
 
     // Get the layer config bounds
-    let layerConfigBounds = layerConfig?.getInitialSettings()?.bounds;
+    let layerConfigBounds = layerConfig?.getInitialSettingsBounds();
 
     // If layer bounds were found, project
     if (layerConfigBounds) {
@@ -543,7 +523,7 @@ export class GVWMS extends AbstractGVRaster {
    * @param {string} wmsStyleId - The style identifier to be used.
    */
   setWmsStyle(wmsStyleId: string): void {
-    // TODO: Verify if we can apply more than one style at the same time since the parameter name is STYLES
+    // TODO: STYLES - Verify if we can apply more than one style at the same time since the parameter name is STYLES
     this.getOLSource()?.updateParams({ STYLES: wmsStyleId });
   }
 
@@ -582,6 +562,12 @@ export class GVWMS extends AbstractGVRaster {
   ): Promise<TypeFeatureInfoEntry[]> {
     // Call the GetFeature
     const responseData = await Fetch.fetchJson(urlWithOutputJson, abortController);
+
+    // Read the EPSG from the data
+    const dataEPSG = GeoUtilities.readEPSGOfGeoJSON(responseData);
+
+    // Check if we have it in Projection and try adding it if we're missing it
+    await Projection.addProjectionIfMissing(dataEPSG);
 
     // Read the features
     const features = GeoUtilities.readFeaturesFromGeoJSON(responseData, undefined);
@@ -684,20 +670,22 @@ export class GVWMS extends AbstractGVRaster {
     let gmlFilterAttribute;
     let gmlFilterSpatial;
     let fieldsToReturn = wfsLayerConfig.getOutfields();
+
+    // Build the filter from style if any
+    const classFilters = GVEsriDynamic.getFilterFromStyle(wmsLayerConfig, wmsLayerConfig.getLayerStyle());
+
+    // If any
+    if (classFilters) {
+      // Build a OGC Filter for the filter
+      gmlFilterAttribute = WfsRenderer.sqlToOlWfsFilterXml(
+        classFilters,
+        wfsLayerConfig.getVersion(),
+        wfsLayerConfig.getOutfields()?.[0]?.name
+      );
+    }
+
+    // If performing a query based on a clicked coordinate, we want to filter spatially
     if (clickCoordinate && viewResolution) {
-      // Build the filter from style if any
-      const classFilters = GVEsriDynamic.getFilterFromStyle(wmsLayerConfig, wmsLayerConfig.getLayerStyle());
-
-      // If any
-      if (classFilters) {
-        // Build a OGC Filter for the filter
-        gmlFilterAttribute = WfsRenderer.sqlToOlWfsFilterXml(
-          classFilters,
-          wfsLayerConfig.getVersion(),
-          wfsLayerConfig.getOutfields()?.[0]?.name
-        );
-      }
-
       // Get the geometry field name
       const geomFieldName = wfsLayerConfig.getGeometryField()?.name || 'geometry'; // default: geometry
 
@@ -757,12 +745,13 @@ export class GVWMS extends AbstractGVRaster {
     const wmsSource = this.getOLSource();
 
     // Get the supported info formats
-    const featureInfoFormat = wmsLayerConfig.getServiceMetadata()?.Capability?.Request?.GetFeatureInfo?.Format;
+    let featureInfoFormat = wmsLayerConfig.getServiceMetadata()?.Capability?.Request?.GetFeatureInfo?.Format;
+
+    // If any output format has worked in the past
+    if (this.#featureOutputFormatWMSWorked) featureInfoFormat = [this.#featureOutputFormatWMSWorked];
 
     // Log the various info format supported for the layer, keeping the line commented, useful for debugging
     // logger.logDebug(layerConfig.getLayerNameCascade(), featureInfoFormat);
-
-    // TODO: Performance - Think of a way to not recall all types when we know which type is the best to answer based on previous calls
 
     // TODO: WMS - Add support for application/vnd.ogc.gml GV issue #3134
 
@@ -782,6 +771,9 @@ export class GVWMS extends AbstractGVRaster {
           this.getGetFeatureInfoFeatureCount(),
           abortController
         );
+
+        // Keep in mind, this output format works
+        this.#featureOutputFormatWMSWorked = 'application/geojson';
       } catch (error: unknown) {
         // Failed to retrieve featureMember using GeoJSON, eat the error, we'll try with another format
         logger.logError(
@@ -806,6 +798,9 @@ export class GVWMS extends AbstractGVRaster {
           this.getGetFeatureInfoFeatureCount(),
           abortController
         );
+
+        // Keep in mind, this output format works
+        this.#featureOutputFormatWMSWorked = 'application/json';
       } catch (error: unknown) {
         // Failed to retrieve featureMember using Json, eat the error, we'll try with another format
         logger.logError(
@@ -829,6 +824,9 @@ export class GVWMS extends AbstractGVRaster {
           abortController
         );
         featureMember = [featMember];
+
+        // Keep in mind, this output format works
+        this.#featureOutputFormatWMSWorked = 'text/xml';
       } catch (error: unknown) {
         // Failed to retrieve featureMember using XML, eat the error, we'll try with another format
         logger.logError(
@@ -1382,17 +1380,17 @@ export class GVWMS extends AbstractGVRaster {
         const fullFieldName = prefix ? `${prefix}.${fieldName}` : fieldName;
         const rawValue = obj[key];
         let value = rawValue as string;
-        if (typeof rawValue === 'object' && '#text' in rawValue) value = rawValue['#text'];
+        if (rawValue && typeof rawValue === 'object' && '#text' in rawValue) value = rawValue['#text'];
 
         // If value has to go recursive
-        if (typeof value === 'object') {
+        if (value && typeof value === 'object') {
           // Go recursive
           extractFields(value, fullFieldName);
         } else {
           // Compile it
           featureInfo.fieldInfo[fullFieldName] = {
             fieldKey: fieldKeyCounter++,
-            value: value,
+            value: value ?? '',
             dataType: 'string',
             alias: fullFieldName,
             domain: null,

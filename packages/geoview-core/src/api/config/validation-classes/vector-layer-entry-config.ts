@@ -1,11 +1,9 @@
-import type { TypeGeoviewLayerType, TypeLayerMetadataVector, TypeVectorSourceInitialConfig } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerType, TypeLayerMetadataVector, TypeBaseVectorSourceInitialConfig } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_ENTRY_TYPES } from '@/api/types/layer-schema-types';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 
 export interface VectorLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
-  /** Source settings to apply to the GeoView layer source at creation time. */
-  source?: TypeVectorSourceInitialConfig;
   /** Max number of records for query */
   maxRecordCount?: number;
 }
@@ -15,9 +13,6 @@ export interface VectorLayerEntryConfigProps extends AbstractBaseLayerEntryConfi
  */
 // TODO: Refactor - This class should be named 'AbstractVectorLayerEntryConfig' to align with others
 export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfig {
-  /** Initial settings to apply to the GeoView vector layer source at creation time. */
-  declare source: TypeVectorSourceInitialConfig;
-
   /** Max number of records for query */
   maxRecordCount?: number;
 
@@ -30,6 +25,21 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
     this.maxRecordCount = layerConfig.maxRecordCount;
   }
 
+  // #region OVERRIDES
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeBaseVectorSourceInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   */
+  override getSource(): TypeBaseVectorSourceInitialConfig {
+    return super.getSource();
+  }
+
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
+
   /**
    * Helper function to get the layer metadata casted as TypeLayerMetadataVector.
    * @returns {TypeLayerMetadataVector | undefined} The casted layer metadata in the right type.
@@ -41,4 +51,6 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
     // TO.DOCONT: `class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig<TypeLayerMetadataWfs[]>`
     return super.getLayerMetadata() as TypeLayerMetadataVector | undefined;
   }
+
+  // #endregion STATIC METHODS
 }
