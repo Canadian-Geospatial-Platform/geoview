@@ -23,6 +23,23 @@ import { doUntil } from '@/core/utils/utilities';
  * Event processor focusing on interacting with the feature info state in the store (currently called detailsState).
  */
 export class FeatureInfoEventProcessor extends AbstractEventProcessor {
+  // **********************************************************
+  // Static functions for Typescript files to access store actions
+  // **********************************************************
+  // GV Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
+  // GV Some action does state modifications AND map actions.
+  // GV ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
+
+  // Holds the list of layer data arrays being buffered in the propagation process for the batch
+  static #batchedPropagationLayerDataArray: BatchedPropagationLayerDataArrayByMap<TypeFeatureInfoResultSetEntry> = {};
+
+  // The time delay between propagations in the batch layer data array.
+  // The longer the delay, the more the layers will have a chance to get in a loaded state before changing the layerDataArray.
+  // The longer the delay, the longer it'll take to update the UI. The delay can be bypassed using the layer path bypass method.
+  static TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH = 1000;
+
+  // #region OVERRIDES
+
   /**
    * Overrides initialization of the GeoChart Event Processor
    * @param {GeoviewStoreType} store The store associated with the GeoChart Event Processor
@@ -87,21 +104,9 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
     return [layerDataArrayUpdateBatch, clickCoordinates, coordinateInfoEnabledSubscription];
   }
 
-  // **********************************************************
-  // Static functions for Typescript files to access store actions
-  // **********************************************************
-  // GV Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
-  // GV Some action does state modifications AND map actions.
-  // GV ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
+  // #endregion OVERRIDES
 
-  // #region
-  // Holds the list of layer data arrays being buffered in the propagation process for the batch
-  static #batchedPropagationLayerDataArray: BatchedPropagationLayerDataArrayByMap<TypeFeatureInfoResultSetEntry> = {};
-
-  // The time delay between propagations in the batch layer data array.
-  // The longer the delay, the more the layers will have a chance to get in a loaded state before changing the layerDataArray.
-  // The longer the delay, the longer it'll take to update the UI. The delay can be bypassed using the layer path bypass method.
-  static TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH = 1000;
+  // #region STATIC METHODS
 
   /**
    * Shortcut to get the Feature Info state for a given map id
@@ -114,7 +119,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Get the selectedLayerPath value
+   * Gets the selectedLayerPath value
    * @param {string} mapId - The map identifier
    * @returns {string} the selected layer path
    */
@@ -123,7 +128,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * GSt the selectedLayerPath value
+   * Sets the selectedLayerPath value
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path to select
    */
