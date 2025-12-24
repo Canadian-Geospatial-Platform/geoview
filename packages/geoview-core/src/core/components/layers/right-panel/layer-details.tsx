@@ -609,6 +609,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     );
   };
 
+  // TODO: WCAG Issue #3116 - Consider using CSS rather than Divider for cleaner HTML structure
   // Render
   return (
     <Paper sx={sxClasses.layerDetails}>
@@ -677,13 +678,13 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             )}
             {layerDetails.controls?.opacity !== false && <LayerOpacityControl layerDetails={layerDetails} />}
           </Box>
-          <Divider sx={{ marginTop: '10px', marginBottom: '10px' }} variant="middle" />
+          <Divider sx={{ height: 'auto', marginTop: '10px', marginBottom: '10px' }} variant="middle" />
           {renderWMSImage()}
           <Box>
             {layerDetails.items?.length > 0 && renderItems()}
             {layerDetails.children.length > 0 && renderSubLayers(layerDetails)}
           </Box>
-          <Divider sx={{ marginTop: '10px', marginBottom: '10px' }} variant="middle" />
+          <Divider sx={{ height: 'auto', marginTop: '10px', marginBottom: '10px' }} variant="middle" />
           {renderInfo()}
           {layerDetails.layerAttribution &&
             layerDetails.layerAttribution.map((attribution) => {

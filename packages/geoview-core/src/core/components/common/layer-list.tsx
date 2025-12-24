@@ -105,15 +105,18 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
     [isDisabled, isLoading, onListItemClick]
   );
 
-  // TODO: WCAG Issue #3116 Finish implementing button styles to be consistent with rest of the app (keyboard focus))
-
   return (
-    <Tooltip title={layer.tooltip} placement="top" arrow>
-      <ListItem id={id} disablePadding>
+    <Tooltip
+      title={layer.tooltip}
+      placement="top"
+      arrow
+      enterDelay={theme.transitions.duration.tooltipDelay}
+      enterNextDelay={theme.transitions.duration.tooltipDelay}
+    >
+      <ListItem id={id} disablePadding className={containerClass}>
         <ListItemButton
           component="button"
           sx={sxClasses.listItemButton}
-          className={containerClass}
           onKeyDown={(e) => handleLayerKeyDown(e, layer)}
           onClick={() => onListItemClick(layer)}
           selected={isSelected}
