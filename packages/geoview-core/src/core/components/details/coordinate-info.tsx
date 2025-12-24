@@ -22,7 +22,11 @@ type CoordinateData = {
   elevation?: string;
 };
 
-export function CoordinateInfoSwitch(): JSX.Element {
+interface CoordinateInfoSwitchProps {
+  disabled?: boolean;
+}
+
+export function CoordinateInfoSwitch({ disabled }: CoordinateInfoSwitchProps): JSX.Element {
   // Log
   logger.logTraceRender('components/toggle-all/toggle');
 
@@ -49,6 +53,7 @@ export function CoordinateInfoSwitch(): JSX.Element {
           checked={coordinateInfoEnabled}
           onChange={handleCoordinateInfoToggle}
           label={t('details.showCoordinateInfo') || undefined}
+          disabled={disabled}
         />
       </span>
     </Tooltip>
@@ -92,7 +97,7 @@ export function CoordinateInfo(): JSX.Element {
   const { lat, lng, utmZone, easting, northing, ntsMapsheet, elevation } = coordinateData;
 
   return (
-    <Box sx={sxClasses.rightPanelContainer}>
+    <Box sx={sxClasses.rightPanelContainer} className="guide-content-container">
       <Box sx={sxClasses.coordinateInfoContainer}>
         <Typography variant="h6" sx={sxClasses.coordinateInfoTitle}>
           {t('details.coordinateInfoTitle')}
