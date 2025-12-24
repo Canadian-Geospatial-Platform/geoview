@@ -1,13 +1,13 @@
 import type { ReactNode } from 'react';
-import { memo, useEffect, useRef } from 'react';
+import { memo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DialogProps } from '@mui/material';
 import { CloseIcon, Dialog, DialogContent, IconButton } from '@/ui';
-import { logger } from '@/core/utils/logger';
 
 interface FullScreenDialogProps extends DialogProps {
   open: boolean;
-  onClose: () => void;
+  onClose: (event?: {}, reason?: 'backdropClick' | 'escapeKeyDown') => void; // Callback fired when dialog closes. Matches MUI Dialog signature.
+  onExited?: () => void; // Callback when dialog exit animation completes
   children: ReactNode;
 }
 
@@ -27,45 +27,48 @@ const CLOSE_BUTTON_STYLES = {
 export const FullScreenDialog = memo(function FullScreenDialog({
   open,
   onClose,
+  onExited,
   children,
   ...dialogProps
 }: FullScreenDialogProps): JSX.Element {
+  // Ref for the close button
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   // Hooks
   const { t } = useTranslation<string>();
-
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('FULL SCREEN DIALOG - open with focus on close', open);
-
-    if (open) {
-      const timer = setTimeout(() => {
-        const closeButton = document.querySelector('.buttonFilledOutline') as HTMLButtonElement;
-        if (closeButton) {
-          closeButton.focus();
-        }
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-
-    return undefined;
-  }, [open]);
 
   return (
     <Dialog
       fullScreen
       maxWidth="xl"
       open={open}
-      onClose={onClose}
+      onClose={(event, reason) => {
+        // Call the original onClose handler with parameters
+        // Material-UI Dialog automatically handles ESC key presses and backdrop clicks.
+        // We forward the event and reason ('escapeKeyDown' | 'backdropClick') to the parent
+        // so they can differentiate how the dialog was closed if needed.
+        // Focus restoration after closing is handled separately via onExited callback.
+        onClose(event, reason);
+      }}
+      onTransitionExited={onExited}
+      slotProps={{
+        transition: {
+          onEntered: () => {
+            // Focus on the close button after dialog opens for keyboard accessibility.
+            // This ensures keyboard users know where they are and can easily close the dialog
+            // with Enter/Space (or ESC key which is handled by Material-UI automatically).
+            closeButtonRef.current?.focus();
+          },
+        },
+      }}
       disablePortal={false}
       {...dialogProps}
       sx={{ maxHeight: '100% !important' }}
     >
       <DialogContent sx={DIALOG_CONTENT_STYLES}>
         <IconButton
-          ref={closeButtonRef}
-          onClick={onClose}
+          iconRef={closeButtonRef}
+          onClick={(event) => onClose(event, 'backdropClick')}
           aria-label={t('general.close')}
           color="primary"
           className="buttonFilledOutline"
