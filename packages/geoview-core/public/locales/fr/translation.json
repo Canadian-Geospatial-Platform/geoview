@@ -186,7 +186,6 @@
     "toggleVisibility": "Basculer la visibilité",
     "toggleItemsVisibility": "Basculer la visibilité des classes",
     "toggleSublayersVisibility": "Basculer la visibilité des sous-couches",
-    "toggleItemVisibility": "Cliquer pour afficher/masquer l'élément",
     "toggleCollapse": "Basculer la fermeture",
     "zoomVisibleScale": "Zoom à l'échelle visible",
     "querying": "Requête en cours",
@@ -215,7 +214,8 @@
     "moveLayerUp": "Déplacer la couche vers le haut",
     "moveLayerDown": "Déplacer la couche vers le bas",
     "layerControls": "Commandes des couches",
-    "selectLayerAndScrollTimeSlider": "Voir dans le panneau Curseur Temporel"
+    "selectLayerAndScrollTimeSlider": "Voir dans le panneau Curseur Temporel",
+    "selectLayer": "Sélectionner {{layerName}}"
   },
   "details": {
     "title": "Détails",
@@ -391,7 +391,8 @@
     "searchInputLabel": "Entrer le(s) mot(s)-clé(s)",
     "errorMessage": "Désolé, impossible de trouver le document d'aide!",
     "arrowUp": "Correspondance précédente",
-    "arrowDown": "Correspondance suivante"
+    "arrowDown": "Correspondance suivante",
+    "closeGuide": "Fermer le guide"
   },
   "footerBar": {
     "resizeTooltip": "Redimensionner",

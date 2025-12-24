@@ -71,6 +71,11 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
     // Log
     logger.logTraceUseMemo('FOCUS-TRAP-ELEMENT - isActive');
 
+    // Don't activate if a modal is currently open (prevents competing FocusTraps)
+    if (focusItem.activeElementId && focusItem.activeElementId !== id) {
+      return false;
+    }
+
     // For footer bar containers, activate focus trap when WCAG is enabled and this container is active
     if (containerType === CONTAINER_TYPE.FOOTER_BAR) {
       return activeTrapGeoView && id === focusItem.activeElementId;
