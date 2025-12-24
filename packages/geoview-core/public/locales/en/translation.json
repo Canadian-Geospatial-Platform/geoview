@@ -176,7 +176,6 @@
     "toggleVisibility": "Toggle visibility",
     "toggleItemsVisibility": "Toggle classes visibility",
     "toggleSublayersVisibility": "Toggle sublayers visibility",
-    "toggleItemVisibility": "Click to show/hide item",
     "toggleCollapse": "Toggle collapse",
     "zoomVisibleScale": "Zoom to visible scale",
     "querying": "Querying",
@@ -205,7 +204,8 @@
     "moveLayerUp": "Move layer up",
     "moveLayerDown": "Move layer down",
     "layerControls": "Layers controls",
-    "selectLayerAndScrollTimeSlider": "Show in Time Slider panel"
+    "selectLayerAndScrollTimeSlider": "Show in Time Slider panel",
+    "selectLayer": "Select {{layerName}}"
   },
   "details": {
     "title": "Details",
@@ -381,7 +381,8 @@
     "searchInputLabel": "Search keyword(s)",
     "errorMessage": "Sorry, unable to find the help document!",
     "arrowUp": "Previous match",
-    "arrowDown": "Next match"
+    "arrowDown": "Next match",
+    "closeGuide": "Close guide"
   },
   "footerBar": {
     "resizeTooltip": "Resize",

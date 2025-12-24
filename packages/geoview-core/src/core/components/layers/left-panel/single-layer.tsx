@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { animated } from '@react-spring/web';
 import { useTheme } from '@mui/material/styles';
 import { getSxClasses } from '@/core/components/common/layer-list-style';
 import {
@@ -17,7 +16,6 @@ import {
   Tooltip,
   VisibilityOffOutlinedIcon,
   VisibilityOutlinedIcon,
-  Paper,
 } from '@/ui';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import {
@@ -64,9 +62,6 @@ interface SingleLayerProps {
   isLayoutEnlarged: boolean;
 }
 
-// Length at which the tooltip should be shown
-const CONST_NAME_LENGTH_TOOLTIP = 50;
-
 export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, isLast, isLayoutEnlarged }: SingleLayerProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/left-panel/single-layer', layerPath);
@@ -103,9 +98,6 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
 
   // Is visibility button disabled?
   const isLayerVisibleCapable = layerControls?.visibility;
-
-  // This is used to determine if the text should be wrapped in a tooltip
-  const shouldShowTooltip = (!!layerName && layerName.length > CONST_NAME_LENGTH_TOOLTIP) || isLayoutEnlarged;
 
   // Scroll this list item into view if selected
   useEffect(() => {
@@ -193,20 +185,6 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     setSelectedLayerPath(layerPath);
     showLayerDetailsPanel?.(layerId || '');
   }, [layerPath, layerId, layerStatus, setSelectedLayerPath, showLayerDetailsPanel]);
-
-  const handleListItemKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLLIElement>) => {
-      // Log
-      logger.logTraceUseCallback('SINGLE-LAYER - handleListItemKeyDown');
-
-      // If clicked enter key
-      if (event.key === 'Enter' && event.currentTarget === event.target) {
-        // Redirect
-        handleLayerClick();
-      }
-    },
-    [handleLayerClick]
-  );
 
   const handleIconButtonUpKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>) => {
@@ -419,7 +397,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     const isZoomToVisibleScaleCapable = !!((layerType as string) !== 'group' && !inVisibleRange);
 
     return (
-      <Box>
+      <Box component="span">
         <IconButton
           edge="end"
           size="small"
@@ -562,40 +540,43 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     }
   }, [displayState, selectedFooterLayerListItemId.length]);
 
-  const AnimatedPaper = animated(Paper);
-
   return (
-    <AnimatedPaper className={memoContainerClass} data-layer-depth={depth}>
-      <ListItem id={layerId} key={layerName} divider tabIndex={0} onKeyDown={handleListItemKeyDown} onClick={handleLayerClick}>
-        <ListItemButton
-          selected={layerIsSelected || (layerChildIsSelected && !legendExpanded)}
-          tabIndex={-1}
-          sx={{
-            minHeight: '4.51rem',
-            ...((!inVisibleRange || parentHidden || !isVisible || layerStatus === 'error') && sxClasses.outOfRange),
-          }}
-          className={!inVisibleRange ? 'out-of-range' : ''}
+    <ListItem className={memoContainerClass} id={layerId} key={layerName} disablePadding={true} data-layer-depth={depth}>
+      <Box>
+        <Tooltip
+          title={t('layers.selectLayer', { layerName })}
+          placement="top"
+          enterDelay={theme.transitions.duration.tooltipDelay}
+          enterNextDelay={theme.transitions.duration.tooltipDelay}
+          arrow
         >
-          <LayerIcon layerPath={layerPath} />
-          <Tooltip title={layerName} placement="top" enterDelay={1000} arrow disableHoverListener={!shouldShowTooltip}>
+          <ListItemButton
+            onClick={handleLayerClick}
+            selected={layerIsSelected || (layerChildIsSelected && !legendExpanded)}
+            sx={{
+              minHeight: '4.51rem',
+              ...((!inVisibleRange || parentHidden || !isVisible || layerStatus === 'error') && sxClasses.outOfRange),
+            }}
+            className={!inVisibleRange ? 'out-of-range' : ''}
+          >
+            <LayerIcon layerPath={layerPath} />
             <ListItemText primary={layerName !== undefined ? layerName : layerId} secondary={memoLayerDescription} />
-          </Tooltip>
-          {!isLayoutEnlarged && (
-            <ListItemIcon className="rightIcons-container">
-              {memoMoreLayerButtons}
-              {memoArrowButtons}
-              {memoEditModeButtons}
-            </ListItemIcon>
-          )}
-        </ListItemButton>
+          </ListItemButton>
+        </Tooltip>
+        {!isLayoutEnlarged && (
+          <ListItemIcon className="rightIcons-container">
+            {memoMoreLayerButtons}
+            {memoArrowButtons}
+            {memoEditModeButtons}
+          </ListItemIcon>
+        )}
         {layerStatus === 'loading' && (
           <Box sx={sxClasses.progressBarSingleLayer}>
             <ProgressBar />
           </Box>
         )}
-      </ListItem>
-
+      </Box>
       {memoCollapse}
-    </AnimatedPaper>
+    </ListItem>
   );
 }

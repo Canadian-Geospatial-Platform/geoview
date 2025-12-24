@@ -18,6 +18,7 @@ import { useUIActiveTrapGeoView, useUISelectedFooterLayerListItemId } from '@/co
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { handleEscapeKey } from '@/core/utils/utilities';
+import { FocusTrap } from '@/ui';
 
 interface ResponsiveGridLayoutProps {
   leftTop?: ReactNode;
@@ -37,6 +38,7 @@ interface ResponsiveGridLayoutProps {
 interface ResponsiveGridLayoutExposedMethods {
   setIsRightPanelVisible: (isVisible: boolean) => void;
   setRightPanelFocus: () => void;
+  closeBtnRef?: React.RefObject<HTMLButtonElement>;
 }
 
 const ResponsiveGridLayout = forwardRef(
@@ -64,6 +66,8 @@ const ResponsiveGridLayout = forwardRef(
     const theme = useTheme();
     const isMapFullScreen = useAppFullscreenActive();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    // Derive whether we have content (vs guide-only) from rightMain prop
+    const hasContent = !!rightMain;
 
     // Ref for right panel
     const rightMainRef = useRef<HTMLDivElement>();
@@ -72,6 +76,7 @@ const ResponsiveGridLayout = forwardRef(
     const guideContainerRef = useRef<HTMLDivElement>(null);
     const guideToggleBtnRef = useRef<HTMLButtonElement>(null);
     const fullScreenBtnRef = useRef<HTMLButtonElement>(null);
+    const closeBtnRef = useRef<HTMLButtonElement>(null);
 
     // Store
     const mapId = useGeoViewMapId();
@@ -101,13 +106,23 @@ const ResponsiveGridLayout = forwardRef(
         return {
           setIsRightPanelVisible: (isVisible: boolean) => setIsRightPanelVisible(isVisible),
           setRightPanelFocus: () => {
-            if (rightMainRef.current && !isGuideOpen) {
-              setTimeout(() => {
-                if (rightMainRef.current) rightMainRef.current.tabIndex = 0;
-                rightMainRef.current?.focus();
-              }, 0);
+            if (isGuideOpen) return;
+            // Focus close button if available, otherwise focus main content
+            if (closeBtnRef.current) {
+              // Use  requestAnimationFrame to ensure DOM is fully painted
+              requestAnimationFrame(() => {
+                closeBtnRef.current?.focus();
+              });
+            } else if (rightMainRef.current) {
+              requestAnimationFrame(() => {
+                if (rightMainRef.current) {
+                  rightMainRef.current.tabIndex = 0;
+                  rightMainRef.current.focus();
+                }
+              });
             }
           },
+          closeBtnRef,
         };
       },
       [isGuideOpen]
@@ -127,6 +142,16 @@ const ResponsiveGridLayout = forwardRef(
       onGuideIsOpen?.(isGuideOpen);
     }, [isGuideOpen, onGuideIsOpen]);
 
+    // Auto-focus Close Selection button when panel opens with content
+    useEffect(() => {
+      // Only focus when: panel visible, has content, not showing guide, and close button exists
+      if (isRightPanelVisible && hasContent && !isGuideOpen && closeBtnRef.current) {
+        requestAnimationFrame(() => {
+          closeBtnRef.current?.focus();
+        });
+      }
+    }, [isRightPanelVisible, hasContent, isGuideOpen]);
+
     useEffect(() => {
       // if hideEnlargeBtn changes to true and isEnlarged is true, set isEnlarged to false
       if (hideEnlargeBtn && isEnlarged) {
@@ -135,15 +160,43 @@ const ResponsiveGridLayout = forwardRef(
     }, [hideEnlargeBtn, isEnlarged]);
 
     // Callback to be executed after escape key is pressed.
+    // When the right sub-panel is open, escape triggers the sub-panel close button.
+    // When the right sub-panel is not open, escape closes the main panel.
     const handleEscapeKeyCallback = useCallback((): void => {
-      if (rightMainRef.current && selectedFooterLayerListItemId.length) {
+      // Don't close sub panel if guide is open - let the guide handle its own ESC
+      if (isGuideOpen) {
+        return;
+      }
+
+      // Check if the sub-panel close button is available (indicating the right panel is open and can be closed)
+      // Close button is visible when there's feature content, the right panel is visible, and WCAG mode is on
+      const shouldCloseSubPanel = hasContent && isRightPanelVisible && isFocusTrap;
+
+      if (shouldCloseSubPanel) {
+        // Trigger the sub-panel close button click if it exists
+        if (closeBtnRef.current) {
+          closeBtnRef.current.click();
+        } else {
+          // Fallback to direct close if button ref not available
+          setIsRightPanelVisible(false);
+          onRightPanelClosed?.();
+        }
+      } else if (rightMainRef.current && selectedFooterLayerListItemId.length) {
+        // Fall back to original focus management behavior (allows parent to handle closing the main panel)
         rightMainRef.current.tabIndex = -1;
       }
-    }, [selectedFooterLayerListItemId]);
+    }, [isGuideOpen, hasContent, isRightPanelVisible, isFocusTrap, closeBtnRef, selectedFooterLayerListItemId, onRightPanelClosed]);
 
     const handleKeyDown = useCallback(
-      (event: KeyboardEvent): void => handleEscapeKey(event.key, selectedFooterLayerListItemId, true, handleEscapeKeyCallback),
-      [handleEscapeKeyCallback, selectedFooterLayerListItemId]
+      (event: KeyboardEvent): void => {
+        // Check if we're in fullscreen mode - if so, don't handle escape here
+        // The fullscreen dialog will handle it
+        if (isFullScreen) {
+          return;
+        }
+        handleEscapeKey(event.key, selectedFooterLayerListItemId, true, handleEscapeKeyCallback);
+      },
+      [handleEscapeKeyCallback, selectedFooterLayerListItemId, isFullScreen]
     );
 
     // return back the focus to layeritem for which right panel was opened.
@@ -210,6 +263,23 @@ const ResponsiveGridLayout = forwardRef(
       }, 200);
     }, []);
 
+    // Add keyboard handler for guide
+    const handleGuideKeyDown = useCallback(
+      (event: React.KeyboardEvent<HTMLDivElement>): void => {
+        // Only handle ESC when not in fullscreen (fullscreen dialog handles its own ESC)
+        if (event.key === 'Escape' && !isFullScreen) {
+          // Only close if the close button would be visible
+          if (isFocusTrap && hasContent) {
+            // IMPORTANT: Stop propagation to prevent parent handlers from closing the sub panel
+            event.stopPropagation();
+            event.preventDefault();
+            handleCloseGuide();
+          }
+        }
+      },
+      [isFullScreen, isFocusTrap, hasContent, handleCloseGuide]
+    );
+
     // If we're on mobile
     if (theme.breakpoints.down('md')) {
       if (!(leftMain || leftTop) && !isRightPanelVisible) {
@@ -240,12 +310,23 @@ const ResponsiveGridLayout = forwardRef(
 
     const renderCloseButton = (): JSX.Element | null => {
       // Check conditions for hiding the button
-      if (!toggleMode && (!isMobile || !isRightPanelVisible)) {
+
+      // Default condition for mobile or toggle mode
+      let shouldShowCloseButton = (toggleMode && hasContent) || (isMobile && isRightPanelVisible);
+
+      // In WCAG mode, show close button when there is content
+      if (isFocusTrap) {
+        shouldShowCloseButton = hasContent && isRightPanelVisible;
+      } else if (isMobile) {
+        shouldShowCloseButton = isRightPanelVisible;
+      }
+      if (!shouldShowCloseButton) {
         return null;
       }
 
       return (
         <Button
+          ref={closeBtnRef}
           makeResponsive
           type="text"
           size="small"
@@ -275,6 +356,7 @@ const ResponsiveGridLayout = forwardRef(
           tooltip={t('general.openGuide')!}
           startIcon={<QuestionMarkIcon />}
           className={`guideButton ${isGuideOpen ? 'active' : ''}`}
+          disabled={isGuideOpen && !hasContent}
         >
           {t('general.guide')}
         </Button>
@@ -332,7 +414,13 @@ const ResponsiveGridLayout = forwardRef(
       if (!content) return null;
 
       return (
-        <Box ref={guideContainerRef} tabIndex={0}>
+        <Box
+          ref={guideContainerRef}
+          tabIndex={0}
+          className="panel-content-container"
+          sx={guideSxClasses.guideContainer}
+          onKeyDown={handleGuideKeyDown}
+        >
           <Box
             className="guideBox"
             sx={{
@@ -340,19 +428,20 @@ const ResponsiveGridLayout = forwardRef(
               ...(guideSxClasses.guideContainer as any)?.['& .guideBox'],
             }}
           >
-            {/* Close button, only shown WCAG is enabled and not fullScreen */}
-            {isFocusTrap && !isFullScreen && (
+            {/* Close button inside guide - shown when WCAG is enabled, not fullscreen, and no feature content is selected */}
+
+            {isFocusTrap && !isFullScreen && hasContent && (
               <IconButton
                 id={`layout-close-guide-${mapId}`}
                 onClick={handleCloseGuide}
                 sx={{
                   position: 'absolute',
                   top: 15,
-                  right: 15,
+                  right: 0,
                   zIndex: 1000,
                 }}
                 tabIndex={0}
-                aria-label={t('general.closeGuide') || 'Close guide'}
+                aria-label={t('guide.closeGuide') || 'Close guide'}
               >
                 <CloseIcon />
               </IconButton>
@@ -366,12 +455,46 @@ const ResponsiveGridLayout = forwardRef(
     const renderRightContent = (): JSX.Element => {
       const content = !isGuideOpen ? rightMain : renderGuide();
 
+      // Only trap focus when: WCAG mode on, right panel is visible, not fullscreen, and has feature content
+      const shouldTrapFocus = isFocusTrap && isRightPanelVisible && !isFullScreen && hasContent;
+
+      // Build the main content box
+      const mainContentBox = (
+        <Box
+          ref={isGuideOpen ? undefined : rightMainRef}
+          tabIndex={shouldTrapFocus ? -1 : undefined} // Required by MUI's FocusTrap when shouldTrapFocus is true
+          sx={sxClasses.rightMainContent}
+          className={`responsive-layout-right-main-content ${isGuideOpen ? 'guide-container' : ''}`}
+        >
+          <Box sx={sxClasses.rightButtonsContainer} className="guide-button-container">
+            <ButtonGroup size="small" variant="outlined" aria-label={t('details.guideControls')!} className="guide-button-group">
+              {!toggleMode && !hideEnlargeBtn && renderEnlargeButton()}
+              {!!guideContentIds?.length && renderGuideButton()}
+              {!isMapFullScreen && renderFullScreenButton()}
+              {!!(leftMain || leftTop) && renderCloseButton()}
+            </ButtonGroup>
+          </Box>
+          {!isGuideOpen && (
+            <Box className="panel-content-container">
+              {content || <Typography className="noSelection">{t('layers.noSelection')}</Typography>}
+            </Box>
+          )}
+          {isGuideOpen && (content || <Typography className="noSelection">{t('layers.noSelection')}</Typography>)}
+        </Box>
+      );
+
+      // Wrap the content box in FocusTrap if conditions are met
+      const wrappedMainContent = shouldTrapFocus ? <FocusTrap open={true}>{mainContentBox}</FocusTrap> : mainContentBox;
+
       return (
         <>
           <FullScreenDialog
             open={isFullScreen}
             onClose={() => {
               setIsFullScreen(false);
+            }}
+            onExited={() => {
+              // Restore focus to fullscreen button after dialog exit animation completes
               fullScreenBtnRef.current?.focus();
             }}
           >
@@ -380,13 +503,7 @@ const ResponsiveGridLayout = forwardRef(
             </Box>
           </FullScreenDialog>
 
-          <Box
-            ref={isGuideOpen ? undefined : rightMainRef}
-            sx={sxClasses.rightMainContent}
-            className={`responsive-layout-right-main-content ${isGuideOpen ? 'guide-container' : ''}`}
-          >
-            {content || <Typography className="noSelection">{t('layers.noSelection')}</Typography>}
-          </Box>
+          {wrappedMainContent}
         </>
       );
     };
@@ -428,15 +545,6 @@ const ResponsiveGridLayout = forwardRef(
               }}
             >
               {rightTop ?? <Box />}
-
-              <Box sx={sxClasses.rightButtonsContainer}>
-                <ButtonGroup size="small" variant="outlined" aria-label={t('details.guideControls')!}>
-                  {!toggleMode && !hideEnlargeBtn && renderEnlargeButton()}
-                  {!!guideContentIds?.length && renderGuideButton()}
-                  {!isMapFullScreen && renderFullScreenButton()}
-                  {!!(leftMain || leftTop) && renderCloseButton()}
-                </ButtonGroup>
-              </Box>
             </Box>
           </ResponsiveGrid.Right>
         </ResponsiveGrid.Root>
@@ -472,8 +580,6 @@ const ResponsiveGridLayout = forwardRef(
     );
   }
 );
-
-ResponsiveGridLayout.displayName = 'ResponsiveGridLayout';
 
 export { ResponsiveGridLayout };
 export type { ResponsiveGridLayoutExposedMethods };
