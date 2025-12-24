@@ -13,6 +13,39 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     color: 'text.primary',
     width: '100%',
     overflowY: 'auto',
+
+    // list item
+    '& .MuiListItem-root': {
+      height: '100%',
+      flexDirection: 'column',
+      alignItems: 'stretch',
+      '& > .MuiBox-root': {
+        height: '100%',
+        position: 'relative',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderBottom: `1px solid ${theme.palette.geoViewColor.grey.darken(1, 0.12)}`,
+      },
+    },
+
+    // list item boxes - remove border from sub-level list box if the list does not contain sub-items
+    '& > .MuiListItem-root:has(ul) ul:not(:has(ul)):last-of-type > li:last-child > .MuiBox-root': {
+      borderBottom: 'none',
+    },
+
+    // list item button
+    '& .MuiListItemButton-root': {
+      padding: '0 2px 0 16px',
+      height: '100%',
+      '&:hover': {
+        backgroundColor: 'transparent',
+      },
+      '&.Mui-selected:not(.Mui-focusVisible)': {
+        backgroundColor: 'transparent',
+      },
+    },
+
     // layer title
     '& .MuiListItemText-primary': {
       fontWeight: '600',
@@ -38,23 +71,6 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
         '& .MuiIconButton-root': {
           margin: '0px 1px',
         },
-      },
-    },
-
-    '& .MuiListItem-root': {
-      height: '100%',
-      '& .MuiListItemButton-root': {
-        padding: '0 2px 0 16px',
-        height: '100%',
-      },
-      '& .MuiBox-root': {
-        height: '100%',
-        borderTopRightRadius: '4px',
-        borderBottomRightRadius: '4px',
-        position: 'relative',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
       },
     },
 

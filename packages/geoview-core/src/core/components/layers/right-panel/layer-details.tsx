@@ -50,6 +50,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useTimeSliderLayers, useTimeSliderStoreActions } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 // TODO: WCAG Issue #3108 - Fix layers.moreInfo button (button nested within a button)
 // TODO: WCAG Issue #3108 - Check all disabled buttons. They may need special treatment. Need to find instance in UI first)
@@ -57,6 +58,7 @@ import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to
 
 interface LayerDetailsProps {
   layerDetails: TypeLegendLayer;
+  containerType?: 'appBar' | 'footerBar';
 }
 
 interface SubLayerProps {
@@ -109,7 +111,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/right-panel/layer-details');
 
-  const { layerDetails } = props;
+  const { layerDetails, containerType = 'footerBar' } = props;
 
   const { t } = useTranslation<string>();
 
@@ -119,6 +121,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   const [isInfoCollapse, setIsInfoCollapse] = useState(false);
   const [allSublayersVisible, setAllSublayersVisible] = useState(true);
+  const mapId = useGeoViewMapId();
 
   // get store actions
   const highlightedLayer = useLayerHighlightedLayer();
@@ -170,6 +173,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   // Get the localized layer type
   const memoLocalizedLayerType = useMemo(() => UtilAddLayer.getLocalizeLayerType(language, true), [language]);
+
+  // Generate unique table details button ID
+  const tableDetailsButtonId = `table-details-${containerType}-${mapId}`;
 
   // GV Wrapped in useEffect since it was throwing a warning otherwise
   useEffect(() => {
@@ -234,7 +240,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         logger.logPromiseFailed('Failed to triggerGetAllFeatureInfo in single-layer.handleLayerClick', error);
       });
     }
-    enableFocusTrap({ activeElementId: 'layerDataTable', callbackElementId: `table-details` });
+    enableFocusTrap({ activeElementId: 'layerDataTable', callbackElementId: tableDetailsButtonId });
   };
 
   const handleHighlightLayer = (): void => {
@@ -387,7 +393,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
     return (
       <IconButton
-        id="table-details"
+        id={tableDetailsButtonId}
         aria-label={isDisabled ? t('layers.tableViewNone') : t('legend.tableDetails')}
         className="buttonOutline"
         onClick={handleOpenTable}
@@ -609,6 +615,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     );
   };
 
+  // TODO: WCAG Issue #3116 - Consider using CSS rather than Divider for cleaner HTML structure
   // Render
   return (
     <Paper sx={sxClasses.layerDetails}>
@@ -677,13 +684,13 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
             )}
             {layerDetails.controls?.opacity !== false && <LayerOpacityControl layerDetails={layerDetails} />}
           </Box>
-          <Divider sx={{ marginTop: '10px', marginBottom: '10px' }} variant="middle" />
+          <Divider sx={{ height: 'auto', marginTop: '10px', marginBottom: '10px' }} variant="middle" />
           {renderWMSImage()}
           <Box>
             {layerDetails.items?.length > 0 && renderItems()}
             {layerDetails.children.length > 0 && renderSubLayers(layerDetails)}
           </Box>
-          <Divider sx={{ marginTop: '10px', marginBottom: '10px' }} variant="middle" />
+          <Divider sx={{ height: 'auto', marginTop: '10px', marginBottom: '10px' }} variant="middle" />
           {renderInfo()}
           {layerDetails.layerAttribution &&
             layerDetails.layerAttribution.map((attribution) => {
