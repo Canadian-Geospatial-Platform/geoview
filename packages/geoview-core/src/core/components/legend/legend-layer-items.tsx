@@ -6,19 +6,9 @@ import type { TypeLegendItem } from '@/core/components/layers/types';
 import { useLayerSelectorControls, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
+import { generateId } from '@/core/utils/utilities';
 import { useMapSelectorIsLayerHiddenOnMap } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-
-// TODO: WCAG Issue #3218 - Remove and use the random id generator utility function (utilities.ts)
-// Sanitize string to create a valid HTML id attribute
-// Replace spaces and special characters with hyphens and convert to lowercase
-// example "Layer Name 123!" becomes "layer-name-123-"
-const sanitizeId = (str: string): string => {
-  return str
-    .toLowerCase()
-    .replace(/[^a-z0-9-_]/g, '-')
-    .replace(/-+/g, '-');
-};
 
 interface ItemsListProps {
   items: TypeLegendItem[];
@@ -26,28 +16,28 @@ interface ItemsListProps {
 }
 
 // Extracted ListItem Component
-// Apply style to increase left/right tooltip area (padding: '0 18px 0 18px', margin: '0 -18px 0 -18px')
-
 const LegendListItem = memo(
   ({
     item: { icon, name, isVisible },
     layerVisible,
-    showVisibilityTooltip: { show, value },
+    canToggle,
     showNameTooltip,
     onToggle,
     sxClasses,
-    mapId,
+    id,
   }: {
     item: TypeLegendItem;
     layerVisible: boolean;
-    showVisibilityTooltip: { show: boolean; value: string };
+    canToggle: boolean;
     showNameTooltip: boolean;
     onToggle?: () => void;
     sxClasses: Record<string, object>;
-    mapId: string;
+    id: string;
   }): JSX.Element => {
+    const { t } = useTranslation<string>();
+    const theme = useTheme();
+    const tooltipTitle = canToggle ? `${isVisible && layerVisible ? t('general.hide') : t('general.show')} ${name}` : '';
     const getItemClassName = (): string | undefined => {
-      if (!show) return undefined;
       return !isVisible || !layerVisible ? 'unchecked' : 'checked';
     };
 
@@ -55,50 +45,28 @@ const LegendListItem = memo(
 
     return (
       <ListItem sx={sxClasses.layerListItem} disablePadding className={`layerListItem ${itemClassName || ''}`}>
-        {onToggle ? (
+        <Tooltip
+          title={tooltipTitle || (showNameTooltip ? name : '')}
+          placement="top"
+          enterDelay={theme.transitions.duration.tooltipDelay}
+          enterNextDelay={theme.transitions.duration.tooltipDelay}
+        >
           <ListItemButton
-            id={`legend-item-${sanitizeId(name)}-${mapId}`}
-            component="button"
+            id={id}
             onClick={onToggle}
+            disabled={!onToggle}
             disableRipple
             sx={sxClasses.layerListItemButton}
             className={`layerListItemButton ${itemClassName || ''}`}
           >
             <ListItemIcon>
-              <Tooltip title={show ? value : ''} key={`Tooltip-${name}-${icon}1`} placement="left" disableHoverListener={!show}>
-                <Box sx={{ display: 'flex', padding: '0 18px 0 18px', margin: '0 -18px 0 -18px' }}>
-                  {icon ? <Box component="img" alt="" src={icon} /> : <BrowserNotSupportedIcon />}
-                </Box>
-              </Tooltip>
+              <Box sx={{ display: 'flex', padding: '0 18px 0 18px', margin: '0 -18px 0 -18px' }}>
+                {icon ? <Box component="img" alt="" src={icon} /> : <BrowserNotSupportedIcon />}
+              </Box>
             </ListItemIcon>
-            <Tooltip
-              title={showNameTooltip ? name : ''}
-              key={`Tooltip-${name}-${icon}2`}
-              placement="top"
-              disableHoverListener={!showNameTooltip}
-            >
-              <ListItemText primary={name} />
-            </Tooltip>
+            <ListItemText primary={name} />
           </ListItemButton>
-        ) : (
-          <>
-            <ListItemIcon>
-              <Tooltip title={show ? value : ''} key={`Tooltip-${name}-${icon}1`} placement="left" disableHoverListener={!show}>
-                <Box sx={{ display: 'flex', padding: '0 18px 0 18px', margin: '0 -18px 0 -18px' }}>
-                  {icon ? <Box component="img" alt="" src={icon} /> : <BrowserNotSupportedIcon />}
-                </Box>
-              </Tooltip>
-            </ListItemIcon>
-            <Tooltip
-              title={showNameTooltip ? name : ''}
-              key={`Tooltip-${name}-${icon}2`}
-              placement="top"
-              disableHoverListener={!showNameTooltip}
-            >
-              <ListItemText primary={name} />
-            </Tooltip>
-          </>
-        )}
+        </Tooltip>
       </ListItem>
     );
   }
@@ -106,7 +74,7 @@ const LegendListItem = memo(
 LegendListItem.displayName = 'LegendListItem';
 
 // Length at which the tooltip should be shown
-const CONST_NAME_LENGTH_TOOLTIP = 30;
+const CONST_NAME_LENGTH_TOOLTIP = 5;
 
 // Item list component (no memo to force re render from layers panel modifications)
 export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsListProps): JSX.Element | null {
@@ -115,9 +83,9 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
   // Hooks
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const { t } = useTranslation<string>();
   const mapId = useGeoViewMapId();
   const lastToggledRef = useRef<string | null>(null);
+  const itemIdMapRef = useRef<Map<string, string>>(new Map());
 
   const { toggleItemVisibility, getLayer } = useLayerStoreActions();
   const layerControls = useLayerSelectorControls(layerPath);
@@ -125,16 +93,26 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
   const legendLayer = getLayer(layerPath);
   const canToggleItemVisibility = legendLayer?.canToggle && layerControls?.visibility !== false;
 
+  // Generate or retrieve a stable ID for each item based on its name
+  // prefix with legend-item for clarity
+  // suffix with mapId to ensure uniqueness across different layers and maps
+  const getItemId = (itemName: string): string => {
+    if (!itemIdMapRef.current.has(itemName)) {
+      itemIdMapRef.current.set(itemName, `legend-item-${generateId(18)}-${mapId}`);
+    }
+    return itemIdMapRef.current.get(itemName)!;
+  };
+
   /**
    * Handles toggling of class visibility when the legend item is clicked.
    * @param {TypeLegendItem} item - the item to change the visibility of
    */
   const handleToggleItemVisibility = useCallback(
-    (item: TypeLegendItem): void => {
-      lastToggledRef.current = `legend-item-${sanitizeId(item.name)}-${mapId}`;
+    (item: TypeLegendItem, itemId: string): void => {
+      lastToggledRef.current = itemId;
       toggleItemVisibility(layerPath, item);
     },
-    [layerPath, toggleItemVisibility, mapId]
+    [layerPath, toggleItemVisibility]
   );
 
   // Keep focus on layers when they are toggled using keyboard
@@ -155,24 +133,26 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
   return (
     <List className="layerList" sx={sxClasses.layerList}>
       {items.map((item) => {
+        const itemId = getItemId(item.name);
+        const canToggle = Boolean(
+          canToggleItemVisibility && !layerHidden && legendLayer.styleConfig?.[item.geometryType]?.fields[0] !== undefined
+        );
+
         // Common properties for the legend list item
         const commonProps = {
           item,
           layerVisible: !layerHidden,
-          showVisibilityTooltip: {
-            show: Boolean(canToggleItemVisibility && !layerHidden && legendLayer.styleConfig?.[item.geometryType]?.fields[0] !== undefined),
-            value: t('layers.toggleItemVisibility'),
-          },
+          canToggle,
           showNameTooltip: item.name.length > CONST_NAME_LENGTH_TOOLTIP,
         };
 
         return (
           <LegendListItem
             key={`${item.name}-${item.isVisible}-${item.icon}`}
+            id={itemId}
             {...commonProps}
-            onToggle={commonProps.showVisibilityTooltip.show ? () => handleToggleItemVisibility(item) : undefined}
+            onToggle={canToggle ? () => handleToggleItemVisibility(item, itemId) : undefined}
             sxClasses={sxClasses}
-            mapId={mapId}
           />
         );
       })}

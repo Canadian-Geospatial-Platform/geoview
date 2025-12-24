@@ -242,6 +242,7 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
         enteringScreen: 225,
         // recommended when something is leaving screen
         leavingScreen: 195,
+        tooltipDelay: 500,
         splash: 1500,
       },
       easing: {

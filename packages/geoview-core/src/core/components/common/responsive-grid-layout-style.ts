@@ -13,6 +13,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     flexDirection: 'column',
     height: '100%',
     padding: '16px 0',
+    gap: '10px',
   },
   topRow: {
     '& .responsive-layout-left-top': {
@@ -63,21 +64,21 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
   rightMainContent: {
-    border: `2px solid ${theme.palette.geoViewColor.primary.main}`,
-    borderRadius: '5px 0 5px 5px',
     backgroundColor: theme.palette.geoViewColor.bgColor.light[300],
-    overflowY: 'auto',
+    height: '100%',
+    width: '100%',
     '&:focus-visible': {
       border: '2px solid inherit',
     },
     '&.guide-container': {
       backgroundColor: theme.palette.geoViewColor.white,
     },
-    width: '100%',
+
     '& .MuiPaper-root': {
       border: 'none',
     },
     '& .guideBox': {
+      position: 'relative',
       color: `${theme.palette.geoViewColor.grey.dark[800]}  !important`,
       padding: '16px',
       img: {
@@ -107,6 +108,24 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       fontSize: theme.palette.geoViewFontSize.md,
       fontWeight: '500',
       padding: 10,
+    },
+    '& .guide-button-container': {
+      display: 'flex',
+      justifyContent: 'flex-end',
+      border: 'none',
+      borderRadius: '0',
+    },
+    '& .guide-button-group': {
+      border: `2px solid ${theme.palette.geoViewColor.primary.main}`,
+      borderBottom: 'none',
+      borderRadius: '8px 8px 0 0',
+    },
+    '& .panel-content-container': {
+      backgroundColor: theme.palette.geoViewColor.white,
+      minHeight: '0',
+      border: `2px solid ${theme.palette.geoViewColor.primary.main}`,
+      borderRadius: '5px 0 5px 5px',
+      overflow: 'auto',
     },
   },
   gridRightMain: {
