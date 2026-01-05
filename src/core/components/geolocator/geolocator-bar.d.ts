@@ -10,7 +10,9 @@ interface GeolocatorBarProps {
     onReset: () => void;
     /** Loading state to disable search while fetching */
     isLoading: boolean;
+    /** Ref for the search input element */
+    inputRef?: React.RefObject<HTMLInputElement>;
 }
-export declare function GeolocatorBar({ searchValue, onChange, onSearch, onReset, isLoading }: GeolocatorBarProps): JSX.Element;
+export declare function GeolocatorBar({ searchValue, onChange, onSearch, onReset, isLoading, inputRef }: GeolocatorBarProps): JSX.Element;
 export {};
 //# sourceMappingURL=geolocator-bar.d.ts.map

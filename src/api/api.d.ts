@@ -74,7 +74,7 @@ export declare class API {
      * @param {string} divId - Id of the div to create map in (becomes the mapId)
      * @param {string} mapConfig - Config passed in from the function call (string or url of a config path)
      * @param {number?} divHeight - Optional, height of the div to inject the map in (mandatory if the map reloads)
-     * @returns {Promise<MapViewer>} A Promise containing the MapViewer which will be created from the configuration.
+     * @returns {Promise<MapViewer>} A Promise containing the MapViewer (after the onMapInit is triggered) which will be created from the configuration.
      */
     createMapFromConfig(divId: string, mapConfig: string, divHeight?: number): Promise<MapViewer>;
     /**
