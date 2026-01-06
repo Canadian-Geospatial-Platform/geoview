@@ -248,7 +248,7 @@ export class EsriUtilities {
 
     // The following line allow the type ascention of the type guard functions on the second line below
     if (layerConfig instanceof EsriDynamicLayerEntryConfig || layerConfig instanceof EsriFeatureLayerEntryConfig) {
-      // Get the style from the Esri Renderer
+      // Create the style from the Esri Renderer
       const styleFromRenderer = EsriRenderer.createStylesFromEsriRenderer(responseJson.drawingInfo?.renderer);
 
       // Initialize the layer style by filling the blanks with the information from the metadata
@@ -355,14 +355,9 @@ export class EsriUtilities {
     // Validate and update the visible initial settings
     layerConfig.initInitialSettingsStatesVisibleFromMetadata(layerMetadata?.defaultVisibility);
 
-    // Update Max / Min Scales with value if service doesn't allow the configured value for proper UI functionality
-    if (layerMetadata?.minScale) {
-      layerConfig.setMinScale(Math.min(layerConfig.getMinScale() ?? Infinity, layerMetadata.minScale));
-    }
-
-    if (layerMetadata?.maxScale) {
-      layerConfig.setMaxScale(Math.max(layerConfig.getMaxScale() ?? -Infinity, layerMetadata.maxScale));
-    }
+    // Update Min / Max Scales with value if service doesn't allow the configured value for proper UI functionality
+    layerConfig.initMinScaleFromMetadata(layerMetadata?.minScale);
+    layerConfig.initMaxScaleFromMetadata(layerMetadata?.maxScale);
 
     // Set the max record count for querying
     if ('maxRecordCount' in layerConfig) {

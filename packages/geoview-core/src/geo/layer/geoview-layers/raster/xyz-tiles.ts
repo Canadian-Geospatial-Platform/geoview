@@ -147,29 +147,17 @@ export class XYZTiles extends AbstractGeoViewRaster {
         layerConfig.setLayerMetadata(metadataLayerConfigFound);
 
         // Initialize the source by filling the blanks with the information from the metadata
-        layerConfig.initSource(metadataLayerConfigFound.source);
+        layerConfig.initSourceFromMetadata(metadataLayerConfigFound.source);
 
         // Initialize the initial settings by filling the blanks with the information from the metadata
         layerConfig.initInitialSettingsFromMetadata(metadataLayerConfigFound.initialSettings);
 
         // Set zoom limits for max / min zooms
-        const maxScale = metadataLayerConfigFound?.maxScale;
-        const minScaleDenominator = metadataLayerConfigFound?.minScaleDenominator;
-
-        layerConfig.setMaxScale(
-          !maxScale && !minScaleDenominator
-            ? layerConfig.getMaxScale()
-            : Math.max(maxScale ?? -Infinity, minScaleDenominator ?? -Infinity, layerConfig.getMaxScale() ?? -Infinity)
-        );
-
-        const minScale = metadataLayerConfigFound?.minScale;
-        const maxScaleDenominator = metadataLayerConfigFound?.maxScaleDenominator;
-
-        layerConfig.setMinScale(
-          !minScale && !maxScaleDenominator
-            ? layerConfig.getMinScale()
-            : Math.min(minScale ?? Infinity, maxScaleDenominator ?? Infinity, layerConfig.getMinScale() ?? Infinity)
-        );
+        // GV MinScaleDenominator is actually the maxScale and MaxScaleDenominator is actually the minScale
+        const minScale = metadataLayerConfigFound?.minScale || metadataLayerConfigFound?.maxScaleDenominator;
+        layerConfig.initMinScaleFromMetadata(minScale);
+        const maxScale = metadataLayerConfigFound?.maxScale || metadataLayerConfigFound?.minScaleDenominator;
+        layerConfig.initMaxScaleFromMetadata(maxScale);
       }
     }
 
@@ -314,7 +302,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
       url: layerConfig.getDataAccessPath(),
       attributions: layerConfig.getAttributions(),
       crossOrigin: layerConfig.getSource().crossOrigin ?? 'Anonymous',
-      projection: layerConfig.getSource().projection ? `EPSG:${layerConfig.getSource().projection}` : undefined,
+      projection: layerConfig.getProjectionWithEPSG(),
     };
 
     // Get the tile grid

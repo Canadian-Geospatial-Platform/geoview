@@ -482,10 +482,14 @@ export class LayerInvalidFeatureInfoFormatWMSError extends LayerError {
    * Creates an instance of LayerInvalidFeatureInfoFormatWMSError.
    *
    * @param {string} layerPath - The path or identifier of the WMS layer that received the invalid format.
+   * @param {string} format - The invalid format.
    * @param {string | undefined} layerName - The layer name.
    */
-  constructor(layerPath: string, layerName: string | undefined) {
-    super(layerPath, 'validation.layer.wmsServiceFormatParameter', [layerName || layerPath]);
+  constructor(layerPath: string, format: string | string[], layerName: string | undefined) {
+    super(layerPath, 'validation.layer.wmsServiceFormatParameter', [
+      Array.isArray(format) ? format.join(',') : format,
+      layerName || layerPath,
+    ]);
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerInvalidFeatureInfoFormatWMSError.prototype);

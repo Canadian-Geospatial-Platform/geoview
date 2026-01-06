@@ -99,29 +99,17 @@ export class VectorTiles extends AbstractGeoViewRaster {
       // Get the spatial reference from the metadata
       const projectionMetadata = metadata.tileInfo?.spatialReference?.wkid;
 
-      // If a spatial reference is specified in the metadata
-      if (projectionMetadata) {
-        // Make sure the projection is set on the source config
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.getSource().projection ??= projectionMetadata as unknown as TypeValidSourceProjectionCodes;
-      }
+      // Make sure the projection is set on the source config
+      layerConfig.initProjectionFromMetadata(projectionMetadata as unknown as TypeValidSourceProjectionCodes);
 
       // Check if we support that projection and if not add it on-the-fly
       await Projection.addProjectionIfMissing(fullExtent.spatialReference);
 
       // Set zoom levels. Vector tiles may be unique as they can have both scale and zoom level properties
-      // First set the min/max scales based on the service / config
-      // * Infinity and -Infinity are used as extreme zoom level values in case the value is undefined
-      if (minScale) {
-        layerConfig.setMinScale(Math.min(layerConfig.getMinScale() ?? Infinity, minScale));
-      }
-
-      if (maxScale) {
-        layerConfig.setMaxScale(Math.max(layerConfig.getMaxScale() ?? -Infinity, maxScale));
-      }
+      layerConfig.initMinScaleFromMetadata(minScale);
+      layerConfig.initMaxScaleFromMetadata(maxScale);
 
       // Second, set the min/max zoom levels based on the service / config.
-      // GV Vector tiles should always have a minZoom and maxZoom, so -Infinity or Infinity should never be set as a value
       layerConfig.initInitialSettingsMinZoomFromMetadata(minZoom);
       layerConfig.initInitialSettingsMaxZoomFromMetadata(maxZoom);
     }
@@ -294,7 +282,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    */
   static createVectorTileSource(layerConfig: VectorTilesLayerEntryConfig): VectorTileSource {
     // Get the projection from the source config
-    const sourceProjection = layerConfig.getSource().projection;
+    const sourceProjection = layerConfig.getProjection();
 
     // If no projection for the layer
     if (!sourceProjection) {
@@ -305,7 +293,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
     const sourceOptions: SourceOptions = {
       url: layerConfig.getDataAccessPath(),
       format: new MVT(),
-      projection: `EPSG:${sourceProjection}`,
+      projection: layerConfig.getProjectionWithEPSG(),
     };
 
     // Get the tile grid
