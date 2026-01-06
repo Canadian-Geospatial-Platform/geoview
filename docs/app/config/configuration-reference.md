@@ -1058,6 +1058,7 @@ interface TypeLayerEntryConfig {
   initialSettings?: TypeLayerInitialSettings;
   source?: TypeSourceConfig;
   layerStyle?: TypeLayerStyle;
+  layerText?: TypeLayerTextConfig;
   layerFilter?: string;
 
   // Scale constraints
@@ -1141,6 +1142,28 @@ layerStyle?: TypeLayerStyle;
 ```
 
 See [Layer Style Configuration](#layer-style-configuration) section.
+
+---
+
+#### layerText (Optional)
+
+Text/label configuration for displaying feature labels on the map.
+
+```typescript
+layerText?: TypeLayerTextConfig;
+```
+
+See [Layer Text Configuration](#layer-text-configuration) section for complete details.
+
+**Example:**
+```typescript
+layerText: {
+  field: "name",
+  fontSize: 12,
+  fill: "#000000",
+  offsetY: -10
+}
+```
 
 ---
 
@@ -1699,6 +1722,295 @@ layerStyle: {
 }
 ```
 
+---
+
+## Layer Text Configuration
+
+Configuration for displaying text labels on map features.
+
+###TypeLayerTextConfig
+
+```typescript
+layerText: {
+  // Content: field takes precedence
+  field?: string;
+  text?: string | string[];
+
+  // Font styling
+  fontSize?: number;
+  fontFamily?: string;
+  bold?: boolean;
+  italic?: boolean;
+
+  // Positioning
+  offsetX?: number;
+  offsetY?: number;
+  placement?: 'point' | 'line';
+  textAlign?: 'left' | 'right' | 'center' | 'end' | 'start';
+  justify?: 'left' | 'center' | 'right';
+  textBaseline?: 'bottom' | 'top' | 'middle' | 'alphabetic' | 'hanging' | 'ideographic';
+
+  // Appearance
+  fill?: string;
+  haloColor?: string;
+  haloWidth?: number;
+  backgroundFill?: string;
+  backgroundStrokeColor?: string;
+  backgroundStrokeWidth?: number;
+
+  // Behavior
+  overflow?: boolean;
+  rotation?: number;
+  rotateWithView?: boolean;
+  keepUpright?: boolean;
+  maxAngle?: number;
+  repeat?: number;
+  scale?: number | [number, number];
+
+  // Layout
+  padding?: [number, number, number, number];
+  declutterMode?: 'declutter' | 'obstacle' | 'none';
+  wrap?: boolean;
+  wrapCount?: number;
+
+  // Visibility
+  minZoomLevel?: number;
+  maxZoomLevel?: number;
+}
+```
+
+### Properties
+
+#### field
+
+Feature field to use as label text.
+
+```typescript
+field?: string;
+```
+
+**Example:**
+
+```typescript
+layerText: {
+  field: "name" // Use the 'name' field from features
+}
+```
+
+---
+
+#### text
+
+Static text or template with field placeholders. Supports rich text arrays.
+
+```typescript
+text?: string | string[];
+```
+
+**Examples:**
+
+```typescript
+// Static text
+text: "Label"
+
+// Template with field placeholders
+text: "Name: {name} - Pop: {population}"
+
+// Date formatting
+text: "Date: {date:MM/DD/YYYY}"
+
+// Rich text array (alternating text and font styles)
+text: ["Name: ", "bold 12px Arial", "{name}", "10px Arial"]
+
+// Rich text array with line break
+text: ["Name: {name}", "bold 12px Arial", "\n", "", "Pop: {population}", "12px Arial"]
+```
+
+**Template Placeholders:**
+- `{fieldName}` - Insert field value
+- `{fieldName:format}` - Format field value (dates only)
+
+**Date Formats:**
+- `YYYY` - 4-digit year
+- `MM` - 2-digit month  
+- `DD` - 2-digit day
+
+---
+
+#### fontSize
+
+Font size in pixels.
+
+```typescript
+fontSize?: number; // Default: 10
+```
+
+**Example:**
+
+```typescript
+layerText: {
+  fontSize: 14
+}
+```
+
+---
+
+#### fontFamily
+
+Font family name.
+
+```typescript
+fontFamily?: string; // Default: 'sans-serif'
+```
+
+**Example:**
+
+```typescript
+layerText: {
+  fontFamily: "Arial"
+}
+```
+
+---
+
+#### bold / italic
+
+Font weight and style.
+
+```typescript
+bold?: boolean; // Default: false
+italic?: boolean; // Default: false
+```
+
+**Example:**
+
+```typescript
+layerText: {
+  bold: true,
+  italic: false
+}
+```
+
+---
+
+#### offsetX / offsetY
+
+Text offset in pixels from feature position.
+
+```typescript
+offsetX?: number; // Horizontal offset
+offsetY?: number; // Vertical offset
+```
+
+**Example:**
+
+```typescript
+layerText: {
+  offsetX: 5,   // 5px right
+  offsetY: -10  // 10px up
+}
+```
+
+---
+
+#### fill
+
+Text color.
+
+```typescript
+fill?: string;
+```
+
+**Examples:**
+
+```typescript
+fill: "#000000"           // Black
+fill: "rgba(255,0,0,0.8)" // Semi-transparent red
+fill: "blue"              // Named color
+```
+
+---
+
+#### haloColor / haloWidth
+
+Text outline (halo) for better readability. The stroke property in OpenLayers.
+
+```typescript
+haloColor?: string;
+haloWidth?: number;
+```
+
+**Example:**
+
+```typescript
+layerText: {
+  fill: "#000000",
+  haloColor: "#FFFFFF",
+  haloWidth: 2
+}
+```
+
+---
+
+#### minZoomLevel / maxZoomLevel
+
+Zoom-based visibility control.
+
+```typescript
+minZoomLevel?: number; // Show only above this zoom
+maxZoomLevel?: number; // Show only below this zoom
+```
+
+**Example:**
+
+```typescript
+layerText: {
+  minZoomLevel: 10, // Only show when zoomed in past level 10
+  maxZoomLevel: 18  // Hide when zoomed in past level 18
+}
+```
+
+---
+
+#### wrap / wrapCount
+
+Text wrapping configuration.
+
+```typescript
+wrap?: boolean;
+wrapCount?: number; // Characters per line (default: 16)
+```
+
+**Example:**
+
+```typescript
+layerText: {
+  wrap: true,
+  wrapCount: 20 // Wrap at 20 characters per line
+}
+```
+
+---
+
+#### declutterMode
+
+Label collision handling.
+
+```typescript
+declutterMode?: 'declutter' | 'obstacle' | 'none'; // Default: 'declutter'
+```
+
+- `'declutter'` - Hide overlapping labels
+- `'obstacle'` - Show labels but treat as obstacles for other labels
+- `'none'` - Show all labels regardless of overlap
+
+**Example:**
+
+```typescript
+layerText: {
+  declutterMode: "none" // Show all labels
+}
+```
 ---
 
 ## Temporal Configuration
