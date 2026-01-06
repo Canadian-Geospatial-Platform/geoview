@@ -54,11 +54,12 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     const layerOptions: VectorLayerOptions<VectorSource<Feature<Geometry>>> = {
       properties: { layerConfig },
       source: olSource,
-      style: (feature) => {
+      style: (feature, resolution) => {
         // Calculate the style for the feature
         const style = AbstractGVVector.calculateStyleForFeature(
           this as AbstractGVLayer,
           feature,
+          resolution,
           label,
           layerConfig.getFilterEquation(),
           layerConfig.getLegendFilterIsOff()
@@ -374,6 +375,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   static calculateStyleForFeature(
     layer: AbstractGVLayer,
     feature: FeatureLike,
+    resolution: number,
     label: string,
     filterEquation?: FilterNodeType[],
     legendFilterIsOff?: boolean
@@ -383,16 +385,19 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
     // Create lookup dictionary of names to alias
     const outfields = layer.getLayerConfig().getOutfields();
+    const layerText = layer.getLayerConfig().getLayerText();
     const aliasLookup = GVLayerUtilities.createAliasLookup(outfields);
 
     // Get and create Feature style if necessary
     return GeoviewRenderer.getAndCreateFeatureStyle(
       feature,
+      resolution,
       style,
       label,
       filterEquation,
       legendFilterIsOff,
       aliasLookup,
+      layerText,
       (geometryType, theStyle) => {
         // A new style has been created
         logger.logDebug('A new style has been created on-the-fly', geometryType, layer);

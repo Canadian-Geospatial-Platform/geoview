@@ -1,5 +1,5 @@
 import { asArray, asString } from 'ol/color';
-import { Style, Stroke, Fill, RegularShape, Circle as StyleCircle, Icon as StyleIcon } from 'ol/style';
+import { Style, Stroke, Fill, RegularShape, Circle as StyleCircle, Icon as StyleIcon, Text } from 'ol/style';
 import type { Geometry } from 'ol/geom';
 import { LineString, Point, Polygon } from 'ol/geom';
 import type { Options as IconOptions } from 'ol/style/Icon';
@@ -29,7 +29,9 @@ import type {
   TypeLayerStyleConfig,
   TypeLayerStyleConfigInfo,
   TypeLayerStyleValueCondition,
+  TypeLayerTextConfig,
   TypeAliasLookup,
+  TypeValidMapProjectionCodes,
   codedValueType,
 } from '@/api/types/map-schema-types';
 import {
@@ -1670,21 +1672,25 @@ export abstract class GeoviewRenderer {
    * This method gets the style of the feature using the layer entry config. If the style does not exist for the geometryType,
    * create it using the default style strategy.
    * @param {FeatureLike} feature - Feature that need its style to be defined.
+   * @param {number} resolution - The resolution of the map
    * @param {TypeStyleConfig} style - The style to use
    * @param {string} label - The style label when one has to be created
    * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
    * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
    * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
+   * @param {TypeLayerTextConfig?} layerText - An optional text configuration to apply to the feature
    * @param {() => Promise<string | null>} callbackWhenCreatingStyle - An optional callback to execute when a new style had to be created
    * @returns {Style | undefined} The style applied to the feature or undefined if not found.
    */
   static getAndCreateFeatureStyle(
     feature: FeatureLike,
+    resolution: number,
     style: TypeLayerStyleConfig,
     label: string,
     filterEquation?: FilterNodeType[],
     legendFilterIsOff?: boolean,
     aliasLookup?: TypeAliasLookup,
+    layerText?: TypeLayerTextConfig,
     callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeLayerStyleConfigInfo) => void
   ): Style | undefined {
     // Get the geometry type
@@ -1719,6 +1725,11 @@ export abstract class GeoviewRenderer {
         undefined,
         aliasLookup
       );
+
+      const textStyle = GeoviewRenderer.getTextStyle(feature, resolution, styleSettings, layerText, aliasLookup);
+      if (textStyle && featureStyle) {
+        featureStyle.setText(textStyle);
+      }
 
       return featureStyle;
     }
@@ -2090,4 +2101,182 @@ export abstract class GeoviewRenderer {
       MultiPolygon: GeoviewRenderer.processClassBreaksPolygon.bind(GeoviewRenderer),
     },
   };
+
+  /**
+   * Method for getting the text style
+   * @param {FeatureLike} feature - The feature to get the text style for
+   * @param {number} resolution - The resolution of the map
+   * @param {TypeLayerStyleSettings} styleSettings - The style settings
+   * @param {TypeLayerTextConfig} layerText - The layer text configuration
+   * @param {TypeAliasLookup} aliasLookup - The alias lookup
+   * @returns {Text | undefined} The text style
+   */
+  static getTextStyle = (
+    feature: FeatureLike,
+    resolution: number,
+    styleSettings: TypeLayerStyleSettings,
+    layerText?: TypeLayerTextConfig,
+    aliasLookup?: TypeAliasLookup
+  ): Text | undefined => {
+    const { type, info } = styleSettings;
+    let symbolText: TypeLayerTextConfig | undefined;
+
+    if (type === 'simple') {
+      // For simple styles, use the first (and only) style info
+      symbolText = info[0]?.text;
+    }
+
+    if (type === 'uniqueValue') {
+      // Find the matching unique value entry
+      const foundUniqueValueInfo = this.searchUniqueValueEntry(
+        styleSettings.fields,
+        info,
+        feature as Feature,
+        undefined, // domainsLookup
+        aliasLookup
+      );
+      symbolText = foundUniqueValueInfo?.text;
+    }
+
+    if (type === 'classBreaks') {
+      // Find the matching class break entry
+      const foundClassBreakInfo = this.searchClassBreakEntry(styleSettings.fields[0], info, feature as Feature, aliasLookup);
+      symbolText = foundClassBreakInfo?.text;
+    }
+
+    const textSettings = symbolText || layerText;
+    if (!textSettings) return undefined;
+    if (textSettings.minZoomLevel !== undefined && resolution > GeoviewRenderer.getApproximateResolution(textSettings.minZoomLevel))
+      return undefined;
+    if (textSettings.maxZoomLevel !== undefined && resolution < GeoviewRenderer.getApproximateResolution(textSettings.maxZoomLevel))
+      return undefined;
+
+    return GeoviewRenderer.createTextStyle(feature, textSettings);
+  };
+
+  /**
+   * Method for creating Text Style
+   * @param {FeatureLike} feature - The feature to create the text style for
+   * @param {TypeLayerTextConfig} textSettings - The text style settings
+   * @returns {Text | undefined} The text style
+   */
+  static createTextStyle = (feature: FeatureLike, textSettings: TypeLayerTextConfig): Text | undefined => {
+    // TODO: Create options for wrapping text
+    const {
+      field,
+      fontSize = 10,
+      fontFamily = 'sans-serif',
+      bold = false,
+      italic = false,
+      maxAngle,
+      offsetX,
+      offsetY,
+      overflow,
+      placement,
+      repeat,
+      scale,
+      rotateWithView,
+      keepUpright,
+      rotation,
+      text,
+      textAlign,
+      justify,
+      textBaseline,
+      fill,
+      haloColor,
+      haloWidth,
+      backgroundFill,
+      backgroundStrokeColor,
+      backgroundStrokeWidth,
+      padding,
+      declutterMode = 'declutter',
+      wrap,
+      wrapCount = 16,
+    } = textSettings;
+
+    // Get text from feature field or use static text
+    let textValue = field ? String(feature.get(field) || undefined) : text || undefined;
+    if (!textValue) return undefined;
+
+    if (wrap) {
+      textValue = GeoviewRenderer.wrapText(textValue, wrapCount);
+    }
+
+    // Build font string
+    let fontStyle = '';
+    if (italic) fontStyle += 'italic ';
+    if (bold) fontStyle += 'bold ';
+    const font = `${fontStyle}${fontSize}px ${fontFamily}`;
+
+    // Convert rotation from degrees to radians
+    const rotationRadians = rotation ? (rotation * Math.PI) / 180 : undefined;
+
+    // Convert maxAngle from degrees to radians
+    const maxAngleRadians = maxAngle ? (maxAngle * Math.PI) / 180 : undefined;
+
+    return new Text({
+      text: textValue,
+      font,
+      maxAngle: maxAngleRadians,
+      offsetX,
+      offsetY,
+      overflow,
+      placement,
+      repeat,
+      scale,
+      rotateWithView,
+      keepUpright,
+      rotation: rotationRadians,
+      textAlign,
+      justify,
+      textBaseline,
+      fill: fill ? new Fill({ color: fill }) : undefined,
+      stroke: haloColor ? new Stroke({ color: haloColor, width: haloWidth || 1 }) : undefined,
+      backgroundFill: backgroundFill ? new Fill({ color: backgroundFill }) : undefined,
+      backgroundStroke: backgroundStrokeColor ? new Stroke({ color: backgroundStrokeColor, width: backgroundStrokeWidth || 1 }) : undefined,
+      padding,
+      declutterMode,
+    });
+  };
+
+  /**
+   * Get approximate resolution for common zoom levels by projection
+   * @param {number} zoom - The zoom level (0-20)
+   * @param {TypeValidMapProjectionCodes} projection - The map projection (3857 for Web Mercator, 3978 for Canada Lambert)
+   * @returns {number} Approximate resolution for the given zoom and projection
+   */
+  static getApproximateResolution(zoom: number, projection: TypeValidMapProjectionCodes = 3857): number {
+    if (projection === 3978) {
+      // Lambert Conformal Conic Canada: resolution ≈ 38364.660062653464 / (2^zoom)
+      return 38364.660062653464 / Math.pow(2, zoom);
+    }
+    // Default to Web Mercator: resolution ≈ 156543.03392804097 / (2^zoom)
+    return 156543.03392804097 / Math.pow(2, zoom);
+  }
+
+  /**
+   * Wrap text to a specified width
+   * @param {string} str - The text to wrap
+   * @param {number} width - The maximum width of the text
+   * @returns {string} The wrapped text
+   */
+  static wrapText(str: string, width: number): string {
+    if (str.length > width) {
+      let p = width;
+      while (p > 0 && str[p] !== ' ' && str[p] !== '-') {
+        p--;
+      }
+      if (p > 0) {
+        let left;
+        if (str.substring(p, p + 1) === '-') {
+          left = str.substring(0, p + 1);
+        } else {
+          left = str.substring(0, p);
+        }
+        const right = str.substring(p + 1);
+        return left + '\n' + GeoviewRenderer.wrapText(right, width);
+      }
+    }
+    return str;
+  }
 } // END CLASS
