@@ -82,10 +82,15 @@
               }
             },
             "layerText": {
-              "field": "Tour",
+              "text": [
+                "{Tour}", "bold 14px sans-serif",
+                "\n", "",
+                "{Date:YYYY-MM}", "12px sans-serif"
+              ],
               "fontSize": 12,
-              "offsetY": 15,
+              "offsetY": -15,
               "placement": "point",
+              "textBaseline": "bottom",
               "rotateWithView": true,
               "fill": "black",
               "haloColor": "rgba(255, 255, 255, 0.7)",

@@ -1142,8 +1142,11 @@
           "type": "number"
         },
         "text": {
-          "description": "Text value to apply to feature labels. Will be overwritten if 'field' is set",
-          "type": "string"
+          "description": "Text value to apply to feature labels. Will be overwritten if 'field' is set. Can be set to more complicated text strings with values inside {} being replaced with their field values.",
+          "oneOf": [
+            {"type": "string"},
+            {"type": "array", "items": {"type": "string"}, "minItems": 2}
+          ]
         },
         "textAlign": {
           "description": "Text alignment. The default is 'center'",

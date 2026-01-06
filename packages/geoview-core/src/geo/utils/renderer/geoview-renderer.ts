@@ -2194,10 +2194,25 @@ export abstract class GeoviewRenderer {
     } = textSettings;
 
     // Get text from feature field or use static text
-    let textValue = field ? String(feature.get(field) || undefined) : text || undefined;
+    let textValue: string | string[] | undefined;
+    if (field) {
+      textValue = String(feature.get(field) || undefined);
+    } else if (text) {
+      if (Array.isArray(text)) {
+        // Process rich text array - only process text elements: ['text value', 'bold 10px sans-serif', '\n', '', 'text value 2', 'italic 8px serif']
+        textValue = text.map((item, index) => {
+          if (index % 2 === 0 && typeof item === 'string') {
+            return item.includes('{') ? GeoviewRenderer.processTextTemplate(item, feature) : item;
+          }
+          return item;
+        });
+      } else {
+        textValue = text.includes('{') ? GeoviewRenderer.processTextTemplate(text, feature) : text;
+      }
+    }
     if (!textValue) return undefined;
 
-    if (wrap) {
+    if (wrap && typeof textValue === 'string') {
       textValue = GeoviewRenderer.wrapText(textValue, wrapCount);
     }
 
@@ -2277,5 +2292,48 @@ export abstract class GeoviewRenderer {
       }
     }
     return str;
+  }
+
+  /**
+   * Process text template by replacing field placeholders with feature values
+   * @param {string} template - The text template with {field-name} placeholders
+   * @param {FeatureLike} feature - The feature to get field values from
+   * @returns {string} The processed text with field values substituted
+   */
+  static processTextTemplate(template: string, feature: FeatureLike): string {
+    return template.replace(/\{([^}:]+)(?::([^}]+))?\}/g, (match, fieldName, format) => {
+      const fieldValue = feature.get(fieldName.trim());
+      if (fieldValue === undefined) return match;
+
+      // If format is specified, try to format as date
+      if (format) {
+        try {
+          const date = new Date(fieldValue);
+          if (!Number.isNaN(date.getTime())) {
+            return GeoviewRenderer.formatDate(date, format);
+          }
+        } catch (e) {
+          // Fall back to string conversion if date parsing fails
+          logger.logWarning(e);
+        }
+      }
+
+      return String(fieldValue);
+    });
+  }
+
+  /**
+   * Format date using simple format strings
+   * @param {Date} date - The date to format
+   * @param {string} format - Format string (YYYY-MM-DD, MM/DD/YYYY, etc.)
+   * @returns {string} Formatted date string
+   */
+  static formatDate(date: Date, format: string): string {
+    // TODO: Add more date modifiers to get Month name, 2 digit year, day of the week, etc.
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return format.replace('YYYY', String(year)).replace('MM', month).replace('DD', day);
   }
 } // END CLASS

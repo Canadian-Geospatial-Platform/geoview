@@ -652,8 +652,17 @@ export type TypeLayerTextConfig = {
   keepUpright?: boolean;
   /** Rotation in degrees */
   rotation?: number;
-  /** Text value to apply to feature labels. Will be overwritten if 'field' is set */
-  text?: string;
+  /**
+   * Text value to apply to feature labels. Will be overwritten if 'field' is set.
+   * More complicated text values can be created and field names placed in {} will be substituded with their values.
+   * e.g.: "My {field-name}" -> "My value"
+   * If the field is a date, a date format can be specified using {DateField:YYYY-MM-DD}
+   * where the YYYY, MM, and DD will be replaced with their respective year, month, and day values
+   * e.g.: "Date: {DateField:YYYY/MM}" -> "Date: 2026/01"
+   * Also supports the native rich text with field replacement as well
+   * e.g.: ["Some text", "bold 10px sans-serif", "Text 2", "italic 8px serif"]
+   */
+  text?: string | string[];
   /** Text alignment. The default is 'center' */
   textAlign?: 'left' | 'right' | 'center' | 'end' | 'start';
   /** Text justification within the text box */
@@ -663,7 +672,7 @@ export type TypeLayerTextConfig = {
   /**
    * Fill style (only supports color like values, no patterns)
    * Examples: #ffffff, rgba(255,255,255, 0.5), white
-   * */
+   */
   fill?: string;
   /** The text halo color (opnly supports colors, no patterns) */
   haloColor?: string;
@@ -676,14 +685,14 @@ export type TypeLayerTextConfig = {
   /**
    * Padding in pixels around the text for decluttering and background
    * Values are: [top,right,bottom,left]
-   * */
+   */
   padding?: [number, number, number, number];
   /**
    * Declutter mode setting. Default is 'declutter'
    * declutter: Overlapping symbols and text are dcluttered
    * obstacle: Symbols and text are rendered, but also serve as obstacles
    * none: No decluttering is done (all rendered)
-   * */
+   */
   declutterMode?: 'declutter' | 'obstacle' | 'none';
   /** Min zoom level the labels will be shown */
   minZoomLevel?: number;
