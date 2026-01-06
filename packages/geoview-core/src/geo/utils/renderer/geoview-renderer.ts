@@ -2161,7 +2161,6 @@ export abstract class GeoviewRenderer {
    * @returns {Text | undefined} The text style
    */
   static createTextStyle = (feature: FeatureLike, textSettings: TypeLayerTextConfig): Text | undefined => {
-    // TODO: Create options for wrapping text
     const {
       field,
       fontSize = 10,
