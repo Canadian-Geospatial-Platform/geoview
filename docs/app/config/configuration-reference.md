@@ -18,6 +18,7 @@ Complete reference for GeoView configuration objects. This guide covers all conf
 - [Initial Settings](#initial-settings)
 - [Source Configuration](#source-configuration)
 - [Layer Style Configuration](#layer-style-configuration)
+- [Layer Text Configuration](#layer-text-configuration)
 - [Temporal Configuration](#temporal-configuration)
 - [Layer Types](#layer-types)
 - [Package Configuration](#package-configuration)
