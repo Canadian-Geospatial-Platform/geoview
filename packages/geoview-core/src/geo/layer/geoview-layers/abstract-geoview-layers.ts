@@ -601,34 +601,55 @@ export abstract class AbstractGeoViewLayer {
   // #region PRIVATE METHODS
 
   /**
-   * Initializes the layer entry configurations.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The GeoView layer configuration options.
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig The list of layer's configuration
+   * Initializes and normalizes the list of layer entry configurations for this GeoView layer.
+   * Behavior:
+   * - If no layer entries are provided, nothing is initialized.
+   * - If a single layer entry is provided:
+   *   - Its name is defaulted to the GeoView layer name if not already defined.
+   *   - It is assigned directly as the layer entry list.
+   * - If multiple layer entries are provided:
+   *   - They are wrapped in a synthetic group layer entry.
+   *   - Each child layer entry is assigned the group as its parent.
+   * Side effects:
+   * - Sets {@link this.listOfLayerEntryConfig}.
+   * - May mutate layer entry configs by setting their name or parent.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig
+   *   The GeoView layer configuration owning the layer entries.
+   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig
+   *   The layer entry configurations to initialize and normalize.
    * @private
    */
   #initListOfLayerEntryConfig(geoviewLayerConfig: TypeGeoviewLayerConfig, listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
-    if (!listOfLayerEntryConfig) return;
-    if (listOfLayerEntryConfig.length === 0) return;
-    if (listOfLayerEntryConfig.length === 1) {
-      if (!listOfLayerEntryConfig[0].getLayerName() && geoviewLayerConfig.geoviewLayerName)
-        listOfLayerEntryConfig[0].setLayerName(geoviewLayerConfig.geoviewLayerName);
-      this.listOfLayerEntryConfig = listOfLayerEntryConfig;
-    } else {
-      const layerGroup = new GroupLayerEntryConfig({
-        geoviewLayerConfig,
-        layerId: 'base-group',
-        layerName: this.getGeoviewLayerName(),
-        isMetadataLayerGroup: false,
-        initialSettings: geoviewLayerConfig.initialSettings,
-        listOfLayerEntryConfig,
-      });
+    if (!listOfLayerEntryConfig?.length) return;
 
-      this.listOfLayerEntryConfig = [layerGroup];
-      layerGroup.listOfLayerEntryConfig.forEach((layerConfig) => {
-        // Set the parent config
-        layerConfig.setParentLayerConfig(layerGroup);
-      });
+    // Single layer: assign default name and use directly
+    if (listOfLayerEntryConfig.length === 1) {
+      const [layerEntry] = listOfLayerEntryConfig;
+
+      if (!layerEntry.getLayerName() && geoviewLayerConfig.geoviewLayerName) {
+        layerEntry.setLayerName(geoviewLayerConfig.geoviewLayerName);
+      }
+
+      this.listOfLayerEntryConfig = [layerEntry];
+      return;
     }
+
+    // Multiple layers: wrap in a group layer
+    const layerGroup = new GroupLayerEntryConfig({
+      geoviewLayerConfig,
+      layerId: 'base-group',
+      layerName: this.getGeoviewLayerName(),
+      isMetadataLayerGroup: false,
+      initialSettings: geoviewLayerConfig.initialSettings,
+      listOfLayerEntryConfig,
+    });
+
+    // Assign parent group to all child layers
+    layerGroup.listOfLayerEntryConfig.forEach((layerConfig) => {
+      layerConfig.setParentLayerConfig(layerGroup);
+    });
+
+    this.listOfLayerEntryConfig = [layerGroup];
   }
 
   /**

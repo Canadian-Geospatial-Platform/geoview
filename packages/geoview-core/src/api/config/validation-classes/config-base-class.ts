@@ -366,6 +366,19 @@ export abstract class ConfigBaseClass {
   }
 
   /**
+   * Initializes the minimum scale from metadata when available.
+   * If a minimum scale is already defined on the layer, the most restrictive
+   * (smallest) value between the existing scale and the metadata value is kept.
+   * This ensures metadata does not loosen an already constrained scale range.
+   * @param {number | undefined} minScaleMetadata - The minimum scale value derived from metadata.
+   */
+  initMinScaleFromMetadata(minScaleMetadata?: number): void {
+    if (minScaleMetadata) {
+      this.setMinScale(Math.min(this.getMinScale() ?? Infinity, minScaleMetadata));
+    }
+  }
+
+  /**
    * Gets the layer max scale if any.
    * @returns {number | undefined} The layer max scale if any.
    */
@@ -379,6 +392,19 @@ export abstract class ConfigBaseClass {
    */
   setMaxScale(maxScale?: number): void {
     this.#maxScale = maxScale;
+  }
+
+  /**
+   * Initializes the maximum scale from metadata when available.
+   * If a maximum scale is already defined on the layer, the most restrictive
+   * (largest) value between the existing scale and the metadata value is kept.
+   * This ensures metadata does not tighten an already constrained scale range.
+   * @param {number | undefined} maxScaleMetadata - The maximum scale value derived from metadata.
+   */
+  initMaxScaleFromMetadata(maxScaleMetadata?: number): void {
+    if (maxScaleMetadata) {
+      this.setMaxScale(Math.max(this.getMaxScale() ?? -Infinity, maxScaleMetadata));
+    }
   }
 
   /**

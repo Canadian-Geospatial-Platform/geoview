@@ -164,7 +164,7 @@ export class GeoJSON extends AbstractGeoViewVector {
         layerConfig.setLayerName(layerConfig.getLayerName() || layerMetadataFound.layerName || layerConfig.getLayerNameCascade());
 
         // Initialize the source by filling the blanks with the information from the metadata
-        layerConfig.initSource(layerMetadataFound.source);
+        layerConfig.initSourceFromMetadata(layerMetadataFound.source);
 
         // Initialize the initial settings by filling the blanks with the information from the metadata
         layerConfig.initInitialSettingsFromMetadata(layerMetadataFound.initialSettings);
@@ -172,15 +172,9 @@ export class GeoJSON extends AbstractGeoViewVector {
         // Initialize the layer style by filling the blanks with the information from the metadata
         layerConfig.initLayerStyleFromMetadata(layerMetadataFound.layerStyle);
 
-        // If max scale found in metadata
-        if (layerMetadataFound.maxScale) {
-          layerConfig.setMaxScale(Math.min(layerConfig.getMaxScale() || Infinity, layerMetadataFound.maxScale));
-        }
-
-        // If min scale found in metadata
-        if (layerMetadataFound.minScale) {
-          layerConfig.setMinScale(Math.max(layerConfig.getMinScale() || 0, layerMetadataFound.minScale));
-        }
+        // Init min and max scales
+        layerConfig.initMinScaleFromMetadata(layerMetadataFound.minScale);
+        layerConfig.initMaxScaleFromMetadata(layerMetadataFound.maxScale);
 
         // Verify the data access path when comparing it to the metadata found
         layerConfig.overrideDataAccessPathFromMetadata(layerMetadataFound.source);

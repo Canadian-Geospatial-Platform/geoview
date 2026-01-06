@@ -282,7 +282,7 @@
       "invalidLayerFilter": "La couche '__param__' contient un filtre invalide.\nfiltre = '__param__'\nfiltre interne = '__param__'.",
       "failedToCreateLayer": "Échec de la création de la couche '__param__'.",
       "noCapabilitiesOrEmpty": "Aucune capacité trouvée (ou vide) pour la couche '__param__'.",
-      "wmsServiceFormatParameter": "Le paramètre 'Format' de GetFeatureInfo n'est pas supporté pour les services WMS, '__param__'.",
+      "wmsServiceFormatParameter": "Le(s) paramètre(s) format '__param__' de GetFeatureInfo ne sont pas supportés pour les services WMS, '__param__'.",
       "wmsSubLayerNotfound": "La sous-couche '__param__' de la couche '__param__' n'existe pas sur le serveur.",
       "csvNoGeographicData": "Aucune donnée géographique trouvée dans le fichier CSV '__param__'.",
       "invalidMetadata": "Métadonnées invalides (listOfLayerEntryConfig) empêchant le chargement de la couche '__param__'.",

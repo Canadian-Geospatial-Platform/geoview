@@ -745,7 +745,7 @@ export class GVWMS extends AbstractGVRaster {
     const wmsSource = this.getOLSource();
 
     // Get the supported info formats
-    let featureInfoFormat = wmsLayerConfig.getServiceMetadata()?.Capability?.Request?.GetFeatureInfo?.Format;
+    let featureInfoFormat = wmsLayerConfig.getServiceMetadata()?.Capability?.Request?.GetFeatureInfo?.Format || ['text/plain'];
 
     // If any output format has worked in the past
     if (this.#featureOutputFormatWMSWorked) featureInfoFormat = [this.#featureOutputFormatWMSWorked];
@@ -757,7 +757,7 @@ export class GVWMS extends AbstractGVRaster {
 
     // If the info format includes GEOJSON
     let featureMember: Record<string, unknown>[] | undefined;
-    if (featureInfoFormat?.includes('application/geojson')) {
+    if (featureInfoFormat.includes('application/geojson')) {
       try {
         // Try to get the feature member using GEOJSON format
         featureMember = await GVWMS.#getFeatureInfoUsingJSON(
@@ -784,7 +784,7 @@ export class GVWMS extends AbstractGVRaster {
     }
 
     // If not found and format includes JSON
-    if (!featureMember && featureInfoFormat?.includes('application/json')) {
+    if (!featureMember && featureInfoFormat.includes('application/json')) {
       try {
         // Try to get the feature member using JSON format
         featureMember = await GVWMS.#getFeatureInfoUsingJSON(
@@ -811,7 +811,7 @@ export class GVWMS extends AbstractGVRaster {
     }
 
     // If not found and format includes XML
-    if (!featureMember && featureInfoFormat?.includes('text/xml')) {
+    if (!featureMember && featureInfoFormat.includes('text/xml')) {
       try {
         // Try to get the feature member using XML format
         const featMember = await GVWMS.#getFeatureInfoUsingXML(
@@ -837,7 +837,7 @@ export class GVWMS extends AbstractGVRaster {
     }
 
     // If not found and format includes HTML
-    if (!featureMember && featureInfoFormat?.includes('text/html')) {
+    if (!featureMember && featureInfoFormat.includes('text/html')) {
       try {
         // Try to get the feature member using HTML format
         const featMember = await GVWMS.#getFeatureInfoUsingHTML(
@@ -875,7 +875,7 @@ export class GVWMS extends AbstractGVRaster {
       } catch (error: unknown) {
         // Failed to retrieve featureMember using plain text, eat the error, we'll handle the case below
         logger.logError(
-          `${wmsLayerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using plain text, eat the error, we'll try with another format`,
+          `${wmsLayerConfig.getLayerNameCascade()} - Failed to retrieve featureMember using plain text. Nothing can be done.`,
           error
         );
       }
@@ -888,7 +888,7 @@ export class GVWMS extends AbstractGVRaster {
     }
 
     // Failed
-    throw new LayerInvalidFeatureInfoFormatWMSError(wmsLayerConfig.layerPath, wmsLayerConfig.getLayerNameCascade());
+    throw new LayerInvalidFeatureInfoFormatWMSError(wmsLayerConfig.layerPath, featureInfoFormat, wmsLayerConfig.getLayerNameCascade());
   }
 
   // #endregion METHODS
@@ -1079,7 +1079,7 @@ export class GVWMS extends AbstractGVRaster {
     }
 
     // Failed
-    throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
+    throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, infoFormat, layerConfig.getLayerNameCascade());
   }
 
   /**
@@ -1105,6 +1105,9 @@ export class GVWMS extends AbstractGVRaster {
     projectionCode: ProjectionLike,
     abortController: AbortController | undefined = undefined
   ): Promise<Record<string, unknown>> {
+    // The info format
+    const infoFormat: string = 'text/xml';
+
     // Try to get the information using xml format
     const responseData = await GVWMS.#readFeatureInfo(
       layerConfig,
@@ -1113,7 +1116,7 @@ export class GVWMS extends AbstractGVRaster {
       viewResolution,
       qgisServerTolerance,
       projectionCode,
-      'text/xml',
+      infoFormat,
       undefined,
       abortController
     );
@@ -1155,7 +1158,7 @@ export class GVWMS extends AbstractGVRaster {
     }
 
     // Failed
-    throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
+    throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, infoFormat, layerConfig.getLayerNameCascade());
   }
 
   /**
@@ -1183,6 +1186,9 @@ export class GVWMS extends AbstractGVRaster {
     projectionCode: ProjectionLike,
     abortController: AbortController | undefined = undefined
   ): Promise<Record<string, unknown>> {
+    // The info format
+    const infoFormat: string = 'text/html';
+
     // Try to get the information using html format
     const responseData = await GVWMS.#readFeatureInfo(
       layerConfig,
@@ -1191,7 +1197,7 @@ export class GVWMS extends AbstractGVRaster {
       viewResolution,
       qgisServerTolerance,
       projectionCode,
-      'text/html',
+      infoFormat,
       undefined,
       abortController
     );
@@ -1204,7 +1210,7 @@ export class GVWMS extends AbstractGVRaster {
 
     // Check if it's empty or only whitespace
     if (!bodyContent) {
-      throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
+      throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, infoFormat, layerConfig.getLayerNameCascade());
     }
 
     // The response is in html format
@@ -1308,7 +1314,7 @@ export class GVWMS extends AbstractGVRaster {
     }
 
     // Error
-    throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
+    throw new LayerInvalidFeatureInfoFormatWMSError(layerConfig.layerPath, infoFormat, layerConfig.getLayerNameCascade());
   }
 
   /**

@@ -282,7 +282,7 @@
       "invalidLayerFilter": "Layer '__param__' has an invalid layer filter.\nfilter = '__param__'\ninternal filter = '__param__'.",
       "failedToCreateLayer": "Failed to create the layer '__param__'.",
       "noCapabilitiesOrEmpty": "No capabilities (or empty) found for layer '__param__'.",
-      "wmsServiceFormatParameter": "Parameter 'Format' of GetFeatureInfo not supported for WMS services, '__param__'.",
+      "wmsServiceFormatParameter": "Parameter format(s) '__param__' of GetFeatureInfo are not supported for WMS services, '__param__'.",
       "wmsSubLayerNotfound": "The sublayer __param__ of the layer __param__ does not exist on the server.",
       "csvNoGeographicData": "Could not find geographic data in the CSV '__param__'.",
       "invalidMetadata": "Invalid metadata (listOfLayerEntryConfig) preventing load of layer '__param__'.",

@@ -192,14 +192,13 @@ export type TypeBaseSourceInitialConfig = {
    */
   dataAccessPath?: string;
   /**
-   * Spatial Reference EPSG code supported (https://epsg.io/). We support lon/lat, Web Mercator and Lambert Conical Conform Canada.
-   * Default = 3978.
+   * Spatial Reference EPSG code supported (https://epsg.io/).
    */
-  projection?: TypeValidSourceProjectionCodes; // TODO: refactor - remove ?
+  projection?: TypeValidSourceProjectionCodes;
   /** The crossOrigin attribute if needed to load the data. */
   crossOrigin?: string;
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
-  featureInfo?: TypeFeatureInfoLayerConfig; // TODO: refactor - from geo map schema type
+  featureInfo?: TypeFeatureInfoLayerConfig;
 };
 
 /** Initial settings for tile image sources. */

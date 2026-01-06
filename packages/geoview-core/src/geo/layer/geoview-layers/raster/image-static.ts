@@ -231,7 +231,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
     }
 
     // Get the source projection
-    const sourceProjection = layerConfig.getSource().projection;
+    const sourceProjection = layerConfig.getProjection();
 
     if (!sourceProjection) {
       throw new LayerEntryConfigParameterProjectionNotDefinedInSourceError(layerConfig);

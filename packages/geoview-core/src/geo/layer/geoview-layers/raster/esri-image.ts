@@ -243,7 +243,7 @@ export class EsriImage extends AbstractGeoViewRaster {
         ...(layerConfig.getSource().format && { format: layerConfig.getSource().format }),
       },
       crossOrigin: layerConfig.getSource().crossOrigin ?? 'Anonymous',
-      projection: layerConfig.getSource().projection ? `EPSG:${layerConfig.getSource().projection}` : undefined,
+      projection: layerConfig.getProjectionWithEPSG(),
     };
 
     // Create the source

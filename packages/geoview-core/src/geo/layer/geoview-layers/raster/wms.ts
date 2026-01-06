@@ -209,13 +209,9 @@ export class WMS extends AbstractGeoViewRaster {
       // Set Min/Max Scale Limits (MaxScale should be set to the largest and MinScale should be set to the smallest)
       // Example: If MinScaleDenominator is 100,000 and maxScale is 50,000, then 100,000 should be used. This is because
       // the service will stop at 100,000 and if you zoom in more, you will get no data anyway.
-      // GV Note: MinScaleDenominator is actually the maxScale and MaxScaleDenominator is actually the minScale
-      if (layerCapabilities.MinScaleDenominator) {
-        layerConfig.setMaxScale(Math.max(layerConfig.getMaxScale() ?? -Infinity, layerCapabilities.MinScaleDenominator));
-      }
-      if (layerCapabilities.MaxScaleDenominator) {
-        layerConfig.setMinScale(Math.min(layerConfig.getMinScale() ?? Infinity, layerCapabilities.MaxScaleDenominator));
-      }
+      // GV MinScaleDenominator is actually the maxScale and MaxScaleDenominator is actually the minScale
+      layerConfig.initMinScaleFromMetadata(layerCapabilities.MaxScaleDenominator);
+      layerConfig.initMaxScaleFromMetadata(layerCapabilities.MinScaleDenominator);
 
       // If no bounds defined in the initial settings and an extent is defined in the layer capabilities metadata
       if (!layerConfig.getInitialSettingsBounds() && layerCapabilities.EX_GeographicBoundingBox?.extent) {
@@ -330,9 +326,7 @@ export class WMS extends AbstractGeoViewRaster {
     };
 
     // Optional projection override
-    if (layerConfig.getSource().projection) {
-      sourceOptions.projection = `EPSG:${layerConfig.getSource().projection}`;
-    }
+    sourceOptions.projection = layerConfig.getProjectionWithEPSG();
 
     // Create the source
     const olSource = new ImageWMS(sourceOptions);

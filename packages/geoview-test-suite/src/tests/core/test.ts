@@ -259,27 +259,6 @@ export class Test<T = unknown> {
   }
 
   /**
-   * Compares two values for strict equality, with optional numeric rounding.
-   * If `roundToPrecision` is provided and both values are numbers, the values are
-   * rounded to the given precision before comparison.
-   * @param {T} actualValue - The actual value to compare.
-   * @param {T} expectedValue - The expected value to compare against.
-   * @param {number?} [roundToPrecision] - Optional number of decimal places to round numeric values to.
-   * @returns An object describing whether the values are equal and the values used for comparison.
-   */
-  static #checkValuesEqual<T = unknown>(actualValue: T, expectedValue: T, roundToPrecision?: number): EqualHelper<T> {
-    // If rounding is specified and both values are numbers, round them first
-    if (roundToPrecision !== undefined && typeof actualValue === 'number' && typeof expectedValue === 'number') {
-      const roundedActual = this.#roundToPrecision(actualValue, roundToPrecision);
-      const roundedExpected = this.#roundToPrecision(expectedValue, roundToPrecision);
-      return { equal: roundedActual === roundedExpected, actualValue: roundedActual as T, expectedValue: roundedExpected as T };
-    }
-
-    // Checks if the result value is the same as the value provided
-    return { equal: actualValue === expectedValue, actualValue, expectedValue };
-  }
-
-  /**
    * Asserts that a value is defined.
    * @param {string} propertyPath - The name or path of the array being validated.
    * @param {T | undefined} actualValue - The actual value being checked.
@@ -356,6 +335,27 @@ export class Test<T = unknown> {
   static assertFail(message: string = 'Test manually failed'): never {
     // Throw the manual fail error
     throw new AssertionManualFailError(message);
+  }
+
+  /**
+   * Compares two values for strict equality, with optional numeric rounding.
+   * If `roundToPrecision` is provided and both values are numbers, the values are
+   * rounded to the given precision before comparison.
+   * @param {T} actualValue - The actual value to compare.
+   * @param {T} expectedValue - The expected value to compare against.
+   * @param {number?} [roundToPrecision] - Optional number of decimal places to round numeric values to.
+   * @returns An object describing whether the values are equal and the values used for comparison.
+   */
+  static #checkValuesEqual<T = unknown>(actualValue: T, expectedValue: T, roundToPrecision?: number): EqualHelper<T> {
+    // If rounding is specified and both values are numbers, round them first
+    if (roundToPrecision !== undefined && typeof actualValue === 'number' && typeof expectedValue === 'number') {
+      const roundedActual = this.#roundToPrecision(actualValue, roundToPrecision);
+      const roundedExpected = this.#roundToPrecision(expectedValue, roundToPrecision);
+      return { equal: roundedActual === roundedExpected, actualValue: roundedActual as T, expectedValue: roundedExpected as T };
+    }
+
+    // Checks if the result value is the same as the value provided
+    return { equal: actualValue === expectedValue, actualValue, expectedValue };
   }
 
   // #endregion PRIMITIVES
@@ -783,4 +783,13 @@ export type TestStatus = 'new' | 'running' | 'verifying' | 'success' | 'failed';
  */
 export type ComparerDelegate<T> = (array1: T, array2: T) => boolean;
 
+/**
+ * Represents the result of an equality comparison between two values.
+ * @property {boolean} equal
+ * Indicates whether {@link actualValue} and {@link expectedValue} are considered equal.
+ * @property {T} actualValue
+ * The value produced or observed during execution.
+ * @property {T} expectedValue
+ * The value that {@link actualValue} was compared against.
+ */
 type EqualHelper<T> = { equal: boolean; actualValue: T; expectedValue: T };

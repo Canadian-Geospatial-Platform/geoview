@@ -5,6 +5,7 @@ import type {
   TypeFeatureInfoLayerConfig,
   TypeGeoviewLayerType,
   TypeLayerEntryType,
+  TypeValidSourceProjectionCodes,
 } from '@/api/types/layer-schema-types';
 import type { ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
@@ -331,7 +332,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * Initializes the source configuration by filling the blanks in our config with the information from the metadata
    * @param {TypeBaseSourceInitialConfig | undefined} sourceMetadata - The source metadata to use to help fill the blanks in our source config.
    */
-  initSource(sourceMetadata: TypeBaseSourceInitialConfig | undefined): void {
+  initSourceFromMetadata(sourceMetadata: TypeBaseSourceInitialConfig | undefined): void {
     this.#source = deepMerge(sourceMetadata, this.#source);
   }
 
@@ -394,7 +395,35 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * @returns {TypeFeatureInfoLayerConfig} The feature info.
    */
   getFeatureInfo(): TypeFeatureInfoLayerConfig {
-    return this.getSource().featureInfo!;
+    return this.getSource().featureInfo!; // Always defined to something, minimally an empty object.
+  }
+
+  /**
+   * Gets the source projection.
+   * @returns {TypeValidSourceProjectionCodes | undefined} The source projection.
+   */
+  getProjection(): TypeValidSourceProjectionCodes | undefined {
+    return this.getSource().projection;
+  }
+
+  /**
+   * Gets the source projection with the EPSG prefix.
+   * @returns {string | undefined} The source projection with the EPSG prefix.
+   */
+  getProjectionWithEPSG(): string | undefined {
+    return this.getProjection() ? `EPSG:${this.getProjection()}` : undefined;
+  }
+
+  /**
+   * Sets the source projection in the source object only if it's not already set and if the parameter is defined.
+   * @param {TypeValidSourceProjectionCodes | undefined} projection - The source projection.
+   */
+  initProjectionFromMetadata(projection: TypeValidSourceProjectionCodes | undefined): void {
+    // If not projection, skip
+    if (!projection) return;
+
+    // Set it if not already set.
+    this.getSource().projection ??= projection;
   }
 
   /**

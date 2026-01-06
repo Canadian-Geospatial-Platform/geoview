@@ -2493,6 +2493,8 @@ export type MapLanguageChangedDelegate = EventDelegateBase<MapViewer, MapLanguag
  * Define a return type for a map click simulation to be able to await on different promises.
  */
 export type SimulatedMapClick = {
+  /** Promise resolving when the query of the map click is complete */
   promiseQuery: Promise<void>;
+  /** Promise resolving when the query of the map click is complete and the UI has been updated */
   promiseQueryBatched: Promise<void>;
 };

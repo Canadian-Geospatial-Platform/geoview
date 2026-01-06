@@ -743,8 +743,8 @@ export class MapTester extends GVAbstractTester {
     const secondClickCoords: Coordinate = [-73.9, 46.5];
     const layerPolygon = 'geojsonLYR5/polygons.json';
     const layerProjects = 'esriFeatureLYR5/0';
-    let originalLayer: string;
-    let alternateLayer: string;
+    let originalLayerPath: string;
+    let alternateLayerPath: string;
 
     return this.test(
       'Test details layer selection persistence across map clicks',
@@ -758,15 +758,15 @@ export class MapTester extends GVAbstractTester {
 
         // Check which layer is selected after first click
         test.addStep('Checking selected layer after first click...');
-        originalLayer = FeatureInfoEventProcessor.getSelectedLayerPath(this.getMapId());
-        test.addStep(`First selected layer: ${originalLayer}`);
+        originalLayerPath = FeatureInfoEventProcessor.getSelectedLayerPath(this.getMapId());
+        test.addStep(`First selected layer: ${originalLayerPath}`);
 
         // The alternate layer
-        alternateLayer = originalLayer === layerPolygon ? layerProjects : layerPolygon;
+        alternateLayerPath = originalLayerPath === layerPolygon ? layerProjects : layerPolygon;
 
         // Manually select the alternate layer
-        test.addStep(`Manually selecting the other layer '${alternateLayer}'...`);
-        FeatureInfoEventProcessor.setSelectedLayerPath(this.getMapId(), alternateLayer);
+        test.addStep(`Manually selecting the other layer '${alternateLayerPath}'...`);
+        FeatureInfoEventProcessor.setSelectedLayerPath(this.getMapId(), alternateLayerPath);
 
         // Simulate a map click at second location
         test.addStep(`Performing second map click at [${secondClickCoords.join(', ')}]...`);
@@ -786,7 +786,7 @@ export class MapTester extends GVAbstractTester {
         test.addStep(`Second layer feature count: ${secondFeatureCount}`);
 
         return {
-          originalLayerPath: originalLayer,
+          originalLayerPath,
           alternateLayerPath: secondSelectedLayerPath,
           secondFeatureCount,
         };
@@ -796,7 +796,7 @@ export class MapTester extends GVAbstractTester {
         Test.assertIsNotEqual(result.originalLayerPath, result.alternateLayerPath);
 
         test.addStep('Verifying second selected layer is the alternate layer...');
-        Test.assertIsEqual(result.alternateLayerPath, alternateLayer);
+        Test.assertIsEqual(result.alternateLayerPath, alternateLayerPath);
 
         test.addStep('Verifying second layer has exactly 1 feature...');
         Test.assertIsEqual(result.secondFeatureCount, 1);
@@ -805,17 +805,37 @@ export class MapTester extends GVAbstractTester {
   }
 }
 
+/**
+ * Represents a layer paired with feature information results
+ * collected before and after an operation (e.g., filtering, ordering, or updates).
+ */
 type LayerWithBeforeAfterFeature<T> = LayerWithResults<T, (TypeFeatureInfoResultSetEntry | undefined)[]>;
 
+/**
+ * Represents a layer paired with hover feature information results
+ * collected before and after an operation.
+ */
 type LayerWithBeforeAfterHover<T> = LayerWithResults<T, (TypeHoverFeatureInfo | undefined)[]>;
 
+/**
+ * Generic structure associating a layer with a set of related results.
+ */
 type LayerWithResults<T, U> = {
+  /** The layer instance. */
   layer: T;
+  /** The results associated with the layer. */
   results: U;
 };
 
+/**
+ * Describes layer path information and comparison metadata used
+ * when evaluating differences between layers.
+ */
 type LayerDetails = {
+  /** The path identifying the original layer.*/
   originalLayerPath: string;
+  /** The path identifying the alternate or comparison layer. */
   alternateLayerPath: string;
+  /** The number of features found in the alternate layer. */
   secondFeatureCount: number;
 };
