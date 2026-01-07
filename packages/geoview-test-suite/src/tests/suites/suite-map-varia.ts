@@ -46,11 +46,11 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
   protected override async onLaunchTestSuite(): Promise<unknown> {
     // // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
     // // Test DEBUG
-    // const pDevTest0 = this.#mapTester.testDetailsLayerSelectionPersistence();
-    // // const pDevTest2 = this.#configTester.testKMLBadUrlExpectSkip();
+    // const pDevTest0 = this.#mapTester.testNonQueryableLayerNotInDetails('geojsonLYR5/polygons.json', [-88, 52]);
+    // const pDevTest1 = this.#mapTester.testLayerHoverableState('geojsonLYR5/polygons.json', [-88, 52]);
 
     // // Resolve when all
-    // return Promise.all([pDevTest0]);
+    // return Promise.all([pDevTest0, pDevTest1]);
     // // GV END DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
 
     // Test the map state
@@ -135,19 +135,14 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
 
     // #region PROMISES SYNCH HOVERABLE/QUERYABLE
 
-    // The promises of the queryable/hoverable tests
-    const promiseTestQueryableHoverable = [];
-
     // Test non-queryable layer not in details
     const pNonQueryableLayerNotInDetails = this.#mapTester.testNonQueryableLayerNotInDetails('geojsonLYR5/polygons.json', [-88, 52]);
-    promiseTestQueryableHoverable.push(pNonQueryableLayerNotInDetails);
 
     // Test layer hoverable state
     const pLayerHoverableState = this.#mapTester.testLayerHoverableState('geojsonLYR5/polygons.json', [-88, 52]);
-    promiseTestQueryableHoverable.push(pLayerHoverableState);
 
     // Wait on all the tests of queryable/hoverable before continuing manipulating the map, those all happen in parallel
-    await Promise.all(promiseTestQueryableHoverable);
+    await Promise.all([pNonQueryableLayerNotInDetails, pLayerHoverableState]);
 
     // #endregion PROMISES SYNCH HOVERABLE/QUERYABLE
 
