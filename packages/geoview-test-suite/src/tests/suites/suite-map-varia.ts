@@ -53,11 +53,71 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
 
     // Test projection switch and zoom to initial extent
     const pProjection = this.#mapTester.testSwitchProjectionAndExtent(3978, 3857, 1);
+    await pProjection;
 
     // Test geometry z-index
     const pZIndex = this.#mapTester.testGeometryGroupZIndex();
 
+    // Test zoom to extent
+    const pZoomToExtent = this.#mapTester.testZoomToExtent();
+    await pZoomToExtent;
+
+    // Test zoom to coordinate
+    const pZoomToCoordinate = this.#mapTester.testZoomToCoordinate();
+    await pZoomToCoordinate;
+
+    // Test footer bar select tab
+    const pFooterBarSelectTab = this.#mapTester.testFooterBarSelectTab();
+    await pFooterBarSelectTab;
+
+    // Test app bar select tab
+    const pAppBarSelectTab = this.#mapTester.testAppBarSelectTab();
+    await pAppBarSelectTab;
+
+    // Test footer bar create tab
+    const pFooterBarCreateTab = this.#mapTester.testFooterBarCreateTab();
+    await pFooterBarCreateTab;
+
+    // Test set language
+    const pSetLanguage = this.#mapTester.testSetLanguage();
+    await pSetLanguage;
+
+    // Test create and set basemap
+    const pCreateAndSetBasemap = this.#mapTester.testCreateAndSetBasemap();
+    await pCreateAndSetBasemap;
+
+    // Test north arrow rotation in LCC projection for BC
+    const pNorthArrowRotationLCC = this.#mapTester.testNorthArrowRotationLCC();
+    await pNorthArrowRotationLCC;
+
+    // Test non-queryable layer not in details
+    const pNonQueryableLayerNotInDetails = this.#mapTester.testNonQueryableLayerNotInDetails('geojsonLYR5/polygons.json', [-88, 52]);
+
+    // Test layer hoverable state
+    const pLayerHoverableState = this.#mapTester.testLayerHoverableState('geojsonLYR5/polygons.json');
+    await pLayerHoverableState;
+
+    // Test details layer selection persistence
+    const pDetailsLayerSelectionPersistence = this.#mapTester.testDetailsLayerSelectionPersistence();
+    await pDetailsLayerSelectionPersistence;
+
     // Resolve when all
-    return Promise.all([pmapState, pZoom, pProjection, pZIndex]);
+    return Promise.all([
+      pmapState,
+      pZoom,
+      pProjection,
+      pZIndex,
+      pZoomToExtent,
+      pZoomToCoordinate,
+      pFooterBarSelectTab,
+      pAppBarSelectTab,
+      pFooterBarCreateTab,
+      pSetLanguage,
+      pCreateAndSetBasemap,
+      pNorthArrowRotationLCC,
+      pNonQueryableLayerNotInDetails,
+      pLayerHoverableState,
+      pDetailsLayerSelectionPersistence,
+    ]);
   }
 }

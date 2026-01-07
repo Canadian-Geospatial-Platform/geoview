@@ -28,7 +28,6 @@ const LOADING_BOX_STYLES = {
 const ICON_BUTTON_BASE_PROPS = {
   color: 'primary' as const,
   size: 'small' as const,
-  tabIndex: -1,
   'aria-hidden': true,
 };
 
@@ -65,7 +64,7 @@ function IconStack({ layerPath }: TypeIconStackProps): JSX.Element | null {
         {iconImage === 'no data' ? (
           <BrowserNotSupportedIcon />
         ) : (
-          <Box sx={sxClasses.legendIcon}>
+          <Box component="span" sx={sxClasses.legendIcon}>
             <Box component="img" alt="" src={iconImage} sx={sxClasses.maxIconImg} />
           </Box>
         )}
@@ -78,14 +77,16 @@ function IconStack({ layerPath }: TypeIconStackProps): JSX.Element | null {
     logger.logTraceUseCallback('LAYER-ICON - renderStackedIcons');
 
     return (
-      <Box sx={sxClasses.stackIconsBox} aria-hidden="true">
+      <Box component="span" sx={sxClasses.stackIconsBox} aria-hidden="true">
         <Icon {...ICON_BUTTON_BASE_PROPS} sx={sxClasses.iconPreviewStacked}>
-          <Box sx={sxClasses.legendIconTransparent}>
+          <Box component="span" sx={sxClasses.legendIconTransparent}>
             {iconImageStacked && <Box component="img" alt="" src={iconImageStacked} sx={sxClasses.maxIconImg} />}
           </Box>
         </Icon>
         <Icon {...ICON_BUTTON_BASE_PROPS} sx={sxClasses.iconPreviewHoverable}>
-          <Box sx={sxClasses.legendIcon}>{iconImage && <Box component="img" alt="" src={iconImage} sx={sxClasses.maxIconImg} />}</Box>
+          <Box component="span" sx={sxClasses.legendIcon}>
+            {iconImage && <Box component="img" alt="" src={iconImage} sx={sxClasses.maxIconImg} />}
+          </Box>
         </Icon>
       </Box>
     );
@@ -105,9 +106,9 @@ function IconStack({ layerPath }: TypeIconStackProps): JSX.Element | null {
     logger.logTraceUseCallback('LAYER-ICON - renderNoDataIcon');
 
     return (
-      <Box sx={sxClasses.stackIconsBox} aria-hidden="true">
+      <Box component="span" sx={sxClasses.stackIconsBox} aria-hidden="true">
         <Icon {...ICON_BUTTON_BASE_PROPS} sx={sxClasses.iconPreviewStacked}>
-          <Box sx={sxClasses.legendIconTransparent}>
+          <Box component="span" sx={sxClasses.legendIconTransparent}>
             <BrowserNotSupportedIcon />
           </Box>
         </Icon>
@@ -152,7 +153,7 @@ export function LayerIcon({ layerPath }: LayerIconProps): JSX.Element {
 
   if (!iconAvailable) {
     return (
-      <Box sx={LOADING_BOX_STYLES}>
+      <Box component="span" sx={LOADING_BOX_STYLES}>
         <CircularProgressBase size={20} />
       </Box>
     );
