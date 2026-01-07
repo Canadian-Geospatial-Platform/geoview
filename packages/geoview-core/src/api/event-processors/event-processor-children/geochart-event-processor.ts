@@ -37,9 +37,11 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
 
   /**
    * Overrides initialization of the GeoChart Event Processor
-   * @param {GeoviewStoreType} store The store associated with the GeoChart Event Processor
-   * @returns An array of the subscriptions callbacks which were created
+   * @param {GeoviewStoreType} store - The store associated with the GeoChart Event Processor
+   * @returns {Array<() => void> | void} An array of the subscriptions callbacks which were created
+   * @override
    */
+  // TODO: CHECK - Why void instead of undefined? Here and in all sibling classes
   protected override onInitialize(store: GeoviewStoreType): Array<() => void> | void {
     // Checks for updated layers in layer data array from the details state
     const layerDataArrayUpdate = store.subscribe(
@@ -135,6 +137,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * Sets the selected layer path for a specific GeoChart map instance in the Zustand store.
    * @param {string} mapId - The unique identifier of the GeoChart map.
    * @param {string} layerPath - The path of the layer to set as selected.
+   * @returns {void}
    */
   static setSelectedGeochartLayerPath(mapId: string, layerPath: string): void {
     // Set the selected layer path
@@ -148,6 +151,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    *
    * @param {string} mapId - The map id
    * @param {GeoViewGeoChartConfig[]} charts The array of JSON configuration for GeoChart
+   * @returns {void}
    * @throws {PluginStateUninitializedError} When the Geochart plugin is uninitialized.
    * @static
    */
@@ -185,6 +189,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map ID
    * @param {string} layerPath - The layer path
    * @param {GeoViewGeoChartConfig} chartConfig - The Geochart Configuration
+   * @returns {void}
    * @throws {PluginStateUninitializedError} When the Geochart plugin is uninitialized.
    * @static
    */
@@ -210,6 +215,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * Removes a GeoChart Configuration at the specified map id and layer path
    * @param {string} mapId - The map ID
    * @param {string} layerPath - The layer path
+   * @returns {void}
    * @throws {PluginStateUninitializedError} When the Geochart plugin is uninitialized.
    * @static
    */

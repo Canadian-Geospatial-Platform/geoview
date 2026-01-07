@@ -381,6 +381,9 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
 
     // If feature exists but doesn't have geometry yet, set up polling
     if (featureToCheck && !featureToCheck.geometry) {
+      // TODO: REFACTOR - Instead of polling every 500ms, use a react hook on when the geometry gets 'mutated' on the record (search id: f1d7bf71)
+
+      // Call doUntil to poll for geometry
       const intervalId = doUntil(
         () => {
           const currentFeature = memoSelectedLayerDataFeatures?.[currentFeatureIndex];

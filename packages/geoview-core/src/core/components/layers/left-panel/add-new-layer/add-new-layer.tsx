@@ -10,6 +10,7 @@ import {
   useAppDisabledLayerTypes,
   useAppDisplayLanguage,
   useAppShellContainer,
+  useAppStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { ConfigApi } from '@/api/config/config-api';
 import { logger } from '@/core/utils/logger';
@@ -32,6 +33,7 @@ import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/
 import { AddLayerTree } from '@/core/components/layers/left-panel/add-new-layer/add-layer-tree';
 import { ShapefileReader } from '@/api/config/reader/shapefile-reader';
 import { GeoPackageReader } from '@/api/config/reader/geopackage-reader';
+import type { GeoViewLayerAddedResult } from '@/geo/layer/layer';
 
 const sxClasses = {
   buttonGroup: {
@@ -72,17 +74,12 @@ function FileUploadSection({
 
   // Hook
   const { t } = useTranslation<string>();
+  const { addMessage } = useAppStoreActions();
 
   // State
   const [localDisplayURL, setLocalDisplayURL] = useState(displayURL);
   const dragPopover = useRef(null);
   const [drag, setDrag] = useState<boolean>(false);
-
-  // Store
-  const mapId = useGeoViewMapId();
-
-  // The MapViewer
-  const mapViewer = MapEventProcessor.getMapViewer(mapId);
 
   // Ref
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -116,7 +113,7 @@ function FileUploadSection({
       onFileSelected(file, fileURL, fileName);
     } else {
       // Handle error
-      mapViewer.notifications.showError('layers.errorFile', [], false);
+      addMessage('error', 'layers.errorFile', [], true);
     }
   };
 
@@ -285,13 +282,11 @@ export function AddNewLayer(): JSX.Element {
 
   // Store
   const mapId = useGeoViewMapId();
+  const { addMessage } = useAppStoreActions();
   const disabledLayerTypes = useAppDisabledLayerTypes();
   const { setDisplayState } = useLayerStoreActions();
   const language = useAppDisplayLanguage();
   const shellContainer = useAppShellContainer();
-
-  // The MapViewer
-  const mapViewer = MapEventProcessor.getMapViewer(mapId);
 
   // List of layer types and labels (Step 2)
   const layerOptions = UtilAddLayer.getLocalizeLayerType(language, false);
@@ -305,7 +300,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorEmpty = (textField: string): void => {
     setIsLoading(false);
-    mapViewer.notifications.showError('layers.errorEmpty', [textField], false);
+    addMessage('error', 'layers.errorEmpty', [textField], false);
   };
 
   /**
@@ -315,7 +310,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorNone = (): void => {
     setIsLoading(false);
-    mapViewer.notifications.showError('layers.errorNone', [], false);
+    addMessage('error', 'layers.errorNone', [], false);
   };
 
   /**
@@ -325,7 +320,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorDisabled = (disabledType: string): void => {
     setIsLoading(false);
-    mapViewer.notifications.showError('layers.errorDisabled', [disabledType], false);
+    addMessage('error', 'layers.errorDisabled', [disabledType], false);
   };
 
   /**
@@ -335,7 +330,7 @@ export function AddNewLayer(): JSX.Element {
    */
   const emitErrorServer = (serviceName: string): void => {
     setIsLoading(false);
-    mapViewer.notifications.showError('layers.errorServer', [serviceName], false);
+    addMessage('error', 'layers.errorServer', [serviceName], false);
   };
 
   // #endregion
@@ -360,11 +355,9 @@ export function AddNewLayer(): JSX.Element {
   };
 
   const doneAddedShowMessage = (layerBeingAdded: AbstractGeoViewLayer): void => {
-    if (layerBeingAdded.allLayerStatusAreGreaterThanOrEqualTo('error'))
-      mapViewer.notifications.showError('layers.layerAddedWithError', [layerName]);
-    else if (layerBeingAdded?.allLayerStatusAreGreaterThanOrEqualTo('loaded'))
-      mapViewer.notifications.showMessage('layers.layerAdded', [layerName]);
-    else mapViewer.notifications.showMessage('layers.layerAddedAndLoading', [layerName]);
+    if (layerBeingAdded.allLayerStatusAreGreaterThanOrEqualTo('error')) addMessage('error', 'layers.layerAddedWithError', [layerName]);
+    else if (layerBeingAdded?.allLayerStatusAreGreaterThanOrEqualTo('loaded')) addMessage('info', 'layers.layerAdded', [layerName]);
+    else addMessage('info', 'layers.layerAddedAndLoading', [layerName]);
   };
 
   // #region HANDLERS FOR THE STEPS
@@ -562,7 +555,7 @@ export function AddNewLayer(): JSX.Element {
       logger.logWarning(`- Map ${mapId}: ${message}`);
 
       // Show the error using its key (which will get translated)
-      mapViewer.notifications.showError(errorKey, params);
+      addMessage('error', errorKey, params);
     });
 
     if (configObj?.length) {
@@ -570,9 +563,15 @@ export function AddNewLayer(): JSX.Element {
       if (configObj[0].geoviewLayerType === CONST_LAYER_TYPES.XYZ_TILES) delete configObj[0].metadataAccessPath;
 
       logger.logDebug('newGeoViewLayer to add', configObj[0]);
+
       // Add the layer using the proper function
-      const addedLayer = mapViewer.layer.addGeoviewLayer(configObj[0] as TypeGeoviewLayerConfig, abortController.signal);
-      if (addedLayer && !abortController.signal.aborted) {
+      const addedLayer: GeoViewLayerAddedResult = MapEventProcessor.addGeoviewLayer(
+        mapId,
+        configObj[0] as TypeGeoviewLayerConfig,
+        abortController.signal
+      );
+
+      if (!abortController.signal.aborted) {
         // Wait on the promise
         addedLayer.promiseLayer
           .then(() => {
@@ -612,7 +611,7 @@ export function AddNewLayer(): JSX.Element {
     else {
       // Remove spinning circle if failed.
       doneAdding();
-      mapViewer.notifications.showError('layers.errorNotLoaded', [layerName]);
+      addMessage('error', 'layers.errorNotLoaded', [layerName]);
       logger.logError('Unable to load layer');
     }
   };

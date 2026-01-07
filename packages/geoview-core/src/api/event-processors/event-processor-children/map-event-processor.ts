@@ -1,4 +1,7 @@
 import type { Root } from 'react-dom/client';
+import i18next from 'i18next';
+import type { AnySchema } from 'ajv';
+import Ajv from 'ajv';
 import type { OverviewMap as OLOverviewMap } from 'ol/control';
 import { ScaleLine } from 'ol/control';
 import Overlay from 'ol/Overlay';
@@ -35,11 +38,13 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { api } from '@/app';
 import type { Draw } from '@/geo/interaction/draw';
 
-import { LayerApi } from '@/geo/layer/layer';
+import { LayerApi, type GeoViewLayerAddedResult } from '@/geo/layer/layer';
 import type { TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { MapViewer } from '@/geo/map/map-viewer';
 import type { TypeMapStateForExportLayout } from '@/core/components/export/utilities';
+import { Plugin } from '@/api/plugin/plugin';
 import type { PluginsContainer } from '@/api/plugin/plugin-types';
+import type { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { Projection } from '@/geo/utils/projection';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
@@ -64,12 +69,14 @@ import { getAppCrosshairsActive } from '@/core/stores/store-interface-and-intial
 import type { TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 
-import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import { InvalidExtentError } from '@/core/exceptions/geoview-exceptions';
+import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { InvalidExtentError, PluginError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { TypeTimeSliderProps } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import { Fetch } from '@/core/utils/fetch-helper';
+import { formatError } from '@/core/exceptions/core-exceptions';
 import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
@@ -222,6 +229,26 @@ export class MapEventProcessor extends AbstractEventProcessor {
    */
   static forceMapToRender(mapId: string): void {
     this.getMapViewer(mapId).map.render();
+  }
+
+  /**
+   * Retrieves a plugin instance registered for a given map viewer, if it exists.
+   * @param {string} mapId - The identifier of the map viewer.
+   * @param {string} pluginId - The identifier of the plugin to retrieve.
+   * @returns {Promise<AbstractPlugin | undefined>} A promise that resolves to the plugin instance if found, or `undefined` otherwise.
+   */
+  static async getMapViewerPluginIfExists(mapId: string, pluginId: string): Promise<AbstractPlugin | undefined> {
+    // Get the plugins
+    const plugins = await this.getMapViewerPlugins(mapId);
+
+    // If plugin exists
+    if (plugins[pluginId]) {
+      // Return it
+      return plugins[pluginId];
+    }
+
+    // Not found
+    return undefined;
   }
 
   /**
@@ -753,7 +780,22 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   static removeLayerHighlights(mapId: string, layerPath: string): void {
+    // Redirect to layer api
     MapEventProcessor.getMapViewerLayerAPI(mapId).removeLayerHighlights(layerPath);
+  }
+
+  /**
+   * Adds a layer to the map. This methods redirects to the method on the layer api.
+   * @param {string} mapId - The map id.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The geoview layer configuration to add.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
+   * @returns {GeoViewLayerAddedResult} The result of the addition of the geoview layer.
+   * @throws {LayerCreatedTwiceError} When there already is a layer on the map with the provided geoviewLayerId.
+   * The result contains the instanciated GeoViewLayer along with a promise that will resolve when the layer will be officially on the map.
+   */
+  static addGeoviewLayer(mapId: string, geoviewLayerConfig: TypeGeoviewLayerConfig, abortSignal?: AbortSignal): GeoViewLayerAddedResult {
+    // Redirect to layer api
+    return MapEventProcessor.getMapViewerLayerAPI(mapId).addGeoviewLayer(geoviewLayerConfig, abortSignal);
   }
 
   /**
@@ -1305,10 +1347,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
    *
    * @param {string} mapId - The map id.
    * @param {string} layerPath - The path for the layer to get filters from.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
    */
   static getActiveFilters(mapId: string, layerPath: string): LayerFilters {
     // Get the layer and layer config
-    const layer = this.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath) as AbstractGVLayer;
+    const layer = this.getMapViewerLayerAPI(mapId).getGeoviewLayerRegular(layerPath);
     const layerConfig = layer.getLayerConfig();
 
     // The initial filter
@@ -1335,19 +1379,165 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Apply all available filters to layer.
    * @param {string} mapId - The map id.
    * @param {string} layerPath - The path of the layer to apply filters to.
+   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
    */
   static applyLayerFilters(mapId: string, layerPath: string): void {
     // Get the Geoview layer
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerRegularIfExists(layerPath);
 
-    // If found it and of right type
-    if (geoviewLayer instanceof AbstractGVLayer) {
+    // If found it
+    if (geoviewLayer) {
       // Read filter information from the UI
       const layerFilters = this.getActiveFilters(mapId, layerPath);
 
       // Apply the view filter on the layer
       geoviewLayer.setLayerFilters(layerFilters, true);
     }
+  }
+
+  /**
+   * Loads a plugin script dynamically and adds the plugin to a map.
+   * This method first loads the plugin script by name, then registers the
+   * plugin with the {@link MapEventProcessor} for the specified map.
+   * @param {string} mapId - The unique identifier of the map to which the plugin will be added.
+   * @param {string} pluginName - The name of the plugin to load and register.
+   * @returns {Promise<void>} A promise that resolves when the plugin has been successfully loaded
+   * and added to the map, or rejects with a formatted error if loading or registration fails.
+   */
+  static loadAndAddPlugin(mapId: string, pluginName: string): Promise<void> {
+    // Create a promise that will resolve when the plugin is added
+    return new Promise<void>((resolve, reject) => {
+      Plugin.loadScript(pluginName)
+        .then((typePlugin) => {
+          // add the plugin by passing in the loaded constructor from the script tag
+          MapEventProcessor.addPlugin(pluginName, typePlugin, mapId)
+            .then(() => {
+              // Plugin added
+              resolve();
+            })
+            .catch((error: unknown) => {
+              // Reject
+              reject(formatError(error));
+            });
+        })
+        .catch((error: unknown) => {
+          // Reject
+          reject(formatError(error));
+        });
+    });
+  }
+
+  /**
+   * Add new plugin
+   * @param {string} pluginId - The plugin id
+   * @param {typeof AbstractPlugin} constructor - The plugin class (React Component)
+   * @param {string} mapId - Id of map to add this plugin to
+   * @param {unknown} props - The plugin options
+   * @returns {Promise<AbstractPlugin>} A Promise which resolves with the Plugin instance.
+   */
+  static async addPlugin(pluginId: string, constructor: typeof AbstractPlugin, mapId: string, props?: unknown): Promise<AbstractPlugin> {
+    // Get the MapViewer
+    const mapViewer = this.getMapViewer(mapId);
+
+    // If the plugin is already loaded, return it
+    if (mapViewer.plugins[pluginId]) return mapViewer.plugins[pluginId];
+
+    // If no constructor provided
+    if (!constructor) throw new PluginError(pluginId, mapId);
+
+    // Construct the Plugin class
+    // create new instance of the plugin. Here we must type the constructor variable to any
+    // in order to cancel the "'new' expression, whose target lacks a construct signature" error message
+    // ? unknown type cannot be use, need to escape
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const plugin: AbstractPlugin = new (constructor as any)(pluginId, mapViewer, props);
+
+    // Attach to the map plugins object
+    mapViewer.plugins[pluginId] = plugin;
+
+    // a config object used to store package config
+    let pluginConfigObj: unknown = {};
+
+    // if a schema is defined then look for a config for this plugin
+    if (plugin.schema && plugin.defaultConfig) {
+      const schema = plugin.schema();
+      const defaultConfig = plugin.defaultConfig();
+
+      // create a validator object
+      const validator = new Ajv({
+        strict: false,
+        allErrors: true,
+      });
+
+      // initialize validator with schema file
+      const validate = validator.compile(schema as AnySchema);
+
+      // if no config is provided then use default
+      pluginConfigObj = defaultConfig;
+
+      /**
+       * If a user is using map config from a file then attempt to look
+       * for custom config for loaded core packages on the same path of the map config.
+       * If none exists then load the default config
+       */
+      const configUrl = document.getElementById(mapViewer.mapId)?.getAttribute('data-config-url');
+
+      // Check if there is a corePackageConfig for the plugin
+      const configObj = mapViewer.getCorePackageConfig(pluginId);
+
+      // If there is an inline config use it, if not try to read the file config associated with map config
+      if (configObj) {
+        logger.logTraceCore('Plugin - addPlugin inline config', configObj);
+        pluginConfigObj = configObj;
+      } else if (configUrl) {
+        const configPath = `${configUrl.split('.json')[0]}-${pluginId}.json`;
+
+        try {
+          // Try to find the custom config from the config path
+          const result = await Fetch.fetchJson(configPath);
+
+          if (result) {
+            logger.logTraceCore('Plugin - addPlugin file config', result);
+            pluginConfigObj = result;
+          }
+        } catch (error: unknown) {
+          // Log warning
+          logger.logWarning(`Config not found.`, error);
+          // Notify with a warning
+          mapViewer.notifications.addNotificationWarning('error.map.pluginConfigNotFound', [pluginId, mapId, configPath]);
+        }
+      }
+
+      // validate configuration
+      const valid = validate(pluginConfigObj);
+
+      if (!valid && validate.errors && validate.errors.length) {
+        for (let j = 0; j < validate.errors.length; j += 1) {
+          const error = validate.errors[j];
+          const errorMessage = `Plugin ${pluginId}: ${error.instancePath} ${error.message} - ${JSON.stringify(error.params)}`;
+
+          // Log
+          logger.logError(errorMessage);
+          // Don't show error message as it can contain non-translated elements via Ajv error messages, only log for now
+          // api.getMapViewer(mapId).notifications.showError(errorMessage);
+        }
+      }
+    }
+
+    // Set the config
+    plugin.setConfig(pluginConfigObj);
+
+    // add translations if provided
+    Object.entries(plugin.defaultTranslations()).forEach(([languageKey, value]) => {
+      // Add the resource bundle to support the plugin language
+      i18next.addResourceBundle(languageKey, 'translation', value, true, false);
+    });
+
+    // Call plugin add method
+    plugin.add();
+
+    // Return the plugin
+    return plugin;
   }
 
   // #endregion
@@ -1628,6 +1818,17 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
 
     return undefined;
+  }
+
+  /**
+   * Gets the layer configuration of the specified layer path. This function redirects to the layer api.
+   * @param {string} mapId - The map id.
+   * @param {string} layerPath - The layer path.
+   * @returns {ConfigBaseClass | undefined} The layer configuration or undefined if not found.
+   */
+  static getLayerEntryConfigIfExists(mapId: string, layerPath: string): ConfigBaseClass | undefined {
+    // Redirect to the layer api
+    return this.getMapViewerLayerAPI(mapId).getLayerEntryConfigIfExists(layerPath);
   }
 
   /**

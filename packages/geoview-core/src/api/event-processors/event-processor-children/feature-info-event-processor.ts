@@ -42,8 +42,9 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
 
   /**
    * Overrides initialization of the GeoChart Event Processor
-   * @param {GeoviewStoreType} store The store associated with the GeoChart Event Processor
+   * @param {GeoviewStoreType} store - The store associated with the GeoChart Event Processor
    * @returns An array of the subscriptions callbacks which were created
+   * @override
    */
   protected override onInitialize(store: GeoviewStoreType): Array<() => void> | void {
     // Checks for updated layers in layer data array and update the batched array consequently
@@ -131,6 +132,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * Sets the selectedLayerPath value
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path to select
+   * @returns {void}
    */
   static setSelectedLayerPath(mapId: string, layerPath: string): void {
     // The feature info state
@@ -163,6 +165,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * removing the higlight and the click marker if selected layer path is the reset path
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path to delete features from resultSet
+   * @returns {void}
    */
   static resetResultSet(mapId: string, layerPath: string): void {
     const { resultSet } = MapEventProcessor.getMapViewerLayerAPI(mapId).featureInfoLayerSet;
@@ -246,6 +249,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   /**
    * Switch the open panel to details when a map click occurs, if it is not already geochart or details.
    * @param {string} mapId - The map identifier of the modified result set.
+   * @returns {void}
    */
   static openDetailsPanelOnMapClick(mapId: string): void {
     // Show details panel as soon as there is a click on the map
@@ -267,6 +271,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * Propagates feature info layer sets to the store. The update of the array will also trigger an update in a batched manner.
    * @param {string} mapId - The map identifier of the modified result set.
    * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry being propagated.
+   * @returns {void}
    */
   static propagateFeatureInfoToStore(mapId: string, resultSetEntry: TypeFeatureInfoResultSetEntry): void {
     // The feature info state

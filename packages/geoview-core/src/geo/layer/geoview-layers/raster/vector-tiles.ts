@@ -66,6 +66,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   * @override
    */
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Redirect
@@ -175,6 +176,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * Overrides the creation of the GV Layer
    * @param {VectorTilesLayerEntryConfig} layerConfig - The layer entry configuration.
    * @returns {GVVectorTiles} The GV Layer
+   * @override
    */
   protected override onCreateGVLayer(layerConfig: VectorTilesLayerEntryConfig): GVVectorTiles {
     // Create the source

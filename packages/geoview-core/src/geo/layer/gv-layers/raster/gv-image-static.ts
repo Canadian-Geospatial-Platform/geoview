@@ -120,8 +120,8 @@ export class GVImageStatic extends AbstractGVRaster {
    * Overrides the way to get the bounds for this layer type.
    * @param {OLProjection} projection - The projection to get the bounds into.
    * @param {number} stops - The number of stops to use to generate the extent.
-   * @override
    * @returns {Extent | undefined} The layer bounding box.
+   * @override
    */
   override onGetBounds(projection: OLProjection, stops: number): Extent | undefined {
     // Get the source projection

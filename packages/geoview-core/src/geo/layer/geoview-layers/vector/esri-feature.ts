@@ -138,6 +138,8 @@ export class EsriFeature extends AbstractGeoViewVector {
    * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
    * with a numeric layerId and creates a group entry when a layer is a group.
    * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
+   * @returns {void}
+   * @override
    */
   protected override onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: ConfigBaseClass[]): void {
     // Redirect and hook when a layer entry must be registered
@@ -155,6 +157,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<EsriFeatureLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    * @throws {LayerTooManyEsriFeatures} When the layer has too many Esri features.
+   * @override
    */
   protected override onProcessLayerMetadata(
     layerConfig: EsriFeatureLayerEntryConfig,
@@ -216,6 +219,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * Overrides the creation of the GV Layer
    * @param {EsriFeatureLayerEntryConfig} layerConfig - The layer entry configuration.
    * @returns {GVEsriFeature} The GV Layer
+   * @override
    */
   protected override onCreateGVLayer(layerConfig: EsriFeatureLayerEntryConfig): GVEsriFeature {
     // Create the source

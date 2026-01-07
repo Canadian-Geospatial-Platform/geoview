@@ -14,8 +14,7 @@ import type {
   TypeFeatureInfoResultSetEntry,
   TypeHoverFeatureInfo,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/feature-info-state';
-import { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
-import { LayerWrongTypeError } from 'geoview-core/core/exceptions/layer-exceptions';
+import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { Projection } from 'geoview-core/geo/utils/projection';
 
 /**
@@ -552,10 +551,7 @@ export class MapTester extends GVAbstractTester {
       'Test non-queryable layer not in details after map click',
       async (test) => {
         // Get the layer
-        const layer = this.getLayerApi().getGeoviewLayer(layerPath);
-
-        // If not an AbstractGVLayer (regular layer)
-        if (!(layer instanceof AbstractGVLayer)) throw new LayerWrongTypeError(layerPath, layer.getLayerName());
+        const layer = this.getLayerApi().getGeoviewLayerRegular(layerPath);
 
         // The layer should be initially queryable
         if (!layer.getQueryable()) throw new TestError(`False precondition, the layer ${layerPath} wasn't initially queryable.`);
@@ -642,10 +638,7 @@ export class MapTester extends GVAbstractTester {
       'Test layer hoverable state in hoverFeatureInfoLayerSet',
       async (test) => {
         // Get the layer
-        const layer = this.getLayerApi().getGeoviewLayer(layerPath);
-
-        // If not an AbstractGVLayer (regular layer)
-        if (!(layer instanceof AbstractGVLayer)) throw new LayerWrongTypeError(layerPath, layer.getLayerName());
+        const layer = this.getLayerApi().getGeoviewLayerRegular(layerPath);
 
         // The layer should be initially hoverable
         if (!layer.getHoverable()) throw new TestError(`False precondition, the layer ${layerPath} wasn't initially hoverable.`);

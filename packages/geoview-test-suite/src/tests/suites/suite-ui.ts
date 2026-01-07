@@ -42,6 +42,7 @@ export class GVTestSuiteUI extends GVAbstractTestSuite {
   /**
    * Overrides the implementation to perform the tests for this Test Suite.
    * @returns {Promise<unknown>} A Promise which resolves when tests are completed.
+   * @override
    */
   protected override onLaunchTestSuite(): Promise<unknown> {
     // Test details panel guide and Top anchor

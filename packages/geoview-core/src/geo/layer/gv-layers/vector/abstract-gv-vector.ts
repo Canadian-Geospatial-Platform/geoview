@@ -15,7 +15,7 @@ import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import { logger } from '@/core/utils/logger';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import type { TypeFeatureInfoEntry, TypeOutfieldsType } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoResult, TypeOutfieldsType } from '@/api/types/map-schema-types';
 import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
@@ -126,6 +126,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
    * @param {string} fieldName - The field name for which we want to get the type.
    * @returns {TypeOutfieldsType} The type of the field or 'string' when undefined.
+   * @override
    */
   protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
     // By default, look into the layer metadata for information on the field types
@@ -139,7 +140,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
    * @param {LayerFilters} layerFilters - The layer filters to apply when querying the features.
    * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
    * @protected
    * @override
    */
@@ -150,28 +151,28 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     layerFilters: LayerFilters,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController?: AbortController
-  ): Promise<TypeFeatureInfoEntry[]> {
+  ): Promise<TypeFeatureInfoResult> {
     // Get the layer config in a loaded phase
     const layerConfig = this.getLayerConfig();
     const features = this.getOLSource().getFeatures();
-    return Promise.resolve(
-      this.formatFeatureInfoResult(
+    return Promise.resolve({
+      results: this.formatFeatureInfoResult(
         features,
         layerConfig,
         layerConfig.getServiceDateFormat(),
         layerConfig.getServiceDateTimezone(),
         layerConfig.getServiceDateTemporalMode()
-      )
-    );
+      ),
+    });
   }
 
   /**
    * Overrides the return of feature information at a given pixel location.
    * @param {OLMap} map - The Map where to get Feature Info At Pixel from.
    * @param {Pixel} location - The pixel coordinate that will be used by the query.
-   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
    */
-  protected override getFeatureInfoAtPixel(map: OLMap, location: Pixel): Promise<TypeFeatureInfoEntry[]> {
+  protected override getFeatureInfoAtPixel(map: OLMap, location: Pixel): Promise<TypeFeatureInfoResult> {
     // Get the layer source
     const layerSource = this.getOLSource();
 
@@ -192,15 +193,15 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     const layerConfig = this.getLayerConfig();
 
     // Format and return the features
-    return Promise.resolve(
-      this.formatFeatureInfoResult(
+    return Promise.resolve({
+      results: this.formatFeatureInfoResult(
         features,
         layerConfig,
         layerConfig.getServiceDateFormat(),
         layerConfig.getServiceDateTimezone(),
         layerConfig.getServiceDateTemporalMode()
-      )
-    );
+      ),
+    });
   }
 
   /**
@@ -209,7 +210,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param {Coordinate} location - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
    */
   protected override getFeatureInfoAtCoordinate(
     map: OLMap,
@@ -218,7 +219,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     queryGeometry: boolean = true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
-  ): Promise<TypeFeatureInfoEntry[]> {
+  ): Promise<TypeFeatureInfoResult> {
     // Redirect to getFeatureInfoAtPixel
     return this.getFeatureInfoAtPixel(map, map.getPixelFromCoordinate(location));
   }
@@ -229,7 +230,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param {Coordinate} lonlat - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
    */
   protected override getFeatureInfoAtLonLat(
     map: OLMap,
@@ -238,7 +239,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     queryGeometry: boolean = true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
-  ): Promise<TypeFeatureInfoEntry[]> {
+  ): Promise<TypeFeatureInfoResult> {
     // Convert Coordinates LonLat to map projection
     const projCoordinate = Projection.transformFromLonLat(lonlat, map.getView().getProjection());
 
@@ -250,8 +251,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * Overrides the way to get the bounds for this layer type.
    * @param {OLProjection} projection - The projection to get the bounds into.
    * @param {number} stops - The number of stops to use to generate the extent.
-   * @override
    * @returns {Extent | undefined} The layer bounding box.
+   * @override
    */
   override onGetBounds(projection: OLProjection, stops: number): Extent | undefined {
     // Get the source projection
@@ -276,8 +277,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param {number[] | string[]} objectIds - The uids of the features to calculate the extent from.
    * @param {OLProjection} outProjection - The output projection for the extent.
    * @param {string?} outfield - ID field to return for services that require a value in outfields.
-   * @override
    * @returns {Promise<Extent>} The extent of the features, if available.
+   * @override
    * @deprecated Seems like this is not used anymore, not called anywhere and unsure how it'd work with adhoc vector layers without 'ids' (objectids) necessarily.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -44,6 +44,7 @@ export class GVGeoJSON extends AbstractGVVector {
   /**
    * Overrides the refresh to reload the Geojson object in the layer source once the refresh completes.
    * @param {OLProjection | undefined} projection - Optional, the projection to refresh to.
+   * @returns {void}
    * @override
    */
   override onRefresh(projection: OLProjection | undefined): void {

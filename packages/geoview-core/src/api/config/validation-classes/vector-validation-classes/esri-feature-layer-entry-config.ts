@@ -47,6 +47,7 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
    * Overrides the get geometry type to interpret the esri type name.
    * @returns {TypeStyleGeometry | undefined} The geometry type, if it could be determined.
    * @throws {NotSupportedError} When the geometry type is not supported.
+   * @override
    */
   protected override onGetGeometryType(): TypeStyleGeometry | undefined {
     // Get the geometry field

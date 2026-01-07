@@ -88,6 +88,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<T = TypeMetadataWMS | undefined>} A promise resolving to the parsed metadata object,
    * or `undefined` if metadata could not be retrieved or no capabilities were found.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+   * @override
    */
   protected override onFetchServiceMetadata<T = TypeMetadataWMS | undefined>(abortSignal?: AbortSignal): Promise<T> {
     // If metadata is in XML format (not WMS GetCapabilities)
@@ -159,6 +160,8 @@ export class WMS extends AbstractGeoViewRaster {
   /**
    * Overrides the validation of a layer entry config.
    * @param {ConfigBaseClass} layerConfig - The layer entry config to validate.
+   * @returns {void}
+   * @override
    */
   protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     const layerFound = this.getLayerCapabilities(layerConfig.layerId);
@@ -281,6 +284,7 @@ export class WMS extends AbstractGeoViewRaster {
    * Overrides the creation of the GV Layer
    * @param {OgcWmsLayerEntryConfig} layerConfig - The layer entry configuration.
    * @returns {GVWMS} The GV Layer
+   * @override
    */
   protected override onCreateGVLayer(layerConfig: OgcWmsLayerEntryConfig): GVWMS {
     // Create the source
@@ -460,7 +464,7 @@ export class WMS extends AbstractGeoViewRaster {
           this.#addLayerToMetadataInstance(layerPath, baseMetadata.Capability.Layer, metadata.Capability.Layer);
         }
       } else {
-        // Log and track metadata fetch failure. Wrap/Unwrap id: 8c97d776
+        // Log and track metadata fetch failure. Search id: 8c97d776
         const reason = result.reason as PromiseRejectErrorWrapper<AbstractBaseLayerEntryConfig>;
         this.addLayerLoadError(reason.error, reason.object);
       }
@@ -496,7 +500,7 @@ export class WMS extends AbstractGeoViewRaster {
               if (metadata.Capability) {
                 resolve({ metadata, layerConfig });
               } else {
-                // Wrap error about no capabilities found. Wrap/Unwrap id: 8c97d776.
+                // Wrap error about no capabilities found. Search id: 8c97d776.
                 reject(
                   new PromiseRejectErrorWrapper(
                     new LayerNoCapabilitiesError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerNameCascade()),
@@ -506,7 +510,7 @@ export class WMS extends AbstractGeoViewRaster {
               }
             })
             .catch((error) => {
-              // Wrap error with additional layer context. Wrap/Unwrap id: 8c97d776.
+              // Wrap error with additional layer context. Search id: 8c97d776.
               reject(
                 new PromiseRejectErrorWrapper(
                   new LayerServiceMetadataUnableToFetchError(

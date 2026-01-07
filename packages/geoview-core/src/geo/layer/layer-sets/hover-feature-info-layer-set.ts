@@ -1,6 +1,5 @@
 import type { Coordinate } from 'ol/coordinate';
-import type { QueryType, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
-import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import type { QueryType, TypeFeatureInfoResult } from '@/api/types/map-schema-types';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
@@ -57,6 +56,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    * Overrides the behavior to apply when a hover-feature-info-layer-set wants to check for condition to register a layer in its set.
    * @param {AbstractBaseGVLayer} layer - The layer
    * @returns {boolean} True when the layer should be registered to this hover-feature-info-layer-set.
+   * @override
    */
   protected override onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean {
     // Return if the layer is of queryable type and source is queryable
@@ -66,6 +66,8 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   /**
    * Overrides the behavior to apply when a hover-feature-info-layer-set wants to register a layer in its set.
    * @param {AbstractBaseGVLayer} layer - The layer
+   * @returns {void}
+   * @override
    */
   protected override onRegisterLayer(layer: AbstractBaseGVLayer): void {
     // Call parent
@@ -81,6 +83,8 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    * Overrides the behavior to apply when propagating to the store
    * @param {TypeHoverResultSetEntry} resultSetEntry - The result set entry to propagate to the store
    * @param {PropagationType} type - The propagation type
+   * @returns {void}
+   * @override
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override onPropagateToStore(resultSetEntry: TypeHoverResultSetEntry, type: PropagationType): void {
@@ -90,6 +94,8 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   /**
    * Overrides the behavior to apply when deleting from the store
    * @param {string} layerPath - The layer path to delete from the store
+   * @returns {void}
+   * @override
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override onDeleteFromStore(layerPath: string): void {
@@ -102,6 +108,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    * @param {QueryType} queryType - The query type, default: HoverFeatureInfoLayerSet.QUERY_TYPE.
    * @returns {Promise<TypeHoverResultSet>} The hover result set results.
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
    * @async
    */
   async queryLayers(coordinate: Coordinate, queryType: QueryType = HoverFeatureInfoLayerSet.QUERY_TYPE): Promise<TypeHoverResultSet> {
@@ -112,99 +119,92 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     const layersToQuery = orderedLayerPaths.filter((path) => path in this.resultSet);
 
     // Prepare to hold all promises of features in the loop below
-    const allPromises: Promise<TypeFeatureInfoEntry[]>[] = [];
+    const allPromises: Promise<TypeFeatureInfoResult>[] = [];
 
     // Reinitialize the resultSet
     // Loop on each layer path in the resultSet were there is a layer to query
     layersToQuery.forEach((layerPath) => {
       // Get the layer associated with the layer path
-      const layer = this.layerApi.getGeoviewLayer(layerPath);
+      const layer = this.layerApi.getGeoviewLayerRegular(layerPath);
 
-      // If layer was found and of right type
-      if (layer instanceof AbstractGVLayer) {
-        // If the layer is not hoverable, skip it
-        if (!layer.getHoverable()) return;
+      // If the layer is not hoverable, skip it
+      if (!layer.getHoverable()) return;
 
-        // Flag processing
-        this.resultSet[layerPath].queryStatus = 'init';
+      // Flag processing
+      this.resultSet[layerPath].queryStatus = 'init';
 
-        // If the layer path has an abort controller
-        if (Object.keys(this.#abortControllers).includes(layerPath)) {
-          // Abort it
-          this.#abortControllers[layerPath].abort();
-        }
+      // If the layer path has an abort controller
+      if (Object.keys(this.#abortControllers).includes(layerPath)) {
+        // Abort it
+        this.#abortControllers[layerPath].abort();
+      }
 
-        // Create an AbortController for the query
-        this.#abortControllers[layerPath] = new AbortController();
+      // Create an AbortController for the query
+      this.#abortControllers[layerPath] = new AbortController();
 
-        // Process query on results data
-        const promiseResult = AbstractLayerSet.queryLayerFeatures(
-          this.layerApi,
-          layer,
-          queryType,
-          coordinate,
-          false,
-          this.#abortControllers[layerPath]
-        );
+      // Process query on results data
+      const promise = this.queryLayerFeatures(layer, queryType, coordinate, false, this.#abortControllers[layerPath]);
 
-        // Add the promise
-        allPromises.push(promiseResult);
+      // Add the promise
+      allPromises.push(promise);
 
-        // When the promise is done, propagate to store
-        promiseResult
-          .then((arrayOfRecords) => {
-            if (arrayOfRecords.length) {
-              const nameField = arrayOfRecords[0].nameField || Object.entries(arrayOfRecords[0].fieldInfo)[0]?.[0];
-              const fieldInfo = arrayOfRecords[0].fieldInfo[nameField];
+      // When the promise is done, propagate to store
+      promise
+        .then((promiseResult) => {
+          // Get the array of records in the results
+          const arrayOfRecords = promiseResult.results;
 
-              this.resultSet[layerPath].feature = {
-                featureIcon: arrayOfRecords[0].featureIcon,
-                fieldInfo,
-                geoviewLayerType: arrayOfRecords[0].geoviewLayerType,
-                nameField,
-              };
-              this.resultSet[layerPath].queryStatus = 'processed';
-            } else {
+          if (arrayOfRecords.length) {
+            const nameField = arrayOfRecords[0].nameField || Object.entries(arrayOfRecords[0].fieldInfo)[0]?.[0];
+            const fieldInfo = arrayOfRecords[0].fieldInfo[nameField];
+
+            this.resultSet[layerPath].feature = {
+              featureIcon: arrayOfRecords[0].featureIcon,
+              fieldInfo,
+              geoviewLayerType: arrayOfRecords[0].geoviewLayerType,
+              nameField,
+            };
+            this.resultSet[layerPath].queryStatus = 'processed';
+          } else {
+            this.resultSet[layerPath].feature = undefined;
+          }
+
+          // Check if this layer should update the store
+          const shouldUpdate = orderedLayerPaths.slice(0, orderedLayerPaths.indexOf(layerPath)).every((higherLayerPath) => {
+            const higherLayer = this.resultSet[higherLayerPath];
+            // Allow update if higher layer:
+            // - hasn't been processed yet (will overwrite later if needed)
+            // - OR is processed but has no feature
+            return (
+              higherLayer.queryStatus === 'init' ||
+              (higherLayer.queryStatus === 'processed' && !higherLayer.feature) ||
+              higherLayer.queryStatus === 'error'
+            );
+          });
+
+          // If it should update and there is a feature to propagate
+          if (shouldUpdate && this.resultSet[layerPath].queryStatus === 'processed' && this.resultSet[layerPath].feature) {
+            // Propagate to the store
+            this.#propagateToStore(this.resultSet[layerPath].feature);
+          }
+        })
+        .catch((error: unknown) => {
+          // If aborted
+          if (error instanceof RequestAbortedError) {
+            // Log
+            logger.logDebug('Query aborted and replaced by another one.. keep spinning..');
+          } else {
+            // If there's a resultSet for the layer path
+            if (this.resultSet[layerPath]) {
+              // Error
+              this.resultSet[layerPath].queryStatus = 'error';
               this.resultSet[layerPath].feature = undefined;
             }
 
-            // Check if this layer should update the store
-            const shouldUpdate = orderedLayerPaths.slice(0, orderedLayerPaths.indexOf(layerPath)).every((higherLayerPath) => {
-              const higherLayer = this.resultSet[higherLayerPath];
-              // Allow update if higher layer:
-              // - hasn't been processed yet (will overwrite later if needed)
-              // - OR is processed but has no feature
-              return (
-                higherLayer.queryStatus === 'init' ||
-                (higherLayer.queryStatus === 'processed' && !higherLayer.feature) ||
-                higherLayer.queryStatus === 'error'
-              );
-            });
-
-            // If it should update and there is a feature to propagate
-            if (shouldUpdate && this.resultSet[layerPath].queryStatus === 'processed' && this.resultSet[layerPath].feature) {
-              // Propagate to the store
-              this.#propagateToStore(this.resultSet[layerPath].feature);
-            }
-          })
-          .catch((error: unknown) => {
-            // If aborted
-            if (error instanceof RequestAbortedError) {
-              // Log
-              logger.logDebug('Query aborted and replaced by another one.. keep spinning..');
-            } else {
-              // If there's a resultSet for the layer path
-              if (this.resultSet[layerPath]) {
-                // Error
-                this.resultSet[layerPath].queryStatus = 'error';
-                this.resultSet[layerPath].feature = undefined;
-              }
-
-              // Log
-              logger.logPromiseFailed('queryLayerFeatures in queryLayers in hoverFeatureInfoLayerSet', error);
-            }
-          });
-      }
+            // Log
+            logger.logPromiseFailed('queryLayerFeatures in queryLayers in hoverFeatureInfoLayerSet', error);
+          }
+        });
     });
 
     // Await for the promises to settle

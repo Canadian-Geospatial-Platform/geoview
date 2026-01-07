@@ -45,6 +45,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    * @returns {Promise<T>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @override
    */
   protected override onFetchServiceMetadata<T>(): Promise<T> {
     // No metadata
@@ -54,6 +55,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   * @override
    */
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Redirect
@@ -75,6 +77,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @param {OLProjection?} [mapProjection] - The map projection.
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<ImageStaticLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   * @override
    */
   protected override onProcessLayerMetadata(
     layerConfig: ImageStaticLayerEntryConfig,
@@ -93,6 +96,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * Overrides the creation of the GV Layer
    * @param {ImageStaticLayerEntryConfig} layerConfig - The layer entry configuration.
    * @returns {GVImageStatic} The GV Layer
+   * @override
    */
   protected override onCreateGVLayer(layerConfig: ImageStaticLayerEntryConfig): GVImageStatic {
     // Create the source

@@ -153,6 +153,8 @@ export class WFS extends AbstractGeoViewVector {
   /**
    * Overrides the validation of a layer entry config.
    * @param {ConfigBaseClass} layerConfig - The layer entry config to validate.
+   * @returns {void}
+   * @override
    */
   protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     // Note that the code assumes wfs feature type list does not contains metadata layer group. If you need layer group,
@@ -332,6 +334,7 @@ export class WFS extends AbstractGeoViewVector {
    * Overrides the creation of the GV Layer
    * @param {OgcWfsLayerEntryConfig} layerConfig - The layer entry configuration.
    * @returns {GVWFS} The GV Layer
+   * @override
    */
   protected override onCreateGVLayer(layerConfig: OgcWfsLayerEntryConfig): GVWFS {
     // Create the source

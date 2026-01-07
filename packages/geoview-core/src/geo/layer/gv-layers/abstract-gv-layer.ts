@@ -30,6 +30,7 @@ import type {
   TypeOutfieldsType,
   TypeOutfields,
   TypeLayerStyleSettings,
+  TypeFeatureInfoResult,
 } from '@/api/types/map-schema-types';
 import {
   type TypeLayerMetadataFields,
@@ -170,8 +171,8 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
   /**
    * Overrides the way the attributions are retrieved.
-   * @override
    * @returns {string[]} The layer attributions
+   * @override
    */
   override onGetAttributions(): string[] {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -186,6 +187,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   /**
    * Overrides the refresh function to refresh the layer source.
    * @param {OLProjection | undefined} projection - Optional, the projection to refresh to.
+   * @returns {void}
    * @override
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -230,6 +232,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   /**
    * Overridable method called when the layer has started to load itself on the map.
    * @param {Event} event - The event which is being triggered.
+   * @returns {void}
    */
   protected onLoading(event: Event): void {
     // Increment the counter
@@ -261,6 +264,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   /**
    * Overridable method called when the layer has been loaded correctly.
    * @param {Event} event - The event which is being triggered.
+   * @returns {void}
    */
   protected onLoaded(event: Event): void {
     // Log it, leaving the logDebug for dev purposes
@@ -301,6 +305,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   /**
    * Overridable method called when the layer is in error and couldn't be loaded correctly.
    * @param {Event} event - The event which is being triggered.
+   * @returns {void}
    */
   protected onError(event: Event): void {
     // Log
@@ -330,6 +335,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   /**
    * Overridable method called when the layer image is in error and couldn't be loaded correctly.
    * @param {Event} event - The event which is being triggered.
+   * @returns {void}
    */
   protected onImageLoadError(event: Event): void {
     // Log
@@ -373,6 +379,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   /**
    * Method called when the layer source changes to check for errors.
    * @param {Event} event - The event which is being triggered.
+   * @returns {void}
    */
   protected onSourceChange(event: Event): void {
     const state = this.#olSource.getState();
@@ -382,7 +389,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       const errorMessage = error?.message || String(error);
 
       // Log the error, we do not throw as the layer can still be added but marked as errored
-      logger.logError('GeoTIFF source failed with error', {
+      logger.logError('Source failed with error', {
         layerId: this.getLayerPath(),
         error: errorMessage,
         event,
@@ -398,12 +405,12 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
    * @param {LayerFilters} layerFilters - The layer filters to apply when querying the features.
    * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   * @returns {Promise<TypeFeatureInfoResult>} A promise of TypeFeatureInfoResult.
    * @throws {NotImplementedError} When the function isn't overridden by the children class.
    * @protected
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getAllFeatureInfo(map: OLMap, layerFilters: LayerFilters, abortController?: AbortController): Promise<TypeFeatureInfoEntry[]> {
+  protected getAllFeatureInfo(map: OLMap, layerFilters: LayerFilters, abortController?: AbortController): Promise<TypeFeatureInfoResult> {
     // Crash on purpose
     throw new NotImplementedError(`getAllFeatureInfo not implemented on layer path ${this.getLayerPath()}`);
   }
@@ -414,14 +421,14 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param {Pixel} location - The pixel coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   * @returns {Promise<TypeFeatureInfoResult>} A promise of TypeFeatureInfoResult.
    */
   protected getFeatureInfoAtPixel(
     map: OLMap,
     location: Pixel,
     queryGeometry: boolean = true,
     abortController: AbortController | undefined = undefined
-  ): Promise<TypeFeatureInfoEntry[]> {
+  ): Promise<TypeFeatureInfoResult> {
     // Redirect to getFeatureInfoAtCoordinate
     return this.getFeatureInfoAtCoordinate(map, map.getCoordinateFromPixel(location), queryGeometry, abortController);
   }
@@ -432,7 +439,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param {Coordinate} location - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   * @returns {Promise<TypeFeatureInfoResult>} A promise of TypeFeatureInfoResult.
    * @throws {NotImplementedError} When the function isn't overridden by the children class.
    */
   protected getFeatureInfoAtCoordinate(
@@ -442,7 +449,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     queryGeometry: boolean = true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
-  ): Promise<TypeFeatureInfoEntry[]> {
+  ): Promise<TypeFeatureInfoResult> {
     // Crash on purpose
     throw new NotImplementedError(`getFeatureInfoAtCoordinate not implemented on layer path ${this.getLayerPath()}`);
   }
@@ -453,7 +460,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param {Coordinate} lonlat - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
    * @throws {NotImplementedError} When the function isn't overridden by the children class.
    */
   protected getFeatureInfoAtLonLat(
@@ -463,7 +470,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     queryGeometry: boolean = true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
-  ): Promise<TypeFeatureInfoEntry[]> {
+  ): Promise<TypeFeatureInfoResult> {
     // Crash on purpose
     throw new NotImplementedError(`getFeatureInfoAtLonLat not implemented on layer path ${this.getLayerPath()}`);
   }
@@ -474,7 +481,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param {Coordinate} location - The bounding box that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
    * @throws {NotImplementedError} When the function isn't overridden by the children class.
    */
   protected getFeatureInfoUsingBBox(
@@ -484,7 +491,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     queryGeometry: boolean = true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
-  ): Promise<TypeFeatureInfoEntry[]> {
+  ): Promise<TypeFeatureInfoResult> {
     // Crash on purpose
     throw new NotImplementedError(`getFeatureInfoUsingBBox not implemented on layer path ${this.getLayerPath()}`);
   }
@@ -495,7 +502,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param {Coordinate} location - The polygon that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
    * @throws {NotImplementedError} When the function isn't overridden by the children class.
    */
   protected getFeatureInfoUsingPolygon(
@@ -505,7 +512,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     queryGeometry: boolean = true,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController: AbortController | undefined = undefined
-  ): Promise<TypeFeatureInfoEntry[]> {
+  ): Promise<TypeFeatureInfoResult> {
     // Crash on purpose
     throw new NotImplementedError(`getFeatureInfoUsingPolygon not implemented on layer path ${this.getLayerPath()}`);
   }
@@ -647,11 +654,17 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   }
 
   /**
-   * Sets the style item visibility on the layer and refresh it.
-   * @param {TypeLegendItem} item - The style item to toggle visibility on
-   * @param {boolean} visibility - The visibility of the style item
+   * Updates the visibility of a style item on the layer and triggers a re-render.
+   * This method mutates the layer's style configuration for the specified legend
+   * item, calls `changed()` on the underlying OpenLayers layer to schedule a new
+   * render, and optionally waits for the next render cycle to complete.
+   * @param {TypeLegendItem} item - The legend/style item whose visibility will be updated.
+   * @param {boolean} visibility - Whether the style item should be visible.
+   * @param {boolean} waitForRender - When `true`, waits for the next layer render to complete before resolving.
+   * @returns {Promise<void>} A promise that resolves after the visibility has been
+   * updated and, if requested, the layer has finished rendering.
    */
-  setStyleItemVisibility(item: TypeLegendItem, visibility: boolean): void {
+  async setStyleItemVisibility(item: TypeLegendItem, visibility: boolean, waitForRender: boolean): Promise<void> {
     // Get the style config
     const geometryStyleConfig = this.getStyle()![item.geometryType];
 
@@ -664,6 +677,12 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
     // Force a re-render of the layer source (this is required if there are classes)
     this.getOLLayer().changed();
+
+    // If waiting for the render to complete
+    if (waitForRender) {
+      // Wait for the render to complete
+      await this.waitForRender();
+    }
   }
 
   /**
@@ -842,7 +861,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param {TypeLocation} location - An pixel, coordinate or polygon that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoEntry[]>} The feature info table.
+   * @returns {Promise<TypeFeatureInfoResult>} The feature info table.
    */
   async getFeatureInfo(
     map: OLMap,
@@ -850,13 +869,13 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     location: TypeLocation,
     queryGeometry: boolean = true,
     abortController: AbortController | undefined = undefined
-  ): Promise<TypeFeatureInfoEntry[]> {
+  ): Promise<TypeFeatureInfoResult> {
     // Log
     logger.logTraceCore('ABSTRACT-GV-LAYERS - getFeatureInfo', queryType);
     const logMarkerKey = `${queryType}`;
     logger.logMarkerStart(logMarkerKey);
 
-    let promiseGetFeature: Promise<TypeFeatureInfoEntry[]>;
+    let promiseGetFeature: Promise<TypeFeatureInfoResult>;
     switch (queryType) {
       case 'all': {
         // Create the filter on the initial filter only, get everything else.
@@ -899,7 +918,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   /**
    * Queries the legend.
    * This function raises legend querying and queried events. It calls the overridable onFetchLegend() function.
-   * @returns {Promise<TypeLegend | null>} The promise when the legend (or null) will be received
+   * @returns {Promise<TypeLegend | null>} The promise when the legend (or null) will be received.
    */
   queryLegend(): Promise<TypeLegend | null> {
     // Emit that the legend has been queried
@@ -928,6 +947,58 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
     // Return the promise
     return promiseLegend;
+  }
+
+  /**
+   * Waits until the underlying OpenLayers source reaches the `ready` state.
+   * If the source is already ready, the returned promise resolves immediately.
+   * If the source enters the `error` state, the promise is rejected.
+   * @returns {Promise<void>} A promise that resolves when the source state becomes
+   * `ready`, or rejects if the source enters the `error` state.
+   */
+  waitForSourceReady(): Promise<void> {
+    // Return a promise when the source is ready
+    return new Promise((resolve, reject) => {
+      const state = this.#olSource.getState();
+
+      if (state === 'ready') {
+        resolve();
+        return;
+      }
+
+      if (state === 'error') {
+        reject(new Error('Source failed to load'));
+        return;
+      }
+
+      const onChange = (): void => {
+        const newState = this.#olSource.getState();
+
+        if (newState === 'ready') {
+          this.#olSource.un('change', onChange);
+          resolve();
+        } else if (newState === 'error') {
+          this.#olSource.un('change', onChange);
+          reject(new Error('Source failed to load'));
+        }
+      };
+
+      // Register handler when the source changes
+      this.#olSource.on('change', onChange);
+    });
+  }
+
+  /**
+   * Waits for the next render cycle of the underlying OpenLayers layer to complete.
+   * Resolves the returned promise after the layer emits a `postrender` event,
+   * indicating that it has finished rendering for a frame.
+   * @returns {Promise<void>} A promise that resolves after the layer has rendered
+   * at least once.
+   */
+  waitForRender(): Promise<void> {
+    return new Promise((resolve) => {
+      this.getOLLayer().once('postrender', () => resolve());
+    });
   }
 
   /**

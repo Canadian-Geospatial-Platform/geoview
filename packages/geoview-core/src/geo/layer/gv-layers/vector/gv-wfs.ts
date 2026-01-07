@@ -38,6 +38,7 @@ export class GVWFS extends AbstractGVVector {
    * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
    * @param {string} fieldName - The field name for which we want to get the type.
    * @returns {TypeOutfieldsType} The type of the field.
+   * @override
    */
   protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect

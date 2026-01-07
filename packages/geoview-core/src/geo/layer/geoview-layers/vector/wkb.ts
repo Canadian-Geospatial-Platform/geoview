@@ -118,6 +118,8 @@ export class WKB extends AbstractGeoViewVector {
   /**
    * Overrides the validation of a layer entry config.
    * @param {ConfigBaseClass} layerConfig - The layer entry config to validate.
+   * @returns {void}
+   * @override
    */
   protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     if (Array.isArray(this.getMetadata()?.listOfLayerEntryConfig)) {
@@ -140,6 +142,7 @@ export class WKB extends AbstractGeoViewVector {
    * @param {OLProjection?} [mapProjection] - The map projection.
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   * @override
    */
   protected override onProcessLayerMetadata(
     layerConfig: VectorLayerEntryConfig,
@@ -242,6 +245,7 @@ export class WKB extends AbstractGeoViewVector {
    * Overrides the creation of the GV Layer
    * @param {WkbLayerEntryConfig} layerConfig - The layer entry configuration.
    * @returns {GVWKB} The GV Layer
+   * @override
    */
   protected override onCreateGVLayer(layerConfig: WkbLayerEntryConfig): GVWKB {
     // Create the source

@@ -96,6 +96,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   /**
    * Overrides the way the validation of the list of layer entry config happens.
    * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
+   * @returns {void}
+   * @override
    */
   protected override onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: ConfigBaseClass[]): void {
     // Redirect and hook when a layer entry must be registered
@@ -112,6 +114,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {OLProjection?} [mapProjection] - The map projection.
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<EsriDynamicLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   * @override
    */
   protected override onProcessLayerMetadata(
     layerConfig: EsriDynamicLayerEntryConfig,
@@ -126,6 +129,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * Overrides the creation of the GV Layer
    * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer entry configuration.
    * @returns {GVEsriDynamic} The GV Layer
+   * @override
    */
   protected override onCreateGVLayer(layerConfig: EsriDynamicLayerEntryConfig): GVEsriDynamic {
     // Create the source

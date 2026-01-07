@@ -951,6 +951,11 @@ export type TypeResultSet<T extends TypeResultSetEntry = TypeResultSetEntry> = {
   [layerPath: string]: T;
 };
 
+export type TypeFeatureInfoResult = {
+  results: TypeFeatureInfoEntry[];
+  promiseGeometries?: Promise<boolean>;
+};
+
 export type TypeFeatureInfoEntry = {
   featureKey: number;
   geoviewLayerType: TypeGeoviewLayerType;
@@ -961,6 +966,7 @@ export type TypeFeatureInfoEntry = {
   extent: Extent | undefined;
   featureIcon?: string;
   fieldInfo: Partial<Record<string, TypeFieldEntry>>;
+  // TODO: CHECK - Do we need to differentiate between undefined and null? If so, write the reason in a GV comment. It'd clean many | null in the callers.
   nameField: string | null;
   layerPath: string;
 };

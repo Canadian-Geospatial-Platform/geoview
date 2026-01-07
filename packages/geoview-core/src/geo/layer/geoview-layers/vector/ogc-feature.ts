@@ -122,6 +122,8 @@ export class OgcFeature extends AbstractGeoViewVector {
   /**
    * Overrides the validation of a layer entry config.
    * @param {ConfigBaseClass} layerConfig - The layer entry config to validate.
+   * @returns {void}
+   * @override
    */
   protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     // Note that the code assumes ogc-feature collections does not contains metadata layer group. If you need layer group,
@@ -232,6 +234,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    * Overrides the creation of the GV Layer
    * @param {OgcFeatureLayerEntryConfig} layerConfig - The layer entry configuration.
    * @returns {GVOGCFeature} The GV Layer
+   * @override
    */
   protected override onCreateGVLayer(layerConfig: OgcFeatureLayerEntryConfig): GVOGCFeature {
     // Create the source

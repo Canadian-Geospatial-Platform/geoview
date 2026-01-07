@@ -149,6 +149,7 @@ export class GVEsriImage extends AbstractGVRaster {
   /**
    * Overrides when the style should be set by the fetched legend.
    * @param {TypeLegend} legend - The legend type
+   * @returns {void}
    * @override
    */
   override onSetStyleAccordingToLegend(legend: TypeLegend): void {
@@ -160,8 +161,8 @@ export class GVEsriImage extends AbstractGVRaster {
    * Overrides the way to get the bounds for this layer type.
    * @param {OLProjection} projection - The projection to get the bounds into.
    * @param {number} stops - The number of stops to use to generate the extent.
-   * @override
    * @returns {Extent | undefined} The layer bounding box.
+   * @override
    */
   override onGetBounds(projection: OLProjection, stops: number): Extent | undefined {
     // Get the metadata projection
@@ -184,6 +185,8 @@ export class GVEsriImage extends AbstractGVRaster {
   /**
    * Overrides the way a WMS layer applies a view filter. It does so by updating the source TIME parameters.
    * @param {LayerFilters} [filter] - An optional filter to be used in place of the getViewFilter value.
+   * @returns {void}
+   * @override
    */
   protected override onSetLayerFilters(filter?: LayerFilters): void {
     // Process the layer filtering using the static method shared between EsriImage and WMS

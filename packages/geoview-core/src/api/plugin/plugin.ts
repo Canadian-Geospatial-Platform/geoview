@@ -1,11 +1,6 @@
-import i18next from 'i18next';
-import type { AnySchema } from 'ajv';
-import Ajv from 'ajv';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { whenThisThen, getScriptAndAssetURL } from '@/core/utils/utilities';
-import { PluginError } from '@/core/exceptions/geoview-exceptions';
-import { Fetch } from '@/core/utils/fetch-helper';
 import { logger } from '@/core/utils/logger';
 import type { AbstractPlugin } from './abstract-plugin';
 
@@ -54,136 +49,6 @@ export abstract class Plugin {
   }
 
   /**
-   * Utility function to call a promise callback resolve function once a plugin is actually available in window.geoviewPlugins property.
-   * @param {string} pluginId - The plugin id to look for.
-   * @param {Function} resolve  - The resolve function to callback on.
-   * @param {Function} reject - The reject function to callback on in case of failure.
-   */
-  static #resolveWhenReady(pluginId: string, resolve: (plugin: typeof AbstractPlugin) => void, reject: (reason: Error) => void): void {
-    whenThisThen(() => window.geoviewPlugins?.[pluginId])
-      .then(() => {
-        // Resolve
-        resolve(window.geoviewPlugins![pluginId]);
-      })
-      .catch((error: unknown) => {
-        // Reject
-        reject(formatError(error));
-      });
-  }
-
-  /**
-   * Add new plugin
-   *
-   * @param {string} pluginId - The plugin id
-   * @param {typeof AbstractPlugin} constructor - The plugin class (React Component)
-   * @param {string} mapId - Id of map to add this plugin to
-   * @param {unknown} props - The plugin options
-   * @returns {Promise<AbstractPlugin>} A Promise which resolves with the Plugin instance.
-   */
-  static async addPlugin(pluginId: string, constructor: typeof AbstractPlugin, mapId: string, props?: unknown): Promise<AbstractPlugin> {
-    // Get the MapViewer
-    const mapViewer = MapEventProcessor.getMapViewer(mapId);
-
-    // If the plugin is already loaded, return it
-    if (mapViewer.plugins[pluginId]) return mapViewer.plugins[pluginId];
-
-    // If no constructor provided
-    if (!constructor) throw new PluginError(pluginId, mapId);
-
-    // Construct the Plugin class
-    // create new instance of the plugin. Here we must type the constructor variable to any
-    // in order to cancel the "'new' expression, whose target lacks a construct signature" error message
-    // ? unknown type cannot be use, need to escape
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const plugin: AbstractPlugin = new (constructor as any)(pluginId, mapViewer, props);
-
-    // Attach to the map plugins object
-    mapViewer.plugins[pluginId] = plugin;
-
-    // a config object used to store package config
-    let pluginConfigObj: unknown = {};
-
-    // if a schema is defined then look for a config for this plugin
-    if (plugin.schema && plugin.defaultConfig) {
-      const schema = plugin.schema();
-      const defaultConfig = plugin.defaultConfig();
-
-      // create a validator object
-      const validator = new Ajv({
-        strict: false,
-        allErrors: true,
-      });
-
-      // initialize validator with schema file
-      const validate = validator.compile(schema as AnySchema);
-
-      // if no config is provided then use default
-      pluginConfigObj = defaultConfig;
-
-      /**
-       * If a user is using map config from a file then attempt to look
-       * for custom config for loaded core packages on the same path of the map config.
-       * If none exists then load the default config
-       */
-      const configUrl = document.getElementById(mapViewer.mapId)?.getAttribute('data-config-url');
-
-      // Check if there is a corePackageConfig for the plugin
-      const configObj = mapViewer.getCorePackageConfig(pluginId);
-
-      // If there is an inline config use it, if not try to read the file config associated with map config
-      if (configObj) {
-        logger.logTraceCore('Plugin - addPlugin inline config', configObj);
-        pluginConfigObj = configObj;
-      } else if (configUrl) {
-        const configPath = `${configUrl.split('.json')[0]}-${pluginId}.json`;
-
-        try {
-          // Try to find the custom config from the config path
-          const result = await Fetch.fetchJson(configPath);
-
-          if (result) {
-            logger.logTraceCore('Plugin - addPlugin file config', result);
-            pluginConfigObj = result;
-          }
-        } catch (error: unknown) {
-          // Log warning but do not notify because most of the time config will be injected later or present in corePackages from main config
-          logger.logWarning(`Config not found.`, error);
-        }
-      }
-
-      // validate configuration
-      const valid = validate(pluginConfigObj);
-
-      if (!valid && validate.errors && validate.errors.length) {
-        for (let j = 0; j < validate.errors.length; j += 1) {
-          const error = validate.errors[j];
-          const errorMessage = `Plugin ${pluginId}: ${error.instancePath} ${error.message} - ${JSON.stringify(error.params)}`;
-
-          // Log
-          logger.logError(errorMessage);
-          // Don't show error message as it can contain non-translated elements via Ajv error messages, only log for now
-          // api.getMapViewer(mapId).notifications.showError(errorMessage);
-        }
-      }
-    }
-
-    // Set the config
-    plugin.setConfig(pluginConfigObj);
-
-    // add translations if provided
-    Object.entries(plugin.defaultTranslations()).forEach(([languageKey, value]) => {
-      // Add the resource bundle to support the plugin language
-      i18next.addResourceBundle(languageKey, 'translation', value, true, false);
-    });
-
-    // Call plugin add method
-    plugin.add();
-
-    // Return the plugin
-    return plugin;
-  }
-
-  /**
    * Delete a specific plugin loaded in a map
    *
    * @param {string} pluginId - The id of the plugin to delete
@@ -215,5 +80,23 @@ export abstract class Plugin {
         });
       }
     }
+  }
+
+  /**
+   * Utility function to call a promise callback resolve function once a plugin is actually available in window.geoviewPlugins property.
+   * @param {string} pluginId - The plugin id to look for.
+   * @param {Function} resolve  - The resolve function to callback on.
+   * @param {Function} reject - The reject function to callback on in case of failure.
+   */
+  static #resolveWhenReady(pluginId: string, resolve: (plugin: typeof AbstractPlugin) => void, reject: (reason: Error) => void): void {
+    whenThisThen(() => window.geoviewPlugins?.[pluginId])
+      .then(() => {
+        // Resolve
+        resolve(window.geoviewPlugins![pluginId]);
+      })
+      .catch((error: unknown) => {
+        // Reject
+        reject(formatError(error));
+      });
   }
 }
