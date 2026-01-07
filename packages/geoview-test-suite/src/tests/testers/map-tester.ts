@@ -16,6 +16,7 @@ import type {
 } from 'geoview-core/core/stores/store-interface-and-intial-values/feature-info-state';
 import { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { LayerWrongTypeError } from 'geoview-core/core/exceptions/layer-exceptions';
+import { Projection } from 'geoview-core/geo/utils/projection';
 
 /**
  * Main Map testing class.
@@ -243,37 +244,29 @@ export class MapTester extends GVAbstractTester {
 
   /**
    * Tests zooming to a lon/lat extent using zoomToLonLatExtentOrCoordinate.
+   * Note: the map doesn't return to original extent after this test.
+   * @param {Extent} extent - The extent to zoom to.
+   * @param {Extent} expectedExtent - The expected extent after zooming (due to map restrictions).
    * @returns {Promise<Test<Extent>>} A Promise that resolves with the Test containing the resulting map extent.
    */
-  testZoomToExtent(): Promise<Test<Extent>> {
-    // Target extent will be adjusted by the map to fit viewport
-    const targetExtent: Extent = [-87, 51, -84, 53];
-    const expectedExtent: Extent = [-88.584, 50.227, -82.142, 53.726];
-
+  testZoomToExtent(extent: Extent, expectedExtent: Extent): Promise<Test<Extent>> {
     return this.test(
       'Test zoom to lon/lat extent',
       async (test) => {
-        test.addStep('Zooming to extent...');
-
         // Zoom to extent
-        await this.getMapViewer().zoomToLonLatExtentOrCoordinate(targetExtent);
+        test.addStep(`Zooming to extent ${extent.join(',')}...`);
+        await this.getMapViewer().zoomToLonLatExtentOrCoordinate(extent);
 
         // Transform extent and handle potential undefined return
-        const transformedExtent = this.getApi().utilities.projection.transformExtentFromProj(
+        return Projection.transformExtentFromProj(
           MapEventProcessor.getMapState(this.getMapId()).mapExtent,
-          this.getApi().utilities.projection.getProjectionFromString('EPSG:3978'),
-          this.getApi().utilities.projection.getProjectionLonLat()
+          this.getMapViewer().getProjection(),
+          Projection.getProjectionLonLat()
         );
-
-        // Ensure we return a valid Extent
-        Test.assertIsArrayLengthEqual(transformedExtent as [], 4);
-
-        // Return the resulting extent
-        return transformedExtent;
       },
       (test, result) => {
-        test.addStep('Verifying map zoomed to extent (with aspect ratio tolerance)...');
         // The map adjusts extent to fit viewport aspect ratio, compare with tolerance for aspect ratio adjustment
+        test.addStep('Verifying map zoomed to extent (with aspect ratio tolerance)...');
         Test.assertIsArrayEqual(result, expectedExtent, 2);
       }
     );
@@ -281,36 +274,32 @@ export class MapTester extends GVAbstractTester {
 
   /**
    * Tests zooming to a lon/lat coordinate using zoomToLonLatExtentOrCoordinate.
+   * Note: the map doesn't return to original extent after this test.
+   * @param {Coordinate} coordinates - The coordinates to zoom to.
    * @returns {Promise<Test<Extent>>} A Promise that resolves with the Test containing the resulting map extent.
    */
-  testZoomToCoordinate(): Promise<Test<Coordinate>> {
-    const targetCoordinate: Coordinate = [-80, 50];
-
+  testZoomToCoordinate(coordinates: Coordinate): Promise<Test<Coordinate>> {
     return this.test(
       'Test zoom to lon/lat coordinate',
       async (test) => {
-        test.addStep('Zooming to coordinate [-80, 50]...');
+        test.addStep(`Zooming to coordinates ${coordinates.join(',')}...`);
 
         // Zoom to coordinate
         await this.getMapViewer().setMapZoomLevel(8);
-        await this.getMapViewer().zoomToLonLatExtentOrCoordinate(targetCoordinate);
+        await this.getMapViewer().zoomToLonLatExtentOrCoordinate(coordinates);
 
         // Transform coordinates
-        const transformedCoordinates = this.getApi().utilities.projection.transformCoordinates(
-          MapEventProcessor.getMapState(this.getMapId()).mapCenterCoordinates,
-          'EPSG:3978',
-          'EPSG:4326'
+        return Promise.resolve(
+          Projection.transformCoordinates(
+            MapEventProcessor.getMapState(this.getMapId()).mapCenterCoordinates,
+            this.getMapViewer().getProjection().getCode(),
+            'EPSG:4326'
+          ) as Coordinate
         );
-
-        // Ensure we return a valid Coordinate
-        Test.assertIsArrayLengthEqual(transformedCoordinates as [], 2);
-
-        // Return as Coordinate type (number array with at least 2 elements)
-        return transformedCoordinates as Coordinate;
       },
       (test, result) => {
         test.addStep('Verifying map centered on coordinate...');
-        Test.assertIsArrayEqual(result, targetCoordinate, 0);
+        Test.assertIsArrayEqual(result, coordinates, 0);
       }
     );
   }
@@ -445,6 +434,7 @@ export class MapTester extends GVAbstractTester {
 
   /**
    * Tests creating and setting a basemap.
+   * Note: The basemap stays changed after this test.
    * @returns {Promise<Test<string>>} A Promise that resolves with the Test containing the basemap id.
    */
   testCreateAndSetBasemap(): Promise<Test<string>> {
@@ -541,8 +531,8 @@ export class MapTester extends GVAbstractTester {
         return angleValue;
       },
       (test, result) => {
-        test.addStep('Verifying north arrow rotation is calculated...');
         // In LCC projection over BC, the north arrow should match expected rotation
+        test.addStep('Verifying north arrow rotation is calculated...');
         Test.assertIsEqual(result, expectedArrowAngle, 0);
       }
     );
@@ -570,18 +560,16 @@ export class MapTester extends GVAbstractTester {
         // The layer should be initially queryable
         if (!layer.getQueryable()) throw new TestError(`False precondition, the layer ${layerPath} wasn't initially queryable.`);
 
-        // Make sure the map is at initial extent
-        // GV: The layer needs to be visible (in viewport) for the query to work
-        test.addStep(`Make sure the map is at initial extent...`);
-        await MapEventProcessor.zoomToInitialExtent(this.getMapId());
+        // Wait for the layer to be loaded after the zoom, a guarantee
+        await layer.waitLoadedStatus();
 
         // Perform a map click using the feature info layer set
         test.addStep(`Perform query operation at given coordinates...`);
-        await this.getLayerApi().featureInfoLayerSet.queryLayers(lonlat);
+        const results1 = await this.getLayerApi().featureInfoLayerSet.queryLayers(lonlat);
 
         // Check if there is feature selected from the layer
         test.addStep(`Checking for features from layer '${layerPath}'...`);
-        const layerDataOnTemp = FeatureInfoEventProcessor.findLayerDataFromLayerDataArray(this.getMapId(), layerPath);
+        const layerDataOnTemp = results1[layerPath];
 
         // Store a deep copy of the data before clearing to preserve it
         const layerDataOn = layerDataOnTemp ? { ...layerDataOnTemp } : undefined;
@@ -592,11 +580,11 @@ export class MapTester extends GVAbstractTester {
 
         // Perform a map click using the feature info layer set
         test.addStep(`Perform query operation at given coordinates...`);
-        await this.getLayerApi().featureInfoLayerSet.queryLayers(lonlat);
+        const results2 = await this.getLayerApi().featureInfoLayerSet.queryLayers(lonlat);
 
         // Check if there is feature selected from the layer
         test.addStep(`Checking for features from layer '${layerPath}'...`);
-        const layerDataOffTemp = FeatureInfoEventProcessor.findLayerDataFromLayerDataArray(this.getMapId(), layerPath);
+        const layerDataOffTemp = results2[layerPath];
 
         // Store a deep copy of the data before clearing to preserve it
         const layerDataOff = layerDataOffTemp ? { ...layerDataOffTemp } : undefined;
@@ -607,11 +595,11 @@ export class MapTester extends GVAbstractTester {
 
         // Perform a map click using the feature info layer set
         test.addStep(`Perform query operation at given coordinates...`);
-        await this.getLayerApi().featureInfoLayerSet.queryLayers(lonlat);
+        const results3 = await this.getLayerApi().featureInfoLayerSet.queryLayers(lonlat);
 
         // Check if there is feature selected from the layer
         test.addStep(`Checking for features from layer '${layerPath}'...`);
-        const layerDataOn2Temp = FeatureInfoEventProcessor.findLayerDataFromLayerDataArray(this.getMapId(), layerPath);
+        const layerDataOn2Temp = results3[layerPath];
 
         // Store a deep copy of the data before clearing to preserve it
         const layerDataOn2 = layerDataOn2Temp ? { ...layerDataOn2Temp } : undefined;
@@ -662,10 +650,8 @@ export class MapTester extends GVAbstractTester {
         // The layer should be initially hoverable
         if (!layer.getHoverable()) throw new TestError(`False precondition, the layer ${layerPath} wasn't initially hoverable.`);
 
-        // Make sure the map is at initial extent
-        // GV: The layer needs to be visible (in viewport) for the query to work
-        test.addStep(`Make sure the map is at initial extent...`);
-        await MapEventProcessor.zoomToInitialExtent(this.getMapId());
+        // Wait for the layer to be loaded after the zoom, a guarantee
+        await layer.waitLoadedStatus();
 
         // Perform a hover query using the hover feature info layer set
         test.addStep(`Perform query operation at given coordinates...`);
@@ -729,20 +715,27 @@ export class MapTester extends GVAbstractTester {
   }
 
   /**
-   * Tests that the selected layer in details persists correctly when clicking on different map locations.
-   * This test performs the following operations:
-   * 1. Clicks on the map and verifies the first layer (polygons) is auto-selected
-   * 2. Manually selects a different layer (Top Projects)
-   * 3. Clicks on a different location
-   * 4. Verifies the manually selected layer remains selected with the correct feature count
-   *
-   * @returns {Promise<Test<LayerDetails>>}
+   * Tests that the selected layer in the details panel persists correctly
+   * when clicking on different map locations.
+   * Test flow:
+   * 1. Clicks on the map at the first location and verifies the auto-selected layer.
+   * 2. Manually switches selection to the alternate layer.
+   * 3. Clicks on a second map location.
+   * 4. Verifies the manually selected layer remains selected and that its
+   *    feature count is correct.
+   * @param {string} layerPath1 - The path of the first candidate layer that may be auto-selected after the initial click.
+   * @param {string} layerPath2 - The path of the second candidate layer used as the alternate manual selection.
+   * @param {Coordinate} clickCoordinates1 - The map coordinates used for the first simulated click.
+   * @param {Coordinate} clickCoordinates2 - The map coordinates used for the second simulated click.
+   * @returns {Promise<Test<LayerDetails>>} A test instance resolving with details about the original selected layer,
+   * the persisted alternate layer, and the feature count after the second click.
    */
-  testDetailsLayerSelectionPersistence(): Promise<Test<LayerDetails>> {
-    const firstClickCoords: Coordinate = [-87.4, 52.9];
-    const secondClickCoords: Coordinate = [-73.9, 46.5];
-    const layerPolygon = 'geojsonLYR5/polygons.json';
-    const layerProjects = 'esriFeatureLYR5/0';
+  testDetailsLayerSelectionPersistence(
+    layerPath1: string,
+    layerPath2: string,
+    clickCoordinates1: Coordinate,
+    clickCoordinates2: Coordinate
+  ): Promise<Test<LayerDetails>> {
     let originalLayerPath: string;
     let alternateLayerPath: string;
 
@@ -750,8 +743,8 @@ export class MapTester extends GVAbstractTester {
       'Test details layer selection persistence across map clicks',
       async (test) => {
         // Simulate a map click at first location
-        test.addStep(`Performing first map click at [${firstClickCoords.join(', ')}]...`);
-        const simulatedMapClick1 = this.getMapViewer().simulateMapClick(firstClickCoords);
+        test.addStep(`Performing first map click at [${clickCoordinates1.join(', ')}]...`);
+        const simulatedMapClick1 = this.getMapViewer().simulateMapClick(clickCoordinates1);
 
         // Wait for the UI to be updated
         await simulatedMapClick1.promiseQueryBatched;
@@ -762,15 +755,15 @@ export class MapTester extends GVAbstractTester {
         test.addStep(`First selected layer: ${originalLayerPath}`);
 
         // The alternate layer
-        alternateLayerPath = originalLayerPath === layerPolygon ? layerProjects : layerPolygon;
+        alternateLayerPath = originalLayerPath === layerPath1 ? layerPath2 : layerPath1;
 
         // Manually select the alternate layer
         test.addStep(`Manually selecting the other layer '${alternateLayerPath}'...`);
         FeatureInfoEventProcessor.setSelectedLayerPath(this.getMapId(), alternateLayerPath);
 
         // Simulate a map click at second location
-        test.addStep(`Performing second map click at [${secondClickCoords.join(', ')}]...`);
-        const simulatedMapClick2 = this.getMapViewer().simulateMapClick(secondClickCoords);
+        test.addStep(`Performing second map click at [${clickCoordinates2.join(', ')}]...`);
+        const simulatedMapClick2 = this.getMapViewer().simulateMapClick(clickCoordinates2);
 
         // Wait for the UI to be updated
         await simulatedMapClick2.promiseQueryBatched;

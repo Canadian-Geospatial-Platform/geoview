@@ -50,6 +50,7 @@ export class EsriUtilities {
    * with a numeric layerId and creates a group entry when a layer is a group.
    * @param {EsriDynamic | EsriFeature} layer The ESRI layer instance pointer.
    * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
+   * @param {RegisterLayerEntryConfigDelegate} callbackWhenRegisteringConfig - Called when a config needs to be registered.
    * @static
    */
   static commonValidateListOfLayerEntryConfig(
