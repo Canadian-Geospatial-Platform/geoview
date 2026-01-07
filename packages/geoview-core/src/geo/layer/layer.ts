@@ -1288,6 +1288,7 @@ export class LayerApi {
    * @param {TypeLegendItem} item - The item to change.
    * @param {boolean} visibility - The visibility to set.
    * @param {boolean} updateLegendLayers - Should legend layers be updated (here to avoid repeated rerendering when setting all items in layer).
+   * @throws {LayerWrongTypeError} When the layer is of the wrong type (a group layer).
    */
   setItemVisibility(layerPath: string, item: TypeLegendItem, visibility: boolean, updateLegendLayers: boolean = true): void {
     // Get registered layer config

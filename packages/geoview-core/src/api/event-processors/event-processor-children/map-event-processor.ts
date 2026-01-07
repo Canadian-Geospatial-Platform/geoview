@@ -86,6 +86,9 @@ import type { TypeTimeSliderProps } from '@/core/stores/store-interface-and-inti
 // GV The reason for this pattern is so that UI components and processes performing back-end code
 // GV both end up running code in MapEventProcessor (UI: via 'actions' and back-end code via 'MapEventProcessor')
 export class MapEventProcessor extends AbstractEventProcessor {
+  /** The minimal delay to wait for the zoom, to be sure.. */
+  static readonly ZOOM_MIN_DELAY = 500;
+
   /**
    * Initializes the map controls
    * @param {string} mapId - The map id being initialized
@@ -579,12 +582,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // Use a Promise and resolve it when the duration expired
     return new Promise((resolve) => {
-      setTimeout(
-        () => {
-          resolve();
-        },
-        (duration || OL_ZOOM_DURATION) + 150
-      );
+      setTimeout(() => {
+        resolve();
+      }, duration + MapEventProcessor.ZOOM_MIN_DELAY);
     });
     // GV No need to save in the store, because this will trigger an event on MapViewer which will take care of updating the store
   }
@@ -1090,8 +1090,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // Store state will be updated by map event
       this.getMapViewer(mapId).getView().fit(extent, mergedOptions);
 
-      // Wait a bit and return. The +150 is just to make sure.
-      return delay((mergedOptions.duration || DEFAULT_OL_FITOPTIONS.duration!) + 150);
+      // Wait a bit and return.
+      return delay(mergedOptions.duration! + MapEventProcessor.ZOOM_MIN_DELAY);
     }
 
     // Invalid extent

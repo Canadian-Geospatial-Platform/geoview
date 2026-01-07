@@ -127,8 +127,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * @returns {TypeOfServer | undefined} The Type of server if it could be determined.
    */
   getServerType(): TypeOfServer | undefined {
-    // TODO: CHECK LAYER PROCESSING - The serverType should likely have been set in the source upon metadata processing and
-    // TO.DOCONT: here it should just return this.getSource().serverType not have to recheck in the metadata
+    // Return the serverType as specified in the config if any or the serverType as read from the metadata (config > metadata)
     return this.getSource().serverType || this.getServiceMetadata()?.serverType;
   }
 
