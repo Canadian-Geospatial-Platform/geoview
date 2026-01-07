@@ -121,8 +121,8 @@ export abstract class ConfigBaseClass {
    * to update the service metadata on the current layer entry, including
    * any recursive behavior for child entries or associated sources.
    * @param {unknown} metadata - The service metadata to set.
-   * @protected
    * @abstract
+   * @protected
    */
   protected abstract onSetServiceMetadata(metadata: unknown): void;
 
@@ -132,8 +132,8 @@ export abstract class ConfigBaseClass {
    * to update the data access path on the current layer entry, including
    * any recursive behavior for child entries or associated sources.
    * @param {string} dataAccessPath - The data access path to set.
-   * @protected
    * @abstract
+   * @protected
    */
   protected abstract onSetDataAccessPath(dataAccessPath: string): void;
 

@@ -570,7 +570,7 @@ export class ConfigApi {
       case 'vectorTiles':
         return VectorTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
       case 'ogcWms':
-        return WMS.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[], false);
+        return WMS.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[], isTimeAware);
       case 'xyzTiles':
         return XYZTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
       case 'CSV':

@@ -56,8 +56,8 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
 
   /**
    * Overrides the way the attributions are retrieved.
-   * @override
    * @returns {string[]} The layer attributions.
+   * @override
    */
   override onGetAttributions(): string[] {
     // For each layer in the group
@@ -74,6 +74,7 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
   /**
    * Overrides the refresh function to refresh each layer in the group.
    * @param {OLProjection | undefined} projection - Optional, the projection to refresh to.
+   * @returns {void}
    * @override
    */
   override onRefresh(projection: OLProjection | undefined): void {

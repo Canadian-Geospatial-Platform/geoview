@@ -44,6 +44,14 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
    * @returns {Promise<unknown>} A Promise which resolves when tests are completed.
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
+    // // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
+    // // Test DEBUG
+    // const pDevTest0 = this.#mapConfigTester.testDataTableSelectedTabFooterBar();
+
+    // // Resolve when all
+    // return Promise.all([pDevTest0]);
+    // // GV END DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
+
     // TODO: CHECK - For performance, check which of these tests can happen in parallel with other tests (remove some 'awaits' here and group some together)
     // Test data table pre-loaded in footer bar
     const pDataTableInFooterBar = this.#mapConfigTester.testDataTableSelectedTabFooterBar();

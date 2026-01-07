@@ -42,6 +42,8 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
   /**
    * Overrides the implementation to perform the tests for this Test Suite.
    * @returns {Promise<unknown>} A Promise which resolves when tests are completed.
+   * @override
+   * @protected
    */
   protected override onLaunchTestSuite(): Promise<unknown> {
     // // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
@@ -83,8 +85,14 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
     // Test WMS OWSMundialis config
     const pWMSMundialis = this.#configTester.testWMSLayerWithOWSMundialis();
 
+    // Test WMS OWSMundialis config no full sub layers
+    const pWMSMundialisNoFullSubLayers = this.#configTester.testWMSLayerWithOWSMundialisNoFullSubLayers();
+
     // Test WMS DatacubeMSI config
     const pWMSDatacubeMSI = this.#configTester.testWMSLayerWithDatacubeMSI();
+
+    // Test WMS DatacubeMSI config
+    const pWMSDatacubeMSINoFullSubLayers = this.#configTester.testWMSLayerWithDatacubeMSINoFullSubLayers();
 
     // Test a true negative
     const pWMSBadUrl = this.#configTester.testWMSBadUrl();
@@ -155,7 +163,9 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
       pEsriImage,
       pEsriImageBadUrl,
       pWMSMundialis,
+      pWMSMundialisNoFullSubLayers,
       pWMSDatacubeMSI,
+      pWMSDatacubeMSINoFullSubLayers,
       pWMSBadUrl,
       pWFSCurrentConditions,
       pWFSBadUrl,

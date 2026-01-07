@@ -109,14 +109,15 @@
     <!-- Tabs Navigation -->
     <div class="tabs">
       <button class="tab-button active" onclick="openTab(event, 'run-all')">Run All Tests</button>
-      <button class="tab-button" onclick="openTab(event, 'map0-test')">Map 0 (EPSG: 3978)</button>
-      <button class="tab-button" onclick="openTab(event, 'map1-test')">Map 1 (EPSG: 3978)</button>
-      <button class="tab-button" onclick="openTab(event, 'map2-test')">Map 2 (EPSG: 3978)</button>
-      <button class="tab-button" onclick="openTab(event, 'map3-test')">Map 3 (EPSG: 3857)</button>
+      <button class="tab-button" onclick="openTab(event, 'map0-test')">Map Core (EPSG: 3978)</button>
+      <button class="tab-button" onclick="openTab(event, 'map1-test')">Layer Configs</button>
+      <button class="tab-button" onclick="openTab(event, 'map2-test')">Layers on Map (EPSG:3978)</button>
+      <button class="tab-button" onclick="openTab(event, 'map3-test')">Layers on Map (EPSG:3857)</button>
       <button class="tab-button" onclick="openTab(event, 'map4-test')">Map Functions</button>
-      <button class="tab-button" onclick="openTab(event, 'map5-test')">Map 5 (EPSG: 3978)</button>
+      <button class="tab-button" onclick="openTab(event, 'map5-test')">Geochart</button>
       <button class="tab-button" onclick="openTab(event, 'map6-test')">Map Config</button>
-      <button class="tab-button" onclick="openTab(event, 'map7-test')">Map 7 (EPSG: 3978)</button>
+      <button class="tab-button" onclick="openTab(event, 'map7-test')">UI Tests</button>
+      <button class="tab-button" onclick="openTab(event, 'map8-test')">Details</button>
     </div>
 
     <!-- Run All Tests Tab -->
@@ -149,7 +150,7 @@
 
       <!-- Map 1 Results -->
       <button id="collapsibleMap1" class="collapsible" onclick="toggleCollapsible(this)">
-        <span style="font-weight: bold">Map 1 - Config Tests (EPSG: 3978)</span>
+        <span style="font-weight: bold">Map 1 - Config Tests</span>
         <span id="statsMap1" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Done success: 0 | Done failed: 0 | Done: 0/0</span>
       </button>
       <div class="panel">
@@ -185,7 +186,7 @@
 
       <!-- Map 5 Results -->
       <button id="collapsibleMap5" class="collapsible" onclick="toggleCollapsible(this)">
-        <span style="font-weight: bold">Map 5 - Geochart Tests (EPSG: 3978)</span>
+        <span style="font-weight: bold">Map 5 - Geochart Tests</span>
         <span id="statsMap5" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Done success: 0 | Done failed: 0 | Done: 0/0</span>
       </button>
       <div class="panel">
@@ -203,11 +204,20 @@
 
       <!-- Map 7 Results -->
       <button id="collapsibleMap7" class="collapsible" onclick="toggleCollapsible(this)">
-        <span style="font-weight: bold">Map 7 - UI Tests (EPSG: 3978)</span>
+        <span style="font-weight: bold">Map 7 - UI Tests</span>
         <span id="statsMap7" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Done success: 0 | Done failed: 0 | Done: 0/0</span>
       </button>
       <div class="panel">
         <div id="runAllMap7Results"></div>
+      </div>
+
+      <!-- Map 8 Results -->
+      <button id="collapsibleMap8" class="collapsible" onclick="toggleCollapsible(this)">
+        <span style="font-weight: bold">Map 8 - Details Tests</span>
+        <span id="statsMap8" style="font-size: 0.9em; margin-left: 20px">Running: 0 | Done success: 0 | Done failed: 0 | Done: 0/0</span>
+      </button>
+      <div class="panel">
+        <div id="runAllMap8Results"></div>
       </div>
     </div>
 
@@ -260,7 +270,7 @@
     <!-- Map 1 Tab -->
     <div id="map1-test" class="tab-content">
       <div class="map-title-holder">
-        <h4 id="HEVNT1">1. Tests on map 1 (EPSG: 3978)</h4>
+        <h4 id="HEVNT1">1. Tests on map 1</h4>
         <a class="ref-link" href="#top">Top</a>
       </div>
 
@@ -347,7 +357,7 @@
             }
           }
         }"
-      ></div>>
+      ></div>
     </div>
 
     <!-- Map 3 Tab -->
@@ -472,7 +482,7 @@
     <!-- Map 5 Tab -->
     <div id="map5-test" class="tab-content">
       <div class="map-title-holder">
-        <h4 id="HEVNT5">5. Tests on map 5 (EPSG: 4326)</h4>
+        <h4 id="HEVNT5">5. Tests on map 5</h4>
         <a class="ref-link" href="#top">Top</a>
       </div>
 
@@ -596,63 +606,110 @@
       ></div>
     </div>
 
-      <!-- Map 6 Tab -->
-      <div id="map6-test" class="tab-content">
-        <div class="map-title-holder">
-          <h4 id="HEVNT6">6. Tests on map config</h4>
-          <a class="ref-link" href="#top">Top</a>
-        </div>
-
-        <div id="testSuiteTable-map6"></div>
-        <br />
-        <div
-          id="map6"
-          class="geoview-map"
-          data-lang="en"
-          data-config="{
-          'map': {
-            'interaction': 'dynamic',
-            'viewSettings': {
-              'projection': 3857
-            },
-            'basemapOptions': {
-              'basemapId': 'transport',
-              'shaded': true,
-              'labeled': true
-            },
-            'listOfGeoviewLayerConfig': []
-          },
-          'components': [],
-          'corePackages': ['test-suite'],
-          'corePackagesConfig': [
-            {
-              'test-suite': { 'suites': ['suite-map-config'] }
-            }
-          ],
-          'theme': 'geo.ca',
-          'footerBar': {
-            'tabs': {
-              'core': []
-            }
-          }
-        }"
-        ></div>
+    <!-- Map 6 Tab -->
+    <div id="map6-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT6">6. Tests on map config</h4>
+        <a class="ref-link" href="#top">Top</a>
       </div>
 
-      <!-- Map 7 Tab -->
-      <div id="map7-test" class="tab-content">
-        <div class="map-title-holder">
-          <h4 id="HEVNT7">7. Tests on map 7 (EPSG: 3978)</h4>
-          <a class="ref-link" href="#top">Top</a>
-        </div>
+      <div id="testSuiteTable-map6"></div>
+      <br />
+      <div
+        id="map6"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3857
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': true,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': []
+        },
+        'components': [],
+        'corePackages': ['test-suite'],
+        'corePackagesConfig': [
+          {
+            'test-suite': { 'suites': ['suite-map-config'] }
+          }
+        ],
+        'theme': 'geo.ca',
+        'footerBar': {
+          'tabs': {
+            'core': []
+          }
+        }
+      }"
+      ></div>
+    </div>
 
-        <div id="testSuiteTable-map7"></div>
-        <br />
-        <div
-          id="map7"
-          class="geoview-map"
-          data-lang="en"
-          data-config="{
+    <!-- Map 7 Tab -->
+    <div id="map7-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT7">7. Tests on map 7</h4>
+        <a class="ref-link" href="#top">Top</a>
+      </div>
+
+      <div id="testSuiteTable-map7"></div>
+      <br />
+      <div
+        id="map7"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3978
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': true,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': []
+        },
+        'components': [],
+        'corePackages': ['test-suite'],
+        'corePackagesConfig': [
+          {
+            'test-suite': { 'suites': ['suite-ui'] }
+          }
+        ],
+        'theme': 'geo.ca',
+        'footerBar': {
+          'tabs': {
+            'core': [
+              'legend',
+              'layers',
+              'details'
+            ]
+          }
+        }
+      }"
+      ></div>
+    </div>
+
+    <!-- Map 8 Tab -->
+    <div id="map8-test" class="tab-content">
+      <div class="map-title-holder">
+        <h4 id="HEVNT8">8. Tests on map 8</h4>
+        <a class="ref-link" href="#top">Top</a>
+      </div>
+
+      <div id="testSuiteTable-map8"></div>
+      <br />
+      <div
+        id="map8"
+        class="geoview-map"
+        data-lang="en"
+        data-config="{
           'map': {
             'interaction': 'dynamic',
             'viewSettings': {
@@ -663,13 +720,27 @@
               'shaded': true,
               'labeled': true
             },
-            'listOfGeoviewLayerConfig': []
+            'listOfGeoviewLayerConfig': [
+              {
+                'geoviewLayerId': 'geojsonLYR5',
+                'geoviewLayerName': 'GeoJSON Sample',
+                'metadataAccessPath': './datasets/geojson/metadata.meta',
+                'geoviewLayerType': 'GeoJSON',
+                'serviceDateFormat': 'DD/MM/YYYYTHH:mm:ss',
+                'listOfLayerEntryConfig': [
+                  {
+                    'layerId': 'polygons.json',
+                    'layerName': 'Polygons'
+                  }
+                ]
+              }
+            ]
           },
           'components': [],
           'corePackages': ['test-suite'],
           'corePackagesConfig': [
             {
-              'test-suite': { 'suites': ['suite-ui'] }
+              'test-suite': { 'suites': ['suite-details'] }
             }
           ],
           'theme': 'geo.ca',
@@ -683,8 +754,7 @@
             }
           }
         }"
-        ></div>
-      </div>
+      ></div>
     </div>
 
     <script>

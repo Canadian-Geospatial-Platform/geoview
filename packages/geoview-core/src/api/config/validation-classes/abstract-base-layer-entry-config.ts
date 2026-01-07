@@ -95,6 +95,8 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Sets the service metadata for the layer.
    * @param {unknown} metadata - The service metadata to set
+   * @returns {void}
+   * @override
    */
   override onSetServiceMetadata(metadata: unknown): void {
     this.#serviceMetadata = metadata;
@@ -104,6 +106,8 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * Sets the data access path for the source object.
    * This method is called when the data access path is being set.
    * @param {string} dataAccessPath - The path string used to access data.
+   * @returns {void}
+   * @override
    */
   protected override onSetDataAccessPath(dataAccessPath: string): void {
     this.#source.dataAccessPath = dataAccessPath;
@@ -131,7 +135,8 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Overrides the toJson of the mother class
-   * @returns {unknown} The Json representation of the instance.
+   * @returns {T} The Json representation of the instance.
+   * @override
    * @protected
    */
   protected override onToJson<T>(): T {

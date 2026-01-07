@@ -126,6 +126,7 @@ class DrawerPlugin extends NavBarPlugin {
   /**
    * Overrides the getConfig in order to return the right type.
    * @returns {TypeDrawerConfig} The Swiper config
+   * @override
    */
   override getConfig(): TypeDrawerConfig {
     // Redirect
@@ -133,7 +134,9 @@ class DrawerPlugin extends NavBarPlugin {
   }
 
   /**
-   * Overrides the creation of the buttons components to create a record of Buttons with their optional panels.
+   * Overrides the creation of the buttons components to create Buttons with their optional panels.
+   * @returns {Record<string, TypeNavBarButtonConfig>} The buttons to be added to the drawer bar.
+   * @override
    */
   override onCreateButtonConfigs(): Record<string, TypeNavBarButtonConfig> {
     // Create all drawer buttons

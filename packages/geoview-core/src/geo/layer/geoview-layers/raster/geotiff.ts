@@ -42,8 +42,17 @@ export class GeoTIFF extends AbstractGeoViewRaster {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @returns {TypeGeoTIFFLayerConfig} The strongly-typed layer configuration specific to this layer.
    * @override
+   */
+  override getGeoviewLayerConfig(): TypeGeoTIFFLayerConfig {
+    return super.getGeoviewLayerConfig() as TypeGeoTIFFLayerConfig;
+  }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @returns {TypeMetadataGeoTIFF | undefined} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getMetadata(): TypeMetadataGeoTIFF | undefined {
     return super.getMetadata() as TypeMetadataGeoTIFF | undefined;
@@ -55,6 +64,8 @@ export class GeoTIFF extends AbstractGeoViewRaster {
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<T = TypeMetadataGeoTIFF | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
+   * @override
+   * @protected
    */
   protected override async onFetchServiceMetadata<T = TypeMetadataGeoTIFF | undefined>(abortSignal?: AbortSignal): Promise<T> {
     // If metadataAccessPath does not point to a .tif file, we try to fetch metadata
@@ -88,6 +99,8 @@ export class GeoTIFF extends AbstractGeoViewRaster {
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   * @override
+   * @protected
    */
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Redirect
@@ -109,6 +122,8 @@ export class GeoTIFF extends AbstractGeoViewRaster {
    * @param {OLProjection?} [mapProjection] - The map projection.
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<GeoTIFFLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   * @override
+   * @protected
    */
   protected override onProcessLayerMetadata(
     layerConfig: GeoTIFFLayerEntryConfig,
@@ -143,6 +158,8 @@ export class GeoTIFF extends AbstractGeoViewRaster {
    * Overrides the creation of the GV Layer
    * @param {GeoTIFFLayerEntryConfig} layerConfig - The layer entry configuration.
    * @returns {GVGeoTIFF} The GV Layer
+   * @override
+   * @protected
    */
   protected override onCreateGVLayer(layerConfig: GeoTIFFLayerEntryConfig): GVGeoTIFF {
     // Create the source

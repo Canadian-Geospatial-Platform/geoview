@@ -2,15 +2,15 @@ import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { TestSuiteCannotExecuteError } from '../core/exceptions';
 import { GVAbstractTester } from '../testers/abstract-gv-tester';
-import { GeochartTester } from '../testers/geochart-tester';
+import { DetailsTester } from '../testers/details-tester';
 import { GVAbstractTestSuite } from './abstract-gv-test-suite';
 
 /**
  * The GeoView Test Suite.
  */
-export class GVTestSuiteGeochart extends GVAbstractTestSuite {
+export class GVTestSuiteDetails extends GVAbstractTestSuite {
   /** The Geochart Tester used in this Test Suite */
-  #geochartTester: GeochartTester;
+  #detailsTester: DetailsTester;
 
   /**
    * Constructs the Test Suite
@@ -21,8 +21,8 @@ export class GVTestSuiteGeochart extends GVAbstractTestSuite {
     super(api, mapViewer);
 
     // Create the Geochart tester
-    this.#geochartTester = new GeochartTester(api, mapViewer);
-    this.addTester(this.#geochartTester);
+    this.#detailsTester = new DetailsTester(api, mapViewer);
+    this.addTester(this.#detailsTester);
   }
 
   /**
@@ -30,7 +30,7 @@ export class GVTestSuiteGeochart extends GVAbstractTestSuite {
    * @returns {string} The name of the Test Suite.
    */
   override getName(): string {
-    return 'Geochart Test Suite';
+    return 'Details Test Suite';
   }
 
   /**
@@ -38,7 +38,7 @@ export class GVTestSuiteGeochart extends GVAbstractTestSuite {
    * @returns {string} The description of the Test Suite.
    */
   override getDescriptionAsHtml(): string {
-    return 'Test Suite to perform various Geochart related tests.';
+    return 'Test Suite to perform various Details related tests.';
   }
 
   /**
@@ -49,10 +49,8 @@ export class GVTestSuiteGeochart extends GVAbstractTestSuite {
   protected override onCanExecuteTestSuite(): Promise<boolean> {
     // Check if the geochart plugin is part of the corePackage on the testing map
     const plugins = this.getMapViewer().mapFeaturesConfig.footerBar?.tabs?.core || [];
-    if (!plugins.includes('geochart'))
-      throw new TestSuiteCannotExecuteError(
-        'To run this Test Suite, the geochart plugin has to be loaded in the footerBar tabs core array.'
-      );
+    if (!plugins.includes('details'))
+      throw new TestSuiteCannotExecuteError('To run this Test Suite, the details tab has to be loaded in the footerBar tabs core array.');
 
     // All good
     return Promise.resolve(true);
@@ -64,18 +62,19 @@ export class GVTestSuiteGeochart extends GVAbstractTestSuite {
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
     // Test Geochart
-    const pGeochartPolygons = this.#geochartTester.testGeochartOpenForLayerMapClick(
+    const pGeochartPolygons = this.#detailsTester.testDetailsForGeoJSONOntarioAlberta(
       'geojsonLYR5/polygons.json',
-      GVAbstractTester.ONTARIO_CENTER_LONLAT
+      GVAbstractTester.ONTARIO_CENTER_LONLAT,
+      GVAbstractTester.ALBERTA_CENTER_LONLAT
     );
 
     // Wait for the test with polygons to complete
     await pGeochartPolygons;
 
     // Test Geochart
-    const pGeochartAirborne = this.#geochartTester.testAddGeocoreLayerUUIDForGeochartAirborne();
+    // const pGeochartAirborne = this.#detailsTester.testAddGeocoreLayerUUIDForGeochartAirborne();
 
     // Resolve when all
-    return Promise.all([pGeochartPolygons, pGeochartAirborne]);
+    return Promise.all([pGeochartPolygons]);
   }
 }

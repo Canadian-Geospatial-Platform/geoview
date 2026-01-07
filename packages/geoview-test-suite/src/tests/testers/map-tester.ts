@@ -14,8 +14,7 @@ import type {
   TypeFeatureInfoResultSetEntry,
   TypeHoverFeatureInfo,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/feature-info-state';
-import { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
-import { LayerWrongTypeError } from 'geoview-core/core/exceptions/layer-exceptions';
+import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { Projection } from 'geoview-core/geo/utils/projection';
 
 /**
@@ -552,10 +551,7 @@ export class MapTester extends GVAbstractTester {
       'Test non-queryable layer not in details after map click',
       async (test) => {
         // Get the layer
-        const layer = this.getLayerApi().getGeoviewLayer(layerPath);
-
-        // If not an AbstractGVLayer (regular layer)
-        if (!(layer instanceof AbstractGVLayer)) throw new LayerWrongTypeError(layerPath, layer.getLayerName());
+        const layer = this.getLayerApi().getGeoviewLayerRegular(layerPath);
 
         // The layer should be initially queryable
         if (!layer.getQueryable()) throw new TestError(`False precondition, the layer ${layerPath} wasn't initially queryable.`);
@@ -608,17 +604,19 @@ export class MapTester extends GVAbstractTester {
         return { layer, results: [layerDataOn, layerDataOff, layerDataOn2] };
       },
       (test, result) => {
+        // Get the results
+        const [layerDataOn, layerDataOff, layerDataOn2] = result.results;
+
         test.addStep('Verifying layer data features when queryable...');
-        Test.assertIsArray(result.results[0]?.features);
-        Test.assertIsArrayLengthEqual(result.results[0].features, 2);
+        Test.assertIsArray(layerDataOn?.features);
+        Test.assertIsArrayLengthEqual(layerDataOn.features, 2);
 
         test.addStep('Verifying no layer data features when non-queryable...');
-        Test.assertIsArray(result.results[1]?.features);
-        Test.assertIsArrayLengthEqual(result.results[1].features, 0);
+        Test.assertIsUndefined('features', layerDataOff?.features);
 
         test.addStep('Verifying layer data features when queryable again...');
-        Test.assertIsArray(result.results[2]?.features);
-        Test.assertIsArrayLengthEqual(result.results[2].features, 2);
+        Test.assertIsArray(layerDataOn2?.features);
+        Test.assertIsArrayLengthEqual(layerDataOn2.features, 2);
       },
       (test, result) => {
         // Make sure to turn it back to queryable
@@ -642,10 +640,7 @@ export class MapTester extends GVAbstractTester {
       'Test layer hoverable state in hoverFeatureInfoLayerSet',
       async (test) => {
         // Get the layer
-        const layer = this.getLayerApi().getGeoviewLayer(layerPath);
-
-        // If not an AbstractGVLayer (regular layer)
-        if (!(layer instanceof AbstractGVLayer)) throw new LayerWrongTypeError(layerPath, layer.getLayerName());
+        const layer = this.getLayerApi().getGeoviewLayerRegular(layerPath);
 
         // The layer should be initially hoverable
         if (!layer.getHoverable()) throw new TestError(`False precondition, the layer ${layerPath} wasn't initially hoverable.`);

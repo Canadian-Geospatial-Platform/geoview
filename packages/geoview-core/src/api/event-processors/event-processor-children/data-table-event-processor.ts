@@ -6,7 +6,7 @@ import type {
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import type { TypeFeatureInfoEntry, TypeLayerData, TypeResultSetEntry } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoEntry, TypeFeatureInfoResult, TypeLayerData, TypeResultSetEntry } from '@/api/types/map-schema-types';
 import { UIEventProcessor } from './ui-event-processor';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
@@ -102,9 +102,9 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
    * Shortcut to get the DataTable state for a given map id and layer path
    * @param {string} mapId - Id of the map.
    * @param {string} layerPath - Layer path to query the features.
-   * @returns {Promise<TypeFeatureInfoEntry[] | void>}
+   * @returns {Promise<TypeFeatureInfoResult>}
    */
-  static triggerGetAllFeatureInfo(mapId: string, layerPath: string): Promise<TypeFeatureInfoEntry[] | void> {
+  static triggerGetAllFeatureInfo(mapId: string, layerPath: string): Promise<TypeFeatureInfoResult> {
     return MapEventProcessor.getMapViewerLayerAPI(mapId).allFeatureInfoLayerSet.queryLayer(layerPath);
   }
 

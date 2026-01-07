@@ -30,6 +30,7 @@ type LayerActions = ILayerState['actions'];
 export interface ILayerState {
   highlightedLayer: string;
   selectedLayer: TypeLegendLayer;
+  // TODO: CHECK - Do we need to differentiate between undefined and null? If so, write the reason in a GV comment. It'd clean many | null in the callers.
   selectedLayerPath: string | undefined | null;
   legendLayers: TypeLegendLayer[];
   displayState: TypeLayersViewDisplayState;
@@ -46,9 +47,12 @@ export interface ILayerState {
     getLayerDeleteInProgress: () => string;
     getLayerServiceProjection: (layerPath: string) => string | undefined;
     getLayerTimeDimension: (layerPath: string) => TimeDimension | undefined;
-    refreshLayer: (layerPath: string) => void;
+    refreshLayer: (layerPath: string) => Promise<void>;
     reloadLayer: (layerPath: string) => void;
+    toggleItemVisibility: (layerPath: string, item: TypeLegendItem) => void;
+    toggleItemVisibilityAndWait: (layerPath: string, item: TypeLegendItem) => Promise<void>;
     setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
+    setAllItemsVisibilityAndWait: (layerPath: string, visibility: boolean) => Promise<void>;
     setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
     setHighlightLayer: (layerPath: string) => void;
     setLayerDeleteInProgress: (newVal: string) => void;
@@ -56,7 +60,6 @@ export interface ILayerState {
     setLayerHoverable: (layerPath: string, enable: boolean) => void;
     setLayerQueryable: (layerPath: string, enable: boolean) => void;
     setSelectedLayerPath: (layerPath: string) => void;
-    toggleItemVisibility: (layerPath: string, item: TypeLegendItem) => void;
     zoomToLayerExtent: (layerPath: string) => Promise<void>;
     zoomToLayerVisibleScale: (layerPath: string) => void;
   };
@@ -124,11 +127,12 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        * @param {number[]} objectIDs - The object ids to filter the query on
        * @returns {Promise<TypeFeatureInfoEntryPartial[]>} A Promise of an array of TypeFeatureInfoEntryPartial records
        * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+       * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
        * @throws {LayerNotEsriDynamicError} When the layer configuration isn't EsriDynamic.
        */
       queryLayerEsriDynamic: (layerPath: string, objectIDs: number[]): Promise<TypeFeatureInfoEntryPartial[]> => {
         // Get the layer
-        const layer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).getGeoviewLayer(layerPath);
+        const layer = MapEventProcessor.getMapViewerLayerAPI(get().mapId).getGeoviewLayerRegular(layerPath);
 
         // If not EsriDynamic
         if (!(layer instanceof GVEsriDynamic)) throw new LayerNotEsriDynamicError(layerPath, layer.getLayerName());
@@ -187,12 +191,17 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       },
 
       /**
-       * Refresh layer and set states to original values.
-       * @param {string} layerPath - The layer path of the layer to change.
+       * Refreshes the specified layer of the current map and resets its states.
+       * This method is a convenience wrapper around
+       * `LegendEventProcessor.refreshLayer` that automatically uses the map ID
+       * from the current store context.
+       * @param {string} layerPath - The path identifying the target layer within the current map.
+       * @returns {Promise<void>} A promise that resolves once the layer has been refreshed,
+       * its states reset, and its items rendered if visible.
        */
-      refreshLayer: (layerPath: string): void => {
+      refreshLayer: (layerPath: string): Promise<void> => {
         // Redirect to processor.
-        LegendEventProcessor.refreshLayer(get().mapId, layerPath);
+        return LegendEventProcessor.refreshLayer(get().mapId, layerPath);
       },
 
       /**
@@ -205,13 +214,64 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       },
 
       /**
-       * Sets the visibility of all items in the layer.
-       * @param {string} layerPath - The layer path of the layer to change.
-       * @param {boolean} visibility - The visibility.
+       * Toggles the visibility of a single legend item on a layer.
+       * This method inverts the current visibility of the given item and updates
+       * the layer asynchronously. Errors during the update are caught and logged.
+       * @param {string} layerPath - The path identifying the target layer within the map.
+       * @param {TypeLegendItem} item - The legend item whose visibility will be toggled.
+       */
+      toggleItemVisibility: (layerPath: string, item: TypeLegendItem): void => {
+        // Redirect to processor
+        LegendEventProcessor.toggleItemVisibility(get().mapId, layerPath, item, false).catch((error: unknown) => {
+          // Log promise failed
+          logger.logPromiseFailed('in LegendEventProcessor.toggleItemVisibility in LayerState.toggleItemVisibility', error);
+        });
+      },
+
+      /**
+       * Toggles the visibility of a single legend item on a layer and waits for completion.
+       * This method inverts the current visibility of the given item, updates the
+       * layer, and returns a promise that resolves once the change has been applied
+       * and the layer has optionally finished rendering.
+       * @param {string} layerPath - The path identifying the target layer within the map.
+       * @param {TypeLegendItem} item - The legend item whose visibility will be toggled.
+       * @returns {Promise<void>} A promise that resolves once the visibility change
+       * has been applied and the layer has rendered if necessary.
+       */
+      toggleItemVisibilityAndWait: (layerPath: string, item: TypeLegendItem): Promise<void> => {
+        // Redirect to processor
+        return LegendEventProcessor.toggleItemVisibility(get().mapId, layerPath, item, true);
+      },
+
+      /**
+       * Sets the visibility of all legend items in a layer.
+       * This method updates the visibility of every item in the specified layer
+       * asynchronously. Errors during the update are caught and logged.
+       * @param {string} layerPath - The path identifying the target layer within the map.
+       * @param {boolean} visibility - Whether all items in the layer should be visible.
+       * @returns {void} This function does not return a value; errors are logged.
        */
       setAllItemsVisibility: (layerPath: string, visibility: boolean): void => {
         // Redirect to processor.
-        LegendEventProcessor.setAllItemsVisibility(get().mapId, layerPath, visibility);
+        LegendEventProcessor.setAllItemsVisibility(get().mapId, layerPath, visibility, false).catch((error: unknown) => {
+          // Log promise failed
+          logger.logPromiseFailed('in LegendEventProcessor.setAllItemsVisibility in LayerState.setAllItemsVisibility', error);
+        });
+      },
+
+      /**
+       * Sets the visibility of all legend items in a layer and waits for completion.
+       * This method updates the visibility of every item in the specified layer and
+       * returns a promise that resolves once all changes have been applied and the
+       * layer has optionally finished rendering.
+       * @param {string} layerPath - The path identifying the target layer within the map.
+       * @param {boolean} visibility - Whether all items in the layer should be visible.
+       * @returns {Promise<void>} A promise that resolves once the visibility changes
+       * have been applied and the layer has rendered if necessary.
+       */
+      setAllItemsVisibilityAndWait: (layerPath: string, visibility: boolean): Promise<void> => {
+        // Redirect to processor.
+        return LegendEventProcessor.setAllItemsVisibility(get().mapId, layerPath, visibility, true);
       },
 
       /**
@@ -279,16 +339,6 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       setSelectedLayerPath: (layerPath: string): void => {
         // Redirect to event processor
         LegendEventProcessor.setSelectedLayersTabLayer(get().mapId, layerPath);
-      },
-
-      /**
-       * Toggle visibility of an item.
-       * @param {string} layerPath - The layer path of the layer to change.
-       * @param {TypeLegendItem} item - The name of the item to change.
-       */
-      toggleItemVisibility: (layerPath: string, item: TypeLegendItem): void => {
-        // Redirect to processor
-        LegendEventProcessor.toggleItemVisibility(get().mapId, layerPath, item);
       },
 
       /**
@@ -572,7 +622,7 @@ export const useLayerDisplayDateFormatShort = (layerPath: string): TypeDisplayDa
     return (
       LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.displayDateFormatShort ??
       LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.displayDateFormat ??
-      AppEventProcessor.getDisplayDateFormatDefault(state.mapId).datetimeFormat
+      AppEventProcessor.getDisplayDateFormatDefault(state.mapId).dateFormat
     );
   });
 };

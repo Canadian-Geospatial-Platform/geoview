@@ -25,6 +25,19 @@ export class KmlLayerEntryConfig extends VectorLayerEntryConfig {
     }
   }
 
+  // #region OVERRIDES
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @returns {TypeKmlLayerConfig} The strongly-typed layer configuration specific to this layer.
+   * @override
+   */
+  override getGeoviewLayerConfig(): TypeKmlLayerConfig {
+    return super.getGeoviewLayerConfig() as TypeKmlLayerConfig;
+  }
+
+  // #endregion OVERRIDES
+
   /**
    * Type guard that checks whether the given configuration (class instance or plain object)
    * represents a KML Feature layer type.

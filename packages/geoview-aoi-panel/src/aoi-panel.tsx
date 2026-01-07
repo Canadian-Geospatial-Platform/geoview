@@ -1,11 +1,13 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import type { Extent } from 'geoview-core/api/types/map-schema-types';
+import { Projection } from 'geoview-core/geo/utils/projection';
+import { useMapProjection, useMapStoreActions } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
+import { useGeoViewMapId } from 'geoview-core/core/stores/geoview-store';
+import { MapEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from 'geoview-core/core/utils/logger';
-import { useMapStoreActions } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 import { getSxClasses } from './area-of-interest-style';
 
 interface AoiPanelProps {
-  mapId: string;
   config: TypeAoiProps;
 }
 
@@ -24,19 +26,44 @@ export type TypeAoiProps = {
 };
 
 export function AoiPanel(props: AoiPanelProps): JSX.Element {
-  const { mapId, config } = props;
+  const { config } = props;
   const { aoiList } = config;
 
   const { cgpv } = window as TypeWindow;
-  const { api, ui } = cgpv;
+  const { ui } = cgpv;
+  const { useCallback } = cgpv.reactUtilities.react;
 
-  const myMap = api.getMapViewer(mapId);
   const { Card, Box } = ui.elements;
 
   const theme = ui.useTheme();
   const sxClasses = getSxClasses(theme);
 
+  const mapId = useGeoViewMapId();
+  const mapProjection = useMapProjection();
   const { highlightBBox } = useMapStoreActions();
+
+  const handleOnClick = useCallback(
+    (aoiItem: AoiItem) => {
+      // Project the extent from lonlatto map projection
+      const extentInMapProjection = Projection.transformExtentFromProj(
+        aoiItem.extent,
+        Projection.getProjectionLonLat(),
+        Projection.getProjectionFromString(`EPSG:${mapProjection}`)
+      );
+
+      // Zoom to extent and highlight
+      MapEventProcessor.zoomToExtent(mapId, extentInMapProjection, { maxZoom: 14 })
+        .then(() => {
+          // Highlight
+          highlightBBox(extentInMapProjection, false);
+        })
+        .catch((error: unknown) => {
+          // Log
+          logger.logPromiseFailed('in zoomToLonLatExtentOrCoordinate', error);
+        });
+    },
+    [mapId, mapProjection, highlightBBox]
+  );
 
   return (
     <Box sx={sxClasses.aoiCard}>
@@ -45,19 +72,8 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
           <Card
             tabIndex={0}
             className="aoiCardThumbnail"
-            onClick={() => {
-              myMap
-                .zoomToLonLatExtentOrCoordinate(aoiItem.extent, { maxZoom: 14 })
-                .then(() => {
-                  highlightBBox(myMap.convertExtentLonLatToMapProj(aoiItem.extent), false);
-                })
-                .catch((error: unknown) => {
-                  // Log
-                  logger.logPromiseFailed('in zoomToLonLatExtentOrCoordinate', error);
-                });
-            }}
-            // eslint-disable-next-line react/no-array-index-key
-            key={index}
+            onClick={() => handleOnClick(aoiItem)}
+            key={aoiItem.aoiTitle}
             title={aoiItem.aoiTitle}
             contentCard={
               // eslint-disable-next-line react/jsx-no-useless-fragment

@@ -84,7 +84,7 @@ export function Map(props: MapProps): JSX.Element {
           <Crosshair mapTargetElement={mapElement.current!} />
           <ClickMarker />
           <HoverTooltip />
-          {deviceSizeMedUp && overviewMap && viewer.map && <OverviewMap />}
+          {deviceSizeMedUp && overviewMap && viewer.map && <OverviewMap i18n={viewer.getI18nInstance()} />}
         </>
       )}
       {layersAreLoading && (

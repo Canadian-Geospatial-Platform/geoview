@@ -38,8 +38,19 @@ export class EsriImage extends AbstractGeoViewRaster {
   // #region OVERRIDES
 
   /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @returns {TypeEsriImageLayerConfig} The strongly-typed layer configuration specific to this layer.
+   * @override
+   */
+  override getGeoviewLayerConfig(): TypeEsriImageLayerConfig {
+    return super.getGeoviewLayerConfig() as TypeEsriImageLayerConfig;
+  }
+
+  /**
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   * @override
+   * @protected
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Attempt a fetch of the metadata
@@ -63,6 +74,8 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {OLProjection?} [mapProjection] - The map projection.
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<EsriImageLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   * @override
+   * @protected
    */
   protected override onProcessLayerMetadata(
     layerConfig: EsriImageLayerEntryConfig,
@@ -77,6 +90,8 @@ export class EsriImage extends AbstractGeoViewRaster {
    * Overrides the creation of the GV Layer
    * @param {EsriImageLayerEntryConfig} layerConfig - The layer entry configuration.
    * @returns {GVEsriImage} The GV Layer
+   * @override
+   * @protected
    */
   protected override onCreateGVLayer(layerConfig: EsriImageLayerEntryConfig): GVEsriImage {
     // Create the source

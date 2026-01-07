@@ -86,6 +86,7 @@ export type TypeMapInfoResult = {
   mapDataUrl: string;
   scaleText: string;
   scaleLineWidth: string;
+  // TODO: CHECK - Do we need to differentiate between undefined and null? If so, write the reason in a GV comment. It'd clean the code.
   northArrowSvg: Array<{
     d: string | null;
     fill: string | null;

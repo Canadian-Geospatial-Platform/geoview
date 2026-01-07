@@ -42,8 +42,19 @@ export class CSV extends AbstractGeoViewVector {
   // #region OVERRIDES
 
   /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @returns {TypeCSVLayerConfig} The strongly-typed layer configuration specific to this layer.
+   * @override
+   */
+  override getGeoviewLayerConfig(): TypeCSVLayerConfig {
+    return super.getGeoviewLayerConfig() as TypeCSVLayerConfig;
+  }
+
+  /**
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   * @override
+   * @protected
    */
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Get the folder url
@@ -62,6 +73,8 @@ export class CSV extends AbstractGeoViewVector {
    * @param {OLProjection?} [mapProjection] - The map projection.
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   * @override
+   * @protected
    */
   protected override onProcessLayerMetadata(
     layerConfig: VectorLayerEntryConfig,
@@ -93,8 +106,8 @@ export class CSV extends AbstractGeoViewVector {
    * `featureProjection`.
    * @returns {Promise<Feature[]>}
    * A promise that resolves to an array of OpenLayers features.
-   * @protected
    * @override
+   * @protected
    */
   protected override async onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
@@ -112,6 +125,8 @@ export class CSV extends AbstractGeoViewVector {
    * Overrides the creation of the GV Layer
    * @param {CsvLayerEntryConfig} layerConfig - The layer entry configuration.
    * @returns {GVCSV} The GV Layer
+   * @override
+   * @protected
    */
   protected override onCreateGVLayer(layerConfig: CsvLayerEntryConfig): GVCSV {
     // Create the source

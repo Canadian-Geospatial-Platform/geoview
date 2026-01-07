@@ -103,8 +103,10 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Initializes the event processor and sets up subscriptions
    * @param {GeoviewStoreType} store - The store to initialize with
    * @returns {Array<() => void>} Array of unsubscribe functions
+   * @override
+   * @protected
    */
-  override onInitialize(store: GeoviewStoreType): Array<() => void> {
+  protected override onInitialize(store: GeoviewStoreType): Array<() => void> {
     const { mapId } = store.getState();
 
     // Set up keyboard handler

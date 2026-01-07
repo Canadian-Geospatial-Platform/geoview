@@ -97,6 +97,8 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
 
   /**
    * Function called when the plugin is removed, used for clean up
+   * @returns {void}
+   * @override
    */
   override onRemoved(): void {}
 }
