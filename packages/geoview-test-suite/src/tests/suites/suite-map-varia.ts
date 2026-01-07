@@ -2,6 +2,7 @@ import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { MapTester } from '../testers/map-tester';
 import { GVAbstractTestSuite } from './abstract-gv-test-suite';
+import { MapEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/map-event-processor';
 
 /**
  * The GeoView Test Suite.
@@ -78,13 +79,13 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
     const pZIndex = this.#mapTester.testGeometryGroupZIndex();
 
     // Test zoom to extent
-    const pZoomToExtent = this.#mapTester.testZoomToExtent();
+    const pZoomToExtent = this.#mapTester.testZoomToExtent([-87, 51, -84, 53], [-88.584, 50.227, -82.142, 53.726]);
 
     // Wait until the zoom finishes before continuing manipulating the map
     await pZoomToExtent;
 
     // Test zoom to coordinate
-    const pZoomToCoordinate = this.#mapTester.testZoomToCoordinate();
+    const pZoomToCoordinate = this.#mapTester.testZoomToCoordinate([-80, 50]);
 
     // Wait until the zoom finishes before continuing manipulating the map
     await pZoomToCoordinate;
@@ -135,6 +136,9 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
 
     // #region PROMISES SYNCH HOVERABLE/QUERYABLE
 
+    // Make sure the map is in its initial extent
+    await MapEventProcessor.zoomToInitialExtent(this.getMapId());
+
     // Test non-queryable layer not in details
     const pNonQueryableLayerNotInDetails = this.#mapTester.testNonQueryableLayerNotInDetails('geojsonLYR5/polygons.json', [-88, 52]);
 
@@ -147,7 +151,12 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
     // #endregion PROMISES SYNCH HOVERABLE/QUERYABLE
 
     // Test details layer selection persistence, this test manipulates the map state too much as should run independently
-    const pDetailsLayerSelectionPersistence = this.#mapTester.testDetailsLayerSelectionPersistence();
+    const pDetailsLayerSelectionPersistence = this.#mapTester.testDetailsLayerSelectionPersistence(
+      'geojsonLYR5/polygons.json',
+      'esriFeatureLYR5/0',
+      [-87.4, 52.9],
+      [-73.9, 46.5]
+    );
 
     // Wait on details layer selection persistence which manipulates the map state a lot and should run independently
     await pDetailsLayerSelectionPersistence;
