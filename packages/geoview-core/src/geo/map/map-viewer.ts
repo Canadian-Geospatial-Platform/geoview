@@ -842,7 +842,7 @@ export class MapViewer {
       dragging: false,
     };
 
-    // Update store... this will not emit the event becaus only when WCAG mode is enable
+    // Update store... this will not emit the event because only when WCAG mode is enable
     MapEventProcessor.setClickCoordinates(this.mapId, clickCoordinates);
 
     // The resolve of the query

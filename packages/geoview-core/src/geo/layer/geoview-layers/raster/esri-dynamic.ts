@@ -299,19 +299,22 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @static
    */
   static createEsriDynamicSource(layerConfig: EsriDynamicLayerEntryConfig): ImageArcGISRest {
+    // Get the source config
+    const source = layerConfig.getSource();
+
     const sourceOptions: SourceOptions = {
       url: layerConfig.getDataAccessPath(),
       attributions: layerConfig.getAttributions(),
       params: {
         LAYERS: `show:${layerConfig.layerId}`,
-        ...(layerConfig.getSource().transparent !== undefined && { transparent: layerConfig.getSource().transparent }),
-        ...(layerConfig.getSource().format && { format: layerConfig.getSource().format }),
+        ...(source.transparent !== undefined && { transparent: source.transparent }),
+        ...(source.format && { format: source.format }),
       },
-      crossOrigin: layerConfig.getSource().crossOrigin ?? 'Anonymous',
+      crossOrigin: source.crossOrigin ?? 'Anonymous',
     };
 
     // If forcing service projection so that OpenLayers takes care of reprojecting locally on the map
-    if (layerConfig.getSource().forceServiceProjection) {
+    if (source.forceServiceProjection) {
       // Find the SRID from the layer metadata
       const srid =
         layerConfig.getLayerMetadata()?.sourceSpatialReference?.latestWkid || layerConfig.getLayerMetadata()?.sourceSpatialReference?.wkid;

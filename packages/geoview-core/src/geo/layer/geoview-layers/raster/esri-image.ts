@@ -234,15 +234,18 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @static
    */
   static createEsriImageSource(layerConfig: EsriImageLayerEntryConfig): ImageArcGISRest {
+    // Get the source
+    const source = layerConfig.getSource();
+
     const sourceOptions: SourceOptions = {
       url: layerConfig.getDataAccessPath(),
       attributions: layerConfig.getAttributions(),
       params: {
         LAYERS: `show:${layerConfig.layerId}`,
-        ...(layerConfig.getSource().transparent !== undefined && { transparent: layerConfig.getSource().transparent }),
-        ...(layerConfig.getSource().format && { format: layerConfig.getSource().format }),
+        ...(source.transparent !== undefined && { transparent: source.transparent }),
+        ...(source.format && { format: source.format }),
       },
-      crossOrigin: layerConfig.getSource().crossOrigin ?? 'Anonymous',
+      crossOrigin: source.crossOrigin ?? 'Anonymous',
       projection: layerConfig.getProjectionWithEPSG(),
     };
 
