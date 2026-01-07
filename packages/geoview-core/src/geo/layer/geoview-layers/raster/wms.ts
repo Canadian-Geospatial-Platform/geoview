@@ -1121,6 +1121,7 @@ export class WMS extends AbstractGeoViewRaster {
       layerConfig.setEntryType(CONST_LAYER_ENTRY_TYPES.GROUP);
       layerConfig.setIsMetadataLayerGroup(true);
     }
+
     // eslint-disable-next-line no-param-reassign
     layerConfig.listOfLayerEntryConfig = newListOfLayerEntryConfig as TypeLayerEntryConfig[];
   }

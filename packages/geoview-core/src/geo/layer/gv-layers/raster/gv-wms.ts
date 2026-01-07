@@ -361,7 +361,7 @@ export class GVWMS extends AbstractGVRaster {
       // If any style, we want a vector-like style legend
       if (layerStyle) {
         // Try to create a legend using the vector styles if any
-        return await AbstractGVLayer.createLegendFromStyle(CONST_LAYER_TYPES.WFS, layerStyle);
+        return await AbstractGVLayer.createLegendFromStyle(CONST_LAYER_TYPES.WFS, 'vector', layerStyle);
       }
     } catch (error: unknown) {
       // Failed to create the legend using vector styling, continue..
@@ -387,6 +387,7 @@ export class GVWMS extends AbstractGVRaster {
           // Return the legend
           return {
             type: CONST_LAYER_TYPES.WMS,
+            entryType: 'raster-image',
             legend: drawingCanvas,
           };
         }
@@ -410,6 +411,7 @@ export class GVWMS extends AbstractGVRaster {
     // No good
     return {
       type: CONST_LAYER_TYPES.WMS,
+      entryType: 'raster-image',
       legend: null,
     };
   }

@@ -206,7 +206,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
     setIsExporting(true);
     try {
       const layer = getLayer(layerPath);
-      const layerIsEsriDynamic = layer?.type === CONST_LAYER_TYPES.ESRI_DYNAMIC;
+      const layerIsEsriDynamic = layer?.schemaTag === CONST_LAYER_TYPES.ESRI_DYNAMIC;
 
       const jsonGenerator = getJson(layerIsEsriDynamic);
       const chunks = [];

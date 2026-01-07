@@ -128,6 +128,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       if (!legendInfo) {
         const legend: TypeLegend = {
           type: CONST_LAYER_TYPES.ESRI_IMAGE,
+          entryType: 'raster-image',
           styleConfig: this.getStyle(),
           legend: null,
         };
@@ -165,6 +166,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
       const legend: TypeLegend = {
         type: CONST_LAYER_TYPES.ESRI_IMAGE,
+        entryType: 'raster-image',
         styleConfig,
         legend: await GeoviewRenderer.getLegendStyles(styleConfig),
       };

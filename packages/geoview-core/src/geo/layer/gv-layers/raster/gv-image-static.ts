@@ -100,6 +100,7 @@ export class GVImageStatic extends AbstractGVRaster {
           // Return legend information
           return {
             type: CONST_LAYER_TYPES.IMAGE_STATIC,
+            entryType: 'raster-image',
             legend: drawingCanvas,
           };
         }
@@ -108,6 +109,7 @@ export class GVImageStatic extends AbstractGVRaster {
       // No good
       return {
         type: CONST_LAYER_TYPES.IMAGE_STATIC,
+        entryType: 'raster-image',
         legend: null,
       };
     } catch (error: unknown) {

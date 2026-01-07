@@ -175,6 +175,7 @@ export class GVGeoTIFF extends AbstractGVTile {
           // Return legend information
           return {
             type: CONST_LAYER_TYPES.GEOTIFF,
+            entryType: 'raster-image',
             legend: drawingCanvas,
           };
         }
@@ -183,6 +184,7 @@ export class GVGeoTIFF extends AbstractGVTile {
       // No good
       return {
         type: CONST_LAYER_TYPES.GEOTIFF,
+        entryType: 'raster-image',
         legend: null,
       };
     } catch (error: unknown) {

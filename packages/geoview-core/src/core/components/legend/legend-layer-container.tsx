@@ -11,7 +11,7 @@ import {
   useLayerSelectorIcons,
   useLayerSelectorItems,
   useLayerSelectorStatus,
-  useLayerSelectorType,
+  useLayerSelectorSchemaTag,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
 import { useMapSelectorLayerLegendCollapsed } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -68,7 +68,7 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const isCollapsed = useMapSelectorLayerLegendCollapsed(layerPath);
-  const layerType = useLayerSelectorType(layerPath);
+  const schemaTag = useLayerSelectorSchemaTag(layerPath);
   const layerItems = useLayerSelectorItems(layerPath);
   const layerChildren = useLayerSelectorChildren(layerPath);
   const layerIcons = useLayerSelectorIcons(layerPath);
@@ -80,7 +80,7 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   // Early returns
   if ((layerChildren?.length === 0 && layerItems?.length === 1) || layerStatus === 'error') return null;
 
-  const isWMSWithLegend = layerType === CONST_LAYER_TYPES.WMS && layerIcons?.[0]?.iconImage && layerIcons[0].iconImage !== 'no data';
+  const isWMSWithLegend = schemaTag === CONST_LAYER_TYPES.WMS && layerIcons?.[0]?.iconImage && layerIcons[0].iconImage !== 'no data';
 
   // If it is a WMS legend, create a specific component
   if (isWMSWithLegend) {

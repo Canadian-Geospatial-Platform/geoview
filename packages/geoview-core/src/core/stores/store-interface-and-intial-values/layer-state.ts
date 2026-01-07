@@ -10,7 +10,7 @@ import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { type TypeGetStore, type TypeSetStore, type IGeoviewState, useStableSelector } from '@/core/stores/geoview-store';
 import type { TypeFeatureInfoEntryPartial, TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
 import { DateMgt, type TemporalMode, type TimeDimension, type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
-import type { TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerType, TypeLayerEntryType } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -463,6 +463,7 @@ export type LegendQueryStatus = 'init' | 'querying' | 'queried' | 'error';
 
 export type TypeLegend = {
   type: TypeGeoviewLayerType;
+  entryType: TypeLayerEntryType;
   // Layers other than vector layers use the HTMLCanvasElement type for their legend.
   legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
   styleConfig?: TypeLayerStyleConfig | null;
@@ -497,10 +498,10 @@ export const useSelectedLayer = (): TypeLegendLayer | undefined => {
 export const useLayerIconLayerSet = (layerPath: string): string[] => {
   const layers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
   const layer = LegendEventProcessor.findLayerByPath(layers, layerPath);
-  if (layer && layer.type !== CONST_LAYER_TYPES.WMS) {
+  if (layer && layer.schemaTag !== CONST_LAYER_TYPES.WMS) {
     return layer.items.map((item) => item.icon).filter((d) => d !== null);
   }
-  if (layer && layer.type === CONST_LAYER_TYPES.WMS) {
+  if (layer && layer.schemaTag === CONST_LAYER_TYPES.WMS) {
     return layer.icons.map((item) => item.iconImage).filter((d) => d !== null) as string[];
   }
   return [];
@@ -694,7 +695,9 @@ export const useLayerSelectorName = createLayerSelectorHook('layerName');
 export const useLayerSelectorStatus = createLayerSelectorHook('layerStatus');
 export const useLayerSelectorFilter = createLayerSelectorHook('layerFilter');
 export const useLayerSelectorFilterClass = createLayerSelectorHook('layerFilterClass');
-export const useLayerSelectorType = createLayerSelectorHook('type');
+export const useLayerSelectorSchemaTag = createLayerSelectorHook('schemaTag');
+export const useLayerSelectorEntryType = createLayerSelectorHook('entryType');
+export const useLayerSelectorBounds = createLayerSelectorHook('bounds');
 export const useLayerSelectorControls = createLayerSelectorHook('controls');
 export const useLayerSelectorChildren = createLayerSelectorHook('children');
 export const useLayerSelectorItems = createLayerSelectorHook('items');

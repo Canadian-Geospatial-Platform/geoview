@@ -1,6 +1,6 @@
 import type { Extent, TypeStyleGeometry } from '@/api/types/map-schema-types';
 import type { TemporalMode, TimeDimension, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
-import type { TypeGeoviewLayerType, TypeLayerControls } from '@/api/types/layer-schema-types';
+import type { TypeLayerControls } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import { isGeoTIFFLegend, isImageStaticLegend, isVectorLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -507,7 +507,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   static propagateLegendToStore(mapId: string, legendResultSetEntry: TypeLegendResultSetEntry): void {
     // TODO: REFACTOR - This whole function should be refactored to an initial propagation into the store and then only specific propagations in the store.
     // TO.DOCONT: Right now things like bounds and many more are all recalculated for every single propagation in the store...
-    // TO.DOCONT: Partially related to issue #3237
 
     const { layerPath } = legendResultSetEntry;
     const layerPathNodes = layerPath.split('/');
@@ -561,6 +560,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           bounds = MapEventProcessor.getMapViewerLayerAPI(mapId).calculateBounds(layerConfig.layerPath);
         }
 
+        // Get the schema tag
+        const schemaTag = legendResultSetEntry.data?.type ?? layerConfig.getSchemaTag();
+
         const controls: TypeLayerControls = setLayerControls(layerConfig, currentLevel > 2);
         if (entryIndex === -1) {
           const legendLayerEntry: TypeLegendLayer = {
@@ -571,7 +573,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             layerName,
             layerStatus: legendResultSetEntry.layerStatus,
             legendQueryStatus: legendResultSetEntry.legendQueryStatus,
-            type: layerConfig.getEntryType() as TypeGeoviewLayerType, // TODO: Check - Bug - This typing is invalid, but we have to keep it for it to work for now...
+            schemaTag: schemaTag,
+            entryType: 'group',
             canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
             opacity: layerConfig.getInitialSettings()?.states?.opacity ?? 1, // default: 1
             icons: [] as TypeLegendLayerItem[],
@@ -591,6 +594,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           existingEntries[entryIndex].layerName = layerName;
           // eslint-disable-next-line no-param-reassign
           existingEntries[entryIndex].bounds = bounds;
+          // eslint-disable-next-line no-param-reassign
+          existingEntries[entryIndex].entryType = 'group';
         }
 
         // Continue recursively
@@ -610,6 +615,10 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         const icons = LegendEventProcessor.getLayerIconImage(legendResultSetEntry.data);
 
         const controls: TypeLayerControls = setLayerControls(layerConfig, currentLevel > 2);
+
+        // Get the schema tag
+        const schemaTag = legendResultSetEntry.data?.type ?? layerConfig.getSchemaTag();
+
         const legendLayerEntry: TypeLegendLayer = {
           bounds,
           controls,
@@ -620,8 +629,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           layerStatus: legendResultSetEntry.layerStatus,
           legendQueryStatus: legendResultSetEntry.legendQueryStatus,
           styleConfig: legendResultSetEntry.data?.styleConfig,
-          type: legendResultSetEntry.data?.type || layerConfig.getSchemaTag(),
-          canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
+          schemaTag: schemaTag,
+          entryType: layerConfig.getEntryType(),
+          canToggle: schemaTag !== CONST_LAYER_TYPES.ESRI_IMAGE,
           opacity: layerConfig.getInitialSettings()?.states?.opacity ?? 1, // default: 1
           hoverable: layerConfig.getInitialSettings()?.states?.hoverable, // default: true
           queryable: layerConfig.getInitialSettings()?.states?.queryable, // default: true

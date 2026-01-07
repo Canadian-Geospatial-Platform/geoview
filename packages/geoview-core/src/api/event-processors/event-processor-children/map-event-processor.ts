@@ -721,7 +721,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
       return (
         (legendLayer?.children && legendLayer.children.length > 0) ||
         (legendLayer?.items && legendLayer.items.length > 1) ||
-        (legendLayer?.type === CONST_LAYER_TYPES.WMS && legendLayer?.icons?.some((icon) => icon.iconImage && icon.iconImage !== 'no data'))
+        (legendLayer?.schemaTag === CONST_LAYER_TYPES.WMS &&
+          legendLayer?.icons?.some((icon) => icon.iconImage && icon.iconImage !== 'no data'))
       );
     });
   }

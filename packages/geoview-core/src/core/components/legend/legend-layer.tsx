@@ -7,7 +7,7 @@ import {
   useLayerSelectorItems,
   useLayerSelectorName,
   useLayerSelectorStatus,
-  useLayerSelectorType,
+  useLayerSelectorSchemaTag,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
   useMapStoreActions,
@@ -52,7 +52,7 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick, sxClasses, 
   const layerName = useLayerSelectorName(layerPath);
   const layerItems = useLayerSelectorItems(layerPath);
   const layerChildren = useLayerSelectorChildren(layerPath);
-  const layerType = useLayerSelectorType(layerPath);
+  const schemaTag = useLayerSelectorSchemaTag(layerPath);
   const layerStatus = useLayerSelectorStatus(layerPath);
 
   // This is used to determine if the text should be wrapped in a tooltip
@@ -77,7 +77,7 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick, sxClasses, 
         disableTypography
         secondary={showControls ? <SecondaryControls layerPath={layerPath} /> : undefined}
       />
-      {((layerChildren && layerChildren.length > 0) || (layerItems && layerItems.length > 1) || layerType === CONST_LAYER_TYPES.WMS) && (
+      {((layerChildren && layerChildren.length > 0) || (layerItems && layerItems.length > 1) || schemaTag === CONST_LAYER_TYPES.WMS) && (
         <IconButton className="buttonOutline" onClick={onExpandClick} edge="end" size="small" aria-label={tooltip}>
           {!isCollapsed ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
         </IconButton>

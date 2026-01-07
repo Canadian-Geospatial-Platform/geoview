@@ -17,24 +17,24 @@ import {
 import {
   useLayerHighlightedLayer,
   useLayerStoreActions,
-  useLayerSelectorType,
   useLayerSelectorChildren,
   useLayerSelectorItems,
   useLayerSelectorControls,
   useLayerSelectorStatus,
+  useLayerSelectorEntryType,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
   useUIFooterBarComponents,
   useUIAppbarComponents,
   useUIActiveTrapGeoView,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import type { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
 import {
-  useMapStoreActions,
-  useMapSelectorLayerVisibility,
   useMapSelectorLayerInVisibleRange,
   useMapSelectorLayerParentHidden,
-} from '@/core/stores/';
+  useMapSelectorLayerVisibility,
+  useMapStoreActions,
+} from '@/core/stores/store-interface-and-intial-values/map-state';
+import type { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
@@ -126,7 +126,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const layerType = useLayerSelectorType(layerPath);
+  const layerEntryType = useLayerSelectorEntryType(layerPath);
   const layerChildren = useLayerSelectorChildren(layerPath);
   const layerItems = useLayerSelectorItems(layerPath);
   const layerControls = useLayerSelectorControls(layerPath);
@@ -147,7 +147,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
   const isLayerZoomToExtentCapable = layerControls?.zoom ?? false;
 
   // Is zoom to visible scale button visible?
-  const isZoomToVisibleScaleCapable = !!((layerType as string) !== 'group' && !isInVisibleRange);
+  const isZoomToVisibleScaleCapable = !isInVisibleRange && layerEntryType !== 'group';
 
   // Component helper
   const controls = useControlActions(layerPath);

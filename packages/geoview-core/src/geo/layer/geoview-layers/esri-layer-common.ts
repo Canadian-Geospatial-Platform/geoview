@@ -19,7 +19,6 @@ import type {
   DisplayDateMode,
 } from '@/api/types/map-schema-types';
 import type { TypeLayerMetadataEsri } from '@/api/types/layer-schema-types';
-import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { Fetch } from '@/core/utils/fetch-helper';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
@@ -232,10 +231,7 @@ export class EsriUtilities {
     if (layerConfig.getEntryTypeIsGroup() && !layerConfig.getIsMetadataLayerGroup()) return layerConfig;
 
     // The url
-    let queryUrl = layer.getMetadataAccessPath();
-
-    if (layerConfig.getSchemaTag() !== CONST_LAYER_TYPES.ESRI_IMAGE)
-      queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
+    const queryUrl = layer.getMetadataAccessPath();
 
     let responseJson;
     try {

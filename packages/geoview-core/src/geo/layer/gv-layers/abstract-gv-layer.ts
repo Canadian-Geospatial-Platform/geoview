@@ -37,6 +37,7 @@ import {
   type TypeLayerMetadataEsri,
   type TypeLayerMetadataVector,
   type TypeGeoviewLayerType,
+  type TypeLayerEntryType,
 } from '@/api/types/layer-schema-types';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import type { TypeLegendItem } from '@/core/components/layers/types';
@@ -221,7 +222,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       const style = this.getStyle() || this.getLayerConfig().getLayerStyle();
 
       // Redirect
-      return await AbstractGVLayer.createLegendFromStyle(this.getLayerConfig().getSchemaTag(), style);
+      return await AbstractGVLayer.createLegendFromStyle(this.getLayerConfig().getSchemaTag(), this.getLayerConfig().getEntryType(), style);
     } catch (error: unknown) {
       // Log
       logger.logError(error);
@@ -1639,10 +1640,12 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    */
   static async createLegendFromStyle(
     schemaTag: TypeGeoviewLayerType,
+    entryType: TypeLayerEntryType,
     style: Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>> | undefined
   ): Promise<TypeLegend> {
     return {
       type: schemaTag,
+      entryType: entryType,
       styleConfig: style,
       legend: await GeoviewRenderer.getLegendStyles(style),
     };

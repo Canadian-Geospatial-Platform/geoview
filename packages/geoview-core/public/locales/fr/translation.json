@@ -202,6 +202,7 @@
     "moreInfo": "Plus d'informations",
     "lessInfo": "Moins d'informations",
     "layerType": "Type : ",
+    "layerBounds": "Étendu: ",
     "layerResource": "Ressource : ",
     "layerMetadata": "Métadonnées : ",
     "layerActiveFilters": "Filtres actifs : ",

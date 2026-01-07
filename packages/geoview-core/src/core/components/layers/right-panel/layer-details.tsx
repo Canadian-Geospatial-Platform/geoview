@@ -29,6 +29,7 @@ import {
   useLayerDisplayDateFormatShort,
   useLayerDisplayDateTimezone,
   useLayerHighlightedLayer,
+  useLayerSelectorBounds,
   useLayerSelectorFilter,
   useLayerSelectorFilterClass,
   useLayerStoreActions,
@@ -150,7 +151,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     setHighlightLayer,
     refreshLayer,
     zoomToLayerExtent,
-    getLayerBounds,
     getLayerServiceProjection,
     setLayerHoverable,
     setLayerQueryable,
@@ -167,6 +167,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const classFilter = useLayerSelectorFilterClass(layerDetails.layerPath);
   const dataFilter = useDataTableFilterSelector(layerDetails.layerPath);
   const timeFilter = useTimeSliderFiltersSelector(layerDetails.layerPath);
+  const bounds = useLayerSelectorBounds(layerDetails.layerPath);
   const layerDisplayDateFormat = useLayerDisplayDateFormat(layerDetails.layerPath);
   const layerDisplayDateFormatShort = useLayerDisplayDateFormatShort(layerDetails.layerPath);
   const layerDateTemporalMode = useLayerDateTemporalMode(layerDetails.layerPath);
@@ -202,17 +203,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   // Generate unique table details button ID
   const tableDetailsButtonId = `table-details-${containerType}-${mapId}`;
-
-  // GV Wrapped in useEffect since it was throwing a warning otherwise
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('LAYER DETAILS - Bounds', layerDetails);
-
-    if (layerDetails.bounds === undefined || layerDetails.bounds[0] === Infinity) {
-      const bounds = getLayerBounds(layerDetails.layerPath);
-      if (bounds) layerDetails.bounds = bounds;
-    }
-  }, [layerDetails, getLayerBounds]);
 
   /**
    * Recursively checks if all children of a layer are visible.
@@ -476,7 +466,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           aria-label={t('legend.zoomTo')}
           onClick={handleZoomTo}
           className="buttonOutline"
-          disabled={layerDetails.bounds === undefined || layerHidden}
+          disabled={layerHidden || bounds === undefined || Number.isNaN(bounds[0])}
         >
           <ZoomInSearchIcon />
         </IconButton>
@@ -538,7 +528,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   const renderWMSImage = (): JSX.Element | null => {
     if (
-      layerDetails.type === CONST_LAYER_TYPES.WMS &&
+      layerDetails.schemaTag === CONST_LAYER_TYPES.WMS &&
       layerDetails.icons.length &&
       layerDetails.icons[0].iconImage &&
       layerDetails.icons[0].iconImage !== 'no data'
@@ -556,7 +546,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   };
 
   const renderInfo = (): JSX.Element | null => {
-    const { type, url, layerPath } = layerDetails;
+    const { schemaTag, url, layerPath } = layerDetails;
 
     // Set Ressource
     const wfsParams = '?service=WFS&version=2.0.0&request=GetCapabilities';
@@ -565,7 +555,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
     // Check if we can set the resource url
     if (url) {
-      switch (type) {
+      switch (schemaTag) {
         case CONST_LAYER_TYPES.WMS:
           // Check if URL already includes WMS GetCapabilities parameters
           // eslint-disable-next-line no-nested-ternary
@@ -603,7 +593,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     const validId = isValidUUID(id) && metadataUrl !== '';
 
     // Find the localized name for the current layer type
-    const localizedTypeEntry = memoLocalizedLayerType.find(([memoType]) => memoType === layerDetails.type);
+    const localizedTypeEntry = memoLocalizedLayerType.find(([memoType]) => memoType === schemaTag);
     let localizedTypeName = localizedTypeEntry ? localizedTypeEntry[1] : t('layers.serviceGroup');
 
     // Special case if type is GeoJSON and url end by zip or shp. It is a GeoJSON format derived from a shapefile
@@ -623,6 +613,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         </Button>
         <Collapse in={isInfoCollapse} sx={sxClasses.layerInfo}>
           <Box>{`${t('layers.layerType')}${localizedTypeName}`}</Box>
+          <Box>{`${t('layers.layerBounds')}${bounds}`}</Box>
           {layerNativeProjection && <Box>{`${t('layers.layerServiceProjection')}${layerNativeProjection}`}</Box>}
           <Box>
             <Box>
