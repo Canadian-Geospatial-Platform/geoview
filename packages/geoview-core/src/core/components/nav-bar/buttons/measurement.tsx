@@ -8,6 +8,8 @@ import type { DrawEvent as OLDrawEvent } from 'ol/interaction/Draw';
 import { Style, Stroke, Fill, Text } from 'ol/style';
 import type { StyleFunction } from 'ol/style/Style';
 import type { FeatureLike } from 'ol/Feature';
+import type Feature from 'ol/Feature';
+import type { Geometry } from 'ol/geom';
 
 import { ToggleButtonGroup, ToggleButton } from '@mui/material';
 
@@ -80,7 +82,7 @@ export default function Measurement(): JSX.Element {
   const [drawInstance, setDrawInstance] = useState<Draw | null>(null);
   const [measureOverlays, setMeasureOverlays] = useState<Overlay[]>([]);
   const [showSegmentLabels, setShowSegmentLabels] = useState<boolean>(true);
-  const [measurementFeatures, setMeasurementFeatures] = useState<any[]>([]);
+  const [measurementFeatures, setMeasurementFeatures] = useState<Feature<Geometry>[]>([]);
 
   /**
    * Creates a style function that shows segment lengths
