@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-
 import { createRoot, type Root } from 'react-dom/client';
-
 import { I18nextProvider } from 'react-i18next';
+
+import type { i18n } from 'i18next';
 
 import { ThemeProvider } from '@mui/material/styles';
 
@@ -16,11 +16,15 @@ import { logger } from '@/core/utils/logger';
 import { Box } from '@/ui/layout';
 import { TIMEOUT } from '@/core/utils/constant';
 
+export type OverviewMapProps = {
+  i18n: i18n;
+};
+
 /**
  * Creates an overview map control and adds it to the map
  * @returns {JSX.Element} returns empty container
  */
-export function OverviewMap(): JSX.Element {
+export function OverviewMap(props: OverviewMapProps): JSX.Element {
   // Log
   logger.logTraceRender('components/overview-map/overview-map');
 
@@ -29,7 +33,7 @@ export function OverviewMap(): JSX.Element {
   const zoomLevel = useMapZoom();
   const hideOnZoom = useMapOverviewMapHideZoom();
   const displayLanguage = useAppDisplayLanguage();
-  const i18n = MapEventProcessor.getMapViewer(mapId).getI18nInstance();
+  const { i18n } = props;
 
   // State
   const [visibility, setVisibility] = useState<boolean>(!(zoomLevel > hideOnZoom));

@@ -13,6 +13,7 @@ import { GVTestSuiteGeochart } from './tests/suites/suite-geochart';
 import { GVTestSuiteLayer } from './tests/suites/suite-layer';
 import { GVTestSuiteMapConfig } from './tests/suites/suite-map-config';
 import { GVTestSuiteUI } from './tests/suites/suite-ui';
+import { GVTestSuiteDetails } from './tests/suites/suite-details';
 
 /**
  * Create a class for the plugin instance
@@ -73,6 +74,8 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Overrides the addition of the Test Suite Plugin.
+   * @returns {void}
+   * @override
    */
   override onAdd(): void {
     // If the plugin has no configured test-suites, throw error
@@ -102,6 +105,9 @@ class TestSuitePlugin extends AbstractPlugin {
       } else if (suite === 'suite-ui') {
         // Instanciate the GeoView Test Suite
         this.addTestSuite(new GVTestSuiteUI(window.cgpv.api, this.mapViewer));
+      } else if (suite === 'suite-details') {
+        // Instanciate the GeoView Test Suite
+        this.addTestSuite(new GVTestSuiteDetails(window.cgpv.api, this.mapViewer));
       } else {
         // Throw
         throw new TestSuiteInitializationError(suite, this.mapViewer.mapId);
@@ -111,6 +117,8 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Overrides the removal of the Test Suite Plugin.
+   * @returns {void}
+   * @override
    */
   override onRemove(): void {} // Nothing to do
 

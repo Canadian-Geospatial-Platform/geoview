@@ -119,7 +119,7 @@ export class GeochartTester extends GVAbstractTester {
         test.addStep(`Adding the layer on the map...`);
 
         // Wait for the layer to be processed (bit optional)
-        await result!.promiseLayer;
+        await result?.promiseLayer;
 
         // Continue the test and return the layer
         return GeochartTester.helperStepLayerWithGeochart(test, this.getMapViewer(), layerPathAdd, lonlat);
@@ -154,6 +154,8 @@ export class GeochartTester extends GVAbstractTester {
    * @param {string} layerPath - The unique path or ID of the layer to interact with.
    * @param {Coordinate} lonlat - The longitude/latitude coordinate at which to query the layer.
    * @returns {Promise<AbstractGVLayer>} A promise that resolves to the layer after setup is complete.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
    * @static
    */
   static async helperStepLayerWithGeochart<T>(
@@ -166,7 +168,7 @@ export class GeochartTester extends GVAbstractTester {
     test.addStep(`Getting the layer with the geochart ${layerPath}...`);
 
     // Get the layer
-    const layer = mapViewer.layer.getGeoviewLayer(layerPath) as AbstractGVLayer;
+    const layer = mapViewer.layer.getGeoviewLayerRegular(layerPath);
 
     // Update the step
     test.addStep(`Waiting for its layer 'loaded' status...`);

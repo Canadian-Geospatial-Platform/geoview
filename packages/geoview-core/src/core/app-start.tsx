@@ -8,17 +8,15 @@ import { ThemeProvider, StyledEngineProvider } from '@mui/material/styles';
 import { ScopedCssBaseline } from '@mui/material';
 import { Shell } from '@/core/containers/shell';
 import { getTheme } from '@/ui/style/theme';
-import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { logger } from '@/core/utils/logger';
 import { useAppDisplayThemeById } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import type { MapViewer } from '@/geo/map/map-viewer';
 
 // create a state that will hold map config information
 // TODO: use store, only keep map id on context for store manager to gather right store on hooks
 export const MapContext = createContext<TypeMapContext>({
   mapId: '',
-  mapFeaturesConfig: undefined,
 });
 
 /**
@@ -26,14 +24,13 @@ export const MapContext = createContext<TypeMapContext>({
  */
 export type TypeMapContext = {
   mapId: string;
-  mapFeaturesConfig?: TypeMapFeaturesConfig;
 };
 
 /**
  * interface used when passing map features configuration
  */
 interface AppStartProps {
-  mapFeaturesConfig: TypeMapFeaturesConfig;
+  mapViewer: MapViewer;
   i18nLang: i18n;
 }
 
@@ -58,8 +55,10 @@ interface AppStartProps {
  * @property retryCount - The number of retry attempts made.
  */
 class ErrorBoundary extends Component<{ children: JSX.Element; language: TypeDisplayLanguage }, { hasError: boolean }> {
-  #retryTimeoutId: number | null = null;
-
+  /**
+   * Constructor
+   * @param {{ children: JSX.Element; language: TypeDisplayLanguage }} props - The props
+   */
   constructor(props: { children: JSX.Element; language: TypeDisplayLanguage }) {
     super(props);
     this.state = { hasError: false };
@@ -74,13 +73,6 @@ class ErrorBoundary extends Component<{ children: JSX.Element; language: TypeDis
     // Log both the error and component stack
     logger.logError('React error caught:', error);
     logger.logError('Component stack:', errorInfo.componentStack);
-  }
-
-  override componentWillUnmount(): void {
-    // Clear any pending retry timeout
-    if (this.#retryTimeoutId !== null) {
-      window.clearTimeout(this.#retryTimeoutId);
-    }
   }
 
   override render(): JSX.Element {
@@ -111,25 +103,21 @@ function AppStart(props: AppStartProps): JSX.Element {
   // Log
   logger.logTraceRender('components/app-start');
 
-  const { mapFeaturesConfig, i18nLang } = props;
-  const { mapId, displayLanguage } = mapFeaturesConfig;
-
-  // Get the MapViewer
-  const mapViewer = MapEventProcessor.getMapViewer(mapId);
+  const { mapViewer, i18nLang } = props;
 
   const mapContextValue = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('APP-START - mapContextValue', mapId);
+    logger.logTraceUseMemo('APP-START - mapContextValue', mapViewer.mapId);
 
-    return { mapId };
-  }, [mapId]);
+    return { mapId: mapViewer.mapId };
+  }, [mapViewer.mapId]);
 
   // GV get store values by id because context is not set.... it is the only atomic selector by id
   // once context is define, map id is available
-  const theme = useAppDisplayThemeById(mapId);
+  const theme = useAppDisplayThemeById(mapViewer.mapId);
 
   return (
-    <ErrorBoundary language={displayLanguage || 'en'}>
+    <ErrorBoundary language={(i18nLang.language as TypeDisplayLanguage) || 'en'}>
       <StyledEngineProvider injectFirst>
         <MapContext.Provider value={mapContextValue}>
           <ThemeProvider theme={getTheme(theme)}>

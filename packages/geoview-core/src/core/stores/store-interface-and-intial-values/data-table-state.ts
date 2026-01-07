@@ -3,7 +3,13 @@ import { useStore } from 'zustand';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
-import type { TypeFeatureInfoEntry, TypeLayerData, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
+import type {
+  TypeFeatureInfoEntry,
+  TypeFeatureInfoResult,
+  TypeLayerData,
+  TypeResultSet,
+  TypeResultSetEntry,
+} from '@/api/types/map-schema-types';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with DataTableEventProcessor vs DataTaleState
@@ -34,7 +40,7 @@ export interface IDataTableState {
     setSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
     setSelectedLayerPath: (layerPath: string) => void;
     setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
-    triggerGetAllFeatureInfo: (layerPath: string) => Promise<TypeFeatureInfoEntry[] | void>;
+    triggerGetAllFeatureInfo: (layerPath: string) => Promise<TypeFeatureInfoResult>;
   };
 
   setterActions: {
@@ -128,7 +134,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
         // Redirect to setter
         get().dataTableState.setterActions.setSelectedLayerPath(layerPath);
       },
-      triggerGetAllFeatureInfo(layerPath: string): Promise<TypeFeatureInfoEntry[] | void> {
+      triggerGetAllFeatureInfo(layerPath: string): Promise<TypeFeatureInfoResult> {
         // Redirect to event processor
         return DataTableEventProcessor.triggerGetAllFeatureInfo(get().mapId, layerPath);
       },

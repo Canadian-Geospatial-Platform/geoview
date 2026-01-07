@@ -4,7 +4,6 @@ import { useTheme } from '@mui/material/styles';
 
 import type { TypeTabs } from '@/ui';
 import { Box, Tabs } from '@/ui';
-import { Plugin } from '@/api/plugin/plugin';
 import { getSxClasses } from './footer-bar-style';
 import { ResizeFooterPanel } from '@/core/components/footer-bar/hooks/resize-footer-panel';
 import { useAppFullscreenActive, useAppHeight, useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -297,22 +296,21 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     logger.logTraceUseEffect('FOOTER-BAR - selectedTab', activeFooterBarTab);
 
     // If clicked on a tab with a plugin
-    MapEventProcessor.getMapViewerPlugins(mapId)
-      .then((plugins) => {
-        if (activeFooterBarTab.tabId && plugins[activeFooterBarTab.tabId]) {
-          // Get the plugin
-          const theSelectedPlugin = plugins[activeFooterBarTab.tabId];
-
+    if (activeFooterBarTab.tabId) {
+      // Get the plugin if it exists
+      MapEventProcessor.getMapViewerPluginIfExists(mapId, activeFooterBarTab.tabId)
+        .then((plugin) => {
           // If the Plugin is a FooterPlugin
-          if (theSelectedPlugin instanceof FooterPlugin) {
-            theSelectedPlugin.select();
+          if (plugin instanceof FooterPlugin) {
+            // Select it
+            plugin.select();
           }
-        }
-      })
-      .catch((error: unknown) => {
-        // Log
-        logger.logPromiseFailed('getMapViewerPluginsInstance in useEffect in footer-bar', error);
-      });
+        })
+        .catch((error: unknown) => {
+          // Log
+          logger.logPromiseFailed('getMapViewerPlugin in useEffect in footer-bar', error);
+        });
+    }
   }, [mapId, activeFooterBarTab]);
 
   /**
@@ -354,33 +352,19 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
 
     // Packages tab
     if (footerBarTabsConfig && footerBarTabsConfig.tabs.core.includes('time-slider')) {
-      // create a new tab by loading the time-slider plugin
-      Plugin.loadScript('time-slider')
-        .then((typePlugin) => {
-          Plugin.addPlugin('time-slider', typePlugin, mapId).catch((error: unknown) => {
-            // Log
-            logger.logPromiseFailed('api.plugin.addPlugin(time-slider) in useEffect in FooterBar', error);
-          });
-        })
-        .catch((error: unknown) => {
-          // Log
-          logger.logPromiseFailed('api.plugin.loadScript(time-slider) in useEffect in FooterBar', error);
-        });
+      // Load and add the plugin
+      MapEventProcessor.loadAndAddPlugin(mapId, 'time-slider').catch((error: unknown) => {
+        // Log
+        logger.logPromiseFailed('loadAndAddPlugin(time-slider) in useEffect in FooterBar', error);
+      });
     }
 
     if (footerBarTabsConfig && footerBarTabsConfig.tabs.core.includes('geochart')) {
-      // create a new tab by loading the geo chart plugin
-      Plugin.loadScript('geochart')
-        .then((typePlugin) => {
-          Plugin.addPlugin('geochart', typePlugin, mapId).catch((error: unknown) => {
-            // Log
-            logger.logPromiseFailed('api.plugin.addPlugin(geochart) in useEffect in FooterBar', error);
-          });
-        })
-        .catch((error: unknown) => {
-          // Log
-          logger.logPromiseFailed('api.plugin.loadScript(geochart) in useEffect in FooterBar', error);
-        });
+      // Load and add the plugin
+      MapEventProcessor.loadAndAddPlugin(mapId, 'geochart').catch((error: unknown) => {
+        // Log
+        logger.logPromiseFailed('loadAndAddPlugin(geochart) in useEffect in FooterBar', error);
+      });
     }
   }, [footerBarTabsConfig, mapId]);
 

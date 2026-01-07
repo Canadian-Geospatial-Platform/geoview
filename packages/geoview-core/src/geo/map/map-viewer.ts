@@ -76,7 +76,6 @@ import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-int
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { formatError } from '@/core/exceptions/core-exceptions';
 import type { PluginsContainer } from '@/api/plugin/plugin-types';
 import type { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 
@@ -1134,6 +1133,26 @@ export class MapViewer {
     return layersCount;
   }
 
+  /**
+   * Waits for the map layers loaded event to be emitted.
+   * @returns {Promise<MapViewer>} Promise resolved when the map layers loaded event is emitted
+   */
+  waitForLayersLoaded(): Promise<MapViewer> {
+    return new Promise((resolve) => {
+      this.onMapLayersLoaded(resolve);
+    });
+  }
+
+  /**
+   * Waits for the rendercomplete event to be triggered
+   * @returns {Promise<void>} Promise resolved when map render is complete
+   */
+  waitForRender(): Promise<void> {
+    return new Promise((resolve) => {
+      this.map.once('rendercomplete', () => resolve());
+    });
+  }
+
   // #endregion
 
   // #region MAP INTERACTIONS
@@ -1814,26 +1833,8 @@ export class MapViewer {
     // Load the core packages which are the ones who load on map (not footer plugin, not app-bar plugin)
     const promises: Promise<void>[] = [];
     this.mapFeaturesConfig?.corePackages?.forEach((corePackage: string): void => {
-      // Create promise
-      const promise = new Promise<void>((resolve, reject) => {
-        Plugin.loadScript(corePackage)
-          .then((typePlugin) => {
-            // add the plugin by passing in the loaded constructor from the script tag
-            Plugin.addPlugin(corePackage, typePlugin, this.mapId)
-              .then(() => {
-                // Plugin added
-                resolve();
-              })
-              .catch((error: unknown) => {
-                // Reject
-                reject(formatError(error));
-              });
-          })
-          .catch((error: unknown) => {
-            // Reject
-            reject(formatError(error));
-          });
-      });
+      // Load and add the plugin compiling the promise in a list
+      const promise = MapEventProcessor.loadAndAddPlugin(this.mapId, corePackage);
 
       // Compile
       promises.push(promise);
@@ -2070,16 +2071,6 @@ export class MapViewer {
   onMapLayersLoaded(callback: MapLayersLoadedDelegate): void {
     // Register the event handler
     EventHelper.onEvent(this.#onMapLayersLoadedHandlers, callback);
-  }
-
-  /**
-   * Waits for the map layers loaded event to be emitted.
-   * @returns {Promise<MapViewer>} Promise resolved when the map layers loaded event is emitted
-   */
-  waitForLayersLoaded(): Promise<MapViewer> {
-    return new Promise((resolve) => {
-      this.onMapLayersLoaded(resolve);
-    });
   }
 
   /**

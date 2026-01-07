@@ -150,7 +150,7 @@ export abstract class AbstractTester {
 
   /**
    * Overridable function called when a test is being created for execution.
-   * @returns {Test} test - The test about to be performed.
+   * @returns {Test<T>} test - The test about to be performed.
    * @protected
    */
   protected onCreatingTest<T>(message: string): Test<T> {
@@ -167,6 +167,7 @@ export abstract class AbstractTester {
   /**
    * Overridable function called before any test is executed.
    * @param {Test} test - The test about to be performed.
+   * @returns {void}
    * @protected
    */
   protected onPerformingTest(test: Test): void {
@@ -190,6 +191,7 @@ export abstract class AbstractTester {
   /**
    * Overridable function called before any test assertion verification is executed.
    * @param {Test} test - The test about to be assertion verified.
+   * @returns {void}
    * @protected
    */
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
@@ -206,6 +208,7 @@ export abstract class AbstractTester {
    * Emits a test updated event.
    * @param {Test} test - The test which updated.
    * @param {BaseTestChangedEvent} event - The event causing the update.
+   * @returns {void}
    * @protected
    */
   protected onPerformingTestStepChanged(test: Test, event: BaseTestChangedEvent): void {
@@ -217,6 +220,7 @@ export abstract class AbstractTester {
    * Emits a success event.
    * @param {Test} test - The test which succeeded.
    * @param {T} result - The assertion result.
+   * @returns {void}
    * @protected
    */
   protected onPerformingTestSuccess<T>(test: Test<T>, result: T): void {
@@ -232,6 +236,7 @@ export abstract class AbstractTester {
    * @param {Test} test - The test which failed.
    * @param {unknown} error - The thrown error from the assertion or test logic.
    * @param {boolean} duringFinalization - Indicates if the failure happened during finalization or during the Test regular processing.
+   * @returns {void}
    * @protected
    */
   protected onPerformingTestFailure<T>(test: Test<T>, error: unknown, duringFinalization: boolean): void {
@@ -260,6 +265,7 @@ export abstract class AbstractTester {
   /**
    * Emits a finalize event.
    * @param {Test} test - The test which is finalizing.
+   * @returns {void}
    * @protected
    */
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
@@ -274,6 +280,7 @@ export abstract class AbstractTester {
   /**
    * Emits a done event.
    * @param {Test} test - The test which is finalizing.
+   * @returns {void}
    * @protected
    */
   protected onPerformingTestDone<T>(test: Test<T>): void {

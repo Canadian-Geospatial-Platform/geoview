@@ -25,8 +25,8 @@ export class GVKML extends AbstractGVVector {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {KmlLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getLayerConfig(): KmlLayerEntryConfig {
     // Call parent and cast

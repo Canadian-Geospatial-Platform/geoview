@@ -17,7 +17,7 @@ export interface LayerListEntry {
   layerPath: string;
   layerStatus: TypeLayerStatus;
   queryStatus: TypeQueryStatus;
-  layerFeatures?: ReactNode;
+  layerFeatures?: string;
   mapFilteredIcon?: ReactNode;
   tooltip?: JSX.Element | string;
   numOffeatures?: number;
@@ -77,7 +77,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
     }
     return (
       <>
-        {layer.layerFeatures} {layer?.mapFilteredIcon ?? ''}
+        {layer.layerFeatures ?? ''} {layer?.mapFilteredIcon ?? ''}
       </>
     );
   }, [layer.layerFeatures, layer.layerStatus, layer?.mapFilteredIcon, layer.queryStatus, t]);

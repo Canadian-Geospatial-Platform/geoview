@@ -50,6 +50,8 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * Overrides the behavior to apply when an all-feature-info-layer-set wants to check for condition to register a layer in its set.
    * @param {ConfigBaseClass} layerConfig - The layer config
    * @returns {boolean} True when the layer should be registered to this legends-layer-set
+   * @override
+   * @protected
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override onRegisterLayerConfigCheck(layerConfig: ConfigBaseClass): boolean {
@@ -61,6 +63,8 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * Overrides the behavior to apply when an all-feature-info-layer-set wants to check for condition to register a layer in its set.
    * @param {AbstractBaseGVLayer} layer - The layer
    * @returns {boolean} True when the layer should be registered to this legends-layer-set
+   * @override
+   * @protected
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean {
@@ -71,6 +75,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
   /**
    * Overrides the behavior to apply when a legends-layer-set wants to register a layer in its set.
    * @param {ConfigBaseClass} layerConfig - The layer config
+   * @returns {void}
+   * @override
+   * @protected
    */
   protected override onRegisterLayerConfig(layerConfig: ConfigBaseClass): void {
     // Call parent
@@ -83,6 +90,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
   /**
    * Overrides the behavior to apply when a legends-layer-set wants to register a layer in its set.
    * @param {AbstractBaseGVLayer} layer - The layer
+   * @returns {void}
+   * @override
+   * @protected
    */
   protected override onRegisterLayer(layer: AbstractBaseGVLayer): void {
     // Call parent
@@ -105,6 +115,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * Overrides the behavior to apply when a layer status changed for a legends-layer-set.
    * @param {ConfigBaseClass} layerConfig - The layer config
    * @param {TypeLayerStatus} layerStatus - The new layer status
+   * @returns {void}
+   * @override
+   * @protected
    */
   protected override onProcessLayerStatusChanged(layerConfig: ConfigBaseClass, layerStatus: TypeLayerStatus): void {
     // Call parent. After this call, this.resultSet?.[layerPath]?.layerStatus may have changed!
@@ -118,6 +131,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * Overrides the behavior to apply when propagating to the store
    * @param {TypeLegendResultSetEntry} resultSetEntry - The result set entry to propagate
    * @param {PropagationType} type - The propagation type
+   * @returns {void}
+   * @override
+   * @protected
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override onPropagateToStore(resultSetEntry: TypeLegendResultSetEntry, type: PropagationType): void {
@@ -128,6 +144,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
   /**
    * Overrides the behavior to apply when deleting from the store
    * @param {string} layerPath - The layer path to delete form the store
+   * @returns {void}
+   * @override
+   * @protected
    */
   protected override onDeleteFromStore(layerPath: string): void {
     // Delete from store
@@ -138,6 +157,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * Checks if the layer config has reached the 'processed' status or greater and if so queries the legend.
    * @param {ConfigBaseClass} layerConfig - The layer config
    * @param {boolean} forced - Indicates if the legend query should be forced to happen (example when refreshing the legend)
+   * @private
    */
   #checkQueryLegend(layerConfig: ConfigBaseClass, forced: boolean): void {
     // Get the layer path
@@ -210,6 +230,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * @param {AbstractBaseGVLayer} layer - The layer
    * @param {ConfigBaseClass} layerConfig - The layer config
    * @param {boolean} forced - Flag to force a query to happen, even if the legendQueryStatus isn't 'init' or style isn't applied.
+   * @private
    */
   #legendShouldBeQueried(layer: AbstractBaseGVLayer, layerConfig: ConfigBaseClass, forced: boolean): layer is AbstractGVLayer {
     // A legend is ready to be queried if its status is > processed
@@ -244,6 +265,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * Handles when a layer style changes on a registered layer
    * @param {AbstractGVLayer} layer - The layer which changed its styles
    * @param {StyleChangedEvent} event - The layer style changed event
+   * @private
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   #handleLayerStyleChanged(layer: AbstractGVLayer, event: StyleChangedEvent): void {
@@ -255,6 +277,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * Handles when a layer style has been applied on a registered AbstractGVVector layer
    * @param {AbstractGVVector} layer - The layer which got its style applied
    * @param {StyleAppliedEvent} event - The StyleAppliedEvent
+   * @private
    */
   #handleStyleApplied(layer: AbstractGVVector, event: StyleAppliedEvent): void {
     // If the style has been applied

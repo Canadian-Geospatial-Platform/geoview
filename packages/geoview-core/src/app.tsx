@@ -237,7 +237,7 @@ async function renderMap(mapElement: HTMLElement): Promise<MapViewer> {
   api.setMapViewer(mapId, mapViewer);
 
   // Create a promise to be resolved when the MapViewer is initialized via the AppStart component
-  reactRoots[mapId].render(<AppStart mapFeaturesConfig={configuration} i18nLang={i18n} />);
+  reactRoots[mapId].render(<AppStart mapViewer={mapViewer} i18nLang={i18n} />);
 
   // Set up MutationObserver to watch for removal of the map div where our MapViewer is mounted
   watchHtmlElementRemoval(mapId, mapElement, handleMapViewerDivRemoved);

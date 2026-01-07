@@ -62,8 +62,17 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @returns {TypeWMSLayerConfig} The strongly-typed layer configuration specific to this layer.
    * @override
+   */
+  override getGeoviewLayerConfig(): TypeWMSLayerConfig {
+    return super.getGeoviewLayerConfig() as TypeWMSLayerConfig;
+  }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @returns {TypeSourceImageWmsInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   * @override
    */
   override getSource(): TypeSourceImageWmsInitialConfig {
     return super.getSource();
@@ -71,8 +80,8 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {TypeMetadataWMS | undefined} The strongly-typed layer configuration specific to this layer entry config.
+   * @override
    */
   override getServiceMetadata(): TypeMetadataWMS | undefined {
     return super.getServiceMetadata() as TypeMetadataWMS | undefined;
@@ -80,8 +89,8 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {TypeMetadataWMSCapabilityLayer | undefined} The strongly-typed layer metadata specific to this layer entry config.
+   * @override
    */
   override getLayerMetadata(): TypeMetadataWMSCapabilityLayer | undefined {
     return super.getLayerMetadata() as TypeMetadataWMSCapabilityLayer | undefined;
@@ -146,7 +155,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * @returns {boolean} True when the vector information should be fetched from the WFS. True by default.
    */
   getShouldFetchVectorInformationFromWFS(): boolean {
-    return (this.getGeoviewLayerConfig() as TypeWMSLayerConfig).fetchVectorsOnWFS ?? true; // default: true
+    return this.getGeoviewLayerConfig().fetchVectorsOnWFS ?? true; // default: true
   }
 
   /**
@@ -360,7 +369,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    */
   #normalizeMetadataAndDataAccessPaths(): void {
     // Get the metadata access path
-    let metadataAccessPath = this.getMetadataAccessPath()!.split('?')[0];
+    let metadataAccessPath = this.getMetadataAccessPath()!;
 
     // Normalize it - datacube specific normalization
     metadataAccessPath = normalizeDatacubeAccessPath(metadataAccessPath);
@@ -369,7 +378,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     this.setMetadataAccessPath(metadataAccessPath);
 
     // Get the data access path
-    let dataAccessPath = this.getDataAccessPath().split('?')[0];
+    let dataAccessPath = this.getDataAccessPath();
 
     // If any, normalize it as well in case the provided one also needed to be normalized
     if (dataAccessPath) {

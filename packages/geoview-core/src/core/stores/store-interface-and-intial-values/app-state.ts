@@ -41,7 +41,7 @@ export interface IAppState {
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
-    addMessage: (type: SnackbarType, messageKey: string, param?: string[]) => void;
+    addMessage: (type: SnackbarType, messageKey: string, param?: string[], notification?: boolean) => void;
     addNotification: (notif: NotificationDetailsType) => void;
     setCrosshairActive: (active: boolean) => void;
     setDisplayLanguage: (lang: TypeDisplayLanguage) => Promise<void>;
@@ -124,10 +124,12 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
        * @param {SnackbarType} type - The type of message.
        * @param {string} messageKey - The message.
        * @param {string} param - Optional param to replace in the string if it is a key
+       * @param {boolean} [notification] - Optional param to indicate if the message should be added to notification panel
+       * @returns {void}
        */
-      addMessage: (type: SnackbarType, messageKey: string, param?: string[]): void => {
+      addMessage: (type: SnackbarType, messageKey: string, param?: string[], notification?: boolean): void => {
         // Redirect to processor
-        AppEventProcessor.addMessage(get().mapId, type, messageKey, param);
+        AppEventProcessor.addMessage(get().mapId, type, messageKey, param, notification);
       },
 
       /**

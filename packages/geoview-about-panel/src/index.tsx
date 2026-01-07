@@ -77,6 +77,7 @@ class AboutPanelPlugin extends AppBarPlugin {
   /**
    * Overrides the onCreateButtonProps to pass the correct props
    * @returns {IconButtonPropsExtend} The icon button props
+   * @override
    */
   override onCreateButtonProps(): IconButtonPropsExtend {
     // Button props
@@ -92,6 +93,7 @@ class AboutPanelPlugin extends AppBarPlugin {
   /**
    * Overrides the creation of the content properties of this AboutPanel AppBar Plugin.
    * @returns {TypePanelProps} The TypePanelProps for the AboutPanel AppBar Plugin
+   * @override
    */
   override onCreateContentProps(): TypePanelProps {
     return {
@@ -105,6 +107,7 @@ class AboutPanelPlugin extends AppBarPlugin {
   /**
    * Overrides the content creation of the AppBar Plugin
    * @returns {JSX.Element} The about panel content
+   * @override
    */
   override onCreateContent = (): JSX.Element => {
     return <AboutPanel config={this.getConfig()} />;

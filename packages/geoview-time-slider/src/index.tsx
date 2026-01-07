@@ -126,6 +126,7 @@ class TimeSliderPlugin extends FooterPlugin {
   /**
    * Overrides the creation of the content properties of this TimeSlider Footer Plugin.
    * @returns {TypeTabs} The TypeTabs for the TimeSlider Footer Plugin
+   * @override
    */
   override onCreateContentProps(): TypeTabs {
     return {
@@ -140,6 +141,8 @@ class TimeSliderPlugin extends FooterPlugin {
 
   /**
    * Overrides the addition of the TimeSlider Footer Plugin to make sure to set the time slider configs in the store and apply filters.
+   * @returns {void}
+   * @override
    */
   override onAdd(): void {
     // Once the map is ready we can initialize the time slider. Layers will be registered for the time slider as they load.
@@ -167,11 +170,11 @@ class TimeSliderPlugin extends FooterPlugin {
         // Get the layer
         const layer = this.mapViewer.layer.getGeoviewLayerIfExists(layerPath);
 
-        // Get the time slider config for the layer
-        const timesliderConfig = this.getConfig().sliders.find((slider) => slider.layerPaths.includes(layerPath));
-
         // If the layer was found and of right type
         if (layer instanceof AbstractGVLayer) {
+          // Get the time slider config for the layer
+          const timesliderConfig = this.getConfig().sliders.find((slider) => slider.layerPaths.includes(layerPath));
+
           // Check and add time slider layer when needed
           TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.mapViewer.mapId, layer, timesliderConfig);
         }
@@ -238,12 +241,12 @@ class TimeSliderPlugin extends FooterPlugin {
 
       // If of the right type
       if (layer instanceof AbstractGVLayer) {
-        // Return the temporal dimension for the layer if any
-        return layer.getTimeDimension();
+        // Return true if the layer has a time dimension
+        return !!layer.getTimeDimension();
       }
 
-      // Skip
-      return undefined;
+      // No time dimension for the layer
+      return false;
     });
   }
 }

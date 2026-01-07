@@ -45,7 +45,6 @@ export class VectorTiles extends AbstractGeoViewRaster {
   /**
    * Constructs a VectorTiles Layer configuration processor.
    * @param {TypeVectorTilesConfig} layerConfig - The layer configuration
-   * @param {ProjectionLike} fallbackProjection - The map projection when this layer is being created, for validation purposes.
    */
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(layerConfig: TypeVectorTilesConfig) {
@@ -56,8 +55,17 @@ export class VectorTiles extends AbstractGeoViewRaster {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @returns {TypeVectorTilesConfig} The strongly-typed layer configuration specific to this layer.
    * @override
+   */
+  override getGeoviewLayerConfig(): TypeVectorTilesConfig {
+    return super.getGeoviewLayerConfig() as TypeVectorTilesConfig;
+  }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @returns {TypeMetadataVectorTiles | undefined} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getMetadata(): TypeMetadataVectorTiles | undefined {
     return super.getMetadata() as TypeMetadataVectorTiles | undefined;
@@ -66,6 +74,8 @@ export class VectorTiles extends AbstractGeoViewRaster {
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   * @override
+   * @protected
    */
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Redirect
@@ -87,6 +97,8 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * @param {OLProjection?} [mapProjection] - The map projection.
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<VectorTilesLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   * @override
+   * @protected
    */
   protected override async onProcessLayerMetadata(
     layerConfig: VectorTilesLayerEntryConfig,
@@ -145,6 +157,8 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
    * @param {VectorTilesLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
    * @returns {Promise<VectorTileLayer<VectorTileSource>>} The GeoView raster layer that has been created.
+   * @override
+   * @protected
    */
   protected override async onProcessOneLayerEntry(layerConfig: VectorTilesLayerEntryConfig): Promise<GVVectorTiles> {
     // Sure call parent
@@ -175,6 +189,8 @@ export class VectorTiles extends AbstractGeoViewRaster {
    * Overrides the creation of the GV Layer
    * @param {VectorTilesLayerEntryConfig} layerConfig - The layer entry configuration.
    * @returns {GVVectorTiles} The GV Layer
+   * @override
+   * @protected
    */
   protected override onCreateGVLayer(layerConfig: VectorTilesLayerEntryConfig): GVVectorTiles {
     // Create the source

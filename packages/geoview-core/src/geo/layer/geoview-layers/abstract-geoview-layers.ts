@@ -264,8 +264,8 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Gets the Geoview layer id.
-   * @returns {string} The geoview layer id
+   * Gets the Geoview layer config.
+   * @returns {string} The geoview layer config
    */
   getGeoviewLayerConfig(): TypeGeoviewLayerConfig {
     return this.#geoviewLayerConfig;
@@ -527,7 +527,6 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Emits a layer-specific message event with localization support
-   * @protected
    * @param {string} messageKey - The key used to lookup the localized message OR message
    * @param {string[] | undefined} messageParams - Array of parameters to be interpolated into the localized message
    * @param {SnackbarType} messageType - The message type
@@ -542,6 +541,7 @@ export abstract class AbstractGeoViewLayer {
    * );
    *
    * @fires LayerMessageEvent
+   * @protected
    */
   protected emitMessage(
     messageKey: string,
@@ -752,7 +752,7 @@ export abstract class AbstractGeoViewLayer {
           this.#emitLayerEntryProcessed({ config: layerConfig });
         }
       } else {
-        // The promise failed. Unwrap the reason. Wrap/Unwrap id: c7bce9e8232c
+        // The promise failed. Unwrap the reason. Search id: c7bce9e8232c
         const reason = promise.reason as PromiseRejectErrorWrapper<AbstractBaseLayerEntryConfig>;
 
         // The layer config
@@ -838,7 +838,7 @@ export abstract class AbstractGeoViewLayer {
       // Return as-is
       return layerConfig;
     } catch (error: unknown) {
-      // Wrap so that we carry the layerConfig into the reject callback and throw it higher. Wrap/Unwrap id: c7bce9e8232c
+      // Wrap so that we carry the layerConfig into the reject callback and throw it higher. Search id: c7bce9e8232c
       throw new PromiseRejectErrorWrapper(error, layerConfig);
     }
   }
@@ -1297,8 +1297,8 @@ export abstract class AbstractGeoViewLayer {
    * Processes a Layer Config by calling 'createGeoViewLayers' on the provided layer.
    * @param {AbstractGeoViewLayer} layer - The layer to use to process the configuration
    * @returns {Promise<ConfigBaseClass>} The promise of a generated ConfigBaseClass.
-   * @protected
    * @static
+   * @protected
    */
   protected static processConfig(layer: AbstractGeoViewLayer): Promise<ConfigBaseClass[]> {
     // Create a promise that the layer config will be created

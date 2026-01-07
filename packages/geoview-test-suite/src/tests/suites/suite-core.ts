@@ -42,6 +42,8 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
   /**
    * Overrides the implementation to perform the tests for this Test Suite.
    * @returns {Promise<unknown>} A Promise which resolves when tests are completed.
+   * @override
+   * @protected
    */
   protected override onLaunchTestSuite(): Promise<unknown> {
     // Test Dates

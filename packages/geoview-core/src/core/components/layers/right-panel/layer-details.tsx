@@ -245,7 +245,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   }, [allSublayersVisible, layerDetails, layerDetails.children, legendLayersChildrenVisible, visibleLayers]);
 
   const handleRefreshLayer = (): void => {
-    refreshLayer(layerDetails.layerPath);
+    refreshLayer(layerDetails.layerPath).catch((error: unknown) => {
+      // Log
+      logger.logPromiseFailed('in refreshLayer in layer-details.handleRefreshLayer', error);
+    });
   };
 
   const handleZoomTo = (): void => {

@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useRef, useState, Fragment, useMemo, isValidElement } from 'react';
-
 import { useTranslation } from 'react-i18next';
-
 import { useTheme } from '@mui/material/styles';
-
-import { Plugin } from '@/api/plugin/plugin';
 
 import BasemapSelect from './buttons/basemap-select';
 import Measurement from './buttons/measurement';
@@ -20,12 +16,12 @@ import { ExpandLessIcon, ExpandMoreIcon } from '@/ui/icons';
 import type { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { getSxClasses } from './nav-bar-style';
 import type { NavBarApi, NavBarCreatedEvent, NavBarRemovedEvent } from '@/core/components';
+import type { TypeValidNavBarProps } from '@/api/types/map-schema-types';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { useUINavbarComponents } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from './nav-bar-panel-button';
-
-import type { TypeValidNavBarProps } from '@/api/types/map-schema-types';
 
 type NavBarProps = {
   api: NavBarApi;
@@ -166,17 +162,11 @@ export function NavBar(props: NavBarProps): JSX.Element {
     const processPlugin = (pluginName: TypeValidNavBarProps): void => {
       // Check if the plugin is in navBarComponents but not in corePackages
       if (navBarComponents.includes(pluginName)) {
-        Plugin.loadScript(pluginName)
-          .then((typePlugin) => {
-            Plugin.addPlugin(pluginName, typePlugin, mapId).catch((error: unknown) => {
-              // Log
-              logger.logPromiseFailed(`api.plugin.addPlugin in useEffect in nav-bar for ${pluginName}`, error);
-            });
-          })
-          .catch((error: unknown) => {
-            // Log
-            logger.logPromiseFailed('api.plugin.loadScript in useEffect in nav-bar', error);
-          });
+        // Load and add the plugin
+        MapEventProcessor.loadAndAddPlugin(mapId, pluginName).catch((error: unknown) => {
+          // Log
+          logger.logPromiseFailed('loadAndAddPlugin(time-slider) in processPlugin in nav-bar', error);
+        });
       }
     };
 

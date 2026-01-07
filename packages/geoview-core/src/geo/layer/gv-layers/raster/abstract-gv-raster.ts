@@ -15,8 +15,8 @@ export abstract class AbstractGVRaster extends AbstractGVLayer {
 
   /**
    * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
-   * @override
    * @returns {BaseImageLayer<ImageSource, LayerRenderer>} The strongly-typed OpenLayers type.
+   * @override
    */
   // Disabling 'any', because that's how it is in OpenLayers
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

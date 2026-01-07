@@ -60,8 +60,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * @returns {Promise<Feature[]>}
    * A promise that resolves to an array of OpenLayers features created from
    * the underlying data source.
-   * @protected
    * @abstract
+   * @protected
    */
   protected abstract onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
@@ -73,6 +73,8 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    * @returns {Promise<T>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @override
+   * @protected
    */
   protected override onFetchServiceMetadata<T>(): Promise<T> {
     // None

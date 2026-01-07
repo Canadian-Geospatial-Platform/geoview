@@ -43,8 +43,8 @@ export class GVImageStatic extends AbstractGVRaster {
 
   /**
    * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
-   * @override
    * @returns {ImageLayer<Static>} The strongly-typed OpenLayers type.
+   * @override
    */
   override getOLLayer(): ImageLayer<Static> {
     // Call parent and cast
@@ -53,8 +53,8 @@ export class GVImageStatic extends AbstractGVRaster {
 
   /**
    * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
-   * @override
    * @returns {Static} The Static source instance associated with this layer.
+   * @override
    */
   override getOLSource(): Static {
     // Get source from OL
@@ -63,8 +63,8 @@ export class GVImageStatic extends AbstractGVRaster {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {ImageStaticLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getLayerConfig(): ImageStaticLayerEntryConfig {
     // Call parent and cast
@@ -73,8 +73,8 @@ export class GVImageStatic extends AbstractGVRaster {
 
   /**
    * Overrides the fetching of the legend for a static image layer.
-   * @override
    * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
+   * @override
    */
   override async onFetchLegend(): Promise<TypeLegend | null> {
     // Get the config
@@ -120,8 +120,8 @@ export class GVImageStatic extends AbstractGVRaster {
    * Overrides the way to get the bounds for this layer type.
    * @param {OLProjection} projection - The projection to get the bounds into.
    * @param {number} stops - The number of stops to use to generate the extent.
-   * @override
    * @returns {Extent | undefined} The layer bounding box.
+   * @override
    */
   override onGetBounds(projection: OLProjection, stops: number): Extent | undefined {
     // Get the source projection

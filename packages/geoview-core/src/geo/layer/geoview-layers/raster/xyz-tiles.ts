@@ -55,8 +55,17 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @returns {TypeXYZTilesConfig} The strongly-typed layer configuration specific to this layer.
    * @override
+   */
+  override getGeoviewLayerConfig(): TypeXYZTilesConfig {
+    return super.getGeoviewLayerConfig() as TypeXYZTilesConfig;
+  }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @returns {TypeMetadataXYZTiles | undefined} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getMetadata(): TypeMetadataXYZTiles | undefined {
     return super.getMetadata() as TypeMetadataXYZTiles | undefined;
@@ -65,6 +74,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   * @override
+   * @protected
    */
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Redirect
@@ -82,6 +93,9 @@ export class XYZTiles extends AbstractGeoViewRaster {
   /**
    * Overrides the validation of a layer entry config.
    * @param {ConfigBaseClass} layerConfig - The layer entry config to validate.
+   * @returns {void}
+   * @override
+   * @protected
    */
   protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     // TODO: Update to properly use metadata from map server
@@ -123,6 +137,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param {OLProjection?} [mapProjection] - The map projection.
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<XYZTilesLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   * @override
+   * @protected
    */
   protected override onProcessLayerMetadata(
     layerConfig: XYZTilesLayerEntryConfig,
@@ -182,6 +198,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * Overrides the creation of the GV Layer
    * @param {XYZTilesLayerEntryConfig} layerConfig - The layer entry configuration.
    * @returns {GVXYZTiles} The GV Layer
+   * @override
    */
   protected override onCreateGVLayer(layerConfig: XYZTilesLayerEntryConfig): GVXYZTiles {
     // Create the source

@@ -1,6 +1,13 @@
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
-import type { QueryType, TypeFeatureInfoEntry, TypeLocation, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
+import type {
+  QueryType,
+  TypeFeatureInfoEntry,
+  TypeFeatureInfoResult,
+  TypeLocation,
+  TypeResultSet,
+  TypeResultSetEntry,
+} from '@/api/types/map-schema-types';
 import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { generateId, whenThisThen } from '@/core/utils/utilities';
 import type {
@@ -58,33 +65,185 @@ export abstract class AbstractLayerSet {
     this.#boundedHandleLayerNameChanged = this.#handleLayerNameChanged.bind(this);
   }
 
-  /**
-   * A quick getter to help identify which layerset class the current instance is coming from.
-   */
-  getClassName(): string {
-    // Return the name of the class
-    return this.constructor.name;
-  }
+  // #region OVERRIDES
 
   /**
    * A must-override method called to propagate the result set entry to the store
    * @param {TypeResultSetEntry} resultSetEntry - The result set entry to propagate
    * @param {PropagationType} type - The propagation type
+   * @returns {void}
+   * @protected
    */
   protected abstract onPropagateToStore(resultSetEntry: TypeResultSetEntry, type: PropagationType): void;
 
   /**
    * A must-override method called to delete a result set entry from the store
    * @param {string} layerPath - The layer path to delete from store
+   * @returns {void}
+   * @protected
    */
   protected abstract onDeleteFromStore(layerPath: string): void;
 
   /**
-   * Gets the MapId for the layer set
-   * @returns
+   * An overridable registration condition function for a layer-set to check if the registration
+   * should happen for a specific geoview layer and layer path.
+   * @param {ConfigBaseClass} layerConfig - The layer config
+   * @returns {boolean} True if the layer config should be registered, false otherwise
+   * @protected
    */
-  protected getMapId(): string {
-    return this.layerApi.getMapId();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected onRegisterLayerConfigCheck(layerConfig: ConfigBaseClass): boolean {
+    // Override this function to perform registration condition logic in the inherited classes
+    // By default, a layer-set doesn't register layer configs, it typically registers the layer objects but not the layer config
+    return this.#defaultRegisterLayerConfigCheck;
+  }
+
+  /**
+   * An overridable registration function for a layer-set that the registration process will use to
+   * create a new entry in the layer set for a specific geoview layer and layer path.
+   * @param {ConfigBaseClass} layerConfig - The layer config
+   * @returns {void}
+   * @protected
+   */
+  protected onRegisterLayerConfig(layerConfig: ConfigBaseClass): void {
+    // Prep the resultSet (it's registered, but it doesn't mean it's in the store yet)
+    this.resultSet[layerConfig.layerPath] = {
+      layerPath: layerConfig.layerPath,
+      layerStatus: layerConfig.layerStatus,
+      layerName: layerConfig.getLayerNameCascade(),
+    };
+
+    // Register the layer status changed handler
+    layerConfig.onLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
+  }
+
+  /**
+   * An overridable registration condition function for a layer-set to check if the registration
+   * should happen for a specific geoview layer and layer path. By default, a layer-set always registers layers except when they are group layers.
+   * @param {AbstractBaseGVLayer} layer - The layer
+   * @returns {boolean} True if the layer should be registered, false otherwise
+   * @protected
+   */
+  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
+  protected onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean {
+    // Override this function to perform registration condition logic in the inherited classes
+    // By default, a layer-set always registers layers except when they are group layers
+    if (layer.getLayerConfig()?.getEntryTypeIsGroup()) {
+      // Skip groups
+      return false;
+    }
+
+    // Default
+    return true;
+  }
+
+  /**
+   * An overridable registration function for a layer-set that the registration process will use to
+   * create a new entry in the layer set for a specific geoview layer and layer path.
+   * @param {AbstractBaseGVLayer} layer - The layer config
+   * @returns {void}
+   * @protected
+   */
+  protected onRegisterLayer(layer: AbstractBaseGVLayer): void {
+    // Get layer name
+    const layerName = layer.getLayerName();
+    const layerPath = layer.getLayerPath();
+
+    // If not there (wasn't pre-registered via a config-registration)
+    if (!(layerPath in this.resultSet)) {
+      this.resultSet[layerPath] = {
+        layerPath,
+        layerStatus: layer.getLayerStatus(),
+        layerName,
+      };
+    } else {
+      // Already there, update it
+      this.resultSet[layerPath].layerStatus = layer.getLayerStatus();
+      this.resultSet[layerPath].layerName = layerName;
+    }
+
+    // Add to the registered layers array
+    this.#registeredLayers.push(layer);
+
+    // Register the layer name changed handler
+    layer.onLayerNameChanged(this.#boundedHandleLayerNameChanged);
+  }
+
+  /**
+   * An overridable unregistration function for a layer-set that the registration process will use to
+   * unregister a specific layer config.
+   * @param {ConfigBaseClass | undefined} layerConfig - The layer config
+   * @returns {void}
+   * @protected
+   */
+  protected onUnregisterLayerConfig(layerConfig: ConfigBaseClass | undefined): void {
+    // Unregister the layer status changed handler
+    layerConfig?.offLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
+  }
+
+  /**
+   * An overridable unregistration function for a layer-set that the registration process will use to
+   * unregister a specific geoview layer.
+   * @param {AbstractBaseGVLayer | undefined} layer - The layer
+   * @returns {void}
+   * @protected
+   */
+  protected onUnregisterLayer(layer: AbstractBaseGVLayer | undefined): void {
+    // Unregister the layer name changed handler
+    layer?.offLayerNameChanged(this.#boundedHandleLayerNameChanged);
+  }
+
+  /**
+   * An overridable function for a layer-set to process a layer status changed event.
+   * @param {ConfigBaseClass} layerConfig - The layer config
+   * @param {TypeLayerStatus} layerStatus - The new layer status
+   * @returns {void}
+   * @protected
+   */
+  protected onProcessLayerStatusChanged(layerConfig: ConfigBaseClass, layerStatus: TypeLayerStatus): void {
+    // Change the layer status!
+    this.resultSet[layerConfig.layerPath].layerStatus = layerStatus;
+
+    // Update the name with a possibly updated layerName during layer status progression
+    // (depending on how this translates in the new layers process, might not need this anymore)
+    this.resultSet[layerConfig.layerPath].layerName =
+      layerConfig.getLayerName() || layerConfig.getGeoviewLayerName() || 'No name / Sans nom';
+  }
+
+  /**
+   * An overridable function for a layer-set to process a layer name change.
+   * @param {string} layerPath - The layer path being affected
+   * @param {string} name - The new layer name
+   * @returns {void}
+   * @protected
+   */
+  protected onProcessNameChanged(layerPath: string, name: string): void {
+    // Update name
+    this.resultSet[layerPath].layerName = name;
+  }
+
+  /**
+   * An overridable layer set updated function for a layer-set to indicate the layer set has been updated.
+   * @param {string} layerPath - The layer path
+   * @returns {void}
+   * @protected
+   */
+  protected onLayerSetUpdatedProcess(layerPath: string): void {
+    // Emit layer set updated event to the outside
+    this.#emitLayerSetUpdated({ layerPath, resultSet: this.resultSet });
+  }
+
+  // #endregion OVERRIDES
+
+  // #region PUBLIC METHODS
+
+  /**
+   * A quick getter to help identify which layerset class the current instance is coming from.
+   */
+  getClassName(): string {
+    // Return the name of the class
+    return this.constructor.name;
   }
 
   /**
@@ -115,6 +274,99 @@ export abstract class AbstractLayerSet {
     // Prepare the config for its layer registration later
     this.#prepareConfigForLayerRegistration(layerConfig);
   }
+
+  /**
+   * Registers the layer in the layer-set.
+   * If the layer is already registered, the function returns immediately.
+   * @param {AbstractBaseGVLayer} layer - The layer to register
+   */
+  async registerLayer(layer: AbstractBaseGVLayer): Promise<void> {
+    // If the layer is already registered, skip it, we don't register twice
+    if (this.getRegisteredLayerPaths().includes(layer.getLayerPath())) return;
+
+    // Wait a maximum of 20 seconds for the layer to get to loaded state so that it can get registered, otherwise another attempt will have to be made
+    // This await is important when devs call this method directly to register ad-hoc layers.
+    // TODO: REFACTOR - Remove this await? Seems useless now?
+    await whenThisThen(() => layer.getLayerStatus() === 'loaded', 20000);
+
+    // Update the registration of all layer sets
+    if (this.onRegisterLayerCheck(layer)) {
+      // Call the registration function for the layer-set. This method is different for each child.
+      this.onRegisterLayer(layer);
+
+      // Call for propagation to the store upon registration
+      this.onPropagateToStore(this.resultSet[layer.getLayerPath()], 'layer-registration');
+
+      // Inform that the layer set has been updated
+      this.onLayerSetUpdatedProcess(layer.getLayerPath());
+    }
+  }
+
+  /**
+   * Unregisters the layer config and layer from the layer-set.
+   * @param {string} layerPath - The layer path
+   */
+  unregister(layerPath: string): void {
+    // Call the unregistration function for the layer-set. This method is different for each child.
+    this.onUnregisterLayerConfig(this.layerApi.getLayerEntryConfigIfExists(layerPath));
+
+    // Call the unregistration function for the layer-set. This method is different for each child.
+    this.onUnregisterLayer(this.layerApi.getGeoviewLayerIfExists(layerPath));
+
+    // Delete from the store
+    this.onDeleteFromStore(layerPath);
+
+    // Delete the result set for the layer path
+    delete this.resultSet[layerPath];
+
+    // Remove layer from registered layers
+    this.#registeredLayers = this.#registeredLayers.filter((layer) => layer.getLayerPath() !== layerPath);
+
+    // Inform that the layer set has been updated
+    this.onLayerSetUpdatedProcess(layerPath);
+  }
+
+  // #endregion PUBLIC METHODS
+
+  // #region PROTECTED METHODS
+
+  /**
+   * Gets the MapId for the layer set
+   * @returns
+   */
+  protected getMapId(): string {
+    return this.layerApi.getMapId();
+  }
+
+  /**
+   * Processes layer data to query features on it, if the layer path can be queried.
+   * @param {AbstractGVLayer} geoviewLayer - The geoview layer
+   * @param {QueryType} queryType - The query type
+   * @param {TypeLocation} location - The location for the query
+   * @param {boolean} queryGeometry - The query geometry boolean
+   * @param {AbortController?} [abortController] - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoResult>} A promise resolving to the query results
+   */
+  protected queryLayerFeatures(
+    geoviewLayer: AbstractGVLayer,
+    queryType: QueryType,
+    location: TypeLocation,
+    queryGeometry: boolean = true,
+    abortController?: AbortController
+  ): Promise<TypeFeatureInfoResult> {
+    // If the layer is invisible (or any of its parent(s) is invisible)
+    if (!geoviewLayer.getVisibleIncludingParents(this.layerApi.getGeoviewLayersGroups())) return Promise.resolve({ results: [] });
+
+    // If is not in visible range
+    if (!geoviewLayer.getInVisibleRange(this.layerApi.mapViewer.getView().getZoom())) return Promise.resolve({ results: [] });
+
+    // Get Feature Info
+    return geoviewLayer.getFeatureInfo(this.layerApi.mapViewer.map, queryType, location, queryGeometry, abortController);
+  }
+
+  // #endregion PROTECTED METHODS
+
+  // #region PRIVATE METHODS
 
   /**
    * Prepares a layer configuration for automatic registration once the layer becomes loaded.
@@ -150,157 +402,6 @@ export abstract class AbstractLayerSet {
         logger.logError('Error trying to register the layer coming from the layer config', error);
       }
     });
-  }
-
-  /**
-   * An overridable registration condition function for a layer-set to check if the registration
-   * should happen for a specific geoview layer and layer path.
-   * @param {ConfigBaseClass} layerConfig - The layer config
-   * @returns {boolean} True if the layer config should be registered, false otherwise
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected onRegisterLayerConfigCheck(layerConfig: ConfigBaseClass): boolean {
-    // Override this function to perform registration condition logic in the inherited classes
-    // By default, a layer-set doesn't register layer configs, it typically registers the layer objects but not the layer config
-    return this.#defaultRegisterLayerConfigCheck;
-  }
-
-  /**
-   * An overridable registration function for a layer-set that the registration process will use to
-   * create a new entry in the layer set for a specific geoview layer and layer path.
-   * @param {ConfigBaseClass} layerConfig - The layer config
-   */
-  protected onRegisterLayerConfig(layerConfig: ConfigBaseClass): void {
-    // Prep the resultSet (it's registered, but it doesn't mean it's in the store yet)
-    this.resultSet[layerConfig.layerPath] = {
-      layerPath: layerConfig.layerPath,
-      layerStatus: layerConfig.layerStatus,
-      layerName: layerConfig.getLayerNameCascade(),
-    };
-
-    // Register the layer status changed handler
-    layerConfig.onLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
-  }
-
-  /**
-   * Registers the layer in the layer-set.
-   * If the layer is already registered, the function returns immediately.
-   * @param {AbstractBaseGVLayer} layer - The layer to register
-   */
-  async registerLayer(layer: AbstractBaseGVLayer): Promise<void> {
-    // If the layer is already registered, skip it, we don't register twice
-    if (this.getRegisteredLayerPaths().includes(layer.getLayerPath())) return;
-
-    // Wait a maximum of 20 seconds for the layer to get to loaded state so that it can get registered, otherwise another attempt will have to be made
-    // This await is important when devs call this method directly to register ad-hoc layers.
-    // TODO: REFACTOR - Remove this await? Seems useless now?
-    await whenThisThen(() => layer.getLayerStatus() === 'loaded', 20000);
-
-    // Update the registration of all layer sets
-    if (this.onRegisterLayerCheck(layer)) {
-      // Call the registration function for the layer-set. This method is different for each child.
-      this.onRegisterLayer(layer);
-
-      // Call for propagation to the store upon registration
-      this.onPropagateToStore(this.resultSet[layer.getLayerPath()], 'layer-registration');
-
-      // Inform that the layer set has been updated
-      this.onLayerSetUpdatedProcess(layer.getLayerPath());
-    }
-  }
-
-  /**
-   * An overridable registration condition function for a layer-set to check if the registration
-   * should happen for a specific geoview layer and layer path. By default, a layer-set always registers layers except when they are group layers.
-   * @param {AbstractBaseGVLayer} layer - The layer
-   * @returns {boolean} True if the layer should be registered, false otherwise
-   */
-  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  protected onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean {
-    // Override this function to perform registration condition logic in the inherited classes
-    // By default, a layer-set always registers layers except when they are group layers
-    if (layer.getLayerConfig()?.getEntryTypeIsGroup()) {
-      // Skip groups
-      return false;
-    }
-
-    // Default
-    return true;
-  }
-
-  /**
-   * An overridable registration function for a layer-set that the registration process will use to
-   * create a new entry in the layer set for a specific geoview layer and layer path.
-   * @param {AbstractBaseGVLayer} layer - The layer config
-   */
-  protected onRegisterLayer(layer: AbstractBaseGVLayer): void {
-    // Get layer name
-    const layerName = layer.getLayerName();
-    const layerPath = layer.getLayerPath();
-
-    // If not there (wasn't pre-registered via a config-registration)
-    if (!(layerPath in this.resultSet)) {
-      this.resultSet[layerPath] = {
-        layerPath,
-        layerStatus: layer.getLayerStatus(),
-        layerName,
-      };
-    } else {
-      // Already there, update it
-      this.resultSet[layerPath].layerStatus = layer.getLayerStatus();
-      this.resultSet[layerPath].layerName = layerName;
-    }
-
-    // Add to the registered layers array
-    this.#registeredLayers.push(layer);
-
-    // Register the layer name changed handler
-    layer.onLayerNameChanged(this.#boundedHandleLayerNameChanged);
-  }
-
-  /**
-   * Unregisters the layer config and layer from the layer-set.
-   * @param {string} layerPath - The layer path
-   */
-  unregister(layerPath: string): void {
-    // Call the unregistration function for the layer-set. This method is different for each child.
-    this.onUnregisterLayerConfig(this.layerApi.getLayerEntryConfigIfExists(layerPath));
-
-    // Call the unregistration function for the layer-set. This method is different for each child.
-    this.onUnregisterLayer(this.layerApi.getGeoviewLayerIfExists(layerPath));
-
-    // Delete from the store
-    this.onDeleteFromStore(layerPath);
-
-    // Delete the result set for the layer path
-    delete this.resultSet[layerPath];
-
-    // Remove layer from registered layers
-    this.#registeredLayers = this.#registeredLayers.filter((layer) => layer.getLayerPath() !== layerPath);
-
-    // Inform that the layer set has been updated
-    this.onLayerSetUpdatedProcess(layerPath);
-  }
-
-  /**
-   * An overridable unregistration function for a layer-set that the registration process will use to
-   * unregister a specific layer config.
-   * @param {ConfigBaseClass | undefined} layerConfig - The layer config
-   */
-  protected onUnregisterLayerConfig(layerConfig: ConfigBaseClass | undefined): void {
-    // Unregister the layer status changed handler
-    layerConfig?.offLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
-  }
-
-  /**
-   * An overridable unregistration function for a layer-set that the registration process will use to
-   * unregister a specific geoview layer.
-   * @param {AbstractBaseGVLayer | undefined} layer - The layer
-   */
-  protected onUnregisterLayer(layer: AbstractBaseGVLayer | undefined): void {
-    // Unregister the layer name changed handler
-    layer?.offLayerNameChanged(this.#boundedHandleLayerNameChanged);
   }
 
   /**
@@ -353,67 +454,9 @@ export abstract class AbstractLayerSet {
     }
   }
 
-  /**
-   * An overridable function for a layer-set to process a layer status changed event.
-   * @param {ConfigBaseClass} layerConfig - The layer config
-   * @param {TypeLayerStatus} layerStatus - The new layer status
-   */
-  protected onProcessLayerStatusChanged(layerConfig: ConfigBaseClass, layerStatus: TypeLayerStatus): void {
-    // Change the layer status!
-    this.resultSet[layerConfig.layerPath].layerStatus = layerStatus;
+  // #endregion PRIVATE METHODS
 
-    // Update the name with a possibly updated layerName during layer status progression
-    // (depending on how this translates in the new layers process, might not need this anymore)
-    this.resultSet[layerConfig.layerPath].layerName =
-      layerConfig.getLayerName() || layerConfig.getGeoviewLayerName() || 'No name / Sans nom';
-  }
-
-  /**
-   * An overridable function for a layer-set to process a layer name change.
-   * @param {string} layerPath - The layer path being affected
-   * @param {string} name - The new layer name
-   */
-  protected onProcessNameChanged(layerPath: string, name: string): void {
-    // Update name
-    this.resultSet[layerPath].layerName = name;
-  }
-
-  /**
-   * An overridable layer set updated function for a layer-set to indicate the layer set has been updated.
-   * @param {string} layerPath - The layer path
-   */
-  protected onLayerSetUpdatedProcess(layerPath: string): void {
-    // Emit layer set updated event to the outside
-    this.#emitLayerSetUpdated({ layerPath, resultSet: this.resultSet });
-  }
-
-  /**
-   * Processes layer data to query features on it, if the layer path can be queried.
-   * @param {OLMap} map - The Map to query layer features from.
-   * @param {AbstractGVLayer} geoviewLayer - The geoview layer
-   * @param {QueryType} queryType - The query type
-   * @param {TypeLocation} location - The location for the query
-   * @param {boolean} queryGeometry - The query geometry boolean
-   * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise resolving to the query results
-   */
-  protected static queryLayerFeatures(
-    layerApi: LayerApi,
-    geoviewLayer: AbstractGVLayer,
-    queryType: QueryType,
-    location: TypeLocation,
-    queryGeometry: boolean = true,
-    abortController: AbortController | undefined = undefined
-  ): Promise<TypeFeatureInfoEntry[]> {
-    // If the layer is invisible (or any of its parent(s) is invisible)
-    if (!geoviewLayer.getVisibleIncludingParents(layerApi.getGeoviewLayersGroups())) return Promise.resolve([]);
-
-    // If is not in visible range
-    if (!geoviewLayer.getInVisibleRange(layerApi.mapViewer.getView().getZoom())) return Promise.resolve([]);
-
-    // Get Feature Info
-    return geoviewLayer.getFeatureInfo(layerApi.mapViewer.map, queryType, location, queryGeometry, abortController);
-  }
+  // #region STATIC METHODS
 
   /**
    * Checks if the layer is of queryable type based on its class definition
@@ -442,8 +485,8 @@ export abstract class AbstractLayerSet {
    * This will update fields in and delete unwanted fields from the arrayOfRecords
    * @param {AbstractBaseLayerEntryConfig} layerEntryConfig - The layer entry config object.
    * @param {TypeFeatureInfoEntry[]} arrayOfRecords - Features to delete fields from.
-   * @protected
    * @static
+   * @protected
    */
   protected static alignRecordsWithOutFields(layerEntryConfig: AbstractBaseLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): void {
     // Get outfields
@@ -490,7 +533,7 @@ export abstract class AbstractLayerSet {
 
   /**
    * Determines whether the retrieved feature info records contain real attribute fields
-   * (i.e., key–value properties) or whether they were returned in a fallback
+   * (i.e., key-value properties) or whether they were returned in a fallback
    * HTML/plain-text form, which commonly occurs with WMS `GetFeatureInfo` responses.
    * This is used primarily to detect when a WMS service cannot return structured
    * feature attributes and instead provides the feature data as a single HTML or
@@ -508,8 +551,8 @@ export abstract class AbstractLayerSet {
    * @returns {boolean}
    *   `true` if the feature info records contain real attribute fields;
    *   `false` if they consist only of fallback HTML or plain-text content.
-   * @protected
    * @static
+   * @protected
    */
   protected static recordsContainActualFields(layerConfig: AbstractBaseLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): boolean {
     // If the layer is WMS and there's only 1 property and it's html or plain_text, let it be, the getFeatureInfo couldn't query object by properties nicely
@@ -527,6 +570,10 @@ export abstract class AbstractLayerSet {
     // Records have actual fields
     return true;
   }
+
+  // #endregion STATIC METHODS
+
+  // #region EVENTS
 
   /**
    * Emits an event to all registered handlers.
@@ -555,6 +602,8 @@ export abstract class AbstractLayerSet {
     // Unregister the layersetupdated event callback
     EventHelper.offEvent(this.#onLayerSetUpdatedHandlers, callback);
   }
+
+  // #endregion EVENTS
 }
 
 /** The propagation type, notably for the store */

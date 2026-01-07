@@ -16,7 +16,6 @@ import {
   LayersOutlinedIcon,
 } from '@/ui';
 
-import { Plugin } from '@/api/plugin/plugin';
 import { Geolocator } from '@/core/components/geolocator/geolocator';
 import type { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import ExportButton from '@/core/components/export/export-modal-button';
@@ -44,6 +43,7 @@ import type { TypeValidAppBarCoreProps } from '@/api/types/map-schema-types';
 import { DEFAULT_APPBAR_CORE, DEFAULT_APPBAR_TABS_ORDER } from '@/api/types/map-schema-types';
 import { camelCase, handleEscapeKey } from '@/core/utils/utilities';
 import { IconButton } from '@/ui/icon-button/icon-button';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 interface GroupPanelType {
   icon: ReactNode;
@@ -268,15 +268,10 @@ export function AppBar(props: AppBarProps): JSX.Element {
         }
 
         // Load and add the plugin
-        Plugin.loadScript(pluginName)
-          .then((typePlugin) => {
-            Plugin.addPlugin(pluginName, typePlugin, mapId).catch((error: unknown) => {
-              logger.logPromiseFailed(`api.plugin.addPlugin in useEffect in app-bar for ${pluginName}`, error);
-            });
-          })
-          .catch((error: unknown) => {
-            logger.logPromiseFailed(`api.plugin.loadScript in useEffect in app-bar for ${pluginName}`, error);
-          });
+        MapEventProcessor.loadAndAddPlugin(mapId, pluginName).catch((error: unknown) => {
+          // Log
+          logger.logPromiseFailed('loadAndAddPlugin(time-slider) in processPlugin in app-bar', error);
+        });
       });
     }
   }, [appBarConfig, mapId]);
