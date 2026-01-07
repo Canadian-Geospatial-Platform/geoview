@@ -8,7 +8,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { DEFAULT_MAP_FEATURE_CONFIG } from '@/api/types/map-schema-types';
 import type { GeoCoreLayerConfig, RCSLayerConfig, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Class used to add geoCore layer to the map
@@ -18,11 +18,11 @@ import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 export class GeoCore {
   /**
    * Gets GeoView layer configurations list from the UUIDs of the list of layer entry configurations.
-   * @param {string} uuid - The UUID of the layer.
-   * @param {TypeDisplayLanguage} language - The language.
-   * @param {string} mapId - The optional map id.
-   * @param {GeoCoreLayerConfig?} layerConfig - The optional layer configuration.
-   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
+   * @param uuid - The UUID of the layer.
+   * @param language - The language.
+   * @param mapId - The optional map id.
+   * @param layerConfig - The optional layer configuration.
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
    * @returns {Promise<GeoCoreLayerConfigResponse>} List of layer configurations to add to the map.
    */
   static async createLayerConfigFromUUID(
@@ -73,9 +73,9 @@ export class GeoCore {
       // Use the name from the first layer if none is provided in the config
       if (!tempLayerConfig.geoviewLayerName) tempLayerConfig.geoviewLayerName = response.layers[0].geoviewLayerName;
 
-      const newLayerConfig = Config.prevalidateGeoviewLayersConfig([tempLayerConfig], (errorKey: string, params: string[]) => {
+      const newLayerConfig = Config.prevalidateGeoviewLayersConfig([tempLayerConfig], (error: GeoViewError) => {
         // When an error happens, raise the exception, we handle it higher in this case
-        throw new GeoViewError(errorKey, params);
+        throw error;
       });
 
       // Return the created layer config from the merged config informations
@@ -100,12 +100,12 @@ export class GeoCore {
 
   /**
    * Gets GeoView layer configurations list from the RCS UUIDs of the list of layer entry configurations.
-   * @param {string} uuid - The UUID of the layer.
-   * @param {TypeDisplayLanguage} language - The language.
-   * @param {string} mapId - The optional map id.
-   * @param {RCSLayerConfig?} layerConfig - The optional layer configuration.
-   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of fetch.
-   * @returns {Promise<TypeGeoviewLayerConfig>} List of layer configurations to add to the map.
+   * @param uuid - The UUID of the layer.
+   * @param language - The language.
+   * @param mapId - The optional map id.
+   * @param layerConfig - Optional layer configuration.
+   * @param abortSignal - Optional {@link AbortSignal} used to handle cancelling of fetch.
+   * @returns List of layer configurations to add to the map.
    */
   static async createLayerConfigFromRCSUUID(
     uuid: string,

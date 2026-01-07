@@ -69,7 +69,6 @@ import { getAppCrosshairsActive } from '@/core/stores/store-interface-and-intial
 import type { TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 
-import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { InvalidExtentError, PluginError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
@@ -184,7 +183,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @static
    */
   protected static getMapStateProtected(mapId: string): IMapState {
-    // TODO: Refactor - Rename this function when we want to clarify the small confusion with getMapState function below
+    // TODO: REFACTOR - Rename this function when we want to clarify the small confusion with getMapState function below
     // Return the map state
     return this.getState(mapId).mapState;
   }
@@ -609,10 +608,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       await this.resetBasemap(mapId);
 
       // refresh layers so new projection is render properly
-      this.getMapViewer(mapId).refreshLayers();
-
-      // When the map projection is changed, all layer bounds must be recalculated
-      this.getMapViewer(mapId).layer.recalculateBoundsAll();
+      this.getMapViewerLayerAPI(mapId).refreshLayers();
 
       // Remove layer highlight if present to avoid bad reprojection
       const highlightName = LegendEventProcessor.getLayerPanelState(mapId, 'highlightedLayer') as string;
@@ -721,7 +717,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
       return (
         (legendLayer?.children && legendLayer.children.length > 0) ||
         (legendLayer?.items && legendLayer.items.length > 1) ||
-        (legendLayer?.type === CONST_LAYER_TYPES.WMS && legendLayer?.icons?.some((icon) => icon.iconImage && icon.iconImage !== 'no data'))
+        (legendLayer?.schemaTag === CONST_LAYER_TYPES.WMS &&
+          legendLayer?.icons?.some((icon) => icon.iconImage && icon.iconImage !== 'no data'))
       );
     });
   }
@@ -816,9 +813,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
   /**
    * Adds a layer to the map. This methods redirects to the method on the layer api.
    * @param {string} mapId - The map id.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The geoview layer configuration to add.
-   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
-   * @returns {GeoViewLayerAddedResult} The result of the addition of the geoview layer.
+   * @param geoviewLayerConfig - The geoview layer configuration to add.
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
+   * @returns The result of the addition of the geoview layer.
    * @throws {LayerCreatedTwiceError} When there already is a layer on the map with the provided geoviewLayerId.
    * The result contains the instanciated GeoViewLayer along with a promise that will resolve when the layer will be officially on the map.
    * @static
@@ -1356,7 +1353,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - ID of map to zoom on
    * @param {string} layerPath - Path of layer to zoom to.
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-   * @returns {void}
    * @static
    */
   static zoomToLayerVisibleScale(mapId: string, layerPath: string): void {
@@ -1374,17 +1370,24 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Change view to go to proper zoom centered in the middle of layer extent
     // If there is no layerExtent or if the zoom needs to zoom out, the center will be undefined and not use
     // Check if the map center is already in the layer extent and if so, do not center
-    const layerExtent = (geoviewLayer as AbstractGVLayer).getBounds(this.getMapViewer(mapId).getProjection(), MapViewer.DEFAULT_STOPS);
-    const centerExtent =
-      layerExtent && layerMinZoom > mapZoom! && !GeoUtilities.isPointInExtent(view.getCenter()!, layerExtent)
-        ? [(layerExtent[2] + layerExtent[0]) / 2, (layerExtent[1] + layerExtent[3]) / 2]
-        : undefined;
+    geoviewLayer
+      .getBounds(this.getMapViewer(mapId).getProjection(), MapViewer.DEFAULT_STOPS)
+      .then((layerExtent) => {
+        const centerExtent =
+          layerExtent && layerMinZoom > mapZoom! && !GeoUtilities.isPointInExtent(view.getCenter()!, layerExtent)
+            ? [(layerExtent[2] + layerExtent[0]) / 2, (layerExtent[1] + layerExtent[3]) / 2]
+            : undefined;
 
-    view.animate({
-      center: centerExtent,
-      zoom: layerZoom,
-      duration: OL_ZOOM_DURATION,
-    });
+        view.animate({
+          center: centerExtent,
+          zoom: layerZoom,
+          duration: OL_ZOOM_DURATION,
+        });
+      })
+      .catch((error: unknown) => {
+        // Log error
+        logger.logPromiseFailed('in getBounds in MapEventProcessor.zoomToLayerVisibleScale', error);
+      });
   }
 
   /**
@@ -2085,9 +2088,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @static
    */
   static createGeometryGroup(mapId: string, groupName: string): void {
-    const viewer = this.getMapViewer(mapId);
-    if (!viewer.layer.geometry.hasGeometryGroup(groupName)) {
-      viewer.layer.geometry.createGeometryGroup(groupName);
+    const layerApi = this.getMapViewerLayerAPI(mapId);
+    if (!layerApi.geometry.hasGeometryGroup(groupName)) {
+      layerApi.geometry.createGeometryGroup(groupName);
     }
   }
 
@@ -2101,9 +2104,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @static
    */
   static deleteGeometriesFromGroup(mapId: string, groupName: string): void {
-    const viewer = this.getMapViewer(mapId);
-    if (viewer.layer.geometry.hasGeometryGroup(groupName)) {
-      viewer.layer.geometry.deleteGeometriesFromGroup(groupName);
+    const layerApi = this.getMapViewerLayerAPI(mapId);
+    if (layerApi.geometry.hasGeometryGroup(groupName)) {
+      layerApi.geometry.deleteGeometriesFromGroup(groupName);
     }
   }
 

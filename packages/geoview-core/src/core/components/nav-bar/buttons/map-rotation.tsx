@@ -6,7 +6,7 @@ import {
   useMapStoreActions,
   useMapFixNorth,
   useMapNorthArrow,
-  useMapProjection,
+  useMapProjectionEPSG,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
@@ -33,10 +33,10 @@ export default function MapRotation(): JSX.Element {
   const mapRotation = useMapRotation();
   const isFixNorth = useMapFixNorth();
   const isNorthEnable = useMapNorthArrow();
-  const mapProjection = useMapProjection();
+  const mapProjectionEPSG = useMapProjectionEPSG();
   const { rotationAngle } = useManageArrow();
 
-  const isLCCProjection = `EPSG:${mapProjection}` === Projection.PROJECTION_NAMES.LCC;
+  const isLCCProjection = mapProjectionEPSG === Projection.PROJECTION_NAMES.LCC;
   const showFixNorthSwitch = isLCCProjection && isNorthEnable;
 
   // Convert radians to degrees (normalize to -180 to 180 range)

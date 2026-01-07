@@ -7,17 +7,21 @@ import { MenuItem } from '@/ui';
 import { logger } from '@/core/utils/logger';
 import { JsonExportWorker } from '@/core/workers/json-export-worker';
 import type { SerializedGeometry, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
-import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  useLayerSelectorName,
+  useLayerSelectorSchemaTag,
+  useLayerStoreActions,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useMapProjection } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapProjectionEPSG } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { TIMEOUT } from '@/core/utils/constant';
 
 interface JSONExportButtonProps {
+  layerPath: string;
   rows: unknown[];
   features: TypeFeatureInfoEntry[];
-  layerPath: string;
 }
 
 /**
@@ -31,9 +35,11 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
   const { t } = useTranslation<string>();
 
   // get store action and map projection
-  const { getLayer, queryLayerEsriDynamic } = useLayerStoreActions();
+  const { queryLayerEsriDynamic } = useLayerStoreActions();
   const { addMessage } = useAppStoreActions();
-  const mapProjection = useMapProjection();
+  const mapProjectionEPSG = useMapProjectionEPSG();
+  const layerName = useLayerSelectorName(layerPath) ?? '';
+  const schemaTag = useLayerSelectorSchemaTag(layerPath);
 
   // Keep exporting state
   const [isExporting, setIsExporting] = useState(false);
@@ -140,7 +146,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
       try {
         // Initialize the worker
         await worker.init({
-          sourceCRS: `EPSG:${mapProjection}`,
+          sourceCRS: mapProjectionEPSG,
           targetCRS: 'EPSG:4326',
         });
 
@@ -182,7 +188,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
         worker.terminate();
       }
     },
-    [features, fetchESRI, mapProjection, rows]
+    [features, fetchESRI, mapProjectionEPSG, rows]
   );
 
   /**
@@ -205,9 +211,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
   const handleExportData = useCallback(async () => {
     setIsExporting(true);
     try {
-      const layer = getLayer(layerPath);
-      const layerIsEsriDynamic = layer?.type === CONST_LAYER_TYPES.ESRI_DYNAMIC;
-
+      const layerIsEsriDynamic = schemaTag === CONST_LAYER_TYPES.ESRI_DYNAMIC;
       const jsonGenerator = getJson(layerIsEsriDynamic);
       const chunks = [];
       let i = 0;
@@ -224,15 +228,14 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
 
       const fullJson = chunks.join('');
       const blob = new Blob([fullJson], { type: 'application/json' });
-      exportBlob(blob, `table-${getLayer(layerPath)?.layerName.replaceAll(' ', '-')}.json`);
+      exportBlob(blob, `table-${layerName.replaceAll(' ', '-')}.json`);
     } catch (error: unknown) {
       addMessage('error', 'dataTable.downloadAsGeoJSONMessage', [t('general.failed')]);
       logger.logError('Download GeoJSON failed:', error);
     } finally {
       setIsExporting(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getJson]);
+  }, [addMessage, exportBlob, getJson, layerName, schemaTag, rows.length, t]);
 
   return (
     // eslint-disable-next-line @typescript-eslint/no-misused-promises

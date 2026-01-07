@@ -1,5 +1,9 @@
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
-import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type {
+  ConfigBaseClass,
+  LayerStatusChangedDelegate,
+  LayerStatusChangedEvent,
+} from '@/api/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
 import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
@@ -31,6 +35,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
   declare resultSet: TypeLegendResultSet;
 
   // Keep a bounded reference to the handle layer status changed
+  #boundedHandleLayerStatusChanged: LayerStatusChangedDelegate;
+
+  // Keep a bounded reference to the handle layer status changed
   #boundedHandleLayerStyleChanged: StyleChangedDelegate;
 
   // Keep a bounded reference to the handle layer style applied
@@ -42,6 +49,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
    */
   constructor(layerApi: LayerApi) {
     super(layerApi);
+    this.#boundedHandleLayerStatusChanged = this.#handleLayerStatusChanged.bind(this);
     this.#boundedHandleLayerStyleChanged = this.#handleLayerStyleChanged.bind(this);
     this.#boundedHandleLayerStyleApplied = this.#handleStyleApplied.bind(this);
   }
@@ -75,11 +83,22 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * @protected
    */
   protected override onRegisterLayerConfig(layerConfig: ConfigBaseClass): void {
-    // Call parent
-    super.onRegisterLayerConfig(layerConfig);
+    // Register the layer status changed handler
+    layerConfig.onLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
 
-    // Keep track if the legend has been queried
+    // Keep track if the legend has been init
     this.resultSet[layerConfig.layerPath].legendQueryStatus = 'init';
+  }
+
+  /**
+   * Overrides the behavior to apply when a legends-layer-set wants to unregister a layer in its set.
+   * @param {ConfigBaseClass | undefined} layerConfig - The layer config
+   * @returns {void}
+   * @protected
+   */
+  protected override onUnregisterLayerConfig(layerConfig: ConfigBaseClass | undefined): void {
+    // Unregister the layer status changed handler
+    layerConfig?.offLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
   }
 
   /**
@@ -107,16 +126,16 @@ export class LegendsLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Overrides the behavior to apply when a layer status changed for a legends-layer-set.
+   * Processes action when the layer status changes.
    * @param {ConfigBaseClass} layerConfig - The layer config
    * @param {TypeLayerStatus} layerStatus - The new layer status
    * @returns {void}
    * @override
    * @protected
    */
-  protected override onProcessLayerStatusChanged(layerConfig: ConfigBaseClass, layerStatus: TypeLayerStatus): void {
-    // Call parent. After this call, this.resultSet?.[layerPath]?.layerStatus may have changed!
-    super.onProcessLayerStatusChanged(layerConfig, layerStatus);
+  protected processLayerStatusChanged(layerConfig: ConfigBaseClass, layerStatus: TypeLayerStatus): void {
+    // Change the layer status!
+    this.resultSet[layerConfig.layerPath].layerStatus = layerStatus;
 
     // Check if ready to query legend
     this.#checkQueryLegend(layerConfig, false);
@@ -132,7 +151,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override onPropagateToStore(resultSetEntry: TypeLegendResultSetEntry, type: PropagationType): void {
-    // Redirect
+    // Redirect - Add layer to the list after registration
     this.#propagateToStore(resultSetEntry);
   }
 
@@ -173,10 +192,11 @@ export class LegendsLayerSet extends AbstractLayerSet {
     // If the legend should be queried
     if (this.#legendShouldBeQueried(layer, layerConfig, forced)) {
       // Flag
+      this.resultSet[layerPath].data = undefined;
       this.resultSet[layerPath].legendQueryStatus = 'querying';
 
       // Propagate to the store about the querying happening
-      this.#propagateToStore(this.resultSet[layerPath]);
+      this.#propagateToStoreLegendQueryStatus(layerPath, this.resultSet[layerPath]);
 
       // Query the legend
       const legendPromise = layer.queryLegend();
@@ -193,10 +213,10 @@ export class LegendsLayerSet extends AbstractLayerSet {
             this.resultSet[layerPath].legendQueryStatus = 'queried';
 
             // Query completed, keep it
-            this.resultSet[layerPath].data = legend;
+            this.resultSet[layerPath].data = legend ?? undefined;
 
             // Propagate to the store once the legend is received
-            this.#propagateToStore(this.resultSet[layerPath]);
+            this.#propagateToStoreLegendQueryStatus(layerPath, this.resultSet[layerPath]);
 
             // Inform that the layer set has been updated by calling parent to emit event
             this.onLayerSetUpdatedProcess(layerPath);
@@ -212,11 +232,18 @@ export class LegendsLayerSet extends AbstractLayerSet {
   /**
    * Propagates the resultSetEntry to the store
    * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate to the store
-   * @private
    */
   #propagateToStore(resultSetEntry: TypeLegendResultSetEntry): void {
     // Propagate
     LegendEventProcessor.propagateLegendToStore(this.getMapId(), resultSetEntry);
+  }
+
+  /**
+   * Propagates the legend query status to the store
+   */
+  #propagateToStoreLegendQueryStatus(layerPath: string, resultSetEntry: TypeLegendResultSetEntry): void {
+    // Propagate
+    LegendEventProcessor.setLegendQueryStatusInStore(this.getMapId(), layerPath, resultSetEntry.legendQueryStatus, resultSetEntry.data);
   }
 
   /**
@@ -254,6 +281,30 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
     // Return if legend should be queried
     return shouldQueryLegend;
+  }
+
+  /**
+   * Handles when a layer status changed on a layer config.
+   * @param {ConfigBaseClass} layerConfig - The layer config
+   * @param {LayerStatusChangedEvent} layerStatusEvent - The new layer status
+   */
+  #handleLayerStatusChanged(layerConfig: ConfigBaseClass, layerStatusEvent: LayerStatusChangedEvent): void {
+    try {
+      // Call the overridable function to process a layer status is changing
+      this.processLayerStatusChanged(layerConfig, layerStatusEvent.layerStatus);
+
+      // If still existing (it's possible a layer set might want to unregister a layer config depending on its status, so we check)
+      if (this.resultSet[layerConfig.layerPath]) {
+        // Propagate the status to the store so that the UI gets updated
+        this.#propagateToStore(this.resultSet[layerConfig.layerPath]);
+      }
+
+      // Emit the layer set updated changed event
+      this.onLayerSetUpdatedProcess(layerConfig.layerPath);
+    } catch (error: unknown) {
+      // Log
+      logger.logError('CAUGHT in handleLayerStatusChanged', layerConfig.layerPath, error);
+    }
   }
 
   /**

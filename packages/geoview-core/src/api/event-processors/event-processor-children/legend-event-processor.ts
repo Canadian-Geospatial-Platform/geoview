@@ -1,15 +1,28 @@
-import type { Extent, TypeStyleGeometry } from '@/api/types/map-schema-types';
+import type { Projection as OLProjection } from 'ol/proj';
+
+import type { Extent } from '@/api/types/map-schema-types';
 import type { TemporalMode, TimeDimension, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
-import type { TypeGeoviewLayerType, TypeLayerControls } from '@/api/types/layer-schema-types';
+import type { TypeLayerControls, TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
-import { isGeoTIFFLegend, isImageStaticLegend, isVectorLegend } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
-import type { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { MapViewer } from '@/geo/map/map-viewer';
+import { GeoUtilities } from '@/geo/utils/utilities';
+import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type {
+  ILayerState,
+  LegendQueryStatus,
+  TypeLegend,
+  TypeLegendResultSetEntry,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
+import { Projection } from '@/geo/utils/projection';
+import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
+import { logger } from '@/core/utils/logger';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -35,7 +48,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     return super.getState(mapId).layerState;
   }
 
-  static setSelectedLayersTabLayer(mapId: string, layerPath: string): void {
+  static setSelectedLayersTabLayerInStore(mapId: string, layerPath: string): void {
     // Save in store
     this.getLayerState(mapId).setterActions.setSelectedLayerPath(layerPath);
   }
@@ -103,61 +116,97 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Calculates the geographic bounds of a layer identified by its layer path
-   * and stores the result in the layer's state within the legend.
-   * This method:
-   *  1. Calls the MapViewer API to compute the layer's bounds.
-   *  2. Validates that the computed bounds are finite.
-   *  3. Locates the corresponding legend layer by its path.
-   *  4. Updates the layer's `bounds` property.
-   *  5. Persists the updated legend state.
-   * @param {string} mapId - Identifier of the map instance containing the layer.
-   * @param {string} layerPath - The unique hierarchical path of the layer whose
-   *   bounds should be calculated and stored.
-   * @static
-   */
-  static calculateLayerBoundsAndSaveToStore(mapId: string, layerPath: string): void {
-    // Calculate the bounds of the layer at the given layerPath
-    const newBounds = MapEventProcessor.getMapViewerLayerAPI(mapId).calculateBounds(layerPath);
-
-    // If calculated successfully
-    if (newBounds && !newBounds.includes(Infinity)) {
-      const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
-      const layer = this.findLayerByPath(layers, layerPath);
-
-      // If found
-      if (layer) {
-        // Set layer bounds
-        layer.bounds = newBounds;
-
-        // Set updated legend layers
-        this.getLayerState(mapId).setterActions.setLegendLayers(layers);
-      }
-    }
-  }
-
-  /**
-   * Retrieves the projection code for a specific layer.
-   *
-   * @param {string} mapId - The unique identifier of the map instance.
-   * @param {string} layerPath - The path to the layer.
-   * @returns {string | undefined} - The projection code of the layer, or `undefined` if not available.
+   * Retrieves the service (metadata) projection code for a specific raster layer.
+   * @param mapId - The unique identifier of the map instance.
+   * @param layerPath - The fully qualified path of the layer.
+   * @returns The projection code (e.g., "EPSG:4326") defined in the layer's service metadata,
+   *          or `undefined` if:
+   *          - the layer does not exist,
+   *          - the layer is not a raster layer,
+   *          - or the metadata projection is not available.
    * @description
-   * This method fetches the Geoview layer for the specified layer path and checks if it has a `getMetadataProjection` method.
-   * If the method exists, it retrieves the projection object and returns its code using the `getCode` method.
-   * If the projection or its code is not available, the method returns `undefined`.
+   * This method looks up the GeoView layer associated with the provided `layerPath`.
+   * If the layer exists and is an instance of `AbstractGVRaster`, it retrieves the
+   * projection defined in the service metadata via `getMetadataProjection()`.
+   * The projection code is then returned using `projection.getCode()`.
    * @static
    */
   static getLayerServiceProjection(mapId: string, layerPath: string): string | undefined {
-    // TODO: Check - Do we want it to throw instead of handling when undefined? (call getGeoviewLayer instead of getGeoviewLayerIfExists)
+    // Get the layer if it exists
     const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
 
-    if (geoviewLayer && 'getMetadataProjection' in geoviewLayer && typeof geoviewLayer.getMetadataProjection === 'function') {
+    // If of the right type
+    if (geoviewLayer instanceof AbstractGVRaster) {
+      // Get the projection and return its code
       const projection = geoviewLayer.getMetadataProjection();
-      return projection && typeof projection.getCode === 'function' ? projection.getCode() : undefined;
+      return projection?.getCode();
     }
 
+    // Layer not found or not a Raster layer or no metadtata projection
     return undefined;
+  }
+
+  /**
+   * Triggers asynchronous bounds recalculation and propagation for a layer
+   * and its parent hierarchy without awaiting completion.
+   * @param mapId - The unique identifier of the map instance.
+   * @param gvLayer - The layer from which bounds recalculation should begin.
+   * @param allGroups - The collection of root-level group layers used to
+   * resolve parent relationships.
+   * @description
+   * This method invokes {@link setLayerBoundsForLayerAndParentsInStore} using a
+   * fire-and-forget pattern. The returned promise is intentionally not awaited,
+   * allowing bounds recalculation and propagation to occur in the background.
+   * @remarks
+   * This method is intended for non-blocking workflows (e.g., UI updates)
+   * where bounds propagation should not delay execution. Callers requiring
+   * completion guarantees should use the awaited version instead.
+   */
+  static setLayerBoundsForLayerAndParentsAndForgetInStore(mapId: string, gvLayer: AbstractBaseGVLayer, allGroups: GVGroupLayer[]): void {
+    // Redirect and forget about it
+    const promise = this.setLayerBoundsForLayerAndParentsInStore(mapId, gvLayer, allGroups);
+    promise.catch((error: unknown) => {
+      // Log the error
+      logger.logPromiseFailed('in LegendEventProcessor.setLayerBoundsForLayerAndParentsAndForget', error);
+    });
+  }
+
+  /**
+   * Recalculates and stores bounds for a layer and all of its parent groups.
+   * @param mapId - The unique identifier of the map instance.
+   * @param gvLayer - The starting layer for which bounds should be computed.
+   * @param allGroups - The collection of root-level group layers used to
+   *   resolve parent relationships.
+   * @returns A promise that resolves once bounds have been computed and
+   * propagated up the entire parent hierarchy.
+   * @description
+   * This method recalculates the bounds for the provided layer and then
+   * iteratively walks up the layer hierarchy, recalculating and storing
+   * bounds for each parent group layer.
+   */
+  static async setLayerBoundsForLayerAndParentsInStore(
+    mapId: string,
+    gvLayer: AbstractBaseGVLayer,
+    allGroups: GVGroupLayer[]
+  ): Promise<void> {
+    const mapViewer = MapEventProcessor.getMapViewer(mapId);
+    const mapProjection = mapViewer.getProjection();
+    const stops = MapViewer.DEFAULT_STOPS;
+
+    // Walk current layer + parents upward once
+    let current: AbstractBaseGVLayer | undefined = gvLayer;
+    while (current) {
+      // Get the bounds of the layer
+      // Must await sequentially: parent bounds depend on child bounds
+      // eslint-disable-next-line no-await-in-loop
+      const bounds = await current.getBounds(mapProjection, stops);
+
+      // Store it
+      this.setLayerBoundsInStore(mapId, current.getLayerPath(), bounds, mapProjection, stops);
+
+      // Advance to parent
+      current = current.getParent(allGroups);
+    }
   }
 
   /**
@@ -167,7 +216,13 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {Extent | undefined} bounds - The extent of the layer at the given path
    * @static
    */
-  static setLayerBounds(mapId: string, layerPath: string, bounds: Extent | undefined): void {
+  static setLayerBoundsInStore(
+    mapId: string,
+    layerPath: string,
+    bounds: Extent | undefined,
+    mapProjection: OLProjection,
+    stops: number
+  ): void {
     // Find the layer for the given layer path
     const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
     const layer = this.findLayerByPath(layers, layerPath);
@@ -175,6 +230,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     if (layer) {
       // Set layer bounds
       layer.bounds = bounds;
+      layer.bounds4326 = undefined;
+
+      if (bounds) {
+        layer.bounds4326 = Projection.transformExtentFromProj(bounds, mapProjection, Projection.getProjectionLonLat(), stops);
+      }
+
       // Set updated legend layers
       this.getLayerState(mapId).setterActions.setLegendLayers(layers);
     }
@@ -361,9 +422,75 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {boolean} areLoading - Indicator if any layer is currently loading
    * @static
    */
-  static setLayersAreLoading(mapId: string, areLoading: boolean): void {
+  static setLayersAreLoadingInStore(mapId: string, areLoading: boolean): void {
     // Update the store
     this.getLayerState(mapId).setterActions.setLayersAreLoading(areLoading);
+  }
+
+  /**
+   * Updates the status of a specific layer in the legend store.
+   * This method:
+   * - Locates the layer using the provided `layerPath`.
+   * - Updates its `layerStatus` value.
+   * - Persists the modified legend layer collection back into the store.
+   * If the layer cannot be found, no changes are applied.
+   * @param mapId - The unique identifier of the map instance containing the layer.
+   * @param layerPath - The fully qualified path used to identify the target layer.
+   * @param layerStatus - The new status to assign to the layer.
+   */
+  static setLayerStatusInStore(mapId: string, layerPath: string, layerStatus: TypeLayerStatus): void {
+    // Find the layer for the given layer path
+    const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
+    const layer = this.findLayerByPath(layers, layerPath);
+
+    if (layer) {
+      // Set layer queryable
+      layer.layerStatus = layerStatus;
+      // Set updated legend layers
+      this.getLayerState(mapId).setterActions.setLegendLayers(layers);
+    }
+  }
+
+  /**
+   * Updates the legend query status and associated legend data for a specific layer
+   * in the store.
+   * This method:
+   * - Locates the target layer using its `layerPath`.
+   * - Updates the layer's `legendQueryStatus`.
+   * - Stores the legend `styleConfig` if provided.
+   * - Regenerates the layer's `icons` and flattened `items` when legend `type` is available.
+   * - Persists the updated legend layers back into the store.
+   * If the layer cannot be found, no updates are performed.
+   * @param mapId - The unique identifier of the map instance whose legend state is being updated.
+   * @param layerPath - The fully qualified path identifying the target layer.
+   * @param legendQueryStatus - The new legend query status to assign to the layer.
+   * @param data - The legend definition returned from the query,
+   * which may include style configuration and rendering information.
+   */
+  static setLegendQueryStatusInStore(
+    mapId: string,
+    layerPath: string,
+    legendQueryStatus: LegendQueryStatus,
+    data: TypeLegend | undefined
+  ): void {
+    // Find the layer for the given layer path
+    const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
+    const layer = this.findLayerByPath(layers, layerPath);
+
+    if (layer) {
+      // Set layer queryable
+      layer.legendQueryStatus = legendQueryStatus;
+      layer.styleConfig = data?.styleConfig;
+
+      // If data.type
+      if (data?.type) {
+        layer.icons = GeoUtilities.getLayerIconImage(data.type, data) ?? [];
+        layer.items = GeoUtilities.getLayerItemsFromIcons(data.type, layer.icons);
+      }
+
+      // Set updated legend layers
+      this.getLayerState(mapId).setterActions.setLegendLayers(layers);
+    }
   }
 
   /**
@@ -421,93 +548,22 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Gets the legend icon images for a given layer legend
-   * @param {TypeLegend | null | undefined} layerLegend - The legend of the layer
-   * @returns {TypeLegendLayerItem[] | undefined} The legend icon images details
-   * @static
-   */
-  static getLayerIconImage(layerLegend: TypeLegend | null | undefined): TypeLegendLayerItem[] | undefined {
-    // TODO: Refactor - Move this function to a utility class instead of at the 'processor' level so it's safer to call from a layer framework level class
-    const iconDetails: TypeLegendLayerItem[] = [];
-    if (layerLegend) {
-      if (isVectorLegend(layerLegend)) {
-        Object.entries(layerLegend.legend).forEach(([key, styleRepresentation]) => {
-          const geometryType = key as TypeStyleGeometry;
-          const styleSettings = layerLegend.styleConfig![geometryType]!;
-          const iconDetailsEntry: TypeLegendLayerItem = {};
-          iconDetailsEntry.geometryType = geometryType;
-
-          if (styleSettings.type === 'simple') {
-            iconDetailsEntry.iconImage = (styleRepresentation.defaultCanvas as HTMLCanvasElement).toDataURL();
-            iconDetailsEntry.name = styleSettings.info[0].label;
-
-            // TODO Adding icons list, to be verified by backend devs
-            const legendLayerListItem: TypeLegendItem = {
-              geometryType,
-              icon: iconDetailsEntry.iconImage,
-              name: iconDetailsEntry.name,
-              isVisible: true,
-            };
-            iconDetailsEntry.iconList = [legendLayerListItem];
-            iconDetails.push(iconDetailsEntry);
-          } else {
-            iconDetailsEntry.iconList = [];
-            styleRepresentation.arrayOfCanvas!.forEach((canvas, i) => {
-              // Check if there is already an entry for this label before adding it.
-              if (!iconDetailsEntry.iconList?.find((listItem) => listItem.name === styleSettings.info[i].label)) {
-                const legendLayerListItem: TypeLegendItem = {
-                  geometryType,
-                  icon: canvas ? canvas.toDataURL() : null,
-                  name: styleSettings.info[i].label,
-                  isVisible: styleSettings.info[i].visible !== false,
-                };
-                iconDetailsEntry.iconList?.push(legendLayerListItem);
-              }
-            });
-            if (styleRepresentation.defaultCanvas) {
-              const legendLayerListItem: TypeLegendItem = {
-                geometryType,
-                icon: styleRepresentation.defaultCanvas.toDataURL(),
-                name: styleSettings.info[styleSettings.info.length - 1].label,
-                isVisible: styleSettings.info[styleSettings.info.length - 1].visible !== false,
-              };
-              iconDetailsEntry.iconList.push(legendLayerListItem);
-            }
-            if (iconDetailsEntry.iconList?.length) iconDetailsEntry.iconImage = iconDetailsEntry.iconList[0].icon;
-            if (iconDetailsEntry.iconList && iconDetailsEntry.iconList.length > 1)
-              iconDetailsEntry.iconImageStacked = iconDetailsEntry.iconList[1].icon;
-            iconDetails.push(iconDetailsEntry);
-          }
-        });
-      } else {
-        const iconDetailsEntry: TypeLegendLayerItem = {};
-        // Use html canvas if available
-        const htmlElement = layerLegend.legend as HTMLCanvasElement | undefined;
-        if (htmlElement?.toDataURL) {
-          iconDetailsEntry.iconImage = htmlElement.toDataURL();
-        } else {
-          // No styles or image, no icon
-          iconDetailsEntry.iconImage = 'no data';
-        }
-        iconDetails.push(iconDetailsEntry);
-      }
-
-      return iconDetails;
-    }
-    return undefined;
-  }
-
-  /**
    * This method propagates the information stored in the legend layer set to the store.
    *
    * @param {string} mapId - The map identifier.
    * @param {TypeLegendResultSetEntry} legendResultSetEntry - The legend result set that triggered the propagation.
    * @static
+   * @deprecated This function should be replaced, it's called too often and does too many things, see TODO.
    */
   static propagateLegendToStore(mapId: string, legendResultSetEntry: TypeLegendResultSetEntry): void {
     // TODO: REFACTOR - This whole function should be refactored to an initial propagation into the store and then only specific propagations in the store.
-    // TO.DOCONT: Right now things like bounds and many more are all recalculated for every single propagation in the store...
-    // TO.DOCONT: Partially related to issue #3237
+    // TO.DOCONT: Right now things are sometimes recalculated, sometimes reset, sometimes unsure processing, for every single propagation in the store...
+
+    // TODO: REFACTOR - IMPORTANT, this function uses 'createNewLegendEntries' recursively which sends the children array (existingEntries[entryIndex].children)
+    // TO.DOCONT: in a loop and pushes objects into the array... However, when pushing objects into an array coming from a Zustand store (or react in general)
+    // TO.DOCONT: the array remains the same object and a hook on the array
+    // TO.DOCONT: (for example here the "useLayerSelectorChildren = createLayerSelectorHook('children')") will never trigger, because
+    // TO.DOCONT: as far as react is concerned, it's the same array object.
 
     const { layerPath } = legendResultSetEntry;
     const layerPathNodes = layerPath.split('/');
@@ -553,25 +609,25 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       const layerName = layer?.getLayerName() || layerConfig.getLayerNameCascade();
 
       let entryIndex = existingEntries.findIndex((entry) => entry.layerPath === entryLayerPath);
+
+      // Get the existing store entry if any
+      const existingStoreEntry: TypeLegendLayer | undefined = existingEntries[entryIndex];
+
       if (layerConfig.getEntryTypeIsGroup()) {
-        // If all loaded
-        let bounds;
-        if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('loaded', layerConfig.listOfLayerEntryConfig)) {
-          // Calculate the bounds
-          bounds = MapEventProcessor.getMapViewerLayerAPI(mapId).calculateBounds(layerConfig.layerPath);
-        }
+        // Get the schema tag
+        const schemaTag = legendResultSetEntry.data?.type ?? layerConfig.getSchemaTag();
 
         const controls: TypeLayerControls = setLayerControls(layerConfig, currentLevel > 2);
         if (entryIndex === -1) {
           const legendLayerEntry: TypeLegendLayer = {
-            bounds,
             controls,
             layerId: layerConfig.layerId,
             layerPath: entryLayerPath,
             layerName,
             layerStatus: legendResultSetEntry.layerStatus,
             legendQueryStatus: legendResultSetEntry.legendQueryStatus,
-            type: layerConfig.getEntryType() as TypeGeoviewLayerType, // TODO: Check - Bug - This typing is invalid, but we have to keep it for it to work for now...
+            schemaTag: schemaTag,
+            entryType: 'group',
             canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
             opacity: layer?.getOLLayer()?.getOpacity() ?? layerConfig.getInitialSettings()?.states?.opacity ?? 1, // GV: This is call all the time, if set on OL use value, default to config or 1
             icons: [] as TypeLegendLayerItem[],
@@ -590,7 +646,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           // eslint-disable-next-line no-param-reassign
           existingEntries[entryIndex].layerName = layerName;
           // eslint-disable-next-line no-param-reassign
-          existingEntries[entryIndex].bounds = bounds;
+          existingEntries[entryIndex].entryType = 'group';
         }
 
         // Continue recursively
@@ -599,19 +655,24 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         // Not a group
         const layerConfigCasted = layerConfig as AbstractBaseLayerEntryConfig;
 
-        // If loaded
-        let bounds;
-        if (layerConfig.layerStatus === 'loaded') {
-          // Calculate the bounds
-          bounds = MapEventProcessor.getMapViewerLayerAPI(mapId).calculateBounds(layerConfig.layerPath);
+        // Read the icons
+        // If data type is set
+        let icons: TypeLegendLayerItem[] = [];
+        let items: TypeLegendItem[] = [];
+        if (legendResultSetEntry.data) {
+          icons = GeoUtilities.getLayerIconImage(legendResultSetEntry.data.type, legendResultSetEntry.data) ?? [];
+          items = GeoUtilities.getLayerItemsFromIcons(legendResultSetEntry.data.type, icons);
         }
 
-        // Read the icons
-        const icons = LegendEventProcessor.getLayerIconImage(legendResultSetEntry.data);
-
         const controls: TypeLayerControls = setLayerControls(layerConfig, currentLevel > 2);
+
+        // Get the schema tag
+        const schemaTag = legendResultSetEntry.data?.type ?? layerConfig.getSchemaTag();
+
         const legendLayerEntry: TypeLegendLayer = {
-          bounds,
+          url: layerConfig.getMetadataAccessPath(),
+          bounds: existingStoreEntry?.bounds,
+          bounds4326: existingStoreEntry?.bounds4326,
           controls,
           layerId: layerPathNodes[currentLevel - 1],
           layerPath: entryLayerPath,
@@ -620,15 +681,15 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           layerStatus: legendResultSetEntry.layerStatus,
           legendQueryStatus: legendResultSetEntry.legendQueryStatus,
           styleConfig: legendResultSetEntry.data?.styleConfig,
-          type: legendResultSetEntry.data?.type || layerConfig.getSchemaTag(),
-          canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
+          schemaTag: schemaTag,
+          entryType: layerConfig.getEntryType(),
+          canToggle: schemaTag !== CONST_LAYER_TYPES.ESRI_IMAGE,
           opacity: layer?.getOLLayer()?.getOpacity() ?? layerConfig.getInitialSettings()?.states?.opacity ?? 1, // GV: This is call all the time, if set on OL use value, default to config or 1
           hoverable: layerConfig.getInitialSettings()?.states?.hoverable, // default: true
           queryable: layerConfig.getInitialSettings()?.states?.queryable, // default: true
-          items: [] as TypeLegendItem[],
           children: [] as TypeLegendLayer[],
-          icons: icons || [],
-          url: layerConfig.getMetadataAccessPath(),
+          items,
+          icons,
         };
 
         // If layer is regular (not group)
@@ -640,34 +701,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           legendLayerEntry.displayDateFormat = layerConfigCasted.getDisplayDateFormat();
           legendLayerEntry.displayDateFormatShort = layerConfigCasted.getDisplayDateFormatShort();
           legendLayerEntry.displayDateTimezone = layerConfigCasted.getDisplayDateTimezone();
-        }
-
-        // Add the icons as items on the layer entry
-        legendLayerEntry.icons.forEach((legendLayerItem) => {
-          if (legendLayerItem.iconList)
-            legendLayerItem.iconList.forEach((legendLayerListItem) => {
-              legendLayerEntry.items.push(legendLayerListItem);
-            });
-        });
-
-        // Also take care of image static by storing the iconImage into the icon property on-the-fly
-        if (isImageStaticLegend(legendResultSetEntry.data!) && icons && icons.length > 0) {
-          legendLayerEntry.items.push({
-            geometryType: 'Point',
-            name: 'image',
-            icon: icons[0].iconImage || null,
-            isVisible: true,
-          });
-        }
-
-        // Also take care of GeoTIFF by storing the iconImage into the icon property on-the-fly
-        if (isGeoTIFFLegend(legendResultSetEntry.data!) && icons && icons.length > 0) {
-          legendLayerEntry.items.push({
-            geometryType: 'Point',
-            name: 'image',
-            icon: icons[0].iconImage || null,
-            isVisible: true,
-          });
         }
 
         // If non existing in the store yet
@@ -1062,6 +1095,26 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           this.#setOpacityInLayerAndChildren(mapId, curLayers, child.layerPath, opacity, true);
         });
       }
+    }
+  }
+
+  /**
+   * Sets the opacity of the layer and its children in the store.
+   * @param {string} mapId - The ID of the map.
+   * @param {string} layerPath - The layer path of the layer to change.
+   * @param {string | undefined} layerName - The layer name to set.
+   * @static
+   */
+  static setLayerNameInStore(mapId: string, layerPath: string, layerName: string | undefined): void {
+    // Find the layer for the given layer path
+    const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
+    const layer = this.findLayerByPath(layers, layerPath);
+
+    if (layer) {
+      // Set layer name
+      layer.layerName = layerName ?? ''; // Default to empty string if undefined
+      // Set updated legend layers
+      this.getLayerState(mapId).setterActions.setLegendLayers(layers);
     }
   }
 

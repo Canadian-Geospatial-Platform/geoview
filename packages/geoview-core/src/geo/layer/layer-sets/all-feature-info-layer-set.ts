@@ -84,7 +84,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override onPropagateToStore(resultSetEntry: TypeAllFeatureInfoResultSetEntry, type: PropagationType): void {
-    // Redirect
+    // Redirect - Add layer to the list after registration
     this.#propagateToStore(resultSetEntry);
   }
 
@@ -216,10 +216,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    * @private
    */
   #propagateToStore(resultSetEntry: TypeAllFeatureInfoResultSetEntry): void {
-    // Only if the layerStatus is loaded
-    if (resultSetEntry.layerStatus === 'loaded') {
-      // Propagate
-      DataTableEventProcessor.propagateFeatureInfoToStore(this.getMapId(), resultSetEntry);
-    }
+    // Propagate
+    DataTableEventProcessor.propagateFeatureInfoToStore(this.getMapId(), resultSetEntry);
   }
 }

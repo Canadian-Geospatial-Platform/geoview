@@ -8,13 +8,8 @@ import type {
   TypeResultSet,
   TypeResultSetEntry,
 } from '@/api/types/map-schema-types';
-import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { generateId, whenThisThen } from '@/core/utils/utilities';
-import type {
-  ConfigBaseClass,
-  LayerStatusChangedDelegate,
-  LayerStatusChangedEvent,
-} from '@/api/config/validation-classes/config-base-class';
+import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { LayerApi } from '@/geo/layer/layer';
@@ -22,7 +17,7 @@ import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
-import type { AbstractBaseGVLayer, LayerNameChangedDelegate, LayerNameChangedEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -49,20 +44,12 @@ export abstract class AbstractLayerSet {
   /** Keep all callback delegates references */
   #onLayerSetUpdatedHandlers: LayerSetUpdatedDelegate[] = [];
 
-  // Keep a bounded reference to the handle layer status changed
-  #boundedHandleLayerStatusChanged: LayerStatusChangedDelegate;
-
-  // Keep a bounded reference to the handle layer status changed
-  #boundedHandleLayerNameChanged: LayerNameChangedDelegate;
-
   /**
    * Constructs a new LayerSet instance.
    * @param {LayerApi} layerApi - The LayerApi instance to work with.
    */
   constructor(layerApi: LayerApi) {
     this.layerApi = layerApi;
-    this.#boundedHandleLayerStatusChanged = this.#handleLayerStatusChanged.bind(this);
-    this.#boundedHandleLayerNameChanged = this.#handleLayerNameChanged.bind(this);
   }
 
   // #region OVERRIDES
@@ -104,17 +91,21 @@ export abstract class AbstractLayerSet {
    *
    * @param layerConfig - The layer config
    */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
   protected onRegisterLayerConfig(layerConfig: ConfigBaseClass): void {
-    if (layerConfig.getGeoviewLayerConfig().useAsBasemap) return;
-    // Prep the resultSet (it's registered, but it doesn't mean it's in the store yet)
-    this.resultSet[layerConfig.layerPath] = {
-      layerPath: layerConfig.layerPath,
-      layerStatus: layerConfig.layerStatus,
-      layerName: layerConfig.getLayerNameCascade(),
-    };
+    // Override this to perform additional registrations
+  }
 
-    // Register the layer status changed handler
-    layerConfig.onLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
+  /**
+   * An overridable unregistration function for a layer-set that the registration process will use to
+   * unregister a specific layer config.
+   * @param {ConfigBaseClass | undefined} layerConfig - The layer config
+   * @returns {void}
+   * @protected
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
+  protected onUnregisterLayerConfig(layerConfig: ConfigBaseClass | undefined): void {
+    // Override this to perform additional unregistrations
   }
 
   /**
@@ -147,80 +138,17 @@ export abstract class AbstractLayerSet {
    */
   protected onRegisterLayer(layer: AbstractBaseGVLayer): void {
     // Get layer name
-    const layerName = layer.getLayerName();
     const layerPath = layer.getLayerPath();
 
     // If not there (wasn't pre-registered via a config-registration)
     if (!(layerPath in this.resultSet)) {
       this.resultSet[layerPath] = {
         layerPath,
-        layerStatus: layer.getLayerStatus(),
-        layerName,
       };
-    } else {
-      // Already there, update it
-      this.resultSet[layerPath].layerStatus = layer.getLayerStatus();
-      this.resultSet[layerPath].layerName = layerName;
     }
 
     // Add to the registered layers array
     this.#registeredLayers.push(layer);
-
-    // Register the layer name changed handler
-    layer.onLayerNameChanged(this.#boundedHandleLayerNameChanged);
-  }
-
-  /**
-   * An overridable unregistration function for a layer-set that the registration process will use to
-   * unregister a specific layer config.
-   * @param {ConfigBaseClass | undefined} layerConfig - The layer config
-   * @returns {void}
-   * @protected
-   */
-  protected onUnregisterLayerConfig(layerConfig: ConfigBaseClass | undefined): void {
-    // Unregister the layer status changed handler
-    layerConfig?.offLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
-  }
-
-  /**
-   * An overridable unregistration function for a layer-set that the registration process will use to
-   * unregister a specific geoview layer.
-   * @param {AbstractBaseGVLayer | undefined} layer - The layer
-   * @returns {void}
-   * @protected
-   */
-  protected onUnregisterLayer(layer: AbstractBaseGVLayer | undefined): void {
-    // Unregister the layer name changed handler
-    layer?.offLayerNameChanged(this.#boundedHandleLayerNameChanged);
-  }
-
-  /**
-   * An overridable function for a layer-set to process a layer status changed event.
-   * @param {ConfigBaseClass} layerConfig - The layer config
-   * @param {TypeLayerStatus} layerStatus - The new layer status
-   * @returns {void}
-   * @protected
-   */
-  protected onProcessLayerStatusChanged(layerConfig: ConfigBaseClass, layerStatus: TypeLayerStatus): void {
-    // Change the layer status!
-    this.resultSet[layerConfig.layerPath].layerStatus = layerStatus;
-
-    // Update the name with a possibly updated layerName during layer status progression
-    // (depending on how this translates in the new layers process, might not need this anymore)
-    this.resultSet[layerConfig.layerPath].layerName =
-      layerConfig.getLayerName() || layerConfig.getGeoviewLayerName() || 'No name / Sans nom';
-  }
-
-  /**
-   * An overridable function for a layer-set to process a layer name change.
-   * @param {string} layerPath - The layer path being affected
-   * @param {string} name - The new layer name
-   * @returns {void}
-   * @protected
-   */
-  protected onProcessNameChanged(layerPath: string, name: string): void {
-    // Update name
-    this.resultSet[layerPath].layerName = name;
   }
 
   /**
@@ -261,6 +189,11 @@ export abstract class AbstractLayerSet {
   registerLayerConfig(layerConfig: ConfigBaseClass): void {
     // Update the registration of all layer sets if !payload.layerSetId or update only the specified layer set
     if (this.onRegisterLayerConfigCheck(layerConfig) && !(layerConfig.layerPath in this.resultSet)) {
+      // Prep the resultSet (it's registered, but it doesn't mean it's in the store yet)
+      this.resultSet[layerConfig.layerPath] = {
+        layerPath: layerConfig.layerPath,
+      };
+
       // Call the registration function for the layer-set. This method is different for each child.
       this.onRegisterLayerConfig(layerConfig);
 
@@ -309,9 +242,6 @@ export abstract class AbstractLayerSet {
   unregister(layerPath: string): void {
     // Call the unregistration function for the layer-set. This method is different for each child.
     this.onUnregisterLayerConfig(this.layerApi.getLayerEntryConfigIfExists(layerPath));
-
-    // Call the unregistration function for the layer-set. This method is different for each child.
-    this.onUnregisterLayer(this.layerApi.getGeoviewLayerIfExists(layerPath));
 
     // Delete from the store
     this.onDeleteFromStore(layerPath);
@@ -381,7 +311,7 @@ export abstract class AbstractLayerSet {
     // Listen to the status changes so that when it gets loaded it automatically gets registered as a layer
     layerConfig.onLayerStatusChanged(() => {
       try {
-        // If the layer status is 'loaded'
+        // If the layer status is 'loaded', otherwise, don't even try yet
         if (layerConfig.layerStatus === 'loaded') {
           // The layer has become loaded
 
@@ -402,56 +332,6 @@ export abstract class AbstractLayerSet {
         logger.logError('Error trying to register the layer coming from the layer config', error);
       }
     });
-  }
-
-  /**
-   * Handles when a layer status changed on a layer config.
-   * @param {ConfigBaseClass} layerConfig - The layer config
-   * @param {LayerStatusChangedEvent} layerStatusEvent - The new layer status
-   */
-  #handleLayerStatusChanged(layerConfig: ConfigBaseClass, layerStatusEvent: LayerStatusChangedEvent): void {
-    try {
-      // Call the overridable function to process a layer status is changing
-      this.onProcessLayerStatusChanged(layerConfig, layerStatusEvent.layerStatus);
-
-      // If still existing (it's possible a layer set might want to unregister a layer config depending on its status, so we check)
-      if (this.resultSet[layerConfig.layerPath]) {
-        // Propagate the status to the store so that the UI gets updated
-        this.onPropagateToStore(this.resultSet[layerConfig.layerPath], 'layerStatus');
-      }
-
-      // Emit the layer set updated changed event
-      this.onLayerSetUpdatedProcess(layerConfig.layerPath);
-    } catch (error: unknown) {
-      // Log
-      logger.logError('CAUGHT in handleLayerStatusChanged', layerConfig.layerPath, error);
-    }
-  }
-
-  /**
-   * Handles when a layer status changed on a layer config.
-   * @param {AbstractBaseGVLayer} layer - The layer
-   * @param {LayerNameChangedEvent} layerNameEvent - The new layer name
-   */
-  #handleLayerNameChanged(layer: AbstractBaseGVLayer, layerNameEvent: LayerNameChangedEvent): void {
-    const layerPath = layer.getLayerPath();
-
-    try {
-      // If the layer path exists for the layer name that changed
-      if (this.resultSet[layerPath]) {
-        // Call the overridable function to process a layer name change
-        this.onProcessNameChanged(layerPath, layerNameEvent.layerName!);
-
-        // Propagate to the store
-        this.onPropagateToStore(this.resultSet[layerPath], 'layerName');
-
-        // Inform that the layer set has been updated
-        this.onLayerSetUpdatedProcess(layerPath);
-      }
-    } catch (error: unknown) {
-      // Log
-      logger.logError('CAUGHT in handleLayerNameChanged', layerPath, error);
-    }
   }
 
   // #endregion PRIVATE METHODS

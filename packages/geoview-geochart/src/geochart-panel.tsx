@@ -10,6 +10,7 @@ import {
   useMapStoreActions,
   useMapAllVisibleandInRangeLayers,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
+import { useLayerNames, useLayerStatuses } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
 import {
   useGeochartConfigs,
@@ -57,6 +58,8 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const { isLayerHiddenOnMap } = useMapStoreActions();
   const displayLanguage = useAppDisplayLanguage();
   const mapClickCoordinates = useMapClickCoordinates();
+  const layerNames = useLayerNames();
+  const layerStatuses = useLayerStatuses();
 
   // Create the validator shared for all the charts in the footer
   const [schemaValidator] = useState<SchemaValidator>(new SchemaValidator());
@@ -172,20 +175,29 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
       if (layer && memoConfigObj[layer.layerPath]) {
         acc.push({
-          layerName: layer.layerName ?? '',
+          layerName: layerNames[layer.layerPath] ?? '',
           layerPath: layer.layerPath,
-          layerStatus: layer.layerStatus,
+          layerStatus: layerStatuses[layer.layerPath],
           queryStatus: layer.queryStatus,
           numOffeatures: layer.features?.length ?? 0,
           layerFeatures: getNumFeaturesLabel(layer),
-          tooltip: `${layer.layerName}, ${getNumFeaturesLabel(layer)}`,
+          tooltip: `${layerNames[layer.layerPath] ?? ''}, ${getNumFeaturesLabel(layer)}`,
           layerUniqueId: `${mapId}-${TABS.GEO_CHART}-${layer.layerPath}`,
         });
       }
 
       return acc;
     }, []);
-  }, [visibleInRangeLayers, storeArrayOfLayerData, memoConfigObj, getNumFeaturesLabel, mapId, isLayerHiddenOnMap]);
+  }, [
+    storeArrayOfLayerData,
+    visibleInRangeLayers,
+    memoConfigObj,
+    isLayerHiddenOnMap,
+    layerNames,
+    layerStatuses,
+    getNumFeaturesLabel,
+    mapId,
+  ]);
 
   /**
    * Memoizes the selected layer for the LayerList component.

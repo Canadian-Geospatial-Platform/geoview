@@ -46,13 +46,19 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Must override method to get the layer attributions
-   * @returns {string[]} The layer attributions
+   * @returns The layer attributions
    */
   protected abstract onGetAttributions(): string[];
 
   /**
+   * Must override method to get the layer bounds
+   * @returns A promise of layer bounding box.
+   */
+  protected abstract onGetBounds(projection: OLProjection, stops: number): Promise<Extent | undefined>;
+
+  /**
    * Must override method to refresh a layer
-   * @param {OLProjection | undefined} projection - Optional, the projection to refresh to.
+   * @param projection - Optional, the projection to refresh to.
    */
   protected abstract onRefresh(projection: OLProjection | undefined): void;
 
@@ -64,11 +70,24 @@ export abstract class AbstractBaseGVLayer {
    * Gets the attributions for the layer by calling the overridable function 'onGetAttributions'.
    * When the layer is a GVLayer, its layer attributions are returned.
    * When the layer is a GVGroup, all layers attributions in the group are returned.
-   * @returns {string[]} The layer attributions.
+   * @returns The layer attributions.
    */
   getAttributions(): string[] {
-    // Redirect
+    // Redirect to overridable method
     return this.onGetAttributions();
+  }
+
+  /**
+   * Gets the bounds for the layer in the given projection.
+   * When the layer is a GVLayer, its layer bounds are returned.
+   * When the layer is a GVGroup, an Extent union of all layers bounds in the group is returned.
+   * @param projection - The projection to get the bounds into.
+   * @param stops - The number of stops to use to generate the extent.
+   * @returns A promise of layer bounding box.
+   */
+  getBounds(projection: OLProjection, stops: number): Promise<Extent | undefined> {
+    // Redirect to overridable method
+    return this.onGetBounds(projection, stops);
   }
 
   /**
@@ -305,18 +324,49 @@ export abstract class AbstractBaseGVLayer {
   }
 
   /**
-   * Returns the direct parent GVGroupLayer of this layer, if any.
-   * This method searches the provided root group layer collection to locate
-   * the group that directly contains this layer. If the layer is nested
-   * inside multiple groups, only the immediate parent group is returned.
-   * @param {GVGroupLayer[]} groupLayers - The root-level group layers to
-   *   search through when looking for this layer's parent.
-   * @returns {GVGroupLayer | undefined} The direct parent group layer, or
-   *   `undefined` if this layer is not a child of any group.
+   * Returns the direct parent `GVGroupLayer` of this layer, if any.
+   * @param groupLayers - The root-level group layers to search when locating
+   *   this layer’s immediate parent.
+   * @returns The direct parent group layer, or `undefined` if this layer is not
+   *   contained within any group.
+   * @description
+   * This method searches through the provided root group layer collection to
+   * determine which group directly contains this layer. If the layer is nested
+   * within multiple groups, only the immediate parent group is returned.
    */
   getParent(groupLayers: GVGroupLayer[]): GVGroupLayer | undefined {
     // Redirect
     return AbstractBaseGVLayer.#getParent(this, groupLayers);
+  }
+
+  /**
+   * Returns the top-most (root) `GVGroupLayer` ancestor of this layer, if any.
+   * @param groupLayers - The root-level group layers used to resolve the
+   *   parent hierarchy.
+   * @returns The highest ancestor group layer in the hierarchy, or `undefined`
+   *   if this layer does not belong to any group.
+   * @description
+   * This method traverses upward through the parent chain starting from the
+   * immediate parent of this layer. It returns the last valid parent found.
+   * A protection mechanism prevents infinite loops in case of circular
+   * parent references.
+   */
+  getParentRoot(groupLayers: GVGroupLayer[]): GVGroupLayer | undefined {
+    // Keep track of the visited parents
+    const visited = new Set<GVGroupLayer>();
+
+    let parent = this.getParent(groupLayers);
+    let rootParent = parent;
+
+    // While a parent is found
+    while (parent && !visited.has(parent)) {
+      visited.add(parent);
+      rootParent = parent;
+      parent = parent.getParent(groupLayers);
+    }
+
+    // Return the root parent
+    return rootParent;
   }
 
   // #endregion METHODS

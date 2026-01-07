@@ -72,12 +72,13 @@ import {
   LayerWrongTypeError,
 } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigError } from '@/core/exceptions/layer-entry-config-exceptions';
-import type {
-  AbstractBaseGVLayer,
-  LayerOpacityChangedEvent,
-  LayerOpacityChangedDelegate,
-  VisibleChangedEvent,
-  VisibleChangedDelegate,
+import type { AbstractBaseGVLayer, LayerNameChangedEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
+import {
+  type LayerOpacityChangedEvent,
+  type LayerOpacityChangedDelegate,
+  type LayerNameChangedDelegate,
+  type VisibleChangedEvent,
+  type VisibleChangedDelegate,
 } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type {
   LayerDelegate as GVLayerDelegate,
@@ -93,6 +94,7 @@ import type {
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractGVVector } from './gv-layers/vector/abstract-gv-vector';
 import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
+import type { LayerDelegate as GVGroupLayerDelegate, LayerEvent as GVGroupLayerEvent } from '@/geo/layer/gv-layers/gv-group-layer';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 import { GVWMS, type ImageLoadRescueDelegate, type ImageLoadRescueEvent } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GeoUtilities } from '@/geo/utils/utilities';
@@ -101,7 +103,7 @@ import { Projection } from '@/geo/utils/projection';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { MapViewer } from '@/geo/map/map-viewer';
+import type { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { TypeLegendItem } from '@/core/components/layers/types';
@@ -139,6 +141,11 @@ import type { TypeTimeSliderProps } from '@/core/stores/store-interface-and-inti
  * @class LayerApi
  */
 export class LayerApi {
+  /** A zoom level buffer to guarantee that the calculations being done via the resolutions, inches per meter, dpi are more strict than not enough */
+  /** The value 0.21 seems rather specific, but it was the value giving us the best result during testing on layer National Forest Inventory Photo Plot Summary */
+  /** It could be increased slightly if ever we need to, but it might offer worse precision depending on various layers */
+  static readonly MIN_MAX_ZOOM_LEVEL_BUFFER = 0.21;
+
   /** Reference on the map viewer */
   mapViewer: MapViewer;
 
@@ -238,6 +245,9 @@ export class LayerApi {
   /** Keep a bounded reference to the handle layer error */
   #boundedHandleLayerError: GVLayerErrorDelegate;
 
+  /** Keep a bounded reference to the handle layer name changed */
+  #boundedHandleLayerNameChanged: LayerNameChangedDelegate;
+
   /** Keep a bounded reference to the handle layer opacity changed */
   #boundedHandleLayerOpacityChanged: LayerOpacityChangedDelegate;
 
@@ -253,9 +263,15 @@ export class LayerApi {
   /** Keep a bounded reference to the handle WMS Layer Image Load Callbacks */
   #boundedHandleLayerWMSImageLoadRescue: ImageLoadRescueDelegate;
 
+  /** Keep a bounded reference to the handle Group Layer Added Callbacks */
+  #boundedHandleLayerGroupLayerAdded: GVGroupLayerDelegate;
+
+  /** Keep a bounded reference to the handle Group Layer Removed Callbacks */
+  #boundedHandleLayerGroupLayerRemoved: GVGroupLayerDelegate;
+
   /**
    * Initializes layer types and listen to add/remove layer events from outside
-   * @param {MapViewer} mapViewer - A reference to the map viewer
+   * @param mapViewer - A reference to the map viewer
    */
   constructor(mapViewer: MapViewer) {
     this.mapViewer = mapViewer;
@@ -275,16 +291,19 @@ export class LayerApi {
     this.#boundedHandleLayerLoading = this.#handleLayerLoading.bind(this);
     this.#boundedHandleLayerLoaded = this.#handleLayerLoaded.bind(this);
     this.#boundedHandleLayerError = this.#handleLayerError.bind(this);
+    this.#boundedHandleLayerNameChanged = this.#handleLayerNameChanged.bind(this);
     this.#boundedHandleLayerOpacityChanged = this.#handleLayerOpacityChanged.bind(this);
     this.#boundedHandleLayerVisibleChanged = this.#handleLayerVisibleChanged.bind(this);
     this.#boundedHandleLayerQueryableChanged = this.#handleLayerQueryableChanged.bind(this);
     this.#boundedHandleLayerHoverableChanged = this.#handleLayerHoverableChanged.bind(this);
     this.#boundedHandleLayerWMSImageLoadRescue = this.#handleLayerWMSImageLoadRescue.bind(this);
+    this.#boundedHandleLayerGroupLayerAdded = this.#handleLayerGroupLayerAdded.bind(this);
+    this.#boundedHandleLayerGroupLayerRemoved = this.#handleLayerGroupLayerRemoved.bind(this);
   }
 
   /**
    * Gets the Map Id.
-   * @returns {string} The map id
+   * @returns The map id
    */
   getMapId(): string {
     return this.mapViewer.mapId;
@@ -304,8 +323,8 @@ export class LayerApi {
 
   /**
    * Verifies if a layer is registered. Returns true if registered.
-   * @param {string} layerPath - The layer path to check.
-   * @returns {boolean} Returns true if the layer configuration is registered.
+   * @param layerPath - The layer path to check.
+   * @returns Returns true if the layer configuration is registered.
    */
   isLayerEntryConfigRegistered(layerPath: string): boolean {
     return !!this.#layerEntryConfigs[layerPath];
@@ -313,7 +332,7 @@ export class LayerApi {
 
   /**
    * Gets the Layer Entry layer paths
-   * @returns {string[]} The GeoView Layer Paths
+   * @returns The GeoView Layer Paths
    */
   getLayerEntryLayerPaths(): string[] {
     return Object.keys(this.#layerEntryConfigs);
@@ -321,7 +340,7 @@ export class LayerApi {
 
   /**
    * Gets the Layer Entry Configs
-   * @returns {string[]} The GeoView Layer Entry Configs
+   * @returns The GeoView Layer Entry Configs
    */
   getLayerEntryConfigs(): ConfigBaseClass[] {
     return Object.values(this.#layerEntryConfigs);
@@ -329,8 +348,8 @@ export class LayerApi {
 
   /**
    * Gets the layer configuration of the specified layer path.
-   * @param {string} layerPath - The layer path.
-   * @returns {ConfigBaseClass} The layer configuration.
+   * @param layerPath - The layer path.
+   * @returns The layer configuration.
    * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
    */
   getLayerEntryConfig(layerPath: string): ConfigBaseClass {
@@ -346,8 +365,8 @@ export class LayerApi {
 
   /**
    * Gets the layer configuration of a regular layer (not a group) at the specified layer path.
-   * @param {string} layerPath - The layer path.
-   * @returns {AbstractBaseLayerEntryConfig} The layer configuration.
+   * @param layerPath - The layer path.
+   * @returns The layer configuration.
    * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
    * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
    */
@@ -364,8 +383,8 @@ export class LayerApi {
 
   /**
    * Gets the layer configuration of a group layer (not a regular) at the specified layer path.
-   * @param {string} layerPath - The layer path.
-   * @returns {AbstractBaseLayerEntryConfig} The layer configuration.
+   * @param layerPath - The layer path.
+   * @returns The layer configuration.
    * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
    * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
    */
@@ -382,8 +401,8 @@ export class LayerApi {
 
   /**
    * Gets the layer configuration of the specified layer path.
-   * @param {string} layerPath - The layer path.
-   * @returns {ConfigBaseClass | undefined} The layer configuration or undefined if not found.
+   * @param layerPath - The layer path.
+   * @returns The layer configuration or undefined if not found.
    */
   getLayerEntryConfigIfExists(layerPath: string): ConfigBaseClass | undefined {
     return this.#layerEntryConfigs?.[layerPath];
@@ -409,8 +428,7 @@ export class LayerApi {
    * Gets all GeoView layers that are regular layers (not groups).
    * This method filters the list returned by `getGeoviewLayers()` and
    * returns only the layers that are instances of `AbstractGVLayer`.
-   * @returns {AbstractGVLayer[]} An array containing only the regular layers
-   *   from the current GeoView layer collection.
+   * @returns An array containing only the regular layers from the current GeoView layer collection.
    */
   getGeoviewLayersRegulars(): AbstractGVLayer[] {
     return this.getGeoviewLayers().filter((l) => l instanceof AbstractGVLayer);
@@ -420,8 +438,7 @@ export class LayerApi {
    * Gets all GeoView layers that are group layers.
    * This method filters the list returned by `getGeoviewLayers()` and
    * returns only the layers that are instances of `GVGroupLayer`.
-   * @returns {GVGroupLayer[]} An array containing only the group layers
-   *   from the current GeoView layer collection.
+   * @returns An array containing only the group layers from the current GeoView layer collection.
    */
   getGeoviewLayersGroups(): GVGroupLayer[] {
     return this.getGeoviewLayers().filter((l) => l instanceof GVGroupLayer);
@@ -429,8 +446,8 @@ export class LayerApi {
 
   /**
    * Returns the GeoView instance associated to the layer path.
-   * @param {string} layerPath - The layer path
-   * @returns {AbstractBaseGVLayer} The new Geoview Layer
+   * @param layerPath - The layer path
+   * @returns The new Geoview Layer
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
   getGeoviewLayer(layerPath: string): AbstractBaseGVLayer {
@@ -448,8 +465,8 @@ export class LayerApi {
    * Returns the AbstractGVLayer instance associated to the layer path.
    * This returns an actual AbstractGVLayer and throws a LayerWrongTypeError if the layerPath points to a GVGroupLayer object.
    * An AbstractGVLayer is essentially a layer that's not a group layer.
-   * @param {string} layerPath - The layer path
-   * @returns {AbstractGVLayer} The new Geoview Layer
+   * @param layerPath - The layer path
+   * @returns The new Geoview Layer
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
    */
@@ -468,8 +485,8 @@ export class LayerApi {
    * Returns the GeoView Layer instance associated to the layer path.
    * This returns an actual AbstractGVLayer (or undefined) and throws a LayerWrongTypeError if the layerPath points to a GVGroupLayer object.
    * An AbstractGVLayer is essentially a layer that's not a group layer.
-   * @param {string} layerPath - The layer path
-   * @returns {AbstractGVLayer | undefined} The AbstractGVLayer or undefined when not found
+   * @param layerPath - The layer path
+   * @returns The AbstractGVLayer or undefined when not found
    * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
    */
   getGeoviewLayerRegularIfExists(layerPath: string): AbstractGVLayer | undefined {
@@ -488,8 +505,8 @@ export class LayerApi {
 
   /**
    * Returns the GeoView Layer instance associated to the layer path.
-   * @param {string} layerPath - The layer path
-   * @returns {AbstractBaseGVLayer | undefined} The AbstractBaseGVLayer or undefined when not found
+   * @param layerPath - The layer path
+   * @returns The AbstractBaseGVLayer or undefined when not found
    */
   getGeoviewLayerIfExists(layerPath: string): AbstractBaseGVLayer | undefined {
     return this.#gvLayers[layerPath];
@@ -497,8 +514,8 @@ export class LayerApi {
 
   /**
    * Returns the OpenLayer instance associated with the layer path.
-   * @param {string} layerPath - The layer path to the layer's configuration.
-   * @returns {BaseLayer} Returns the geoview instance associated to the layer path.
+   * @param layerPath - The layer path to the layer's configuration.
+   * @returns Returns the geoview instance associated to the layer path.
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
   getOLLayer(layerPath: string): BaseLayer {
@@ -508,8 +525,8 @@ export class LayerApi {
 
   /**
    * Returns the OpenLayer instance associated with the layer path.
-   * @param {string} layerPath - The layer path to the layer's configuration.
-   * @returns {BaseLayer | undefined} Returns the geoview instance associated to the layer path.
+   * @param layerPath - The layer path to the layer's configuration.
+   * @returns Returns the geoview instance associated to the layer path.
    */
   getOLLayerIfExists(layerPath: string): BaseLayer | undefined {
     // Get the OpenLayer layer as part of the new GVLayer design
@@ -520,10 +537,10 @@ export class LayerApi {
    * Asynchronously returns the OpenLayer layer associated to a specific layer path.
    * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
    * Note this function uses the 'Async' suffix to differentiate it from 'getOLLayer'.
-   * @param {string} layerPath - The layer path to the layer's configuration.
-   * @param {number} timeout - Optionally indicate the timeout after which time to abandon the promise
-   * @param {number} checkFrequency - Optionally indicate the frequency at which to check for the condition on the layerabstract
-   * @returns {Promise<BaseLayer>} Returns the OpenLayer layer associated to the layer path.
+   * @param layerPath - The layer path to the layer's configuration.
+   * @param timeout - Optionally indicate the timeout after which time to abandon the promise
+   * @param checkFrequency - Optionally indicate the frequency at which to check for the condition on the layerabstract
+   * @returns Returns a Promise of an OpenLayer layer associated to the layer path.
    */
   getOLLayerAsync(layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer> {
     // Make sure the open layer has been created, sometimes it can still be in the process of being created
@@ -539,8 +556,8 @@ export class LayerApi {
 
   /**
    * Load layers that was passed in with the map config
-   * @param {MapConfigLayerEntry[]} mapConfigLayerEntries - An optional array containing layers passed within the map config
-   * @returns {Promise<void>}
+   * @param mapConfigLayerEntries - An optional array containing layers passed within the map config
+   * @returns A Promise resolving when everything is done
    */
   async loadListOfGeoviewLayer(mapConfigLayerEntries: MapConfigLayerEntry[]): Promise<void> {
     const validGeoviewLayerConfigs = this.#deleteDuplicateAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries);
@@ -626,9 +643,9 @@ export class LayerApi {
 
   /**
    * Adds a Geoview Layer by GeoCore UUID.
-   * @param {string} uuid - The GeoCore UUID to add to the map
-   * @param {string} layerEntryConfig - The optional layer configuration
-   * @returns {Promise<GeoViewLayerAddedResult | undefined>} A promise which resolves when done adding
+   * @param uuid - The GeoCore UUID to add to the map
+   * @param layerEntryConfig - The optional layer configuration
+   * @returns A Promise which resolves when done adding
    */
   async addGeoviewLayerByGeoCoreUUID(uuid: string, layerEntryConfig?: string): Promise<GeoViewLayerAddedResult | undefined> {
     // Add a place holder to the ordered layer info array
@@ -719,7 +736,7 @@ export class LayerApi {
    * with a promise that will resolve when the layer will be officially on the map.
    *
    * @param geoviewLayerConfig - The geoview layer configuration to add.
-   * @param abortSignal - Optional abort signal to handle cancelling of the process.
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
    * @returns The result of the addition of the geoview layer.
    * @throws {LayerCreatedTwiceError} When there already is a layer on the map with the provided geoviewLayerId.
    */
@@ -754,9 +771,9 @@ export class LayerApi {
 
   /**
    * Continues the addition of the geoview layer.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The geoview layer configuration to add.
-   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
-   * @returns {GeoViewLayerAddedResult} The result of the addition of the geoview layer.
+   * @param geoviewLayerConfig - The geoview layer configuration to add.
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
+   * @returns The result of the addition of the geoview layer.
    * The result contains the instanciated GeoViewLayer along with a promise that will resolve when the layer will be officially on the map.
    * @private
    */
@@ -1091,11 +1108,22 @@ export class LayerApi {
           // Unregister layer config from the application
           this.unregisterLayerConfig(this.getLayerEntryConfig(registeredLayerPath));
 
+          // Get the layer being removed
+          const layerBeingRemoved = this.#gvLayers[registeredLayerPath];
+
+          // If the layer had a parent
+          const parent = layerBeingRemoved?.getParent(this.getGeoviewLayersGroups());
+          if (parent) {
+            // Make sure to remove the layer from the parent and that way when the bounds get recalculated the removed layer won't be included
+            parent.removeLayer(layerBeingRemoved);
+          }
+
           // Unregister the events on the layer
-          if (this.#gvLayers[registeredLayerPath] instanceof AbstractGVLayer)
-            this.#unregisterLayerHandlers(this.#gvLayers[registeredLayerPath]);
-          else if (this.#gvLayers[registeredLayerPath] instanceof GVGroupLayer)
-            this.#unregisterGroupLayerHandlers(this.#gvLayers[registeredLayerPath]);
+          if (layerBeingRemoved instanceof AbstractGVLayer) {
+            this.#unregisterLayerHandlers(layerBeingRemoved);
+          } else if (layerBeingRemoved instanceof GVGroupLayer) {
+            this.#unregisterGroupLayerHandlers(layerBeingRemoved);
+          }
 
           // Remove from registered layer configs
           delete this.#layerEntryConfigs[registeredLayerPath];
@@ -1275,6 +1303,7 @@ export class LayerApi {
         // Get max extents from all selected layers.
         subLayerPaths.forEach((layerPath) => {
           // Get the bounds for the layer path
+          // TODO: CHECK - Instead of getting the layer bounds via the store, simply use the gvLayer.getBounds() method?
           const layerBounds = LegendEventProcessor.getLayerBounds(this.getMapId(), layerPath);
 
           // If layer bounds were found
@@ -1530,12 +1559,6 @@ export class LayerApi {
     // Override the GeoJson source
     await gvLayer.setGeojsonSource(geojson, this.mapViewer.getProjection());
 
-    // Update the bounds in the store
-    const bounds = gvLayer.getBounds(this.mapViewer.getProjection(), MapViewer.DEFAULT_STOPS);
-    if (bounds) {
-      LegendEventProcessor.setLayerBounds(mapId, layerPath, bounds);
-    }
-
     // Reset the feature info result set
     FeatureInfoEventProcessor.resetResultSet(mapId, layerPath);
 
@@ -1614,47 +1637,6 @@ export class LayerApi {
         layerConfig.setOutfields(newOutfields);
       } else throw new LayerDifferingFieldLengthsError(layerPath);
     } else throw new LayerNotQueryableError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
-  }
-
-  /**
-   * Calculates an union of all the layer extents based on the given layerPath and its possible children.
-   * @param {string} layerPath - The layer path
-   * @returns {Extent | undefined} An extent representing an union of all layer extents associated with the layer path
-   */
-  calculateBounds(layerPath: string): Extent | undefined {
-    // Get the layer config at the layer path
-    const layerConfig = this.getLayerEntryConfigIfExists(layerPath);
-
-    // Current bounds
-    const boundsArray = [] as Extent[];
-
-    // If found
-    if (layerConfig) {
-      // Redirect
-      this.#gatherAllBoundsRec(layerConfig, boundsArray);
-    }
-
-    // For each bounds found
-    let boundsUnion: Extent | undefined;
-    boundsArray.forEach((bounds) => {
-      // Union the bounds with each other
-      boundsUnion = GeoUtilities.getExtentUnion(boundsUnion, bounds);
-    });
-
-    // Return the unioned bounds
-    return boundsUnion;
-  }
-
-  /**
-   * Recalculates the bounds for all layers and updates the store.
-   * @returns {void}
-   */
-  recalculateBoundsAll(): void {
-    // For each layer path
-    this.getLayerEntryLayerPaths().forEach((layerPath: string) => {
-      const bounds = this.calculateBounds(layerPath);
-      LegendEventProcessor.setLayerBounds(this.getMapId(), layerPath, bounds);
-    });
   }
 
   /**
@@ -1767,6 +1749,9 @@ export class LayerApi {
     // Register a hook when a layer is going into error state
     gvLayer.onLayerError(this.#boundedHandleLayerError);
 
+    // Register a hook when a layer name is changed
+    gvLayer.onLayerNameChanged(this.#boundedHandleLayerNameChanged);
+
     // Register a hook when a layer opacity is changed
     gvLayer.onLayerOpacityChanged(this.#boundedHandleLayerOpacityChanged);
 
@@ -1824,7 +1809,7 @@ export class LayerApi {
   /**
    * Attaches event handlers to a group layer
    * @private
-   * @param {AbstractBaseGVLayer} baseLayer - The layer instance to attach events to
+   * @param groupLayer - The group layer instance to attach events to
    * @description
    * This method sets up the following event handlers:
    * - Layer opacity changed through onLayerOpacityChanged
@@ -1832,26 +1817,41 @@ export class LayerApi {
    * @returns {void}
    * @private
    */
-  #registerGroupLayerHandlers(baseLayer: AbstractBaseGVLayer): void {
+  #registerGroupLayerHandlers(groupLayer: GVGroupLayer): void {
+    // Register a hook when a layer is added to the group layer
+    groupLayer.onLayerAdded(this.#boundedHandleLayerGroupLayerAdded);
+
+    // Register a hook when a layer is removed from the group layer
+    groupLayer.onLayerRemoved(this.#boundedHandleLayerGroupLayerRemoved);
+
+    // Register a hook when a layer name is changed
+    groupLayer.onLayerNameChanged(this.#boundedHandleLayerNameChanged);
+
     // Register a hook when a layer opacity is changed
-    baseLayer.onLayerOpacityChanged(this.#boundedHandleLayerOpacityChanged);
+    groupLayer.onLayerOpacityChanged(this.#boundedHandleLayerOpacityChanged);
 
     // Register a hook when a layer visibility is changed
-    baseLayer.onVisibleChanged(this.#boundedHandleLayerVisibleChanged);
+    groupLayer.onVisibleChanged(this.#boundedHandleLayerVisibleChanged);
   }
 
   /**
    * Detaches the events registration on the group layer
-   * @param {AbstractBaseGVLayer} baseLayer - The layer to detach events registrations from.
+   * @param groupLayer - The group layer to detach events registrations from.
    * @returns {void}
    * @private
    */
-  #unregisterGroupLayerHandlers(baseLayer: AbstractBaseGVLayer): void {
+  #unregisterGroupLayerHandlers(groupLayer: GVGroupLayer): void {
+    // Register a hook when a layer is added to the group layer
+    groupLayer.offLayerAdded(this.#boundedHandleLayerGroupLayerAdded);
+
+    // Register a hook when a layer is removed from the group layer
+    groupLayer.offLayerRemoved(this.#boundedHandleLayerGroupLayerRemoved);
+
     // Unregister handler on layer opacity change
-    baseLayer.offLayerOpacityChanged(this.#boundedHandleLayerOpacityChanged);
+    groupLayer.offLayerOpacityChanged(this.#boundedHandleLayerOpacityChanged);
 
     // Unregister handler on layer visibility change
-    baseLayer.offVisibleChanged(this.#boundedHandleLayerVisibleChanged);
+    groupLayer.offVisibleChanged(this.#boundedHandleLayerVisibleChanged);
   }
 
   /**
@@ -1948,17 +1948,8 @@ export class LayerApi {
     // Register events handler for the layer
     this.#registerLayerHandlers(gvLayer);
 
-    // Wait for the source to be 'ready'
-    gvLayer
-      .waitForSourceReady()
-      .then(() => {
-        // Calculate the bounds on the source
-        LegendEventProcessor.calculateLayerBoundsAndSaveToStore(this.getMapId(), layerConfig.layerPath);
-      })
-      .catch((error: unknown) => {
-        // Log promise failed
-        logger.logPromiseFailed('in waitForSourceReady in layer.#handleLayerGVCreated', error);
-      });
+    // Calculate the bounds upon creation
+    LegendEventProcessor.setLayerBoundsForLayerAndParentsAndForgetInStore(this.getMapId(), gvLayer, this.getGeoviewLayersGroups());
 
     // Emit about its creation so that one can attach events on it right away if necessary
     this.#emitLayerCreated({ layer: gvLayer });
@@ -2054,7 +2045,7 @@ export class LayerApi {
     this.#emitLayerLoading({ layer });
 
     // Update the store that at least 1 layer is loading
-    LegendEventProcessor.setLayersAreLoading(this.getMapId(), true);
+    LegendEventProcessor.setLayersAreLoadingInStore(this.getMapId(), true);
   }
 
   /**
@@ -2079,6 +2070,12 @@ export class LayerApi {
    * @returns {void}
    */
   #handleLayerLoaded(layer: AbstractGVLayer): void {
+    // If a vector layer has been loaded
+    if (layer instanceof AbstractGVVector) {
+      // Calculate the bounds as those depend on the actual features in the layer
+      LegendEventProcessor.setLayerBoundsForLayerAndParentsAndForgetInStore(this.getMapId(), layer, this.getGeoviewLayersGroups());
+    }
+
     // Emit about it
     this.#emitLayerLoaded({ layer });
   }
@@ -2095,10 +2092,18 @@ export class LayerApi {
   }
 
   /**
+   * Handles when a layer name is changed on the map.
+   * @param layer - The layer that's become changed.
+   * @param event - The event containing the name change.
+   */
+  #handleLayerNameChanged(layer: AbstractBaseGVLayer, event: LayerNameChangedEvent): void {
+    LegendEventProcessor.setLayerNameInStore(this.getMapId(), layer.getLayerPath(), event.layerName);
+  }
+
+  /**
    * Handles when a layer opacity is changed on the map.
-   * @param {AbstractBaseGVLayer} layer - The layer that's become changed.
-   * @param {LayerOpacityChangedEvent} event - The event containing the opacity change.
-   * @returns {void}
+   * @param layer - The layer that's become changed.
+   * @param event - The event containing the opacity change.
    */
   #handleLayerOpacityChanged(layer: AbstractBaseGVLayer, event: LayerOpacityChangedEvent): void {
     LegendEventProcessor.setOpacityInStore(this.getMapId(), layer.getLayerPath(), event.opacity);
@@ -2227,6 +2232,41 @@ export class LayerApi {
   }
 
   /**
+   * Handles the event triggered when a layer is added to a `GVGroupLayer`.
+   * @param sender - The group layer receiving the new child layer.
+   * @param event - The event payload containing information about the layer addition.
+   * @description
+   * When a layer is added to a group, this handler checks whether the added
+   * layer is a concrete `AbstractGVLayer` (i.e., not another group wrapper type).
+   * If so, it waits for the layer's source to become ready before recalculating
+   * and propagating its bounds to the store. This ensures bounds are computed
+   * only after the layer has sufficient metadata (e.g., extent) available.
+   * Bounds propagation may also affect the parent group hierarchy.
+   * @private
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  #handleLayerGroupLayerAdded(sender: GVGroupLayer, event: GVGroupLayerEvent): void {
+    // Calculate the bounds on the group layer which had a layer added
+    LegendEventProcessor.setLayerBoundsForLayerAndParentsAndForgetInStore(this.getMapId(), sender, this.getGeoviewLayersGroups());
+  }
+
+  /**
+   * Handles the event triggered when a layer is removed from a `GVGroupLayer`.
+   * @param sender - The group layer from which the child layer was removed.
+   * @param event - The event payload containing information about the layer removal.
+   * @description
+   * When a child layer is removed from a group, this handler recalculates the
+   * bounds of the group layer to reflect the updated set of children. The
+   * recalculated bounds are then stored and may propagate upward in the
+   * layer hierarchy.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  #handleLayerGroupLayerRemoved(sender: GVGroupLayer, event: GVGroupLayerEvent): void {
+    // Calculate the bounds on the group layer which had a layer removed
+    LegendEventProcessor.setLayerBoundsForLayerAndParentsAndForgetInStore(this.getMapId(), sender, this.getGeoviewLayersGroups());
+  }
+
+  /**
    * Validates the geoview layer configuration array to eliminate duplicate entries and inform the user.
    * @param {MapConfigLayerEntry[]} mapConfigLayerEntries - The Map Config Layer Entries to validate.
    * @returns {MapConfigLayerEntry[]} The new configuration with duplicate entries eliminated.
@@ -2311,20 +2351,28 @@ export class LayerApi {
     // in visible range. Inheritance has already been passed in the config and the group layer visibility will
     // be handled in the map-viewer's handleMapZoomEnd by checking the children visibility
     if ((layerConfig.getInitialSettings()?.maxZoom || layerConfig.getMaxScale()) && !(gvLayer instanceof GVGroupLayer)) {
-      let maxScaleZoomLevel = this.mapViewer.getMapZoomFromScale(layerConfig.getMaxScale());
-      maxScaleZoomLevel = maxScaleZoomLevel ? Math.ceil(maxScaleZoomLevel * 100) / 100 : undefined;
-      const maxZoom = Math.min(layerConfig.getInitialSettings()?.maxZoom ?? Infinity, maxScaleZoomLevel ?? Infinity);
+      // Calculate the map zoom for the corresponding max scale
+      let scaleZoomLevel = this.mapViewer.getMapZoomFromScale(layerConfig.getMaxScale()) ?? Infinity;
+
+      // Add a buffer, because the calculations are sometimes a bit off
+      scaleZoomLevel -= LayerApi.MIN_MAX_ZOOM_LEVEL_BUFFER;
+
+      const maxZoom = Math.min(layerConfig.getInitialSettings()?.maxZoom ?? Infinity, scaleZoomLevel);
       gvLayer.setMaxZoom(maxZoom);
     }
 
     if ((layerConfig.getInitialSettings()?.minZoom || layerConfig.getMinScale()) && !(gvLayer instanceof GVGroupLayer)) {
-      let minScaleZoomLevel = this.mapViewer.getMapZoomFromScale(layerConfig.getMinScale());
-      minScaleZoomLevel = minScaleZoomLevel ? Math.ceil(minScaleZoomLevel * 100) / 100 : undefined;
-      const minZoom = Math.max(layerConfig.getInitialSettings()?.minZoom ?? -Infinity, minScaleZoomLevel ?? -Infinity);
+      // Calculate the map zoom for the corresponding min scale
+      let scaleZoomLevel = this.mapViewer.getMapZoomFromScale(layerConfig.getMinScale()) ?? -Infinity;
+
+      // Add a buffer, because the calculations are sometimes a bit off
+      scaleZoomLevel += LayerApi.MIN_MAX_ZOOM_LEVEL_BUFFER;
+
+      const minZoom = Math.max(layerConfig.getInitialSettings()?.minZoom ?? -Infinity, scaleZoomLevel);
       gvLayer.setMinZoom(minZoom);
     }
 
-    const zoom = this.mapViewer.getView().getZoom() as number;
+    const zoom = this.mapViewer.getView().getZoom()!;
     const inVisibleRange = gvLayer.inVisibleRange(zoom);
     MapEventProcessor.setLayerInVisibleRange(this.getMapId(), gvLayer.getLayerPath(), inVisibleRange);
   }
@@ -2410,8 +2458,6 @@ export class LayerApi {
   /**
    * Registers layer information for TimeSlider.
    * @param {AbstractGVLayer} layer - The layer to be registered.
-   * @returns {void}
-   * @private
    */
   #registerForTimeSlider(layer: AbstractGVLayer): void {
     try {
@@ -2434,33 +2480,6 @@ export class LayerApi {
       logger.logError(error);
       // Layer failed to load, abandon it for the TimeSlider registration, too bad.
       // Here, we haven't even made it to a possible layer registration for a possible Time Slider, because we couldn't even get the layer to load anyways.
-    }
-  }
-
-  /**
-   * Recursively gathers all bounds on the layers associated with the given layer path and store them in the bounds parameter.
-   * @param {ConfigBaseClass} layerConfig - The layer config being processed
-   * @param {Extent[]} bounds - The currently gathered bounds during the recursion
-   * @returns {void}
-   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
-   */
-  #gatherAllBoundsRec(layerConfig: ConfigBaseClass, bounds: Extent[]): void {
-    // If a leaf
-    if (layerConfig.getEntryTypeIsRegular()) {
-      // Get the layer
-      const layer = this.getGeoviewLayerRegularIfExists(layerConfig.layerPath);
-
-      // If found
-      if (layer) {
-        // Get the bounds of the layer
-        const calculatedBounds = layer.getBounds(this.mapViewer.getProjection(), MapViewer.DEFAULT_STOPS);
-        if (calculatedBounds) bounds.push(calculatedBounds);
-      }
-    } else if (layerConfig.getEntryTypeIsGroup()) {
-      // Is a group
-      layerConfig.listOfLayerEntryConfig.forEach((subLayerConfig) => {
-        this.#gatherAllBoundsRec(subLayerConfig, bounds);
-      });
     }
   }
 
@@ -2493,7 +2512,7 @@ export class LayerApi {
     // If all loaded/error
     if (allLoadedOrError) {
       // Update the store that all layers are loaded at this point
-      LegendEventProcessor.setLayersAreLoading(this.getMapId(), false);
+      LegendEventProcessor.setLayersAreLoadingInStore(this.getMapId(), false);
     }
 
     // Return result

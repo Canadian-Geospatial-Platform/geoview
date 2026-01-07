@@ -41,6 +41,7 @@ import {
   useLayerDisplayDateFormat,
   useLayerDisplayDateTimezone,
   useLayerSelectorFilterClass,
+  useLayerSelectorName,
   useLayerStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useDataTableStoreActions, useDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
@@ -89,6 +90,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   const displayDateFormat = useLayerDisplayDateFormat(layerPath);
   const displayDateTimezone = useLayerDisplayDateTimezone(layerPath);
   const displayDateTimezoneUniversal = displayDateTimezone === 'local' ? DateMgt.TIME_IANA_LOCAL : displayDateTimezone;
+  const layerName = useLayerSelectorName(layerPath);
 
   // internal state
   const [density, setDensity] = useState<MRTDensityState>('compact');
@@ -650,7 +652,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     },
     // Improve table accessibility
     muiTableProps: {
-      'aria-label': t('dataTable.tableAriaLabelWithLayer', { layerName: data.layerName })!,
+      'aria-label': t('dataTable.tableAriaLabelWithLayer', { layerName })!,
     },
   });
 

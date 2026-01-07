@@ -35,12 +35,14 @@ export abstract class AbstractGVVectorTile extends AbstractGVLayer {
 
   /**
    * Overrides the way to get the bounds for this layer type.
-   * @param {OLProjection} projection - The projection to get the bounds into.
-   * @param {number} stops - The number of stops to use to generate the extent.
-   * @returns {Extent | undefined} The layer bounding box.
-   * @override
+   * @param projection - The projection to get the bounds into.
+   * @param stops - The number of stops to use to generate the extent.
+   * @returns A promise of layer bounding box.
    */
-  override onGetBounds(projection: OLProjection, stops: number): Extent | undefined {
+  override async onGetBounds(projection: OLProjection, stops: number): Promise<Extent | undefined> {
+    // Wait for the source to be ready, just in case the caller is early
+    await this.waitForSourceReady();
+
     // Get the source projection
     const sourceProjection = this.getOLSource().getProjection();
 

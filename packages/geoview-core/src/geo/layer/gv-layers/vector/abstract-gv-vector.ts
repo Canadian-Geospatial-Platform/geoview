@@ -20,10 +20,11 @@ import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { GVVectorSource } from '@/geo/layer/source/vector-source';
 import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
-import { NoExtentError } from '@/core/exceptions/geoview-exceptions';
+import { GeoViewError, NoExtentError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer vector type layer.
@@ -104,12 +105,12 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
-   * @returns {VectorSource} The VectorSource source instance associated with this layer.
+   * @returns {GVVectorSource} The VectorSource source instance associated with this layer.
    * @override
    */
-  override getOLSource(): VectorSource {
+  override getOLSource(): GVVectorSource {
     // Get source from OL
-    return super.getOLSource() as VectorSource;
+    return super.getOLSource() as GVVectorSource;
   }
 
   /**
@@ -134,6 +135,27 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     const layerMetadata = this.getLayerConfig();
     const fieldDefinitions = layerMetadata?.getOutfields()?.find((fieldDefinition) => fieldDefinition.name === fieldName);
     return fieldDefinitions?.type || 'string';
+  }
+
+  /**
+   * Overridable method called to get a more specific error code for all errors.
+   * @param event - The event which is being triggered.
+   * @returns The GeoViewError stored in the GVVectorSource if any or the one from the parent method.
+   */
+  protected override onErrorDecipherError(event: Event): GeoViewError {
+    // Try to get the error from the source
+    const layerSource = event.target;
+
+    // Check if the source is GVVectorSource (should be) and check if the error inside is a GeoViewError
+    if (layerSource instanceof GVVectorSource) {
+      const loaderError = layerSource.getLoaderError();
+      if (loaderError instanceof GeoViewError) {
+        return loaderError;
+      }
+    }
+
+    // Couldn't be deciphered, use parent's
+    return super.onErrorDecipherError(event);
   }
 
   /**
@@ -256,22 +278,21 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Overrides the way to get the bounds for this layer type.
-   * @param {OLProjection} projection - The projection to get the bounds into.
-   * @param {number} stops - The number of stops to use to generate the extent.
-   * @returns {Extent | undefined} The layer bounding box.
-   * @override
+   * @param projection - The projection to get the bounds into.
+   * @param stops - The number of stops to use to generate the extent.
+   * @returns A promise of layer bounding box.
    */
-  override onGetBounds(projection: OLProjection, stops: number): Extent | undefined {
-    // Get the source projection
-    const sourceProjection = this.getOLSource().getProjection();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  override async onGetBounds(projection: OLProjection, stops: number): Promise<Extent | undefined> {
+    // Wait for the features to be loaded, because this is a vector layer the features have to be loaded for the extent to be valid
+    await this.waitLoadedStatus();
 
     // Get the layer bounds
     let sourceExtent = this.getOLSource()?.getExtent();
 
     // If both found
-    if (sourceExtent && sourceProjection) {
+    if (sourceExtent) {
       // Transform extent to given projection
-      sourceExtent = Projection.transformExtentFromProj(sourceExtent, sourceProjection, projection, stops);
       sourceExtent = GeoUtilities.validateExtent(sourceExtent, projection.getCode());
     }
 

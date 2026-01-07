@@ -53,9 +53,9 @@ type TableInfo = {
 export class GeoPackageReader {
   /**
    * Generates a WKB layer config from a GeoPackage.
-   * @param {GeoPackageLayerConfig} layerConfig - the config to convert
-   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
-   * @returns {Promise<TypeWkbLayerConfig>} A WKB layer config
+   * @param layerConfig - The config to convert
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
+   * @returns A Promise of a WKB layer config
    */
   static async createLayerConfigFromGeoPackage(layerConfig: GeoPackageLayerConfig, abortSignal?: AbortSignal): Promise<TypeWkbLayerConfig> {
     // Set up WKB layer config so it can be used in layer entry configs
@@ -190,9 +190,9 @@ export class GeoPackageReader {
 
   /**
    * Fetches a GeoPackage and creates layer data from it.
-   * @param {string} url - The URL of the GeoPackage.
-   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
-   * @returns {Promise<LayerData[]>} Promise of the layer data.
+   * @param url - The URL of the GeoPackage.
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
+   * @returns A Promise of the layer data.
    * @private
    */
   static async #getGeoPackageData(url: string, abortSignal?: AbortSignal): Promise<GeoPackageLayerData[]> {

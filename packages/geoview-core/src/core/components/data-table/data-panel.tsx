@@ -11,6 +11,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useMapStoreActions, useMapAllVisibleandInRangeLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useLayerNames, useLayerStatuses } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
   useUIActiveAppBarTab,
   useUIActiveFooterBarTab,
@@ -60,6 +61,8 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   const appBarComponents = useUIAppbarComponents();
   const showUnsymbolizedFeatures = useAppShowUnsymbolizedFeatures();
   const { disableFocusTrap } = useUIStoreActions();
+  const layerNames = useLayerNames();
+  const layerStatuses = useLayerStatuses();
 
   // Create columns for data table.
   const mappedLayerData = useFeatureFieldInfos(layerData);
@@ -303,9 +306,11 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
 
     return orderedLayerData.map((layer) => ({
       ...layer,
+      layerName: layerNames[layer.layerPath],
+      layerStatus: layerStatuses[layer.layerPath],
       layerUniqueId: `${mapId}-${containerType}-${TABS.DATA_TABLE}-${layer.layerPath}`,
       layerFeatures: getFeaturesOfLayer(layer.layerPath),
-      tooltip: getLayerTooltip(layer.layerName ?? '', layer.layerPath),
+      tooltip: getLayerTooltip(layerNames[layer.layerPath] ?? '', layer.layerPath),
       mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerPath) && (
         <FilterAltIcon sx={{ color: theme.palette.geoViewColor.grey.main, verticalAlign: 'middle' }} />
       ),

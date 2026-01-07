@@ -14,7 +14,8 @@ import {
   useLayerDateTemporalModes,
   useLayerDisplayDateFormats,
   useLayerDisplayDateTimezones,
-  useLayerLegendLayers,
+  useLayerNames,
+  useLayerStatuses,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import { Box } from 'geoview-core/ui';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
@@ -49,7 +50,8 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   // TO.DOCONT: because return type is different then geochart store. We need to check existance of store easily for link component to work
   const { setSelectedLayerPath } = useTimeSliderStoreActions()!;
   const { isLayerHiddenOnMap } = useMapStoreActions();
-  const legendLayers = useLayerLegendLayers();
+  const layerNames = useLayerNames();
+  const layerStatuses = useLayerStatuses();
   const layerDisplayDateFormats = useLayerDisplayDateFormats();
   const layerDisplayDateTimezones = useLayerDisplayDateTimezones();
   const layerTemporalModes = useLayerDateTemporalModes();
@@ -122,39 +124,6 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       );
     };
 
-    /**
-     * Recursively find a layer by path in legendLayers, searching through children
-     * @param {string} targetPath - Layer path to find
-     * @param {typeof legendLayers} layers - Array of legend layers to search
-     * @returns {typeof legendLayers[number] | undefined} Found layer or undefined
-     */
-    const findLayerInLegend = (targetPath: string, layers: typeof legendLayers): (typeof legendLayers)[number] | undefined => {
-      for (const layer of layers) {
-        // Check if this is the layer we're looking for
-        if (layer.layerPath === targetPath && (!layer.children || layer.children.length === 0)) {
-          return layer;
-        }
-
-        // If this layer has children, search recursively in children
-        if (layer.children && layer.children.length > 0) {
-          const found = findLayerInLegend(targetPath, layer.children);
-          if (found) {
-            return found;
-          }
-        }
-      }
-      return undefined;
-    };
-
-    // Create lookup map by looping through timeSliderLayers and finding each in legendLayers
-    const legendLayersMap = new Map<string, (typeof legendLayers)[number]>();
-    Object.keys(timeSliderLayers).forEach((layerPath) => {
-      const layer = findLayerInLegend(layerPath, legendLayers);
-      if (layer) {
-        legendLayersMap.set(layerPath, layer);
-      }
-    });
-
     // Return the layers
     return visibleInRangeLayers
       .map((layerPath) => {
@@ -185,24 +154,21 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
         }
 
         // Check if layer is in error
-        const legendLayer = legendLayersMap.get(layer.layerPath);
-        if (legendLayer?.layerStatus === 'error') {
+        if (layerStatuses[layer.layerPath] === 'error') {
           return false;
         }
 
         return true;
       })
       .map((layer) => {
-        const legendLayer = legendLayersMap.get(layer.layerPath);
         const additionalNames = layer.timeSliderLayerInfo.additionalLayerpaths
           ?.map((additionalLayerPath) => {
-            const additionalLayer = legendLayersMap.get(additionalLayerPath);
-            return additionalLayer?.layerName;
+            return layerNames[additionalLayerPath];
           })
           .filter(Boolean);
 
         const combinedAdditionalNames = additionalNames ? `, ${additionalNames.join(', ')}` : '';
-        const layerName = layer.timeSliderLayerInfo.title || `${legendLayer?.layerName || ''}${combinedAdditionalNames}` || '';
+        const layerName = layer.timeSliderLayerInfo.title || `${layerNames[layer.layerPath]}${combinedAdditionalNames}` || '';
         return {
           layerName,
           layerPath: layer.layerPath,
@@ -213,7 +179,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
           layerUniqueId: `${mapId}-${TABS.TIME_SLIDER}-${layer.layerPath}`,
         } as LayerListEntry;
       });
-  }, [timeSliderLayers, visibleInRangeLayers, getFilterInfo, legendLayers, isLayerHiddenOnMap, displayLanguage, mapId]);
+  }, [timeSliderLayers, visibleInRangeLayers, getFilterInfo, isLayerHiddenOnMap, layerStatuses, layerNames, displayLanguage, mapId]);
 
   // Unselect layer if it's removed from visibility array
   useEffect(() => {

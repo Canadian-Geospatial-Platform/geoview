@@ -1,4 +1,3 @@
-import { useCallback } from 'react';
 import { useStore } from 'zustand';
 
 import type { FitOptions } from 'ol/View';
@@ -7,21 +6,20 @@ import type { Extent } from 'ol/extent';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import type { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { type TypeGetStore, type TypeSetStore, type IGeoviewState, useStableSelector } from '@/core/stores/geoview-store';
+import { type TypeGetStore, type TypeSetStore, useStableSelector } from '@/core/stores/geoview-store';
 import type { TypeFeatureInfoEntryPartial, TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
 import { DateMgt, type TemporalMode, type TimeDimension, type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
-import type { TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerType, TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import type { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import type { TypeVectorLayerStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { LayerNotEsriDynamicError } from '@/core/exceptions/layer-exceptions';
 import { NoBoundsError } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
-import { shallowObjectEqual } from '@/core/utils/utilities';
 
 // #region INTERFACES & TYPES
 
@@ -41,11 +39,8 @@ export interface ILayerState {
     deleteLayer: (layerPath: string) => void;
     getExtentFromFeatures: (layerPath: string, featureIds: number[], outfield?: string) => Promise<Extent>;
     queryLayerEsriDynamic: (layerPath: string, objectIDs: number[]) => Promise<TypeFeatureInfoEntryPartial[]>;
-    getLayer: (layerPath: string) => TypeLegendLayer | undefined;
-    getLayerBounds: (layerPath: string) => number[] | undefined;
     getLayerDeleteInProgress: () => string;
     getLayerServiceProjection: (layerPath: string) => string | undefined;
-    getLayerTimeDimension: (layerPath: string) => TimeDimension | undefined;
     refreshLayer: (layerPath: string) => Promise<void>;
     reloadLayer: (layerPath: string) => void;
     toggleItemVisibility: (layerPath: string, item: TypeLegendItem) => void;
@@ -140,28 +135,9 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       },
 
       /**
-       * Gets legend layer for given layer path.
-       * @param {string} layerPath - The layer path to get info for.
-       * @return {TypeLegendLayer | undefined}
-       */
-      getLayer: (layerPath: string): TypeLegendLayer | undefined => {
-        const curLayers = get().layerState.legendLayers;
-        return LegendEventProcessor.findLayerByPath(curLayers, layerPath);
-      },
-
-      /**
-       * Gets the layer bounds in the store which correspond to the layer path
-       * @param {string} layerPath - The layer path of the bounds to get
-       * @returns {Extent | undefined} The bounds or undefined
-       */
-      getLayerBounds: (layerPath: string): Extent | undefined => {
-        // Redirect to processor
-        return LegendEventProcessor.getLayerBounds(get().mapId, layerPath);
-      },
-
-      /**
        * Get the LayerDeleteInProgress state.
        */
+      // TODO: REFACTOR - HOOK - This should probably be a hook rather than an action
       getLayerDeleteInProgress: () => get().layerState.layerDeleteInProgress,
 
       /**
@@ -172,20 +148,6 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       getLayerServiceProjection: (layerPath: string): string | undefined => {
         // Redirect to processor
         return LegendEventProcessor.getLayerServiceProjection(get().mapId, layerPath);
-      },
-
-      /**
-       * Gets the layer time dimension initial configuration.
-       * @param {string} layerPath - The layer path
-       * @returns {TimeDimension | undefined} Time dimension information
-       */
-      getLayerTimeDimension: (layerPath: string): TimeDimension | undefined => {
-        try {
-          return LegendEventProcessor.getLayerTimeDimension(get().mapId, layerPath);
-        } catch (error: unknown) {
-          logger.logError(`Error getting temporal dimension for layer ${layerPath}`, error);
-        }
-        return undefined;
       },
 
       /**
@@ -336,7 +298,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        */
       setSelectedLayerPath: (layerPath: string): void => {
         // Redirect to event processor
-        LegendEventProcessor.setSelectedLayersTabLayer(get().mapId, layerPath);
+        LegendEventProcessor.setSelectedLayersTabLayerInStore(get().mapId, layerPath);
       },
 
       /**
@@ -455,8 +417,9 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 }
 
 export type TypeLegendResultInfo = {
+  layerStatus: TypeLayerStatus;
   legendQueryStatus: LegendQueryStatus;
-  data: TypeLegend | undefined | null;
+  data: TypeLegend | undefined;
 };
 
 export type LegendQueryStatus = 'init' | 'querying' | 'queried' | 'error';
@@ -465,7 +428,7 @@ export type TypeLegend = {
   type: TypeGeoviewLayerType;
   // Layers other than vector layers use the HTMLCanvasElement type for their legend.
   legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
-  styleConfig?: TypeLayerStyleConfig | null;
+  styleConfig?: TypeLayerStyleConfig;
 };
 
 export type TypeLegendResultSetEntry = TypeResultSetEntry & TypeLegendResultInfo;
@@ -475,6 +438,7 @@ export type TypeLegendResultSet = TypeResultSet<TypeLegendResultSetEntry>;
 // **********************************************************
 // Layer state selectors
 // **********************************************************
+
 export const useLayerHighlightedLayer = (): string => useStore(useGeoViewStore(), (state) => state.layerState.highlightedLayer);
 export const useLayerLegendLayers = (): TypeLegendLayer[] => useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
 export const useLayerSelectedLayer = (): TypeLegendLayer => useStore(useGeoViewStore(), (state) => state.layerState.selectedLayer);
@@ -497,10 +461,10 @@ export const useSelectedLayer = (): TypeLegendLayer | undefined => {
 export const useLayerIconLayerSet = (layerPath: string): string[] => {
   const layers = useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
   const layer = LegendEventProcessor.findLayerByPath(layers, layerPath);
-  if (layer && layer.type !== CONST_LAYER_TYPES.WMS) {
+  if (layer && layer.schemaTag !== CONST_LAYER_TYPES.WMS) {
     return layer.items.map((item) => item.icon).filter((d) => d !== null);
   }
-  if (layer && layer.type === CONST_LAYER_TYPES.WMS) {
+  if (layer && layer.schemaTag === CONST_LAYER_TYPES.WMS) {
     return layer.icons.map((item) => item.iconImage).filter((d) => d !== null) as string[];
   }
   return [];
@@ -513,6 +477,8 @@ export const useLayerIconLayerSet = (layerPath: string): string[] => {
 export const useLayerTimeDimension = (layerPath: string): TimeDimension | undefined => {
   // Hook
   return useStore(useGeoViewStore(), (state) => {
+    // TODO: REFACTOR - This getter has nothing to do with the store state and fakes it via the LegendEventProcessor going through the layerApi.
+    // TO.DOCONT: This pattern shouldn't(?) be allowed in the framework, but the processors allow it via getters jumping on the cgpv.api.
     return LegendEventProcessor.getLayerTimeDimension(state.mapId, layerPath);
   });
 };
@@ -523,23 +489,19 @@ export const useLayerTimeDimension = (layerPath: string): TimeDimension | undefi
  */
 export const useLayerDateTemporalModes = (): Record<string, TemporalMode> => {
   // Hook
-  return useStableSelector(
-    useGeoViewStore(),
-    (state) => {
-      // Get all layers
-      const allLayers = LegendEventProcessor.findAllLayers(state.layerState.legendLayers);
+  return useStableSelector(useGeoViewStore(), (state) => {
+    // Get all layers
+    const allLayers = LegendEventProcessor.findAllLayers(state.layerState.legendLayers);
 
-      // Return the object with the display date formats for all layers, using the default format when not defined at the layer level
-      return Object.values(allLayers).reduce<Record<string, TemporalMode>>((acc, layer) => {
-        if (layer.layerPath) {
-          // eslint-disable-next-line no-param-reassign
-          acc[layer.layerPath] = layer.dateTemporalMode ?? DateMgt.DEFAULT_TEMPORAL_MODE;
-        }
-        return acc;
-      }, {});
-    },
-    shallowObjectEqual
-  );
+    // Return the object with the display date formats for all layers, using the default format when not defined at the layer level
+    return Object.values(allLayers).reduce<Record<string, TemporalMode>>((acc, layer) => {
+      if (layer.layerPath) {
+        // eslint-disable-next-line no-param-reassign
+        acc[layer.layerPath] = layer.dateTemporalMode ?? DateMgt.DEFAULT_TEMPORAL_MODE;
+      }
+      return acc;
+    }, {});
+  });
 };
 
 /**
@@ -562,26 +524,22 @@ export const useLayerDateTemporalMode = (layerPath: string): TemporalMode => {
  */
 export const useLayerDisplayDateFormats = (): Record<string, TypeDisplayDateFormat> => {
   // Hook
-  return useStableSelector(
-    useGeoViewStore(),
-    (state) => {
-      // Get the default format
-      const defaultFormat = AppEventProcessor.getDisplayDateFormatDefault(state.mapId).datetimeFormat;
+  return useStableSelector(useGeoViewStore(), (state) => {
+    // Get the default format
+    const defaultFormat = AppEventProcessor.getDisplayDateFormatDefault(state.mapId).datetimeFormat;
 
-      // Get all layers
-      const allLayers = LegendEventProcessor.findAllLayers(state.layerState.legendLayers);
+    // Get all layers
+    const allLayers = LegendEventProcessor.findAllLayers(state.layerState.legendLayers);
 
-      // Return the object with the display date formats for all layers, using the default format when not defined at the layer level
-      return Object.values(allLayers).reduce<Record<string, TypeDisplayDateFormat>>((acc, layer) => {
-        if (layer.layerPath) {
-          // eslint-disable-next-line no-param-reassign
-          acc[layer.layerPath] = layer.displayDateFormat ?? defaultFormat;
-        }
-        return acc;
-      }, {});
-    },
-    shallowObjectEqual
-  );
+    // Return the object with the display date formats for all layers, using the default format when not defined at the layer level
+    return Object.values(allLayers).reduce<Record<string, TypeDisplayDateFormat>>((acc, layer) => {
+      if (layer.layerPath) {
+        // eslint-disable-next-line no-param-reassign
+        acc[layer.layerPath] = layer.displayDateFormat ?? defaultFormat;
+      }
+      return acc;
+    }, {});
+  });
 };
 
 /**
@@ -631,23 +589,19 @@ export const useLayerDisplayDateFormatShort = (layerPath: string): TypeDisplayDa
  */
 export const useLayerDisplayDateTimezones = (): Record<string, TimeIANA> => {
   // Hook
-  return useStableSelector(
-    useGeoViewStore(),
-    (state) => {
-      // Get all layers
-      const allLayers = LegendEventProcessor.findAllLayers(state.layerState.legendLayers);
+  return useStableSelector(useGeoViewStore(), (state) => {
+    // Get all layers
+    const allLayers = LegendEventProcessor.findAllLayers(state.layerState.legendLayers);
 
-      // Return the object with the display date formats for all layers, using the default format when not defined at the layer level
-      return Object.values(allLayers).reduce<Record<string, TimeIANA>>((acc, layer) => {
-        if (layer.layerPath) {
-          // eslint-disable-next-line no-param-reassign
-          acc[layer.layerPath] = layer.displayDateTimezone ?? AppEventProcessor.getDisplayDateTimezone(state.mapId);
-        }
-        return acc;
-      }, {});
-    },
-    shallowObjectEqual
-  );
+    // Return the object with the display date formats for all layers, using the default format when not defined at the layer level
+    return Object.values(allLayers).reduce<Record<string, TimeIANA>>((acc, layer) => {
+      if (layer.layerPath) {
+        // eslint-disable-next-line no-param-reassign
+        acc[layer.layerPath] = layer.displayDateTimezone ?? AppEventProcessor.getDisplayDateTimezone(state.mapId);
+      }
+      return acc;
+    }, {});
+  });
 };
 
 /**
@@ -672,15 +626,10 @@ export const useLayerDisplayDateTimezone = (layerPath: string): TimeIANA => {
 
 // Generic hook that can select any key from the layer
 function useLayerSelectorLayerValueGeneric<K extends keyof TypeLegendLayer>(layerPath: string, key: K): TypeLegendLayer[K] | undefined {
-  const selector = useCallback(
-    (state: IGeoviewState) => {
-      const layer = LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath);
-      return layer ? layer[key] : undefined;
-    },
-    [layerPath, key] // re-memoize only when either changes
-  );
-
-  return useStore(useGeoViewStore(), selector);
+  return useStore(useGeoViewStore(), (state) => {
+    const layer = LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath);
+    return layer?.[key];
+  });
 }
 
 // Factory to create strongly typed layer selector hooks
@@ -690,16 +639,56 @@ function createLayerSelectorHook<K extends keyof TypeLegendLayer>(key: K) {
 
 // Specialized hooks
 export const useLayerSelectorId = createLayerSelectorHook('layerId');
+
 export const useLayerSelectorName = createLayerSelectorHook('layerName');
+export const useLayerNames = (): Record<string, string> => {
+  // Hook
+  return useStableSelector(useGeoViewStore(), (state) => {
+    // Get all layers
+    const allLayers = LegendEventProcessor.findAllLayers(state.layerState.legendLayers);
+
+    // Return the object with the display date formats for all layers, using the default format when not defined at the layer level
+    return Object.values(allLayers).reduce<Record<string, string>>((acc, layer) => {
+      if (layer.layerPath) {
+        // eslint-disable-next-line no-param-reassign
+        acc[layer.layerPath] = layer.layerName;
+      }
+      return acc;
+    }, {});
+  });
+};
+
 export const useLayerSelectorStatus = createLayerSelectorHook('layerStatus');
+export const useLayerStatuses = (): Record<string, TypeLayerStatus> => {
+  // Hook
+  return useStableSelector(useGeoViewStore(), (state) => {
+    // Get all layers
+    const allLayers = LegendEventProcessor.findAllLayers(state.layerState.legendLayers);
+
+    // Return the object with the display date formats for all layers, using the default format when not defined at the layer level
+    return Object.values(allLayers).reduce<Record<string, TypeLayerStatus>>((acc, layer) => {
+      if (layer.layerPath) {
+        // eslint-disable-next-line no-param-reassign
+        acc[layer.layerPath] = layer.layerStatus ?? 'newInstance'; // Defaults to most basic
+      }
+      return acc;
+    }, {});
+  });
+};
+
 export const useLayerSelectorFilter = createLayerSelectorHook('layerFilter');
 export const useLayerSelectorFilterClass = createLayerSelectorHook('layerFilterClass');
-export const useLayerSelectorType = createLayerSelectorHook('type');
+export const useLayerSelectorSchemaTag = createLayerSelectorHook('schemaTag');
+export const useLayerSelectorEntryType = createLayerSelectorHook('entryType');
+export const useLayerSelectorBounds = createLayerSelectorHook('bounds');
+export const useLayerSelectorBounds4326 = createLayerSelectorHook('bounds4326');
 export const useLayerSelectorControls = createLayerSelectorHook('controls');
 export const useLayerSelectorChildren = createLayerSelectorHook('children');
 export const useLayerSelectorItems = createLayerSelectorHook('items');
 export const useLayerSelectorIcons = createLayerSelectorHook('icons');
 export const useLayerSelectorLegendQueryStatus = createLayerSelectorHook('legendQueryStatus');
+export const useLayerSelectorCanToggle = createLayerSelectorHook('canToggle');
+export const useLayerSelectorStyleConfig = createLayerSelectorHook('styleConfig');
 
 // Store Actions
 export const useLayerStoreActions = (): LayerActions => useStore(useGeoViewStore(), (state) => state.layerState.actions);

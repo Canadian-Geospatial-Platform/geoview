@@ -5,7 +5,7 @@ import {
   useMapCenterCoordinates,
   useMapFixNorth,
   useMapNorthArrowElement,
-  useMapProjection,
+  useMapProjectionEPSG,
   useMapRotation,
   useMapSize,
   useMapStoreActions,
@@ -31,7 +31,7 @@ export const useManageArrow = (): ArrowReturn => {
   const angle = useRef(0); // keep track of rotation angle for fix north
 
   // Store
-  const mapProjection = useMapProjection();
+  const mapProjectionEPSG = useMapProjectionEPSG();
   const northArrowElement = useMapNorthArrowElement();
   const fixNorth = useMapFixNorth();
   const mapZoom = useMapZoom();
@@ -41,8 +41,8 @@ export const useManageArrow = (): ArrowReturn => {
   const { getPixelFromCoordinate, setRotation } = useMapStoreActions();
 
   // Memoize projection check as it's used multiple times
-  const isLCCProjection = useMemo(() => `EPSG:${mapProjection}` === Projection.PROJECTION_NAMES.LCC, [mapProjection]);
-  const isWebMercator = useMemo(() => `EPSG:${mapProjection}` === Projection.PROJECTION_NAMES.WM, [mapProjection]);
+  const isLCCProjection = useMemo(() => mapProjectionEPSG === Projection.PROJECTION_NAMES.LCC, [mapProjectionEPSG]);
+  const isWebMercator = useMemo(() => mapProjectionEPSG === Projection.PROJECTION_NAMES.WM, [mapProjectionEPSG]);
 
   const prevRotationRef = useRef(0);
   const equalCountRef = useRef(0);

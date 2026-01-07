@@ -24,7 +24,7 @@ import {
   useLayerSelectorName,
   useLayerSelectorId,
   useLayerSelectorStatus,
-  useLayerSelectorType,
+  useLayerSelectorEntryType,
   useLayerSelectorControls,
   useLayerSelectorChildren,
   useLayerSelectorItems,
@@ -102,7 +102,7 @@ export function SingleLayer({
   const layerId = useLayerSelectorId(layerPath);
   const layerName = useLayerSelectorName(layerPath);
   const layerStatus = useLayerSelectorStatus(layerPath);
-  const layerType = useLayerSelectorType(layerPath);
+  const layerEntryType = useLayerSelectorEntryType(layerPath);
   const layerControls = useLayerSelectorControls(layerPath);
   const layerChildren = useLayerSelectorChildren(layerPath);
   const layerItems = useLayerSelectorItems(layerPath);
@@ -657,7 +657,7 @@ export function SingleLayer({
     }
 
     // Is zoom to visible scale button visible?
-    const isZoomToVisibleScaleCapable = !!((layerType as string) !== 'group' && !inVisibleRange);
+    const isZoomToVisibleScaleCapable = !inVisibleRange && layerEntryType !== 'group';
 
     return (
       <>
@@ -694,7 +694,7 @@ export function SingleLayer({
     showDeleteOnLoading,
     layerControls?.remove,
     isLayerAlwaysVisible,
-    layerType,
+    layerEntryType,
     inVisibleRange,
     t,
     handleZoomToLayerVisibleScale,

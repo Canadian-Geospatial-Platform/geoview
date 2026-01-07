@@ -3,7 +3,12 @@ import { Tooltip, useTheme } from '@mui/material';
 import { memo, useCallback, useMemo, useEffect, useRef } from 'react';
 import { Box, ListItem, ListItemButton, ListItemText, ListItemIcon, List, BrowserNotSupportedIcon } from '@/ui';
 import type { TypeLegendItem } from '@/core/components/layers/types';
-import { useLayerSelectorControls, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  useLayerSelectorCanToggle,
+  useLayerSelectorControls,
+  useLayerSelectorStyleConfig,
+  useLayerStoreActions,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 import { generateId } from '@/core/utils/utilities';
@@ -99,11 +104,12 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
   const lastToggledRef = useRef<string | null>(null);
   const itemIdMapRef = useRef<Map<string, string>>(new Map());
 
-  const { toggleItemVisibility, getLayer } = useLayerStoreActions();
+  const { toggleItemVisibility } = useLayerStoreActions();
   const layerControls = useLayerSelectorControls(layerPath);
   const layerHidden = useMapSelectorIsLayerHiddenOnMap(layerPath);
-  const legendLayer = getLayer(layerPath);
-  const canToggleItemVisibility = legendLayer?.canToggle && layerControls?.visibility !== false;
+  const canToggle = useLayerSelectorCanToggle(layerPath);
+  const canToggleItemVisibility = canToggle && layerControls?.visibility !== false;
+  const styleConfig = useLayerSelectorStyleConfig(layerPath);
 
   /**
    * Generates or retrieves a stable HTML ID for a legend item.
@@ -154,15 +160,15 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
     <List className="layerList" sx={sxClasses.layerList}>
       {items.map((item) => {
         const itemId = getItemId(item);
-        const canToggle = Boolean(
-          canToggleItemVisibility && !layerHidden && legendLayer.styleConfig?.[item.geometryType]?.fields[0] !== undefined
+        const canReallyToggle = Boolean(
+          canToggleItemVisibility && !layerHidden && styleConfig?.[item.geometryType]?.fields[0] !== undefined
         );
 
         // Common properties for the legend list item
         const commonProps = {
           item,
           layerVisible: !layerHidden,
-          canToggle,
+          canToggle: canReallyToggle,
           showNameTooltip: item.name.length > CONST_NAME_LENGTH_TOOLTIP,
         };
 

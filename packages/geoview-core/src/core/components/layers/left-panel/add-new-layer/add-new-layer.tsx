@@ -34,6 +34,7 @@ import { AddLayerTree } from '@/core/components/layers/left-panel/add-new-layer/
 import { ShapefileReader } from '@/api/config/reader/shapefile-reader';
 import { GeoPackageReader } from '@/api/config/reader/geopackage-reader';
 import type { GeoViewLayerAddedResult } from '@/geo/layer/layer';
+import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 const sxClasses = {
   buttonGroup: {
@@ -554,15 +555,15 @@ export function AddNewLayer(): JSX.Element {
       );
 
     // Use the config to convert simplified layer config into proper layer config
-    const configObj = Config.initializeMapConfig(mapId, [newGeoViewLayer], (errorKey: string, params: string[]) => {
+    const configObj = Config.initializeMapConfig(mapId, [newGeoViewLayer], (gvError: GeoViewError) => {
       // Get the message for the logger
-      const message = getLocalizedMessage(language, errorKey, params);
+      const message = gvError.translateMessage(language);
 
       // Log it
       logger.logWarning(`- Map ${mapId}: ${message}`);
 
       // Show the error using its key (which will get translated)
-      addMessage('error', errorKey, params);
+      addMessage('error', gvError.messageKey, gvError.messageParams);
     });
 
     if (configObj?.length) {

@@ -99,6 +99,10 @@ export class GVGeoJSON extends AbstractGVVector {
 
     // Refresh
     olLayer.changed();
+
+    // Emit a loaded event manually, because we're not going through the 'loader' callback when features are added manually
+    // Therefore, the layer doesn't go through the 'loading' -> 'loaded' layer status
+    this.onLoaded();
   }
 
   /**

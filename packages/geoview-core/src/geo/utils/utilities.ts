@@ -20,13 +20,22 @@ import { ensureServiceRequestUrl } from '@/core/utils/ogc-url-helper';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { Projection } from '@/geo/utils/projection';
 import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
-import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES, validVectorLayerLegendTypes } from '@/api/types/layer-schema-types';
 import type { TypeOutfields, TypeStyleGeometry, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
-import type { TypeMetadataWMS, TypeMetadataWMSCapabilityLayer, TypeMetadataWMSRoot, TypeStylesWMS } from '@/api/types/layer-schema-types';
+import type {
+  TypeGeoviewLayerType,
+  TypeMetadataWMS,
+  TypeMetadataWMSCapabilityLayer,
+  TypeMetadataWMSRoot,
+  TypeStylesWMS,
+} from '@/api/types/layer-schema-types';
 import type { TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { NetworkError, NotSupportedError, ResponseEmptyError } from '@/core/exceptions/core-exceptions';
 import type { TypeMetadataWMTS } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
+import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { TypeLegendItem, TypeLegendLayerItem } from '@/core/components/layers/types';
+import type { TypeVectorLayerStyles } from './renderer/geoview-renderer';
 
 // available layer types
 export const layerTypes = CONST_LAYER_TYPES;
@@ -199,7 +208,7 @@ export abstract class GeoUtilities {
    * @param {string} url - The url the url of the WMS server.
    * @param {CallbackNewMetadataDelegate?} [callbackNewMetadataUrl] - Callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
-   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
    * @returns {Promise<TypeMetadataWMS>} A json promise containing the result of the query.
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
@@ -246,7 +255,7 @@ export abstract class GeoUtilities {
    * @param {string} layers - The layers to query separate by.
    * @param {CallbackNewMetadataDelegate?} [callbackNewMetadataUrl] - Callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
-   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
    * @returns {Promise<TypeMetadataWMS>} A json promise containing the result of the query.
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
@@ -563,7 +572,7 @@ export abstract class GeoUtilities {
    * @param {string} layers - The layers to query separate by.
    * @param {CallbackNewMetadataDelegate?} [callbackNewMetadataUrl] - Callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
-   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
    * @returns {Promise<TypeStylesWMS>} A json promise containing the result of the query.
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
@@ -646,6 +655,174 @@ export abstract class GeoUtilities {
   }
 
   // #endregion FETCH METADATA
+
+  // #region LEGEND
+
+  /**
+   * Generates legend layer icon metadata from a layer legend definition.
+   * This method extracts icon imagery and legend item details from the provided
+   * `layerLegend`, handling both vector and non-vector legends.
+   * Behavior:
+   * - **Vector legends**:
+   *   - Iterates through each geometry type in the legend definition.
+   *   - Generates icon images from HTML canvas elements using `toDataURL()`.
+   *   - Supports both `simple` and categorized style configurations.
+   *   - Builds an `iconList` of {@link TypeLegendItem} entries per geometry type.
+   *   - Assigns:
+   *     - `iconImage` as the primary icon (first legend item)
+   *     - `iconImageStacked` as the secondary icon when multiple entries exist
+   * - **Non-vector legends**:
+   *   - Attempts to extract a canvas image directly from `layerLegend.legend`.
+   *   - Falls back to `'no data'` if no canvas is available.
+   * Notes:
+   * - Duplicate legend labels within categorized styles are filtered out.
+   * - Visibility defaults to `true` unless explicitly set to `false`.
+   * - Returns `undefined` if `layerLegend` is `null` or `undefined`.
+   * @param schemaTag - The layer schema type used to determine
+   * whether the legend should be interpreted as vector-based.
+   * @param layerLegend - The legend configuration
+   * object associated with the layer.
+   * @returns An array of legend layer item metadata containing icon images and legend entries,
+   * or `undefined` if no legend is provided.
+   */
+  static getLayerIconImage(schemaTag: TypeGeoviewLayerType, layerLegend: TypeLegend | null | undefined): TypeLegendLayerItem[] | undefined {
+    const iconDetails: TypeLegendLayerItem[] = [];
+    if (layerLegend) {
+      if (this.isVectorLegend(layerLegend, schemaTag)) {
+        Object.entries(layerLegend.legend).forEach(([key, styleRepresentation]) => {
+          const geometryType = key as TypeStyleGeometry;
+          const styleSettings = layerLegend.styleConfig![geometryType]!;
+          const iconDetailsEntry: TypeLegendLayerItem = {};
+          iconDetailsEntry.geometryType = geometryType;
+
+          if (styleSettings.type === 'simple') {
+            iconDetailsEntry.iconImage = (styleRepresentation.defaultCanvas as HTMLCanvasElement).toDataURL();
+            iconDetailsEntry.name = styleSettings.info[0].label;
+
+            // TODO Adding icons list, to be verified by backend devs
+            const legendLayerListItem: TypeLegendItem = {
+              geometryType,
+              icon: iconDetailsEntry.iconImage,
+              name: iconDetailsEntry.name,
+              isVisible: true,
+            };
+            iconDetailsEntry.iconList = [legendLayerListItem];
+            iconDetails.push(iconDetailsEntry);
+          } else {
+            iconDetailsEntry.iconList = [];
+            styleRepresentation.arrayOfCanvas!.forEach((canvas, i) => {
+              // Check if there is already an entry for this label before adding it.
+              if (!iconDetailsEntry.iconList?.find((listItem) => listItem.name === styleSettings.info[i].label)) {
+                const legendLayerListItem: TypeLegendItem = {
+                  geometryType,
+                  icon: canvas ? canvas.toDataURL() : null,
+                  name: styleSettings.info[i].label,
+                  isVisible: styleSettings.info[i].visible !== false,
+                };
+                iconDetailsEntry.iconList?.push(legendLayerListItem);
+              }
+            });
+            if (styleRepresentation.defaultCanvas) {
+              const legendLayerListItem: TypeLegendItem = {
+                geometryType,
+                icon: styleRepresentation.defaultCanvas.toDataURL(),
+                name: styleSettings.info[styleSettings.info.length - 1].label,
+                isVisible: styleSettings.info[styleSettings.info.length - 1].visible !== false,
+              };
+              iconDetailsEntry.iconList.push(legendLayerListItem);
+            }
+            if (iconDetailsEntry.iconList?.length) iconDetailsEntry.iconImage = iconDetailsEntry.iconList[0].icon;
+            if (iconDetailsEntry.iconList && iconDetailsEntry.iconList.length > 1)
+              iconDetailsEntry.iconImageStacked = iconDetailsEntry.iconList[1].icon;
+            iconDetails.push(iconDetailsEntry);
+          }
+        });
+      } else {
+        const iconDetailsEntry: TypeLegendLayerItem = {};
+        // Use html canvas if available
+        const htmlElement = layerLegend.legend as HTMLCanvasElement | undefined;
+        if (htmlElement?.toDataURL) {
+          iconDetailsEntry.iconImage = htmlElement.toDataURL();
+        } else {
+          // No styles or image, no icon
+          iconDetailsEntry.iconImage = 'no data';
+        }
+        iconDetails.push(iconDetailsEntry);
+      }
+
+      return iconDetails;
+    }
+    return undefined;
+  }
+
+  /**
+   * Extracts and normalizes legend items from a collection of legend layer icons.
+   * This method:
+   * - Flattens all `iconList` entries from the provided legend layer items.
+   * - Handles special layer types (`imageStatic` and `GeoTIFF`) by dynamically
+   *   creating a legend item using the `iconImage` property.
+   * For `imageStatic` and `GeoTIFF` schema tags, if at least one icon is present,
+   * an additional legend item is created with:
+   * - `geometryType` set to `'Point'`
+   * - `name` set to `'image'`
+   * - `icon` set from `icons[0].iconImage`
+   * - `isVisible` set to `true`
+   * @param schemaTag - The layer schema type used to determine
+   * special handling logic (e.g., `'imageStatic'`, `'GeoTIFF'`).
+   * @param icons - The list of legend layer items containing
+   * optional `iconList` collections and optional `iconImage` values.
+   * @returns A flattened array of legend items derived from the
+   * provided icons, including any dynamically generated items for special layer types.
+   */
+  static getLayerItemsFromIcons(schemaTag: TypeGeoviewLayerType, icons: TypeLegendLayerItem[]): TypeLegendItem[] {
+    // The items to be returned
+    const items: TypeLegendItem[] = [];
+
+    // Add the icons as items on the layer entry
+    icons.forEach((legendLayerItem) => {
+      if (legendLayerItem.iconList)
+        legendLayerItem.iconList.forEach((legendLayerListItem) => {
+          items.push(legendLayerListItem);
+        });
+    });
+
+    // Also take care of image static by storing the iconImage into the icon property on-the-fly
+    if (schemaTag === 'imageStatic' && icons.length > 0) {
+      items.push({
+        geometryType: 'Point',
+        name: 'image',
+        icon: icons[0].iconImage || null,
+        isVisible: true,
+      });
+    }
+
+    // Also take care of GeoTIFF by storing the iconImage into the icon property on-the-fly
+    if (schemaTag === 'GeoTIFF' && icons.length > 0) {
+      items.push({
+        geometryType: 'Point',
+        name: 'image',
+        icon: icons[0].iconImage || null,
+        isVisible: true,
+      });
+    }
+
+    // Return
+    return items;
+  }
+
+  /**
+   * type guard function that redefines a TypeLegend as a TypeVectorLegend
+   * if the type attribute of the verifyIfLegend parameter is valid. The type ascention
+   * applies only to the true block of the if clause.
+   *
+   * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
+   * @returns {boolean} returns true if the payload is valid
+   */
+  static isVectorLegend(verifyIfLegend: TypeLegend, schemaTag: TypeGeoviewLayerType): verifyIfLegend is TypeVectorLegend {
+    return validVectorLayerLegendTypes.includes(schemaTag);
+  }
+
+  // #endregion LEGEND
 
   // #region GEOMETRY
 
@@ -1276,3 +1453,7 @@ export abstract class GeoUtilities {
 
 /** The type for the function callback for getWMSServiceMetadata() */
 export type CallbackNewMetadataDelegate = (proxyUsed: string) => void;
+
+export interface TypeVectorLegend extends TypeLegend {
+  legend: TypeVectorLayerStyles;
+}

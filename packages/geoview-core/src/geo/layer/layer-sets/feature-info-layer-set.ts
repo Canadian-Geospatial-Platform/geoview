@@ -5,8 +5,7 @@ import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import type { QueryType, TypeFeatureInfoResult, TypeResultSet } from '@/api/types/map-schema-types';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
-import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { AbstractLayerSet, type PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { GVKML } from '@/geo/layer/gv-layers/vector/gv-kml';
 import type { LayerApi } from '@/geo/layer/layer';
 import type {
@@ -93,12 +92,10 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    * @override
    * @protected
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override onPropagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry, type: PropagationType): void {
     // Redirect - Add layer to the list after registration
     this.#propagateToStore(resultSetEntry);
-
-    // Open details panel if the propagation type is layer status
-    if (type === 'layerStatus') FeatureInfoEventProcessor.openDetailsPanelOnMapClick(this.getMapId());
   }
 
   /**

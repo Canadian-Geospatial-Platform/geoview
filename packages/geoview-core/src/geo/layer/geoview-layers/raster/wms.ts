@@ -94,7 +94,7 @@ export class WMS extends AbstractGeoViewRaster {
    * - Otherwise, the method constructs a WMS GetCapabilities request.
    *   - If no specific layer configs are provided, a single metadata fetch is made.
    *   - If layer configs are present (e.g., Geomet use case), individual layer metadata is merged.
-   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
    * @returns {Promise<T = TypeMetadataWMS | undefined>} A promise resolving to the parsed metadata object,
    * or `undefined` if metadata could not be retrieved or no capabilities were found.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
@@ -133,8 +133,8 @@ export class WMS extends AbstractGeoViewRaster {
 
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
-   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
-   * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
+   * @returns A promise resolved once the layer entries have been initialized.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    * @override
    * @protected
@@ -219,7 +219,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {OgcWmsLayerEntryConfig} layerConfig - The layer entry configuration to process.
    * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
    * @param {OLProjection?} [mapProjection] - The map projection.
-   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
    * @returns {Promise<OgcWmsLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    * @throws {InvalidTimeDimensionError} When range couldn't be computed, or when duration is invalid, or non-positive or when an infinite loop is detected.
    * @throws {InvalidDateError} When input has invalid dates.
@@ -565,7 +565,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {string} metadataUrl The metadataAccessPath
    * @param {CallbackNewMetadataDelegate?} [callbackNewMetadataUrl] - Callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
-   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
    * @returns {Promise<void>} A promise that the execution is completed.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    * @private
@@ -786,7 +786,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {string} url - The url to query the metadata from.
    * @param {CallbackNewMetadataDelegate?} [callbackNewMetadataUrl] - Callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
-   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
    * @throws {ResponseError} When the response is not OK (non-2xx).
@@ -881,12 +881,12 @@ export class WMS extends AbstractGeoViewRaster {
    * This method creates a basic TypeGeoviewLayerConfig using the provided
    * ID, name, and metadata access path URL. It then initializes the layer entries by calling
    * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
-   * @param {string} geoviewLayerId - A unique identifier for the layer.
-   * @param {string} geoviewLayerName - The display name of the layer.
-   * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
-   * @param {boolean?} [isTimeAware] - Indicates whether the layer supports time-based filtering.
-   * @param {boolean} [useFullWmsSublayers] - Indicates if we want the full sublayers of all wms or grouped (default is all sublayers).
-   * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   * @param geoviewLayerId - A unique identifier for the layer.
+   * @param geoviewLayerName - The display name of the layer.
+   * @param metadataAccessPath - The full service URL to the layer endpoint.
+   * @param isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param useFullWmsSublayers - Indicates if we want the full sublayers of all wms or grouped (default is all sublayers).
+   * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries.
    * @static
    */
   static initGeoviewLayerConfig(
@@ -911,15 +911,15 @@ export class WMS extends AbstractGeoViewRaster {
    * Creates a complete configuration object for a WMS GeoView layer.
    * This function constructs a `TypeWMSLayerConfig` object that defines a WMS layer and its associated
    * entries. It supports both individual layers and nested group layers through recursive processing.
-   * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
-   * @param {string} geoviewLayerName - The human-readable name of the GeoView layer.
-   * @param {string} metadataAccessPath - The URL or path used to access the layer's metadata.
-   * @param {TypeOfServer | undefined} serverType - The type of WMS server (e.g., 'geoserver', 'mapserver').
-   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @param {TypeLayerEntryShell[]} layerEntries - The root array of parsed layer entries (may include nested groups).
-   * @param {boolean} [useFullWmsSublayers] - Indicates if we want the full sublayers of all wms or grouped (default is all sublayers).
-   * @param {unknown} [customGeocoreLayerConfig={}] - Optional custom layer configuration to merge into leaf layers.
-   * @returns {TypeWMSLayerConfig} The fully constructed WMS layer configuration object.
+   * @param geoviewLayerId - A unique identifier for the GeoView layer.
+   * @param geoviewLayerName - The display name of the GeoView layer.
+   * @param metadataAccessPath - The full service URL to the layer endpoint.
+   * @param serverType - The type of WMS server (e.g., 'geoserver', 'mapserver').
+   * @param isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param layerEntries - The root array of parsed layer entries (may include nested groups).
+   * @param useFullWmsSublayers - Indicates if we want the full sublayers of all wms or grouped (default is all sublayers).
+   * @param customGeocoreLayerConfig - Optional custom layer configuration to merge into leaf layers.
+   * @returns The fully constructed WMS layer configuration object.
    * @static
    */
   static createGeoviewLayerConfig(
@@ -961,7 +961,7 @@ export class WMS extends AbstractGeoViewRaster {
    * This function acts as an entry point to recursively transform a WMS layer tree into fully configured layer entry objects.
    * @param {TypeLayerEntryShell} layerEntry - The WMS layer entry shell to convert (may be a group or leaf).
    * @param {TypeWMSLayerConfig} geoviewLayerConfig - The parent GeoView layer config that this entry belongs to.
-   * @param {TypeOfServer | undefined} serverType - The type of WMS server (e.g., 'geoserver', 'mapserver', etc.).
+   * @param serverType - The type of WMS server (e.g., 'geoserver', 'mapserver', etc.).
    * @param {unknown} customGeocoreLayerConfig - Optional custom layer configuration to merge into leaf layers.
    * @returns {OgcWmsLayerEntryConfig | GroupLayerEntryConfig} The fully constructed layer entry configuration object.
    * @private
@@ -1022,7 +1022,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {string} url - The URL of the service endpoint.
    * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
    * @param {boolean} isTimeAware - Indicates if the layer is time aware.
-   * @param {boolean} [useFullWmsSublayers] - Indicates if we want the full sublayers of all wms or grouped (default is all sublayers).
+   * @param useFullWmsSublayers - Indicates if we want the full sublayers of all wms or grouped (default is all sublayers).
    * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
    * @static
    */
@@ -1121,6 +1121,7 @@ export class WMS extends AbstractGeoViewRaster {
       layerConfig.setEntryType(CONST_LAYER_ENTRY_TYPES.GROUP);
       layerConfig.setIsMetadataLayerGroup(true);
     }
+
     // eslint-disable-next-line no-param-reassign
     layerConfig.listOfLayerEntryConfig = newListOfLayerEntryConfig as TypeLayerEntryConfig[];
   }

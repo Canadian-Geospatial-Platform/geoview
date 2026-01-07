@@ -13,7 +13,7 @@ import {
   useUIAppbarComponents,
   useUIActiveTrapGeoView,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useLayerSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerNames, useLayerSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useDataTableStoreActions } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { getSxClasses } from './data-table-style';
 import { logger } from '@/core/utils/logger';
@@ -43,7 +43,7 @@ export default function DataTableModal(): JSX.Element {
   // get store function
   const { disableFocusTrap } = useUIStoreActions();
   const activeModalId = useUIActiveFocusItem().activeElementId;
-  const selectedLayer = useLayerSelectedLayerPath();
+  const selectedLayerPath = useLayerSelectedLayerPath();
   const layersData = useDataTableAllFeaturesDataArray();
   const language = useAppDisplayLanguage();
   const shellContainer = useAppShellContainer();
@@ -51,6 +51,7 @@ export default function DataTableModal(): JSX.Element {
   const appBarComponents = useUIAppbarComponents();
   const { setSelectedLayerPath: setDataTableSelectedLayerPath } = useDataTableStoreActions();
   const isFocusTrap = useUIActiveTrapGeoView();
+  const layerNames = useLayerNames();
 
   const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
 
@@ -67,10 +68,10 @@ export default function DataTableModal(): JSX.Element {
 
   const layer = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('DATA-TABLE-MODAL - layer', mappedLayerData, selectedLayer);
+    logger.logTraceUseMemo('DATA-TABLE-MODAL - layer', mappedLayerData, selectedLayerPath);
 
-    return mappedLayerData?.find((layerData) => layerData.layerPath === selectedLayer);
-  }, [mappedLayerData, selectedLayer]);
+    return mappedLayerData?.find((layerData) => layerData.layerPath === selectedLayerPath);
+  }, [mappedLayerData, selectedLayerPath]);
 
   /**
    * Create data table body cell
@@ -160,27 +161,27 @@ export default function DataTableModal(): JSX.Element {
     logger.logTraceUseEffect('DATA-TABLE-MODAL - query status');
 
     // Get feature info result for selected layer to check if it is loading
-    const selectedLayerData = layersData.find((_layer) => _layer.layerPath === selectedLayer);
+    const selectedLayerData = layersData.find((_layer) => _layer.layerPath === selectedLayerPath);
 
     if (selectedLayerData?.queryStatus === 'processing') {
       setIsLoading(true);
     } else setIsLoading(false);
-  }, [layersData, selectedLayer]);
+  }, [layersData, selectedLayerPath]);
 
   // Handle navigation to advanced data table
   const handleNavigateToDataTable = useCallback(() => {
     // Close modal first
     disableFocusTrap();
     // Navigate to data-table tab with selected layer
-    navigateToDataTable({ layerPath: selectedLayer! });
-  }, [disableFocusTrap, navigateToDataTable, selectedLayer]);
+    navigateToDataTable({ layerPath: selectedLayerPath! });
+  }, [disableFocusTrap, navigateToDataTable, selectedLayerPath]);
 
   return (
     <Modal
       modalId="layerDataTable"
       open={activeModalId === 'layerDataTable'}
       onClose={() => disableFocusTrap()}
-      title={`${t('legend.tableDetails')} ${layer?.layerName ?? selectedLayer}`}
+      title={`${t('legend.tableDetails')} ${layerNames[selectedLayerPath!] || ''}`}
       container={shellContainer}
       width="90vw"
       contentModal={
@@ -197,7 +198,7 @@ export default function DataTableModal(): JSX.Element {
           )}
           {!isLoading && (
             <>
-              {hasDataTableTab && selectedLayer && !isFocusTrap && (
+              {hasDataTableTab && selectedLayerPath && !isFocusTrap && (
                 <Box sx={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 2 }}>
                   <Button
                     variant="outlined"

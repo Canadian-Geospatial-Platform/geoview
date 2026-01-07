@@ -1,7 +1,7 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import type { Extent } from 'geoview-core/api/types/map-schema-types';
 import { Projection } from 'geoview-core/geo/utils/projection';
-import { useMapProjection, useMapStoreActions } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
+import { useMapProjectionEPSG, useMapStoreActions } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 import { useGeoViewMapId } from 'geoview-core/core/stores/geoview-store';
 import { MapEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from 'geoview-core/core/utils/logger';
@@ -39,7 +39,7 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   const mapId = useGeoViewMapId();
-  const mapProjection = useMapProjection();
+  const mapProjectionEPSG = useMapProjectionEPSG();
   const { highlightBBox } = useMapStoreActions();
 
   const handleOnClick = useCallback(
@@ -51,7 +51,7 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
       const extentInMapProjection = Projection.transformExtentFromProj(
         aoiItem.extent,
         Projection.getProjectionLonLat(),
-        Projection.getProjectionFromString(`EPSG:${mapProjection}`)
+        Projection.getProjectionFromString(mapProjectionEPSG)
       );
 
       // Zoom to extent and highlight
@@ -65,7 +65,7 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
           logger.logPromiseFailed('in zoomToLonLatExtentOrCoordinate', error);
         });
     },
-    [mapId, mapProjection, highlightBBox]
+    [mapId, mapProjectionEPSG, highlightBBox]
   );
 
   return (

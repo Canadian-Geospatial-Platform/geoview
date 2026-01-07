@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
 import { IconButton, Grid, ArrowForwardIosOutlinedIcon, ArrowBackIosOutlinedIcon, ClearHighlightIcon, Box } from '@/ui';
+
 import type { TypeContainerBox } from '@/core/types/global-types';
 import {
   useDetailsStoreActions,
@@ -13,6 +14,7 @@ import {
   useMapHideCoordinateInfoSwitch,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useUIActiveAppBarTab, useUIActiveFooterBarTab, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useLayerNames, useLayerStatuses } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import {
   useMapStoreActions,
@@ -68,6 +70,8 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
   const { addHighlightedFeature, removeHighlightedFeature, isLayerHiddenOnMap, getMapLayerParentHidden } = useMapStoreActions();
   const { disableFocusTrap } = useUIStoreActions();
+  const layerNames = useLayerNames();
+  const layerStatuses = useLayerStatuses();
 
   // States
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
@@ -177,14 +181,14 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       .map(
         (layer) =>
           ({
-            layerName: layer!.layerName ?? '',
+            layerName: layerNames[layer!.layerPath] ?? '',
             layerPath: layer!.layerPath,
-            layerStatus: layer!.layerStatus,
+            layerStatus: layerStatuses[layer!.layerPath],
             queryStatus: layer!.queryStatus,
             numOffeatures: layer!.features?.length ?? 0,
             layerFeatures: getNumFeaturesLabel(layer!),
-            tooltip: t('layers.selectLayer', { layerName: layer!.layerName }) ?? '',
-            layerUniqueId: `${mapId}-${TABS.DETAILS}-${layer?.layerPath ?? ''}`,
+            tooltip: t('layers.selectLayer', { layerName: layerNames[layer!.layerPath] }) ?? '',
+            layerUniqueId: `${mapId}-${TABS.DETAILS}-${layer!.layerPath ?? ''}`,
           }) as LayerListEntry
       );
 
@@ -200,13 +204,13 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
         !getMapLayerParentHidden(layer.layerPath)
       ) {
         layerListEntries.push({
-          layerName: layer.layerName ?? '',
+          layerName: layerNames[layer.layerPath] ?? '',
           layerPath: layer.layerPath,
-          layerStatus: layer.layerStatus,
+          layerStatus: layerStatuses[layer.layerPath],
           queryStatus: layer.queryStatus,
           numOffeatures: layer.features?.length ?? 0,
           layerFeatures: getNumFeaturesLabel(layer),
-          tooltip: t('layers.selectLayer', { layerName: layer.layerName }) ?? '',
+          tooltip: t('layers.selectLayer', { layerName: layerNames[layer.layerPath] }) ?? '',
           layerUniqueId: `${mapId}-${TABS.DETAILS}-${layer.layerPath}`,
         });
       }
@@ -235,13 +239,13 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     const coordinateInfoLayer = arrayOfLayerDataBatch.find((layer) => layer.layerPath === 'coordinate-info');
     if (coordinateInfoLayer && coordinateInfoEnabled) {
       orderedLayerListEntries.unshift({
-        layerName: coordinateInfoLayer.layerName ?? 'Coordinate Information',
+        layerName: layerNames[coordinateInfoLayer.layerPath] ?? 'Coordinate Information',
         layerPath: coordinateInfoLayer.layerPath,
-        layerStatus: coordinateInfoLayer.layerStatus,
+        layerStatus: layerStatuses[coordinateInfoLayer.layerPath],
         queryStatus: coordinateInfoLayer.queryStatus,
         numOffeatures: coordinateInfoLayer.features?.length ?? 0,
         layerFeatures: getNumFeaturesLabel(coordinateInfoLayer),
-        tooltip: t('layers.selectLayer', { layerName: coordinateInfoLayer.layerName ?? '' }) ?? '',
+        tooltip: t('layers.selectLayer', { layerName: layerNames[coordinateInfoLayer.layerPath] ?? '' }) ?? '',
         layerUniqueId: `${mapId}-${TABS.DETAILS}-${coordinateInfoLayer.layerPath}`,
       });
     }
@@ -253,6 +257,8 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     coordinateInfoEnabled,
     isLayerHiddenOnMap,
     queryableByLayerPath,
+    layerNames,
+    layerStatuses,
     getNumFeaturesLabel,
     mapId,
     getMapLayerParentHidden,

@@ -33,11 +33,11 @@ import type { TypeLayerEntryShell } from '@/api/config/validation-classes/config
 export class UUIDmapConfigReader {
   /**
    * Generates GeoView layers and package configurations (i.e. geochart), from GeoCore API, using a list of UUIDs.
-   * @param {string} baseUrl - The base url of GeoCore API
-   * @param {TypeDisplayLanguage} lang - The language to get the config for
-   * @param {string[]} uuids - A list of uuids to get the configurations for
-   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
-   * @returns {Promise<UUIDmapConfigReaderResponse>} Layers and Geocharts read and parsed from uuids results from GeoCore
+   * @param baseUrl - The base url of GeoCore API
+   * @param lang - The language to get the config for
+   * @param uuids - A list of uuids to get the configurations for
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
+   * @returns A Promise of Layers and Geocharts read and parsed from uuids results from GeoCore
    */
   static async getGVConfigFromUUIDs(
     baseUrl: string,
@@ -69,11 +69,11 @@ export class UUIDmapConfigReader {
 
   /**
    * Generates GeoView layers configurations, from Geonetwork RCS API, using a list of UUIDs.
-   * @param {string} baseUrl - The base url of GeoCore API
-   * @param {TypeDisplayLanguage} lang - The language to get the config for
-   * @param {string[]} uuids - A list of uuids to get the configurations for
-   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
-   * @returns {Promise<UUIDmapConfigReaderResponse>} Layers read and parsed from uuids results from Geonetwork RCS
+   * @param baseUrl - The base url of GeoCore API
+   * @param lang - The language to get the config for
+   * @param uuids - A list of uuids to get the configurations for
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
+   * @returns A Promise of Layers read and parsed from uuids results from Geonetwork RCS
    */
   static async getGVConfigFromUUIDsRCS(
     baseUrl: string,

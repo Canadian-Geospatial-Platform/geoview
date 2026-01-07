@@ -30,7 +30,6 @@ import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import type { TypeHoverFeatureInfo } from './feature-info-state';
-import { shallowObjectEqual } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with MapEventProcessor vs MapState
@@ -1214,6 +1213,7 @@ export const useMapPointerPosition = (): TypeMapMouseInfo | undefined =>
 export const useMapPointMarkers = (): Record<string, TypePointMarker[]> =>
   useStore(useGeoViewStore(), (state) => state.mapState.pointMarkers);
 export const useMapProjection = (): TypeValidMapProjectionCodes => useStore(useGeoViewStore(), (state) => state.mapState.currentProjection);
+export const useMapProjectionEPSG = (): string => useStore(useGeoViewStore(), (state) => 'EPSG:' + state.mapState.currentProjection);
 export const useMapRotation = (): number => useStore(useGeoViewStore(), (state) => state.mapState.rotation);
 export const useMapScale = (): TypeScaleInfo => useStore(useGeoViewStore(), (state) => state.mapState.scale);
 export const useMapSize = (): Size => useStore(useGeoViewStore(), (state) => state.mapState.size);
@@ -1281,20 +1281,16 @@ export const useMapSelectorLayerLegendCollapsed = (layerPath: string): boolean =
 };
 export const useMapSelectorLayerQueryable = (layerPaths: string[]): Record<string, boolean> => {
   // Hook
-  return useStableSelector(
-    useGeoViewStore(),
-    (state) => {
-      const result: Record<string, boolean> = {};
+  return useStableSelector(useGeoViewStore(), (state) => {
+    const result: Record<string, boolean> = {};
 
-      for (const layerPath of layerPaths) {
-        result[layerPath] =
-          MapEventProcessor.findMapLayerFromOrderedInfo(state.mapId, layerPath, state.mapState.orderedLayerInfo)?.queryableState || false;
-      }
+    for (const layerPath of layerPaths) {
+      result[layerPath] =
+        MapEventProcessor.findMapLayerFromOrderedInfo(state.mapId, layerPath, state.mapState.orderedLayerInfo)?.queryableState || false;
+    }
 
-      return result;
-    },
-    shallowObjectEqual
-  );
+    return result;
+  });
 };
 
 // For toggle-all component

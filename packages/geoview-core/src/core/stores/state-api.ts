@@ -90,7 +90,7 @@ export class StateApi {
   }
 
   /**
-   * Get the collapsed state of layer's legend.
+   * Set the collapsed state of layer's legend.
    * @param {string} layerPath - Path of the layer to get state for.
    * @param {boolean} collapsed - The new state
    * @returns {boolean} If the legend is collapsed.
@@ -105,7 +105,7 @@ export class StateApi {
    * @param {string} layerPath - The path of the layer to set
    */
   setSelectedLayersTabLayer(layerPath: string): void {
-    LegendEventProcessor.setSelectedLayersTabLayer(this.mapId, layerPath);
+    LegendEventProcessor.setSelectedLayersTabLayerInStore(this.mapId, layerPath);
   }
 
   reorderLayers(mapId: string, layerPath: string, move: number): void {

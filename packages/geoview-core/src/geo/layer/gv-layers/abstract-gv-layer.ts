@@ -38,16 +38,16 @@ import {
   type TypeLayerMetadataVector,
   type TypeGeoviewLayerType,
 } from '@/api/types/layer-schema-types';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { LayerFailedToLoadError, LayerImageFailedToLoadError } from '@/core/exceptions/geoview-exceptions';
 import type { TypeLegendItem } from '@/core/components/layers/types';
 import { GeoviewRenderer, type TypeStyleProcessorOptions } from '@/geo/utils/renderer/geoview-renderer';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { SnackbarType } from '@/core/utils/notifications';
-import { NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
+import { formatError, NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { LayerNotQueryableError, LayerStatusErrorError } from '@/core/exceptions/layer-exceptions';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
-import { GVVectorSource } from '@/geo/layer/source/vector-source';
 import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 import { delay, whenThisThen } from '@/core/utils/utilities';
 
@@ -143,14 +143,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   // #region OVERRIDES
 
   /**
-   * Must override method to return the bounds of a layer in the given projection.
-   * @param {OLProjection} projection - The projection to get the bounds into.
-   * @param {number} stops - The number of stops to use to generate the extent.
-   * @returns {Extent} The layer bounding box.
-   */
-  abstract onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
-
-  /**
    * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
    * @override
    * @returns {Layer} The strongly-typed OpenLayers type.
@@ -231,20 +223,8 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
   /**
    * Overridable method called when the layer has started to load itself on the map.
-   * @param {Event} event - The event which is being triggered.
-   * @returns {void}
    */
-  protected onLoading(event: Event): void {
-    // Increment the counter
-    this.loadingCounter++;
-
-    // Mark the current event with the loading counter, this is a trick using the wrapper to re-obtain it in the 'onLoaded' function below.
-    // eslint-disable-next-line no-underscore-dangle
-    this.#findWrapperBetweenEventHandlers(event)._loadingCounter = this.loadingCounter;
-
-    // Log it, leaving the logDebug for dev purposes
-    // logger.logDebug('PRIOR', this.#findWrapperBetweenEventHandlers(event)._loadingCounter);
-
+  protected onLoading(): void {
     // Get the layer config
     const layerConfig = this.getLayerConfig();
 
@@ -254,29 +234,15 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     // Update the parent group if any
     this.getLayerConfig().updateLayerStatusParent();
 
-    // Start a watcher and bind the loadingCounter with it
-    this.#startLoadingPeriodWatcher(this.loadingCounter);
-
     // Emit event for all layer load events
     this.#emitLayerLoading();
   }
 
   /**
    * Overridable method called when the layer has been loaded correctly.
-   * @param {Event} event - The event which is being triggered.
    * @returns {void}
    */
-  protected onLoaded(event: Event): void {
-    // Log it, leaving the logDebug for dev purposes
-    // logger.logDebug('AFTER', this.#findWrapperBetweenEventHandlers(event)._loadingCounter);
-
-    // If it's not the 'loaded' that correspond to the last 'loading' (asynchronicity thing)
-    // eslint-disable-next-line no-underscore-dangle
-    if (this.loadingCounter !== this.#findWrapperBetweenEventHandlers(event)._loadingCounter) return;
-
-    // Log it, leaving the logDebug for dev purposes
-    // logger.logDebug('AFTER CHECKED', this.#findWrapperBetweenEventHandlers(event)._loadingCounter);
-
+  protected onLoaded(): void {
     // Get the layer config
     const layerConfig = this.getLayerConfig();
 
@@ -306,13 +272,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
   /**
    * Overridable method called when the layer is in error and couldn't be loaded correctly.
-   * @param {Event} event - The event which is being triggered.
-   * @returns {void}
+   * @param error - The error which is being raised.
    */
-  protected onError(event: Event): void {
-    // Log
-    logger.logError(`An error happened on the layer: ${this.getLayerPath()} after it was processed and added on the map.`, event);
-
+  protected onError(error: GeoViewError): void {
     // Check the layer status before
     const layerStatusBefore = this.getLayerConfig().layerStatus;
 
@@ -325,29 +287,23 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       this.getLayerConfig().updateLayerStatusParent();
 
       // Emit about the error
-      this.#emitError(event, 'layers.errorNotLoaded');
+      this.#emitError(error);
     } else {
       // We've already emitted an error to the user about the layer being in error, skip so that we don't spam
     }
 
     // Emit event for all layer error events
-    this.#emitLayerError({ error: event });
+    this.#emitLayerError({ error });
   }
 
   /**
    * Overridable method called when the layer image is in error and couldn't be loaded correctly.
-   * @param {Event} event - The event which is being triggered.
+   * @param error - The error which is being raised.
    * @returns {void}
    */
-  protected onImageLoadError(event: Event): void {
-    // Log
-    logger.logError(`Error loading source image for layer: ${this.getLayerPath()}.`, event);
-
+  protected onImageLoadError(error: GeoViewError): void {
     // Check the layer status before
     const layerStatusBefore = this.getLayerConfig().layerStatus;
-
-    // Decipher the error code to use for the message to the user, allowing children classes to be more specific (ex: WMS GetMap specific errors)
-    const errorCode = this.onImageLoadErrorDecipherError(event);
 
     // If we were not error before
     if (layerStatusBefore !== 'error') {
@@ -358,48 +314,47 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       this.getLayerConfig().updateLayerStatusParent();
 
       // Emit about the error
-      this.#emitError(event, errorCode);
+      this.#emitError(error);
     } else {
-      // We've already emitted an error to the user about the layer being in error, skip
+      // We've already emitted an error to the user about the layer being in error, skip so that we don't spam
     }
 
     // Emit event for all layer error events
-    this.#emitLayerError({ error: event });
+    this.#emitLayerError({ error });
+  }
+
+  /**
+   * Overridable method called to get a more specific error code for all errors.
+   * @param event - The event which is being triggered.
+   * @returns A LayerFailedToLoadError error.
+   */
+  // We need to keep the 'this' context and the event param for overrides.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected onErrorDecipherError(event: Event): GeoViewError {
+    // Try to read an error in the source object
+    // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/no-explicit-any
+    const sourceError = (this.#olSource as any).error_;
+    const error = sourceError ? formatError(sourceError) : undefined;
+
+    // Return a generic error with a cause inside when any was found
+    return new LayerFailedToLoadError(this.getLayerName(), error);
   }
 
   /**
    * Overridable method called to get a more specific error code for image load errors.
-   * @param {Event} event - The event which is being triggered.
-   * @returns {string} The error code to use for the error message to the user, default is 'layers.errorImageLoad'.
+   * @param event - The event which is being triggered.
+   * @returns A LayerImageFailedToLoadError error.
    */
   // We need to keep the 'this' context and the event param for overrides.
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
-  protected onImageLoadErrorDecipherError(event: Event): string {
-    return 'layers.errorImageLoad';
-  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected onImageLoadErrorDecipherError(event: Event): GeoViewError {
+    // Try to read an error in the source object
+    // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/no-explicit-any
+    const sourceError = (this.#olSource as any).error_;
+    const error = sourceError ? formatError(sourceError) : undefined;
 
-  /**
-   * Method called when the layer source changes to check for errors.
-   * @param {Event} event - The event which is being triggered.
-   * @returns {void}
-   */
-  protected onSourceChange(event: Event): void {
-    const state = this.#olSource.getState();
-    if (state === 'error') {
-      // eslint-disable-next-line no-underscore-dangle, @typescript-eslint/no-explicit-any
-      const error = (this.#olSource as any).error_;
-      const errorMessage = error?.message || String(error);
-
-      // Log the error, we do not throw as the layer can still be added but marked as errored
-      logger.logError('Source failed with error', {
-        layerId: this.getLayerPath(),
-        error: errorMessage,
-        event,
-      });
-
-      // Trigger onError handling
-      this.onError(error);
-    }
+    // Return a generic error with a cause inside when any was found
+    return new LayerImageFailedToLoadError(this.getLayerName(), error);
   }
 
   /**
@@ -572,17 +527,17 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   init(): void {
     // Activation of the load end/error listeners
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.#olSource as any).on(['featuresloadstart', 'imageloadstart', 'tileloadstart'], this.onLoading.bind(this));
+    (this.#olSource as any).on(['featuresloadstart', 'imageloadstart', 'tileloadstart'], this.#handleLoading.bind(this));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.#olSource as any).on(['featuresloadend', 'imageloadend', 'tileloadend'], this.onLoaded.bind(this));
+    (this.#olSource as any).on(['featuresloadend', 'imageloadend', 'tileloadend'], this.#handleLoaded.bind(this));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.#olSource as any).on(['featuresloaderror', 'tileloaderror'], this.onError.bind(this));
+    (this.#olSource as any).on(['featuresloaderror', 'tileloaderror'], this.#handleError.bind(this));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.#olSource as any).on(['imageloaderror'], this.onImageLoadError.bind(this));
+    (this.#olSource as any).on(['imageloaderror'], this.#handleImageLoadError.bind(this));
 
     // Activate source change listener to catch errors
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (this.#olSource as any).on('change', this.onSourceChange.bind(this));
+    (this.#olSource as any).on('change', this.#handleSourceChange.bind(this));
 
     // Apply render error handling to prevent "Cannot read properties of null (reading 'globalAlpha')" errors
     AbstractGVLayer.#addRenderErrorHandling(this.getOLLayer());
@@ -701,18 +656,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       this.getLayerConfig().getLayerStyle(), // TODO: Use this.getStyle() once we progress in the refactoring, right now leaving it as-is was..
       this.getLayerConfig().getLayerStyleSettings()
     );
-  }
-
-  /**
-   * Gets the bounds for the layer in the given projection.
-   * @param {OLProjection} projection - The projection to get the bounds into.
-   * @param {number} stops - The number of stops to use to generate the extent.
-   * @returns {Extent | undefined} The layer bounding box.
-   */
-  getBounds(projection: OLProjection, stops: number): Extent | undefined {
-    // Redirect to overridable method
-    // TODO: REFACTOR - Review all onGetBounds() to see how they can be optimized now that the initialSettings extent and bounds have been clarified
-    return this.onGetBounds(projection, stops);
   }
 
   /**
@@ -1138,7 +1081,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    */
   protected emitMessage(
     messageKey: string,
-    messageParams: string[],
+    messageParams: unknown[] | undefined,
     messageType: SnackbarType = 'info',
     notification: boolean = false
   ): void {
@@ -1148,6 +1091,92 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   // #endregion PROTECTED METHODS
 
   // #region PRIVATE METHODS
+
+  /**
+   * Handles when the layer goes into a loading state.
+   * @param event - The event which is being triggered.
+   */
+  #handleLoading(event: Event): void {
+    // Increment the counter
+    this.loadingCounter++;
+
+    // Mark the current event with the loading counter, this is a trick using the wrapper to re-obtain it in the 'onLoaded' function below.
+    // eslint-disable-next-line no-underscore-dangle
+    this.#findWrapperBetweenEventHandlers(event)._loadingCounter = this.loadingCounter;
+
+    // Log it, leaving the logDebug for dev purposes
+    // logger.logDebug('PRIOR', this.#findWrapperBetweenEventHandlers(event)._loadingCounter);
+
+    // Start a watcher and bind the loadingCounter with it
+    this.#startLoadingPeriodWatcher(this.loadingCounter);
+
+    // Call overridable method
+    this.onLoading();
+  }
+
+  /**
+   * Handles when the layer goes into a loaded state.
+   * @param event - The event which is being triggered.
+   */
+  #handleLoaded(event: Event): void {
+    // Log it, leaving the logDebug for dev purposes
+    // logger.logDebug('AFTER', this.#findWrapperBetweenEventHandlers(event)._loadingCounter);
+
+    // If it's not the 'loaded' that correspond to the last 'loading' (asynchronicity thing)
+    // eslint-disable-next-line no-underscore-dangle
+    if (this.loadingCounter !== this.#findWrapperBetweenEventHandlers(event)._loadingCounter) return;
+
+    // Log it, leaving the logDebug for dev purposes
+    // logger.logDebug('AFTER CHECKED', this.#findWrapperBetweenEventHandlers(event)._loadingCounter);
+
+    // Call overridable method
+    this.onLoaded();
+  }
+
+  /**
+   * Handles when the layer is in error and couldn't be loaded correctly.
+   * @param event - The event which is being triggered.
+   */
+  #handleError(event: Event): void {
+    // Log
+    logger.logError(`An error happened on the layer: ${this.getLayerPath()} after it was processed and added on the map.`, event);
+
+    // Decipher the error, allowing children classes to be more specific (ex: Vector specific errors)
+    const gvError = this.onErrorDecipherError(event);
+
+    // Call overridable method
+    this.onError(gvError);
+  }
+
+  /**
+   * Handles when the layer is in error and couldn't be loaded correctly.
+   * @param event - The event which is being triggered.
+   */
+  #handleImageLoadError(event: Event): void {
+    // Log
+    logger.logError(`Error loading source image for layer: ${this.getLayerPath()}.`, event);
+
+    // Decipher the error, allowing children classes to be more specific (ex: WMS GetMap specific errors)
+    const gvError = this.onImageLoadErrorDecipherError(event);
+
+    // Call overridable method
+    this.onImageLoadError(gvError);
+  }
+
+  /**
+   * Method called when the layer source changes to check for errors.
+   * @param event - The event which is being triggered.
+   */
+  #handleSourceChange(event: Event): void {
+    const state = this.#olSource.getState();
+    if (state === 'error') {
+      // Decipher the error, allowing children classes to be more specific
+      const gvError = this.onErrorDecipherError(event);
+
+      // Call overridable method
+      this.onError(gvError);
+    }
+  }
 
   /**
    * Extracts the relevant image, tile, or dispatching_ object from the event based on its structure.
@@ -1212,40 +1241,11 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
   /**
    * Emits a user-facing error message for a source loading error.
-   * This method attempts to extract a {@link GeoViewError} from the event target
-   * when the source is a {@link GVVectorSource}. If a GeoViewError is found, its
-   * localized message key and parameters are emitted. Otherwise, a default
-   * error message is emitted using the provided fallback message key.
-   * @param {Event} event -
-   * The load error event emitted by the vector source. The event target is
-   * expected to be the source that triggered the error.
-   * @param {string} defaultErrorMessageKey -
-   * The localization key to use when no {@link GeoViewError} is available
-   * on the source.
+   * @param gvError - The GeoView Error containing the message to emit.
    */
-  #emitError(event: Event, defaultErrorMessageKey: string): void {
-    // Get the error
-    const layerSource = event.target;
-
-    // If the source is GVVectorSource and the error inside is a GeoViewError
-    let emitted: boolean = false;
-    if (layerSource instanceof GVVectorSource) {
-      const loaderError = layerSource.getLoaderError();
-      if (loaderError instanceof GeoViewError) {
-        // Emit about the error
-        this.emitMessage(loaderError.messageKey, (loaderError.messageParams as string[]) || [], 'error', true);
-        emitted = true;
-      } else {
-        // At least log it
-        logger.logError(loaderError);
-      }
-    }
-
-    // If not emitted
-    if (!emitted) {
-      // Emit about the error
-      this.emitMessage(defaultErrorMessageKey, [this.getLayerName()], 'error', true);
-    }
+  #emitError(gvError: GeoViewError): void {
+    // Emit about the error
+    this.emitMessage(gvError.messageKey, gvError.messageParams, 'error', true);
   }
 
   // #endregion PRIVATE METHODS
@@ -2030,7 +2030,7 @@ export type LayerDelegate = EventDelegateBase<AbstractGVLayer, undefined, void>;
  */
 export type LayerErrorEvent = {
   // The error
-  error: unknown;
+  error: GeoViewError;
 };
 
 /**
@@ -2044,7 +2044,7 @@ export type LayerErrorDelegate = EventDelegateBase<AbstractGVLayer, LayerErrorEv
 export type LayerMessageEvent = {
   // The loaded layer
   messageKey: string;
-  messageParams: string[];
+  messageParams: unknown[] | undefined;
   messageType: SnackbarType;
   notification: boolean;
 };

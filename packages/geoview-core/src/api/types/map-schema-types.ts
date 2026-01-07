@@ -4,7 +4,7 @@ import type { Geometry } from 'ol/geom';
 import type Feature from 'ol/Feature';
 
 import type { MapFeatureConfig } from '@/api/config/map-feature-config';
-import type { MapConfigLayerEntry, TypeGeoviewLayerType, TypeLayerStatus } from './layer-schema-types';
+import type { MapConfigLayerEntry, TypeGeoviewLayerType } from './layer-schema-types';
 
 /**
  *  Definition of the map feature instance according to what is specified in the schema.
@@ -944,8 +944,6 @@ export type TypeLocation = null | Pixel | Coordinate | Coordinate[] | string;
 
 export type TypeResultSetEntry = {
   layerPath: string;
-  layerName: string;
-  layerStatus: TypeLayerStatus;
 };
 
 export type TypeResultSet<T extends TypeResultSetEntry = TypeResultSetEntry> = {

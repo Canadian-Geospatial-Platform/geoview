@@ -6,7 +6,11 @@ import { Box } from '@/ui';
 import { Projection } from '@/geo/utils/projection';
 import { NorthArrowIcon, NorthPoleIcon } from './north-arrow-icon';
 import { getSxClasses } from './north-arrow-style';
-import { useMapNorthArrowElement, useMapProjection, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import {
+  useMapNorthArrowElement,
+  useMapProjectionEPSG,
+  useMapStoreActions,
+} from '@/core/stores/store-interface-and-intial-values/map-state';
 
 import { useManageArrow } from './hooks/useManageArrow';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
@@ -30,14 +34,14 @@ export const NorthArrow = memo(function NorthArrow(): JSX.Element {
   const northArrowRef = useRef<HTMLDivElement>(null);
 
   // Store
-  const mapProjection = useMapProjection();
+  const mapProjectionEPSG = useMapProjectionEPSG();
   const northArrowElement = useMapNorthArrowElement();
   const { rotationAngle, northOffset } = useManageArrow();
 
   // Memoize this check as it's used in conditional rendering
   const isValidProjection = useMemo(
-    () => `EPSG:${mapProjection}` === Projection.PROJECTION_NAMES.LCC || `EPSG:${mapProjection}` === Projection.PROJECTION_NAMES.WM,
-    [mapProjection]
+    () => mapProjectionEPSG === Projection.PROJECTION_NAMES.LCC || mapProjectionEPSG === Projection.PROJECTION_NAMES.WM,
+    [mapProjectionEPSG]
   );
 
   if (!isValidProjection) return <Box />;
@@ -72,11 +76,11 @@ export const NorthPoleFlag = memo(function NorthPoleFlag(): JSX.Element {
   const northPoleRef = useRef<HTMLDivElement | null>(null);
 
   // Store
-  const mapProjection = useMapProjection();
+  const mapProjectionEPSG = useMapProjectionEPSG();
   const { setOverlayNorthMarkerRef } = useMapStoreActions();
   setTimeout(() => setOverlayNorthMarkerRef(northPoleRef.current as HTMLElement), TIMEOUT.deferExecution); // set marker reference
 
-  const isVisible = `EPSG:${mapProjection}` === Projection.PROJECTION_NAMES.LCC;
+  const isVisible = mapProjectionEPSG === Projection.PROJECTION_NAMES.LCC;
 
   return (
     <Box ref={northPoleRef} id={northPoleId} style={{ visibility: isVisible ? 'visible' : 'hidden' }}>

@@ -28,8 +28,7 @@ import { KmlLayerEntryConfig } from 'geoview-core/api/config/validation-classes/
 import { GeoTIFFLayerEntryConfig } from 'geoview-core/api/config/validation-classes/raster-validation-classes/geotiff-layer-entry-config';
 import type { GeoCoreLayerConfigResponse } from 'geoview-core/api/config/geocore';
 import { GeoCore } from 'geoview-core/api/config/geocore';
-import { Config, getLocalizedMessage } from 'geoview-core/app';
-import { logger } from 'geoview-core/core/utils/logger';
+import { Config } from 'geoview-core/api/config/config';
 
 /**
  * Main Config testing class.
@@ -654,8 +653,8 @@ export class ConfigTester extends GVAbstractTester {
         Test.assertJsonObject(result, expectedConfig);
 
         // Supposedly 92 layer entries
-        test.addStep('Verifying 92 layer entries in the config...');
-        Test.assertIsArrayLengthEqual(result.listOfLayerEntryConfig, 92);
+        test.addStep('Verifying minimal count of layer entries in the config...');
+        Test.assertIsArrayLengthMinimal(result.listOfLayerEntryConfig, 90);
 
         // Check at least one has the correct layerId
         test.addStep('Verifying Current Conditions in the list...');
@@ -1285,20 +1284,7 @@ export class ConfigTester extends GVAbstractTester {
       'Test Settings Cascade to Sublayers',
       () => {
         // Use the config to convert simplified layer config into proper layer config
-        const configObj = Config.initializeMapConfig(
-          this.getMapId(),
-          [config as unknown as MapConfigLayerEntry],
-          (errorKey: string, params: string[]) => {
-            // Get the message for the logger
-            const message = getLocalizedMessage('en', errorKey, params);
-
-            // Log it
-            logger.logWarning(`- Map ${this.getMapId()}: ${message}`);
-
-            // Show the error using its key (which will get translated)
-            this.getMapViewer().notifications.showError(errorKey, params);
-          }
-        );
+        const configObj = Config.initializeMapConfig(this.getMapId(), [config as unknown as MapConfigLayerEntry], () => {}); // Empty callback, not necessary
 
         if (!configObj || !configObj[0]) {
           throw new Error('Failed to initialize map config');

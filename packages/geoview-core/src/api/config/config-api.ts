@@ -414,15 +414,15 @@ export class ConfigApi {
    * This method dynamically selects the appropriate layer class (e.g., EsriDynamic, WMS, GeoJSON, etc.)
    * based on the provided `layerType`, and calls its `initGeoviewLayerConfig` method using the
    * supplied ID, name, and URL. If the layer type is not supported, an error is thrown.
-   * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
-   * @param {string} geoviewLayerName - The display name of the layer.
-   * @param {TypeInitialGeoviewLayerType} layerType - The type of GeoView layer to initialize (e.g., 'esriDynamic', 'ogcWms', 'GeoJSON', etc.).
-   * @param {string} layerURL - The URL endpoint associated with the layer (e.g., service URL, file path).
-   * @param {boolean?} [isTimeAware] - Indicates whether the layer supports time-based filtering.
-   * @param {TypeDisplayLanguage} [language] - The language, used for the geocore layer types to know which language to use when extracting layer information.
-   * @param {string} [mapId] - The map id, used for the geocore layer types, to determine the layer id.
-   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
-   * @returns {Promise<TypeGeoviewLayerConfig>} A Promise of a fully initialized `TypeGeoviewLayerConfig`.
+   * @param geoviewLayerId - A unique identifier for the GeoView layer.
+   * @param geoviewLayerName - The display name of the layer.
+   * @param layerType - The type of GeoView layer to initialize (e.g., 'esriDynamic', 'ogcWms', 'GeoJSON', etc.).
+   * @param layerURL - The URL endpoint associated with the layer (e.g., service URL, file path).
+   * @param isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param language - The language, used for the geocore layer types to know which language to use when extracting layer information.
+   * @param mapId - The map id, used for the geocore layer types, to determine the layer id.
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
+   * @returns A Promise of a fully initialized `TypeGeoviewLayerConfig`.
    * @throws {NotSupportedError} If the provided layer type is not recognized or supported.
    * @static
    */

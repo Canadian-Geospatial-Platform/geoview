@@ -1,6 +1,6 @@
 import type { Extent } from 'ol/extent';
 import type { TypeLayerStyleConfig, TypeStyleGeometry } from '@/api/types/map-schema-types';
-import type { TypeGeoviewLayerType, TypeLayerControls, TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerType, TypeLayerControls, TypeLayerEntryType, TypeLayerStatus } from '@/api/types/layer-schema-types';
 import type { LegendQueryStatus } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { TemporalMode, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 
@@ -22,15 +22,17 @@ export interface TypeLegendItem {
 }
 
 export interface TypeLegendLayer {
-  bounds: Extent | undefined;
+  bounds?: Extent;
+  bounds4326?: Extent;
   controls?: TypeLayerControls;
   layerId: string;
   layerPath: string;
   layerAttribution?: string[];
   layerName: string;
   legendQueryStatus: LegendQueryStatus;
-  type?: TypeGeoviewLayerType;
-  styleConfig?: TypeLayerStyleConfig | null;
+  schemaTag: TypeGeoviewLayerType;
+  entryType: TypeLayerEntryType;
+  styleConfig?: TypeLayerStyleConfig;
   layerStatus?: TypeLayerStatus;
   layerFilter?: string;
   layerFilterClass?: string;
