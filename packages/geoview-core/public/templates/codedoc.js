@@ -293,7 +293,7 @@ function testSuiteCreateTable(plugin) {
       Suites: <span id="suitesCompleted-${mapId}">0</span>/<span id="suitesTotal-${mapId}">0</span>
     </div>
     <div style="text-align:right;">
-      Running: <span id="testsRunning-${mapId}">0</span> | Done success: <span id="testsDoneSuccess-${mapId}" style="color:green;">0</span> | Done failed: <span id="testsDoneFailed-${mapId}" style="color:red;">0</span> | Done: <span id="testsDone-${mapId}">0</span>/<span id="testsTotal-${mapId}">0</span>
+      Running: <span id="testsRunning-${mapId}">0</span> | Done success: <span id="testsDoneSuccess-${mapId}" style="color:green;">0</span> | Done failed: <span id="testsDoneFailed-${mapId}" style="color:green;">0</span> | Done: <span id="testsDone-${mapId}">0</span>/<span id="testsTotal-${mapId}">0</span>
     </div>
     <button class="btnLaunchTests" onclick="launchTests('${mapId}')">LAUNCH TESTS ${mapId} !</button>
     <br/><br/>
@@ -332,7 +332,13 @@ function testSuiteUpdateTotals(plugin, idPrefix = '') {
   const testsDoneSuccess = document.getElementById(prefix + 'testsDoneSuccess-' + plugin.mapViewer.mapId);
   if (testsDoneSuccess) testsDoneSuccess.textContent = plugin.getTestsDoneSuccess();
   const testsDoneFailed = document.getElementById(prefix + 'testsDoneFailed-' + plugin.mapViewer.mapId);
-  if (testsDoneFailed) testsDoneFailed.textContent = plugin.getTestsDoneFailed();
+  if (testsDoneFailed) {
+    testsDoneFailed.textContent = plugin.getTestsDoneFailed();
+    testsDoneFailed.style.color = 'green';
+    if (plugin.getTestsDoneFailed() > 0) {
+      testsDoneFailed.style.color = 'red';
+    }
+  }
   const testsDone = document.getElementById(prefix + 'testsDone-' + plugin.mapViewer.mapId);
   if (testsDone) testsDone.textContent = plugin.getTestsDone();
   const testsTotal = document.getElementById(prefix + 'testsTotal-' + plugin.mapViewer.mapId);
