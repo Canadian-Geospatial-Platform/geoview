@@ -26,8 +26,8 @@ export class GVWFS extends AbstractGVVector {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {OgcWfsLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getLayerConfig(): OgcWfsLayerEntryConfig {
     // Call parent and cast
@@ -38,6 +38,8 @@ export class GVWFS extends AbstractGVVector {
    * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
    * @param {string} fieldName - The field name for which we want to get the type.
    * @returns {TypeOutfieldsType} The type of the field.
+   * @override
+   * @protected
    */
   protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect

@@ -63,6 +63,8 @@ class SwiperPlugin extends MapPlugin {
 
   /**
    * Overrides the addition of the Swiper Map Plugin to make sure to set the layer paths from the config into the store.
+   * @returns {void}
+   * @override
    */
   override onAdd(): void {
     // Call parent

@@ -137,6 +137,9 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
     // Test set language
     const pSetLanguage = this.#mapTester.testSetLanguage();
 
+    // Make sure the map is in its initial extent
+    await MapEventProcessor.zoomToInitialExtent(this.getMapId());
+
     // Test non-queryable layer not in details
     const pNonQueryableLayerNotInDetails = this.#mapTester.testNonQueryableLayerNotInDetails('geojsonLYR5/polygons.json', [-88, 52]);
 

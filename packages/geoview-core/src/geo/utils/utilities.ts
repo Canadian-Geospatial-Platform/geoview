@@ -169,6 +169,42 @@ export abstract class GeoUtilities {
   }
 
   /**
+   * Removes specified query parameters from a URL, preserving all others.
+   * This method normalizes a URL by stripping out any query parameters whose
+   * keys match the ones provided in `removeParams`. It works even if the URL
+   * contains multiple `?` or `&` characters (e.g., proxy-wrapped URLs).
+   * @param {string} url - The URL to normalize.
+   * @param {string[]} removeParams - Array of parameter names (case-insensitive)
+   *   to remove from the URL.
+   * @returns {string} - The normalized URL with the specified parameters removed.
+   * @static
+   */
+  static ensureURLForOpenLayersSource(url: string, removeParams: string[]): string {
+    const lowerRemove = removeParams.map((p) => p.toLowerCase());
+    const [base, ...queryParts] = url.split('?');
+    const cleanedParams: string[] = [];
+
+    // Flatten all &-separated query parts
+    const allParams: string[] = [];
+    queryParts.forEach((q) => {
+      allParams.push(...q.split('&'));
+    });
+
+    // Keep only params not in removeParams
+    allParams.forEach((param) => {
+      if (param) {
+        const key = param.split('=')[0].toLowerCase();
+        if (!lowerRemove.includes(key)) {
+          cleanedParams.push(param);
+        }
+      }
+    });
+
+    // Rebuild URL
+    return cleanedParams.length > 0 ? base + '?' + cleanedParams.join('&') : base;
+  }
+
+  /**
    * Fetch the json response from the ESRI map server to get REST endpoint metadata.
    * @param {string} url - The url of the ESRI map server.
    * @returns {Promise<unknown>} A json promise containing the result of the query.

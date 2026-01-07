@@ -26,8 +26,8 @@ export class GVOGCFeature extends AbstractGVVector {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {OgcFeatureLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getLayerConfig(): OgcFeatureLayerEntryConfig {
     // Call parent and cast
@@ -38,6 +38,8 @@ export class GVOGCFeature extends AbstractGVVector {
    * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
    * @param {string} fieldName - The field name for which we want to get the type.
    * @returns {TypeOutfieldsType} The type of the field.
+   * @override
+   * @protected
    */
   protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect
@@ -53,6 +55,7 @@ export class GVOGCFeature extends AbstractGVVector {
    * @param {TypeLayerMetadataOGC} layerMetadata - The OGC Feature metadata
    * @param {string} fieldName - The field name to get the field type information
    * @returns {TypeOutfieldsType} The field type information for the given field name
+   * @static
    */
   static getFieldType(layerMetadata: TypeLayerMetadataOGC | undefined, fieldName: string): TypeOutfieldsType {
     const fieldEntryType = layerMetadata?.[fieldName].type.split(':').slice(-1)[0];

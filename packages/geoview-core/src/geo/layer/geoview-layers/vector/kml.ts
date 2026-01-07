@@ -38,8 +38,19 @@ export class KML extends AbstractGeoViewVector {
   // #region OVERRIDES
 
   /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @returns {TypeKmlLayerConfig} The strongly-typed layer configuration specific to this layer.
+   * @override
+   */
+  override getGeoviewLayerConfig(): TypeKmlLayerConfig {
+    return super.getGeoviewLayerConfig() as TypeKmlLayerConfig;
+  }
+
+  /**
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   * @override
+   * @protected
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Get the folder url
@@ -61,6 +72,8 @@ export class KML extends AbstractGeoViewVector {
    * @param {OLProjection?} [mapProjection] - The map projection.
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   * @override
+   * @protected
    */
   protected override onProcessLayerMetadata(
     layerConfig: VectorLayerEntryConfig,
@@ -92,8 +105,8 @@ export class KML extends AbstractGeoViewVector {
    * `featureProjection`.
    * @returns {Promise<Feature[]>}
    * A promise that resolves to an array of OpenLayers features.
-   * @protected
    * @override
+   * @protected
    */
   protected override async onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
@@ -120,6 +133,8 @@ export class KML extends AbstractGeoViewVector {
    * Overrides the creation of the GV Layer
    * @param {KmlLayerEntryConfig} layerConfig - The layer entry configuration.
    * @returns {GVKML} The GV Layer
+   * @override
+   * @protected
    */
   protected override onCreateGVLayer(layerConfig: KmlLayerEntryConfig): GVKML {
     // Create the source

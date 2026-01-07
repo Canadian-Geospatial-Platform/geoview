@@ -17,7 +17,7 @@ import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
-import type { TypeFeatureInfoEntry, TypeOutfieldsType } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoEntry, TypeOutfieldsType, TypeFeatureInfoResult } from '@/api/types/map-schema-types';
 import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
 import type { TypeMetadataFeatureInfo } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
@@ -141,6 +141,9 @@ export class GVWMS extends AbstractGVRaster {
   /**
    * Overrides when the layer image is in error and couldn't be loaded correctly.
    * @param {Event} event - The event which is being triggered.
+   * @returns {void}
+   * @override
+   * @protected
    */
   protected override onImageLoadError(event: Event): void {
     // The WMS image failed to load.. check if there's something we can do..
@@ -155,6 +158,22 @@ export class GVWMS extends AbstractGVRaster {
     }
   }
 
+  /**
+   * Deciphers an image load error event and returns a corresponding
+   * localized error message key.
+   * This override inspects the failed image request to detect more specific
+   * failure scenarios before falling back to a generic error message.
+   * The method currently checks for:
+   * - Image size exceeding the service-defined `MaxWidth` or `MaxHeight`
+   *   constraints (if available in service metadata).
+   * - An empty image response (zero width or height).
+   * If none of the specific conditions are met, a generic image load error
+   * message key is returned.
+   * @param {Event} event - The image load error event triggered by the image source.
+   * @returns {string} A translation key representing the detected error condition.
+   * @override
+   * @protected
+   */
   protected override onImageLoadErrorDecipherError(event: Event): string {
     // Checks for more specific errors
     const maxWidth = this.getLayerConfig().getServiceMetadata()?.Service.MaxWidth;
@@ -189,15 +208,16 @@ export class GVWMS extends AbstractGVRaster {
    * @param {Coordinate} location - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
    * @override
+   * @protected
    */
   protected override getFeatureInfoAtCoordinate(
     map: OLMap,
     location: Coordinate,
     queryGeometry: boolean = true,
     abortController: AbortController | undefined = undefined
-  ): Promise<TypeFeatureInfoEntry[]> {
+  ): Promise<TypeFeatureInfoResult> {
     // Transform coordinate from map projection to lntlat
     const projCoordinate = Projection.transformToLonLat(location, map.getView().getProjection());
 
@@ -211,9 +231,10 @@ export class GVWMS extends AbstractGVRaster {
    * @param {Coordinate} lonlat - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
    * @throws {LayerConfigWFSMissingError} If no WFS layer configuration is defined for this WMS layer.
    * @override
+   * @protected
    */
   protected override async getFeatureInfoAtLonLat(
     map: OLMap,
@@ -221,7 +242,13 @@ export class GVWMS extends AbstractGVRaster {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     queryGeometry: boolean = true,
     abortController: AbortController | undefined = undefined
-  ): Promise<TypeFeatureInfoEntry[]> {
+  ): Promise<TypeFeatureInfoResult> {
+    // The FeatureInfoResult object that will be returned
+    const featureInfoResult: TypeFeatureInfoResult = { results: [] };
+
+    // If the layer is invisible
+    if (!this.getVisible()) return featureInfoResult;
+
     // Get the layer config and its initial settings
     const wmsLayerConfig = this.getLayerConfig();
     const initialSettingsBounds = wmsLayerConfig.getInitialSettingsBounds();
@@ -237,7 +264,7 @@ export class GVWMS extends AbstractGVRaster {
       if (lon < minX || lon > maxX || lat < minY || lat > maxY) {
         // Log warning
         logger.logWarning(`Coordinates were out-of-bounds for layer ${wmsLayerConfig.layerPath}, query was aborted.`);
-        return [];
+        return featureInfoResult;
       }
     } else {
       // Log warning
@@ -285,21 +312,21 @@ export class GVWMS extends AbstractGVRaster {
    * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
    * @param {LayerFilters} layerFilters - The layer filters to apply when querying the features.
    * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
    * @throws {LayerConfigWFSMissingError} If no WFS layer configuration is defined for this WMS layer.
    * @throws {ResponseError} When the response is not OK (non-2xx).
    * @throws {ResponseEmptyError} When the JSON response is empty.
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
    * @throws {NetworkError} When a network issue happened.
-   * @protected
    * @override
+   * @protected
    */
   protected override getAllFeatureInfo(
     map: OLMap,
     layerFilters: LayerFilters,
     abortController?: AbortController
-  ): Promise<TypeFeatureInfoEntry[]> {
+  ): Promise<TypeFeatureInfoResult> {
     // Get the layer config and its initial settings
     const wmsLayerConfig = this.getLayerConfig();
 
@@ -493,7 +520,7 @@ export class GVWMS extends AbstractGVRaster {
 
     // For each feature
     let calculatedExtent: Extent | undefined;
-    parsedFeatures.forEach((feature) => {
+    parsedFeatures.results.forEach((feature) => {
       // If calculatedExtent has not been defined, set it to extent
       if (!calculatedExtent) calculatedExtent = feature.extent;
       else GeoUtilities.getExtentUnion(calculatedExtent, feature.extent);
@@ -509,6 +536,9 @@ export class GVWMS extends AbstractGVRaster {
   /**
    * Overrides the way a WMS layer applies a view filter. It does so by updating the source FILTER and TIME parameters.
    * @param {LayerFilters} [filter] - An optional filter to be used in place of the getViewFilter value.
+   * @returns {void}
+   * @override
+   * @protected
    */
   protected override onSetLayerFilters(filter?: LayerFilters): void {
     // Process the layer filtering using the static method shared between EsriImage and WMS
@@ -593,9 +623,7 @@ export class GVWMS extends AbstractGVRaster {
    * @param {OgcWfsLayerEntryConfig} wfsLayerConfig - The WFS layer configuration used for schema tags, outfields, metadata, and
    *   date formatting.
    * @param {AbortController} [abortController] - Optional `AbortController` used to cancel the fetch request.
-   * @returns {Promise<TypeFeatureInfoEntry[]>}
-   *   A promise resolving to an array of GeoView Feature Info entries representing
-   *   the parsed and formatted features from the WFS response.
+   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
    * @throws {ResponseError} When the response is not OK (non-2xx).
    * @throws {ResponseEmptyError} When the JSON response is empty.
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
@@ -608,7 +636,7 @@ export class GVWMS extends AbstractGVRaster {
     wmsLayerConfig: OgcWmsLayerEntryConfig,
     wfsLayerConfig: OgcWfsLayerEntryConfig,
     abortController: AbortController | undefined = undefined
-  ): Promise<TypeFeatureInfoEntry[]> {
+  ): Promise<TypeFeatureInfoResult> {
     // Call the GetFeature
     const responseData = await Fetch.fetchJson(urlWithOutputJson, abortController);
 
@@ -622,7 +650,7 @@ export class GVWMS extends AbstractGVRaster {
     const features = GeoUtilities.readFeaturesFromGeoJSON(responseData, undefined);
 
     // Parse the features
-    return AbstractGVLayer.helperFormatFeatureInfoResult(
+    const results = AbstractGVLayer.helperFormatFeatureInfoResult(
       features,
       wfsLayerConfig.layerPath,
       wfsLayerConfig.getSchemaTag(),
@@ -638,6 +666,9 @@ export class GVWMS extends AbstractGVRaster {
       () => null,
       AbstractGVLayer.helperGetFieldValue
     );
+
+    // Return the results
+    return { results };
   }
 
   /**
@@ -661,7 +692,7 @@ export class GVWMS extends AbstractGVRaster {
    * @param {LayerFilters} [layerFilters] - The layer filters to use to filter the query, if any.
    * @param {AbortController} [abortController] - Optional AbortController to
    *        allow cancellation of the WFS request.
-   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise resolving to an array
+   * @returns {Promise<TypeFeatureInfoResult>} A promise resolving to an array
    *          of feature info entries retrieved from the WFS service.
    * @private
    */
@@ -673,7 +704,7 @@ export class GVWMS extends AbstractGVRaster {
     projectionCode: string,
     layerFilters?: LayerFilters,
     abortController?: AbortController
-  ): Promise<TypeFeatureInfoEntry[]> {
+  ): Promise<TypeFeatureInfoResult> {
     // Get the supported info formats
     const featureInfoFormat = wfsLayerConfig.getSupportedFormats('application/json'); // application/json by default (QGIS Server doesn't seem to provide the metadata for the output formats, use application/json)
 
@@ -748,8 +779,8 @@ export class GVWMS extends AbstractGVRaster {
    * @param {Coordinate} clickCoordinate - The coordinate on the map where the user clicked.
    * @param {number} viewResolution - The current resolution of the map view.
    * @param {ProjectionLike} projectionCode - The projection used for the request (e.g., 'EPSG:3857').
-   * @param {AbortController} [abortController] - Optional abort controller to cancel the request if needed.
-   * @returns {Promise<Record<string, unknown>>} A promise that resolves to the feature info response, in the format of the first successful retrieval.
+   * @param {AbortController?} [abortController] - Optional abort controller to cancel the request if needed.
+   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
    * @throws {LayerInvalidFeatureInfoFormatWMSError} If no supported format returns usable feature info data.
    * @private
    */
@@ -758,8 +789,8 @@ export class GVWMS extends AbstractGVRaster {
     clickCoordinate: Coordinate,
     viewResolution: number,
     projectionCode: ProjectionLike,
-    abortController: AbortController | undefined = undefined
-  ): Promise<TypeFeatureInfoEntry[]> {
+    abortController?: AbortController
+  ): Promise<TypeFeatureInfoResult> {
     // Get the layer source
     const wmsSource = this.getOLSource();
 
@@ -903,7 +934,7 @@ export class GVWMS extends AbstractGVRaster {
     // If any found result
     if (featureMember) {
       // Format and return the information
-      return GVWMS.#formatWmsFeatureInfoResult(wmsLayerConfig.layerPath, featureMember, clickCoordinate);
+      return { results: GVWMS.#formatWmsFeatureInfoResult(wmsLayerConfig.layerPath, featureMember, clickCoordinate) };
     }
 
     // Failed

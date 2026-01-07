@@ -1,6 +1,5 @@
 import type { TypeFeatureInfoEntry, TypeFeatureInfoEntryPartial } from 'geoview-core/api/types/map-schema-types';
 import type { GeoChartDatasource } from 'geochart';
-import type { LayerApi } from 'geoview-core/geo/layer/layer';
 import type { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
 import type { ConfigBaseClass } from 'geoview-core/api/config/validation-classes/config-base-class';
 import type { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';
@@ -10,8 +9,8 @@ export class GeoChartParsing {
   /**
    * Finds complete configuration necessary to build a GeoChart based on a given results set.
    * @param {PluginGeoChartConfig} config - The complete GeoChart Plugin configuration
-   * @param {LayerApi} layerApi - The GeoView core layer api
    * @param {TypeLayerData[]} layerDataArray - The Results set of results to search for a chart
+   * @param {SearchConfigClassDelegate} onSearchIfExists - Callback function to search for a layer entry config based on a layer path
    * @return [
       GeoViewGeoChartConfig | undefined,
       GeoViewGeoChartConfigLayer | undefined,
@@ -21,8 +20,8 @@ export class GeoChartParsing {
   */
   static findLayerDataAndConfigFromQueryResults(
     config: PluginGeoChartConfig,
-    layerApi: LayerApi,
-    layerDataArray: TypeGeochartResultSetEntry[]
+    layerDataArray: TypeGeochartResultSetEntry[],
+    onSearchIfExists: SearchConfigClassDelegate
   ): [
     GeoViewGeoChartConfig | undefined,
     GeoViewGeoChartConfigLayer | undefined,
@@ -45,7 +44,7 @@ export class GeoChartParsing {
           // If found a corresponding layer config
           if (foundConfigChartLyr) {
             // Grab the layer entry config associated with the layer path
-            foundLayerEntry = layerApi.getLayerEntryConfigIfExists(layerData.layerPath);
+            foundLayerEntry = onSearchIfExists(layerData.layerPath);
 
             // Grab the working data and this will exit the loop
             foundData = layerData.features;
@@ -196,7 +195,10 @@ export class GeoChartParsing {
    * @returns {string} The corresponding Luxon format string.
    */
   static dayjsToLuxonFormat(format: string): string {
-    return format.replace(/YYYY/g, 'yyyy').replace(/DD(?!D)/g, 'dd'); // avoid DDD
+    return format
+      .replace(/YYYY/g, 'yyyy')
+      .replace(/DD(?!D)/g, 'dd') // DD → dd (avoid DDD)
+      .replace(/D(?!D)/g, 'd'); // D  → d  (avoid DD and DDD)
   }
 
   /**
@@ -210,3 +212,10 @@ export class GeoChartParsing {
     return format.replace('UTC', 'utc');
   }
 }
+
+/**
+ * Type definition for the callback function used to search for a layer entry config based on a layer path.
+ * @param {string} layerPath - The unique path or ID of the layer to search for.
+ * @returns {ConfigBaseClass | undefined} The layer entry configuration if found, otherwise undefined.
+ */
+type SearchConfigClassDelegate = (layerPath: string) => ConfigBaseClass | undefined;

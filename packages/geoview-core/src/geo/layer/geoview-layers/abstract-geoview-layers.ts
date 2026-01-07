@@ -264,8 +264,8 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Gets the Geoview layer id.
-   * @returns {string} The geoview layer id
+   * Gets the Geoview layer config.
+   * @returns {string} The geoview layer config
    */
   getGeoviewLayerConfig(): TypeGeoviewLayerConfig {
     return this.#geoviewLayerConfig;
@@ -752,7 +752,7 @@ export abstract class AbstractGeoViewLayer {
           this.#emitLayerEntryProcessed({ config: layerConfig });
         }
       } else {
-        // The promise failed. Unwrap the reason. Wrap/Unwrap id: c7bce9e8232c
+        // The promise failed. Unwrap the reason. Search id: c7bce9e8232c
         const reason = promise.reason as PromiseRejectErrorWrapper<AbstractBaseLayerEntryConfig>;
 
         // The layer config
@@ -838,7 +838,7 @@ export abstract class AbstractGeoViewLayer {
       // Return as-is
       return layerConfig;
     } catch (error: unknown) {
-      // Wrap so that we carry the layerConfig into the reject callback and throw it higher. Wrap/Unwrap id: c7bce9e8232c
+      // Wrap so that we carry the layerConfig into the reject callback and throw it higher. Search id: c7bce9e8232c
       throw new PromiseRejectErrorWrapper(error, layerConfig);
     }
   }

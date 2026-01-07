@@ -5,7 +5,7 @@ import {
   useAppStoreActions,
   useDisplayDateTimezone,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
-import { useLayerDisplayDateFormat } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerDisplayDateFormatShort } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
 import { MapEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/map-event-processor';
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
@@ -62,7 +62,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
 
   // Use Store
   const displayLanguage = useAppDisplayLanguageById(mapId);
-  const displayDateFormat = useLayerDisplayDateFormat(layerPath);
+  const displayDateFormatShort = useLayerDisplayDateFormatShort(layerPath);
   const displayDateTimezone = useDisplayDateTimezone();
   const { addNotification } = useAppStoreActions();
 
@@ -121,7 +121,10 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
       GeoViewGeoChartConfigLayer | undefined,
       ConfigBaseClass | undefined,
       TypeFeatureInfoEntry[] | undefined,
-    ] = GeoChartParsing.findLayerDataAndConfigFromQueryResults(config, MapEventProcessor.getMapViewerLayerAPI(mapId), layers);
+    ] = GeoChartParsing.findLayerDataAndConfigFromQueryResults(config, layers, (lyrPath: string) => {
+      // Searches the layer entry config based on the layer path using the MapEventProcessor
+      return MapEventProcessor.getLayerEntryConfigIfExists(mapId, lyrPath);
+    });
 
     // If found a chart for the layer
     let chartConfig;
@@ -129,17 +132,17 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
       // Check and attach datasources to the Chart config
       chartConfig = GeoChartParsing.loadDatasources(foundConfigChart!, foundConfigChartLyr!, foundData);
 
-      // Set the title
-      chartConfig.title = foundLayerEntry.getLayerName();
+      // Set the title only if a title isn't already set
+      chartConfig.title ??= foundLayerEntry.getLayerName();
 
       // Assign the date format and time IANA if none are set by the config itself
-      chartConfig.geochart.xAxis.timeFormat ??= GeoChartParsing.dayjsToLuxonFormat(displayDateFormat[displayLanguage]);
+      chartConfig.geochart.xAxis.timeFormat ??= GeoChartParsing.dayjsToLuxonFormat(displayDateFormatShort[displayLanguage]);
       chartConfig.geochart.xAxis.timeIANA ??= GeoChartParsing.dayjsToLuxonTimeIANA(displayDateTimezone);
     }
 
     // Return all info
     return { foundConfigChart, foundConfigChartLyr, foundLayerEntry, foundData, chartConfig };
-  }, [config, mapId, layers, displayLanguage, displayDateFormat, displayDateTimezone]);
+  }, [config, mapId, layers, displayLanguage, displayDateFormatShort, displayDateTimezone]);
 
   // #endregion
 

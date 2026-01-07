@@ -47,7 +47,7 @@ export interface IconButtonPropsExtend extends Omit<IconButtonProps, 'aria-label
  * >
  *   <DeleteIcon />
  * </IconButton>
- * 
+ *
  * // With explicit tooltip
  * <IconButton
  *   aria-label="Delete item"
@@ -56,15 +56,15 @@ export interface IconButtonPropsExtend extends Omit<IconButtonProps, 'aria-label
  * >
  *   <DeleteIcon />
  * </IconButton>
- * 
+ *
  * // Tooltip disabled (no tooltip on hover)
  * <IconButton
  * aria-label="Close dialog"
  * tooltip={null}
- * > 
+ * >
  * <CloseIcon />
  * </IconButton>
- * 
+ *
  * // With custom styling
  * <IconButton
  *   aria-label="Edit item"

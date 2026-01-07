@@ -195,7 +195,7 @@ export class UUIDmapConfigReader {
               serverType,
               layerIsTimeAware,
               layerEntries,
-              true
+              WMS.DEFAULT_WMS_LAYER_GROUP_FULL_SUB_LAYERS
             );
           } else if (layerType === CONST_LAYER_TYPES.WFS) {
             // Redirect

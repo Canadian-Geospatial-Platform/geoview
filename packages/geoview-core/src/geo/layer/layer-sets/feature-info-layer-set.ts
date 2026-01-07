@@ -3,8 +3,7 @@ import { AppEventProcessor } from '@/api/event-processors/event-processor-childr
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
-import type { QueryType, TypeFeatureInfoEntry, TypeResultSet } from '@/api/types/map-schema-types';
-import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import type { QueryType, TypeFeatureInfoResult, TypeResultSet } from '@/api/types/map-schema-types';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
@@ -60,6 +59,8 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
    * @param {AbstractBaseGVLayer} layer - The layer
    * @returns {boolean} True when the layer should be registered to this feature-info-layer-set.
+   * @override
+   * @protected
    */
   protected override onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean {
     // Return if the layer is of queryable type and source is queryable
@@ -69,6 +70,9 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   /**
    * Overrides the behavior to apply when a feature-info-layer-set wants to register a layer in its set.
    * @param {AbstractBaseGVLayer} layer - The layer
+   * @returns {void}
+   * @override
+   * @protected
    */
   protected override onRegisterLayer(layer: AbstractBaseGVLayer): void {
     // Call parent
@@ -77,13 +81,17 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // Update the resultSet data
     const layerPath = layer.getLayerPath();
     this.resultSet[layerPath].queryStatus = 'processed';
-    this.resultSet[layerPath].features = [];
+    this.resultSet[layerPath].features = undefined;
+    this.resultSet[layerPath].featuresHaveGeometry = false;
   }
 
   /**
    * Overrides the behavior to apply when propagating to the store
    * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate
    * @param {PropagationType} type - The propagation type
+   * @returns {void}
+   * @override
+   * @protected
    */
   protected override onPropagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry, type: PropagationType): void {
     // Redirect - Add layer to the list after registration
@@ -96,6 +104,9 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   /**
    * Overrides the behavior to apply when deleting from the store
    * @param {string} layerPath - The layer path to delete from the store
+   * @returns {void}
+   * @override
+   * @protected
    */
   protected override onDeleteFromStore(layerPath: string): void {
     // Remove it from feature info array (propagating to the store)
@@ -134,100 +145,117 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     this.#lastQueryLonLat = lonLatCoordinate;
 
     // Prepare to hold all promises of features in the loop below
-    const allPromises: Promise<TypeFeatureInfoEntry[]>[] = [];
+    const allPromises: Promise<TypeFeatureInfoResult>[] = [];
 
     // Reinitialize the resultSet
     // Loop on each layer path in the resultSet
     Object.keys(this.resultSet).forEach((layerPath) => {
       // Get the layer config and layer associated with the layer path
-      const layer = this.layerApi.getGeoviewLayer(layerPath);
+      const layer = this.layerApi.getGeoviewLayerRegular(layerPath);
 
-      // If layer was found and of right type
-      if (layer instanceof AbstractGVLayer) {
-        // If the layer is not queryable, skip it
-        if (!layer.getQueryable()) return;
+      // If the layer is not queryable, skip it
+      if (!layer.getQueryable()) return;
 
-        // Flag processing
-        this.resultSet[layerPath].features = undefined;
-        this.resultSet[layerPath].queryStatus = 'processing';
+      // Flag processing
+      this.resultSet[layerPath].features = undefined;
+      this.resultSet[layerPath].featuresHaveGeometry = false;
+      this.resultSet[layerPath].queryStatus = 'processing';
 
-        // Propagate to store
-        this.#propagateToStore(this.resultSet[layerPath]);
+      // Propagate to store
+      this.#propagateToStore(this.resultSet[layerPath]);
 
-        // If the layer path has an abort controller
-        if (Object.keys(this.#abortControllers).includes(layerPath)) {
-          // Abort it
-          this.#abortControllers[layerPath].abort();
-        }
-
-        // Create an AbortController for the query
-        this.#abortControllers[layerPath] = new AbortController();
-
-        // Process query on results data
-        const promiseResult = AbstractLayerSet.queryLayerFeatures(
-          this.layerApi,
-          layer,
-          FeatureInfoLayerSet.QUERY_TYPE,
-          lonLatCoordinate,
-          true,
-          this.#abortControllers[layerPath]
-        );
-
-        // Add the promise
-        allPromises.push(promiseResult);
-
-        // When the promise is done, propagate to store
-        promiseResult
-          .then((arrayOfRecords) => {
-            // Get the layer config
-            const layerConfig = layer.getLayerConfig();
-
-            // If the response contain actual fields
-            if (AbstractLayerSet.recordsContainActualFields(layerConfig, arrayOfRecords)) {
-              // Align fields with layerConfig fields
-              AbstractLayerSet.alignRecordsWithOutFields(layerConfig, arrayOfRecords);
-            }
-
-            // Filter out unsymbolized features if the showUnsymbolizedFeatures config is false
-            // GV: KML is excluded as it currently has no symbology.
-            if (!AppEventProcessor.getShowUnsymbolizedFeatures(this.getMapId()) && !(layer instanceof GVKML)) {
-              // eslint-disable-next-line no-param-reassign
-              arrayOfRecords = arrayOfRecords.filter((record) => record.featureIcon);
-            }
-
-            // Keep the features retrieved
-            this.resultSet[layerPath].features = arrayOfRecords;
-
-            // Query was processed
-            this.resultSet[layerPath].queryStatus = 'processed';
-          })
-          .catch((error: unknown) => {
-            // If aborted
-            if (error instanceof RequestAbortedError) {
-              // Log
-              logger.logDebug('Query aborted and replaced by another one.. keep spinning..');
-            } else {
-              // Error in the query
-              this.resultSet[layerPath].features = undefined;
-              this.resultSet[layerPath].queryStatus = 'error';
-
-              // Log
-              logger.logPromiseFailed('queryLayerFeatures in queryLayers in FeatureInfoLayerSet', error);
-            }
-          })
-          .finally(() => {
-            // Propagate to store
-            this.#propagateToStore(this.resultSet[layerPath]);
-            if (fromClick) FeatureInfoEventProcessor.openDetailsPanelOnMapClick(this.getMapId());
-          });
-      } else {
-        // Error
-        this.resultSet[layerPath].features = undefined;
-        this.resultSet[layerPath].queryStatus = 'error';
-
-        // Propagate to store
-        this.#propagateToStore(this.resultSet[layerPath]);
+      // If the layer path has an abort controller
+      if (Object.keys(this.#abortControllers).includes(layerPath)) {
+        // Abort it
+        this.#abortControllers[layerPath].abort();
       }
+
+      // Create an AbortController for the query
+      this.#abortControllers[layerPath] = new AbortController();
+
+      // Process query on results data
+      const promise = this.queryLayerFeatures(
+        layer,
+        FeatureInfoLayerSet.QUERY_TYPE,
+        lonLatCoordinate,
+        true,
+        this.#abortControllers[layerPath]
+      );
+
+      // Add the promise
+      allPromises.push(promise);
+
+      // When the promise is done, propagate to store
+      promise
+        .then((promiseResult) => {
+          // Get the array of records in the results
+          const arrayOfRecords = promiseResult.results;
+
+          // GV: When using 'at_lon_lat' query type, the results may be returned without their geometries when a promiseGeometries is defined.
+          // GV: We have to wait for the promise (promiseResult.promiseGeometries) to resolve if we want to know when the geometries are actually part of the results.
+
+          // If there's a promise of geometries
+          if (promiseResult.promiseGeometries) {
+            // There's a promise that the geometries are coming, wait for them
+            promiseResult.promiseGeometries
+              .then(() => {
+                // Ok, geometries have been loaded now
+                this.resultSet[layerPath].featuresHaveGeometry = true;
+
+                // Propagate to store
+                this.#propagateToStore(this.resultSet[layerPath]);
+              })
+              .catch((error: unknown) => {
+                // Log
+                logger.logPromiseFailed('Geometry error in promiseResult.promiseGeometries in queryLayers', error);
+              });
+          }
+
+          // Get the layer config
+          const layerConfig = layer.getLayerConfig();
+
+          // If the response contain actual fields
+          if (AbstractLayerSet.recordsContainActualFields(layerConfig, arrayOfRecords)) {
+            // Align fields with layerConfig fields
+            AbstractLayerSet.alignRecordsWithOutFields(layerConfig, arrayOfRecords);
+          }
+
+          // Filter out unsymbolized features if the showUnsymbolizedFeatures config is false
+          // GV: KML is excluded as it currently has no symbology.
+          if (!AppEventProcessor.getShowUnsymbolizedFeatures(this.getMapId()) && !(layer instanceof GVKML)) {
+            // eslint-disable-next-line no-param-reassign
+            promiseResult.results = arrayOfRecords.filter((record) => record.featureIcon);
+          }
+
+          // Keep the features retrieved
+          this.resultSet[layerPath].features = arrayOfRecords;
+
+          // Indicate that the geometries have been loaded if there was no promises for them (default)
+          this.resultSet[layerPath].featuresHaveGeometry = !promiseResult.promiseGeometries;
+
+          // Query was processed
+          this.resultSet[layerPath].queryStatus = 'processed';
+        })
+        .catch((error: unknown) => {
+          // If aborted
+          if (error instanceof RequestAbortedError) {
+            // Log
+            logger.logDebug('Query aborted and replaced by another one.. keep spinning..');
+          } else {
+            // Error in the query
+            this.resultSet[layerPath].features = undefined;
+            this.resultSet[layerPath].featuresHaveGeometry = false;
+            this.resultSet[layerPath].queryStatus = 'error';
+
+            // Log
+            logger.logPromiseFailed('queryLayerFeatures in queryLayers in FeatureInfoLayerSet', error);
+          }
+        })
+        .finally(() => {
+          // Propagate to store
+          this.#propagateToStore(this.resultSet[layerPath]);
+          if (fromClick) FeatureInfoEventProcessor.openDetailsPanelOnMapClick(this.getMapId());
+        });
     });
 
     // Await for the promises to settle
@@ -246,7 +274,8 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    */
   clearResults(layerPath: string): void {
     // Edit the result set
-    this.resultSet[layerPath].features = [];
+    this.resultSet[layerPath].features = undefined;
+    this.resultSet[layerPath].featuresHaveGeometry = false;
 
     // Propagate to store
     this.#propagateToStore(this.resultSet[layerPath]);

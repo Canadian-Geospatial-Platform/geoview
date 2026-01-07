@@ -22,8 +22,17 @@ export class WkbLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @returns {TypeWkbLayerConfig} The strongly-typed layer configuration specific to this layer.
    * @override
+   */
+  override getGeoviewLayerConfig(): TypeWkbLayerConfig {
+    return super.getGeoviewLayerConfig() as TypeWkbLayerConfig;
+  }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @returns {TypeSourceWkbVectorInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   * @override
    */
   override getSource(): TypeSourceWkbVectorInitialConfig {
     return super.getSource();

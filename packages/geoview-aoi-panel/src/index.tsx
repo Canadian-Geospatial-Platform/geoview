@@ -80,7 +80,7 @@ class AoiPanelPlugin extends AppBarPlugin {
   }
 
   override onCreateContent = (): JSX.Element => {
-    return <AoiPanel mapId={this.mapViewer.mapId} config={this.getConfig()} />;
+    return <AoiPanel config={this.getConfig()} />;
   };
 
   /**

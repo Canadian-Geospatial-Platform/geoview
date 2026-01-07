@@ -73,6 +73,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    * @returns {Promise<T>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @override
    */
   protected override onFetchServiceMetadata<T>(): Promise<T> {
     // None

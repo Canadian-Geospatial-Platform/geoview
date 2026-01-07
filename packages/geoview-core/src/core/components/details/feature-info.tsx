@@ -37,7 +37,7 @@ interface FeatureHeaderProps {
   hasGeometry: boolean;
   hasGeochart: boolean;
   checked: boolean;
-  onCheckChange: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  onCheckChange: (checked: boolean) => void;
   onZoomIn: (event: React.MouseEvent<HTMLButtonElement>) => void;
   onGeochart: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
@@ -82,6 +82,14 @@ const FeatureHeader = memo(function FeatureHeader({
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const isFocusTrap = useUIActiveTrapGeoView();
+
+  /**
+   * Handles when the checked button is toggled.
+   */
+  const handleChecked = useCallback(() => {
+    // Callback about the checked state providing the checked information
+    onCheckChange(!checked);
+  }, [checked, onCheckChange]);
 
   return (
     <Box sx={HEADER_STYLES.container}>
@@ -129,7 +137,7 @@ const FeatureHeader = memo(function FeatureHeader({
           aria-label={t('details.keepFeatureSelected')}
           tooltipPlacement="top"
           disabled={!hasGeometry}
-          onClick={onCheckChange}
+          onClick={handleChecked}
           className="buttonOutline"
           size="small"
         >
@@ -175,25 +183,26 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
     setSelectedLayerPath ? (layerPath: string) => setSelectedLayerPath(layerPath) : undefined
   );
 
-  // Feature data processing
-  const featureData = useMemo(() => {
-    if (!feature) return null;
-
-    return {
-      uid: feature.uid,
-      iconSrc: feature.featureIcon,
-      name:
-        feature.nameField && feature.fieldInfo?.[feature.nameField]?.value
-          ? (feature.fieldInfo?.[feature.nameField]?.value as string)
-          : 'No name / Sans nom',
-      extent: feature.extent,
-      geometry: feature.geometry,
-      geoviewLayerType: feature.geoviewLayerType,
-    };
+  /**
+   * Memoize the feature name
+   */
+  const memoFeatureName = useMemo(() => {
+    return feature.nameField && feature.fieldInfo?.[feature.nameField]?.value
+      ? (feature.fieldInfo?.[feature.nameField]?.value as string)
+      : 'No name / Sans nom';
   }, [feature]);
 
-  // Process feature info list
-  const featureInfoList: TypeFieldEntry[] = useMemo(() => {
+  /**
+   * Memoize if the feature has a geometry associated with the object
+   */
+  const memoFeatureHasGeometry = useMemo(() => {
+    return !!feature.geometry;
+  }, [feature.geometry]);
+
+  /**
+   * Memoize the Feature Info list
+   */
+  const memoFeatureInfoList: TypeFieldEntry[] = useMemo(() => {
     if (!feature?.fieldInfo) return [];
 
     return Object.entries(feature.fieldInfo)
@@ -210,36 +219,51 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
       }));
   }, [feature]);
 
-  // Event Handlers
-  const handleFeatureSelectedChange = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>): void => {
-      event.stopPropagation();
-      if (!feature) return;
+  /**
+   * Memoize if the feature has a geochart
+   */
+  const memoHasGeochart = useMemo(() => {
+    return (
+      !!geochartConfigs?.[feature.layerPath] &&
+      (geochartLayerDataArrayBatch?.some((entry) => entry.layerPath === feature.layerPath && (entry.features?.length ?? 0) > 0) ?? false)
+    );
+  }, [feature.layerPath, geochartConfigs, geochartLayerDataArrayBatch]);
 
-      if (!checked) {
+  /**
+   * Handles when the feature has been checked/unchecked changes.
+   */
+  const handleFeatureChecked = useCallback(
+    (checkedState: boolean): void => {
+      // If feature is checked
+      if (checkedState) {
+        // Add
         addCheckedFeature(feature);
       } else {
+        // Remove
         removeCheckedFeature(feature);
       }
     },
-    [addCheckedFeature, checked, feature, removeCheckedFeature]
+    [feature, addCheckedFeature, removeCheckedFeature]
   );
 
+  /**
+   * Handles when the button to zoom in on the feature has been clicked.
+   */
   const handleZoomIn = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>): void => {
       event.stopPropagation();
-      if (!featureData?.extent) return;
+      if (!feature?.extent) return;
 
       // Buffer the extent to avoid zooming too close if it's a point
-      const isPoint = featureData.geometry!.getType() === 'Point';
-      const zoomExtent = isPoint ? GeoUtilities.bufferExtent(featureData.extent, EXTENT_BUFFER) : featureData.extent;
+      const isPoint = feature.geometry!.getType() === 'Point';
+      const zoomExtent = isPoint ? GeoUtilities.bufferExtent(feature.extent, EXTENT_BUFFER) : feature.extent;
 
       // Zoom to extent and highlight the feature
       zoomToExtent(zoomExtent, { padding: ZOOM_PADDING, maxZoom: ZOOM_MAX_LEVEL })
         .then(() => {
           // Highlight the bounding box
-          if (featureData.extent && !isPoint) {
-            highlightBBox(featureData.extent, false);
+          if (feature.extent && !isPoint) {
+            highlightBBox(feature.extent, false);
           }
           // Add the current feature to highlights
           addHighlightedFeature(feature);
@@ -248,9 +272,12 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
           logger.logPromiseFailed('zoomToExtent in handleZoomIn in FeatureInfoNew', error);
         });
     },
-    [featureData, feature, zoomToExtent, highlightBBox, addHighlightedFeature]
+    [feature, zoomToExtent, highlightBBox, addHighlightedFeature]
   );
 
+  /**
+   * Handles when the button to jump to the chart has been clicked.
+   */
   const handleGeochart = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>): void => {
       event.stopPropagation();
@@ -264,34 +291,26 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
   useEffect(() => {
     logger.logTraceUseEffect('FEATURE-INFO - checkedFeatures', checkedFeatures);
 
-    if (!featureData?.uid) return;
+    if (!feature?.uid) return;
 
-    setChecked(checkedFeatures.some((checkedFeature) => checkedFeature?.uid === featureData.uid));
-  }, [checkedFeatures, featureData]);
-
-  // Early return if no feature
-  if (!featureData) return null;
-
-  // Check if layer has geochart config and data with features
-  const hasGeochart =
-    !!geochartConfigs?.[feature.layerPath] &&
-    (geochartLayerDataArrayBatch?.some((entry) => entry.layerPath === feature.layerPath && (entry.features?.length ?? 0) > 0) ?? false);
+    setChecked(checkedFeatures.some((checkedFeature) => checkedFeature?.uid === feature.uid));
+  }, [checkedFeatures, feature]);
 
   return (
     <Paper sx={PAPER_STYLES}>
       <FeatureHeader
-        iconSrc={featureData.iconSrc}
-        name={featureData.name}
-        hasGeometry={!!featureData.geometry && !!featureData.extent && !featureData.extent.includes(Infinity)}
-        hasGeochart={hasGeochart}
+        iconSrc={feature.featureIcon}
+        name={memoFeatureName}
+        hasGeometry={memoFeatureHasGeometry}
+        hasGeochart={memoHasGeochart}
         checked={checked}
-        onCheckChange={handleFeatureSelectedChange}
+        onCheckChange={handleFeatureChecked}
         onZoomIn={handleZoomIn}
         onGeochart={handleGeochart}
       />
 
       <Box sx={sxClasses.featureInfoListContainer}>
-        <FeatureInfoTable layerPath={feature.layerPath} featureInfoList={featureInfoList} />
+        <FeatureInfoTable layerPath={feature.layerPath} featureInfoList={memoFeatureInfoList} />
       </Box>
     </Paper>
   );

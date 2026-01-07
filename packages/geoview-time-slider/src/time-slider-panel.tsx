@@ -74,7 +74,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
    * @param {TypeTimeSliderValues} timeSliderLayerInfo - Time slider layer info.
    */
   const getFilterInfo = useCallback(
-    (layerPath: string, timeSliderLayerInfo: TypeTimeSliderValues, language: TypeDisplayLanguage): string | null => {
+    (layerPath: string, timeSliderLayerInfo: TypeTimeSliderValues, language: TypeDisplayLanguage): string | undefined => {
       // Log
       logger.logTraceUseCallback('TIME-SLIDER-PANEL - getFilterInfo', layerPath, language);
 
@@ -92,7 +92,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
         );
       }
 
-      return null;
+      return undefined;
     },
     [layerDisplayDateFormats, layerDisplayDateTimezones, layerTemporalModes]
   );
@@ -117,7 +117,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       return (
         <Box sx={{ display: 'flex', alignContent: 'center', '& svg ': { width: '0.75em', height: '0.75em' } }}>
           {name}
-          {timeSliderLayerInfo.filtering && `: ${getFilterInfo(layerPath, timeSliderLayerInfo, language)}`}
+          {timeSliderLayerInfo.filtering && `: ${getFilterInfo(layerPath, timeSliderLayerInfo, language) ?? ''}`}
         </Box>
       );
     };

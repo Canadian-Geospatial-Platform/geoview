@@ -75,6 +75,8 @@ class GeoChartFooterPlugin extends FooterPlugin {
 
   /**
    * Overrides the addition of the GeoChart Footer Plugin to make sure to set the chart configs into the store.
+   * @returns {void}
+   * @override
    */
   override onAdd(): void {
     // Call parent
@@ -93,6 +95,7 @@ class GeoChartFooterPlugin extends FooterPlugin {
   /**
    * Overrides the creation of the content properties of this GeoChart Footer Plugin.
    * @returns {TypeTabs} The TypeTabs for the GeoChart Footer Plugin
+   * @override
    */
   override onCreateContentProps(): TypeTabs {
     // Create element
@@ -125,6 +128,8 @@ class GeoChartFooterPlugin extends FooterPlugin {
 
   /**
    * Overrides when the plugin is selected in the Footer Bar.
+   * @returns {void}
+   * @override
    */
   override onSelect(): void {
     // Call parent
