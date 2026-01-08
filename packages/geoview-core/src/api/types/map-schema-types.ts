@@ -688,7 +688,8 @@ export type TypeLayerTextConfig = {
    */
   padding?: [number, number, number, number];
   /**
-   * Declutter mode setting. Default is 'declutter'
+   * NOTE: DeclutterMode is not currently working because it requires the layer to have declutter: true for declutterMode to work.
+   * declutterMode setting. Default is 'declutter'
    * declutter: Overlapping symbols and text are dcluttered
    * obstacle: Symbols and text are rendered, but also serve as obstacles
    * none: No decluttering is done (all rendered)

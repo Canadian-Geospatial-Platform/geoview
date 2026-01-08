@@ -74,7 +74,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       // TODO: For layers with text, in order for declutterMode options to work, declutter at the layer level must be true
       // TO.DOCONT: If true though, this will cause the features themselves to be decluttered, which we don't want
       // TO.DOCONT: Instead, the best solution would be to create a second text only layer that uses the same source.
-      // TO.DOCONT: Could both layers be accessed by the same GeoView Layer? So the only the text layer or both layer's visibility can be toggled?
+      // TO.DOCONT: Could both layers be accessed by the same GeoView Layer? So that only the text layer or both layer's visibility can be toggled?
       // declutter: true,
     };
 

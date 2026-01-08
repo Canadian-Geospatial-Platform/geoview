@@ -1770,7 +1770,7 @@ layerText: {
 
   // Layout
   padding?: [number, number, number, number];
-  declutterMode?: 'declutter' | 'obstacle' | 'none';
+  declutterMode?: 'declutter' | 'obstacle' | 'none'; **Not working at the moment**
   wrap?: boolean;
   wrapCount?: number;
 
