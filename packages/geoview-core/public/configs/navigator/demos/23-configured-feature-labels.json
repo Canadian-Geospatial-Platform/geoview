@@ -55,6 +55,7 @@
               "minZoomLevel": 5,
               "maxZoomLevel": 19,
               "wrap": true,
+              "wrapLines": 3,
               "wrapCount": 16
             }
           }
@@ -96,7 +97,7 @@
               "haloColor": "rgba(255, 255, 255, 0.7)",
               "haloWidth": 2,
               "declutterMode": "obstacle",
-              "minZoomLevel": 10
+              "minZoomLevel": 7
             }
           }
         ]
@@ -141,6 +142,7 @@
               "haloWidth": 2,
               "minZoomLevel": 6,
               "wrap": true,
+              "wrapLines": 4,
               "wrapCount": 16
             },
             "layerStyle": {

@@ -1206,6 +1206,10 @@
           "description": "Allow labels to be wrapped",
           "type": "boolean"
         },
+        "wrapLines": {
+          "description": "The number of lines that the text is able to be wrapped into",
+          "type": "number"
+        },
         "wrapCount": {
           "description": "The number of characters per line to attempt to reach when wrapping",
           "type": "number"

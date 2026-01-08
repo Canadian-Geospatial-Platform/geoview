@@ -657,7 +657,7 @@ export type TypeLayerTextConfig = {
    * More complicated text values can be created and field names placed in {} will be substituded with their values.
    * e.g.: "My {field-name}" -> "My value"
    * If the field is a date, a date format can be specified using {DateField:YYYY-MM-DD}
-   * where the YYYY, MM, and DD will be replaced with their respective year, month, and day values
+   * Documentation for date format tags can be found here: https://day.js.org/docs/en/display/format
    * e.g.: "Date: {DateField:YYYY/MM}" -> "Date: 2026/01"
    * Also supports the native rich text with field replacement as well
    * e.g.: ["Some text", "bold 10px sans-serif", "Text 2", "italic 8px serif"]
@@ -701,6 +701,9 @@ export type TypeLayerTextConfig = {
   maxZoomLevel?: number;
   /** Allow labels to be wrapped */
   wrap?: boolean;
+  /** The maximum number of lines that can be used when wrapping text
+   * NOTE: wrapLines takes precendence over the count, but will try to use the count, if possible */
+  wrapLines?: number;
   /** The number of characters/line to attempt to reach when wrapping */
   wrapCount?: number;
 };

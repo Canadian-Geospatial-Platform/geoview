@@ -2191,6 +2191,7 @@ export abstract class GeoviewRenderer {
       declutterMode = 'declutter',
       wrap,
       wrapCount = 16,
+      wrapLines,
     } = textSettings;
 
     // Get text from feature field or use static text
@@ -2213,7 +2214,7 @@ export abstract class GeoviewRenderer {
     if (!textValue) return undefined;
 
     if (wrap && typeof textValue === 'string') {
-      textValue = GeoviewRenderer.wrapText(textValue, wrapCount);
+      textValue = GeoviewRenderer.wrapText(textValue, wrapCount, wrapLines);
     }
 
     // Build font string
@@ -2269,71 +2270,125 @@ export abstract class GeoviewRenderer {
   }
 
   /**
-   * Wrap text to a specified width
+   * Wrap text to fit within specified constraints
    * @param {string} str - The text to wrap
-   * @param {number} width - The maximum width of the text
+   * @param {number} width - The maximum width per line
+   * @param {number} maxLines - Maximum number of lines (optional, overrides width if needed)
    * @returns {string} The wrapped text
    */
-  static wrapText(str: string, width: number): string {
-    if (str.length > width) {
-      let p = width;
-      while (p > 0 && str[p] !== ' ' && str[p] !== '-') {
-        p--;
-      }
-      if (p > 0) {
-        let left;
-        if (str.substring(p, p + 1) === '-') {
-          left = str.substring(0, p + 1);
-        } else {
-          left = str.substring(0, p);
+  static wrapText(str: string, width: number, maxLines?: number): string {
+    if (!maxLines) {
+      // Original behavior when no maxLines specified
+      return GeoviewRenderer.wrapTextByWidth(str, width);
+    }
+
+    // Split text into words
+    const words = str.split(/\s+/);
+    if (words.length === 0) return str;
+
+    // If we can fit everything in maxLines with normal wrapping, do that
+    const normalWrap = GeoviewRenderer.wrapTextByWidth(str, width);
+    const normalLines = normalWrap.split('\n');
+
+    if (normalLines.length <= maxLines) {
+      return normalWrap;
+    }
+
+    // Need to fit into fewer lines - calculate optimal width per line
+    const totalChars = str.length;
+    const targetWidth = Math.ceil(totalChars / maxLines);
+
+    // Build lines with the calculated width
+    const lines: string[] = [];
+    let currentLine = '';
+
+    for (const word of words) {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+
+      if (testLine.length <= targetWidth || currentLine === '') {
+        currentLine = testLine;
+      } else {
+        lines.push(currentLine);
+        currentLine = word;
+
+        // If we've reached maxLines, truncate remaining text
+        if (lines.length >= maxLines - 1) {
+          // Add ellipsis if there are more words
+          const remainingWords = words.slice(words.indexOf(word));
+          if (remainingWords.length > 1) {
+            currentLine = `${currentLine}...`;
+          }
+          break;
         }
-        const right = str.substring(p + 1);
-        return left + '\n' + GeoviewRenderer.wrapText(right, width);
       }
     }
-    return str;
+
+    if (currentLine) lines.push(currentLine);
+    return lines.slice(0, maxLines).join('\n');
+  }
+
+  /**
+   * Wrap text to a specified width using word boundaries
+   * @param {string} str - The text to wrap
+   * @param {number} width - The maximum width of each line
+   * @returns {string} The wrapped text
+   */
+  static wrapTextByWidth(str: string, width: number): string {
+    // No wrapping required
+    if (str.length <= width) return str;
+
+    const words = str.split(/\s+/);
+    const lines: string[] = [];
+    let currentLine = '';
+
+    for (const word of words) {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+
+      if (testLine.length <= width) {
+        currentLine = testLine;
+      } else {
+        // If current line has content, push it and start new line
+        if (currentLine) {
+          lines.push(currentLine);
+          currentLine = word;
+        } else {
+          // Single word longer than width - force break it
+          currentLine = word;
+        }
+      }
+    }
+
+    // Add the last line if it has content
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+
+    return lines.join('\n');
   }
 
   /**
    * Process text template by replacing field placeholders with feature values
+   * Expects somewhat clean field names, so we shouldn't need to worry about escaping special characters (Dates may still have characters after the colon)
    * @param {string} template - The text template with {field-name} placeholders
    * @param {FeatureLike} feature - The feature to get field values from
    * @returns {string} The processed text with field values substituted
    */
   static processTextTemplate(template: string, feature: FeatureLike): string {
-    return template.replace(/\{([^}:]+)(?::([^}]+))?\}/g, (match, fieldName, format) => {
+    return template.replace(/\{(\w+)(?::([^}]+))?\}/g, (match, fieldName, format) => {
       const fieldValue = feature.get(fieldName.trim());
       if (fieldValue === undefined) return match;
 
       // If format is specified, try to format as date
       if (format) {
         try {
-          const date = new Date(fieldValue);
-          if (!Number.isNaN(date.getTime())) {
-            return GeoviewRenderer.formatDate(date, format);
-          }
+          return DateMgt.formatDate(fieldValue, format);
         } catch (e) {
           // Fall back to string conversion if date parsing fails
-          logger.logWarning(e);
+          logger.logWarning(`There was an issue replacing the field, ${fieldName}, with a value:`, e);
         }
       }
 
       return String(fieldValue);
     });
-  }
-
-  /**
-   * Format date using simple format strings
-   * @param {Date} date - The date to format
-   * @param {string} format - Format string (YYYY-MM-DD, MM/DD/YYYY, etc.)
-   * @returns {string} Formatted date string
-   */
-  static formatDate(date: Date, format: string): string {
-    // TODO: Add more date modifiers to get Month name, 2 digit year, day of the week, etc.
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-
-    return format.replace('YYYY', String(year)).replace('MM', month).replace('DD', day);
   }
 } // END CLASS

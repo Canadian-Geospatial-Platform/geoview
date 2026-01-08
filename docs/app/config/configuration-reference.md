@@ -1772,6 +1772,7 @@ layerText: {
   padding?: [number, number, number, number];
   declutterMode?: 'declutter' | 'obstacle' | 'none'; **Not working at the moment**
   wrap?: boolean;
+  wrapLines?: number
   wrapCount?: number;
 
   // Visibility
@@ -1802,7 +1803,7 @@ layerText: {
 
 #### text
 
-Static text or template with field placeholders. Supports rich text arrays.
+Static text or template with field placeholders. Supports rich text arrays and date formatting. Documentation for the date formatting tags can be found here: [Day.js Format](https://day.js.org/docs/en/display/format)
 
 ```typescript
 text?: string | string[];
@@ -1973,12 +1974,13 @@ layerText: {
 
 ---
 
-#### wrap / wrapCount
+#### wrap / wrapLines / wrapCount
 
-Text wrapping configuration.
+Text wrapping configuration. WrapLines takes precedence over wrapCount, but the count will be honored if possible, otherwise the text will be limited to the number of lines and surpass the count limit.
 
 ```typescript
 wrap?: boolean;
+wrapLines?: number; // Number of lines to limit the wrapped text to
 wrapCount?: number; // Characters per line (default: 16)
 ```
 
@@ -1987,6 +1989,7 @@ wrapCount?: number; // Characters per line (default: 16)
 ```typescript
 layerText: {
   wrap: true,
+  wrapLines: 3,
   wrapCount: 20 // Wrap at 20 characters per line
 }
 ```
