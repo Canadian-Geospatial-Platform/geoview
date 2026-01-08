@@ -160,7 +160,7 @@ export default function DataTableModal(): JSX.Element {
     // Get feature info result for selected layer to check if it is loading
     const selectedLayerData = layersData.find((_layer) => _layer.layerPath === selectedLayer);
 
-    if (selectedLayerData?.queryStatus !== 'error' && selectedLayerData?.queryStatus !== 'processed') {
+    if (selectedLayerData?.queryStatus === 'processing') {
       setIsLoading(true);
     } else setIsLoading(false);
   }, [layersData, selectedLayer]);

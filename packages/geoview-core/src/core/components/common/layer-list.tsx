@@ -22,7 +22,7 @@ export interface LayerListEntry {
   mapFilteredIcon?: ReactNode;
   tooltip?: JSX.Element | string;
   numOffeatures?: number;
-  features?: TypeFeatureInfoEntry[] | undefined | null;
+  features?: TypeFeatureInfoEntry[] | undefined;
   layerUniqueId?: string;
   isDisabled?: boolean;
 }
@@ -63,10 +63,9 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
     .trim();
 
   // Constant for state
-  const isDisabled = layer?.numOffeatures === 0 || layer?.features === null || layer?.isDisabled;
+  const isDisabled = layer?.numOffeatures === 0 || layer?.queryStatus === 'error' || layer?.isDisabled;
   const isLoading =
     layer?.numOffeatures === 0 ||
-    layer?.features === null ||
     layer.queryStatus === 'processing' ||
     layer.layerStatus === 'loading' ||
     layer.layerStatus === 'processing';
@@ -78,7 +77,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
     if (layer.layerStatus === 'error' || layer?.queryStatus === 'error') {
       return `${t('legend.layerError')}`;
     }
-    if (['init', 'processing'].includes(layer.queryStatus)) {
+    if (['processing'].includes(layer.queryStatus)) {
       return `${t('layers.querying')}...`;
     }
     return (
