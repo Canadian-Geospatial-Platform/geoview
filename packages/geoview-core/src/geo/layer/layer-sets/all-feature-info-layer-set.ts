@@ -68,6 +68,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
   /**
    * Overrides the behavior to apply when propagating to the store
    * @param {TypeAllFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate
+   * @param {PropagationType} type - The propagation type
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override onPropagateToStore(resultSetEntry: TypeAllFeatureInfoResultSetEntry, type: PropagationType): void {

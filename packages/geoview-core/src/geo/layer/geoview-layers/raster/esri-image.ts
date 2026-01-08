@@ -1,4 +1,5 @@
 import { ImageArcGISRest } from 'ol/source';
+import type { Projection as OLProjection } from 'ol/proj';
 import type { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
 
 import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
@@ -59,11 +60,13 @@ export class EsriImage extends AbstractGeoViewRaster {
   /**
    * Overrides the way the layer metadata is processed.
    * @param {EsriImageLayerEntryConfig} layerConfig - The layer entry configuration to process.
-   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
+   * @param {OLProjection?} [mapProjection] - The map projection.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<EsriImageLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
   protected override onProcessLayerMetadata(
     layerConfig: EsriImageLayerEntryConfig,
+    mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<EsriImageLayerEntryConfig> {
     return EsriUtilities.commonProcessLayerMetadata(this, layerConfig, abortSignal);

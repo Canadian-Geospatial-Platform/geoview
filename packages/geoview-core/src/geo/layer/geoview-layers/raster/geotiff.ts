@@ -1,4 +1,5 @@
 import type { Options as SourceOptions } from 'ol/source/GeoTIFF';
+import type { Projection as OLProjection } from 'ol/proj';
 import GeoTIFFSource from 'ol/source/GeoTIFF';
 
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
@@ -50,7 +51,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<T = TypeMetadataGeoTIFF | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
    */
@@ -103,9 +104,17 @@ export class GeoTIFF extends AbstractGeoViewRaster {
   /**
    * Overrides the way the layer metadata is processed.
    * @param {GeoTIFFLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @param {OLProjection?} [mapProjection] - The map projection.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<GeoTIFFLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  protected override onProcessLayerMetadata(layerConfig: GeoTIFFLayerEntryConfig): Promise<GeoTIFFLayerEntryConfig> {
+  protected override onProcessLayerMetadata(
+    layerConfig: GeoTIFFLayerEntryConfig,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    mapProjection?: OLProjection,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    abortSignal?: AbortSignal
+  ): Promise<GeoTIFFLayerEntryConfig> {
     const metadata = this.getMetadata();
     if (metadata) {
       // Set the metadata

@@ -1,5 +1,6 @@
-import { ImageWMS } from 'ol/source';
 import type { Options as SourceOptions } from 'ol/source/ImageWMS';
+import type { Projection as OLProjection } from 'ol/proj';
+import { ImageWMS } from 'ol/source';
 
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import type {
@@ -81,7 +82,7 @@ export class WMS extends AbstractGeoViewRaster {
    * - Otherwise, the method constructs a WMS GetCapabilities request.
    *   - If no specific layer configs are provided, a single metadata fetch is made.
    *   - If layer configs are present (e.g., Geomet use case), individual layer metadata is merged.
-   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<T = TypeMetadataWMS | undefined>} A promise resolving to the parsed metadata object,
    * or `undefined` if metadata could not be retrieved or no capabilities were found.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
@@ -118,7 +119,7 @@ export class WMS extends AbstractGeoViewRaster {
 
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
-   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    */
@@ -188,9 +189,17 @@ export class WMS extends AbstractGeoViewRaster {
   /**
    * Overrides the way the layer metadata is processed.
    * @param {OgcWmsLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @param {OLProjection?} [mapProjection] - The map projection.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<OgcWmsLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  protected override async onProcessLayerMetadata(layerConfig: OgcWmsLayerEntryConfig): Promise<OgcWmsLayerEntryConfig> {
+  protected override async onProcessLayerMetadata(
+    layerConfig: OgcWmsLayerEntryConfig,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    mapProjection?: OLProjection,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    abortSignal?: AbortSignal
+  ): Promise<OgcWmsLayerEntryConfig> {
     // Get the layer capabilities
     const layerCapabilities = this.getLayerCapabilities(layerConfig.layerId)!;
 
@@ -437,7 +446,7 @@ export class WMS extends AbstractGeoViewRaster {
           this.#addLayerToMetadataInstance(layerPath, baseMetadata.Capability.Layer, metadata.Capability.Layer);
         }
       } else {
-        // Log and track metadata fetch failure
+        // Log and track metadata fetch failure. Wrap/Unwrap id: 8c97d776
         const reason = result.reason as PromiseRejectErrorWrapper<AbstractBaseLayerEntryConfig>;
         this.addLayerLoadError(reason.error, reason.object);
       }
@@ -473,7 +482,7 @@ export class WMS extends AbstractGeoViewRaster {
               if (metadata.Capability) {
                 resolve({ metadata, layerConfig });
               } else {
-                // No capabilities found in the response
+                // Wrap error about no capabilities found. Wrap/Unwrap id: 8c97d776.
                 reject(
                   new PromiseRejectErrorWrapper(
                     new LayerNoCapabilitiesError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerNameCascade()),
@@ -483,7 +492,7 @@ export class WMS extends AbstractGeoViewRaster {
               }
             })
             .catch((error) => {
-              // Wrap any fetch error with additional layer context
+              // Wrap error with additional layer context. Wrap/Unwrap id: 8c97d776.
               reject(
                 new PromiseRejectErrorWrapper(
                   new LayerServiceMetadataUnableToFetchError(
@@ -509,16 +518,16 @@ export class WMS extends AbstractGeoViewRaster {
   /**
    * This method reads the service metadata from a XML metadataAccessPath.
    * @param {string} metadataUrl The metadataAccessPath
-   * @param {Function} callbackNewMetadataUrl - Callback executed when a proxy had to be used to fetch the metadata.
-   *                                            The parameter sent in the callback is the proxy prefix with the '?' at the end.
-   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
+   * @param {CallbackNewMetadataDelegate?} [callbackNewMetadataUrl] - Callback executed when a proxy had to be used to fetch the metadata.
+   * The parameter sent in the callback is the proxy prefix with the '?' at the end.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<void>} A promise that the execution is completed.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    * @private
    */
   async #fetchXmlServiceMetadata(
     metadataUrl: string,
-    callbackNewMetadataUrl?: (proxyUsed: string) => void,
+    callbackNewMetadataUrl?: CallbackNewMetadataDelegate,
     abortSignal?: AbortSignal
   ): Promise<TypeMetadataWMS> {
     let metadata;
@@ -728,9 +737,9 @@ export class WMS extends AbstractGeoViewRaster {
   /**
    * Fetches the metadata for WMS Capabilities.
    * @param {string} url - The url to query the metadata from.
-   * @param {CallbackNewMetadataDelegate} callbackNewMetadataUrl - Callback executed when a proxy had to be used to fetch the metadata.
+   * @param {CallbackNewMetadataDelegate?} [callbackNewMetadataUrl] - Callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
-   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
    * @throws {ResponseError} When the response is not OK (non-2xx).
@@ -751,7 +760,7 @@ export class WMS extends AbstractGeoViewRaster {
    * Fetches the metadata for WMS Capabilities for particular layer(s).
    * @param {string} url - The url to query the metadata from.
    * @param {string} layers - The layers to get the capabilities for.
-   * @param {CallbackNewMetadataDelegate} callbackNewMetadataUrl - Callback executed when a proxy had to be used to fetch the metadata.
+   * @param {CallbackNewMetadataDelegate?} [callbackNewMetadataUrl] - Callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal.

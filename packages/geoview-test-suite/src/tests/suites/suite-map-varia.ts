@@ -54,11 +54,15 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
     // return Promise.all([pDevTest0, pDevTest1]);
     // // GV END DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
 
+    // #region STATE CHECK
+
     // Test the map state
     const pmapState = this.#mapTester.testInitialMapState();
 
     // Wait until this test finishes before starting manipulating the map
     await pmapState;
+
+    // #endregion STATE CHECK
 
     // #region PROMISES SYNCH ZOOMING
 
@@ -74,10 +78,6 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
     // Wait until the projection switch finishes before continuing manipulating the map
     await pProjection;
 
-    // Test geometry z-index, not awaiting on it, it can happen at the same time as the rest, even testDetailsLayerSelectionPersistence for example
-    // TODO: CHECK - Confirm this assessment - No need to await on pZIndex test, keep testing the rest in parallel
-    const pZIndex = this.#mapTester.testGeometryGroupZIndex();
-
     // Test zoom to extent
     const pZoomToExtent = this.#mapTester.testZoomToExtent([-87, 51, -84, 53], [-88.584, 50.227, -82.142, 53.726]);
 
@@ -90,9 +90,27 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
     // Wait until the zoom finishes before continuing manipulating the map
     await pZoomToCoordinate;
 
+    // Test create and set basemap
+    const pCreateAndSetBasemap = this.#mapTester.testCreateAndSetBasemap();
+
+    // Wait until the basemap change finishes before continuing manipulating the map
+    await pCreateAndSetBasemap;
+
+    // Test north arrow rotation in LCC projection for BC
+    const pNorthArrowRotationLCC = this.#mapTester.testNorthArrowRotationLCC();
+
+    // Wait until the north arrow rotation finishes, because there are zooms and projection changes happening in that test
+    await pNorthArrowRotationLCC;
+
+    // Make sure the map is reset in its initial extent after the zooms
+    await MapEventProcessor.zoomToInitialExtent(this.getMapId());
+
     // #endregion PROMISES SYNCH ZOOMING
 
     // #region PROMISES SYNCH SELECTED TABS
+
+    // Test geometry z-index, not awaiting on it, it can happen at the same time as the rest, even testDetailsLayerSelectionPersistence for example
+    const pZIndex = this.#mapTester.testGeometryGroupZIndex();
 
     // Test footer bar select tab
     const pFooterBarSelectTab = this.#mapTester.testFooterBarSelectTab();
@@ -114,30 +132,10 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
 
     // #endregion PROMISES SYNCH SELECTED TABS
 
-    // Test set language
-    const pSetLanguage = this.#mapTester.testSetLanguage();
-
-    // Wait until the selected language test finishes before continuing manipulating the map
-    // TODO: CHECK - Confirm this assessment - Do we really need to wait for this test to finish before doing other tests?
-    await pSetLanguage;
-
-    // Test create and set basemap
-    const pCreateAndSetBasemap = this.#mapTester.testCreateAndSetBasemap();
-
-    // Wait until the basemap change finishes before continuing manipulating the map
-    // TODO: CHECK - Confirm this assessment - Do we really need to wait for this test to finish before doing other tests?
-    await pCreateAndSetBasemap;
-
-    // Test north arrow rotation in LCC projection for BC
-    const pNorthArrowRotationLCC = this.#mapTester.testNorthArrowRotationLCC();
-
-    // Wait until the north arrow rotation finishes, because there are zooms and projection changes happening in that test
-    await pNorthArrowRotationLCC;
-
     // #region PROMISES SYNCH HOVERABLE/QUERYABLE
 
-    // Make sure the map is in its initial extent
-    await MapEventProcessor.zoomToInitialExtent(this.getMapId());
+    // Test set language
+    const pSetLanguage = this.#mapTester.testSetLanguage();
 
     // Test non-queryable layer not in details
     const pNonQueryableLayerNotInDetails = this.#mapTester.testNonQueryableLayerNotInDetails('geojsonLYR5/polygons.json', [-88, 52]);
@@ -150,6 +148,8 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
 
     // #endregion PROMISES SYNCH HOVERABLE/QUERYABLE
 
+    // #region PROMISES DETAILS PANEL
+
     // Test details layer selection persistence, this test manipulates the map state too much as should run independently
     const pDetailsLayerSelectionPersistence = this.#mapTester.testDetailsLayerSelectionPersistence(
       'geojsonLYR5/polygons.json',
@@ -161,20 +161,22 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
     // Wait on details layer selection persistence which manipulates the map state a lot and should run independently
     await pDetailsLayerSelectionPersistence;
 
+    // #endregion PROMISES DETAILS PANEL
+
     // Resolve when all
     return Promise.all([
       pmapState,
       pZoom,
       pProjection,
-      pZIndex,
       pZoomToExtent,
       pZoomToCoordinate,
+      pCreateAndSetBasemap,
+      pNorthArrowRotationLCC,
+      pZIndex,
       pFooterBarSelectTab,
       pAppBarSelectTab,
       pFooterBarCreateTab,
       pSetLanguage,
-      pCreateAndSetBasemap,
-      pNorthArrowRotationLCC,
       pNonQueryableLayerNotInDetails,
       pLayerHoverableState,
       pDetailsLayerSelectionPersistence,

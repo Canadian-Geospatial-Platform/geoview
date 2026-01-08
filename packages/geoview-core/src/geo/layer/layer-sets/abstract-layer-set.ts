@@ -69,6 +69,7 @@ export abstract class AbstractLayerSet {
   /**
    * A must-override method called to propagate the result set entry to the store
    * @param {TypeResultSetEntry} resultSetEntry - The result set entry to propagate
+   * @param {PropagationType} type - The propagation type
    */
   protected abstract onPropagateToStore(resultSetEntry: TypeResultSetEntry, type: PropagationType): void;
 
@@ -392,7 +393,7 @@ export abstract class AbstractLayerSet {
    * @param {QueryType} queryType - The query type
    * @param {TypeLocation} location - The location for the query
    * @param {boolean} queryGeometry - The query geometry boolean
-   * @param {AbortController?} abortController - The optional abort controller.
+   * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise resolving to the query results
    */
   protected static queryLayerFeatures(
