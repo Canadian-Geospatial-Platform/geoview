@@ -1,4 +1,10 @@
-import type { TypeLayerStyleConfig, TypeStyleGeometry, TypeLayerStyleSettings, TypeOutfields } from '@/api/types/map-schema-types';
+import type {
+  TypeLayerStyleConfig,
+  TypeStyleGeometry,
+  TypeLayerStyleSettings,
+  TypeOutfields,
+  TypeLayerTextConfig,
+} from '@/api/types/map-schema-types';
 import type {
   ConfigClassOrType,
   TypeBaseSourceInitialConfig,
@@ -21,6 +27,8 @@ export interface AbstractBaseLayerEntryConfigProps extends ConfigBaseClassProps 
   layerFilter?: string;
   /** Style to apply to the vector layer. */
   layerStyle?: TypeLayerStyleConfig;
+  /** The Text style to apply to the label */
+  layerText?: TypeLayerTextConfig;
 }
 
 /**
@@ -47,6 +55,9 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /** Style to apply to the vector layer. */
   #layerStyle?: TypeLayerStyleConfig;
+
+  /** The OpenLayers Text style to apply to the label (will override the global feature text) */
+  #layerText?: TypeLayerTextConfig;
 
   /** The time dimension information */
   #timeDimension?: TimeDimension;
@@ -81,6 +92,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     this.#layerStyle = AbstractBaseLayerEntryConfig.getClassOrTypeLayerStyle(layerConfig);
     this.#layerFilter = AbstractBaseLayerEntryConfig.getClassOrTypeLayerFilter(layerConfig);
     this.#attributions = AbstractBaseLayerEntryConfig.getClassOrTypeLayerAttributions(layerConfig);
+    this.#layerText = AbstractBaseLayerEntryConfig.getClassOrTypeLayerText(layerConfig);
 
     // Initialize the dataAccessPath
     this.source.dataAccessPath ??= this.layerEntryProps.geoviewLayerConfig.metadataAccessPath;
@@ -178,6 +190,22 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    */
   setLayerStyle(layerStyle: TypeLayerStyleConfig): void {
     this.#layerStyle = layerStyle;
+  }
+
+  /**
+   * Gets the text metadata that is associated to the layer.
+   * @returns {TypeLayerTextConfig} The layer text or undefined.
+   */
+  getLayerText(): TypeLayerTextConfig | undefined {
+    return this.#layerText;
+  }
+
+  /**
+   * Sets the layer text metadata for the layer.
+   * @param {TypeLayerTextConfig} layerText - The layer text
+   */
+  setLayerText(layerText: TypeLayerTextConfig): void {
+    this.#layerText = layerText;
   }
 
   /**
@@ -488,7 +516,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigAbstractBaseClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
-   * @returns {string | undefined} The layer style or undefined.
+   * @returns {TypeLayerStyleConfig | undefined} The layer style or undefined.
    */
   static getClassOrTypeLayerStyle(layerConfig: ConfigClassOrType | undefined): TypeLayerStyleConfig | undefined {
     if (layerConfig instanceof AbstractBaseLayerEntryConfig) {
@@ -522,6 +550,19 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     }
     // Try to narrow the type and return, worst case it will be undefined
     return (layerConfig as AbstractBaseLayerEntryConfigProps)?.attributions;
+  }
+
+  /**
+   * Helper function to support when a layerConfig is either a class instance or a regular json object.
+   * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
+   * @returns {TypeLayerTextConfig | undefined} The layer attributions or undefined.
+   */
+  static getClassOrTypeLayerText(layerConfig: ConfigClassOrType | undefined): TypeLayerTextConfig | undefined {
+    if (layerConfig instanceof AbstractBaseLayerEntryConfig) {
+      return layerConfig.getLayerText();
+    }
+    // Try to narrow the type and return, worst case it will be undefined
+    return (layerConfig as AbstractBaseLayerEntryConfigProps)?.layerText;
   }
 
   // #endregion STATIC METHODS
