@@ -57,9 +57,17 @@ export class CSV extends AbstractGeoViewVector {
   /**
    * Overrides the way the layer metadata is processed.
    * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @param {OLProjection?} [mapProjection] - The map projection.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  protected override onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig): Promise<VectorLayerEntryConfig> {
+  protected override onProcessLayerMetadata(
+    layerConfig: VectorLayerEntryConfig,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    mapProjection?: OLProjection,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    abortSignal?: AbortSignal
+  ): Promise<VectorLayerEntryConfig> {
     // process the feature info configuration and attach the config to the instance for access by parent class
     layerConfig.setLayerMetadata(layerConfig);
 

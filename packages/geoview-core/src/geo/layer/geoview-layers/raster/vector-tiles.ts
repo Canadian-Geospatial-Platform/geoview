@@ -1,6 +1,7 @@
 import type { Options as SourceOptions } from 'ol/source/VectorTile';
-import VectorTileSource from 'ol/source/VectorTile';
 import type { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
+import type { Projection as OLProjection } from 'ol/proj';
+import VectorTileSource from 'ol/source/VectorTile';
 import TileGrid from 'ol/tilegrid/TileGrid';
 
 import { applyStyle } from 'ol-mapbox-style';
@@ -19,7 +20,10 @@ import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validati
 import { Projection } from '@/geo/utils/projection';
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { logger } from '@/core/utils/logger';
-import { LayerEntryConfigParameterProjectionNotDefinedInSourceError } from '@/core/exceptions/layer-entry-config-exceptions';
+import {
+  LayerEntryConfigParameterProjectionNotDefinedInSourceError,
+  LayerEntryNotSupportingProjectionError,
+} from '@/core/exceptions/layer-entry-config-exceptions';
 import { GVVectorTiles } from '@/geo/layer/gv-layers/vector/gv-vector-tiles';
 
 // TODO: Implement method to validate Vector Tiles service
@@ -78,9 +82,16 @@ export class VectorTiles extends AbstractGeoViewRaster {
   /**
    * Overrides the way the layer metadata is processed.
    * @param {VectorTilesLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @param {OLProjection?} [mapProjection] - The map projection.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<VectorTilesLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  protected override async onProcessLayerMetadata(layerConfig: VectorTilesLayerEntryConfig): Promise<VectorTilesLayerEntryConfig> {
+  protected override async onProcessLayerMetadata(
+    layerConfig: VectorTilesLayerEntryConfig,
+    mapProjection?: OLProjection,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    abortSignal?: AbortSignal
+  ): Promise<VectorTilesLayerEntryConfig> {
     // Get the metadata
     const metadata = this.getMetadata();
 
@@ -112,6 +123,15 @@ export class VectorTiles extends AbstractGeoViewRaster {
       // Second, set the min/max zoom levels based on the service / config.
       layerConfig.initInitialSettingsMinZoomFromMetadata(minZoom);
       layerConfig.initInitialSettingsMaxZoomFromMetadata(maxZoom);
+    }
+
+    // Get the source projection
+    const sourceProjection = layerConfig.getSource().projection;
+
+    // Validate the projection of the source is the same as the map projection, otherwise the the open layers vector tile will throw an uncatchable error
+    if (mapProjection && sourceProjection && sourceProjection !== Projection.readEPSGNumber(mapProjection)) {
+      // Error
+      throw new LayerEntryNotSupportingProjectionError(mapProjection.getCode(), layerConfig);
     }
 
     // Return the layer config

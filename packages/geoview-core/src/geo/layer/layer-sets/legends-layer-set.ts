@@ -60,7 +60,6 @@ export class LegendsLayerSet extends AbstractLayerSet {
   /**
    * Overrides the behavior to apply when an all-feature-info-layer-set wants to check for condition to register a layer in its set.
    * @param {AbstractBaseGVLayer} layer - The layer
-   * @param {string} layerPath - The layer path
    * @returns {boolean} True when the layer should be registered to this legends-layer-set
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -118,6 +117,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
   /**
    * Overrides the behavior to apply when propagating to the store
    * @param {TypeLegendResultSetEntry} resultSetEntry - The result set entry to propagate
+   * @param {PropagationType} type - The propagation type
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override onPropagateToStore(resultSetEntry: TypeLegendResultSetEntry, type: PropagationType): void {

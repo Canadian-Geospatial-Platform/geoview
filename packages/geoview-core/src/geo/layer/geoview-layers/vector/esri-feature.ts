@@ -1,6 +1,7 @@
 import type { Feature } from 'ol';
 import type { ReadOptions } from 'ol/format/Feature';
 import type { Options as SourceOptions } from 'ol/source/Vector';
+import type { Projection as OLProjection } from 'ol/proj';
 
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
@@ -53,7 +54,7 @@ export class EsriFeature extends AbstractGeoViewVector {
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<T = TypeMetadataEsriFeature | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    */
@@ -80,7 +81,7 @@ export class EsriFeature extends AbstractGeoViewVector {
 
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
-   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    */
@@ -148,12 +149,14 @@ export class EsriFeature extends AbstractGeoViewVector {
   /**
    * Overrides the way the layer metadata is processed.
    * @param {EsriFeatureLayerEntryConfig} layerConfig - The layer entry configuration to process.
-   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
+   * @param {OLProjection?} [mapProjection] - The map projection.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<EsriFeatureLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    * @throws {LayerTooManyEsriFeatures} When the layer has too many Esri features.
    */
   protected override onProcessLayerMetadata(
     layerConfig: EsriFeatureLayerEntryConfig,
+    mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<EsriFeatureLayerEntryConfig> {
     return EsriUtilities.commonProcessLayerMetadata(this, layerConfig, abortSignal);

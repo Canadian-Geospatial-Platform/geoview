@@ -1,6 +1,7 @@
 import type { Options as SourceOptions } from 'ol/source/XYZ';
-import XYZ from 'ol/source/XYZ';
 import type { Options as TileGridOptions } from 'ol/tilegrid/TileGrid';
+import type { Projection as OLProjection } from 'ol/proj';
+import XYZ from 'ol/source/XYZ';
 import TileGrid from 'ol/tilegrid/TileGrid';
 
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
@@ -117,9 +118,17 @@ export class XYZTiles extends AbstractGeoViewRaster {
   /**
    * Overrides the way the layer metadata is processed.
    * @param {XYZTilesLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @param {OLProjection?} [mapProjection] - The map projection.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<XYZTilesLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  protected override onProcessLayerMetadata(layerConfig: XYZTilesLayerEntryConfig): Promise<XYZTilesLayerEntryConfig> {
+  protected override onProcessLayerMetadata(
+    layerConfig: XYZTilesLayerEntryConfig,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    mapProjection?: OLProjection,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    abortSignal?: AbortSignal
+  ): Promise<XYZTilesLayerEntryConfig> {
     // TODO: Need to see why the metadata isn't handled properly for ESRI XYZ tiles.
     // GV Possibly caused by a difference between OGC and ESRI XYZ Tiles, but only have ESRI XYZ Tiles as example currently
     // GV Also, might be worth checking out OGCMapTile for this? https://openlayers.org/en/latest/examples/ogc-map-tiles-geographic.html

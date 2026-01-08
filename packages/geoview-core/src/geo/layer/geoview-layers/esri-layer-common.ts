@@ -214,7 +214,7 @@ export class EsriUtilities {
    * initial settings, fields and aliases).
    * @param {EsriDynamic | EsriFeature | EsriImage} layer The ESRI layer instance pointer.
    * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
-   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    * @static

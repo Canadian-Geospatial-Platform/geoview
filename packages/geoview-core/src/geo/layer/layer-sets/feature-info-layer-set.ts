@@ -80,6 +80,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   /**
    * Overrides the behavior to apply when propagating to the store
    * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate
+   * @param {PropagationType} type - The propagation type
    */
   protected override onPropagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry, type: PropagationType): void {
     // Redirect - Add layer to the list after registration

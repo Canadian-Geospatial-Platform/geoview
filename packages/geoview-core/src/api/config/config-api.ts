@@ -452,7 +452,7 @@ export class ConfigApi {
    * @param {boolean?} [isTimeAware] - Indicates whether the layer supports time-based filtering.
    * @param {TypeDisplayLanguage} [language] - The language, used for the geocore layer types to know which language to use when extracting layer information.
    * @param {string} [mapId] - The map id, used for the geocore layer types, to determine the layer id.
-   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<TypeGeoviewLayerConfig>} A Promise of a fully initialized `TypeGeoviewLayerConfig`.
    * @throws {NotSupportedError} If the provided layer type is not recognized or supported.
    */

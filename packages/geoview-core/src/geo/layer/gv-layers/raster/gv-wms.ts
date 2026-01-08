@@ -161,7 +161,7 @@ export class GVWMS extends AbstractGVRaster {
    * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.
    * @param {Coordinate} location - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-   * @param {AbortController?} abortController - The optional abort controller.
+   * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    * @override
    */
@@ -183,7 +183,7 @@ export class GVWMS extends AbstractGVRaster {
    * @param {OLMap} map - The Map where to get Feature Info At LonLat from.
    * @param {Coordinate} lonlat - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-   * @param {AbortController?} abortController - The optional abort controller.
+   * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    * @throws {LayerConfigWFSMissingError} If no WFS layer configuration is defined for this WMS layer.
    * @override
@@ -255,7 +255,7 @@ export class GVWMS extends AbstractGVRaster {
    * Overrides the get all feature information for all the features stored in the layer.
    * This function performs a WFS 'GetFeature' query operation using the WFS layer configuration embedded in the WMS layer configuration.
    * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
-   * @param {AbortController?} abortController - The optional abort controller.
+   * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    * @throws {LayerConfigWFSMissingError} If no WFS layer configuration is defined for this WMS layer.
    * @throws {ResponseError} When the response is not OK (non-2xx).
@@ -264,10 +264,7 @@ export class GVWMS extends AbstractGVRaster {
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
    * @throws {NetworkError} When a network issue happened.
    */
-  protected override getAllFeatureInfo(
-    map: OLMap,
-    abortController: AbortController | undefined = undefined
-  ): Promise<TypeFeatureInfoEntry[]> {
+  protected override getAllFeatureInfo(map: OLMap, abortController?: AbortController): Promise<TypeFeatureInfoEntry[]> {
     // Get the layer config and its initial settings
     const wmsLayerConfig = this.getLayerConfig();
 

@@ -80,6 +80,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   /**
    * Overrides the behavior to apply when propagating to the store
    * @param {TypeHoverResultSetEntry} resultSetEntry - The result set entry to propagate to the store
+   * @param {PropagationType} type - The propagation type
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override onPropagateToStore(resultSetEntry: TypeHoverResultSetEntry, type: PropagationType): void {

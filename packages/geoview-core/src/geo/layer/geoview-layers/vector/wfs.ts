@@ -1,6 +1,7 @@
 import type { Feature } from 'ol';
 import type { ReadOptions } from 'ol/format/Feature';
 import type { Options as SourceOptions } from 'ol/source/Vector';
+import type { Projection as OLProjection } from 'ol/proj';
 import { bbox } from 'ol/loadingstrategy';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
@@ -73,7 +74,7 @@ export class WFS extends AbstractGeoViewVector {
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<T = TypeMetadataWFS>} A promise with the metadata or undefined when no metadata for the particular layer type.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities).
@@ -101,7 +102,7 @@ export class WFS extends AbstractGeoViewVector {
 
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
-   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities).
@@ -193,12 +194,14 @@ export class WFS extends AbstractGeoViewVector {
   /**
    * Overrides the way the layer metadata is processed.
    * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration to process.
-   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
+   * @param {OLProjection?} [mapProjection] - The map projection.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    */
   protected override async onProcessLayerMetadata(
     layerConfig: VectorLayerEntryConfig,
+    mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<VectorLayerEntryConfig> {
     // Cast it
@@ -343,7 +346,7 @@ export class WFS extends AbstractGeoViewVector {
   /**
    * Fetches the metadata for a typical WFS class.
    * @param {string} url - The url to query the metadata from.
-   * @param {AbortSignal | undefined} [abortSignal] - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<TypeMetadataWFS | undefined>} Promise with the metadata when fetched or undefined when capabilities weren't found.
    * @static
    */
