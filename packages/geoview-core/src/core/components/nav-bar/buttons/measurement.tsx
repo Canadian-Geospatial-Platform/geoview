@@ -11,13 +11,11 @@ import type { FeatureLike } from 'ol/Feature';
 import type Feature from 'ol/Feature';
 import type { Geometry } from 'ol/geom';
 
-import { ToggleButtonGroup, ToggleButton } from '@mui/material';
-
 import { logger } from '@/core/utils/logger';
 import type { TypePanelProps } from '@/ui/panel/panel-types';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { IconButton } from '@/ui/icon-button/icon-button';
-import { Box, Stack, Switch } from '@/ui';
+import { Box, Switch, ToggleButtonGroup, ToggleButton } from '@/ui';
 import { ShowChartIcon, DeleteIcon, StraightenIcon } from '@/ui/icons';
 import { HexagonOutlined as HexagonOutlinedIcon } from '@mui/icons-material';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
@@ -26,7 +24,7 @@ import { formatLength, formatArea } from '@/core/utils/utilities';
 import type { Draw } from '@/geo/interaction/draw';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 const MEASURE_GROUP_KEY = 'geoview-measurement';
 
@@ -77,6 +75,9 @@ export default function Measurement(): JSX.Element {
   const { t } = useTranslation<string>();
   const mapId = useGeoViewMapId();
 
+  // Stores
+  const displayLanguage = useAppDisplayLanguage();
+
   // States
   const [activeMeasurement, setActiveMeasurement] = useState<MeasureType>(null);
   const [drawInstance, setDrawInstance] = useState<Draw | null>(null);
@@ -89,8 +90,10 @@ export default function Measurement(): JSX.Element {
    */
   const createSegmentStyle = useCallback(
     (isDrawing: boolean = false, includeSegmentLabels: boolean = true): StyleFunction => {
+      // Log
+      logger.logTraceUseCallback('MEASUREMENT, createSegmentStyle');
+
       return (feature: FeatureLike) => {
-        const displayLanguage = AppEventProcessor.getDisplayLanguage(mapId);
         const styles: Style[] = [];
         const geometry = feature.getGeometry();
 
@@ -163,7 +166,7 @@ export default function Measurement(): JSX.Element {
         return styles;
       };
     },
-    [mapId]
+    [displayLanguage]
   );
 
   /**
@@ -171,7 +174,9 @@ export default function Measurement(): JSX.Element {
    */
   const createMeasureTooltip = useCallback(
     (geometry: LineString | Polygon, coord: number[]): Overlay => {
-      const displayLanguage = AppEventProcessor.getDisplayLanguage(mapId);
+      // Log
+      logger.logTraceUseCallback('MEASUREMENT, createMeasureTooltip', geometry);
+
       const measureTooltipElement = document.createElement('div');
       measureTooltipElement.className = 'measurement-tooltip';
       Object.assign(measureTooltipElement.style, TOOLTIP_STYLE);
@@ -199,7 +204,7 @@ export default function Measurement(): JSX.Element {
 
       return overlay;
     },
-    [mapId]
+    [displayLanguage]
   );
 
   /**
@@ -207,11 +212,11 @@ export default function Measurement(): JSX.Element {
    */
   const startMeasurement = useCallback(
     (type: MeasureType): void => {
+      // Log
       logger.logTraceUseCallback('MEASUREMENT, startMeasurement', type);
 
+      // Early return if no type
       if (!type) return;
-
-      const viewer = MapEventProcessor.getMapViewer(mapId);
 
       // Stop existing measurement if any
       if (drawInstance) {
@@ -219,6 +224,7 @@ export default function Measurement(): JSX.Element {
       }
 
       // Create or get the geometry group for measurements
+      const viewer = MapEventProcessor.getMapViewer(mapId);
       if (!viewer.layer.geometry.hasGeometryGroup(MEASURE_GROUP_KEY)) {
         viewer.layer.geometry.createGeometryGroup(MEASURE_GROUP_KEY);
       }
@@ -244,7 +250,6 @@ export default function Measurement(): JSX.Element {
           setMeasurementFeatures((prev) => [...prev, feature]);
 
           let tooltipCoord: number[];
-
           if (geometry instanceof LineString) {
             tooltipCoord = geometry.getLastCoordinate();
           } else {
@@ -274,6 +279,7 @@ export default function Measurement(): JSX.Element {
    * Stops the current measurement
    */
   const stopMeasurement = useCallback((): void => {
+    // Log
     logger.logTraceUseCallback('MEASUREMENT, stopMeasurement');
 
     if (drawInstance) {
@@ -287,6 +293,7 @@ export default function Measurement(): JSX.Element {
    * Clears all measurements
    */
   const clearMeasurements = useCallback((): void => {
+    // Log
     logger.logTraceUseCallback('MEASUREMENT, clearMeasurements');
 
     const viewer = MapEventProcessor.getMapViewer(mapId);
@@ -315,6 +322,7 @@ export default function Measurement(): JSX.Element {
    */
   const handleMeasurementToggle = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {
+      // Log
       logger.logTraceUseCallback('MEASUREMENT, handleMeasurementToggle', event.target.checked);
 
       if (event.target.checked) {
@@ -332,7 +340,10 @@ export default function Measurement(): JSX.Element {
    */
   const handleSegmentLabelsToggle = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {
+      // Log
       logger.logTraceUseCallback('MEASUREMENT, handleSegmentLabelsToggle', event.target.checked);
+
+      // Set the segments hook state
       setShowSegmentLabels(event.target.checked);
 
       // Update all stored measurement features
@@ -352,6 +363,7 @@ export default function Measurement(): JSX.Element {
    */
   const handleTypeChange = useCallback(
     (_event: React.MouseEvent<HTMLElement>, newType: MeasureType): void => {
+      // Log
       logger.logTraceUseCallback('MEASUREMENT, handleTypeChange', newType);
 
       if (newType !== null) {
@@ -363,6 +375,9 @@ export default function Measurement(): JSX.Element {
 
   // Cleanup on unmount
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('MEASUREMENT, Clean up on mount');
+
     return () => {
       clearMeasurements();
     };
@@ -376,7 +391,7 @@ export default function Measurement(): JSX.Element {
     const isMeasurementActive = activeMeasurement !== null;
 
     return (
-      <Stack spacing={2} sx={{ p: 2, minWidth: 200 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         {/* On/Off Switch */}
         <Switch
           label={!isMeasurementActive ? t('general.enable')! : t('general.disable')!}
@@ -386,7 +401,7 @@ export default function Measurement(): JSX.Element {
         />
         {/* Segment Labels Toggle */}
         <Switch
-          label={t('measurement.segmentLabels') || 'Segment labels'}
+          label={t('measurement.segmentLabels')!}
           checked={showSegmentLabels}
           onChange={handleSegmentLabelsToggle}
           size="small"
@@ -398,7 +413,7 @@ export default function Measurement(): JSX.Element {
             value={activeMeasurement}
             exclusive
             onChange={handleTypeChange}
-            aria-label={t('measurement.title') || 'Measurement'}
+            aria-label={t('measurement.title')!}
             fullWidth
             size="small"
             disabled={!isMeasurementActive}
@@ -412,11 +427,11 @@ export default function Measurement(): JSX.Element {
               },
             }}
           >
-            <ToggleButton value="line" aria-label={t('measurement.line') || 'Line'}>
+            <ToggleButton value="line" aria-label={t('measurement.line')!}>
               <ShowChartIcon fontSize="small" />
               {t('measurement.line')}
             </ToggleButton>
-            <ToggleButton value="area" aria-label={t('measurement.area') || 'Area'}>
+            <ToggleButton value="area" aria-label={t('measurement.area')!}>
               <HexagonOutlinedIcon fontSize="small" />
               {t('measurement.area')}
             </ToggleButton>
@@ -433,7 +448,7 @@ export default function Measurement(): JSX.Element {
         >
           <DeleteIcon fontSize="small" />
         </IconButton>
-      </Stack>
+      </Box>
     );
   };
 

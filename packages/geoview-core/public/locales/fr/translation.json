@@ -48,7 +48,7 @@
     "line": "Distance",
     "area": "Surface",
     "clear": "Effacer",
-    "segmentLabels": "Afficher les étiquettes de segment"
+    "segmentLabels": "Afficher les étiquettes des segments"
   },
   "basemaps": {
     "select": "Choisir une carte de base",
