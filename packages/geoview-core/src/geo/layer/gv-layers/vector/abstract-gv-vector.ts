@@ -54,11 +54,12 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     const layerOptions: VectorLayerOptions<VectorSource<Feature<Geometry>>> = {
       properties: { layerConfig },
       source: olSource,
-      style: (feature) => {
+      style: (feature, resolution) => {
         // Calculate the style for the feature
         const style = AbstractGVVector.calculateStyleForFeature(
           this as AbstractGVLayer,
           feature,
+          resolution,
           label,
           layerConfig.getFilterEquation(),
           layerConfig.getLegendFilterIsOff()
@@ -70,6 +71,13 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
         // Return the style
         return style;
       },
+      // TODO: (SEE ISSUE 3227)For layers with text, in order for declutterMode options to work, declutter at the layer level must be true
+      // TO.DOCONT: If true though, this will cause the features themselves to be decluttered, which we don't want
+      // TO.DOCONT: Instead, the best solution would be to create a second text only layer that uses the same source.
+      // TO.DOCONT: Could both layers be accessed by the same GeoView Layer? So that only the text layer or both layer's visibility can be toggled?
+      // TO.DOCONT: If two separate layers, could we remove the text from the sublayers? Could have separate categories for the text, although
+      // TO.DOCONT: then we wouldn't be able to turn off the individual text categories in the UI. Would be all or nothing at the main layer level.
+      // declutter: true,
     };
 
     // Init the layer options with initial settings
@@ -374,6 +382,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   static calculateStyleForFeature(
     layer: AbstractGVLayer,
     feature: FeatureLike,
+    resolution: number,
     label: string,
     filterEquation?: FilterNodeType[],
     legendFilterIsOff?: boolean
@@ -383,16 +392,19 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
     // Create lookup dictionary of names to alias
     const outfields = layer.getLayerConfig().getOutfields();
+    const layerText = layer.getLayerConfig().getLayerText();
     const aliasLookup = GVLayerUtilities.createAliasLookup(outfields);
 
     // Get and create Feature style if necessary
     return GeoviewRenderer.getAndCreateFeatureStyle(
       feature,
+      resolution,
       style,
       label,
       filterEquation,
       legendFilterIsOff,
       aliasLookup,
+      layerText,
       (geometryType, theStyle) => {
         // A new style has been created
         logger.logDebug('A new style has been created on-the-fly', geometryType, layer);
