@@ -699,6 +699,34 @@ export class MapViewer {
   }
 
   /**
+   * Gets map scale for Web Mercator or Lambert Conformal Conic projections.
+   * @returns {number} The map scale (e.g. 50000 for 1:50,000)
+   */
+  getMapScale(): number | undefined {
+    return this.getMapScaleFromZoom(this.getView().getZoom() || 0);
+  }
+
+  /**
+   * Converts zoom level to a map scale.
+   * @param {number} zoom - The desired zoom (e.g. 50000 for 1:50,000)
+   * @returns {number} The closest scale for the given zoom number
+   */
+  getMapScaleFromZoom(zoom: number): number | undefined {
+    const projection = this.getView().getProjection();
+    const mpu = projection.getMetersPerUnit();
+    if (!mpu) return undefined;
+
+    const dpi = 25.4 / 0.28; // OpenLayers default DPI
+
+    // Get resolution for zoom level
+    const resolution = this.getView().getResolutionForZoom(zoom);
+
+    // Calculate scale from resolution
+    // Scale = Resolution * metersPerUnit * inchesPerMeter * DPI
+    return resolution * mpu * 39.37 * dpi;
+  }
+
+  /**
    * Set the map zoom level.
    *
    * @param {number} zoom - New zoom level
