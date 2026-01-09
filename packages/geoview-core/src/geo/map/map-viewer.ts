@@ -699,6 +699,55 @@ export class MapViewer {
   }
 
   /**
+   * Gets map scale for Web Mercator or Lambert Conformal Conic projections.
+   * @returns {number} The map scale (e.g. 50000 for 1:50,000)
+   */
+  getMapScale(): number | undefined {
+    return this.getMapScaleFromZoom(this.getView().getZoom() || 0);
+  }
+
+  /**
+   * Converts a zoom level to a map scale.
+   * @param {number} zoom - The desired zoom (e.g. 50000 for 1:50,000)
+   * @returns {number} The closest scale for the given zoom number
+   */
+  getMapScaleFromZoom(zoom: number): number | undefined {
+    const projection = this.getView().getProjection();
+    const mpu = projection.getMetersPerUnit();
+    if (!mpu) return undefined;
+
+    const dpi = 25.4 / 0.28; // OpenLayers default DPI
+
+    // Get resolution for zoom level
+    const resolution = this.getView().getResolutionForZoom(zoom);
+
+    // Calculate scale from resolution
+    // Scale = Resolution * metersPerUnit * inchesPerMeter * DPI
+    return resolution * mpu * 39.37 * dpi;
+  }
+
+  /**
+   * Converts a map scale to a zoom level.
+   * @param {number | undefined} targetScale - The desired scale (e.g. 50000 for 1:50,000)
+   * @param {number?} [dpiValue] - The optional DPI value to use for calculation
+   * @returns {number} The closest zoom level for the given scale
+   */
+  getMapZoomFromScale(targetScale: number | undefined, dpiValue?: number): number | undefined {
+    if (!targetScale) return undefined;
+    const projection = this.getView().getProjection();
+    const mpu = projection.getMetersPerUnit();
+    const dpi = dpiValue ?? 25.4 / 0.28; // OpenLayers' default DPI
+
+    // Calculate resolution from scale
+    if (!mpu) return undefined;
+
+    // Resolution = Scale / ( metersPerUnit * inchesPerMeter * DPI )
+    const targetResolution = targetScale / (mpu * 39.37 * dpi);
+
+    return this.getView().getZoomForResolution(targetResolution) || undefined;
+  }
+
+  /**
    * Set the map zoom level.
    *
    * @param {number} zoom - New zoom level

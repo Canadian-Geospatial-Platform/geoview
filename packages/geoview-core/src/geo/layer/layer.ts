@@ -2169,22 +2169,21 @@ export class LayerApi {
     // Skip the GVGroupLayers since we don't want to prevent the children from loading if they aren't initially
     // in visible range. Inheritance has already been passed in the config and the group layer visibility will
     // be handled in the map-viewer's handleMapZoomEnd by checking the children visibility
-    const mapView = this.mapViewer.getView();
     if ((layerConfig.getInitialSettings()?.maxZoom || layerConfig.getMaxScale()) && !(gvLayer instanceof GVGroupLayer)) {
-      let maxScaleZoomLevel = GeoUtilities.getZoomFromScale(mapView, layerConfig.getMaxScale());
+      let maxScaleZoomLevel = this.mapViewer.getMapZoomFromScale(layerConfig.getMaxScale());
       maxScaleZoomLevel = maxScaleZoomLevel ? Math.ceil(maxScaleZoomLevel * 100) / 100 : undefined;
       const maxZoom = Math.min(layerConfig.getInitialSettings()?.maxZoom ?? Infinity, maxScaleZoomLevel ?? Infinity);
       gvLayer.setMaxZoom(maxZoom);
     }
 
     if ((layerConfig.getInitialSettings()?.minZoom || layerConfig.getMinScale()) && !(gvLayer instanceof GVGroupLayer)) {
-      let minScaleZoomLevel = GeoUtilities.getZoomFromScale(mapView, layerConfig.getMinScale());
+      let minScaleZoomLevel = this.mapViewer.getMapZoomFromScale(layerConfig.getMinScale());
       minScaleZoomLevel = minScaleZoomLevel ? Math.ceil(minScaleZoomLevel * 100) / 100 : undefined;
       const minZoom = Math.max(layerConfig.getInitialSettings()?.minZoom ?? -Infinity, minScaleZoomLevel ?? -Infinity);
       gvLayer.setMinZoom(minZoom);
     }
 
-    const zoom = mapView.getZoom() as number;
+    const zoom = this.mapViewer.getView().getZoom() as number;
     const inVisibleRange = gvLayer.inVisibleRange(zoom);
     MapEventProcessor.setLayerInVisibleRange(this.getMapId(), gvLayer.getLayerPath(), inVisibleRange);
   }
