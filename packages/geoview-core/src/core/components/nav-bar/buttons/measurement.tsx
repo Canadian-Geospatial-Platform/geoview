@@ -23,8 +23,8 @@ import { GeoUtilities } from '@/geo/utils/utilities';
 import { formatLength, formatArea } from '@/core/utils/utilities';
 import type { Draw } from '@/geo/interaction/draw';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppDisplayLanguage, useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 const MEASURE_GROUP_KEY = 'geoview-measurement';
 
@@ -73,10 +73,12 @@ export default function Measurement(): JSX.Element {
 
   // Hooks
   const { t } = useTranslation<string>();
-  const mapId = useGeoViewMapId();
 
   // Stores
   const displayLanguage = useAppDisplayLanguage();
+  const { addOverlay, removeOverlay, createGeometryGroup, deleteGeometriesFromGroup, forceMapToRender, initDrawInteractions } =
+    useMapStoreActions();
+  const mapElement = useAppGeoviewHTMLElement().querySelector(`[id^="mapTargetElement-${useGeoViewMapId()}"]`) as HTMLElement;
 
   // States
   const [activeMeasurement, setActiveMeasurement] = useState<MeasureType>(null);
@@ -139,10 +141,24 @@ export default function Measurement(): JSX.Element {
           // Get midpoint of segment for label placement
           const midpoint = [(coordinates[i][0] + coordinates[i + 1][0]) / 2, (coordinates[i][1] + coordinates[i + 1][1]) / 2];
 
-          // Center labels on segment for both lines and polygons
+          // Calculate angle to align label with segment
+          // Note: In map coordinates, we calculate the bearing from point i to point i+1
+          const dx = coordinates[i + 1][0] - coordinates[i][0];
+          const dy = coordinates[i + 1][1] - coordinates[i][1];
+          let angleRadians = -Math.atan2(dy, dx);
+
+          // Normalize angle to keep text readable (prevent upside-down labels)
+          // Keep angle between -90° and +90° (-π/2 to π/2)
+          if (angleRadians > Math.PI / 2) {
+            angleRadians -= Math.PI;
+          } else if (angleRadians < -Math.PI / 2) {
+            angleRadians += Math.PI;
+          }
+
+          // Position labels just above the line segment
           const offsetX = 0;
-          const offsetY = 0;
-          const textBaseline: 'top' | 'middle' | 'bottom' = 'middle';
+          const offsetY = -10;
+          const textBaseline: 'top' | 'middle' | 'bottom' = 'bottom';
 
           styles.push(
             new Style({
@@ -155,6 +171,7 @@ export default function Measurement(): JSX.Element {
                 padding: LABEL_STYLE_CONFIG.padding,
                 offsetY,
                 offsetX,
+                rotation: angleRadians,
                 textAlign: 'center',
                 textBaseline,
                 overflow: true,
@@ -224,14 +241,11 @@ export default function Measurement(): JSX.Element {
       }
 
       // Create or get the geometry group for measurements
-      const viewer = MapEventProcessor.getMapViewer(mapId);
-      if (!viewer.layer.geometry.hasGeometryGroup(MEASURE_GROUP_KEY)) {
-        viewer.layer.geometry.createGeometryGroup(MEASURE_GROUP_KEY);
-      }
+      createGeometryGroup(MEASURE_GROUP_KEY);
 
       // Start drawing interaction
       const geomType = type === 'line' ? 'LineString' : 'Polygon';
-      const draw = viewer.initDrawInteractions(MEASURE_GROUP_KEY, geomType, {
+      const draw = initDrawInteractions(MEASURE_GROUP_KEY, geomType, {
         strokeColor: STROKE_COLORS.drawing,
         strokeWidth: STROKE_WIDTH,
         fillColor: FILL_COLORS.drawing,
@@ -258,7 +272,7 @@ export default function Measurement(): JSX.Element {
           }
 
           const overlay = createMeasureTooltip(geometry, tooltipCoord);
-          viewer.map.addOverlay(overlay);
+          addOverlay(overlay);
           setMeasureOverlays((prev) => [...prev, overlay]);
         }
       });
@@ -267,12 +281,20 @@ export default function Measurement(): JSX.Element {
       setActiveMeasurement(type);
 
       // Set focus to map for WCAG keyboard interaction
-      const mapElement = viewer.map.getTargetElement();
       if (mapElement) {
         mapElement.focus();
       }
     },
-    [mapId, drawInstance, createMeasureTooltip, createSegmentStyle, showSegmentLabels]
+    [
+      mapElement,
+      drawInstance,
+      initDrawInteractions,
+      createMeasureTooltip,
+      createGeometryGroup,
+      createSegmentStyle,
+      addOverlay,
+      showSegmentLabels,
+    ]
   );
 
   /**
@@ -296,12 +318,10 @@ export default function Measurement(): JSX.Element {
     // Log
     logger.logTraceUseCallback('MEASUREMENT, clearMeasurements');
 
-    const viewer = MapEventProcessor.getMapViewer(mapId);
-
     // Remove all overlays
     measureOverlays.forEach((overlay) => {
       overlay.getElement()?.remove();
-      viewer.map.removeOverlay(overlay);
+      removeOverlay(overlay);
     });
     setMeasureOverlays([]);
 
@@ -309,13 +329,11 @@ export default function Measurement(): JSX.Element {
     setMeasurementFeatures([]);
 
     // Delete all geometries from the group
-    if (viewer.layer.geometry.hasGeometryGroup(MEASURE_GROUP_KEY)) {
-      viewer.layer.geometry.deleteGeometriesFromGroup(MEASURE_GROUP_KEY);
-    }
+    deleteGeometriesFromGroup(MEASURE_GROUP_KEY);
 
     // Stop current drawing
     stopMeasurement();
-  }, [mapId, measureOverlays, stopMeasurement]);
+  }, [measureOverlays, stopMeasurement, deleteGeometriesFromGroup, removeOverlay]);
 
   /**
    * Handles measurement mode toggle
@@ -352,10 +370,9 @@ export default function Measurement(): JSX.Element {
       });
 
       // Force map to re-render
-      const viewer = MapEventProcessor.getMapViewer(mapId);
-      viewer.map.render();
+      forceMapToRender();
     },
-    [mapId, createSegmentStyle, measurementFeatures]
+    [createSegmentStyle, forceMapToRender, measurementFeatures]
   );
 
   /**
@@ -381,6 +398,7 @@ export default function Measurement(): JSX.Element {
     return () => {
       clearMeasurements();
     };
+    // We use the empty array to avoid the rerender for clear measurement trigger on enable toggle
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

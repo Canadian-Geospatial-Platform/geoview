@@ -24,6 +24,8 @@ import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import { Projection } from '@/geo/utils/projection';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
+import type { Draw } from '@/geo/interaction/draw';
+import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
@@ -80,6 +82,10 @@ export interface IMapState {
 
   actions: {
     createBasemapFromOptions: (basemapOptions: TypeBasemapOptions) => Promise<void>;
+    createGeometryGroup: (groupName: string) => void;
+    deleteGeometriesFromGroup: (groupName: string) => void;
+    forceMapToRender: () => void;
+    initDrawInteractions: (geomGroupKey: string, type: string, style: TypeFeatureStyle) => Draw;
     getMapLayerParentHidden(layerPath: string): boolean;
     isLayerHiddenOnMap(layerPath: string): boolean;
     getPixelFromCoordinate: (coord: Coordinate) => Pixel;
@@ -89,6 +95,8 @@ export interface IMapState {
     addHighlightedFeature: (feature: TypeFeatureInfoEntry) => void;
     removeHighlightedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
     removeLayerHighlights: (layerPath: string) => void;
+    addOverlay: (overlay: Overlay) => void;
+    removeOverlay: (overlay: Overlay) => void;
     addPointMarkers: (group: string, pointMarkers: TypePointMarker[]) => void;
     removePointMarkersOrGroup: (group: string, idsOrCoordinates?: string[] | Coordinate[]) => void;
     reorderLayer: (layerPath: string, move: number) => void;
@@ -255,6 +263,47 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       },
 
       /**
+       * Creates a new geometry group on the map if it doesn't already exist.
+       * Geometry groups are used to organize and manage collections of vector features (lines, polygons, points).
+       * @param {string} groupName - The unique name for the geometry group to create
+       */
+      createGeometryGroup: (groupName: string): void => {
+        // Redirect to processor
+        MapEventProcessor.createGeometryGroup(get().mapId, groupName);
+      },
+
+      /**
+       * Deletes all geometries from a geometry group.
+       * Removes all vector features (lines, polygons, points) that belong to the specified group.
+       * The group itself remains and can be reused.
+       * @param {string} groupName - The name of the geometry group to clear
+       */
+      deleteGeometriesFromGroup: (groupName: string): void => {
+        // Redirect to processor
+        MapEventProcessor.deleteGeometriesFromGroup(get().mapId, groupName);
+      },
+
+      /**
+       * Forces the map to re-render all layers and features.
+       * Useful when layer styles or features have been updated programmatically and need to be reflected visually.
+       */
+      forceMapToRender: (): void => {
+        // Redirect to processor
+        MapEventProcessor.forceMapToRender(get().mapId);
+      },
+
+      /**
+       * Initializes drawing interactions on the given vector source
+       * @param {string} geomGroupKey - The geometry group key in which to hold the geometries
+       * @param {string} type - The type of geometry to draw (Polygon, LineString, Circle, etc)
+       * @param {TypeFeatureStyle} [style] - The styles for the drawing
+       */
+      initDrawInteractions: (geomGroupKey: string, type: string, style: TypeFeatureStyle): Draw => {
+        // Redirect to processor
+        return MapEventProcessor.initDrawInteractions(get().mapId, geomGroupKey, type, style);
+      },
+
+      /**
        * Returns true if any of the layers parents are hidden.
        * @param {string} layerPath - The layers path
        * @returns {boolean} - If there is a hidden parent
@@ -340,6 +389,27 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       removeLayerHighlights: (layerPath: string): void => {
         // Redirect to processor
         MapEventProcessor.removeLayerHighlights(get().mapId, layerPath);
+      },
+
+      /**
+       * Adds an overlay to the map.
+       * Overlays are HTML DOM elements positioned at map coordinates that float above the map canvas.
+       * Common uses include tooltips, popups, and measurement labels.
+       * @param {Overlay} overlay - The OpenLayers overlay to add to the map.
+       */
+      addOverlay: (overlay: Overlay): void => {
+        // Redirect to processor
+        MapEventProcessor.addOverlay(get().mapId, overlay);
+      },
+
+      /**
+       * Removes an overlay from the map.
+       * Removes the HTML element from the map display and cleans up references.
+       * @param {Overlay} overlay - The OpenLayers overlay to remove from the map.
+       */
+      removeOverlay: (overlay: Overlay): void => {
+        // Redirect to processor
+        MapEventProcessor.removeOverlay(get().mapId, overlay);
       },
 
       /**
