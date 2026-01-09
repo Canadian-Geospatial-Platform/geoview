@@ -130,7 +130,7 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
      * @returns {Style} The style for the feature
      */
-    static calculateStyleForFeature(layer: AbstractGVLayer, feature: FeatureLike, label: string, filterEquation?: FilterNodeType[], legendFilterIsOff?: boolean): Style | undefined;
+    static calculateStyleForFeature(layer: AbstractGVLayer, feature: FeatureLike, resolution: number, label: string, filterEquation?: FilterNodeType[], legendFilterIsOff?: boolean): Style | undefined;
     /**
      * Applies a view filter to a vector layer configuration. The resulting filter is parsed and stored in the layer
      * config's `filterEquation`, and triggers a re-evaluation of feature styles if applicable.

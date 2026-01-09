@@ -1,9 +1,9 @@
-import { Style } from 'ol/style';
+import { Style, Text } from 'ol/style';
 import type { Geometry } from 'ol/geom';
 import type { Options as StrokeOptions } from 'ol/style/Stroke';
 import type { FeatureLike } from 'ol/Feature';
 import type Feature from 'ol/Feature';
-import type { TypeLayerStyleConfigType, TypePolygonVectorConfig, TypeIconSymbolVectorConfig, TypeLineStyle, TypeLineStringVectorConfig, TypeSimpleSymbolVectorConfig, TypeKindOfVectorSettings, TypeStyleGeometry, TypeLayerStyleSettings, TypeLayerStyleConfig, TypeLayerStyleConfigInfo, TypeLayerStyleValueCondition, TypeAliasLookup } from '@/api/types/map-schema-types';
+import type { TypeLayerStyleConfigType, TypePolygonVectorConfig, TypeIconSymbolVectorConfig, TypeLineStyle, TypeLineStringVectorConfig, TypeSimpleSymbolVectorConfig, TypeKindOfVectorSettings, TypeStyleGeometry, TypeLayerStyleSettings, TypeLayerStyleConfig, TypeLayerStyleConfigInfo, TypeLayerStyleValueCondition, TypeLayerTextConfig, TypeAliasLookup, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
 import type { TypeLayerMetadataFields } from '@/api/types/layer-schema-types';
 import type { FillPatternLine, FillPatternSettings, FilterNodeType } from './geoview-renderer-types';
 import type { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -466,15 +466,17 @@ export declare abstract class GeoviewRenderer {
      * This method gets the style of the feature using the layer entry config. If the style does not exist for the geometryType,
      * create it using the default style strategy.
      * @param {FeatureLike} feature - Feature that need its style to be defined.
+     * @param {number} resolution - The resolution of the map
      * @param {TypeStyleConfig} style - The style to use
      * @param {string} label - The style label when one has to be created
      * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
      * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
      * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
+     * @param {TypeLayerTextConfig?} layerText - An optional text configuration to apply to the feature
      * @param {() => Promise<string | null>} callbackWhenCreatingStyle - An optional callback to execute when a new style had to be created
      * @returns {Style | undefined} The style applied to the feature or undefined if not found.
      */
-    static getAndCreateFeatureStyle(feature: FeatureLike, style: TypeLayerStyleConfig, label: string, filterEquation?: FilterNodeType[], legendFilterIsOff?: boolean, aliasLookup?: TypeAliasLookup, callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeLayerStyleConfigInfo) => void): Style | undefined;
+    static getAndCreateFeatureStyle(feature: FeatureLike, resolution: number, style: TypeLayerStyleConfig, label: string, filterEquation?: FilterNodeType[], legendFilterIsOff?: boolean, aliasLookup?: TypeAliasLookup, layerText?: TypeLayerTextConfig, callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeLayerStyleConfigInfo) => void): Style | undefined;
     /**
      * This method gets the image source from the style of the feature using the layer entry config.
      * @param {Feature} feature - The feature that need its icon to be defined.
@@ -532,6 +534,53 @@ export declare abstract class GeoviewRenderer {
     static FillPatternSettings: FillPatternSettings;
     /** Table of function to process the style settings based on the feature geometry and the kind of style settings. */
     static processStyle: Record<TypeLayerStyleConfigType, Record<TypeStyleGeometry, TypeStyleProcessor>>;
+    /**
+     * Method for getting the text style
+     * @param {FeatureLike} feature - The feature to get the text style for
+     * @param {number} resolution - The resolution of the map
+     * @param {TypeLayerStyleSettings} styleSettings - The style settings
+     * @param {TypeLayerTextConfig} layerText - The layer text configuration
+     * @param {TypeAliasLookup} aliasLookup - The alias lookup
+     * @returns {Text | undefined} The text style
+     */
+    static getTextStyle: (feature: FeatureLike, resolution: number, styleSettings: TypeLayerStyleSettings, layerText?: TypeLayerTextConfig, aliasLookup?: TypeAliasLookup) => Text | undefined;
+    /**
+     * Method for creating Text Style
+     * @param {FeatureLike} feature - The feature to create the text style for
+     * @param {TypeLayerTextConfig} textSettings - The text style settings
+     * @returns {Text | undefined} The text style
+     */
+    static createTextStyle: (feature: FeatureLike, textSettings: TypeLayerTextConfig) => Text | undefined;
+    /**
+     * Get approximate resolution for common zoom levels by projection
+     * @param {number} zoom - The zoom level (0-20)
+     * @param {TypeValidMapProjectionCodes} projection - The map projection (3857 for Web Mercator, 3978 for Canada Lambert)
+     * @returns {number} Approximate resolution for the given zoom and projection
+     */
+    static getApproximateResolution(zoom: number, projection?: TypeValidMapProjectionCodes): number;
+    /**
+     * Wrap text to fit within specified constraints
+     * @param {string} str - The text to wrap
+     * @param {number} width - The maximum width per line
+     * @param {number} maxLines - Maximum number of lines (optional, overrides width if needed)
+     * @returns {string} The wrapped text
+     */
+    static wrapText(str: string, width: number, maxLines?: number): string;
+    /**
+     * Wrap text to a specified width using word boundaries
+     * @param {string} str - The text to wrap
+     * @param {number} width - The maximum width of each line
+     * @returns {string} The wrapped text
+     */
+    static wrapTextByWidth(str: string, width: number): string;
+    /**
+     * Process text template by replacing field placeholders with feature values
+     * Expects somewhat clean field names, so we shouldn't need to worry about escaping special characters (Dates may still have characters after the colon)
+     * @param {string} template - The text template with {field-name} placeholders
+     * @param {FeatureLike} feature - The feature to get field values from
+     * @returns {string} The processed text with field values substituted
+     */
+    static processTextTemplate(template: string, feature: FeatureLike): string;
 }
 export {};
 //# sourceMappingURL=geoview-renderer.d.ts.map
