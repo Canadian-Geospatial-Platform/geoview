@@ -109,6 +109,25 @@ export class LayerNotEsriDynamicError extends LayerError {
 }
 
 /**
+ * Custom error class thrown when the GeoView layer configuration is invalid due to the EsriDynamic layer not supporting dynamic layers.
+ * @extends {LayerError}
+ */
+export class LayerNotSupportingDynamicLayersError extends LayerError {
+  /**
+   * Constructor to initialize the LayerNotSupportingDynamicLayersError.
+   * This error is thrown when the layer ID provided does not correspond to a feature layer.
+   * @param {string} layerPath - The configuration object associated with the GeoView layer.
+   * @param {string | undefined} layerName - The layer name.
+   */
+  constructor(layerPath: string, layerName: string | undefined) {
+    super(layerPath, 'error.layer.notSupportingDynamicLayers', [layerName || layerPath]);
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerNotSupportingDynamicLayersError.prototype);
+  }
+}
+
+/**
  * Custom error class thrown when the GeoView layer configuration is invalid due to the layer ID not being a feature layer.
  * This error is specifically used when the provided layer ID does not correspond to a valid feature layer.
  * @extends {LayerError}
@@ -463,10 +482,14 @@ export class LayerInvalidFeatureInfoFormatWMSError extends LayerError {
    * Creates an instance of LayerInvalidFeatureInfoFormatWMSError.
    *
    * @param {string} layerPath - The path or identifier of the WMS layer that received the invalid format.
+   * @param {string} format - The invalid format.
    * @param {string | undefined} layerName - The layer name.
    */
-  constructor(layerPath: string, layerName: string | undefined) {
-    super(layerPath, 'validation.layer.wmsServiceFormatParameter', [layerName || layerPath]);
+  constructor(layerPath: string, format: string | string[], layerName: string | undefined) {
+    super(layerPath, 'validation.layer.wmsServiceFormatParameter', [
+      Array.isArray(format) ? format.join(',') : format,
+      layerName || layerPath,
+    ]);
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerInvalidFeatureInfoFormatWMSError.prototype);

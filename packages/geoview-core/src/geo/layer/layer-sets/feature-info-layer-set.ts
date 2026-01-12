@@ -4,10 +4,9 @@ import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processo
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import type { QueryType, TypeFeatureInfoEntry, TypeResultSet } from '@/api/types/map-schema-types';
-import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import type { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import type { EventType, PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
+import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { GVKML } from '@/geo/layer/gv-layers/vector/gv-kml';
 import type { LayerApi } from '@/geo/layer/layer';
@@ -56,25 +55,24 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
-   * @param {AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseGVLayer} layer - The layer
    * @returns {boolean} True when the layer should be registered to this feature-info-layer-set.
    */
-  protected override onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
+  protected override onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean {
     // Return if the layer is of queryable type and source is queryable
     return super.onRegisterLayerCheck(layer) && AbstractLayerSet.isQueryableType(layer) && AbstractLayerSet.isSourceQueryable(layer);
   }
 
   /**
    * Overrides the behavior to apply when a feature-info-layer-set wants to register a layer in its set.
-   * @param {AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseGVLayer} layer - The layer
    */
-  protected override onRegisterLayer(layer: AbstractBaseLayer): void {
+  protected override onRegisterLayer(layer: AbstractBaseGVLayer): void {
     // Call parent
     super.onRegisterLayer(layer);
 
     // Update the resultSet data
     const layerPath = layer.getLayerPath();
-    this.resultSet[layerPath].eventListenerEnabled = layer.getLayerConfig().getInitialSettings().states?.queryable ?? true; // default: true
     this.resultSet[layerPath].queryStatus = 'processed';
     this.resultSet[layerPath].features = [];
   }
@@ -82,10 +80,19 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   /**
    * Overrides the behavior to apply when propagating to the store
    * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate
+   * @param {PropagationType} type - The propagation type
    */
   protected override onPropagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry, type: PropagationType): void {
     // Redirect - Add layer to the list after registration
-    this.#propagateToStore(resultSetEntry, type !== 'layerStatus' ? 'name' : 'click');
+    switch (type) {
+      case 'layerStatus':
+        this.#propagateToStoreClick(resultSetEntry);
+        break;
+
+      default:
+        this.#propagateToStoreName(resultSetEntry);
+        break;
+    }
   }
 
   /**
@@ -115,23 +122,20 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // Reinitialize the resultSet
     // Loop on each layer path in the resultSet
     Object.keys(this.resultSet).forEach((layerPath) => {
-      // If event listener is disabled
-      if (!this.resultSet[layerPath].eventListenerEnabled) return;
-
       // Get the layer config and layer associated with the layer path
       const layer = this.layerApi.getGeoviewLayer(layerPath);
 
       // If layer was found and of right type
       if (layer instanceof AbstractGVLayer) {
-        // If state is not in visible range
-        if (!AbstractLayerSet.isInVisibleRange(layer, this.layerApi.mapViewer.getView().getZoom())) return;
+        // If the layer is not queryable, skip it
+        if (!layer.getQueryable()) return;
 
         // Flag processing
         this.resultSet[layerPath].features = undefined;
         this.resultSet[layerPath].queryStatus = 'processing';
 
         // Propagate to store
-        this.#propagateToStore(this.resultSet[layerPath]);
+        this.#propagateToStoreClick(this.resultSet[layerPath]);
 
         // If the layer path has an abort controller
         if (Object.keys(this.#abortControllers).includes(layerPath)) {
@@ -144,7 +148,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
         // Process query on results data
         const promiseResult = AbstractLayerSet.queryLayerFeatures(
-          this.layerApi.mapViewer.map,
+          this.layerApi,
           layer,
           FeatureInfoLayerSet.QUERY_TYPE,
           lonLatCoordinate,
@@ -163,8 +167,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
             // If the response contain actual fields
             if (AbstractLayerSet.recordsContainActualFields(layerConfig, arrayOfRecords)) {
-              // Use the response to patch and align arrayOfRecords fields with layerConfig fields
-              FeatureInfoLayerSet.#patchMissingOutfieldsIfNecessary(layerConfig, arrayOfRecords);
+              // Align fields with layerConfig fields
               AbstractLayerSet.alignRecordsWithOutFields(layerConfig, arrayOfRecords);
             }
 
@@ -196,7 +199,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
           })
           .finally(() => {
             // Propagate to store
-            this.#propagateToStore(this.resultSet[layerPath]);
+            this.#propagateToStoreClick(this.resultSet[layerPath]);
           });
       } else {
         // Error
@@ -204,7 +207,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         this.resultSet[layerPath].queryStatus = 'error';
 
         // Propagate to store
-        this.#propagateToStore(this.resultSet[layerPath]);
+        this.#propagateToStoreClick(this.resultSet[layerPath]);
       }
     });
 
@@ -212,109 +215,22 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     await Promise.allSettled(allPromises);
 
     // Emit the query layers has ended
-    this.#emitQueryEnded({ coordinate: lonLatCoordinate, resultSet: this.resultSet, eventType: 'click' });
+    this.#emitQueryEnded({ coordinate: lonLatCoordinate, resultSet: this.resultSet });
 
     // Return the results
     return this.resultSet;
   }
 
   /**
-   * Function used to enable listening of click events. When a layer path is not provided,
-   * click events listening is enabled for all layers
-   * @param {string} layerPath - Optional parameter used to enable only one layer
-   */
-  enableClickListener(layerPath?: string): void {
-    if (layerPath) this.#processListenerStatusChanged(layerPath, true);
-    else
-      Object.keys(this.resultSet).forEach((key: string) => {
-        this.#processListenerStatusChanged(key, true);
-      });
-  }
-
-  /**
-   * Function used to disable listening of click events. When a layer path is not provided,
-   * click events listening is disable for all layers
-   * @param {string} layerPath - Optional parameter used to disable only one layer
-   */
-  disableClickListener(layerPath?: string): void {
-    if (layerPath) this.#processListenerStatusChanged(layerPath, false);
-    else
-      Object.keys(this.resultSet).forEach((key: string) => {
-        this.#processListenerStatusChanged(key, false);
-      });
-  }
-
-  /**
-   * Function used to determine whether click events are disabled for a layer. When a layer path is not provided,
-   * the value returned is undefined if the map flags are a mixture of true and false values.
-   * @param {string} layerPath - Optional parameter used to get the flag value of a layer.
-   * @returns {boolean | undefined} The flag value for the map or layer.
-   */
-  isClickListenerEnabled(layerPath?: string): boolean | undefined {
-    if (layerPath) return !!this.resultSet?.[layerPath]?.eventListenerEnabled;
-
-    let returnValue: boolean | undefined;
-    Object.keys(this.resultSet).forEach((key: string, i) => {
-      if (i === 0) returnValue = this.resultSet[key].eventListenerEnabled;
-      if (returnValue !== this.resultSet[key].eventListenerEnabled) returnValue = undefined;
-    });
-    return returnValue;
-  }
-
-  /**
-   * Updates outfields and aliases from query result if those weren't set already.
-   * @param {string} layerConfig - The layer config to possibly update.
-   * @param {TypeFeatureInfoEntry[]} records - Feature info to parse.
-   * @private
-   */
-  static #patchMissingOutfieldsIfNecessary(layerConfig: AbstractBaseLayerEntryConfig, records: TypeFeatureInfoEntry[]): void {
-    // If no records
-    if (!records.length) return;
-
-    // Take the first one
-    const record = records[0];
-
-    // Get the outfields
-    let outfields = layerConfig.getOutfields();
-
-    // Process undefined outfields or aliasFields
-    if (!outfields?.length) {
-      // Create it
-      outfields = [];
-
-      // Loop
-      Object.keys(record.fieldInfo).forEach((fieldName) => {
-        const newOutfield = {
-          name: fieldName,
-          alias: record.fieldInfo[fieldName]?.alias || fieldName,
-          type: record.fieldInfo[fieldName]?.dataType || 'string',
-          domain: null,
-        };
-
-        outfields!.push(newOutfield);
-      });
-
-      // Set it
-      layerConfig.setOutfields(outfields);
-    }
-
-    // Set the nameField if not already defined
-    layerConfig.initNameField(outfields?.[0]?.name);
-  }
-
-  /**
-   * Apply status to item in results set reference by the layer path and propagate to store
+   * Clears the results for the provided layer path.
    * @param {string} layerPath - The layer path
-   * @param {boolean} isEnable - Status to apply
-   * @private
    */
-  #processListenerStatusChanged(layerPath: string, isEnable: boolean): void {
+  clearResults(layerPath: string): void {
     // Edit the result set
-    this.resultSet[layerPath].eventListenerEnabled = isEnable;
     this.resultSet[layerPath].features = [];
 
     // Propagate to store
-    this.#propagateToStore(this.resultSet[layerPath], 'name');
+    this.#propagateToStoreName(this.resultSet[layerPath]);
   }
 
   /**
@@ -322,12 +238,19 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate to the store
    * @private
    */
-  #propagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry, eventType: EventType = 'click'): void {
+  #propagateToStoreClick(resultSetEntry: TypeFeatureInfoResultSetEntry): void {
     // Propagate
-    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.getMapId(), eventType, resultSetEntry).catch((error: unknown) => {
-      // Log
-      logger.logPromiseFailed('FeatureInfoEventProcessor.propagateToStore in FeatureInfoLayerSet', error);
-    });
+    FeatureInfoEventProcessor.propagateFeatureInfoClickToStore(this.getMapId(), resultSetEntry);
+  }
+
+  /**
+   * Propagates the resultSetEntry to the store
+   * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate to the store
+   * @private
+   */
+  #propagateToStoreName(resultSetEntry: TypeFeatureInfoResultSetEntry): void {
+    // Propagate
+    FeatureInfoEventProcessor.propagateFeatureInfoNameToStore(this.getMapId(), resultSetEntry);
   }
 
   /**
@@ -370,5 +293,4 @@ type QueryEndedDelegate = EventDelegateBase<FeatureInfoLayerSet, QueryEndedEvent
 export type QueryEndedEvent = {
   coordinate: Coordinate;
   resultSet: TypeResultSet;
-  eventType: EventType;
 };

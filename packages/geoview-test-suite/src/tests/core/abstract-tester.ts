@@ -3,8 +3,8 @@ import type { ClassType } from 'geoview-core/core/types/global-types';
 import type { EventDelegateBase } from 'geoview-core/api/events/event-helper';
 import EventHelper from 'geoview-core/api/events/event-helper';
 import { logger } from 'geoview-core/core/utils/logger';
-import { Test } from './test';
 import { formatError } from 'geoview-core/core/exceptions/core-exceptions';
+import { Test } from './test';
 
 /**
  * Abstract base class for creating custom testers with assertion and event capabilities.
@@ -345,7 +345,7 @@ export abstract class AbstractTester {
       this.onPerformingTestFinalization(test, callbackFinalize);
 
       // Possibly callback for more
-      await callbackFinalize?.(test);
+      await callbackFinalize?.(test, test.getResult()!);
     } catch (error: unknown) {
       // The execution of the test has failed during finalization
       this.onPerformingTestFailure(test, error, true);
@@ -429,7 +429,7 @@ export abstract class AbstractTester {
       this.onPerformingTestFinalization(test, callbackFinalize);
 
       // Possibly callback for more
-      await callbackFinalize?.(test);
+      await callbackFinalize?.(test, test.getResult()!);
     } catch (error: unknown) {
       // The execution of the test has failed during finalization
       this.onPerformingTestFailure(test, error, true);
@@ -637,7 +637,7 @@ export type BaseAssertionDelegate<T = unknown> = (test: Test<T>, result: T) => v
 /**
  * Define a delegate for the event handler function signature
  */
-export type BaseFinalizeDelegate<T = unknown> = (test: Test<T>) => void | Promise<void>;
+export type BaseFinalizeDelegate<T = unknown> = (test: Test<T>, result: T) => void | Promise<void>;
 
 /**
  * Define an event for the delegate

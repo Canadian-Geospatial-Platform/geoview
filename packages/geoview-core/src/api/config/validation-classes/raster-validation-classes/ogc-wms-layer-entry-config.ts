@@ -27,9 +27,6 @@ export interface OgcWmsLayerEntryConfigProps extends AbstractBaseLayerEntryConfi
  * Type used to define a GeoView image layer to display on the map.
  */
 export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
-  /** Source settings to apply to the GeoView image layer source at creation time. */
-  declare source: TypeSourceImageWmsInitialConfig;
-
   /** The associated WFS layer config, if any */
   #wfsLayerConfig?: OgcWfsLayerEntryConfig;
 
@@ -46,15 +43,29 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     // Normalize the access paths
     this.#normalizeMetadataAndDataAccessPaths();
 
+    // Get the wms Style if any
+    const { wmsStyle } = this.getSource();
+
     // If any wms styles in the config
-    if (this.source.wmsStyle) {
+    if (wmsStyle) {
       // If an array
-      if (Array.isArray(this.source.wmsStyle)) {
-        this.#styles = this.source.wmsStyle;
+      if (Array.isArray(wmsStyle)) {
+        this.#styles = wmsStyle;
       } else {
-        this.#styles = [this.source.wmsStyle];
+        this.#styles = [wmsStyle];
       }
     }
+  }
+
+  // #region OVERRIDES
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeSourceImageWmsInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   */
+  override getSource(): TypeSourceImageWmsInitialConfig {
+    return super.getSource();
   }
 
   /**
@@ -64,49 +75,6 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    */
   override getServiceMetadata(): TypeMetadataWMS | undefined {
     return super.getServiceMetadata() as TypeMetadataWMS | undefined;
-  }
-
-  /**
-   * Gets the version. Defaults to 1.3.0.
-   * @returns {string} The service version as read from the metadata attribute.
-   */
-  getVersion(): string {
-    return this.getServiceMetadata()?.version || '1.3.0';
-  }
-
-  /**
-   * Gets the server type as read from the config or as read from the service GetCapabilities metadata response.
-   * @returns {TypeOfServer | undefined} The Type of server if it could be determined.
-   */
-  getServerType(): TypeOfServer | undefined {
-    return this.source.serverType || this.getServiceMetadata()?.serverType;
-  }
-
-  /**
-   * Returns a list of supported CRS (Coordinate Reference System) identifiers
-   * from the WMS service metadata.
-   * @returns {string[]} An array of supported CRS identifiers (e.g., 'EPSG:3857').
-   */
-  getSupportedCRSs(): string[] {
-    return this.getServiceMetadata()?.Capability.Layer.CRS ?? [];
-  }
-
-  /**
-   * Gets if the config has specified that we should fetch the vectorial information from the WFS.
-   * @returns {boolean} True when the vector information should be fetched from the WFS. True by default.
-   */
-  getShouldFetchVectorInformationFromWFS(): boolean {
-    return (this.getGeoviewLayerConfig() as TypeWMSLayerConfig).fetchVectorsOnWFS ?? true; // default: true
-  }
-
-  /**
-   * Gets if the service supports 'GetStyles' requests.
-   * @returns {boolean} True when the service supports GetStyles requests.
-   */
-  getSupportsGetStyles(): boolean {
-    return (
-      !!this.getServiceMetadata()?.Capability.Request['qgs:GetStyles'] || !!this.getServiceMetadata()?.Capability.Request['ms:GetStyles']
-    );
   }
 
   /**
@@ -140,6 +108,54 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
     // Return it
     return super.getAttributions();
+  }
+
+  // #endregion OVERRIDES
+
+  // #region METHODS
+
+  /**
+   * Gets the version. Defaults to 1.3.0.
+   * @returns {string} The service version as read from the metadata attribute.
+   */
+  getVersion(): string {
+    return this.getServiceMetadata()?.version || '1.3.0';
+  }
+
+  /**
+   * Gets the server type as read from the config or as read from the service GetCapabilities metadata response.
+   * @returns {TypeOfServer | undefined} The Type of server if it could be determined.
+   */
+  getServerType(): TypeOfServer | undefined {
+    // Return the serverType as specified in the config if any or the serverType as read from the metadata (config > metadata)
+    return this.getSource().serverType || this.getServiceMetadata()?.serverType;
+  }
+
+  /**
+   * Returns a list of supported CRS (Coordinate Reference System) identifiers
+   * from the WMS service metadata.
+   * @returns {string[]} An array of supported CRS identifiers (e.g., 'EPSG:3857').
+   */
+  getSupportedCRSs(): string[] {
+    return this.getServiceMetadata()?.Capability.Layer.CRS ?? [];
+  }
+
+  /**
+   * Gets if the config has specified that we should fetch the vectorial information from the WFS.
+   * @returns {boolean} True when the vector information should be fetched from the WFS. True by default.
+   */
+  getShouldFetchVectorInformationFromWFS(): boolean {
+    return (this.getGeoviewLayerConfig() as TypeWMSLayerConfig).fetchVectorsOnWFS ?? true; // default: true
+  }
+
+  /**
+   * Gets if the service supports 'GetStyles' requests.
+   * @returns {boolean} True when the service supports GetStyles requests.
+   */
+  getSupportsGetStyles(): boolean {
+    return (
+      !!this.getServiceMetadata()?.Capability.Request['qgs:GetStyles'] || !!this.getServiceMetadata()?.Capability.Request['ms:GetStyles']
+    );
   }
 
   /**
@@ -212,9 +228,9 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     if (chosenStyle) {
       // Use explicitly chosen style if provided
       selectedStyle = styles.find((style) => style.Name === chosenStyle);
-    } else if (typeof this.source?.wmsStyle === 'string') {
+    } else if (typeof this.getSource()?.wmsStyle === 'string') {
       // If source.wmsStyle is defined and not an array, use that
-      selectedStyle = styles.find((style) => style.Name === this.source.wmsStyle);
+      selectedStyle = styles.find((style) => style.Name === this.getSource().wmsStyle);
     } else {
       // No chosen style; prefer 'default' if available, else use the first style
       selectedStyle = hasDefaultStyle ? styles.find((style) => style.Name === 'default') : styles[0];
@@ -367,6 +383,10 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     this.setDataAccessPath(dataAccessPath);
   }
 
+  // #region OVERRIDES
+
+  // #region STATIC METHODS
+
   /**
    * Type guard that checks whether the given configuration (class instance or plain object)
    * represents a WMS layer type.
@@ -379,4 +399,6 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     // Redirect
     return this.isClassOrTypeSchemaTag(layerConfig, CONST_LAYER_TYPES.WMS);
   }
+
+  // #region STATIC METHODS
 }

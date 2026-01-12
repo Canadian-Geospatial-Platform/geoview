@@ -1,5 +1,3 @@
-import type { Map as OLMap } from 'ol';
-
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import type { QueryType, TypeFeatureInfoEntry, TypeLocation, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
@@ -17,7 +15,7 @@ import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
-import type { AbstractBaseLayer, LayerNameChangedDelegate, LayerNameChangedEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { AbstractBaseGVLayer, LayerNameChangedDelegate, LayerNameChangedEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -39,7 +37,7 @@ export abstract class AbstractLayerSet {
   #defaultRegisterLayerConfigCheck = false;
 
   // The registered layers
-  #registeredLayers: AbstractBaseLayer[] = [];
+  #registeredLayers: AbstractBaseGVLayer[] = [];
 
   /** Keep all callback delegates references */
   #onLayerSetUpdatedHandlers: LayerSetUpdatedDelegate[] = [];
@@ -71,6 +69,7 @@ export abstract class AbstractLayerSet {
   /**
    * A must-override method called to propagate the result set entry to the store
    * @param {TypeResultSetEntry} resultSetEntry - The result set entry to propagate
+   * @param {PropagationType} type - The propagation type
    */
   protected abstract onPropagateToStore(resultSetEntry: TypeResultSetEntry, type: PropagationType): void;
 
@@ -186,9 +185,9 @@ export abstract class AbstractLayerSet {
   /**
    * Registers the layer in the layer-set.
    * If the layer is already registered, the function returns immediately.
-   * @param {AbstractBaseLayer} layer - The layer to register
+   * @param {AbstractBaseGVLayer} layer - The layer to register
    */
-  async registerLayer(layer: AbstractBaseLayer): Promise<void> {
+  async registerLayer(layer: AbstractBaseGVLayer): Promise<void> {
     // If the layer is already registered, skip it, we don't register twice
     if (this.getRegisteredLayerPaths().includes(layer.getLayerPath())) return;
 
@@ -212,12 +211,12 @@ export abstract class AbstractLayerSet {
   /**
    * An overridable registration condition function for a layer-set to check if the registration
    * should happen for a specific geoview layer and layer path. By default, a layer-set always registers layers except when they are group layers.
-   * @param {AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseGVLayer} layer - The layer
    * @returns {boolean} True if the layer should be registered, false otherwise
    */
   // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
-  protected onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
+  protected onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean {
     // Override this function to perform registration condition logic in the inherited classes
     // By default, a layer-set always registers layers except when they are group layers
     if (layer.getLayerConfig()?.getEntryTypeIsGroup()) {
@@ -232,9 +231,9 @@ export abstract class AbstractLayerSet {
   /**
    * An overridable registration function for a layer-set that the registration process will use to
    * create a new entry in the layer set for a specific geoview layer and layer path.
-   * @param {AbstractBaseLayer} layer - The layer config
+   * @param {AbstractBaseGVLayer} layer - The layer config
    */
-  protected onRegisterLayer(layer: AbstractBaseLayer): void {
+  protected onRegisterLayer(layer: AbstractBaseGVLayer): void {
     // Get layer name
     const layerName = layer.getLayerName();
     const layerPath = layer.getLayerPath();
@@ -296,9 +295,9 @@ export abstract class AbstractLayerSet {
   /**
    * An overridable unregistration function for a layer-set that the registration process will use to
    * unregister a specific geoview layer.
-   * @param {AbstractBaseLayer | undefined} layer - The layer
+   * @param {AbstractBaseGVLayer | undefined} layer - The layer
    */
-  protected onUnregisterLayer(layer: AbstractBaseLayer | undefined): void {
+  protected onUnregisterLayer(layer: AbstractBaseGVLayer | undefined): void {
     // Unregister the layer name changed handler
     layer?.offLayerNameChanged(this.#boundedHandleLayerNameChanged);
   }
@@ -329,10 +328,10 @@ export abstract class AbstractLayerSet {
 
   /**
    * Handles when a layer status changed on a layer config.
-   * @param {AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseGVLayer} layer - The layer
    * @param {LayerNameChangedEvent} layerNameEvent - The new layer name
    */
-  #handleLayerNameChanged(layer: AbstractBaseLayer, layerNameEvent: LayerNameChangedEvent): void {
+  #handleLayerNameChanged(layer: AbstractBaseGVLayer, layerNameEvent: LayerNameChangedEvent): void {
     const layerPath = layer.getLayerPath();
 
     try {
@@ -394,52 +393,47 @@ export abstract class AbstractLayerSet {
    * @param {QueryType} queryType - The query type
    * @param {TypeLocation} location - The location for the query
    * @param {boolean} queryGeometry - The query geometry boolean
-   * @param {AbortController?} abortController - The optional abort controller.
+   * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise resolving to the query results
    */
   protected static queryLayerFeatures(
-    map: OLMap,
+    layerApi: LayerApi,
     geoviewLayer: AbstractGVLayer,
     queryType: QueryType,
     location: TypeLocation,
     queryGeometry: boolean = true,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
+    // If the layer is invisible (or any of its parent(s) is invisible)
+    if (!geoviewLayer.getVisibleIncludingParents(layerApi.getGeoviewLayersGroups())) return Promise.resolve([]);
+
+    // If is not in visible range
+    if (!geoviewLayer.getInVisibleRange(layerApi.mapViewer.getView().getZoom())) return Promise.resolve([]);
+
     // Get Feature Info
-    return geoviewLayer.getFeatureInfo(map, queryType, location, queryGeometry, abortController);
+    return geoviewLayer.getFeatureInfo(layerApi.mapViewer.map, queryType, location, queryGeometry, abortController);
   }
 
   /**
    * Checks if the layer is of queryable type based on its class definition
-   * @param {AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseGVLayer} layer - The layer
    * @returns True if the layer is of queryable type
    */
-  protected static isQueryableType(layer: AbstractBaseLayer): boolean {
+  protected static isQueryableType(layer: AbstractBaseGVLayer): boolean {
     return layer instanceof AbstractGVVector || layer instanceof GVEsriDynamic || layer instanceof GVWMS;
   }
 
   /**
    * Checks if the layer config source is queryable.
-   * @param {AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseGVLayer} layer - The layer
    * @returns {boolean} True if the source is queryable or undefined
    */
-  protected static isSourceQueryable(layer: AbstractBaseLayer): boolean {
+  protected static isSourceQueryable(layer: AbstractBaseGVLayer): boolean {
     // Cast
     const layerConfigCasted = layer.getLayerConfig() as AbstractBaseLayerEntryConfig;
 
     // Get if the source is queryable
-    return layerConfigCasted.getQueryableDefaulted();
-  }
-
-  /**
-   * Checks if the layer is in visible range.
-   * @param {AbstractGVLayer} layer - The layer
-   * @param {number | undefined} currentZoom - The map current zoom level
-   * @returns {boolean} True if the state is queryable or undefined
-   */
-  protected static isInVisibleRange(layer: AbstractGVLayer, currentZoom: number | undefined): boolean {
-    // Return false when false or undefined
-    return layer.getInVisibleRange(currentZoom);
+    return layerConfigCasted.getQueryableSourceDefaulted();
   }
 
   /**
@@ -562,11 +556,7 @@ export abstract class AbstractLayerSet {
   }
 }
 
-// TODO: Rename this type to something like 'store-container-type' as it is now mostly used to indicate in which store to propagate the result set
-// TO.DOCONT: Be mindful if you rename the eventType property in the event payload to the outside! Because lots of templates expect an 'eventType' in the payload.
-// TO.DOCONT: Ideally, get rid of it completely. The templates should be self aware of the layer-set that responded to their request now.
-export type EventType = 'click' | 'hover' | 'all-features' | 'name';
-
+/** The propagation type, notably for the store */
 export type PropagationType = 'config-registration' | 'layer-registration' | 'layerStatus' | 'layerName';
 
 /**

@@ -2,7 +2,7 @@ import { DataTableEventProcessor } from '@/api/event-processors/event-processor-
 import type { QueryType, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
-import type { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import type {
@@ -30,10 +30,10 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
-   * @param {AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseGVLayer} layer - The layer
    * @returns {boolean} True when the layer should be registered to this all-feature-info-layer-set.
    */
-  protected override onRegisterLayerCheck(layer: AbstractBaseLayer): boolean {
+  protected override onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean {
     // Return if the layer is of queryable type and source is queryable
     let isQueryable =
       super.onRegisterLayerCheck(layer) && AbstractLayerSet.isQueryableType(layer) && AbstractLayerSet.isSourceQueryable(layer);
@@ -50,15 +50,14 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when an all-feature-info-layer-set wants to register a layer in its set.
-   * @param {AbstractBaseLayer} layer - The layer
+   * @param {AbstractBaseGVLayer} layer - The layer
    */
-  protected override onRegisterLayer(layer: AbstractBaseLayer): void {
+  protected override onRegisterLayer(layer: AbstractBaseGVLayer): void {
     // Call parent
     super.onRegisterLayer(layer);
 
     // Update the resultSet data
     const layerPath = layer.getLayerPath();
-    this.resultSet[layerPath].eventListenerEnabled = true;
     this.resultSet[layerPath].queryStatus = 'processed';
     this.resultSet[layerPath].features = undefined;
 
@@ -69,6 +68,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
   /**
    * Overrides the behavior to apply when propagating to the store
    * @param {TypeAllFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate
+   * @param {PropagationType} type - The propagation type
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override onPropagateToStore(resultSetEntry: TypeAllFeatureInfoResultSetEntry, type: PropagationType): void {
@@ -88,7 +88,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
   /**
    * Helper function used to launch the query on a layer to get all of its feature information.
    * @param {string} layerPath - The layerPath that will be queried
-   * @param {QueryType} queryType - The query's type to perform
+   * @param {QueryType} queryType - The query type, default: AllFeatureInfoLayerSet.QUERY_TYPE.
    * @returns {Promise<TypeFeatureInfoEntry[] | void>} A promise which will hold the result of the query
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
@@ -101,9 +101,6 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
     // If valid layer path
     if (this.resultSet[layerPath]) {
-      // If event listener is disabled
-      if (!this.resultSet[layerPath].eventListenerEnabled) return Promise.resolve();
-
       // Get the layer config and layer associated with the layer path
       const layer = this.layerApi.getGeoviewLayer(layerPath);
 
@@ -131,7 +128,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
         // Process query on results data
         const promiseResult = AbstractLayerSet.queryLayerFeatures(
-          this.layerApi.mapViewer.map,
+          this.layerApi,
           layer,
           queryType,
           layerPath,
