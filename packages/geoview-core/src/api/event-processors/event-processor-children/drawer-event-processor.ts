@@ -180,8 +180,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * @throws {InvaliGeometryGroupIdError} If the provided geometry group id does not exist.
    */
   static #getDrawingFeatures(mapId: string): Feature[] {
+    // Check if state exist and if draw instance is enable, solve error when switch lang and no draw instance
     const state = this.getDrawerState(mapId);
-    if (!state) return [];
+    if (!state || state.drawInstance === undefined) return [];
 
     // Get the map viewer instance
     const viewer = MapEventProcessor.getMapViewer(mapId);
