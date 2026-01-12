@@ -101,6 +101,8 @@ export default function Measurement(): JSX.Element {
 
   /**
    * Creates a style function that shows segment lengths
+   * @param {boolean} [includeSegmentLabels=true] - Whether to include segment length labels on the geometry
+   * @returns {StyleFunction} OpenLayers style function that applies measurement styles
    */
   const createSegmentStyle = useCallback(
     (includeSegmentLabels: boolean = true): StyleFunction => {
@@ -192,6 +194,9 @@ export default function Measurement(): JSX.Element {
 
   /**
    * Creates a measurement tooltip overlay
+   * @param {LineString | Polygon} geometry - The geometry to measure (LineString for distance, Polygon for area)
+   * @param {number[]} coord - The coordinate [x, y] where the tooltip should be positioned
+   * @returns {Overlay} OpenLayers overlay containing the measurement tooltip element
    */
   const createMeasureTooltip = useCallback(
     (geometry: LineString | Polygon, coord: number[]): Overlay => {
@@ -253,6 +258,7 @@ export default function Measurement(): JSX.Element {
 
   /**
    * Starts a measurement operation
+   * @param {MeasureType} type - The type of measurement to start ('line' for distance, 'area' for area, null to clear)
    */
   const startMeasurement = useCallback(
     (type: MeasureType): void => {
@@ -365,6 +371,8 @@ export default function Measurement(): JSX.Element {
 
   /**
    * Handles measurement mode toggle
+   * @param {React.ChangeEvent<HTMLInputElement>} event - The change event from the switch toggle
+   * @param {boolean} event.target.checked - Whether the measurement mode is enabled or disabled
    */
   const handleMeasurementToggle = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -383,6 +391,8 @@ export default function Measurement(): JSX.Element {
 
   /**
    * Handles segment labels visibility toggle
+   * @param {React.ChangeEvent<HTMLInputElement>} event - The change event from the segment labels switch toggle
+   * @param {boolean} event.target.checked - Whether segment labels should be shown or hidden
    */
   const handleSegmentLabelsToggle = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -405,6 +415,8 @@ export default function Measurement(): JSX.Element {
 
   /**
    * Handles measurement type selection
+   * @param {React.MouseEvent<HTMLElement>} _event - The mouse event from the toggle button (unused)
+   * @param {MeasureType} newType - The newly selected measurement type ('line' or 'area')
    */
   const handleTypeChange = useCallback(
     (_event: React.MouseEvent<HTMLElement>, newType: MeasureType): void => {
