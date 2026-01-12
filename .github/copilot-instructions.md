@@ -45,14 +45,14 @@ Backend/Map Events → Event Processors → Zustand Store
 1. **UI components**: Read state from `MapState`/store slices, call `MapState.actions.*` (which redirect to Event Processors), NEVER import Event Processors directly
 2. **TypeScript backend code**: Use Event Processor static methods directly (e.g., `MapEventProcessor.setZoom(mapId, 10)`)
 3. **Event Processors**: Single source of truth for business logic, state validation, side effects
-   - Extend `AbstractEventProcessor` from [event-processor-architecture.md](docs/programming/event-processor-architecture.md)
+   - Extend `AbstractEventProcessor` from [event-processor-architecture.md](../docs/programming/event-processor-architecture.md)
    - Static methods for TS files, store actions for UI
 
 ### Layer Architecture
 
 - **Two Categories**: Raster (`AbstractGeoViewRaster`) and Vector (`AbstractGeoViewVector`)
 - **GV Layers**: OpenLayers wrapper layer classes (`GVEsriFeature`, `GVCSV`, etc.)
-- **Layer Sets**: Reactive collections tracking legends/queries/state (see [layerset-architecture.md](docs/programming/layerset-architecture.md))
+- **Layer Sets**: Reactive collections tracking legends/queries/state (see [layerset-architecture.md](../docs/programming/layerset-architecture.md))
   - `LegendsLayerSet`, `DetailsLayerSet` - extend `AbstractLayerSet`
   - Event-driven sync with layer changes via result sets
 
@@ -64,7 +64,7 @@ Backend/Map Events → Event Processors → Zustand Store
 - **Always define hook types**: `useState<TypeBasemapProps[]>([])` not `useState([])`
 - **Avoid name collisions**: Use `GVLayer` not `Layer` when OpenLayers has a `Layer` class
 
-### Code Organization (per [best-practices.md](docs/programming/best-practices.md))
+### Code Organization (per [best-practices.md](../docs/programming/best-practices.md))
 
 **Component order:**
 
@@ -100,7 +100,7 @@ import { MapEventProcessor } from "@/api/event-processors";
 
 ## State Management (Zustand Store)
 
-**No Store Leakage in .ts Files** - pattern from [using-store.md](docs/programming/using-store.md):
+**No Store Leakage in .ts Files** - pattern from [using-store.md](../docs/programming/using-store.md):
 
 ```typescript
 // ✅ In TypeScript file
@@ -121,7 +121,7 @@ export interface IMapState {
 
 ## Logging & Debugging
 
-Use the `logger` class ([logging.md](docs/programming/logging.md)) - NOT `console.log`:
+Use the `logger` class ([logging.md](../docs/programming/logging.md)) - NOT `console.log`:
 
 ```typescript
 logger.logTrace(); // Trace levels (1-10): use effects, renders, callbacks - disabled by default
@@ -145,7 +145,7 @@ Control via localStorage:
 
 ## Documentation Standards
 
-**JSDoc format** (per [CONTRIBUTING.md](CONTRIBUTING.md)):
+**JSDoc format** (per [CONTRIBUTING.md](../CONTRIBUTING.md)):
 
 ```typescript
 /**
@@ -171,12 +171,11 @@ Control via localStorage:
 
 ## Key Files to Reference
 
-- [event-processor-architecture.md](docs/programming/event-processor-architecture.md) - State management patterns
-- [layerset-architecture.md](docs/programming/layerset-architecture.md) - Layer data synchronization
-- [adding-layer-types.md](docs/programming/adding-layer-types.md) - Extending layer support
-- [best-practices.md](docs/programming/best-practices.md) - Code style & patterns
-- [using-store.md](docs/programming/using-store.md) - Zustand usage patterns
-
+- [event-processor-architecture.md](../docs/programming/event-processor-architecture.md) - State management patterns
+- [layerset-architecture.md](../docs/programming/layerset-architecture.md) - Layer data synchronization
+- [adding-layer-types.md](../docs/programming/adding-layer-types.md) - Extending layer support
+- [best-practices.md](../docs/programming/best-practices.md) - Code style & patterns
+- [using-store.md](../docs/programming/using-store.md) - Zustand usage patterns
 ## File Structure Quick Reference
 
 ```
