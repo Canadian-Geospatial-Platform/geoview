@@ -399,6 +399,8 @@ export type TypeLayerStyleConfigInfo = {
     visible: boolean;
     /** The label to display for the field. */
     label: string;
+    /** The OpenLayers Text style to apply to the label (will override the global feature text) */
+    text?: TypeLayerTextConfig;
     /**
      * Simple type has a single value at index 0; uniqueValue type has many entries (up to 3 for ESRI) and classBreaks
      * type has two entries (index 0 for min and index 1 for max).
@@ -408,6 +410,100 @@ export type TypeLayerStyleConfigInfo = {
     valuesConditions?: TypeLayerStyleValueCondition[];
     /** The geometry settings. */
     settings: TypeBaseVectorGeometryConfig;
+};
+/**
+ * The style config for vector layers. Options are the same as
+ * OpenLayers Text object plus the field name.
+ * https://openlayers.org/en/latest/apidoc/module-ol_style_Text.html
+ * GV: All angles in degrees. Will later be converted to radians
+ */
+export type TypeLayerTextConfig = {
+    /** The field that will be used to create the label */
+    field?: string;
+    /** The font size in pixels (Default is 10px) */
+    fontSize?: number;
+    /** The font family (Default: sans-serif) */
+    fontFamily?: string;
+    bold?: boolean;
+    italic?: boolean;
+    /** The max allowed angle (in degrees) between adjacent characters */
+    maxAngle?: number;
+    /** Horizontal text offset in pixels */
+    offsetX?: number;
+    /** Vertical text offset in pixels */
+    offsetY?: number;
+    /**
+     * For polygon labels or when placement is set to 'line'
+     * Allow text to exceed the width of the polygon at the label position
+     * or the length of the path that it follows
+     */
+    overflow?: boolean;
+    /** Text placement ('point' or 'line') */
+    placement?: 'point' | 'line';
+    /** Repeat interval in pixels */
+    repeat?: number;
+    /** For scaling up or down text */
+    scale?: number | [number, number];
+    /** Whether to rotate the text with the view */
+    rotateWithView?: boolean;
+    /** Whether the text can be rotated 180 degrees to prevent being rendered upside down */
+    keepUpright?: boolean;
+    /** Rotation in degrees */
+    rotation?: number;
+    /**
+     * Text value to apply to feature labels. Will be overwritten if 'field' is set.
+     * More complicated text values can be created and field names placed in {} will be substituded with their values.
+     * e.g.: "My {field-name}" -> "My value"
+     * If the field is a date, a date format can be specified using {DateField:YYYY-MM-DD}
+     * Documentation for date format tags can be found here: https://day.js.org/docs/en/display/format
+     * e.g.: "Date: {DateField:YYYY/MM}" -> "Date: 2026/01"
+     * Also supports the native rich text with field replacement as well
+     * e.g.: ["Some text", "bold 10px sans-serif", "Text 2", "italic 8px serif"]
+     */
+    text?: string | string[];
+    /** Text alignment. The default is 'center' */
+    textAlign?: 'left' | 'right' | 'center' | 'end' | 'start';
+    /** Text justification within the text box */
+    justify?: 'left' | 'center' | 'right';
+    /** Text base line */
+    textBaseline?: 'bottom' | 'top' | 'middle' | 'alphabetic' | 'hanging' | 'ideographic';
+    /**
+     * Fill style (only supports color like values, no patterns)
+     * Examples: #ffffff, rgba(255,255,255, 0.5), white
+     */
+    fill?: string;
+    /** The text halo color (opnly supports colors, no patterns) */
+    haloColor?: string;
+    /** Width of the halo in pixels */
+    haloWidth?: number;
+    /** Background is the text box that will surround the text */
+    backgroundFill?: string;
+    backgroundStrokeColor: string;
+    backgroundStrokeWidth: number;
+    /**
+     * Padding in pixels around the text for decluttering and background
+     * Values are: [top,right,bottom,left]
+     */
+    padding?: [number, number, number, number];
+    /**
+     * NOTE: DeclutterMode is not currently working because it requires the layer to have declutter: true for declutterMode to work.
+     * declutterMode setting. Default is 'declutter'
+     * declutter: Overlapping symbols and text are dcluttered
+     * obstacle: Symbols and text are rendered, but also serve as obstacles
+     * none: No decluttering is done (all rendered)
+     */
+    declutterMode?: 'declutter' | 'obstacle' | 'none';
+    /** Min zoom level the labels will be shown */
+    minZoomLevel?: number;
+    /** Max zoom level the labels will be shown */
+    maxZoomLevel?: number;
+    /** Allow labels to be wrapped */
+    wrap?: boolean;
+    /** The maximum number of lines that can be used when wrapping text
+     * NOTE: wrapLines takes precendence over the count, but will try to use the count, if possible */
+    wrapLines?: number;
+    /** The number of characters/line to attempt to reach when wrapping */
+    wrapCount?: number;
 };
 /** Valid value comparisons for class breaks rendering */
 export type TypeLayerStyleValueCondition = '>' | '>=' | '<' | '<=';
@@ -436,6 +532,8 @@ export interface TypeLineStringVectorConfig extends TypeBaseVectorGeometryConfig
     stroke: TypeStrokeSymbolConfig;
     /** The additional graphic stroke symbology for special strokes */
     graphicStrokes?: GraphicStrokeWithPlacement[];
+    /** The text / label settings */
+    text?: TypeLayerTextConfig;
 }
 export interface GraphicStrokeWithPlacement {
     placement?: string;
@@ -486,6 +584,8 @@ export interface TypePolygonVectorConfig extends TypeBaseVectorGeometryConfig {
     fillStyle: TypeFillStyle;
     /** The additional graphic fills symbology for special fills */
     graphicFills?: GraphicFillWithPattern[];
+    /** The text / label settings */
+    text?: TypeLayerTextConfig;
 }
 /** Valid values to specify fill styles. */
 export type TypeFillStyle = 'null' | 'solid' | 'backwardDiagonal' | 'cross' | 'diagonalCross' | 'forwardDiagonal' | 'horizontal' | 'vertical' | 'dot';
@@ -505,6 +605,8 @@ export interface TypeSimpleSymbolVectorConfig extends TypeBaseVectorGeometryConf
     offset?: [number, number];
     /** Symbol to draw. */
     symbol: TypeSymbol;
+    /** The text / label settings */
+    text?: TypeLayerTextConfig;
 }
 /** Valid values to specify symbol shapes. */
 export type TypeSymbol = 'circle' | '+' | 'diamond' | 'square' | 'triangle' | 'X' | 'star';

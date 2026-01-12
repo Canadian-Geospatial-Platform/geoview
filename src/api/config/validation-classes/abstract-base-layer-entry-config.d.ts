@@ -1,4 +1,4 @@
-import type { TypeLayerStyleConfig, TypeStyleGeometry, TypeLayerStyleSettings, TypeOutfields } from '@/api/types/map-schema-types';
+import type { TypeLayerStyleConfig, TypeStyleGeometry, TypeLayerStyleSettings, TypeOutfields, TypeLayerTextConfig } from '@/api/types/map-schema-types';
 import type { ConfigClassOrType, TypeBaseSourceInitialConfig, TypeFeatureInfoLayerConfig, TypeGeoviewLayerType, TypeLayerEntryType } from '@/api/types/layer-schema-types';
 import type { ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
@@ -11,6 +11,8 @@ export interface AbstractBaseLayerEntryConfigProps extends ConfigBaseClassProps 
     layerFilter?: string;
     /** Style to apply to the vector layer. */
     layerStyle?: TypeLayerStyleConfig;
+    /** The Text style to apply to the label */
+    layerText?: TypeLayerTextConfig;
 }
 /**
  * Base type used to define a GeoView layer to display on the map.
@@ -75,6 +77,16 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      * @param {TypeLayerStyleConfig} layerStyle - The layer style
      */
     setLayerStyle(layerStyle: TypeLayerStyleConfig): void;
+    /**
+     * Gets the text metadata that is associated to the layer.
+     * @returns {TypeLayerTextConfig} The layer text or undefined.
+     */
+    getLayerText(): TypeLayerTextConfig | undefined;
+    /**
+     * Sets the layer text metadata for the layer.
+     * @param {TypeLayerTextConfig} layerText - The layer text
+     */
+    setLayerText(layerText: TypeLayerTextConfig): void;
     /**
      * The TypeStyleGeometries associated with the style as could be read from the layer config metadata.
      * @returns {TypeStyleGeometry[]} The array of TypeStyleGeometry
@@ -235,7 +247,7 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
     /**
      * Helper function to support when a layerConfig is either a class instance or a regular json object.
      * @param {ConfigAbstractBaseClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
-     * @returns {string | undefined} The layer style or undefined.
+     * @returns {TypeLayerStyleConfig | undefined} The layer style or undefined.
      */
     static getClassOrTypeLayerStyle(layerConfig: ConfigClassOrType | undefined): TypeLayerStyleConfig | undefined;
     /**
@@ -250,5 +262,11 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      * @returns {string | undefined} The layer attributions or undefined.
      */
     static getClassOrTypeLayerAttributions(layerConfig: ConfigClassOrType | undefined): string[] | undefined;
+    /**
+     * Helper function to support when a layerConfig is either a class instance or a regular json object.
+     * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
+     * @returns {TypeLayerTextConfig | undefined} The layer attributions or undefined.
+     */
+    static getClassOrTypeLayerText(layerConfig: ConfigClassOrType | undefined): TypeLayerTextConfig | undefined;
 }
 //# sourceMappingURL=abstract-base-layer-entry-config.d.ts.map
