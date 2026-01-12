@@ -29,36 +29,48 @@ import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-val
 const MEASURE_GROUP_KEY = 'geoview-measurement';
 
 // Style constants
-const STROKE_COLORS = {
-  drawing: '#ff0000',
-  completed: '#FF1493',
-} as const;
+const STROKE_COLORS = '#ff0000';
 
-const FILL_COLORS = {
-  drawing: 'rgba(255, 0, 0, 0.2)',
-  completed: 'rgba(255, 20, 147, 0.2)',
-} as const;
+const FILL_COLORS = 'rgba(255, 0, 0, 0.2)';
 
 const STROKE_WIDTH = 2;
 
-const LABEL_STYLE_CONFIG = {
-  font: '12px sans-serif',
+// Shared tooltip/label style values (drawer-tooltip style)
+const TOOLTIP_BASE_STYLE = {
+  backgroundColor: 'rgba(0, 0, 0, 0.6)',
   textColor: '#fff',
-  backgroundColor: 'rgba(0, 0, 0, 0.7)',
-  padding: [2, 4, 2, 4] as [number, number, number, number],
+  fontSize: '12px',
+  fontWeight: 'bold',
+  padding: { top: 4, right: 8, bottom: 4, left: 8 },
+} as const;
+
+// OpenLayers canvas Text style config (for segment labels)
+const LABEL_STYLE_CONFIG = {
+  font: `${TOOLTIP_BASE_STYLE.fontWeight} ${TOOLTIP_BASE_STYLE.fontSize} sans-serif`,
+  textColor: TOOLTIP_BASE_STYLE.textColor,
+  backgroundColor: TOOLTIP_BASE_STYLE.backgroundColor,
+  padding: [
+    TOOLTIP_BASE_STYLE.padding.top / 2,
+    TOOLTIP_BASE_STYLE.padding.right / 2,
+    TOOLTIP_BASE_STYLE.padding.bottom / 2,
+    TOOLTIP_BASE_STYLE.padding.left / 2,
+  ] as [number, number, number, number],
 } as const;
 
 // Reusable Fill objects for labels
 const LABEL_TEXT_FILL = new Fill({ color: LABEL_STYLE_CONFIG.textColor });
 const LABEL_BACKGROUND_FILL = new Fill({ color: LABEL_STYLE_CONFIG.backgroundColor });
 
+// DOM element CSS style (for total measurement tooltip)
 const TOOLTIP_STYLE = {
-  backgroundColor: 'rgba(0, 0, 0, 0.7)',
-  color: 'white',
-  padding: '2px 4px',
+  backgroundColor: TOOLTIP_BASE_STYLE.backgroundColor,
+  color: TOOLTIP_BASE_STYLE.textColor,
+  padding: `${TOOLTIP_BASE_STYLE.padding.top}px ${TOOLTIP_BASE_STYLE.padding.right}px ${TOOLTIP_BASE_STYLE.padding.bottom}px ${TOOLTIP_BASE_STYLE.padding.left}px`,
   borderRadius: '4px',
-  fontSize: '12px',
+  fontSize: TOOLTIP_BASE_STYLE.fontSize,
+  fontWeight: TOOLTIP_BASE_STYLE.fontWeight,
   whiteSpace: 'nowrap',
+  textAlign: 'center',
 } as const;
 
 type MeasureType = 'line' | 'area' | null;
@@ -91,7 +103,7 @@ export default function Measurement(): JSX.Element {
    * Creates a style function that shows segment lengths
    */
   const createSegmentStyle = useCallback(
-    (isDrawing: boolean = false, includeSegmentLabels: boolean = true): StyleFunction => {
+    (includeSegmentLabels: boolean = true): StyleFunction => {
       // Log
       logger.logTraceUseCallback('MEASUREMENT, createSegmentStyle');
 
@@ -103,14 +115,14 @@ export default function Measurement(): JSX.Element {
 
         // Base stroke style
         const stroke = new Stroke({
-          color: isDrawing ? STROKE_COLORS.drawing : STROKE_COLORS.completed,
+          color: STROKE_COLORS,
           width: STROKE_WIDTH,
         });
 
         // Add base geometry style
         if (geometry instanceof Polygon) {
           const fill = new Fill({
-            color: isDrawing ? FILL_COLORS.drawing : FILL_COLORS.completed,
+            color: FILL_COLORS,
           });
           styles.push(new Style({ stroke, fill }));
         } else {
@@ -127,57 +139,49 @@ export default function Measurement(): JSX.Element {
           return styles;
         }
 
-        // Skip segment labels if disabled
-        if (!includeSegmentLabels) {
-          return styles;
-        }
+        // Create segment labels using canvas Text
+        if (includeSegmentLabels) {
+          for (let i = 0; i < coordinates.length - 1; i++) {
+            const segment = new LineString([coordinates[i], coordinates[i + 1]]);
+            const segmentLength = GeoUtilities.getLength(segment);
+            const segmentLabel = formatLength(segmentLength, displayLanguage);
 
-        // Create labels for each segment with smart positioning
-        for (let i = 0; i < coordinates.length - 1; i++) {
-          const segment = new LineString([coordinates[i], coordinates[i + 1]]);
-          const segmentLength = GeoUtilities.getLength(segment);
-          const segmentLabel = formatLength(segmentLength, displayLanguage);
+            // Get midpoint of segment
+            const midpoint = [(coordinates[i][0] + coordinates[i + 1][0]) / 2, (coordinates[i][1] + coordinates[i + 1][1]) / 2];
 
-          // Get midpoint of segment for label placement
-          const midpoint = [(coordinates[i][0] + coordinates[i + 1][0]) / 2, (coordinates[i][1] + coordinates[i + 1][1]) / 2];
+            // Calculate rotation angle
+            const dx = coordinates[i + 1][0] - coordinates[i][0];
+            const dy = coordinates[i + 1][1] - coordinates[i][1];
+            let angleRadians = -Math.atan2(dy, dx);
 
-          // Calculate angle to align label with segment
-          // Note: In map coordinates, we calculate the bearing from point i to point i+1
-          const dx = coordinates[i + 1][0] - coordinates[i][0];
-          const dy = coordinates[i + 1][1] - coordinates[i][1];
-          let angleRadians = -Math.atan2(dy, dx);
+            // Normalize angle to keep text readable
+            if (angleRadians > Math.PI / 2) {
+              angleRadians -= Math.PI;
+            } else if (angleRadians < -Math.PI / 2) {
+              angleRadians += Math.PI;
+            }
 
-          // Normalize angle to keep text readable (prevent upside-down labels)
-          // Keep angle between -90° and +90° (-π/2 to π/2)
-          if (angleRadians > Math.PI / 2) {
-            angleRadians -= Math.PI;
-          } else if (angleRadians < -Math.PI / 2) {
-            angleRadians += Math.PI;
+            // Position labels above the line segment
+            const offsetY = -5;
+
+            styles.push(
+              new Style({
+                geometry: new LineString([midpoint]),
+                text: new Text({
+                  text: segmentLabel,
+                  font: LABEL_STYLE_CONFIG.font,
+                  fill: LABEL_TEXT_FILL,
+                  backgroundFill: LABEL_BACKGROUND_FILL,
+                  padding: LABEL_STYLE_CONFIG.padding,
+                  offsetY,
+                  rotation: angleRadians,
+                  textAlign: 'center',
+                  textBaseline: 'bottom',
+                  overflow: true,
+                }),
+              })
+            );
           }
-
-          // Position labels just above the line segment
-          const offsetX = 0;
-          const offsetY = -10;
-          const textBaseline: 'top' | 'middle' | 'bottom' = 'bottom';
-
-          styles.push(
-            new Style({
-              geometry: new LineString([midpoint]),
-              text: new Text({
-                text: segmentLabel,
-                font: LABEL_STYLE_CONFIG.font,
-                fill: LABEL_TEXT_FILL,
-                backgroundFill: LABEL_BACKGROUND_FILL,
-                padding: LABEL_STYLE_CONFIG.padding,
-                offsetY,
-                offsetX,
-                rotation: angleRadians,
-                textAlign: 'center',
-                textBaseline,
-                overflow: true,
-              }),
-            })
-          );
         }
 
         return styles;
@@ -197,6 +201,29 @@ export default function Measurement(): JSX.Element {
       const measureTooltipElement = document.createElement('div');
       measureTooltipElement.className = 'measurement-tooltip';
       Object.assign(measureTooltipElement.style, TOOLTIP_STYLE);
+
+      // Add CSS for the arrow at the bottom using ::before pseudo-element
+      const styleId = 'measurement-tooltip-arrow-style';
+      if (!document.getElementById(styleId)) {
+        const style = document.createElement('style');
+        style.id = styleId;
+        style.textContent = `
+          .measurement-tooltip {
+            position: relative;
+          }
+          .measurement-tooltip::before {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            margin-left: -7px;
+            border-top: 6px solid ${TOOLTIP_BASE_STYLE.backgroundColor};
+            border-right: 6px solid transparent;
+            border-left: 6px solid transparent;
+          }
+        `;
+        document.head.appendChild(style);
+      }
 
       let output = '';
       if (geometry instanceof LineString) {
@@ -246,9 +273,9 @@ export default function Measurement(): JSX.Element {
       // Start drawing interaction
       const geomType = type === 'line' ? 'LineString' : 'Polygon';
       const draw = initDrawInteractions(MEASURE_GROUP_KEY, geomType, {
-        strokeColor: STROKE_COLORS.drawing,
+        strokeColor: STROKE_COLORS,
         strokeWidth: STROKE_WIDTH,
-        fillColor: FILL_COLORS.drawing,
+        fillColor: FILL_COLORS,
       });
 
       // Handle draw end
@@ -257,8 +284,8 @@ export default function Measurement(): JSX.Element {
         const geometry = feature.getGeometry();
 
         if (geometry && (geometry instanceof LineString || geometry instanceof Polygon)) {
-          // Apply final style with segment labels
-          feature.setStyle(createSegmentStyle(false, showSegmentLabels));
+          // Apply final style with segment labels (canvas-based)
+          feature.setStyle(createSegmentStyle(showSegmentLabels));
 
           // Store feature reference
           setMeasurementFeatures((prev) => [...prev, feature]);
@@ -271,6 +298,7 @@ export default function Measurement(): JSX.Element {
             tooltipCoord.pop(); // Remove the third coordinate
           }
 
+          // Create only ONE overlay for total measurement
           const overlay = createMeasureTooltip(geometry, tooltipCoord);
           addOverlay(overlay);
           setMeasureOverlays((prev) => [...prev, overlay]);
@@ -318,7 +346,7 @@ export default function Measurement(): JSX.Element {
     // Log
     logger.logTraceUseCallback('MEASUREMENT, clearMeasurements');
 
-    // Remove all overlays
+    // Remove all total measurement overlays
     measureOverlays.forEach((overlay) => {
       overlay.getElement()?.remove();
       removeOverlay(overlay);
@@ -364,9 +392,9 @@ export default function Measurement(): JSX.Element {
       // Set the segments hook state
       setShowSegmentLabels(event.target.checked);
 
-      // Update all stored measurement features
+      // Update all stored measurement features with new style
       measurementFeatures.forEach((feature) => {
-        feature.setStyle(createSegmentStyle(false, event.target.checked));
+        feature.setStyle(createSegmentStyle(event.target.checked));
       });
 
       // Force map to re-render
