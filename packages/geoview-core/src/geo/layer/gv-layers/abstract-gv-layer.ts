@@ -597,10 +597,10 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @returns {boolean} The visibility of the style item
    */
   getStyleItemVisibility(item: TypeLegendItem): boolean {
-    // Assign value to registered layer. This is use by applyFilter function to set visibility
+    // Get the style config
     const geometryStyleConfig = this.getStyle()![item.geometryType];
 
-    // Get all styles with the label matching the name of the clicked item and update their visibility
+    // Get all styles with the label matching the name of the clicked item
     const styleInfos = geometryStyleConfig?.info.filter((styleInfo) => styleInfo.label === item.name);
     const styleInfosVisible = styleInfos?.filter((styleInfo) => styleInfo.visible ?? false);
 
@@ -614,7 +614,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param {boolean} visibility - The visibility of the style item
    */
   setStyleItemVisibility(item: TypeLegendItem, visibility: boolean): void {
-    // Assign value to registered layer. This is use by applyFilter function to set visibility
+    // Get the style config
     const geometryStyleConfig = this.getStyle()![item.geometryType];
 
     // Get all styles with the label matching the name of the clicked item and update their visibility
