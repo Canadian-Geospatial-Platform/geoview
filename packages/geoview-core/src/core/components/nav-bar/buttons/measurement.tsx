@@ -36,7 +36,7 @@ const STROKE_WIDTH = 2;
 
 // Shared tooltip/label style values (drawer-tooltip style)
 const TOOLTIP_BASE_STYLE = {
-  backgroundColor: 'rgba(0, 0, 0, 0.6)',
+  backgroundColor: 'rgba(0, 0, 0, 0.7)',
   textColor: '#fff',
   fontSize: '13px',
   fontWeight: 'bold',
@@ -47,8 +47,8 @@ const TOOLTIP_BASE_STYLE = {
 const LABEL_STYLE_CONFIG = {
   font: `${TOOLTIP_BASE_STYLE.fontWeight} ${TOOLTIP_BASE_STYLE.fontSize} sans-serif`,
   textColor: TOOLTIP_BASE_STYLE.textColor,
-  haloColor: 'rgba(0, 0, 0, 0.9)',
-  haloWidth: 7,
+  haloColor: 'rgba(0, 0, 0, 0.7)',
+  haloWidth: 9,
 } as const;
 
 // Reusable Fill and Stroke objects for labels
@@ -152,6 +152,7 @@ export default function Measurement(): JSX.Element {
                   fill: LABEL_TEXT_FILL,
                   stroke: LABEL_HALO_STROKE,
                   rotation: angleRadians,
+                  rotateWithView: true,
                   textAlign: 'center',
                   textBaseline: 'middle',
                   overflow: true,
@@ -165,6 +166,8 @@ export default function Measurement(): JSX.Element {
         // Overlays are not exportable
         let labelCoord: number[];
         let totalLabel = '';
+        let labelOffsetY = -15; // Default offset for line (above end point)
+
         if (geometry instanceof LineString) {
           labelCoord = coordinates[coordinates.length - 1];
           const length = GeoUtilities.getLength(geometry);
@@ -173,6 +176,7 @@ export default function Measurement(): JSX.Element {
           // Position at polygon centroid
           labelCoord = geometry.getInteriorPoint().getCoordinates();
           labelCoord.pop(); // Remove the third coordinate
+          labelOffsetY = 0; // No offset for polygon - keep label inside
           const area = GeoUtilities.getArea(geometry);
           const length = GeoUtilities.getLength(geometry);
           // Convert HTML <sup> tags to Unicode superscript for canvas rendering
@@ -191,14 +195,14 @@ export default function Measurement(): JSX.Element {
               fill: new Fill({ color: TOOLTIP_BASE_STYLE.textColor }),
               backgroundFill: new Fill({ color: TOOLTIP_BASE_STYLE.backgroundColor }),
               padding: [
-                TOOLTIP_BASE_STYLE.padding.top + 1,
-                TOOLTIP_BASE_STYLE.padding.right + 2,
-                TOOLTIP_BASE_STYLE.padding.bottom + 1,
-                TOOLTIP_BASE_STYLE.padding.left + 2,
+                TOOLTIP_BASE_STYLE.padding.top,
+                TOOLTIP_BASE_STYLE.padding.right,
+                TOOLTIP_BASE_STYLE.padding.bottom,
+                TOOLTIP_BASE_STYLE.padding.left,
               ],
-              offsetY: -15,
+              offsetY: labelOffsetY,
               textAlign: 'center',
-              textBaseline: 'bottom',
+              textBaseline: 'middle',
               overflow: true,
             }),
           })
