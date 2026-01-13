@@ -4,6 +4,7 @@ import type { LayerApi } from 'geoview-core/geo/layer/layer';
 import type { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
 import type { ConfigBaseClass } from 'geoview-core/api/config/validation-classes/config-base-class';
 import type { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';
+import { deepClone } from 'geoview-core/core/utils/utilities';
 
 export class GeoChartParsing {
   /**
@@ -72,9 +73,8 @@ export class GeoChartParsing {
     configChartLayer: GeoViewGeoChartConfigLayer,
     layerData: TypeFeatureInfoEntryPartial[]
   ): GeoViewGeoChartConfig {
-    // The new Plugin input to be returned
-    // Cloning it in the process to make sure we're detaching ourselves from the configuration plugin object
-    const retConfigChart: GeoViewGeoChartConfig = { ...configChart };
+    // Clone the config to make sure we're detaching ourselves from the configuration plugin object
+    const retConfigChart: GeoViewGeoChartConfig = deepClone(configChart);
 
     // If there's no datasources associated with the chart config, figure it out!
     if (!retConfigChart.datasources) {
@@ -185,5 +185,28 @@ export class GeoChartParsing {
       });
       return obj;
     });
+  }
+
+  /**
+   * Converts a Day.js date format string to a Luxon-compatible format string.
+   * Specifically:
+   * - `YYYY` → `yyyy` (year)
+   * - `DD` → `dd` (day of month), but avoids replacing `DDD` (ordinal day of year)
+   * @param {string} format - The Day.js format string.
+   * @returns {string} The corresponding Luxon format string.
+   */
+  static dayjsToLuxonFormat(format: string): string {
+    return format.replace(/YYYY/g, 'yyyy').replace(/DD(?!D)/g, 'dd'); // avoid DDD
+  }
+
+  /**
+   * Converts a Day.js IANA timezone string to a Luxon-compatible string.
+   * Currently only normalizes UTC:
+   * - `'UTC'` → `'utc'`
+   * @param {string} format - The Day.js timezone string.
+   * @returns {string} The corresponding Luxon-compatible timezone string.
+   */
+  static dayjsToLuxonTimeIANA(format: string): string {
+    return format.replace('UTC', 'utc');
   }
 }

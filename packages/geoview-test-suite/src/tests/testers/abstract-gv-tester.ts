@@ -412,6 +412,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     geoviewLayerName: 'GeoJSON Sample',
     metadataAccessPath: './datasets/geojson/metadata.meta',
     geoviewLayerType: 'GeoJSON' as TypeGeoviewLayerType,
+    serviceDateFormat: 'DD/MM/YYYYTHH:mm:ss',
     initialSettings: {
       controls: {
         highlight: false,

@@ -8,9 +8,10 @@ import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers'
 import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import type { NotificationDetailsType } from '@/core/components/notifications/notifications';
 import type { TypeHTMLElement, TypeMapFeaturesConfig } from '@/core/types/global-types';
-import { logger } from '@/core/utils/logger';
 import { getScriptAndAssetURL } from '@/core/utils/utilities';
+import { DateMgt, type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { SnackbarType } from '@/core/utils/notifications';
+import { logger } from '@/core/utils/logger';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with AppEventProcessor vs AppState
 
@@ -21,6 +22,8 @@ type AppActions = IAppState['actions'];
 export interface IAppState {
   disabledLayerTypes: TypeInitialGeoviewLayerType[];
   displayLanguage: TypeDisplayLanguage;
+  displayDateFormat: TypeDisplayDateFormat;
+  displayDateTimezone: TimeIANA;
   displayTheme: TypeDisplayTheme;
   guide: TypeGuideObject | undefined;
   geolocatorServiceURL: string | undefined;
@@ -41,6 +44,8 @@ export interface IAppState {
     addNotification: (notif: NotificationDetailsType) => void;
     setCrosshairActive: (active: boolean) => void;
     setDisplayLanguage: (lang: TypeDisplayLanguage) => Promise<void>;
+    setDisplayDateFormat: (displayDateFormat: TypeDisplayDateFormat) => void;
+    setDisplayDateTimezone: (displayDateTimezone: TimeIANA) => void;
     setDisplayTheme: (theme: TypeDisplayTheme) => void;
     setFullScreenActive: (active: boolean, element?: TypeHTMLElement) => void;
     removeNotification: (key: string) => void;
@@ -51,6 +56,8 @@ export interface IAppState {
     setCircularProgress: (active: boolean) => void;
     setCrosshairActive: (active: boolean) => void;
     setDisplayLanguage: (lang: TypeDisplayLanguage) => void;
+    setDisplayDateFormat: (displayDateFormat: TypeDisplayDateFormat) => void;
+    setDisplayDateTimezone: (displayDateTimezone: TimeIANA) => void;
     setDisplayTheme: (theme: TypeDisplayTheme) => void;
     setFullScreenActive: (active: boolean) => void;
     setGuide: (guide: TypeGuideObject) => void;
@@ -70,6 +77,8 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
   return {
     disabledLayerTypes: [],
     displayLanguage: 'en' as TypeDisplayLanguage,
+    displayDateFormat: DateMgt.DEFAULT_DATETIME_FORMAT,
+    displayDateTimezone: 'UTC' as TimeIANA,
     displayTheme: 'geo.ca',
     guide: {},
     geolocatorServiceURL: '',
@@ -142,21 +151,41 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
 
       /**
        * Sets the display language.
-       * @param {TypeDisplayLanguage} lang - The new display language.
+       * @param {TypeDisplayLanguage} displayLanguage - The display language.
        * @returns {Promise<void>}
        */
-      setDisplayLanguage: (lang: TypeDisplayLanguage): Promise<void> => {
+      setDisplayLanguage: (displayLanguage: TypeDisplayLanguage): Promise<void> => {
         // Redirect to processor
-        return AppEventProcessor.setDisplayLanguage(get().mapId, lang);
+        return AppEventProcessor.setDisplayLanguage(get().mapId, displayLanguage);
+      },
+
+      /**
+       * Sets the display date format.
+       * @param {TypeDisplayDateFormat} displayDateFormat - The display date format.
+       * @returns {void}
+       */
+      setDisplayDateFormat: (displayDateFormat: TypeDisplayDateFormat): void => {
+        // Redirect to processor
+        return AppEventProcessor.setDisplayDateFormat(get().mapId, displayDateFormat);
+      },
+
+      /**
+       * Sets the display date timezone.
+       * @param {TimeIANA} displayDateTimezone - The display date timezone.
+       * @returns {void}
+       */
+      setDisplayDateTimezone: (displayDateTimezone: TimeIANA): void => {
+        // Redirect to processor
+        return AppEventProcessor.setDisplayDateTimezone(get().mapId, displayDateTimezone);
       },
 
       /**
        * Sets the theme.
-       * @param {TypeDisplayTheme} theme - The new theme.
+       * @param {TypeDisplayTheme} displayTheme - The theme.
        */
-      setDisplayTheme: (theme: TypeDisplayTheme): void => {
+      setDisplayTheme: (displayTheme: TypeDisplayTheme): void => {
         // Redirect to setter
-        get().appState.setterActions.setDisplayTheme(theme);
+        get().appState.setterActions.setDisplayTheme(displayTheme);
       },
 
       /**
@@ -189,70 +218,96 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     setterActions: {
       /**
        * Sets the circularProgress state.
-       * @param {boolean} active - The new state.
+       * @param {boolean} isCircularProgressActive - The new state.
        */
-      setCircularProgress: (active: boolean) => {
+      setCircularProgress: (isCircularProgressActive: boolean) => {
         set({
           appState: {
             ...get().appState,
-            isCircularProgressActive: active,
+            isCircularProgressActive,
           },
         });
       },
 
       /**
        * Sets the isCrosshairsActive state.
-       * @param {boolean} active - The new state.
+       * @param {boolean} isCrosshairsActive - The new state.
        */
-      setCrosshairActive: (active: boolean) => {
+      setCrosshairActive: (isCrosshairsActive: boolean) => {
         set({
           appState: {
             ...get().appState,
-            isCrosshairsActive: active,
+            isCrosshairsActive,
           },
         });
       },
 
       /**
        * Sets the display language.
-       * @param {TypeDisplayLanguage} lang - The new language.
+       * @param {TypeDisplayLanguage} displayLanguage - The new language.
        */
-      setDisplayLanguage: (lang: TypeDisplayLanguage): void => {
+      setDisplayLanguage: (displayLanguage: TypeDisplayLanguage): void => {
         set({
           appState: {
             ...get().appState,
-            displayLanguage: lang,
+            displayLanguage,
+          },
+        });
+      },
+
+      /**
+       * Sets the display date format.
+       * @param {TypeDisplayDateFormat} displayDateFormat - The display date format.
+       */
+      setDisplayDateFormat: (displayDateFormat: TypeDisplayDateFormat): void => {
+        set({
+          appState: {
+            ...get().appState,
+            displayDateFormat,
+          },
+        });
+      },
+
+      /**
+       * Sets the display date timezone.
+       * @param {TimeIANA} displayDateTimezone - The display date timezone.
+       */
+      setDisplayDateTimezone: (displayDateTimezone: TimeIANA): void => {
+        set({
+          appState: {
+            ...get().appState,
+            displayDateTimezone,
           },
         });
       },
 
       /**
        * Sets the display theme.
-       * @param {TypeDisplayTheme} theme - The new theme.
+       * @param {TypeDisplayTheme} displayTheme - The new theme.
        */
-      setDisplayTheme: (theme: TypeDisplayTheme): void => {
+      setDisplayTheme: (displayTheme: TypeDisplayTheme): void => {
         set({
           appState: {
             ...get().appState,
-            displayTheme: theme,
+            displayTheme,
           },
         });
 
         // also set the theme from original config for reloading purpose
         const config = get().mapConfig;
-        config!.theme = theme;
+        config!.theme = displayTheme;
         set({ mapConfig: config });
       },
 
       /**
        * Sets the isFullscreenActive state.
-       * @param {boolean} active - The new state.
+       * @param {boolean} isFullscreenActive - The new state.
        */
-      setFullScreenActive: (active: boolean): void => {
+      setFullScreenActive: (isFullscreenActive: boolean): void => {
         set({
           appState: {
             ...get().appState,
-            isFullscreenActive: active,
+            isFullscreenActive,
           },
         });
       },
@@ -304,6 +359,8 @@ export const useAppCrosshairsActive = (): boolean => useStore(useGeoViewStore(),
 export const useAppDisabledLayerTypes = (): TypeInitialGeoviewLayerType[] =>
   useStore(useGeoViewStore(), (state) => state.appState.disabledLayerTypes);
 export const useAppDisplayLanguage = (): TypeDisplayLanguage => useStore(useGeoViewStore(), (state) => state.appState.displayLanguage);
+export const useDisplayDateFormat = (): TypeDisplayDateFormat => useStore(useGeoViewStore(), (state) => state.appState.displayDateFormat);
+export const useDisplayDateTimezone = (): TimeIANA => useStore(useGeoViewStore(), (state) => state.appState.displayDateTimezone);
 export const useAppDisplayTheme = (): TypeDisplayTheme => useStore(useGeoViewStore(), (state) => state.appState.displayTheme);
 export const useAppFullscreenActive = (): boolean => useStore(useGeoViewStore(), (state) => state.appState.isFullscreenActive);
 export const useAppGeolocatorServiceURL = (): string | undefined =>

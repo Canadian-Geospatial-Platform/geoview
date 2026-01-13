@@ -17,7 +17,7 @@ import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
-import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoEntry, TypeOutfieldsType } from '@/api/types/map-schema-types';
 import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
 import type { TypeMetadataFeatureInfo } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
@@ -26,7 +26,6 @@ import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raste
 import { Projection } from '@/geo/utils/projection';
 import { LayerInvalidFeatureInfoFormatWMSError, LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
 import { formatError, NetworkError, ResponseContentError } from '@/core/exceptions/core-exceptions';
-import { type TypeDateFragments } from '@/core/utils/date-mgt';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
@@ -513,7 +512,7 @@ export class GVWMS extends AbstractGVRaster {
    */
   protected override onSetLayerFilters(filter?: LayerFilters): void {
     // Process the layer filtering using the static method shared between EsriImage and WMS
-    GVWMS.applyViewFilterOnSource(this.getLayerConfig(), this.getOLSource(), this.getLayerConfig().getExternalFragmentsOrder(), filter);
+    GVWMS.applyViewFilterOnSource(this.getLayerConfig(), this.getOLSource(), filter);
   }
 
   // #endregion OVERRIDES
@@ -632,17 +631,12 @@ export class GVWMS extends AbstractGVRaster {
       wmsLayerConfig.hasOutfieldsPK(),
       undefined, // TODO: Support domains?
       wmsLayerConfig.getLayerStyle(), // The styles as read from the WMS layer config (not WFS in case it was overridden in the WMS)
+      wmsLayerConfig.getServiceDateFormat(),
+      wmsLayerConfig.getServiceDateTimezone(),
+      wmsLayerConfig.getServiceDateTemporalMode(),
       (fieldName) => GVWFS.getFieldType(wfsLayerConfig.getLayerMetadata(), fieldName),
       () => null,
-      (feature, fieldName, fieldType) => {
-        return AbstractGVLayer.helperGetFieldValue(
-          feature,
-          fieldName,
-          fieldType,
-          wfsLayerConfig.getServiceDateFragmentsOrder(),
-          wfsLayerConfig.getExternalFragmentsOrder()
-        );
-      }
+      AbstractGVLayer.getFieldValue
     );
   }
 
@@ -926,7 +920,6 @@ export class GVWMS extends AbstractGVRaster {
    * optional style, and time-based fragments. It ensures the filter is only applied if it has changed or needs to be reset.
    * @param {OgcWmsLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig - The configuration object for the WMS or Esri Image layer.
    * @param {ImageWMS | ImageArcGISRest} source - The OpenLayers `ImageWMS` or `ImageArcGISRest` source instance to which the filter will be applied.
-   * @param {TypeDateFragments | undefined} externalDateFragments - Optional external date fragments used to assist in formatting time-based filters.
    * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
    * @throws {LayerInvalidLayerFilterError} If the filter expression fails to parse or cannot be applied.
    * @static
@@ -934,7 +927,6 @@ export class GVWMS extends AbstractGVRaster {
   static applyViewFilterOnSource(
     layerConfig: OgcWmsLayerEntryConfig | EsriImageLayerEntryConfig,
     source: ImageWMS | ImageArcGISRest,
-    externalDateFragments: TypeDateFragments | undefined,
     filter: LayerFilters | undefined
   ): void {
     // Create the source parameter to update
@@ -949,10 +941,10 @@ export class GVWMS extends AbstractGVRaster {
       // Get the current data filter
       currentDataFilter = source.getParams()['FILTER'];
 
-      // If working with a WMS layer entry config, it's possible that it's filtered based on its style
+      // If working with a WMS layer entry config, it's possible that it's filtered based on its style, which is no possible with Esri Image
       if (layerConfig instanceof OgcWmsLayerEntryConfig) {
-        // Reset
-        sourceParams.FILTER = '';
+        // Init to nothing
+        sourceParams.FILTER = undefined;
 
         // Get the data filters if any
         newDataFilter = filter?.getDataRelatedFilters();
@@ -971,6 +963,9 @@ export class GVWMS extends AbstractGVRaster {
         }
       }
 
+      // Init to nothing
+      sourceParams.TIME = undefined;
+
       // Check the time filter
       newDatetimeFilter = filter?.getTimeFilter();
       if (newDatetimeFilter) {
@@ -983,7 +978,10 @@ export class GVWMS extends AbstractGVRaster {
           currentDatetimeFilter = source.getParams()['TIME'];
 
           // Parse the filter value to use
-          const datetimeFilter = GVLayerUtilities.parseDateTimeValuesEsriImageOrWMS(queryElements[1].trim(), externalDateFragments);
+          const datetimeFilter = GVLayerUtilities.parseDateTimeValuesEsriImageOrWMS(
+            queryElements[1].trim(),
+            layerConfig.getServiceDateTimezone()
+          );
 
           // Create the source parameter to update
           sourceParams.TIME = datetimeFilter.replace(/\s*/g, '');
@@ -1397,7 +1395,7 @@ export class GVWMS extends AbstractGVRaster {
         const fieldName = parts[parts.length - 1];
         const fullFieldName = prefix ? `${prefix}.${fieldName}` : fieldName;
         const rawValue = obj[key];
-        let value = rawValue as string;
+        let value: unknown = rawValue;
         if (rawValue && typeof rawValue === 'object' && '#text' in rawValue) value = rawValue['#text'];
 
         // If value has to go recursive
@@ -1405,11 +1403,25 @@ export class GVWMS extends AbstractGVRaster {
           // Go recursive
           extractFields(value, fullFieldName);
         } else {
+          // If the value looks like a date
+          const dataType: TypeOutfieldsType = 'string';
+          const dataValue: unknown = value;
+
+          // TODO: EXPERIMENT - Try parsing dates to dynamically 'spot' date values inside date fields?
+          // // If the value is a string
+          // if (typeof value === 'string') {
+          //   const dateDate = DateMgt.tryParseDate(value);
+          //   if (dateDate) {
+          //     dataType = 'date';
+          //     dataValue = dateDate;
+          //   }
+          // }
+
           // Compile it
           featureInfo.fieldInfo[fullFieldName] = {
             fieldKey: fieldKeyCounter++,
-            value: value ?? '',
-            dataType: 'string',
+            value: dataValue ?? '',
+            dataType,
             alias: fullFieldName,
             domain: null,
           };

@@ -15,6 +15,7 @@
         "geoviewLayerName": "Root Settings Layer",
         "metadataAccessPath": "./datasets/geojson/metadata.meta",
         "geoviewLayerType": "GeoJSON",
+        "serviceDateFormat": "DD/MM/YYYYTHH:mm:ss",
         "initialSettings": {
           "controls": {
             "highlight": false,
@@ -76,6 +77,7 @@
         "geoviewLayerName": "Group Layer Setting Sample",
         "metadataAccessPath": "./datasets/geojson/metadata.meta",
         "geoviewLayerType": "GeoJSON",
+        "serviceDateFormat": "DD/MM/YYYYTHH:mm:ss",
         "listOfLayerEntryConfig": [
           {
             "entryType": "group",
@@ -137,6 +139,7 @@
         "geoviewLayerName": "SubLayer Setting Sample",
         "metadataAccessPath": "./datasets/geojson/metadata.meta",
         "geoviewLayerType": "GeoJSON",
+        "serviceDateFormat": "DD/MM/YYYYTHH:mm:ss",
         "initialSettings": {
           "controls": {
             "remove": false

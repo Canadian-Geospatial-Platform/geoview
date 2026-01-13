@@ -28,11 +28,10 @@ export class EsriImage extends AbstractGeoViewRaster {
    * Constructs an EsriImage Layer configuration processor.
    * @param {TypeEsriImageLayerConfig} layerConfig The layer configuration.
    */
+  // The constructor is not useless, it narrows down the accepted parameter type.
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(layerConfig: TypeEsriImageLayerConfig) {
     super(layerConfig);
-
-    // Initialize the serverDateFragmentsOrder if not already set
-    this.initServerDateFragmentsOrderFromServiceDateFormat();
   }
 
   // #region OVERRIDES

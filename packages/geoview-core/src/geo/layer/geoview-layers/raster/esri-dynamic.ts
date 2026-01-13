@@ -39,11 +39,10 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * Constructs an EsriDynamic Layer configuration processor.
    * @param {TypeEsriDynamicLayerConfig} layerConfig The layer configuration.
    */
+  // The constructor is not useless, it narrows down the accepted parameter type.
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(layerConfig: TypeEsriDynamicLayerConfig) {
     super(layerConfig);
-
-    // Initialize the serverDateFragmentsOrder if not already set
-    this.initServerDateFragmentsOrderFromServiceDateFormat();
   }
 
   // #region OVERRIDES

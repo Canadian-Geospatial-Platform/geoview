@@ -203,6 +203,8 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {OLProjection?} [mapProjection] - The map projection.
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<OgcWmsLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   * @throws {InvalidTimeDimensionError} When range couldn't be computed, or when duration is invalid, or non-positive or when an infinite loop is detected.
+   * @throws {InvalidDateError} When input has invalid dates.
    */
   protected override async onProcessLayerMetadata(
     layerConfig: OgcWmsLayerEntryConfig,

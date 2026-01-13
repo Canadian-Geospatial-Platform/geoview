@@ -3,7 +3,13 @@ import {
   useTimeSliderLayers,
   useTimeSliderStoreActions,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/time-slider-state';
-import { useLayerLegendLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  useLayerDateTemporalMode,
+  useLayerDisplayDateFormat,
+  useLayerDisplayDateFormatShort,
+  useLayerDisplayDateTimezone,
+  useLayerLegendLayers,
+} from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import { LegendEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/legend-event-processor';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
@@ -81,8 +87,27 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     delay,
     locked,
     reversed,
-    displayPattern,
+    displayDateFormat: displayDateFormatFromStore,
+    displayDateFormatShort: displayDateFormatShortFromStore,
+    displayDateTimezone: displayDateTimezoneFromStore,
+    serviceDateTemporalMode: serviceDateTemporalModeFromStore,
   } = useTimeSliderLayers()![layerPath]; // timeSliderLayers will always have a value here, ! to ignore possibility of undefined
+
+  // The display date format as specified by the layer
+  const layerDisplayDateFormat = useLayerDisplayDateFormat(layerPath);
+  const displayDateFormat = displayDateFormatFromStore ?? layerDisplayDateFormat;
+
+  // The display date format as specified by the layer
+  const layerDisplayDateFormatShort = useLayerDisplayDateFormatShort(layerPath);
+  const displayDateFormatShort = displayDateFormatShortFromStore ?? layerDisplayDateFormatShort;
+
+  // The display date timezone as specified by the layer
+  const layerDisplayDateTimezone = useLayerDisplayDateTimezone(layerPath);
+  const displayDateTimezone = displayDateTimezoneFromStore ?? layerDisplayDateTimezone;
+
+  // The temporal mode as specified by the layer
+  const layerTemporalMode = useLayerDateTemporalMode(layerPath);
+  const serviceDateTemporalMode = serviceDateTemporalModeFromStore ?? layerTemporalMode;
 
   // Get name from legend layers
   const legendLayers = useLayerLegendLayers();
@@ -118,10 +143,13 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     sliderMarks.push({
       value: timeMarks[i],
       // If timeframe is a single day, use time. If it is a single year, drop year from dates.
-      label:
-        displayPattern[1] !== undefined && displayPattern[1] !== null
-          ? DateMgt.formatDatePattern(timeMarks[i], undefined, displayPattern[1])
-          : DateMgt.formatDatePattern(timeMarks[i], displayPattern[0], displayPattern[1]),
+      label: DateMgt.formatDate(
+        timeMarks[i],
+        displayDateFormatShort[displayLanguage],
+        displayLanguage,
+        displayDateTimezone,
+        serviceDateTemporalMode
+      ),
     });
   }
 
@@ -349,14 +377,18 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   const handleLabelFormat = useCallback(
     (theValue: number): string => {
       // Log
-      logger.logTraceUseCallback('TIME-SLIDER - handleLabelFormat', displayPattern);
+      logger.logTraceUseCallback('TIME-SLIDER - handleLabelFormat', displayDateFormat);
 
       // If timeframe is a single day, use time. If it is a single year, drop year from dates.
-      DateMgt.formatDatePattern(values[0], displayPattern[0], displayPattern[1]);
-
-      return DateMgt.formatDatePattern(theValue, displayPattern[0], displayPattern[1]);
+      return DateMgt.formatDate(
+        theValue,
+        displayDateFormat[displayLanguage],
+        displayLanguage,
+        displayDateTimezone,
+        serviceDateTemporalMode
+      );
     },
-    [displayPattern, values]
+    [displayLanguage, displayDateFormat, displayDateTimezone, serviceDateTemporalMode]
   );
   // #endregion
 
@@ -380,7 +412,6 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
           <Grid size={{ xs: 9 }}>
             <Typography component="div" sx={{ ...sxClasses.panelHeaders, paddingLeft: '20px' }}>
               {displayTitle}
-              {displayPattern[0] === undefined && ` (${DateMgt.formatDate(DateMgt.formatDateToISO(values[0]), 'YYYY-MM-DD')})`}
             </Typography>
           </Grid>
           <Grid size={{ xs: 3 }}>

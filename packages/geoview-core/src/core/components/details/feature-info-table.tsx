@@ -6,13 +6,21 @@ import linkifyHtml from 'linkify-html';
 import { CardMedia, Box, Grid } from '@/ui';
 import { isImage, stringify, generateId, sanitizeHtmlContent } from '@/core/utils/utilities';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
+import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
+import {
+  useLayerDateTemporalMode,
+  useLayerDisplayDateFormat,
+  useLayerDisplayDateTimezone,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
-import type { TypeFieldEntry } from '@/api/types/map-schema-types';
-import { getSxClasses } from './details-style';
+import type { TypeDisplayLanguage, TypeFieldEntry } from '@/api/types/map-schema-types';
+import { DateMgt, type TemporalMode, type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { useLightBox } from '@/core/components/common';
 import { Button } from '@/ui/button/button';
+import { getSxClasses } from './details-style';
 
 interface FeatureInfoTableProps {
+  layerPath: string;
   featureInfoList: TypeFieldEntry[];
 }
 
@@ -27,6 +35,10 @@ interface FeatureItemProps {
 interface FeatureRowProps {
   featureInfoItem: TypeFieldEntry;
   onInitLightBox: (value: string, alias: string, index: number) => void;
+  language: TypeDisplayLanguage;
+  layerDateTemporalMode: TemporalMode;
+  displayDateFormat: TypeDisplayDateFormat;
+  displayDateTimezone: TimeIANA;
 }
 
 // Extracted FeatureItem component
@@ -102,7 +114,14 @@ export const FeatureItem = memo(function FeatureItem({
 });
 
 // Extracted FeatureRow component
-export const FeatureRow = memo(function FeatureRow({ featureInfoItem, onInitLightBox }: FeatureRowProps): JSX.Element {
+export const FeatureRow = memo(function FeatureRow({
+  featureInfoItem,
+  onInitLightBox,
+  language,
+  layerDateTemporalMode,
+  displayDateFormat,
+  displayDateTimezone,
+}: FeatureRowProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const { alias, value } = featureInfoItem;
@@ -121,6 +140,9 @@ export const FeatureRow = memo(function FeatureRow({ featureInfoItem, onInitLigh
     // Stringify values and create array of string to split item with ';' to separate images
     const stringValue: string = Array.isArray(value) ? String(value.map(stringify)) : String(stringify(value));
     stringValues = stringValue.split(';');
+  } else if (value instanceof Date) {
+    // The value is a date, format it
+    stringValues = [DateMgt.formatDate(value, displayDateFormat[language], language, displayDateTimezone, layerDateTemporalMode)];
   }
 
   // Generate stable IDs for each item when component mounts
@@ -164,12 +186,18 @@ export const FeatureRow = memo(function FeatureRow({ featureInfoItem, onInitLigh
   );
 });
 
-export const FeatureInfoTable = memo(function FeatureInfoTable({ featureInfoList }: FeatureInfoTableProps): JSX.Element {
+export const FeatureInfoTable = memo(function FeatureInfoTable({ layerPath, featureInfoList }: FeatureInfoTableProps): JSX.Element {
   logger.logTraceRender('components/details/feature-info-table');
 
   // Hooks
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+
+  // Store hooks
+  const language = useAppDisplayLanguage();
+  const layerDateTemporalMode = useLayerDateTemporalMode(layerPath);
+  const displayDateFormat = useLayerDisplayDateFormat(layerPath);
+  const displayDateTimezone = useLayerDisplayDateTimezone(layerPath);
 
   // Store
   const { initLightBox, LightBoxComponent } = useLightBox();
@@ -180,7 +208,15 @@ export const FeatureInfoTable = memo(function FeatureInfoTable({ featureInfoList
   return (
     <Box className="details-feature-info-table" sx={sxClasses.boxContainerFeatureInfo}>
       {featureInfoList.map((featureInfoItem) => (
-        <FeatureRow key={`${featureInfoItem.alias}_${generateId()}`} featureInfoItem={featureInfoItem} onInitLightBox={initLightBox} />
+        <FeatureRow
+          key={`${featureInfoItem.alias}_${generateId()}`}
+          featureInfoItem={featureInfoItem}
+          language={language}
+          layerDateTemporalMode={layerDateTemporalMode}
+          displayDateFormat={displayDateFormat}
+          displayDateTimezone={displayDateTimezone}
+          onInitLightBox={initLightBox}
+        />
       ))}
       <LightBoxComponent />
     </Box>

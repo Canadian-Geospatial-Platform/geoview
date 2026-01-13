@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { getCenter } from 'ol/extent';
 
+import type { Dayjs } from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 
@@ -35,7 +36,13 @@ import {
 
 import TopToolbar from './top-toolbar';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useLayerSelectorFilterClass, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  useLayerDateTemporalMode,
+  useLayerDisplayDateFormat,
+  useLayerDisplayDateTimezone,
+  useLayerSelectorFilterClass,
+  useLayerStoreActions,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useDataTableStoreActions, useDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useTimeSliderFiltersSelector } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useAppDisplayLanguage, useAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -79,6 +86,9 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   const showUnsymbolizedFeatures = useAppShowUnsymbolizedFeatures();
   const layerClassFilter = useLayerSelectorFilterClass(layerPath);
   const layerTimeFilter = useTimeSliderFiltersSelector(layerPath);
+  const layerDateTemporalMode = useLayerDateTemporalMode(layerPath);
+  const displayDateFormat = useLayerDisplayDateFormat(layerPath);
+  const displayDateTimezone = useLayerDisplayDateTimezone(layerPath);
 
   // internal state
   const [density, setDensity] = useState<MRTDensityState>('compact');
@@ -113,6 +123,10 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     setShowColumnFilters((prev) => !prev);
     setColumnsFiltersVisibility(false, layerPath);
   };
+
+  const isDayjs = (v: unknown): v is Dayjs => typeof v === 'object' && v !== null && 'isValid' in v;
+
+  const isDateRange = useCallback((v: unknown): v is [Dayjs | null, Dayjs | null] => Array.isArray(v) && v.some(isDayjs), []);
 
   /**
    * Create table header cell
@@ -199,17 +213,26 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
    * @param {Date} date value to be shown in column.
    * @returns JSX.Element
    */
-  const getDateColumnTooltip = useCallback((date: Date): JSX.Element => {
-    // Log
-    logger.logTraceUseCallback('DATA-TABLE - getDateColumnTooltip');
+  const getCellContentDate = useCallback(
+    (date: Dayjs): JSX.Element => {
+      // Log
+      logger.logTraceUseCallback('DATA-TABLE - getDateColumnTooltip');
 
-    const formattedDate = DateMgt.formatDate(date, 'YYYY-MM-DDThh:mm:ss');
-    return (
-      <Tooltip title={formattedDate} arrow>
-        <Box tabIndex={0}>{formattedDate}</Box>
-      </Tooltip>
-    );
-  }, []);
+      const formattedDate = DateMgt.formatDate(
+        date.toDate(),
+        displayDateFormat[language],
+        language,
+        displayDateTimezone,
+        layerDateTemporalMode
+      );
+      return (
+        <Tooltip title={formattedDate} arrow>
+          <Box tabIndex={0}>{formattedDate}</Box>
+        </Tooltip>
+      );
+    },
+    [language, displayDateFormat, displayDateTimezone, layerDateTemporalMode]
+  );
 
   /**
    * Build material react data table column header.
@@ -260,16 +283,16 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
         Header: ({ column }) => getTableHeader(column.columnDef.header),
         Cell: ({ cell }) => getCellValueWithTooltip(cell.getValue() as string | number | JSX.Element, cell.id),
         ...(value.dataType === 'date' && {
-          accessorFn: (row) => new Date(row[key].value as string),
+          accessorFn: (row) => DateMgt.createDayjs(row[key].value as string),
           sortingFn: 'datetime',
           filterFn: 'between',
-          Cell: ({ cell }) => getDateColumnTooltip(cell.getValue<Date>()),
+          Cell: ({ cell }) => getCellContentDate(cell.getValue<Dayjs>()),
           filterVariant: 'date',
           muiFilterDatePickerProps: {
-            timezone: 'UTC',
+            timezone: displayDateTimezone,
             format: 'YYYY-MM-DD',
             // NOTE: reason for type cast as undefined as x-mui-datepicker prop type saying Date cant be assigned to undefined.
-            minDate: DateMgt.getDayjsDate('1600-01-01') as unknown as undefined,
+            minDate: DateMgt.createDayjs('1600-01-01') as unknown as undefined,
             slotProps: {
               textField: {
                 placeholder: language === VALID_DISPLAY_LANGUAGE[1] ? 'AAAA-MM-JJ' : 'YYYY-MM-DD',
@@ -314,7 +337,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     return columnList;
     // TODO: CLEANUP REACT - Uncomment all disable react-hooks/exhaustive-deps from this file and fix all dependencies!
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [density]);
+  }, [density, getCellContentDate, displayDateTimezone]);
 
   /**
    * Utility function to check if a particular columnId has numerical filters.
@@ -636,52 +659,102 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
       logger.logTraceUseCallback('DATA-TABLE - buildFilterList');
 
       const tableState = useTable.getState();
-
       if (!columnFilter.length) return [''];
-      return columnFilter.map((filter) => {
-        const filterValue = filter.value;
-        const filterId = filter.id;
-        // Check if filterValue is of type array because columnfilters return array with min and max.
-        if (Array.isArray(filterValue)) {
-          let numQuery = '';
-          const minValue = filterValue[0] === '' ? undefined : Number(filterValue[0]);
-          const maxValue = filterValue[1] === '' ? undefined : Number(filterValue[1]);
-          const inclusive = tableState?.columnFilterFns[filterId] === 'betweenInclusive' ? '=' : '';
 
-          if (minValue && maxValue) {
-            numQuery = `${filterId} >${inclusive} ${minValue} and ${filterId} <${inclusive} ${maxValue}`;
-          } else if (minValue) {
-            numQuery = `${filterId} >${inclusive} ${minValue}`;
-          } else if (maxValue) {
-            numQuery = `${filterId} <${inclusive} ${maxValue}`;
+      return columnFilter.map(({ id: filterId, value }) => {
+        const filterFn = tableState?.columnFilterFns[filterId];
+
+        /* ---------------------------------
+         * DATE RANGE FILTER (array of Dayjs)
+         * --------------------------------- */
+        if (isDateRange(value)) {
+          const [start, end] = value;
+
+          // Convert the dates as read to UTC ISO strings, that's the core standard
+          const startDate = start?.isValid() ? start.utc().format('YYYY-MM-DDTHH:mm:ss[Z]') : undefined;
+          const endDate = end?.isValid() ? end.utc().format('YYYY-MM-DDTHH:mm:ss[Z]') : undefined;
+
+          const inclusive = filterFn === 'betweenInclusive' ? '=' : '';
+
+          if (startDate && endDate) {
+            return `${filterId} >${inclusive} date '${startDate}' and ${filterId} <${inclusive} date '${endDate}'`;
           }
-          return numQuery;
+          if (startDate) {
+            return `${filterId} >${inclusive} date '${startDate}'`;
+          }
+          if (endDate) {
+            return `${filterId} <${inclusive} date '${endDate}'`;
+          }
+
+          return '';
         }
 
-        // If the column is numeric and the input is not an object (not a date)
-        if (isColumnFilterNumeric(filterId) && !(typeof filterValue === 'object')) {
-          return `${filterId} ${NUMBER_FILTER[tableState?.columnFilterFns[filterId]]} ${Number(filterValue)}`;
+        /* -------------------------
+         * NUMERIC RANGE (min / max)
+         * ------------------------- */
+        if (Array.isArray(value) && isColumnFilterNumeric(filterId)) {
+          const [minRaw, maxRaw] = value;
+          const min = minRaw === '' || minRaw === null || String(minRaw).trim() === '' ? undefined : Number(minRaw);
+          const max = maxRaw === '' || maxRaw === null || String(maxRaw).trim() === '' ? undefined : Number(maxRaw);
+
+          if ((min !== undefined && Number.isNaN(min)) || (max !== undefined && Number.isNaN(max))) {
+            return '';
+          }
+
+          const inclusive = filterFn === 'betweenInclusive' ? '=' : '';
+
+          if (min !== undefined && max !== undefined) {
+            return `${filterId} >${inclusive} ${min} and ${filterId} <${inclusive} ${max}`;
+          }
+          if (min !== undefined) {
+            return `${filterId} >${inclusive} ${min}`;
+          }
+          if (max !== undefined) {
+            return `${filterId} <${inclusive} ${max}`;
+          }
+
+          return '';
         }
 
-        if (tableState?.columnFilterFns[filterId] === 'empty') return `${filterId} is null`;
-        if (tableState?.columnFilterFns[filterId] === 'notEmpty') return `${filterId} is not null`;
-
-        // Check filter value is of type date,
-        if (typeof filterValue === 'object' && filterValue) {
-          const dateOpr = tableState?.columnFilterFns[filterId] || 'equals';
+        /* -------------------------
+         * SINGLE DATE FILTER
+         * ------------------------- */
+        if (isDayjs(value) && value.isValid()) {
+          const dateOpr = filterFn || 'equals';
           const dateFilter = DATE_FILTER[dateOpr];
-          const date = DateMgt.applyInputDateFormat(`${(filterValue as Date).toISOString().slice(0, -5)}Z`);
-          const formattedDate = date.slice(0, -1);
-          return `${filterId} ${dateFilter.replace('value', formattedDate)}`;
+
+          // Convert the date as read to UTC ISO string, that's the core standard
+          const date = value.utc().format('YYYY-MM-DDTHH:mm:ss[Z]');
+
+          // Return the UTC date filter
+          return `${filterId} ${dateFilter.replace('value', `date '${date}'`)}`;
         }
 
-        const operator = tableState?.columnFilterFns[filterId] ?? 'contains';
+        /* -------------------------
+         * NULL / NOT NULL
+         * ------------------------- */
+        if (filterFn === 'empty') return `${filterId} is null`;
+        if (filterFn === 'notEmpty') return `${filterId} is not null`;
+
+        /* -------------------------
+         * SINGLE NUMERIC
+         * ------------------------- */
+        if (isColumnFilterNumeric(filterId)) {
+          const num = Number(value);
+          if (Number.isNaN(num)) return '';
+          return `${filterId} ${NUMBER_FILTER[filterFn]} ${num}`;
+        }
+
+        /* -------------------------
+         * STRING FILTER (default)
+         * ------------------------- */
+        const operator = filterFn ?? 'contains';
         const strFilter = STRING_FILTER[operator];
 
-        return `${strFilter.replace('filterId', filterId).replace('value', filterValue as string)}`;
+        return strFilter.replace('filterId', filterId).replace('value', value as string);
       });
     },
-    [useTable, isColumnFilterNumeric]
+    [useTable, isDateRange, isColumnFilterNumeric]
   );
 
   /**
