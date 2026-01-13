@@ -77,7 +77,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
     appBarComponents: ['geolocator'],
     activeFooterBarTabId: '',
     activeAppBarTab: { tabId: '', isOpen: false, isFocusTrapped: false },
-    activeTrapGeoView: false,
+    activeTrapGeoView: true,
     corePackagesComponents: [],
     focusItem: { activeElementId: false, callbackElementId: false },
     hiddenTabs: ['time-slider', 'geochart'],
