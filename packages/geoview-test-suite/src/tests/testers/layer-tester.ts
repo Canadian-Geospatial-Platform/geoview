@@ -7,6 +7,7 @@ import type { TypeGeoviewLayerConfig } from 'geoview-core/api/types/layer-schema
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { EsriDynamic } from 'geoview-core/geo/layer/geoview-layers/raster/esri-dynamic';
 import { generateId } from 'geoview-core/core/utils/utilities';
+import { AbstractBaseLayerEntryConfig } from 'geoview-core/api/config/validation-classes/abstract-base-layer-entry-config';
 import { LegendEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/legend-event-processor';
 import { EsriFeature } from 'geoview-core/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from 'geoview-core/geo/layer/geoview-layers/raster/esri-image';
@@ -304,7 +305,7 @@ export class LayerTester extends GVAbstractTester {
   // #region ESRI IMAGE
 
   /**
-   * Tests adding an Esri Feature Forest Industry layer on the map.
+   * Tests adding an EsriImage with Elevationlayer on the map.
    * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
    */
   testAddEsriImageWithElevation(): Promise<Test<AbstractGVLayer>> {
@@ -343,7 +344,7 @@ export class LayerTester extends GVAbstractTester {
   }
 
   /**
-   * Tests adding an Esri Feature Forest Industry layer on the map.
+   * Tests adding an EsriImage with USA layer on the map.
    * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
    */
   testAddEsriImageWithUSA(): Promise<Test<AbstractGVLayer>> {
@@ -436,7 +437,7 @@ export class LayerTester extends GVAbstractTester {
   // #region WMS
 
   /**
-   * Tests adding an Esri Feature Forest Industry layer on the map.
+   * Tests adding a WMS Layer from OWS Mundialis on the map.
    * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
    */
   testAddWMSLayerWithOWSMundialis(): Promise<Test<AbstractGVLayer>> {
@@ -754,7 +755,7 @@ export class LayerTester extends GVAbstractTester {
 
   // #endregion WFS
 
-  // #region GeoJSON
+  // #region GEOJSON
 
   /**
    * Tests adding a GeoJSON with Polygons layer on the map.
@@ -847,9 +848,9 @@ export class LayerTester extends GVAbstractTester {
     );
   }
 
-  // #endregion GeoJSON
+  // #endregion GEOJSON
 
-  // #region GeoTIFF
+  // #region GEOTIFF
 
   /**
    * Tests adding a GeoTIFF layer on the map.
@@ -936,7 +937,7 @@ export class LayerTester extends GVAbstractTester {
     );
   }
 
-  // #endregion GeoTIFF
+  // #endregion GEOTIFF
 
   // #region CSV
 
@@ -1287,7 +1288,7 @@ export class LayerTester extends GVAbstractTester {
 
   // #endregion KML
 
-  // #region Settings
+  // #region SETTINGS
 
   /**
    * Tests initial settings properly cascading to sub layers.
@@ -1299,7 +1300,7 @@ export class LayerTester extends GVAbstractTester {
 
     // Expected config
     const expectedResults = {
-      groupHighlight: false,
+      groupHighlight: undefined,
       groupRemove: false,
       childHighlight: true,
     };
@@ -1317,20 +1318,23 @@ export class LayerTester extends GVAbstractTester {
       (test, result) => {
         const layer = result?.map?.listOfGeoviewLayerConfig.find(
           (geoviewLayer) => geoviewLayer.geoviewLayerId === config.geoviewLayerId
-          // GV: Casting as any to avoid TS error related to incompatible types between AbstractGeoViewLayerConfig and TypeGeoviewLayerConfig
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ) as any;
+        ) as TypeGeoviewLayerConfig;
 
         // Perform assertions
+
         test.addStep('Verifying group layer highlight control...');
         Test.assertIsEqual(layer?.initialSettings?.controls?.highlight, expectedResults.groupHighlight);
 
         test.addStep('Verifying group layer remove control...');
-        Test.assertIsEqual(layer?.listOfLayerEntryConfig?.[0]?.initialSettings?.controls?.remove, expectedResults.groupRemove);
+        Test.assertIsEqual(
+          AbstractBaseLayerEntryConfig.getClassOrTypeInitialSettings(layer?.listOfLayerEntryConfig?.[0])?.controls?.remove,
+          expectedResults.groupRemove
+        );
 
         test.addStep('Verifying child layer highlight control...');
         Test.assertIsEqual(
-          layer?.listOfLayerEntryConfig?.[0]?.listOfLayerEntryConfig?.[0]?.initialSettings?.controls?.highlight,
+          AbstractBaseLayerEntryConfig.getClassOrTypeInitialSettings(layer?.listOfLayerEntryConfig?.[0]?.listOfLayerEntryConfig?.[0])
+            ?.controls?.highlight,
           expectedResults.childHighlight
         );
       },
@@ -1341,7 +1345,7 @@ export class LayerTester extends GVAbstractTester {
     );
   }
 
-  // #endregion Settings
+  // #endregion SETTINGS
 
   // #region HELPERS
 

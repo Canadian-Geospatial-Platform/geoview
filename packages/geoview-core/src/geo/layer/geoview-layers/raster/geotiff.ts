@@ -1,4 +1,5 @@
 import type { Options as SourceOptions } from 'ol/source/GeoTIFF';
+import type { Projection as OLProjection } from 'ol/proj';
 import GeoTIFFSource from 'ol/source/GeoTIFF';
 
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
@@ -36,6 +37,8 @@ export class GeoTIFF extends AbstractGeoViewRaster {
     super(layerConfig);
   }
 
+  // #region OVERRIDES
+
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
@@ -48,16 +51,18 @@ export class GeoTIFF extends AbstractGeoViewRaster {
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<T = TypeMetadataGeoTIFF | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
    */
   protected override async onFetchServiceMetadata<T = TypeMetadataGeoTIFF | undefined>(abortSignal?: AbortSignal): Promise<T> {
+    // If metadataAccessPath does not point to a .tif file, we try to fetch metadata
+    const metadataAccessPath = this.getMetadataAccessPath();
+
     try {
-      // If metadataAccessPath does not point to a .tif file, we try to fetch metadata
       // GV: This is currently only for datacube sources that provide a JSON metadata file
-      if (this.metadataAccessPath && !this.metadataAccessPath.endsWith('.tif')) {
-        const url = this.metadataAccessPath.endsWith('/') ? this.metadataAccessPath.slice(0, -1) : this.metadataAccessPath;
+      if (metadataAccessPath && !metadataAccessPath.endsWith('.tif')) {
+        const url = metadataAccessPath.endsWith('/') ? metadataAccessPath.slice(0, -1) : metadataAccessPath;
 
         // Fetch it
         return (await Fetch.fetchJson<T>(url, { signal: abortSignal })) as T;
@@ -65,7 +70,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
 
       // The metadataAccessPath didn't seem like it was containing actual metadata, so it was skipped
       logger.logWarning(
-        `The metadataAccessPath '${this.metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped`
+        `The metadataAccessPath '${metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped`
       );
 
       // None
@@ -73,7 +78,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
     } catch (error: unknown) {
       // Error likely means there is no metadata to fetch
       logger.logWarning(
-        `The metadataAccessPath '${this.metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped. Error: ${error}`
+        `The metadataAccessPath '${metadataAccessPath}' didn't seem like it was containing actual metadata, so it was skipped. Error: ${error}`
       );
       return Promise.resolve(undefined) as Promise<T>;
     }
@@ -86,46 +91,48 @@ export class GeoTIFF extends AbstractGeoViewRaster {
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Redirect
     return Promise.resolve(
-      // TODO: Check - Config init - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
-      GeoTIFF.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false, [])
+      GeoTIFF.createGeoviewLayerConfig(
+        this.getGeoviewLayerId(),
+        this.getGeoviewLayerName(),
+        this.getMetadataAccessPathIfExists(),
+        this.getGeoviewLayerConfig().isTimeAware,
+        []
+      )
     );
   }
 
   /**
    * Overrides the way the layer metadata is processed.
    * @param {GeoTIFFLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @param {OLProjection?} [mapProjection] - The map projection.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<GeoTIFFLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
-  protected override onProcessLayerMetadata(layerConfig: GeoTIFFLayerEntryConfig): Promise<GeoTIFFLayerEntryConfig> {
+  protected override onProcessLayerMetadata(
+    layerConfig: GeoTIFFLayerEntryConfig,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    mapProjection?: OLProjection,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    abortSignal?: AbortSignal
+  ): Promise<GeoTIFFLayerEntryConfig> {
     const metadata = this.getMetadata();
     if (metadata) {
       // Set the metadata
       layerConfig.setServiceMetadata(metadata);
+
       // If the data access path points to the layerId, and there's a classification asset, use that as data access path
       if (
-        layerConfig.source.dataAccessPath?.endsWith(layerConfig.layerId) &&
-        layerConfig.source.dataAccessPath.startsWith(this.metadataAccessPath) &&
+        layerConfig.hasDataAccessPath() &&
+        layerConfig.getDataAccessPath().endsWith(layerConfig.layerId) &&
+        layerConfig.getDataAccessPath().startsWith(this.getMetadataAccessPath()) &&
         metadata.assets?.[layerConfig.layerId]?.href
-      )
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.source.dataAccessPath = metadata.assets[layerConfig.layerId].href;
+      ) {
+        // Update the data access path
+        layerConfig.setDataAccessPath(metadata.assets[layerConfig.layerId].href);
+      }
     }
 
     return Promise.resolve(layerConfig);
-  }
-
-  /**
-   * Creates a GeoTIFF source from a layer config.
-   * @param {GeoTIFFLayerEntryConfig} layerConfig - The configuration for the GeoTIFF layer.
-   * @returns A fully configured GeoTIFF source.
-   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
-   */
-  static createGeoTIFFSource(layerConfig: GeoTIFFLayerEntryConfig): GeoTIFFSource {
-    const sourceOptions: SourceOptions = {
-      sources: [{ url: layerConfig.getDataAccessPath(), overviews: layerConfig.source.overviews }],
-    };
-
-    return new GeoTIFFSource(sourceOptions);
   }
 
   /**
@@ -147,10 +154,30 @@ export class GeoTIFF extends AbstractGeoViewRaster {
     return gvLayer;
   }
 
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
+
+  /**
+   * Creates a GeoTIFF source from a layer config.
+   * @param {GeoTIFFLayerEntryConfig} layerConfig - The configuration for the GeoTIFF layer.
+   * @returns A fully configured GeoTIFF source.
+   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   * @static
+   */
+  static createGeoTIFFSource(layerConfig: GeoTIFFLayerEntryConfig): GeoTIFFSource {
+    const sourceOptions: SourceOptions = {
+      sources: [{ url: layerConfig.getDataAccessPath(), overviews: layerConfig.getSource().overviews }],
+    };
+
+    return new GeoTIFFSource(sourceOptions);
+  }
+
   /**
    * Initializes monitoring for the GeoTIFF source (async)
    * @param {GeoTIFFSource} source - The GeoTIFF source
    * @param {GeoTIFFLayerEntryConfig} layerConfig - The layer config
+   * @static
    * @private
    */
   static async #initializeSourceProjection(source: GeoTIFFSource, layerConfig: GeoTIFFLayerEntryConfig): Promise<void> {
@@ -178,12 +205,15 @@ export class GeoTIFF extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerId - A unique identifier for the layer.
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @param {boolean?} [isTimeAware] - Indicates whether the layer supports time-based filtering.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   * @static
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
-    metadataAccessPath: string
+    metadataAccessPath: string,
+    isTimeAware?: boolean
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
     const myLayer = new GeoTIFF({
@@ -191,6 +221,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
       geoviewLayerName:
         geoviewLayerName === 'tempoName' || !geoviewLayerName ? metadataAccessPath.split('/').pop()?.split('.')[0] : geoviewLayerName,
       metadataAccessPath,
+      isTimeAware,
     } as TypeGeoTIFFLayerConfig);
     return myLayer.initGeoViewLayerEntries();
   }
@@ -201,16 +232,17 @@ export class GeoTIFF extends AbstractGeoViewRaster {
    * and its associated entry configurations based on the provided parameters.
    * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
-   * @param {string} metadataAccessPath - The URL or path to access metadata.
-   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {string | undefined} metadataAccessPath - The URL or path to access metadata.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeGeoTIFFConfig} The constructed configuration object for the GeoTIFF layer.
+   * @static
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
-    metadataAccessPath: string,
-    isTimeAware: boolean,
+    metadataAccessPath: string | undefined,
+    isTimeAware: boolean | undefined,
     layerEntries: TypeLayerEntryShell[]
   ): TypeGeoTIFFLayerConfig {
     const geoviewLayerConfig: TypeGeoTIFFLayerConfig = {
@@ -238,7 +270,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
           geoviewLayerConfig,
           schemaTag: CONST_LAYER_TYPES.GEOTIFF,
           entryType: CONST_LAYER_ENTRY_TYPES.RASTER_TILE,
-          layerId: metadataAccessPath.split('/').pop() || generateId(18),
+          layerId: metadataAccessPath?.split('/').pop() || generateId(18),
           layerName: geoviewLayerName,
         }),
       ];
@@ -261,6 +293,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
    * @param {boolean} isTimeAware - Indicates if the layer is time aware.
    * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
    * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
+   * @static
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -286,4 +319,6 @@ export class GeoTIFF extends AbstractGeoViewRaster {
     // Process it
     return AbstractGeoViewLayer.processConfig(myLayer);
   }
+
+  // #endregion STATIC METHODS
 }

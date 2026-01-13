@@ -881,13 +881,13 @@ export abstract class WfsRenderer {
     if (externalGraphics.length > 0) {
       // Redirect building the SVGs
       return this.#parseGraphicsGatherSVGs(externalGraphics, sizeGraphic);
-    } else {
-      // Support se:Mark (well-known shapes)
-      const marker = graphic?.['se:Mark'];
-      if (marker) {
-        // Redirect building the markers
-        return this.#parseGraphicsMarkers(marker, sizeGraphic);
-      }
+    }
+
+    // Support se:Mark (well-known shapes)
+    const marker = graphic?.['se:Mark'];
+    if (marker) {
+      // Redirect building the markers
+      return this.#parseGraphicsMarkers(marker, sizeGraphic);
     }
 
     // Unsupported
@@ -1234,36 +1234,36 @@ export abstract class WfsRenderer {
         }
 
         return '';
-      } else {
-        // --- PRETTY MODE ---
-        const pad = ' '.repeat(depth * indent);
-        let out = '';
+      }
 
-        if (node.nodeType === Node.ELEMENT_NODE) {
-          const el = node as Element;
-          const attrs = Array.from(el.attributes)
-            .map((a) => `${a.name}="${a.value}"`)
-            .join(' ');
-          const openTag = attrs ? `<${el.tagName} ${attrs}>` : `<${el.tagName}>`;
-          const children = Array.from(el.childNodes);
+      // --- PRETTY MODE ---
+      const pad = ' '.repeat(depth * indent);
+      let out = '';
 
-          if (children.length === 0) {
-            return `${pad}${openTag}</${el.tagName}>\n`;
-          }
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        const el = node as Element;
+        const attrs = Array.from(el.attributes)
+          .map((a) => `${a.name}="${a.value}"`)
+          .join(' ');
+        const openTag = attrs ? `<${el.tagName} ${attrs}>` : `<${el.tagName}>`;
+        const children = Array.from(el.childNodes);
 
-          out += `${pad}${openTag}\n`;
-          children.forEach((child) => (out += serialize(child, depth + 1)));
-          out += `${pad}</${el.tagName}>\n`;
-          return out;
+        if (children.length === 0) {
+          return `${pad}${openTag}</${el.tagName}>\n`;
         }
 
-        if (node.nodeType === Node.TEXT_NODE) {
-          const trimmed = node.nodeValue?.trim();
-          if (trimmed) out += `${pad}${trimmed}\n`;
-        }
-
+        out += `${pad}${openTag}\n`;
+        children.forEach((child) => (out += serialize(child, depth + 1)));
+        out += `${pad}</${el.tagName}>\n`;
         return out;
       }
+
+      if (node.nodeType === Node.TEXT_NODE) {
+        const trimmed = node.nodeValue?.trim();
+        if (trimmed) out += `${pad}${trimmed}\n`;
+      }
+
+      return out;
     }
 
     return serialize(xml.documentElement);

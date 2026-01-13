@@ -413,6 +413,7 @@ export function AddNewLayer(): JSX.Element {
           generateId(18),
           layerName,
           layerURL,
+          true, // isTimeAware true by default
           language,
           mapId,
           abortController.signal
@@ -535,17 +536,6 @@ export function AddNewLayer(): JSX.Element {
   const addGeoviewLayer = async (newGeoViewLayer: MapConfigLayerEntry): Promise<void> => {
     // Create new abort controller to handle canceling of this step.
     setAbortController(new AbortController());
-
-    // Remove unwanted items from sources before proceeding
-    if (newGeoViewLayer.listOfLayerEntryConfig?.length)
-      newGeoViewLayer.listOfLayerEntryConfig.forEach((layerEntryConfig) => {
-        // TODO: Check - Alex: What is this doing? setting layerEntryConfig.source only when it's already set to something? Shouldn't it be the contrary?
-        // TO.DOCONT: Damon: I don't remember the specifics, but buildGeoLayerToAdd was sometimes adding in properties that would interfere with
-        // TO.DOCONT: later operations. This was before all of the "optimization" was done, so it might be worth removing and checking again, but
-        // TO.DOCONT: this just insured that we would get the barebones we needed and left out unnecessary things that would cause errors or not be properly overridden
-        // eslint-disable-next-line no-param-reassign
-        if (layerEntryConfig.source) layerEntryConfig.source = { dataAccessPath: layerEntryConfig.source.dataAccessPath };
-      });
 
     // Shapefile config must be converted to GeoJSON before we proceed
     if (newGeoViewLayer.geoviewLayerType === SHAPEFILE)

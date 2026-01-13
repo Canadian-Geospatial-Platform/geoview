@@ -1,7 +1,7 @@
+import type { Feature } from 'ol';
+import type { ReadOptions } from 'ol/format/Feature';
 import type { Options as SourceOptions } from 'ol/source/Vector';
-import { GeoJSON as FormatGeoJSON } from 'ol/format';
-import type { Vector as VectorSource } from 'ol/source';
-import type Feature from 'ol/Feature';
+import type { Projection as OLProjection } from 'ol/proj';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import type { TypeOutfields } from '@/api/types/map-schema-types';
@@ -24,6 +24,7 @@ import { GVOGCFeature } from '@/geo/layer/gv-layers/vector/gv-ogc-feature';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
+import { GeoUtilities } from '@/geo/utils/utilities';
 
 export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig' | 'geoviewLayerType'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.OGC_FEATURE;
@@ -47,6 +48,8 @@ export class OgcFeature extends AbstractGeoViewVector {
     super(layerConfig);
   }
 
+  // #region OVERRIDES
+
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
@@ -59,17 +62,21 @@ export class OgcFeature extends AbstractGeoViewVector {
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<T = TypeMetadataOGCFeature>} A promise with the metadata or undefined when no metadata for the particular layer type.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    */
   protected override async onFetchServiceMetadata<T = TypeMetadataOGCFeature>(abortSignal?: AbortSignal): Promise<T> {
     try {
       // Fetch it
-      return (await OgcFeature.fetchMetadata(this.metadataAccessPath, abortSignal)) as T;
+      return (await OgcFeature.fetchMetadata(this.getMetadataAccessPath(), abortSignal)) as T;
     } catch (error: unknown) {
       // Throw
-      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName(), formatError(error));
+      throw new LayerServiceMetadataUnableToFetchError(
+        this.getGeoviewLayerId(),
+        this.getLayerEntryNameOrGeoviewLayerName(),
+        formatError(error)
+      );
     }
   }
 
@@ -81,13 +88,13 @@ export class OgcFeature extends AbstractGeoViewVector {
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Get the folder url
     const sep = '/collections/';
-    const idx = this.metadataAccessPath.lastIndexOf(sep);
-    let rootUrl = this.metadataAccessPath;
+    const idx = this.getMetadataAccessPath().lastIndexOf(sep);
+    let rootUrl = this.getMetadataAccessPath();
     let id: string | undefined;
     let entries: TypeLayerEntryShell[] = [];
     if (idx > 0) {
-      rootUrl = this.metadataAccessPath.substring(0, idx);
-      id = this.metadataAccessPath.substring(idx + sep.length);
+      rootUrl = this.getMetadataAccessPath().substring(0, idx);
+      id = this.getMetadataAccessPath().substring(idx + sep.length);
       entries = [{ id }];
     }
 
@@ -103,8 +110,13 @@ export class OgcFeature extends AbstractGeoViewVector {
     }
 
     // Redirect
-    // TODO: Check - Config init - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
-    return OgcFeature.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, entries);
+    return OgcFeature.createGeoviewLayerConfig(
+      this.getGeoviewLayerId(),
+      this.getGeoviewLayerName(),
+      rootUrl,
+      this.getGeoviewLayerConfig().isTimeAware,
+      entries
+    );
   }
 
   /**
@@ -129,23 +141,21 @@ export class OgcFeature extends AbstractGeoViewVector {
       // If found description, replace the name
       if (foundCollection.description) layerConfig.setLayerName(foundCollection.description);
 
-      // Validate and update the extent initial settings
-      layerConfig.validateUpdateInitialSettingsExtent();
-
       // If no bounds defined in the initial settings and an extent is defined in the metadata
-      if (!layerConfig.getInitialSettings().bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
-        const latlonExtent = Projection.transformExtentFromProj(
+      let bounds = layerConfig.getInitialSettingsBounds();
+      if (!bounds && foundCollection.extent?.spatial?.bbox && foundCollection.extent?.spatial?.crs) {
+        // Project the latlong
+        bounds = Projection.transformExtentFromProj(
           foundCollection.extent.spatial.bbox[0],
           Projection.getProjectionFromString(foundCollection.extent.spatial.crs),
           Projection.getProjectionLonLat()
         );
 
-        // Update the bounds initial settings
-        layerConfig.updateInitialSettings({ bounds: latlonExtent });
+        // Validate and update the bounds initial settings
+        layerConfig.initInitialSettingsBoundsFromMetadata(bounds);
       }
 
-      // Validate and update the bounds initial settings
-      layerConfig.validateUpdateInitialSettingsBounds();
+      // Done
       return;
     }
 
@@ -156,14 +166,16 @@ export class OgcFeature extends AbstractGeoViewVector {
   /**
    * Overrides the way the layer metadata is processed.
    * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration to process.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {OLProjection?} [mapProjection] - The map projection.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
   protected override async onProcessLayerMetadata(
     layerConfig: VectorLayerEntryConfig,
+    mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<VectorLayerEntryConfig> {
-    const metadataUrl = this.metadataAccessPath;
+    const metadataUrl = this.getMetadataAccessPath();
     if (metadataUrl) {
       const queryUrl = metadataUrl.endsWith('/')
         ? `${metadataUrl}collections/${layerConfig.layerId}/queryables?f=json`
@@ -180,23 +192,38 @@ export class OgcFeature extends AbstractGeoViewVector {
   }
 
   /**
-   * Overrides the creation of the source configuration for the vector layer.
-   * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration.
-   * @param {SourceOptions} sourceOptions - The source options.
-   * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
-   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   * Overrides the loading of the vector features for the layer by fetching OGC Feature data and converting it
+   * into OpenLayers {@link Feature} feature instances.
+   * @param {VectorLayerEntryConfig} layerConfig -
+   * The configuration object for the vector layer, containing source and
+   * data access information.
+   * @param {SourceOptions<Feature>} sourceOptions -
+   * The OpenLayers vector source options associated with the layer. This may be
+   * used by implementations to customize loading behavior or source configuration.
+   * @param {ReadOptions} readOptions -
+   * Options controlling how features are read, including the target
+   * `featureProjection`.
+   * @returns {Promise<Feature[]>}
+   * A promise that resolves to an array of OpenLayers features.
+   * @protected
+   * @override
    */
-  protected override onCreateVectorSource(
+  protected override async onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
-    sourceOptions: SourceOptions<Feature>
-  ): VectorSource<Feature> {
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = `${layerConfig.getDataAccessPath(true)}collections/${layerConfig.layerId}/items?f=json`;
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.format = new FormatGeoJSON();
+    sourceOptions: SourceOptions<Feature>,
+    readOptions: ReadOptions
+  ): Promise<Feature[]> {
+    // Query
+    const responseData = await Fetch.fetchJson(`${layerConfig.getDataAccessPath(true)}collections/${layerConfig.layerId}/items?f=json`);
 
-    // Call parent
-    return super.onCreateVectorSource(layerConfig, sourceOptions);
+    // Read the EPSG from the data
+    const dataEPSG = GeoUtilities.readEPSGOfGeoJSON(responseData);
+
+    // Check if we have it in Projection and try adding it if we're missing it
+    await Projection.addProjectionIfMissing(dataEPSG);
+
+    // Read the features
+    return GeoUtilities.readFeaturesFromGeoJSON(responseData, readOptions);
   }
 
   /**
@@ -213,11 +240,16 @@ export class OgcFeature extends AbstractGeoViewVector {
     return gvLayer;
   }
 
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
+
   /**
    * This method sets the outfields and aliasFields of the source feature info.
    *
    * @param {TypeLayerMetadataOGC} fields An array of field names and its aliases.
    * @param {VectorLayerEntryConfig} layerConfig The vector layer entry to configure.
+   * @static
    * @private
    */
   static #processFeatureInfoConfig(fields: TypeLayerMetadataOGC, layerConfig: VectorLayerEntryConfig): void {
@@ -264,11 +296,12 @@ export class OgcFeature extends AbstractGeoViewVector {
   /**
    * Fetches the metadata for a typical OGCFeature class.
    * @param {string} url - The url to query the metadata from.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
    * @throws {ResponseError} When the response is not OK (non-2xx).
    * @throws {ResponseEmptyError} When the JSON response is empty.
+   * @static
    */
   static fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataOGCFeature> {
     // The url
@@ -286,15 +319,18 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @param {string} geoviewLayerId - A unique identifier for the layer.
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @param {boolean?} [isTimeAware] - Indicates whether the layer supports time-based filtering.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   * @static
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
-    metadataAccessPath: string
+    metadataAccessPath: string,
+    isTimeAware?: boolean
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const myLayer = new OgcFeature({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeOgcFeatureLayerConfig);
+    const myLayer = new OgcFeature({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeOgcFeatureLayerConfig);
     return myLayer.onInitLayerEntries();
   }
 
@@ -305,15 +341,16 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata or feature data.
-   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeOgcFeatureLayerConfig} The constructed configuration object for the OGC Feature layer.
+   * @static
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
-    isTimeAware: boolean,
+    isTimeAware: boolean | undefined,
     layerEntries: TypeLayerEntryShell[]
   ): TypeOgcFeatureLayerConfig {
     const geoviewLayerConfig: TypeOgcFeatureLayerConfig = {
@@ -351,6 +388,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
    * @param {boolean} isTimeAware - Indicates if the layer is time aware.
    * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
+   * @static
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -376,4 +414,6 @@ export class OgcFeature extends AbstractGeoViewVector {
     // Process it
     return AbstractGeoViewVector.processConfig(myLayer);
   }
+
+  // #endregion STATIC METHODS
 }

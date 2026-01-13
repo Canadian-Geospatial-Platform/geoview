@@ -3,6 +3,7 @@ import EventHelper from '@/api/events/event-helper';
 import type { Extent, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
 import type {
   ConfigClassOrType,
+  TypeBaseSourceInitialConfig,
   TypeGeoviewLayerConfig,
   TypeGeoviewLayerType,
   TypeLayerEntryType,
@@ -20,6 +21,7 @@ import type { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
 import { DateMgt } from '@/core/utils/date-mgt';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GeoUtilities } from '@/geo/utils/utilities';
+import { deepMerge } from '@/core/utils/utilities';
 
 export interface ConfigBaseClassProps {
   layerId: string;
@@ -29,6 +31,7 @@ export interface ConfigBaseClassProps {
   layerPath?: string; // This property isn't necessary in the config, but we have it explicit here for the ConfigClassOrType thing.
   layerName?: string;
   initialSettings?: TypeLayerInitialSettings;
+  source?: TypeBaseSourceInitialConfig;
   minScale?: number;
   maxScale?: number;
   isMetadataLayerGroup?: boolean;
@@ -53,12 +56,6 @@ export abstract class ConfigBaseClass {
   /** The layer entry properties used to create the layer entry config */
   protected layerEntryProps: ConfigBaseClassProps;
 
-  /**
-   * Initial settings to apply to the GeoView layer entry at creation time. Initial settings are inherited from the parent in the
-   * configuration tree.
-   */
-  #initialSettings: TypeLayerInitialSettings;
-
   /** The schema tag for the layer entry config */
   #schemaTag: TypeGeoviewLayerType;
 
@@ -68,13 +65,19 @@ export abstract class ConfigBaseClass {
   /** The display name of the layer. */
   #layerName?: string;
 
+  /**
+   * Initial settings to apply to the GeoView layer entry at creation time. Initial settings are inherited from the parent in the
+   * configuration tree.
+   */
+  #initialSettings?: TypeLayerInitialSettings;
+
   /** It is used to identified unprocessed layers and shows the final layer state */
   #layerStatus: TypeLayerStatus = 'newInstance';
 
-  /** The min scale that can be reach by the layer. */
+  /** The min scale that can be reached by the layer. */
   #minScale?: number;
 
-  /** The max scale that can be reach by the layer. */
+  /** The max scale that can be reached by the layer. */
   #maxScale?: number;
 
   /** It is used internally to distinguish layer groups derived from the metadata. */
@@ -106,8 +109,8 @@ export abstract class ConfigBaseClass {
     this.layerId = layerConfig.layerId;
     this.#schemaTag = schemaTag;
     this.#entryType = entryType;
-    this.#initialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(layerConfig);
     this.#layerName = ConfigBaseClass.getClassOrTypeLayerName(layerConfig);
+    this.#initialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(layerConfig);
     this.#minScale = ConfigBaseClass.getClassOrTypeMinScale(layerConfig);
     this.#maxScale = ConfigBaseClass.getClassOrTypeMaxScale(layerConfig);
     this.#isMetadataLayerGroup = ConfigBaseClass.getClassOrTypeIsMetadataLayerGroup(layerConfig);
@@ -363,6 +366,19 @@ export abstract class ConfigBaseClass {
   }
 
   /**
+   * Initializes the minimum scale from metadata when available.
+   * If a minimum scale is already defined on the layer, the most restrictive
+   * (smallest) value between the existing scale and the metadata value is kept.
+   * This ensures metadata does not loosen an already constrained scale range.
+   * @param {number | undefined} minScaleMetadata - The minimum scale value derived from metadata.
+   */
+  initMinScaleFromMetadata(minScaleMetadata?: number): void {
+    if (minScaleMetadata) {
+      this.setMinScale(Math.min(this.getMinScale() ?? Infinity, minScaleMetadata));
+    }
+  }
+
+  /**
    * Gets the layer max scale if any.
    * @returns {number | undefined} The layer max scale if any.
    */
@@ -379,107 +395,121 @@ export abstract class ConfigBaseClass {
   }
 
   /**
+   * Initializes the maximum scale from metadata when available.
+   * If a maximum scale is already defined on the layer, the most restrictive
+   * (largest) value between the existing scale and the metadata value is kept.
+   * This ensures metadata does not tighten an already constrained scale range.
+   * @param {number | undefined} maxScaleMetadata - The maximum scale value derived from metadata.
+   */
+  initMaxScaleFromMetadata(maxScaleMetadata?: number): void {
+    if (maxScaleMetadata) {
+      this.setMaxScale(Math.max(this.getMaxScale() ?? -Infinity, maxScaleMetadata));
+    }
+  }
+
+  /**
    * Gets the initial settings.
-   * @returns {Readonly<TypeLayerInitialSettings>} The initial settings.
+   * @returns {TypeLayerInitialSettings | undefined} The initial settings.
    */
-  getInitialSettings(): Readonly<TypeLayerInitialSettings> {
-    return { ...this.#initialSettings };
+  getInitialSettings(): TypeLayerInitialSettings | undefined {
+    return this.#initialSettings;
   }
 
   /**
-   * Sets the initial settings.
-   * @param {TypeLayerInitialSettings} newSettings - The new initial settings.
+   * Returns a shallow-copy of the initialSettings object.
+   * @returns {TypeLayerInitialSettings} The shallow-copy of the initialSettings object.
    */
-  setInitialSettings(newSettings: TypeLayerInitialSettings): void {
-    this.#initialSettings = { ...newSettings };
+  cloneInitialSettings(): TypeLayerInitialSettings {
+    return { ...this.getInitialSettings(), states: this.getInitialSettings()?.states };
   }
 
   /**
-   * Updates the `initialSettings` by applying the specified updates using a shallow merge.
-   * Only the provided fields in the `updates` object will be changed; all other existing values are preserved.
-   * This method returns the instance to support method chaining.
-   * @param {Partial<TypeLayerInitialSettings>} updates - A partial object containing the fields to update in the initial settings.
-   * @returns The current instance (for chaining).
+   * Gets the the initial settings extend, if any
+   * @returns {Extent  | undefined} The initial settings extend, if any.
    */
-  updateInitialSettings(updates: Partial<TypeLayerInitialSettings>): this {
-    this.#initialSettings = {
-      ...this.#initialSettings,
-      ...updates,
-    };
-    return this;
+  getInitialSettingsExtent(): Extent | undefined {
+    return this.#initialSettings?.extent;
   }
 
   /**
-   * Validates and updates the `minZoom` value in the `initialSettings` object.
-   * Ensures that the `minZoom` is not decreased unintentionally by keeping the more restrictive (higher) value
-   * between the existing `minZoom` and the provided `minZoomToValidate`.
-   * This uses a shallow update via `updateInitialSettings()` and supports method chaining by returning the instance.
-   * @param {boolean} visible - The candidate `minZoom` value to validate against the current setting.
-   * @returns The current instance (for chaining).
+   * Gets the the initial settings bounds, if any
+   * @returns {Extent  | undefined} The initial settings bounds, if any.
    */
-  updateInitialSettingsStateVisible(visible: boolean): this {
-    // Update the state visible initial settings
-    this.updateInitialSettings({ states: { ...this.getInitialSettings().states, visible } });
-    return this;
+  getInitialSettingsBounds(): Extent | undefined {
+    return this.#initialSettings?.bounds;
   }
 
   /**
-   * Validates and updates the `minZoom` value in the `initialSettings` object.
-   * Ensures that the `minZoom` is not decreased unintentionally by keeping the more restrictive (higher) value
-   * between the existing `minZoom` and the provided `minZoomToValidate`.
-   * This uses a shallow update via `updateInitialSettings()` and supports method chaining by returning the instance.
-   * @param {number} minZoomToValidate - The candidate `minZoom` value to validate against the current setting.
-   * @returns The current instance (for chaining).
+   * Gets the the initial settings className, if any
+   * @returns {string  | undefined} The initial settings className, if any.
    */
-  validateUpdateInitialSettingsMinZoom(minZoomToValidate: number): this {
+  getInitialSettingsClassName(): string | undefined {
+    return this.#initialSettings?.className;
+  }
+
+  /**
+   * Initializes the initial settings configuration by filling the blanks in our config with the information from the metadata, if necessary.
+   * @param {TypeLayerInitialSettings | undefined} initialSettingsMetadata - The initialSettings metadata to use to help fill the blanks in our initialSettings config, if any.
+   */
+  initInitialSettingsFromMetadata(initialSettingsMetadata: TypeLayerInitialSettings | undefined): void {
+    this.#initialSettings = deepMerge(initialSettingsMetadata, this.#initialSettings);
+  }
+
+  /**
+   * Validates and initializes the `visible` value in the `initialSettings` object, if necessary.
+   * @param {number | undefined} visible - The candidate `visible` value to validate against the current setting, if any.
+   */
+  initInitialSettingsStatesVisibleFromMetadata(visible: boolean | undefined): void {
     // Validate and update the extent initial settings
-    this.updateInitialSettings({ minZoom: Math.max(this.getInitialSettings().minZoom ?? -Infinity, minZoomToValidate) });
-    return this;
+    this.#initialSettings ??= {};
+    this.#initialSettings.states ??= {};
+    this.#initialSettings.states.visible ??= visible;
   }
 
   /**
-   * Validates and updates the `maxZoom` value in the `initialSettings` object.
-   * Ensures that the `maxZoom` is not increased unintentionally by keeping the more restrictive (lower) value
-   * between the existing `maxZoom` and the provided `maxZoomToValidate`.
-   *
-   * This uses a shallow update via `updateInitialSettings()` and supports method chaining by returning the instance.
-   * @param {number} maxZoomToValidate - The candidate `maxZoom` value to validate against the current setting.
-   * @returns The current instance (for chaining).
+   * Initializes the minimum zoom level in the initial settings using metadata.
+   * @param {number | undefined} minZoomMetadata - The minimum zoom value from metadata, if any.
    */
-  validateUpdateInitialSettingsMaxZoom(maxZoomToValidate: number): this {
-    // Validate and update the extent initial settings
-    this.updateInitialSettings({ maxZoom: Math.min(this.getInitialSettings().maxZoom ?? Infinity, maxZoomToValidate) });
-    return this;
+  initInitialSettingsMinZoomFromMetadata(minZoomMetadata: number | undefined): void {
+    // Redirect
+    this.#initInitialSettingsMinZoom(minZoomMetadata);
   }
 
   /**
-   * Validates and updates the `extent` in the `initialSettings` object, if necessary.
-   * If no extent is explicitly provided, the current `initialSettings.extent` is used by default.
-   * The provided extent (or existing one) is passed to `validateExtentWhenDefined()` to apply any required corrections.
-   * The result is then shallowly merged into `initialSettings` using `updateInitialSettings()`.
-   * Supports method chaining by returning the instance.
-   * @param {Extent | undefined} extentToValidate - The extent to validate and apply. If omitted, defaults to the current `initialSettings.extent`.
-   * @returns The current instance (for chaining).
+   * Initializes the maximum zoom level in the initial settings using metadata.
+   * @param {number | undefined} maxZoomMetadata - The maximum zoom value from metadata, if any.
    */
-  validateUpdateInitialSettingsExtent(extentToValidate: Extent | undefined = this.getInitialSettings().extent): this {
-    // Validate and update the extent initial settings
-    this.updateInitialSettings({ extent: GeoUtilities.validateExtentWhenDefined(extentToValidate) });
-    return this;
+  initInitialSettingsMaxZoomFromMetadata(maxZoomMetadata: number | undefined): void {
+    // Redirect
+    this.#initInitialSettingsMaxZoom(maxZoomMetadata);
   }
 
   /**
-   * Validates and updates the `bounds` in the `initialSettings` object, if necessary.
-   * If no bounds is explicitly provided, the current `initialSettings.bounds` is used by default.
-   * The provided bounds (or existing one) is passed to `validateExtentWhenDefined()` to apply any required corrections.
-   * The result is then shallowly merged into `initialSettings` using `updateInitialSettings()`.
-   * Supports method chaining by returning the instance.
-   * @param {Extent | undefined} boundsToValidate - The bounds to validate and apply. If omitted, defaults to the current `initialSettings.bounds`.
-   * @returns The current instance (for chaining).
+   * Initializes the extent in the initial settings using the layer configuration, if any.
    */
-  validateUpdateInitialSettingsBounds(boundsToValidate: Extent | undefined = this.getInitialSettings().bounds): this {
-    // Validate and update the bounds initial settings
-    this.updateInitialSettings({ bounds: GeoUtilities.validateExtentWhenDefined(boundsToValidate) });
-    return this;
+  initInitialSettingsExtentAndBoundsFromConfig(): void {
+    // Redirect
+    this.#initInitialSettingsExtent(this.#initialSettings?.extent);
+    this.#initInitialSettingsBounds(this.#initialSettings?.bounds);
+  }
+
+  /**
+   * Initializes the extent in the initial settings using metadata.
+   * @param {Extent | undefined} extentToValidate - The extent from metadata to validate and apply, if any.
+   */
+  // TODO: CHECK - This function isn't called, but I feel like it should be... What's the relationship between extent and bounds?
+  initInitialSettingsExtentFromMetadata(extentToValidate: Extent | undefined): void {
+    // Redirect
+    this.#initInitialSettingsExtent(extentToValidate);
+  }
+
+  /**
+   * Initializes the bounds in the initial settings using metadata.
+   * @param {Extent | undefined} extentToValidate - The bounds from metadata to validate and apply, if any.
+   */
+  initInitialSettingsBoundsFromMetadata(extentToValidate: Extent | undefined): void {
+    // Redirect
+    this.#initInitialSettingsBounds(extentToValidate);
   }
 
   /**
@@ -635,39 +665,12 @@ export abstract class ConfigBaseClass {
   }
 
   /**
-   * Overridable function to create and return a deep clone of the layer entry configuration properties.
-   * This method returns a cloned copy of the original properties (`layerEntryProps`)
-   * that were used to create this layer entry configuration. Modifying the returned
-   * object will not affect the internal state of the layer.
-   * @returns {ConfigBaseClassProps} A deep-cloned copy of the layer entry properties.
-   */
-  protected onCloneLayerProps(): ConfigBaseClassProps {
-    // Return a cloned copy of the layer entry props that were used to create this layer entry config
-    return { ...this.layerEntryProps };
-  }
-
-  /**
    * Writes the instance as Json.
    * @returns {T} The Json representation of the instance.
    */
   toJson<T>(): T {
     // Redirect
     return this.onToJson();
-  }
-
-  /**
-   * Overridable function to write the instance as Json.
-   * @returns {unknown} The Json representation of the instance.
-   * @protected
-   */
-  protected onToJson<T>(): T {
-    return {
-      schemaTag: this.getSchemaTag(),
-      entryType: this.getEntryType(),
-      layerId: this.layerId,
-      layerName: this.getLayerName(),
-      isMetadataLayerGroup: this.getIsMetadataLayerGroup(),
-    } as T;
   }
 
   /**
@@ -689,6 +692,95 @@ export abstract class ConfigBaseClass {
     groupLayerProps.listOfLayerEntryConfig = [];
     return groupLayerProps;
   }
+
+  // #region PROTECTED/PRIVATE METHODS
+
+  /**
+   * Validates and initializes the `minZoom` value in the `initialSettings` object, if necessary.
+   * Ensures that the `minZoom` is not decreased unintentionally by keeping the more restrictive (higher) value
+   * between the existing `minZoom` and the provided `minZoomToValidate`.
+   * @param {number | undefined} minZoomToValidate - The candidate `minZoom` value to validate against the current setting, if any.
+   */
+  #initInitialSettingsMinZoom(minZoomToValidate: number | undefined): void {
+    // If we have something to update it with
+    if (minZoomToValidate) {
+      this.#initialSettings ??= {};
+      this.#initialSettings.minZoom = Math.max(this.#initialSettings.minZoom ?? -Infinity, minZoomToValidate);
+    }
+  }
+
+  /**
+   * Validates and initializes the `maxZoom` value in the `initialSettings` object, if necessary.
+   * Ensures that the `maxZoom` is not increased unintentionally by keeping the more restrictive (lower) value
+   * between the existing `maxZoom` and the provided `maxZoomToValidate`.
+   * @param {number | undefined} maxZoomToValidate - The candidate `maxZoom` value to validate against the current setting, if any.
+   */
+  #initInitialSettingsMaxZoom(maxZoomToValidate: number | undefined): void {
+    // If we have something to update it with
+    if (maxZoomToValidate) {
+      this.#initialSettings ??= {};
+      this.#initialSettings.maxZoom = Math.min(this.#initialSettings.maxZoom ?? Infinity, maxZoomToValidate);
+    }
+  }
+
+  /**
+   * Validates and initializes the `extent` in the `initialSettings` object, if necessary.
+   * If no extent is explicitly provided, the current `initialSettings.extent` is used by default.
+   * The provided extent (or existing one) is passed to `validateExtentWhenDefined()` to apply any required corrections.
+   * @param {Extent | undefined} extentToValidate - The extent to validate and apply, if any.
+   */
+  #initInitialSettingsExtent(extentToValidate: Extent | undefined): void {
+    // If we have something to update it with
+    if (extentToValidate) {
+      // Validate and update the extent initial settings
+      this.#initialSettings ??= {};
+      this.#initialSettings.extent = GeoUtilities.validateExtentWhenDefined(extentToValidate);
+    }
+  }
+
+  /**
+   * Validates and initializes the `bounds` in the `initialSettings` object, if necessary.
+   * If no bounds is explicitly provided, the current `initialSettings.bounds` is used by default.
+   * The provided bounds (or existing one) is passed to `validateExtentWhenDefined()` to apply any required corrections.
+   * @param {Extent | undefined} boundsToValidate - The bounds to validate and apply, if any.
+   */
+  #initInitialSettingsBounds(boundsToValidate: Extent | undefined): void {
+    // If we have something to update it with
+    if (boundsToValidate) {
+      // Validate and update the bounds initial settings
+      this.#initialSettings ??= {};
+      this.#initialSettings.bounds = GeoUtilities.validateExtentWhenDefined(boundsToValidate);
+    }
+  }
+
+  /**
+   * Overridable function to create and return a deep clone of the layer entry configuration properties.
+   * This method returns a cloned copy of the original properties (`layerEntryProps`)
+   * that were used to create this layer entry configuration. Modifying the returned
+   * object will not affect the internal state of the layer.
+   * @returns {ConfigBaseClassProps} A deep-cloned copy of the layer entry properties.
+   */
+  protected onCloneLayerProps(): ConfigBaseClassProps {
+    // Return a cloned copy of the layer entry props that were used to create this layer entry config
+    return { ...this.layerEntryProps };
+  }
+
+  /**
+   * Overridable function to write the instance as Json.
+   * @returns {unknown} The Json representation of the instance.
+   * @protected
+   */
+  protected onToJson<T>(): T {
+    return {
+      schemaTag: this.getSchemaTag(),
+      entryType: this.getEntryType(),
+      layerId: this.layerId,
+      layerName: this.getLayerName(),
+      isMetadataLayerGroup: this.getIsMetadataLayerGroup(),
+    } as T;
+  }
+
+  // #endregion PROTECTED/PRIVATE METHODS
 
   // #region STATIC
 
@@ -1030,26 +1122,16 @@ export abstract class ConfigBaseClass {
 
   /**
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
-   * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
-   * @returns {TypeLayerInitialSettings} The initial settings in the layer config.
+   * @param {ConfigClassOrType | TypeGeoviewLayerConfig | undefined} layerConfig - The layer config class instance or regular json object.
+   * @returns {TypeLayerInitialSettings | undefined} The initial settings in the layer config or undefined.
    */
   static getClassOrTypeInitialSettings(
     layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig | undefined
-  ): Readonly<TypeLayerInitialSettings> {
-    let settings: TypeLayerInitialSettings | undefined;
-
+  ): TypeLayerInitialSettings | undefined {
     if (layerConfig instanceof ConfigBaseClass) {
-      settings = layerConfig.getInitialSettings();
-    } else {
-      settings = layerConfig?.initialSettings;
+      return layerConfig.getInitialSettings();
     }
-
-    return {
-      ...settings,
-      states: {
-        ...settings?.states, // Preserve existing settings
-      },
-    };
+    return layerConfig?.initialSettings;
   }
 
   /**
@@ -1059,7 +1141,8 @@ export abstract class ConfigBaseClass {
    */
   static setClassOrTypeInitialSettings(layerConfig: ConfigClassOrType, initialSettings: TypeLayerInitialSettings): void {
     if (layerConfig instanceof ConfigBaseClass) {
-      layerConfig.setInitialSettings(initialSettings);
+      // eslint-disable-next-line no-param-reassign
+      layerConfig.#initialSettings = initialSettings;
     } else {
       // eslint-disable-next-line no-param-reassign
       layerConfig.initialSettings = initialSettings;
@@ -1076,20 +1159,6 @@ export abstract class ConfigBaseClass {
       return layerConfig.getIsMetadataLayerGroup();
     }
     return layerConfig?.isMetadataLayerGroup || false;
-  }
-
-  /**
-   * Helper function to support when a layerConfig is either a class instance or a regular json object.
-   * @param {ConfigClassOrType} layerConfig - The layer config class instance or regular json object.
-   * @param {boolean} isMetadataLayerGroup - The indication if the layer config is metadata layer group.
-   */
-  static setClassOrTypeIsMetadataLayerGroup(layerConfig: ConfigClassOrType, isMetadataLayerGroup: boolean): void {
-    if (layerConfig instanceof ConfigBaseClass) {
-      layerConfig.setIsMetadataLayerGroup(isMetadataLayerGroup);
-    } else {
-      // eslint-disable-next-line no-param-reassign
-      layerConfig.isMetadataLayerGroup = isMetadataLayerGroup;
-    }
   }
 
   // #endregion

@@ -37,20 +37,23 @@ import type {
   TypeLayerMetadataVector,
   TypeGeoviewLayerType,
 } from '@/api/types/layer-schema-types';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import type { TypeLegendItem } from '@/core/components/layers/types';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { SnackbarType } from '@/core/utils/notifications';
 import { NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { LayerNotQueryableError, LayerStatusErrorError } from '@/core/exceptions/layer-exceptions';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
+import { GVVectorSource } from '@/geo/layer/source/vector-source';
 import { delay, whenThisThen } from '@/core/utils/utilities';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
  */
-export abstract class AbstractGVLayer extends AbstractBaseLayer {
+export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   /** The default hit tolerance the query should be using */
   static readonly DEFAULT_HIT_TOLERANCE: number = 4;
 
@@ -73,8 +76,11 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /** Style to apply to the vector layer. */
   #layerStyle?: TypeLayerStyleConfig;
 
-  /** Boolean indicating if the layer should be included in time awareness functions such as the Time Slider. True by default. */
-  #isTimeAware: boolean;
+  /** Indicates if the layer is currently queryable */
+  #queryable: boolean;
+
+  /** Indicates if the layer is currently hoverable */
+  #hoverable: boolean;
 
   /** Keep all callback delegate references */
   #onLayerStyleChangedHandlers: StyleChangedDelegate[] = [];
@@ -103,6 +109,12 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /** Keep all callback delegate references */
   #onLayerMessageHandlers: LayerMessageDelegate[] = [];
 
+  /** Keep all callback delegate references */
+  #onLayerQueryableChangedHandlers: LayerQueryableChangedDelegate[] = [];
+
+  /** Keep all callback delegate references */
+  #onLayerHoverableChangedHandlers: LayerHoverableChangedDelegate[] = [];
+
   /**
    * Constructs a GeoView layer to manage an OpenLayer layer.
    * @param {Source} olSource - The OpenLayer Source.
@@ -112,9 +124,9 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     super(layerConfig);
     this.#olSource = olSource;
 
-    // TODO: Get rid of this #isTimeAware attribute and use layerConfig.getIsTimeAware() instead (like getExternalFragmentsOrder, etc)
-    // Boolean indicating if the layer should be included in time awareness functions such as the Time Slider.
-    this.#isTimeAware = layerConfig.getGeoviewLayerConfig()?.isTimeAware ?? true; // default: true
+    // Copy the queryable flag, we'll work with this and the config remains static
+    this.#queryable = layerConfig.getInitialSettings()?.states?.queryable ?? true;
+    this.#hoverable = layerConfig.getInitialSettings()?.states?.hoverable ?? true;
 
     // If there is a layer style in the config, set it in the layer
     const style = layerConfig.getLayerStyle();
@@ -299,7 +311,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       this.getLayerConfig().updateLayerStatusParent();
 
       // Emit about the error
-      this.emitMessage('layers.errorNotLoaded', [this.getLayerName()], 'error', true);
+      this.#emitError(event, 'layers.errorNotLoaded');
     } else {
       // We've already emitted an error to the user about the layer being in error, skip so that we don't spam
     }
@@ -328,7 +340,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       this.getLayerConfig().updateLayerStatusParent();
 
       // Emit about the error
-      this.emitMessage('layers.errorImageLoad', [this.getLayerName()], 'error', true);
+      this.#emitError(event, 'layers.errorImageLoad');
     } else {
       // We've already emitted an error to the user about the layer being in error, skip
     }
@@ -363,11 +375,11 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   /**
    * Overridable function to get all feature information for all the features stored in the layer.
    * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
-   * @param {AbortController?} abortController - The optional abort controller.
+   * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getAllFeatureInfo(map: OLMap, abortController: AbortController | undefined = undefined): Promise<TypeFeatureInfoEntry[]> {
+  protected getAllFeatureInfo(map: OLMap, abortController?: AbortController): Promise<TypeFeatureInfoEntry[]> {
     // Crash on purpose
     throw new NotImplementedError(`getAllFeatureInfo not implemented on layer path ${this.getLayerPath()}`);
   }
@@ -377,7 +389,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @param {OLMap} map - The Map where to get Feature Info At Pixel from.
    * @param {Pixel} location - The pixel coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-   * @param {AbortController?} abortController - The optional abort controller.
+   * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected getFeatureInfoAtPixel(
@@ -395,7 +407,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.
    * @param {Coordinate} location - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-   * @param {AbortController?} abortController - The optional abort controller.
+   * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected getFeatureInfoAtCoordinate(
@@ -415,7 +427,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @param {OLMap} map - The Map where to get Feature Info At LonLat from.
    * @param {Coordinate} lonlat - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-   * @param {AbortController?} abortController - The optional abort controller.
+   * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected getFeatureInfoAtLonLat(
@@ -435,7 +447,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @param {OLMap} map - The Map where to get Feature using BBox from.
    * @param {Coordinate} location - The bounding box that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-   * @param {AbortController?} abortController - The optional abort controller.
+   * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected getFeatureInfoUsingBBox(
@@ -455,7 +467,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @param {OLMap} map - The Map where to get Feature Info using Polygon from.
    * @param {Coordinate} location - The polygon that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-   * @param {AbortController?} abortController - The optional abort controller.
+   * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected getFeatureInfoUsingPolygon(
@@ -580,6 +592,43 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   }
 
   /**
+   * Gets the style item visibility on the layer.
+   * @param {TypeLegendItem} item - The style item to toggle visibility on
+   * @returns {boolean} The visibility of the style item
+   */
+  getStyleItemVisibility(item: TypeLegendItem): boolean {
+    // Get the style config
+    const geometryStyleConfig = this.getStyle()![item.geometryType];
+
+    // Get all styles with the label matching the name of the clicked item
+    const styleInfos = geometryStyleConfig?.info.filter((styleInfo) => styleInfo.label === item.name);
+    const styleInfosVisible = styleInfos?.filter((styleInfo) => styleInfo.visible ?? false);
+
+    // Return if all visible
+    return styleInfosVisible?.length === styleInfos?.length;
+  }
+
+  /**
+   * Sets the style item visibility on the layer and refresh it.
+   * @param {TypeLegendItem} item - The style item to toggle visibility on
+   * @param {boolean} visibility - The visibility of the style item
+   */
+  setStyleItemVisibility(item: TypeLegendItem, visibility: boolean): void {
+    // Get the style config
+    const geometryStyleConfig = this.getStyle()![item.geometryType];
+
+    // Get all styles with the label matching the name of the clicked item and update their visibility
+    const styleInfos = geometryStyleConfig?.info.filter((styleInfo) => styleInfo.label === item.name);
+    styleInfos?.forEach((styleInfo) => {
+      // eslint-disable-next-line no-param-reassign
+      styleInfo.visible = visibility;
+    });
+
+    // Force a re-render of the layer source (this is required if there are classes)
+    this.getOLLayer().changed();
+  }
+
+  /**
    * Gets the bounds for the layer in the given projection.
    * @param {OLProjection} projection - The projection to get the bounds into.
    * @param {number} stops - The number of stops to use to generate the extent.
@@ -587,6 +636,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    */
   getBounds(projection: OLProjection, stops: number): Extent | undefined {
     // Redirect to overridable method
+    // TODO: REFACTOR - ALEX - Review all onGetBounds() to see how they can be optimized now that the initialSettings extent and bounds have been clarified
     return this.onGetBounds(projection, stops);
   }
 
@@ -603,7 +653,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @returns {boolean} The flag indicating if the layer should be included in time awareness functions such as the Time Slider. True by default.
    */
   getIsTimeAware(): boolean {
-    return this.#isTimeAware;
+    return this.getLayerConfig().getGeoviewLayerConfig()?.isTimeAware ?? true;
   }
 
   /**
@@ -614,6 +664,48 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
   getInVisibleRange(currentZoom: number | undefined): boolean {
     if (!currentZoom) return false;
     return currentZoom > this.getMinZoom() && currentZoom <= this.getMaxZoom();
+  }
+
+  /**
+   * Indicates if the layer is currently queryable.
+   * @returns {boolean} The currently queryable flag.
+   */
+  getQueryable(): boolean {
+    return this.#queryable;
+  }
+
+  /**
+   * Sets if the layer is currently queryable.
+   * @param {boolean} queryable - The queryable value.
+   */
+  setQueryable(queryable: boolean): void {
+    // Get the layer config
+    const layerConfig = this.getLayerConfig();
+
+    // If the source is not queryable
+    if (!layerConfig.getQueryableSourceDefaulted()) throw new LayerNotQueryableError(layerConfig.layerPath, this.getLayerName());
+
+    // Go for it
+    this.#queryable = queryable;
+    this.#emitLayerQueryableChanged({ queryable });
+  }
+
+  /**
+   * Indicates if the layer is currently hoverable.
+   * @returns {boolean} The currently hoverable flag.
+   */
+  getHoverable(): boolean {
+    return this.#hoverable;
+  }
+
+  /**
+   * Sets if the layer is currently hoverable.
+   * @param {boolean} hoverable - The hoverable value.
+   */
+  setHoverable(hoverable: boolean): void {
+    // Go for it
+    this.#hoverable = hoverable;
+    this.#emitLayerHoverableChanged({ hoverable });
   }
 
   /**
@@ -654,7 +746,7 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
    * @param {QueryType} queryType - The type of query to perform.
    * @param {TypeLocation} location - An pixel, coordinate or polygon that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-   * @param {AbortController?} abortController - The optional abort controller.
+   * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} The feature info table.
    */
   async getFeatureInfo(
@@ -664,15 +756,6 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     queryGeometry: boolean = true,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
-    // Get the layer config
-    const layerConfig = this.getLayerConfig();
-
-    // If the layer is not queryable
-    if (!layerConfig.getQueryableDefaulted()) {
-      // Throw error
-      throw new LayerNotQueryableError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
-    }
-
     // Log
     logger.logTraceCore('ABSTRACT-GV-LAYERS - getFeatureInfo', queryType);
     const logMarkerKey = `${queryType}`;
@@ -763,6 +846,25 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
       // If the layer was first loaded
       return this.loadedOnce;
+    }, timeout);
+  }
+
+  /**
+   * Utility function allowing to wait for the layer to be loaded at least once.
+   * @param {number} timeout - A timeout for the period to wait for. Defaults to 30,000 ms.
+   * @returns {Promise<boolean>} A Promise that resolves when the layer has been loaded at least once.
+   */
+  waitLoadedStatus(timeout: number = 30000): Promise<boolean> {
+    // Create a promise and wait until the layer is first loaded
+    return whenThisThen(() => {
+      // If the layer is in error, abort the waiting
+      if (this.getLayerStatus() === 'error') {
+        // The layer is in error, throw error
+        throw new LayerStatusErrorError(this.getGeoviewLayerId(), this.getLayerName());
+      }
+
+      // If the layer status is loaded
+      return this.getLayerStatus() === 'loaded';
     }, timeout);
   }
 
@@ -936,6 +1038,41 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
       },
       (error: unknown) => logger.logPromiseFailed('Delay in #startLoadingPeriodWatcher failed', error)
     );
+  }
+
+  /**
+   * Emits a user-facing error message for a source loading error.
+   * This method attempts to extract a {@link GeoViewError} from the event target
+   * when the source is a {@link GVVectorSource}. If a GeoViewError is found, its
+   * localized message key and parameters are emitted. Otherwise, a default
+   * error message is emitted using the provided fallback message key.
+   * @param {Event} event -
+   * The load error event emitted by the vector source. The event target is
+   * expected to be the source that triggered the error.
+   * @param {string} defaultErrorMessageKey -
+   * The localization key to use when no {@link GeoViewError} is available
+   * on the source.
+   */
+  #emitError(event: Event, defaultErrorMessageKey: string): void {
+    // Get the error
+    const layerSource = event.target;
+
+    // If the source is GVVectorSource and the error inside is a GeoViewError
+    let emitted: boolean = false;
+    if (layerSource instanceof GVVectorSource) {
+      const loaderError = layerSource.getLoaderError();
+      if (loaderError instanceof GeoViewError) {
+        // Emit about the error
+        this.emitMessage(loaderError.messageKey, (loaderError.messageParams as string[]) || [], 'error', true);
+        emitted = true;
+      }
+    }
+
+    // If not emitted
+    if (!emitted) {
+      // Emit about the error
+      this.emitMessage(defaultErrorMessageKey, [this.getLayerName()], 'error', true);
+    }
   }
 
   // #endregion METHODS
@@ -1190,6 +1327,62 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
     EventHelper.offEvent(this.#onLayerMessageHandlers, callback);
   }
 
+  /**
+   * Emits queryable changed event.
+   * @param {LayerQueryableChangedEvent} event - The event to emit
+   * @private
+   */
+  #emitLayerQueryableChanged(event: LayerQueryableChangedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerQueryableChangedHandlers, event);
+  }
+
+  /**
+   * Registers an queryable changed event handler.
+   * @param {LayerQueryableChangedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerQueryableChanged(callback: LayerQueryableChangedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerQueryableChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters an queryable changed event handler.
+   * @param {LayerQueryableChangedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerQueryableChanged(callback: LayerQueryableChangedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerQueryableChangedHandlers, callback);
+  }
+
+  /**
+   * Emits hoverable changed event.
+   * @param {LayerHoverableChangedEvent} event - The event to emit
+   * @private
+   */
+  #emitLayerHoverableChanged(event: LayerHoverableChangedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerHoverableChangedHandlers, event);
+  }
+
+  /**
+   * Registers an hoverable changed event handler.
+   * @param {LayerHoverableChangedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerHoverableChanged(callback: LayerHoverableChangedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerHoverableChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters an hoverable changed event handler.
+   * @param {LayerHoverableChangedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerHoverableChanged(callback: LayerHoverableChangedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerHoverableChangedHandlers, callback);
+  }
+
   // #endregion EVENTS
 
   // #region STATIC
@@ -1208,16 +1401,16 @@ export abstract class AbstractGVLayer extends AbstractBaseLayer {
 
     // If a className is defined in the initial settings, set it in the layer options
     // eslint-disable-next-line no-param-reassign
-    if (layerConfig.getInitialSettings()?.className !== undefined) layerOptions.className = layerConfig.getInitialSettings().className;
+    if (layerConfig.getInitialSettingsClassName() !== undefined) layerOptions.className = layerConfig.getInitialSettingsClassName();
 
     // If an extent is defined in the initial settings, set it in the layer options
     // eslint-disable-next-line no-param-reassign
-    if (layerConfig.getInitialSettings()?.extent !== undefined) layerOptions.extent = layerConfig.getInitialSettings().extent;
+    if (layerConfig.getInitialSettingsExtent() !== undefined) layerOptions.extent = layerConfig.getInitialSettingsExtent();
 
     // If an opacity is defined in the initial settings, set it in the layer options
     if (layerConfig.getInitialSettings()?.states?.opacity !== undefined)
       // eslint-disable-next-line no-param-reassign
-      layerOptions.opacity = layerConfig.getInitialSettings().states!.opacity;
+      layerOptions.opacity = layerConfig.getInitialSettings()?.states!.opacity;
   }
 
   /**
@@ -1647,5 +1840,31 @@ export type LayerMessageEvent = {
  * Define a delegate for the event handler function signature
  */
 export type LayerMessageDelegate = EventDelegateBase<AbstractGVLayer, LayerMessageEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerQueryableChangedEvent = {
+  // The flag
+  queryable: boolean;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type LayerQueryableChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, LayerQueryableChangedEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerHoverableChangedEvent = {
+  // The flag
+  hoverable: boolean;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type LayerHoverableChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, LayerHoverableChangedEvent, void>;
 
 // #endregion EVENT TYPES

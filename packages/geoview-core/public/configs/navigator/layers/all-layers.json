@@ -11,6 +11,10 @@
     },
     "listOfGeoviewLayerConfig": [
       {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerId": "ccc75c12-5acc-4a6a-959f-ef6f621147b9"
+      },
+      {
         "geoviewLayerId": "geojsonLYR1",
         "geoviewLayerName": "GeoJSON Sample",
         "metadataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta",
@@ -70,20 +74,15 @@
         ]
       },
       {
-        "geoviewLayerId": "ESRIImageLYR2",
-        "geoviewLayerName": "Max Temp",
+        "geoviewLayerId": "ESRIImageLYR3",
+        "geoviewLayerName": "Heat Wave",
         "geoviewLayerType": "esriImage",
-        "metadataAccessPath": "https://www5.agr.gc.ca/atlas/rest/services/imageservices/annual_crop_inventory_2022/ImageServer",
+        "metadataAccessPath": "https://agriculture.canada.ca/imagery-images/rest/services/agclimate/heat_wave/ImageServer",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "annual_crop_inventory_2022",
-            "layerName": "Crop Inventory 2022"
+            "layerId": "heat_wave"
           }
         ]
-      },
-      {
-        "geoviewLayerType": "geoCore",
-        "geoviewLayerId": "ccc75c12-5acc-4a6a-959f-ef6f621147b9"
       },
       {
         "geoviewLayerId": "wfsLYR2",

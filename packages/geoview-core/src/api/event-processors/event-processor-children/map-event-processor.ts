@@ -58,7 +58,6 @@ import type { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stor
 import { getAppCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import type { TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
-import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
@@ -87,6 +86,9 @@ import type { TypeTimeSliderProps } from '@/core/stores/store-interface-and-inti
 // GV The reason for this pattern is so that UI components and processes performing back-end code
 // GV both end up running code in MapEventProcessor (UI: via 'actions' and back-end code via 'MapEventProcessor')
 export class MapEventProcessor extends AbstractEventProcessor {
+  /** The minimal delay to wait for the zoom, to be sure.. */
+  static readonly ZOOM_MIN_DELAY = 500;
+
   /**
    * Initializes the map controls
    * @param {string} mapId - The map id being initialized
@@ -167,10 +169,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.setInteraction(mapId, store.getState().mapState.interaction);
   }
 
-  // **********************************************************
-  // Static functions for Typescript files to access store actions
-  // **********************************************************
-
   // #region
   /**
    * Shortcut to get the Map state for a given map id
@@ -189,6 +187,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - map Id
    * @returns {MapViewer} The Map viewer instance
    */
+  // TODO: REFACTOR? - These functions are the only place in the code where we still import api from '@/app'.
   static getMapViewer(mapId: string): MapViewer {
     return api.getMapViewer(mapId);
   }
@@ -199,6 +198,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - map Id
    * @returns {LayerApi} The Map viewer layer API instance
    */
+  // TODO: REFACTOR? - These functions are the only place in the code where we still import api from '@/app'.
   static getMapViewerLayerAPI(mapId: string): LayerApi {
     return api.getMapViewer(mapId).layer;
   }
@@ -209,8 +209,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - map Id
    * @returns {PluginsContainer} The map plugins container
    */
+  // TODO: REFACTOR? - These functions are the only place in the code where we still import api from '@/app'.
   static async getMapViewerPlugins(mapId: string): Promise<PluginsContainer> {
-    // TODO: Check - Remove the try/catch here to force explicit case-by-case handling instead of via shared function.
     await whenThisThen(() => api && api.hasMapViewer(mapId));
     return api.getMapViewer(mapId).plugins;
   }
@@ -507,6 +507,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // use store action to set projection value in store and apply new view to the map
       this.getMapStateProtected(mapId).setterActions.setProjection(projectionCode);
 
+      // Clear the WMS layers that had an override CRS
+      this.getMapViewerLayerAPI(mapId).clearWMSLayersWithOverrideCRS();
+
+      // Clear any loaded vector features in the data table
+      this.getMapViewerLayerAPI(mapId).clearVectorFeaturesFromAllFeatureInfoLayerSet();
+
       // Before changing the view, clear the basemaps right away to prevent a moment where a
       // vector tile basemap might, momentarily, be in different projection than the view.
       // Note: It seems that since OpenLayers 10.5 OpenLayers throws an exception about this. So this line was added.
@@ -576,12 +582,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // Use a Promise and resolve it when the duration expired
     return new Promise((resolve) => {
-      setTimeout(
-        () => {
-          resolve();
-        },
-        (duration || OL_ZOOM_DURATION) + 150
-      );
+      setTimeout(() => {
+        resolve();
+      }, duration + MapEventProcessor.ZOOM_MIN_DELAY);
     });
     // GV No need to save in the store, because this will trigger an event on MapViewer which will take care of updating the store
   }
@@ -809,8 +812,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // Get bounds and highlight a bounding box for the layer
     const bounds = LegendEventProcessor.getLayerBounds(mapId, layerPath);
-
-    if (bounds && bounds[0] !== Infinity) this.getMapStateProtected(mapId).actions.highlightBBox(bounds, true);
+    if (bounds) this.getMapStateProtected(mapId).actions.highlightBBox(bounds, true);
 
     return layerPath;
   }
@@ -822,6 +824,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static setCurrentBasemapOptions(mapId: string, basemapOptions: TypeBasemapOptions): void {
     this.getMapStateProtected(mapId).setterActions.setCurrentBasemapOptions(basemapOptions);
+  }
+
+  static getMapHoverFeatureInfo(mapId: string): TypeHoverFeatureInfo | undefined | null {
+    return this.getMapStateProtected(mapId).hoverFeatureInfo;
   }
 
   static setMapLayerHoverable(mapId: string, layerPath: string, hoverable: boolean): void {
@@ -855,9 +861,24 @@ export class MapEventProcessor extends AbstractEventProcessor {
     });
   }
 
+  /**
+   * Sets or toggles the visibility of a specific layer within a map.
+   * If the layer exists at the provided layer path for the given map, the method delegates
+   * the visibility change to the map viewer's layer API. If `newValue` is provided, the layer
+   * visibility is explicitly set to that value; otherwise, the visibility is toggled.
+   * @param {string} mapId - The identifier of the map containing the target layer.
+   * @param {string} layerPath - The path of the layer whose visibility is being changed.
+   * @param {boolean} [newValue] - Optional. The new visibility value. If omitted, the visibility is toggled.
+   * @returns {boolean} The resulting visibility state of the layer after the operation, or `false`
+   * if the layer does not exist at the given path.
+   */
   static setOrToggleMapLayerVisibility(mapId: string, layerPath: string, newValue?: boolean): boolean {
-    // Redirect to layerAPI
-    return this.getMapViewerLayerAPI(mapId).setOrToggleLayerVisibility(layerPath, newValue);
+    // If the GV layer exists at the layer path
+    if (this.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath)) {
+      // Redirect to layerAPI
+      return this.getMapViewerLayerAPI(mapId).setOrToggleLayerVisibility(layerPath, newValue);
+    }
+    return false;
   }
 
   /**
@@ -878,6 +899,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
   }
 
+  /**
+   * Sets the visibility of **all layers** in a given map.
+   * Iterates through all GeoView layers associated with the specified map ID and
+   * applies the provided visibility value. Only layers whose current visibility
+   * differs from the desired state will be updated.
+   * @param {string} mapId - The identifier of the map whose layers will be updated.
+   * @param {boolean} newVisibility - The visibility state to apply to all layers (`true` to show, `false` to hide).
+   */
   static setAllMapLayerVisibility(mapId: string, newVisibility: boolean): void {
     // Set the visibility for all layers
     const layerApi = this.getMapViewerLayerAPI(mapId);
@@ -888,6 +917,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     });
   }
 
+  // TODO: REFACTOR? - These functions are the only place in the code where we still import api from '@/app'.
   static reorderLayer(mapId: string, layerPath: string, move: number): void {
     // Redirect to state API
     api.getMapViewer(mapId).stateApi.reorderLayers(mapId, layerPath, move);
@@ -1060,8 +1090,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // Store state will be updated by map event
       this.getMapViewer(mapId).getView().fit(extent, mergedOptions);
 
-      // Wait a bit and return. The +150 is just to make sure.
-      return delay((mergedOptions.duration || DEFAULT_OL_FITOPTIONS.duration!) + 150);
+      // Wait a bit and return.
+      return delay(mergedOptions.duration! + MapEventProcessor.ZOOM_MIN_DELAY);
     }
 
     // Invalid extent
@@ -1311,15 +1341,15 @@ export class MapEventProcessor extends AbstractEventProcessor {
         visible: orderedLayerInfo.visible,
         opacity: legendLayerInfo.opacity,
         legendCollapsed: orderedLayerInfo.legendCollapsed,
-        queryable: orderedLayerInfo.queryable,
+        queryable: orderedLayerInfo.queryableState,
         hoverable: orderedLayerInfo.hoverable,
       },
-      controls: legendLayerInfo.controls,
-      bounds: layerEntryConfig.getInitialSettings().bounds,
-      className: layerEntryConfig.getInitialSettings().className,
-      extent: layerEntryConfig.getInitialSettings().extent,
-      minZoom: layerEntryConfig.getInitialSettings().minZoom,
-      maxZoom: layerEntryConfig.getInitialSettings().maxZoom,
+      controls: layerEntryConfig.getInitialSettings()?.controls,
+      bounds: layerEntryConfig.getInitialSettingsBounds(),
+      className: layerEntryConfig.getInitialSettingsClassName(),
+      extent: layerEntryConfig.getInitialSettingsExtent(),
+      minZoom: layerEntryConfig.getInitialSettings()?.minZoom,
+      maxZoom: layerEntryConfig.getInitialSettings()?.maxZoom,
     };
   }
 
@@ -1379,13 +1409,16 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Get initial settings
     const initialSettings = this.#getInitialSettings(layerEntryConfig, orderedLayerInfo!, legendLayerInfo!);
 
-    const source = (layerEntryConfig as VectorLayerEntryConfig).source
-      ? { ...(layerEntryConfig as VectorLayerEntryConfig).source }
-      : undefined;
+    // Clone the source object
+    let source;
+    if (layerEntryConfig instanceof AbstractBaseLayerEntryConfig) {
+      source = layerEntryConfig.cloneSource();
+    }
 
     // Only use feature info specified in original config, not drawn from services
     if (source?.featureInfo) delete source?.featureInfo;
-    if (configLayerEntryConfig?.source?.featureInfo && source) source.featureInfo = configLayerEntryConfig.source.featureInfo;
+    const configLayerEntryConfigFeatureInfo = AbstractBaseLayerEntryConfig.getClassOrTypeFeatureInfo(configLayerEntryConfig);
+    if (source && configLayerEntryConfigFeatureInfo) source.featureInfo = configLayerEntryConfigFeatureInfo;
 
     if (source?.dataAccessPath && isGeocore && overrideGeocoreServiceNames !== true) source.dataAccessPath = undefined;
 
