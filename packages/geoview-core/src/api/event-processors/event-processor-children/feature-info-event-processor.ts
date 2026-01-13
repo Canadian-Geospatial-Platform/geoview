@@ -234,6 +234,16 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Repeats the last feature info query if any.
+   * @param {string} mapId - The map identifier
+   * @returns {void}
+   * @static
+   */
+  static repeatLastQuery(mapId: string): void {
+    MapEventProcessor.getMapViewerLayerAPI(mapId).featureInfoLayerSet.repeatLastQuery();
+  }
+
+  /**
    * Propagates feature info layer sets to the store. The update of the array will also trigger an update in a batched manner.
    *
    * @param {string} mapId - The map identifier of the modified result set.
