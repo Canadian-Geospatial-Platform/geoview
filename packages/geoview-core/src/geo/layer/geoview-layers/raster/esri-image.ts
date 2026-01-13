@@ -1,4 +1,5 @@
 import { ImageArcGISRest } from 'ol/source';
+import type { Projection as OLProjection } from 'ol/proj';
 import type { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
 
 import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
@@ -29,13 +30,13 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {TypeEsriImageLayerConfig} layerConfig The layer configuration.
    */
   constructor(layerConfig: TypeEsriImageLayerConfig) {
-    // TODO: Check - Rework this serviceDateFormat, serverDateFragmentsOrder, externalDateFormat and DateMgt.getDateFragmentsOrder stuff
-    // TO.DOCONT: Why are we setting serviceDateFormat to default only in esri dynamic and esri image?
-    // TO.DOCONT: I've added getters/setters in ConfigBaseClass in preparation to simplify these dates processing
-    // eslint-disable-next-line no-param-reassign
-    layerConfig.serviceDateFormat ??= 'DD/MM/YYYY HH:MM:SSZ';
     super(layerConfig);
+
+    // Initialize the serverDateFragmentsOrder if not already set
+    this.initServerDateFragmentsOrderFromServiceDateFormat();
   }
+
+  // #region OVERRIDES
 
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
@@ -46,20 +47,26 @@ export class EsriImage extends AbstractGeoViewRaster {
     await this.onFetchServiceMetadata();
 
     // Redirect
-    // TODO: Check - Config init - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
     return Promise.resolve(
-      EsriImage.createGeoviewLayerConfigSimple(this.geoviewLayerId, this.geoviewLayerName, this.metadataAccessPath, false)
+      EsriImage.createGeoviewLayerConfigSimple(
+        this.getGeoviewLayerId(),
+        this.getGeoviewLayerName(),
+        this.getMetadataAccessPath(),
+        this.getGeoviewLayerConfig().isTimeAware
+      )
     );
   }
 
   /**
    * Overrides the way the layer metadata is processed.
    * @param {EsriImageLayerEntryConfig} layerConfig - The layer entry configuration to process.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {OLProjection?} [mapProjection] - The map projection.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<EsriImageLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
   protected override onProcessLayerMetadata(
     layerConfig: EsriImageLayerEntryConfig,
+    mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<EsriImageLayerEntryConfig> {
     return EsriUtilities.commonProcessLayerMetadata(this, layerConfig, abortSignal);
@@ -81,6 +88,10 @@ export class EsriImage extends AbstractGeoViewRaster {
     return gvLayer;
   }
 
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
+
   /**
    * Initializes a GeoView layer configuration for an Esri Image layer.
    * This method creates a basic TypeGeoviewLayerConfig using the provided
@@ -89,15 +100,18 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerId - A unique identifier for the layer.
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @param {boolean?} [isTimeAware] - Indicates whether the layer supports time-based filtering.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   * @static
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
-    metadataAccessPath: string
+    metadataAccessPath: string,
+    isTimeAware?: boolean
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const myLayer = new EsriImage({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeEsriImageLayerConfig);
+    const myLayer = new EsriImage({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeEsriImageLayerConfig);
     return myLayer.initGeoViewLayerEntries();
   }
 
@@ -108,14 +122,15 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata.
-   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @returns {TypeEsriImageLayerConfig} The constructed configuration object for the Esri Image layer.
+   * @static
    */
   static createGeoviewLayerConfigSimple(
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
-    isTimeAware: boolean
+    isTimeAware: boolean | undefined
   ): TypeEsriImageLayerConfig {
     const geoviewLayerConfig: TypeEsriImageLayerConfig = {
       geoviewLayerId,
@@ -149,15 +164,16 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata.
-   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeEsriImageLayerConfig} The constructed configuration object for the Esri Image layer.
+   * @static
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
-    isTimeAware: boolean,
+    isTimeAware: boolean | undefined,
     layerEntries: TypeLayerEntryShell[]
   ): TypeEsriImageLayerConfig {
     const geoviewLayerConfig: TypeEsriImageLayerConfig = {
@@ -195,6 +211,7 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {string} url - The URL of the service endpoint.
    * @param {boolean} isTimeAware - Indicates if the layer is time aware.
    * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
+   * @static
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -217,18 +234,22 @@ export class EsriImage extends AbstractGeoViewRaster {
    * @param {EsriImageLayerEntryConfig} layerConfig - The configuration for the EsriImage layer.
    * @returns A fully configured ImageArcGISRest source.
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   * @static
    */
   static createEsriImageSource(layerConfig: EsriImageLayerEntryConfig): ImageArcGISRest {
+    // Get the source
+    const source = layerConfig.getSource();
+
     const sourceOptions: SourceOptions = {
       url: layerConfig.getDataAccessPath(),
       attributions: layerConfig.getAttributions(),
       params: {
         LAYERS: `show:${layerConfig.layerId}`,
-        ...(layerConfig.source.transparent !== undefined && { transparent: layerConfig.source.transparent }),
-        ...(layerConfig.source.format && { format: layerConfig.source.format }),
+        ...(source.transparent !== undefined && { transparent: source.transparent }),
+        ...(source.format && { format: source.format }),
       },
-      crossOrigin: layerConfig.source.crossOrigin ?? 'Anonymous',
-      projection: layerConfig.source.projection ? `EPSG:${layerConfig.source.projection}` : undefined,
+      crossOrigin: source.crossOrigin ?? 'Anonymous',
+      projection: layerConfig.getProjectionWithEPSG(),
     };
 
     // Create the source
@@ -247,4 +268,6 @@ export class EsriImage extends AbstractGeoViewRaster {
     // Return the source
     return olSource;
   }
+
+  // #endregion STATIC METHODS
 }

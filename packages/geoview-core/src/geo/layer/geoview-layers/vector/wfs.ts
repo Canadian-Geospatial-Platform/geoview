@@ -1,15 +1,26 @@
+import type { Feature } from 'ol';
+import type { ReadOptions } from 'ol/format/Feature';
 import type { Options as SourceOptions } from 'ol/source/Vector';
-import { WFS as FormatWFS } from 'ol/format';
-import type { Vector as VectorSource } from 'ol/source';
-import type Feature from 'ol/Feature';
-import { bbox } from 'ol/loadingstrategy';
-import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection } from 'ol/proj';
+import { bbox } from 'ol/loadingstrategy';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
-import { type TypeOutfields, type TypeOutfieldsType } from '@/api/types/map-schema-types';
-import type { TypeGeoviewLayerConfig, WFSJsonResponse, TypeMetadataWFS, VectorStrategy } from '@/api/types/layer-schema-types';
+import {
+  type TypeLayerStyleSettings,
+  type TypeOutfields,
+  type TypeOutfieldsType,
+  type TypeStyleGeometry,
+} from '@/api/types/map-schema-types';
+import type {
+  TypeGeoviewLayerConfig,
+  WFSJsonResponse,
+  TypeMetadataWFS,
+  VectorStrategy,
+  TypeMetadataWFSOperationMetadataOperationParameter,
+  TypeMetadataWFSOperationMetadataOperationParameterValue,
+  TypeMetadataWFSTextOnly,
+} from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { findPropertyByRegexPath } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
@@ -23,6 +34,7 @@ import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { GeoUtilities } from '@/geo/utils/utilities';
+import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
 
 export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geoviewLayerType'> {
@@ -48,6 +60,8 @@ export class WFS extends AbstractGeoViewVector {
     super(layerConfig);
   }
 
+  // #region OVERRIDES
+
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
@@ -60,7 +74,7 @@ export class WFS extends AbstractGeoViewVector {
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<T = TypeMetadataWFS>} A promise with the metadata or undefined when no metadata for the particular layer type.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities).
@@ -69,14 +83,18 @@ export class WFS extends AbstractGeoViewVector {
     let metadata;
     try {
       // Fetch it
-      metadata = await WFS.fetchMetadata(this.metadataAccessPath, abortSignal);
+      metadata = await WFS.fetchMetadata(this.getMetadataAccessPath(), abortSignal);
     } catch (error: unknown) {
       // Throw
-      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName(), formatError(error));
+      throw new LayerServiceMetadataUnableToFetchError(
+        this.getGeoviewLayerId(),
+        this.getLayerEntryNameOrGeoviewLayerName(),
+        formatError(error)
+      );
     }
 
     // If not found
-    if (!metadata) throw new LayerNoCapabilitiesError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName());
+    if (!metadata) throw new LayerNoCapabilitiesError(this.getGeoviewLayerId(), this.getLayerEntryNameOrGeoviewLayerName());
 
     // Return it
     return metadata as T;
@@ -84,14 +102,14 @@ export class WFS extends AbstractGeoViewVector {
 
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities).
    */
   protected override async onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig> {
     // Fetch metadata
-    const rootUrl = this.metadataAccessPath;
+    const rootUrl = this.getMetadataAccessPath();
     const metadata = await this.onFetchServiceMetadata(abortSignal);
 
     // The entries
@@ -120,9 +138,15 @@ export class WFS extends AbstractGeoViewVector {
     }
 
     // Redirect
-    // TODO: Check - Config init - Check if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
     // TODO: Check - Config init - Check if there's a way to better determine the vector strategy flag, defaults to 'all', how is it used here?
-    return WFS.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, rootUrl, false, 'all', entries);
+    return WFS.createGeoviewLayerConfig(
+      this.getGeoviewLayerId(),
+      this.getGeoviewLayerName(),
+      rootUrl,
+      this.getGeoviewLayerConfig().isTimeAware,
+      'all',
+      entries
+    );
   }
 
   /**
@@ -147,27 +171,20 @@ export class WFS extends AbstractGeoViewVector {
         if (foundTitle) layerConfig.setLayerName(foundTitle);
       }
 
-      // Validate and update the extent initial settings
-      layerConfig.validateUpdateInitialSettingsExtent();
-
       // If no bounds defined in the initial settings and an extent is defined in the metadata
-      if (!layerConfig.getInitialSettings()?.bounds && featureType['ows:WGS84BoundingBox']) {
-        // TODO: Check - This additional processing seem valid, but is it at the right place? A bit confusing with the rest of the codebase.
-        // TODO: Refactor - Layers refactoring. Validate if this code is still being executed after the layers migration. This code may easily have been forgotten.
+      let bounds = layerConfig.getInitialSettingsBounds();
+      if (!bounds && featureType['ows:WGS84BoundingBox']) {
         let lowerCornerRaw = featureType['ows:WGS84BoundingBox']['ows:LowerCorner'] as string;
         if (typeof lowerCornerRaw === 'object' && '#text' in lowerCornerRaw) lowerCornerRaw = lowerCornerRaw['#text'];
         let upperCornerRaw = featureType['ows:WGS84BoundingBox']['ows:UpperCorner'] as string;
         if (typeof upperCornerRaw === 'object' && '#text' in upperCornerRaw) upperCornerRaw = upperCornerRaw['#text'];
         const lowerCorner = lowerCornerRaw.split(' ');
         const upperCorner = upperCornerRaw.split(' ');
-        const bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
+        bounds = [Number(lowerCorner[0]), Number(lowerCorner[1]), Number(upperCorner[0]), Number(upperCorner[1])];
 
-        // Update the bounds initial settings
-        layerConfig.updateInitialSettings({ bounds: bounds });
+        // Validate and update the bounds initial settings
+        layerConfig.initInitialSettingsBoundsFromMetadata(bounds);
       }
-
-      // Validate and update the bounds initial settings
-      layerConfig.validateUpdateInitialSettingsBounds();
     } catch (error: unknown) {
       // Add a layer load error
       this.addLayerLoadError(formatError(error), layerConfig);
@@ -177,12 +194,14 @@ export class WFS extends AbstractGeoViewVector {
   /**
    * Overrides the way the layer metadata is processed.
    * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration to process.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {OLProjection?} [mapProjection] - The map projection.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    */
   protected override async onProcessLayerMetadata(
     layerConfig: VectorLayerEntryConfig,
+    mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<VectorLayerEntryConfig> {
     // Cast it
@@ -208,53 +227,102 @@ export class WFS extends AbstractGeoViewVector {
     }
 
     // Try
-    await WFS.#tryProcessLayerStylingInformationIfAny(layerConfigWFS);
+    const layerStyle = await WFS.#tryProcessLayerStylingInformationIfAny(layerConfigWFS);
+
+    // Initialize the layer style by filling the blanks with the information from the metadata
+    layerConfig.initLayerStyleFromMetadata(layerStyle);
 
     // Return the layer config
     return layerConfig;
   }
 
   /**
-   * Overrides the creation of the source configuration for the vector layer
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration.
-   * @param {SourceOptions} sourceOptions - The source options.
-   * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
-   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   * Overrides the loading of the vector features for the layer by fetching WFS data and converting it
+   * into OpenLayers {@link Feature} feature instances.
+   * @param {VectorLayerEntryConfig} layerConfig -
+   * The configuration object for the vector layer, containing source and
+   * data access information.
+   * @param {SourceOptions<Feature>} sourceOptions -
+   * The OpenLayers vector source options associated with the layer. This may be
+   * used by implementations to customize loading behavior or source configuration.
+   * @param {ReadOptions} readOptions -
+   * Options controlling how features are read, including the target
+   * `featureProjection`.
+   * @returns {Promise<Feature[]>}
+   * A promise that resolves to an array of OpenLayers features.
+   * @protected
+   * @override
    */
-  protected override onCreateVectorSource(
+  protected override async onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
-    sourceOptions: SourceOptions<Feature>
-  ): VectorSource<Feature> {
-    // Cast it
+    sourceOptions: SourceOptions<Feature>,
+    readOptions: ReadOptions
+  ): Promise<Feature[]> {
+    // Cast it to a WFS layer config
     const layerConfigWFS = layerConfig as OgcWfsLayerEntryConfig;
 
+    // Get the supported info formats
+    const featureInfoFormat = layerConfigWFS.getSupportedFormats('application/json'); // application/json by default (QGIS Server doesn't seem to provide the metadata for the output formats, use application/json)
+
+    // If one of those contain application/json, use that format to get features
+    let outputFormat = featureInfoFormat.find((format) => format.toLowerCase().includes('application/json'));
+
+    // TODO: WMS - Add support for other formats. Not quite the GV issue #3134, but similar
+
+    // TODO: ALEX - FIX THIS EXCEPTION - Exception, the geo.weather.gc.ca/geomet service says it supports application/json, but it doesn't in reality
+    if (layerConfig.getDataAccessPath().includes('//geo.weather.gc.ca/geomet')) outputFormat = undefined;
+
+    // Check if url contains metadata parameters for the getCapabilities request and reformat the urls
+    let wfsUrl = GeoUtilities.ensureServiceRequestUrlGetFeature(
+      layerConfig.getDataAccessPath(),
+      layerConfig.layerId,
+      layerConfigWFS.getVersion(),
+      outputFormat,
+      undefined,
+      undefined,
+      undefined
+    );
+
+    // if an extent is provided, use it in the url
+    if (sourceOptions.strategy === bbox && Number.isFinite(readOptions.extent?.[0])) {
+      wfsUrl = `${wfsUrl}&bbox=${readOptions.extent},${Projection.getProjectionFromString(readOptions.featureProjection)?.getCode()}`;
+    }
+
+    // If output format is json
+    let responseData;
+    if (outputFormat) {
+      // Query and read Json
+      responseData = await AbstractGeoViewVector.fetchJson(wfsUrl, layerConfig.getSource().postSettings);
+    } else {
+      // Query and read text
+      responseData = await AbstractGeoViewVector.fetchText(wfsUrl, layerConfig.getSource().postSettings);
+    }
+
+    // Check if the data is GeoJSON
+    if (GeoUtilities.isGeoJSONObject(responseData)) {
+      // Read the EPSG from the data
+      const dataEPSG = GeoUtilities.readEPSGOfGeoJSON(responseData);
+
+      // Check if we have it in Projection and try adding it if we're missing it
+      await Projection.addProjectionIfMissing(dataEPSG);
+
+      // Read the features
+      return GeoUtilities.readFeaturesFromGeoJSON(responseData, readOptions);
+    }
+
+    // Here, the output isn't GeoJSON, probably XML/GML
+
+    // Use the features response to determine the EPSG of the data, otherwise use the config otherwise force it to 4326, because OpenLayers struggles to figure it out by itself here
+    const dataEPSG = GeoUtilities.readEPSGOfGML(responseData);
+
+    // Check if we have it in Projection and try adding it if we're missing it
+    await Projection.addProjectionIfMissing(dataEPSG);
+
     // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = (extent: Extent, resolution: number, projection: OLProjection): string => {
-      // check if url contains metadata parameters for the getCapabilities request and reformat the urls
-      let sourceUrl = GeoUtilities.ensureServiceRequestUrlGetFeature(
-        layerConfig.getDataAccessPath(),
-        layerConfig.layerId,
-        layerConfigWFS.getVersion(),
-        undefined,
-        undefined,
-        undefined,
-        undefined
-      );
+    readOptions.dataProjection = dataEPSG || 'EPSG:4326'; // default: 4326
 
-      // if an extent is provided, use it in the url
-      if (sourceOptions.strategy === bbox && Number.isFinite(extent[0])) {
-        sourceUrl = `${sourceUrl}&bbox=${extent},${projection.getCode()}`;
-      }
-      return sourceUrl;
-    };
-
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.format = new FormatWFS({
-      version: layerConfigWFS.getVersion(),
-    });
-
-    // Call parent
-    return super.onCreateVectorSource(layerConfig, sourceOptions);
+    // Read the features
+    return GeoUtilities.readFeaturesFromWFS(responseData, layerConfigWFS.getVersion(), readOptions);
   }
 
   /**
@@ -271,11 +339,16 @@ export class WFS extends AbstractGeoViewVector {
     return gvLayer;
   }
 
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
+
   /**
    * Fetches the metadata for a typical WFS class.
    * @param {string} url - The url to query the metadata from.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<TypeMetadataWFS | undefined>} Promise with the metadata when fetched or undefined when capabilities weren't found.
+   * @static
    */
   static async fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataWFS | undefined> {
     // Get the GetCapabilities url
@@ -301,6 +374,7 @@ export class WFS extends AbstractGeoViewVector {
    * @param {string} layerId - The name or identifier of the layer to inspect.
    * @param {AbortSignal} [abortSignal] - Optional signal that allows the request to be aborted.
    * @returns {Promise<TypeOutfields[]>} A promise that resolves with the list of fields for the layer.
+   * @static
    */
   static async fetchMetadataAndRetrieveFieldsInfo(url: string, layerId: string, abortSignal?: AbortSignal): Promise<TypeOutfields[]> {
     // Fetch the WFS metadata
@@ -323,15 +397,18 @@ export class WFS extends AbstractGeoViewVector {
    * @param {string} geoviewLayerId - A unique identifier for the layer.
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @param {boolean?} [isTimeAware] - Indicates whether the layer supports time-based filtering.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   * @static
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
-    metadataAccessPath: string
+    metadataAccessPath: string,
+    isTimeAware?: boolean
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const myLayer = new WFS({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeWFSLayerConfig);
+    const myLayer = new WFS({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeWFSLayerConfig);
     return myLayer.initGeoViewLayerEntries();
   }
 
@@ -344,32 +421,59 @@ export class WFS extends AbstractGeoViewVector {
    * @param {TypeMetadataWFS} metadata - The parsed WFS capabilities metadata object.
    * @returns {string} The detected output format string for the DescribeFeatureType operation,
    * or an empty string if no suitable value is found.
+   * @static
    */
   static extractDescribeFeatureOutputFormat(metadata: TypeMetadataWFS): string {
-    const describeFeatureParams = metadata['ows:OperationsMetadata']['ows:Operation'][1]['ows:Parameter'];
+    // Find the operation for DescribeFeatureOutput
+    const describeFeatureOp = metadata['ows:OperationsMetadata']['ows:Operation'].find(
+      (op) => op['@attributes'].name === 'DescribeFeatureType'
+    );
 
-    const values = findPropertyByRegexPath(describeFeatureParams, /(?:Value)/);
+    // If found
+    if (describeFeatureOp) {
+      // Find the outputFormat parameter
+      let describeFeatureOperationParameter = describeFeatureOp['ows:Parameter'] as TypeMetadataWFSOperationMetadataOperationParameter[];
+      if (!Array.isArray(describeFeatureOperationParameter)) describeFeatureOperationParameter = [describeFeatureOperationParameter];
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const normalize = (input: any): string => {
-      if (input === null) return '';
-      if (typeof input === 'string') return input.trim();
-      if (typeof input === 'object' && '#text' in input) return String(input['#text']).trim();
-      return '';
-    };
+      // Now Parameter is an array, find the 'outputFormat' parameter
+      const describeOperationOutputFormat = describeFeatureOperationParameter.find((op) => op['@attributes'].name === 'outputFormat');
 
-    // Case 1: value is array (most common)
-    if (Array.isArray(values)) {
-      return normalize(values[0]);
+      // If found
+      if (describeOperationOutputFormat) {
+        // If there's an 'AllowedValues' property
+        let outputFormatValue;
+        if (typeof describeOperationOutputFormat === 'object' && 'ows:AllowedValues' in describeOperationOutputFormat) {
+          // GEO SERVER WAY
+          // Read
+          let values = describeOperationOutputFormat['ows:AllowedValues'] as TypeMetadataWFSOperationMetadataOperationParameterValue[];
+          if (!Array.isArray(values)) values = [values];
+
+          // Read first one
+          outputFormatValue = values?.[0]['ows:Value'] as (string | TypeMetadataWFSTextOnly)[];
+          if (!Array.isArray(outputFormatValue)) outputFormatValue = [outputFormatValue];
+        } else if (typeof describeOperationOutputFormat === 'object' && 'ows:Value' in describeOperationOutputFormat) {
+          // QGIS SERVER WAY
+          // Read
+          let values = describeOperationOutputFormat['ows:Value'] as (string | TypeMetadataWFSTextOnly)[];
+          if (!Array.isArray(values)) values = [values];
+
+          // Read first one
+          outputFormatValue = values?.[0];
+          if (!Array.isArray(outputFormatValue)) outputFormatValue = [outputFormatValue];
+        }
+
+        // Final read
+        let outputFormatValueFinal = outputFormatValue?.[0];
+        if (typeof outputFormatValueFinal === 'object' && '#text' in outputFormatValueFinal)
+          outputFormatValueFinal = outputFormatValueFinal['#text'];
+
+        // Return it
+        return outputFormatValueFinal || '';
+      }
     }
 
-    // Case 2: value is a struct containing an `ows:Value` array
-    if (values && Array.isArray(values['ows:Value'])) {
-      return normalize(values['ows:Value'][0]);
-    }
-
-    // Case 3: fallback
-    return normalize(values);
+    // Not found
+    return '';
   }
 
   /**
@@ -381,6 +485,7 @@ export class WFS extends AbstractGeoViewVector {
    * @param {AbortSignal} [abortSignal] - Optional signal that allows the fetch request to be aborted.
    * @returns {Promise<TypeOutfields[]>} A promise resolving to an array of field definitions
    *   describing the feature type's properties (including geometry fields).
+   * @static
    */
   static fetchDescribeFeature(url: string, outputFormat: string, abortSignal?: AbortSignal): Promise<TypeOutfields[]> {
     // If json
@@ -401,6 +506,7 @@ export class WFS extends AbstractGeoViewVector {
    * @param {AbortSignal} [abortSignal] - Optional signal to abort the fetch request.
    * @returns {Promise<TypeOutfields[]>} A promise resolving to
    *   an array of feature type field definitions extracted from the JSON response.
+   * @static
    */
   static async fetchDescribeFeatureJson(url: string, abortSignal?: AbortSignal): Promise<TypeOutfields[]> {
     // Fetch
@@ -418,6 +524,7 @@ export class WFS extends AbstractGeoViewVector {
    * @param {AbortSignal} [abortSignal] - Optional signal to abort the fetch request.
    * @returns {Promise<TypeOutfields[]>} A promise resolving to
    *   an array of feature type field definitions extracted from the XML schema.
+   * @static
    */
   static async fetchDescribeFeatureXML(url: string, abortSignal?: AbortSignal): Promise<TypeOutfields[]> {
     // Fetch
@@ -444,6 +551,7 @@ export class WFS extends AbstractGeoViewVector {
    * @param {AbortSignal} [abortSignal] - Optional abort signal to cancel the fetch request.
    * @returns {Promise<void>} Resolves once the layer metadata has been processed and feature info configuration updated.
    * @private
+   * @static
    */
   static async #processDescribeFeatureJson(url: string, layerConfig: VectorLayerEntryConfig, abortSignal?: AbortSignal): Promise<void> {
     // Fetch
@@ -462,6 +570,7 @@ export class WFS extends AbstractGeoViewVector {
    * @param {AbortSignal} [abortSignal] - Optional abort signal to cancel the fetch request.
    * @returns {Promise<void>} Resolves once the layer metadata has been processed and feature info configuration updated.
    * @private
+   * @static
    */
   static async #processDescribeFeatureXml(url: string, layerConfig: VectorLayerEntryConfig, abortSignal?: AbortSignal): Promise<void> {
     // Fetch
@@ -478,6 +587,7 @@ export class WFS extends AbstractGeoViewVector {
    * @param {TypeOutfields[]} fields An array of field names and its aliases.
    * @param {VectorLayerEntryConfig} layerConfig The vector layer entry to configure.
    * @private
+   * @static
    */
   static #processFeatureInfoConfig(fields: TypeOutfields[], layerConfig: OgcWfsLayerEntryConfig): void {
     // Get the outfields
@@ -525,6 +635,7 @@ export class WFS extends AbstractGeoViewVector {
    * @param {string} fieldName - The name of the field whose type should be retrieved.
    * @param {OgcWfsLayerEntryConfig} layerConfig - The WFS layer configuration containing metadata definitions.
    * @returns {TypeOutfieldsType} The normalized field type (`'string'`, `'number'`, or `'date'`).
+   * @static
    */
   static getFieldType(fieldName: string, layerConfig: OgcWfsLayerEntryConfig): TypeOutfieldsType {
     const fieldDefinitions = layerConfig.getLayerMetadata();
@@ -548,6 +659,7 @@ export class WFS extends AbstractGeoViewVector {
    * a GML geometry type such as `gml:PointPropertyType`, `gml:PolygonPropertyType`, etc.
    * @param {TypeOutfields} field - The feature type field definition to evaluate.
    * @returns {boolean} `true` if the field is a geometry field; otherwise, `false`.
+   * @static
    */
   static isGmlGeometryField(field: TypeOutfields): boolean {
     return field.type.startsWith('gml:');
@@ -560,16 +672,17 @@ export class WFS extends AbstractGeoViewVector {
    * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata or feature data.
-   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @param {VectorStrategy} strategy - Indicates the strategy to use to fetch vector data.
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeWFSLayerConfig} The constructed configuration object for the WFS Feature layer.
+   * @static
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
-    isTimeAware: boolean,
+    isTimeAware: boolean | undefined,
     strategy: VectorStrategy,
     layerEntries: TypeLayerEntryShell[] // TODO: ALEX: Change this (and in all siblings) to receive a OgcWfsLayerEntryConfigProps[]
   ): TypeWFSLayerConfig {
@@ -587,7 +700,6 @@ export class WFS extends AbstractGeoViewVector {
         layerId: `${layerEntry.id}`,
         layerName: layerEntry.layerName || geoviewLayerName || `${layerEntry.id}`,
         source: {
-          format: 'WFS',
           strategy,
         },
       } as unknown as TypeLayerEntryShell;
@@ -615,6 +727,7 @@ export class WFS extends AbstractGeoViewVector {
    * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
    * @param {boolean} isTimeAware - Indicates if the layer is time aware.
    * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
+   * @static
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -681,9 +794,11 @@ export class WFS extends AbstractGeoViewVector {
    * @static
    * @async
    */
-  static async #tryProcessLayerStylingInformationIfAny(layerConfig: OgcWfsLayerEntryConfig): Promise<void> {
-    // If no layer style defined and should fetch styles from the WMS (default)
-    if (!layerConfig.getLayerStyle() && layerConfig.getShouldFetchStylesFromWMS()) {
+  static async #tryProcessLayerStylingInformationIfAny(
+    layerConfig: OgcWfsLayerEntryConfig
+  ): Promise<Record<TypeStyleGeometry, TypeLayerStyleSettings> | undefined> {
+    // If should fetch styles from the WMS (default)
+    if (layerConfig.getShouldFetchStylesFromWMS()) {
       try {
         // Get the layer id equivalent for the WMS
         const wmsLayerId = layerConfig.getWmsStylesLayerId();
@@ -691,18 +806,17 @@ export class WFS extends AbstractGeoViewVector {
         // Tweak the url, all the time, typical wms/wfs url
         const tweakedUrl = layerConfig.getDataAccessPath().replaceAll('cgi-bin/wfs', 'cgi-bin/wms');
 
-        // Create the layer style
-        const layerStyle = await WMS.createStylesFromWMS(tweakedUrl, wmsLayerId, layerConfig.getGeometryType());
-
-        // If style was generated
-        if (layerStyle) {
-          // Set the layer style
-          layerConfig.setLayerStyle(layerStyle);
-        }
+        // Create the layer style and return
+        return await WMS.createStylesFromWMS(tweakedUrl, wmsLayerId, layerConfig.getGeometryType());
       } catch (error: unknown) {
         // Log warning
         logger.logWarning(`Failed to create a dynamic layer style for the WFS using the WMS styles for ${layerConfig.layerPath}`, error);
       }
     }
+
+    // None
+    return undefined;
   }
+
+  // #endregion STATIC METHODS
 }

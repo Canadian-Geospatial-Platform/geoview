@@ -15,6 +15,7 @@ import type {
   TypeStrokeSymbolConfig,
 } from '@/api/types/map-schema-types';
 import type { TypeWkbLayerConfig } from '@/geo/layer/geoview-layers/vector/wkb';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { Fetch } from '@/core/utils/fetch-helper';
@@ -53,7 +54,7 @@ export class GeoPackageReader {
   /**
    * Generates a WKB layer config from a GeoPackage.
    * @param {GeoPackageLayerConfig} layerConfig - the config to convert
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<TypeWkbLayerConfig>} A WKB layer config
    */
   static async createLayerConfigFromGeoPackage(layerConfig: GeoPackageLayerConfig, abortSignal?: AbortSignal): Promise<TypeWkbLayerConfig> {
@@ -73,7 +74,7 @@ export class GeoPackageReader {
         const layerEntryConfig = layerConfig.listOfLayerEntryConfig[i];
 
         // Base for URL
-        let url = layerEntryConfig.source?.dataAccessPath || layerConfig.metadataAccessPath;
+        let url = AbstractBaseLayerEntryConfig.getClassOrTypeSource(layerEntryConfig)?.dataAccessPath || layerConfig.metadataAccessPath;
 
         // Append layerId to URL if not pointing to blob or .gpkg
         const isBlob = url.startsWith('blob') && !url.endsWith('/');
@@ -109,9 +110,8 @@ export class GeoPackageReader {
                   source: {
                     dataAccessPath: url,
                     dataProjection: matchingLayerData.dataProjection || Projection.PROJECTION_NAMES.LONLAT,
-                    format: 'WKB',
                     featureInfo:
-                      layerEntryConfig.source?.featureInfo ||
+                      AbstractBaseLayerEntryConfig.getClassOrTypeFeatureInfo(layerEntryConfig) ||
                       GeoPackageReader.#processFeatureInfoConfig(matchingLayerData.geoPackageFeatures[0].properties),
                     geoPackageFeatures: matchingLayerData.geoPackageFeatures,
                   },
@@ -139,9 +139,8 @@ export class GeoPackageReader {
                 source: {
                   dataAccessPath: url,
                   dataProjection: layerData.dataProjection || Projection.PROJECTION_NAMES.LONLAT,
-                  format: 'WKB',
                   featureInfo:
-                    layerEntryConfig.source?.featureInfo ||
+                    AbstractBaseLayerEntryConfig.getClassOrTypeFeatureInfo(layerEntryConfig) ||
                     GeoPackageReader.#processFeatureInfoConfig(layerData.geoPackageFeatures[0].properties),
                   geoPackageFeatures: layerData.geoPackageFeatures,
                 },
@@ -177,7 +176,6 @@ export class GeoPackageReader {
             source: {
               dataAccessPath: layerConfig.metadataAccessPath,
               dataProjection: layerData.dataProjection || Projection.PROJECTION_NAMES.LONLAT,
-              format: 'WKB',
               featureInfo: GeoPackageReader.#processFeatureInfoConfig(layerData.geoPackageFeatures[0].properties),
               geoPackageFeatures: layerData.geoPackageFeatures,
             },
@@ -193,7 +191,7 @@ export class GeoPackageReader {
   /**
    * Fetches a GeoPackage and creates layer data from it.
    * @param {string} url - The URL of the GeoPackage.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<LayerData[]>} Promise of the layer data.
    * @private
    */

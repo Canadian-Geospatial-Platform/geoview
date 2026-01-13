@@ -19,8 +19,6 @@ export interface VectorTilesLayerEntryConfigProps extends AbstractBaseLayerEntry
 }
 
 export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
-  declare source: TypeSourceTileInitialConfig;
-
   /** The style url */
   #styleUrl?: string;
 
@@ -41,6 +39,30 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
     }
   }
 
+  // #region OVERRIDES
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeSourceTileInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   */
+  override getSource(): TypeSourceTileInitialConfig {
+    return super.getSource();
+  }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeMetadataVectorTiles | undefined} The strongly-typed layer configuration specific to this layer entry config.
+   */
+  override getServiceMetadata(): TypeMetadataVectorTiles | undefined {
+    return super.getServiceMetadata() as TypeMetadataVectorTiles | undefined;
+  }
+
+  // #endregion OVERRIDES
+
+  // #region METHODS
+
   /**
    * Gets the style url or undefined.
    */
@@ -56,14 +78,9 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
     this.#styleUrl = styleUrl;
   }
 
-  /**
-   * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
-   * @returns {TypeMetadataVectorTiles | undefined} The strongly-typed layer configuration specific to this layer entry config.
-   */
-  override getServiceMetadata(): TypeMetadataVectorTiles | undefined {
-    return super.getServiceMetadata() as TypeMetadataVectorTiles | undefined;
-  }
+  // #endregion METHODS
+
+  // #region STATIC METHODS
 
   /**
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
@@ -103,4 +120,6 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
     // Redirect
     return this.isClassOrTypeSchemaTag(layerConfig, CONST_LAYER_TYPES.VECTOR_TILES);
   }
+
+  // #endregion STATIC METHODS
 }

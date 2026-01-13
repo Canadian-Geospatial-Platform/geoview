@@ -73,7 +73,7 @@ export abstract class GeoviewRenderer {
    *
    * @returns {string} The current default color string.
    */
-  // TODO: create a mechanism to have one counter by map if needed with a small class who reuse the static function
+  // TODO: MINOR - Create a mechanism to have one counter by map if needed with a small class who reuse the static function
   static getDefaultColor(alpha: number, increment: boolean = false): string {
     // get color then increment if needed
     const color = asString(setAlphaColor(asArray(defaultColor[colorCount]), alpha));
@@ -886,7 +886,7 @@ export abstract class GeoviewRenderer {
     geometry?: Geometry
   ): Style | undefined {
     // Depending on the pattern
-    const patternSize = settings.patternSize ?? settings.paternSize ?? 8;
+    const patternSize = settings.patternSize ?? 8;
     const patternWidth = settings.patternWidth ?? 16;
 
     // eslint-disable-next-line no-param-reassign
@@ -918,7 +918,7 @@ export abstract class GeoviewRenderer {
 
       context.strokeStyle = settings.color;
       context.lineCap = 'round';
-      context.lineWidth = settings.patternWidth ?? settings.paternWidth ?? 1;
+      context.lineWidth = settings.patternWidth ?? 1;
       context.beginPath();
       for (let i = 0; i < FillPatternLines.length; i++) {
         const { moveTo, lineTo } = FillPatternLines[i];

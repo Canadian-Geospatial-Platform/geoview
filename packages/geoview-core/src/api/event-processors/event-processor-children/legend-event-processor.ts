@@ -93,12 +93,33 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     // Find the layer for the given layer path
     const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
     const layer = this.findLayerByPath(layers, layerPath);
+    return layer?.bounds;
+  }
 
-    // If layer bounds are not set, or have infinity (can be due to setting before features load), recalculate
-    if (layer && (!layer.bounds || layer.bounds?.includes(Infinity))) {
-      const newBounds = MapEventProcessor.getMapViewerLayerAPI(mapId).calculateBounds(layerPath);
+  /**
+   * Calculates the geographic bounds of a layer identified by its layer path
+   * and stores the result in the layer's state within the legend.
+   * This method:
+   *  1. Calls the MapViewer API to compute the layer's bounds.
+   *  2. Validates that the computed bounds are finite.
+   *  3. Locates the corresponding legend layer by its path.
+   *  4. Updates the layer's `bounds` property.
+   *  5. Persists the updated legend state.
+   * @param {string} mapId - Identifier of the map instance containing the layer.
+   * @param {string} layerPath - The unique hierarchical path of the layer whose
+   *   bounds should be calculated and stored.
+   */
+  static calculateLayerBoundsAndSaveToStore(mapId: string, layerPath: string): void {
+    // Calculate the bounds of the layer at the given layerPath
+    const newBounds = MapEventProcessor.getMapViewerLayerAPI(mapId).calculateBounds(layerPath);
 
-      if (newBounds && (!newBounds.includes(Infinity) || !layer.bounds)) {
+    // If calculated successfully
+    if (newBounds && !newBounds.includes(Infinity)) {
+      const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
+      const layer = this.findLayerByPath(layers, layerPath);
+
+      // If found
+      if (layer) {
         // Set layer bounds
         layer.bounds = newBounds;
 
@@ -106,14 +127,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         this.getLayerState(mapId).setterActions.setLegendLayers(layers);
       }
     }
-
-    // If found and bounds found
-    if (layer && layer.bounds) {
-      return layer.bounds;
-    }
-
-    // No bounds found
-    return undefined;
   }
 
   /**
@@ -178,6 +191,75 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Sets the layer queryable.
+   * @param {string} mapId - The ID of the map.
+   * @param {string} layerPath - The layer path of the layer to change.
+   * @param {boolean} queryable - The queryable state to set.
+   */
+  // TODO: REFACTOR EVENT PROCESSOR - The 'EventProcessor' classes could use some rethinking, especially when they end up calling the layer api to execute something like
+  // TO.DOCONT: here and in multiple other places. This TODO considers also the next function here 'setLayerQueryableInStore' which saves the state to the store.
+  // TO.DOCONT: Is there a big benefit to having this function here which simply redirect the call to the layer api - which is basically hiding the coupling to the 'api'?
+  // TO.DOCONT: It seems a bit convoluted that the event processor would both perform the action via layer api AND be responsible to update the store (which is a function also called by the layer api).
+  // TO.DOCONT: Why not explicitely couple the layer api with the code needing it instead of hiding it via a jump to the event processor which
+  static setLayerQueryable(mapId: string, layerPath: string, queryable: boolean): void {
+    MapEventProcessor.getMapViewerLayerAPI(mapId).setLayerQueryable(layerPath, queryable);
+  }
+
+  /**
+   * Updates the "queryable" state of a layer in the store for a given map.
+   * Finds the layer by its `layerPath` in the legend layers of the specified `mapId`.
+   * If the layer exists, updates its `queryable` property and writes the updated
+   * legend layers back to the store.
+   * @param {string} mapId - The ID of the map whose layer state should be updated.
+   * @param {string} layerPath - The unique path/identifier of the layer to update.
+   * @param {boolean} queryable - The new queryable state to set for the layer.
+   */
+  static setLayerQueryableInStore(mapId: string, layerPath: string, queryable: boolean): void {
+    // Find the layer for the given layer path
+    const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
+    const layer = this.findLayerByPath(layers, layerPath);
+
+    if (layer) {
+      // Set layer queryable
+      layer.queryable = queryable;
+      // Set updated legend layers
+      this.getLayerState(mapId).setterActions.setLegendLayers(layers);
+    }
+  }
+
+  /**
+   * Sets the layer hoverable.
+   * @param {string} mapId - The ID of the map.
+   * @param {string} layerPath - The layer path of the layer to change.
+   * @param {boolean} queryable - The queryable state to set.
+   */
+  static setLayerHoverable(mapId: string, layerPath: string, queryable: boolean): void {
+    MapEventProcessor.getMapViewerLayerAPI(mapId).setLayerHoverable(layerPath, queryable);
+  }
+
+  /**
+   * Updates the "hoverable" state of a layer in the store for a given map.
+   * Finds the layer by its `layerPath` in the legend layers of the specified `mapId`.
+   * If the layer exists, updates its `hoverable` property and writes the updated
+   * legend layers back to the store.
+   * @param {string} mapId - The ID of the map whose layer state should be updated.
+   * @param {string} layerPath - The unique path/identifier of the layer to update.
+   * @param {boolean} hoverable - The new hoverable state to set for the layer.
+   */
+  static setLayerHoverableInStore(mapId: string, layerPath: string, hoverable: boolean): void {
+    // Find the layer for the given layer path
+    const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
+    const layer = this.findLayerByPath(layers, layerPath);
+
+    if (layer) {
+      // Set layer queryable
+      layer.hoverable = hoverable;
+      // Set updated legend layers
+      this.getLayerState(mapId).setterActions.setLegendLayers(layers);
+    }
+  }
+
+  /**
    * Sets the layersAreLoading flag in the store
    * @param {string} mapId - The map id
    * @param {boolean} areLoading - Indicator if any layer is currently loading
@@ -217,17 +299,16 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath - The path to the layer.
    * @returns {TimeDimension | undefined} - The temporal dimension information of the layer, or `undefined` if not available.
    * @description
-   * This method fetches the Geoview layer for the specified layer path and checks if it has a `getTimeDimension` method.
+   * This method fetches the Geoview layer for the specified layer path (if it exists) and checks if it has a `getTimeDimension` method.
    * If the method exists, it retrieves the temporal dimension information for the layer.
    * If the layer doesn't support temporal dimensions, the method returns `undefined`.
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
   static getLayerTimeDimension(mapId: string, layerPath: string): TimeDimension | undefined {
     // Get the layer api
     const layerApi = MapEventProcessor.getMapViewerLayerAPI(mapId);
 
     // Get the layer
-    const layer = layerApi.getGeoviewLayer(layerPath);
+    const layer = layerApi.getGeoviewLayerIfExists(layerPath);
 
     // Get the temporal dimension calling the GV Layer method, check if getTimeDimension exists and is a function
     if (layer instanceof AbstractGVLayer) return layer.getTimeDimension();
@@ -423,8 +504,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           type: legendResultSetEntry.data?.type || layerConfig.getSchemaTag(),
           canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
           opacity: layerConfig.getInitialSettings()?.states?.opacity ?? 1, // default: 1
-          hoverable: layerConfig.getInitialSettings()?.states?.hoverable, // TODO: Check - Should it be default: true here?
-          queryable: layerConfig.getInitialSettings()?.states?.queryable, // TODO: Check - Should it be default: true here?
+          hoverable: layerConfig.getInitialSettings()?.states?.hoverable, // default: true
+          queryable: layerConfig.getInitialSettings()?.states?.queryable, // default: true
           items: [] as TypeLegendItem[],
           children: [] as TypeLegendLayer[],
           icons: icons || [],
@@ -603,14 +684,14 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
 
     // Refresh the layer
-    layer?.refresh(MapEventProcessor.getMapViewer(mapId).getProjection());
+    layer.refresh(MapEventProcessor.getMapViewer(mapId).getProjection());
 
     // Get the layer config
     const layerConfig = layer.getLayerConfig();
 
     // Reset layer states to original values
-    const opacity = layerConfig.getInitialSettings().states?.opacity ?? 1; // default: 1
-    const visibility = layerConfig.getInitialSettings().states?.visible ?? true; // default: true
+    const opacity = layerConfig.getInitialSettings()?.states?.opacity ?? 1; // default: 1
+    const visibility = layerConfig.getInitialSettings()?.states?.visible ?? true; // default: true
     LegendEventProcessor.setLayerOpacity(mapId, layerPath, opacity);
     MapEventProcessor.setOrToggleMapLayerVisibility(mapId, layerPath, visibility);
 
@@ -665,6 +746,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   static setAllItemsVisibility(mapId: string, layerPath: string, visibility: boolean): void {
     // Set layer to visible
     MapEventProcessor.setOrToggleMapLayerVisibility(mapId, layerPath, true);
+
     // Get legend layers and legend layer to update
     const curLayers = this.getLayerState(mapId).legendLayers;
 
@@ -739,53 +821,13 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {boolean} updateLegendLayers - Whether to update the legend layers or not
    */
   static setLayerOpacity(mapId: string, layerPath: string, opacity: number, updateLegendLayers?: boolean): void {
+    // Redirect
     MapEventProcessor.getMapViewerLayerAPI(mapId).setLayerOpacity(layerPath, opacity, updateLegendLayers);
-  }
-
-  /**
-   * Sets the layer hoverable capacity.
-   * @param {string} mapId - The ID of the map.
-   * @param {string} layerPath - The layer path of the layer to change.
-   * @param {boolean} hoverable - The hoverable state to set.
-   */
-  static setLayerHoverable(mapId: string, layerPath: string, hoverable: boolean): void {
-    if (hoverable) MapEventProcessor.getMapViewerLayerAPI(mapId).hoverFeatureInfoLayerSet.enableHoverListener(layerPath);
-    else MapEventProcessor.getMapViewerLayerAPI(mapId).hoverFeatureInfoLayerSet.disableHoverListener(layerPath);
-
-    // ! Wrong pattern, need to be look at...
-    // TODO: These setters take curLayers, modify an object indirectly (which happens to affect an object inside curLayers!),
-    // TO.DOCONT: and then return curLayers—making it appear unchanged when reading the code. This behavior needs careful review.
-    const curLayers = this.getLayerState(mapId).legendLayers;
-    this.getLegendLayerInfo(mapId, layerPath)!.hoverable = hoverable;
-
-    // Set updated legend layers
-    this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);
-  }
-
-  /**
-   * Sets the layer queryable capacity.
-   * @param {string} mapId - The ID of the map.
-   * @param {string} layerPath - The layer path of the layer to change.
-   * @param {boolean} queryable - The queryable state to set.
-   */
-  static setLayerQueryable(mapId: string, layerPath: string, queryable: boolean): void {
-    if (queryable) MapEventProcessor.getMapViewerLayerAPI(mapId).featureInfoLayerSet.enableClickListener(layerPath);
-    else MapEventProcessor.getMapViewerLayerAPI(mapId).featureInfoLayerSet.disableClickListener(layerPath);
-
-    // ! Wrong pattern, need to be look at...
-    // TODO: These setters take curLayers, modify an object indirectly (which happens to affect an object inside curLayers!),
-    // TO.DOCONT: and then return curLayers—making it appear unchanged when reading the code. This behavior needs careful review.
-    const curLayers = this.getLayerState(mapId).legendLayers;
-    this.getLegendLayerInfo(mapId, layerPath)!.queryable = queryable;
-
-    // Set updated legend layers
-    this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);
   }
 
   /**
    * Filters features based on their visibility settings defined in the layer's unique value or class break style configuration.
    *
-   * @static
    * @param {string} mapId - The unique identifier of the map instance
    * @param {string} layerPath - The path to the layer in the map configuration
    * @param {TypeFeatureInfoEntry[]} features - Array of features to filter
@@ -798,21 +840,26 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * - Features matching visible styles are included
    * - Features matching invisible styles are excluded
    * - Features with no matching style follow the defaultVisible setting
+   * @static
    */
-  static getFeatureVisibleFromClassVibility(mapId: string, layerPath: string, features: TypeFeatureInfoEntry[]): TypeFeatureInfoEntry[] {
+  static processClassVisibility(mapId: string, layerPath: string, features: TypeFeatureInfoEntry[]): TypeFeatureInfoEntry[] {
     // Get the layer config and geometry type
     const layerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfigRegular(layerPath);
-    const [geometryType] = layerConfig.getTypeGeometries();
 
-    // Get the style
-    const layerStyle = layerConfig.getLayerStyle()?.[geometryType];
+    // Get the layer style settings
+    const layerStyleSettings = layerConfig.getLayerStyleSettings();
+
+    // If has geometry field
     let filteredFeatures = features;
-    if (layerStyle && layerStyle.type === 'uniqueValue') {
-      filteredFeatures = this.#processClassVisibilityUniqueValue(layerStyle, features);
-    } else if (layerStyle && layerStyle.type === 'classBreaks') {
-      filteredFeatures = this.#processClassVisibilityClassBreak(layerStyle, features);
+    if (layerStyleSettings) {
+      if (layerStyleSettings.type === 'uniqueValue') {
+        filteredFeatures = this.#processClassVisibilityUniqueValue(layerStyleSettings, features);
+      } else if (layerStyleSettings.type === 'classBreaks') {
+        filteredFeatures = this.#processClassVisibilityClassBreak(layerStyleSettings, features);
+      }
     }
 
+    // Return the filtered features
     return filteredFeatures;
   }
 
@@ -844,7 +891,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const visibleValues = new Set(styleUnique.filter((style) => style.visible).map((style) => style.values.join(';')));
     const unvisibleValues = new Set(styleUnique.filter((style) => !style.visible).map((style) => style.values.join(';')));
 
-    // TODO: Cleanup - This seems to be unnecessary now, commenting it for testing (2025-11-24)
+    // TODO: COMMENTED CODE - This seems to be unnecessary now, commenting it for testing (2025-11-24)
     // // GV: Some esri layer has uniqueValue renderer but there is no field define in their metadata (i.e. e2424b6c-db0c-4996-9bc0-2ca2e6714d71).
     // // TODO: The fields contain undefined, it should be empty. Check in new config api
     // // TODO: This is a workaround

@@ -14,8 +14,6 @@ export interface XYZTilesLayerEntryConfigProps extends AbstractBaseLayerEntryCon
 }
 
 export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
-  declare source: TypeSourceImageXYZTilesInitialConfig;
-
   /** The minimum scale denominator as read from metadata */
   minScaleDenominator: number;
 
@@ -38,6 +36,21 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
     }
   }
 
+  // #region OVERRIDES
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeSourceImageXYZTilesInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   */
+  override getSource(): TypeSourceImageXYZTilesInitialConfig {
+    return super.getSource();
+  }
+
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
+
   /**
    * Type guard that checks whether the given configuration (class instance or plain object)
    * represents a XYZTiles layer type.
@@ -50,6 +63,8 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
     // Redirect
     return this.isClassOrTypeSchemaTag(layerConfig, CONST_LAYER_TYPES.XYZ_TILES);
   }
+
+  // #endregion STATIC METHODS
 }
 
 export interface TypeMetadataXYZTiles {
