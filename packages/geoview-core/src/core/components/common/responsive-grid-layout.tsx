@@ -6,6 +6,8 @@ import type { SxProps } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
 import Markdown from 'markdown-to-jsx';
 import { Box, FullscreenIcon, ButtonGroup, Button, Typography, IconButton } from '@/ui';
+import { FocusTrap } from '@/ui';
+
 import { ResponsiveGrid } from './responsive-grid';
 import { getSxClasses } from './responsive-grid-layout-style';
 import { getSxClasses as getGuideSxClasses } from '@/core/components/guide/guide-style';
@@ -17,7 +19,7 @@ import { useAppGuide, useAppFullscreenActive } from '@/core/stores/store-interfa
 import { useUIActiveTrapGeoView, useUIActiveFocusItem } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
-import { FocusTrap } from '@/ui';
+
 
 interface ResponsiveGridLayoutProps {
   leftTop?: ReactNode;

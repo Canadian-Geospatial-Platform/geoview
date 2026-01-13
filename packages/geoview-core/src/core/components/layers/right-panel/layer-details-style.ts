@@ -78,12 +78,12 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     height: '30px',
     backgroundColor: theme.palette.geoViewColor.bgColor.dark[300],
   },
-  layerMoreInfoFilters: {
+  layerDetailsListGroup: {
     listStyleType: 'disc',
     listStylePosition: 'outside',
     paddingLeft: '20px',
   },
-  layerMoreInfoFiltersItem: {
+  layerDetailsListItem: {
     display: 'list-item',
     paddingTop: '0px',
     paddingBottom: '0px',

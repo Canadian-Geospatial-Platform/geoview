@@ -4,7 +4,7 @@ import { useGeoViewStore } from '@/core/stores/stores-managers';
 import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
-import type { DatePrecision, TimeDimension, TimePrecision } from '@/core/utils/date-mgt';
+import type { TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with TimeSliderEventProcessor vs TimeSliderState
 
@@ -23,13 +23,14 @@ export interface ITimeSliderState {
     setTitle: (layerPath: string, title: string) => void;
     setDescription: (layerPath: string, description: string) => void;
     setDelay: (layerPath: string, delay: number) => void;
+    setDisplayDateFormat: (layerPath: string, displayDateFormat: TypeDisplayDateFormat) => void;
+    setDisplayDateTimezone: (layerPath: string, displayDateTimezone: TimeIANA) => void;
     setFiltering: (layerPath: string, filter: boolean) => void;
     setLocked: (layerPath: string, locked: boolean) => void;
     setReversed: (layerPath: string, locked: boolean) => void;
     setSelectedLayerPath: (layerPath: string) => void;
     setStep: (layerPath: string, step: number) => void;
     setValues: (layerPath: string, values: number[]) => void;
-    setDisplayPattern: (layerPath: string, value: [DatePrecision, TimePrecision]) => void;
   };
 
   setterActions: {
@@ -38,6 +39,8 @@ export interface ITimeSliderState {
     setTitle: (layerPath: string, title: string) => void;
     setDescription: (layerPath: string, description: string) => void;
     setDelay: (layerPath: string, delay: number) => void;
+    setDisplayDateFormat: (layerPath: string, displayDateFormat: TypeDisplayDateFormat) => void;
+    setDisplayDateTimezone: (layerPath: string, displayDateTimezone: TimeIANA) => void;
     setFiltering: (layerPath: string, filter: boolean) => void;
     setLocked: (layerPath: string, locked: boolean) => void;
     setReversed: (layerPath: string, locked: boolean) => void;
@@ -45,7 +48,6 @@ export interface ITimeSliderState {
     setSliderFilters: (newSliderFilters: Record<string, string>) => void;
     setStep: (layerPath: string, step: number) => void;
     setValues: (layerPath: string, values: number[]) => void;
-    setDisplayPattern: (layerPath: string, value: [DatePrecision, TimePrecision]) => void;
   };
 }
 
@@ -73,6 +75,9 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
     },
 
     // #region ACTIONS
+
+    // TODO: REFACTOR - Many of these actions are actually setters. They should be changed to call the TimeSliderEventProcessor.
+    // TO.DOCONT: It's the TimeSliderEventProcessor that's supposed to call the setterActions according to the GV pattern.
     actions: {
       addOrUpdateSliderFilter(layerPath: string, filter: string): void {
         // Redirect to event processor
@@ -90,10 +95,34 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
         // Redirect to setter
         get().timeSliderState.setterActions.setDelay(layerPath, delay);
       },
+
+      /**
+       * Sets the display date format.
+       * @param {TypeDisplayDateFormat} displayDateFormat - The display date format.
+       * @returns {void}
+       */
+      setDisplayDateFormat: (layerPath: string, displayDateFormat: TypeDisplayDateFormat): void => {
+        // Redirect to processor
+        return TimeSliderEventProcessor.setDisplayDateFormat(get().mapId, layerPath, displayDateFormat);
+      },
+
+      /**
+       * Sets the display date timezone.
+       * @param {TimeIANA} displayDateTimezone - The display date timezone.
+       * @returns {void}
+       */
+      setDisplayDateTimezone: (layerPath: string, displayDateTimezone: TimeIANA): void => {
+        // Redirect to processor
+        return TimeSliderEventProcessor.setDisplayDateTimezone(get().mapId, layerPath, displayDateTimezone);
+      },
+
       setFiltering(layerPath: string, filtering: boolean): void {
         // Redirect to TimeSliderEventProcessor
         const { field, minAndMax, values, additionalLayerpaths } = get().timeSliderState.timeSliderLayers[layerPath];
+
+        // Update the filters
         TimeSliderEventProcessor.updateFilters(get().mapId, layerPath, field, filtering, minAndMax, values);
+
         // Update filtering for additional layers
         if (additionalLayerpaths)
           additionalLayerpaths.forEach((additionalLayerPath) => get().timeSliderState.actions.setFiltering(additionalLayerPath, filtering));
@@ -117,27 +146,21 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
       setValues(layerPath: string, values: number[]): void {
         // Redirect to TimeSliderEventProcessor
         const { field, minAndMax, filtering, additionalLayerpaths } = get().timeSliderState.timeSliderLayers[layerPath];
+
+        // Update the filters
         TimeSliderEventProcessor.updateFilters(get().mapId, layerPath, field, filtering, minAndMax, values);
+
         // Update values for additional layers
         if (additionalLayerpaths)
           additionalLayerpaths.forEach((additionalLayerPath) => get().timeSliderState.actions.setValues(additionalLayerPath, values));
       },
-      setDisplayPattern(layerPath: string, value: [DatePrecision, TimePrecision]): void {
-        // Redirect to setter
-        get().timeSliderState.setterActions.setDisplayPattern(layerPath, value);
-      },
     },
 
+    // TODO: REFACTOR - These setters reassign the whole 'timeSliderLayers' object (for all layerPaths) instead of just
+    // TO.DOCONT: changing the one for the layerPath in question. This should be changed and a hook selector should be put in
+    // TO.DOCONT: place - instead of the too-high-level: useTimeSliderLayers
     setterActions: {
       addTimeSliderLayer(newLayer: TimeSliderLayerSet): void {
-        // Set a default displayPattern if it's undefined
-        Object.keys(newLayer).forEach((layerPath) => {
-          if (newLayer[layerPath].displayPattern === undefined) {
-            // eslint-disable-next-line no-param-reassign
-            newLayer[layerPath].displayPattern = ['day', undefined];
-          }
-        });
-
         set({
           timeSliderState: {
             ...get().timeSliderState,
@@ -185,6 +208,29 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
           },
         });
       },
+
+      setDisplayDateFormat: (layerPath: string, displayDateFormat: TypeDisplayDateFormat): void => {
+        const sliderLayers = get().timeSliderState.timeSliderLayers;
+        sliderLayers[layerPath].displayDateFormat = displayDateFormat;
+        set({
+          timeSliderState: {
+            ...get().timeSliderState,
+            timeSliderLayers: { ...sliderLayers },
+          },
+        });
+      },
+
+      setDisplayDateTimezone: (layerPath: string, displayDateTimezone: TimeIANA): void => {
+        const sliderLayers = get().timeSliderState.timeSliderLayers;
+        sliderLayers[layerPath].displayDateTimezone = displayDateTimezone;
+        set({
+          timeSliderState: {
+            ...get().timeSliderState,
+            timeSliderLayers: { ...sliderLayers },
+          },
+        });
+      },
+
       setFiltering(layerPath: string, filtering: boolean): void {
         const sliderLayers = get().timeSliderState.timeSliderLayers;
         sliderLayers[layerPath].filtering = filtering;
@@ -251,16 +297,6 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
           },
         });
       },
-      setDisplayPattern(layerPath: string, value: [DatePrecision, TimePrecision]): void {
-        const sliderLayers = get().timeSliderState.timeSliderLayers;
-        sliderLayers[layerPath].displayPattern = value ?? ['day', undefined];
-        set({
-          timeSliderState: {
-            ...get().timeSliderState,
-            timeSliderLayers: { ...sliderLayers },
-          },
-        });
-      },
     },
 
     // #endregion ACTIONS
@@ -292,7 +328,10 @@ export interface TypeTimeSliderValues {
   singleHandle: boolean;
   title?: string;
   values: number[];
-  displayPattern: [DatePrecision, TimePrecision];
+  displayDateFormat?: TypeDisplayDateFormat;
+  displayDateFormatShort?: TypeDisplayDateFormat;
+  serviceDateTemporalMode?: TemporalMode;
+  displayDateTimezone?: TimeIANA;
 }
 
 export type TypeTimeSliderProps = {
@@ -312,7 +351,12 @@ export type TypeTimeSliderProps = {
 // **********************************************************
 export const useTimeSliderLayers = (): TimeSliderLayerSet | undefined =>
   useStore(useGeoViewStore(), (state) => state.timeSliderState?.timeSliderLayers);
+
+export const useTimeSliderLayersSelector = (layerPath: string): TypeTimeSliderValues | undefined =>
+  useStore(useGeoViewStore(), (state) => state.timeSliderState?.timeSliderLayers[layerPath]);
+
 export const useTimeSliderSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.timeSliderState.selectedLayerPath);
+
 export const useTimeSliderFilters = (): Record<string, string> =>
   useStore(useGeoViewStore(), (state) => state.timeSliderState?.sliderFilters);
 

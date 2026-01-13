@@ -73,18 +73,37 @@
                 "minItems": 1,
                 "maxItems": 2
               },
-              "displayPattern": {
-                "type": "array",
-                "items": {
-                  "datePrecision": {
-                    "type": "string",
-                    "enum": ["", "year", "month", "day"]
+              "displayDateFormat": {
+                "type": "object",
+                "description": "The display date format to be used in the Time Slider panel and ui slider label.",
+                "properties": {
+                  "en": {
+                    "type": "string"
                   },
-                  "timePrecision": {
-                    "type": "string",
-                    "enum": ["", "hour", "minute", "second"]
+                  "fr": {
+                    "type": "string"
                   }
                 }
+              },
+              "displayDateFormatShort": {
+                "type": "object",
+                "description": "The display date format to be used on the Time Slider's ui slider. Defaults on the displayDateFormat property if not specified.",
+                "properties": {
+                  "en": {
+                    "type": "string"
+                  },
+                  "fr": {
+                    "type": "string"
+                  }
+                }
+              },
+              "displayDateTimezone": {
+                "type": "string"
+              },
+              "serviceDateTemporalMode": {
+                "enum": ["calendar", "instant"],
+                "default": "calendar",
+                "description": "Calendar mode: interprets input as calendar date (YYYY-MM-DD) ignoring timezones. Instant mode interprets input as absolute moment in time."
               },
               "rangeItems": {
                 "description": "Definition of the range object in the OGC time dimension.",

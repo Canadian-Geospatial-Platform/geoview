@@ -7,19 +7,21 @@ import type { Extent } from 'ol/extent';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import type { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import type { TypeGetStore, TypeSetStore, IGeoviewState } from '@/core/stores/geoview-store';
+import { type TypeGetStore, type TypeSetStore, type IGeoviewState, useStableSelector } from '@/core/stores/geoview-store';
 import type { TypeFeatureInfoEntryPartial, TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
-import type { TimeDimension } from '@/core/utils/date-mgt';
+import { DateMgt, type TemporalMode, type TimeDimension, type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import type { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { LayerNotEsriDynamicError } from '@/core/exceptions/layer-exceptions';
 import { NoBoundsError } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
+import { shallowObjectEqual } from '@/core/utils/utilities';
 
 // #region INTERFACES & TYPES
 
@@ -170,6 +172,12 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         return LegendEventProcessor.getLayerServiceProjection(get().mapId, layerPath);
       },
 
+      /**
+       * Gets the layer time dimension initial configuration.
+       * @param {string} layerPath - The layer path
+       * @returns {TimeDimension | undefined} Time dimension information
+       * @deprecated Deprecated, because it's using the deprecated function LegendEventProcessor.getLayerTimeDimension.
+       */
       getLayerTimeDimension: (layerPath: string): TimeDimension | undefined => {
         try {
           return LegendEventProcessor.getLayerTimeDimension(get().mapId, layerPath);
@@ -449,6 +457,150 @@ export const useLayerIconLayerSet = (layerPath: string): string[] => {
     return layer.icons.map((item) => item.iconImage).filter((d) => d !== null) as string[];
   }
   return [];
+};
+
+/**
+ * React hook that returns if the temporal modes for the layers.
+ * @returns {Record<string, TemporalMode | undefined>} - The temporal mode of the dates for the layer.
+ */
+export const useLayerDateTemporalModes = (): Record<string, TemporalMode> => {
+  // Hook
+  return useStableSelector(
+    useGeoViewStore(),
+    (state) => {
+      const modes: Record<string, TemporalMode> = {};
+
+      state.layerState.legendLayers.forEach((layer) => {
+        if (layer.layerPath) {
+          modes[layer.layerPath] = layer.dateTemporalMode ?? DateMgt.DEFAULT_TEMPORAL_MODE;
+        }
+      });
+
+      return modes;
+    },
+    shallowObjectEqual
+  );
+};
+
+/**
+ * React hook that returns if the temporal mode of the dates for the layer.
+ * @param {string} layerPath - Unique path identifying the layer in the legend state.
+ * @returns {TemporalMode} - The temporal mode of the dates for the layer. Default: DateMgt.DEFAULT_TEMPORAL_MODE.
+ */
+export const useLayerDateTemporalMode = (layerPath: string): TemporalMode => {
+  // Hook
+  return useStore(useGeoViewStore(), (state) => {
+    return (
+      LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.dateTemporalMode ?? DateMgt.DEFAULT_TEMPORAL_MODE
+    );
+  });
+};
+
+/**
+ * React hook that returns if the display date formats for the layers.
+ * @returns {Record<string, TypeDisplayDateFormat>} - The display date format of the dates for the layer.
+ */
+export const useLayerDisplayDateFormats = (): Record<string, TypeDisplayDateFormat> => {
+  // Hook
+  return useStableSelector(
+    useGeoViewStore(),
+    (state) => {
+      const modes: Record<string, TypeDisplayDateFormat> = {};
+
+      state.layerState.legendLayers.forEach((layer) => {
+        if (layer.layerPath) {
+          modes[layer.layerPath] = layer.displayDateFormat ?? AppEventProcessor.getDisplayDateFormat(state.mapId);
+        }
+      });
+
+      return modes;
+    },
+    shallowObjectEqual
+  );
+};
+
+/**
+ * React hook that returns the display date format for a specific layer.
+ * The hook first attempts to resolve a layer-specific display date format
+ * using the provided layer path. If the layer does not define its own
+ * display date format (or cannot be found), the application-wide display
+ * date format for the current map is returned as a fallback.
+ * @param {string} layerPath - Unique path identifying the layer in the legend state.
+ * @returns {TypeDisplayDateFormat} - The display date format to use for the layer, falling back to the
+ * application's default display date format when none is defined.
+ */
+export const useLayerDisplayDateFormat = (layerPath: string): TypeDisplayDateFormat => {
+  // Hook
+  return useStore(useGeoViewStore(), (state) => {
+    return (
+      LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.displayDateFormat ??
+      AppEventProcessor.getDisplayDateFormat(state.mapId)
+    );
+  });
+};
+
+/**
+ * React hook that returns the display date format for a specific layer.
+ * The hook first attempts to resolve a layer-specific display date format
+ * using the provided layer path. If the layer does not define its own
+ * display date format (or cannot be found), the application-wide display
+ * date format for the current map is returned as a fallback.
+ * @param {string} layerPath - Unique path identifying the layer in the legend state.
+ * @returns {TypeDisplayDateFormat} - The display date format to use for the layer, falling back to the
+ * application's default display date format when none is defined.
+ */
+export const useLayerDisplayDateFormatShort = (layerPath: string): TypeDisplayDateFormat => {
+  // Hook
+  return useStore(useGeoViewStore(), (state) => {
+    return (
+      LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.displayDateFormatShort ??
+      LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.displayDateFormat ??
+      AppEventProcessor.getDisplayDateFormat(state.mapId)
+    );
+  });
+};
+
+/**
+ * React hook that returns if the display date timezones for the layers.
+ * @returns {Record<string, TimeIANA>} - The display date timezone of the dates for the layer.
+ */
+export const useLayerDisplayDateTimezones = (): Record<string, TimeIANA> => {
+  // Hook
+  return useStableSelector(
+    useGeoViewStore(),
+    (state) => {
+      const modes: Record<string, TimeIANA> = {};
+
+      state.layerState.legendLayers.forEach((layer) => {
+        if (layer.layerPath) {
+          modes[layer.layerPath] = layer.displayDateTimezone ?? AppEventProcessor.getDisplayDateTimezone(state.mapId);
+        }
+      });
+
+      return modes;
+    },
+    shallowObjectEqual
+  );
+};
+
+/**
+ * React hook that returns the display date timezone for a specific layer.
+ * The hook first attempts to resolve a layer-specific display date timezone
+ * using the provided layer path. If the layer does not define its own
+ * display date timezone (or cannot be found), the application-wide display
+ * date timezone for the current map is returned as a fallback.
+ * @param {string} layerPath - Unique path identifying the layer in the legend state.
+ * @returns {TimeIANA} - The display date timezone to use for the layer, falling back to the
+ * application's default display date timezone when none is defined.
+ */
+export const useLayerDisplayDateTimezone = (layerPath: string): TimeIANA => {
+  // Hook
+  return useStore(useGeoViewStore(), (state) => {
+    return (
+      LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.displayDateTimezone ??
+      AppEventProcessor.getDisplayDateTimezone(state.mapId)
+    );
+  });
 };
 
 // Generic hook that can select any key from the layer

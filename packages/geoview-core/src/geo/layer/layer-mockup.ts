@@ -97,8 +97,6 @@ export abstract class LayerMockup {
       geoviewLayerType: type,
       geoviewLayerName: layerName,
       metadataAccessPath,
-      serviceDateFormat: 'DD/MM/YYYY HH:MM:SSZ',
-      externalDateFormat: 'DD/MM/YYYY HH:MM:SSZ',
       listOfLayerEntryConfig: listOfLayerEntry,
     } as unknown as TypeGeoviewLayerConfig;
   }

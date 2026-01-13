@@ -291,7 +291,7 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
       />
 
       <Box sx={sxClasses.featureInfoListContainer}>
-        <FeatureInfoTable featureInfoList={featureInfoList} />
+        <FeatureInfoTable layerPath={feature.layerPath} featureInfoList={featureInfoList} />
       </Box>
     </Paper>
   );

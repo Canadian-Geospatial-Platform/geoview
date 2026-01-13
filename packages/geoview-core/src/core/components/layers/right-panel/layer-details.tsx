@@ -24,6 +24,10 @@ import {
 } from '@/ui';
 import { ListItemText } from '@/ui/list';
 import {
+  useLayerDateTemporalMode,
+  useLayerDisplayDateFormat,
+  useLayerDisplayDateFormatShort,
+  useLayerDisplayDateTimezone,
   useLayerHighlightedLayer,
   useLayerSelectorFilter,
   useLayerSelectorFilterClass,
@@ -58,6 +62,7 @@ import {
 import {
   useTimeSliderFiltersSelector,
   useTimeSliderLayers,
+  useTimeSliderLayersSelector,
   useTimeSliderStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
@@ -146,7 +151,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     zoomToLayerExtent,
     getLayerBounds,
     getLayerServiceProjection,
-    getLayerTimeDimension,
     setLayerHoverable,
     setLayerQueryable,
   } = useLayerStoreActions();
@@ -162,7 +166,11 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const classFilter = useLayerSelectorFilterClass(layerDetails.layerPath);
   const dataFilter = useDataTableFilterSelector(layerDetails.layerPath);
   const timeFilter = useTimeSliderFiltersSelector(layerDetails.layerPath);
-  const layerTimeDimension = getLayerTimeDimension(layerDetails.layerPath);
+  const layerDisplayDateFormat = useLayerDisplayDateFormat(layerDetails.layerPath);
+  const layerDisplayDateFormatShort = useLayerDisplayDateFormatShort(layerDetails.layerPath);
+  const layerDateTemporalMode = useLayerDateTemporalMode(layerDetails.layerPath);
+  const layerDisplayDateTimezone = useLayerDisplayDateTimezone(layerDetails.layerPath);
+  const layerTimeDimension = useTimeSliderLayersSelector(layerDetails.layerPath);
   const layerNativeProjection = getLayerServiceProjection(layerDetails.layerPath);
   const layerVisible = useMapSelectorLayerVisibility(layerDetails.layerPath);
   const parentHidden = useMapSelectorLayerParentHidden(layerDetails.layerPath);
@@ -614,37 +622,85 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           <Box>
             <Box>
               {t('layers.layerActiveFilters')}
-              <List sx={sxClasses.layerMoreInfoFilters}>
+              <List sx={sxClasses.layerDetailsListGroup}>
                 {layerFilter && (
-                  <ListItem sx={sxClasses.layerMoreInfoFiltersItem}>
+                  <ListItem sx={sxClasses.layerDetailsListItem}>
                     <ListItemText primary={`${t('layers.layerDefaultFilter')}${layerFilter}`} />
                   </ListItem>
                 )}
                 {classFilter && (
-                  <ListItem sx={sxClasses.layerMoreInfoFiltersItem}>
+                  <ListItem sx={sxClasses.layerDetailsListItem}>
                     <ListItemText primary={`${t('layers.layerClassFilter')}${classFilter}`} />
                   </ListItem>
                 )}
                 {dataFilter && (
-                  <ListItem sx={sxClasses.layerMoreInfoFiltersItem}>
+                  <ListItem sx={sxClasses.layerDetailsListItem}>
                     <ListItemText primary={`${t('layers.layerDataTableFilter')}${dataFilter}`} />
                   </ListItem>
                 )}
                 {timeFilter && (
-                  <ListItem sx={sxClasses.layerMoreInfoFiltersItem}>
+                  <ListItem sx={sxClasses.layerDetailsListItem}>
                     <ListItemText primary={`${t('layers.layerTimeFilter')}${timeFilter}`} />
                   </ListItem>
                 )}
                 {!layerFilter && !classFilter && !dataFilter && !timeFilter && (
-                  <ListItem sx={sxClasses.layerMoreInfoFiltersItem}>
+                  <ListItem sx={sxClasses.layerDetailsListItem}>
                     <ListItemText primary={t('layers.layerActiveFiltersNone')} />
                   </ListItem>
                 )}
               </List>
             </Box>
           </Box>
+          <Box>
+            <Box>
+              {t('layers.layerTemporalSettings')}
+              <List sx={sxClasses.layerDetailsListGroup}>
+                {layerDisplayDateFormat && (
+                  <ListItem sx={sxClasses.layerDetailsListItem}>
+                    <ListItemText primary={`${t('layers.layerDisplayDateFormat')}${layerDisplayDateFormat[language]}`} />
+                  </ListItem>
+                )}
+                {layerDisplayDateFormatShort && (
+                  <ListItem sx={sxClasses.layerDetailsListItem}>
+                    <ListItemText primary={`${t('layers.layerDisplayDateFormatShort')}${layerDisplayDateFormatShort[language]}`} />
+                  </ListItem>
+                )}
+                {layerDateTemporalMode && (
+                  <ListItem sx={sxClasses.layerDetailsListItem}>
+                    <ListItemText primary={`${t('layers.layerDateTemporalMode')}${layerDateTemporalMode}`} />
+                  </ListItem>
+                )}
+                {layerDisplayDateTimezone && (
+                  <ListItem sx={sxClasses.layerDetailsListItem}>
+                    <ListItemText primary={`${t('layers.layerDisplayDateTimezone')}${layerDisplayDateTimezone}`} />
+                  </ListItem>
+                )}
+              </List>
+            </Box>
+          </Box>
           {layerTimeDimension && (
-            <Box>{`${t('layers.layerTimeDimension')}${t('layers.layerTimeDimensionField')} - ${layerTimeDimension.field} -, min - ${layerTimeDimension.rangeItems.range[0]} / max - ${layerTimeDimension.rangeItems.range[layerTimeDimension.rangeItems.range.length - 1]}`}</Box>
+            <Box>
+              {t('layers.layerTimeDimension')}
+              <List sx={sxClasses.layerDetailsListGroup}>
+                <ListItem sx={sxClasses.layerDetailsListItem}>
+                  <ListItemText primary={`${t('layers.layerTimeDimensionField')}${layerTimeDimension.field}`} />
+                </ListItem>
+                <ListItem sx={sxClasses.layerDetailsListItem}>
+                  <ListItemText
+                    primary={`${'Min/Max: '}${layerTimeDimension.range[0]} / ${layerTimeDimension.range[layerTimeDimension.range.length - 1]}`}
+                  />
+                </ListItem>
+                <ListItem sx={sxClasses.layerDetailsListItem}>
+                  <ListItemText primary={`${t('layers.layerDisplayDateFormat')}${layerTimeDimension.displayDateFormat?.[language]}`} />
+                </ListItem>
+                <ListItem sx={sxClasses.layerDetailsListItem}>
+                  <ListItemText primary={`${t('layers.layerDateTemporalMode')}${layerTimeDimension.serviceDateTemporalMode}`} />
+                </ListItem>
+                <ListItem sx={sxClasses.layerDetailsListItem}>
+                  <ListItemText primary={`${t('layers.layerDisplayDateTimezone')}${layerTimeDimension.displayDateTimezone}`} />
+                </ListItem>
+              </List>
+            </Box>
           )}
           {resources !== '' && (
             <Box className="info-container">

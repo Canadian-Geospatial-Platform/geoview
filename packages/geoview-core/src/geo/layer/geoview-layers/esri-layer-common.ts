@@ -393,6 +393,8 @@ export class EsriUtilities {
    * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig - The layer entry to configure
    * @param {TimeDimensionESRI} esriTimeDimension - The ESRI time dimension object
    * @param {boolean} singleHandle - True for ESRI Image
+   * @throws {InvalidTimeDimensionError} When range couldn't be computed, or when duration is invalid, or non-positive or when an infinite loop is detected.
+   * @throws {InvalidDateError} When input has invalid dates.
    * @static
    */
   // TODO: Issue #2139 - There is a bug with the temporal dimension returned by service URL:

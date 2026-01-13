@@ -562,10 +562,10 @@ export abstract class GeoviewRenderer {
             if (operand.nodeValue === null) dataStack.push(operand);
             else if (typeof operand.nodeValue !== 'string') throw new Error(`DATE operator error`);
             else {
-              operand.nodeValue = DateMgt.applyInputDateFormat(operand.nodeValue);
+              operand.nodeValue = DateMgt.convertToMilliseconds(operand.nodeValue);
               dataStack.push({
                 nodeType: NodeType.variable,
-                nodeValue: DateMgt.convertToMilliseconds(DateMgt.convertToUTC(operand.nodeValue)),
+                nodeValue: operand.nodeValue,
               });
             }
             break;
@@ -3006,6 +3006,7 @@ export abstract class GeoviewRenderer {
       // If format is specified, try to format as date
       if (format) {
         try {
+          // TODO: CHECK DATETIME - Assuming the fieldValue to always be UTC, okay?
           return DateMgt.formatDate(fieldValue, format);
         } catch (e) {
           // Fall back to string conversion if date parsing fails

@@ -62,6 +62,7 @@ import { ModalApi } from '@/ui';
 import { delay, exitFullscreen, generateId, getLocalizedMessage, requestFullscreen, whenThisThen } from '@/core/utils/utilities';
 import { debounce } from '@/core/utils/debounce';
 import { GeoUtilities } from '@/geo/utils/utilities';
+import { DateMgt, type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 import type { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
@@ -405,7 +406,16 @@ export class MapViewer {
    * @param {string} pluginId - The plugin id
    * @returns {AbstractPlugin} The plugin
    */
-  getPlugin(pluginId: string): Promise<AbstractPlugin> {
+  getPlugin(pluginId: string): AbstractPlugin {
+    return this.plugins[pluginId];
+  }
+
+  /**
+   * Asynchronously attempts to get a plugin by its id.
+   * @param {string} pluginId - The plugin id
+   * @returns {AbstractPlugin} The plugin
+   */
+  getPluginAsync(pluginId: string): Promise<AbstractPlugin> {
     return whenThisThen(() => {
       return this.plugins[pluginId];
     });
@@ -639,7 +649,7 @@ export class MapViewer {
    * Set the display language of the map
    *
    * @param {TypeDisplayLanguage} displayLanguage - The language to use (en, fr)
-   * @param {boolean} resetLayer - Optional flag to ask viewer to reload layers with the new localize language
+   * @param {boolean} reloadLayers - Optional flag to ask viewer to reload layers with the new localize language
    * @returns {Promise<void>}
    */
   async setLanguage(displayLanguage: TypeDisplayLanguage, reloadLayers?: boolean | false): Promise<void> {
@@ -660,6 +670,35 @@ export class MapViewer {
 
     // Unsupported
     this.notifications.addNotificationError(getLocalizedMessage(displayLanguage, 'validation.changeDisplayLanguage'));
+  }
+
+  /**
+   * Sets the date display format used by the application for this map.
+   * This controls how date values are rendered in the UI (e.g. tables, tooltips, legends).
+   * @param {TypeDisplayDateFormat | string} displayDateFormat - The date format pattern to use for display.
+   */
+  setDisplayDateFormat(displayDateFormat: TypeDisplayDateFormat | string): void {
+    // Handle a TypeDisplayDateFormat or a string
+    let theFormat = displayDateFormat as TypeDisplayDateFormat;
+    if (typeof displayDateFormat === 'string') theFormat = { en: displayDateFormat, fr: displayDateFormat };
+
+    // Redirect to processor
+    AppEventProcessor.setDisplayDateFormat(this.mapId, theFormat);
+  }
+
+  /**
+   * Sets the timezone used to display date values for this map.
+   * This affects how parsed date instants are converted and presented in the UI,
+   * without modifying the underlying stored values.
+   * @param {TimeIANA} displayDateTimezone - The IANA timezone identifier to use for display.
+   * @throws {InvalidTimezoneError} If the time zone is not a valid or supported IANA identifier.
+   */
+  setDisplayDateTimezone(displayDateTimezone: TimeIANA): void {
+    // Validate the timezone
+    DateMgt.validateTimezone(displayDateTimezone);
+
+    // Redirect to processor
+    AppEventProcessor.setDisplayDateTimezone(this.mapId, displayDateTimezone);
   }
 
   /**

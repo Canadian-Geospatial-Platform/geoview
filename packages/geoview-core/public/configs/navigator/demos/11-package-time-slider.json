@@ -11,8 +11,15 @@
     },
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerId": "7f835844-3774-4323-b20e-a898c9f20136",
-        "geoviewLayerType": "geoCore"
+        "geoviewLayerId": "ESRIImageCrop",
+        "geoviewLayerName": "Weekly best-quality NDVI",
+        "geoviewLayerType": "esriImage",
+        "metadataAccessPath": "https://agriculture.canada.ca/imagery-images/rest/services/agextent_mod_anomaly_best_quality_max_ndvi_weekly/ImageServer",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "annual_crop_inventory_2022"
+          }
+        ]
       },
       {
         "geoviewLayerId": "napl",
@@ -31,15 +38,10 @@
         "geoviewLayerName": "Hist. Flood Events - EsriDynamic",
         "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
         "geoviewLayerType": "esriDynamic",
-        "serviceDateFormat": "yyyy/mm/ddThh:mm:ssz",
+        "serviceDateFormatIdentify": "M/D/YYYY",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "0",
-            "initialSettings": {
-              "states": {
-                "visible": false
-              }
-            }
+            "layerId": "0"
           }
         ]
       },
@@ -48,10 +50,14 @@
         "geoviewLayerName": "Hist. Flood Events - EsriFeature",
         "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
         "geoviewLayerType": "esriFeature",
-        "serviceDateFormat": "yyyy/mm/ddThh:mm:ssz",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "0"
+            "layerId": "0",
+            "initialSettings": {
+              "states": {
+                "visible": false
+              }
+            }
           }
         ]
       },
@@ -95,7 +101,7 @@
       "core": ["layers", "data-table", "time-slider"]
     },
     "selectedTab": "time-slider",
-    "selectedTimeSliderLayerPath": "historical-flood/0"
+    "selectedTimeSliderLayerPath": "historical-flood-dynamic/0"
   },
   "corePackages": [],
   "externalPackages": []

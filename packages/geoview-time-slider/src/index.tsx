@@ -2,6 +2,7 @@ import React from 'react'; // GV This import is to validate that we're on the ri
 import type { TypeTabs } from 'geoview-core/ui/tabs/tabs';
 import { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { TimeSliderIcon } from 'geoview-core/ui';
+import { DateMgt, type TimeIANA, type TypeDisplayDateFormat } from 'geoview-core/core/utils/date-mgt';
 import { FooterPlugin } from 'geoview-core/api/plugin/footer-plugin';
 import { TimeSliderEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/time-slider-event-processor';
 
@@ -179,14 +180,40 @@ class TimeSliderPlugin extends FooterPlugin {
   }
 
   /**
+   * Sets the date display format for a given layer.
+   * This controls how date values are rendered in the time slider UI.
+   * @param layerPath - Path identifying the target layer
+   * @param displayDateFormat - Date format configuration to apply
+   */
+  setDisplayDateFormat(layerPath: string, displayDateFormat: TypeDisplayDateFormat): void {
+    // Redirect to processor
+    TimeSliderEventProcessor.setDisplayDateFormat(this.mapViewer.mapId, layerPath, displayDateFormat);
+  }
+
+  /**
+   * Sets the time zone used to display date values for a given layer.
+   * The provided time zone must be a valid and supported IANA time zone.
+   * @param layerPath - Path identifying the target layer
+   * @param displayDateTimezone - IANA time zone identifier (e.g. 'America/Toronto', 'Europe/Paris', 'UTC')
+   * @throws {InvalidTimezoneError} If the time zone is not a valid or supported IANA identifier.
+   */
+  setDisplayDateTimezone(layerPath: string, displayDateTimezone: TimeIANA): void {
+    // Validate the timezone before sending it in the store in order to protect the ui
+    DateMgt.validateTimezone(displayDateTimezone);
+
+    // Redirect to processor
+    TimeSliderEventProcessor.setDisplayDateTimezone(this.mapViewer.mapId, layerPath, displayDateTimezone);
+  }
+
+  /**
    * Filters an array of legend layers to get usable time slider layer paths
-   *
    * @param {string[]} layerPaths - Array of layer paths to filter
    * @returns {string[]} A list of usable layer paths
    * @private
    */
   #filterTimeSliderLayers(layerPaths: string[]): string[] {
-    const filteredLayerPaths = layerPaths.filter((layerPath) => {
+    // Return the layer paths for the layers that have a time dimension
+    return layerPaths.filter((layerPath) => {
       // Get the layer
       const layer = this.mapViewer.layer.getGeoviewLayerIfExists(layerPath);
 
@@ -199,7 +226,6 @@ class TimeSliderPlugin extends FooterPlugin {
       // Skip
       return undefined;
     });
-    return filteredLayerPaths;
   }
 }
 
