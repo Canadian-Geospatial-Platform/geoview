@@ -46,6 +46,8 @@ import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { DEFAULT_OL_FITOPTIONS, NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_PADDING, TIMEOUT } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { delay, isValidUUID, whenThisThen } from '@/core/utils/utilities';
+import type { TimeDimension } from '@/core/utils/date-mgt';
+import { DateMgt } from '@/core/utils/date-mgt';
 
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { TypeClickMarker } from '@/core/components';
@@ -67,8 +69,6 @@ import { InvalidExtentError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
-import type { TimeDimension } from '@/core/utils/date-mgt';
-import { DateMgt } from '@/core/utils/date-mgt';
 import type { TypeTimeSliderProps } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 
@@ -1536,7 +1536,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
             listOfLayerEntryConfig,
           }
         : {
-            externalDateFormat: geoviewLayerConfig.externalDateFormat,
             geoviewLayerId: geoviewLayerConfig.geoviewLayerId,
             geoviewLayerName: geoviewLayerConfig.geoviewLayerName,
             geoviewLayerType: geoviewLayerConfig.geoviewLayerType,
@@ -1545,6 +1544,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
             listOfLayerEntryConfig,
             metadataAccessPath: geoviewLayerConfig.metadataAccessPath,
             serviceDateFormat: geoviewLayerConfig.serviceDateFormat,
+            serviceDateFormatIdentify: geoviewLayerConfig.serviceDateFormatIdentify,
+            serviceDateTimezone: geoviewLayerConfig.serviceDateTimezone,
+            serviceDateTemporalMode: geoviewLayerConfig.serviceDateTemporalMode,
+            displayDateFormat: geoviewLayerConfig.displayDateFormat,
+            displayDateTimezone: geoviewLayerConfig.displayDateTimezone,
           };
 
     return newGeoviewLayerConfig;
@@ -1575,7 +1579,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
           filtering,
           range,
           discreteValues,
-          displayPattern,
+          displayDateFormat,
+          displayDateFormatShort,
+          serviceDateTemporalMode,
+          displayDateTimezone,
           field,
         } = timeSliderLayers[layerPath];
 
@@ -1583,9 +1590,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
           // Build time dimension
           const timeDimension: TimeDimension = {
             field,
-            default: values.map((value) => DateMgt.formatDateToISO(value)),
+            default: values.map((value) => DateMgt.formatDateISOShort(value)),
             nearestValues: discreteValues ? 'discrete' : 'continuous',
-            displayPattern,
+            displayDateFormat,
+            displayDateFormatShort,
+            serviceDateTemporalMode,
+            displayDateTimezone,
             rangeItems: {
               type: '',
               range,

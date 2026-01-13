@@ -2,12 +2,13 @@ import type { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-sche
 import type { IAppState } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import type { NotificationDetailsType } from '@/core/components';
+import { formatError } from '@/core/exceptions/core-exceptions';
 import type { TypeHTMLElement } from '@/core/types/global-types';
+import type { TimeIANA } from '@/core/utils/date-mgt';
 import { createGuideObject } from '@/core/utils/utilities';
 import { MapEventProcessor } from './map-event-processor';
 import type { SnackbarType } from '@/core/utils/notifications';
 import { logger } from '@/core/utils/logger';
-import { formatError } from '@/core/exceptions/core-exceptions';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -46,6 +47,15 @@ export class AppEventProcessor extends AbstractEventProcessor {
    */
   static getDisplayLanguage(mapId: string): TypeDisplayLanguage {
     return this.getAppState(mapId).displayLanguage;
+  }
+
+  /**
+   * Shortcut to get the display date timezone for a given map id
+   * @param {string} mapId - The mapId
+   * @returns {TimeIANA} The display date timezone.
+   */
+  static getDisplayDateTimezone(mapId: string): TimeIANA {
+    return this.getAppState(mapId).displayDateTimezone;
   }
 
   /**
@@ -174,6 +184,10 @@ export class AppEventProcessor extends AbstractEventProcessor {
           reject(formatError(error));
         });
     });
+  }
+
+  static setDisplayDateTimezone(mapId: string, displayDateTimezone: TimeIANA): void {
+    this.getAppState(mapId).setterActions.setDisplayDateTimezone(displayDateTimezone);
   }
 
   static setDisplayTheme(mapId: string, theme: TypeDisplayTheme): void {

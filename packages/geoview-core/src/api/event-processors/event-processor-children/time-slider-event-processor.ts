@@ -5,14 +5,13 @@ import type {
   TypeTimeSliderValues,
   TypeTimeSliderProps,
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import { DateMgt } from '@/core/utils/date-mgt';
+import { DateMgt, type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { LayerWrongTypeError } from '@/core/exceptions/layer-exceptions';
 import { PluginStateUninitializedError } from '@/core/exceptions/geoview-exceptions';
 
@@ -154,6 +153,8 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     timeSliderState.setterActions.addTimeSliderLayer(timeSliderLayer);
 
     const { field, filtering, minAndMax, values } = timeSliderLayer[layerPath];
+
+    // Update the filters
     this.updateFilters(mapId, layerPath, field, filtering, minAndMax, values);
 
     // Make sure tab is visible
@@ -205,10 +206,10 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     // If not of right type
     if (!(geoviewLayer instanceof AbstractGVLayer)) throw new LayerWrongTypeError(layerConfig.layerPath, layerConfig.getLayerNameCascade());
 
-    // Get the temporal dimension information
+    // Get the temporal dimension information from metadata
     const timeDimensionInfo = geoviewLayer.getTimeDimension();
 
-    // Get temporal dimension info from config, if there is any
+    // Get temporal dimension info from plugin config
     const configTimeDimension = timesliderConfig?.timeDimension;
 
     // Get index of layerPath, if mutliple exist
@@ -225,9 +226,20 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     const defaultDates = configTimeDimension?.default || timeDimensionInfo!.default;
 
     const minAndMax: number[] = [DateMgt.convertToMilliseconds(range[0]), DateMgt.convertToMilliseconds(range[range.length - 1])];
-    const singleHandle = configTimeDimension?.singleHandle || timeDimensionInfo!.singleHandle;
-    const nearestValues = configTimeDimension?.nearestValues || timeDimensionInfo!.nearestValues;
-    const displayPattern = configTimeDimension?.displayPattern || timeDimensionInfo!.displayPattern;
+    const singleHandle = configTimeDimension?.singleHandle ?? timeDimensionInfo?.singleHandle ?? false;
+    const nearestValues = configTimeDimension?.nearestValues ?? timeDimensionInfo?.nearestValues;
+
+    // The date temporal mode prioritized: plugin config > time dimension config
+    const serviceDateTemporalMode = configTimeDimension?.serviceDateTemporalMode ?? timeDimensionInfo?.serviceDateTemporalMode;
+
+    // The display date format prioritized: plugin config > time dimension config
+    const displayDateFormat = configTimeDimension?.displayDateFormat ?? timeDimensionInfo?.displayDateFormat;
+
+    // The display date format prioritized: plugin config > time dimension config
+    const displayDateFormatShort = configTimeDimension?.displayDateFormatShort ?? timeDimensionInfo?.displayDateFormatShort;
+
+    // The display date timezone prioritized: plugin config > time dimension config
+    const displayDateTimezone = configTimeDimension?.displayDateTimezone ?? timeDimensionInfo?.displayDateTimezone;
 
     // Check if the time slider info is associated with another time slider
     const isMainLayerPath = timesliderConfig ? timesliderConfig.layerPaths[0] === layerConfig.layerPath : true;
@@ -256,7 +268,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     let step: number | undefined;
     if (nearestValues === 'continuous') {
       // Try to guess the steps that should be used
-      step = TimeSliderEventProcessor.guessEstimatedStep(minAndMax[0], minAndMax[1]);
+      step = DateMgt.guessEstimatedStep(minAndMax[0], minAndMax[1]);
     }
 
     return {
@@ -264,7 +276,10 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       delay: timesliderConfig?.delay || 1000,
       discreteValues: nearestValues === 'discrete',
       description: timesliderConfig?.description,
-      displayPattern,
+      displayDateFormat,
+      displayDateFormatShort,
+      serviceDateTemporalMode,
+      displayDateTimezone,
       field,
       fieldAlias,
       filtering: timesliderConfig?.filtering !== false,
@@ -278,29 +293,6 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       title: timesliderConfig?.title,
       values,
     };
-  }
-
-  /**
-   * Guesses the estimated steps that should be used by the slider, depending on the value range
-   * @param {number} minValue - The minimum value
-   * @param {number} maxValue - The maximum value
-   * @returns The estimated stepping value based on the min and max values
-   * @static
-   */
-  static guessEstimatedStep(minValue: number, maxValue: number): number | undefined {
-    const day1 = 86400000; // 24h x 60m x 60s x 1000ms = 86,400,000ms in a day
-    const month1 = day1 * 30; // 2,592,000,000ms in 1 month
-    const year1 = day1 * 365; // 31,536,000,000ms in 1 year
-    const years2 = year1 * 2; // 63,072,000,000ms in 2 years
-    const years10 = year1 * 10; // 63,072,000,000ms in 2 years
-    const months2 = month1 * 2; // 315,360,000,000 in 10 years
-    const intervalDiff = maxValue - minValue;
-
-    let step: number | undefined;
-    if (intervalDiff > months2) step = day1; // Daily stepping
-    if (intervalDiff > years2) step = month1; // Monthly stepping
-    if (intervalDiff > years10) step = year1; // Yearly stepping
-    return step;
   }
 
   /**
@@ -328,6 +320,27 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     this.getTimeSliderState(mapId).setterActions.setSliderFilters({ ...curSliderFilters, [layerPath]: filter });
   }
 
+  /**
+   * Updates the display date format for a specific layer in the time slider state.
+   * @param mapId - Identifier of the map viewer instance
+   * @param layerPath - Path identifying the target layer
+   * @param displayDateFormat - Date format configuration to store
+   */
+  static setDisplayDateFormat(mapId: string, layerPath: string, displayDateFormat: TypeDisplayDateFormat): void {
+    this.getTimeSliderState(mapId).setterActions.setDisplayDateFormat(layerPath, displayDateFormat);
+  }
+
+  /**
+   * Updates the display time zone for date rendering of a specific layer
+   * in the time slider state.
+   * @param mapId - Identifier of the map viewer instance
+   * @param layerPath - Path identifying the target layer
+   * @param displayDateTimezone - IANA time zone identifier to store
+   */
+  static setDisplayDateTimezone(mapId: string, layerPath: string, displayDateTimezone: TimeIANA): void {
+    this.getTimeSliderState(mapId).setterActions.setDisplayDateTimezone(layerPath, displayDateTimezone);
+  }
+
   // #endregion
 
   // **********************************************************
@@ -337,76 +350,86 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
   // GV Review the action in store state to make sure
 
   // #region
+
   /**
-   * Filter the layer provided in the layerPath variable according to current states (filtering and values)
-   *
-   * @param {string} mapId - The id of the map
-   * @param {string} layerPath - The path of the layer to filter
-   * @param {string} field - The field to filter the layer by
-   * @param {boolean} filtering - Whether the layer should be filtered or returned to default
-   * @param {number[]} minAndMax - Minimum and maximum values of slider
-   * @param {number[]} values - Filter values to apply
-   * @returns {void}
-   * @throws {PluginStateUninitializedError} When the TimeSlider plugin is uninitialized.
+   * Applies or resets a time-based filter on the specified layer based on the
+   * current Time Slider state.
+   * The generated filter expression varies depending on the layer type
+   * (WMS, ESRI Image, or vector layers) and whether filtering is enabled.
+   * Date values are normalized and formatted before being injected into
+   * the filter expression.
+   * @param {string} mapId - The unique identifier of the map.
+   * @param {string} layerPath - The path of the layer to which the filter is applied.
+   * @param {string} field - The name of the date/time attribute used for filtering.
+   * @param {boolean} filtering - Whether filtering is enabled (`true`) or the layer
+   * should be reset to its default (unfiltered) state (`false`).
+   * @param {number[]} minAndMax - The minimum and maximum values representing the
+   * full temporal extent of the layer (typically epoch milliseconds).
+   * @param {number[]} values - The active filter values (typically epoch milliseconds)
+   * selected by the time slider.
+   * @throws {PluginStateUninitializedError} Thrown when the Time Slider plugin state
+   * has not been initialized for the specified map.
    * @static
    */
   static updateFilters(mapId: string, layerPath: string, field: string, filtering: boolean, minAndMax: number[], values: number[]): void {
-    // Get the layer using the map event processor
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
+    let filter = '';
 
-    let filter: string;
-    if (geoviewLayer instanceof WMS || geoviewLayer instanceof GVWMS) {
-      if (filtering) {
-        const newValue = DateMgt.formatDateToISO(values[0]);
-        if (newValue !== 'Invalid DateZ') filter = `${field}=date '${newValue}'`;
-        else filter = '';
-      } else {
-        filter = `${field}=date '${DateMgt.formatDateToISO(minAndMax[0])}'`;
-      }
-    } else if (geoviewLayer instanceof GVEsriImage) {
-      if (filtering) {
-        filter = `time=${minAndMax[0]},${DateMgt.formatDateToISO(values[0])}`;
-      } else {
-        filter = `time=${minAndMax[0]},${DateMgt.formatDateToISO(minAndMax[1])}`;
-      }
-    } else if (filtering) {
-      const timeSliderValues = this.getTimeSliderLayers(mapId)[layerPath];
-      const startDate = DateMgt.formatDateToISO(values[0]);
+    // If filtering
+    if (filtering) {
+      // Get the layer
+      const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
 
-      if (values.length > 1) {
-        // Range handle (two handles) - use range filter
-        filter = `${field} >= date '${startDate}' and ${field} <= date '${DateMgt.formatDateToISO(values[1])}'`;
-      } else if (timeSliderValues.discreteValues) {
-        // Discrete mode with single handle - use current and next value in range
-        const { range } = timeSliderValues;
-        const nextIdx = range.findIndex((entry) => DateMgt.convertToMilliseconds(entry) > values[0]);
-
-        if (nextIdx !== -1 && nextIdx < range.length) {
-          const nextDate =
-            typeof range[nextIdx] === 'string' ? range[nextIdx] : DateMgt.formatDateToISO(DateMgt.convertToMilliseconds(range[nextIdx]));
-          filter = `${field} >= date '${startDate}' and ${field} < date '${nextDate}'`;
+      // ---- GVWMS ----
+      if (geoviewLayer instanceof GVWMS) {
+        filter = `${field} = date '${DateMgt.formatDateISOShort(values[0])}'`;
+      } else if (geoviewLayer instanceof GVEsriImage) {
+        // ---- Esri Image ----
+        // Esri Image layers expect the date to be an Epoch timestamp, not an ISO format
+        if (values.length > 1) {
+          filter = `time=${values[0]},${values[1]}`;
         } else {
-          // Last value
-          filter = `${field} >= date '${startDate}'`;
+          filter = `time=${values[0]}`;
         }
       } else {
-        // Absolute mode with single handle - range based on step
-        const step = timeSliderValues.step || this.guessEstimatedStep(minAndMax[0], minAndMax[1]);
-        if (step) {
-          const endDate = DateMgt.formatDateToISO(values[0] + step);
-          filter = `${field} >= date '${startDate}' and ${field} < date '${endDate}'`;
+        // TODO: CHECK - There's a lot of convertToMilliseconds and formatDateISOShort going on, clean up?
+        // ---- Other layers (Dynamic / Vector) ----
+        // Esri Dynamic and Vector layers expect the date to be in ISO format
+        const timeSliderValues = this.getTimeSliderLayers(mapId)[layerPath];
+        const startDate = DateMgt.formatDateISOShort(values[0]);
+
+        if (values.length > 1) {
+          // Range mode (two handles)
+          filter = `${field} >= date '${startDate}' and ${field} <= date '${DateMgt.formatDateISOShort(values[1])}'`;
+        } else if (timeSliderValues.discreteValues) {
+          // Discrete mode (single handle)
+          const { range } = timeSliderValues;
+          const nextIdx = range.findIndex((entry) => DateMgt.convertToMilliseconds(entry) > values[0]);
+
+          if (nextIdx !== -1 && nextIdx < range.length) {
+            const nextDate = typeof range[nextIdx] === 'string' ? range[nextIdx] : DateMgt.formatDateISOShort(range[nextIdx]);
+            filter = `${field} >= date '${startDate}' and ${field} < date '${nextDate}'`;
+          } else {
+            filter = `${field} >= date '${startDate}'`;
+          }
         } else {
-          // Fallback to exact match if step can't be determined
-          filter = `${field} = date '${startDate}'`;
+          // Absolute mode (single handle)
+          const step = timeSliderValues.step ?? DateMgt.guessEstimatedStep(minAndMax[0], minAndMax[1]);
+
+          if (step) {
+            filter = `${field} >= date '${startDate}' and ${field} < date '${DateMgt.formatDateISOShort(values[0] + step)}'`;
+          } else {
+            filter = `${field} = date '${startDate}'`;
+          }
         }
       }
     }
 
+    // ---- Always applied ----
     this.getTimeSliderState(mapId).setterActions.setFiltering(layerPath, filtering);
     this.getTimeSliderState(mapId).setterActions.setValues(layerPath, values);
-    this.addOrUpdateSliderFilter(mapId, layerPath, filter!);
-
+    this.addOrUpdateSliderFilter(mapId, layerPath, filter);
     MapEventProcessor.applyLayerFilters(mapId, layerPath);
   }
+
   // #endregion
 }

@@ -29,6 +29,8 @@ import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Loading
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useAppGeoviewHTMLElement, useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppDisplayLanguage, useDisplayDateTimezone } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useLayerDateTemporalModes } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { exportFile } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
@@ -36,6 +38,7 @@ import { createPDFMapUrl } from '@/core/components/export/pdf-layout';
 import { createCanvasMapUrls } from '@/core/components/export/canvas-layout';
 import { getSxClasses } from '@/core/components/export/export-modal-style';
 import { TIMEOUT } from '@/core/utils/constant';
+import { ExportUtilities } from './utilities';
 
 type FileFormat = 'pdf' | 'png' | 'jpeg';
 
@@ -69,6 +72,11 @@ export default function ExportModal(): JSX.Element {
   const { disableFocusTrap } = useUIStoreActions();
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const shellContainer = useAppShellContainer();
+
+  // Set the export utilities date formatting settings based on the app settings (with fallbacks to defaults in utilities)
+  ExportUtilities.DISPLAY_DATE_LANGUAGE = useAppDisplayLanguage();
+  ExportUtilities.DISPLAY_DATE_TIMEZONE = useDisplayDateTimezone();
+  ExportUtilities.DISPLAY_DATE_TEMPORAL_MODES = useLayerDateTemporalModes();
 
   // State & refs
   const [isMapLoading, setIsMapLoading] = useState(true);

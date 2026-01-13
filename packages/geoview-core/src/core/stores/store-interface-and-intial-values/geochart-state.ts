@@ -1,7 +1,7 @@
 import { useStore } from 'zustand';
 
 import type { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
-import type { TypeFeatureInfoEntry, TypeQueryStatus, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoEntry, TypeQueryStatus, TypeResultSetEntry } from '@/api/types/map-schema-types';
 import { useGeoViewStore } from '@/core/stores/stores-managers';
 import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 
@@ -135,8 +135,6 @@ export type GeoChartStoreByLayerPath = {
 };
 
 export type TypeGeochartResultSetEntry = TypeResultSetEntry & GeoChartResultInfo;
-
-export type TypeGeochartResultSet = TypeResultSet<TypeGeochartResultSetEntry>;
 
 // **********************************************************
 // Geochart state selectors

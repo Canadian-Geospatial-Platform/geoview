@@ -6,8 +6,9 @@ import EventHelper from 'geoview-core/api/events/event-helper';
 import type { TesterFailureEvent, TesterSuccessEvent, TesterTestEvent, TesterTestUpdatedEvent } from './tests/core/abstract-test-suite';
 import { TestSuiteRunningError } from './tests/core/exceptions';
 import type { GVAbstractTestSuite } from './tests/suites/abstract-gv-test-suite';
-import { GVTestSuiteMapVaria } from './tests/suites/suite-map-varia';
+import { GVTestSuiteCore } from './tests/suites/suite-core';
 import { GVTestSuiteConfig } from './tests/suites/suite-config';
+import { GVTestSuiteMapVaria } from './tests/suites/suite-map-varia';
 import { GVTestSuiteGeochart } from './tests/suites/suite-geochart';
 import { GVTestSuiteLayer } from './tests/suites/suite-layer';
 import { GVTestSuiteMapConfig } from './tests/suites/suite-map-config';
@@ -80,7 +81,10 @@ class TestSuitePlugin extends AbstractPlugin {
 
     // For each defined suite
     this.getConfig().suites.forEach((suite) => {
-      if (suite === 'suite-config') {
+      if (suite === 'suite-core') {
+        // Instanciate the GeoView Test Suite
+        this.addTestSuite(new GVTestSuiteCore(window.cgpv.api, this.mapViewer));
+      } else if (suite === 'suite-config') {
         // Instanciate the GeoView Test Suite
         this.addTestSuite(new GVTestSuiteConfig(window.cgpv.api, this.mapViewer));
       } else if (suite === 'suite-map') {

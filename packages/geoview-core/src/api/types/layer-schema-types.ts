@@ -12,7 +12,7 @@ import type {
 import type { GeoPackageFeature } from '@/api/config/reader/geopackage-reader';
 
 import type { TypeProjection } from '@/geo/utils/projection';
-import type { TimeDimensionESRI } from '@/core/utils/date-mgt';
+import type { TemporalMode, TimeDimensionESRI, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { EsriBaseRenderer } from '@/geo/utils/renderer/esri-renderer';
 
 /** Definition of the keys used to create the constants of the GeoView layer */
@@ -396,8 +396,18 @@ export type TypeGeoviewLayerConfig = {
   geoviewLayerType: TypeGeoviewLayerType;
   /** Date format used by the service endpoint. */
   serviceDateFormat?: string;
-  /** Date format used by the getFeatureInfo to output date variable. */
-  externalDateFormat?: string;
+  /** Date format used by the service endpoint for an identify. */
+  serviceDateFormatIdentify?: string;
+  /** Indicates the temporal mode the dates should be interpreted. */
+  serviceDateTemporalMode?: TemporalMode;
+  /** Service time zone of the dates */
+  serviceDateTimezone?: TimeIANA;
+  /** Indicates the format how the dates should be displayed in general */
+  displayDateFormat?: TypeDisplayDateFormat;
+  /** Indicates the format how the dates should be displayed when shortened. Defaults to displayDateFormat */
+  displayDateFormatShort?: TypeDisplayDateFormat;
+  /** Indicates the format how the dates should be displayed */
+  displayDateTimezone?: TimeIANA;
   /** Flag to include layer in time able function like time slider */
   isTimeAware?: boolean;
 
@@ -600,7 +610,11 @@ export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLay
     geoviewLayerType: geoviewLayerConfigCasted.geoviewLayerType,
     metadataAccessPath: geoviewLayerConfigCasted.metadataAccessPath,
     serviceDateFormat: geoviewLayerConfigCasted.serviceDateFormat,
-    externalDateFormat: geoviewLayerConfigCasted.externalDateFormat,
+    serviceDateFormatIdentify: geoviewLayerConfigCasted.serviceDateFormatIdentify,
+    serviceDateTemporalMode: geoviewLayerConfigCasted.serviceDateTemporalMode,
+    serviceDateTimezone: geoviewLayerConfigCasted.serviceDateTimezone,
+    displayDateFormat: geoviewLayerConfigCasted.displayDateFormat,
+    displayDateTimezone: geoviewLayerConfigCasted.displayDateTimezone,
     initialSettings: geoviewLayerConfigCasted.initialSettings,
     isTimeAware: geoviewLayerConfigCasted.isTimeAware,
     listOfLayerEntryConfig: [],

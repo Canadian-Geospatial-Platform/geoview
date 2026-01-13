@@ -15,11 +15,12 @@ import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 
 import { logger } from '@/core/utils/logger';
-import { DateMgt } from '@/core/utils/date-mgt';
+import { DateMgt, type TemporalMode, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { NorthArrowIcon } from '@/core/components/north-arrow/north-arrow-icon';
 
 import { SHARED_STYLES, getScaledCanvasStyles } from '@/core/components/export/layout-styles';
 import { CanvasDocument } from '@/core/components/export/canvas-layout';
+import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 
 // GV Buffer polyfill for react-pdf
 if (typeof window !== 'undefined') {
@@ -110,6 +111,15 @@ const MAP_IMAGE_DIMENSIONS = {
 };
 
 export class ExportUtilities {
+  // Default date formatting (can be enhanced to use app language)
+  static DISPLAY_DATE_FORMAT: TypeDisplayDateFormat = DateMgt.DEFAULT_DATETIME_FORMAT;
+  // Default language for date formatting (can be enhanced to use app language)
+  static DISPLAY_DATE_LANGUAGE: TypeDisplayLanguage = 'en';
+  // Default timezone for date formatting (can be enhanced to use app timezone)
+  static DISPLAY_DATE_TIMEZONE: string = 'UTC';
+  // Default temporal mode for date formatting (can be enhanced to use app setting)
+  static DISPLAY_DATE_TEMPORAL_MODES: Record<string, TemporalMode> = {};
+
   /**
    * Extract native dimensions from a base64-encoded PNG image by reading the IHDR chunk.
    * PNG format stores width/height in IHDR chunk at bytes 16-23 after the 8-byte signature.
@@ -238,26 +248,20 @@ export class ExportUtilities {
     }
 
     if (item.type === 'time') {
-      const timeText = item.timeInfo?.singleHandle
-        ? DateMgt.formatDate(
-            new Date(item.timeInfo.values[0]),
-            item.timeInfo.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-          )
-        : `${DateMgt.formatDate(
-            new Date(item.timeInfo?.values[0] || 0),
-            item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-          )} - ${DateMgt.formatDate(
-            new Date(item.timeInfo?.values[1] || 0),
-            item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-          )}`;
-
       return createElement(
         Text,
         {
           key: `time-${item.data.layerPath}-${itemIndex}`,
           style: scaledStyles.timeText(indentLevel),
         },
-        timeText
+        DateMgt.formatDateOrDateRange(
+          item.timeInfo!.values[0],
+          item.timeInfo!.displayDateFormat ?? this.DISPLAY_DATE_FORMAT,
+          this.DISPLAY_DATE_LANGUAGE,
+          item.timeInfo!.displayDateTimezone ?? this.DISPLAY_DATE_TIMEZONE,
+          item.timeInfo!.serviceDateTemporalMode ?? this.DISPLAY_DATE_TEMPORAL_MODES[item.data.layerPath] ?? 'calendar',
+          item.timeInfo!.values?.[1]
+        )
       );
     }
 
@@ -1036,19 +1040,14 @@ export class ExportUtilities {
           } else if (item.type === 'time') {
             const timeText = document.createElement('div');
             Object.assign(timeText.style, scaledStyles.timeText(indentLevel));
-            const timeValue = item.timeInfo?.singleHandle
-              ? DateMgt.formatDate(
-                  new Date(item.timeInfo.values[0]),
-                  item.timeInfo.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-                )
-              : `${DateMgt.formatDate(
-                  new Date(item.timeInfo?.values[0] || 0),
-                  item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-                )} - ${DateMgt.formatDate(
-                  new Date(item.timeInfo?.values[1] || 0),
-                  item.timeInfo?.displayPattern?.[1] === 'minute' ? 'YYYY-MM-DD HH:mm' : 'YYYY-MM-DD'
-                )}`;
-            timeText.textContent = timeValue;
+            timeText.textContent = DateMgt.formatDateOrDateRange(
+              item.timeInfo!.values[0],
+              item.timeInfo!.displayDateFormat ?? this.DISPLAY_DATE_FORMAT,
+              this.DISPLAY_DATE_LANGUAGE,
+              item.timeInfo!.displayDateTimezone ?? this.DISPLAY_DATE_TIMEZONE,
+              item.timeInfo!.serviceDateTemporalMode ?? this.DISPLAY_DATE_TEMPORAL_MODES[item.data.layerPath] ?? 'calendar',
+              item.timeInfo!.values?.[1]
+            );
             groupDiv.appendChild(timeText);
           } else if (item.type === 'child') {
             const childText = document.createElement('div');

@@ -396,6 +396,11 @@
           "type": "boolean",
           "description": "Whether or not to show the coordinate info switch",
           "default": false
+        },
+        "displayDateMode": {
+          "enum": ["iso", "long"],
+          "description": "Display date mode for all dates throughout the application.",
+          "default": "long"
         }
       }
     },
@@ -2400,11 +2405,44 @@
         },
         "serviceDateFormat": {
           "type": "string",
-          "description": "Date format used by the service endpoint."
+          "description": "Date format expected by the service query endpoint when date values are not provided as epoch timestamps or in a standard ISO format."
         },
-        "externalDateFormat": {
+        "serviceDateFormatIdentify": {
           "type": "string",
-          "description": "Date format used by the getFeatureInfo to output date variable."
+          "description": "Date format expected by the service identify endpoint when date values are not provided as epoch timestamps or in a standard ISO format."
+        },
+        "serviceDateTimezone": {
+          "type": "string",
+          "description": "IANA timezone in which date/time values are stored by the service. This is used when date values are provided in a timezone other than UTC or epoch timestamps."
+        },
+        "serviceDateTemporalMode": {
+          "enum": ["calendar", "instant"],
+          "default": "calendar",
+          "description": "Calendar mode: interprets input as calendar date (YYYY-MM-DD) ignoring timezones. Instant mode interprets input as absolute moment in time."
+        },
+        "displayDateFormat": {
+          "type": "object",
+          "description": "The display date format to be used in general, e.g. in Details panel, in Data Table.",
+          "properties": {
+            "en": {
+              "type": "string"
+            },
+            "fr": {
+              "type": "string"
+            }
+          }
+        },
+        "displayDateFormatShort": {
+          "type": "object",
+          "description": "The display date format to be used when a short format is needed, e.g. on Time Slider's ui slider. Defaults on the displayDateFormat property if not specified.",
+          "properties": {
+            "en": {
+              "type": "string"
+            },
+            "fr": {
+              "type": "string"
+            }
+          }
         },
         "fetchVectorsOnWFS": {
           "description": "Flag used by WMS layers to indicate if the layer should get the vector information from a WFS and retrieve the styling information.",

@@ -50,6 +50,14 @@ export type TypeDisplayLanguage = 'en' | 'fr';
 /** Constante mainly use for language validation. */
 export const VALID_DISPLAY_LANGUAGE: TypeDisplayLanguage[] = ['en', 'fr'];
 
+/**
+ * iso mode:
+ *   Favors compact, machine-readable ISO 8601 date formats (e.g., "YYYY-MM-DDTHH:mm") for data exchange.
+ * long mode:
+ *   Favors more human-readable date formats (e.g., "MMM D, YYYY @ HH:mm") for display purposes.
+ */
+export type DisplayDateMode = 'iso' | 'long';
+
 // #region MAP FEATURES
 
 /** Supported geoview themes. */
@@ -202,6 +210,8 @@ export const ACCEPTED_SCHEMA_VERSIONS: TypeValidVersions[] = ['1.0'];
 
 /** Service endpoint urls. */
 export type TypeGlobalSettings = {
+  /** The display date pattern to use for the application */
+  displayDateMode?: DisplayDateMode;
   /** Whether or not sublayers can be removed from layer groups. Default = true */
   canRemoveSublayers?: boolean;
   /** Whether a certain layer type should be disabled */
@@ -500,6 +510,7 @@ export const DEFAULT_MAP_FEATURE_CONFIG = {
     showLayerHighlightLayerBbox: true,
     coordinateInfoEnabled: false,
     hideCoordinateInfoSwitch: false,
+    displayDateMode: 'long',
   },
   schemaVersionUsed: '1.0',
 } as unknown as MapFeatureConfig;

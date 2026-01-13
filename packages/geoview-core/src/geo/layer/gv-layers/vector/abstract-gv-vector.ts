@@ -154,7 +154,15 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     // Get the layer config in a loaded phase
     const layerConfig = this.getLayerConfig();
     const features = this.getOLSource().getFeatures();
-    return Promise.resolve(this.formatFeatureInfoResult(features, layerConfig));
+    return Promise.resolve(
+      this.formatFeatureInfoResult(
+        features,
+        layerConfig,
+        layerConfig.getServiceDateFormat(),
+        layerConfig.getServiceDateTimezone(),
+        layerConfig.getServiceDateTemporalMode()
+      )
+    );
   }
 
   /**
@@ -180,8 +188,19 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       layerFilter,
     }) as Feature[];
 
+    // Get the layer config
+    const layerConfig = this.getLayerConfig();
+
     // Format and return the features
-    return Promise.resolve(this.formatFeatureInfoResult(features, this.getLayerConfig()));
+    return Promise.resolve(
+      this.formatFeatureInfoResult(
+        features,
+        layerConfig,
+        layerConfig.getServiceDateFormat(),
+        layerConfig.getServiceDateTimezone(),
+        layerConfig.getServiceDateTemporalMode()
+      )
+    );
   }
 
   /**

@@ -291,6 +291,7 @@ export class ResponseEmptyError extends Error {
     Object.setPrototypeOf(this, ResponseEmptyError.prototype);
   }
 }
+
 /**
  * Custom error class for handling fetch response errors where the response body has an error inside of it.
  * This is typically used when a fetch request returns a successful status but with error in the content itself.
@@ -353,5 +354,89 @@ export class ResponseTypeError extends Error {
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, ResponseTypeError.prototype);
+  }
+}
+
+/**
+ * Custom error class for handling invalid dates.
+ * @extends {Error}
+ */
+export class InvalidDateError extends Error {
+  /**
+   * Constructor to initialize the InvalidDateError with an optional message.
+   * The default message is "Response contained an error in its content." to indicate that the response body contained an error.
+   * @param {string} date - The invalid date
+   */
+  constructor(date: string) {
+    // Pass the provided message (or default message) to the parent Error class
+    super(`Invalid date ${date}`);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'InvalidDateError';
+
+    // Capture the stack trace (V8-specific engines like Chrome and Node.js)
+    // Omits the constructor call from the trace for cleaner debugging
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, InvalidDateError);
+    }
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, InvalidDateError.prototype);
+  }
+}
+
+/**
+ * Custom error class for handling invalid time iana formats.
+ * @extends {Error}
+ */
+export class InvalidTimezoneError extends Error {
+  /**
+   * Constructor to initialize the InvalidTimezoneError with an optional message.
+   * The default message is "Response contained an error in its content." to indicate that the response body contained an error.
+   * @param {string} timezone - The invalid timezone
+   */
+  constructor(timezone: string) {
+    // Pass the provided message (or default message) to the parent Error class
+    super(`Invalid timezone ${timezone}`);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'InvalidTimezoneError';
+
+    // Capture the stack trace (V8-specific engines like Chrome and Node.js)
+    // Omits the constructor call from the trace for cleaner debugging
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, InvalidTimezoneError);
+    }
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, InvalidTimezoneError.prototype);
+  }
+}
+
+/**
+ * Custom error class for handling invalid time dimensions.
+ * @extends {Error}
+ */
+export class InvalidTimeDimensionError extends Error {
+  /**
+   * Constructor to initialize the InvalidTimeDimensionError with an optional message.
+   * The default message is "Response contained an error in its content." to indicate that the response body contained an error.
+   * @param {string} dimension - The invalid date duration
+   */
+  constructor(dimension: string) {
+    // Pass the provided message (or default message) to the parent Error class
+    super(`Invalid time dimension ${dimension}`);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'InvalidTimeDimensionError';
+
+    // Capture the stack trace (V8-specific engines like Chrome and Node.js)
+    // Omits the constructor call from the trace for cleaner debugging
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, InvalidTimeDimensionError);
+    }
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, InvalidTimeDimensionError.prototype);
   }
 }

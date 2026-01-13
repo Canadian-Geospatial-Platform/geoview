@@ -251,16 +251,17 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
    * @param {CSSProperties} sx - Styling to apply (basically if the GeoChart should be visible or not depending on the selected layer)
    * @returns {JSX.Element}
    */
-  const renderChart = (chartsConfig: GeoViewGeoChartRootConfig, sx: React.CSSProperties, key: string): JSX.Element => {
+  const renderChart = (chartsConfig: GeoViewGeoChartRootConfig, sx: React.CSSProperties, layerPath: string): JSX.Element => {
     return (
       <GeoChart
         sx={sx}
-        key={key}
+        key={layerPath}
         mapId={mapId}
+        layerPath={layerPath}
         config={chartsConfig}
         layers={storeArrayOfLayerData ?? []}
         schemaValidator={schemaValidator}
-        provideCallbackRedraw={(theCallbackRedraw) => handleProvideCallbackRedraw(key, theCallbackRedraw)}
+        provideCallbackRedraw={(theCallbackRedraw) => handleProvideCallbackRedraw(layerPath, theCallbackRedraw)}
       />
     );
   };

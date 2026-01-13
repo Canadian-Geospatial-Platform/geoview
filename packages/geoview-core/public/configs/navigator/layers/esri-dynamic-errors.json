@@ -24,7 +24,6 @@
       {
         "geoviewLayerId": "historical-flood",
         "geoviewLayerName": "Error layerId",
-        "externalDateFormat": "mm/dd/yyyy hh:mm:ss-05:00",
         "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
         "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [

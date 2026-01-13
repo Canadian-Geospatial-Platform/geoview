@@ -34,7 +34,7 @@
       <h4>Select Configuration</h4>
       <div class="selector-container navigator-selector-row">
         <label for="configLoader" class="navigator-label-nowrap">Configuration to load:</label>
-        <select name="Config Loader" id="configLoader" class="navigator-select">
+        <select id="configLoader" class="navigator-select">
           <option value="">--select--</option>
           <option value="./configs/navigator/demos/00-basic-footer-appbar-combo.json">Basic map with app bar footer bar combo</option>
           <option value="./configs/navigator/demos/01-basemap-LCC-TLS.json">Basemap LCC Transport-Labeled-Shaded</option>
@@ -76,7 +76,7 @@
       <div class="selector-container navigator-selector-wrap">
         <div class="navigator-option-group">
           <label for="switchLang" class="navigator-label">Language:</label>
-          <select name="Switch Language" id="switchLang" class="navigator-select">
+          <select id="switchLang" class="navigator-select">
             <option value="en">English</option>
             <option value="fr">French</option>
             <option value="unsupported">Not Supported</option>
@@ -88,7 +88,7 @@
         </div>
         <div class="navigator-option-group">
           <label for="switchTheme" class="navigator-label">Theme:</label>
-          <select name="Switch Theme" id="switchTheme" class="navigator-select">
+          <select id="switchTheme" class="navigator-select">
             <option value="geo.ca">Geo.ca</option>
             <option value="light">Light</option>
             <option value="dark">Dark</option>
@@ -97,10 +97,20 @@
         </div>
         <div class="navigator-option-group">
           <label for="switchProjection" class="navigator-label">Projection:</label>
-          <select name="Switch Projection" id="switchProjection" class="navigator-select">
+          <select id="switchProjection" class="navigator-select">
             <option value="3978">LCC (3978)</option>
             <option value="3857">Web Mercator (3857)</option>
             <option value="unsupported">Not Supported</option>
+          </select>
+        </div>
+        <div class="navigator-option-group">
+          <label for="switchDatetimeTimezone" class="navigator-label">Date timezone:</label>
+          <select id="switchDatetimeTimezone" class="navigator-select">
+            <option value='UTC'>UTC</option>
+            <option selected value='local'>Local</option>
+            <option value='America/Toronto'>Toronto</option>
+            <option value='America/Vancouver'>Vancouver</option>
+            <option value='Europe/Paris'>Paris</option>
           </select>
         </div>
       </div>
@@ -143,6 +153,7 @@
       const resetLayer = document.getElementById('resetLayer');
       const switchThemeElem = document.getElementById('switchTheme');
       const switchProjectioneElem = document.getElementById('switchProjection');
+      const switchDatetimeTimezoneElem = document.getElementById('switchDatetimeTimezone');
       const reload = document.getElementById('Reload-Button');
       const remove = document.getElementById('Remove-Button');
       const urlParams = new URLSearchParams(window.location.search);
@@ -173,6 +184,12 @@
       switchProjectioneElem.addEventListener('change', (e) => {
         cgpv.api.getMapViewer(mapId).setProjection(e.target.value);
       });
+
+      switchDatetimeTimezoneElem.addEventListener('change', (e) => {
+        let timezone = e.target.value;
+        cgpv.api.getMapViewer(mapId).setDisplayDateTimezone(timezone);
+      });
+
       // ------------------ SWITCHER SECTION END -----------------------------------------
 
       reload.addEventListener('click', (e) => {

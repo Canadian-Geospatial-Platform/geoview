@@ -41,7 +41,6 @@ import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { NoFeaturesPropertyError } from '@/core/exceptions/geoview-exceptions';
 import { formatError, RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
-import type { TypeDateFragments } from '@/core/utils/date-mgt';
 import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 
 /**
@@ -345,7 +344,13 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // Format and return the result
       // Not having geometry have an effect on the style as it use the geometry to define wich one to use
       // The formatFeatureInfoResult (abstact-geoview-layer) / getFeatureCanvas (geoview-renderer) use geometry stored in style
-      return this.formatFeatureInfoResult(features, layerConfig);
+      return this.formatFeatureInfoResult(
+        features,
+        layerConfig,
+        layerConfig.getServiceDateFormat(),
+        layerConfig.getServiceDateTimezone(),
+        layerConfig.getServiceDateTemporalMode()
+      );
     }
 
     // Error
@@ -449,7 +454,13 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // TO.DOCONT: geometry assignement must not be in an async function.
     // Transform the features in an OL feature - at this point, there is no geometry associated with the feature
     const features = new EsriJSON().readFeatures({ features: identifyJsonResponse.results });
-    const arrayOfFeatureInfoEntries = this.formatFeatureInfoResult(features, layerConfig);
+    const arrayOfFeatureInfoEntries = this.formatFeatureInfoResult(
+      features,
+      layerConfig,
+      layerConfig.getServiceDateFormatIdentify(),
+      layerConfig.getServiceDateTimezone(),
+      layerConfig.getServiceDateTemporalMode()
+    );
 
     // If cancelled
     // Explicitely checking the abort condition here, after reading the features, because the processing above is time consuming and maybe things have become aborted meanwhile.
@@ -527,12 +538,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    */
   protected override onSetLayerFilters(filter?: LayerFilters): void {
     // Redirect
-    GVEsriDynamic.applyViewFilterOnSource(
-      this.getLayerConfig(),
-      this.getOLSource(),
-      this.getLayerConfig().getExternalFragmentsOrder(),
-      filter
-    );
+    GVEsriDynamic.applyViewFilterOnSource(this.getLayerConfig(), this.getOLSource(), filter);
   }
 
   // #endregion OVERRIDES
@@ -683,15 +689,12 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * optional style, and time-based fragments. It ensures the filter is only applied if it has changed or needs to be reset.
    * @param {EsriDynamicLayerEntryConfig} layerConfig - The configuration object for the Esri Dynamic layer.
    * @param {ImageArcGISRest} source - The OpenLayers `ImageArcGISRest` source instance to which the filter will be applied.
-   * @param {TypeLayerStyleConfig | undefined} style - Optional style configuration that may influence filter expression generation.
-   * @param {TypeDateFragments | undefined} externalDateFragments - Optional external date fragments used to assist in formatting time-based filters.
    * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
    * @throws {LayerInvalidLayerFilterError} If the filter expression fails to parse or cannot be applied.
    */
   static applyViewFilterOnSource(
     layerConfig: EsriDynamicLayerEntryConfig,
     source: ImageArcGISRest,
-    externalDateFragments: TypeDateFragments | undefined,
     filter: LayerFilters | undefined
   ): void {
     // Get the filter to use
@@ -704,7 +707,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // Parse the filter value to use
       const fieldNames = layerConfig.getOutfields()?.map((f) => f.name) || [];
       filterValueToUse = GVLayerUtilities.parseLikeOperationsEsriDynamic(filterValueToUse, fieldNames);
-      filterValueToUse = GVLayerUtilities.parseDateTimeValuesEsriDynamic(filterValueToUse, externalDateFragments);
+      filterValueToUse = GVLayerUtilities.parseDateTimeValuesEsriDynamic(filterValueToUse, layerConfig.getServiceDateTimezone());
 
       // Create the source parameter to update
       const layerDefs = layerConfig.getLayerMetadata()?.type === 'Raster Layer' ? '' : `{"${layerConfig.layerId}": "${filterValueToUse}"}`;

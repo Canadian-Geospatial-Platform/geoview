@@ -81,7 +81,7 @@ export default function FeatureDetailModal(): JSX.Element {
             </Typography>
           </Box>
           <List sx={sxClasses.featureDetailListContainer}>
-            <FeatureInfoTable featureInfoList={featureInfoList} />
+            <FeatureInfoTable layerPath={feature.layerPath} featureInfoList={featureInfoList} />
           </List>
         </>
       }

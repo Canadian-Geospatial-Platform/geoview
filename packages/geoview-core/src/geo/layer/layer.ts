@@ -10,6 +10,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 
 import { ConfigValidation } from '@/api/config/config-validation';
 import { generateId, isValidUUID, whenThisThen } from '@/core/utils/utilities';
+import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type {
   LayerStatusChangedDelegate as ConfigLayerStatusChangedDelegate,
   LayerStatusChangedEvent as ConfigLayerStatusChangedEvent,
@@ -1385,6 +1386,48 @@ export class LayerApi {
   }
 
   /**
+   * Sets the date display format for a specific layer.
+   * This updates the layer-level configuration used to control how date values
+   * are formatted when displayed (e.g., in legends, tooltips, or UI components).
+   * The value is stored in the application state via the LegendEventProcessor.
+   * @param {string} layerPath - The unique path identifying the layer.
+   * @param {TypeDisplayDateFormat} displayDateFormat - The date format to apply
+   * for displaying date values associated with this layer.
+   */
+  setLayerDisplayDateFormat(layerPath: string, displayDateFormat: TypeDisplayDateFormat): void {
+    // Redirect
+    LegendEventProcessor.setLayerDisplayDateFormatInStore(this.getMapId(), layerPath, displayDateFormat);
+  }
+
+  /**
+   * Sets the date display format (short) for a specific layer.
+   * This updates the layer-level configuration used to control how date values
+   * are formatted when displayed (e.g., in legends, tooltips, or UI components).
+   * The value is stored in the application state via the LegendEventProcessor.
+   * @param {string} layerPath - The unique path identifying the layer.
+   * @param {TypeDisplayDateFormat} displayDateFormat - The date format to apply
+   * for displaying date values associated with this layer.
+   */
+  setLayerDisplayDateFormatShort(layerPath: string, displayDateFormat: TypeDisplayDateFormat): void {
+    // Redirect
+    LegendEventProcessor.setLayerDisplayDateFormatShortInStore(this.getMapId(), layerPath, displayDateFormat);
+  }
+
+  /**
+   * Sets the date temporal mode for the specific layer.
+   * This updates the layer-level configuration used to control how date values
+   * are interpreted.
+   * The value is stored in the application state via the LegendEventProcessor.
+   * @param {string} layerPath - The unique path identifying the layer.
+   * @param {TemporalMode} temporalMode - The date format to apply
+   * for displaying date values associated with this layer.
+   */
+  setLayerDateTemporalMode(layerPath: string, temporalMode: TemporalMode): void {
+    // Redirect
+    LegendEventProcessor.setLayerDateTemporalInStore(this.getMapId(), layerPath, temporalMode);
+  }
+
+  /**
    * Changes a GeoJson Source of a GeoJSON layer at the given layer path.
    *
    * @param {string} layerPath - The path of the layer.
@@ -2261,6 +2304,7 @@ export class LayerApi {
       const timeSliderConfigs = MapEventProcessor.getGeoViewMapConfig(this.getMapId())?.corePackagesConfig?.find((config) =>
         Object.keys(config).includes('time-slider')
       )?.['time-slider'] as Record<'sliders', TypeTimeSliderProps[]>;
+
       const layerSliderConfig = timeSliderConfigs?.sliders?.find((slider: TypeTimeSliderProps) =>
         slider.layerPaths.includes(layer.getLayerPath())
       );
