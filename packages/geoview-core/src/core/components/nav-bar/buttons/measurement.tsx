@@ -2,8 +2,7 @@ import type { ReactNode } from 'react';
 import { createElement, useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { LineString, Polygon } from 'ol/geom';
-import { Overlay } from 'ol';
+import { LineString, Polygon, Point } from 'ol/geom';
 import type { DrawEvent as OLDrawEvent } from 'ol/interaction/Draw';
 import { Style, Stroke, Fill, Text } from 'ol/style';
 import type { StyleFunction } from 'ol/style/Style';
@@ -39,7 +38,7 @@ const STROKE_WIDTH = 2;
 const TOOLTIP_BASE_STYLE = {
   backgroundColor: 'rgba(0, 0, 0, 0.6)',
   textColor: '#fff',
-  fontSize: '12px',
+  fontSize: '13px',
   fontWeight: 'bold',
   padding: { top: 4, right: 8, bottom: 4, left: 8 },
 } as const;
@@ -48,30 +47,13 @@ const TOOLTIP_BASE_STYLE = {
 const LABEL_STYLE_CONFIG = {
   font: `${TOOLTIP_BASE_STYLE.fontWeight} ${TOOLTIP_BASE_STYLE.fontSize} sans-serif`,
   textColor: TOOLTIP_BASE_STYLE.textColor,
-  backgroundColor: TOOLTIP_BASE_STYLE.backgroundColor,
-  padding: [
-    TOOLTIP_BASE_STYLE.padding.top / 2,
-    TOOLTIP_BASE_STYLE.padding.right / 2,
-    TOOLTIP_BASE_STYLE.padding.bottom / 2,
-    TOOLTIP_BASE_STYLE.padding.left / 2,
-  ] as [number, number, number, number],
+  haloColor: 'rgba(0, 0, 0, 0.9)',
+  haloWidth: 7,
 } as const;
 
-// Reusable Fill objects for labels
+// Reusable Fill and Stroke objects for labels
 const LABEL_TEXT_FILL = new Fill({ color: LABEL_STYLE_CONFIG.textColor });
-const LABEL_BACKGROUND_FILL = new Fill({ color: LABEL_STYLE_CONFIG.backgroundColor });
-
-// DOM element CSS style (for total measurement tooltip)
-const TOOLTIP_STYLE = {
-  backgroundColor: TOOLTIP_BASE_STYLE.backgroundColor,
-  color: TOOLTIP_BASE_STYLE.textColor,
-  padding: `${TOOLTIP_BASE_STYLE.padding.top}px ${TOOLTIP_BASE_STYLE.padding.right}px ${TOOLTIP_BASE_STYLE.padding.bottom}px ${TOOLTIP_BASE_STYLE.padding.left}px`,
-  borderRadius: '4px',
-  fontSize: TOOLTIP_BASE_STYLE.fontSize,
-  fontWeight: TOOLTIP_BASE_STYLE.fontWeight,
-  whiteSpace: 'nowrap',
-  textAlign: 'center',
-} as const;
+const LABEL_HALO_STROKE = new Stroke({ color: LABEL_STYLE_CONFIG.haloColor, width: LABEL_STYLE_CONFIG.haloWidth });
 
 type MeasureType = 'line' | 'area' | null;
 
@@ -88,14 +70,12 @@ export default function Measurement(): JSX.Element {
 
   // Stores
   const displayLanguage = useAppDisplayLanguage();
-  const { addOverlay, removeOverlay, createGeometryGroup, deleteGeometriesFromGroup, forceMapToRender, initDrawInteractions } =
-    useMapStoreActions();
+  const { createGeometryGroup, deleteGeometriesFromGroup, forceMapToRender, initDrawInteractions } = useMapStoreActions();
   const mapElement = useAppGeoviewHTMLElement().querySelector(`[id^="mapTargetElement-${useGeoViewMapId()}"]`) as HTMLElement;
 
   // States
   const [activeMeasurement, setActiveMeasurement] = useState<MeasureType>(null);
   const [drawInstance, setDrawInstance] = useState<Draw | null>(null);
-  const [measureOverlays, setMeasureOverlays] = useState<Overlay[]>([]);
   const [showSegmentLabels, setShowSegmentLabels] = useState<boolean>(true);
   const [measurementFeatures, setMeasurementFeatures] = useState<Feature<Geometry>[]>([]);
 
@@ -163,9 +143,6 @@ export default function Measurement(): JSX.Element {
               angleRadians += Math.PI;
             }
 
-            // Position labels above the line segment
-            const offsetY = -5;
-
             styles.push(
               new Style({
                 geometry: new LineString([midpoint]),
@@ -173,12 +150,10 @@ export default function Measurement(): JSX.Element {
                   text: segmentLabel,
                   font: LABEL_STYLE_CONFIG.font,
                   fill: LABEL_TEXT_FILL,
-                  backgroundFill: LABEL_BACKGROUND_FILL,
-                  padding: LABEL_STYLE_CONFIG.padding,
-                  offsetY,
+                  stroke: LABEL_HALO_STROKE,
                   rotation: angleRadians,
                   textAlign: 'center',
-                  textBaseline: 'bottom',
+                  textBaseline: 'middle',
                   overflow: true,
                 }),
               })
@@ -186,72 +161,51 @@ export default function Measurement(): JSX.Element {
           }
         }
 
+        // Add total measurement label for map exports (canvas-based) so we can add to export
+        // Overlays are not exportable
+        let labelCoord: number[];
+        let totalLabel = '';
+        if (geometry instanceof LineString) {
+          labelCoord = coordinates[coordinates.length - 1];
+          const length = GeoUtilities.getLength(geometry);
+          totalLabel = formatLength(length, displayLanguage);
+        } else if (geometry instanceof Polygon) {
+          // Position at polygon centroid
+          labelCoord = geometry.getInteriorPoint().getCoordinates();
+          labelCoord.pop(); // Remove the third coordinate
+          const area = GeoUtilities.getArea(geometry);
+          const length = GeoUtilities.getLength(geometry);
+          // Convert HTML <sup> tags to Unicode superscript for canvas rendering
+          const areaText = formatArea(area, displayLanguage).replace(/<sup>2<\/sup>/g, '²');
+          totalLabel = `${formatLength(length, displayLanguage)}\n${areaText}`;
+        } else {
+          return styles;
+        }
+
+        styles.push(
+          new Style({
+            geometry: new Point(labelCoord),
+            text: new Text({
+              text: totalLabel,
+              font: `bold 14px sans-serif`, // Slightly larger for prominence
+              fill: new Fill({ color: TOOLTIP_BASE_STYLE.textColor }),
+              backgroundFill: new Fill({ color: TOOLTIP_BASE_STYLE.backgroundColor }),
+              padding: [
+                TOOLTIP_BASE_STYLE.padding.top + 1,
+                TOOLTIP_BASE_STYLE.padding.right + 2,
+                TOOLTIP_BASE_STYLE.padding.bottom + 1,
+                TOOLTIP_BASE_STYLE.padding.left + 2,
+              ],
+              offsetY: -15,
+              textAlign: 'center',
+              textBaseline: 'bottom',
+              overflow: true,
+            }),
+          })
+        );
+
         return styles;
       };
-    },
-    [displayLanguage]
-  );
-
-  /**
-   * Creates a measurement tooltip overlay
-   * @param {LineString | Polygon} geometry - The geometry to measure (LineString for distance, Polygon for area)
-   * @param {number[]} coord - The coordinate [x, y] where the tooltip should be positioned
-   * @returns {Overlay} OpenLayers overlay containing the measurement tooltip element
-   */
-  const createMeasureTooltip = useCallback(
-    (geometry: LineString | Polygon, coord: number[]): Overlay => {
-      // Log
-      logger.logTraceUseCallback('MEASUREMENT, createMeasureTooltip', geometry);
-
-      const measureTooltipElement = document.createElement('div');
-      measureTooltipElement.className = 'measurement-tooltip';
-      Object.assign(measureTooltipElement.style, TOOLTIP_STYLE);
-
-      // Add CSS for the arrow at the bottom using ::before pseudo-element
-      const styleId = 'measurement-tooltip-arrow-style';
-      if (!document.getElementById(styleId)) {
-        const style = document.createElement('style');
-        style.id = styleId;
-        style.textContent = `
-          .measurement-tooltip {
-            position: relative;
-          }
-          .measurement-tooltip::before {
-            content: '';
-            position: absolute;
-            bottom: -6px;
-            left: 50%;
-            margin-left: -7px;
-            border-top: 6px solid ${TOOLTIP_BASE_STYLE.backgroundColor};
-            border-right: 6px solid transparent;
-            border-left: 6px solid transparent;
-          }
-        `;
-        document.head.appendChild(style);
-      }
-
-      let output = '';
-      if (geometry instanceof LineString) {
-        const length = GeoUtilities.getLength(geometry);
-        output = `Total: ${formatLength(length, displayLanguage)}`;
-      } else if (geometry instanceof Polygon) {
-        const area = GeoUtilities.getArea(geometry);
-        const length = GeoUtilities.getLength(geometry);
-        output = `${formatLength(length, displayLanguage)}<br>${formatArea(area, displayLanguage)}`;
-      }
-
-      measureTooltipElement.innerHTML = output;
-
-      const overlay = new Overlay({
-        element: measureTooltipElement,
-        offset: [0, -15],
-        positioning: 'bottom-center',
-        stopEvent: false,
-        insertFirst: false,
-      });
-      overlay.setPosition(coord);
-
-      return overlay;
     },
     [displayLanguage]
   );
@@ -290,24 +244,15 @@ export default function Measurement(): JSX.Element {
         const geometry = feature.getGeometry();
 
         if (geometry && (geometry instanceof LineString || geometry instanceof Polygon)) {
-          // Apply final style with segment labels (canvas-based)
-          feature.setStyle(createSegmentStyle(showSegmentLabels));
+          // Use current state value for segment labels visibility
+          setShowSegmentLabels((currentShowSegments) => {
+            // Apply final style with segment labels (canvas-based)
+            feature.setStyle(createSegmentStyle(currentShowSegments));
+            return currentShowSegments;
+          });
 
           // Store feature reference
           setMeasurementFeatures((prev) => [...prev, feature]);
-
-          let tooltipCoord: number[];
-          if (geometry instanceof LineString) {
-            tooltipCoord = geometry.getLastCoordinate();
-          } else {
-            tooltipCoord = geometry.getInteriorPoint().getCoordinates();
-            tooltipCoord.pop(); // Remove the third coordinate
-          }
-
-          // Create only ONE overlay for total measurement
-          const overlay = createMeasureTooltip(geometry, tooltipCoord);
-          addOverlay(overlay);
-          setMeasureOverlays((prev) => [...prev, overlay]);
         }
       });
 
@@ -319,16 +264,7 @@ export default function Measurement(): JSX.Element {
         mapElement.focus();
       }
     },
-    [
-      mapElement,
-      drawInstance,
-      initDrawInteractions,
-      createMeasureTooltip,
-      createGeometryGroup,
-      createSegmentStyle,
-      addOverlay,
-      showSegmentLabels,
-    ]
+    [mapElement, drawInstance, initDrawInteractions, createGeometryGroup, createSegmentStyle]
   );
 
   /**
@@ -352,13 +288,6 @@ export default function Measurement(): JSX.Element {
     // Log
     logger.logTraceUseCallback('MEASUREMENT, clearMeasurements');
 
-    // Remove all total measurement overlays
-    measureOverlays.forEach((overlay) => {
-      overlay.getElement()?.remove();
-      removeOverlay(overlay);
-    });
-    setMeasureOverlays([]);
-
     // Clear stored feature references
     setMeasurementFeatures([]);
 
@@ -367,7 +296,7 @@ export default function Measurement(): JSX.Element {
 
     // Stop current drawing
     stopMeasurement();
-  }, [measureOverlays, stopMeasurement, deleteGeometriesFromGroup, removeOverlay]);
+  }, [stopMeasurement, deleteGeometriesFromGroup]);
 
   /**
    * Handles measurement mode toggle
@@ -399,18 +328,23 @@ export default function Measurement(): JSX.Element {
       // Log
       logger.logTraceUseCallback('MEASUREMENT, handleSegmentLabelsToggle', event.target.checked);
 
+      const shouldShow = event.target.checked;
+
       // Set the segments hook state
-      setShowSegmentLabels(event.target.checked);
+      setShowSegmentLabels(shouldShow);
 
       // Update all stored measurement features with new style
-      measurementFeatures.forEach((feature) => {
-        feature.setStyle(createSegmentStyle(event.target.checked));
+      setMeasurementFeatures((currentFeatures) => {
+        currentFeatures.forEach((feature) => {
+          feature.setStyle(createSegmentStyle(shouldShow));
+        });
+        return currentFeatures;
       });
 
       // Force map to re-render
       forceMapToRender();
     },
-    [createSegmentStyle, forceMapToRender, measurementFeatures]
+    [createSegmentStyle, forceMapToRender]
   );
 
   /**
@@ -501,7 +435,7 @@ export default function Measurement(): JSX.Element {
           id="button-clear-measurements"
           aria-label={t('measurement.clear')}
           onClick={clearMeasurements}
-          disabled={measureOverlays.length === 0}
+          disabled={measurementFeatures.length === 0}
           size="small"
         >
           <DeleteIcon fontSize="small" />
