@@ -30,6 +30,9 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   /** The resultSet object as existing in the base class, retyped here as a TypeFeatureInfoResultSet */
   declare resultSet: TypeFeatureInfoResultSet;
 
+  /** Keep lon/lat of last query */
+  #lastQueryLonLat: Coordinate | null = null;
+
   /** Keep all callback delegate references */
   #onQueryEndedHandlers: QueryEndedDelegate[] = [];
 
@@ -105,16 +108,35 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   }
 
   /**
+   * Repeats the last query if there was one.
+   * @returns {void}
+   */
+  repeatLastQuery(): void {
+    // If we have a last query lon/lat
+    if (this.#lastQueryLonLat) {
+      // Re-query the layers
+      this.queryLayers(this.#lastQueryLonLat, false).catch((error: unknown) => {
+        // Log
+        logger.logPromiseFailed('queryLayers in repeatLastQuery in FeatureInfoLayerSet', error);
+      });
+    }
+  }
+
+  /**
    * Queries the features at the provided coordinate for all the registered layers.
    * @param {Coordinate} lonLatCoordinate - The longitude/latitude coordinate where to query the features
+   * @param {boolean} fromClick - True if the query is from a user click, false otherwise.
    * @returns {Promise<TypeFeatureInfoResultSet>} A promise which will hold the result of the query
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
-  async queryLayers(lonLatCoordinate: Coordinate): Promise<TypeFeatureInfoResultSet> {
+  async queryLayers(lonLatCoordinate: Coordinate, fromClick: boolean = true): Promise<TypeFeatureInfoResultSet> {
     // FIXME: Watch out for code reentrancy between queries!
     // FIX.MECONT: The AbortController helps a lot, but there could be some minor timing issues left
     // FIX.MECONT: with the mutating this.resultSet.
     // FIX.MECONT: Consider using a LIFO pattern, per layer path, as the race condition resolution
+
+    // Keep the lon/lat for possible repeat
+    this.#lastQueryLonLat = lonLatCoordinate;
 
     // Prepare to hold all promises of features in the loop below
     const allPromises: Promise<TypeFeatureInfoEntry[]>[] = [];
@@ -135,7 +157,8 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         this.resultSet[layerPath].queryStatus = 'processing';
 
         // Propagate to store
-        this.#propagateToStoreClick(this.resultSet[layerPath]);
+        if (fromClick) this.#propagateToStoreClick(this.resultSet[layerPath]);
+        else this.#propagateToStoreName(this.resultSet[layerPath]);
 
         // If the layer path has an abort controller
         if (Object.keys(this.#abortControllers).includes(layerPath)) {
@@ -199,7 +222,8 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
           })
           .finally(() => {
             // Propagate to store
-            this.#propagateToStoreClick(this.resultSet[layerPath]);
+            if (fromClick) this.#propagateToStoreClick(this.resultSet[layerPath]);
+            else this.#propagateToStoreName(this.resultSet[layerPath]);
           });
       } else {
         // Error
@@ -207,7 +231,8 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         this.resultSet[layerPath].queryStatus = 'error';
 
         // Propagate to store
-        this.#propagateToStoreClick(this.resultSet[layerPath]);
+        if (fromClick) this.#propagateToStoreClick(this.resultSet[layerPath]);
+        else this.#propagateToStoreName(this.resultSet[layerPath]);
       }
     });
 
