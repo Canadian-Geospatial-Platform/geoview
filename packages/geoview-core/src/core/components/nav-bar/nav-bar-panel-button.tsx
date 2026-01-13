@@ -14,6 +14,7 @@ import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial
 
 interface NavbarPanelButtonType {
   buttonPanel: TypeButtonPanel;
+  isActive?: boolean;
 }
 
 /**
@@ -21,7 +22,7 @@ interface NavbarPanelButtonType {
  *
  * @returns {JSX.Element} the export popover component
  */
-export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType): JSX.Element {
+export default function NavbarPanelButton({ buttonPanel, isActive = false }: NavbarPanelButtonType): JSX.Element {
   // Log
   logger.logTraceRender('components/nav-bar/nav-bar-panel-button');
 
@@ -84,7 +85,7 @@ export default function NavbarPanelButton({ buttonPanel }: NavbarPanelButtonType
           tooltipPlacement={buttonPanel.button.tooltipPlacement}
           sx={sxClasses.navButton}
           onClick={(e) => handleClick(e)}
-          className={open ? 'highlighted active' : ''}
+          className={open || isActive ? 'highlighted active' : ''}
         >
           {buttonPanel.button.children}
         </IconButton>

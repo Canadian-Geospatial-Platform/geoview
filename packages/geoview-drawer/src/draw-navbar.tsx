@@ -16,7 +16,7 @@ import Download from './buttons/download';
 import Upload from './buttons/upload';
 import Clear from './buttons/clear';
 
-export function createDrawerButtons(config: TypeDrawerConfig): Record<string, TypeNavBarButtonConfig> {
+export function createDrawerButtons(config: TypeDrawerConfig, t: (key: string) => string): Record<string, TypeNavBarButtonConfig> {
   const { cgpv } = window as TypeWindow;
   const { createElement } = cgpv.reactUtilities.react;
 
@@ -29,7 +29,7 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   buttonConfigs.draw = {
     buttonProps: {
       id: 'drawer-draw',
-      'aria-label': 'drawer.ToggleDrawing',
+      'aria-label': 'drawer.toggleDrawing',
       tooltipPlacement: 'left',
       children: createElement(Draw),
       visible: true,
@@ -43,7 +43,7 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   buttonConfigs.geometryPicker = {
     buttonProps: {
       id: 'drawer-geometry-picker',
-      'aria-label': 'drawer.geometryPicker',
+      'aria-label': t('drawer.geometryPicker'),
       tooltipPlacement: 'left',
       children: createElement(GeometryPickerButton),
       visible: true,
@@ -62,7 +62,7 @@ export function createDrawerButtons(config: TypeDrawerConfig): Record<string, Ty
   buttonConfigs.style = {
     buttonProps: {
       id: 'drawer-style',
-      'aria-label': 'drawer.style',
+      'aria-label': t('drawer.style'),
       tooltipPlacement: 'left',
       children: createElement(StyleButton),
       visible: true,

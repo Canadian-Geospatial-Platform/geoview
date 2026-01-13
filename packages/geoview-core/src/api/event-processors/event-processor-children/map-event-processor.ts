@@ -33,6 +33,8 @@ import type {
 } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { api } from '@/app';
+import type { Draw } from '@/geo/interaction/draw';
+
 import { LayerApi } from '@/geo/layer/layer';
 import type { TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { MapViewer } from '@/geo/map/map-viewer';
@@ -48,6 +50,7 @@ import { delay, isValidUUID, whenThisThen } from '@/core/utils/utilities';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { TypeClickMarker } from '@/core/components';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
+import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
@@ -213,6 +216,15 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static async getMapViewerPlugins(mapId: string): Promise<PluginsContainer> {
     await whenThisThen(() => api && api.hasMapViewer(mapId));
     return api.getMapViewer(mapId).plugins;
+  }
+
+  /**
+   * Forces the map to re-render all layers and features.
+   * Useful when layer styles or features have been updated programmatically and need to be reflected visually.
+   * @param {string} mapId - The map identifier
+   */
+  static forceMapToRender(mapId: string): void {
+    this.getMapViewer(mapId).map.render();
   }
 
   /**
@@ -1756,6 +1768,67 @@ export class MapEventProcessor extends AbstractEventProcessor {
       if (layerEntryConfig.listOfLayerEntryConfig?.length)
         this.#replaceLayerEntryConfigNames(pairsDict, layerEntryConfig.listOfLayerEntryConfig, removeUnlisted);
     });
+  }
+
+  /**
+   * Creates a new geometry group on the map if it doesn't already exist.
+   * Geometry groups are used to organize and manage collections of vector features (lines, polygons, points).
+   * @param {string} mapId - The map identifier
+   * @param {string} groupName - The unique name for the geometry group to create
+   */
+  static createGeometryGroup(mapId: string, groupName: string): void {
+    const viewer = this.getMapViewer(mapId);
+    if (!viewer.layer.geometry.hasGeometryGroup(groupName)) {
+      viewer.layer.geometry.createGeometryGroup(groupName);
+    }
+  }
+
+  /**
+   * Deletes all geometries from a geometry group.
+   * Removes all vector features (lines, polygons, points) that belong to the specified group.
+   * The group itself remains and can be reused.
+   * @param {string} mapId - The map identifier
+   * @param {string} groupName - The name of the geometry group to clear
+   */
+  static deleteGeometriesFromGroup(mapId: string, groupName: string): void {
+    const viewer = this.getMapViewer(mapId);
+    if (viewer.layer.geometry.hasGeometryGroup(groupName)) {
+      viewer.layer.geometry.deleteGeometriesFromGroup(groupName);
+    }
+  }
+
+  /**
+   * Adds an overlay to the map.
+   * Overlays are HTML DOM elements positioned at map coordinates that float above the map canvas.
+   * Common uses include tooltips, popups, and measurement labels.
+   * @param {string} mapId - The map identifier
+   * @param {Overlay} overlay - The OpenLayers overlay to add to the map.
+   */
+  static addOverlay(mapId: string, overlay: Overlay): void {
+    const viewer = this.getMapViewer(mapId);
+    if (overlay) viewer.map.addOverlay(overlay);
+  }
+
+  /**
+   * Removes an overlay from the map.
+   * Removes the HTML element from the map display and cleans up references.
+   * @param {string} mapId - The map identifier
+   * @param {Overlay} overlay - The OpenLayers overlay to remove from the map.
+   */
+  static removeOverlay(mapId: string, overlay: Overlay): void {
+    const viewer = this.getMapViewer(mapId);
+    if (overlay) viewer.map.removeOverlay(overlay);
+  }
+
+  /**
+   * Initializes drawing interactions on the given vector source
+   * @param {string} mapId - The map identifier
+   * @param {string} geomGroupKey - The geometry group key in which to hold the geometries
+   * @param {string} type - The type of geometry to draw (Polygon, LineString, Circle, etc)
+   * @param {TypeFeatureStyle} [style] - The styles for the drawing
+   */
+  static initDrawInteractions(mapId: string, geomGroupKey: string, type: string, style: TypeFeatureStyle): Draw {
+    return this.getMapViewer(mapId).initDrawInteractions(geomGroupKey, type, style);
   }
   // #endregion
 }
