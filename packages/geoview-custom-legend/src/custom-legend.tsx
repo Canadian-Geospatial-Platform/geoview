@@ -17,12 +17,6 @@ interface SymbolConfig {
   };
 }
 
-interface FilterConfig {
-  property: string;
-  value: string | number | boolean;
-  operator?: '=' | '!=' | '>' | '<' | '>=' | '<=' | 'contains' | 'startsWith' | 'endsWith';
-}
-
 interface LegendItem {
   id: string;
   name: string;
@@ -32,7 +26,6 @@ interface LegendItem {
   description?: string;
   visible?: boolean;
   layerId?: string;
-  filter?: FilterConfig;
 }
 
 type LegendListItems = LegendItem[];
@@ -55,7 +48,7 @@ interface DisplayConfig {
 export type TypeLegendProps = {
   id: string;
   enabled?: boolean;
-  isOpen?: boolean;
+  isOpen: boolean;
   title?: string;
   legendList: LegendListItems;
   display?: DisplayConfig;
@@ -71,6 +64,10 @@ export function CustomLegendPanel(props: CustomLegendPanelProps): JSX.Element {
   const { Box } = ui.elements;
 
   const theme = ui.useTheme();
+  const t = theme as unknown as Record<string, unknown>;
+  const palette = t.palette as Record<string, unknown> | undefined;
+  const background = palette?.background as Record<string, unknown> | undefined;
+  const text = palette?.text as Record<string, unknown> | undefined;
   const sxClasses = getSxClasses(theme);
 
   const activeLegendList = legendList;
@@ -188,7 +185,7 @@ export function CustomLegendPanel(props: CustomLegendPanelProps): JSX.Element {
                 className="legend-description"
                 sx={{
                   fontSize: (config.display?.text?.size || 12) * 0.88,
-                  color: theme.palette.geoViewColor.textColor.light[600],
+                  color: (text?.secondary as string) || '#666',
                   marginTop: 0.5,
                 }}
               >
@@ -202,7 +199,7 @@ export function CustomLegendPanel(props: CustomLegendPanelProps): JSX.Element {
   };
 
   return (
-    <Box sx={{ background: theme.palette.geoViewColor.bgColor.main, ...sxClasses.container }}>
+    <Box sx={{ background: (background?.paper as string) || '#fff', ...Object.assign({}, sxClasses.container) }}>
       {activeLegendList.map((legendItem: LegendItem) => renderLegendItem(legendItem))}
     </Box>
   );

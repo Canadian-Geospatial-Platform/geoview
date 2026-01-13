@@ -112,6 +112,17 @@ export class GeoChartParsing {
           items: layerDataSimplified,
         });
       }
+    } else {
+      // There's already a datasource in the config, repeat it as many times as we have features to have a 'better' mockup representation of what was clicked at least
+      const datasources: GeoChartDatasource[] = [];
+      for (let i = 1; i <= layerData.length; i++) {
+        // Add it
+        datasources.push({
+          ...retConfigChart.datasources[0], // spread the base datasource
+          display: `Feature ${i}`, // override/add display
+        });
+        retConfigChart.datasources = datasources;
+      }
     }
 
     // Return it

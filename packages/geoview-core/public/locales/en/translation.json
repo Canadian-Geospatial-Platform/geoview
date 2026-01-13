@@ -282,7 +282,7 @@
       "invalidLayerFilter": "Layer '__param__' has an invalid layer filter.\nfilter = '__param__'\ninternal filter = '__param__'.",
       "failedToCreateLayer": "Failed to create the layer '__param__'.",
       "noCapabilitiesOrEmpty": "No capabilities (or empty) found for layer '__param__'.",
-      "wmsServiceFormatParameter": "Parameter 'Format' of GetFeatureInfo not supported for WMS services, '__param__'.",
+      "wmsServiceFormatParameter": "Parameter format(s) '__param__' of GetFeatureInfo are not supported for WMS services, '__param__'.",
       "wmsSubLayerNotfound": "The sublayer __param__ of the layer __param__ does not exist on the server.",
       "csvNoGeographicData": "Could not find geographic data in the CSV '__param__'.",
       "invalidMetadata": "Invalid metadata (listOfLayerEntryConfig) preventing load of layer '__param__'.",
@@ -418,6 +418,7 @@
       "statusWasError": "Layer '__param__' status was 'error'.",
       "notAGeoJsonLayer": "Not a GeoJson layer for layer '__param__'.",
       "notAnEsriDynamicLayer": "Not an Esri Dynamic Layer for layer '__param__'.",
+      "notSupportingDynamicLayers": "Layer '__param__' does not technically support dynamic layers per its metadata.",
       "notAFeatureLayer": "Layer id not a Feature Layer for layer '__param__'.",
       "notQueryableLayer": "Layer '__param__' is not queryable.",
       "notAbleToQuery": "Not able to download records for '__param__'"

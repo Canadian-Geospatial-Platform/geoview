@@ -742,7 +742,12 @@
             const done = plugin.getTestsDone();
             const total = plugin.getTestsTotal();
 
-            statsSpan.innerHTML = `Running: <span style="color: ${running > 0 ? 'orange' : '#666'};">${running}</span> | Done success: <span style="color: #28a745;">${doneSuccess}</span> | Done failed: <span style="color: #dc3545;">${doneFailed}</span> | Done: ${done}/${total}`;
+            let colorRunning = 'inherit';
+            if (running > 0) colorRunning = 'orange';
+            let colorFailed = '#00ff00'; // green
+            if (doneFailed) colorFailed = 'red';
+
+            statsSpan.innerHTML = `Running: <span style="color: ${colorRunning};">${running}</span> | Done success: <span style="color: #00ff00;">${doneSuccess}</span> | Done failed: <span style="color: ${colorFailed};">${doneFailed}</span> | Done: ${done}/${total}`;
           }
         });
 

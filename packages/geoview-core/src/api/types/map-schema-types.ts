@@ -93,7 +93,6 @@ export type TypeValidAppBarCoreProps =
   | 'export'
   | 'aoi-panel'
   | 'custom-legend'
-  | 'geochart'
   | 'guide'
   | 'legend'
   | 'details'
@@ -803,15 +802,6 @@ export interface TypePolygonVectorConfig extends TypeBaseVectorGeometryConfig {
   /** Pattern line width.default = 1. */
   patternWidth?: number;
 
-  /** Pattern line width.default = 1.
-   * @deprecated Remove it after the release, once files like metadata.data are fixed in the hosted website.
-   */
-  paternSize?: number;
-  /** Pattern line width.default = 1.
-   * @deprecated Remove it after the release, once files like metadata.data are fixed in the hosted website.
-   */
-  paternWidth?: number;
-
   /** Kind of filling  for vector features. Default = solid.  */
   fillStyle: TypeFillStyle;
   /** The additional graphic fills symbology for special fills */
@@ -925,7 +915,6 @@ export type TypeFeatureInfoEntryPartial = Pick<TypeFeatureInfoEntry, 'fieldInfo'
 // TODO: Refactor - Check if this type is still used and replace it with something like TypeAllFeatureInfoResultSetEntry?
 // TO.DOCONT:  Still use in data-table-state and detail.tsx
 export type TypeLayerData = {
-  eventListenerEnabled: boolean;
   // When property features is undefined, we are waiting for the query result.
   // when Array.isArray(features) is true, the features property contains the query result.
   // when property features is null, the query ended with an error.

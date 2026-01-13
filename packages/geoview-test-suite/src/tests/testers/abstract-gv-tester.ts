@@ -1,9 +1,11 @@
 import type { Coordinate } from 'ol/coordinate';
-import { AbstractTester } from '../core/abstract-tester';
+
 import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
 import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
+import type { LayerApi } from 'geoview-core/geo/layer/layer';
+import { AbstractTester } from '../core/abstract-tester';
 
 /**
  * Main GeoView Abstract Tester class.
@@ -380,7 +382,7 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly CSV_STATION_ICON_LIST: Partial<TypeLegendItem>[] = [
     {
       geometryType: 'Point',
-      name: 'Station_List_Minus_HQ-MELCC.csv',
+      name: 'Station List CSV',
       isVisible: true,
     },
   ];
@@ -475,6 +477,13 @@ export abstract class GVAbstractTester extends AbstractTester {
    */
   getMapViewer(): MapViewer {
     return this.#mapViewer;
+  }
+
+  /**
+   * Gets the LayerApi.
+   */
+  getLayerApi(): LayerApi {
+    return this.getMapViewer().layer;
   }
 
   /**

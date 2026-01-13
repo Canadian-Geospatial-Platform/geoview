@@ -49,13 +49,12 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
     };
   }
 
-  /**
-   * Overrides the getConfig in order to return the right type.
-   * @returns {TypeLegendProps} The Geochart config
-   */
   override getConfig(): TypeLegendProps {
-    // Redirect
-    return super.getConfig() as TypeLegendProps;
+    const config = super.getConfig() as TypeLegendProps;
+    return {
+      ...config,
+      isOpen: config.isOpen ?? false,
+    };
   }
 
   override onCreateButtonProps(): IconButtonPropsExtend {

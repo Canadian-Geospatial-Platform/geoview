@@ -234,6 +234,9 @@ export class Notifications {
    * @param {ISnackbarButton} button - Optional snackbar button
    */
   showWarning(messageKey: string, params: unknown[] = [], withNotification: boolean = true, button: ISnackbarButton = {}): void {
+    // Also log the warning in console
+    logger.logWarning(getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapId), messageKey, params));
+
     // Redirect
     this.#addSnackbarMessage('warning', messageKey, params, withNotification, button);
     if (withNotification) this.addNotificationWarning(messageKey, params);
@@ -247,6 +250,9 @@ export class Notifications {
    * @param {ISnackbarButton} button - Optional snackbar button
    */
   showError(messageKey: string, params: unknown[] = [], withNotification: boolean = true, button: ISnackbarButton = {}): void {
+    // Log the error in console
+    logger.logError(getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapId), messageKey, params));
+
     // Redirect
     this.#addSnackbarMessage('error', messageKey, params, withNotification, button);
     if (withNotification) this.addNotificationError(messageKey, params);

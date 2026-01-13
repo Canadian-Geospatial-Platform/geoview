@@ -6,11 +6,12 @@ import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 
 /**
- * Abstract Base Layer managing an OpenLayer layer, including a layer group.
+ * Abstract Base GV Layer managing an OpenLayer layer, including a layer group.
  */
-export abstract class AbstractBaseLayer {
+export abstract class AbstractBaseGVLayer {
   /** Indicates if the layer has become in loaded status at least once already */
   loadedOnce: boolean = false;
 
@@ -197,7 +198,7 @@ export abstract class AbstractBaseLayer {
    */
   setOpacity(layerOpacity: number, emitOpacityChange: boolean = true): void {
     this.getOLLayer().setOpacity(layerOpacity);
-    if (emitOpacityChange) this.#emitLayerOpacityChanged({ layerPath: this.getLayerPath(), opacity: layerOpacity });
+    if (emitOpacityChange) this.#emitLayerOpacityChanged({ opacity: layerOpacity });
   }
 
   /**
@@ -206,6 +207,48 @@ export abstract class AbstractBaseLayer {
    */
   getVisible(): boolean {
     return this.getOLLayer().getVisible();
+  }
+
+  /**
+   * Determines whether this layer is visible, taking into account the visibility
+   * of all its parent groups. A layer is considered visible only if:
+   *   - the layer itself is visible, and
+   *   - every parent GVGroupLayer up the hierarchy is also visible.
+   * This function walks upward through the group layer tree until it reaches
+   * the root, returning `false` immediately if any parent is not visible.
+   * @param {GVGroupLayer[]} groupLayers - The top-level group layers from which
+   *   the layer hierarchy is searched. This must represent the root collection
+   *   of the layer tree.
+   * @returns {boolean} `true` if this layer and all its parent groups are visible;
+   *   otherwise `false`.
+   */
+  getVisibleIncludingParents(groupLayers: GVGroupLayer[]): boolean {
+    // If this layer itself is not visible, stop immediately.
+    if (!this.getVisible()) return false;
+
+    // Start from this layer
+    let current: AbstractBaseGVLayer | undefined = this;
+
+    // Loop until no parent reached
+    while (true) {
+      // Get the parent
+      const parent: GVGroupLayer | undefined = current?.getParent(groupLayers);
+
+      // If no parent
+      if (!parent) {
+        // No parent: reached the top → all good
+        return true;
+      }
+
+      // Check the parent visibility
+      if (!parent.getVisible()) {
+        // Parent is invisible → this layer must also be invisible
+        return false;
+      }
+
+      // Loop
+      current = parent;
+    }
   }
 
   /**
@@ -259,6 +302,21 @@ export abstract class AbstractBaseLayer {
     const minZoom = this.getOLLayer().getMinZoom();
     const maxZoom = this.getOLLayer().getMaxZoom();
     return (!minZoom || zoom > minZoom) && (!maxZoom || zoom <= maxZoom);
+  }
+
+  /**
+   * Returns the direct parent GVGroupLayer of this layer, if any.
+   * This method searches the provided root group layer collection to locate
+   * the group that directly contains this layer. If the layer is nested
+   * inside multiple groups, only the immediate parent group is returned.
+   * @param {GVGroupLayer[]} groupLayers - The root-level group layers to
+   *   search through when looking for this layer’s parent.
+   * @returns {GVGroupLayer | undefined} The direct parent group layer, or
+   *   `undefined` if this layer is not a child of any group.
+   */
+  getParent(groupLayers: GVGroupLayer[]): GVGroupLayer | undefined {
+    // Redirect
+    return AbstractBaseGVLayer.#getParent(this, groupLayers);
   }
 
   // #endregion METHODS
@@ -350,6 +408,52 @@ export abstract class AbstractBaseLayer {
   }
 
   // #endregion EVENTS
+
+  // #region STATIC METHODS
+
+  /**
+   * Recursively searches the layer tree to find the parent GVGroupLayer
+   * of a given layer. The search begins from the provided list of layers,
+   * which should represent the root-level layer collection.
+   * This method walks top-down through all nested GVGroupLayers until it
+   * finds the group whose children contain the specified layer.
+   * It proceeds this way, because OpenLayers doesn't have a way to start from a leaf - have to start from the root.
+   * @param {AbstractBaseGVLayer} layer - The layer for which the parent
+   *   group is being searched.
+   * @param {AbstractBaseGVLayer[]} groupLayers - The list of layers to
+   *   search within. Typically this is the root layer group of the map.
+   * @returns {GVGroupLayer | undefined} The parent group layer if found,
+   *   otherwise `undefined` if the layer has no parent.
+   * @private
+   * @static
+   */
+  static #getParent(layer: AbstractBaseGVLayer, groupLayers: AbstractBaseGVLayer[]): GVGroupLayer | undefined {
+    // GV This function proceeds this way, because OpenLayers doesn't have a way to start from a leaf - have to start from the root.
+    // For each group layers
+    for (const group of groupLayers) {
+      if (group instanceof GVGroupLayer) {
+        const children = group.getLayers();
+
+        for (const child of children) {
+          // Direct parent
+          if (child === layer) {
+            return group;
+          }
+
+          // Look deeper recursively
+          if (child instanceof GVGroupLayer) {
+            const parent = this.#getParent(layer, child.getLayers());
+            if (parent) return parent;
+          }
+        }
+      }
+    }
+
+    // No parent
+    return undefined;
+  }
+
+  // #endregion
 }
 
 /**
@@ -363,7 +467,7 @@ export type LayerNameChangedEvent = {
 /**
  * Define a delegate for the event handler function signature.
  */
-export type LayerNameChangedDelegate = EventDelegateBase<AbstractBaseLayer, LayerNameChangedEvent, void>;
+export type LayerNameChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, LayerNameChangedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -375,19 +479,17 @@ export type VisibleChangedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-export type VisibleChangedDelegate = EventDelegateBase<AbstractBaseLayer, VisibleChangedEvent, void>;
-
-/**
- * Define a delegate for the event handler function signature
- */
-export type LayerOpacityChangedDelegate = EventDelegateBase<AbstractBaseLayer, LayerOpacityChangedEvent, void>;
+export type VisibleChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, VisibleChangedEvent, void>;
 
 /**
  * Define an event for the delegate
  */
 export type LayerOpacityChangedEvent = {
-  // The layer path of the affected layer
-  layerPath: string;
   // The filter
   opacity: number;
 };
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type LayerOpacityChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, LayerOpacityChangedEvent, void>;

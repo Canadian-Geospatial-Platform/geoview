@@ -1,5 +1,4 @@
 import { logger } from '@/core/utils/logger';
-import type { EventType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { Projection } from '@/geo/utils/projection';
 
@@ -24,6 +23,23 @@ import { doUntil } from '@/core/utils/utilities';
  * Event processor focusing on interacting with the feature info state in the store (currently called detailsState).
  */
 export class FeatureInfoEventProcessor extends AbstractEventProcessor {
+  // **********************************************************
+  // Static functions for Typescript files to access store actions
+  // **********************************************************
+  // GV Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
+  // GV Some action does state modifications AND map actions.
+  // GV ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
+
+  // Holds the list of layer data arrays being buffered in the propagation process for the batch
+  static #batchedPropagationLayerDataArray: BatchedPropagationLayerDataArrayByMap<TypeFeatureInfoResultSetEntry> = {};
+
+  // The time delay between propagations in the batch layer data array.
+  // The longer the delay, the more the layers will have a chance to get in a loaded state before changing the layerDataArray.
+  // The longer the delay, the longer it'll take to update the UI. The delay can be bypassed using the layer path bypass method.
+  static TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH = 1000;
+
+  // #region OVERRIDES
+
   /**
    * Overrides initialization of the GeoChart Event Processor
    * @param {GeoviewStoreType} store The store associated with the GeoChart Event Processor
@@ -88,21 +104,9 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
     return [layerDataArrayUpdateBatch, clickCoordinates, coordinateInfoEnabledSubscription];
   }
 
-  // **********************************************************
-  // Static functions for Typescript files to access store actions
-  // **********************************************************
-  // GV Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
-  // GV Some action does state modifications AND map actions.
-  // GV ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
+  // #endregion OVERRIDES
 
-  // #region
-  // Holds the list of layer data arrays being buffered in the propagation process for the batch
-  static #batchedPropagationLayerDataArray: BatchedPropagationLayerDataArrayByMap<TypeFeatureInfoResultSetEntry> = {};
-
-  // The time delay between propagations in the batch layer data array.
-  // The longer the delay, the more the layers will have a chance to get in a loaded state before changing the layerDataArray.
-  // The longer the delay, the longer it'll take to update the UI. The delay can be bypassed using the layer path bypass method.
-  static #timeDelayBetweenPropagationsForBatch = 1000;
+  // #region STATIC METHODS
 
   /**
    * Shortcut to get the Feature Info state for a given map id
@@ -115,7 +119,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Get the selectedLayerPath value
+   * Gets the selectedLayerPath value
    * @param {string} mapId - The map identifier
    * @returns {string} the selected layer path
    */
@@ -124,7 +128,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * GSt the selectedLayerPath value
+   * Sets the selectedLayerPath value
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path to select
    */
@@ -159,16 +163,12 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * removing the higlight and the click marker if selected layer path is the reset path
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path to delete features from resultSet
-   * @param {EventType} eventType - The event that triggered the reset.
    */
-  static resetResultSet(mapId: string, layerPath: string, eventType: EventType = 'click'): void {
+  static resetResultSet(mapId: string, layerPath: string): void {
     const { resultSet } = MapEventProcessor.getMapViewerLayerAPI(mapId).featureInfoLayerSet;
     if (resultSet[layerPath]) {
       resultSet[layerPath].features = [];
-      this.propagateFeatureInfoToStore(mapId, eventType, resultSet[layerPath]).catch((error: unknown) =>
-        // Log error
-        logger.logPromiseFailed('Not able to reset resultSet', error, layerPath)
-      );
+      this.propagateFeatureInfoNameToStore(mapId, resultSet[layerPath]);
     }
 
     // Remove highlighted features and marker if it is the selected layer path
@@ -237,11 +237,9 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * Propagates feature info layer sets to the store. The update of the array will also trigger an update in a batched manner.
    *
    * @param {string} mapId - The map identifier of the modified result set.
-   * @param {EventType} eventType - The event type that triggered the layer set update.
    * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry being propagated.
-   * @returns {Promise<void>}
    */
-  static propagateFeatureInfoToStore(mapId: string, eventType: EventType, resultSetEntry: TypeFeatureInfoResultSetEntry): Promise<void> {
+  static propagateFeatureInfoClickToStore(mapId: string, resultSetEntry: TypeFeatureInfoResultSetEntry): void {
     // The feature info state
     const featureInfoState = this.getFeatureInfoState(mapId);
 
@@ -249,31 +247,40 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
     const layerDataArray = [...featureInfoState.layerDataArray];
     if (!layerDataArray.find((layerEntry) => layerEntry.layerPath === resultSetEntry.layerPath)) layerDataArray.push(resultSetEntry);
 
-    // Depending on the event type
-    if (eventType === 'click') {
-      // Show details panel as soon as there is a click on the map
-      // If the current tab is not 'details' nor 'geochart', switch to details
-      if (
-        UIEventProcessor.getActiveFooterBarTab(mapId) === undefined ||
-        (!['details', 'geochart'].includes(UIEventProcessor.getActiveFooterBarTab(mapId)!) &&
-          UIEventProcessor.getFooterBarComponents(mapId).includes('details'))
-      ) {
-        UIEventProcessor.setActiveFooterBarTab(mapId, 'details');
-      }
-      // Open details appbar tab when user clicked on map layer.
-      if (UIEventProcessor.getAppBarComponents(mapId).includes('details')) {
-        UIEventProcessor.setActiveAppBarTab(mapId, 'details', true, true);
-      }
-
-      // Update the layer data array in the store, all the time, for all statuses
-      featureInfoState.setterActions.setLayerDataArray(layerDataArray);
-    } else if (eventType === 'name') {
-      // Update the layer data array in the store, all the time, for all statuses
-      featureInfoState.setterActions.setLayerDataArray(layerDataArray);
+    // Show details panel as soon as there is a click on the map
+    // If the current tab is not 'details' nor 'geochart', switch to details
+    if (
+      UIEventProcessor.getActiveFooterBarTab(mapId) === undefined ||
+      (!['details', 'geochart'].includes(UIEventProcessor.getActiveFooterBarTab(mapId)!) &&
+        UIEventProcessor.getFooterBarComponents(mapId).includes('details'))
+    ) {
+      UIEventProcessor.setActiveFooterBarTab(mapId, 'details');
+    }
+    // Open details appbar tab when user clicked on map layer.
+    if (UIEventProcessor.getAppBarComponents(mapId).includes('details')) {
+      UIEventProcessor.setActiveAppBarTab(mapId, 'details', true, true);
     }
 
-    // Nothing to do
-    return Promise.resolve();
+    // Update the layer data array in the store, all the time, for all statuses
+    featureInfoState.setterActions.setLayerDataArray(layerDataArray);
+  }
+
+  /**
+   * Propagates feature info layer sets to the store. The update of the array will also trigger an update in a batched manner.
+   *
+   * @param {string} mapId - The map identifier of the modified result set.
+   * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry being propagated.
+   */
+  static propagateFeatureInfoNameToStore(mapId: string, resultSetEntry: TypeFeatureInfoResultSetEntry): void {
+    // The feature info state
+    const featureInfoState = this.getFeatureInfoState(mapId);
+
+    // Create a details object for each layer which is then used to render layers in details panel.
+    const layerDataArray = [...featureInfoState.layerDataArray];
+    if (!layerDataArray.find((layerEntry) => layerEntry.layerPath === resultSetEntry.layerPath)) layerDataArray.push(resultSetEntry);
+
+    // Update the layer data array in the store, all the time, for all statuses
+    featureInfoState.setterActions.setLayerDataArray(layerDataArray);
   }
 
   /**
@@ -301,7 +308,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
       mapId,
       layerDataArray,
       this.#batchedPropagationLayerDataArray,
-      this.#timeDelayBetweenPropagationsForBatch,
+      this.TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH,
       featureInfoState.setterActions.setLayerDataArrayBatch,
       'feature-info-processor',
       featureInfoState.layerDataArrayBatchLayerPathBypass,

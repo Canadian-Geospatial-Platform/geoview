@@ -26,6 +26,7 @@ import type {
   TypeValidMapProjectionCodes,
   TypeIconSymbolVectorConfig,
   TypeOutfields,
+  TypeFeatureInfoEntryPartial,
 } from '@/api/types/map-schema-types';
 import type { TypeLayerMetadataEsriExtent } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
@@ -52,6 +53,7 @@ import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-v
  * @class GVEsriDynamic
  */
 export class GVEsriDynamic extends AbstractGVRaster {
+  /** The worker pool used when fetching records */
   #fetchWorkerPool: FetchEsriWorkerPool;
 
   // The default hit tolerance the query should be using
@@ -143,7 +145,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       legendInfo.forEach((info) => {
         const styleInfo: TypeLayerStyleConfigInfo = {
           label: info.label,
-          visible: layerConfig.getInitialSettings().states?.visible ?? true, // default: true,
+          visible: layerConfig.getInitialSettings()?.states?.visible ?? true, // default: true,
           values: info.label.split(','),
           settings: {
             type: 'iconSymbol',
@@ -236,7 +238,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const layerEntryConfig = this.getLayerConfig();
 
     // Use the returnExtentOnly=true to get only the extent of ids and ask in the right projection right away
-    const idStringClause = `&objectIds=${objectIds.join('%2C')}`;
+    const idStringClause = `&objectIds=${objectIds.join(',')}`;
     const outfieldQueryClause = outfield ? `&outFields=${outfield}` : '';
     const outSrClause = `&outSR=${Projection.readEPSGNumber(outProjection)}`;
     const queryUrl = `${layerEntryConfig.getDataAccessPath(true)}${layerEntryConfig.layerId}/query?${idStringClause}${outfieldQueryClause}${outSrClause}&returnExtentOnly=true&f=json`;
@@ -312,13 +314,10 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Overrides the get all feature information for all the features stored in the layer.
    * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
-   * @param {AbortController?} abortController - The optional abort controller.
+   * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override async getAllFeatureInfo(
-    map: OLMap,
-    abortController: AbortController | undefined = undefined
-  ): Promise<TypeFeatureInfoEntry[]> {
+  protected override async getAllFeatureInfo(map: OLMap, abortController?: AbortController): Promise<TypeFeatureInfoEntry[]> {
     // Get the layer config in a loaded phase
     const layerConfig = this.getLayerConfig();
 
@@ -356,7 +355,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.
    * @param {Coordinate} location - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-   * @param {AbortController?} abortController - The optional abort controller.
+   * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
   protected override getFeatureInfoAtCoordinate(
@@ -377,7 +376,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {OLMap} map - The Map where to get Feature Info At LonLat from.
    * @param {Coordinate} lonlat - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-   * @param {AbortController?} abortController - The optional abort controller.
+   * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    */
@@ -387,14 +386,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
     queryGeometry: boolean = true,
     abortController: AbortController | undefined = undefined
   ): Promise<TypeFeatureInfoEntry[]> {
-    // If invisible
-    if (!this.getVisible()) return [];
-
     // Get the layer config in a loaded phase
     const layerConfig = this.getLayerConfig();
-
-    // If not queryable return []
-    if (!layerConfig.getQueryableDefaulted()) return [];
 
     // GV: We cannot directly use the view extent and reproject. If we do so some layers (issue #2413) identify will return empty resultset
     // GV.CONT: This happen with max extent as initial extent and 3978 projection. If we use only the LL and UP corners for the reprojection it works
@@ -422,11 +415,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // If no features identified return []
     if (identifyJsonResponse.results.length === 0) return [];
 
-    // Get the outfields
-    const outfields = layerConfig.getOutfields();
-
     // Extract OBJECTIDs
-    const oidField = outfields?.find((field) => field.type === 'oid')?.name ?? 'OBJECTID';
+    const oidField = layerConfig.getOutfieldsPKNameOrDefault('OBJECTID');
     const objectIds = identifyJsonResponse.results.map((result) => String(result.attributes[oidField]).replace(',', ''));
 
     // Get meters per pixel to set the maxAllowableOffset to simplify return geometry
@@ -496,8 +486,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
             //   featureProjection: `EPSG:${mapViewer.getMapState().currentProjection}`,
             // }) as Feature<Geometry>;
 
-            // TODO: Performance - Relying on style to get geometry is not good. We should extract it from metadata and keep it in dedicated attribute
-            const geomType = layerConfig?.getTypeGeometries() || [];
+            // Get the geometry type
+            const geomType = layerConfig?.getGeometryType();
 
             // Get coordinates in right format and create geometry
             const coordinates = (feat.geometry?.points ||
@@ -506,8 +496,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
               feat.geometry?.rings || [feat.geometry?.x, feat.geometry?.y]) as any; // MultiPoint or Line or Polygon or Point schema
 
             // Create the geometry from the (first?) type
-            const newGeom: Geometry | undefined =
-              geomType.length > 0 ? GeometryApi.createGeometryFromType(geomType[0], coordinates) : undefined;
+            const newGeom: Geometry | undefined = geomType ? GeometryApi.createGeometryFromType(geomType, coordinates) : undefined;
 
             // TODO: Performance - We will need a trigger to refresh the higight and details panel (for zoom button) when extent and
             // TO.DOCONT: is applied. Sometimes the delay is too big so we need to change tab or layer in layer list to trigger the refresh
@@ -529,6 +518,38 @@ export class GVEsriDynamic extends AbstractGVRaster {
   // #endregion OVERRIDES
 
   // #region METHODS
+
+  /**
+   * Retrieves feature records from the layer using their Object IDs (OIDs).
+   * This method queries the underlying layer for the specified object IDs and returns
+   * a Promise resolving to an array of partial feature info entries.
+   * The method automatically determines the geometry type and output fields from
+   * the layer configuration. If an output spatial reference (`outSR`) is provided,
+   * the geometries are projected accordingly.
+   * @param {number[]} objectIDs - An array of Object IDs to query.
+   * @param {number} [outSR] - Optional output spatial reference (WKID) for geometry projection.
+   * @returns {Promise<TypeFeatureInfoEntryPartial[]>} A promise resolving to an array of partial feature info entries.
+   */
+  getRecordsByOIDs(objectIDs: number[], outSR?: number | undefined): Promise<TypeFeatureInfoEntryPartial[]> {
+    // Get the layer config
+    const layerConfig = this.getLayerConfig();
+
+    // Get the geometry type
+    const geometryType = layerConfig.getGeometryType();
+
+    // Get oid field
+    const oidField = layerConfig.getOutfieldsPKNameOrDefault('OBJECTID');
+
+    // Query for the specific object ids
+    return EsriUtilities.queryRecordsByUrlObjectIds(
+      `${layerConfig.getDataAccessPath(true)}${layerConfig.layerId}`,
+      geometryType,
+      objectIDs,
+      oidField,
+      true,
+      outSR
+    );
+  }
 
   /**
    * Applies a view filter to an Esri Dynamic layer's source by updating the `layerDefs` parameter.
@@ -742,7 +763,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const defaultFilter = isWMS ? undefined : this.DEFAULT_FILTER_1EQUALS1;
     const layerFilter = layerConfig.getLayerFilter();
 
-    const styleSettings = layerConfig.getFirstStyleSettings();
+    const styleSettings = layerConfig.getLayerStyleSettings();
     if (!styleSettings) return this.#appendLayerFilter(defaultFilter, layerFilter, isWMS);
 
     // Get the outfields
@@ -1088,7 +1109,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const spacing = useExtraSpacingInFilter ? ' ' : '';
     const withQuotes = useExtraSpacingInFilter ? '"' : '';
 
-    // TODO The below commented code was previously causing the classes to be reversed by adding a 'not' to the query
+    // TODO COMMENTED CODE - The code below was previously causing the classes to be reversed by adding a 'not' to the query
     // TO.DO Need to confirm that the 'not' is no longer needed
     // TO.DO Changed on 2025-05-29 in PR 2916
     // let queryString = styleSettings.info[styleSettings.info.length - 1].visible !== false && !level ? 'not (' : '(';

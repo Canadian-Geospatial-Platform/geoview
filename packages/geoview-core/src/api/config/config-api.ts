@@ -405,7 +405,7 @@ export class ConfigApi {
    */
   static getStyleFromESRIRenderer(rendererAsString: string): TypeLayerStyleConfig | undefined {
     // Redirect
-    return EsriRenderer.getStyleFromEsriRenderer(JSON.parse(rendererAsString));
+    return EsriRenderer.createStylesFromEsriRenderer(JSON.parse(rendererAsString));
   }
 
   /**
@@ -449,9 +449,10 @@ export class ConfigApi {
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {TypeInitialGeoviewLayerType} layerType - The type of GeoView layer to initialize (e.g., 'esriDynamic', 'ogcWms', 'GeoJSON', etc.).
    * @param {string} layerURL - The URL endpoint associated with the layer (e.g., service URL, file path).
-   * @param {TypeDisplayLanguage} language - The language, used for the geocore layer types to know which language to use when extracting layer information.
-   * @param {string} mapId - The map id, used for the geocore layer types, to determine the layer id.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {boolean?} [isTimeAware] - Indicates whether the layer supports time-based filtering.
+   * @param {TypeDisplayLanguage} [language] - The language, used for the geocore layer types to know which language to use when extracting layer information.
+   * @param {string} [mapId] - The map id, used for the geocore layer types, to determine the layer id.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<TypeGeoviewLayerConfig>} A Promise of a fully initialized `TypeGeoviewLayerConfig`.
    * @throws {NotSupportedError} If the provided layer type is not recognized or supported.
    */
@@ -460,9 +461,10 @@ export class ConfigApi {
     geoviewLayerId: string,
     geoviewLayerName: string,
     layerURL: string,
+    isTimeAware?: boolean,
     language?: TypeDisplayLanguage,
     mapId?: string,
-    abortSignal: AbortSignal | undefined = undefined
+    abortSignal?: AbortSignal
   ): Promise<TypeGeoviewLayerConfig> {
     // If working with geoCore
     if (layerType === 'geoCore') {
@@ -479,6 +481,7 @@ export class ConfigApi {
         layerConfigFromGeocore.geoviewLayerId,
         layerConfigFromGeocore.geoviewLayerName!,
         layerConfigFromGeocore.metadataAccessPath!,
+        layerConfigFromGeocore.isTimeAware,
         language,
         mapId,
         abortSignal
@@ -507,33 +510,33 @@ export class ConfigApi {
     // Depending on the type
     switch (layerType) {
       case 'esriDynamic':
-        return EsriDynamic.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return EsriDynamic.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'esriImage':
-        return EsriImage.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return EsriImage.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'imageStatic':
-        return ImageStatic.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return ImageStatic.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'GeoTIFF':
-        return GeoTIFF.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return GeoTIFF.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'vectorTiles':
-        return VectorTiles.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return VectorTiles.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'ogcWms':
-        return WMS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, false);
+        return WMS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, false, isTimeAware);
       case 'xyzTiles':
-        return XYZTiles.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return XYZTiles.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'CSV':
-        return CSV.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return CSV.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'esriFeature':
-        return EsriFeature.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return EsriFeature.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'GeoJSON':
-        return GeoJSON.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return GeoJSON.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'KML':
-        return KML.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return KML.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'WKB':
-        return WKB.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return WKB.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'ogcFeature':
-        return OgcFeature.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return OgcFeature.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'ogcWfs':
-        return WFS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL);
+        return WFS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'GeoPackage':
         // For GeoPackage, we build a WKB config
         return await GeoPackageReader.createLayerConfigFromGeoPackage(
@@ -564,6 +567,7 @@ export class ConfigApi {
    * @param {string} geoviewLayerName - The geoview layer name
    * @param {string} layerURL - The layer url
    * @param {number[] | string[]} layerIds - The layer ids for each layer entry config.
+   * @param {boolean} isTimeAware - Indicates if the layer is time aware.
    * @returns {Promise<ConfigBaseClass[]>} A Promise of a list of ConfigBaseClass objects.
    * @throws {NotSupportedError} If the provided layer type is not recognized or supported.
    */
@@ -572,31 +576,30 @@ export class ConfigApi {
     geoviewLayerId: string,
     geoviewLayerName: string,
     layerURL: string,
-    layerIds: number[] | string[]
+    layerIds: number[] | string[],
+    isTimeAware: boolean
   ): Promise<ConfigBaseClass[]> {
     // Depending on the type
-    // TODO: Check - Config init - Check, for ALL layers here, if there's a way to better determine the isTimeAware flag, defaults to false, how is it used here?
     switch (layerType) {
       case 'esriDynamic':
-        return EsriDynamic.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[], false);
+        return EsriDynamic.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[], isTimeAware);
       case 'esriImage':
-        return EsriImage.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, false);
+        return EsriImage.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'GeoTIFF':
-        return GeoTIFF.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false);
+        return GeoTIFF.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
       case 'imageStatic':
-        // TODO: Check - Config init - Check if there's a way to better determine the source extent to send, defaults to napl-ring-of-fire's extent
+        // TODO: CHECK - Config init - Check if there's a way to better determine the source extent to send, defaults to napl-ring-of-fire's extent
         return ImageStatic.processGeoviewLayerConfig(
           geoviewLayerId,
           geoviewLayerName,
           layerURL,
           layerIds as string[],
-          false,
+          isTimeAware,
           [-87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075],
           4326
         );
       case 'vectorTiles':
-        // TODO: Check - Config init - Check if there's a way to better determine the projection to send, defaults to 'EPSG:3978'
-        return VectorTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false, 'EPSG:3978');
+        return VectorTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
       case 'ogcWms':
         return WMS.processGeoviewLayerConfig(
           geoviewLayerId,
@@ -607,22 +610,21 @@ export class ConfigApi {
           LayerApi.DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS
         );
       case 'xyzTiles':
-        return XYZTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false);
+        return XYZTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
       case 'CSV':
-        return CSV.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false);
+        return CSV.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
       case 'esriFeature':
-        return EsriFeature.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[], false);
+        return EsriFeature.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[], isTimeAware);
       case 'GeoJSON':
-        return GeoJSON.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false);
+        return GeoJSON.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
       case 'KML':
-        return KML.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false);
+        return KML.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
       case 'WKB':
-        return WKB.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false);
+        return WKB.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
       case 'ogcFeature':
-        return OgcFeature.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false);
+        return OgcFeature.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
       case 'ogcWfs':
-        // TODO: Check - Config init - Check if there's a way to better determine the typeOfServer to send, defaults to 'all'
-        return WFS.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], false, 'all', true);
+        return WFS.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware, 'all', true);
       default:
         // Unsupported
         throw new NotSupportedError(`Unsupported layer type ${layerType}`);

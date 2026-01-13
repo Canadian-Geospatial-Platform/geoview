@@ -1,25 +1,22 @@
-import type { Vector as VectorSource } from 'ol/source';
+import type { Feature } from 'ol';
+import type { ReadOptions } from 'ol/format/Feature';
 import type { Options as SourceOptions } from 'ol/source/Vector';
-import { EsriJSON } from 'ol/format';
-import type Feature from 'ol/Feature';
+import type { Projection as OLProjection } from 'ol/proj';
 
+import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
-import type { TypeVectorSourceInitialConfig, TypeGeoviewLayerConfig, TypeMetadataEsriFeature } from '@/api/types/layer-schema-types';
+import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
+import type { TypeGeoviewLayerConfig, TypeMetadataEsriFeature } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
-import { LayerNotFeatureLayerError, LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-exceptions';
+import { LayerServiceMetadataUnableToFetchError, LayerTooManyEsriFeatures } from '@/core/exceptions/layer-exceptions';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 import { Fetch } from '@/core/utils/fetch-helper';
-import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
-
-export interface TypeSourceEsriFeatureInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
-  format: 'EsriJSON';
-}
+import { GeoUtilities } from '@/geo/utils/utilities';
 
 export interface TypeEsriFeatureLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_FEATURE;
@@ -43,6 +40,8 @@ export class EsriFeature extends AbstractGeoViewVector {
     super(layerConfig);
   }
 
+  // #region OVERRIDES
+
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
@@ -55,7 +54,7 @@ export class EsriFeature extends AbstractGeoViewVector {
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<T = TypeMetadataEsriFeature | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    */
@@ -63,14 +62,18 @@ export class EsriFeature extends AbstractGeoViewVector {
     let responseJson;
     try {
       // Query
-      responseJson = await Fetch.fetchJson<T>(`${this.metadataAccessPath}?f=json`, { signal: abortSignal });
+      responseJson = await Fetch.fetchJson<T>(`${this.getMetadataAccessPath()}?f=json`, { signal: abortSignal });
     } catch (error: unknown) {
       // Throw
-      throw new LayerServiceMetadataUnableToFetchError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName(), formatError(error));
+      throw new LayerServiceMetadataUnableToFetchError(
+        this.getGeoviewLayerId(),
+        this.getLayerEntryNameOrGeoviewLayerName(),
+        formatError(error)
+      );
     }
 
     // Validate the metadata response
-    AbstractGeoViewRaster.throwIfMetatadaHasError(this.geoviewLayerId, this.getLayerEntryNameOrGeoviewLayerName(), responseJson);
+    AbstractGeoViewRaster.throwIfMetatadaHasError(this.getGeoviewLayerId(), this.getLayerEntryNameOrGeoviewLayerName(), responseJson);
 
     // Return it
     return responseJson as T;
@@ -78,7 +81,7 @@ export class EsriFeature extends AbstractGeoViewVector {
 
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    */
@@ -88,15 +91,15 @@ export class EsriFeature extends AbstractGeoViewVector {
 
     // If metadata was fetched successfully
     const entries = [];
-    let finalUrl = this.metadataAccessPath;
+    let finalUrl = this.getMetadataAccessPath();
     if (metadata) {
       // If MapServer url
       let sep = '/mapserver';
-      let idx = this.metadataAccessPath.toLowerCase().lastIndexOf(sep);
+      let idx = this.getMetadataAccessPath().toLowerCase().lastIndexOf(sep);
 
       if (idx > 0) {
         // The layer id is in the metadata at root
-        finalUrl = this.metadataAccessPath.substring(0, idx + sep.length);
+        finalUrl = this.getMetadataAccessPath().substring(0, idx + sep.length);
         entries.push({
           id: Number(metadata.id),
           index: Number(metadata.id),
@@ -106,7 +109,7 @@ export class EsriFeature extends AbstractGeoViewVector {
       } else {
         // If FeatureServer url, the metadata is in the first layer
         sep = '/featureserver';
-        idx = this.metadataAccessPath.toLowerCase().lastIndexOf(sep);
+        idx = this.getMetadataAccessPath().toLowerCase().lastIndexOf(sep);
         if (idx > 0) {
           // The layer metadata is in the first layer of the metadata
           const layer = metadata.layers[0];
@@ -121,8 +124,13 @@ export class EsriFeature extends AbstractGeoViewVector {
     }
 
     // Redirect
-    // TODO: Check - Config init - a way to better determine the isTimeAware flag, defaults to false, how is it used here?
-    return EsriFeature.createGeoviewLayerConfig(this.geoviewLayerId, this.geoviewLayerName, finalUrl, false, entries);
+    return EsriFeature.createGeoviewLayerConfig(
+      this.getGeoviewLayerId(),
+      this.getGeoviewLayerName(),
+      finalUrl,
+      this.getGeoviewLayerConfig().isTimeAware,
+      entries
+    );
   }
 
   /**
@@ -131,40 +139,74 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    */
   protected override onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: ConfigBaseClass[]): void {
-    EsriUtilities.commonValidateListOfLayerEntryConfig(this, listOfLayerEntryConfig);
+    // Redirect and hook when a layer entry must be registered
+    EsriUtilities.commonValidateListOfLayerEntryConfig(this, listOfLayerEntryConfig, (config) => {
+      // Register the layer entry config
+      this.emitLayerEntryRegisterInit({ config });
+    });
   }
 
   /**
    * Overrides the way the layer metadata is processed.
    * @param {EsriFeatureLayerEntryConfig} layerConfig - The layer entry configuration to process.
-   * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+   * @param {OLProjection?} [mapProjection] - The map projection.
+   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<EsriFeatureLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   * @throws {LayerTooManyEsriFeatures} When the layer has too many Esri features.
    */
   protected override onProcessLayerMetadata(
     layerConfig: EsriFeatureLayerEntryConfig,
+    mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<EsriFeatureLayerEntryConfig> {
     return EsriUtilities.commonProcessLayerMetadata(this, layerConfig, abortSignal);
   }
 
   /**
-   * Overrides the creation of the source configuration for the vector layer.
-   * @param {EsriFeatureLayerEntryConfig} layerConfig - The layer entry configuration.
-   * @param {SourceOptions} sourceOptions - The source options.
-   * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
-   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   * Overrides the loading of the vector features for the layer by fetching EsriFeature data and converting it
+   * into OpenLayers {@link Feature} feature instances.
+   * @param {VectorLayerEntryConfig} layerConfig -
+   * The configuration object for the vector layer, containing source and
+   * data access information.
+   * @param {SourceOptions<Feature>} sourceOptions -
+   * The OpenLayers vector source options associated with the layer. This may be
+   * used by implementations to customize loading behavior or source configuration.
+   * @param {ReadOptions} readOptions -
+   * Options controlling how features are read, including the target
+   * `featureProjection`.
+   * @returns {Promise<Feature[]>}
+   * A promise that resolves to an array of OpenLayers features.
+   * @protected
+   * @override
    */
-  protected override onCreateVectorSource(
-    layerConfig: EsriFeatureLayerEntryConfig,
-    sourceOptions: SourceOptions<Feature>
-  ): VectorSource<Feature> {
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.url = `${layerConfig.getDataAccessPath(true)}${layerConfig.layerId}/query?f=json&where=1%3D1&returnCountOnly=true`;
-    // eslint-disable-next-line no-param-reassign
-    sourceOptions.format = new EsriJSON();
+  protected override async onCreateVectorSourceLoadFeatures(
+    layerConfig: VectorLayerEntryConfig,
+    sourceOptions: SourceOptions<Feature>,
+    readOptions: ReadOptions
+  ): Promise<Feature[]> {
+    // Use the basic fetch
+    const responseDataCount = await Fetch.fetchEsriJson<{ count: number }>(
+      `${layerConfig.getDataAccessPath(true)}${layerConfig.layerId}/query?f=json&where=1=1&returnCountOnly=true`
+    );
 
-    // Call parent
-    return super.onCreateVectorSource(layerConfig, sourceOptions);
+    // Check if feature count is too large
+    if (responseDataCount.count > AbstractGeoViewVector.MAX_ESRI_FEATURES) {
+      // Throw
+      throw new LayerTooManyEsriFeatures(layerConfig.layerId, layerConfig.getLayerNameCascade(), responseDataCount.count);
+    }
+
+    // Determine the maximum number of records allowed
+    const maxRecords = layerConfig.getLayerMetadataCasted()?.maxRecordCount;
+
+    // Retrieve the full ESRI feature data
+    const responseData = await EsriFeature.#fetchEsriFeaturesByChunk(
+      `${layerConfig.getDataAccessPath(true)}${layerConfig.layerId}/query?f=json&where=1=1&outfields=*&geometryPrecision=1&maxAllowableOffset=5`,
+      responseDataCount.count,
+      maxRecords
+    );
+
+    // Convert each ESRI response chunk to features and flatten the result
+    return responseData.flatMap((json) => GeoUtilities.readFeaturesFromEsriJSON(json, readOptions));
   }
 
   /**
@@ -181,20 +223,9 @@ export class EsriFeature extends AbstractGeoViewVector {
     return gvLayer;
   }
 
-  /**
-   * Performs specific validation that can only be done by the child of the AbstractGeoViewEsriLayer class.
-   * @param {ConfigBaseClass} layerConfig - The layer config to check.
-   * @param {esriIndex} esriIndex - The esri layer index config to check.
-   * @returns {boolean} true if an error is detected.
-   */
-  esriChildHasDetectedAnError(layerConfig: ConfigBaseClass, esriIndex: number): boolean {
-    // If the metadata for the particular layer doesn't indicate 'Feature Layer' as the type
-    if (this.getMetadata()!.layers[esriIndex].type !== 'Feature Layer') {
-      // Log warning
-      GeoViewError.logWarning(new LayerNotFeatureLayerError(layerConfig.layerPath, layerConfig.getLayerNameCascade()));
-    }
-    return false;
-  }
+  // #endregion OVERRIDES
+
+  // #region STATIC METHODS
 
   /**
    * Initializes a GeoView layer configuration for a Esri Feature layer.
@@ -204,15 +235,18 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {string} geoviewLayerId - A unique identifier for the layer.
    * @param {string} geoviewLayerName - The display name of the layer.
    * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+   * @param {boolean?} [isTimeAware] - Indicates whether the layer supports time-based filtering.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+   * @static
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
-    metadataAccessPath: string
+    metadataAccessPath: string,
+    isTimeAware?: boolean
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
-    const myLayer = new EsriFeature({ geoviewLayerId, geoviewLayerName, metadataAccessPath } as TypeEsriFeatureLayerConfig);
+    const myLayer = new EsriFeature({ geoviewLayerId, geoviewLayerName, metadataAccessPath, isTimeAware } as TypeEsriFeatureLayerConfig);
     return myLayer.initGeoViewLayerEntries();
   }
 
@@ -223,15 +257,16 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
    * @param {string} geoviewLayerName - The display name of the GeoView layer.
    * @param {string} metadataAccessPath - The URL or path to access metadata or feature data.
-   * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
    * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns {TypeEsriFeatureLayerConfig} The constructed configuration object for the Esri Feature layer.
+   * @static
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
     geoviewLayerName: string,
     metadataAccessPath: string,
-    isTimeAware: boolean,
+    isTimeAware: boolean | undefined,
     layerEntries: TypeLayerEntryShell[]
   ): TypeEsriFeatureLayerConfig {
     const geoviewLayerConfig: TypeEsriFeatureLayerConfig = {
@@ -269,6 +304,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
    * @param {boolean} isTimeAware - Indicates if the layer is time aware.
    * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
+   * @static
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -294,4 +330,41 @@ export class EsriFeature extends AbstractGeoViewVector {
     // Process it
     return AbstractGeoViewRaster.processConfig(myLayer);
   }
+
+  /**
+   * Fetches features from ESRI Feature services with query and feature limits.
+   * @param {string} url - The base url for the service.
+   * @param {number} featureCount - The number of features in the layer.
+   * @param {number} maxRecordCount - The max features per query from the service.
+   * @param {number} featureLimit - The maximum number of features to fetch per query.
+   * @returns {Promise<unknown[]>} An array of the response text for the features.
+   * @static
+   * @private
+   */
+  // GV: featureLimit ideal amount varies with the service and with maxAllowableOffset.
+  // TODO: Add options for featureLimit to config
+  static #fetchEsriFeaturesByChunk(
+    url: string,
+    featureCount: number,
+    maxRecordCount?: number,
+    featureLimit: number = 1000
+  ): Promise<unknown[]> {
+    // Update url
+    const featureFetchLimit = maxRecordCount && maxRecordCount < featureLimit ? maxRecordCount : featureLimit;
+
+    // GV: Web worker does not improve the performance of this fetching
+    // Create array of url's to call
+    const urlArray: string[] = [];
+    for (let i = 0; i < featureCount; i += featureFetchLimit) {
+      urlArray.push(`${url}&resultOffset=${i}&resultRecordCount=${featureFetchLimit}`);
+    }
+
+    // Get array of all the promises
+    const promises = urlArray.map((featureUrl) => Fetch.fetchEsriJson(featureUrl));
+
+    // Return the all promise
+    return Promise.all(promises);
+  }
+
+  // #endregion STATIC METHODS
 }

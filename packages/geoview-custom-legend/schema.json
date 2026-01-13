@@ -15,7 +15,7 @@
     },
     "legendList": {
       "type": "array",
-      "description": "List of legend items to display",
+      "description": "List of custom legend items to display",
       "items": {
         "type": "object",
         "properties": {
@@ -94,13 +94,7 @@
           }
         },
         "required": ["name"]
-      }
-    },
-    "version": {
-      "type": "string",
-      "enum": ["1.0.0"],
-      "description": "Schema version"
-    },
+      },
     "entry": {
       "type": "object",
       "description": "Entry component configuration for individual legend items",
@@ -140,6 +134,12 @@
         }
       },
       "required": ["name"]
+    }      
+    },
+    "version": {
+      "type": "string",
+      "enum": ["1.0.0"],
+      "description": "Schema version"
     },
     "entryGroup": {
       "type": "object",
@@ -153,7 +153,7 @@
           "type": "array",
           "description": "Array of entry objects in this group",
           "items": {
-            "$ref": "#/properties/entry"
+            "$ref": "#/properties/legendList/entry"
           }
         },
         "expanded": {

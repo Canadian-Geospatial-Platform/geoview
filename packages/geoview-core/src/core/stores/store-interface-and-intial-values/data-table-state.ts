@@ -97,7 +97,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
         );
       },
       getFilteredDataFromLegendVisibility: (layerPath: string, features: TypeFeatureInfoEntry[]): TypeFeatureInfoEntry[] => {
-        return LegendEventProcessor.getFeatureVisibleFromClassVibility(get().mapId, layerPath, features);
+        return LegendEventProcessor.processClassVisibility(get().mapId, layerPath, features);
       },
       setActiveLayersData: (activeLayerData: TypeLayerData[]) => {
         // Redirect to setter

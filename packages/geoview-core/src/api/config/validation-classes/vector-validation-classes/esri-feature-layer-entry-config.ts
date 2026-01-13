@@ -2,18 +2,13 @@ import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeLayerMetadataEsri }
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import type { TypeEsriFeatureLayerConfig, TypeSourceEsriFeatureInitialConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import type { TypeEsriFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import type { TypeStyleGeometry } from '@/api/types/map-schema-types';
 
-export interface EsriFeatureLayerEntryConfigProps extends VectorLayerEntryConfigProps {
-  /** Source settings to apply to the GeoView layer source at creation time. */
-  source?: TypeSourceEsriFeatureInitialConfig;
-}
+export interface EsriFeatureLayerEntryConfigProps extends VectorLayerEntryConfigProps {}
 
 export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
-  declare source: TypeSourceEsriFeatureInitialConfig;
-
   /**
    * The class constructor.
    * @param {EsriFeatureLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
@@ -21,9 +16,6 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
   constructor(layerConfig: EsriFeatureLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.ESRI_FEATURE);
     this.maxRecordCount = layerConfig.maxRecordCount;
-
-    // Write the default properties when not specified
-    this.source.format ??= 'EsriJSON';
 
     // Trim any trailing '/'
     let path = this.getDataAccessPath();
@@ -53,12 +45,21 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Overrides the get geometry type to interpret the esri type name.
-   * @returns {TypeStyleGeometry} The geometry type.
+   * @returns {TypeStyleGeometry | undefined} The geometry type, if it could be determined.
    * @throws {NotSupportedError} When the geometry type is not supported.
    */
-  protected override onGetGeometryType(): TypeStyleGeometry {
-    // Check the geometry type based on the Esri name
-    return GeoUtilities.esriConvertEsriGeometryTypeToOLGeometryType(this.getGeometryField()!.type);
+  protected override onGetGeometryType(): TypeStyleGeometry | undefined {
+    // Get the geometry field
+    const geometryField = this.getGeometryField();
+
+    // If found
+    if (geometryField) {
+      // Check the geometry type based on the Esri name
+      return GeoUtilities.esriConvertEsriGeometryTypeToOLGeometryType(geometryField.type);
+    }
+
+    // None
+    return undefined;
   }
 
   /**

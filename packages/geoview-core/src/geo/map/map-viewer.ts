@@ -67,6 +67,7 @@ import { NORTH_POLE_POSITION } from '@/core/utils/constant';
 import type { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
+import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
@@ -94,7 +95,7 @@ export class MapViewer {
   // The default densification number when forming layer extents, to make ture to compensate for earth curvature
   static DEFAULT_STOPS: number = 25;
 
-  // TODO: refactor UI - If we do not put a high timeout, ui start but the function getMapCoordinateFromPixel
+  // TODO: REFACTOR UI - If we do not put a high timeout, ui start but the function getMapCoordinateFromPixel
   // TD.CONT: AND scale component return null and fails. To patch, we add an higher time out for promise.
   // TD.CONT: This solves for now the issue where the page start to load and user switch to another page and came back.
   // Timeout value when map init to avoid when use the map is not ready, the UI will not start
@@ -661,12 +662,6 @@ export class MapViewer {
    */
   setProjection(projectionCode: TypeValidMapProjectionCodes): Promise<void> {
     if (VALID_PROJECTION_CODES.includes(Number(projectionCode))) {
-      // Clear the WMS layers that had an override CRS
-      this.layer.clearWMSLayersWithOverrideCRS();
-
-      // Clear any loaded vector features in the data table
-      this.layer.clearVectorFeaturesFromAllFeatureInfoLayerSet();
-
       // Propagate to the store
       const promise = MapEventProcessor.setProjection(this.mapId, projectionCode);
 
@@ -701,6 +696,55 @@ export class MapViewer {
     if (VALID_DISPLAY_THEME.includes(displayTheme)) {
       AppEventProcessor.setDisplayTheme(this.mapId, displayTheme);
     } else this.notifications.addNotificationError(getLocalizedMessage(this.getDisplayLanguage(), 'validation.changeDisplayTheme'));
+  }
+
+  /**
+   * Gets map scale for Web Mercator or Lambert Conformal Conic projections.
+   * @returns {number} The map scale (e.g. 50000 for 1:50,000)
+   */
+  getMapScale(): number | undefined {
+    return this.getMapScaleFromZoom(this.getView().getZoom() || 0);
+  }
+
+  /**
+   * Converts a zoom level to a map scale.
+   * @param {number} zoom - The desired zoom (e.g. 50000 for 1:50,000)
+   * @returns {number} The closest scale for the given zoom number
+   */
+  getMapScaleFromZoom(zoom: number): number | undefined {
+    const projection = this.getView().getProjection();
+    const mpu = projection.getMetersPerUnit();
+    if (!mpu) return undefined;
+
+    const dpi = 25.4 / 0.28; // OpenLayers default DPI
+
+    // Get resolution for zoom level
+    const resolution = this.getView().getResolutionForZoom(zoom);
+
+    // Calculate scale from resolution
+    // Scale = Resolution * metersPerUnit * inchesPerMeter * DPI
+    return resolution * mpu * 39.37 * dpi;
+  }
+
+  /**
+   * Converts a map scale to a zoom level.
+   * @param {number | undefined} targetScale - The desired scale (e.g. 50000 for 1:50,000)
+   * @param {number?} [dpiValue] - The optional DPI value to use for calculation
+   * @returns {number} The closest zoom level for the given scale
+   */
+  getMapZoomFromScale(targetScale: number | undefined, dpiValue?: number): number | undefined {
+    if (!targetScale) return undefined;
+    const projection = this.getView().getProjection();
+    const mpu = projection.getMetersPerUnit();
+    const dpi = dpiValue ?? 25.4 / 0.28; // OpenLayers' default DPI
+
+    // Calculate resolution from scale
+    if (!mpu) return undefined;
+
+    // Resolution = Scale / ( metersPerUnit * inchesPerMeter * DPI )
+    const targetResolution = targetScale / (mpu * 39.37 * dpi);
+
+    return this.getView().getZoomForResolution(targetResolution) || undefined;
   }
 
   /**
@@ -831,15 +875,64 @@ export class MapViewer {
   }
 
   /**
-   * Simulate a map click eith store and ui update
-   * @param {MapSingleClickEvent} clickCoordinates - The clicked coordinates to simulate.
+   * Simulate a map click and return promises of store update and ui update.
+   * @param {Coordinate} lonlat - The lonlat coordinates to simulate.
    */
-  simulateMapClick(clickCoordinates: MapSingleClickEvent): void {
-    // Update store... this will not emit the event becaus only when WCAG mode is enable
+  simulateMapClick(lonlat: Coordinate): SimulatedMapClick {
+    // Transform lonlat to map projection
+    const projCode = this.getProjection().getCode();
+    const projected = Projection.transformPoints([lonlat], Projection.PROJECTION_NAMES.LONLAT, projCode)[0];
+
+    // Create the clickCoordinates object
+    const clickCoordinates = {
+      lonlat: lonlat,
+      pixel: [0, 0],
+      projected,
+      dragging: false,
+    };
+
+    // Update store... this will not emit the event because only when WCAG mode is enable
     MapEventProcessor.setClickCoordinates(this.mapId, clickCoordinates);
+
+    // The resolve of the query
+    let resolveQuery: () => void;
+    const promiseQuery = new Promise<void>((resolve) => {
+      resolveQuery = resolve;
+    });
+
+    // The resolve of the query once batched
+    let resolveQueryBatched: () => void;
+    const promiseQueryBatched = new Promise<void>((resolve) => {
+      resolveQueryBatched = resolve;
+    });
+
+    // Register one-time listener for query completion
+    const handleQueryEnded = (): void => {
+      // Unregister the listener immediately
+      this.layer.featureInfoLayerSet.offQueryEnded(handleQueryEnded);
+
+      // Resolve the promise about the completion of the query
+      resolveQuery();
+
+      // Wait for UI batch propagation
+      delay(FeatureInfoEventProcessor.TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH)
+        .then(() => {
+          // Now resolve the promise about the completion of the query and batched through the UI
+          resolveQueryBatched();
+        })
+        .catch((error: unknown) => {
+          logger.logPromiseFailed('in delay in simulateMapClick in testDetailsLayerSelectionPersistence', error);
+        });
+    };
+
+    // Register the handler before clicking
+    this.layer.featureInfoLayerSet.onQueryEnded(handleQueryEnded);
 
     // Emit the event is done here, not from the processor to avoid circular references
     this.#emitMapSingleClick(clickCoordinates);
+
+    // Return the simulated map click information
+    return { promiseQuery, promiseQueryBatched };
   }
 
   /**
@@ -906,7 +999,7 @@ export class MapViewer {
    * @returns {Promise<void>} A promise that resolves when the zoom operation completes.
    */
   zoomToExtent(extent: Extent, options?: FitOptions): Promise<void> {
-    // TODO: Discussion - Where is the line between a function using MapEventProcessor in MapViewer vs in MapState action?
+    // TODO: DISCUSSION - Where is the line between a function using MapEventProcessor in MapViewer vs in MapState action?
     // TO.DOCONT: This function (and there are many others in this class) redirects to the MapEventProcessor, should it be in MapState with the others or do we keep some in MapViewer and some in MapState?
     // TO.DOCONT: If we keep some here, we should maybe add a fourth call-stack possibility in the MapEventProcessor paradigm documentation which goes like so:
     // - 4th paradigm: MapViewer ---calls---> MapEventProcessor ---calls---> MapViewer ---calls/emits events---> MapState.setterActions.
@@ -1490,10 +1583,10 @@ export class MapViewer {
       const zoom = this.getView().getZoom();
       if (!zoom) return;
 
-      // Get new inVisibleRange values for all layers
-      const newOrderedLayerInfo = this.getMapLayerOrderInfo();
+      // Save in the store
+      MapEventProcessor.setZoom(this.mapId, zoom);
 
-      const visibleRangeLayers: string[] = [];
+      // Get all layers
       const allLayers = this.layer.getGeoviewLayers();
 
       // Get the inVisibleRange property based on the layer's minZoom and maxZoom values
@@ -1514,16 +1607,9 @@ export class MapViewer {
           inVisibleRange = childLayers.some((childLayer) => childLayer.inVisibleRange(zoom));
         }
 
-        const foundLayer = newOrderedLayerInfo.find((info) => info.layerPath === layerPath);
-        if (foundLayer) foundLayer.inVisibleRange = inVisibleRange;
-        if (inVisibleRange) {
-          visibleRangeLayers.push(layerPath);
-        }
+        // Save in the store
+        MapEventProcessor.setLayerInVisibleRange(this.mapId, layerPath, inVisibleRange);
       });
-
-      // Save in the store
-      MapEventProcessor.setZoom(this.mapId, zoom);
-      MapEventProcessor.setMapOrderedLayerInfo(this.mapId, newOrderedLayerInfo);
 
       // Emit to the outside
       this.#emitMapZoomEnd({ zoom });
@@ -2451,3 +2537,13 @@ export type MapLanguageChangedEvent = {
  * Define a delegate for the event handler function signature
  */
 export type MapLanguageChangedDelegate = EventDelegateBase<MapViewer, MapLanguageChangedEvent, void>;
+
+/**
+ * Define a return type for a map click simulation to be able to await on different promises.
+ */
+export type SimulatedMapClick = {
+  /** Promise resolving when the query of the map click is complete */
+  promiseQuery: Promise<void>;
+  /** Promise resolving when the query of the map click is complete and the UI has been updated */
+  promiseQueryBatched: Promise<void>;
+};

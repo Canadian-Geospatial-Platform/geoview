@@ -103,14 +103,6 @@ export type ConfigAbstractBaseClassOrType = AbstractBaseLayerEntryConfig | Abstr
  * the configs being treated as types and class instances simultaneously in the code base. */
 export type ConfigVectorTilesClassOrType = VectorTilesLayerEntryConfig | VectorTilesLayerEntryConfigProps;
 
-export interface TypeSourceOgcFeatureInitialConfig extends TypeVectorSourceInitialConfig {
-  format: 'featureAPI';
-}
-
-export interface TypeSourceWFSVectorInitialConfig extends TypeVectorSourceInitialConfig {
-  format: 'WFS';
-}
-
 /** Definition of the post settings type needed when the GeoView GeoJSON layers need to use a POST instead of a GET. */
 export type TypePostSettings = { header?: Record<string, string>; data: unknown };
 
@@ -200,14 +192,13 @@ export type TypeBaseSourceInitialConfig = {
    */
   dataAccessPath?: string;
   /**
-   * Spatial Reference EPSG code supported (https://epsg.io/). We support lon/lat, Web Mercator and Lambert Conical Conform Canada.
-   * Default = 3978.
+   * Spatial Reference EPSG code supported (https://epsg.io/).
    */
-  projection?: TypeValidSourceProjectionCodes; // TODO: refactor - remove ?
+  projection?: TypeValidSourceProjectionCodes;
   /** The crossOrigin attribute if needed to load the data. */
   crossOrigin?: string;
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
-  featureInfo?: TypeFeatureInfoLayerConfig; // TODO: refactor - from geo map schema type
+  featureInfo?: TypeFeatureInfoLayerConfig;
 };
 
 /** Initial settings for tile image sources. */
@@ -233,8 +224,6 @@ export interface TypeBaseVectorSourceInitialConfig extends TypeBaseSourceInitial
   maxRecordCount?: number; // TODO: refactor - remove ?
   /** Filter to apply on features of this layer. */
   layerFilter?: string;
-  /** The feature format used by the XHR feature loader when url is set. */
-  format?: TypeVectorSourceFormats;
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
   featureInfo?: TypeFeatureInfoLayerConfig;
   /** Loading strategy to use (all or bbox). */
@@ -245,24 +234,11 @@ export interface TypeBaseVectorSourceInitialConfig extends TypeBaseSourceInitial
   postSettings?: TypePostSettings; // TODO: refactor - from geo map schema types
 }
 
-/** Type from which we derive the source properties for all the Wfs leaf nodes in the layer tree. */
-export type TypeSourceWfsInitialConfig = TypeBaseVectorSourceInitialConfig;
-
-/** Initial settings to apply to the GeoView vector layer source at creation time. */
-export interface TypeVectorSourceInitialConfig extends TypeBaseVectorSourceInitialConfig {
-  /** The character used to separate columns of csv file. */
-  separator?: string;
-  /** The feature format used by the XHR feature loader when url is set. */
-  format?: TypeVectorSourceFormats; // TODO: refactor - from geo map schema type
-}
-
-export interface TypeSourceGeoJSONInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
-  format: 'GeoJSON';
+export interface TypeSourceGeoJSONInitialConfig extends TypeBaseVectorSourceInitialConfig {
   geojson?: string;
 }
 
-export interface TypeSourceWkbVectorInitialConfig extends Omit<TypeVectorSourceInitialConfig, 'format'> {
-  format: 'WKB';
+export interface TypeSourceWkbVectorInitialConfig extends TypeBaseVectorSourceInitialConfig {
   geoPackageFeatures?: GeoPackageFeature[];
 }
 
@@ -293,9 +269,6 @@ export type TypeTileGrid = {
   tileSize?: [number, number];
 };
 
-/** Type that defines the vector layer source formats. */
-export type TypeVectorSourceFormats = 'GeoJSON' | 'EsriJSON' | 'KML' | 'WFS' | 'featureAPI' | 'CSV' | 'MVT' | 'WKB';
-
 /** Type from which we derive the source properties for all the ESRI dynamic leaf nodes in the layer tree. */
 export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitialConfig {
   /** Maximum number of records to fetch (default: 0). */
@@ -304,26 +277,55 @@ export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitia
   layerFilter?: string;
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
   featureInfo?: TypeFeatureInfoLayerConfig;
-  /** The format used by the image layer. */
+
+  /** The format used by the image layer.
+   * @deprecated Seems not used anymore?
+   */
   format?: TypeEsriFormatParameter; // TODO: refactor - remove ?
+
   /**
    * If true, the image will be exported with the background color of the map set as its transparent color. Only the .png
    * and .gif formats support transparency.
+   * @deprecated Seems not used anymore?
    */
   transparent?: boolean;
+
   /**
    * If true, the layer will call the service using its native SRID so that OpenLayers take charge of the reprojection on the map.
    */
   forceServiceProjection?: boolean;
 }
 
-/** Type from which we derive the source properties for all the ESRI Image leaf nodes in the layer tree. */
-export interface TypeSourceEsriImageInitialConfig extends TypeBaseSourceInitialConfig {
-  /** The format used by the image layer. */
-  format: TypeEsriFormatParameter;
+export type TypeSourceImageInitialConfig =
+  | TypeSourceImageWmsInitialConfig
+  | TypeSourceImageEsriInitialConfig
+  | TypeSourceImageStaticInitialConfig;
+
+export interface TypeSourceImageStaticInitialConfig extends TypeBaseSourceInitialConfig {
+  /** Image extent */
+  extent?: Extent;
+}
+
+export interface TypeSourceCSVInitialConfig extends TypeBaseVectorSourceInitialConfig {
+  separator?: ',';
+}
+
+export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceInitialConfig {
+  /** The type of the remote WMS server. The default value is mapserver. */
+  serverType?: TypeOfServer;
+  /** Style to apply. Default = '' */
+  wmsStyle?: string | string[];
+}
+
+export interface TypeSourceImageEsriInitialConfig extends TypeBaseSourceInitialConfig {
+  /** The format used by the image layer.
+   * @deprecated Seems not used anymore?
+   */
+  format?: TypeEsriFormatParameter;
   /**
-   * If true, the image will be exported with the background color of the map set as its transparent color. Only the .png
-   * and .gif formats support transparency.
+   * If true, the image will be exported with the background color of the map set as its transparent color. Only the .png and
+   * .gif formats support transparency. Default = true.
+   * @deprecated Seems not used anymore?
    */
   transparent?: boolean;
 }
@@ -332,10 +334,10 @@ export interface TypeSourceEsriImageInitialConfig extends TypeBaseSourceInitialC
 export type TypeLayerInitialSettings = {
   /** Settings for availablity of controls */
   controls?: TypeLayerControls;
-  /** The geographic bounding box that contains all the layer's features. */
+  /** The geographic bounding box that contains all the layer's features. The bounds are always stored in latlon EPSG:4326 */
   bounds?: Extent;
-  /** The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates. */
-  extent?: Extent;
+  /** The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates. The extent is always stored in latlon EPSG:4326 */
+  extent?: Extent; // TODO: CHECK - Is this property even used or is everything basically relying on 'bounds'? Seems deprecated when browsing its utility? Delete?
   /** The minimum view zoom level (exclusive) above which this layer will be visible. */
   minZoom?: number;
   /** The maximum view zoom level (inclusive) below which this layer will be visible. */
@@ -616,37 +618,6 @@ export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLay
   // Return it
   return serializedGeoviewLayerConfig;
 };
-
-export type TypeSourceImageInitialConfig =
-  | TypeSourceImageWmsInitialConfig
-  | TypeSourceImageEsriInitialConfig
-  | TypeSourceImageStaticInitialConfig;
-
-export interface TypeSourceImageStaticInitialConfig extends Omit<TypeBaseSourceInitialConfig, 'featureInfo'> {
-  /** Definition of the feature information structure that will be used by the getFeatureInfo method. We only use queryable and
-   * it must be set to false if specified.
-   */
-  featureInfo?: { queryable: false };
-  /** Image extent */
-  extent: Extent;
-}
-
-export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceInitialConfig {
-  /** The type of the remote WMS server. The default value is mapserver. */
-  serverType?: TypeOfServer;
-  /** Style to apply. Default = '' */
-  wmsStyle?: string | string[];
-}
-
-export interface TypeSourceImageEsriInitialConfig extends TypeBaseSourceInitialConfig {
-  /** The format used by the image layer. */
-  format?: TypeEsriFormatParameter;
-  /**
-   * If true, the image will be exported with the background color of the map set as its transparent color. Only the .png and
-   * .gif formats support transparency. Default = true.
-   */
-  transparent?: boolean;
-}
 
 export interface TypeMetadataWMSRoot {
   WMS_Capabilities?: TypeMetadataWMS;
@@ -1071,7 +1042,7 @@ export interface TypeMetadataWFSTextOnly {
 }
 
 export interface TypeMetadataWFSFeatureTypeListFeatureOutputFormat {
-  Format: (string | TypeMetadataWFSTextOnly)[];
+  Format?: string | (string | TypeMetadataWFSTextOnly)[];
 }
 
 export interface TypeMetadataWFSAttributes {
@@ -1083,11 +1054,22 @@ export interface TypeMetadataWFSOperationMetadata {
 }
 
 export interface TypeMetadataWFSOperationMetadataOperation {
+  '@attributes': TypeMetadataWFSAttribute;
   'ows:Parameter': TypeMetadataWFSOperationMetadataOperationParameter | TypeMetadataWFSOperationMetadataOperationParameter[];
 }
 
 export interface TypeMetadataWFSOperationMetadataOperationParameter {
-  'ows:Value': string | TypeMetadataWFSTextOnly;
+  '@attributes': TypeMetadataWFSAttribute;
+  'ows:AllowedValues'?: TypeMetadataWFSOperationMetadataOperationParameterValue | TypeMetadataWFSOperationMetadataOperationParameterValue[];
+  'ows:Value'?: string | string[] | TypeMetadataWFSTextOnly | TypeMetadataWFSTextOnly[];
+}
+
+export interface TypeMetadataWFSOperationMetadataOperationParameterValue {
+  'ows:Value': string | string[] | TypeMetadataWFSTextOnly | TypeMetadataWFSTextOnly[];
+}
+
+export interface TypeMetadataWFSAttribute {
+  name: string;
 }
 
 export interface TypeMetadataGeoJSON {
