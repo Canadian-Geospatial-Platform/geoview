@@ -73,18 +73,24 @@
                 "minItems": 1,
                 "maxItems": 2
               },
-              "displayPattern": {
-                "type": "array",
-                "items": {
-                  "datePrecision": {
-                    "type": "string",
-                    "enum": ["", "year", "month", "day"]
+              "displayDateFormat": {
+                "type": "object",
+                "properties": {
+                  "en": {
+                    "type": "string"
                   },
-                  "timePrecision": {
-                    "type": "string",
-                    "enum": ["", "hour", "minute", "second"]
+                  "fr": {
+                    "type": "string"
                   }
                 }
+              },
+              "displayDateTimezone": {
+                "type": "string"
+              },
+              "serviceDateTemporalMode": {
+                "enum": ["calendar", "instant"],
+                "default": "calendar",
+                "description": "Calendar mode: interprets input as calendar date (YYYY-MM-DD) ignoring timezones. Instant mode interprets input as absolute moment in time."
               },
               "rangeItems": {
                 "description": "Definition of the range object in the OGC time dimension.",

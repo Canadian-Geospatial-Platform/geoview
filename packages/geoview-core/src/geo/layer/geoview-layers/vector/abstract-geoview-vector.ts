@@ -122,7 +122,7 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         AbstractGeoViewVector.#processFeatureMetadata(featuresFiltered, layerConfig);
 
         // Normalize the date fields
-        this.#normalizeDateFields(featuresFiltered, layerConfig);
+        AbstractGeoViewVector.#normalizeDateFields(features, layerConfig);
 
         // If the strategy is 'bbox'
         if (sourceOptions.strategy === bbox) {
@@ -166,36 +166,6 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
   createVectorSource(layerConfig: VectorLayerEntryConfig): GVVectorSource {
     // Redirect
     return this.onCreateVectorSource(layerConfig, {});
-  }
-
-  /**
-   * Normalizes all date fields in the provided features to a standard millisecond timestamp format.
-   * @param {Feature[]} features - The features whose date fields should be normalized.
-   * @param {VectorLayerEntryConfig} layerConfig - The layer configuration containing metadata about the date fields.
-   * @private
-   */
-  #normalizeDateFields(features: Feature[], layerConfig: VectorLayerEntryConfig): void {
-    // Get all fields declared as type 'date' in the feature info config
-    const dateFields = layerConfig.getOutfields()?.filter((f) => f.type === 'date');
-    if (!dateFields?.length) return;
-
-    // Iterate over each feature to normalize its date fields
-    features.forEach((feature) => {
-      dateFields.forEach((field) => {
-        const value = feature.get(field.name);
-
-        // If the value is already a number, treat it as a timestamp and reformat
-        if (typeof value === 'number') {
-          const dateStr = DateMgt.applyInputDateFormat(DateMgt.convertMilisecondsToDate(value), this.getServerDateFragmentsOrder());
-          feature.set(field.name, DateMgt.convertToMilliseconds(dateStr), true);
-        } else {
-          // If the value is a string, determine or reuse the date fragment order
-          this.initServerDateFragmentsOrderFromServiceDateFormat(DateMgt.deduceDateFormat(value));
-          const dateStr = DateMgt.applyInputDateFormat(value, this.getServerDateFragmentsOrder());
-          feature.set(field.name, DateMgt.convertToMilliseconds(dateStr), true);
-        }
-      });
-    });
   }
 
   // #endregion METHODS
@@ -349,6 +319,30 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     features.forEach((feature) => {
       const id = feature.get(oidField) ?? getUid(feature);
       feature.setId(id);
+    });
+  }
+
+  /**
+   * Normalizes all date fields in the provided features to a standard millisecond timestamp format.
+   * @param {Feature[]} features - The features whose date fields should be normalized.
+   * @param {VectorLayerEntryConfig} layerConfig - The layer configuration containing metadata about the date fields.
+   * @private
+   */
+  static #normalizeDateFields(features: Feature[], layerConfig: VectorLayerEntryConfig): void {
+    // Get all fields declared as type 'date' in the feature info config
+    const dateFields = layerConfig.getOutfields()?.filter((f) => f.type === 'date');
+    if (!dateFields?.length) return;
+
+    // Iterate over each feature to normalize its date fields
+    features.forEach((feature) => {
+      dateFields.forEach((field) => {
+        const value = feature.get(field.name);
+        feature.set(
+          field.name,
+          DateMgt.convertToMilliseconds(value, layerConfig.getServiceDateFormat(), layerConfig.getServiceDateTimezone()),
+          true
+        );
+      });
     });
   }
 

@@ -1,6 +1,11 @@
 import type { GeoChartConfig, ChartType, GeoChartDefaultColors, SchemaValidator, GeoChartAction } from 'geochart';
 import { GeoChart as GeoChartComponent } from 'geochart';
-import { useAppDisplayLanguageById, useAppStoreActions } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import {
+  useAppDisplayLanguageById,
+  useAppStoreActions,
+  useDisplayDateTimezone,
+} from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useLayerDisplayDateFormat } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
 import { MapEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/map-event-processor';
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
@@ -15,6 +20,7 @@ import type { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfig
  */
 interface GeoChartProps {
   mapId: string;
+  layerPath: string;
   config: PluginGeoChartConfig;
   schemaValidator: SchemaValidator;
   layers: TypeGeochartResultSetEntry[];
@@ -36,7 +42,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   const { useState, useCallback, useMemo } = cgpv.reactUtilities.react;
 
   // Read props
-  const { mapId, config, layers, schemaValidator, sx, provideCallbackRedraw } = props;
+  const { mapId, layerPath, config, layers, schemaValidator, sx, provideCallbackRedraw } = props;
 
   // Get the theme
   const theme = useTheme();
@@ -56,6 +62,8 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
 
   // Use Store
   const displayLanguage = useAppDisplayLanguageById(mapId);
+  const displayDateFormat = useLayerDisplayDateFormat(layerPath);
+  const displayDateTimezone = useDisplayDateTimezone();
   const { addNotification } = useAppStoreActions();
 
   // #endregion
@@ -123,11 +131,15 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
 
       // Set the title
       chartConfig.title = foundLayerEntry.getLayerName();
+
+      // Assign the date format and time IANA if none are set by the config itself
+      chartConfig.geochart.xAxis.timeFormat ??= GeoChartParsing.dayjsToLuxonFormat(displayDateFormat[displayLanguage]);
+      chartConfig.geochart.xAxis.timeIANA ??= GeoChartParsing.dayjsToLuxonTimeIANA(displayDateTimezone);
     }
 
     // Return all info
     return { foundConfigChart, foundConfigChartLyr, foundLayerEntry, foundData, chartConfig };
-  }, [config, mapId, layers]);
+  }, [config, mapId, layers, displayLanguage, displayDateFormat, displayDateTimezone]);
 
   // #endregion
 

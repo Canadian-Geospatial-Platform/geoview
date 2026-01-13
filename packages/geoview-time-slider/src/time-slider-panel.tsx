@@ -1,14 +1,21 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import type { LayerListEntry } from 'geoview-core/core/components/common';
 import { Layout } from 'geoview-core/core/components/common';
+import type { TypeDisplayLanguage } from 'geoview-core/api/types/map-schema-types';
 import type { TypeTimeSliderValues } from 'geoview-core/core/stores/store-interface-and-intial-values/time-slider-state';
 import {
   useTimeSliderLayers,
   useTimeSliderSelectedLayerPath,
   useTimeSliderStoreActions,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/time-slider-state';
+import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { useMapStoreActions, useMapAllVisibleandInRangeLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
-import { useLayerLegendLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  useLayerDateTemporalModes,
+  useLayerDisplayDateFormats,
+  useLayerDisplayDateTimezones,
+  useLayerLegendLayers,
+} from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import { Box } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 import { CONTAINER_TYPE, TABS } from 'geoview-core/core/utils/constant';
@@ -41,6 +48,10 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const { setSelectedLayerPath } = useTimeSliderStoreActions()!;
   const { isLayerHiddenOnMap } = useMapStoreActions();
   const legendLayers = useLayerLegendLayers();
+  const displayLanguage = useAppDisplayLanguage();
+  const layerDisplayDateFormats = useLayerDisplayDateFormats();
+  const layerDisplayDateTimezones = useLayerDisplayDateTimezones();
+  const layerTemporalModes = useLayerDateTemporalModes();
 
   /**
    * Handles Layer list when clicked on each layer.
@@ -61,24 +72,26 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
    * Gets dates for current filters
    * @param {TypeTimeSliderValues} timeSliderLayerInfo - Time slider layer info.
    */
-  const getFilterInfo = (timeSliderLayerInfo: TypeTimeSliderValues): string | null => {
-    if (timeSliderLayerInfo.filtering) {
-      const { values } = timeSliderLayerInfo;
+  const getFilterInfo = useCallback(
+    (layerPath: string, timeSliderLayerInfo: TypeTimeSliderValues, language: TypeDisplayLanguage): string | null => {
+      if (timeSliderLayerInfo.filtering) {
+        const { values } = timeSliderLayerInfo;
 
-      // Fill in date pattern and time pattern with default values if the display pattern is empty for some reason
-      const [datePattern, timePattern] = timeSliderLayerInfo.displayPattern;
+        // Read the display date format
+        return DateMgt.formatDateOrDateRange(
+          values[0],
+          timeSliderLayerInfo.displayDateFormat ?? layerDisplayDateFormats[layerPath],
+          language,
+          timeSliderLayerInfo.displayDateTimezone ?? layerDisplayDateTimezones[layerPath],
+          timeSliderLayerInfo.serviceDateTemporalMode ?? layerTemporalModes[layerPath],
+          values?.[1]
+        );
+      }
 
-      return timeSliderLayerInfo.values.length === 1
-        ? DateMgt.formatDatePattern(values[0], 'day', timePattern)
-        : `${DateMgt.formatDatePattern(values[0], datePattern, timePattern)} / ${DateMgt.formatDatePattern(
-            values[1],
-            datePattern,
-            timePattern
-          )}`;
-    }
-
-    return null;
-  };
+      return null;
+    },
+    [layerDisplayDateFormats, layerDisplayDateTimezones, layerTemporalModes]
+  );
 
   // Reacts when the array of layer data updates
   const memoLayersList = useMemo(() => {
@@ -91,11 +104,16 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
      * @param {string} name Time slider layer name.
      * @returns
      */
-    const getLayerTooltip = (timeSliderLayerInfo: TypeTimeSliderValues, name: string): JSX.Element => {
+    const getLayerTooltip = (
+      layerPath: string,
+      timeSliderLayerInfo: TypeTimeSliderValues,
+      language: TypeDisplayLanguage,
+      name: string
+    ): JSX.Element => {
       return (
         <Box sx={{ display: 'flex', alignContent: 'center', '& svg ': { width: '0.75em', height: '0.75em' } }}>
           {name}
-          {timeSliderLayerInfo.filtering && `: ${getFilterInfo(timeSliderLayerInfo)}`}
+          {timeSliderLayerInfo.filtering && `: ${getFilterInfo(layerPath, timeSliderLayerInfo, language)}`}
         </Box>
       );
     };
@@ -184,14 +202,14 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
         return {
           layerName,
           layerPath: layer.layerPath,
-          layerFeatures: getFilterInfo(layer.timeSliderLayerInfo),
-          tooltip: getLayerTooltip(layer.timeSliderLayerInfo, layerName),
+          layerFeatures: getFilterInfo(layer.layerPath, layer.timeSliderLayerInfo, displayLanguage),
+          tooltip: getLayerTooltip(layer.layerPath, layer.timeSliderLayerInfo, displayLanguage, layerName),
           layerStatus: 'loaded',
           queryStatus: 'processed',
           layerUniqueId: `${mapId}-${TABS.TIME_SLIDER}-${layer.layerPath}`,
         } as LayerListEntry;
       });
-  }, [legendLayers, timeSliderLayers, visibleInRangeLayers, mapId, isLayerHiddenOnMap]);
+  }, [timeSliderLayers, visibleInRangeLayers, getFilterInfo, legendLayers, isLayerHiddenOnMap, displayLanguage, mapId]);
 
   // Unselect layer if it's removed from visibility array
   useEffect(() => {

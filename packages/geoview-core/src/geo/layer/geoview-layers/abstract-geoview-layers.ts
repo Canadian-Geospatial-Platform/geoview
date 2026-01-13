@@ -5,8 +5,6 @@ import Collection from 'ol/Collection';
 import LayerGroup from 'ol/layer/Group';
 
 import { delay } from '@/core/utils/utilities';
-import type { TypeDateFragments } from '@/core/utils/date-mgt';
-import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
@@ -102,9 +100,6 @@ export abstract class AbstractGeoViewLayer {
   /** The service metadata. */
   #metadata?: unknown;
 
-  /** Date format object used to translate server to ISO format and ISO to server format */
-  #serverDateFragmentsOrder?: TypeDateFragments;
-
   /** Keep all callback delegate references */
   #onLayerEntryRegisterInitHandlers: LayerEntryRegisterInitDelegate[] = [];
 
@@ -130,11 +125,6 @@ export abstract class AbstractGeoViewLayer {
   constructor(geoviewLayerConfig: TypeGeoviewLayerConfig) {
     // Keep it internally
     this.#geoviewLayerConfig = geoviewLayerConfig;
-
-    // Set the Date Fragments Order if it's specified in the config
-    if (geoviewLayerConfig.serviceDateFormat) {
-      this.setServerDateFragmentsOrder(DateMgt.getDateFragmentsOrder(geoviewLayerConfig.serviceDateFormat));
-    }
 
     // Initialize the layer entry configs
     this.#initListOfLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
@@ -348,45 +338,6 @@ export abstract class AbstractGeoViewLayer {
       if (layerEntryName) return layerEntryName;
     }
     return this.getGeoviewLayerName() || this.getGeoviewLayerId();
-  }
-
-  /**
-   * Gets the current server date fragments order.
-   * The date fragments order describes how date components (e.g. day, month, year,
-   * time fragments) are arranged in server-provided date strings.
-   * @returns {TypeDateFragments | undefined} The server date fragments order,
-   * or `undefined` if it has not been initialized.
-   */
-  getServerDateFragmentsOrder(): TypeDateFragments | undefined {
-    return this.#serverDateFragmentsOrder;
-  }
-
-  /**
-   * Sets the server date fragments order.
-   * This value is typically derived from a service date format and cached
-   * for reuse when parsing or formatting server dates.
-   * @param {TypeDateFragments | undefined} serverDateFragmentsOrder -
-   * The date fragments order to store. Use `undefined` to reset the value.
-   */
-  setServerDateFragmentsOrder(serverDateFragmentsOrder: TypeDateFragments | undefined): void {
-    this.#serverDateFragmentsOrder = serverDateFragmentsOrder;
-  }
-
-  /**
-   * Initializes the server date fragments order from a service date format string.
-   * If the date fragments order has not already been set, this method derives it
-   * from the provided date format using {@link DateMgt.getDateFragmentsOrder}
-   * and stores it for later use.
-   * @param {string} [dateFormat='DD/MM/YYYY HH:MM:SSZ'] -
-   * The date format string provided by the service, used to determine
-   * the order of date fragments.
-   */
-  initServerDateFragmentsOrderFromServiceDateFormat(dateFormat: string = 'DD/MM/YYYY HH:MM:SSZ'): void {
-    // If any not already set and have a service date format provided
-    if (!this.getServerDateFragmentsOrder()) {
-      // Set it
-      this.setServerDateFragmentsOrder(DateMgt.getDateFragmentsOrder(dateFormat));
-    }
   }
 
   /**

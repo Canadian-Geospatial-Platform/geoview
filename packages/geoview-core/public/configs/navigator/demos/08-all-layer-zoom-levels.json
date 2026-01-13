@@ -15,6 +15,7 @@
         "geoviewLayerName": "GeoJSON Sample",
         "metadataAccessPath": "./datasets/geojson/metadata.meta",
         "geoviewLayerType": "GeoJSON",
+        "serviceDateFormat": "DD/MM/YYYYTHH:mm:ss",
         "listOfLayerEntryConfig": [
           {
             "layerId": "polygons.json",
@@ -98,7 +99,6 @@
       {
         "geoviewLayerId": "historical-flood",
         "geoviewLayerName": "Historical Flood Events (HFE)",
-        "externalDateFormat": "mm/dd/yyyy hh:mm:ss-05:00",
         "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
         "geoviewLayerType": "esriFeature",
         "listOfLayerEntryConfig": [

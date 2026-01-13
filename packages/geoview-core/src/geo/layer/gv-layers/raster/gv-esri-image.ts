@@ -187,7 +187,7 @@ export class GVEsriImage extends AbstractGVRaster {
    */
   protected override onSetLayerFilters(filter?: LayerFilters): void {
     // Process the layer filtering using the static method shared between EsriImage and WMS
-    GVWMS.applyViewFilterOnSource(this.getLayerConfig(), this.getOLSource(), this.getLayerConfig().getExternalFragmentsOrder(), filter);
+    GVWMS.applyViewFilterOnSource(this.getLayerConfig(), this.getOLSource(), filter);
   }
 
   // #endregion OVERRIDES
