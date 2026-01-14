@@ -566,6 +566,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
       // Reset the map object of overview map control
       MapEventProcessor.setOverviewMapVisibility(mapId, true);
+
+      // Repeat last query for layer features after a delay to allow projection change to propagate
+      // TODO: Optimize this with event listener instead of timeout - need to find/create an event that signals reprojection is done
+      setTimeout(() => this.getMapViewer(mapId).layer.repeatLastQuery(), 1000);
     } finally {
       // Remove circular progress as refresh is done
       AppEventProcessor.setCircularProgress(mapId, false);

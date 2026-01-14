@@ -135,8 +135,8 @@ export class FooterBarApi {
    * Shows a tab by id.
    * @param {string} id - The id of the tab to be shown
    */
-  showTab(id: string): void {
-    UIEventProcessor.showTab(this.mapId, id);
+  showTabButton(id: string): void {
+    UIEventProcessor.showTabButton(this.mapId, id);
   }
 
   /**
