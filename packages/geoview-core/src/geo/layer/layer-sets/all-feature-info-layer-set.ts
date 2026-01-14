@@ -1,4 +1,5 @@
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
+import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
 import type { QueryType, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
@@ -42,6 +43,10 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     if (isQueryable && layer instanceof GVWMS) {
       // If we have a WFS layer config associated with the WMS
       isQueryable = layer.getLayerConfig().hasWfsLayerConfig();
+    }
+
+    if (isQueryable) {
+      UIEventProcessor.showTab(this.getMapId(), 'data-table');
     }
 
     // Return

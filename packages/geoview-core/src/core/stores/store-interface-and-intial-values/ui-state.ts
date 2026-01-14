@@ -80,7 +80,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
     activeTrapGeoView: false,
     corePackagesComponents: [],
     focusItem: { activeElementId: false, callbackElementId: false },
-    hiddenTabs: ['time-slider', 'geochart'],
+    hiddenTabs: ['data-table', 'time-slider', 'geochart'],
     navBarComponents: [],
     footerBarComponents: [],
     footerPanelResizeValue: 35,
