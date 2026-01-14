@@ -114,13 +114,8 @@ export class GeoCore {
     layerConfig?: RCSLayerConfig,
     abortSignal?: AbortSignal
   ): Promise<TypeGeoviewLayerConfig> {
-    let { rcsUrl } = DEFAULT_MAP_FEATURE_CONFIG.serviceUrls;
-
     // Get the map config and rcsUrl if it overrides the default
-    const mapConfig = MapEventProcessor.getGeoViewMapConfig(mapId);
-    if (mapConfig?.serviceUrls) {
-      ({ rcsUrl } = mapConfig.serviceUrls);
-    }
+    const rcsUrl = MapEventProcessor.getGeoViewMapConfig(mapId)?.serviceUrls?.rcsUrl ?? DEFAULT_MAP_FEATURE_CONFIG.serviceUrls.rcsUrl;
 
     // Get the GV config from UUID and await
     const response = await UUIDmapConfigReader.getGVConfigFromUUIDsRCS(`${rcsUrl}`, language, [uuid], abortSignal);
