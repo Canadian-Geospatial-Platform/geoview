@@ -18,7 +18,7 @@ Specifically, it looks for `<div>` elements with certain attributes that identif
 **Typical requirements for a GeoView map container:**
 - The element is a `<div>`.
 - It has the class attribute value `geoview-map`.
-- It may include additional attributes such as `data-config`, `data-config-url`, `data-lang`, or `data-shared` to specify map configuration, language, or shared state.
+- It may include additional attributes such as `data-config`, `data-config-url`, `data-lang`, `data-footer-height` or `data-shared` to specify map configuration, language, footer height, or shared state.
 - The `data-config` has precedence over `data-config-url` if both are provided.
 
 **Example:**
@@ -28,6 +28,7 @@ Specifically, it looks for `<div>` elements with certain attributes that identif
   class="geoview-map"
   data-lang="en"
   data-config-url="path/to/config.json"
+  data-footer-height="50vh"
   style="width: 100%; height: 400px;"
 ></div>
 ```
@@ -73,6 +74,21 @@ The `data-config-url` attribute specifies a URL to a JSON configuration file. Th
 ```
 
 The JSON file should have the same structure as the inline `data-config` value.
+
+#### `data-footer-height`
+
+The `data-footer-height` attribute allows for manually setting the height of the footer bar so that it is not default 600px or the same height as the map. The value can be any css height value although pixels (px) and view height (vh) are recommended.
+
+```html
+<div
+  id="myMap"
+  class="geoview-map"
+  data-lang="en"
+  data-footer-height="450px"
+  data-config-url="configs/map-config.json"
+  style="width: 100%; height: 400px;"
+></div>
+```
 
 ##### `data-shared`
 
