@@ -30,7 +30,7 @@
   data-config-url="../configs/footer-tabs-config.json"&gt;&lt;/div&gt;
       </textarea>
     </div>
-    <div id="Map1" class="geoview-map" data-lang="en" data-footer-height="400px" data-config-url="../configs/footer-tabs-config.json"></div>
+    <div id="Map1" class="geoview-map" data-lang="en" data-footer-height="400px" data-config-url="./configs/footer-tabs-config.json"></div>
 
     <div class="demo-section">
       <h4 id="HMap2">Footer height: 100vh</h4>
@@ -41,7 +41,7 @@
   data-config-url="../configs/footer-tabs-config.json"&gt;&lt;/div&gt;
       </textarea>
     </div>
-    <div id="Map2" class="geoview-map" data-lang="en" data-footer-height="100vh" data-config-url="../configs/footer-tabs-config.json"></div>
+    <div id="Map2" class="geoview-map" data-lang="en" data-footer-height="100vh" data-config-url="./configs/footer-tabs-config.json"></div>
     <div>
       <a class="ref-link" href="#top">Top</a>
     </div>
@@ -50,21 +50,8 @@
     <script>
       insertPageHeader();
 
-
-
-      // Register handler when map has been initialized
-      cgpv.onMapInit((mapViewer) => {
-        listenToLegendLayerSetChanges(`H${mapViewer.mapId}-state`, mapViewer);
-      });
-
       // initialize cgpv
       cgpv.init();
-
-      // create snippets
-      window.addEventListener('load', () => {
-        createCodeSnippet();
-        createConfigSnippet();
-      });
     </script>
   </body>
 </html>
