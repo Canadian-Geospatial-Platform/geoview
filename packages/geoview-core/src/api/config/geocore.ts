@@ -102,6 +102,7 @@ export class GeoCore {
    * Gets GeoView layer configurations list from the RCS UUIDs of the list of layer entry configurations.
    * @param {string} uuid - The UUID of the layer.
    * @param {TypeDisplayLanguage} language - The language.
+   * @param {string} mapId - The optional map id.
    * @param {RCSLayerConfig?} layerConfig - The optional layer configuration.
    * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
    * @returns {Promise<TypeGeoviewLayerConfig>} List of layer configurations to add to the map.
@@ -109,10 +110,12 @@ export class GeoCore {
   static async createLayerConfigFromRCSUUID(
     uuid: string,
     language: TypeDisplayLanguage,
+    mapId: string,
     layerConfig?: RCSLayerConfig,
     abortSignal?: AbortSignal
   ): Promise<TypeGeoviewLayerConfig> {
-    const { rcsUrl } = DEFAULT_MAP_FEATURE_CONFIG.serviceUrls;
+    // Get the map config and rcsUrl if it overrides the default
+    const rcsUrl = MapEventProcessor.getGeoViewMapConfig(mapId)?.serviceUrls?.rcsUrl ?? DEFAULT_MAP_FEATURE_CONFIG.serviceUrls.rcsUrl;
 
     // Get the GV config from UUID and await
     const response = await UUIDmapConfigReader.getGVConfigFromUUIDsRCS(`${rcsUrl}`, language, [uuid], abortSignal);

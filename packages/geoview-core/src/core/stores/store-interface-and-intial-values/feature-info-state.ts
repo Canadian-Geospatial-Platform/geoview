@@ -184,7 +184,7 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
 export type TypeFeatureInfoSetEntry = {
   eventListenerEnabled: boolean;
   queryStatus: TypeQueryStatus;
-  features: TypeFeatureInfoEntry[] | undefined | null;
+  features: TypeFeatureInfoEntry[] | undefined;
 };
 
 export type TypeFeatureInfoResultSetEntry = TypeResultSetEntry & TypeFeatureInfoSetEntry;
