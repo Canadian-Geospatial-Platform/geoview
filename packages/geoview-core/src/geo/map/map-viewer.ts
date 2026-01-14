@@ -668,8 +668,6 @@ export class MapViewer {
       // Emit to outside
       this.#emitMapProjectionChanged({ projection: Projection.PROJECTIONS[projectionCode] });
 
-      setTimeout(() => this.layer.repeatLastQuery(), 1000); // Delay to allow projection change to propagate
-
       // Return the promise
       return promise;
     }

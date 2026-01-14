@@ -157,7 +157,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     this.updateFilters(mapId, layerPath, field, filtering, minAndMax, values);
 
     // Make sure tab is visible
-    UIEventProcessor.showTab(mapId, 'time-slider');
+    UIEventProcessor.showTabButton(mapId, 'time-slider');
   }
 
   /**
@@ -177,7 +177,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     // If there are no more layers with time dimension
     if (!Object.keys(timeSliderState.timeSliderLayers).length) {
       // Hide tab
-      UIEventProcessor.hideTab(mapId, 'time-slider');
+      UIEventProcessor.hideTabButton(mapId, 'time-slider');
     }
   }
 

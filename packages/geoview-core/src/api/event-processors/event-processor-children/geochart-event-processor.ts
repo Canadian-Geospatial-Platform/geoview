@@ -174,7 +174,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
     geochartState.setterActions.setGeochartCharts(chartData);
 
     // If there is chart data, tab should not be hidden
-    if (Object.keys(chartData).length) UIEventProcessor.showTab(mapId, 'geochart');
+    if (Object.keys(chartData).length) UIEventProcessor.showTabButton(mapId, 'geochart');
 
     // Log
     logger.logInfo('Added GeoChart configs for layer paths:', layerPaths);
@@ -200,7 +200,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
     geochartState.setterActions.setGeochartCharts({ ...geochartState.geochartChartsConfig, ...toAdd });
 
     // Make sure tab is not hidden
-    UIEventProcessor.showTab(mapId, 'geochart');
+    UIEventProcessor.showTabButton(mapId, 'geochart');
 
     // Log
     logger.logInfo('Added GeoChart configs for layer path:', layerPath);
@@ -232,7 +232,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
       geochartState.setterActions.setGeochartCharts({ ...chartConfigs });
 
       // If there are no more geochart layers, hide tab
-      if (!Object.keys(geochartState.geochartChartsConfig).length) UIEventProcessor.hideTab(mapId, 'geochart');
+      if (!Object.keys(geochartState.geochartChartsConfig).length) UIEventProcessor.hideTabButton(mapId, 'geochart');
 
       // Log
       logger.logInfo('Removed GeoChart configs for layer path:', layerPath);
