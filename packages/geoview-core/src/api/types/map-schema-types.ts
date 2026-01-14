@@ -598,6 +598,7 @@ export type TypeLayerStyleSettings = {
   // If true, last style info from info array is default style.
   hasDefault: boolean;
   info: TypeLayerStyleConfigInfo[];
+  visualVariables?: TypeLayerStyleVisualVariable[];
 };
 
 /** Information needed to render the feature. */
@@ -619,6 +620,32 @@ export type TypeLayerStyleConfigInfo = {
 
   /** The geometry settings. */
   settings: TypeBaseVectorGeometryConfig;
+};
+
+/**
+ * Indiviual feature style modifications sometimes specified in ESRI Renderer
+ * https://developers.arcgis.com/documentation/mapping-and-location-services/data-visualization/data-driven-styles/visual-variables/
+ */
+export type TypeLayerStyleVisualVariable = {
+  type: 'color' | 'size' | 'rotation' | 'opacity';
+  field: string;
+  normalizationField?: string;
+  stops?: TypeEsriStyleStops[];
+  minDataValue?: number;
+  maxDataValue?: number;
+  minSize?: number;
+  maxSize?: number;
+  rotationType?: 'geographic' | 'arithmetic';
+  valueExpression?: string;
+};
+
+/** Stops for Visual Variable modifications */
+export type TypeEsriStyleStops = {
+  value: string | number;
+  // Assuming RGB
+  color?: string;
+  size?: number;
+  opacity?: number;
 };
 
 /**

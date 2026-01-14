@@ -13,6 +13,7 @@ import type {
   TypeLayerStyleSettings,
   TypeStyleGeometry,
   TypeSymbol,
+  TypeLayerStyleVisualVariable,
 } from '@/api/types/map-schema-types';
 import {
   isFilledPolygonVectorConfig,
@@ -409,6 +410,9 @@ export abstract class EsriRenderer {
       };
       if (styleGeometry) {
         style[styleGeometry] = styleSettings;
+        if (renderer.visualVariables) {
+          style[styleGeometry].visualVariables = renderer.visualVariables;
+        }
         return style;
       }
     }
@@ -441,6 +445,9 @@ export abstract class EsriRenderer {
       };
       if (styleGeometry) {
         style[styleGeometry] = styleSettings;
+        if (renderer.visualVariables) {
+          style[styleGeometry].visualVariables = renderer.visualVariables;
+        }
         return style;
       }
     }
@@ -507,6 +514,9 @@ export abstract class EsriRenderer {
         };
 
         style[styleGeometry] = styleSettings;
+        if (renderer.visualVariables) {
+          style[styleGeometry].visualVariables = renderer.visualVariables;
+        }
         return style;
       }
     }
@@ -521,6 +531,7 @@ export type EsriRendererTypes = 'uniqueValue' | 'simple' | 'classBreaks';
 
 export type EsriBaseRenderer = {
   type: EsriRendererTypes;
+  visualVariables?: TypeLayerStyleVisualVariable[];
 };
 
 type TypeEsriColor = [number, number, number, number];
