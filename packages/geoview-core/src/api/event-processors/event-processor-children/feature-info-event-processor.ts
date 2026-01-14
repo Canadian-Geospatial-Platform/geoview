@@ -168,7 +168,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
     const { resultSet } = MapEventProcessor.getMapViewerLayerAPI(mapId).featureInfoLayerSet;
     if (resultSet[layerPath]) {
       resultSet[layerPath].features = [];
-      this.propagateFeatureInfoNameToStore(mapId, resultSet[layerPath]);
+      this.propagateFeatureInfoToStore(mapId, resultSet[layerPath]);
     }
 
     // Remove highlighted features and marker if it is the selected layer path
@@ -244,19 +244,10 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Propagates feature info layer sets to the store. The update of the array will also trigger an update in a batched manner.
-   *
+   * Switch the open panel to details when a map click occurs, if it is not already geochart or details.
    * @param {string} mapId - The map identifier of the modified result set.
-   * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry being propagated.
    */
-  static propagateFeatureInfoClickToStore(mapId: string, resultSetEntry: TypeFeatureInfoResultSetEntry): void {
-    // The feature info state
-    const featureInfoState = this.getFeatureInfoState(mapId);
-
-    // Create a details object for each layer which is then used to render layers in details panel.
-    const layerDataArray = [...featureInfoState.layerDataArray];
-    if (!layerDataArray.find((layerEntry) => layerEntry.layerPath === resultSetEntry.layerPath)) layerDataArray.push(resultSetEntry);
-
+  static openDetailsPanelOnMapClick(mapId: string): void {
     // Show details panel as soon as there is a click on the map
     // If the current tab is not 'details' nor 'geochart', switch to details
     if (
@@ -270,18 +261,14 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
     if (UIEventProcessor.getAppBarComponents(mapId).includes('details')) {
       UIEventProcessor.setActiveAppBarTab(mapId, 'details', true, true);
     }
-
-    // Update the layer data array in the store, all the time, for all statuses
-    featureInfoState.setterActions.setLayerDataArray(layerDataArray);
   }
 
   /**
    * Propagates feature info layer sets to the store. The update of the array will also trigger an update in a batched manner.
-   *
    * @param {string} mapId - The map identifier of the modified result set.
    * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry being propagated.
    */
-  static propagateFeatureInfoNameToStore(mapId: string, resultSetEntry: TypeFeatureInfoResultSetEntry): void {
+  static propagateFeatureInfoToStore(mapId: string, resultSetEntry: TypeFeatureInfoResultSetEntry): void {
     // The feature info state
     const featureInfoState = this.getFeatureInfoState(mapId);
 
