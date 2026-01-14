@@ -7,7 +7,7 @@ import type { SxStyles } from '@/ui/style/types';
  * @param {Theme} theme the theme object
  * @returns {Object} the sx classes object
  */
-export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: number): SxStyles => ({
+export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: string): SxStyles => ({
   rightIcons: {
     marginTop: 0,
     display: 'flex',
@@ -18,7 +18,7 @@ export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: 
     borderTop: 1,
     borderTopColor: 'divider',
     flexGrow: 1,
-    height: isMapFullScreen ? 'calc(100% - 56px)' : `calc(${appHeight}px - 56px)`,
+    height: isMapFullScreen ? 'calc(100% - 56px)' : `calc(${appHeight} - 56px)`,
     overflow: 'hidden',
     paddingTop: '0 !important',
     width: '100%',

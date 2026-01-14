@@ -74,7 +74,8 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const isCollapsed = useUIFooterBarIsCollapsed();
   const shellContainer = useAppShellContainer();
   const { setActiveFooterBarTab, enableFocusTrap, disableFocusTrap, setFooterBarIsCollapsed } = useUIStoreActions();
-  const appHeight: number = useAppHeight();
+  const backupAppHeight: number = useAppHeight();
+  const appHeight = document.getElementById(mapId)?.getAttribute('data-footer-height') ?? `${backupAppHeight}px`;
   const hiddenTabs: string[] = useUIHiddenTabs();
 
   // get store config for footer bar tabs to add (similar logic as in app-bar)
