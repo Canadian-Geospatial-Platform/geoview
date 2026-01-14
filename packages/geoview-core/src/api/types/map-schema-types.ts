@@ -928,7 +928,7 @@ export type TypeLayerData = {
   // when Array.isArray(features) is true, the features property contains the query result.
   // when property features is null, the query ended with an error.
   queryStatus: TypeQueryStatus;
-  features: TypeFeatureInfoEntry[] | undefined | null;
+  features?: TypeFeatureInfoEntry[];
   isDisabled?: boolean;
 };
 

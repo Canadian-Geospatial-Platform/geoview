@@ -191,6 +191,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
               logger.logDebug('Query aborted and replaced by another one.. keep spinning..');
             } else {
               // Error in the query
+              this.resultSet[layerPath].features = undefined;
               this.resultSet[layerPath].queryStatus = 'error';
 
               // Log
@@ -203,7 +204,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
           });
       } else {
         // Error
-        this.resultSet[layerPath].features = null;
+        this.resultSet[layerPath].features = undefined;
         this.resultSet[layerPath].queryStatus = 'error';
 
         // Propagate to store
