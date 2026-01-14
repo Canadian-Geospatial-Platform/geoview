@@ -44,7 +44,7 @@ export function Datapanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPan
 
   const dataTableRef = useRef<HTMLDivElement>();
   const [isLoading, setIsLoading] = useState(false);
-  const isFirstLoad = useRef(true);
+  const isFirstLoad = useRef<Record<string, boolean>>({});
 
   const mapId = useGeoViewMapId();
   const layerData = useDataTableAllFeaturesDataArray();
@@ -80,18 +80,10 @@ export function Datapanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPan
       // Log
       logger.logTraceUseCallback('DATA-PANEL - handleLayerChange');
 
-      setSelectedLayerPath(_layer.layerPath);
+      setSelectedLayerPath(_layer.layerPath); // This will trigger the useEffect below to call tiggerGetAllFeatureInfo()
       setIsLoading(true);
-
-      // If the features weren't fetched yet for the layer, trigger it now
-      if (!orderedLayerData.filter((layers) => layers.layerPath === _layer.layerPath && !!layers?.features?.length).length) {
-        triggerGetAllFeatureInfo(_layer.layerPath).catch((error: unknown) => {
-          // Log
-          logger.logPromiseFailed('Failed to triggerGetAllFeatureInfo in data-panel.handleLayerChange', error);
-        });
-      }
     },
-    [orderedLayerData, setSelectedLayerPath, triggerGetAllFeatureInfo]
+    [setSelectedLayerPath]
   );
 
   /**
@@ -211,6 +203,9 @@ export function Datapanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPan
    * It will unselect the layer path when component is unmounted.
    */
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DATA-PANEL - isOpen', isOpen);
+
     if ((tabId !== DEFAULT_APPBAR_CORE.DATA_TABLE || !isOpen) && appBarComponents.includes(DEFAULT_APPBAR_CORE.DATA_TABLE)) {
       setSelectedLayerPath('');
     }
@@ -220,13 +215,16 @@ export function Datapanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPan
   // TODO Occasionally, setting the default selected layer can have unexpected behaviours.
   // TO.DOCONT e.g. Refresh the page, switch tabs in the browser, come back to tab when done. The layer isn't selected
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DATA-PANEL - selectedLayerPath', selectedLayerPath, isFirstLoad.current[selectedLayerPath]);
+
     // Only trigger on first load when we have a selectedLayerPath
-    if (isFirstLoad.current && selectedLayerPath) {
+    if (selectedLayerPath && !isFirstLoad.current[selectedLayerPath]) {
       // Check if the layer is now available in orderedLayerData
       const foundLayer = orderedLayerData.find((lyr) => lyr.layerPath === selectedLayerPath);
 
       if (foundLayer) {
-        isFirstLoad.current = false;
+        isFirstLoad.current[selectedLayerPath] = true;
         setIsLoading(true);
         triggerGetAllFeatureInfo(selectedLayerPath)
           .catch((error: unknown) => {
