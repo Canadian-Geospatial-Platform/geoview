@@ -62,7 +62,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
     .trim();
 
   // Constant for state
-  const isDisabled = layer?.isDisabled;
+  const isDisabled = layer?.numOffeatures === 0 || layer?.isDisabled;
   const isLoading =
     layer.queryStatus === 'processing' ||
     layer.layerStatus === 'loading' ||
