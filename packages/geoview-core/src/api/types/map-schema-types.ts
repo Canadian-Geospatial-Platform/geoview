@@ -625,9 +625,11 @@ export type TypeLayerStyleConfigInfo = {
 /**
  * Indiviual feature style modifications sometimes specified in ESRI Renderer
  * https://developers.arcgis.com/documentation/mapping-and-location-services/data-visualization/data-driven-styles/visual-variables/
+ * Rest specific documentation
+ * https://developers.arcgis.com/web-map-specification/objects/colorInfo_visualVariable/
  */
 export type TypeLayerStyleVisualVariable = {
-  type: 'color' | 'size' | 'rotation' | 'opacity';
+  type: 'colorInfo' | 'sizeInfo' | 'rotationInfo' | 'opacityInfo';
   field: string;
   normalizationField?: string;
   stops?: TypeEsriStyleStops[];

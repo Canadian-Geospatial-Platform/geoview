@@ -1,5 +1,5 @@
 import { asArray, asString } from 'ol/color';
-import { Style, Stroke, Fill, RegularShape, Circle as StyleCircle, Icon as StyleIcon, Text } from 'ol/style';
+import { Style, Stroke, Fill, RegularShape, Circle as StyleCircle, Icon as StyleIcon, Text, Circle } from 'ol/style';
 import type { Geometry } from 'ol/geom';
 import { LineString, Point, Polygon } from 'ol/geom';
 import type { Options as IconOptions } from 'ol/style/Icon';
@@ -30,6 +30,7 @@ import type {
   TypeLayerStyleConfigInfo,
   TypeLayerStyleValueCondition,
   TypeLayerTextConfig,
+  TypeLayerStyleVisualVariable,
   TypeAliasLookup,
   TypeValidMapProjectionCodes,
   codedValueType,
@@ -50,11 +51,19 @@ import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 type TypeStyleProcessor = (
   styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
   feature?: Feature,
-  filterEquation?: FilterNodeType[],
-  legendFilterIsOff?: boolean,
-  domainsLookup?: TypeLayerMetadataFields[],
-  aliasLookup?: TypeAliasLookup
+  options?: TypeStyleProcessorOptions
 ) => Style | undefined;
+
+/**
+ * Options object for processing styles with optional parameters
+ */
+type TypeStyleProcessorOptions = {
+  filterEquation?: FilterNodeType[];
+  legendFilterIsOff?: boolean;
+  domainsLookup?: TypeLayerMetadataFields[];
+  aliasLookup?: TypeAliasLookup;
+  visualVariables?: TypeLayerStyleVisualVariable[];
+};
 
 /** Default value of the legend canvas width when the settings do not provide one. */
 const LEGEND_CANVAS_WIDTH = 50;
@@ -784,25 +793,37 @@ export abstract class GeoviewRenderer {
    *
    * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Settings to use for the Style creation.
    * @param {Feature} feature - Optional feature. This method does not use it, it is there to have a homogeneous signature.
-   * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
+   * @param {TypeStyleProcessorOptions} options - Optional processing options.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
   static processSimplePoint(
     styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
     feature?: Feature,
-    filterEquation?: FilterNodeType[]
+    options?: TypeStyleProcessorOptions
   ): Style | undefined {
+    const { filterEquation, visualVariables } = options || {};
+
     if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
       if (this.featureIsNotVisible(feature, filterEquation)) return undefined;
 
     const settings = (styleSettings.type === 'simple' ? styleSettings.info[0].settings : styleSettings) as TypeKindOfVectorSettings;
+    let style: Style | undefined;
     if (isSimpleSymbolVectorConfig(settings)) {
       const { symbol } = settings;
-      return this.#processSymbol[symbol](settings);
+      style = this.#processSymbol[symbol](settings);
+    } else if (isIconSymbolVectorConfig(settings)) {
+      style = this.processIconSymbol(settings);
     }
-    if (isIconSymbolVectorConfig(settings)) return this.processIconSymbol(settings);
-    return undefined;
+
+    // Apply visual variables if feature and style exist
+    const visualVarsToApply = visualVariables || ('visualVariables' in styleSettings ? styleSettings.visualVariables : undefined);
+
+    if (style && feature && visualVarsToApply) {
+      style = this.applyVisualVariables(style, feature, visualVarsToApply);
+    }
+
+    return style;
   }
 
   /**
@@ -810,15 +831,17 @@ export abstract class GeoviewRenderer {
    *
    * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Settings to use for the Style creation.
    * @param {Feature} feature - Optional feature. This method does not use it, it is there to have a homogeneous signature.
-   * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
+   * @param {TypeStyleProcessorOptions} options - Optional processing options.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
   static processSimpleLineString(
     styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
     feature?: Feature,
-    filterEquation?: FilterNodeType[]
+    options?: TypeStyleProcessorOptions
   ): Style | undefined {
+    const { filterEquation, visualVariables } = options || {};
+
     if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
       if (this.featureIsNotVisible(feature, filterEquation)) return undefined;
 
@@ -827,11 +850,20 @@ export abstract class GeoviewRenderer {
     if (feature) {
       geometry = feature.getGeometry() as Geometry;
     }
+    let style: Style | undefined;
     if (isLineStringVectorConfig(settings)) {
       const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
-      return new Style({ stroke: new Stroke(strokeOptions), geometry });
+      style = new Style({ stroke: new Stroke(strokeOptions), geometry });
     }
-    return undefined;
+
+    // Apply visual variables if feature and style exist
+    const visualVarsToApply = visualVariables || ('visualVariables' in styleSettings ? styleSettings.visualVariables : undefined);
+
+    if (style && feature && visualVarsToApply) {
+      style = this.applyVisualVariables(style, feature, visualVarsToApply);
+    }
+
+    return style;
   }
 
   /**
@@ -1026,15 +1058,17 @@ export abstract class GeoviewRenderer {
    *
    * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Settings to use for the Style creation.
    * @param {Feature} feature - Optional feature. This method does not use it, it is there to have a homogeneous signature.
-   * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
+   * @param {TypeStyleProcessorOptions} options - Optional processing options
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
   static processSimplePolygon(
     styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
     feature?: Feature,
-    filterEquation?: FilterNodeType[]
+    options?: TypeStyleProcessorOptions
   ): Style | undefined {
+    const { filterEquation, visualVariables } = options || {};
+
     if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
       if (this.featureIsNotVisible(feature, filterEquation)) return undefined;
 
@@ -1043,14 +1077,24 @@ export abstract class GeoviewRenderer {
     if (feature) {
       geometry = feature.getGeometry() as Geometry;
     }
+    let style: Style | undefined;
     if (isFilledPolygonVectorConfig(settings)) {
       const { fillStyle } = settings; // TODO: refactor - introduce by moving to config map schema type
       if (geometry !== undefined) {
-        return this.#processFillStyle[fillStyle](settings, geometry);
+        style = this.#processFillStyle[fillStyle](settings, geometry);
+      } else {
+        style = this.#processFillStyle[fillStyle](settings);
       }
-      return this.#processFillStyle[fillStyle](settings);
     }
-    return undefined;
+
+    // Apply visual variables if feature and style exist
+    const visualVarsToApply = visualVariables || ('visualVariables' in styleSettings ? styleSettings.visualVariables : undefined);
+
+    if (style && feature && visualVarsToApply) {
+      style = this.applyVisualVariables(style, feature, visualVarsToApply);
+    }
+
+    return style;
   }
 
   // #endregion PROCESS RENDERER
@@ -1264,6 +1308,431 @@ export abstract class GeoviewRenderer {
   }
 
   /**
+   * Interpolate a value between two stops linearly.
+   *
+   * @param {number} value - The data value to interpolate for.
+   * @param {number} value1 - The lower data value.
+   * @param {number} value2 - The upper data value.
+   * @param {number} output1 - The output at the lower value.
+   * @param {number} output2 - The output at the upper value.
+   * @returns {number} The interpolated output value.
+   */
+  static interpolateValue(value: number, value1: number, value2: number, output1: number, output2: number): number {
+    if (value1 === value2) return output1;
+    const ratio = (value - value1) / (value2 - value1);
+    return output1 + ratio * (output2 - output1);
+  }
+
+  /**
+   * Interpolate a color between two hex colors.
+   *
+   * @param {number} value - The data value to interpolate for.
+   * @param {number} value1 - The lower data value.
+   * @param {number} value2 - The upper data value.
+   * @param {string | number[]} color1 - The hex color at the lower value.
+   * @param {string | number[]} color2 - The hex color at the upper value.
+   * @returns {string} The interpolated color in rgba format.
+   */
+  static interpolateColor(value: number, value1: number, value2: number, color1: string | number[], color2: string | number[]): string {
+    /**
+     * Parse a color input to [r, g, b, a] format where RGB are 0-255 and alpha is 0-1
+     * @param {string | number[]} color - Color as hex string, rgba string, or [r,g,b,a] array (a is 0-255)
+     * @returns {[number, number, number, number]} Color as [r, g, b, alpha] where alpha is 0-1
+     */
+    const parseColor = (color: string | number[]): [number, number, number, number] => {
+      if (Array.isArray(color)) {
+        if (color.length < 3) {
+          logger.logWarning('Invalid color array length, expected at least 3 values [r,g,b]:', color);
+          return [255, 0, 0, 1];
+        }
+        // Safely get values that may be less then 0 or greater than 255
+        const r = Math.max(0, Math.min(255, color[0]));
+        const g = Math.max(0, Math.min(255, color[1]));
+        const b = Math.max(0, Math.min(255, color[2]));
+        // Alpha is optional, defaults to 255 (fully opaque), convert to 0-1 range
+        const a = color.length > 3 ? Math.max(0, Math.min(255, color[3])) / 255 : 1;
+        return [r, g, b, a];
+      }
+
+      if (color.startsWith('#')) {
+        const hex = color.slice(1);
+        const r = parseInt(hex.slice(0, 2), 16);
+        const g = parseInt(hex.slice(2, 4), 16);
+        const b = parseInt(hex.slice(4, 6), 16);
+        const a = hex.length === 8 ? parseInt(hex.slice(6, 8), 16) / 255 : 1;
+        return [r, g, b, a];
+      }
+      if (color.startsWith('rgba')) {
+        const matches = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+),?\s*([\d.]+)?\)/);
+        if (matches) {
+          return [parseInt(matches[1], 10), parseInt(matches[2], 10), parseInt(matches[3], 10), parseFloat(matches[4] || '1')];
+        }
+      }
+      // Default to white if parsing fails
+      return [255, 255, 255, 1];
+    };
+
+    const [r1, g1, b1, a1] = parseColor(color1);
+    const [r2, g2, b2, a2] = parseColor(color2);
+
+    const r = Math.round(this.interpolateValue(value, value1, value2, r1, r2));
+    const g = Math.round(this.interpolateValue(value, value1, value2, g1, g2));
+    const b = Math.round(this.interpolateValue(value, value1, value2, b1, b2));
+    const a = this.interpolateValue(value, value1, value2, a1, a2);
+
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
+  }
+
+  /**
+   * Evaluate a simple value expression using feature data.
+   * Supports basic arithmetic operations and field references.
+   *
+   * @param {string} expression - Expression string (e.g., "$feature[\"FIELD_NAME\"] + 90")
+   * @param {Feature} feature - Feature containing field data
+   * @returns {number | null} The evaluated result or null if evaluation fails
+   */
+  static evaluateValueExpression(expression: string, feature: Feature): number | null {
+    try {
+      // Replace $feature["fieldName"] or $feature['fieldName'] with actual values
+      const evaluableExpression = expression.replace(/\$feature\[["']([^"']+)["']\]/g, (match, fieldName) => {
+        const value = feature.get(fieldName);
+        if (value === undefined || value === null) {
+          return 'null';
+        }
+        const numericValue = Number(value);
+        if (Number.isNaN(numericValue)) {
+          return value;
+        }
+        return String(numericValue);
+      });
+
+      // Safety check: only allow numbers, operators, and whitespace
+      if (!/^(null|\d+\.?\d*|\.\d+|\s|[+\-*/().%^])+$/i.test(evaluableExpression)) {
+        logger.logWarning('Invalid characters in expression:', expression);
+        return null;
+      }
+
+      // Evaluate the expression using Function constructor (safer than eval)
+      const result = new Function(`return ${evaluableExpression}`)();
+
+      return typeof result === 'number' && !Number.isNaN(result) ? result : null;
+    } catch (error) {
+      logger.logWarning('Failed to evaluate expression:', expression, error);
+      return null;
+    }
+  }
+
+  /**
+   * Apply visual variables to a style based on feature data.
+   *
+   * @param {Style} style - The base style to modify.
+   * @param {Feature} feature - Feature containing the data values.
+   * @param {TypeLayerStyleVisualVariable[]} visualVariables - Visual variable configurations.
+   * @param {TypeAliasLookup?} aliasLookup - Optional lookup table for field name aliases.
+   * @returns {Style} The modified style with visual variables applied.
+   */
+  static applyVisualVariables(style: Style, feature: Feature, visualVariables: TypeLayerStyleVisualVariable[]): Style {
+    if (!visualVariables || visualVariables.length === 0) return style;
+
+    const modifiedStyle = style.clone();
+
+    visualVariables.forEach((visualVar) => {
+      let dataValue: number;
+
+      if (visualVar.valueExpression) {
+        // Evaluate the expression
+        const expressionResult = this.evaluateValueExpression(visualVar.valueExpression, feature);
+        if (expressionResult === null) return; // Skip if expression evaluation failed
+        dataValue = expressionResult;
+      } else if (visualVar.field) {
+        // Get the field value from the feature
+        const rawValue = feature.get(visualVar.field);
+        if (rawValue === undefined || rawValue === null) return;
+
+        dataValue = typeof rawValue === 'number' ? rawValue : parseFloat(String(rawValue));
+        if (Number.isNaN(dataValue)) return;
+
+        // Handle normalization field if specified
+        if (visualVar.normalizationField) {
+          const normValue = feature.get(visualVar.normalizationField);
+          const normNumber = typeof normValue === 'number' ? normValue : parseFloat(String(normValue));
+          if (!Number.isNaN(normNumber) && normNumber !== 0) {
+            dataValue /= normNumber;
+          }
+        }
+      } else {
+        // Neither expression or field specified
+        return;
+      }
+
+      // Apply based on visual variable type
+      switch (visualVar.type) {
+        case 'colorInfo':
+          this.applyColorVisualVariable(modifiedStyle, dataValue, visualVar);
+          break;
+        case 'sizeInfo':
+          this.applySizeVisualVariable(modifiedStyle, dataValue, visualVar);
+          break;
+        case 'rotationInfo':
+          this.applyRotationVisualVariable(modifiedStyle, dataValue, visualVar);
+          break;
+        case 'opacityInfo':
+          this.applyOpacityVisualVariable(modifiedStyle, dataValue, visualVar);
+          break;
+        default:
+          break;
+      }
+    });
+
+    return modifiedStyle;
+  }
+
+  /**
+   * Apply color visual variable to a style.
+   *
+   * @param {Style} style - The style to modify.
+   * @param {number} dataValue - The data value from the feature.
+   * @param {TypeLayerStyleVisualVariable} visualVar - The visual variable configuration.
+   */
+  static applyColorVisualVariable(style: Style, dataValue: number, visualVar: TypeLayerStyleVisualVariable): void {
+    if (!visualVar.stops || visualVar.stops.length < 2) return;
+
+    // Find the two stops that bracket the data value
+    const sortedStops = [...visualVar.stops].sort((a, b) => Number(a.value) - Number(b.value));
+
+    let color: string | undefined;
+
+    // Check if value is below the first stop
+    if (dataValue <= Number(sortedStops[0].value)) {
+      const { color: stopColor } = sortedStops[0];
+      color = stopColor;
+    }
+    // Check if value is above the last stop
+    else if (dataValue >= Number(sortedStops[sortedStops.length - 1].value)) {
+      const { color: stopColor } = sortedStops[sortedStops.length - 1];
+      color = stopColor;
+    }
+    // Interpolate between stops
+    else {
+      for (let i = 0; i < sortedStops.length - 1; i++) {
+        const stop1 = sortedStops[i];
+        const stop2 = sortedStops[i + 1];
+        if (dataValue >= Number(stop1.value) && dataValue <= Number(stop2.value)) {
+          if (stop1.color && stop2.color) {
+            color = this.interpolateColor(dataValue, Number(stop1.value), Number(stop2.value), stop1.color, stop2.color);
+          }
+          break;
+        }
+      }
+    }
+
+    if (!color) return;
+
+    const image = style.getImage();
+    if (image instanceof Circle || image instanceof RegularShape) {
+      const fill = image.getFill();
+      fill?.setColor(color);
+    }
+
+    // Apply color to appropriate style component
+    const fill = style.getFill();
+    const stroke = style.getStroke();
+
+    if (fill) {
+      fill.setColor(color);
+    }
+    // Optionally update stroke color as well
+    if (stroke) {
+      stroke.setColor(color);
+    }
+  }
+
+  /**
+   * Apply size visual variable to a style.
+   *
+   * @param {Style} style - The style to modify.
+   * @param {number} dataValue - The data value from the feature.
+   * @param {TypeLayerStyleVisualVariable} visualVar - The visual variable configuration.
+   */
+  static applySizeVisualVariable(style: Style, dataValue: number, visualVar: TypeLayerStyleVisualVariable): void {
+    let size: number | undefined;
+
+    // Method 1: Using min/max data values and sizes
+    if (
+      visualVar.minDataValue !== undefined &&
+      visualVar.maxDataValue !== undefined &&
+      visualVar.minSize !== undefined &&
+      visualVar.maxSize !== undefined
+    ) {
+      size = this.interpolateValue(dataValue, visualVar.minDataValue, visualVar.maxDataValue, visualVar.minSize, visualVar.maxSize);
+    }
+    // Method 2: Using stops
+    else if (visualVar.stops && visualVar.stops.length >= 2) {
+      const sortedStops = [...visualVar.stops].sort((a, b) => Number(a.value) - Number(b.value));
+
+      // Check if value is below the first stop
+      if (dataValue <= Number(sortedStops[0].value)) {
+        const { size: stopSize } = sortedStops[0];
+        size = stopSize;
+      }
+      // Check if value is above the last stop
+      else if (dataValue >= Number(sortedStops[sortedStops.length - 1].value)) {
+        const { size: stopSize } = sortedStops[sortedStops.length - 1];
+        size = stopSize;
+      }
+      // Interpolate between stops
+      else {
+        for (let i = 0; i < sortedStops.length - 1; i++) {
+          const stop1 = sortedStops[i];
+          const stop2 = sortedStops[i + 1];
+          if (dataValue >= Number(stop1.value) && dataValue <= Number(stop2.value)) {
+            if (stop1.size !== undefined && stop2.size !== undefined) {
+              size = this.interpolateValue(dataValue, Number(stop1.value), Number(stop2.value), stop1.size, stop2.size);
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    if (size === undefined) return;
+
+    // Apply size to appropriate style component
+    const image = style.getImage();
+    if (image instanceof Circle) {
+      image.setRadius(size);
+    }
+
+    if (image instanceof RegularShape) {
+      const prevRadius = image.getRadius();
+      image.setScale(size / prevRadius);
+    }
+
+    // For line strings
+    const stroke = style.getStroke();
+    if (stroke && !image) {
+      stroke.setWidth(size);
+    }
+  }
+
+  /**
+   * Apply rotation visual variable to a style.
+   *
+   * @param {Style} style - The style to modify.
+   * @param {number} dataValue - The data value from the feature.
+   * @param {TypeLayerStyleVisualVariable} visualVar - The visual variable configuration.
+   */
+  static applyRotationVisualVariable(style: Style, dataValue: number, visualVar: TypeLayerStyleVisualVariable): void {
+    const image = style.getImage();
+    if (!image) return;
+
+    // Convert rotation based on type
+    let rotationRadians = dataValue;
+
+    if (visualVar.rotationType === 'geographic') {
+      // Geographic rotation: 0 degrees = North, clockwise
+      // Convert to mathematical rotation (counter-clockwise from East)
+      rotationRadians = ((90 - dataValue) * Math.PI) / 180;
+    } else {
+      // Arithmetic rotation: 0 degrees = East, counter-clockwise (default)
+      rotationRadians = (dataValue * Math.PI) / 180;
+    }
+
+    // Apply rotation
+    if (image.setRotation) {
+      image.setRotation(rotationRadians);
+    }
+  }
+
+  /**
+   * Apply opacity visual variable to a style.
+   *
+   * @param {Style} style - The style to modify.
+   * @param {number} dataValue - The data value from the feature.
+   * @param {TypeLayerStyleVisualVariable} visualVar - The visual variable configuration.
+   */
+  static applyOpacityVisualVariable(style: Style, dataValue: number, visualVar: TypeLayerStyleVisualVariable): void {
+    if (!visualVar.stops || visualVar.stops.length < 2) return;
+
+    const sortedStops = [...visualVar.stops].sort((a, b) => Number(a.value) - Number(b.value));
+
+    let opacity: number | undefined;
+
+    // Check if value is below the first stop
+    if (dataValue <= Number(sortedStops[0].value)) {
+      const { opacity: stopOpacity } = sortedStops[0];
+      opacity = stopOpacity;
+    }
+    // Check if value is above the last stop
+    else if (dataValue >= Number(sortedStops[sortedStops.length - 1].value)) {
+      const { opacity: stopOpacity } = sortedStops[sortedStops.length - 1];
+      opacity = stopOpacity;
+    }
+    // Interpolate between stops
+    else {
+      for (let i = 0; i < sortedStops.length - 1; i++) {
+        const stop1 = sortedStops[i];
+        const stop2 = sortedStops[i + 1];
+        if (dataValue >= Number(stop1.value) && dataValue <= Number(stop2.value)) {
+          if (stop1.opacity !== undefined && stop2.opacity !== undefined) {
+            opacity = this.interpolateValue(dataValue, Number(stop1.value), Number(stop2.value), stop1.opacity, stop2.opacity);
+          }
+          break;
+        }
+      }
+    }
+
+    if (opacity === undefined) return;
+
+    // Clamp opacity to [0, 1]
+    opacity = Math.max(0, Math.min(1, opacity));
+
+    // Apply opacity to all style components
+    const image = style.getImage();
+    if (image && image.setOpacity) {
+      image.setOpacity(opacity);
+      style.setImage(image);
+    }
+
+    if (image instanceof Circle || image instanceof RegularShape) {
+      const imgFill = image.getFill();
+      if (imgFill) {
+        const color = imgFill?.getColor();
+        if (typeof color === 'string') {
+          // Parse and modify alpha channel
+          const rgba = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+),?\s*([\d.]+)?\)/);
+          if (rgba) {
+            imgFill.setColor(`rgba(${rgba[1]}, ${rgba[2]}, ${rgba[3]}, ${opacity})`);
+          }
+        }
+      }
+    }
+
+    const fill = style.getFill();
+    if (fill) {
+      const color = fill.getColor();
+      if (typeof color === 'string') {
+        // Parse and modify alpha channel
+        const rgba = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+),?\s*([\d.]+)?\)/);
+        if (rgba) {
+          fill.setColor(`rgba(${rgba[1]}, ${rgba[2]}, ${rgba[3]}, ${opacity})`);
+        }
+      }
+    }
+
+    const stroke = style.getStroke();
+    if (stroke) {
+      const color = stroke.getColor();
+      if (typeof color === 'string') {
+        const rgba = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+),?\s*([\d.]+)?\)/);
+        if (rgba) {
+          stroke.setColor(`rgba(${rgba[1]}, ${rgba[2]}, ${rgba[3]}, ${opacity})`);
+        }
+      }
+    }
+  }
+
+  /**
    * Search the unique value entry using the field values stored in the feature.
    *
    * @param {string[]} fields - Fields involved in the unique value definition.
@@ -1350,28 +1819,25 @@ export abstract class GeoviewRenderer {
    *
    * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
    * @param {Feature?} feature - Feature used to test the unique value conditions.
-   * @param {FilterNodeType[]?} filterEquation - Filter equation associated to the layer.
-   * @param {boolean?} legendFilterIsOff - When true, do not apply legend filter.
-   * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
-   * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
+   * @param {TypeStyleProcessorOptions?} options - Optional processing options.
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
   static processUniqueValuePoint(
     styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
     feature?: Feature,
-    filterEquation?: FilterNodeType[],
-    legendFilterIsOff?: boolean,
-    domainsLookup?: TypeLayerMetadataFields[],
-    aliasLookup?: TypeAliasLookup
+    options?: TypeStyleProcessorOptions
   ): Style | undefined {
+    const { filterEquation, legendFilterIsOff, domainsLookup, aliasLookup, visualVariables } = options || {};
+
     if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
       if (this.featureIsNotVisible(feature, filterEquation)) return undefined;
 
     if (styleSettings.type === 'uniqueValue') {
       const { hasDefault, fields, info } = styleSettings;
       const styleEntry = this.searchUniqueValueEntry(fields, info, feature, domainsLookup, aliasLookup);
+
       if (styleEntry !== undefined && (legendFilterIsOff || styleEntry.visible !== false))
-        return this.processSimplePoint(styleEntry.settings);
+        return this.processSimplePoint(styleEntry.settings, feature, { visualVariables });
 
       // TODO: Check - Why look for styleSettings.info.length - 1?
       if (
@@ -1379,7 +1845,7 @@ export abstract class GeoviewRenderer {
         hasDefault &&
         (legendFilterIsOff || styleSettings.info[styleSettings.info.length - 1].visible !== false)
       )
-        return this.processSimplePoint(styleSettings.info[styleSettings.info.length - 1].settings);
+        return this.processSimplePoint(styleSettings.info[styleSettings.info.length - 1].settings, feature, { visualVariables });
     }
     return undefined;
   }
@@ -1389,32 +1855,29 @@ export abstract class GeoviewRenderer {
    *
    * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
    * @param {Feature?} feature - Feature used to test the unique value conditions.
-   * @param {FilterNodeType[]?} filterEquation - Filter equation associated to the layer.
-   * @param {boolean?} legendFilterIsOff - When true, do not apply legend filter.
-   * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
-   * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
+   * @param {TypeStyleProcessorOptions?} options - Optional processing options.
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
   static processUniqueLineString(
     styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
     feature?: Feature,
-    filterEquation?: FilterNodeType[],
-    legendFilterIsOff?: boolean,
-    domainsLookup?: TypeLayerMetadataFields[],
-    aliasLookup?: TypeAliasLookup
+    options?: TypeStyleProcessorOptions
   ): Style | undefined {
+    const { filterEquation, legendFilterIsOff, domainsLookup, aliasLookup, visualVariables } = options || {};
+
     if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
       if (this.featureIsNotVisible(feature, filterEquation)) return undefined;
 
     if (styleSettings.type === 'uniqueValue') {
       const { hasDefault, fields, info } = styleSettings;
       const styleEntry = this.searchUniqueValueEntry(fields, info, feature, domainsLookup, aliasLookup);
+
       if (styleEntry !== undefined && (legendFilterIsOff || styleEntry.visible !== false))
-        return this.processSimpleLineString(styleEntry.settings, feature);
+        return this.processSimpleLineString(styleEntry.settings, feature, { visualVariables });
 
       // TODO: Check - Why look for info.length - 1?
       if (styleEntry === undefined && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false))
-        return this.processSimpleLineString(info[info.length - 1].settings, feature);
+        return this.processSimpleLineString(info[info.length - 1].settings, feature, { visualVariables });
     }
     return undefined;
   }
@@ -1424,20 +1887,16 @@ export abstract class GeoviewRenderer {
    *
    * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
    * @param {Feature?} feature - Feature used to test the unique value conditions.
-   * @param {FilterNodeType[]?} filterEquation - Filter equation associated to the layer.
-   * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
-   * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
-   * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
+   * @param {TypeStyleProcessorOptions?} options - Optional processing options.
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
   static processUniquePolygon(
     styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
     feature?: Feature,
-    filterEquation?: FilterNodeType[],
-    legendFilterIsOff?: boolean,
-    domainsLookup?: TypeLayerMetadataFields[],
-    aliasLookup?: TypeAliasLookup
+    options?: TypeStyleProcessorOptions
   ): Style | undefined {
+    const { filterEquation, legendFilterIsOff, domainsLookup, aliasLookup, visualVariables } = options || {};
+
     if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
       if (this.featureIsNotVisible(feature, filterEquation)) return undefined;
 
@@ -1445,11 +1904,11 @@ export abstract class GeoviewRenderer {
       const { hasDefault, fields, info } = styleSettings;
       const styleEntry = this.searchUniqueValueEntry(fields, info, feature, domainsLookup, aliasLookup);
       if (styleEntry !== undefined && (legendFilterIsOff || styleEntry.visible !== false))
-        return this.processSimplePolygon(styleEntry.settings, feature);
+        return this.processSimplePolygon(styleEntry.settings, feature, { visualVariables });
 
       // TODO: Check - Why look for info.length - 1?
       if (styleEntry === undefined && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false))
-        return this.processSimplePolygon(info[info.length - 1].settings, feature);
+        return this.processSimplePolygon(info[info.length - 1].settings, feature, { visualVariables });
     }
     return undefined;
   }
@@ -1550,20 +2009,16 @@ export abstract class GeoviewRenderer {
    *
    * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
    * @param {Feature} feature - Feature used to test the unique value conditions.
-   * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
-   * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
-   * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
-   * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
+   * @param {TypeStyleProcessorOptions?} options - Optional processing options.
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
   static processClassBreaksPoint(
     styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
     feature?: Feature,
-    filterEquation?: FilterNodeType[],
-    legendFilterIsOff?: boolean,
-    domainsLookup?: TypeLayerMetadataFields[],
-    aliasLookup?: TypeAliasLookup
+    options?: TypeStyleProcessorOptions
   ): Style | undefined {
+    const { filterEquation, legendFilterIsOff, aliasLookup, visualVariables } = options || {};
+
     if (filterEquation !== undefined && filterEquation.length !== 0 && feature) {
       if (this.featureIsNotVisible(feature, filterEquation)) return undefined;
     }
@@ -1574,13 +2029,13 @@ export abstract class GeoviewRenderer {
 
       // If found a class break renderer that works for the value of the feature
       if (foundClassBreakInfo && (legendFilterIsOff || foundClassBreakInfo.visible !== false)) {
-        return this.processSimplePoint(foundClassBreakInfo.settings);
+        return this.processSimplePoint(foundClassBreakInfo.settings, feature, { visualVariables });
       }
 
       // If not found a class break renderer that works, but we want default values
       // TODO: Check - I'm not sure we should be using info[info.length - 1] to know if the default should be visible?
       if (!foundClassBreakInfo && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false)) {
-        return this.processSimplePoint(info[info.length - 1].settings);
+        return this.processSimplePoint(info[info.length - 1].settings, feature, { visualVariables });
       }
     }
     return undefined;
@@ -1591,20 +2046,15 @@ export abstract class GeoviewRenderer {
    *
    * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
    * @param {Feature} feature - Feature used to test the unique value conditions.
-   * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
-   * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
-   * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
-   * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
+   * @param {TypeStyleProcessorOptions?} options - Optional processing options.
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
   static processClassBreaksLineString(
     styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
     feature?: Feature,
-    filterEquation?: FilterNodeType[],
-    legendFilterIsOff?: boolean,
-    domainsLookup?: TypeLayerMetadataFields[],
-    aliasLookup?: TypeAliasLookup
+    options?: TypeStyleProcessorOptions
   ): Style | undefined {
+    const { filterEquation, legendFilterIsOff, aliasLookup, visualVariables } = options || {};
     if (filterEquation !== undefined && filterEquation.length !== 0 && feature) {
       if (this.featureIsNotVisible(feature, filterEquation)) return undefined;
     }
@@ -1615,13 +2065,13 @@ export abstract class GeoviewRenderer {
 
       // If found a class break renderer that works for the value of the feature
       if (foundClassBreakInfo && (legendFilterIsOff || foundClassBreakInfo.visible !== false)) {
-        return this.processSimpleLineString(foundClassBreakInfo.settings, feature);
+        return this.processSimpleLineString(foundClassBreakInfo.settings, feature, { visualVariables });
       }
 
       // If not found a class break renderer that works, but we want default values
       // TODO: Check - I'm not sure we should be using info[info.length - 1] to know if the default should be visible?
       if (!foundClassBreakInfo && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false)) {
-        return this.processSimpleLineString(info[info.length - 1].settings, feature);
+        return this.processSimpleLineString(info[info.length - 1].settings, feature, { visualVariables });
       }
     }
     return undefined;
@@ -1632,20 +2082,16 @@ export abstract class GeoviewRenderer {
    *
    * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
    * @param {Feature} feature - Feature used to test the unique value conditions.
-   * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
-   * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
-   * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
-   * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
+   * @param {TypeStyleProcessorOptions?} options - Optional processing options.
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
    */
   static processClassBreaksPolygon(
     styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
     feature?: Feature,
-    filterEquation?: FilterNodeType[],
-    legendFilterIsOff?: boolean,
-    domainsLookup?: TypeLayerMetadataFields[],
-    aliasLookup?: TypeAliasLookup
+    options?: TypeStyleProcessorOptions
   ): Style | undefined {
+    const { filterEquation, legendFilterIsOff, aliasLookup, visualVariables } = options || {};
+
     if (filterEquation !== undefined && filterEquation.length !== 0 && feature) {
       if (this.featureIsNotVisible(feature, filterEquation)) return undefined;
     }
@@ -1656,13 +2102,13 @@ export abstract class GeoviewRenderer {
 
       // If found a class break renderer that works for the value of the feature
       if (foundClassBreakInfo && (legendFilterIsOff || foundClassBreakInfo.visible !== false)) {
-        return this.processSimplePolygon(foundClassBreakInfo.settings, feature);
+        return this.processSimplePolygon(foundClassBreakInfo.settings, feature, { visualVariables });
       }
 
       // If not found a class break renderer that works, but we want default values
       // TODO: Check - I'm not sure we should be using info[info.length - 1] to know if the default should be visible?
       if (!foundClassBreakInfo && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false)) {
-        return this.processSimplePolygon(info[info.length - 1].settings, feature);
+        return this.processSimplePolygon(info[info.length - 1].settings, feature, { visualVariables });
       }
     }
     return undefined;
@@ -1715,16 +2161,15 @@ export abstract class GeoviewRenderer {
     // Get the style according to its type and geometry.
     if (styleWorkOn[geometryType]) {
       const styleSettings = style[geometryType]!;
-      const { type } = styleSettings;
-      // TODO: Refactor - Rewrite this to use explicit function calls instead, for clarity and references finding
-      const featureStyle = this.processStyle[type][geometryType](
-        styleSettings,
-        feature as Feature,
+      const { type, visualVariables } = styleSettings;
+      const options: TypeStyleProcessorOptions = {
         filterEquation,
         legendFilterIsOff,
-        undefined,
-        aliasLookup
-      );
+        aliasLookup,
+        visualVariables,
+      };
+      // TODO: Refactor - Rewrite this to use explicit function calls instead, for clarity and references finding
+      const featureStyle = this.processStyle[type][geometryType](styleSettings, feature as Feature, options);
 
       const textStyle = GeoviewRenderer.getTextStyle(feature, resolution, styleSettings, layerText, aliasLookup);
       if (textStyle && featureStyle) {
@@ -1767,7 +2212,7 @@ export abstract class GeoviewRenderer {
       // Get the style accordingly to its type and geometry.
       if (style[geometryType]) {
         const styleSettings = style[geometryType];
-        const { type } = styleSettings;
+        const { type, visualVariables } = styleSettings;
 
         // TODO: Performance #2688 - Wrap the style processing in a Promise to prevent blocking, Use requestAnimationFrame to process style during next frame
         // Wrap the style processing in a Promise to prevent blocking
@@ -1783,15 +2228,15 @@ export abstract class GeoviewRenderer {
         //     resolve(processedStyle);
         //   });
         // });
-
-        const featureStyle = this.processStyle[type][geometryType](
-          styleSettings,
-          feature,
+        const options: TypeStyleProcessorOptions = {
           filterEquation,
           legendFilterIsOff,
           domainsLookup,
-          aliasLookup
-        );
+          aliasLookup,
+          visualVariables,
+        };
+
+        const featureStyle = this.processStyle[type][geometryType](styleSettings, feature, options);
 
         if (featureStyle) {
           if (geometryType === 'Point') {
