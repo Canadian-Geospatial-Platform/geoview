@@ -24,6 +24,7 @@ import {
   useUIActiveFocusItem,
   useUIAppbarComponents,
   useUIActiveAppBarTab,
+  useUIHiddenTabs,
   useUIStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapInteraction, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -81,6 +82,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const interaction = useMapInteraction();
   const appBarComponents = useUIAppbarComponents();
   const { tabId, isOpen, isFocusTrapped } = useUIActiveAppBarTab();
+  const hiddenTabs = useUIHiddenTabs();
   const { hideClickMarker } = useMapStoreActions();
 
   const geoviewElement = useAppGeoviewHTMLElement().querySelector('[id^="mapTargetElement-"]') as HTMLElement;
@@ -335,6 +337,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const renderButtonPanel = (panelNames: string[]): ReactNode => {
     // Map through panel names and create ListItems for visible buttons
     const visibleButtons = panelNames
+      .filter((name) => !hiddenTabs.includes(name))
       .map((panelName: string) => {
         // Get the button panel configuration for this panel name
         const buttonPanel = buttonPanels[panelName];

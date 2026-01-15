@@ -583,8 +583,8 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
         setSelectedLayerPath(selectedLayer?.layerPath ?? '');
       }
 
-      // make sure the right panel is visible
-      if (!isRightPanelVisible) {
+      // Make sure the right panel is visible as long as the coordinates have changed from a user click
+      if (!isRightPanelVisible && coordinatesChanged) {
         layoutRef.current?.showRightPanel(true);
       }
     }

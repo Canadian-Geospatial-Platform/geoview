@@ -58,12 +58,12 @@ export class UIEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // GV NEVER add a store action who does set state AND map action at a same time.
   // GV Review the action in store state to make sure
-  static hideTab(mapId: string, tab: string): void {
+  static hideTabButton(mapId: string, tab: string): void {
     if (!this.getUIStateProtected(mapId).hiddenTabs.includes(tab))
       this.getUIStateProtected(mapId).setterActions.setHiddenTabs([...this.getUIStateProtected(mapId).hiddenTabs, tab]);
   }
 
-  static showTab(mapId: string, tab: string): void {
+  static showTabButton(mapId: string, tab: string): void {
     const curHiddenTabs = this.getUIStateProtected(mapId).hiddenTabs;
     const tabIndex = curHiddenTabs.indexOf(tab);
     if (tabIndex !== -1) {

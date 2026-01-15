@@ -1621,6 +1621,14 @@ export class LayerApi {
       });
   }
 
+  /**
+   * Repeats the last feature info query if any.
+   * @returns {void}
+   */
+  repeatLastQuery(): void {
+    FeatureInfoEventProcessor.repeatLastQuery(this.getMapId());
+  }
+
   // #region PRIVATE FUNCTIONS
 
   /**
