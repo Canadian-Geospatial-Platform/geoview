@@ -20,9 +20,12 @@ export class AppEventProcessor extends AbstractEventProcessor {
 
   // #region
   /**
-   * Shortcut to get the App state for a given map id
-   * @param {string} mapId - The mapId
-   * @returns {IAppState} The App state.
+   * Gets the app state slice from the store for the specified map.
+   * Provides access to application-level state including display language, theme, and notifications.
+   * @param {string} mapId - The map identifier
+   * @return {IAppState} The app state slice
+   * @protected
+   * @static
    */
   protected static getAppState(mapId: string): IAppState {
     // Return the app state
@@ -30,9 +33,12 @@ export class AppEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Shortcut to get the App state for a given map id
-   * @param {string} mapId - The mapId
-   * @returns {IAppState} The App state.
+   * Asynchronously gets the app state slice from the store for the specified map.
+   * This method waits for the store to be available before returning the state.
+   * @param {string} mapId - The map identifier
+   * @return {Promise<IAppState>} Promise that resolves with the app state slice
+   * @protected
+   * @static
    */
   protected static async getAppStateAsync(mapId: string): Promise<IAppState> {
     // Return the app state
@@ -40,47 +46,56 @@ export class AppEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Shortcut to get the display language for a given map id
-   * @param {string} mapId - The mapId
-   * @returns {TypeDisplayLanguage} The display language.
+   * Gets the current display language setting for the map.
+   * @param {string} mapId - The map identifier
+   * @return {TypeDisplayLanguage} The display language ('en' or 'fr')
+   * @static
    */
   static getDisplayLanguage(mapId: string): TypeDisplayLanguage {
     return this.getAppState(mapId).displayLanguage;
   }
 
   /**
-   * Shortcut to get the display theme for a given map id
-   * @param {string} mapId - The mapId
-   * @returns {TypeDisplayTheme} The display theme.
+   * Gets the current display theme setting for the map.
+   * @param {string} mapId - The map identifier
+   * @return {TypeDisplayTheme} The display theme ('dark', 'light' or 'geo-ca')
+   * @static
    */
   static getDisplayTheme(mapId: string): TypeDisplayTheme {
     return this.getAppState(mapId).displayTheme;
   }
 
   /**
-   * Shortcut to get the GeoView HTML Element
-   * @param {string} mapId - The mapId
-   * @returns {HTMLElement} The GeoView HTML Element
+   * Gets the root HTML element that contains the GeoView map instance.
+   * @param {string} mapId - The map identifier
+   * @return {HTMLElement} The GeoView container HTML element
+   * @static
    */
   static getGeoviewHTMLElement(mapId: string): HTMLElement {
     return this.getAppState(mapId).geoviewHTMLElement;
   }
 
   /**
-   * Shortcut to get if unsymbolized features should be shown
-   * @param {string} mapId - The mapId
-   * @returns {boolean} Whether unsymbolized features should be shown
+   * Gets whether unsymbolized features should be displayed on the map.
+   * When true, features without defined styles will still be rendered with default styling.
+   * @param {string} mapId - The map identifier
+   * @return {boolean} True if unsymbolized features should be shown, false otherwise
+   * @static
    */
   static getShowUnsymbolizedFeatures(mapId: string): boolean {
     return this.getAppState(mapId).showUnsymbolizedFeatures;
   }
 
   /**
-   * Adds a snackbar message (optional add to notification).
-   * @param {SnackbarType} type - The type of message.
-   * @param {string} messageKey - The message key.
-   * @param {string} param - Optional param to replace in the string if it is a key
-   * @param {boolean} notification - True if we add the message to notification panel (default false)
+   * Displays a snackbar message to the user and optionally adds it to the notification panel.
+   * Routes the message to the appropriate notification method based on type (info, success, warning, error).
+   * @param {string} mapId - The map identifier
+   * @param {SnackbarType} type - The type of message (info, success, warning, error)
+   * @param {string} messageKey - The translation key for the message
+   * @param {string[]} [param] - Optional parameters to replace in the message string
+   * @param {boolean} notification - True to add the message to notification panel (default false)
+   * @return {void}
+   * @static
    */
   static addMessage(mapId: string, type: SnackbarType, messageKey: string, param?: string[], notification: boolean = false): void {
     switch (type) {
@@ -101,6 +116,15 @@ export class AppEventProcessor extends AbstractEventProcessor {
     }
   }
 
+  /**
+   * Adds a notification to the notification panel or increments count if it already exists.
+   * Uses the async version of getAppStateAsync since notifications can be added before map is fully created.
+   * Checks if notification already exists and increments its count if found, otherwise adds new notification with count of 1.
+   * @param {string} mapId - The map identifier
+   * @param {NotificationDetailsType} notif - The notification details to add
+   * @return {Promise<void>} Promise that resolves when the notification is added
+   * @static
+   */
   static async addNotification(mapId: string, notif: NotificationDetailsType): Promise<void> {
     // Because notification is called before map is created, we use the async
     // version of getAppStateAsync
@@ -120,16 +144,37 @@ export class AppEventProcessor extends AbstractEventProcessor {
     this.getAppState(mapId).setterActions.setNotifications(curNotifications);
   }
 
+  /**
+   * Removes a specific notification from the notification panel by its key.
+   * @param {string} mapId - The map identifier
+   * @param {string} key - The unique key of the notification to remove
+   * @return {void}
+   * @static
+   */
   static removeNotification(mapId: string, key: string): void {
     // filter out notification
     const notifications = this.getAppState(mapId).notifications.filter((item: NotificationDetailsType) => item.key !== key);
     this.getAppState(mapId).setterActions.setNotifications(notifications);
   }
 
+  /**
+   * Removes all notifications from the notification panel.
+   * @param {string} mapId - The map identifier
+   * @return {void}
+   * @static
+   */
   static removeAllNotifications(mapId: string): void {
     this.getAppState(mapId).setterActions.setNotifications([]);
   }
 
+  /**
+   * Sets the crosshair active state and enables/disables map interaction for WCAG compliance.
+   * When crosshair is active, the map is focused and keyboard interactions are enabled.
+   * @param {string} mapId - The map identifier
+   * @param {boolean} isActive - True to activate crosshair, false to deactivate
+   * @return {void}
+   * @static
+   */
   static setAppIsCrosshairActive(mapId: string, isActive: boolean): void {
     this.getAppState(mapId).setterActions.setCrosshairActive(isActive);
 
@@ -137,6 +182,14 @@ export class AppEventProcessor extends AbstractEventProcessor {
     MapEventProcessor.setActiveMapInteractionWCAG(mapId, isActive);
   }
 
+  /**
+   * Sets the display language for the map and triggers related updates.
+   * Changes i18n language, resets basemap, reloads guide, and clears notifications to prevent mixed language content.
+   * @param {string} mapId - The map identifier
+   * @param {TypeDisplayLanguage} lang - The language to set ('en' or 'fr')
+   * @return {Promise<void>} Promise that resolves when all language changes are complete
+   * @static
+   */
   static setDisplayLanguage(mapId: string, lang: TypeDisplayLanguage): Promise<void> {
     // Return a new promise of void when all will be done instead of promise of array of voids
     return new Promise((resolve, reject) => {
@@ -167,22 +220,48 @@ export class AppEventProcessor extends AbstractEventProcessor {
     });
   }
 
+  /**
+   * Sets the display theme for the map.
+   * @param {string} mapId - The map identifier
+   * @param {TypeDisplayTheme} theme - The theme to set ('dark' or 'geo-ca')
+   * @return {void}
+   * @static
+   */
   static setDisplayTheme(mapId: string, theme: TypeDisplayTheme): void {
     this.getAppState(mapId).setterActions.setDisplayTheme(theme);
   }
 
+  /**
+   * Toggles fullscreen mode for the map.
+   * @param {string} mapId - The map identifier
+   * @param {boolean} active - True to enter fullscreen, false to exit
+   * @param {TypeHTMLElement} [element] - Optional HTML element to make fullscreen (defaults to map container)
+   * @return {void}
+   * @static
+   */
   static setFullscreen(mapId: string, active: boolean, element?: TypeHTMLElement): void {
     this.getAppState(mapId).setterActions.setFullScreenActive(active);
     MapEventProcessor.getMapViewer(mapId).setFullscreen(active, element);
   }
 
+  /**
+   * Shows or hides the circular progress indicator on the map.
+   * Used to indicate loading states for async operations.
+   * @param {string} mapId - The map identifier
+   * @param {boolean} active - True to show progress indicator, false to hide
+   * @return {void}
+   * @static
+   */
   static setCircularProgress(mapId: string, active: boolean): void {
     this.getAppState(mapId).setterActions.setCircularProgress(active);
   }
 
   /**
-   * Process the guide .md file and add the object to the store.
-   * @param {string} mapId - ID of map to create guide object for.
+   * Processes the guide markdown file and stores the parsed guide object in the app state.
+   * Loads the guide content based on the current display language and logs performance metrics.
+   * @param {string} mapId - The map identifier to create guide object for
+   * @return {Promise<void>} Promise that resolves when the guide is loaded and stored
+   * @static
    */
   static async setGuide(mapId: string): Promise<void> {
     // Start guide loading tracker

@@ -21,10 +21,15 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // Static functions for Store Map State to action on API
   // **********************************************************
+
   /**
-   * Shortcut to get the DataTable state for a given map id
-   * @param {string} mapId - The mapId
-   * @returns {IDataTableState} The DataTable state
+   * Retrieves the data table state slice from the store for the specified map.
+   * Provides access to feature data arrays, active layer data, table settings, and filters.
+   * Used by other processors and data table UI components to access current table state.
+   * @param {string} mapId - The map identifier
+   * @return {IDataTableState} The data table state slice containing all table-related data
+   * @static
+   * @protected
    */
   protected static getDataTableState(mapId: string): IDataTableState {
     // Return the DataTable state
@@ -32,10 +37,13 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Get a specific state.
-   * @param {string} mapId - The mapId
-   * @param {'allFeaturesDataArray' | 'activeLayerData' | 'layersDataTableSetting' | 'selectedFeature' | 'selectedLayerPath' | 'tableFilters'} state - The state to get
-   * @returns {string | TypeAllFeatureInfoResultSetEntry[] | TypeLayerData[] | Record<string, IDataTableSettings> | TypeFeatureInfoEntry | Record<string, string> | undefined | null} The requested state
+   * Retrieves a specific property from the data table state.
+   * Provides type-safe access to feature arrays, layer data, settings, selected features, and filters.
+   * Returns undefined if the state doesn't exist for the specified map.
+   * @param {string} mapId - The map identifier
+   * @param {'allFeaturesDataArray' | 'activeLayerData' | 'layersDataTableSetting' | 'selectedFeature' | 'selectedLayerPath' | 'tableFilters'} state - The state property key to retrieve
+   * @return {string | TypeAllFeatureInfoResultSetEntry[] | TypeLayerData[] | Record<string, IDataTableSettings> | TypeFeatureInfoEntry | Record<string, string> | undefined | null} The requested state property value
+   * @static
    */
   static getSingleDataTableState(
     mapId: string,
@@ -55,21 +63,28 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Gets filter(s) for a layer.
-   * @param {string} mapId - The map id of the state to act on
-   * @param {string} layerPath - The path of the layer
-   * @returns {string | undefined} The data table filter(s) for the layer
+   * Retrieves the filter string applied to a specific layer in the data table.
+   * Used to get the current filter expression for displaying filtered records.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The unique path identifying the layer
+   * @return {string | undefined} The filter string, or undefined if no filter is applied
+   * @static
    */
   static getTableFilter(mapId: string, layerPath: string): string | undefined {
     return this.getDataTableState(mapId)?.tableFilters[layerPath];
   }
 
   /**
-   * Filter the map based on filters set on date table.
-   * @param {string} mapId - Id of the map.
-   * @param {string} layerPath - Path of the layer
-   * @param {string} filterStrings - Filters set on the data table
-   * @param {boolean} mapFilteredRecord - Filtered Map switch is on/off.
+   * Updates map layer filters based on data table filter state.
+   * Applies or removes filters on the map based on the mapFilteredRecord toggle.
+   * When enabled, only features matching the filter criteria are displayed on the map.
+   * Constructs filter string, updates table filter state, and triggers layer filtering via MapEventProcessor.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The unique path identifying the layer
+   * @param {string} filterStrings - The filter expression to apply
+   * @param {boolean} mapFilteredRecord - True to apply filter to map, false to remove filter
+   * @return {void}
+   * @static
    */
   static updateFilters(mapId: string, layerPath: string, filterStrings: string, mapFilteredRecord: boolean): void {
     const filter = mapFilteredRecord ? filterStrings : '';
@@ -78,19 +93,26 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Initialize columns filter information for a layer.
-   * @param {string} mapId - Id of the map.
-   * @param {string} layerPath - Path of the layer
+   * Initializes the data table settings for a layer.
+   * Sets up initial column configurations, sorting, and filtering settings.
+   * Called when a layer is first added to the data table.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The unique path identifying the layer
+   * @return {void}
+   * @static
    */
   static setInitialSettings(mapId: string, layerPath: string): void {
     this.getDataTableState(mapId).setterActions.setInitiallayerDataTableSetting(layerPath);
   }
 
   /**
-   * Sets the filter for the layer path
-   * @param {string} mapId - The map id of the state to act on
-   * @param {string} layerPath - The layer path to use
-   * @param {string} filter - The filter
+   * Adds or updates the filter string for a layer in the data table state.
+   * Stores the filter expression that will be applied when querying layer features.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The unique path identifying the layer
+   * @param {string} filter - The filter expression to store
+   * @return {void}
+   * @static
    */
   static addOrUpdateTableFilter(mapId: string, layerPath: string, filter: string): void {
     const curTableFilters = this.getDataTableState(mapId)?.tableFilters;
@@ -98,19 +120,25 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Shortcut to get the DataTable state for a given map id and layer path
-   * @param {string} mapId - Id of the map.
-   * @param {string} layerPath - Layer path to query the features.
-   * @returns {Promise<TypeFeatureInfoEntry[] | void>}
+   * Triggers a query to retrieve all features for a layer.
+   * Calls the AllFeatureInfoLayerSet to fetch complete feature data for the data table.
+   * Returns a promise that resolves with the feature array when the query completes.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The unique path identifying the layer to query
+   * @return {Promise<TypeFeatureInfoEntry[] | void>} Promise that resolves with feature data or void
+   * @static
    */
   static triggerGetAllFeatureInfo(mapId: string, layerPath: string): Promise<TypeFeatureInfoEntry[] | void> {
     return MapEventProcessor.getMapViewerLayerAPI(mapId).allFeatureInfoLayerSet.queryLayer(layerPath);
   }
 
   /**
-   * Shortcut to reset the DataTable features given map id and layer path
-   * @param {string} mapId - Id of the map.
-   * @param {string} layerPath - Layer path to reset the features.
+   * Resets and clears all feature data for a layer in the data table.
+   * Removes cached features from the AllFeatureInfoLayerSet and clears the selected layer.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The unique path identifying the layer to reset
+   * @return {void}
+   * @static
    */
   static triggerResetFeatureInfo(mapId: string, layerPath: string): void {
     // Clear
@@ -121,10 +149,13 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Propagates feature info layer sets to the store.
-   * The propagation actually happens only if it wasn't already there. Otherwise, no update is propagated.
-   * @param {string} mapId - The map identifier of the modified result set.
-   * @param {TypeAllFeatureInfoResultSetEntry} resultSetEntry - The result set associated to the map.
+   * Propagates all feature info result set to the data table store.
+   * Adds new layer feature data to the store if not already present.
+   * Called by AllFeatureInfoLayerSet when feature queries complete.
+   * @param {string} mapId - The map identifier
+   * @param {TypeAllFeatureInfoResultSetEntry} resultSetEntry - The feature result set to propagate
+   * @return {void}
+   * @static
    */
   static propagateFeatureInfoToStore(mapId: string, resultSetEntry: TypeAllFeatureInfoResultSetEntry): void {
     /**
@@ -140,9 +171,13 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Deletes the specified layer path from the all features layers sets in the store
+   * Deletes all feature data for a layer from the data table store.
+   * Removes the layer's feature array from allFeaturesDataArray.
+   * Called when a layer is removed from the map or data table.
    * @param {string} mapId - The map identifier
-   * @param {string} layerPath - The layer path to delete
+   * @param {string} layerPath - The unique path identifying the layer to delete
+   * @return {void}
+   * @static
    */
   static deleteFeatureAllInfo(mapId: string, layerPath: string): void {
     // Redirect to helper function
@@ -156,11 +191,15 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Helper function to delete a layer information from an array when found
-   * @param {T[]} layerArray - The layer array to work with
-   * @param {string} layerPath - The layer path to delete
-   * @param {(layerArray: T[]) => void} onDeleteCallback - The callback executed when the array is updated
+   * Internal helper method to remove a layer's data from an array by layer path.
+   * Searches for the layer in the array, removes it if found, and executes a callback with the updated array.
+   * Used by delete operations to maintain consistency across different feature info arrays.
+   * @param {T[]} layerArray - The array containing layer result set entries to search
+   * @param {string} layerPath - The unique path identifying the layer to remove
+   * @param {(layerArray: T[]) => void} onDeleteCallback - Callback function executed with the modified array after deletion
+   * @return {void}
    * @private
+   * @static
    */
   static #deleteFromArray<T extends TypeResultSetEntry>(
     layerArray: T[],

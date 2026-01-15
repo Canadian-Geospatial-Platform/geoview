@@ -18,9 +18,11 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
   // GV ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
 
   /**
-   * Checks if the Swiper plugin is iniitialized for the given map.
-   * @param {string} mapId - The map id
-   * @returns {boolean} True when the Swiper plugin is initialized.
+   * Checks whether the Swiper plugin is initialized and available for the specified map.
+   * Attempts to retrieve the swiper state and returns true if successful, false if uninitialized.
+   * Use this before calling other Swiper methods to avoid PluginStateUninitializedError.
+   * @param {string} mapId - The map identifier
+   * @return {boolean} True when the Swiper plugin is initialized and ready, false otherwise
    * @static
    */
   static isSwiperInitialized(mapId: string): boolean {
@@ -35,11 +37,14 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Shortcut to get the Swiper state for a given map id
-   * @param {string} mapId - The mapId
-   * @returns {ISwiperState} The Swiper state.
-   * @throws {PluginStateUninitializedError} When the Swiper plugin is uninitialized.
+   * Retrieves the swiper state slice from the store for the specified map.
+   * Provides access to layer paths being swiped and swiper orientation settings.
+   * Only available when the Swiper plugin is active for the map.
+   * @param {string} mapId - The map identifier
+   * @return {ISwiperState} The swiper state slice
+   * @throws {PluginStateUninitializedError} When the Swiper plugin is not initialized for this map
    * @static
+   * @protected
    */
   protected static getSwiperState(mapId: string): ISwiperState {
     // Get the swiper state
@@ -53,11 +58,11 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Sets the layer paths on which the swiper should be activated.
-   *
-   * @param {string} mapId - The map id.
-   * @returns {string[]} The layer paths
-   * @throws {PluginStateUninitializedError} When the Swiper plugin is uninitialized.
+   * Retrieves the array of layer paths that currently have swiper functionality active.
+   * Returns an array of layer path strings that are being affected by the swiper interaction.
+   * @param {string} mapId - The map identifier
+   * @return {string[]} Array of layer paths with active swiper functionality
+   * @throws {PluginStateUninitializedError} When the Swiper plugin is not initialized for this map
    * @static
    */
   static getLayerPaths(mapId: string): string[] {
@@ -69,11 +74,13 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Sets the layer paths on which the swiper should be activated.
-   *
-   * @param {string} mapId - The map id
-   * @param {string[]} layerPaths - The array of layer paths
-   * @throws {PluginStateUninitializedError} When the Swiper plugin is uninitialized.
+   * Sets the complete array of layer paths that should have swiper functionality active.
+   * Replaces the current swiper layer paths with the provided array.
+   * Layers in this array will be affected by the swiper interaction (before/after comparison).
+   * @param {string} mapId - The map identifier
+   * @param {string[]} layerPaths - Array of layer paths to apply swiper functionality to
+   * @return {void}
+   * @throws {PluginStateUninitializedError} When the Swiper plugin is not initialized for this map
    * @static
    */
   static setLayerPaths(mapId: string, layerPaths: string[]): void {
@@ -90,10 +97,13 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Adds a swiper functionality to the specified map id and layer path
-   * @param {string} mapId - The map ID
-   * @param {string} layerPath - The layer path
-   * @throws {PluginStateUninitializedError} When the Swiper plugin is uninitialized.
+   * Adds swiper functionality to a single layer without affecting existing swiper layers.
+   * Appends the layer path to the current swiper layer paths array if not already present.
+   * If the layer is already in the swiper, logs info and takes no action.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The unique path identifying the layer to add swiper to
+   * @return {void}
+   * @throws {PluginStateUninitializedError} When the Swiper plugin is not initialized for this map
    * @static
    */
   static addLayerPath(mapId: string, layerPath: string): void {
@@ -123,10 +133,13 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Removes a swiper functionality for the specified map id and layer path
-   * @param {string} mapId - The map ID
-   * @param {string} layerPath - The layer path
-   * @throws {PluginStateUninitializedError} When the Swiper plugin is uninitialized.
+   * Removes swiper functionality from a single layer without affecting other swiper layers.
+   * Removes the layer path from the swiper layer paths array if present.
+   * If the layer is not in the swiper, logs info and takes no action.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The unique path identifying the layer to remove swiper from
+   * @return {void}
+   * @throws {PluginStateUninitializedError} When the Swiper plugin is not initialized for this map
    * @static
    */
   static removeLayerPath(mapId: string, layerPath: string): void {
@@ -159,9 +172,11 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Removes the swiper functionality for all layer paths
-   * @param {string} mapId - The map ID
-   * @throws {PluginStateUninitializedError} When the Swiper plugin is uninitialized.
+   * Removes swiper functionality from all layers on the map.
+   * Clears the entire swiper layer paths array, disabling the swiper for all layers.
+   * @param {string} mapId - The map identifier
+   * @return {void}
+   * @throws {PluginStateUninitializedError} When the Swiper plugin is not initialized for this map
    * @static
    */
   static removeAll(mapId: string): void {
@@ -184,10 +199,12 @@ export class SwiperEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Sets the orientation of the swiper.
-   * @param {string} mapId - The map IDh
-   * @param {SwipeOrientation} orientation - The orientation to set
-   * @throws {PluginStateUninitializedError} When the Swiper plugin is uninitialized.
+   * Sets the orientation (direction) of the swiper divider line.
+   * Controls whether the swiper divides the map horizontally or vertically.
+   * @param {string} mapId - The map identifier
+   * @param {SwipeOrientation} orientation - The swiper orientation ('horizontal' or 'vertical')
+   * @return {void}
+   * @throws {PluginStateUninitializedError} When the Swiper plugin is not initialized for this map
    * @static
    */
   static setOrientation(mapId: string, orientation: SwipeOrientation): void {

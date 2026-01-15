@@ -57,8 +57,11 @@ export abstract class AbstractEventProcessor {
   }
 
   /**
-   * Initializes the processor
-   * @param {GeoviewStoreType} store the store to initialize the processor with
+   * Initializes the event processor with the provided store and sets up subscriptions.
+   * This method calls the onInitialize hook which allows derived classes to register their store subscriptions.
+   * All returned subscriptions are stored for cleanup during destruction.
+   * @param {GeoviewStoreType} store - The GeoView store instance to initialize the processor with
+   * @return {void}
    */
   initialize(store: GeoviewStoreType): void {
     // Call on initialize for the inherited classes to initialize and return their subscribtions
@@ -66,6 +69,14 @@ export abstract class AbstractEventProcessor {
     if (subs) this.#subscriptionArr.push(...subs);
   }
 
+  /**
+   * Hook called during initialization to allow derived classes to set up their store subscriptions.
+   * Override this method in derived event processors to register subscriptions to store state changes.
+   * Return an array of unsubscribe functions that will be automatically cleaned up on destroy.
+   * @param {GeoviewStoreType} store - The GeoView store instance for setting up subscriptions
+   * @return {Array<() => void> | void} Array of unsubscribe functions for cleanup, or void if no subscriptions
+   * @protected
+   */
   // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/class-methods-use-this
   protected onInitialize(store: GeoviewStoreType): Array<() => void> | void {
@@ -75,14 +86,23 @@ export abstract class AbstractEventProcessor {
   }
 
   /**
-   * Destroys the processor
-   * @param {GeoviewStoreType} store the store to initialize the processor with
+   * Destroys the event processor by cleaning up all subscriptions and calling the onDestroy hook.
+   * This method automatically unsubscribes from all store subscriptions that were registered during initialization.
+   * Derived classes can override onDestroy to perform additional cleanup operations.
+   * @return {void}
    */
   destroy(): void {
     // Call onDestroy for the inherited classes to destroy themselves. Their subscriptions returned upon initializations will already be destroyed.
     this.onDestroy();
   }
 
+  /**
+   * Hook called during destruction to allow derived classes to perform cleanup operations.
+   * Override this method in derived event processors to clean up resources, timers, or other state.
+   * The base implementation automatically unsubscribes from all store subscriptions registered during initialization.
+   * @return {void}
+   * @protected
+   */
   protected onDestroy(): void {
     // destroying all subscriptions
     this.#subscriptionArr.forEach((unsub) => unsub());

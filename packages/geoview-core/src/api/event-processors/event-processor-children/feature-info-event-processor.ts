@@ -41,9 +41,12 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   // #region OVERRIDES
 
   /**
-   * Overrides initialization of the GeoChart Event Processor
-   * @param {GeoviewStoreType} store The store associated with the GeoChart Event Processor
-   * @returns An array of the subscriptions callbacks which were created
+   * Initializes the Feature Info Event Processor and sets up store subscriptions.
+   * Subscribes to layer data array changes, click coordinates, and coordinate info enabled state.
+   * Creates coordinate info layer if enabled on initialization.
+   * @param {GeoviewStoreType} store - The store associated with the Feature Info Event Processor
+   * @return {Array<() => void> | void} Array of unsubscribe functions for cleanup
+   * @protected
    */
   protected override onInitialize(store: GeoviewStoreType): Array<() => void> | void {
     // Checks for updated layers in layer data array and update the batched array consequently
@@ -109,9 +112,12 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   // #region STATIC METHODS
 
   /**
-   * Shortcut to get the Feature Info state for a given map id
-   * @param {string} mapId - The mapId
-   * @returns {IFeatureInfoState} The Feature Info state
+   * Gets the feature info state slice from the store for the specified map.
+   * Provides access to layer data arrays, selected layer path, and query status information.
+   * @param {string} mapId - The map identifier
+   * @return {IFeatureInfoState} The feature info state slice
+   * @static
+   * @protected
    */
   protected static getFeatureInfoState(mapId: string): IFeatureInfoState {
     // Return the feature info state
@@ -119,18 +125,22 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Gets the selectedLayerPath value
+   * Gets the currently selected layer path in the feature info panel.
    * @param {string} mapId - The map identifier
-   * @returns {string} the selected layer path
+   * @return {string} The selected layer path
+   * @static
    */
   static getSelectedLayerPath(mapId: string): string {
     return this.getFeatureInfoState(mapId).selectedLayerPath;
   }
 
   /**
-   * Sets the selectedLayerPath value
+   * Sets the selected layer path in the feature info panel.
+   * Logs a warning if the specified layer path is not found in the layer data array.
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path to select
+   * @return {void}
+   * @static
    */
   static setSelectedLayerPath(mapId: string, layerPath: string): void {
     // The feature info state
@@ -145,10 +155,13 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Gets the layer data array for one layer.
-   * @param {string} mapId - The map id.
-   * @param {string} layerPath - The path of the layer to get.
-   * @returns {TypeOrderedLayerInfo | undefined} The ordered layer info.
+   * Finds layer data entry from the layer data array by its path.
+   * Optionally searches in a custom layer data array instead of the store's array.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The path of the layer to find
+   * @param {TypeFeatureInfoResultSetEntry[]} [layerDataArray] - Optional custom layer data array to search (defaults to store's array)
+   * @return {TypeFeatureInfoResultSetEntry | undefined} The layer data entry if found, undefined otherwise
+   * @static
    */
   static findLayerDataFromLayerDataArray(
     mapId: string,
@@ -159,10 +172,12 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Deletes the feature from a resultSet for a specific layerPath. At the same time it check for
-   * removing the higlight and the click marker if selected layer path is the reset path
+   * Resets the feature query result set for a specific layer path.
+   * Clears features array and removes highlights/marker if the layer is currently selected.
    * @param {string} mapId - The map identifier
-   * @param {string} layerPath - The layer path to delete features from resultSet
+   * @param {string} layerPath - The layer path to reset features for
+   * @return {void}
+   * @static
    */
   static resetResultSet(mapId: string, layerPath: string): void {
     const { resultSet } = MapEventProcessor.getMapViewerLayerAPI(mapId).featureInfoLayerSet;
@@ -179,10 +194,13 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Deletes the specified layer path from the layer sets in the store. The update of the array will also trigger an update in a batched manner.
+   * Deletes the specified layer path from the feature info layer sets in the store.
+   * Clears selected layer path and batch bypass if they match the deleted path.
+   * The array update triggers batched propagation automatically.
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path to delete
-   * @returns {void}
+   * @return {void}
+   * @static
    */
   static deleteFeatureInfo(mapId: string, layerPath: string): void {
     // The feature info state
@@ -208,11 +226,13 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Helper function to delete a layer information from an array when found
-   * @param {T[]} layerArray - The layer array to work with
+   * Helper function to remove a layer from an array by its path and execute a callback.
+   * Finds the layer by path, removes it from the array, and calls the provided callback with updated array.
+   * @param {T[]} layerArray - The layer array to search and modify
    * @param {string} layerPath - The layer path to delete
-   * @param {(layerArray: T[]) => void} onDeleteCallback - The callback executed when the array is updated
-   * @returns {void}
+   * @param {(layerArray: T[]) => void} onDeleteCallback - Callback executed with the updated array
+   * @return {void}
+   * @static
    * @private
    */
   static #deleteFromArray<T extends TypeResultSetEntry>(
@@ -234,10 +254,13 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Propagates feature info layer sets to the store. The update of the array will also trigger an update in a batched manner.
-   *
-   * @param {string} mapId - The map identifier of the modified result set.
-   * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry being propagated.
+   * Propagates feature info result to the store on map click and opens the details panel.
+   * Adds result set entry to layer data array and switches to details tab if not already on details or geochart.
+   * Also opens the details appbar tab if available.
+   * @param {string} mapId - The map identifier
+   * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate
+   * @return {void}
+   * @static
    */
   static propagateFeatureInfoClickToStore(mapId: string, resultSetEntry: TypeFeatureInfoResultSetEntry): void {
     // The feature info state
@@ -266,10 +289,12 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Propagates feature info layer sets to the store. The update of the array will also trigger an update in a batched manner.
-   *
-   * @param {string} mapId - The map identifier of the modified result set.
-   * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry being propagated.
+   * Propagates feature info result to the store without opening panels.
+   * Adds result set entry to layer data array for updates like layer name changes.
+   * @param {string} mapId - The map identifier
+   * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate
+   * @return {void}
+   * @static
    */
   static propagateFeatureInfoNameToStore(mapId: string, resultSetEntry: TypeFeatureInfoResultSetEntry): void {
     // The feature info state
@@ -284,14 +309,13 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Propagates feature info layer sets to the store in a batched manner, every 'timeDelayBetweenPropagationsForBatch' millisecond.
-   * This is used to provide another 'layerDataArray', in the store, which updates less often so that we save a couple 'layerDataArray'
-   * update triggers in the components that are listening to the store array.
-   * The propagation can be bypassed using the store 'layerDataArrayBatchLayerPathBypass' state which tells the process to
-   * immediately batch out the array in the store for faster triggering of the state, for faster updating of the UI.
-   * @param {string} mapId - The map id
-   * @param {TypeFeatureInfoResultSetEntry[]} layerDataArray - The layer data array to batch on
-   * @returns {Promise<void>} Promise upon completion
+   * Propagates layer data to the store in a batched manner with time delay between updates.
+   * Reduces UI update frequency by batching multiple rapid changes into fewer store updates.
+   * Supports bypass mechanism via layerDataArrayBatchLayerPathBypass for immediate propagation when needed.
+   * @param {string} mapId - The map identifier
+   * @param {TypeFeatureInfoResultSetEntry[]} layerDataArray - The layer data array to batch
+   * @return {Promise<void>} Promise that resolves when batch propagation completes
+   * @static
    * @private
    */
   static #propagateFeatureInfoToStoreBatch(mapId: string, layerDataArray: TypeFeatureInfoResultSetEntry[]): Promise<void> {
@@ -316,6 +340,14 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
     );
   }
 
+  /**
+   * Creates or updates the coordinate information layer in the feature info panel.
+   * Adds a special layer entry containing coordinate details for the clicked location.
+   * @param {string} mapId - The map identifier
+   * @param {TypeFeatureInfoEntry[]} features - Array of coordinate information features (defaults to empty)
+   * @return {void}
+   * @static
+   */
   static createCoordinateInfoLayer(mapId: string, features: TypeFeatureInfoEntry[] = []): void {
     const coordinateInfoLayer = {
       layerPath: 'coordinate-info',
@@ -339,10 +371,13 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Queries coordinate information from endpoints
-   * @param {string} mapId - The map ID
-   * @param {[number, number]} coordinates - The lng/lat coordinates
-   * @returns {Promise<TypeCoordinateInfo>} Promise of coordinate information
+   * Queries coordinate information from multiple web services and updates the coordinate info layer.
+   * Fetches UTM zone, NTS mapsheet, and elevation data for the clicked location.
+   * Creates a coordinate info feature with all retrieved information and adds it to the feature info panel.
+   * @param {string} mapId - The map identifier
+   * @param {TypeMapMouseInfo} coordinates - The map mouse information containing lonlat coordinates
+   * @return {void}
+   * @static
    */
   static getCoordinateInfo(mapId: string, coordinates: TypeMapMouseInfo): void {
     // If the coordinate info is not enabled, clear any existing info

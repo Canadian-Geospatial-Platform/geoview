@@ -24,20 +24,38 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   // #region
 
   /**
-   * Shortcut to get the Layer state for a given map id
-   * @param {string} mapId - The mapId
-   * @returns {ILayerState} The Layer state
+   * Gets the layer state slice from the store for the specified map.
+   * Provides access to legend layers, selection state, and layer panel configuration.
+   * @param {string} mapId - The map identifier
+   * @return {ILayerState} The layer state slice
+   * @static
+   * @protected
    */
   protected static getLayerState(mapId: string): ILayerState {
     // Return the layer state
     return super.getState(mapId).layerState;
   }
 
+  /**
+   * Sets the selected layer path in the layers tab panel.
+   * Updates which layer is currently selected in the legend/layers panel.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The layer path to select
+   * @return {void}
+   * @static
+   */
   static setSelectedLayersTabLayer(mapId: string, layerPath: string): void {
     // Save in store
     this.getLayerState(mapId).setterActions.setSelectedLayerPath(layerPath);
   }
 
+  /**
+   * Reorders legend layers based on their map rendering order.
+   * Sorts the legend layers array to match the z-index order of layers on the map.
+   * @param {string} mapId - The map identifier
+   * @return {void}
+   * @static
+   */
   static reorderLegendLayers(mapId: string): void {
     // Sort the layers
     const sortedLayers = this.getLayerState(mapId).legendLayers.sort(
@@ -51,10 +69,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Gets a specific state.
-   * @param {string} mapId - The mapId
-   * @param {'highlightedLayer' | 'selectedLayerPath' | 'displayState' | 'layerDeleteInProgress'} state - The state to get
-   * @returns {string | boolean | null | undefined} The requested state
+   * Gets a specific property from the layer panel state.
+   * Provides type-safe access to highlighted layer, selected path, display state, and deletion status.
+   * @param {string} mapId - The map identifier
+   * @param {'highlightedLayer' | 'selectedLayerPath' | 'displayState' | 'layerDeleteInProgress'} state - The state property key to retrieve
+   * @return {string | boolean | null | undefined} The requested state property value
+   * @static
    */
   static getLayerPanelState(
     mapId: string,
@@ -64,10 +84,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Gets a legend layer.
-   * @param {string} mapId - The mapId
-   * @param {string} layerPath - The path of the layer to get
-   * @returns {TypeLegendLayer | undefined} The requested legend layer
+   * Gets a legend layer entry by its path.
+   * Searches through the legend layers hierarchy to find the specified layer.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The path of the layer to retrieve
+   * @return {TypeLegendLayer | undefined} The legend layer if found, undefined otherwise
+   * @static
    */
   static getLegendLayerInfo(mapId: string, layerPath: string): TypeLegendLayer | undefined {
     const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
@@ -75,19 +97,23 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Gets the full legend layers list
-   * @param {string} mapId - The mapId
-   * @returns {TypeLegendLayer[]} The list of legend layers
+   * Gets the complete array of legend layers for the map.
+   * Returns all root-level legend layers including their hierarchical children.
+   * @param {string} mapId - The map identifier
+   * @return {TypeLegendLayer[]} The array of legend layers
+   * @static
    */
   static getLegendLayers(mapId: string): TypeLegendLayer[] {
     return LegendEventProcessor.getLayerState(mapId).legendLayers;
   }
 
   /**
-   * Gets the layer bounds for a layer path
-   * @param {string} mapId - The map id
+   * Gets the geographic bounds (extent) for a specific layer.
+   * Returns the extent as [minX, minY, maxX, maxY] in the map's projection.
+   * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path
-   * @returns {Extent | undefined} The extent of the layer at the given path
+   * @return {Extent | undefined} The extent of the layer, or undefined if not available
+   * @static
    */
   static getLayerBounds(mapId: string, layerPath: string): Extent | undefined {
     // Find the layer for the given layer path
@@ -97,17 +123,17 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Calculates the geographic bounds of a layer identified by its layer path
-   * and stores the result in the layer's state within the legend.
+   * Calculates the geographic bounds of a layer and stores the result in the legend state.
    * This method:
-   *  1. Calls the MapViewer API to compute the layer's bounds.
-   *  2. Validates that the computed bounds are finite.
-   *  3. Locates the corresponding legend layer by its path.
-   *  4. Updates the layer's `bounds` property.
-   *  5. Persists the updated legend state.
-   * @param {string} mapId - Identifier of the map instance containing the layer.
-   * @param {string} layerPath - The unique hierarchical path of the layer whose
-   *   bounds should be calculated and stored.
+   * - Computes layer bounds via MapViewer API
+   * - Validates they are finite
+   * - Locates the legend layer by path
+   * - Updates its bounds property
+   * - Persists to store
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The unique hierarchical path of the layer whose bounds should be calculated
+   * @return {void}
+   * @static
    */
   static calculateLayerBoundsAndSaveToStore(mapId: string, layerPath: string): void {
     // Calculate the bounds of the layer at the given layerPath
@@ -130,15 +156,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Retrieves the default filter configuration for a specific layer entry.
-   *
-   * @param {string} mapId - The unique identifier of the map instance.
-   * @param {string} layerPath - The path to the layer in the map configuration.
-   * @returns {string | undefined} - The default filter for the layer entry, or `undefined` if not available.
-   *
-   * @description
-   * This method fetches the layer entry configuration for the specified layer path and checks if it contains a `layerFilter` property.
-   * If the property exists, its value is returned; otherwise, `undefined` is returned.
+   * Retrieves the default filter configuration from layer entry config.
+   * Checks the layer entry configuration for a layerFilter property and returns its value.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The path to the layer
+   * @return {string | undefined} The default filter string, or undefined if not available
+   * @static
    */
   static getLayerEntryConfigDefaultFilter(mapId: string, layerPath: string): string | undefined {
     const entryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfigIfExists(layerPath);
@@ -148,16 +171,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Retrieves the projection code for a specific layer.
-   *
-   * @param {string} mapId - The unique identifier of the map instance.
-   * @param {string} layerPath - The path to the layer.
-   * @returns {string | undefined} - The projection code of the layer, or `undefined` if not available.
-   *
-   * @description
-   * This method fetches the Geoview layer for the specified layer path and checks if it has a `getMetadataProjection` method.
-   * If the method exists, it retrieves the projection object and returns its code using the `getCode` method.
-   * If the projection or its code is not available, the method returns `undefined`.
+   * Retrieves the projection code from the layer's service metadata.
+   * Fetches the GeoView layer and calls getMetadataProjection if available to obtain the projection code.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The path to the layer
+   * @return {string | undefined} The projection code (e.g., 'EPSG:3857'), or undefined if not available
+   * @static
    */
   static getLayerServiceProjection(mapId: string, layerPath: string): string | undefined {
     // TODO: Check - Do we want it to throw instead of handling when undefined? (call getGeoviewLayer instead of getGeoviewLayerIfExists)
@@ -172,10 +191,13 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Sets the layer bounds for a layer path
-   * @param {string} mapId - The map id
+   * Sets the geographic bounds for a specific layer in the legend.
+   * Updates the layer's bounds property and persists changes to the store.
+   * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path
-   * @param {Extent | undefined} bounds - The extent of the layer at the given path
+   * @param {Extent | undefined} bounds - The extent to set as [minX, minY, maxX, maxY], or undefined to clear
+   * @return {void}
+   * @static
    */
   static setLayerBounds(mapId: string, layerPath: string, bounds: Extent | undefined): void {
     // Find the layer for the given layer path
@@ -191,10 +213,13 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Sets the layer queryable.
-   * @param {string} mapId - The ID of the map.
-   * @param {string} layerPath - The layer path of the layer to change.
-   * @param {boolean} queryable - The queryable state to set.
+   * Sets whether a layer is queryable (can be clicked for feature info).
+   * Delegates to layer API which handles both layer state and store updates.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The layer path
+   * @param {boolean} queryable - True to make layer queryable, false otherwise
+   * @return {void}
+   * @static
    */
   // TODO: REFACTOR EVENT PROCESSOR - The 'EventProcessor' classes could use some rethinking, especially when they end up calling the layer api to execute something like
   // TO.DOCONT: here and in multiple other places. This TODO considers also the next function here 'setLayerQueryableInStore' which saves the state to the store.
@@ -206,13 +231,13 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Updates the "queryable" state of a layer in the store for a given map.
-   * Finds the layer by its `layerPath` in the legend layers of the specified `mapId`.
-   * If the layer exists, updates its `queryable` property and writes the updated
-   * legend layers back to the store.
-   * @param {string} mapId - The ID of the map whose layer state should be updated.
-   * @param {string} layerPath - The unique path/identifier of the layer to update.
-   * @param {boolean} queryable - The new queryable state to set for the layer.
+   * Updates the queryable state of a layer in the store without affecting the layer itself.
+   * Finds the layer by path, updates its queryable property, and persists to store.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The unique path identifier of the layer
+   * @param {boolean} queryable - The new queryable state
+   * @return {void}
+   * @static
    */
   static setLayerQueryableInStore(mapId: string, layerPath: string, queryable: boolean): void {
     // Find the layer for the given layer path
@@ -228,23 +253,26 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Sets the layer hoverable.
-   * @param {string} mapId - The ID of the map.
-   * @param {string} layerPath - The layer path of the layer to change.
-   * @param {boolean} queryable - The queryable state to set.
+   * Sets whether a layer is hoverable (responds to mouse hover for tooltips/highlights).
+   * Delegates to layer API which handles both layer state and store updates.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The layer path
+   * @param {boolean} queryable - True to make layer hoverable, false otherwise
+   * @return {void}
+   * @static
    */
   static setLayerHoverable(mapId: string, layerPath: string, queryable: boolean): void {
     MapEventProcessor.getMapViewerLayerAPI(mapId).setLayerHoverable(layerPath, queryable);
   }
 
   /**
-   * Updates the "hoverable" state of a layer in the store for a given map.
-   * Finds the layer by its `layerPath` in the legend layers of the specified `mapId`.
-   * If the layer exists, updates its `hoverable` property and writes the updated
-   * legend layers back to the store.
-   * @param {string} mapId - The ID of the map whose layer state should be updated.
-   * @param {string} layerPath - The unique path/identifier of the layer to update.
-   * @param {boolean} hoverable - The new hoverable state to set for the layer.
+   * Updates the hoverable state of a layer in the store without affecting the layer itself.
+   * Finds the layer by path, updates its hoverable property, and persists to store.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The unique path identifier of the layer
+   * @param {boolean} hoverable - The new hoverable state
+   * @return {void}
+   * @static
    */
   static setLayerHoverableInStore(mapId: string, layerPath: string, hoverable: boolean): void {
     // Find the layer for the given layer path
@@ -260,9 +288,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Sets the layersAreLoading flag in the store
-   * @param {string} mapId - The map id
-   * @param {boolean} areLoading - Indicator if any layer is currently loading
+   * Sets the global loading indicator for whether any layers are currently loading.
+   * Used to show/hide loading spinners in the layers panel.
+   * @param {string} mapId - The map identifier
+   * @param {boolean} areLoading - True if any layer is loading, false if all layers are loaded
+   * @return {void}
+   * @static
    */
   static setLayersAreLoading(mapId: string, areLoading: boolean): void {
     // Update the store
@@ -270,13 +301,15 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Gets the extent of a feature or group of features
+   * Calculates the geographic extent containing the specified features.
+   * Retrieves features by their object IDs and computes their combined bounding box.
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path
-   * @param {number[]} objectIds - The IDs of features to get extents from.
-   * @param {string} outfield - ID field to return for services that require a value in outfields.
-   * @returns {Promise<Extent>} The extent of the feature, if available
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+   * @param {number[]} objectIds - The feature IDs to calculate extent for
+   * @param {string} [outfield] - Optional ID field name for services requiring outfields parameter
+   * @return {Promise<Extent>} Promise that resolves with the extent [minX, minY, maxX, maxY]
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+   * @static
    */
   static getExtentFromFeatures(mapId: string, layerPath: string, objectIds: number[], outfield?: string): Promise<Extent> {
     // Get the layer api
@@ -293,15 +326,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Retrieves the time dimension information for a specific layer.
-   *
-   * @param {string} mapId - The unique identifier of the map instance.
-   * @param {string} layerPath - The path to the layer.
-   * @returns {TimeDimension | undefined} - The temporal dimension information of the layer, or `undefined` if not available.
-   * @description
-   * This method fetches the Geoview layer for the specified layer path (if it exists) and checks if it has a `getTimeDimension` method.
-   * If the method exists, it retrieves the temporal dimension information for the layer.
-   * If the layer doesn't support temporal dimensions, the method returns `undefined`.
+   * Retrieves the temporal dimension information for a layer if it supports time-based data.
+   * Checks if the layer has a getTimeDimension method and returns its time dimension configuration.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The path to the layer
+   * @return {TimeDimension | undefined} The temporal dimension information, or undefined if not available
+   * @static
    */
   static getLayerTimeDimension(mapId: string, layerPath: string): TimeDimension | undefined {
     // Get the layer api
@@ -315,6 +345,14 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     return undefined;
   }
 
+  /**
+   * Generates icon images from layer legend style information.
+   * Converts legend canvas elements and style configurations into icon data URLs for display in the legend panel.
+   * Handles both vector legends (with geometry-specific styles) and raster legends.
+   * @param {TypeLegend | null | undefined} layerLegend - The layer legend containing style information
+   * @return {TypeLegendLayerItem[] | undefined} Array of legend items with icon images, or undefined if no legend
+   * @static
+   */
   static getLayerIconImage(layerLegend: TypeLegend | null | undefined): TypeLegendLayerItem[] | undefined {
     // TODO: Refactor - Move this function to a utility class instead of at the 'processor' level so it's safer to call from a layer framework level class
     const iconDetails: TypeLegendLayerItem[] = [];
@@ -387,10 +425,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * This method propagates the information stored in the legend layer set to the store.
-   *
-   * @param {string} mapId - The map identifier.
-   * @param {TypeLegendResultSetEntry} legendResultSetEntry - The legend result set that triggered the propagation.
+   * Propagates legend layer set information to the store.
+   * Creates or updates legend layer entries with icons, controls, and metadata from the legend result set.
+   * @param {string} mapId - The map identifier
+   * @param {TypeLegendResultSetEntry} legendResultSetEntry - The legend result set entry to propagate
+   * @return {void}
+   * @static
    */
   static propagateLegendToStore(mapId: string, legendResultSetEntry: TypeLegendResultSetEntry): void {
     const { layerPath } = legendResultSetEntry;
