@@ -5,7 +5,12 @@
 GeoView is a lightweight React+TypeScript geospatial viewer built on OpenLayers for the Canadian Geospatial Platform. This is a **Rush monorepo** with multiple packages under `packages/`:
 
 - **geoview-core**: Main package - the webpack starter/loader that provides APIs, layers, UI, and map rendering
-- **geoview-{aoi-panel,custom-legend,drawer,geochart,swiper,time-slider}**: Plugin packages that consume geoview-core APIs
+- **geoview-aoi-panel**: Area of Interest panel plugin
+- **geoview-custom-legend**: Custom legend plugin
+- **geoview-drawer**: Drawer component plugin for side panels
+- **geoview-geochart**: Geochart visualization plugin
+- **geoview-swiper**: Layer swiper plugin for comparing layers
+- **geoview-time-slider**: Time-based layer animation plugin
 - **geoview-test-suite**: Test engine package for creating and running tests
 
 **Key Architecture**: Plugins import and use geoview-core APIs. Core is the foundation; plugins extend functionality.
@@ -51,9 +56,15 @@ Backend/Map Events → Event Processors → Zustand Store
 ### Layer Architecture
 
 - **Two Categories**: Raster (`AbstractGeoViewRaster`) and Vector (`AbstractGeoViewVector`)
-- **GV Layers**: OpenLayers wrapper layer classes (`GVEsriFeature`, `GVCSV`, etc.)
+- **GeoView Layers**: OpenLayers wrapper layer classes implementing specific data sources:
+  - **Raster**: `EsriDynamic`, `EsriImage`, `GeoTIFF`, `ImageStatic`, `VectorTiles`, `WMS`, `XYZTiles`
+  - **Vector**: `CSV`, `EsriFeature`, `GeoJSON`, `KML`, `OgcFeature`, `WFS`, `WKB`
+  - **Note**: `GeoPackage` and `shapefile` are input formats auto-converted to vector types (typically GeoJSON/WKB)
 - **Layer Sets**: Reactive collections tracking legends/queries/state (see [layerset-architecture.md](../docs/programming/layerset-architecture.md))
-  - `LegendsLayerSet`, `DetailsLayerSet` - extend `AbstractLayerSet`
+  - `LegendsLayerSet` - Tracks layer status and fetches legend/symbology data for all layers
+  - `FeatureInfoLayerSet` - Queries features at clicked map locations
+  - `AllFeatureInfoLayerSet` - Queries all features from layers (no spatial filter)
+  - `HoverFeatureInfoLayerSet` - Queries features under mouse cursor for hover tooltips
   - Event-driven sync with layer changes via result sets
 
 ## TypeScript Conventions
@@ -62,7 +73,7 @@ Backend/Map Events → Event Processors → Zustand Store
 
 - **NEVER use `any`** without disabling ESLint + comment explaining why
 - **Always define hook types**: `useState<TypeBasemapProps[]>([])` not `useState([])`
-- **Avoid name collisions**: Use `GVLayer` not `Layer` when OpenLayers has a `Layer` class
+- **Avoid name collisions**: Use descriptive prefixes when OpenLayers has conflicting class names (e.g., `GeoViewLayer` vs OL's `Layer`)
 
 ### Code Organization (per [best-practices.md](../docs/programming/best-practices.md))
 
@@ -71,11 +82,13 @@ Backend/Map Events → Event Processors → Zustand Store
 1. Imports (grouped: react → react-dom → react-i18n → MUI → OpenLayers → project deps)
 2. Props interface/type definitions
 3. Component function
-4. Translation/theme hooks
-5. Store/API access
-6. Internal state
-7. Callback functions
-8. Render logic
+4. Context (mapId)
+5. Translation/theme hooks
+6. Store/API access
+7. Internal state
+8. Callback functions
+9. Hooks section (useEffect, useCallback, useMemo)
+10. Render logic
 
 **Import grouping** (empty line between groups):
 
@@ -109,15 +122,18 @@ MapEventProcessor.clickMarkerIconHide(this.mapId);
 // ✅ In Event Processor
 static clickMarkerIconHide(mapId: string) {
   const store = getGeoViewStore(mapId);
-  store.getState().mapState.actions.hideClickMarker();
+  store.getState().mapState.setterActions.hideClickMarker();
 }
 
 // ✅ In store interface
 export interface IMapState {
   clickMarker: TypeClickMarker | undefined;
   actions: { hideClickMarker: () => void };
+  setterActions: { hideClickMarker: () => void };
 }
 ```
+
+**Store Structure**: Each state slice has `actions` (redirects to Event Processors for UI) and `setterActions` (direct state updates used by Event Processors)
 
 ## Logging & Debugging
 
@@ -176,6 +192,7 @@ Control via localStorage:
 - [adding-layer-types.md](../docs/programming/adding-layer-types.md) - Extending layer support
 - [best-practices.md](../docs/programming/best-practices.md) - Code style & patterns
 - [using-store.md](../docs/programming/using-store.md) - Zustand usage patterns
+
 ## File Structure Quick Reference
 
 ```
