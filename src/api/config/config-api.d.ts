@@ -87,13 +87,14 @@ export declare class ConfigApi {
      * @param {string} geoviewLayerName - The display name of the layer.
      * @param {TypeInitialGeoviewLayerType} layerType - The type of GeoView layer to initialize (e.g., 'esriDynamic', 'ogcWms', 'GeoJSON', etc.).
      * @param {string} layerURL - The URL endpoint associated with the layer (e.g., service URL, file path).
-     * @param {TypeDisplayLanguage} language - The language, used for the geocore layer types to know which language to use when extracting layer information.
-     * @param {string} mapId - The map id, used for the geocore layer types, to determine the layer id.
-     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+     * @param {boolean?} [isTimeAware] - Indicates whether the layer supports time-based filtering.
+     * @param {TypeDisplayLanguage} [language] - The language, used for the geocore layer types to know which language to use when extracting layer information.
+     * @param {string} [mapId] - The map id, used for the geocore layer types, to determine the layer id.
+     * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
      * @returns {Promise<TypeGeoviewLayerConfig>} A Promise of a fully initialized `TypeGeoviewLayerConfig`.
      * @throws {NotSupportedError} If the provided layer type is not recognized or supported.
      */
-    static createInitConfigFromType(layerType: TypeInitialGeoviewLayerType, geoviewLayerId: string, geoviewLayerName: string, layerURL: string, language?: TypeDisplayLanguage, mapId?: string, abortSignal?: AbortSignal | undefined): Promise<TypeGeoviewLayerConfig>;
+    static createInitConfigFromType(layerType: TypeInitialGeoviewLayerType, geoviewLayerId: string, geoviewLayerName: string, layerURL: string, isTimeAware?: boolean, language?: TypeDisplayLanguage, mapId?: string, abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig>;
     /**
      * Processes the layer to generate a list of ConfigBaseClass objects.
      * @param {TypeInitialGeoviewLayerType} layerType - The layer type
@@ -101,10 +102,11 @@ export declare class ConfigApi {
      * @param {string} geoviewLayerName - The geoview layer name
      * @param {string} layerURL - The layer url
      * @param {number[] | string[]} layerIds - The layer ids for each layer entry config.
+     * @param {boolean} isTimeAware - Indicates if the layer is time aware.
      * @returns {Promise<ConfigBaseClass[]>} A Promise of a list of ConfigBaseClass objects.
      * @throws {NotSupportedError} If the provided layer type is not recognized or supported.
      */
-    static processLayerFromType(layerType: TypeInitialGeoviewLayerType, geoviewLayerId: string, geoviewLayerName: string, layerURL: string, layerIds: number[] | string[]): Promise<ConfigBaseClass[]>;
+    static processLayerFromType(layerType: TypeInitialGeoviewLayerType, geoviewLayerId: string, geoviewLayerName: string, layerURL: string, layerIds: number[] | string[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
     /**
      * Utility function to serialize to string a TypeGeoviewLayerConfig object.
      * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The TypeGeoviewLayerConfig to serialize.

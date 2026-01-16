@@ -6,5 +6,5 @@ import type { SxStyles } from '@/ui/style/types';
  * @param {Theme} theme the theme object
  * @returns {Object} the sx classes object
  */
-export declare const getSxClasses: (theme: Theme, isMapFullScreen: boolean, appHeight: number) => SxStyles;
+export declare const getSxClasses: (theme: Theme, isMapFullScreen: boolean, appHeight: string) => SxStyles;
 //# sourceMappingURL=tabs-style.d.ts.map

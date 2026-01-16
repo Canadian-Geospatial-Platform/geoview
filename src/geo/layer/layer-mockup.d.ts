@@ -1,5 +1,5 @@
 import type { TypeLayerStyleConfig } from '@/api/types/map-schema-types';
-import type { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerEntryType, TypeVectorSourceFormats } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerEntryType } from '@/api/types/layer-schema-types';
 import type { TimeDimension } from '@/core/utils/date-mgt';
 export declare abstract class LayerMockup {
     #private;
@@ -8,7 +8,7 @@ export declare abstract class LayerMockup {
     static getFeaturesInGroupLayer(): TypeGeoviewLayerConfig;
     static configNonMetalMines(layerId: string, metadata: unknown, source: unknown, style: unknown): TypeLayerEntryConfig;
     static configTop100Metadata(): unknown;
-    static configTop100Source(format: TypeVectorSourceFormats | undefined): unknown;
+    static configTop100Source(): unknown;
     static configTop100Style(): TypeLayerStyleConfig;
     static configNonMetalMetadata(): unknown;
     static configNonMetalSource(): unknown;

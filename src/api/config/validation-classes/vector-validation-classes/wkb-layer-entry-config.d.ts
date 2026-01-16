@@ -7,12 +7,17 @@ export interface WkbLayerEntryConfigProps extends VectorLayerEntryConfigProps {
     source?: TypeSourceWkbVectorInitialConfig;
 }
 export declare class WkbLayerEntryConfig extends VectorLayerEntryConfig {
-    source: TypeSourceWkbVectorInitialConfig;
     /**
      * The class constructor.
      * @param {WkbLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
      */
     constructor(layerConfig: WkbLayerEntryConfigProps);
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {TypeSourceWkbVectorInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+     */
+    getSource(): TypeSourceWkbVectorInitialConfig;
     /**
      * Type guard that checks whether the given configuration (class instance or plain object)
      * represents a WKB Feature layer type.

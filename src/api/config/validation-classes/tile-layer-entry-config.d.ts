@@ -6,12 +6,16 @@ import type { VectorTilesLayerEntryConfigProps } from '@/api/config/validation-c
  * Type used to define a GeoView image layer to display on the map.
  */
 export declare abstract class TileLayerEntryConfig extends AbstractBaseLayerEntryConfig {
-    /** Initial settings to apply to the GeoView image layer source at creation time. */
-    source: TypeSourceTileInitialConfig;
     /**
      * The class constructor.
      * @param {VectorLayerEntryConfigProps | TileLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
      */
     protected constructor(layerConfig: VectorTilesLayerEntryConfigProps | XYZTilesLayerEntryConfigProps | TileLayerEntryConfig, schemaTag: TypeGeoviewLayerType, entryType: TypeLayerEntryType);
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {TypeSourceTileInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+     */
+    getSource(): TypeSourceTileInitialConfig;
 }
 //# sourceMappingURL=tile-layer-entry-config.d.ts.map

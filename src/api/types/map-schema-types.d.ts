@@ -49,7 +49,7 @@ export type TypeDisplayTheme = 'dark' | 'light' | 'geo.ca';
 /** Array of valid geoview themes. */
 export declare const VALID_DISPLAY_THEME: TypeDisplayTheme[];
 /** Valid values for the navBar array. */
-export type TypeValidNavBarProps = 'zoom' | 'rotation' | 'fullscreen' | 'home' | 'location' | 'basemap-select' | 'projection' | 'drawer';
+export type TypeValidNavBarProps = 'zoom' | 'rotation' | 'fullscreen' | 'home' | 'location' | 'basemap-select' | 'measurement' | 'projection' | 'drawer';
 /** Supported footer bar tabs */
 export type TypeValidFooterBarTabsCoreProps = 'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart' | 'guide';
 /** Default tabs order */
@@ -73,7 +73,7 @@ export type TypeFooterBarProps = {
     selectedTimeSliderLayerPath: string;
 };
 /** Supported app bar values. */
-export type TypeValidAppBarCoreProps = 'geolocator' | 'export' | 'aoi-panel' | 'custom-legend' | 'geochart' | 'guide' | 'legend' | 'details' | 'data-table' | 'layers';
+export type TypeValidAppBarCoreProps = 'geolocator' | 'export' | 'aoi-panel' | 'custom-legend' | 'guide' | 'legend' | 'details' | 'data-table' | 'layers';
 /** Configuration available on the application bar. Default = ['geolocator']. The about GeoView and notification are always there. */
 export type TypeAppBarProps = {
     tabs: {
@@ -392,6 +392,7 @@ export type TypeLayerStyleSettings = {
     fields: string[];
     hasDefault: boolean;
     info: TypeLayerStyleConfigInfo[];
+    visualVariables?: TypeLayerStyleVisualVariable[];
 };
 /** Information needed to render the feature. */
 export type TypeLayerStyleConfigInfo = {
@@ -410,6 +411,31 @@ export type TypeLayerStyleConfigInfo = {
     valuesConditions?: TypeLayerStyleValueCondition[];
     /** The geometry settings. */
     settings: TypeBaseVectorGeometryConfig;
+};
+/**
+ * Indiviual feature style modifications sometimes specified in ESRI Renderer
+ * https://developers.arcgis.com/documentation/mapping-and-location-services/data-visualization/data-driven-styles/visual-variables/
+ * Rest specific documentation
+ * https://developers.arcgis.com/web-map-specification/objects/colorInfo_visualVariable/
+ */
+export type TypeLayerStyleVisualVariable = {
+    type: 'colorInfo' | 'sizeInfo' | 'rotationInfo' | 'opacityInfo';
+    field: string;
+    normalizationField?: string;
+    stops?: TypeEsriStyleStops[];
+    minDataValue?: number;
+    maxDataValue?: number;
+    minSize?: number;
+    maxSize?: number;
+    rotationType?: 'geographic' | 'arithmetic';
+    valueExpression?: string;
+};
+/** Stops for Visual Variable modifications */
+export type TypeEsriStyleStops = {
+    value: string | number;
+    color?: string;
+    size?: number;
+    opacity?: number;
 };
 /**
  * The style config for vector layers. Options are the same as
@@ -572,14 +598,6 @@ export interface TypePolygonVectorConfig extends TypeBaseVectorGeometryConfig {
     patternSize?: number;
     /** Pattern line width.default = 1. */
     patternWidth?: number;
-    /** Pattern line width.default = 1.
-     * @deprecated Remove it after the release, once files like metadata.data are fixed in the hosted website.
-     */
-    paternSize?: number;
-    /** Pattern line width.default = 1.
-     * @deprecated Remove it after the release, once files like metadata.data are fixed in the hosted website.
-     */
-    paternWidth?: number;
     /** Kind of filling  for vector features. Default = solid.  */
     fillStyle: TypeFillStyle;
     /** The additional graphic fills symbology for special fills */
@@ -667,9 +685,8 @@ export type TypeFeatureInfoEntry = {
  */
 export type TypeFeatureInfoEntryPartial = Pick<TypeFeatureInfoEntry, 'fieldInfo' | 'geometry'>;
 export type TypeLayerData = {
-    eventListenerEnabled: boolean;
     queryStatus: TypeQueryStatus;
-    features: TypeFeatureInfoEntry[] | undefined | null;
+    features?: TypeFeatureInfoEntry[];
     isDisabled?: boolean;
 };
 export interface TypeUtmZoneFeature {

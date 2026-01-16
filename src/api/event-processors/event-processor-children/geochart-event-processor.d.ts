@@ -7,6 +7,7 @@ import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-pr
  */
 export declare class GeochartEventProcessor extends AbstractEventProcessor {
     #private;
+    static TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH: number;
     /**
      * Overrides initialization of the GeoChart Event Processor
      * @param {GeoviewStoreType} store The store associated with the GeoChart Event Processor

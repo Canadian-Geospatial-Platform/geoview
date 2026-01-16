@@ -140,23 +140,43 @@ export declare abstract class DateMgt {
      */
     static createDateLocaleTooltip(date: string, locale: TypeDisplayLanguage): string;
     /**
-     * Get the date fragments order. Normaly, the order is year followed by month followed by day.
-     * @param dateFormat {string} The date format to be analyzed.
-     * @returns {TypeDateFragments} array of index indicating the field position in the format. index 0 is for
-     * year, 1 for month, 2 for day and 4 for time. A value of -1 indicates theat the fragment is missing.
+     * Returns the input/output fragment order and separators for a given date format.
+     * Supports formats like "YYYY-MM-DD", "YYYY-MM-DDTHH:MM:SS", or "YYYY-MM-DDZ".
+     *
+     * @param {string} [dateFormat] - Optional date format string to analyze.
+     * @returns {TypeDateFragments} The input/output fragment positions and separators.
+     *
+     * @throws {Error} When the provided date format is invalid.
      */
     static getDateFragmentsOrder(dateFormat?: string): TypeDateFragments;
     /**
-     * Reorder the date to the ISO UTC format using the input section (index = 0) of the date fragments order provided.
-     * This routine is used to convert the dates returned by the server to the internal ISO UTC format. It is also used
-     * to convert the date constants (date '...') found in the layer filter string using a reverse time zone to return
-     * the date to the same time zone the server use since the filter string will be sent to the server to perform the
-     * query.
-     *
-     * @param date {string} The date to format.
-     * @param dateFragmentsOrder {TypeDateFragments} The date fragments order (obtained with getDateFragmentsOrder).
-     * @param reverseTimeZone {boolean} Flag indicating that we must change the time zone sign before the conversion.
-     * @returns {string} The reformatted date string.
+     * Converts and normalizes a date string into a standard ISO8601 UTC-based format.
+     * This function supports a variety of input formats:
+     * - Partial dates: "YYYY", "YYYY-MM", "YYYY-MM-DD"
+     * - Dates with or without time: "YYYY-MM-DD", "YYYY-MM-DDTHH:mm", etc.
+     * - UTC "Z" suffix: "1988-09-13Z"
+     * - Flexible separators: "/" → "-", space → "T"
+     * It applies defaults for missing components:
+     * - Missing month/day defaults to "01"
+     * - Missing time defaults to "00:00:00"
+     * - Missing timezone defaults to the configured separator and offset (typically "+00:00")
+     * Optional features:
+     * - reverseTimeZone: flips the sign of the timezone offset if provided
+     * @param {string} date - The input date string to normalize.
+     * @param {TypeDateFragments} [dateFragmentsOrder=ISO_UTC_DATE_FRAGMENTS_ORDER] - Configuration array
+     *   defining the index order of year, month, day, and separator characters.
+     * @param {boolean} [reverseTimeZone=false] - If true, reverses the sign of the timezone offset.
+     * @returns {string} The normalized ISO8601 date string, e.g., "1988-09-13T00:00:00Z".
+     * @throws {Error} Throws an error if the input cannot be parsed or normalized into a valid ISO date.
+     * @example
+     * applyInputDateFormat("1988-09-13Z");
+     * // returns "1988-09-13T00:00:00Z"
+     * @example
+     * applyInputDateFormat("1988-9-3 14:5");
+     * // returns "1988-09-03T14:05:00+00:00" (assuming default separators)
+     * @example
+     * applyInputDateFormat("1988-09", ISO_UTC_DATE_FRAGMENTS_ORDER, true);
+     * // returns "1988-09-01T00:00:00+00:00" (timezone reversed if needed)
      */
     static applyInputDateFormat(date: string, dateFragmentsOrder?: TypeDateFragments, reverseTimeZone?: boolean): string;
     /**

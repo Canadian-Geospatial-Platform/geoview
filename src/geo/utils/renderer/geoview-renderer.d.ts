@@ -3,11 +3,21 @@ import type { Geometry } from 'ol/geom';
 import type { Options as StrokeOptions } from 'ol/style/Stroke';
 import type { FeatureLike } from 'ol/Feature';
 import type Feature from 'ol/Feature';
-import type { TypeLayerStyleConfigType, TypePolygonVectorConfig, TypeIconSymbolVectorConfig, TypeLineStyle, TypeLineStringVectorConfig, TypeSimpleSymbolVectorConfig, TypeKindOfVectorSettings, TypeStyleGeometry, TypeLayerStyleSettings, TypeLayerStyleConfig, TypeLayerStyleConfigInfo, TypeLayerStyleValueCondition, TypeLayerTextConfig, TypeAliasLookup, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
+import type { TypeLayerStyleConfigType, TypePolygonVectorConfig, TypeIconSymbolVectorConfig, TypeLineStyle, TypeLineStringVectorConfig, TypeSimpleSymbolVectorConfig, TypeKindOfVectorSettings, TypeStyleGeometry, TypeLayerStyleSettings, TypeLayerStyleConfig, TypeLayerStyleConfigInfo, TypeLayerStyleValueCondition, TypeLayerTextConfig, TypeLayerStyleVisualVariable, TypeAliasLookup, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
 import type { TypeLayerMetadataFields } from '@/api/types/layer-schema-types';
 import type { FillPatternLine, FillPatternSettings, FilterNodeType } from './geoview-renderer-types';
 import type { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-type TypeStyleProcessor = (styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, filterEquation?: FilterNodeType[], legendFilterIsOff?: boolean, domainsLookup?: TypeLayerMetadataFields[], aliasLookup?: TypeAliasLookup) => Style | undefined;
+type TypeStyleProcessor = (styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions) => Style | undefined;
+/**
+ * Options object for processing styles with optional parameters
+ */
+type TypeStyleProcessorOptions = {
+    filterEquation?: FilterNodeType[];
+    legendFilterIsOff?: boolean;
+    domainsLookup?: TypeLayerMetadataFields[];
+    aliasLookup?: TypeAliasLookup;
+    visualVariables?: TypeLayerStyleVisualVariable[];
+};
 export declare abstract class GeoviewRenderer {
     #private;
     /**
@@ -17,6 +27,7 @@ export declare abstract class GeoviewRenderer {
      * @param {boolean} increment - True, if we want to skip to next color
      *
      * @returns {string} The current default color string.
+     * @static
      */
     static getDefaultColor(alpha: number, increment?: boolean): string;
     /**
@@ -26,6 +37,7 @@ export declare abstract class GeoviewRenderer {
      * @param {FeatureLike} feature - The feature to check
      *
      * @returns {TypeStyleGeometry} The type of geometry (Point, LineString, Polygon).
+     * @static
      */
     static getGeometryType(feature: FeatureLike): TypeStyleGeometry;
     /**
@@ -43,6 +55,7 @@ export declare abstract class GeoviewRenderer {
      * @param {string} base64 - The base64-encoded SVG string, optionally including
      *   query parameters (e.g. `"base64:...?...fill=%23ff0000&outline=%23000000"`).
      * @returns {string} The decoded, cleaned, and parameter-substituted SVG XML string.
+     * @static
      */
     static base64ToSVGString(base64: string): string;
     /**
@@ -51,6 +64,7 @@ export declare abstract class GeoviewRenderer {
      * embed or transmit SVG data in formats where raw XML is not permitted.
      * @param {string} svgXML - The raw SVG XML string to encode.
      * @returns {string} A base64-encoded representation of the SVG string.
+     * @static
      */
     static SVGStringToBase64(svgXML: string): string;
     /**
@@ -59,6 +73,7 @@ export declare abstract class GeoviewRenderer {
      * @param {string} src - Source information (base64 image) of the image to load.
      *
      * @returns {Promise<HTMLImageElement>} A promise that the image is loaded.
+     * @static
      */
     static loadImage(src: string): Promise<HTMLImageElement | null>;
     /**
@@ -67,6 +82,7 @@ export declare abstract class GeoviewRenderer {
      * @param {Style} pointStyle - Style associated to the point symbol.
      *
      * @returns {Promise<HTMLCanvasElement>} A promise that the canvas is created.
+     * @static
      */
     static createIconCanvas(pointStyle?: Style): Promise<HTMLCanvasElement | null>;
     /**
@@ -75,6 +91,7 @@ export declare abstract class GeoviewRenderer {
      * @param {Style} pointStyle - Style associated to the point symbol.
      *
      * @returns {Promise<HTMLCanvasElement>} A promise that the canvas is created.
+     * @static
      */
     static createPointCanvas(pointStyle?: Style): HTMLCanvasElement;
     /**
@@ -83,6 +100,7 @@ export declare abstract class GeoviewRenderer {
      * @param {Style} lineStringStyle - Style associated to the lineString.
      *
      * @returns {Promise<HTMLCanvasElement>} A promise that the canvas is created.
+     * @static
      */
     static createLineStringCanvas(lineStringStyle?: Style): HTMLCanvasElement;
     /**
@@ -91,6 +109,7 @@ export declare abstract class GeoviewRenderer {
      * @param {Style} polygonStyle - Style associated to the polygon.
      *
      * @returns {Promise<HTMLCanvasElement>} A promise that the canvas is created.
+     * @static
      */
     static createPolygonCanvas(polygonStyle?: Style): HTMLCanvasElement;
     /**
@@ -100,6 +119,7 @@ export declare abstract class GeoviewRenderer {
      * for the stroke options creation.
      *
      * @returns {StrokeOptions} The stroke options created.
+     * @static
      */
     static createStrokeOptions(settings: TypeSimpleSymbolVectorConfig | TypeLineStringVectorConfig | TypePolygonVectorConfig): StrokeOptions;
     /**
@@ -108,6 +128,7 @@ export declare abstract class GeoviewRenderer {
      *
      * @param {FilterNodeType} operator - Operator to execute.
      * @param {FilterNodeType[]} dataStack - Data stack to use for the operator execution.
+     * @static
      */
     static executeOperator(operator: FilterNodeType, dataStack: FilterNodeType[]): void;
     /**
@@ -117,6 +138,7 @@ export declare abstract class GeoviewRenderer {
      * @param {FilterNodeType[]} filterEquation - Filter used to find the visibility value to return.
      *
      * @returns {boolean | undefined} The visibility flag for the feature specified.
+     * @static
      */
     static featureIsNotVisible(feature: Feature, filterEquation: FilterNodeType[]): boolean | undefined;
     /**
@@ -125,6 +147,7 @@ export declare abstract class GeoviewRenderer {
      * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
      *
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
     static processCircleSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined;
     /**
@@ -135,6 +158,7 @@ export declare abstract class GeoviewRenderer {
      * @param {number} angle - Angle to use for the symbol creation.
      *
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
     static processStarShapeSymbol(settings: TypeSimpleSymbolVectorConfig, points: number, angle: number): Style | undefined;
     /**
@@ -143,6 +167,7 @@ export declare abstract class GeoviewRenderer {
      * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
      *
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
     static processStarSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined;
     /**
@@ -151,6 +176,7 @@ export declare abstract class GeoviewRenderer {
      * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
      *
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
     static processXSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined;
     /**
@@ -159,6 +185,7 @@ export declare abstract class GeoviewRenderer {
      * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
      *
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
     static processPlusSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined;
     /**
@@ -170,6 +197,7 @@ export declare abstract class GeoviewRenderer {
      * @param {[number, number]} scale - Scale to use for the symbol creation.
      *
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
     static processRegularShape(settings: TypeSimpleSymbolVectorConfig, points: number, angle: number, scale: [number, number]): Style | undefined;
     /**
@@ -178,6 +206,7 @@ export declare abstract class GeoviewRenderer {
      * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
      *
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
     static processSquareSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined;
     /**
@@ -186,6 +215,7 @@ export declare abstract class GeoviewRenderer {
      * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
      *
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
     static processDiamondSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined;
     /**
@@ -194,6 +224,7 @@ export declare abstract class GeoviewRenderer {
      * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
      *
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
     static processTriangleSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined;
     /**
@@ -202,6 +233,7 @@ export declare abstract class GeoviewRenderer {
      * @param {TypeIconSymbolVectorConfig} settings - Settings to use for the Style creation.
      *
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
     static processIconSymbol(settings: TypeIconSymbolVectorConfig): Style | undefined;
     /**
@@ -209,27 +241,30 @@ export declare abstract class GeoviewRenderer {
      *
      * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Settings to use for the Style creation.
      * @param {Feature} feature - Optional feature. This method does not use it, it is there to have a homogeneous signature.
-     * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
+     * @param {TypeStyleProcessorOptions} options - Optional processing options.
      *
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
-    static processSimplePoint(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, filterEquation?: FilterNodeType[]): Style | undefined;
+    static processSimplePoint(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions): Style | undefined;
     /**
      * Process a simple lineString using the settings.
      *
      * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Settings to use for the Style creation.
      * @param {Feature} feature - Optional feature. This method does not use it, it is there to have a homogeneous signature.
-     * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
+     * @param {TypeStyleProcessorOptions} options - Optional processing options.
      *
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
-    static processSimpleLineString(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, filterEquation?: FilterNodeType[]): Style | undefined;
+    static processSimpleLineString(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions): Style | undefined;
     /**
      * Process a simple solid fill (polygon) using the settings.
      *
      * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
      *
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
     static processSolidFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined;
     /**
@@ -238,6 +273,7 @@ export declare abstract class GeoviewRenderer {
      * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
      *
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
     static processNullFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined;
     /**
@@ -247,6 +283,7 @@ export declare abstract class GeoviewRenderer {
      * @param {FillPatternLine[]} FillPatternLines - Fill pattern lines needed to create the fill.
      *
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
     static processPatternFill(settings: TypePolygonVectorConfig, FillPatternLines: FillPatternLine[], geometry?: Geometry): Style | undefined;
     /**
@@ -255,6 +292,7 @@ export declare abstract class GeoviewRenderer {
      * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
      *
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
     static processBackwardDiagonalFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined;
     /**
@@ -263,6 +301,7 @@ export declare abstract class GeoviewRenderer {
      * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
      *
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
     static processForwardDiagonalFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined;
     /**
@@ -271,6 +310,7 @@ export declare abstract class GeoviewRenderer {
      * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
      *
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
     static processCrossFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined;
     /**
@@ -279,6 +319,7 @@ export declare abstract class GeoviewRenderer {
      * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
      *
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
     static processDiagonalCrossFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined;
     /**
@@ -287,6 +328,7 @@ export declare abstract class GeoviewRenderer {
      * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
      *
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
     static processHorizontalFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined;
     /**
@@ -295,6 +337,7 @@ export declare abstract class GeoviewRenderer {
      * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
      *
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
     static processVerticalFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined;
     /**
@@ -303,6 +346,7 @@ export declare abstract class GeoviewRenderer {
      * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
      *
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
     static processDotFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined;
     /**
@@ -310,38 +354,28 @@ export declare abstract class GeoviewRenderer {
      *
      * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Settings to use for the Style creation.
      * @param {Feature} feature - Optional feature. This method does not use it, it is there to have a homogeneous signature.
-     * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
+     * @param {TypeStyleProcessorOptions} options - Optional processing options
      *
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
-    static processSimplePolygon(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, filterEquation?: FilterNodeType[]): Style | undefined;
+    static processSimplePolygon(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions): Style | undefined;
     /**
      * This method is used to process the array of point styles as described in the pointStyleConfig.
      *
      * @param {TypeVectorLayerStyles} layerStyle - Object that will receive the created canvas.
      * @param {TypeLayerStyleConfigInfo[]} arrayOfPointStyleConfig - Array of point style configuration.
      * @returns {Promise<TypeVectorLayerStyles>} A promise that the vector layer style is created.
+     * @static
      */
     static processArrayOfPointStyleConfig(layerStyles: TypeVectorLayerStyles, arrayOfPointStyleConfig: TypeLayerStyleConfigInfo[]): Promise<TypeVectorLayerStyles>;
-    /**
-     * This method is a private sub routine used by the getLegendStyles method to gets the style of the layer as specified by the
-     * style configuration.
-     *
-     * @param {TypeKindOfVectorSettings | undefined} defaultSettings - Settings associated to simple styles or default style of
-     * unique value and class break styles. When this parameter is undefined, no defaultCanvas is created.
-     * @param {TypeLayerStyleConfigInfo[] | undefined} arrayOfPointStyleConfig - Array of point style
-     * configuration associated to unique value and class break styles. When this parameter is undefined, no arrayOfCanvas is
-     * created.
-     *
-     * @returns {Promise<TypeVectorLayerStyles>} A promise that the layer styles are processed.
-     */
-    static getPointStyleSubRoutine(defaultSettings?: TypeKindOfVectorSettings, arrayOfPointStyleConfig?: TypeLayerStyleConfigInfo[]): Promise<TypeVectorLayerStyles>;
     /**
      * This method gets the legend styles used by the the layer as specified by the style configuration.
      *
      * @param {TypeStyleConfig} styleConfig - The style configuration.
      *
      * @returns {Promise<TypeVectorLayerStyles>} A promise that the layer styles are processed.
+     * @static
      */
     static getLegendStyles(styleConfig: TypeLayerStyleConfig | undefined): Promise<TypeVectorLayerStyles>;
     /**
@@ -351,8 +385,43 @@ export declare abstract class GeoviewRenderer {
      * @param {string} label - Label for the style.
      *
      * @returns {TypeLayerStyleConfigInfo | undefined} The Style configuration created. Undefined if unable to create it.
+     * @static
      */
     static createDefaultStyle(geometryType: TypeStyleGeometry, label: string): TypeLayerStyleSettings | undefined;
+    /**
+     * Interpolate a value between two stops linearly.
+     *
+     * @param {number} value - The data value to interpolate for.
+     * @param {number} value1 - The lower data value.
+     * @param {number} value2 - The upper data value.
+     * @param {number} output1 - The output at the lower value.
+     * @param {number} output2 - The output at the upper value.
+     * @returns {number} The interpolated output value.
+     * @static
+     */
+    static interpolateValue(value: number, value1: number, value2: number, output1: number, output2: number): number;
+    /**
+     * Interpolate a color between two hex colors.
+     *
+     * @param {number} value - The data value to interpolate for.
+     * @param {number} value1 - The lower data value.
+     * @param {number} value2 - The upper data value.
+     * @param {string | number[]} color1 - The hex color at the lower value.
+     * @param {string | number[]} color2 - The hex color at the upper value.
+     * @returns {string} The interpolated color in rgba format.stat
+     * @static
+     */
+    static interpolateColor(value: number, value1: number, value2: number, color1: string | number[], color2: string | number[]): string;
+    /**
+     * Evaluate a simple value expression using feature data.
+     * Supports basic arithmetic operations and field references.
+     *
+     * @param {string} expression - Expression string (e.g., "$feature[\"FIELD_NAME\"] + 90")
+     * @param {Feature} feature - Feature containing field data
+     * @returns {number | null} The evaluated result or null if evaluation fails
+     * @static
+     */
+    static evaluateValueExpression(expression: string, feature: Feature): number | null;
     /**
      * Search the unique value entry using the field values stored in the feature.
      *
@@ -362,6 +431,7 @@ export declare abstract class GeoviewRenderer {
      * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
      * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
      * @returns {TypeLayerStyleConfigInfo | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
     static searchUniqueValueEntry(fields: string[], uniqueValueStyleInfo: TypeLayerStyleConfigInfo[], feature?: Feature, domainsLookup?: TypeLayerMetadataFields[], aliasLookup?: TypeAliasLookup): TypeLayerStyleConfigInfo | undefined;
     /**
@@ -369,37 +439,31 @@ export declare abstract class GeoviewRenderer {
      *
      * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
      * @param {Feature?} feature - Feature used to test the unique value conditions.
-     * @param {FilterNodeType[]?} filterEquation - Filter equation associated to the layer.
-     * @param {boolean?} legendFilterIsOff - When true, do not apply legend filter.
-     * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
-     * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
+     * @param {TypeStyleProcessorOptions?} options - Optional processing options.
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
-    static processUniqueValuePoint(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, filterEquation?: FilterNodeType[], legendFilterIsOff?: boolean, domainsLookup?: TypeLayerMetadataFields[], aliasLookup?: TypeAliasLookup): Style | undefined;
+    static processUniqueValuePoint(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions): Style | undefined;
     /**
      * Process the unique value settings using a lineString feature to get its Style.
      *
      * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
      * @param {Feature?} feature - Feature used to test the unique value conditions.
-     * @param {FilterNodeType[]?} filterEquation - Filter equation associated to the layer.
-     * @param {boolean?} legendFilterIsOff - When true, do not apply legend filter.
-     * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
-     * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
+     * @param {TypeStyleProcessorOptions?} options - Optional processing options.
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
-    static processUniqueLineString(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, filterEquation?: FilterNodeType[], legendFilterIsOff?: boolean, domainsLookup?: TypeLayerMetadataFields[], aliasLookup?: TypeAliasLookup): Style | undefined;
+    static processUniqueLineString(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions): Style | undefined;
     /**
      * Process the unique value settings using a polygon feature to get its Style.
      *
      * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
      * @param {Feature?} feature - Feature used to test the unique value conditions.
-     * @param {FilterNodeType[]?} filterEquation - Filter equation associated to the layer.
-     * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
-     * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
-     * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
+     * @param {TypeStyleProcessorOptions?} options - Optional processing options.
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
-    static processUniquePolygon(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, filterEquation?: FilterNodeType[], legendFilterIsOff?: boolean, domainsLookup?: TypeLayerMetadataFields[], aliasLookup?: TypeAliasLookup): Style | undefined;
+    static processUniquePolygon(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions): Style | undefined;
     /**
      * Search the class breakentry using the field value stored in the feature.
      *
@@ -408,6 +472,7 @@ export declare abstract class GeoviewRenderer {
      * @param {Feature} feature - Feature used to test the class break conditions.
      * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
      * @returns {number | undefined} The index of the entry. Undefined if unable to find it.
+     * @static
      */
     static searchClassBreakEntry(field: string, classBreakStyleInfo: TypeLayerStyleConfigInfo[], feature: Feature, aliasLookup?: TypeAliasLookup): TypeLayerStyleConfigInfo | undefined;
     /**
@@ -424,6 +489,7 @@ export declare abstract class GeoviewRenderer {
      * @param {TypeLayerStyleValueCondition[]} conditions - Two-element array describing the boundary operators.
      * @returns {boolean} True if the value satisfies the interval according to the conditions, false otherwise.
      * @throws {NotSupportedError} If `conditions` contains an unsupported combination of operators.
+     * @static
      */
     static searchClassBreakEntryCheck(value: number, min: number, max: number, conditions: TypeLayerStyleValueCondition[]): boolean;
     /**
@@ -431,37 +497,31 @@ export declare abstract class GeoviewRenderer {
      *
      * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
      * @param {Feature} feature - Feature used to test the unique value conditions.
-     * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
-     * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
-     * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
-     * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
+     * @param {TypeStyleProcessorOptions?} options - Optional processing options.
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
-    static processClassBreaksPoint(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, filterEquation?: FilterNodeType[], legendFilterIsOff?: boolean, domainsLookup?: TypeLayerMetadataFields[], aliasLookup?: TypeAliasLookup): Style | undefined;
+    static processClassBreaksPoint(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions): Style | undefined;
     /**
      * Process the class break settings using a lineString feature to get its Style.
      *
      * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
      * @param {Feature} feature - Feature used to test the unique value conditions.
-     * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
-     * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
-     * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
-     * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
+     * @param {TypeStyleProcessorOptions?} options - Optional processing options.
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
-    static processClassBreaksLineString(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, filterEquation?: FilterNodeType[], legendFilterIsOff?: boolean, domainsLookup?: TypeLayerMetadataFields[], aliasLookup?: TypeAliasLookup): Style | undefined;
+    static processClassBreaksLineString(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions): Style | undefined;
     /**
      * Process the class break settings using a Polygon feature to get its Style.
      *
      * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
      * @param {Feature} feature - Feature used to test the unique value conditions.
-     * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
-     * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
-     * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
-     * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
+     * @param {TypeStyleProcessorOptions?} options - Optional processing options.
      * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+     * @static
      */
-    static processClassBreaksPolygon(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, filterEquation?: FilterNodeType[], legendFilterIsOff?: boolean, domainsLookup?: TypeLayerMetadataFields[], aliasLookup?: TypeAliasLookup): Style | undefined;
+    static processClassBreaksPolygon(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions): Style | undefined;
     /**
      * This method gets the style of the feature using the layer entry config. If the style does not exist for the geometryType,
      * create it using the default style strategy.
@@ -475,6 +535,7 @@ export declare abstract class GeoviewRenderer {
      * @param {TypeLayerTextConfig?} layerText - An optional text configuration to apply to the feature
      * @param {() => Promise<string | null>} callbackWhenCreatingStyle - An optional callback to execute when a new style had to be created
      * @returns {Style | undefined} The style applied to the feature or undefined if not found.
+     * @static
      */
     static getAndCreateFeatureStyle(feature: FeatureLike, resolution: number, style: TypeLayerStyleConfig, label: string, filterEquation?: FilterNodeType[], legendFilterIsOff?: boolean, aliasLookup?: TypeAliasLookup, layerText?: TypeLayerTextConfig, callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeLayerStyleConfigInfo) => void): Style | undefined;
     /**
@@ -486,6 +547,7 @@ export declare abstract class GeoviewRenderer {
      * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
      * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
      * @returns {string} The icon associated to the feature or a default empty one.
+     * @static
      */
     static getFeatureImageSource(feature: Feature, style: TypeLayerStyleConfig, filterEquation?: FilterNodeType[], legendFilterIsOff?: boolean, domainsLookup?: TypeLayerMetadataFields[], aliasLookup?: TypeAliasLookup): string | undefined;
     /**
@@ -496,6 +558,7 @@ export declare abstract class GeoviewRenderer {
      * @param {FilterNodeType[]} keywordArray - Array of keywords to process.
      *
      * @returns {FilterNodeType[]} The new keywords array with all nodes classified.
+     * @static
      */
     static classifyUnprocessedNodes(keywordArray: FilterNodeType[]): FilterNodeType[];
     /**
@@ -507,6 +570,7 @@ export declare abstract class GeoviewRenderer {
      * @param {RegExp} regExp - An optional regular expression to use for the extraction.
      *
      * @returns {FilterNodeType[]} The new keywords array.
+     * @static
      */
     static extractKeyword(filterNodeArray: FilterNodeType[], keyword: string, regExp?: RegExp): FilterNodeType[];
     /**
@@ -517,6 +581,7 @@ export declare abstract class GeoviewRenderer {
      * @param {FilterNodeType[]} keywordArray - Array of keywords to process.
      *
      * @returns {FilterNodeType[]} The new keywords array with all string nodes classified.
+     * @static
      */
     static extractStrings(keywordArray: FilterNodeType[]): FilterNodeType[];
     /**
@@ -526,6 +591,7 @@ export declare abstract class GeoviewRenderer {
      * @param {FilterNodeType[]} filterNodeArrayType - Node array to analyse.
      *
      * @returns {FilterNodeType[]} The new node array with all nodes classified.
+     * @static
      */
     static analyzeLayerFilter(filterNodeArrayType: FilterNodeType[]): FilterNodeType[];
     /** Table used to define line symbology to use when drawing lineString and polygon perimeters */
@@ -542,6 +608,7 @@ export declare abstract class GeoviewRenderer {
      * @param {TypeLayerTextConfig} layerText - The layer text configuration
      * @param {TypeAliasLookup} aliasLookup - The alias lookup
      * @returns {Text | undefined} The text style
+     * @static
      */
     static getTextStyle: (feature: FeatureLike, resolution: number, styleSettings: TypeLayerStyleSettings, layerText?: TypeLayerTextConfig, aliasLookup?: TypeAliasLookup) => Text | undefined;
     /**
@@ -549,6 +616,7 @@ export declare abstract class GeoviewRenderer {
      * @param {FeatureLike} feature - The feature to create the text style for
      * @param {TypeLayerTextConfig} textSettings - The text style settings
      * @returns {Text | undefined} The text style
+     * @static
      */
     static createTextStyle: (feature: FeatureLike, textSettings: TypeLayerTextConfig) => Text | undefined;
     /**
@@ -556,6 +624,7 @@ export declare abstract class GeoviewRenderer {
      * @param {number} zoom - The zoom level (0-20)
      * @param {TypeValidMapProjectionCodes} projection - The map projection (3857 for Web Mercator, 3978 for Canada Lambert)
      * @returns {number} Approximate resolution for the given zoom and projection
+     * @static
      */
     static getApproximateResolution(zoom: number, projection?: TypeValidMapProjectionCodes): number;
     /**
@@ -564,6 +633,7 @@ export declare abstract class GeoviewRenderer {
      * @param {number} width - The maximum width per line
      * @param {number} maxLines - Maximum number of lines (optional, overrides width if needed)
      * @returns {string} The wrapped text
+     * @static
      */
     static wrapText(str: string, width: number, maxLines?: number): string;
     /**
@@ -571,6 +641,7 @@ export declare abstract class GeoviewRenderer {
      * @param {string} str - The text to wrap
      * @param {number} width - The maximum width of each line
      * @returns {string} The wrapped text
+     * @static
      */
     static wrapTextByWidth(str: string, width: number): string;
     /**
@@ -579,6 +650,7 @@ export declare abstract class GeoviewRenderer {
      * @param {string} template - The text template with {field-name} placeholders
      * @param {FeatureLike} feature - The feature to get field values from
      * @returns {string} The processed text with field values substituted
+     * @static
      */
     static processTextTemplate(template: string, feature: FeatureLike): string;
 }

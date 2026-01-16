@@ -9,13 +9,11 @@ import { XYZ } from 'ol/source';
 import TileLayer from 'ol/layer/Tile';
 import { Polygon } from 'ol/geom';
 import type { Coordinate } from 'ol/coordinate';
-import type View from 'ol/View';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
-import type { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
-import type { TypeLayerStyleConfig, TypeOutfields, TypeStyleGeometry, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
+import type { TypeOutfields, TypeStyleGeometry, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
 import type { TypeMetadataWMS, TypeStylesWMS } from '@/api/types/layer-schema-types';
 import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
-export declare const layerTypes: Record<"CSV" | "KML" | "WKB" | "WFS" | "ESRI_DYNAMIC" | "ESRI_FEATURE" | "ESRI_IMAGE" | "IMAGE_STATIC" | "GEOJSON" | "GEOTIFF" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WMS", import("@/api/types/layer-schema-types").TypeGeoviewLayerType>;
+export declare const layerTypes: Record<"CSV" | "ESRI_DYNAMIC" | "ESRI_FEATURE" | "ESRI_IMAGE" | "IMAGE_STATIC" | "GEOJSON" | "GEOTIFF" | "KML" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WFS" | "WKB" | "WMS", import("@/api/types/layer-schema-types").TypeGeoviewLayerType>;
 export declare abstract class GeoUtilities {
     #private;
     /**
@@ -90,7 +88,9 @@ export declare abstract class GeoUtilities {
     /**
      * Fetch the json response from the XML response of a WMS getCapabilities request.
      * @param {string} url - The url the url of the WMS server.
-     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+     * @param {CallbackNewMetadataDelegate?} [callbackNewMetadataUrl] - Callback executed when a proxy had to be used to fetch the metadata.
+     * The parameter sent in the callback is the proxy prefix with the '?' at the end.
+     * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
      * @returns {Promise<TypeMetadataWMS>} A json promise containing the result of the query.
      * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
      * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
@@ -103,7 +103,9 @@ export declare abstract class GeoUtilities {
      * Fetch the json response from the XML response of a WMS getCapabilities request.
      * @param {string} url - The url the url of the WMS server.
      * @param {string} layers - The layers to query separate by.
-     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+     * @param {CallbackNewMetadataDelegate?} [callbackNewMetadataUrl] - Callback executed when a proxy had to be used to fetch the metadata.
+     * The parameter sent in the callback is the proxy prefix with the '?' at the end.
+     * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
      * @returns {Promise<TypeMetadataWMS>} A json promise containing the result of the query.
      * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
      * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
@@ -116,7 +118,9 @@ export declare abstract class GeoUtilities {
      * Fetch the json response from the XML response of a WMS getCapabilities request.
      * @param {string} url - The url the url of the WMS server.
      * @param {string} layers - The layers to query separate by.
-     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+     * @param {CallbackNewMetadataDelegate?} [callbackNewMetadataUrl] - Callback executed when a proxy had to be used to fetch the metadata.
+     * The parameter sent in the callback is the proxy prefix with the '?' at the end.
+     * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
      * @returns {Promise<TypeStylesWMS>} A json promise containing the result of the query.
      * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
      * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
@@ -195,6 +199,13 @@ export declare abstract class GeoUtilities {
      */
     static readEPSGOfGML(gml: any): string | undefined;
     /**
+     * Reads OpenLayers features from an Esri features object.
+     * @param {unknown} features - The Features data to read.
+     * @param {import('ol/format/Feature').ReadOptions} [options] - Optional read options such as projection or extent.
+     * @returns {import('ol/Feature').default[]} An array of parsed OpenLayers Feature instances.
+     */
+    static readFeaturesFromEsriJSON(features: unknown, options: ReadOptions | undefined): Feature<Geometry>[];
+    /**
      * Reads OpenLayers features from a GeoJSON object.
      * @param {unknown} geojson - The GeoJSON data to read.
      * @param {import('ol/format/Feature').ReadOptions} [options] - Optional read options such as projection or extent.
@@ -202,12 +213,26 @@ export declare abstract class GeoUtilities {
      */
     static readFeaturesFromGeoJSON(geojson: unknown, options: ReadOptions | undefined): Feature<Geometry>[];
     /**
-     * Reads OpenLayers features from a WKBObject object.
-     * @param {unknown} wkbObject - The WKBObject data to read.
+     * Reads OpenLayers features from an WFS features object.
+     * @param {unknown} features - The Features data to read.
      * @param {import('ol/format/Feature').ReadOptions} [options] - Optional read options such as projection or extent.
      * @returns {import('ol/Feature').default[]} An array of parsed OpenLayers Feature instances.
      */
-    static readFeaturesFromWKB(wkbObject: unknown, options: ReadOptions | undefined): Feature<Geometry>[];
+    static readFeaturesFromWFS(features: unknown, version: string, options: ReadOptions | undefined): Feature<Geometry>[];
+    /**
+     * Reads OpenLayers features from a WKBObject object.
+     * @param {string | ArrayBuffer | ArrayBufferView<ArrayBufferLike>} wkbObject - The WKBObject data to read.
+     * @param {import('ol/format/Feature').ReadOptions} [options] - Optional read options such as projection or extent.
+     * @returns {import('ol/Feature').default[]} An array of parsed OpenLayers Feature instances.
+     */
+    static readFeaturesFromWKB(wkbObject: string | ArrayBuffer | ArrayBufferView<ArrayBufferLike>, options: ReadOptions | undefined): Feature<Geometry>[];
+    /**
+     * Reads OpenLayers features from a KML object.
+     * @param {unknown} kmlObject - The KML data to read.
+     * @param {import('ol/format/Feature').ReadOptions} [options] - Optional read options such as projection or extent.
+     * @returns {import('ol/Feature').default[]} An array of parsed OpenLayers Feature instances.
+     */
+    static readFeaturesFromKML(kmlObject: unknown, options: ReadOptions | undefined): Feature<Geometry>[];
     /**
      * Default drawing style for GeoView
      * @returns {Style} An Open Layers styling for drawing on a map
@@ -220,12 +245,6 @@ export declare abstract class GeoUtilities {
      * @returns {TileLayer<XYZ>} The created empty basemap
      */
     static createEmptyBasemap(): TileLayer<XYZ | OSM | VectorTile>;
-    /**
-     * This method gets the legend styles used by the the layer as specified by the style configuration.
-     * @param {TypeLayerStyleConfig} styleConfig - Layer style configuration.
-     * @returns {Promise<TypeVectorLayerStyles>} A promise that the layer styles are processed.
-     */
-    static getLegendStylesFromConfig(styleConfig: TypeLayerStyleConfig): Promise<TypeVectorLayerStyles>;
     /**
      * Format the coordinates for degrees - minutes - seconds (lat, long)
      * @param {number} value the value to format
@@ -322,26 +341,6 @@ export declare abstract class GeoUtilities {
      */
     static getMetersPerPixel(projection: TypeValidMapProjectionCodes, resolution: number, lat?: number): number;
     /**
-     * Converts a map scale to zoom level
-     * @param view The view for converting the scale
-     * @param targetScale The desired scale (e.g. 50000 for 1:50,000)
-     * @returns number representing the closest zoom level for the given scale
-     */
-    static getZoomFromScale(view: View, targetScale: number | undefined, dpiValue?: number): number | undefined;
-    /**
-     * Converts a map scale to zoom level
-     * @param view The view for converting the zoom
-     * @param zoom The desired zoom (e.g. 50000 for 1:50,000)
-     * @returns number representing the closest scale for the given zoom number
-     */
-    static getScaleFromZoom(view: View, zoom: number): number | undefined;
-    /**
-     * Gets map scale for Web Mercator or Lambert Conformal Conic projections
-     * @param view The view to get the current scale from
-     * @returns number representing scale (e.g. 50000 for 1:50,000)
-     */
-    static getMapScale(view: View): number | undefined;
-    /**
      * Gets the pointer position information from a Map Event and a specified projection.
      * @param {MapEvent} mapEvent - The map event
      * @param {string} projCode - The map projection code
@@ -379,7 +378,7 @@ export declare abstract class GeoUtilities {
      * @returns {TypeStyleGeometry} The corresponding TypeStyleGeometry
      * @throws {NotSupportedError} When the geometry type is not supported.
      */
-    static wfsConvertGeometryTypeToOLGeometryType(wfsGeometryType: string | undefined): TypeStyleGeometry;
+    static wfsConvertGeometryTypeToOLGeometryType(wfsGeometryType: string): TypeStyleGeometry;
     /**
      * Converts an esri geometry type string to a TypeStyleGeometry.
      * @param {string} esriGeometryType - The esri geometry type to convert

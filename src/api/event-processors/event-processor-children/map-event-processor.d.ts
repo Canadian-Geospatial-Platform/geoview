@@ -1,5 +1,6 @@
 import type { Root } from 'react-dom/client';
 import type { OverviewMap as OLOverviewMap } from 'ol/control';
+import Overlay from 'ol/Overlay';
 import type { Extent } from 'ol/extent';
 import type { FitOptions } from 'ol/View';
 import type { Coordinate } from 'ol/coordinate';
@@ -7,6 +8,7 @@ import type { Size } from 'ol/size';
 import type { Pixel } from 'ol/pixel';
 import type { TypeBasemapOptions, TypeInteraction, TypeValidMapProjectionCodes, TypePointMarker, TypeHighlightColors, TypeMapViewSettings, TypeFeatureInfoEntry, TypeMapFeaturesInstance } from '@/api/types/map-schema-types';
 import type { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { Draw } from '@/geo/interaction/draw';
 import { LayerApi } from '@/geo/layer/layer';
 import type { TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { MapViewer } from '@/geo/map/map-viewer';
@@ -14,12 +16,15 @@ import type { TypeMapStateForExportLayout } from '@/core/components/export/utili
 import type { PluginsContainer } from '@/api/plugin/plugin-types';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { TypeClickMarker } from '@/core/components';
+import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import type { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import type { TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 export declare class MapEventProcessor extends AbstractEventProcessor {
     #private;
+    /** The minimal delay to wait for the zoom, to be sure.. */
+    static readonly ZOOM_MIN_DELAY = 500;
     /**
      * Initializes the map controls
      * @param {string} mapId - The map id being initialized
@@ -52,6 +57,12 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      * @returns {PluginsContainer} The map plugins container
      */
     static getMapViewerPlugins(mapId: string): Promise<PluginsContainer>;
+    /**
+     * Forces the map to re-render all layers and features.
+     * Useful when layer styles or features have been updated programmatically and need to be reflected visually.
+     * @param {string} mapId - The map identifier
+     */
+    static forceMapToRender(mapId: string): void;
     /**
      * Retrieves the scale information from the DOM elements for the given map ID.
      * @param {string} mapId - The unique identifier of the map.
@@ -188,12 +199,24 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static changeOrRemoveLayerHighlight(mapId: string, layerPath: string, highlightedLayerPath: string): string;
     static addInitialFilter(mapId: string, layerPath: string, filter: string): void;
     static setCurrentBasemapOptions(mapId: string, basemapOptions: TypeBasemapOptions): void;
+    static getMapHoverFeatureInfo(mapId: string): TypeHoverFeatureInfo | undefined | null;
     static setMapLayerHoverable(mapId: string, layerPath: string, hoverable: boolean): void;
     static setMapHoverFeatureInfo(mapId: string, hoverFeatureInfo: TypeHoverFeatureInfo): void;
     static setMapOrderedLayerInfo(mapId: string, orderedLayerInfo: TypeOrderedLayerInfo[]): void;
     static setMapLayerQueryable(mapId: string, layerPath: string, queryable: boolean): void;
     static setMapLegendCollapsed(mapId: string, layerPath: string, collapsed: boolean): void;
     static setAllMapLayerCollapsed(mapId: string, newCollapsed: boolean): void;
+    /**
+     * Sets or toggles the visibility of a specific layer within a map.
+     * If the layer exists at the provided layer path for the given map, the method delegates
+     * the visibility change to the map viewer's layer API. If `newValue` is provided, the layer
+     * visibility is explicitly set to that value; otherwise, the visibility is toggled.
+     * @param {string} mapId - The identifier of the map containing the target layer.
+     * @param {string} layerPath - The path of the layer whose visibility is being changed.
+     * @param {boolean} [newValue] - Optional. The new visibility value. If omitted, the visibility is toggled.
+     * @returns {boolean} The resulting visibility state of the layer after the operation, or `false`
+     * if the layer does not exist at the given path.
+     */
     static setOrToggleMapLayerVisibility(mapId: string, layerPath: string, newValue?: boolean): boolean;
     /**
      * Sets the opacity of a layer in the layer legend.
@@ -202,6 +225,14 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      * @param {boolean} visibility - The visibility to set.
      */
     static setMapLayerVisibilityInStore(mapId: string, layerPath: string, visibility: boolean): void;
+    /**
+     * Sets the visibility of **all layers** in a given map.
+     * Iterates through all GeoView layers associated with the specified map ID and
+     * applies the provided visibility value. Only layers whose current visibility
+     * differs from the desired state will be updated.
+     * @param {string} mapId - The identifier of the map whose layers will be updated.
+     * @param {boolean} newVisibility - The visibility state to apply to all layers (`true` to show, `false` to hide).
+     */
     static setAllMapLayerVisibility(mapId: string, newVisibility: boolean): void;
     static reorderLayer(mapId: string, layerPath: string, move: number): void;
     /**
@@ -320,5 +351,43 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      * @returns {TypeMapFeaturesInstance} Map config with updated names.
      */
     static replaceMapConfigLayerNames(namePairs: string[][], mapConfig: TypeMapFeaturesInstance, removeUnlisted?: boolean): TypeMapFeaturesInstance;
+    /**
+     * Creates a new geometry group on the map if it doesn't already exist.
+     * Geometry groups are used to organize and manage collections of vector features (lines, polygons, points).
+     * @param {string} mapId - The map identifier
+     * @param {string} groupName - The unique name for the geometry group to create
+     */
+    static createGeometryGroup(mapId: string, groupName: string): void;
+    /**
+     * Deletes all geometries from a geometry group.
+     * Removes all vector features (lines, polygons, points) that belong to the specified group.
+     * The group itself remains and can be reused.
+     * @param {string} mapId - The map identifier
+     * @param {string} groupName - The name of the geometry group to clear
+     */
+    static deleteGeometriesFromGroup(mapId: string, groupName: string): void;
+    /**
+     * Adds an overlay to the map.
+     * Overlays are HTML DOM elements positioned at map coordinates that float above the map canvas.
+     * Common uses include tooltips, popups, and measurement labels.
+     * @param {string} mapId - The map identifier
+     * @param {Overlay} overlay - The OpenLayers overlay to add to the map.
+     */
+    static addOverlay(mapId: string, overlay: Overlay): void;
+    /**
+     * Removes an overlay from the map.
+     * Removes the HTML element from the map display and cleans up references.
+     * @param {string} mapId - The map identifier
+     * @param {Overlay} overlay - The OpenLayers overlay to remove from the map.
+     */
+    static removeOverlay(mapId: string, overlay: Overlay): void;
+    /**
+     * Initializes drawing interactions on the given vector source
+     * @param {string} mapId - The map identifier
+     * @param {string} geomGroupKey - The geometry group key in which to hold the geometries
+     * @param {string} type - The type of geometry to draw (Polygon, LineString, Circle, etc)
+     * @param {TypeFeatureStyle} [style] - The styles for the drawing
+     */
+    static initDrawInteractions(mapId: string, geomGroupKey: string, type: string, style: TypeFeatureStyle): Draw;
 }
 //# sourceMappingURL=map-event-processor.d.ts.map

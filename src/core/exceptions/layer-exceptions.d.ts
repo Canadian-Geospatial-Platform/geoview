@@ -66,6 +66,19 @@ export declare class LayerNotEsriDynamicError extends LayerError {
     constructor(layerPath: string, layerName: string | undefined);
 }
 /**
+ * Custom error class thrown when the GeoView layer configuration is invalid due to the EsriDynamic layer not supporting dynamic layers.
+ * @extends {LayerError}
+ */
+export declare class LayerNotSupportingDynamicLayersError extends LayerError {
+    /**
+     * Constructor to initialize the LayerNotSupportingDynamicLayersError.
+     * This error is thrown when the layer ID provided does not correspond to a feature layer.
+     * @param {string} layerPath - The configuration object associated with the GeoView layer.
+     * @param {string | undefined} layerName - The layer name.
+     */
+    constructor(layerPath: string, layerName: string | undefined);
+}
+/**
  * Custom error class thrown when the GeoView layer configuration is invalid due to the layer ID not being a feature layer.
  * This error is specifically used when the provided layer ID does not correspond to a valid feature layer.
  * @extends {LayerError}
@@ -310,9 +323,10 @@ export declare class LayerInvalidFeatureInfoFormatWMSError extends LayerError {
      * Creates an instance of LayerInvalidFeatureInfoFormatWMSError.
      *
      * @param {string} layerPath - The path or identifier of the WMS layer that received the invalid format.
+     * @param {string} format - The invalid format.
      * @param {string | undefined} layerName - The layer name.
      */
-    constructor(layerPath: string, layerName: string | undefined);
+    constructor(layerPath: string, format: string | string[], layerName: string | undefined);
 }
 /**
  * Error thrown when no geographic data (e.g., coordinates or location fields) is found in a CSV sheet.

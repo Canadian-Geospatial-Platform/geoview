@@ -10,13 +10,17 @@ export interface EsriImageLayerEntryConfigProps extends AbstractBaseLayerEntryCo
  * Type used to define a GeoView image layer to display on the map.
  */
 export declare class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
-    /** Source settings to apply to the GeoView image layer source at creation time. */
-    source: TypeSourceImageEsriInitialConfig;
     /**
      * The class constructor.
      * @param {EsriImageLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
      */
     constructor(layerConfig: EsriImageLayerEntryConfigProps);
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {TypeSourceImageEsriInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+     */
+    getSource(): TypeSourceImageEsriInitialConfig;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      * @override

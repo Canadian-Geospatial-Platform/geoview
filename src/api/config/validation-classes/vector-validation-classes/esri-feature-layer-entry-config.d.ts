@@ -1,14 +1,11 @@
 import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeLayerMetadataEsri } from '@/api/types/layer-schema-types';
 import type { VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import type { TypeEsriFeatureLayerConfig, TypeSourceEsriFeatureInitialConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
+import type { TypeEsriFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import type { TypeStyleGeometry } from '@/api/types/map-schema-types';
 export interface EsriFeatureLayerEntryConfigProps extends VectorLayerEntryConfigProps {
-    /** Source settings to apply to the GeoView layer source at creation time. */
-    source?: TypeSourceEsriFeatureInitialConfig;
 }
 export declare class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
-    source: TypeSourceEsriFeatureInitialConfig;
     /**
      * The class constructor.
      * @param {EsriFeatureLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
@@ -22,10 +19,10 @@ export declare class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig 
     getLayerMetadata(): TypeLayerMetadataEsri | undefined;
     /**
      * Overrides the get geometry type to interpret the esri type name.
-     * @returns {TypeStyleGeometry} The geometry type.
+     * @returns {TypeStyleGeometry | undefined} The geometry type, if it could be determined.
      * @throws {NotSupportedError} When the geometry type is not supported.
      */
-    protected onGetGeometryType(): TypeStyleGeometry;
+    protected onGetGeometryType(): TypeStyleGeometry | undefined;
     /**
      * Type guard that checks whether the given configuration (class instance or plain object)
      * represents a Esri Feature layer type.

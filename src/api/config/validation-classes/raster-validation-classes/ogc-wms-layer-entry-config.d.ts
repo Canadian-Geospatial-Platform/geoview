@@ -13,8 +13,6 @@ export interface OgcWmsLayerEntryConfigProps extends AbstractBaseLayerEntryConfi
  */
 export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     #private;
-    /** Source settings to apply to the GeoView image layer source at creation time. */
-    source: TypeSourceImageWmsInitialConfig;
     /**
      * The class constructor.
      * @param {OgcWmsLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
@@ -23,9 +21,29 @@ export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      * @override
+     * @returns {TypeSourceImageWmsInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+     */
+    getSource(): TypeSourceImageWmsInitialConfig;
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
      * @returns {TypeMetadataWMS | undefined} The strongly-typed layer configuration specific to this layer entry config.
      */
     getServiceMetadata(): TypeMetadataWMS | undefined;
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {TypeMetadataWMSCapabilityLayer | undefined} The strongly-typed layer metadata specific to this layer entry config.
+     */
+    getLayerMetadata(): TypeMetadataWMSCapabilityLayer | undefined;
+    /**
+     * Retrieves the attributions associated with the layer.
+     * If attributions are not yet cached, this method attempts
+     * to read them from the layer's metadata (via the `Attribution.Title` property)
+     * and sets them accordingly. Once set, the attributions are cached in the layer.
+     * @returns {string[] | undefined} The list of layer attributions, or `undefined` if none are available.
+     */
+    getAttributions(): string[] | undefined;
     /**
      * Gets the version. Defaults to 1.3.0.
      * @returns {string} The service version as read from the metadata attribute.
@@ -52,20 +70,6 @@ export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig
      * @returns {boolean} True when the service supports GetStyles requests.
      */
     getSupportsGetStyles(): boolean;
-    /**
-     * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @override
-     * @returns {TypeMetadataWMSCapabilityLayer | undefined} The strongly-typed layer metadata specific to this layer entry config.
-     */
-    getLayerMetadata(): TypeMetadataWMSCapabilityLayer | undefined;
-    /**
-     * Retrieves the attributions associated with the layer.
-     * If attributions are not yet cached, this method attempts
-     * to read them from the layer's metadata (via the `Attribution.Title` property)
-     * and sets them accordingly. Once set, the attributions are cached in the layer.
-     * @returns {string[] | undefined} The list of layer attributions, or `undefined` if none are available.
-     */
-    getAttributions(): string[] | undefined;
     /**
      * Retrieves the list of style names available for this layer.
      * If styles are not yet cached, the method reads them from the layer metadata

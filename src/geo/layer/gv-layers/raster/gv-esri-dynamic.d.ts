@@ -5,7 +5,7 @@ import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { Map as OLMap } from 'ol';
 import type { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import type { TypeFeatureInfoEntry, rangeDomainType, codedValueType, TypeLayerStyleConfig, TypeOutfieldsType } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoEntry, rangeDomainType, codedValueType, TypeLayerStyleConfig, TypeOutfieldsType, TypeFeatureInfoEntryPartial } from '@/api/types/map-schema-types';
 import type { TypeLayerMetadataEsriExtent } from '@/api/types/layer-schema-types';
 import type { GeometryJson } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
@@ -104,16 +104,16 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
     /**
      * Overrides the get all feature information for all the features stored in the layer.
      * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
-     * @param {AbortController?} abortController - The optional abort controller.
+     * @param {AbortController?} [abortController] - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getAllFeatureInfo(map: OLMap, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
+    protected getAllFeatureInfo(map: OLMap, abortController?: AbortController): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overrides the return of feature information at a given coordinate.
      * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.
      * @param {Coordinate} location - The coordinate that will be used by the query.
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-     * @param {AbortController?} abortController - The optional abort controller.
+     * @param {AbortController?} [abortController] - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
     protected getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
@@ -122,11 +122,23 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
      * @param {OLMap} map - The Map where to get Feature Info At LonLat from.
      * @param {Coordinate} lonlat - The coordinate that will be used by the query.
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-     * @param {AbortController?} abortController - The optional abort controller.
+     * @param {AbortController?} [abortController] - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
      */
     protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
+    /**
+     * Retrieves feature records from the layer using their Object IDs (OIDs).
+     * This method queries the underlying layer for the specified object IDs and returns
+     * a Promise resolving to an array of partial feature info entries.
+     * The method automatically determines the geometry type and output fields from
+     * the layer configuration. If an output spatial reference (`outSR`) is provided,
+     * the geometries are projected accordingly.
+     * @param {number[]} objectIDs - An array of Object IDs to query.
+     * @param {number} [outSR] - Optional output spatial reference (WKID) for geometry projection.
+     * @returns {Promise<TypeFeatureInfoEntryPartial[]>} A promise resolving to an array of partial feature info entries.
+     */
+    getRecordsByOIDs(objectIDs: number[], outSR?: number | undefined): Promise<TypeFeatureInfoEntryPartial[]>;
     /**
      * Applies a view filter to an Esri Dynamic layer's source by updating the `layerDefs` parameter.
      * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).

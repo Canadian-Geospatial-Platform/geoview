@@ -11,7 +11,7 @@ export interface LayerListEntry {
     mapFilteredIcon?: ReactNode;
     tooltip?: JSX.Element | string;
     numOffeatures?: number;
-    features?: TypeFeatureInfoEntry[] | undefined | null;
+    features?: TypeFeatureInfoEntry[] | undefined;
     layerUniqueId?: string;
     isDisabled?: boolean;
 }

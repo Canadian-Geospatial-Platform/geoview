@@ -1,14 +1,14 @@
 import type LayerGroup from 'ol/layer/Group';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
-import { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 /**
  * Manages a Group Layer.
  *
  * @exports
  * @class GVGroupLayer
  */
-export declare class GVGroupLayer extends AbstractBaseLayer {
+export declare class GVGroupLayer extends AbstractBaseGVLayer {
     #private;
     /**
      * Constructs a Group layer to manage an OpenLayer Group Layer.
@@ -42,18 +42,18 @@ export declare class GVGroupLayer extends AbstractBaseLayer {
     onRefresh(projection: OLProjection | undefined): void;
     /**
      * Gets the layers in the group.
-     * @returns {AbstractBaseLayer[]} The layers in the group.
+     * @returns {AbstractBaseGVLayer[]} The layers in the group.
      */
-    getLayers(): AbstractBaseLayer[];
+    getLayers(): AbstractBaseGVLayer[];
     /**
      * Adds a layer to the group layer.
-     * @param {AbstractBaseLayer} layer - The layer to add.
+     * @param {AbstractBaseGVLayer} layer - The layer to add.
      */
-    addLayer(layer: AbstractBaseLayer): void;
+    addLayer(layer: AbstractBaseGVLayer): void;
     /**
      * Removes a layer from the group layer.
-     * @param {AbstractBaseLayer} layer - The layer to remove.
+     * @param {AbstractBaseGVLayer} layer - The layer to remove.
      */
-    removeLayer(layer: AbstractBaseLayer): void;
+    removeLayer(layer: AbstractBaseGVLayer): void;
 }
 //# sourceMappingURL=gv-group-layer.d.ts.map

@@ -13,7 +13,7 @@ export declare class UUIDmapConfigReader {
      * @param {string} baseUrl - The base url of GeoCore API
      * @param {TypeDisplayLanguage} lang - The language to get the config for
      * @param {string[]} uuids - A list of uuids to get the configurations for
-     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+     * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
      * @returns {Promise<UUIDmapConfigReaderResponse>} Layers and Geocharts read and parsed from uuids results from GeoCore
      */
     static getGVConfigFromUUIDs(baseUrl: string, lang: TypeDisplayLanguage, uuids: string[], abortSignal?: AbortSignal): Promise<UUIDmapConfigReaderResponse>;
@@ -22,7 +22,7 @@ export declare class UUIDmapConfigReader {
      * @param {string} baseUrl - The base url of GeoCore API
      * @param {TypeDisplayLanguage} lang - The language to get the config for
      * @param {string[]} uuids - A list of uuids to get the configurations for
-     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+     * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
      * @returns {Promise<UUIDmapConfigReaderResponse>} Layers read and parsed from uuids results from Geonetwork RCS
      */
     static getGVConfigFromUUIDsRCS(baseUrl: string, lang: TypeDisplayLanguage, uuids: string[], abortSignal?: AbortSignal): Promise<UUIDmapConfigReaderResponse>;

@@ -1,13 +1,10 @@
-import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeLayerMetadataOGC, TypeSourceOgcFeatureInitialConfig } from '@/api/types/layer-schema-types';
+import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeLayerMetadataOGC } from '@/api/types/layer-schema-types';
 import type { TypeOgcFeatureLayerConfig } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import type { VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 export interface OgcFeatureLayerEntryConfigProps extends VectorLayerEntryConfigProps {
-    /** Source settings to apply to the GeoView layer source at creation time. */
-    source?: TypeSourceOgcFeatureInitialConfig;
 }
 export declare class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
-    source: TypeSourceOgcFeatureInitialConfig;
     /**
      * The class constructor.
      * @param {OgcFeatureLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
