@@ -14,7 +14,6 @@ export const getSxClasses = (theme: Theme): SxStyles =>
       display: 'flex',
       flexDirection: 'column',
       '& .responsive-layout-right-main-content': {
-        backgroundColor: theme.palette.geoViewColor.white,
         '&:focus-visible': {
           border: '2px solid inherit',
         },

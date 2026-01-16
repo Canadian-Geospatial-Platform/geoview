@@ -43,7 +43,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   listItemButton: {
     width: '100%',
     borderRadius: '5px',
-    marginBottom: '10px',
     '&.Mui-selected:hover': {
       backgroundColor: 'inherit',
     },

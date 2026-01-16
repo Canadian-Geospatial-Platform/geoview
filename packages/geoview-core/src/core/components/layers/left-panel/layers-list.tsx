@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
-import { Box } from '@/ui';
+import { List } from '@/ui';
 import { useGeoViewMapId, useMapOrderedLayers } from '@/core/stores';
 import { logger } from '@/core/utils/logger';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
@@ -67,5 +67,5 @@ export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged
     });
   }, [depth, isLayoutEnlarged, mapId, showLayerDetailsPanel, layersList, layerPathOrder]);
 
-  return <Box sx={getListClass()}>{memoLegendItems}</Box>;
+  return <List sx={getListClass()}>{memoLegendItems}</List>;
 }

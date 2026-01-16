@@ -39,113 +39,117 @@ const TITLE_STYLES = {
 
 interface LayoutExposedMethods {
   showRightPanel: (visible: boolean) => void;
-};
+}
 
-const Layout = forwardRef(({
-  children,
-  layoutSwitch,
-  guideContentIds,
-  layerList,
-  selectedLayerPath,
-  onLayerListClicked,
-  onIsEnlargeClicked,
-  onGuideIsOpen,
-  onRightPanelClosed,
-  onRightPanelVisibilityChanged,
-  containerType = CONTAINER_TYPE.FOOTER_BAR,
-  hideEnlargeBtn,
-  toggleMode = false,
-}: LayoutProps,
-ref: Ref<LayoutExposedMethods>) => {
-  logger.logTraceRender('components/common/layout');
+const Layout = forwardRef(
+  (
+    {
+      children,
+      layoutSwitch,
+      guideContentIds,
+      layerList,
+      selectedLayerPath,
+      onLayerListClicked,
+      onIsEnlargeClicked,
+      onGuideIsOpen,
+      onRightPanelClosed,
+      onRightPanelVisibilityChanged,
+      containerType = CONTAINER_TYPE.FOOTER_BAR,
+      hideEnlargeBtn,
+      toggleMode = false,
+    }: LayoutProps,
+    ref: Ref<LayoutExposedMethods>
+  ) => {
+    logger.logTraceRender('components/common/layout');
 
-  // Hooks
-  const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
-  const theme = useTheme();
-  const layerName = useLayerSelectorName(selectedLayerPath!);
+    // Hooks
+    const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
+    const theme = useTheme();
+    const layerName = useLayerSelectorName(selectedLayerPath!);
 
-  // Store
-  const { setSelectedFooterLayerListItemId } = useUIStoreActions();
+    // Store
+    const { setSelectedFooterLayerListItemId } = useUIStoreActions();
 
-  // Callbacks
-  /**
-   * Handles clicks to layers in left panel. Sets selected layer.
-   *
-   * @param {LayerListEntry} layer The data of the selected layer
-   */
-  const handleLayerChange = useCallback(
-    (layer: LayerListEntry): void => {
-      onLayerListClicked?.(layer);
+    // Callbacks
+    /**
+     * Handles clicks to layers in left panel. Sets selected layer.
+     *
+     * @param {LayerListEntry} layer The data of the selected layer
+     */
+    const handleLayerChange = useCallback(
+      (layer: LayerListEntry): void => {
+        onLayerListClicked?.(layer);
 
-      // Show the panel (hiding the layers list in the process if we're on mobile)
-      responsiveLayoutRef.current?.setIsRightPanelVisible(true);
-      responsiveLayoutRef.current?.setRightPanelFocus();
+        // Show the panel (hiding the layers list in the process if we're on mobile)
+        responsiveLayoutRef.current?.setIsRightPanelVisible(true);
+        responsiveLayoutRef.current?.setRightPanelFocus();
 
-      // set the focus item when layer item clicked.
-      setSelectedFooterLayerListItemId(`${layer.layerUniqueId}`);
-    },
-    [onLayerListClicked, setSelectedFooterLayerListItemId]
-  );
+        // set the focus item when layer item clicked.
+        setSelectedFooterLayerListItemId(`${layer.layerUniqueId}`);
+      },
+      [onLayerListClicked, setSelectedFooterLayerListItemId]
+    );
 
-  /**
-   * Render group layers as list.
-   *
-   * @returns JSX.Element
-   */
-  const renderLayerList = useCallback(() => {
-    // Log
-    logger.logTraceUseCallback('LAYOUT - renderLayerList');
+    /**
+     * Render group layers as list.
+     *
+     * @returns JSX.Element
+     */
+    const renderLayerList = useCallback(() => {
+      // Log
+      logger.logTraceUseCallback('LAYOUT - renderLayerList');
 
-    return <LayerList selectedLayerPath={selectedLayerPath} onListItemClick={handleLayerChange} layerList={layerList} />;
-  }, [selectedLayerPath, handleLayerChange, layerList]);
+      return <LayerList selectedLayerPath={selectedLayerPath} onListItemClick={handleLayerChange} layerList={layerList} />;
+    }, [selectedLayerPath, handleLayerChange, layerList]);
 
-  /**
-   * Render layer title
-   * @returns JSX.Element
-   */
-  const renderLayerTitle = useCallback((): JSX.Element => {
-    // clamping code copied from https://tailwindcss.com/docs/line-clamp
-    const sxClasses = {
-      ...TITLE_STYLES,
-      fontSize: theme.palette.geoViewFontSize.lg,
-      width: containerType === CONTAINER_TYPE.APP_BAR ? '100%' : 'auto',
-      ...(!toggleMode && { [theme.breakpoints.up('sm')]: { display: 'none' } }),
-    };
+    /**
+     * Render layer title
+     * @returns JSX.Element
+     */
+    const renderLayerTitle = useCallback((): JSX.Element => {
+      // clamping code copied from https://tailwindcss.com/docs/line-clamp
+      const sxClasses = {
+        ...TITLE_STYLES,
+        fontSize: theme.palette.geoViewFontSize.lg,
+        width: containerType === CONTAINER_TYPE.APP_BAR ? '100%' : 'auto',
+        ...(!toggleMode && { [theme.breakpoints.up('sm')]: { display: 'none' } }),
+      };
+
+      return (
+        <Tooltip title={layerName} placement="top" arrow>
+          <Typography sx={sxClasses} component="h3">
+            {layerName}
+          </Typography>
+        </Tooltip>
+      );
+    }, [containerType, layerName, theme.breakpoints, theme.palette.geoViewFontSize.lg, toggleMode]);
+
+    // Expose methods to parent component
+    useImperativeHandle(ref, () => ({
+      showRightPanel: (visible: boolean) => {
+        responsiveLayoutRef.current?.setIsRightPanelVisible(visible);
+      },
+    }));
 
     return (
-      <Tooltip title={layerName} placement="top" arrow>
-        <Typography sx={sxClasses} component="div">
-          {layerName}
-        </Typography>
-      </Tooltip>
+      <ResponsiveGridLayout
+        ref={responsiveLayoutRef}
+        leftTop={layoutSwitch}
+        leftMain={renderLayerList()}
+        rightTop={renderLayerTitle()}
+        rightMain={children}
+        guideContentIds={guideContentIds}
+        onIsEnlargeClicked={onIsEnlargeClicked}
+        onGuideIsOpen={onGuideIsOpen}
+        onRightPanelClosed={onRightPanelClosed}
+        onRightPanelVisibilityChanged={onRightPanelVisibilityChanged}
+        hideEnlargeBtn={hideEnlargeBtn}
+        containerType={containerType}
+        toggleMode={toggleMode}
+      />
     );
-  }, [containerType, layerName, theme.breakpoints, theme.palette.geoViewFontSize.lg, toggleMode]);
-
-  // Expose methods to parent component
-  useImperativeHandle( ref, () => ({
-    showRightPanel: (visible: boolean) => {
-      responsiveLayoutRef.current?.setIsRightPanelVisible(visible);
-    }
-  }));
-
-  return (
-    <ResponsiveGridLayout
-      ref={responsiveLayoutRef}
-      leftTop={layoutSwitch}
-      leftMain={renderLayerList()}
-      rightTop={renderLayerTitle()}
-      rightMain={children}
-      guideContentIds={guideContentIds}
-      onIsEnlargeClicked={onIsEnlargeClicked}
-      onGuideIsOpen={onGuideIsOpen}
-      onRightPanelClosed={onRightPanelClosed}
-      onRightPanelVisibilityChanged={onRightPanelVisibilityChanged}
-      hideEnlargeBtn={hideEnlargeBtn}
-      containerType={containerType}
-      toggleMode={toggleMode}
-    />
-  );
-});
+  }
+);
 
 export { Layout };
 export type { LayoutExposedMethods };

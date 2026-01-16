@@ -85,6 +85,8 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
   const prevFeatureIndex = useRef<number>(0); // 0 because that's the default index for the features
   const prevMapClickCoordinates = useRef<TypeMapMouseInfo | undefined>(mapClickCoordinates);
   const layoutRef = useRef<LayoutExposedMethods>(null);
+  const prevButtonRef = useRef<HTMLButtonElement>(null);
+  const nextButtonRef = useRef<HTMLButtonElement>(null);
 
   // #region MAIN HOOKS SECTION ***************************************************************************************
 
@@ -187,8 +189,8 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
             queryStatus: layer!.queryStatus,
             numOffeatures: layer!.features?.length ?? 0,
             layerFeatures: getNumFeaturesLabel(layer!),
-            tooltip: `${layer!.layerName}, ${getNumFeaturesLabel(layer!)}`,
-            layerUniqueId: `${mapId}-${TABS.DETAILS}-${layer?.layerPath}`,
+            tooltip: t('layers.selectLayer', { layerName: layer!.layerName }) ?? '',
+            layerUniqueId: `${mapId}-${TABS.DETAILS}-${layer?.layerPath ?? ''}`,
           }) as LayerListEntry
       );
 
@@ -210,7 +212,7 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
           queryStatus: layer.queryStatus,
           numOffeatures: layer.features?.length ?? 0,
           layerFeatures: getNumFeaturesLabel(layer),
-          tooltip: `${layer.layerName}, ${getNumFeaturesLabel(layer)}`,
+          tooltip: t('layers.selectLayer', { layerName: layer.layerName }) ?? '',
           layerUniqueId: `${mapId}-${TABS.DETAILS}-${layer.layerPath}`,
         });
       }
@@ -245,7 +247,7 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
         queryStatus: coordinateInfoLayer.queryStatus,
         numOffeatures: coordinateInfoLayer.features?.length ?? 0,
         layerFeatures: getNumFeaturesLabel(coordinateInfoLayer),
-        tooltip: `${coordinateInfoLayer.layerName}, ${getNumFeaturesLabel(coordinateInfoLayer)}`,
+        tooltip: t('layers.selectLayer', { layerName: coordinateInfoLayer.layerName ?? '' }) ?? '',
         layerUniqueId: `${mapId}-${TABS.DETAILS}-${coordinateInfoLayer.layerPath}`,
       });
     }
@@ -261,6 +263,7 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
     mapId,
     getMapLayerParentHidden,
     orderedLayers,
+    t,
   ]);
 
   /**
@@ -491,11 +494,28 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
       // Log
       logger.logTraceUseCallback('DETAILS-PANEL - handleFeatureNavigateChange', currentFeatureIndex);
 
+      const newIndex = currentFeatureIndex + change;
+      const maxIndex = (memoSelectedLayerData?.features?.length ?? 0) - 1;
+
+      // Don't navigate if out of bounds
+      if (newIndex < 0 || newIndex > maxIndex) {
+        return;
+      }
+
       // Keep previous index for navigation
       prevFeatureIndex.current = currentFeatureIndex;
 
       // Update current index
-      updateFeatureSelected(currentFeatureIndex + change, memoSelectedLayerData);
+      updateFeatureSelected(newIndex, memoSelectedLayerData);
+
+      // Restore focus to the navigation button after React completes the state update and re-render
+      requestAnimationFrame(() => {
+        if (change === -1) {
+          prevButtonRef.current?.focus();
+        } else {
+          nextButtonRef.current?.focus();
+        }
+      });
     },
     [currentFeatureIndex, memoSelectedLayerData, updateFeatureSelected]
   );
@@ -710,9 +730,11 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
     if (memoSelectedLayerDataFeatures && memoSelectedLayerDataFeatures.length > 0) {
       // Get only the current feature
       const currentFeature = memoSelectedLayerDataFeatures[currentFeatureIndex];
+      const isPrevDisabled = currentFeatureIndex <= 0;
+      const isNextDisabled = !memoSelectedLayerData?.features || currentFeatureIndex + 1 >= memoSelectedLayerData.features.length;
 
       return (
-        <Box sx={sxClasses.rightPanelContainer}>
+        <Box sx={sxClasses.rightPanelContainer} className="guide-content-container">
           <Grid container sx={sxClasses.rightPanelBtnHolder}>
             <Grid size={{ xs: 6 }} sx={{ alignSelf: 'center' }}>
               <Box>
@@ -723,22 +745,43 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
             </Grid>
             {memoSelectedLayerData?.features && memoSelectedLayerData.features.length > 1 && (
               <Grid size={{ xs: 6 }} className="buttonGroup">
+                {/* Navigation buttons use aria-disabled with manual styling to preserve keyboard focus when users reach first/last items */}
                 <Box sx={{ textAlign: 'right' }}>
                   <IconButton
+                    iconRef={prevButtonRef}
                     aria-label={t('details.previousFeatureBtn')}
                     tooltipPlacement="top"
-                    onClick={() => handleFeatureNavigateChange(-1)}
-                    disabled={currentFeatureIndex <= 0}
+                    onClick={() => {
+                      if (!isPrevDisabled) {
+                        handleFeatureNavigateChange(-1);
+                      }
+                    }}
+                    aria-disabled={isPrevDisabled}
+                    sx={{
+                      opacity: isPrevDisabled ? 0.5 : 1,
+                      cursor: isPrevDisabled ? 'not-allowed' : 'pointer',
+                      pointerEvents: isPrevDisabled ? 'none' : 'auto',
+                    }}
                     className="buttonOutline"
                   >
                     <ArrowBackIosOutlinedIcon />
                   </IconButton>
                   <IconButton
-                    sx={{ marginLeft: '16px' }}
+                    iconRef={nextButtonRef}
+                    sx={{
+                      marginLeft: '16px',
+                      opacity: isNextDisabled ? 0.5 : 1,
+                      cursor: isNextDisabled ? 'not-allowed' : 'pointer',
+                      pointerEvents: isNextDisabled ? 'none' : 'auto',
+                    }}
                     aria-label={t('details.nextFeatureBtn')}
                     tooltipPlacement="top"
-                    onClick={() => handleFeatureNavigateChange(1)}
-                    disabled={!memoSelectedLayerData?.features || currentFeatureIndex + 1 >= memoSelectedLayerData.features.length}
+                    onClick={() => {
+                      if (!isNextDisabled) {
+                        handleFeatureNavigateChange(1);
+                      }
+                    }}
+                    aria-disabled={isNextDisabled}
                     className="buttonOutline"
                   >
                     <ArrowForwardIosOutlinedIcon />
@@ -763,7 +806,7 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
       containerType={containerType}
       layoutSwitch={
         <Box sx={sxClasses.layoutSwitch}>
-          {!hideCoordinateInfoSwitch && <CoordinateInfoSwitch />}
+          {!hideCoordinateInfoSwitch && <CoordinateInfoSwitch disabled={selectedLayerPath === ''} />}
           <IconButton
             aria-label={t('details.clearAllfeatures')}
             tooltipPlacement="top"

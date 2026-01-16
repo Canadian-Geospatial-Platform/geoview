@@ -34,10 +34,9 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
       // Log
       logger.logTraceUseCallback('LAYERS-PANEL - showLayerDetailsPanel');
 
-      // Set the visibility and focus
+      // Just set visibility - focus will be handled automatically by useEffect
       responsiveLayoutRef.current?.setIsRightPanelVisible(true);
       responsiveLayoutRef.current?.setRightPanelFocus();
-      // set the focus item when layer item clicked.
       setSelectedFooterLayerListItemId(`${layerId}`);
     },
     [setSelectedFooterLayerListItemId]

@@ -242,6 +242,7 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
         enteringScreen: 225,
         // recommended when something is leaving screen
         leavingScreen: 195,
+        tooltipDelay: 1000,
         splash: 1500,
       },
       easing: {
@@ -295,6 +296,15 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
             borderStyle: 'solid',
             boxShadow: `0px 12px 9px -13px ${geoViewColors.bgColor.darken(0.2, 0.5)}`,
 
+            '&.unbordered': {
+              borderStyle: 'none',
+            },
+          },
+        },
+      },
+      MuiListItem: {
+        styleOverrides: {
+          root: {
             '&.layer-panel': {
               boxShadow: 'none',
               '&[data-layer-depth="0"], &:not([data-layer-depth])': {
@@ -309,7 +319,7 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
                 backgroundColor: 'unset',
               },
 
-              '& .MuiListItemButton-root': {
+              '& .MuiListItemButton-root:not(.Mui-focusVisible)': {
                 backgroundColor: 'transparent !important',
               },
 
@@ -341,10 +351,6 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
                   color: geoViewColors.info.main,
                 },
               },
-            },
-
-            '&.unbordered': {
-              borderStyle: 'none',
             },
           },
         },

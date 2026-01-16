@@ -61,6 +61,7 @@ declare module '@mui/material/styles/createPalette' {
 
 declare module '@mui/material/styles/createTransitions' {
   interface Duration {
+    tooltipDelay?: number;
     splash: number;
   }
 }
