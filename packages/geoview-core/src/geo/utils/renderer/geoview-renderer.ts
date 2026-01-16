@@ -843,7 +843,7 @@ export abstract class GeoviewRenderer {
     const visualVarsToApply = visualVariables || ('visualVariables' in styleSettings ? styleSettings.visualVariables : undefined);
 
     if (style && feature && visualVarsToApply) {
-      style = this.applyVisualVariables(style, feature, visualVarsToApply);
+      style = this.#applyVisualVariables(style, feature, visualVarsToApply);
     }
 
     return style;
@@ -884,7 +884,7 @@ export abstract class GeoviewRenderer {
     const visualVarsToApply = visualVariables || ('visualVariables' in styleSettings ? styleSettings.visualVariables : undefined);
 
     if (style && feature && visualVarsToApply) {
-      style = this.applyVisualVariables(style, feature, visualVarsToApply);
+      style = this.#applyVisualVariables(style, feature, visualVarsToApply);
     }
 
     return style;
@@ -1126,7 +1126,7 @@ export abstract class GeoviewRenderer {
     const visualVarsToApply = visualVariables || ('visualVariables' in styleSettings ? styleSettings.visualVariables : undefined);
 
     if (style && feature && visualVarsToApply) {
-      style = this.applyVisualVariables(style, feature, visualVarsToApply);
+      style = this.#applyVisualVariables(style, feature, visualVarsToApply);
     }
 
     return style;
@@ -1475,9 +1475,9 @@ export abstract class GeoviewRenderer {
    * @param {TypeLayerStyleVisualVariable[]} visualVariables - Visual variable configurations.
    * @param {TypeAliasLookup?} aliasLookup - Optional lookup table for field name aliases.
    * @returns {Style} The modified style with visual variables applied.
-   * @static
+   * @static @private
    */
-  static applyVisualVariables(style: Style, feature: Feature, visualVariables: TypeLayerStyleVisualVariable[]): Style {
+  static #applyVisualVariables(style: Style, feature: Feature, visualVariables: TypeLayerStyleVisualVariable[]): Style {
     if (!visualVariables || visualVariables.length === 0) return style;
 
     const modifiedStyle = style.clone();
@@ -1514,16 +1514,16 @@ export abstract class GeoviewRenderer {
       // Apply based on visual variable type
       switch (visualVar.type) {
         case 'colorInfo':
-          this.applyColorVisualVariable(modifiedStyle, dataValue, visualVar);
+          this.#applyColorVisualVariable(modifiedStyle, dataValue, visualVar);
           break;
         case 'sizeInfo':
-          this.applySizeVisualVariable(modifiedStyle, dataValue, visualVar);
+          this.#applySizeVisualVariable(modifiedStyle, dataValue, visualVar);
           break;
         case 'rotationInfo':
-          this.applyRotationVisualVariable(modifiedStyle, dataValue, visualVar);
+          this.#applyRotationVisualVariable(modifiedStyle, dataValue, visualVar);
           break;
         case 'opacityInfo':
-          this.applyOpacityVisualVariable(modifiedStyle, dataValue, visualVar);
+          this.#applyOpacityVisualVariable(modifiedStyle, dataValue, visualVar);
           break;
         default:
           break;
@@ -1539,9 +1539,9 @@ export abstract class GeoviewRenderer {
    * @param {Style} style - The style to modify.
    * @param {number} dataValue - The data value from the feature.
    * @param {TypeLayerStyleVisualVariable} visualVar - The visual variable configuration.
-   * @static
+   * @static @private
    */
-  static applyColorVisualVariable(style: Style, dataValue: number, visualVar: TypeLayerStyleVisualVariable): void {
+  static #applyColorVisualVariable(style: Style, dataValue: number, visualVar: TypeLayerStyleVisualVariable): void {
     if (!visualVar.stops || visualVar.stops.length < 2) return;
 
     // Find the two stops that bracket the data value
@@ -1600,9 +1600,9 @@ export abstract class GeoviewRenderer {
    * @param {Style} style - The style to modify.
    * @param {number} dataValue - The data value from the feature.
    * @param {TypeLayerStyleVisualVariable} visualVar - The visual variable configuration.
-   * @static
+   * @static @private
    */
-  static applySizeVisualVariable(style: Style, dataValue: number, visualVar: TypeLayerStyleVisualVariable): void {
+  static #applySizeVisualVariable(style: Style, dataValue: number, visualVar: TypeLayerStyleVisualVariable): void {
     let size: number | undefined;
 
     // Method 1: Using min/max data values and sizes
@@ -1669,9 +1669,9 @@ export abstract class GeoviewRenderer {
    * @param {Style} style - The style to modify.
    * @param {number} dataValue - The data value from the feature.
    * @param {TypeLayerStyleVisualVariable} visualVar - The visual variable configuration.
-   * @static
+   * @static @private
    */
-  static applyRotationVisualVariable(style: Style, dataValue: number, visualVar: TypeLayerStyleVisualVariable): void {
+  static #applyRotationVisualVariable(style: Style, dataValue: number, visualVar: TypeLayerStyleVisualVariable): void {
     const image = style.getImage();
     if (!image) return;
 
@@ -1699,9 +1699,9 @@ export abstract class GeoviewRenderer {
    * @param {Style} style - The style to modify.
    * @param {number} dataValue - The data value from the feature.
    * @param {TypeLayerStyleVisualVariable} visualVar - The visual variable configuration.
-   * @static
+   * @static @private
    */
-  static applyOpacityVisualVariable(style: Style, dataValue: number, visualVar: TypeLayerStyleVisualVariable): void {
+  static #applyOpacityVisualVariable(style: Style, dataValue: number, visualVar: TypeLayerStyleVisualVariable): void {
     if (!visualVar.stops || visualVar.stops.length < 2) return;
 
     const sortedStops = [...visualVar.stops].sort((a, b) => Number(a.value) - Number(b.value));
