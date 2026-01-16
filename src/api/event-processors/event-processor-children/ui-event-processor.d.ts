@@ -14,8 +14,8 @@ export declare class UIEventProcessor extends AbstractEventProcessor {
     static getNavBarComponents(mapId: string): TypeValidNavBarProps[];
     static getCorePackageComponents(mapId: string): TypeValidMapCorePackageProps[];
     static getFooterBarIsCollapsed(mapId: string): boolean;
-    static hideTab(mapId: string, tab: string): void;
-    static showTab(mapId: string, tab: string): void;
+    static hideTabButton(mapId: string, tab: string): void;
+    static showTabButton(mapId: string, tab: string): void;
     static setActiveFooterBarTab(mapId: string, id: string): void;
     static setActiveAppBarTab(mapId: string, tabId: string, isOpen: boolean, isFocusTrapped: boolean): void;
     static getActiveAppBarTab(mapId: string): ActiveAppBarTabType;

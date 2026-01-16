@@ -52,7 +52,7 @@ export declare class FooterBarApi {
      * Shows a tab by id.
      * @param {string} id - The id of the tab to be shown
      */
-    showTab(id: string): void;
+    showTabButton(id: string): void;
     /**
      * Selects a tab by id, if the id is not a tab, the footer bar will close
      * @param {string} id - The id of the tab to be selected

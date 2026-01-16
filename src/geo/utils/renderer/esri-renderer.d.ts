@@ -1,5 +1,12 @@
-import type { TypeKindOfVectorSettings, TypeFillStyle, TypeLineStyle, TypeLayerStyleConfig, TypeStyleGeometry, TypeSymbol } from '@/api/types/map-schema-types';
+import type { TypeKindOfVectorSettings, TypeFillStyle, TypeLineStyle, TypeLayerStyleConfig, TypeStyleGeometry, TypeSymbol, TypeLayerStyleVisualVariable } from '@/api/types/map-schema-types';
 export declare abstract class EsriRenderer {
+    #private;
+    /**
+     * Creates the GeoView style from the provided Esri renderer.
+     * @param {EsriBaseRenderer | undefined} renderer - ESRI renderer to convert.
+     * @returns {TypeStyleConfig | undefined} The Geoview style or undefined if it can not be created.
+     */
+    static createStylesFromEsriRenderer(renderer: EsriBaseRenderer | undefined): TypeLayerStyleConfig | undefined;
     /**
      * type guard function that redefines an EsriBaseRenderer as an EsriUniqueValueRenderer if the type attribute of the
      * verifyIfRenderer parameter is 'uniqueValue'. The type ascention applies only to the true block of the if clause that use
@@ -8,6 +15,7 @@ export declare abstract class EsriRenderer {
      * @param {EsriBaseRenderer} verifyIfRenderer - Polymorphic object to test in order to determine if the type ascention is valid.
      *
      * @returns {boolean} true if the type ascention is valid.
+     * @static
      */
     static esriRendererIsUniqueValue: (verifyIfRenderer: EsriBaseRenderer) => verifyIfRenderer is EsriUniqueValueRenderer;
     /**
@@ -17,6 +25,7 @@ export declare abstract class EsriRenderer {
      * @param {EsriBaseSymbol} verifyIfSymbol - Polymorphic object to test in order to determine if the type ascention is valid.
      *
      * @returns {boolean} true if the type ascention is valid.
+     * @static
      */
     static isSimpleMarkerSymbol: (verifyIfSymbol: EsriBaseSymbol) => verifyIfSymbol is EsriSimpleMarkerSymbol;
     /**
@@ -26,6 +35,7 @@ export declare abstract class EsriRenderer {
      * @param {EsriBaseSymbol} verifyIfSymbol - Polymorphic object to test in order to determine if the type ascention is valid.
      *
      * @returns {boolean} true if the type ascention is valid.
+     * @static
      */
     static isEsriSimpleFillSymbol: (verifyIfSymbol: EsriBaseSymbol) => verifyIfSymbol is EsriSimpleFillSymbol;
     /**
@@ -35,6 +45,7 @@ export declare abstract class EsriRenderer {
      * @param {EsriBaseSymbol} verifyIfSymbol - Polymorphic object to test in order to determine if the type ascention is valid.
      *
      * @returns {boolean} true if the type ascention is valid.
+     * @static
      */
     static isSimpleLineSymbol: (verifyIfSymbol: EsriBaseSymbol) => verifyIfSymbol is EsriSimpleLineSymbol;
     /**
@@ -44,6 +55,7 @@ export declare abstract class EsriRenderer {
      * @param {EsriBaseSymbol} verifyIfSymbol - Polymorphic object to test in order to determine if the type ascention is valid.
      *
      * @returns {boolean} true if the type ascention is valid.
+     * @static
      */
     static isPictureMarkerSymbol: (verifyIfSymbol: EsriBaseSymbol) => verifyIfSymbol is EsriPictureMarkerSymbol;
     /**
@@ -53,6 +65,7 @@ export declare abstract class EsriRenderer {
      * @param {EsriBaseRenderer} verifyIfRenderer - Polymorphic object to test in order to determine if the type ascention is valid.
      *
      * @returns {boolean} true if the type ascention is valid.
+     * @static
      */
     static esriRendererIsSimple: (verifyIfRenderer: EsriBaseRenderer) => verifyIfRenderer is EsriSimpleRenderer;
     /**
@@ -63,6 +76,7 @@ export declare abstract class EsriRenderer {
      * @param {EsriBaseRenderer} verifyIfRenderer - Polymorphic object to test in order to determine if the type ascention is valid.
      *
      * @returns {boolean} true if the type ascention is valid.
+     * @static
      */
     static esriRendererIsClassBreaks: (verifyIfRenderer: EsriBaseRenderer) => verifyIfRenderer is EsriClassBreakRenderer;
     /**
@@ -71,6 +85,7 @@ export declare abstract class EsriRenderer {
      * @param {EsriLineStyle} lineStyle - ESRI line style to convert.
      *
      * @returns {TypeLineStyle} The Geoview line style associated to the ESRI line style.
+     * @static
      */
     static convertLineStyle(lineStyle: EsriLineStyle): TypeLineStyle;
     /**
@@ -79,6 +94,7 @@ export declare abstract class EsriRenderer {
      * @param {EsriFillStyle} fillStyle - ESRI fill style to convert.
      *
      * @returns {TypeFillStyle} The Geoview fill style associated to the ESRI fill style.
+     * @static
      */
     static convertFillStyle(fillStyle: EsriFillStyle): TypeFillStyle;
     /**
@@ -87,6 +103,7 @@ export declare abstract class EsriRenderer {
      * @param {EsriSymbolStyle} symbolStyle - ESRI symbol style to convert.
      *
      * @returns {TypeSymbol} The Geoview symbol style associated to the ESRI symbol style.
+     * @static
      */
     static convertSymbolStyle(symbolStyle: EsriSymbolStyle): TypeSymbol;
     /**
@@ -95,6 +112,7 @@ export declare abstract class EsriRenderer {
      * @param {TypeEsriColor} color - ESRI color to convert.
      *
      * @returns {string} The Geoview color corresponding to the ESRI color.
+     * @static
      */
     static convertEsriColor(color: TypeEsriColor): string;
     /**
@@ -104,6 +122,7 @@ export declare abstract class EsriRenderer {
      *
      * @returns {TypeKindOfVectorSettings | undefined} The Geoview symbol corresponding to the ESRI symbol or undefined if
      * ESRI symbol is not handled.
+     * @static
      */
     static convertSymbol(symbol: EsriSymbol): TypeKindOfVectorSettings | undefined;
     /**
@@ -112,52 +131,14 @@ export declare abstract class EsriRenderer {
      * @param {TypeKindOfVectorSettings} settings - GeoView settings.
      *
      * @returns {TypeStyleGeometry | undefined} The Geoview style key or undefined if it can not be determined.
+     * @static
      */
     static getStyleGeometry(settings: TypeKindOfVectorSettings): TypeStyleGeometry | undefined;
-    /**
-     * Process ESRI unique value renderer and convert it to a GeoView style.
-     *
-     * @param {EsriUniqueValueRenderer} renderer - ESRI renderer to convert.
-     *
-     * @returns {TypeLayerStyleConfig | undefined} The Geoview style or undefined if it can not be created.
-     */
-    static processUniqueValueRenderer(renderer: EsriUniqueValueRenderer): TypeLayerStyleConfig | undefined;
-    /**
-     * Process ESRI simple renderer and convert it to a GeoView style.
-     *
-     * @param {EsriSimpleRenderer} renderer - ESRI renderer to convert.
-     *
-     * @returns {TypeLayerStyleConfig | undefined} The Geoview style or undefined if it can not be created.
-     */
-    static processSimpleRenderer(renderer: EsriSimpleRenderer): TypeLayerStyleConfig | undefined;
-    /**
-     * Process ESRI class break renderer and convert it to a GeoView style.
-     *
-     * @param {EsriClassBreakRenderer} renderer - ESRI renderer to convert.
-     *
-     * @returns {TypeLayerStyleConfig | undefined} The Geoview style or undefined if it can not be created.
-     */
-    static processClassBreakRenderer(renderer: EsriClassBreakRenderer): TypeLayerStyleConfig | undefined;
-    /**
-     * Get GeoView style from Esri renderer.
-     *
-     * @param {EsriBaseRenderer | undefined} renderer - ESRI renderer to convert.
-     *
-     * @returns {TypeStyleConfig | undefined} The Geoview style or undefined if it can not be created.
-     */
-    static getStyleFromEsriRenderer(renderer: EsriBaseRenderer | undefined): TypeLayerStyleConfig | undefined;
-    /** *****************************************************************************************************************************
-     * Parse the GeoView style using the Esri renderer.
-     *
-     * @param {EsriBaseRenderer} renderer - ESRI renderer to convert.
-     *
-     * @returns {TypeLayerStyleSettings | undefined} The Geoview style or undefined if it can not be created.
-     */
-    static createStyleUsingEsriRenderer(renderer: EsriBaseRenderer): TypeLayerStyleConfig | undefined;
 }
 export type EsriRendererTypes = 'uniqueValue' | 'simple' | 'classBreaks';
 export type EsriBaseRenderer = {
     type: EsriRendererTypes;
+    visualVariables?: TypeLayerStyleVisualVariable[];
 };
 type TypeEsriColor = [number, number, number, number];
 export interface EsriUniqueValueRenderer extends EsriBaseRenderer {

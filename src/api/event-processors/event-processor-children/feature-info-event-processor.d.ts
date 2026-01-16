@@ -1,4 +1,3 @@
-import type { EventType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
@@ -9,6 +8,7 @@ import type { GeoviewStoreType } from '@/core/stores/geoview-store';
  */
 export declare class FeatureInfoEventProcessor extends AbstractEventProcessor {
     #private;
+    static TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH: number;
     /**
      * Overrides initialization of the GeoChart Event Processor
      * @param {GeoviewStoreType} store The store associated with the GeoChart Event Processor
@@ -22,13 +22,13 @@ export declare class FeatureInfoEventProcessor extends AbstractEventProcessor {
      */
     protected static getFeatureInfoState(mapId: string): IFeatureInfoState;
     /**
-     * Get the selectedLayerPath value
+     * Gets the selectedLayerPath value
      * @param {string} mapId - The map identifier
      * @returns {string} the selected layer path
      */
     static getSelectedLayerPath(mapId: string): string;
     /**
-     * GSt the selectedLayerPath value
+     * Sets the selectedLayerPath value
      * @param {string} mapId - The map identifier
      * @param {string} layerPath - The layer path to select
      */
@@ -45,9 +45,8 @@ export declare class FeatureInfoEventProcessor extends AbstractEventProcessor {
      * removing the higlight and the click marker if selected layer path is the reset path
      * @param {string} mapId - The map identifier
      * @param {string} layerPath - The layer path to delete features from resultSet
-     * @param {EventType} eventType - The event that triggered the reset.
      */
-    static resetResultSet(mapId: string, layerPath: string, eventType?: EventType): void;
+    static resetResultSet(mapId: string, layerPath: string): void;
     /**
      * Deletes the specified layer path from the layer sets in the store. The update of the array will also trigger an update in a batched manner.
      * @param {string} mapId - The map identifier
@@ -56,14 +55,23 @@ export declare class FeatureInfoEventProcessor extends AbstractEventProcessor {
      */
     static deleteFeatureInfo(mapId: string, layerPath: string): void;
     /**
-     * Propagates feature info layer sets to the store. The update of the array will also trigger an update in a batched manner.
-     *
-     * @param {string} mapId - The map identifier of the modified result set.
-     * @param {EventType} eventType - The event type that triggered the layer set update.
-     * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry being propagated.
-     * @returns {Promise<void>}
+     * Repeats the last feature info query if any.
+     * @param {string} mapId - The map identifier
+     * @returns {void}
+     * @static
      */
-    static propagateFeatureInfoToStore(mapId: string, eventType: EventType, resultSetEntry: TypeFeatureInfoResultSetEntry): Promise<void>;
+    static repeatLastQuery(mapId: string): void;
+    /**
+     * Switch the open panel to details when a map click occurs, if it is not already geochart or details.
+     * @param {string} mapId - The map identifier of the modified result set.
+     */
+    static openDetailsPanelOnMapClick(mapId: string): void;
+    /**
+     * Propagates feature info layer sets to the store. The update of the array will also trigger an update in a batched manner.
+     * @param {string} mapId - The map identifier of the modified result set.
+     * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry being propagated.
+     */
+    static propagateFeatureInfoToStore(mapId: string, resultSetEntry: TypeFeatureInfoResultSetEntry): void;
     static createCoordinateInfoLayer(mapId: string, features?: TypeFeatureInfoEntry[]): void;
     /**
      * Queries coordinate information from endpoints

@@ -4,10 +4,11 @@ import type { Extent } from '@/api/types/map-schema-types';
 import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 /**
- * Abstract Base Layer managing an OpenLayer layer, including a layer group.
+ * Abstract Base GV Layer managing an OpenLayer layer, including a layer group.
  */
-export declare abstract class AbstractBaseLayer {
+export declare abstract class AbstractBaseGVLayer {
     #private;
     /** Indicates if the layer has become in loaded status at least once already */
     loadedOnce: boolean;
@@ -119,6 +120,20 @@ export declare abstract class AbstractBaseLayer {
      */
     getVisible(): boolean;
     /**
+     * Determines whether this layer is visible, taking into account the visibility
+     * of all its parent groups. A layer is considered visible only if:
+     *   - the layer itself is visible, and
+     *   - every parent GVGroupLayer up the hierarchy is also visible.
+     * This function walks upward through the group layer tree until it reaches
+     * the root, returning `false` immediately if any parent is not visible.
+     * @param {GVGroupLayer[]} groupLayers - The top-level group layers from which
+     *   the layer hierarchy is searched. This must represent the root collection
+     *   of the layer tree.
+     * @returns {boolean} `true` if this layer and all its parent groups are visible;
+     *   otherwise `false`.
+     */
+    getVisibleIncludingParents(groupLayers: GVGroupLayer[]): boolean;
+    /**
      * Sets the visibility of the layer (true or false).
      * @param {boolean} layerVisibility The visibility of the layer.
      */
@@ -149,6 +164,17 @@ export declare abstract class AbstractBaseLayer {
      * @returns {boolean} If the layer is visible at this zoom level
      */
     inVisibleRange(zoom: number): boolean;
+    /**
+     * Returns the direct parent GVGroupLayer of this layer, if any.
+     * This method searches the provided root group layer collection to locate
+     * the group that directly contains this layer. If the layer is nested
+     * inside multiple groups, only the immediate parent group is returned.
+     * @param {GVGroupLayer[]} groupLayers - The root-level group layers to
+     *   search through when looking for this layer’s parent.
+     * @returns {GVGroupLayer | undefined} The direct parent group layer, or
+     *   `undefined` if this layer is not a child of any group.
+     */
+    getParent(groupLayers: GVGroupLayer[]): GVGroupLayer | undefined;
     /**
      * Registers a layer name changed event handler.
      * @param {LayerNameChangedDelegate} callback - The callback to be executed whenever the event is emitted
@@ -189,7 +215,7 @@ export type LayerNameChangedEvent = {
 /**
  * Define a delegate for the event handler function signature.
  */
-export type LayerNameChangedDelegate = EventDelegateBase<AbstractBaseLayer, LayerNameChangedEvent, void>;
+export type LayerNameChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, LayerNameChangedEvent, void>;
 /**
  * Define an event for the delegate
  */
@@ -199,16 +225,15 @@ export type VisibleChangedEvent = {
 /**
  * Define a delegate for the event handler function signature
  */
-export type VisibleChangedDelegate = EventDelegateBase<AbstractBaseLayer, VisibleChangedEvent, void>;
-/**
- * Define a delegate for the event handler function signature
- */
-export type LayerOpacityChangedDelegate = EventDelegateBase<AbstractBaseLayer, LayerOpacityChangedEvent, void>;
+export type VisibleChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, VisibleChangedEvent, void>;
 /**
  * Define an event for the delegate
  */
 export type LayerOpacityChangedEvent = {
-    layerPath: string;
     opacity: number;
 };
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type LayerOpacityChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, LayerOpacityChangedEvent, void>;
 //# sourceMappingURL=abstract-base-layer.d.ts.map

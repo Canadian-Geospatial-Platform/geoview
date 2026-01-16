@@ -8,8 +8,6 @@ export interface GroupLayerEntryConfigProps extends ConfigBaseClassProps {
  * Type used to define a layer group.
  */
 export declare class GroupLayerEntryConfig extends ConfigBaseClass {
-    /** Source settings to apply to the GeoView layer source at creation time is not used by groups. */
-    source: never;
     /** The list of layer entry configurations to use from the GeoView layer group. */
     listOfLayerEntryConfig: TypeLayerEntryConfig[];
     /**

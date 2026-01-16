@@ -38,9 +38,8 @@ export interface IFeatureInfoState {
  */
 export declare function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFeatureInfoState;
 export type TypeFeatureInfoSetEntry = {
-    eventListenerEnabled: boolean;
     queryStatus: TypeQueryStatus;
-    features: TypeFeatureInfoEntry[] | undefined | null;
+    features: TypeFeatureInfoEntry[] | undefined;
 };
 export type TypeFeatureInfoResultSetEntry = TypeResultSetEntry & TypeFeatureInfoSetEntry;
 export type TypeFeatureInfoResultSet = TypeResultSet<TypeFeatureInfoResultSetEntry>;
@@ -51,7 +50,6 @@ export type TypeHoverFeatureInfo = {
     nameField: string | null;
 } | undefined | null;
 export type TypeHoverSetEntry = {
-    eventListenerEnabled: boolean;
     queryStatus: TypeQueryStatus;
     feature: TypeHoverFeatureInfo;
 };

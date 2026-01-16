@@ -10,13 +10,17 @@ export interface GeoTIFFLayerEntryConfigProps extends AbstractBaseLayerEntryConf
  * Type used to define a GeoTIFF layer to display on the map.
  */
 export declare class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfig {
-    /** Source settings to apply to the GeoTIFF layer source at creation time. */
-    source: TypeSourceGeoTIFFInitialConfig;
     /**
      * The class constructor.
      * @param {GeoTIFFLayerEntryConfigProps} layerConfig -  The layer configuration we want to instanciate.
      */
     constructor(layerConfig: GeoTIFFLayerEntryConfigProps);
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {TypeSourceGeoTIFFInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+     */
+    getSource(): TypeSourceGeoTIFFInitialConfig;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      * @override

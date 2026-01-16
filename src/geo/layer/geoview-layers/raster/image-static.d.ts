@@ -1,3 +1,4 @@
+import type { Projection as OLProjection } from 'ol/proj';
 import Static from 'ol/source/ImageStatic';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
@@ -36,9 +37,11 @@ export declare class ImageStatic extends AbstractGeoViewRaster {
     /**
      * Overrides the way the layer metadata is processed.
      * @param {ImageStaticLayerEntryConfig} layerConfig - The layer entry configuration to process.
+     * @param {OLProjection?} [mapProjection] - The map projection.
+     * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
      * @returns {Promise<ImageStaticLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
      */
-    protected onProcessLayerMetadata(layerConfig: ImageStaticLayerEntryConfig): Promise<ImageStaticLayerEntryConfig>;
+    protected onProcessLayerMetadata(layerConfig: ImageStaticLayerEntryConfig, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<ImageStaticLayerEntryConfig>;
     /**
      * Overrides the creation of the GV Layer
      * @param {ImageStaticLayerEntryConfig} layerConfig - The layer entry configuration.
@@ -53,21 +56,24 @@ export declare class ImageStatic extends AbstractGeoViewRaster {
      * @param {string} geoviewLayerId - A unique identifier for the layer.
      * @param {string} geoviewLayerName - The display name of the layer.
      * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+     * @param {boolean?} [isTimeAware] - Indicates whether the layer supports time-based filtering.
      * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+     * @static
      */
-    static initGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string): Promise<TypeGeoviewLayerConfig>;
+    static initGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware?: boolean): Promise<TypeGeoviewLayerConfig>;
     /**
      * Creates a configuration object for a Static Image layer.
      * This function constructs a `TypeImageStaticLayerConfig` object that describes an Static Image layer
      * and its associated entry configurations based on the provided parameters.
      * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
      * @param {string} geoviewLayerName - The display name of the GeoView layer.
-     * @param {string} metadataAccessPath - The URL or path to access metadata.
-     * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+     * @param {string | undefined} metadataAccessPath - The URL or path to access metadata.
+     * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
      * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
      * @returns {TypeImageStaticLayerConfig} The constructed configuration object for the Static Image layer.
+     * @static
      */
-    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean, layerEntries: TypeLayerEntryShell[]): TypeImageStaticLayerConfig;
+    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string | undefined, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeImageStaticLayerConfig;
     /**
      * Processes an ImageStatic GeoviewLayerConfig and returns a promise
      * that resolves to an array of `ConfigBaseClass` layer entry configurations.
@@ -84,6 +90,7 @@ export declare class ImageStatic extends AbstractGeoViewRaster {
      * @param {Extent} sourceExtent - Indicates the extent where the static image should be.
      * @param {number} sourceProjection - Indicates the projection used for the sourceExtent.
      * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
+     * @static
      */
     static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: string[], isTimeAware: boolean, sourceExtent: Extent, sourceProjection: TypeValidSourceProjectionCodes): Promise<ConfigBaseClass[]>;
     /**
@@ -93,6 +100,7 @@ export declare class ImageStatic extends AbstractGeoViewRaster {
      * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
      * @throws {LayerEntryConfigParameterExtentNotDefinedInSourceError} When the source extent isn't defined.
      * @throws {LayerEntryConfigParameterProjectionNotDefinedInSourceError} When the source projection isn't defined.
+     * @static
      */
     static createImageStaticSource(layerConfig: ImageStaticLayerEntryConfig): Static;
 }

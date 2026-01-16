@@ -5,9 +5,11 @@ import type { FitOptions } from 'ol/View';
 import type { Size } from 'ol/size';
 import type { Pixel } from 'ol/pixel';
 import type { TypeBasemapOptions, TypeHighlightColors, TypeInteraction, TypeMapViewSettings, TypeValidMapProjectionCodes, TypeZoomAndCenter, TypeFeatureInfoEntry, TypePointMarker } from '@/api/types/map-schema-types';
-import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
+import { type TypeSetStore, type TypeGetStore } from '@/core/stores/geoview-store';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
+import type { Draw } from '@/geo/interaction/draw';
+import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import type { TypeHoverFeatureInfo } from './feature-info-state';
 export declare const DEFAULT_PROJECTION: TypeValidMapProjectionCodes;
@@ -52,6 +54,10 @@ export interface IMapState {
     setDefaultConfigValues: (config: TypeMapFeaturesConfig) => void;
     actions: {
         createBasemapFromOptions: (basemapOptions: TypeBasemapOptions) => Promise<void>;
+        createGeometryGroup: (groupName: string) => void;
+        deleteGeometriesFromGroup: (groupName: string) => void;
+        forceMapToRender: () => void;
+        initDrawInteractions: (geomGroupKey: string, type: string, style: TypeFeatureStyle) => Draw;
         getMapLayerParentHidden(layerPath: string): boolean;
         isLayerHiddenOnMap(layerPath: string): boolean;
         getPixelFromCoordinate: (coord: Coordinate) => Pixel;
@@ -61,6 +67,8 @@ export interface IMapState {
         addHighlightedFeature: (feature: TypeFeatureInfoEntry) => void;
         removeHighlightedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
         removeLayerHighlights: (layerPath: string) => void;
+        addOverlay: (overlay: Overlay) => void;
+        removeOverlay: (overlay: Overlay) => void;
         addPointMarkers: (group: string, pointMarkers: TypePointMarker[]) => void;
         removePointMarkersOrGroup: (group: string, idsOrCoordinates?: string[] | Coordinate[]) => void;
         reorderLayer: (layerPath: string, move: number) => void;
@@ -139,9 +147,10 @@ export interface TypeNorthArrow {
     isNorthVisible: boolean;
 }
 export interface TypeOrderedLayerInfo {
-    hoverable?: boolean;
     layerPath: string;
-    queryable?: boolean;
+    hoverable?: boolean;
+    queryableSource?: boolean;
+    queryableState?: boolean;
     visible: boolean;
     inVisibleRange: boolean;
     legendCollapsed: boolean;
@@ -182,6 +191,7 @@ export declare const useMapSelectorLayerParentHidden: (layerPath: string) => boo
 export declare const useMapSelectorLayerInVisibleRange: (layerPath: string) => boolean;
 export declare const useMapSelectorIsLayerHiddenOnMap: (layerPath: string) => boolean;
 export declare const useMapSelectorLayerLegendCollapsed: (layerPath: string) => boolean;
+export declare const useMapSelectorLayerQueryable: (layerPaths: string[]) => Record<string, boolean>;
 export declare const useMapAllLayersVisibleToggle: () => boolean;
 export declare const useMapHasCollapsibleLayersToggle: () => boolean;
 export declare const useMapAllLayersCollapsedToggle: () => boolean;

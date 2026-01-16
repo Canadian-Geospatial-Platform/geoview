@@ -41,6 +41,20 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      */
     static getLayerBounds(mapId: string, layerPath: string): Extent | undefined;
     /**
+     * Calculates the geographic bounds of a layer identified by its layer path
+     * and stores the result in the layer's state within the legend.
+     * This method:
+     *  1. Calls the MapViewer API to compute the layer's bounds.
+     *  2. Validates that the computed bounds are finite.
+     *  3. Locates the corresponding legend layer by its path.
+     *  4. Updates the layer's `bounds` property.
+     *  5. Persists the updated legend state.
+     * @param {string} mapId - Identifier of the map instance containing the layer.
+     * @param {string} layerPath - The unique hierarchical path of the layer whose
+     *   bounds should be calculated and stored.
+     */
+    static calculateLayerBoundsAndSaveToStore(mapId: string, layerPath: string): void;
+    /**
      * Retrieves the default filter configuration for a specific layer entry.
      *
      * @param {string} mapId - The unique identifier of the map instance.
@@ -73,6 +87,40 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      */
     static setLayerBounds(mapId: string, layerPath: string, bounds: Extent | undefined): void;
     /**
+     * Sets the layer queryable.
+     * @param {string} mapId - The ID of the map.
+     * @param {string} layerPath - The layer path of the layer to change.
+     * @param {boolean} queryable - The queryable state to set.
+     */
+    static setLayerQueryable(mapId: string, layerPath: string, queryable: boolean): void;
+    /**
+     * Updates the "queryable" state of a layer in the store for a given map.
+     * Finds the layer by its `layerPath` in the legend layers of the specified `mapId`.
+     * If the layer exists, updates its `queryable` property and writes the updated
+     * legend layers back to the store.
+     * @param {string} mapId - The ID of the map whose layer state should be updated.
+     * @param {string} layerPath - The unique path/identifier of the layer to update.
+     * @param {boolean} queryable - The new queryable state to set for the layer.
+     */
+    static setLayerQueryableInStore(mapId: string, layerPath: string, queryable: boolean): void;
+    /**
+     * Sets the layer hoverable.
+     * @param {string} mapId - The ID of the map.
+     * @param {string} layerPath - The layer path of the layer to change.
+     * @param {boolean} queryable - The queryable state to set.
+     */
+    static setLayerHoverable(mapId: string, layerPath: string, queryable: boolean): void;
+    /**
+     * Updates the "hoverable" state of a layer in the store for a given map.
+     * Finds the layer by its `layerPath` in the legend layers of the specified `mapId`.
+     * If the layer exists, updates its `hoverable` property and writes the updated
+     * legend layers back to the store.
+     * @param {string} mapId - The ID of the map whose layer state should be updated.
+     * @param {string} layerPath - The unique path/identifier of the layer to update.
+     * @param {boolean} hoverable - The new hoverable state to set for the layer.
+     */
+    static setLayerHoverableInStore(mapId: string, layerPath: string, hoverable: boolean): void;
+    /**
      * Sets the layersAreLoading flag in the store
      * @param {string} mapId - The map id
      * @param {boolean} areLoading - Indicator if any layer is currently loading
@@ -95,10 +143,9 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      * @param {string} layerPath - The path to the layer.
      * @returns {TimeDimension | undefined} - The temporal dimension information of the layer, or `undefined` if not available.
      * @description
-     * This method fetches the Geoview layer for the specified layer path and checks if it has a `getTimeDimension` method.
+     * This method fetches the Geoview layer for the specified layer path (if it exists) and checks if it has a `getTimeDimension` method.
      * If the method exists, it retrieves the temporal dimension information for the layer.
      * If the layer doesn't support temporal dimensions, the method returns `undefined`.
-     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
      */
     static getLayerTimeDimension(mapId: string, layerPath: string): TimeDimension | undefined;
     static getLayerIconImage(layerLegend: TypeLegend | null | undefined): TypeLegendLayerItem[] | undefined;
@@ -184,23 +231,8 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      */
     static setLayerOpacity(mapId: string, layerPath: string, opacity: number, updateLegendLayers?: boolean): void;
     /**
-     * Sets the layer hoverable capacity.
-     * @param {string} mapId - The ID of the map.
-     * @param {string} layerPath - The layer path of the layer to change.
-     * @param {boolean} hoverable - The hoverable state to set.
-     */
-    static setLayerHoverable(mapId: string, layerPath: string, hoverable: boolean): void;
-    /**
-     * Sets the layer queryable capacity.
-     * @param {string} mapId - The ID of the map.
-     * @param {string} layerPath - The layer path of the layer to change.
-     * @param {boolean} queryable - The queryable state to set.
-     */
-    static setLayerQueryable(mapId: string, layerPath: string, queryable: boolean): void;
-    /**
      * Filters features based on their visibility settings defined in the layer's unique value or class break style configuration.
      *
-     * @static
      * @param {string} mapId - The unique identifier of the map instance
      * @param {string} layerPath - The path to the layer in the map configuration
      * @param {TypeFeatureInfoEntry[]} features - Array of features to filter
@@ -213,8 +245,9 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      * - Features matching visible styles are included
      * - Features matching invisible styles are excluded
      * - Features with no matching style follow the defaultVisible setting
+     * @static
      */
-    static getFeatureVisibleFromClassVibility(mapId: string, layerPath: string, features: TypeFeatureInfoEntry[]): TypeFeatureInfoEntry[];
+    static processClassVisibility(mapId: string, layerPath: string, features: TypeFeatureInfoEntry[]): TypeFeatureInfoEntry[];
     /**
      * Sorts legend layers children recursively in given legend layers list.
      * @param {string} mapId - The ID of the map.

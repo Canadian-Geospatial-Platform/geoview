@@ -10,12 +10,23 @@ export interface VectorTilesLayerEntryConfigProps extends AbstractBaseLayerEntry
 }
 export declare class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
     #private;
-    source: TypeSourceTileInitialConfig;
     /**
      * The class constructor.
      * @param {VectorTilesLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
      */
     constructor(layerConfig: VectorTilesLayerEntryConfigProps);
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {TypeSourceTileInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+     */
+    getSource(): TypeSourceTileInitialConfig;
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {TypeMetadataVectorTiles | undefined} The strongly-typed layer configuration specific to this layer entry config.
+     */
+    getServiceMetadata(): TypeMetadataVectorTiles | undefined;
     /**
      * Gets the style url or undefined.
      */
@@ -25,12 +36,6 @@ export declare class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
      * @param {string} styleUrl - The style url.
      */
     setStyleUrl(styleUrl: string): void;
-    /**
-     * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @override
-     * @returns {TypeMetadataVectorTiles | undefined} The strongly-typed layer configuration specific to this layer entry config.
-     */
-    getServiceMetadata(): TypeMetadataVectorTiles | undefined;
     /**
      * Helper function to support when a layerConfig is either a class instance or a regular json object.
      * @param {ConfigVectorTilesClassOrType | undefined} layerConfig - The layer config class instance or regular json object.

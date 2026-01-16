@@ -36,7 +36,7 @@ export interface TypeTabsProps {
     onOpenKeyboard?: (uiFocus: FocusItemProps) => void;
     onCloseKeyboard?: () => void;
     containerType?: TypeContainerBox;
-    appHeight: number;
+    appHeight: string;
     hiddenTabs: string[];
     isFullScreen: boolean;
 }

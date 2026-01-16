@@ -207,6 +207,24 @@ export declare class MapViewer {
      */
     setTheme(displayTheme: TypeDisplayTheme): void;
     /**
+     * Gets map scale for Web Mercator or Lambert Conformal Conic projections.
+     * @returns {number} The map scale (e.g. 50000 for 1:50,000)
+     */
+    getMapScale(): number | undefined;
+    /**
+     * Converts a zoom level to a map scale.
+     * @param {number} zoom - The desired zoom (e.g. 50000 for 1:50,000)
+     * @returns {number} The closest scale for the given zoom number
+     */
+    getMapScaleFromZoom(zoom: number): number | undefined;
+    /**
+     * Converts a map scale to a zoom level.
+     * @param {number | undefined} targetScale - The desired scale (e.g. 50000 for 1:50,000)
+     * @param {number?} [dpiValue] - The optional DPI value to use for calculation
+     * @returns {number} The closest zoom level for the given scale
+     */
+    getMapZoomFromScale(targetScale: number | undefined, dpiValue?: number): number | undefined;
+    /**
      * Set the map zoom level.
      *
      * @param {number} zoom - New zoom level
@@ -265,10 +283,10 @@ export declare class MapViewer {
      */
     emitMapSingleClick(clickCoordinates: MapSingleClickEvent): void;
     /**
-     * Simulate a map click eith store and ui update
-     * @param {MapSingleClickEvent} clickCoordinates - The clicked coordinates to simulate.
+     * Simulate a map click and return promises of store update and ui update.
+     * @param {Coordinate} lonlat - The lonlat coordinates to simulate.
      */
-    simulateMapClick(clickCoordinates: MapSingleClickEvent): void;
+    simulateMapClick(lonlat: Coordinate): SimulatedMapClick;
     /**
      * Loops through all geoview layers and refresh their respective source.
      * Use this function on projection change or other viewer modification which may affect rendering.
@@ -761,4 +779,13 @@ export type MapLanguageChangedEvent = {
  * Define a delegate for the event handler function signature
  */
 export type MapLanguageChangedDelegate = EventDelegateBase<MapViewer, MapLanguageChangedEvent, void>;
+/**
+ * Define a return type for a map click simulation to be able to await on different promises.
+ */
+export type SimulatedMapClick = {
+    /** Promise resolving when the query of the map click is complete */
+    promiseQuery: Promise<void>;
+    /** Promise resolving when the query of the map click is complete and the UI has been updated */
+    promiseQueryBatched: Promise<void>;
+};
 //# sourceMappingURL=map-viewer.d.ts.map

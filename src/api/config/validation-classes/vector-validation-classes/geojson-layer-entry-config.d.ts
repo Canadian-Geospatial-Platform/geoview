@@ -7,12 +7,17 @@ export interface GeoJSONLayerEntryConfigProps extends VectorLayerEntryConfigProp
     source?: TypeSourceGeoJSONInitialConfig;
 }
 export declare class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
-    source: TypeSourceGeoJSONInitialConfig;
     /**
      * The class constructor.
      * @param {GeoJSONLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
      */
     constructor(layerConfig: GeoJSONLayerEntryConfigProps);
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {TypeSourceGeoJSONInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+     */
+    getSource(): TypeSourceGeoJSONInitialConfig;
     /**
      * Type guard that checks whether the given configuration (class instance or plain object)
      * represents a GeoJSON layer type.
