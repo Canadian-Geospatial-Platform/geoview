@@ -81,6 +81,7 @@ export abstract class GeoviewRenderer {
    * @param {boolean} increment - True, if we want to skip to next color
    *
    * @returns {string} The current default color string.
+   * @static
    */
   // TODO: MINOR - Create a mechanism to have one counter by map if needed with a small class who reuse the static function
   static getDefaultColor(alpha: number, increment: boolean = false): string {
@@ -97,6 +98,7 @@ export abstract class GeoviewRenderer {
    * @param {FeatureLike} feature - The feature to check
    *
    * @returns {TypeStyleGeometry} The type of geometry (Point, LineString, Polygon).
+   * @static
    */
   static getGeometryType(feature: FeatureLike): TypeStyleGeometry {
     const geometryType = feature.getGeometry()?.getType();
@@ -119,6 +121,7 @@ export abstract class GeoviewRenderer {
    * @param {string} base64 - The base64-encoded SVG string, optionally including
    *   query parameters (e.g. `"base64:...?...fill=%23ff0000&outline=%23000000"`).
    * @returns {string} The decoded, cleaned, and parameter-substituted SVG XML string.
+   * @static
    */
   static base64ToSVGString(base64: string): string {
     if (!base64) return base64;
@@ -162,6 +165,7 @@ export abstract class GeoviewRenderer {
    * embed or transmit SVG data in formats where raw XML is not permitted.
    * @param {string} svgXML - The raw SVG XML string to encode.
    * @returns {string} A base64-encoded representation of the SVG string.
+   * @static
    */
   static SVGStringToBase64(svgXML: string): string {
     return window.btoa(svgXML);
@@ -173,6 +177,7 @@ export abstract class GeoviewRenderer {
    * @param {string} src - Source information (base64 image) of the image to load.
    *
    * @returns {Promise<HTMLImageElement>} A promise that the image is loaded.
+   * @static
    */
   static loadImage(src: string): Promise<HTMLImageElement | null> {
     const promisedImage = new Promise<HTMLImageElement | null>((resolve) => {
@@ -195,6 +200,7 @@ export abstract class GeoviewRenderer {
    * @param {Style} pointStyle - Style associated to the point symbol.
    *
    * @returns {Promise<HTMLCanvasElement>} A promise that the canvas is created.
+   * @static
    */
   static async createIconCanvas(pointStyle?: Style): Promise<HTMLCanvasElement | null> {
     try {
@@ -227,6 +233,7 @@ export abstract class GeoviewRenderer {
    * @param {Style} pointStyle - Style associated to the point symbol.
    *
    * @returns {Promise<HTMLCanvasElement>} A promise that the canvas is created.
+   * @static
    */
   static createPointCanvas(pointStyle?: Style): HTMLCanvasElement {
     const size = pointStyle?.getImage()?.getSize();
@@ -247,6 +254,7 @@ export abstract class GeoviewRenderer {
    * @param {Style} lineStringStyle - Style associated to the lineString.
    *
    * @returns {Promise<HTMLCanvasElement>} A promise that the canvas is created.
+   * @static
    */
   static createLineStringCanvas(lineStringStyle?: Style): HTMLCanvasElement {
     const drawingCanvas = document.createElement('canvas');
@@ -277,6 +285,7 @@ export abstract class GeoviewRenderer {
    * @param {Style} polygonStyle - Style associated to the polygon.
    *
    * @returns {Promise<HTMLCanvasElement>} A promise that the canvas is created.
+   * @static
    */
   static createPolygonCanvas(polygonStyle?: Style): HTMLCanvasElement {
     const drawingCanvas = document.createElement('canvas');
@@ -317,6 +326,7 @@ export abstract class GeoviewRenderer {
    * for the stroke options creation.
    *
    * @returns {StrokeOptions} The stroke options created.
+   * @static
    */
   static createStrokeOptions(settings: TypeSimpleSymbolVectorConfig | TypeLineStringVectorConfig | TypePolygonVectorConfig): StrokeOptions {
     // eslint-disable-next-line no-param-reassign
@@ -346,6 +356,7 @@ export abstract class GeoviewRenderer {
    *
    * @param {FilterNodeType} operator - Operator to execute.
    * @param {FilterNodeType[]} dataStack - Data stack to use for the operator execution.
+   * @static
    */
   static executeOperator(operator: FilterNodeType, dataStack: FilterNodeType[]): void {
     if (operator.nodeType === NodeType.binary) {
@@ -542,6 +553,7 @@ export abstract class GeoviewRenderer {
    * @param {FilterNodeType[]} filterEquation - Filter used to find the visibility value to return.
    *
    * @returns {boolean | undefined} The visibility flag for the feature specified.
+   * @static
    */
   static featureIsNotVisible(feature: Feature, filterEquation: FilterNodeType[]): boolean | undefined {
     const operatorStack: FilterNodeType[] = [];
@@ -622,6 +634,7 @@ export abstract class GeoviewRenderer {
    * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processCircleSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
     // eslint-disable-next-line no-param-reassign
@@ -646,6 +659,7 @@ export abstract class GeoviewRenderer {
    * @param {number} angle - Angle to use for the symbol creation.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processStarShapeSymbol(settings: TypeSimpleSymbolVectorConfig, points: number, angle: number): Style | undefined {
     // eslint-disable-next-line no-param-reassign
@@ -673,6 +687,7 @@ export abstract class GeoviewRenderer {
    * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processStarSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
     return this.processStarShapeSymbol(settings, 5, 0);
@@ -684,6 +699,7 @@ export abstract class GeoviewRenderer {
    * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processXSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
     return this.processStarShapeSymbol(settings, 4, Math.PI / 4);
@@ -695,6 +711,7 @@ export abstract class GeoviewRenderer {
    * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processPlusSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
     return this.processStarShapeSymbol(settings, 4, 0);
@@ -709,6 +726,7 @@ export abstract class GeoviewRenderer {
    * @param {[number, number]} scale - Scale to use for the symbol creation.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processRegularShape(
     settings: TypeSimpleSymbolVectorConfig,
@@ -741,6 +759,7 @@ export abstract class GeoviewRenderer {
    * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processSquareSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
     return this.processRegularShape(settings, 4, Math.PI / 4, [1, 1]);
@@ -752,6 +771,7 @@ export abstract class GeoviewRenderer {
    * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processDiamondSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
     return this.processRegularShape(settings, 4, 0, [0.75, 1]);
@@ -763,6 +783,7 @@ export abstract class GeoviewRenderer {
    * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processTriangleSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined {
     return this.processRegularShape(settings, 3, 0, [1, 1]);
@@ -774,6 +795,7 @@ export abstract class GeoviewRenderer {
    * @param {TypeIconSymbolVectorConfig} settings - Settings to use for the Style creation.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processIconSymbol(settings: TypeIconSymbolVectorConfig): Style | undefined {
     const iconOptions: IconOptions = {};
@@ -796,6 +818,7 @@ export abstract class GeoviewRenderer {
    * @param {TypeStyleProcessorOptions} options - Optional processing options.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processSimplePoint(
     styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
@@ -834,6 +857,7 @@ export abstract class GeoviewRenderer {
    * @param {TypeStyleProcessorOptions} options - Optional processing options.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processSimpleLineString(
     styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
@@ -872,6 +896,7 @@ export abstract class GeoviewRenderer {
    * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processSolidFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
     // eslint-disable-next-line no-param-reassign
@@ -891,6 +916,7 @@ export abstract class GeoviewRenderer {
    * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processNullFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
     // eslint-disable-next-line no-param-reassign
@@ -911,6 +937,7 @@ export abstract class GeoviewRenderer {
    * @param {FillPatternLine[]} FillPatternLines - Fill pattern lines needed to create the fill.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processPatternFill(
     settings: TypePolygonVectorConfig,
@@ -982,6 +1009,7 @@ export abstract class GeoviewRenderer {
    * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processBackwardDiagonalFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
     return this.processPatternFill(settings, this.FillPatternSettings.backwardDiagonal, geometry);
@@ -993,6 +1021,7 @@ export abstract class GeoviewRenderer {
    * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processForwardDiagonalFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
     return this.processPatternFill(settings, this.FillPatternSettings.forwardDiagonal, geometry);
@@ -1004,6 +1033,7 @@ export abstract class GeoviewRenderer {
    * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processCrossFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
     return this.processPatternFill(settings, this.FillPatternSettings.cross, geometry);
@@ -1015,6 +1045,7 @@ export abstract class GeoviewRenderer {
    * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processDiagonalCrossFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
     return this.processPatternFill(settings, this.FillPatternSettings.diagonalCross, geometry);
@@ -1026,6 +1057,7 @@ export abstract class GeoviewRenderer {
    * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processHorizontalFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
     return this.processPatternFill(settings, this.FillPatternSettings.horizontal, geometry);
@@ -1037,6 +1069,7 @@ export abstract class GeoviewRenderer {
    * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processVerticalFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
     return this.processPatternFill(settings, this.FillPatternSettings.vertical, geometry);
@@ -1048,6 +1081,7 @@ export abstract class GeoviewRenderer {
    * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processDotFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined {
     return this.processPatternFill(settings, this.FillPatternSettings.dot, geometry);
@@ -1061,6 +1095,7 @@ export abstract class GeoviewRenderer {
    * @param {TypeStyleProcessorOptions} options - Optional processing options
    *
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processSimplePolygon(
     styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
@@ -1105,6 +1140,7 @@ export abstract class GeoviewRenderer {
    * @param {TypeVectorLayerStyles} layerStyle - Object that will receive the created canvas.
    * @param {TypeLayerStyleConfigInfo[]} arrayOfPointStyleConfig - Array of point style configuration.
    * @returns {Promise<TypeVectorLayerStyles>} A promise that the vector layer style is created.
+   * @static
    */
   static async processArrayOfPointStyleConfig(
     layerStyles: TypeVectorLayerStyles,
@@ -1148,6 +1184,7 @@ export abstract class GeoviewRenderer {
    * created.
    *
    * @returns {Promise<TypeVectorLayerStyles>} A promise that the layer styles are processed.
+   * @static
    */
   static async getPointStyleSubRoutine(
     defaultSettings?: TypeKindOfVectorSettings,
@@ -1194,6 +1231,7 @@ export abstract class GeoviewRenderer {
    * @param {TypeStyleConfig} styleConfig - The style configuration.
    *
    * @returns {Promise<TypeVectorLayerStyles>} A promise that the layer styles are processed.
+   * @static
    */
   static async getLegendStyles(styleConfig: TypeLayerStyleConfig | undefined): Promise<TypeVectorLayerStyles> {
     try {
@@ -1272,6 +1310,7 @@ export abstract class GeoviewRenderer {
    * @param {string} label - Label for the style.
    *
    * @returns {TypeLayerStyleConfigInfo | undefined} The Style configuration created. Undefined if unable to create it.
+   * @static
    */
   static createDefaultStyle(geometryType: TypeStyleGeometry, label: string): TypeLayerStyleSettings | undefined {
     if (geometryType === 'Point') {
@@ -1316,6 +1355,7 @@ export abstract class GeoviewRenderer {
    * @param {number} output1 - The output at the lower value.
    * @param {number} output2 - The output at the upper value.
    * @returns {number} The interpolated output value.
+   * @static
    */
   static interpolateValue(value: number, value1: number, value2: number, output1: number, output2: number): number {
     if (value1 === value2) return output1;
@@ -1331,7 +1371,8 @@ export abstract class GeoviewRenderer {
    * @param {number} value2 - The upper data value.
    * @param {string | number[]} color1 - The hex color at the lower value.
    * @param {string | number[]} color2 - The hex color at the upper value.
-   * @returns {string} The interpolated color in rgba format.
+   * @returns {string} The interpolated color in rgba format.stat
+   * @static
    */
   static interpolateColor(value: number, value1: number, value2: number, color1: string | number[], color2: string | number[]): string {
     /**
@@ -1345,12 +1386,15 @@ export abstract class GeoviewRenderer {
           logger.logWarning('Invalid color array length, expected at least 3 values [r,g,b]:', color);
           return [255, 0, 0, 1];
         }
+
         // Safely get values that may be less then 0 or greater than 255
         const r = Math.max(0, Math.min(255, color[0]));
         const g = Math.max(0, Math.min(255, color[1]));
         const b = Math.max(0, Math.min(255, color[2]));
+
         // Alpha is optional, defaults to 255 (fully opaque), convert to 0-1 range
         const a = color.length > 3 ? Math.max(0, Math.min(255, color[3])) / 255 : 1;
+
         return [r, g, b, a];
       }
 
@@ -1363,7 +1407,7 @@ export abstract class GeoviewRenderer {
         return [r, g, b, a];
       }
       if (color.startsWith('rgba')) {
-        const matches = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+),?\s*([\d.]+)?\)/);
+        const matches = color.match(/^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})(?:\s*,\s*(\d*\.?\d+))?\s*\)$/);
         if (matches) {
           return [parseInt(matches[1], 10), parseInt(matches[2], 10), parseInt(matches[3], 10), parseFloat(matches[4] || '1')];
         }
@@ -1390,6 +1434,7 @@ export abstract class GeoviewRenderer {
    * @param {string} expression - Expression string (e.g., "$feature[\"FIELD_NAME\"] + 90")
    * @param {Feature} feature - Feature containing field data
    * @returns {number | null} The evaluated result or null if evaluation fails
+   * @static
    */
   static evaluateValueExpression(expression: string, feature: Feature): number | null {
     try {
@@ -1407,7 +1452,7 @@ export abstract class GeoviewRenderer {
       });
 
       // Safety check: only allow numbers, operators, and whitespace
-      if (!/^(null|\d+\.?\d*|\.\d+|\s|[+\-*/().%^])+$/i.test(evaluableExpression)) {
+      if (!/^[\d+\-*/().%^ \t\r\n]+$/i.test(evaluableExpression)) {
         logger.logWarning('Invalid characters in expression:', expression);
         return null;
       }
@@ -1430,6 +1475,7 @@ export abstract class GeoviewRenderer {
    * @param {TypeLayerStyleVisualVariable[]} visualVariables - Visual variable configurations.
    * @param {TypeAliasLookup?} aliasLookup - Optional lookup table for field name aliases.
    * @returns {Style} The modified style with visual variables applied.
+   * @static
    */
   static applyVisualVariables(style: Style, feature: Feature, visualVariables: TypeLayerStyleVisualVariable[]): Style {
     if (!visualVariables || visualVariables.length === 0) return style;
@@ -1493,6 +1539,7 @@ export abstract class GeoviewRenderer {
    * @param {Style} style - The style to modify.
    * @param {number} dataValue - The data value from the feature.
    * @param {TypeLayerStyleVisualVariable} visualVar - The visual variable configuration.
+   * @static
    */
   static applyColorVisualVariable(style: Style, dataValue: number, visualVar: TypeLayerStyleVisualVariable): void {
     if (!visualVar.stops || visualVar.stops.length < 2) return;
@@ -1553,6 +1600,7 @@ export abstract class GeoviewRenderer {
    * @param {Style} style - The style to modify.
    * @param {number} dataValue - The data value from the feature.
    * @param {TypeLayerStyleVisualVariable} visualVar - The visual variable configuration.
+   * @static
    */
   static applySizeVisualVariable(style: Style, dataValue: number, visualVar: TypeLayerStyleVisualVariable): void {
     let size: number | undefined;
@@ -1621,6 +1669,7 @@ export abstract class GeoviewRenderer {
    * @param {Style} style - The style to modify.
    * @param {number} dataValue - The data value from the feature.
    * @param {TypeLayerStyleVisualVariable} visualVar - The visual variable configuration.
+   * @static
    */
   static applyRotationVisualVariable(style: Style, dataValue: number, visualVar: TypeLayerStyleVisualVariable): void {
     const image = style.getImage();
@@ -1650,6 +1699,7 @@ export abstract class GeoviewRenderer {
    * @param {Style} style - The style to modify.
    * @param {number} dataValue - The data value from the feature.
    * @param {TypeLayerStyleVisualVariable} visualVar - The visual variable configuration.
+   * @static
    */
   static applyOpacityVisualVariable(style: Style, dataValue: number, visualVar: TypeLayerStyleVisualVariable): void {
     if (!visualVar.stops || visualVar.stops.length < 2) return;
@@ -1741,6 +1791,7 @@ export abstract class GeoviewRenderer {
    * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
    * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
    * @returns {TypeLayerStyleConfigInfo | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static searchUniqueValueEntry(
     fields: string[],
@@ -1821,6 +1872,7 @@ export abstract class GeoviewRenderer {
    * @param {Feature?} feature - Feature used to test the unique value conditions.
    * @param {TypeStyleProcessorOptions?} options - Optional processing options.
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processUniqueValuePoint(
     styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
@@ -1857,6 +1909,7 @@ export abstract class GeoviewRenderer {
    * @param {Feature?} feature - Feature used to test the unique value conditions.
    * @param {TypeStyleProcessorOptions?} options - Optional processing options.
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processUniqueLineString(
     styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
@@ -1889,6 +1942,7 @@ export abstract class GeoviewRenderer {
    * @param {Feature?} feature - Feature used to test the unique value conditions.
    * @param {TypeStyleProcessorOptions?} options - Optional processing options.
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processUniquePolygon(
     styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
@@ -1921,6 +1975,7 @@ export abstract class GeoviewRenderer {
    * @param {Feature} feature - Feature used to test the class break conditions.
    * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
    * @returns {number | undefined} The index of the entry. Undefined if unable to find it.
+   * @static
    */
   static searchClassBreakEntry(
     field: string,
@@ -1987,6 +2042,7 @@ export abstract class GeoviewRenderer {
    * @param {TypeLayerStyleValueCondition[]} conditions - Two-element array describing the boundary operators.
    * @returns {boolean} True if the value satisfies the interval according to the conditions, false otherwise.
    * @throws {NotSupportedError} If `conditions` contains an unsupported combination of operators.
+   * @static
    */
   static searchClassBreakEntryCheck(value: number, min: number, max: number, conditions: TypeLayerStyleValueCondition[]): boolean {
     // Depending on the conditions for minimum and maximum
@@ -2011,6 +2067,7 @@ export abstract class GeoviewRenderer {
    * @param {Feature} feature - Feature used to test the unique value conditions.
    * @param {TypeStyleProcessorOptions?} options - Optional processing options.
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processClassBreaksPoint(
     styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
@@ -2048,6 +2105,7 @@ export abstract class GeoviewRenderer {
    * @param {Feature} feature - Feature used to test the unique value conditions.
    * @param {TypeStyleProcessorOptions?} options - Optional processing options.
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processClassBreaksLineString(
     styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
@@ -2084,6 +2142,7 @@ export abstract class GeoviewRenderer {
    * @param {Feature} feature - Feature used to test the unique value conditions.
    * @param {TypeStyleProcessorOptions?} options - Optional processing options.
    * @returns {Style | undefined} The Style created. Undefined if unable to create it.
+   * @static
    */
   static processClassBreaksPolygon(
     styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings,
@@ -2127,6 +2186,7 @@ export abstract class GeoviewRenderer {
    * @param {TypeLayerTextConfig?} layerText - An optional text configuration to apply to the feature
    * @param {() => Promise<string | null>} callbackWhenCreatingStyle - An optional callback to execute when a new style had to be created
    * @returns {Style | undefined} The style applied to the feature or undefined if not found.
+   * @static
    */
   static getAndCreateFeatureStyle(
     feature: FeatureLike,
@@ -2191,6 +2251,7 @@ export abstract class GeoviewRenderer {
    * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
    * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
    * @returns {string} The icon associated to the feature or a default empty one.
+   * @static
    */
   static getFeatureImageSource(
     feature: Feature,
@@ -2272,6 +2333,7 @@ export abstract class GeoviewRenderer {
    * @param {FilterNodeType[]} keywordArray - Array of keywords to process.
    *
    * @returns {FilterNodeType[]} The new keywords array with all nodes classified.
+   * @static
    */
   static classifyUnprocessedNodes(keywordArray: FilterNodeType[]): FilterNodeType[] {
     return keywordArray.map((node, i) => {
@@ -2318,6 +2380,7 @@ export abstract class GeoviewRenderer {
    * @param {RegExp} regExp - An optional regular expression to use for the extraction.
    *
    * @returns {FilterNodeType[]} The new keywords array.
+   * @static
    */
   static extractKeyword(filterNodeArray: FilterNodeType[], keyword: string, regExp?: RegExp): FilterNodeType[] {
     const getNodeType = (keywordValue: string): NodeType => {
@@ -2360,6 +2423,7 @@ export abstract class GeoviewRenderer {
    * @param {FilterNodeType[]} keywordArray - Array of keywords to process.
    *
    * @returns {FilterNodeType[]} The new keywords array with all string nodes classified.
+   * @static
    */
   static extractStrings(keywordArray: FilterNodeType[]): FilterNodeType[] {
     let stringNeeded = false;
@@ -2409,6 +2473,7 @@ export abstract class GeoviewRenderer {
    * @param {FilterNodeType[]} filterNodeArrayType - Node array to analyse.
    *
    * @returns {FilterNodeType[]} The new node array with all nodes classified.
+   * @static
    */
   static analyzeLayerFilter(filterNodeArrayType: FilterNodeType[]): FilterNodeType[] {
     let resultingKeywordArray = filterNodeArrayType;
@@ -2555,6 +2620,7 @@ export abstract class GeoviewRenderer {
    * @param {TypeLayerTextConfig} layerText - The layer text configuration
    * @param {TypeAliasLookup} aliasLookup - The alias lookup
    * @returns {Text | undefined} The text style
+   * @static
    */
   static getTextStyle = (
     feature: FeatureLike,
@@ -2604,6 +2670,7 @@ export abstract class GeoviewRenderer {
    * @param {FeatureLike} feature - The feature to create the text style for
    * @param {TypeLayerTextConfig} textSettings - The text style settings
    * @returns {Text | undefined} The text style
+   * @static
    */
   static createTextStyle = (feature: FeatureLike, textSettings: TypeLayerTextConfig): Text | undefined => {
     const {
@@ -2704,6 +2771,7 @@ export abstract class GeoviewRenderer {
    * @param {number} zoom - The zoom level (0-20)
    * @param {TypeValidMapProjectionCodes} projection - The map projection (3857 for Web Mercator, 3978 for Canada Lambert)
    * @returns {number} Approximate resolution for the given zoom and projection
+   * @static
    */
   static getApproximateResolution(zoom: number, projection: TypeValidMapProjectionCodes = 3857): number {
     if (projection === 3978) {
@@ -2720,6 +2788,7 @@ export abstract class GeoviewRenderer {
    * @param {number} width - The maximum width per line
    * @param {number} maxLines - Maximum number of lines (optional, overrides width if needed)
    * @returns {string} The wrapped text
+   * @static
    */
   static wrapText(str: string, width: number, maxLines?: number): string {
     if (!maxLines) {
@@ -2777,6 +2846,7 @@ export abstract class GeoviewRenderer {
    * @param {string} str - The text to wrap
    * @param {number} width - The maximum width of each line
    * @returns {string} The wrapped text
+   * @static
    */
   static wrapTextByWidth(str: string, width: number): string {
     // No wrapping required
@@ -2817,6 +2887,7 @@ export abstract class GeoviewRenderer {
    * @param {string} template - The text template with {field-name} placeholders
    * @param {FeatureLike} feature - The feature to get field values from
    * @returns {string} The processed text with field values substituted
+   * @static
    */
   static processTextTemplate(template: string, feature: FeatureLike): string {
     return template.replace(/\{(\w+)(?::([^}]+))?\}/g, (match, fieldName, format) => {
