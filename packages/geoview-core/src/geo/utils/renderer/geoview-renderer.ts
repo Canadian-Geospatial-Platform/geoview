@@ -1407,7 +1407,7 @@ export abstract class GeoviewRenderer {
         return [r, g, b, a];
       }
       if (color.startsWith('rgba')) {
-        const matches = color.match(/^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})(?:\s*,\s*(\d*\.?\d+))?\s*\)$/);
+        const matches = color.match(/^rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})(?:\s*,\s*(1|0|0?\.\d+|1\.0+))?\s*\)$/);
         if (matches) {
           return [parseInt(matches[1], 10), parseInt(matches[2], 10), parseInt(matches[3], 10), parseFloat(matches[4] || '1')];
         }
