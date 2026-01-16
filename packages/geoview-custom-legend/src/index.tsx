@@ -49,21 +49,20 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
     };
   }
 
-  /**
-   * Overrides the getConfig in order to return the right type.
-   * @returns {TypeLegendProps} The Geochart config
-   */
   override getConfig(): TypeLegendProps {
-    // Redirect
-    return super.getConfig() as TypeLegendProps;
+    const config = super.getConfig() as TypeLegendProps;
+    return {
+      ...config,
+      isOpen: config.isOpen ?? false,
+    };
   }
 
   override onCreateButtonProps(): IconButtonPropsExtend {
     // Button props
     return {
       id: `custom-legend`,
-      'aria-label': 'CustomLegend.title',
       tooltipPlacement: 'right',
+      'aria-label': 'CustomLegend.title',
       children: <LegendIcon />,
       visible: true,
     };
@@ -74,7 +73,7 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
     return {
       title: 'CustomLegend.title',
       icon: <LegendIcon />,
-      width: 350,
+      width: 15,
       status: this.getConfig().isOpen,
     };
   }

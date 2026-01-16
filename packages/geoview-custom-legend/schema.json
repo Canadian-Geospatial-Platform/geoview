@@ -1,39 +1,270 @@
 {
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GeoView Custom Legend Configuration",
+  "description": "Schema for configuring a custom legend in GeoView",
   "type": "object",
   "properties": {
-    "id": {
-      "type": "string"
-    },
-    "enabled": {
-      "type": "boolean"
-    },
     "isOpen": {
-      "type": "boolean"
+      "type": "boolean",
+      "description": "Whether the legend panel is open by default",
+      "default": true
+    },
+    "title": {
+      "type": "string",
+      "description": "Title to display for the legend panel"
     },
     "legendList": {
       "type": "array",
+      "description": "List of custom legend items to display",
       "items": {
         "type": "object",
         "properties": {
-          "legendTitle": {
-            "type": "string"
+          "name": {
+            "type": "string",
+            "description": "Display name for the legend item"
           },
-          "iconUrl": {
-            "type": "string"
+          "type": {
+            "type": "string",
+            "enum": ["group", "item"],
+            "description": "Type of legend item - 'group' for expandable sections, 'item' for individual legend entries",
+            "default": "item"
+          },
+          "items": {
+            "type": "array",
+            "description": "Child items (for groups)",
+            "items": {
+              "$ref": "#/properties/legendList/items"
+            }
+          },
+          "symbol": {
+            "type": "object",
+            "description": "Symbol configuration for the legend item",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["image", "color", "line", "point", "polygon"],
+                "description": "Type of symbol"
+              },
+              "url": {
+                "type": "string",
+                "description": "URL to an image symbol (if type is 'image')"
+              },
+              "color": {
+                "type": "string",
+                "description": "Color value (hex, rgb, or named color) for the symbol",
+                "pattern": "^(#([0-9A-Fa-f]{3}){1,2}|rgb\\(\\s*\\d{1,3}\\s*,\\s*\\d{1,3}\\s*,\\s*\\d{1,3}\\s*\\)|rgba\\(\\s*\\d{1,3}\\s*,\\s*\\d{1,3}\\s*,\\s*\\d{1,3}\\s*,\\s*[01]?\\d?\\d?\\s*\\)|[a-zA-Z]+)$"
+              },
+              "width": {
+                "type": "number",
+                "description": "Width of the symbol in pixels",
+                "minimum": 1
+              },
+              "height": {
+                "type": "number",
+                "description": "Height of the symbol in pixels",
+                "minimum": 1
+              },
+              "stroke": {
+                "type": "object",
+                "properties": {
+                  "color": {
+                    "type": "string",
+                    "description": "Stroke color"
+                  },
+                  "width": {
+                    "type": "number",
+                    "description": "Stroke width in pixels"
+                  }
+                }
+              }
+            }
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description text for the legend item"
+          },
+          "visible": {
+            "type": "boolean",
+            "description": "Whether the legend item is visible by default",
+            "default": true
           },
           "layerId": {
-            "type": "string"
-          },
-          "visibility": {
-            "type": "boolean"
+            "type": "string",
+            "description": "ID of the layer this legend item is associated with (if any)"
           }
         },
-        "required": ["legendTitle", "layerId"]
-      }
+        "required": ["name"]
+      },
+    "entry": {
+      "type": "object",
+      "description": "Entry component configuration for individual legend items",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name for the entry"
+        },
+        "symbol": {
+          "type": "object",
+          "description": "Symbol configuration for the entry",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["image", "color", "line", "point", "polygon"],
+              "description": "Type of symbol"
+            },
+            "url": {
+              "type": "string",
+              "description": "URL to an image symbol (if type is 'image')"
+            },
+            "color": {
+              "type": "string",
+              "description": "Color value for the symbol"
+            },
+            "size": {
+              "type": "number",
+              "description": "Size of the symbol",
+              "minimum": 1
+            }
+          }
+        },
+        "visible": {
+          "type": "boolean",
+          "description": "Whether the entry is visible",
+          "default": true
+        }
+      },
+      "required": ["name"]
+    }      
     },
     "version": {
-      "type": "string"
+      "type": "string",
+      "enum": ["1.0.0"],
+      "description": "Schema version"
+    },
+    "entryGroup": {
+      "type": "object",
+      "description": "Entry group component for organizing related legend entries",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name for the entry group"
+        },
+        "entries": {
+          "type": "array",
+          "description": "Array of entry objects in this group",
+          "items": {
+            "$ref": "#/properties/legendList/entry"
+          }
+        },
+        "expanded": {
+          "type": "boolean",
+          "description": "Whether the group is expanded by default",
+          "default": true
+        },
+        "visible": {
+          "type": "boolean",
+          "description": "Whether the entry group is visible",
+          "default": true
+        }
+      },
+      "required": ["name", "entries"]
+    },
+    "infoSection": {
+      "type": "object",
+      "description": "Info section component for displaying additional legend information",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Title for the info section"
+        },
+        "content": {
+          "type": "string",
+          "description": "Content text for the info section"
+        },
+        "position": {
+          "type": "string",
+          "enum": ["top", "bottom", "left", "right"],
+          "description": "Position of the info section relative to the legend",
+          "default": "bottom"
+        },
+        "visible": {
+          "type": "boolean",
+          "description": "Whether the info section is visible",
+          "default": true
+        }
+      },
+      "required": ["title", "content"]
+    },
+    "unboundLayer": {
+      "type": "object",
+      "description": "Unbound layer component for layers not tied to specific data sources",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name for the unbound layer"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["basemap", "overlay", "annotation", "reference"],
+          "description": "Type of unbound layer",
+          "default": "overlay"
+        },
+        "symbol": {
+          "type": "object",
+          "description": "Symbol configuration for the unbound layer",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["image", "color", "line", "point", "polygon"],
+              "description": "Type of symbol"
+            },
+            "url": {
+              "type": "string",
+              "description": "URL to an image symbol (if type is 'image')"
+            },
+            "color": {
+              "type": "string",
+              "description": "Color value for the symbol"
+            }
+          }
+        },
+        "visible": {
+          "type": "boolean",
+          "description": "Whether the unbound layer is visible",
+          "default": true
+        }
+      },
+      "required": ["name", "type"]
+    },
+    "visibilitySet": {
+      "type": "object",
+      "description": "Visibility set component for managing visibility states of legend items",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name for the visibility set"
+        },
+        "items": {
+          "type": "array",
+          "description": "Array of item IDs in this visibility set",
+          "items": {
+            "type": "string"
+          }
+        },
+        "visible": {
+          "type": "boolean",
+          "description": "Whether all items in the set are visible",
+          "default": true
+        },
+        "toggleMode": {
+          "type": "string",
+          "enum": ["all", "individual", "exclusive"],
+          "description": "How visibility toggles work for this set",
+          "default": "individual"
+        }
+      },
+      "required": ["name", "items"]
     }
   },
-  "required": ["id", "legendList"]
+  "required": ["legendList"]
 }
