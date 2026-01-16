@@ -1184,9 +1184,9 @@ export abstract class GeoviewRenderer {
    * created.
    *
    * @returns {Promise<TypeVectorLayerStyles>} A promise that the layer styles are processed.
-   * @static
+   * @static @private
    */
-  static async getPointStyleSubRoutine(
+  static async #getPointStyleSubRoutine(
     defaultSettings?: TypeKindOfVectorSettings,
     arrayOfPointStyleConfig?: TypeLayerStyleConfigInfo[]
   ): Promise<TypeVectorLayerStyles> {
@@ -1242,13 +1242,13 @@ export abstract class GeoviewRenderer {
         // ======================================================================================================================
         // Point style configuration ============================================================================================
         if (styleConfig.Point.type === 'simple') {
-          const layerStyles = await this.getPointStyleSubRoutine(styleConfig.Point.info[0].settings);
+          const layerStyles = await this.#getPointStyleSubRoutine(styleConfig.Point.info[0].settings);
           legendStyles.Point = layerStyles.Point;
         } else {
           const defaultSettings = styleConfig.Point.hasDefault
             ? styleConfig.Point.info[styleConfig.Point.info.length - 1].settings
             : undefined;
-          const layerStyles = await this.getPointStyleSubRoutine(defaultSettings, styleConfig.Point.info);
+          const layerStyles = await this.#getPointStyleSubRoutine(defaultSettings, styleConfig.Point.info);
           legendStyles.Point = layerStyles.Point;
         }
       }
