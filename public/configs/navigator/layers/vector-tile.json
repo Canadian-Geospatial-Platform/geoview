@@ -1,0 +1,55 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "nogeom",
+      "shaded": false,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "vectorTilesLYR1",
+        "geoviewLayerName": "CBCT - French Basemap",
+        "geoviewLayerType": "vectorTiles",
+        "metadataAccessPath": "https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer/",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "CBMT_CBCT_3978_V_OSM",
+            "styleUrl": "https://nrcan-rncan.maps.arcgis.com/sharing/rest/content/items/88ad9e2ef6e040a19472985e6606a2f9/resources/styles/root.json",
+            "initialSettings": { "minZoom": 3, "maxZoom": 18 }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "vectorTilesLYR2",
+        "geoviewLayerName": "CBMT - English Basemap",
+        "geoviewLayerType": "vectorTiles",
+        "metadataAccessPath": "https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer/",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "CBMT_CBCT_3978_V_OSM",
+            "styleUrl": "https://nrcan-rncan.maps.arcgis.com/sharing/rest/content/items/708e92c1f00941e3af3dd3c092ae4a0a/resources/styles/root.json",
+            "initialSettings": { "minZoom": 3, "maxZoom": 18 }
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map", "north-arrow"],
+  "overviewMap": { "hideOnZoom": 7 },
+  "footerBar": {
+    "tabs": {
+      "core": ["layers", "data-table"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "legend", "details", "export"]
+    }
+  }
+}

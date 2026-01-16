@@ -1,0 +1,95 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Draw (interactions) - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="codedoc.js"></script><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Draw (interactions)</strong></h1></td></tr></tbody></table><table><tbody><tr><td><ol><a href="./index.html">Main</a><li><a href="#DRAW">Draw (simple case)</a></li></ol></td></tr></tbody></table><table><tbody><tr><td>This page is used to showcase different Draw functionalities</td></tr></tbody></table></div><div class="map-title-holder"><h4 id="SELECT1">1. Draw (simple case)</h4><a class="ref-link" href="#top">Top</a></div><div>In this example, select a shape to draw and start drawing.</div><div class="draw-menu" style="text-align: center"><div id="drawGroup"><div class="draw-menu-item"><span>Select shape:</span> <select name="Draw switcher" id="switchDraw1" onchange="selDrawChanged1('drawGroup');"><option value="None" selected="selected">None</option><option value="Point">Points</option><option value="LineString">Lines</option><option value="Circle">Circles</option><option value="Polygon">Polygons</option></select> <button onclick="btnDrawStop1('switchDraw1')">Stop drawing</button></div><div class="draw-menu-item"><button onclick="btnClearGroup1('drawGroup')">Clear</button></div></div></div><div style="position: relative"><div class="logs-container"><div class="logs-container-title">API EVENTS LOGS</div><div class="logs-container-sub-title">(see console for more)</div><div id="LOGS1"></div></div><div id="map1" class="geoview-map" data-lang="en" data-config="{
+            'map': {
+              'interaction': 'dynamic',
+              'viewSettings': {
+                    'minZoom': 2,
+                    'maxZoom': 12,
+                    'projection': 3978
+                },
+                'basemapOptions': {
+                    'basemapId': 'simple',
+                    'shaded': true,
+                    'labeled': false
+                }
+            },
+            'theme': 'geo.ca',
+            'corePackages': []
+          }"></div></div><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script>let map1;
+      let draw1;
+      function initMap1(map) {
+        // Keep reference
+        map1 = map;
+      }
+
+      function btnClearGroup1(groupKey) {
+        // Delete the geometries from the group
+        map1.layer.geometry.deleteGeometriesFromGroup(groupKey);
+      }
+
+      function selDrawChanged1(groupKey) {
+        // Redirect
+        startDrawing1(groupKey, event.currentTarget.value);
+      }
+
+      function btnDrawStop1(groupKey) {
+        // Redirect
+        stopDrawing1();
+
+        // Set None in the drop down
+        document.getElementById(groupKey).options[0].selected = true;
+      }
+
+      function startDrawing1(groupKey, geomType) {
+        // Stop if any
+        stopDrawing1();
+
+        // Start drawing interaction
+        draw1 = map1.initDrawInteractions(groupKey, geomType);
+
+        // Wire handler
+        draw1.onDrawStart((sender, payload) => {
+          // Log the event
+          addLog('LOGS1', 'drawStart');
+          console.log(payload);
+        });
+
+        // Wire handler
+        draw1.onDrawEnd((sender, payload) => {
+          // Log the event
+          addLog('LOGS1', 'drawEnd');
+          console.log(payload);
+        });
+
+        // Wire handler
+        draw1.onDrawAbort((sender, payload) => {
+          // Log the event
+          addLog('LOGS1', 'drawAbort');
+          console.log(payload);
+        });
+      }
+
+      function stopDrawing1() {
+        // If drawing
+        if (draw1) {
+          // Stop drawing interaction
+          draw1.stopInteraction();
+        }
+      }
+
+      // Register handler when map has been initialized
+      cgpv.onMapInit((mapViewer) => {
+        // If all maps initialized
+        if (mapViewer.mapId === 'map1') {
+          // Init map
+          initMap1(mapViewer);
+        }
+      });
+
+      // initialize cgpv
+      cgpv.init();
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

@@ -1,0 +1,127 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>PyGeoAPI process on a GeoJSON layer - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./index.html?tab=demos">← Back to Main</a></div><div class="demo-section"><h4>PyGeoAPI process on a GeoJSON layer</h4><p>This page is used to showcase how we can load a GeoJSON layer from data returned by a process using a POST query.</p></div></div><div class="map-title-holder"><h4 id="HLYR5">GeoJSON Layer</h4></div><div id="map1" class="geoview-map" data-lang="en" data-config="{
+    'map': {
+      'interaction': 'dynamic',
+      'viewSettings': {
+        'projection': 3857
+      },
+      'basemapOptions': {
+        'basemapId': 'transport',
+        'shaded': true,
+        'labeled': false
+      },
+      'listOfGeoviewLayerConfig': [
+        {
+          'geoviewLayerId': 'NHN',
+          'geoviewLayerName': 'Hydro Network',
+          'metadataAccessPath': 'https://maps.geogratis.gc.ca/wms/hydro_network_en',
+          'geoviewLayerType': 'ogcWms',
+          'listOfLayerEntryConfig': [
+            {
+              'layerId': 'nhn:nhn:drainageareas:nhnda',
+              'initialSettings': {
+                'states': {'visible' : false}
+              },
+              'layerName': 'Hydro Network'
+            }
+          ]
+        }
+      ]
+    },
+    'components': ['overview-map'],
+    'footerBar': {
+      'tabs': {
+        'core': ['legend', 'layers', 'details', 'data-table']
+      }
+    },
+    'corePackages': [],
+    'theme': 'light'
+    }"></div><table style="border: 1px solid black;"><tbody><tr style="border: 1px solid black;padding: 15px; width: 5%;"><td style="border: 1px solid black;padding: 15px; width: 5%;"><button id="Add-GeoMet-Button" class="btn btn-primary">Raster Drill process</button><br/>Latitude: <input id="GeoMet-Lat-Input" type="number" class="form-control" style="width: 250px; margin: 5px 0;" value="51.132831196692806"><br/>Longitude: <input id="GeoMet-Long-Input" type="number" class="form-control" style="width: 250px; margin: 5px 0;" value="-114.74968888274337"><br/><label>Added Layer ID :</label><label id="GeoMet-New-Layer-Id-Label"></label></td><td style="border: 1px solid black;padding: 15px; width: 5%;"><button id="Add-Hydro-Button" class="btn btn-success">Downstream Analysis</button><br/>Latitude: <input id="Hydro-Lat-Input" type="number" class="form-control" style="width: 250px; margin: 5px 0;" value="47.02115799969316"><br/>Longitude: <input id="Hydro-Long-Input" type="number" class="form-control" style="width: 250px; margin: 5px 0;" value="-65.93753763004142"><br/><label>Added Layer ID :</label><label id="Hydro-New-Layer-Id-Label"></label></td></tr></tbody></table><hr/><p>This map has an empty configuration. You can add a GeoJSON layer by clicking the buttons.</p><button type="button" class="collapsible">Configuration Snippet</button><pre id="map1CS" class="panel"></pre><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script>insertPageHeader();
+
+    // initialize cgpv
+    cgpv.init();
+
+    // GeoMetButton============================================================================================================
+    // find the button element by ID
+    var addGeoJSONButton = document.getElementById('Add-GeoMet-Button');
+
+    // add an event listener when a button is clicked
+    addGeoJSONButton.addEventListener('click', async () => {
+      const layerPath = document.getElementById('GeoMet-New-Layer-Id-Label').innerText;
+      if (layerPath) cgpv.api.getMapViewer('map1').layer.removeLayerUsingPath(layerPath);
+
+      // adding a geojson layer requires a type of geojson and url
+      const lat = document.getElementById('GeoMet-Lat-Input').value;
+      const long = document.getElementById('GeoMet-Long-Input').value;
+      const addResult = cgpv.api.getMapViewer('map1').layer.addGeoviewLayer(
+        {
+          geoviewLayerId: 'GeoMetGeoJsonProcess',
+          metadataAccessPath: './datasets/geojson/processes-metadata.meta' ,
+          geoviewLayerName: 'GeoMet-OGC-API',
+          geoviewLayerType: 'GeoJSON',
+          'listOfLayerEntryConfig': [
+            {
+              'layerId': 'execution',
+              'source': {
+                'postSettings': {
+                  'data': {
+                    'inputs': {
+                      'y': lat,
+                      'x': long,
+                    }
+                  }
+                }
+              }
+            }
+          ],
+        }
+      );
+
+      // Wait for the full response
+      await addResult.promiseLayer;
+    });
+
+    // HydroButton============================================================================================================
+    // find the button element by ID
+    var addGeoJSONButton = document.getElementById('Add-Hydro-Button');
+
+    // add an event listener when a button is clicked
+    addGeoJSONButton.addEventListener('click', async () => {
+      const layerPath = document.getElementById('Hydro-New-Layer-Id-Label').innerText;
+      if (layerPath) cgpv.api.getMapViewer('map1').layer.removeLayerUsingPath(layerPath);
+
+      // adding a geojson layer requires a type of geojson and url
+      const lat = document.getElementById('Hydro-Lat-Input').value;
+      const long = document.getElementById('Hydro-Long-Input').value;
+      const addResult = cgpv.api.getMapViewer('map1').layer.addGeoviewLayer(
+        {
+          geoviewLayerId: 'HydroGeoJsonProcess',
+          metadataAccessPath: './datasets/geojson/hydro-metadata.meta',
+          geoviewLayerName: 'Downstream Analysis',
+          geoviewLayerType: 'GeoJSON',
+          'listOfLayerEntryConfig': [
+            {
+              'layerId': 'execution',
+              'source': {
+                'postSettings': {
+                  'data': {
+                    'inputs': {
+                      'lat': Number(lat),
+                      'long': Number(long),
+                    }
+                  }
+                }
+              }
+            }
+          ],
+        }
+      );
+
+      // Wait for the full response
+      await addResult.promiseLayer;
+    });
+
+    // create snippets
+    window.addEventListener('load', () => {
+      createCodeSnippet();
+      createConfigSnippet();
+    });</script></body></html>

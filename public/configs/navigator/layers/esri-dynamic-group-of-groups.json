@@ -1,0 +1,54 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "initialView": { "zoomAndCenter": [10, [-75.370748, 45.001058]] },
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "group-of-groups",
+        "geoviewLayerName": "Group-Of-Groups",
+        "metadataAccessPath": "https://egisp.dfo-mpo.gc.ca/arcgis/rest/services/open_data_donnees_ouvertes/fieldnotes_pacific_science_field_operations_en/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "entryType": "group",
+            "layerId": "my-group",
+            "layerName": "My Group!",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "1"
+              },
+              {
+                "layerId": "2"
+              }
+            ]
+          },
+          {
+            "layerId": "22"
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map", "north-arrow"],
+  "overviewMap": { "hideOnZoom": 7 },
+  "footerBar": {
+    "tabs": {
+      "core": ["layers", "data-table"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "legend", "details", "export"]
+    }
+  }
+}

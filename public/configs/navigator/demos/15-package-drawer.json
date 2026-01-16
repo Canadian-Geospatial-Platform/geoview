@@ -1,0 +1,54 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "initialView": {
+        "layerIds": []
+      },
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "ElevationHRDEM",
+        "geoviewLayerName": "Elevation HRDEM Mosaic",
+        "metadataAccessPath": "https://datacube.services.geo.ca/wrapper/ramp/ogc/elevation-hrdem-mosaic",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "dsm-hillshade",
+            "layerName": "Elevation HRDEM Mosaic Hillshade DSM"
+          }
+        ]
+      }
+    ]
+  },
+  "theme": "light",
+  "components": ["north-arrow", "overview-map"],
+  "appBar": {
+    "tabs": {
+      "core": ["legend", "export"]
+    }
+  },
+  "navBar": ["drawer", "basemap-select", "projection", "fullscreen"],
+  "corePackages": [],
+  "externalPackages": [],
+  "corePackagesConfig": [
+    {
+      "drawer": {
+        "style": {
+          "fillColor": "rgba(252, 241, 0, 0.3)",
+          "strokeColor": "#000000",
+          "strokeWidth": 1.3
+        },
+        "activeGeom": "LineString",
+        "geomTypes": ["Point", "Text", "LineString", "Polygon", "Rectangle", "Circle", "Star"],
+        "hideMeasurements": false
+      }
+    }
+  ]
+}

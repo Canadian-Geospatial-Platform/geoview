@@ -1,0 +1,267 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Bounding Box Selector - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="codedoc.js"></script><script src="cgpv-main.js"></script></head><body><div class="header-table"><table><tbody><tr><td><img class="header-logo" alt="logo" src="./img/Logo.png"/></td><td class="header-title"><h1><strong>Bounding Box Selector</strong></h1></td></tr></tbody></table><table><tbody><tr><td><a href="./index.html">Main</a></td></tr></tbody></table><table><tbody><tr><td>This page demonstrates how the modify and translate interactions can be used to create an advanced bounding box selector. This can be useful for assigning coordinates to spatial filters while perfoming geographic queries.</td></tr></tbody></table></div><div class="map-title-holder"><h4>Bounding Box Selector</h4></div><div>Modify the bounding box by entering coordinates below or adjusting it directly on the map. Click and drag the box to move it, or drag its vertices to resize it.<div><div><label for="north">North:</label> <input type="number" id="north" name="north" min="-90" max="90" step="any" value="70"/> <label for="east">East:</label> <input type="number" id="east" name="east" min="-180" max="180" step="any" value="-70"/> <label for="south">South:</label> <input type="number" id="south" name="south" min="-90" max="90" step="any" value="60"/> <label for="west">West:</label> <input type="number" id="west" name="west" min="-90" max="90" step="any" value="-100"/></div><div style="position: relative"><div id="map1" class="geoview-map" data-lang="en" data-config="{
+            'map': {
+              'interaction': 'dynamic',
+              'viewSettings': {
+                    'projection': 3857
+                },
+                'basemapOptions': {
+                    'basemapId': 'transport',
+                    'shaded': true,
+                    'labeled': false
+                }
+            },
+            'theme': 'geo.ca',
+            'corePackages': []
+          }"></div></div><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script>let map1;
+      function initMap1(map) {
+        // Keep reference
+        map1 = map;
+
+        // The geometry of the map layer
+        const layerGeometry = map?.layer.geometry;
+
+        // The projection used to convert coordinates to longitude and latitude
+        // coordinates reguardless of the map projection.
+        const lonLatProjection = 4326;
+
+        // Store the coordinates of the bounding box
+        let bboxCoordinates = [];
+
+        // While the modify interaction is taking place, the modifyDragged event is triggered
+        // whenever the vertices of the bounding box are modified. So, when the enforceRectangle()
+        // function is called, a redundant set of modifyDragged events are dispatched for each of the
+        // updated vertices. We can use this flag to indicate when the bounding box is being
+        // modified, ignoring these redundant events and avoiding an endless recursive loop.
+        let isUpdating = false;
+
+        // This tracks the modified vertex index (-1 means it is unset). It also ensures that
+        // enforceRectangle() is applied only to the dragged vertex, preventing redundant calls.
+        let modifiedIndex = -1;
+
+        // Create geometry group
+        const groupKey = 'boundingBoxGroup';
+        const geomGrp = map.layer.geometry.createGeometryGroup(groupKey);
+        const bboxId = 'rectangle-outline';
+
+        // Add bounding box
+        addRectangle(map, groupKey);
+
+        // Get the coordinate inputs and listen for changes to the input values.
+        // This will allow for the bbox vertices to be modified using inputs.
+        const northEl = document.getElementById('north');
+        const eastEl = document.getElementById('east');
+        const southEl = document.getElementById('south');
+        const westEl = document.getElementById('west');
+
+        northEl.addEventListener('change', () => setVerticesFromCoords(layerGeometry, bboxId, lonLatProjection));
+        eastEl.addEventListener('change', () => setVerticesFromCoords(layerGeometry, bboxId, lonLatProjection));
+        southEl.addEventListener('change', () => setVerticesFromCoords(layerGeometry, bboxId, lonLatProjection));
+        westEl.addEventListener('change', () => setVerticesFromCoords(layerGeometry, bboxId, lonLatProjection));
+
+        // Init translate interaction to allow for the bounding box to be moved on the map.
+        const translateInteraction = map.initTranslateOneFeatureInteractions(groupKey);
+
+        translateInteraction.onTranslateEnded((sender, payload) => {
+          const lonLatCoords = layerGeometry.getFeatureCoords(bboxId, lonLatProjection)[0];
+          setBboxInputs(lonLatCoords);
+        });
+
+        // Init modify interactions. Note: The third parameter in the initModifyInteractions
+        // function ensures that only the bounding box vertices are selectable by preventing
+        // new vertices from being created.
+        const modify1 = map.initModifyInteractions(groupKey, {}, () => false, 15);
+
+        // When the modify interaction starts, set the coordinates of the bounding box
+        modify1.onModifyStarted((sender, payload) => {
+          const feature = payload.features.item(0);
+          if (feature) {
+            const geometry = feature.getGeometry();
+            if (geometry && geometry.getType() === 'Polygon') {
+              bboxCoordinates = geometry.getCoordinates()[0];
+            }
+          }
+        });
+
+        // When the modify event ends, set the final coordinates of the bounding box
+        // and update the values in the coordinate inputs
+        modify1.onModifyEnded((sender, payload) => {
+          // Set the final coordinates of the bounding box.
+          // Skipping this step causes the modify vertices and bbox vertices to
+          // be mismatched.
+          const feature = payload.features.item(0);
+          if (feature) {
+            const geometry = feature.getGeometry();
+            if (geometry && geometry.getType() === 'Polygon') {
+              geometry.setCoordinates([bboxCoordinates]);
+            }
+          }
+
+          // Reset the current modified index
+          modifiedIndex = -1;
+
+          // Send the new bbox coordinates back to the parent component. Convert the coordinates to degrees first.
+          const lonLatCoords = layerGeometry.getFeatureCoords(bboxId, lonLatProjection)[0];
+          setBboxInputs(lonLatCoords);
+        });
+
+        // While a bounding box vertex is being dragged, determine which coordinate
+        // in the coordinate array is being modified, then update adjacent vertices to
+        // ensure that the bounding box remains rectangular.
+        modify1.onModifyDragged((sender, payload) => {
+          // Prevents redundant and recursive calls from the enforceRectangle() function.
+          if (isUpdating) {
+            return;
+          }
+
+          // Get the feature with the dragged vertex
+          let feature = payload.features.item(0);
+
+          // If a feature exists, proceed with modifying the vertices
+          if (feature) {
+            let geometry = feature.getGeometry();
+
+            // Ensure the geometry exists for the bounding box
+            if (geometry && geometry.getType() === 'Polygon') {
+              // Get the coordinates of the modified bounding box
+              const newCoordinates = geometry.getCoordinates()[0];
+
+              // Get the index of the vertex being dragged by cycling through the
+              // newCoordinates array and finding the vertex that doesn't match
+              // the original coordinate set.
+              if (modifiedIndex === -1) {
+                for (let i = 0; i < newCoordinates.length - 1; i++) {
+                  if (
+                    bboxCoordinates[i][0] !== newCoordinates[i][0] ||
+                    bboxCoordinates[i][1] !== newCoordinates[i][1]
+                  ) {
+                    modifiedIndex = i;
+                    break;
+                  }
+                }
+              }
+
+              // If the bounding box has been modified from it's previous state,
+              // update it's vertices to ensure that it remains a rectangle.
+              // Update the isUpdating flag to prevent redundant modifications.
+              if (modifiedIndex !== -1 &&
+                (bboxCoordinates[modifiedIndex][0] !== newCoordinates[modifiedIndex][0] ||
+                bboxCoordinates[modifiedIndex][1] !== newCoordinates[modifiedIndex][1])
+              ) {
+                // Block additional updates
+                isUpdating = true;
+
+                // Get the updated coordinates of the new bbox
+                const newCoords = enforceRectangle(bboxCoordinates, modifiedIndex, newCoordinates[modifiedIndex]);
+
+                // Assign the new coordinates to the map feature and update the bboxCoordinates variable.
+                geometry.setCoordinates([newCoords]);
+                feature.setGeometry(geometry);
+                bboxCoordinates = newCoords;
+
+                // Allow additional updates
+                isUpdating = false;
+              }
+            }
+          }
+        });
+      }
+
+      // Set the coordinate input values based on the vertices of the bounding box on the map
+      function setBboxInputs(coordinates) {
+        // Get bounding box inputs
+        const northEl = document.getElementById('north');
+        const eastEl = document.getElementById('east');
+        const southEl = document.getElementById('south');
+        const westEl = document.getElementById('west');
+
+        // Find input values based on coordinates
+        const northVal = coordinates.find((coord, i, arr) =>
+          i > 0 && coord[1] > arr[i - 1][1]
+        )[1];
+        const eastVal = coordinates.find((coord, i, arr) =>
+          i > 0 && coord[0] > arr[i - 1][0]
+        )[0];
+        const southVal = coordinates.find((coord, i, arr) =>
+          i > 0 && coord[1] < arr[i - 1][1]
+        )[1];
+        const westVal = coordinates.find((coord, i, arr) =>
+          i > 0 && coord[0] < arr[i - 1][0]
+        )[0];
+
+        // Set the input values to the new coordinates
+        northEl.value = northVal;
+        eastEl.value = eastVal;
+        southEl.value = southVal;
+        westEl.value = westVal;
+      }
+
+      // The modify interaction typically updates only one vertex in a polygon.
+      // To ensure the bounding box remains a rectangle, the vertices adjacent to the one
+      // being modified need to be updated too. This method determines what the coordinates
+      // should be to maintain a rectangular shape.
+      function enforceRectangle(coords, movedIndex, newCoord) {
+        // Only modify the polygon if it has four vertices. We check for five
+        // since the first and last coordinates will be same to close the polygon.
+        if (coords.length != 5) {
+          return coords;
+        }
+
+        // Store the new coordinates in an array
+        let modifiedCoords = [];
+
+        // Determine which vertices are adjacent to the modified vertex.
+        // Only these will change, leaving the oposite in the same place.
+        let oppositeIndex = (movedIndex + 2) % 4;
+        let adjacentIndex1 = (movedIndex + 1) % 4;
+        let adjacentIndex2 = (movedIndex + 3) % 4;
+
+        // Apply the changes to the feature's coordinates
+        modifiedCoords[movedIndex] = [newCoord[0], newCoord[1]];
+        modifiedCoords[adjacentIndex1] = [newCoord[0], coords[oppositeIndex][1]];
+        modifiedCoords[adjacentIndex2] = [coords[oppositeIndex][0], newCoord[1]];
+        modifiedCoords[oppositeIndex] = [coords[oppositeIndex][0], coords[oppositeIndex][1]];
+
+        // Close the polygon
+        modifiedCoords[4] = modifiedCoords[0]
+
+        return modifiedCoords;
+      }
+
+      // Set the vertices of the bounding box from the coordinate inputs
+      function setVerticesFromCoords(geometry, bboxId, lonLatProjection) {
+        // Get the coordinate inputs' values
+        const northVal = document.getElementById('north').value;
+        const eastVal = document.getElementById('east').value;
+        const southVal = document.getElementById('south').value;
+        const westVal = document.getElementById('west').value;
+
+        // New bounding box coordinates
+        let newCoordinates = [[
+          [westVal, southVal],
+          [westVal, northVal],
+          [eastVal, northVal],
+          [eastVal, southVal],
+          [westVal, southVal]
+        ]];
+
+        // Set the bbox coordinates
+        geometry.setFeatureCoords(bboxId, newCoordinates, lonLatProjection);
+      }
+
+      // Register handler when map has been initialized
+      cgpv.onMapInit((mapViewer) => {
+        // If all maps initialized
+        if (mapViewer.mapId === 'map1') {
+          // Init map
+          initMap1(mapViewer);
+        }
+      });
+
+      // initialize cgpv
+      cgpv.init();
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></div></div></body></html>
