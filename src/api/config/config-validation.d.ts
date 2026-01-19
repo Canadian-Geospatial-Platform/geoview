@@ -15,6 +15,7 @@ export declare class ConfigValidation {
     static validateLayersConfigAgainstSchema(listOfGeoviewLayerConfig: MapConfigLayerEntry[], onErrorCallback: ErrorCallbackDelegate): MapConfigLayerEntry[];
     /**
      * Validate and adjust the list of GeoView layer configuration.
+     * Errors, when expected, are logged and not thrown so that each MapConfigLayerEntry can be processed independently.
      * @param {MapConfigLayerEntry[]} listOfMapConfigLayerEntry - The list of GeoView layer configuration to adjust and
      * validate.
      */

@@ -1,6 +1,7 @@
+import type { Feature } from 'ol';
+import type { ReadOptions } from 'ol/format/Feature';
 import type { Options as SourceOptions } from 'ol/source/Vector';
-import type { Vector as VectorSource } from 'ol/source';
-import type Feature from 'ol/Feature';
+import type { Projection as OLProjection } from 'ol/proj';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { type TypeOutfields, type TypeOutfieldsType } from '@/api/types/map-schema-types';
 import type { TypeGeoviewLayerConfig, TypeMetadataWFS, VectorStrategy } from '@/api/types/layer-schema-types';
@@ -36,7 +37,7 @@ export declare class WFS extends AbstractGeoViewVector {
     /**
      * Overrides the way the metadata is fetched.
      * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+     * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
      * @returns {Promise<T = TypeMetadataWFS>} A promise with the metadata or undefined when no metadata for the particular layer type.
      * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
      * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities).
@@ -44,7 +45,7 @@ export declare class WFS extends AbstractGeoViewVector {
     protected onFetchServiceMetadata<T = TypeMetadataWFS>(abortSignal?: AbortSignal): Promise<T>;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
-     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+     * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
      * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
      * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
      * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities).
@@ -58,19 +59,30 @@ export declare class WFS extends AbstractGeoViewVector {
     /**
      * Overrides the way the layer metadata is processed.
      * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration to process.
-     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+     * @param {OLProjection?} [mapProjection] - The map projection.
+     * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
      * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
      * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
      */
-    protected onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig, abortSignal?: AbortSignal): Promise<VectorLayerEntryConfig>;
+    protected onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<VectorLayerEntryConfig>;
     /**
-     * Overrides the creation of the source configuration for the vector layer
-     * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer entry configuration.
-     * @param {SourceOptions} sourceOptions - The source options.
-     * @returns {VectorSource<Geometry>} The source configuration that will be used to create the vector layer.
-     * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+     * Overrides the loading of the vector features for the layer by fetching WFS data and converting it
+     * into OpenLayers {@link Feature} feature instances.
+     * @param {VectorLayerEntryConfig} layerConfig -
+     * The configuration object for the vector layer, containing source and
+     * data access information.
+     * @param {SourceOptions<Feature>} sourceOptions -
+     * The OpenLayers vector source options associated with the layer. This may be
+     * used by implementations to customize loading behavior or source configuration.
+     * @param {ReadOptions} readOptions -
+     * Options controlling how features are read, including the target
+     * `featureProjection`.
+     * @returns {Promise<Feature[]>}
+     * A promise that resolves to an array of OpenLayers features.
+     * @protected
+     * @override
      */
-    protected onCreateVectorSource(layerConfig: VectorLayerEntryConfig, sourceOptions: SourceOptions<Feature>): VectorSource<Feature>;
+    protected onCreateVectorSourceLoadFeatures(layerConfig: VectorLayerEntryConfig, sourceOptions: SourceOptions<Feature>, readOptions: ReadOptions): Promise<Feature[]>;
     /**
      * Overrides the creation of the GV Layer
      * @param {OgcWfsLayerEntryConfig} layerConfig - The layer entry configuration.
@@ -80,8 +92,9 @@ export declare class WFS extends AbstractGeoViewVector {
     /**
      * Fetches the metadata for a typical WFS class.
      * @param {string} url - The url to query the metadata from.
-     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+     * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
      * @returns {Promise<TypeMetadataWFS | undefined>} Promise with the metadata when fetched or undefined when capabilities weren't found.
+     * @static
      */
     static fetchMetadata(url: string, abortSignal?: AbortSignal): Promise<TypeMetadataWFS | undefined>;
     /**
@@ -97,6 +110,7 @@ export declare class WFS extends AbstractGeoViewVector {
      * @param {string} layerId - The name or identifier of the layer to inspect.
      * @param {AbortSignal} [abortSignal] - Optional signal that allows the request to be aborted.
      * @returns {Promise<TypeOutfields[]>} A promise that resolves with the list of fields for the layer.
+     * @static
      */
     static fetchMetadataAndRetrieveFieldsInfo(url: string, layerId: string, abortSignal?: AbortSignal): Promise<TypeOutfields[]>;
     /**
@@ -107,9 +121,11 @@ export declare class WFS extends AbstractGeoViewVector {
      * @param {string} geoviewLayerId - A unique identifier for the layer.
      * @param {string} geoviewLayerName - The display name of the layer.
      * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+     * @param {boolean?} [isTimeAware] - Indicates whether the layer supports time-based filtering.
      * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+     * @static
      */
-    static initGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string): Promise<TypeGeoviewLayerConfig>;
+    static initGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware?: boolean): Promise<TypeGeoviewLayerConfig>;
     /**
      * Extracts the preferred output format value for a WFS DescribeFeatureType operation
      * from the parsed WFS capabilities metadata.
@@ -119,6 +135,7 @@ export declare class WFS extends AbstractGeoViewVector {
      * @param {TypeMetadataWFS} metadata - The parsed WFS capabilities metadata object.
      * @returns {string} The detected output format string for the DescribeFeatureType operation,
      * or an empty string if no suitable value is found.
+     * @static
      */
     static extractDescribeFeatureOutputFormat(metadata: TypeMetadataWFS): string;
     /**
@@ -130,6 +147,7 @@ export declare class WFS extends AbstractGeoViewVector {
      * @param {AbortSignal} [abortSignal] - Optional signal that allows the fetch request to be aborted.
      * @returns {Promise<TypeOutfields[]>} A promise resolving to an array of field definitions
      *   describing the feature type's properties (including geometry fields).
+     * @static
      */
     static fetchDescribeFeature(url: string, outputFormat: string, abortSignal?: AbortSignal): Promise<TypeOutfields[]>;
     /**
@@ -141,6 +159,7 @@ export declare class WFS extends AbstractGeoViewVector {
      * @param {AbortSignal} [abortSignal] - Optional signal to abort the fetch request.
      * @returns {Promise<TypeOutfields[]>} A promise resolving to
      *   an array of feature type field definitions extracted from the JSON response.
+     * @static
      */
     static fetchDescribeFeatureJson(url: string, abortSignal?: AbortSignal): Promise<TypeOutfields[]>;
     /**
@@ -153,6 +172,7 @@ export declare class WFS extends AbstractGeoViewVector {
      * @param {AbortSignal} [abortSignal] - Optional signal to abort the fetch request.
      * @returns {Promise<TypeOutfields[]>} A promise resolving to
      *   an array of feature type field definitions extracted from the XML schema.
+     * @static
      */
     static fetchDescribeFeatureXML(url: string, abortSignal?: AbortSignal): Promise<TypeOutfields[]>;
     /**
@@ -163,6 +183,7 @@ export declare class WFS extends AbstractGeoViewVector {
      * @param {string} fieldName - The name of the field whose type should be retrieved.
      * @param {OgcWfsLayerEntryConfig} layerConfig - The WFS layer configuration containing metadata definitions.
      * @returns {TypeOutfieldsType} The normalized field type (`'string'`, `'number'`, or `'date'`).
+     * @static
      */
     static getFieldType(fieldName: string, layerConfig: OgcWfsLayerEntryConfig): TypeOutfieldsType;
     /**
@@ -171,6 +192,7 @@ export declare class WFS extends AbstractGeoViewVector {
      * a GML geometry type such as `gml:PointPropertyType`, `gml:PolygonPropertyType`, etc.
      * @param {TypeOutfields} field - The feature type field definition to evaluate.
      * @returns {boolean} `true` if the field is a geometry field; otherwise, `false`.
+     * @static
      */
     static isGmlGeometryField(field: TypeOutfields): boolean;
     /**
@@ -180,12 +202,13 @@ export declare class WFS extends AbstractGeoViewVector {
      * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
      * @param {string} geoviewLayerName - The display name of the GeoView layer.
      * @param {string} metadataAccessPath - The URL or path to access metadata or feature data.
-     * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+     * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
      * @param {VectorStrategy} strategy - Indicates the strategy to use to fetch vector data.
      * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
      * @returns {TypeWFSLayerConfig} The constructed configuration object for the WFS Feature layer.
+     * @static
      */
-    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean, strategy: VectorStrategy, layerEntries: TypeLayerEntryShell[]): TypeWFSLayerConfig;
+    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined, strategy: VectorStrategy, layerEntries: TypeLayerEntryShell[]): TypeWFSLayerConfig;
     /**
      * Processes a WFS (Web Feature Service) GeoviewLayerConfig and returns a promise
      * that resolves to an array of `ConfigBaseClass` layer entry configurations.
@@ -200,6 +223,7 @@ export declare class WFS extends AbstractGeoViewVector {
      * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
      * @param {boolean} isTimeAware - Indicates if the layer is time aware.
      * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
+     * @static
      */
     static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: string[], isTimeAware: boolean, vectorStrategy: VectorStrategy, fetchStylesOnWMS: boolean, callbackCreateLayerEntryConfig?: (wfsEntry: TypeLayerEntryShell) => TypeLayerEntryShell): Promise<ConfigBaseClass[]>;
 }

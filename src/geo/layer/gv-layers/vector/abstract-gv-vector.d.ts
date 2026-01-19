@@ -54,10 +54,10 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
     /**
      * Overrides the get all feature information for all the features stored in the layer.
      * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
-     * @param {AbortController?} abortController - The optional abort controller.
+     * @param {AbortController?} [abortController] - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
-    protected getAllFeatureInfo(map: OLMap, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
+    protected getAllFeatureInfo(map: OLMap, abortController?: AbortController): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overrides the return of feature information at a given pixel location.
      * @param {OLMap} map - The Map where to get Feature Info At Pixel from.
@@ -70,7 +70,7 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.
      * @param {Coordinate} location - The coordinate that will be used by the query.
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-     * @param {AbortController?} abortController - The optional abort controller.
+     * @param {AbortController?} [abortController] - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
     protected getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
@@ -79,7 +79,7 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      * @param {OLMap} map - The Map where to get Feature Info At LonLat from.
      * @param {Coordinate} lonlat - The coordinate that will be used by the query.
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-     * @param {AbortController?} abortController - The optional abort controller.
+     * @param {AbortController?} [abortController] - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      */
     protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;

@@ -13,8 +13,6 @@ export interface EsriDynamicLayerEntryConfigProps extends AbstractBaseLayerEntry
  * Type used to define a GeoView image layer to display on the map.
  */
 export declare class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
-    /** Source settings to apply to the GeoView image layer source at creation time. */
-    source: TypeSourceEsriDynamicInitialConfig;
     /** Max number of records for query */
     maxRecordCount?: number;
     /**
@@ -22,6 +20,12 @@ export declare class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryC
      * @param {EsriDynamicLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
      */
     constructor(layerConfig: EsriDynamicLayerEntryConfigProps);
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {TypeSourceEsriDynamicInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+     */
+    getSource(): TypeSourceEsriDynamicInitialConfig;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      * @override
@@ -36,10 +40,10 @@ export declare class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryC
     getLayerMetadata(): TypeLayerMetadataEsri | undefined;
     /**
      * Overrides the get geometry type to interpret the esri type name.
-     * @returns {TypeStyleGeometry} The geometry type.
+     * @returns {TypeStyleGeometry | undefined} The geometry type, if it could be determined.
      * @throws {NotSupportedError} When the geometry type is not supported.
      */
-    protected onGetGeometryType(): TypeStyleGeometry;
+    protected onGetGeometryType(): TypeStyleGeometry | undefined;
     /**
      * Type guard that checks whether the given configuration (class instance or plain object)
      * represents an Esri Dynamic layer type.

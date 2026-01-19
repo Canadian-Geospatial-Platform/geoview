@@ -11,7 +11,6 @@ export interface XYZTilesLayerEntryConfigProps extends AbstractBaseLayerEntryCon
     maxScaleDenominator?: number;
 }
 export declare class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
-    source: TypeSourceImageXYZTilesInitialConfig;
     /** The minimum scale denominator as read from metadata */
     minScaleDenominator: number;
     /** The maximum scale denominator as read from metadata */
@@ -21,6 +20,12 @@ export declare class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
      * @param {XYZTilesLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
      */
     constructor(layerConfig: XYZTilesLayerEntryConfigProps);
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {TypeSourceImageXYZTilesInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+     */
+    getSource(): TypeSourceImageXYZTilesInitialConfig;
     /**
      * Type guard that checks whether the given configuration (class instance or plain object)
      * represents a XYZTiles layer type.

@@ -34,11 +34,11 @@ export declare class GVWKB extends AbstractGVVector {
      * @param {WkbObject | string} wkb - The WKB object.
      * @param {OLProjection} projection - The output projection.
      */
-    setWkbSource(wkb: WKBObject | string, projection: OLProjection): void;
+    setWkbSource(wkb: WKBObject | string, projection: OLProjection): Promise<void>;
     /**
      * Updates the WKB object, if any, to reproject the features into the new provided projection.
      * @param {OLProjection} projection - The projection to project the wkb source features into.
      */
-    updateWkbSource(projection: OLProjection): void;
+    updateWkbSource(projection: OLProjection): Promise<void>;
 }
 //# sourceMappingURL=gv-wkb.d.ts.map

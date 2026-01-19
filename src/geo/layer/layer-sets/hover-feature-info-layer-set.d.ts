@@ -1,10 +1,10 @@
 import type { Coordinate } from 'ol/coordinate';
-import type { AbstractBaseLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { QueryType } from '@/api/types/map-schema-types';
+import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import type { LayerApi } from '@/geo/layer/layer';
 import type { TypeHoverResultSet, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import type { QueryType } from '@/api/types/map-schema-types';
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
  * events happening on them (in this case when the user hovers on the map) with a store
@@ -24,18 +24,19 @@ export declare class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     constructor(layerApi: LayerApi);
     /**
      * Overrides the behavior to apply when a hover-feature-info-layer-set wants to check for condition to register a layer in its set.
-     * @param {AbstractBaseLayer} layer - The layer
+     * @param {AbstractBaseGVLayer} layer - The layer
      * @returns {boolean} True when the layer should be registered to this hover-feature-info-layer-set.
      */
-    protected onRegisterLayerCheck(layer: AbstractBaseLayer): boolean;
+    protected onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean;
     /**
      * Overrides the behavior to apply when a hover-feature-info-layer-set wants to register a layer in its set.
-     * @param {AbstractBaseLayer} layer - The layer
+     * @param {AbstractBaseGVLayer} layer - The layer
      */
-    protected onRegisterLayer(layer: AbstractBaseLayer): void;
+    protected onRegisterLayer(layer: AbstractBaseGVLayer): void;
     /**
      * Overrides the behavior to apply when propagating to the store
      * @param {TypeHoverResultSetEntry} resultSetEntry - The result set entry to propagate to the store
+     * @param {PropagationType} type - The propagation type
      */
     protected onPropagateToStore(resultSetEntry: TypeHoverResultSetEntry, type: PropagationType): void;
     /**
@@ -45,28 +46,17 @@ export declare class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     protected onDeleteFromStore(layerPath: string): void;
     /**
      * Queries the features at the provided coordinate for all the registered layers.
-     * @param {Coordinate} pixelCoordinate - The pixel coordinate where to query the features
+     * @param {Coordinate} coordinate - The pixel coordinate where to query the features when the queryType is 'at_pixel' or the map coordinate otherwise.
+     * @param {QueryType} queryType - The query type, default: HoverFeatureInfoLayerSet.QUERY_TYPE.
+     * @returns {Promise<TypeHoverResultSet>} The hover result set results.
      * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+     * @async
      */
-    queryLayers(pixelCoordinate: Coordinate): void;
+    queryLayers(coordinate: Coordinate, queryType?: QueryType): Promise<TypeHoverResultSet>;
     /**
-     * Function used to enable listening of hover events. When a layer path is not provided,
-     * hover events listening is enabled for all layers.
-     * @param {string} layerPath - Optional parameter used to enable only one layer
+     * Clears the results for the provided layer path.
+     * @param {string} layerPath - The layer path
      */
-    enableHoverListener(layerPath?: string): void;
-    /**
-     * Function used to disable listening of hover events. When a layer path is not provided,
-     * hover events listening is disable for all layers.
-     * @param {string} layerPath - Optional parameter used to disable only one layer
-     */
-    disableHoverListener(layerPath?: string): void;
-    /**
-     * Function used to determine whether hover events are disabled for a layer. When a layer path is not provided,
-     * the value returned is undefined if the map flags are a mixture of true and false values.
-     * @param {string} layerPath - Optional parameter used to get the flag value of a layer.
-     * @returns {boolean | undefined} The flag value for the map or layer.
-     */
-    isHoverListenerEnabled(layerPath?: string): boolean | undefined;
+    clearResults(layerPath: string): void;
 }
 //# sourceMappingURL=hover-feature-info-layer-set.d.ts.map

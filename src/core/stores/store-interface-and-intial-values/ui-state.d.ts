@@ -22,10 +22,10 @@ export interface IUIState {
     selectedFooterLayerListItemId: string;
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
     actions: {
-        hideTab: (tab: string) => void;
+        hideTabButton: (tab: string) => void;
         enableFocusTrap: (uiFocus: FocusItemProps) => void;
         disableFocusTrap: (callbackElementId?: string) => void;
-        showTab: (tab: string) => void;
+        showTabButton: (tab: string) => void;
         setActiveFooterBarTab: (id: string | undefined) => void;
         setActiveAppBarTab: (tabId: string, isOpen: boolean, isFocusTrapped: boolean) => void;
         setActiveTrapGeoView: (active: boolean) => void;

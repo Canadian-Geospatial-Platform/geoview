@@ -1,5 +1,5 @@
 import type { TypeLayerStyleConfig, TypeStyleGeometry, TypeLayerStyleSettings, TypeOutfields, TypeLayerTextConfig } from '@/api/types/map-schema-types';
-import type { ConfigClassOrType, TypeBaseSourceInitialConfig, TypeFeatureInfoLayerConfig, TypeGeoviewLayerType, TypeLayerEntryType } from '@/api/types/layer-schema-types';
+import type { ConfigClassOrType, TypeBaseSourceInitialConfig, TypeFeatureInfoLayerConfig, TypeGeoviewLayerType, TypeLayerEntryType, TypeValidSourceProjectionCodes } from '@/api/types/layer-schema-types';
 import type { ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { TimeDimension } from '@/core/utils/date-mgt';
@@ -19,8 +19,6 @@ export interface AbstractBaseLayerEntryConfigProps extends ConfigBaseClassProps 
  */
 export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     #private;
-    /** Source settings to apply to the GeoView layer source at creation time. */
-    source: TypeBaseSourceInitialConfig;
     /** The listOfLayerEntryConfig attribute is not used by child of AbstractBaseLayerEntryConfig. */
     listOfLayerEntryConfig: never;
     /**
@@ -42,10 +40,10 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
     /**
      * Overridable function get the geometry type based on the geometry field type.
      * It uses the WFS/WMS OGC standard (GML) to interpret the geometry type.
-     * @returns {TypeStyleGeometry} The geometry type.
+     * @returns {TypeStyleGeometry | undefined} The geometry type, if it could be determined
      * @throws {NotSupportedError} When the geometry type is not supported.
      */
-    protected onGetGeometryType(): TypeStyleGeometry;
+    protected onGetGeometryType(): TypeStyleGeometry | undefined;
     /**
      * Overrides the toJson of the mother class
      * @returns {unknown} The Json representation of the instance.
@@ -78,6 +76,11 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      */
     setLayerStyle(layerStyle: TypeLayerStyleConfig): void;
     /**
+     * Initializes the layer style configuration by filling the blanks in our config with the information from the metadata
+     * @param {TypeLayerStyleConfig} layerStyleMetadata - The layer style metadata to use to help fill the blanks in our layer style config.
+     */
+    initLayerStyleFromMetadata(layerStyleMetadata: TypeLayerStyleConfig | undefined): void;
+    /**
      * Gets the text metadata that is associated to the layer.
      * @returns {TypeLayerTextConfig} The layer text or undefined.
      */
@@ -88,15 +91,10 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      */
     setLayerText(layerText: TypeLayerTextConfig): void;
     /**
-     * The TypeStyleGeometries associated with the style as could be read from the layer config metadata.
-     * @returns {TypeStyleGeometry[]} The array of TypeStyleGeometry
-     */
-    getTypeGeometries(): TypeStyleGeometry[];
-    /**
      * The first TypeStyleSetting associated with the TypeStyleGeometry associated with the style as could be read from the layer config metadata.
      * @returns {TypeStyleSettings[]} The array of TypeStyleSettings
      */
-    getFirstStyleSettings(): TypeLayerStyleSettings | undefined;
+    getLayerStyleSettings(): TypeLayerStyleSettings | undefined;
     /**
      * Gets the temporal dimension, if any, that is associated to the layer.
      * @returns {TimeDimension | undefined} The temporal dimension or undefined.
@@ -140,18 +138,29 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
     /**
      * Gets the layer legend filter is off flag
      * @returns {boolean} The legend filter is off flag
+     * @deprecated This getter doesn't seem to be used as its corresponding attribute is always false and there's no setters
      */
     getLegendFilterIsOff(): boolean;
-    /**
-     * Sets the layer legend filter is off flag
-     * @param {boolean} legendFilterIsOff - The legend filter is off flag
-     */
-    setLegendFilterIsOff(legendFilterIsOff: boolean): void;
     /**
      * Gets the source object.
      * @returns {TypeBaseSourceInitialConfig} The source.
      */
     getSource(): TypeBaseSourceInitialConfig;
+    /**
+     * Initializes the source configuration by filling the blanks in our config with the information from the metadata
+     * @param {TypeBaseSourceInitialConfig | undefined} sourceMetadata - The source metadata to use to help fill the blanks in our source config.
+     */
+    initSourceFromMetadata(sourceMetadata: TypeBaseSourceInitialConfig | undefined): void;
+    /**
+     * Returns a shallow-copy of the source object.
+     * @returns {TypeBaseSourceInitialConfig} The shallow-copy of the source object.
+     */
+    cloneSource(): TypeBaseSourceInitialConfig;
+    /**
+     * Indicates whether the source has a data access path defined.
+     * @returns {boolean} `true` if a data access path is present; otherwise, `false`.
+     */
+    hasDataAccessPath(): boolean;
     /**
      * Gets the source data access path from the source object.
      * @param {boolean} endsWithSlash - Indicates if the dataAccessPath received should end with a '/', because it's going to be dynamically used to create a url path.
@@ -160,15 +169,32 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      */
     getDataAccessPath(endsWithSlash?: boolean): string;
     /**
+     * Overrides the data access path using the value provided by metadata.
+     * If the metadata source does not define a data access path, no action is taken.
+     * @param {TypeBaseSourceInitialConfig | undefined} metadataSource
+     * The metadata source configuration containing a data access path.
+     */
+    overrideDataAccessPathFromMetadata(metadataSource: TypeBaseSourceInitialConfig | undefined): void;
+    /**
      * Gets the source feature info object.
      * @returns {TypeFeatureInfoLayerConfig} The feature info.
      */
     getFeatureInfo(): TypeFeatureInfoLayerConfig;
     /**
-     * Sets the source feature info object.
-     * @param {TypeFeatureInfoLayerConfig} featureInfo - The feature info.
+     * Gets the source projection.
+     * @returns {TypeValidSourceProjectionCodes | undefined} The source projection.
      */
-    setFeatureInfo(featureInfo: TypeFeatureInfoLayerConfig): void;
+    getProjection(): TypeValidSourceProjectionCodes | undefined;
+    /**
+     * Gets the source projection with the EPSG prefix.
+     * @returns {string | undefined} The source projection with the EPSG prefix.
+     */
+    getProjectionWithEPSG(): string | undefined;
+    /**
+     * Sets the source projection in the source object only if it's not already set and if the parameter is defined.
+     * @param {TypeValidSourceProjectionCodes | undefined} projection - The source projection.
+     */
+    initProjectionFromMetadata(projection: TypeValidSourceProjectionCodes | undefined): void;
     /**
      * Gets the source outfields from the source object.
      * @returns {TypeOutfields[] | undefined} The outfields.
@@ -190,6 +216,13 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      * @throws {NoPrimaryKeyFieldError} When the no outfields has the type 'oid'.
      */
     getOutfieldsPK(): TypeOutfields;
+    /**
+     * Gets the field name representing the primary key (OID) if available,
+     * otherwise returns the provided default field name.
+     * @param {string} defaultField - The field name to return if no OID field is found.
+     * @returns {string} The primary key (OID) field name or the provided default value.
+     */
+    getOutfieldsPKNameOrDefault(defaultField: string): string;
     /**
      * Initializes any outfield aliases that's undefined using the name property as default.
      */
@@ -213,22 +246,22 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      * Gets the source queryable value.
      * @returns {boolean | undefined} The source queryable value.
      */
-    getQueryable(): boolean | undefined;
+    getQueryableSource(): boolean | undefined;
     /**
      * Gets the source queryable value. Defaults to true when couldn't be determined.
      * @returns {boolean} The source queryable value, defaulted if necessary.
      */
-    getQueryableDefaulted(): boolean;
+    getQueryableSourceDefaulted(): boolean;
     /**
      * Sets the source queryable in the source object. The source.featureInfo object must already exist.
      * @param {boolean | undefined} queryable - The source queryable value.
      */
-    setQueryable(queryable: boolean | undefined): void;
+    setQueryableSource(queryable: boolean | undefined): void;
     /**
      * Sets the source queryable in the source object only if it's not already set. The source.featureInfo object must already exist.
      * @param {boolean} queryable - The source queryable value.
      */
-    initQueryable(queryable: boolean | undefined): void;
+    initQueryableSource(queryable: boolean | undefined): void;
     /**
      * Gets the geometry field.
      * @returns {TypeOutfields | undefined} The geometry field.
@@ -241,13 +274,25 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
     setGeometryField(geometryField: TypeOutfields | undefined): void;
     /**
      * Returns the OpenLayers-compatible geometry type of this layer's geometry field.
-     * @returns {TypeStyleGeometry} The OpenLayers geometry type (e.g., 'Point', 'LineString', 'Polygon')
+     * @returns {TypeStyleGeometry | undefined} The OpenLayers geometry type (e.g., 'Point', 'LineString', 'Polygon'), if it could be determined.
      */
-    getGeometryType(): TypeStyleGeometry;
+    getGeometryType(): TypeStyleGeometry | undefined;
     /**
      * Helper function to support when a layerConfig is either a class instance or a regular json object.
      * @param {ConfigAbstractBaseClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
-     * @returns {TypeLayerStyleConfig | undefined} The layer style or undefined.
+     * @returns {string | undefined} The source or undefined.
+     */
+    static getClassOrTypeSource(layerConfig: ConfigClassOrType | undefined): TypeBaseSourceInitialConfig | undefined;
+    /**
+     * Helper function to support when a layerConfig is either a class instance or a regular json object.
+     * @param {ConfigAbstractBaseClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
+     * @returns {string | undefined} The feature info or undefined.
+     */
+    static getClassOrTypeFeatureInfo(layerConfig: ConfigClassOrType | undefined): TypeFeatureInfoLayerConfig | undefined;
+    /**
+     * Helper function to support when a layerConfig is either a class instance or a regular json object.
+     * @param {ConfigAbstractBaseClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
+     * @returns {string | undefined} The layer style or undefined.
      */
     static getClassOrTypeLayerStyle(layerConfig: ConfigClassOrType | undefined): TypeLayerStyleConfig | undefined;
     /**

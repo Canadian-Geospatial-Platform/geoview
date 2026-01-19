@@ -1,23 +1,23 @@
 import type { VectorLayerEntryConfigProps } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import type { TypeCSVLayerConfig, TypeSourceCSVInitialConfig } from '@/geo/layer/geoview-layers/vector/csv';
-import type { ConfigClassOrType, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
+import type { TypeCSVLayerConfig } from '@/geo/layer/geoview-layers/vector/csv';
+import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeSourceCSVInitialConfig } from '@/api/types/layer-schema-types';
 export interface CsvLayerEntryConfigProps extends VectorLayerEntryConfigProps {
     /** Source settings to apply to the GeoView layer source at creation time. */
     source?: TypeSourceCSVInitialConfig;
-    /** Character separating values in csv file */
-    valueSeparator?: string;
 }
 export declare class CsvLayerEntryConfig extends VectorLayerEntryConfig {
-    /** Source settings to apply to the GeoView layer source at creation time. */
-    source: TypeSourceCSVInitialConfig;
-    /** Character separating values in csv file */
-    valueSeparator?: string;
     /**
      * The class constructor.
      * @param {CsvLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
      */
     constructor(layerConfig: CsvLayerEntryConfigProps);
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @override
+     * @returns {TypeSourceCSVInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+     */
+    getSource(): TypeSourceCSVInitialConfig;
     /**
      * Type guard that checks whether the given configuration (class instance or plain object)
      * represents a CSV layer type.

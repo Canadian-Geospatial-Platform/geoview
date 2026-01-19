@@ -1,3 +1,4 @@
+import type { Projection as OLProjection } from 'ol/proj';
 import GeoTIFFSource from 'ol/source/GeoTIFF';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
@@ -30,7 +31,7 @@ export declare class GeoTIFF extends AbstractGeoViewRaster {
     /**
      * Overrides the way the metadata is fetched.
      * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
-     * @param {AbortSignal | undefined} abortSignal - Abort signal to handle cancelling of fetch.
+     * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
      * @returns {Promise<T = TypeMetadataGeoTIFF | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
      * @throws {LayerServiceMetadataUnableToFetchError} Error thrown when the metadata fetch fails or contains an error.
      */
@@ -43,22 +44,25 @@ export declare class GeoTIFF extends AbstractGeoViewRaster {
     /**
      * Overrides the way the layer metadata is processed.
      * @param {GeoTIFFLayerEntryConfig} layerConfig - The layer entry configuration to process.
+     * @param {OLProjection?} [mapProjection] - The map projection.
+     * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
      * @returns {Promise<GeoTIFFLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
      */
-    protected onProcessLayerMetadata(layerConfig: GeoTIFFLayerEntryConfig): Promise<GeoTIFFLayerEntryConfig>;
-    /**
-     * Creates a GeoTIFF source from a layer config.
-     * @param {GeoTIFFLayerEntryConfig} layerConfig - The configuration for the GeoTIFF layer.
-     * @returns A fully configured GeoTIFF source.
-     * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
-     */
-    static createGeoTIFFSource(layerConfig: GeoTIFFLayerEntryConfig): GeoTIFFSource;
+    protected onProcessLayerMetadata(layerConfig: GeoTIFFLayerEntryConfig, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<GeoTIFFLayerEntryConfig>;
     /**
      * Overrides the creation of the GV Layer
      * @param {GeoTIFFLayerEntryConfig} layerConfig - The layer entry configuration.
      * @returns {GVGeoTIFF} The GV Layer
      */
     protected onCreateGVLayer(layerConfig: GeoTIFFLayerEntryConfig): GVGeoTIFF;
+    /**
+     * Creates a GeoTIFF source from a layer config.
+     * @param {GeoTIFFLayerEntryConfig} layerConfig - The configuration for the GeoTIFF layer.
+     * @returns A fully configured GeoTIFF source.
+     * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+     * @static
+     */
+    static createGeoTIFFSource(layerConfig: GeoTIFFLayerEntryConfig): GeoTIFFSource;
     /**
      * Initializes a GeoView layer configuration for a GeoTIFF layer.
      * This method creates a basic TypeGeoviewLayerConfig using the provided
@@ -67,21 +71,24 @@ export declare class GeoTIFF extends AbstractGeoViewRaster {
      * @param {string} geoviewLayerId - A unique identifier for the layer.
      * @param {string} geoviewLayerName - The display name of the layer.
      * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
+     * @param {boolean?} [isTimeAware] - Indicates whether the layer supports time-based filtering.
      * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+     * @static
      */
-    static initGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string): Promise<TypeGeoviewLayerConfig>;
+    static initGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware?: boolean): Promise<TypeGeoviewLayerConfig>;
     /**
      * Creates a configuration object for a GeoTIFF layer.
      * This function constructs a `TypeGeoTIFFConfig` object that describes an GeoTIFF layer
      * and its associated entry configurations based on the provided parameters.
      * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
      * @param {string} geoviewLayerName - The display name of the GeoView layer.
-     * @param {string} metadataAccessPath - The URL or path to access metadata.
-     * @param {boolean} isTimeAware - Indicates whether the layer supports time-based filtering.
+     * @param {string | undefined} metadataAccessPath - The URL or path to access metadata.
+     * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
      * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
      * @returns {TypeGeoTIFFConfig} The constructed configuration object for the GeoTIFF layer.
+     * @static
      */
-    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean, layerEntries: TypeLayerEntryShell[]): TypeGeoTIFFLayerConfig;
+    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string | undefined, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeGeoTIFFLayerConfig;
     /**
      * Processes a GeoTIFF GeoviewLayerConfig and returns a promise
      * that resolves to an array of `ConfigBaseClass` layer entry configurations.
@@ -96,6 +103,7 @@ export declare class GeoTIFF extends AbstractGeoViewRaster {
      * @param {boolean} isTimeAware - Indicates if the layer is time aware.
      * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
      * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
+     * @static
      */
     static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: string[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
 }
