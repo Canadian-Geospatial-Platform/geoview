@@ -7,13 +7,14 @@ import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstrac
 import type { EsriDynamicLayerEntryConfigProps } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import type { TypeGeoviewLayerConfig, TypeMetadataEsriDynamic } from '@/api/types/layer-schema-types';
+import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { deepMergeObjects } from '@/core/utils/utilities';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
-import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import { LayerFilters } from '@/core/types/layer-filters';
 
 export interface TypeEsriDynamicLayerConfig extends TypeGeoviewLayerConfig {
   // TODO: Refactor - Layers - Get rid of the `geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_DYNAMIC` property in this interface and all others in other layers.
@@ -340,15 +341,14 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       olSource.updateParams({ ...params, layerDefs: '' });
     }
 
-    // Apply the filter on the source right away, before the first load
-    GVEsriDynamic.applyViewFilterOnSource(
-      layerConfig,
-      olSource,
-      layerConfig.getLayerStyle(),
-      layerConfig.getExternalFragmentsOrder(),
-      undefined,
-      layerConfig.getLayerFilter()
+    // The filter for the initial view
+    const layerFilters = new LayerFilters(
+      layerConfig.getLayerFilter(),
+      GVEsriDynamic.getFilterFromStyle(layerConfig, layerConfig.getLayerStyle())
     );
+
+    // Apply the filter on the source right away, before the first load
+    GVEsriDynamic.applyViewFilterOnSource(layerConfig, olSource, layerConfig.getExternalFragmentsOrder(), undefined, layerFilters);
 
     // Return the source
     return olSource;

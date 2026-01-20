@@ -114,9 +114,9 @@
       },
       {
         "geoviewLayerId": "ESRIImageLYR2",
-        "geoviewLayerName": "Max Temp",
+        "geoviewLayerName": "Crop Inventory",
         "geoviewLayerType": "esriImage",
-        "metadataAccessPath": "https://www5.agr.gc.ca/atlas/rest/services/imageservices/annual_crop_inventory_2022/ImageServer",
+        "metadataAccessPath": "https://agriculture.canada.ca/imagery-images/rest/services/annual_crop_inventory/2022/ImageServer",
         "listOfLayerEntryConfig": [
           {
             "layerId": "annual_crop_inventory_2022",

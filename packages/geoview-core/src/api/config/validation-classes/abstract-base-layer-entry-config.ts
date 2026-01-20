@@ -316,14 +316,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   }
 
   /**
-   * Sets the layer filter for the layer.
-   * @param {string} layerFilter - The layer filter
-   */
-  setLayerFilter(layerFilter: string): void {
-    this.#layerFilter = layerFilter;
-  }
-
-  /**
    * Gets the layer filter equation
    * @returns {FilterNodeType[] | undefined} The filter equation if any
    */

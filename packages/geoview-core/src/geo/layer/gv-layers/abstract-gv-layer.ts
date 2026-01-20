@@ -1490,7 +1490,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    */
   static getImageSource(
     feature: Feature,
-    layerPath: string,
     layerStyle: TypeLayerStyleConfig,
     filterEquation: FilterNodeType[] | undefined,
     domainsLookup: TypeLayerMetadataFields[] | undefined,
@@ -1591,7 +1590,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       for (const feature of features) {
         // Get the image source for a feature using styling information and cache it
         const imageSource = layerStyle
-          ? AbstractGVLayer.getImageSource(feature, layerPath, layerStyle, filterEquation, domainsLookup, aliasLookup, imageSourceDict)
+          ? AbstractGVLayer.getImageSource(feature, layerStyle, filterEquation, domainsLookup, aliasLookup, imageSourceDict)
           : undefined;
 
         // Get the extent

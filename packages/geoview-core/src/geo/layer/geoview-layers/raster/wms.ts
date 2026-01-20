@@ -34,10 +34,12 @@ import {
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { deepMergeObjects, normalizeDatacubeAccessPath } from '@/core/utils/utilities';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { WfsRenderer } from '@/geo/utils/renderer/wfs-renderer';
 import { logger } from '@/core/utils/logger';
+import { LayerFilters } from '@/core/types/layer-filters';
 
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
@@ -340,15 +342,14 @@ export class WMS extends AbstractGeoViewRaster {
     // Create the source
     const olSource = new ImageWMS(sourceOptions);
 
-    // Apply the filter on the source right away, before the first load
-    GVWMS.applyViewFilterOnSource(
-      layerConfig,
-      olSource,
-      layerConfig.getLayerStyle(),
-      layerConfig.getExternalFragmentsOrder(),
-      undefined,
-      layerConfig.getLayerFilter()
+    // The filter for the initial view
+    const layerFilters = new LayerFilters(
+      layerConfig.getLayerFilter(),
+      GVEsriDynamic.getFilterFromStyle(layerConfig, layerConfig.getLayerStyle())
     );
+
+    // Apply the filter on the source right away, before the first load
+    GVWMS.applyViewFilterOnSource(layerConfig, olSource, layerConfig.getExternalFragmentsOrder(), undefined, layerFilters);
 
     // Return the source
     return olSource;

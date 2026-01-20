@@ -22,17 +22,19 @@ import type { TypeFeatureInfoEntry, TypeOutfieldsType } from '@/api/types/map-sc
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import type { FilterCapable } from '@/geo/layer/gv-layers/interface-filter';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
 import { NoExtentError } from '@/core/exceptions/geoview-exceptions';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import type { TypeDateFragments } from '@/core/utils/date-mgt';
+import { LayerFilters } from '@/core/types/layer-filters';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer vector type layer.
  */
-export abstract class AbstractGVVector extends AbstractGVLayer {
+export abstract class AbstractGVVector extends AbstractGVLayer implements FilterCapable {
   /** Indicates if the style has been applied on the layer yet */
   styleApplied: boolean = false;
 
@@ -83,8 +85,12 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     // Init the layer options with initial settings
     AbstractGVVector.initOptionsWithInitialSettings(layerOptions, layerConfig);
 
-    // Apply the layer filter right away if any
-    AbstractGVVector.applyViewFilterOnConfig(layerConfig, layerConfig.getExternalFragmentsOrder(), undefined, layerConfig.getLayerFilter());
+    // The filter for the initial view
+    // GV No need to set the classFilter, because it's already set in the config and the style() callback above takes care of it
+    const layerFilters = new LayerFilters(layerConfig.getLayerFilter());
+
+    // Apply the filter on the source right away, before the first load
+    AbstractGVVector.applyViewFilterOnConfig(layerConfig, layerConfig.getExternalFragmentsOrder(), undefined, layerFilters);
 
     // If the layer is initially not visible, make it visible until the style is set so we have a style for the legend
     this.onLayerFirstLoaded(() => {
@@ -299,12 +305,9 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Applies a view filter to a Vector layer's configuration by updating the layerConfig.filterEquation parameter.
-   * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
+   * @param {LayerFilters} [filter] - The raw filter string input (defaults to an empty string if not provided).
    */
-  applyViewFilter(filter: string | undefined = ''): void {
-    // Log
-    logger.logTraceCore('ABSTRACT-GV-VECTOR - applyViewFilter', this.getLayerPath());
-
+  applyViewFilter(filter?: LayerFilters): void {
     // Redirect
     AbstractGVVector.applyViewFilterOnConfig(
       this.getLayerConfig(),
@@ -318,6 +321,25 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
         });
       }
     );
+  }
+
+  /**
+   * Applies a time filter on a date range.
+   * @param {string} date1 - The start date
+   * @param {string} date2 - The end date
+   */
+  applyDateFilter(date1: string, date2: string): void {
+    // Get the time dimension field
+    const { field } = this.getTimeDimension()!;
+
+    // Create an application filter for dates keeping the initial filter
+    const layerFilters = new LayerFilters(
+      this.getLayerConfig().getLayerFilter(),
+      `${field} >= date '${date1}' and ${field} <= date '${date2}'`
+    );
+
+    // Redirect
+    this.applyViewFilter(layerFilters);
   }
 
   /**
@@ -430,17 +452,14 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     layerConfig: VectorLayerEntryConfig,
     externalDateFragments: TypeDateFragments | undefined,
     layer: AbstractGVLayer | undefined,
-    filter: string | undefined = '',
+    filter: LayerFilters | undefined,
     callbackWhenUpdated: ((filterToUse: string) => void) | undefined = undefined
   ): void {
-    // Update the layer config on the fly (maybe not ideal to do this here at this stage?)
-    layerConfig.setLayerFilter(filter);
-
     // Get the current filter
     const currentFilter = layerConfig.getFilterEquation();
 
-    // Parse the filter value to use
-    let filterValueToUse: string = filter.replaceAll(/\s{2,}/g, ' ').trim();
+    // Get the filter to use
+    let filterValueToUse: string = filter?.getAllFilters() || '';
 
     try {
       // Parse is some more for the dates
