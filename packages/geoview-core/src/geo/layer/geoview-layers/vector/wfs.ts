@@ -647,7 +647,7 @@ export class WFS extends AbstractGeoViewVector {
 
     const fieldEntryType = fieldDefinition.type.split(':').slice(-1)[0];
     if (fieldEntryType === 'date') return 'date';
-    if (['int', 'number'].includes(fieldEntryType)) return 'number';
+    if (['int', 'integer', 'number', 'decimal', 'long', 'short', 'float', 'double'].includes(fieldEntryType)) return 'number';
 
     // Default: string
     return 'string';
