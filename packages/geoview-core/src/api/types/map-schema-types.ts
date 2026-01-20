@@ -59,7 +59,16 @@ export type TypeDisplayTheme = 'dark' | 'light' | 'geo.ca';
 export const VALID_DISPLAY_THEME: TypeDisplayTheme[] = ['dark', 'light', 'geo.ca'];
 
 /** Valid values for the navBar array. */
-export type TypeValidNavBarProps = 'zoom' | 'rotation' | 'fullscreen' | 'home' | 'location' | 'basemap-select' | 'projection' | 'drawer';
+export type TypeValidNavBarProps =
+  | 'zoom'
+  | 'rotation'
+  | 'fullscreen'
+  | 'home'
+  | 'location'
+  | 'basemap-select'
+  | 'measurement'
+  | 'projection'
+  | 'drawer';
 
 /** Supported footer bar tabs */
 export type TypeValidFooterBarTabsCoreProps = 'legend' | 'layers' | 'details' | 'data-table' | 'time-slider' | 'geochart' | 'guide';
@@ -589,6 +598,7 @@ export type TypeLayerStyleSettings = {
   // If true, last style info from info array is default style.
   hasDefault: boolean;
   info: TypeLayerStyleConfigInfo[];
+  visualVariables?: TypeLayerStyleVisualVariable[];
 };
 
 /** Information needed to render the feature. */
@@ -610,6 +620,34 @@ export type TypeLayerStyleConfigInfo = {
 
   /** The geometry settings. */
   settings: TypeBaseVectorGeometryConfig;
+};
+
+/**
+ * Indiviual feature style modifications sometimes specified in ESRI Renderer
+ * https://developers.arcgis.com/documentation/mapping-and-location-services/data-visualization/data-driven-styles/visual-variables/
+ * Rest specific documentation
+ * https://developers.arcgis.com/web-map-specification/objects/colorInfo_visualVariable/
+ */
+export type TypeLayerStyleVisualVariable = {
+  type: 'colorInfo' | 'sizeInfo' | 'rotationInfo' | 'opacityInfo';
+  field: string;
+  normalizationField?: string;
+  stops?: TypeEsriStyleStops[];
+  minDataValue?: number;
+  maxDataValue?: number;
+  minSize?: number;
+  maxSize?: number;
+  rotationType?: 'geographic' | 'arithmetic';
+  valueExpression?: string;
+};
+
+/** Stops for Visual Variable modifications */
+export type TypeEsriStyleStops = {
+  value: string | number;
+  // Assuming RGB
+  color?: string;
+  size?: number;
+  opacity?: number;
 };
 
 /**
@@ -919,7 +957,7 @@ export type TypeLayerData = {
   // when Array.isArray(features) is true, the features property contains the query result.
   // when property features is null, the query ended with an error.
   queryStatus: TypeQueryStatus;
-  features: TypeFeatureInfoEntry[] | undefined | null;
+  features?: TypeFeatureInfoEntry[];
   isDisabled?: boolean;
 };
 

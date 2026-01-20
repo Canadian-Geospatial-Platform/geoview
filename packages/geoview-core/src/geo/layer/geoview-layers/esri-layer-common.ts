@@ -202,7 +202,11 @@ export class EsriUtilities {
       }
     } else if (layer instanceof EsriFeature) {
       // If the metadata for the particular layer doesn't indicate 'Feature Layer' as the type
-      if (layer.getMetadata()!.layers[esriIndexForFeature].type !== 'Feature Layer') {
+      // GV: Older ArcGIS servers do not have a 'type' attribute for layers in the layers list and it can only be retrieved from the layer's metadata endpoint
+      if (
+        Object.prototype.hasOwnProperty.call(layer.getMetadata()!.layers[esriIndexForFeature], 'type') &&
+        layer.getMetadata()!.layers[esriIndexForFeature].type !== 'Feature Layer'
+      ) {
         // Log warning
         GeoViewError.logWarning(new LayerNotFeatureLayerError(layerConfig.layerPath, layerConfig.getLayerNameCascade()));
       }

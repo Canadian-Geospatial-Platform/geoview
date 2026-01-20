@@ -1,6 +1,6 @@
 {
   "name": "geoview-core",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Lightweight viewer based on Open Layers and React for the Canadian Geospatial Platform",
   "private": true,
   "main": "src/app.tsx",

@@ -138,7 +138,14 @@ class DrawerPlugin extends NavBarPlugin {
   override onCreateButtonConfigs(): Record<string, TypeNavBarButtonConfig> {
     // Create all drawer buttons
     logger.logInfo('Drawer Plugin - onAdd');
-    return createDrawerButtons(this.getConfig());
+
+    // GV: WORK AROUND - buttonPanel - Pass the translate function to createDrawerButtons
+    // TODO: The regular button nav bar are working fine with the key but not the nav bar panel button, need a better refactor because
+    // TODO.CONT: on language switch, the tooltip for both button are not updated as well...
+    // TODO.CONT: Related to nav-bar.tsx.handleNavApiAddButtonPanel and nav-bar.tsx.renderButtonPanelGroup via an event from nav-bar-api and the UI-react isn't aware of the button creation
+    // TODO.CONT: Need cleanup of nav-bar, app-bar and footer-bar api's
+    const t = (key: string): string => this.translate?.getI18n().t(key) ?? key;
+    return createDrawerButtons(this.getConfig(), t);
   }
 }
 

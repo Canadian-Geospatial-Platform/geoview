@@ -39,10 +39,10 @@ export interface IUIState {
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
-    hideTab: (tab: string) => void;
+    hideTabButton: (tab: string) => void;
     enableFocusTrap: (uiFocus: FocusItemProps) => void;
     disableFocusTrap: (callbackElementId?: string) => void;
-    showTab: (tab: string) => void;
+    showTabButton: (tab: string) => void;
     setActiveFooterBarTab: (id: string | undefined) => void;
     setActiveAppBarTab: (tabId: string, isOpen: boolean, isFocusTrapped: boolean) => void;
     setActiveTrapGeoView: (active: boolean) => void;
@@ -80,7 +80,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
     activeTrapGeoView: false,
     corePackagesComponents: [],
     focusItem: { activeElementId: false, callbackElementId: false },
-    hiddenTabs: ['time-slider', 'geochart'],
+    hiddenTabs: ['data-table', 'time-slider', 'geochart'],
     navBarComponents: [],
     footerBarComponents: [],
     footerPanelResizeValue: 35,
@@ -115,9 +115,9 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
     // #region ACTIONS
 
     actions: {
-      hideTab: (tab: string): void => {
+      hideTabButton: (tab: string): void => {
         // Redirect to event processor
-        UIEventProcessor.hideTab(get().mapId, tab);
+        UIEventProcessor.hideTabButton(get().mapId, tab);
       },
       enableFocusTrap: (uiFocus: FocusItemProps) => {
         // Redirect to setter
@@ -127,9 +127,9 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         // Redirect to setter
         get().uiState.setterActions.disableFocusTrap(callbackElementId);
       },
-      showTab: (tab: string): void => {
+      showTabButton: (tab: string): void => {
         // Redirect to event processor
-        UIEventProcessor.showTab(get().mapId, tab);
+        UIEventProcessor.showTabButton(get().mapId, tab);
       },
       setActiveFooterBarTab: (id: string | undefined) => {
         // Redirect to setter

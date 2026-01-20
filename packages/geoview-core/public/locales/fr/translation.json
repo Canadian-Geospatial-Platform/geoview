@@ -21,7 +21,9 @@
     "show": "Afficher",
     "hide": "Masquer",
     "none": "Aucun",
-    "clearSearch": "Effacer la recherche"
+    "clearSearch": "Effacer la recherche",
+    "enable": "Activer",
+    "disable": "Désactiver"
   },
   "mapnav": {
     "arianavbar": "Groupe de buttons vertical pour navigation sur la carte",
@@ -33,12 +35,20 @@
     "coordinates": "Basculer le format des coordonnées",
     "scale": "Basculer entre l'échelle et la résolution",
     "location": "Zoom sur ma position",
+    "measurement": "Mesurer sur la carte",
     "projection": "Changer la projection de la carte",
     "rotation": {
       "title": "Rotation de la carte",
       "degrees": "Degrés",
       "reset": "Réinitialiser"
     }
+  },
+  "measurement": {
+    "title": "Mesurer",
+    "line": "Distance",
+    "area": "Surface",
+    "clear": "Effacer",
+    "segmentLabels": "Afficher les étiquettes des segments"
   },
   "basemaps": {
     "select": "Choisir une carte de base",

@@ -21,7 +21,9 @@
     "show": "Show",
     "hide": "Hide",
     "none": "No",
-    "clearSearch": "Clear search"
+    "clearSearch": "Clear search",
+    "enable": "Enable",
+    "disable": "Disable"
   },
   "mapnav": {
     "arianavbar": "Vertical button group for map navigation",
@@ -33,12 +35,20 @@
     "coordinates": "Toggle coordinates format",
     "scale": "Toggle between scale and resolution",
     "location": "Zoom to my location",
+    "measurement": "Measure on map",
     "projection": "Change map projection",
     "rotation": {
       "title": "Map Rotation",
       "degrees": "Degrees",
       "reset": "Reset"
     }
+  },
+  "measurement": {
+    "title": "Measure",
+    "line": "Distance",
+    "area": "Area",
+    "clear": "Clear",
+    "segmentLabels": "Show segment labels"
   },
   "basemaps": {
     "select": "Select a basemap",

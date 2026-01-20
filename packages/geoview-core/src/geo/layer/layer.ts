@@ -1621,6 +1621,14 @@ export class LayerApi {
       });
   }
 
+  /**
+   * Repeats the last feature info query if any.
+   * @returns {void}
+   */
+  repeatLastQuery(): void {
+    FeatureInfoEventProcessor.repeatLastQuery(this.getMapId());
+  }
+
   // #region PRIVATE FUNCTIONS
 
   /**
@@ -2727,7 +2735,7 @@ export class LayerApi {
       promise = ShapefileReader.convertShapefileConfigToGeoJson(entry);
     } else if (mapConfigLayerEntryIsRCS(entry)) {
       // Working with a RCS (Geocore subset) layer
-      promise = GeoCore.createLayerConfigFromRCSUUID(entry.geoviewLayerId, language, entry);
+      promise = GeoCore.createLayerConfigFromRCSUUID(entry.geoviewLayerId, language, mapId, entry);
     } else {
       // Working with a standard GeoView layer
       promise = Promise.resolve(entry);

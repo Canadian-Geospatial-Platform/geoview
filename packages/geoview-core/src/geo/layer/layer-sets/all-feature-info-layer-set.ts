@@ -1,4 +1,5 @@
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
+import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
 import type { QueryType, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
@@ -44,6 +45,10 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
       isQueryable = layer.getLayerConfig().hasWfsLayerConfig();
     }
 
+    if (isQueryable) {
+      UIEventProcessor.showTabButton(this.getMapId(), 'data-table');
+    }
+
     // Return
     return isQueryable;
   }
@@ -58,7 +63,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
     // Update the resultSet data
     const layerPath = layer.getLayerPath();
-    this.resultSet[layerPath].queryStatus = 'processed';
+    this.resultSet[layerPath].queryStatus = 'init';
     this.resultSet[layerPath].features = undefined;
 
     // Extra initialization of settings
@@ -146,8 +151,6 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
             // Keep the features retrieved
             this.resultSet[layerPath].features = arrayOfRecords;
-
-            // Query was processed
             this.resultSet[layerPath].queryStatus = 'processed';
           })
           .catch((error: unknown) => {
@@ -157,7 +160,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
               logger.logDebug('Query aborted and replaced by another one.. keep spinning..');
             } else {
               // Error
-              this.resultSet[layerPath].features = null;
+              this.resultSet[layerPath].features = undefined;
               this.resultSet[layerPath].queryStatus = 'error';
 
               // Log
@@ -179,7 +182,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
       }
 
       // Error
-      this.resultSet[layerPath].features = null;
+      this.resultSet[layerPath].features = undefined;
       this.resultSet[layerPath].queryStatus = 'error';
 
       // Propagate to the store
@@ -204,7 +207,8 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     if (!this.resultSet[layerPath]) return;
 
     // Clear features
-    this.resultSet[layerPath].features = null;
+    this.resultSet[layerPath].features = undefined;
+    this.resultSet[layerPath].queryStatus = 'init';
 
     // Propagate to the store
     this.#propagateToStore(this.resultSet[layerPath]);

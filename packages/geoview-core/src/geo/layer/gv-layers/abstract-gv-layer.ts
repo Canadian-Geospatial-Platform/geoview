@@ -1508,14 +1508,14 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     const styleSettings = layerStyle[geometryType];
     const { type } = styleSettings;
 
-    const featureStyle = GeoviewRenderer.processStyle[type][geometryType](
-      styleSettings,
-      feature,
+    const options = {
       filterEquation,
-      true,
+      legendFilterIsOff: true,
       domainsLookup,
-      aliasLookup
-    );
+      aliasLookup,
+    };
+
+    const featureStyle = GeoviewRenderer.processStyle[type][geometryType](styleSettings, feature, options);
 
     if (!featureStyle) {
       return GeoviewRenderer.getFeatureImageSource(feature, layerStyle, filterEquation, true, domainsLookup, aliasLookup);

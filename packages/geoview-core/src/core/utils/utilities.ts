@@ -1232,3 +1232,45 @@ export function isLocalhost(): boolean {
   if (typeof window === 'undefined' || !window.location) return false;
   return window.location.hostname === 'localhost' && window.location.port === '8080';
 }
+
+/**
+ * Formats a numeric value according to the display language
+ * @param {number} value - The value to format
+ * @param {string} displayLanguage - The display language ('en' or 'fr')
+ * @returns {string} The formatted value
+ */
+export function formatMeasurementValue(value: number, displayLanguage: string): string {
+  return displayLanguage === 'fr'
+    ? value.toLocaleString('fr-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+/**
+ * Formats a length measurement with appropriate units
+ * @param {number} length - The length in meters
+ * @param {string} displayLanguage - The display language
+ * @returns {string} The formatted length string
+ */
+export function formatLength(length: number, displayLanguage: string): string {
+  if (length > 100) {
+    const value = Math.round((length / 1000) * 100) / 100;
+    return `${formatMeasurementValue(value, displayLanguage)} km`;
+  }
+  const value = Math.round(length * 100) / 100;
+  return `${formatMeasurementValue(value, displayLanguage)} m`;
+}
+
+/**
+ * Formats an area measurement with appropriate units
+ * @param {number} area - The area in square meters
+ * @param {string} displayLanguage - The display language
+ * @returns {string} The formatted area string
+ */
+export function formatArea(area: number, displayLanguage: string): string {
+  if (area > 10000) {
+    const value = Math.round((area / 1000000) * 100) / 100;
+    return `${formatMeasurementValue(value, displayLanguage)} km<sup>2</sup>`;
+  }
+  const value = Math.round(area * 100) / 100;
+  return `${formatMeasurementValue(value, displayLanguage)} m<sup>2</sup>`;
+}
