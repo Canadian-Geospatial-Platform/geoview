@@ -16,7 +16,7 @@ import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
-import type { TypeFeatureInfoEntry, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
 import type { TypeMetadataFeatureInfo } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
@@ -24,6 +24,7 @@ import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import type { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
+import type { FilterCapable } from '@/geo/layer/gv-layers/interface-filter';
 import { Projection } from '@/geo/utils/projection';
 import { LayerInvalidFeatureInfoFormatWMSError, LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
 import { formatError, NetworkError, ResponseContentError } from '@/core/exceptions/core-exceptions';
@@ -33,6 +34,7 @@ import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { WfsRenderer } from '@/geo/utils/renderer/wfs-renderer';
 import { NoExtentError } from '@/core/exceptions/geoview-exceptions';
+import { LayerFilters } from '@/core/types/layer-filters';
 
 /**
  * Manages a WMS layer.
@@ -40,7 +42,7 @@ import { NoExtentError } from '@/core/exceptions/geoview-exceptions';
  * @exports
  * @class GVWMS
  */
-export class GVWMS extends AbstractGVRaster {
+export class GVWMS extends AbstractGVRaster implements FilterCapable {
   /** The max feature count returned by the GetFeatureInfo */
   static readonly DEFAULT_MAX_FEATURE_COUNT: number = 100;
 
@@ -232,6 +234,14 @@ export class GVWMS extends AbstractGVRaster {
         // Get the Geoview Layer Config WFS equivalent
         const wfsLayerConfig = wmsLayerConfig.getWfsLayerConfig();
 
+        // The filter when querying the map
+        // TODO: Add the data table filters when performing a getFeatureInfoAtLonLat!? We have to get it from the UI, ouch better receive it as param here...
+        const layerFilters = new LayerFilters(
+          wmsLayerConfig.getLayerFilter(),
+          GVEsriDynamic.getFilterFromStyle(wmsLayerConfig, wmsLayerConfig.getLayerStyle()),
+          undefined
+        );
+
         // We're going to try performing a GetFeature using the WFS query instead of WMS, better chance to retrieve the geometry that way
         return await this.#getFeatureInfoUsingWFS(
           wmsLayerConfig,
@@ -239,6 +249,7 @@ export class GVWMS extends AbstractGVRaster {
           clickCoordinate,
           viewResolution,
           projectionCode,
+          layerFilters,
           abortController
         );
       } catch (error: unknown) {
@@ -271,6 +282,12 @@ export class GVWMS extends AbstractGVRaster {
     // Get the Geoview Layer Config WFS equivalent
     const wfsLayerConfig = wmsLayerConfig.getWfsLayerConfig();
 
+    // The filter for loading the data table
+    const layerFilters = new LayerFilters(
+      wmsLayerConfig.getLayerFilter(),
+      GVEsriDynamic.getFilterFromStyle(wmsLayerConfig, wmsLayerConfig.getLayerStyle())
+    );
+
     // Redirect
     return this.#getFeatureInfoUsingWFS(
       wmsLayerConfig,
@@ -278,6 +295,7 @@ export class GVWMS extends AbstractGVRaster {
       undefined,
       undefined,
       map.getView().getProjection().getCode(),
+      layerFilters,
       abortController
     );
   }
@@ -424,9 +442,11 @@ export class GVWMS extends AbstractGVRaster {
     // Create the sql filter using the object IDs
     const sqlFilter = objectIds.length === 1 ? `${pkFieldName} = ${objectIds[0]}` : `${pkFieldName} in (${objectIds.join(', ')})`;
 
-    // Create the filterXML from the sql filter
-    const xmlFilter =
-      '<ogc:Filter>' + WfsRenderer.sqlToOlWfsFilterXml(sqlFilter, wfsLayerConfig.getVersion(), pkFieldName) + '</ogc:Filter>';
+    // The xml filter
+    const xmlFilter = WfsRenderer.sqlToOlFilterXml(sqlFilter, wfsLayerConfig.getVersion(), pkFieldName);
+
+    // Wrap the ogc filter request
+    const xmlFilterReady = WfsRenderer.wrapOGCFilter(xmlFilter, 'wfs', wfsLayerConfig.getVersion());
 
     // Get the supported info formats
     const featureInfoFormat = wfsLayerConfig.getSupportedFormats('application/json'); // application/json by default (QGIS Server doesn't seem to provide the metadata for the output formats, use application/json)
@@ -441,7 +461,7 @@ export class GVWMS extends AbstractGVRaster {
       wfsLayerConfig.getVersion(),
       outputFormat,
       [],
-      xmlFilter,
+      xmlFilterReady,
       outProjection.getCode()
     );
 
@@ -595,22 +615,14 @@ export class GVWMS extends AbstractGVRaster {
   }
 
   /**
-   * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter parameter is used alone to display
-   * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
-   * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
-   * is done.
-   * TODO ! The combination of the legend filter and the dimension filter probably does not apply to WMS. The code can be simplified.
-   * @param {string} filter - An optional filter to be used in place of the getViewFilter value.
+   * Applies a view filter to the layer by updating the source FILTER and TIME parameters.
+   * @param {LayerFilters} [filter] - An optional filter to be used in place of the getViewFilter value.
    */
-  applyViewFilter(filter: string | undefined = ''): void {
-    // Log
-    logger.logTraceCore('GV-WMS - applyViewFilter', this.getLayerPath());
-
+  applyViewFilter(filter?: LayerFilters): void {
     // Process the layer filtering using the static method shared between EsriImage and WMS
     GVWMS.applyViewFilterOnSource(
       this.getLayerConfig(),
       this.getOLSource(),
-      this.getStyle(),
       this.getLayerConfig().getExternalFragmentsOrder(),
       this,
       filter,
@@ -621,6 +633,27 @@ export class GVWMS extends AbstractGVRaster {
         });
       }
     );
+  }
+
+  /**
+   * Applies a time filter on a date range.
+   * @param {string} date1 - The start date
+   * @param {string} date2 - The end date
+   */
+  applyDateFilter(date1: string, date2: string): void {
+    // Get the time dimension field
+    const { field } = this.getTimeDimension()!;
+
+    // Create an application filter for dates keeping the initial filter
+    const layerFilters = new LayerFilters(
+      this.getLayerConfig().getLayerFilter(),
+      undefined,
+      undefined,
+      `${field} >= date '${date1}' and ${field} <= date '${date2}'`
+    );
+
+    // Redirect
+    this.applyViewFilter(layerFilters);
   }
 
   /**
@@ -653,6 +686,7 @@ export class GVWMS extends AbstractGVRaster {
     clickCoordinate: Coordinate | undefined,
     viewResolution: number | undefined,
     projectionCode: string,
+    layerFilters: LayerFilters,
     abortController?: AbortController
   ): Promise<TypeFeatureInfoEntry[]> {
     // Get the supported info formats
@@ -668,16 +702,16 @@ export class GVWMS extends AbstractGVRaster {
     let gmlFilterSpatial;
     let fieldsToReturn = wfsLayerConfig.getOutfields();
 
-    // Build the filter from style if any
-    const classFilters = GVEsriDynamic.getFilterFromStyle(wmsLayerConfig, wmsLayerConfig.getLayerStyle());
+    // Total filter
+    const totalFilter = layerFilters.getAllFilters();
 
     // If any
-    if (classFilters) {
+    if (totalFilter) {
       // Build a OGC Filter for the filter
-      gmlFilterAttribute = WfsRenderer.sqlToOlWfsFilterXml(
-        classFilters,
+      gmlFilterAttribute = WfsRenderer.sqlToOlFilterXml(
+        totalFilter,
         wfsLayerConfig.getVersion(),
-        wfsLayerConfig.getOutfields()?.[0]?.name
+        wfsLayerConfig.getOutfields()?.[0]?.name!
       );
     }
 
@@ -702,6 +736,9 @@ export class GVWMS extends AbstractGVRaster {
     // Build attribute+spatial OGC filter
     const xmlFilterTotal = WfsRenderer.combineGmlFilters(gmlFilterSpatial, gmlFilterAttribute);
 
+    // Wrap the ogc filter request
+    const xmlFilterReady = WfsRenderer.wrapOGCFilter(xmlFilterTotal, 'wfs', wfsLayerConfig.getVersion());
+
     // Format the url
     const urlWithOutputJson = GeoUtilities.ensureServiceRequestUrlGetFeature(
       wfsLayerConfig.getMetadataAccessPath()!,
@@ -709,7 +746,7 @@ export class GVWMS extends AbstractGVRaster {
       wfsLayerConfig.getVersion(),
       outputFormat,
       fieldsToReturn,
-      xmlFilterTotal,
+      xmlFilterReady,
       projectionCode
     );
 
@@ -908,77 +945,70 @@ export class GVWMS extends AbstractGVRaster {
   static applyViewFilterOnSource(
     layerConfig: OgcWmsLayerEntryConfig | EsriImageLayerEntryConfig,
     source: ImageWMS | ImageArcGISRest,
-    style: TypeLayerStyleConfig | undefined,
     externalDateFragments: TypeDateFragments | undefined,
     layer: GVWMS | GVEsriImage | undefined,
-    filter: string | undefined = '',
+    filter: LayerFilters | undefined,
     callbackWhenUpdated: ((filterToUse: string) => void) | undefined = undefined
   ): void {
+    // Create the source parameter to update
+    const sourceParams: { TIME?: string; FILTER?: string } = {};
+
     // Parse
-    let filterValueToUse: string = filter.replaceAll(/\s{2,}/g, ' ').trim();
-    let currentFilter;
-    let classFilters: string | undefined = undefined;
+    let currentDataFilter: string | undefined;
+    let currentDatetimeFilter: string | undefined;
     try {
-      // Update the layer config on the fly (maybe not ideal to do this?)
-      layerConfig.setLayerFilter(filterValueToUse);
-
-      const queryElements = filterValueToUse.split(/(?<=\b)\s*=/);
-      const dimension = queryElements[0].trim().replaceAll('"', '');
-      // If there's a specific filter
-      if (queryElements.length > 1) {
-        filterValueToUse = queryElements[1].trim();
-      }
-
-      // Get the current dimension filter
-      currentFilter = source.getParams()[dimension];
-
-      // Get the current class filter
-      const currentClassFilter = source.getParams()['FILTER'];
-
-      // Parse the filter value to use
-      filterValueToUse = GVLayerUtilities.parseDateTimeValuesEsriImageOrWMS(filterValueToUse, externalDateFragments);
-
-      // Create the source parameter to update
-      const sourceParams = { [dimension]: filterValueToUse.replace(/\s*/g, '') };
+      // Get the current data filter
+      currentDataFilter = source.getParams()['FILTER'];
 
       // If working with a WMS layer entry config, it's possible that it's filtered based on its style
       if (layerConfig instanceof OgcWmsLayerEntryConfig) {
-        // Get the filters if any
-        classFilters = GVEsriDynamic.getFilterFromStyle(layerConfig, style);
+        // Reset
+        sourceParams.FILTER = '';
+
+        // Get the data filters if any
+        const dataFilters = filter?.getDataFilters();
 
         // If filtering
-        sourceParams.FILTER = '';
-        if (classFilters) {
-          // If QGIS Server
-          if (layerConfig.getServerType() === 'qgis') {
-            sourceParams.FILTER = layerConfig.layerId + ':' + classFilters;
-          } else {
-            // Build a OGC Filter for the filter
-            const ogcXmlFilter = WfsRenderer.sqlToOlWfsFilterXml(
-              classFilters,
-              layerConfig.getVersion(),
-              layerConfig.getOutfields()?.[0]?.name
-            );
-            sourceParams.FILTER = layerConfig.layerId + ':<ogc:Filter>' + ogcXmlFilter + '</ogc:Filter>';
-          }
+        if (dataFilters) {
+          // TODO: CLEAN - Leaving the comment here for now, to indicate we can also do it more simply when it comes to serverType() === qgis, but 'like' operations fail.
+          // Use regular Filter
+          // sourceParams.FILTER = layerConfig.layerId + ':' + dataFilters;
+
+          // Build a OGC Filter for the filter
+          const ogcXmlFilter = WfsRenderer.sqlToOlFilterXml(dataFilters, layerConfig.getVersion(), layerConfig.getOutfields()?.[0]?.name!);
+
+          // Wrap the ogc filter request
+          sourceParams.FILTER = WfsRenderer.wrapOGCFilter(ogcXmlFilter, 'wms', layerConfig.getVersion());
         }
       }
 
-      // Define what is considered the default filter
-      const isDefaultFilter = !filterValueToUse;
+      // Check the time filter
+      const timeFilter = filter?.getTimeFilter();
+      if (timeFilter) {
+        // Read the date filter
+        const queryElements = timeFilter.split(/(?<=\b)\s*=/);
 
-      // Define what is a no operation
-      const isNewFilterEffectivelyNoop = isDefaultFilter && !currentFilter;
+        // If there's a specific filter
+        if (queryElements.length > 1) {
+          // Get the current datetime filter
+          currentDatetimeFilter = source.getParams()['TIME'];
 
-      // Check whether the current filter is different from the new one
-      const filterChanged = sourceParams[dimension] !== currentFilter;
+          // Parse the filter value to use
+          const datetimeFilter = GVLayerUtilities.parseDateTimeValuesEsriImageOrWMS(queryElements[1].trim(), externalDateFragments);
 
-      // Check whether the class filter is different from the new one
-      const classFilterChanged = sourceParams.FILTER !== currentClassFilter;
+          // Create the source parameter to update
+          sourceParams.TIME = datetimeFilter.replace(/\s*/g, '');
+        }
+      }
+
+      // Check whether the current data filter is different from the new one
+      const dataFilterChanged = sourceParams.FILTER !== currentDataFilter;
+
+      // Check whether the current datetime filter is different from the new one
+      const datetimeFilterChanged = sourceParams.TIME !== currentDatetimeFilter;
 
       // Determine if we should apply or reset filter
-      const shouldUpdateFilter =
-        classFilterChanged || (filterChanged && !isNewFilterEffectivelyNoop) || (!!currentFilter && isDefaultFilter);
+      const shouldUpdateFilter = dataFilterChanged || datetimeFilterChanged;
 
       // If should update the filtering
       if (shouldUpdateFilter) {
@@ -987,15 +1017,15 @@ export class GVWMS extends AbstractGVRaster {
         layer?.getOLLayer().changed();
 
         // Updated
-        callbackWhenUpdated?.(filterValueToUse);
+        callbackWhenUpdated?.(sourceParams.FILTER || '');
       }
     } catch (error: unknown) {
       // Failed
       throw new LayerInvalidLayerFilterError(
         layerConfig.layerPath,
         layerConfig.getLayerNameCascade(),
-        filterValueToUse || classFilters!,
-        currentFilter,
+        sourceParams.FILTER!,
+        currentDataFilter,
         formatError(error)
       );
     }

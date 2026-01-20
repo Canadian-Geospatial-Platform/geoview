@@ -34,6 +34,7 @@ import type { GeometryJson } from '@/geo/layer/gv-layers/utils';
 import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
+import type { FilterCapable } from '@/geo/layer/gv-layers/interface-filter';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeEsriImageLayerLegend } from '@/geo/layer/gv-layers/raster/gv-esri-image';
@@ -45,6 +46,7 @@ import { formatError, RequestAbortedError } from '@/core/exceptions/core-excepti
 import { LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
 import type { TypeDateFragments } from '@/core/utils/date-mgt';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { LayerFilters } from '@/core/types/layer-filters';
 
 /**
  * Manages an Esri Dynamic layer.
@@ -52,7 +54,7 @@ import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-v
  * @exports
  * @class GVEsriDynamic
  */
-export class GVEsriDynamic extends AbstractGVRaster {
+export class GVEsriDynamic extends AbstractGVRaster implements FilterCapable {
   /** The worker pool used when fetching records */
   #fetchWorkerPool: FetchEsriWorkerPool;
 
@@ -552,18 +554,14 @@ export class GVEsriDynamic extends AbstractGVRaster {
   }
 
   /**
-   * Applies a view filter to an Esri Dynamic layer's source by updating the `layerDefs` parameter.
-   * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
+   * Applies a view filter by updateing the source `layerDefs` parameter.
+   * @param {LayerFilters} [filter] - The raw filter string input (defaults to an empty string if not provided).
    */
-  applyViewFilter(filter: string | undefined = ''): void {
-    // Log
-    logger.logTraceCore('GV-ESRI-DYNAMIC - applyViewFilterOnSource', this.getLayerPath());
-
+  applyViewFilter(filter?: LayerFilters): void {
     // Redirect
     GVEsriDynamic.applyViewFilterOnSource(
       this.getLayerConfig(),
       this.getOLSource(),
-      this.getStyle(),
       this.getLayerConfig().getExternalFragmentsOrder(),
       this,
       filter,
@@ -574,6 +572,27 @@ export class GVEsriDynamic extends AbstractGVRaster {
         });
       }
     );
+  }
+
+  /**
+s   * Applies a time filter on a date range.
+   * @param {string} date1 - The start date
+   * @param {string} date2 - The end date
+   */
+  applyDateFilter(date1: string, date2: string): void {
+    // Get the time dimension field
+    const { field } = this.getTimeDimension()!;
+
+    // Create an application filter for dates keeping the initial filter
+    const layerFilters = new LayerFilters(
+      this.getLayerConfig().getLayerFilter(),
+      undefined,
+      undefined,
+      `${field} >= date '${date1}' and ${field} <= date '${date2}'`
+    );
+
+    // Redirect
+    this.applyViewFilter(layerFilters);
   }
 
   /**
@@ -686,23 +705,18 @@ export class GVEsriDynamic extends AbstractGVRaster {
   static applyViewFilterOnSource(
     layerConfig: EsriDynamicLayerEntryConfig,
     source: ImageArcGISRest,
-    style: TypeLayerStyleConfig | undefined,
     externalDateFragments: TypeDateFragments | undefined,
     layer: GVEsriDynamic | undefined,
-    filter: string | undefined = '',
+    filter: LayerFilters | undefined,
     callbackWhenUpdated: ((filterToUse: string) => void) | undefined = undefined
   ): void {
-    // Parse the filter value to use
-    let filterValueToUse = filter.replaceAll(/\s{2,}/g, ' ').trim();
+    // Get the filter to use
+    let filterValueToUse = filter?.getAllFilters() || '';
 
     // Get the current filter
     const currentFilter = source.getParams().layerDefs;
 
     try {
-      // Update the layer config information (not ideal to do this here at this stage...)
-      layerConfig.setLayerFilter(filterValueToUse);
-      filterValueToUse = this.getFilterFromStyle(layerConfig, style) || '';
-
       // Parse the filter value to use
       filterValueToUse = GVLayerUtilities.parseDateTimeValuesEsriDynamic(filterValueToUse, externalDateFragments);
 
@@ -744,6 +758,35 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Builds a filter string (SQL-like or OGC-compliant) for a given layer and style configuration.
+   * @param {EsriDynamicLayerEntryConfig | OgcWmsLayerEntryConfig} layerConfig - The layer configuration.
+   * @param {string | undefined} dataFilter - The raw data filter to parse.
+   * @returns {string | undefined} The filter expression, or `undefined` if not applicable.
+   */
+  // TODO: ALEX - rename this function to parseDataFilter
+  static getFilterFromDataFilter(
+    layerConfig: EsriDynamicLayerEntryConfig | OgcWmsLayerEntryConfig,
+    dataFilter: string | undefined
+  ): string | undefined {
+    // Check is WMS
+    const isWMS = layerConfig instanceof OgcWmsLayerEntryConfig;
+
+    // Each word that is a outfields, put double quotes
+    if (isWMS && dataFilter) {
+      // Get the outfield names for reference
+      const outFields = layerConfig.getOutfields()?.map((field) => field.name);
+
+      if (outFields) {
+        // eslint-disable-next-line no-param-reassign
+        dataFilter = this.#quoteWords(dataFilter, outFields);
+      }
+    }
+
+    // Return it
+    return dataFilter;
+  }
+
+  /**
+   * Builds a filter string (SQL-like or OGC-compliant) for a given layer and style configuration.
    * This method supports:
    * - **simple styles** → returns the base layer filter or a default `(1=1)` condition.
    * - **unique value styles** → builds an optimized filter for visible categories.
@@ -761,17 +804,16 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
     const isWMS = layerConfig instanceof OgcWmsLayerEntryConfig;
     const defaultFilter = isWMS ? undefined : this.DEFAULT_FILTER_1EQUALS1;
-    const layerFilter = layerConfig.getLayerFilter();
 
     const styleSettings = layerConfig.getLayerStyleSettings();
-    if (!styleSettings) return this.#appendLayerFilter(defaultFilter, layerFilter, isWMS);
+    if (!styleSettings) return defaultFilter;
 
     // Get the outfields
     const outfields = layerConfig.getOutfields();
 
     switch (styleSettings.type) {
       case 'simple':
-        return this.#appendLayerFilter(defaultFilter, layerFilter, isWMS);
+        return defaultFilter;
 
       case 'uniqueValue': {
         // Check if any fields were retrieved
@@ -780,17 +822,16 @@ export class GVEsriDynamic extends AbstractGVRaster {
           logger.logWarning(
             'A style with filter capabilities was set on the layer, but no fields were read from vector data. Make sure source.featureInfo?.outfields has values.'
           );
-          return this.#appendLayerFilter(defaultFilter, layerFilter, isWMS);
+          return defaultFilter;
         }
 
         this.#normalizeVisibility(styleSettings);
-        if (this.#allFeaturesVisible(styleSettings.info)) return this.#appendLayerFilter(defaultFilter, layerFilter, isWMS);
+        if (this.#allFeaturesVisible(styleSettings.info)) return defaultFilter;
 
         const fieldCounts = this.#countFieldOfTheSameValue(styleSettings);
         const fieldOrder = this.#sortFieldOfTheSameValue(styleSettings, fieldCounts);
         const queryTree = this.#getQueryTree(styleSettings, fieldCounts, fieldOrder);
-        const query = this.#buildQueryUniqueValue(queryTree, 0, fieldOrder, styleSettings, outfields, isWMS);
-        return this.#appendLayerFilter(query, layerFilter, isWMS);
+        return this.#buildQueryUniqueValue(queryTree, 0, fieldOrder, styleSettings, outfields, isWMS);
       }
 
       case 'classBreaks': {
@@ -800,14 +841,12 @@ export class GVEsriDynamic extends AbstractGVRaster {
           logger.logWarning(
             'A style with filter capabilities was set on the layer, but no fields were read from vector data. Make sure source.featureInfo?.outfields has values.'
           );
-          return this.#appendLayerFilter(defaultFilter, layerFilter, isWMS);
+          return defaultFilter;
         }
 
         this.#normalizeVisibility(styleSettings);
-        if (this.#allFeaturesVisible(styleSettings.info)) return this.#appendLayerFilter(defaultFilter, layerFilter, isWMS);
-
-        const filterExpression = this.#buildQueryClassBreaksFilter(styleSettings, outfields);
-        return this.#appendLayerFilter(filterExpression, layerFilter, isWMS);
+        if (this.#allFeaturesVisible(styleSettings.info)) return defaultFilter;
+        return this.#buildQueryClassBreaksFilter(styleSettings, outfields);
       }
 
       default:
@@ -837,25 +876,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
    */
   static #allFeaturesVisible(settings: TypeLayerStyleConfigInfo[]): boolean {
     return settings.every((s) => s.visible);
-  }
-  /**
-   * Combines a base style-derived filter expression with an optional
-   * layer-level filter, using the logical `AND` operator.
-   * @param {string | undefined} baseFilter - The base filter expression derived from style settings.
-   * @param {string | undefined} layerFilter - An optional additional filter to append.
-   * @param {boolean} useExtraSpacingInFilter - Indicate if we need extra spaces around characters (WMS limitation).
-   * @returns {string | undefined} The combined filter expression, or `undefined` if none apply.
-   */
-  static #appendLayerFilter(
-    baseFilter: string | undefined,
-    layerFilter: string | undefined,
-    useExtraSpacingInFilter: boolean
-  ): string | undefined {
-    if (!baseFilter && !layerFilter) return undefined;
-    if (!baseFilter) return layerFilter!;
-    if (!layerFilter) return baseFilter;
-    const spacing = useExtraSpacingInFilter ? ' ' : '';
-    return `${baseFilter} and (${spacing}${layerFilter}${spacing})`;
   }
 
   /**
@@ -1172,6 +1192,14 @@ export class GVEsriDynamic extends AbstractGVRaster {
         return `${number}`; // All good
       }
     }
+  }
+
+  // TODO: ALEX - jsdoc this and move somewhere else
+  static #quoteWords(sentence: string, checkList: string[]): string {
+    return sentence
+      .split(/\s+/)
+      .map((word) => (checkList.map((field) => field.toLowerCase()).includes(word.toLowerCase()) ? `"${word}"` : word))
+      .join(' ');
   }
 
   // #endregion STATIC METHODS
