@@ -55,6 +55,11 @@
               }
             ]
           },
+          'footerBar': {
+            'tabs': {
+              'core': ['layers', 'data-table', 'time-slider']
+            }
+          },
           'theme': 'geo.ca',
           'corePackages': []
         }"
@@ -64,7 +69,7 @@
 
     <!-- SLIDER SECTION START -->
     <h4 style="padding-top: 10px; width: 90%; padding-left: 10%">
-      Filter EsriDynamic from slider (Bug - Need to zoom the map to see the layer filtered)
+      Filter EsriFeature from slider
     </h4>
     <div id="UI1-rangeslider1" class="Panel" style="padding-top: 20px; width: 90%; padding-left: 10%"></div>
     <hr />
@@ -148,10 +153,9 @@
               ],
               track: 'normal',
               onChange: (dates) => {
-                const field = mapViewer.layer.getGeoviewLayer('historical-flood/0').getTimeDimension().field;
                 mapViewer.layer
                   .getGeoviewLayer('historical-flood/0')
-                  .applyViewFilter(`${field} >= date '${dates[0]}-01-01' and ${field} <= date '${dates[1]}-12-31'`);
+                  .applyDateFilter(dates[0] + '-01-01', dates[1] + '-12-31');
               },
             })
           );

@@ -309,8 +309,29 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     });
 
     return columnList;
+    // TODO: CLEANUP REACT - Uncomment all disable react-hooks/exhaustive-deps from this file and fix all dependencies!
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [density]);
+
+  /**
+   * Utility function to check if a particular columnId has numerical filters.
+   * @param {string} columnId - The column id to check if it has numerical filters.
+   */
+  const isColumnFilterNumeric = useCallback(
+    (columnId: string): boolean => {
+      // Log
+      logger.logTraceUseCallback('DATA-TABLE - isColumnFilterNumeric');
+
+      return !!columns.find((col) => {
+        if (col.id === columnId) {
+          // If the column has a 'lessThanOrEqualTo' filter option, we can assume it's filtering on numbers
+          return col.columnFilterModeOptions?.includes('lessThanOrEqualTo');
+        }
+        return false;
+      });
+    },
+    [columns]
+  );
 
   /**
    * Handles zoom to feature.
@@ -319,6 +340,9 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
    */
   const handleZoomIn = useCallback(
     async (feature: TypeFeatureInfoEntry) => {
+      // Log
+      logger.logTraceUseCallback('DATA-TABLE - handleZoomIn');
+
       let { extent } = feature;
 
       // Get oid field
@@ -590,56 +614,59 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
    *
    * @param {MRTColumnFiltersState} columnFilter list of filter from table.
    */
-  const buildFilterList = useCallback((columnFilter: MRTColumnFiltersState) => {
-    // Log
-    logger.logTraceUseEffect('DATA-TABLE - buildFilterList');
+  const buildFilterList = useCallback(
+    (columnFilter: MRTColumnFiltersState) => {
+      // Log
+      logger.logTraceUseCallback('DATA-TABLE - buildFilterList');
 
-    const tableState = useTable.getState();
+      const tableState = useTable.getState();
 
-    if (!columnFilter.length) return [''];
-    return columnFilter.map((filter) => {
-      const filterValue = filter.value;
-      const filterId = filter.id;
-      // Check if filterValue is of type array because columnfilters return array with min and max.
-      if (Array.isArray(filterValue)) {
-        let numQuery = '';
-        const minValue = filterValue[0] === '' ? undefined : Number(filterValue[0]);
-        const maxValue = filterValue[1] === '' ? undefined : Number(filterValue[1]);
-        const inclusive = tableState?.columnFilterFns[filterId] === 'betweenInclusive' ? '=' : '';
+      if (!columnFilter.length) return [''];
+      return columnFilter.map((filter) => {
+        const filterValue = filter.value;
+        const filterId = filter.id;
+        // Check if filterValue is of type array because columnfilters return array with min and max.
+        if (Array.isArray(filterValue)) {
+          let numQuery = '';
+          const minValue = filterValue[0] === '' ? undefined : Number(filterValue[0]);
+          const maxValue = filterValue[1] === '' ? undefined : Number(filterValue[1]);
+          const inclusive = tableState?.columnFilterFns[filterId] === 'betweenInclusive' ? '=' : '';
 
-        if (minValue && maxValue) {
-          numQuery = `${filterId} >${inclusive} ${minValue} and ${filterId} <${inclusive} ${maxValue}`;
-        } else if (minValue) {
-          numQuery = `${filterId} >${inclusive} ${minValue}`;
-        } else if (maxValue) {
-          numQuery = `${filterId} <${inclusive} ${maxValue}`;
+          if (minValue && maxValue) {
+            numQuery = `${filterId} >${inclusive} ${minValue} and ${filterId} <${inclusive} ${maxValue}`;
+          } else if (minValue) {
+            numQuery = `${filterId} >${inclusive} ${minValue}`;
+          } else if (maxValue) {
+            numQuery = `${filterId} <${inclusive} ${maxValue}`;
+          }
+          return numQuery;
         }
-        return numQuery;
-      }
 
-      if (!Number.isNaN(Number(filterValue))) {
-        return `${filterId} ${NUMBER_FILTER[tableState?.columnFilterFns[filterId]]} ${Number(filterValue)}`;
-      }
+        // If the column is numeric and the input is not an object (not a date)
+        if (isColumnFilterNumeric(filterId) && !(typeof filterValue === 'object')) {
+          return `${filterId} ${NUMBER_FILTER[tableState?.columnFilterFns[filterId]]} ${Number(filterValue)}`;
+        }
 
-      if (tableState?.columnFilterFns[filterId] === 'empty') return `${filterId} is null`;
-      if (tableState?.columnFilterFns[filterId] === 'notEmpty') return `${filterId} is not null`;
+        if (tableState?.columnFilterFns[filterId] === 'empty') return `${filterId} is null`;
+        if (tableState?.columnFilterFns[filterId] === 'notEmpty') return `${filterId} is not null`;
 
-      // Check filter value is of type date,
-      if (typeof filterValue === 'object' && filterValue) {
-        const dateOpr = tableState?.columnFilterFns[filterId] || 'equals';
-        const dateFilter = DATE_FILTER[dateOpr];
-        const date = DateMgt.applyInputDateFormat(`${(filterValue as Date).toISOString().slice(0, -5)}Z`);
-        const formattedDate = date.slice(0, -1);
-        return `${filterId} ${dateFilter.replace('value', formattedDate)}`;
-      }
+        // Check filter value is of type date,
+        if (typeof filterValue === 'object' && filterValue) {
+          const dateOpr = tableState?.columnFilterFns[filterId] || 'equals';
+          const dateFilter = DATE_FILTER[dateOpr];
+          const date = DateMgt.applyInputDateFormat(`${(filterValue as Date).toISOString().slice(0, -5)}Z`);
+          const formattedDate = date.slice(0, -1);
+          return `${filterId} ${dateFilter.replace('value', formattedDate)}`;
+        }
 
-      const operator = tableState?.columnFilterFns[filterId] ?? 'contains';
-      const strFilter = STRING_FILTER[operator];
+        const operator = tableState?.columnFilterFns[filterId] ?? 'contains';
+        const strFilter = STRING_FILTER[operator];
 
-      return `${strFilter.replace('filterId', filterId).replace('value', filterValue as string)}`;
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+        return `${strFilter.replace('filterId', filterId).replace('value', filterValue as string)}`;
+      });
+    },
+    [useTable, isColumnFilterNumeric]
+  );
 
   /**
    * Filter map based on the filter strings of data table.
@@ -654,7 +681,12 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   }, 500);
 
   const debouncedColumnFilters = useCallback(
-    (filters: MRTColumnFiltersState) => filterMap(filters),
+    (filters: MRTColumnFiltersState) => {
+      // Log
+      logger.logTraceUseCallback('DATA-TABLE - debouncedColumnFilters');
+
+      return filterMap(filters);
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [datatableSettings[layerPath]?.mapFilteredRecord]
   );

@@ -62,11 +62,9 @@ import { getAppCrosshairsActive } from '@/core/stores/store-interface-and-intial
 import type { TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 
-import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
-import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
-import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { isLayerViewFilterable } from '@/geo/layer/gv-layers/interface-filter';
 import { InvalidExtentError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
@@ -74,6 +72,9 @@ import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-lay
 import type { TimeDimension } from '@/core/utils/date-mgt';
 import { DateMgt } from '@/core/utils/date-mgt';
 import type { TypeTimeSliderProps } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
+import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { LayerFilters } from '@/core/types/layer-filters';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
 // GV MapState provides: 'state values', 'actions' and 'setterActions'.
@@ -272,7 +273,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map id of the state to act on
    * @param {string} layerPath - The path of the layer
    * @returns {string | undefined} The initial filter(s) for the layer
+   * @deprecated
    */
+  // TODO: ALEX - get rid of this
   static getInitialFilter(mapId: string, layerPath: string): string | undefined {
     return this.getMapStateProtected(mapId).initialFilters[layerPath];
   }
@@ -1296,22 +1299,44 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map id.
    * @param {string} layerPath - The path for the layer to get filters from.
    */
-  static getActiveVectorFilters(mapId: string, layerPath: string): (string | undefined)[] | undefined {
-    const initialFilter = this.getInitialFilter(mapId, layerPath);
-    const tableFilter = DataTableEventProcessor.getTableFilter(mapId, layerPath);
+  // TODO: ALEX - rename this to getActiveFilters()
+  static getActiveVectorFilters(mapId: string, layerPath: string): LayerFilters {
+    // Get the layer config
+    const layerConfig = this.getMapViewerLayerAPI(mapId).getLayerEntryConfigRegular(layerPath);
+
+    // The initial filter
+    const initialFilter = layerConfig.getLayerFilter();
+
+    // The data table filter
+    const dataTableFilter = DataTableEventProcessor.getTableFilter(mapId, layerPath);
+
+    // The class breaks filter if any
+    let classFilter: string | undefined;
+    let dataFilter: string | undefined = dataTableFilter;
+    if (layerConfig instanceof EsriDynamicLayerEntryConfig || layerConfig instanceof OgcWmsLayerEntryConfig) {
+      // Get the filter
+      classFilter = GVEsriDynamic.getFilterFromStyle(layerConfig, layerConfig.getLayerStyle());
+
+      // If WMS layer
+      if (layerConfig instanceof OgcWmsLayerEntryConfig) {
+        // Tweak the data table filter
+        dataFilter = GVEsriDynamic.getFilterFromDataFilter(layerConfig, dataFilter);
+      }
+    }
 
     // If the TimeSlider is initialized
-    let sliderFilter;
+    let timeFilter: string | undefined;
     if (TimeSliderEventProcessor.isTimeSliderInitialized(mapId)) {
       // Assign it for the return
-      sliderFilter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
+      timeFilter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
     }
-    return [initialFilter, tableFilter, sliderFilter].filter((filter) => filter);
+
+    // Return the current filters in the application
+    return new LayerFilters(initialFilter, classFilter, dataFilter, timeFilter);
   }
 
   /**
    * Apply all available filters to layer.
-   *
    * @param {string} mapId - The map id.
    * @param {string} layerPath - The path of the layer to apply filters to.
    */
@@ -1320,18 +1345,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
 
     // If found it and of right type
-    if (
-      geoviewLayer instanceof AbstractGVVector ||
-      geoviewLayer instanceof GVWMS ||
-      geoviewLayer instanceof GVEsriImage ||
-      geoviewLayer instanceof GVEsriDynamic
-    ) {
-      // Read filter information
-      const filters = this.getActiveVectorFilters(mapId, layerPath) || [''];
-      const filter = filters.join(' AND ');
+    if (geoviewLayer && isLayerViewFilterable(geoviewLayer)) {
+      // Read filter information from the UI
+      const layerFilters = this.getActiveVectorFilters(mapId, layerPath);
 
-      // Force the layer to applyfilter
-      geoviewLayer.applyViewFilter(filter);
+      // Apply the view filter on the layer
+      geoviewLayer.applyViewFilter(layerFilters);
     }
   }
 
