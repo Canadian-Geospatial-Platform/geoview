@@ -16,10 +16,12 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
+import type { FilterCapable } from '@/geo/layer/gv-layers/interface-filter';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { Projection } from '@/geo/utils/projection';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
+import { LayerFilters } from '@/core/types/layer-filters';
 
 /**
  * Manages an Esri Image layer.
@@ -27,7 +29,7 @@ import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
  * @exports
  * @class GVEsriImage
  */
-export class GVEsriImage extends AbstractGVRaster {
+export class GVEsriImage extends AbstractGVRaster implements FilterCapable {
   /**
    * Constructs a GVEsriImage layer to manage an OpenLayer layer.
    * @param {ImageArcGISRest} olSource - The OpenLayer source.
@@ -185,21 +187,14 @@ export class GVEsriImage extends AbstractGVRaster {
   // #region METHODS
 
   /**
-   * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter parameter is used alone to display
-   * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
-   * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
-   * is done.
-   * @param {string} filter - An optional filter to be used in place of the getViewFilter value.
+   * Applies a view filter to the layer by updating the source FILTER and TIME parameters.
+   * @param {LayerFilters} [filter] - An optional filter to be used in place of the getViewFilter value.
    */
-  applyViewFilter(filter: string | undefined = ''): void {
-    // Log
-    logger.logTraceCore('GV-ESRI-IMAGE - applyViewFilter', this.getLayerPath());
-
+  applyViewFilter(filter?: LayerFilters): void {
     // Process the layer filtering using the static method shared between EsriImage and WMS
     GVWMS.applyViewFilterOnSource(
       this.getLayerConfig(),
       this.getOLSource(),
-      undefined,
       this.getLayerConfig().getExternalFragmentsOrder(),
       this,
       filter,
@@ -210,6 +205,27 @@ export class GVEsriImage extends AbstractGVRaster {
         });
       }
     );
+  }
+
+  /**
+   * Applies a time filter on a date range.
+   * @param {string} date1 - The start date
+   * @param {string} date2 - The end date
+   */
+  applyDateFilter(date1: string, date2: string): void {
+    // Get the time dimension field
+    const { field } = this.getTimeDimension()!;
+
+    // Create an application filter for dates keeping the initial filter
+    const layerFilters = new LayerFilters(
+      this.getLayerConfig().getLayerFilter(),
+      undefined,
+      undefined,
+      `${field} >= date '${date1}' and ${field} <= date '${date2}'`
+    );
+
+    // Redirect
+    this.applyViewFilter(layerFilters);
   }
 
   // #endregion METHODS

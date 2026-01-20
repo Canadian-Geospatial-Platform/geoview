@@ -464,12 +464,24 @@ export abstract class GeoviewRenderer {
             if ((typeof operand1.nodeValue !== 'string' && operand1.nodeValue !== null) || typeof operand2.nodeValue !== 'string')
               throw new Error(`like operator error`);
             else {
-              const regularExpression = new RegExp(
-                operand2.nodeValue.toLowerCase().replaceAll('.', '\\.').replaceAll('%', '.*').replaceAll('_', '.'),
-                ''
-              );
-              const match = operand1.nodeValue ? operand1.nodeValue.toLowerCase().match(regularExpression) : null;
-              dataStack.push({ nodeType: NodeType.variable, nodeValue: match !== null && match[0] === operand1.nodeValue?.toLowerCase() });
+              const value = operand1.nodeValue;
+              const likePattern = operand2.nodeValue;
+
+              // Escape all RegExp metacharacters except SQL wildcards
+              const escapedPattern = likePattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+              // Convert SQL LIKE wildcards to RegExp equivalents
+              const regexPattern = '^' + escapedPattern.replaceAll('%', '.*').replaceAll('_', '.') + '$';
+
+              // Case-insensitive match and multiline
+              const regex = new RegExp(regexPattern, 'is');
+
+              const matches = value && regex.test(value);
+
+              dataStack.push({
+                nodeType: NodeType.variable,
+                nodeValue: matches,
+              });
             }
             break;
           case ',':
