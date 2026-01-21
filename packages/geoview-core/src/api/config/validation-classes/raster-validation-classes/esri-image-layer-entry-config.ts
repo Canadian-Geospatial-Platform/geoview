@@ -31,7 +31,7 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {TypeSourceImageEsriInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   * @return {TypeSourceImageEsriInitialConfig} The strongly-typed source configuration specific to this layer entry config.
    */
   override getSource(): TypeSourceImageEsriInitialConfig {
     return super.getSource();
@@ -40,7 +40,7 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {TypeLayerMetadataEsri | undefined} The strongly-typed layer metadata specific to this layer entry config.
+   * @return {TypeLayerMetadataEsri | undefined} The strongly-typed layer metadata specific to this layer entry config.
    */
   override getLayerMetadata(): TypeLayerMetadataEsri | undefined {
     return super.getLayerMetadata() as TypeLayerMetadataEsri | undefined;

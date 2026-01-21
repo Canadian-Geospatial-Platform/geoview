@@ -94,7 +94,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   /**
    * Initializes the map controls
-   * @param {string} mapId - The map id being initialized
+   * @param {string} mapId -The map identifier being initialized
+   * @return {Promise<void>} Promise that resolves when controls are initialized
+   * @static
    */
   static async initMapControls(mapId: string): Promise<void> {
     // Log
@@ -176,7 +178,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
   /**
    * Shortcut to get the Map state for a given map id
    * @param {string} mapId - map Id
-   * @returns {IMapState} The Map state
+   * @return {IMapState} The Map state
+   * @static
+   * @protected
    */
   protected static getMapStateProtected(mapId: string): IMapState {
     // TODO: Refactor - Rename this function when we want to clarify the small confusion with getMapState function below
@@ -188,7 +192,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Shortcut to get the Map Viewer instance for a given map id
    * This is use to reduce the use of api.getMapViewer(mapId) and be more explicit
    * @param {string} mapId - map Id
-   * @returns {MapViewer} The Map viewer instance
+   * @return {MapViewer} The Map viewer instance
+   * @static
    */
   // TODO: REFACTOR? - These functions are the only place in the code where we still import api from '@/app'.
   static getMapViewer(mapId: string): MapViewer {
@@ -199,7 +204,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Shortcut to get the Map Viewer layer api instance for a given map id
    * This is use to reduce the use of api.getMapViewer(mapId).layer and be more explicit
    * @param {string} mapId - map Id
-   * @returns {LayerApi} The Map viewer layer API instance
+   * @return {LayerApi} The Map viewer layer API instance
+   * @static
    */
   // TODO: REFACTOR? - These functions are the only place in the code where we still import api from '@/app'.
   static getMapViewerLayerAPI(mapId: string): LayerApi {
@@ -210,7 +216,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Shortcut to get the Map Viewer plugins instance for a given map id
    * This is use to reduce the use of api.getMapViewer(mapId).plugins and be more explicit
    * @param {string} mapId - map Id
-   * @returns {PluginsContainer} The map plugins container
+   * @return {Promise<PluginsContainer>} Promise resolving to the map plugins container
+   * @static
    */
   // TODO: REFACTOR? - These functions are the only place in the code where we still import api from '@/app'.
   static async getMapViewerPlugins(mapId: string): Promise<PluginsContainer> {
@@ -222,6 +229,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Forces the map to re-render all layers and features.
    * Useful when layer styles or features have been updated programmatically and need to be reflected visually.
    * @param {string} mapId - The map identifier
+   * @return {void}
+   * @static
    */
   static forceMapToRender(mapId: string): void {
     this.getMapViewer(mapId).map.render();
@@ -230,7 +239,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
   /**
    * Retrieves the scale information from the DOM elements for the given map ID.
    * @param {string} mapId - The unique identifier of the map.
-   * @returns {TypeScaleInfo} The scale information object
+   * @return {TypeScaleInfo} The scale information object
+   * @static
    */
   static getScaleInfoFromDomElement(mapId: string): TypeScaleInfo {
     // Get metric values
@@ -251,32 +261,53 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   /**
    * Shortcut to get the Map config for a given map id
-   * @param {string} mapId - The map id to retrieve the config for
-   * @returns {TypeMapFeaturesConfig | undefined} the map config or undefined if there is no config for this map id
+   * @param {string} mapId -The map identifier to retrieve the config for
+   * @return {TypeMapFeaturesConfig | undefined} the map config or undefined if there is no config for this map id
+   * @static
    */
   static getGeoViewMapConfig(mapId: string): TypeMapFeaturesConfig | undefined {
     // Return the map config
     return this.getState(mapId).mapConfig;
   }
 
+  /**
+   * Gets the current or fallback basemap options for the map.
+   * Returns the current basemap options if available, otherwise returns the default basemap options.
+   * @param {string} mapId - The map identifier
+   * @return {TypeBasemapOptions} The basemap options
+   * @static
+   */
   static getBasemapOptions(mapId: string): TypeBasemapOptions {
     return this.getMapStateProtected(mapId).currentBasemapOptions || this.getMapStateProtected(mapId).basemapOptions;
   }
 
+  /**
+   * Gets the currently active basemap options for the map.
+   * @param {string} mapId - The map identifier
+   * @return {TypeBasemapOptions} The current basemap options
+   * @static
+   */
   static getCurrentBasemapOptions(mapId: string): TypeBasemapOptions {
     return this.getMapStateProtected(mapId).currentBasemapOptions;
   }
 
   /**
    * Gets initial filter(s) for a layer.
-   * @param {string} mapId - The map id of the state to act on
+   * @param {string} mapId -The map identifier of the state to act on
    * @param {string} layerPath - The path of the layer
-   * @returns {string | undefined} The initial filter(s) for the layer
+   * @return {string | undefined} The initial filter(s) for the layer
    */
   static getInitialFilter(mapId: string, layerPath: string): string | undefined {
     return this.getMapStateProtected(mapId).initialFilters[layerPath];
   }
 
+  /**
+   * Gets all point markers organized by group for the map.
+   * Point markers are used to display custom markers on the map at specific coordinates.
+   * @param {string} mapId - The map identifier
+   * @return {Record<string, TypePointMarker[]>} Record of point marker arrays keyed by group name
+   * @static
+   */
   static getPointMarkers(mapId: string): Record<string, TypePointMarker[]> {
     return this.getMapStateProtected(mapId).pointMarkers;
   }
@@ -284,12 +315,20 @@ export class MapEventProcessor extends AbstractEventProcessor {
   /**
    * Gets feature highlight color.
    * @param {string} mapId - The ID of the map
-   * @returns {TypeHighlightColors} The highlight color
+   * @return {TypeHighlightColors} The highlight color
    */
   static getFeatureHighlightColor(mapId: string): TypeHighlightColors {
     return this.getMapStateProtected(mapId).featureHighlightColor;
   }
 
+  /**
+   * Shows a click marker icon at the specified location on the map.
+   * The marker coordinates are projected from lon/lat to the current map projection before display.
+   * @param {string} mapId - The map identifier
+   * @param {TypeClickMarker} marker - The marker object containing lonlat coordinates
+   * @return {void}
+   * @static
+   */
   static clickMarkerIconShow(mapId: string, marker: TypeClickMarker): void {
     // Project coords
     const projectedCoords = Projection.transformPoints(
@@ -305,24 +344,47 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.getMapStateProtected(mapId).setterActions.setClickMarker(projectedCoords[0]);
   }
 
+  /**
+   * Hides the click marker icon from the map.
+   * Removes the marker by setting the click marker state to undefined.
+   * @param {string} mapId - The map identifier
+   * @return {void}
+   * @static
+   */
   static clickMarkerIconHide(mapId: string): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setClickMarker(undefined);
   }
 
+  /**
+   * Highlights a bounding box (extent) on the map.
+   * Used to visually emphasize a geographic area, typically for search results or layer extents.
+   * @param {string} mapId - The map identifier
+   * @param {Extent} extent - The extent to highlight [minX, minY, maxX, maxY]
+   * @param {boolean} [isLayerHighlight] - True if highlighting a layer extent, false otherwise
+   * @return {void}
+   * @static
+   */
   static highlightBBox(mapId: string, extent: Extent, isLayerHighlight?: boolean): void {
     // Perform a highlight
     this.getMapViewerLayerAPI(mapId).featureHighlight.highlightGeolocatorBBox(extent, isLayerHighlight);
   }
 
+  /**
+   * Gets the current interaction mode of the map.
+   * Interaction mode controls whether map interactions (pan, zoom, etc.) are enabled or disabled.
+   * @param {string} mapId - The map identifier
+   * @return {TypeInteraction} The current interaction mode ('static' or 'dynamic')
+   * @static
+   */
   static getMapInteraction(mapId: string): TypeInteraction {
     return this.getMapStateProtected(mapId).interaction;
   }
 
   /**
    * Gets map layer paths in order.
-   * @param {string} mapId - The map id
-   * @returns {string[]} The ordered layer paths
+   * @param {string} mapId -The map identifier
+   * @return {string[]} The ordered layer paths
    */
   static getMapLayerOrder(mapId: string): string[] {
     return this.getMapStateProtected(mapId).orderedLayerInfo.map((orderedLayerInfo) => {
@@ -332,15 +394,22 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   /**
    * Gets the status of a layer.
-   * @param {string} mapId - The map id.
+   * @param {string} mapId -The map identifier.
    * @param {string} layerPath - The layer path.
-   * @returns {TypeLayerStatus | undefined} The layer status
+   * @return {TypeLayerStatus | undefined} The layer status
    * @static
    */
   static getMapLayerStatus(mapId: string, layerPath: string): TypeLayerStatus | undefined {
     return LegendEventProcessor.getLegendLayerInfo(mapId, layerPath)?.layerStatus;
   }
 
+  /**
+   * Gets the current map state containing projection, zoom, center, extent, and position information.
+   * Provides a comprehensive snapshot of the map's current view state.
+   * @param {string} mapId - The map identifier
+   * @return {TypeMapState} The map state object
+   * @static
+   */
   static getMapState(mapId: string): TypeMapState {
     const mapState = this.getMapStateProtected(mapId);
     return {
@@ -367,7 +436,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   /**
    * Gets the map state information for creating the export layout
    * @param {string} mapId - The map id
-   * @returns {TypeMapStateForExportLayout} The map state required for the export layout
+   * @return {TypeMapStateForExportLayout} The map state required for the export layout
    */
   static getMapStateForExportLayout(mapId: string): TypeMapStateForExportLayout {
     const mapState = this.getMapStateProtected(mapId);
@@ -380,26 +449,65 @@ export class MapEventProcessor extends AbstractEventProcessor {
     };
   }
 
+  /**
+   * Sets the attribution strings for the map.
+   * Attribution is typically used to display data source credits and copyright information.
+   * @param {string} mapId - The map identifier
+   * @param {string[]} attribution - Array of attribution strings to display
+   * @return {void}
+   * @static
+   */
   static setMapAttribution(mapId: string, attribution: string[]): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setAttribution(attribution);
   }
 
+  /**
+   * Sets the map loaded state.
+   * Indicates whether the map has finished its initialization and is ready for interaction.
+   * @param {string} mapId - The map identifier
+   * @param {boolean} mapLoaded - True if the map is fully loaded, false otherwise
+   * @return {void}
+   * @static
+   */
   static setMapLoaded(mapId: string, mapLoaded: boolean): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setMapLoaded(mapLoaded);
   }
 
+  /**
+   * Sets the map as displayed.
+   * Marks the map as visible and ready for user interaction.
+   * @param {string} mapId - The map identifier
+   * @return {void}
+   * @static
+   */
   static setMapDisplayed(mapId: string): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setMapDisplayed();
   }
 
+  /**
+   * Sets the current pointer (mouse cursor) position on the map.
+   * Stores pixel coordinates, lon/lat coordinates, and projected coordinates.
+   * @param {string} mapId - The map identifier
+   * @param {TypeMapMouseInfo} pointerPosition - The pointer position information
+   * @return {void}
+   * @static
+   */
   static setMapPointerPosition(mapId: string, pointerPosition: TypeMapMouseInfo): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setPointerPosition(pointerPosition);
   }
 
+  /**
+   * Sets the coordinates where the user clicked on the map.
+   * Stores the click location and emits a single click event if in WCAG mode.
+   * @param {string} mapId - The map identifier
+   * @param {TypeMapMouseInfo} clickCoordinates - The click position information
+   * @return {void}
+   * @static
+   */
   static setClickCoordinates(mapId: string, clickCoordinates: TypeMapMouseInfo): void {
     // GV: We do not need to perform query, there is a handler on the map click in layer set.
     // Save in store
@@ -409,12 +517,28 @@ export class MapEventProcessor extends AbstractEventProcessor {
     if (getAppCrosshairsActive(mapId)) this.getMapViewer(mapId).emitMapSingleClick(clickCoordinates);
   }
 
+  /**
+   * Gets all layers that are currently in the visible zoom/scale range.
+   * Returns layer paths of layers whose visibility is not restricted by the current zoom level.
+   * @param {string} mapId - The map identifier
+   * @return {string[]} Array of layer paths that are in visible range
+   * @static
+   */
   static getLayersInVisibleRange = (mapId: string): string[] => {
     const { orderedLayerInfo } = this.getMapStateProtected(mapId);
     const layersInVisibleRange = orderedLayerInfo.filter((layer) => layer.inVisibleRange).map((layer) => layer.layerPath);
     return layersInVisibleRange;
   };
 
+  /**
+   * Sets whether a layer is in the visible zoom/scale range.
+   * Updates the layer's visibility state based on the current map zoom level and layer's min/max zoom.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The path of the layer
+   * @param {boolean} inVisibleRange - True if the layer is in visible range, false otherwise
+   * @return {void}
+   * @static
+   */
   static setLayerInVisibleRange(mapId: string, layerPath: string, inVisibleRange: boolean): void {
     const { orderedLayerInfo } = this.getMapStateProtected(mapId);
     const orderedLayer = orderedLayerInfo.find((layer) => layer.layerPath === layerPath);
@@ -425,32 +549,86 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
   }
 
+  /**
+   * Sets the map zoom level.
+   * Updates the zoom level in the store without animating the view change.
+   * @param {string} mapId - The map identifier
+   * @param {number} zoom - The new zoom level
+   * @return {void}
+   * @static
+   */
   static setZoom(mapId: string, zoom: number): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setZoom(zoom);
   }
 
+  /**
+   * Sets whether the mouse cursor is currently inside the map viewport.
+   * Used to track mouse enter/leave events for the map container.
+   * @param {string} mapId - The map identifier
+   * @param {boolean} inside - True if mouse is inside the map, false otherwise
+   * @return {void}
+   * @static
+   */
   static setIsMouseInsideMap(mapId: string, inside: boolean): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setIsMouseInsideMap(inside);
   }
 
+  /**
+   * Sets the map rotation angle.
+   * Updates the rotation value in the store without animating the rotation change.
+   * @param {string} mapId - The map identifier
+   * @param {number} rotation - The rotation angle in radians
+   * @return {void}
+   * @static
+   */
   static setRotation(mapId: string, rotation: number): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setRotation(rotation);
   }
 
+  /**
+   * Sets the map size (width and height in pixels).
+   * Optionally triggers a map resize to update the OpenLayers map dimensions.
+   * @param {string} mapId - The map identifier
+   * @param {Size} size - The map size [width, height] in pixels
+   * @param {boolean} [resizeMap=false] - True to resize the OpenLayers map, false to only update store
+   * @return {void}
+   * @static
+   */
   static setMapSize(mapId: string, size: Size, resizeMap: boolean = false): void {
     // Save in store
     if (resizeMap) this.getMapViewer(mapId).map.setSize(size);
     this.getMapStateProtected(mapId).setterActions.setMapSize(size);
   }
 
+  /**
+   * Sets the map scale information including metric and imperial scales.
+   * Updates the scale bar display with current resolution and scale values.
+   * @param {string} mapId - The map identifier
+   * @param {TypeScaleInfo} scale - The scale information object
+   * @return {void}
+   * @static
+   */
   static setMapScale(mapId: string, scale: TypeScaleInfo): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setMapScale(scale);
   }
 
+  /**
+   * Sets the map state when a map move/pan operation ends.
+   * Updates center coordinates, pointer position, rotation, extent, and scale in one batch.
+   * @param {string} mapId - The map identifier
+   * @param {Coordinate} centerCoordinates - The new center coordinates
+   * @param {TypeMapMouseInfo} pointerPosition - The current pointer position
+   * @param {string} degreeRotation - The rotation in degrees as a string
+   * @param {boolean} isNorthVisible - True if north arrow should be visible
+   * @param {Extent} mapExtent - The current map extent
+   * @param {TypeScaleInfo} scale - The current scale information
+   * @return {void}
+   * @static
+   */
   static setMapMoveEnd(
     mapId: string,
     centerCoordinates: Coordinate,
@@ -471,6 +649,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
     );
   }
 
+  /**
+   * Sets the map interaction mode.
+   * Controls whether map interactions (pan, zoom, drag) are enabled or disabled.
+   * @param {string} mapId - The map identifier
+   * @param {TypeInteraction} interaction - The interaction mode ('static' or 'dynamic')
+   * @return {void}
+   * @static
+   */
   static setInteraction(mapId: string, interaction: TypeInteraction): void {
     // enable or disable map interaction when type of map interaction is set
     this.getMapViewer(mapId)
@@ -481,6 +667,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.getMapStateProtected(mapId).setterActions.setInteraction(interaction);
   }
 
+  /**
+   * Sets the map projection and re-creates the view with the new projection.
+   * Transforms the current center coordinates to the new projection and updates all layers.
+   * @param {string} mapId - The map identifier
+   * @param {TypeValidMapProjectionCodes} projectionCode - The new projection code to apply
+   * @return {Promise<void>} Promise that resolves when projection change is complete
+   * @static
+   */
   static async setProjection(mapId: string, projectionCode: TypeValidMapProjectionCodes): Promise<void> {
     try {
       // Set circular progress to hide basemap switching
@@ -573,21 +767,41 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Sets the home view
-   * @param mapId - The map id
-   * @param view - The view settings
+   * Sets the home button view configuration.
+   * Defines the view (extent or zoom/center) that the map returns to when the home button is clicked.
+   * @param {string} mapId - The map identifier
+   * @param {TypeMapViewSettings} view - The view settings for the home button
+   * @return {void}
+   * @static
    */
   static setHomeButtonView(mapId: string, view: TypeMapViewSettings): void {
     // Save in store
     this.getMapStateProtected(mapId).setterActions.setHomeView(view);
   }
 
+  /**
+   * Rotates the map view to the specified angle.
+   * Animates the rotation transition using OpenLayers' view animation.
+   * @param {string} mapId - The map identifier
+   * @param {number} rotation - The target rotation angle in radians
+   * @return {void}
+   * @static
+   */
   static rotate(mapId: string, rotation: number): void {
     // Do the actual view map rotation
     this.getMapViewer(mapId).map.getView().animate({ rotation });
     // GV No need to save in the store, because this will trigger an event on MapViewer which will take care of updating the store
   }
 
+  /**
+   * Zooms the map to the specified zoom level with animation.
+   * Returns a Promise that resolves when the zoom animation completes.
+   * @param {string} mapId - The map identifier
+   * @param {number} zoom - The target zoom level
+   * @param {number} [duration=OL_ZOOM_DURATION] - The animation duration in milliseconds
+   * @return {Promise<void>} Promise that resolves when zoom animation completes
+   * @static
+   */
   static zoomMap(mapId: string, zoom: number, duration: number = OL_ZOOM_DURATION): Promise<void> {
     // Do the actual zoom
     this.getMapViewer(mapId).map.getView().animate({ zoom, duration });
@@ -602,9 +816,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Gets the ordered layer info.
-   * @param {string} mapId - The map id
-   * @returns {TypeOrderedLayerInfo[]} The ordered layer info
+   * Gets the complete ordered layer information array for the map.
+   * Returns all layers in the order they appear in the layer stack.
+   * @param {string} mapId - The map identifier
+   * @return {TypeOrderedLayerInfo[]} Array of ordered layer information
+   * @static
    */
   static getMapOrderedLayerInfo(mapId: string): TypeOrderedLayerInfo[] {
     return this.getMapStateProtected(mapId).orderedLayerInfo;
@@ -612,9 +828,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   /**
    * Gets the ordered layer info for one layer.
-   * @param {string} mapId - The map id.
+   * @param {string} mapId -The map identifier.
    * @param {string} layerPath - The path of the layer to get.
-   * @returns {TypeOrderedLayerInfo | undefined} The ordered layer info.
+   * @return {TypeOrderedLayerInfo | undefined} The ordered layer info.
+   * @static
    */
   static findMapLayerFromOrderedInfo(
     mapId: string,
@@ -626,10 +843,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   /**
    * Gets the ordered layer info for one layer and its children.
-   * @param {string} mapId - The map id.
+   * @param {string} mapId -The map identifier.
    * @param {string} layerPath - The path of the layer to get.
    * @param {TypeOrderedLayerInfo[]} orderedLayerInfo - The array of ordered layer info to search, default is current ordered layer info.
-   * @returns {TypeOrderedLayerInfo[] | undefined} The ordered layer info of the layer and its children.
+   * @return {TypeOrderedLayerInfo[] | undefined} The ordered layer info of the layer and its children.
+   * @static
    */
   static findMapLayerAndChildrenFromOrderedInfo(
     mapId: string,
@@ -639,6 +857,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return orderedLayerInfo.filter((layer) => layer.layerPath.startsWith(`${layerPath}/`) || layer.layerPath === layerPath);
   }
 
+  /**
+   * Gets the index position of a layer in the ordered layer info array.
+   * Returns -1 if the layer is not found.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The path of the layer to find
+   * @return {number} The index of the layer, or -1 if not found
+   * @static
+   */
   static getMapIndexFromOrderedLayerInfo(mapId: string, layerPath: string): number {
     // Get index of a layer
     const info = this.getMapStateProtected(mapId).orderedLayerInfo;
@@ -646,6 +872,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return -1;
   }
 
+  /**
+   * Gets all layers that have collapsible legend sections.
+   * Returns layers that have children, multiple legend items, or WMS layers with icons.
+   * @param {string} mapId - The map identifier
+   * @return {TypeOrderedLayerInfo[]} Array of collapsible layer information
+   * @static
+   */
   static getLegendCollapsibleLayers(mapId: string): TypeOrderedLayerInfo[] {
     // Get collapsible layers
     const orderedLayerInfo = this.getMapOrderedLayerInfo(mapId);
@@ -661,6 +894,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
     });
   }
 
+  /**
+   * Checks if all collapsible legend layers are currently collapsed.
+   * Returns true if there are no collapsible layers or if all are collapsed.
+   * @param {string} mapId - The map identifier
+   * @return {boolean} True if all collapsible layers are collapsed, false otherwise
+   * @static
+   */
   static getAllLegendLayersCollapsed(mapId: string): boolean {
     // Get whether all the collapsible layers are collapsed
     const collapsibleLayers = MapEventProcessor.getLegendCollapsibleLayers(mapId);
@@ -670,20 +910,39 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return collapsibleLayers.every((layer) => layer.legendCollapsed);
   }
 
+  /**
+   * Gets the legend collapsed state for a specific layer.
+   * Returns true if the layer's legend is collapsed or if the layer is not found.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The path of the layer
+   * @return {boolean} True if legend is collapsed, false otherwise
+   * @static
+   */
   static getMapLegendCollapsedFromOrderedLayerInfo(mapId: string, layerPath: string): boolean {
     // Get legend status of a layer
     return this.findMapLayerFromOrderedInfo(mapId, layerPath)?.legendCollapsed !== false;
   }
 
+  /**
+   * Gets the visibility state for a specific layer from ordered layer info.
+   * Returns true if the layer is visible or if the layer is not found.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The path of the layer
+   * @return {boolean} True if layer is visible, false otherwise
+   * @static
+   */
   static getMapVisibilityFromOrderedLayerInfo(mapId: string, layerPath: string): boolean {
     // Get visibility of a layer
     return this.findMapLayerFromOrderedInfo(mapId, layerPath)?.visible !== false;
   }
 
   /**
-   * Checks if any parent of a layer is hidden.
-   * @param {string} mapId - The ID of the map.
-   * @param {string} layerPath - The layer path of the layer to check.
+   * Checks if any parent layer of a given layer is hidden.
+   * Traverses up the layer hierarchy to determine if visibility is inherited.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The layer path to check
+   * @return {boolean} True if any parent is hidden, false otherwise
+   * @static
    */
   static getMapLayerParentHidden(mapId: string, layerPath: string): boolean {
     const curOrderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(mapId);
@@ -708,11 +967,28 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return false;
   }
 
+  /**
+   * Gets whether a layer is within the visible zoom/scale range.
+   * Returns true if the layer is in visible range or if the layer is not found.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The path of the layer
+   * @return {boolean} True if layer is in visible range, false otherwise
+   * @static
+   */
   static getMapInVisibleRangeFromOrderedLayerInfo(mapId: string, layerPath: string): boolean {
     // Get inVisibleRange of a layer
     return this.findMapLayerFromOrderedInfo(mapId, layerPath)?.inVisibleRange !== false;
   }
 
+  /**
+   * Adds a feature to the map's highlighted features collection.
+   * The feature is visually highlighted on the map and stored in the state.
+   * WMS layers are excluded from highlighting.
+   * @param {string} mapId - The map identifier
+   * @param {TypeFeatureInfoEntry} feature - The feature to highlight
+   * @return {void}
+   * @static
+   */
   static addHighlightedFeature(mapId: string, feature: TypeFeatureInfoEntry): void {
     if (feature.geoviewLayerType !== CONST_LAYER_TYPES.WMS) {
       MapEventProcessor.getMapViewerLayerAPI(mapId).featureHighlight.highlightFeature(feature);
@@ -724,6 +1000,15 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
   }
 
+  /**
+   * Removes a feature from the map's highlighted features collection.
+   * Can remove a specific feature by reference or all highlighted features at once.
+   * WMS layers are excluded from the removal process.
+   * @param {string} mapId - The map identifier
+   * @param {TypeFeatureInfoEntry | 'all'} feature - The feature to remove, or 'all' to remove all highlights
+   * @return {void}
+   * @static
+   */
   static removeHighlightedFeature(mapId: string, feature: TypeFeatureInfoEntry | 'all'): void {
     if (feature === 'all' || feature.geoviewLayerType !== CONST_LAYER_TYPES.WMS) {
       // Filter what we want to keep as highlighted features
@@ -742,6 +1027,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
   }
 
+  /**
+   * Removes all feature highlights for a specific layer.
+   * Clears all highlighted features belonging to the specified layer path.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The path of the layer whose highlights should be removed
+   * @return {void}
+   * @static
+   */
   static removeLayerHighlights(mapId: string, layerPath: string): void {
     MapEventProcessor.getMapViewerLayerAPI(mapId).removeLayerHighlights(layerPath);
   }
@@ -750,7 +1043,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Add a point marker
    * @param {string} mapId - The ID of the map.
    * @param {string} group - The group to add the markers to.
-   * @param {TypePointMarker} pointMarkers - The point markers to add.
+   * @param {TypePointMarker[]} pointMarkers - The point markers to add.
+   * @return {void}
+   * @static
    */
   static addPointMarkers(mapId: string, group: string, pointMarkers: TypePointMarker[]): void {
     const curMarkers = this.getMapStateProtected(mapId).pointMarkers;
@@ -778,7 +1073,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Remove a point marker
    * @param {string} mapId - The ID of the map.
    * @param {string} group - The group to remove the markers from.
-   * @param {string | Coordinate} idsOrCoordinates - The IDs or coordinates of the markers to remove.
+   * @param {string[] | Coordinate[]} [idsOrCoordinates] - The IDs or coordinates of the markers to remove.
+   * @return {void}
+   * @static
    */
   static removePointMarkersOrGroup(mapId: string, group: string, idsOrCoordinates?: string[] | Coordinate[]): void {
     const curMarkers = this.getMapStateProtected(mapId).pointMarkers;
@@ -809,7 +1106,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The ID of the map.
    * @param {string} layerPath - The layer path to set as the highlighted layer.
    * @param {string} highlightedLayerPath - The layer path of the currently highlighted layer.
-   * @returns {string} The layer path of the highlighted layer.
+   * @return {string} The layer path of the highlighted layer.
+   * @static
    */
   static changeOrRemoveLayerHighlight(mapId: string, layerPath: string, highlightedLayerPath: string): string {
     // If layer is currently highlighted layer, remove highlight
@@ -829,40 +1127,115 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return layerPath;
   }
 
+  /**
+   * Adds an initial filter to a layer.
+   * The filter is stored in the map state and applied when the layer is first loaded.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The path of the layer to filter
+   * @param {string} filter - The filter expression to apply
+   * @return {void}
+   * @static
+   */
   static addInitialFilter(mapId: string, layerPath: string, filter: string): void {
     const curFilters = this.getMapStateProtected(mapId).initialFilters;
     this.getMapStateProtected(mapId).setterActions.setInitialFilters({ ...curFilters, [layerPath]: filter });
   }
 
+  /**
+   * Sets the current basemap options in the map state.
+   * Updates the active basemap configuration without recreating the basemap.
+   * @param {string} mapId - The map identifier
+   * @param {TypeBasemapOptions} basemapOptions - The basemap options to set
+   * @return {void}
+   * @static
+   */
   static setCurrentBasemapOptions(mapId: string, basemapOptions: TypeBasemapOptions): void {
     this.getMapStateProtected(mapId).setterActions.setCurrentBasemapOptions(basemapOptions);
   }
 
+  /**
+   * Gets the current hover feature information for the map.
+   * Returns feature details for the feature currently under the mouse cursor.
+   * @param {string} mapId - The map identifier
+   * @return {TypeHoverFeatureInfo | undefined | null} The hover feature info, undefined if not set, or null if cleared
+   * @static
+   */
   static getMapHoverFeatureInfo(mapId: string): TypeHoverFeatureInfo | undefined | null {
     return this.getMapStateProtected(mapId).hoverFeatureInfo;
   }
 
+  /**
+   * Sets whether a layer is hoverable (responds to mouse hover events).
+   * Wreturn {void}
+   * @hen enabled, the layer will display feature information when the cursor hovers over features.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The path of the layer
+   * @param {boolean} hoverable - True to enable hover, false to disable
+   * @static
+   */
   static setMapLayerHoverable(mapId: string, layerPath: string, hoverable: boolean): void {
     this.getMapStateProtected(mapId).setterActions.setHoverable(layerPath, hoverable);
   }
 
+  /**
+   * Sreturn {void}
+   * @ets the hover feature information for the map.
+   * Updates the feature details shown when hovering over map features.
+   * @param {string} mapId - The map identifier
+   * @param {TypeHoverFeatureInfo} hoverFeatureInfo - The hover feature information to set
+   * @static
+   */
   static setMapHoverFeatureInfo(mapId: string, hoverFeatureInfo: TypeHoverFeatureInfo): void {
     this.getMapStateProtected(mapId).setterActions.setHoverFeatureInfo(hoverFeatureInfo);
   }
 
+  /**
+   * Sreturn {void}
+   * @ets the ordered layer information array for the map.
+   * Updates the layer stacking order and recalculates z-indices for all layers.
+   * @param {string} mapId - The map identifier
+   * @param {TypeOrderedLayerInfo[]} orderedLayerInfo - The ordered array of layer information
+   * @static
+   */
   static setMapOrderedLayerInfo(mapId: string, orderedLayerInfo: TypeOrderedLayerInfo[]): void {
     this.getMapStateProtected(mapId).setterActions.setOrderedLayerInfo(orderedLayerInfo);
     this.setLayerZIndices(mapId);
   }
 
+  /**
+   * Sets whether a layer is queryable (can be queried for feature information).
+   * When enabled, clicking on the map will query features from this layer.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The path of the layer
+   * @param {boolean} queryable - True to enable querying, false to disable
+   * @return {void}
+   * @static
+   */
   static setMapLayerQueryable(mapId: string, layerPath: string, queryable: boolean): void {
     this.getMapStateProtected(mapId).setterActions.setQueryable(layerPath, queryable);
   }
 
+  /**
+   * Sets the collapsed state of a layer's legend section.
+   * Controls whether the layer's legend details are expanded or collapsed in the UI.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The path of the layer
+   * @param {boolean} collapsed - True to collapse the legend, false to expand it
+   * @return {void}
+   * @static
+   */
   static setMapLegendCollapsed(mapId: string, layerPath: string, collapsed: boolean): void {
     this.getMapStateProtected(mapId).setterActions.setLegendCollapsed(layerPath, collapsed);
   }
 
+  /**
+   * Sets the collapsed state for all layers' legend sections at once.
+   * Expands or collapses all layer legends in the legend panel.
+   * @param {string} mapId - The map identifier
+   * @param {boolean} newCollapsed - True to collapse all legends, false to expand all
+   * @return {void}
+   * @static
+   */
   static setAllMapLayerCollapsed(mapId: string, newCollapsed: boolean): void {
     // Set the collapsed state for all layers
     const orderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(mapId);
@@ -881,8 +1254,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The identifier of the map containing the target layer.
    * @param {string} layerPath - The path of the layer whose visibility is being changed.
    * @param {boolean} [newValue] - Optional. The new visibility value. If omitted, the visibility is toggled.
-   * @returns {boolean} The resulting visibility state of the layer after the operation, or `false`
+   * @return {boolean} The resulting visibility state of the layer after the operation, or `false`
    * if the layer does not exist at the given path.
+   * @static
    */
   static setOrToggleMapLayerVisibility(mapId: string, layerPath: string, newValue?: boolean): boolean {
     // If the GV layer exists at the layer path
@@ -894,10 +1268,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Sets the opacity of a layer in the layer legend.
-   * @param {string} mapId - The ID of the map.
-   * @param {string} layerPath - The layer path of the layer to change.
-   * @param {boolean} visibility - The visibility to set.
+   * Sets the visibility state of a layer in the store only.
+   * Updates the layer's visibility in the ordered layer info without triggering map updates.
+   * Used internally by layer visibility management to sync state.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The path of the layer to update
+   * @param {boolean} visibility - The visibility state to set (true for visible, false for hidden)
+   * @return {void}
+   * @static
    */
   static setMapLayerVisibilityInStore(mapId: string, layerPath: string, visibility: boolean): void {
     const curOrderedLayerInfo = this.getMapOrderedLayerInfo(mapId);
@@ -918,6 +1296,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * differs from the desired state will be updated.
    * @param {string} mapId - The identifier of the map whose layers will be updated.
    * @param {boolean} newVisibility - The visibility state to apply to all layers (`true` to show, `false` to hide).
+   * @return {void}
+   * @static
    */
   static setAllMapLayerVisibility(mapId: string, newVisibility: boolean): void {
     // Set the visibility for all layers
@@ -930,18 +1310,28 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   // TODO: REFACTOR? - These functions are the only place in the code where we still import api from '@/app'.
+  /**
+   * Reorders a layer in the layer stack by moving it up or down.
+   * Changes the z-index and visual stacking order of layers on the map.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The path of the layer to reorder
+   * @param {number} move - The number of positions to move (positive = up, negative = down)
+   * @return {void}
+   * @static
+   */
   static reorderLayer(mapId: string, layerPath: string, move: number): void {
     // Redirect to state API
     api.getMapViewer(mapId).stateApi.reorderLayers(mapId, layerPath, move);
   }
 
   /**
-   * Replace a layer in the orderedLayerInfo array.
-   *
-   * @param {string} mapId The ID of the map to add the layer to.
-   * @param {ConfigBaseClass} layerConfig The config of the layer to add.
-   * @param {string} layerPathToReplace The layerPath of the info to replace.
+   * Replaces a layer in the orderedLayerInfo array with a new layer configuration.
+   * Used when updating or swapping out layer configurations dynamically.
+   * @param {string} mapId - The map identifier
+   * @param {ConfigBaseClass} layerConfig - The new layer configuration
+   * @param {string} [layerPathToReplace] - Optional path of the layer to replace; if omitted, uses the new layer's path
    * @return {void}
+   * @static
    */
   static replaceOrderedLayerInfo(mapId: string, layerConfig: ConfigBaseClass, layerPathToReplace?: string): void {
     const { orderedLayerInfo } = this.getMapStateProtected(mapId);
@@ -957,11 +1347,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Add a new layer to the orderedLayerInfo array using a layer config.
-   *
-   * @param {string} mapId The ID of the map to add the layer to.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig The config of the layer to add.
+   * Adds a new layer to the orderedLayerInfo array using a layer configuration.
+   * Inserts the layer at the beginning of the stack or at a specific index.
+   * @param {string} mapId - The map identifier
+   * @param {TypeGeoviewLayerConfig | TypeLayerEntryConfig} geoviewLayerConfig - The layer configuration to add
+   * @param {number} [index] - Optional index position to insert the layer; if omitted, inserts at the beginning
    * @return {void}
+   * @static
    */
   static addOrderedLayerInfoByConfig(
     mapId: string,
@@ -978,10 +1370,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Add new layer info to the orderedLayerInfo array.
-   *
-   * @param {string} mapId The ID of the map to add the layer to.
-   * @param {TypeOrderedLayerInfo} layerInfo The ordered layer info to add.
+   * Adds new layer information to the orderedLayerInfo array.
+   * Inserts a pre-constructed layer info object at the beginning or a specific index.
+   * @param {string} mapId - The map identifier
+   * @param {TypeOrderedLayerInfo} layerInfo - The ordered layer information to add
+   * @param {number} [index] - Optional index position to insert; if omitted, inserts at the beginning
+   * @return {void}
+   * @static
    */
   static addOrderedLayerInfo(mapId: string, layerInfo: TypeOrderedLayerInfo, index?: number): void {
     const { orderedLayerInfo } = this.getMapStateProtected(mapId);
@@ -993,12 +1388,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Remove a layer from the orderedLayerInfo array.
-   *
-   * @param {string} mapId The ID of the map to remove the layer from.
-   * @param {string} layerPath - The path of the layer to remove.
-   * @param {boolean} removeSublayers - Should sublayers be removed.
+   * Removes a layer from the orderedLayerInfo array.
+   * Optionally removes all sublayers (child layers) along with the specified layer.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The path of the layer to remove
+   * @param {boolean} [removeSublayers=true] - True to remove sublayers, false to remove only the specified layer
    * @return {void}
+   * @static
    */
   static removeOrderedLayerInfo(mapId: string, layerPath: string, removeSublayers: boolean = true): void {
     const { orderedLayerInfo } = this.getMapStateProtected(mapId);
@@ -1017,16 +1413,39 @@ export class MapEventProcessor extends AbstractEventProcessor {
   // **********************************************************
   // GV NEVER add a store action who does set state AND map action at a same time.
   // GV Review the action in store state to make sure
+  /**
+   * Gets the OpenLayers overview map control for the specified map.
+   * Creates and returns an overview map control that can be added to the map.
+   * @param {string} mapId - The map identifier
+   * @param {HTMLDivElement} div - The container div element for the overview map
+   * @return {OLOverviewMap} The OpenLayers overview map control
+   * @static
+   */
   static getOverviewMapControl(mapId: string, div: HTMLDivElement): OLOverviewMap {
     const olMap = this.getMapViewer(mapId).map;
     return this.getMapViewer(mapId).basemap.getOverviewMapControl(olMap, div);
   }
 
+  /**
+   * Sets the visibility of the overview map control.
+   * Shows or hides the overview map minimap in the corner of the main map.
+   * @param {string} mapId - The map identifier
+   * @param {boolean} visible - True to show the overview map, false to hide it
+   * @return {void}
+   * @static
+   */
   static setOverviewMapVisibility(mapId: string, visible: boolean): void {
     const olMap = this.getMapViewer(mapId).map;
     this.getMapViewer(mapId).basemap.setOverviewMapControlVisibility(olMap, visible);
   }
 
+  /**
+   * Resets the basemap to the default basemap configuration.
+   * Uses the current display language and projection to recreate the basemap.
+   * @param {string} mapId - The map identifier
+   * @return {Promise<void>} Promise that resolves when the basemap is reset
+   * @static
+   */
   static resetBasemap(mapId: string): Promise<void> {
     // reset basemap will use the current display language and projection and recreate the basemap
     const language = AppEventProcessor.getDisplayLanguage(mapId);
@@ -1034,6 +1453,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return this.getMapViewer(mapId).basemap.loadDefaultBasemaps(projection, language);
   }
 
+  /**
+   * Sets the basemap using the provided basemap options.
+   * Creates a new basemap with the specified configuration using the current language and projection.
+   * @param {string} mapId - The map identifier
+   * @param {TypeBasemapOptions} basemapOptions - The basemap options configuration
+   * @return {Promise<void>} Promise that resolves when the basemap is set
+   * @static
+   */
   static async setBasemap(mapId: string, basemapOptions: TypeBasemapOptions): Promise<void> {
     // Set basemap will use the current display language and projection and recreate the basemap
     const language = AppEventProcessor.getDisplayLanguage(mapId);
@@ -1047,6 +1474,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.setCurrentBasemapOptions(mapId, basemapOptions);
   }
 
+  /**
+   * Sets the keyboard pan interaction pixel delta for the map.
+   * Controls how many pixels the map pans when arrow keys are pressed.
+   * @param {string} mapId - The map identifier
+   * @param {number} panDelta - The number of pixels to pan per keypress
+   * @return {void}
+   * @static
+   */
   static setMapKeyboardPanInteractions(mapId: string, panDelta: number): void {
     const mapElement = this.getMapViewer(mapId).map;
 
@@ -1059,6 +1494,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
     mapElement.addInteraction(new KeyboardPan({ pixelDelta: panDelta }));
   }
 
+  /**
+   * Sets the active state for WCAG keyboard interactions.
+   * Enables or disables keyboard pan and zoom interactions for accessibility compliance.
+   * @param {string} mapId - The map identifier
+   * @param {boolean} active - True to activate keyboard interactions, false to deactivate
+   * @return {void}
+   * @static
+   */
   static setActiveMapInteractionWCAG(mapId: string, active: boolean): void {
     const mapElement = this.getMapViewer(mapId).map;
 
@@ -1070,22 +1513,26 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Set the React root overview map element so it can be destroy if the map element is destroyed
-   *
-   * @param mapId The map id.
-   * @param overviewRoot The React root element for the overview map
+   * Sets the React root element for the overview map.
+   * Stores the React root so it can be properly destroyed when the map is destroyed.
+   * @param {string} mapId - The map identifier
+   * @param {Root} overviewRoot - The React root element for the overview map
+   * @return {void}
+   * @static
    */
   static setMapOverviewMapRoot(mapId: string, overviewRoot: Root): void {
     this.getMapViewer(mapId).overviewRoot = overviewRoot;
   }
 
   /**
-   * Zoom to the specified extent.
-   *
-   * @param {string} mapId - The map id.
-   * @param {Extent} extent - The extent to zoom to.
-   * @param {FitOptions} options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 13, duration: 500 }).
-   * @returns Promise<void>
+   * Zooms the map to fit the specified extent with animation.
+   * Validates the extent coordinates and applies the zoom with configurable options.
+   * @param {string} mapId - The map identifier
+   * @param {Extent} extent - The extent to zoom to [minX, minY, maxX, maxY]
+   * @param {FitOptions} [options=DEFAULT_OL_FITOPTIONS] - Zoom options (padding, maxZoom, duration)
+   * @return {Promise<void>} Promise that resolves when the zoom animation completes
+   * @throws {InvalidExtentError} When the extent coordinates are invalid
+   * @static
    */
   static zoomToExtent(mapId: string, extent: Extent, options: FitOptions = DEFAULT_OL_FITOPTIONS): Promise<void> {
     // Merge user options with defaults
@@ -1111,6 +1558,16 @@ export class MapEventProcessor extends AbstractEventProcessor {
     throw new InvalidExtentError(extent);
   }
 
+  /**
+   * Zooms the map to a geolocator search result location.
+   * If a bounding box is provided, highlights and zooms to the extent.
+   * Otherwise, zooms to the point coordinates and displays a click marker.
+   * @param {string} mapId - The map identifier
+   * @param {Coordinate} coords - The lon/lat coordinates of the location
+   * @param {Extent} [bbox] - Optional bounding box extent for the location
+   * @return {Promise<void>} Promise that resolves when the zoom operation completes
+   * @static
+   */
   static async zoomToGeoLocatorLocation(mapId: string, coords: Coordinate, bbox?: Extent): Promise<void> {
     const indicatorBox = document.getElementsByClassName('ol-overviewmap-box');
     for (let i = 0; i < indicatorBox.length; i++) {
@@ -1160,10 +1617,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Return to initial view state of map using config.
-   *
-   * @param {string} mapId - ID of the map to return to original view
-   * @returns Promise<void>
+   * Returns the map to its initial view state using the configuration.
+   * Uses the home view settings or falls back to the initial view configured at map creation.
+   * @param {string} mapId - The map identifier
+   * @return {Promise<void>} Promise that resolves when the zoom to initial extent completes
+   * @static
    */
   static zoomToInitialExtent(mapId: string): Promise<void> {
     const currProjection = this.getMapStateProtected(mapId).currentProjection;
@@ -1211,11 +1669,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Zoom to geolocation position provided.
-   *
-   * @param {string} mapId - ID of map to zoom on
-   * @param {GeolocationPosition} position - Info on position to zoom to.
-   * @returns Promise<void>
+   * Zooms the map to the user's geolocation position.
+   * Transforms the geolocation coordinates to the map projection and zooms to that location.
+   * @param {string} mapId - The map identifier
+   * @param {GeolocationPosition} position - The geolocation position information
+   * @return {Promise<void>} Promise that resolves when the zoom completes
+   * @static
    */
   static zoomToMyLocation(mapId: string, position: GeolocationPosition): Promise<void> {
     const coord: Coordinate = [position.coords.longitude, position.coords.latitude];
@@ -1231,11 +1690,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Zoom to layer visible scale.
-   *
-   * @param {string} mapId - ID of map to zoom on
-   * @param {string} layerPath - Path of layer to zoom to.
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+   * Zooms the map to make a layer visible within its scale range.
+   * Adjusts the zoom level to bring the layer into its min/max zoom visibility range.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The path of the layer to zoom to
+   * @return {void}
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+   * @static
    */
   static zoomToLayerVisibleScale(mapId: string, layerPath: string): void {
     const view = this.getMapViewer(mapId).getView();
@@ -1266,9 +1727,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Set Z index for layers
-   *
-   * @param {string} mapId - Id of map to set layer Z indices
+   * Sets the z-index for all layers based on their order in the layer stack.
+   * Ensures proper visual stacking of layers on the map.
+   * @param {string} mapId - The map identifier
+   * @return {void}
+   * @static
    */
   static setLayerZIndices = (mapId: string): void => {
     const reversedLayers = [...this.getMapStateProtected(mapId).orderedLayerInfo].reverse();
@@ -1278,19 +1741,37 @@ export class MapEventProcessor extends AbstractEventProcessor {
     });
   };
 
+  /**
+   * Converts map coordinates to pixel coordinates.
+   * Transforms a coordinate in the map projection to screen pixel coordinates.
+   * @param {string} mapId - The map identifier
+   * @param {Coordinate} coord - The coordinate to convert
+   * @return {Pixel} The pixel coordinates [x, y]
+   * @static
+   */
   static getPixelFromCoordinate = (mapId: string, coord: Coordinate): Pixel => {
     return this.getMapViewer(mapId).map.getPixelFromCoordinate(coord);
   };
 
+  /**
+   * Sets the position of the click marker overlay on the map.
+   * Updates the marker's screen position to the specified coordinates.
+   * @param {string} mapId - The map identifier
+   * @param {number[]} position - The position coordinates to set
+   * @return {void}
+   * @static
+   */
   static setClickMarkerOnPosition = (mapId: string, position: number[]): void => {
     this.getMapViewer(mapId).map.getOverlayById(`${mapId}-clickmarker`)!.setPosition(position);
   };
 
   /**
-   * Get all active filters for layer.
-   *
-   * @param {string} mapId - The map id.
-   * @param {string} layerPath - The path for the layer to get filters from.
+   * Gets all active filters for a layer.
+   * Collects filters from initial config, data table, and time slider (if initialized).
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The path of the layer to get filters from
+   * @return {(string | undefined)[] | undefined} Array of active filter expressions, or undefined if none
+   * @static
    */
   static getActiveVectorFilters(mapId: string, layerPath: string): (string | undefined)[] | undefined {
     const initialFilter = this.getInitialFilter(mapId, layerPath);
@@ -1306,10 +1787,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Apply all available filters to layer.
-   *
-   * @param {string} mapId - The map id.
-   * @param {string} layerPath - The path of the layer to apply filters to.
+   * Applies all available filters to a layer.
+   * Combines initial, data table, and time slider filters and applies them to the layer's view.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The path of the layer to apply filters to
+   * @return {void}
+   * @static
    */
   static applyLayerFilters(mapId: string, layerPath: string): void {
     // Get the Geoview layer
@@ -1338,10 +1821,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   /**
    * Creates layer initial settings according to provided configs.
-   * @param {ConfigBaseClass} layerEntryConfig - Layer entry config for the layer.
-   * @param {TypeOrderedLayerInfo} orderedLayerInfo - Ordered layer info for the layer.
-   * @param {TypeLegendLayer} legendLayerInfo - Legend layer info for the layer.
-   * @returns {TypeLayerInitialSettings} Initial settings object.
+   * Combines state from ordered layer info, legend layer info, and layer entry config.
+   * @param {ConfigBaseClass} layerEntryConfig - Layer entry config for the layer
+   * @param {TypeOrderedLayerInfo} orderedLayerInfo - Ordered layer info for the layer
+   * @param {TypeLegendLayer} legendLayerInfo - Legend layer info for the layer
+   * @return {TypeLayerInitialSettings} Initial settings object
+   * @private
+   * @static
    */
   static #getInitialSettings(
     layerEntryConfig: ConfigBaseClass,
@@ -1367,12 +1853,15 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   /**
    * Creates a layer entry config based on current layer state.
-   * @param {string} mapId - Id of map.
-   * @param {string} layerPath - Path of the layer to create config for.
-   * @param {boolean} isGeocore - Indicates if it is a geocore layer.
-   * @param {boolean | 'hybrid'} overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults.
-   * @returns {TypeLayerEntryConfig} Entry config object.
-   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
+   * Reconstructs the layer configuration from the current map state and layer information.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - Path of the layer to create config for
+   * @param {boolean} isGeocore - Indicates if it is a geocore layer
+   * @param {boolean | 'hybrid'} overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults
+   * @return {TypeLayerEntryConfig} Entry config object
+   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path
+   * @private
+   * @static
    */
   static #createLayerEntryConfig(
     mapId: string,
@@ -1457,7 +1946,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - Id of map.
    * @param {string} layerPath - Path of the layer to create config for.
    * @param {boolean | "hybrid"} overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults.
-   * @returns {MapConfigLayerEntry | undefined} Geoview layer config object.
+   * @return {MapConfigLayerEntry | undefined} Geoview layer config object.
+   * @static
    */
   static #createGeoviewLayerConfig(
     mapId: string,
@@ -1534,7 +2024,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
   /**
    * Creates a geoview layer config based on current layer state.
    * @param {string} mapId - Id of map.
-   * @returns {TypeTimeSliderProps[] | undefined} Array of time slider props.
+   * @return {TypeTimeSliderProps[] | undefined} Array of time slider props.
+   * @private
+   * @static
    */
   static #createTimeSliderConfigs(mapId: string): TypeTimeSliderProps[] | undefined {
     // Get time slider info
@@ -1605,6 +2097,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Creates a map config based on current map state.
    * @param {string} mapId - Id of map.
    * @param {boolean | "hybrid"} overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults.
+   * @static
    */
   static createMapConfigFromMapState(
     mapId: string,
@@ -1719,11 +2212,11 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   /**
    * Searches through a map config and replaces any matching layer names with their provided partner.
-   *
    * @param {string[][]} namePairs -  The array of name pairs. Presumably one english and one french name in each pair.
    * @param {TypeMapFeaturesInstance} mapConfig - The config to modify.
-   * @param {boolean} removeUnlisted - Remove any layer name that doesn't appear in namePairs.
-   * @returns {TypeMapFeaturesInstance} Map config with updated names.
+   * @param {boolean} [removeUnlisted=false] - Remove any layer name that doesn't appear in namePairs.
+   * @return {TypeMapFeaturesInstance} Map config with updated names.
+   * @static
    */
   static replaceMapConfigLayerNames(
     namePairs: string[][],
@@ -1754,6 +2247,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {Record<string, string>} pairsDict -  The dict of name pairs. Presumably one english and one french name in each pair.
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfigs - The layer entry configs to modify.
    * @param {boolean} removeUnlisted - Remove any layer name that doesn't appear in namePairs.
+   * @return {void}
+   * @static
+   * @private
    */
   static #replaceLayerEntryConfigNames(
     pairsDict: Record<string, string>,
@@ -1775,6 +2271,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Geometry groups are used to organize and manage collections of vector features (lines, polygons, points).
    * @param {string} mapId - The map identifier
    * @param {string} groupName - The unique name for the geometry group to create
+   * @return {void}
+   * @static
    */
   static createGeometryGroup(mapId: string, groupName: string): void {
     const viewer = this.getMapViewer(mapId);
@@ -1789,6 +2287,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * The group itself remains and can be reused.
    * @param {string} mapId - The map identifier
    * @param {string} groupName - The name of the geometry group to clear
+   * @return {void}
+   * @static
    */
   static deleteGeometriesFromGroup(mapId: string, groupName: string): void {
     const viewer = this.getMapViewer(mapId);
@@ -1803,6 +2303,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Common uses include tooltips, popups, and measurement labels.
    * @param {string} mapId - The map identifier
    * @param {Overlay} overlay - The OpenLayers overlay to add to the map.
+   * @return {void}
+   * @static
    */
   static addOverlay(mapId: string, overlay: Overlay): void {
     const viewer = this.getMapViewer(mapId);
@@ -1814,6 +2316,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * Removes the HTML element from the map display and cleans up references.
    * @param {string} mapId - The map identifier
    * @param {Overlay} overlay - The OpenLayers overlay to remove from the map.
+   * @return {void}
+   * @static
    */
   static removeOverlay(mapId: string, overlay: Overlay): void {
     const viewer = this.getMapViewer(mapId);
@@ -1826,6 +2330,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} geomGroupKey - The geometry group key in which to hold the geometries
    * @param {string} type - The type of geometry to draw (Polygon, LineString, Circle, etc)
    * @param {TypeFeatureStyle} [style] - The styles for the drawing
+   * @return {Draw} The OpenLayers Draw interaction
+   * @static
    */
   static initDrawInteractions(mapId: string, geomGroupKey: string, type: string, style: TypeFeatureStyle): Draw {
     return this.getMapViewer(mapId).initDrawInteractions(geomGroupKey, type, style);

@@ -40,7 +40,7 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {TypeSourceEsriDynamicInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   * @return {TypeSourceEsriDynamicInitialConfig} The strongly-typed source configuration specific to this layer entry config.
    */
   override getSource(): TypeSourceEsriDynamicInitialConfig {
     return super.getSource();
@@ -49,7 +49,7 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {TypeMetadataEsriDynamic | undefined} The strongly-typed layer configuration specific to this layer entry config.
+   * @return {TypeMetadataEsriDynamic | undefined} The strongly-typed layer configuration specific to this layer entry config.
    */
   override getServiceMetadata(): TypeMetadataEsriDynamic | undefined {
     return super.getServiceMetadata() as TypeMetadataEsriDynamic | undefined;
@@ -58,7 +58,7 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {TypeLayerMetadataEsri | undefined} The strongly-typed layer metadata specific to this layer entry config.
+   * @return {TypeLayerMetadataEsri | undefined} The strongly-typed layer metadata specific to this layer entry config.
    */
   override getLayerMetadata(): TypeLayerMetadataEsri | undefined {
     return super.getLayerMetadata() as TypeLayerMetadataEsri | undefined;
@@ -66,7 +66,7 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the get geometry type to interpret the esri type name.
-   * @returns {TypeStyleGeometry | undefined} The geometry type, if it could be determined.
+   * @return {TypeStyleGeometry | undefined} The geometry type, if it could be determined.
    * @throws {NotSupportedError} When the geometry type is not supported.
    */
   protected override onGetGeometryType(): TypeStyleGeometry | undefined {

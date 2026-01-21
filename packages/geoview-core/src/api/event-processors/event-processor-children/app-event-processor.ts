@@ -93,7 +93,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
    * @param {SnackbarType} type - The type of message (info, success, warning, error)
    * @param {string} messageKey - The translation key for the message
    * @param {string[]} [param] - Optional parameters to replace in the message string
-   * @param {boolean} notification - True to add the message to notification panel (default false)
+   * @param {boolean} [notification=false] - True to add the message to notification panel (default false)
    * @return {void}
    * @static
    */

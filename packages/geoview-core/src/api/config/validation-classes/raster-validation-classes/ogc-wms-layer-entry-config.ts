@@ -62,7 +62,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {TypeSourceImageWmsInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   * @return {TypeSourceImageWmsInitialConfig} The strongly-typed source configuration specific to this layer entry config.
    */
   override getSource(): TypeSourceImageWmsInitialConfig {
     return super.getSource();
@@ -71,7 +71,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {TypeMetadataWMS | undefined} The strongly-typed layer configuration specific to this layer entry config.
+   * @return {TypeMetadataWMS | undefined} The strongly-typed layer configuration specific to this layer entry config.
    */
   override getServiceMetadata(): TypeMetadataWMS | undefined {
     return super.getServiceMetadata() as TypeMetadataWMS | undefined;
@@ -80,7 +80,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {TypeMetadataWMSCapabilityLayer | undefined} The strongly-typed layer metadata specific to this layer entry config.
+   * @return {TypeMetadataWMSCapabilityLayer | undefined} The strongly-typed layer metadata specific to this layer entry config.
    */
   override getLayerMetadata(): TypeMetadataWMSCapabilityLayer | undefined {
     return super.getLayerMetadata() as TypeMetadataWMSCapabilityLayer | undefined;
@@ -91,7 +91,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * If attributions are not yet cached, this method attempts
    * to read them from the layer's metadata (via the `Attribution.Title` property)
    * and sets them accordingly. Once set, the attributions are cached in the layer.
-   * @returns {string[] | undefined} The list of layer attributions, or `undefined` if none are available.
+   * @return {string[] | undefined} The list of layer attributions, or `undefined` if none are available.
    */
   override getAttributions(): string[] | undefined {
     // If no attributions defined
@@ -116,7 +116,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Gets the version. Defaults to 1.3.0.
-   * @returns {string} The service version as read from the metadata attribute.
+   * @return {string} The service version as read from the metadata attribute.
    */
   getVersion(): string {
     return this.getServiceMetadata()?.version || '1.3.0';
@@ -124,7 +124,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Gets the server type as read from the config or as read from the service GetCapabilities metadata response.
-   * @returns {TypeOfServer | undefined} The Type of server if it could be determined.
+   * @return {TypeOfServer | undefined} The Type of server if it could be determined.
    */
   getServerType(): TypeOfServer | undefined {
     // Return the serverType as specified in the config if any or the serverType as read from the metadata (config > metadata)
@@ -134,7 +134,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Returns a list of supported CRS (Coordinate Reference System) identifiers
    * from the WMS service metadata.
-   * @returns {string[]} An array of supported CRS identifiers (e.g., 'EPSG:3857').
+   * @return {string[]} An array of supported CRS identifiers (e.g., 'EPSG:3857').
    */
   getSupportedCRSs(): string[] {
     return this.getServiceMetadata()?.Capability.Layer.CRS ?? [];
@@ -142,7 +142,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Gets if the config has specified that we should fetch the vectorial information from the WFS.
-   * @returns {boolean} True when the vector information should be fetched from the WFS. True by default.
+   * @return {boolean} True when the vector information should be fetched from the WFS. True by default.
    */
   getShouldFetchVectorInformationFromWFS(): boolean {
     return (this.getGeoviewLayerConfig() as TypeWMSLayerConfig).fetchVectorsOnWFS ?? true; // default: true
@@ -150,7 +150,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Gets if the service supports 'GetStyles' requests.
-   * @returns {boolean} True when the service supports GetStyles requests.
+   * @return {boolean} True when the service supports GetStyles requests.
    */
   getSupportsGetStyles(): boolean {
     return (
@@ -163,7 +163,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * If styles are not yet cached, the method reads them from the layer metadata
    * and initializes the internal style list. The styles correspond to named
    * style definitions advertised by the WMS service (from the `Style` section of the metadata).
-   * @returns {string[] | undefined} The list of available style names, or `undefined` if none are defined.
+   * @return {string[] | undefined} The list of available style names, or `undefined` if none are defined.
    */
   getStyles(): string[] | undefined {
     // If no styles defined
@@ -186,7 +186,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * Retrieves the list of available styles from the layer config/metadata and returns
    * the first available one as the default style to use. If no styles are defined,
    * the method returns `undefined`.
-   * @returns {string | undefined} The name of the style to use, or `undefined` if no styles are available.
+   * @return {string | undefined} The name of the style to use, or `undefined` if no styles are available.
    */
   getStyleToUse(): string | undefined {
     // Redirect
@@ -210,7 +210,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * Once the target style is identified, the method searches its `LegendURL` entries
    * for one in `"image/png"` format and returns the corresponding `OnlineResource` URL.
    * @param {string} [chosenStyle] - Optional style name to prioritize.
-   * @returns {string | undefined} The legend image URL if found; otherwise `undefined`.
+   * @return {string | undefined} The legend image URL if found; otherwise `undefined`.
    */
   getLegendUrl(chosenStyle?: string): string | undefined {
     // Get the capabilities metadata from the layer config
@@ -243,7 +243,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Gets the bounds as defined in the metadata, favoring the ones in the given projection or returning the first one found
    * @param {string} projection - The projection to favor when looking for the bounds inside the metadata
-   * @returns {[string, Extent]} The projection and its extent as provided by the metadata
+   * @return {[string, Extent]} The projection and its extent as provided by the metadata
    */
   getBoundsExtent(projection: string): [string, Extent] | undefined {
     // Get the bounding boxes in the metadata
@@ -278,7 +278,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Gets the WFS styles layer id associated with this WMS layer entry config, defaults on the same layer id as the WMS.
-   * @returns {string} The WFS styles layer id
+   * @return {string} The WFS styles layer id
    */
   getWfsStylesLayerId(): string {
     return this.layerEntryProps.wfsLayerId || this.layerId;
@@ -286,7 +286,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Gets if the WMS layer has an associated WFS layer configuration.
-   * @returns {boolean} True if the WMS layer has an associated WFS layer configuration.
+   * @return {boolean} True if the WMS layer has an associated WFS layer configuration.
    */
   hasWfsLayerConfig(): boolean {
     return !!this.#wfsLayerConfig;
@@ -295,7 +295,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Gets the associated WFS layer configuration for this WMS layer.
    * Throws an error if the configuration has not been set.
-   * @returns {OgcWfsLayerEntryConfig} The WFS layer configuration instance.
+   * @return {OgcWfsLayerEntryConfig} The WFS layer configuration instance.
    * @throws {LayerConfigWFSMissingError} If no WFS layer configuration is defined for this WMS layer.
    */
   getWfsLayerConfig(): OgcWfsLayerEntryConfig {
@@ -306,7 +306,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Associates a WFS layer configuration with this WMS layer.
    * @param {OgcWfsLayerEntryConfig} layerConfig - The WFS layer configuration to associate.
-   * @returns {void}
+   * @return {void}
    */
   setWfsLayerConfig(layerConfig: OgcWfsLayerEntryConfig): void {
     this.#wfsLayerConfig = layerConfig;
@@ -319,7 +319,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * 2. Using `WFS.processGeoviewLayerConfig` to generate WFS layer configurations.
    * 3. Modifying each generated entry to include the current WMS layer ID.
    * 4. Returning the first generated WFS layer configuration.
-   * @returns {Promise<OgcWfsLayerEntryConfig>} A promise that resolves to the first generated WFS layer entry configuration.
+   * @return {Promise<OgcWfsLayerEntryConfig>} A promise that resolves to the first generated WFS layer entry configuration.
    * @async
    */
   async createGeoviewLayerConfigWfs(): Promise<OgcWfsLayerEntryConfig> {

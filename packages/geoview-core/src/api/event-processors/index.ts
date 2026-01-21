@@ -24,22 +24,47 @@ const geochartEventProcessor = new GeochartEventProcessor();
 const swiperEventProcessor = new SwiperEventProcessor();
 const drawerEventProcessor = new DrawerEventProcessor();
 
+/**
+ * Checks if the time slider plugin is enabled in the map configuration.
+ * @param {GeoviewStoreType} store - The GeoView store instance
+ * @return {boolean} True if time slider plugin is enabled
+ */
 export function hasTimeSliderPlugin(store: GeoviewStoreType): boolean {
   return store.getState().mapConfig!.footerBar?.tabs.core.includes('time-slider') ?? false;
 }
 
+/**
+ * Checks if the geochart plugin is enabled in the map configuration.
+ * @param {GeoviewStoreType} store - The GeoView store instance
+ * @return {boolean} True if geochart plugin is enabled
+ */
 export function hasGeochartPlugin(store: GeoviewStoreType): boolean {
   return store.getState().mapConfig!.footerBar?.tabs.core.includes('geochart') ?? false;
 }
 
+/**
+ * Checks if the swiper plugin is enabled in the map configuration.
+ * @param {GeoviewStoreType} store - The GeoView store instance
+ * @return {boolean} True if swiper plugin is enabled
+ */
 export function hasSwiperPlugin(store: GeoviewStoreType): boolean {
   return store.getState().mapConfig!.corePackages?.includes('swiper') ?? false;
 }
 
+/**
+ * Checks if the drawer plugin is enabled in the map configuration.
+ * @param {GeoviewStoreType} store - The GeoView store instance
+ * @return {boolean} True if drawer plugin is enabled
+ */
 export function hasDrawerPlugin(store: GeoviewStoreType): boolean {
   return store.getState().mapConfig!.navBar?.includes('drawer') ?? false;
 }
 
+/**
+ * Initializes all event processors for the given store.
+ * @param {GeoviewStoreType} store - The GeoView store instance
+ * @return {void}
+ */
 export function initializeEventProcessors(store: GeoviewStoreType): void {
   // core stores
   appEventProcessor.initialize(store);
@@ -56,6 +81,11 @@ export function initializeEventProcessors(store: GeoviewStoreType): void {
   if (hasDrawerPlugin(store)) drawerEventProcessor.initialize(store);
 }
 
+/**
+ * Destroys all event processors for the given store.
+ * @param {GeoviewStoreType} store - The GeoView store instance
+ * @return {void}
+ */
 export function destroyEventProcessors(store: GeoviewStoreType): void {
   // core stores
   appEventProcessor.destroy();

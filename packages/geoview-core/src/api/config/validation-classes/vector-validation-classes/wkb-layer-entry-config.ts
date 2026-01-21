@@ -23,7 +23,7 @@ export class WkbLayerEntryConfig extends VectorLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {TypeSourceWkbVectorInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   * @return {TypeSourceWkbVectorInitialConfig} The strongly-typed source configuration specific to this layer entry config.
    */
   override getSource(): TypeSourceWkbVectorInitialConfig {
     return super.getSource();

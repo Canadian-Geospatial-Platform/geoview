@@ -28,7 +28,7 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
   /**
    * Returns the `layerPath` values of all immediate child layers in `listOfLayerEntryConfig`.
    * This method does **not** recurse into nested sublayers.
-   * @returns {string[]} An array of `layerPath` strings for direct sublayers.
+   * @return {string[]} An array of `layerPath` strings for direct sublayers.
    */
   getLayerPaths(): string[] {
     return this.listOfLayerEntryConfig.map((geoviewLayerEntryConfig) => geoviewLayerEntryConfig.layerPath);
@@ -37,7 +37,7 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
   /**
    * Recursively returns the `layerPath` values of all layers and sublayers starting from this layer.
    * This includes the `layerPath` of the current layer, its direct children, and all nested descendants.
-   * @returns {string[]} An array of `layerPath` strings for all descendant layers (including nested groups).
+   * @return {string[]} An array of `layerPath` strings for all descendant layers (including nested groups).
    */
   getLayerPathsAll(): string[] {
     function getChildPaths(listOfLayerEntryConfig: TypeLayerEntryConfig[]): string[] {
@@ -88,7 +88,7 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
   /**
    * Overrides the creation of the layer props and return a deep clone of the layer entry configuration properties.
    * This method calls the parent method and then copies the listOfLayerEntryConfig over.
-   * @returns {GroupLayerEntryConfigProps} A deep-cloned copy of the layer entry properties.
+   * @return {GroupLayerEntryConfigProps} A deep-cloned copy of the layer entry properties.
    */
   protected override onCloneLayerProps(): GroupLayerEntryConfigProps {
     // Sure
@@ -103,7 +103,7 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Overrides the toJson of the mother class
-   * @returns {T} The Json representation of the instance.
+   * @return {T} The Json representation of the instance.
    * @protected
    */
   protected override onToJson<T>(): T {

@@ -619,8 +619,10 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Sets the highlighted layer state.
-   * @param {string} mapId - The ID of the map
+   * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path to set as the highlighted layer
+   * @return {void}
+   * @static
    */
   static setHighlightLayer(mapId: string, layerPath: string): void {
     // Get highlighted layer to set active button state because there can only be one highlighted layer at a time.
@@ -634,7 +636,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * Finds a legend layer by a layerPath.
    * @param {TypeLegendLayer[]} layers - The legend layers to search.
    * @param {string} layerPath - The path of the layer.
-   * @returns {TypeLegendLayer | undefined}
+   * @return {TypeLegendLayer | undefined}
+   * @static
    */
   static findLayerByPath(layers: TypeLegendLayer[], layerPath: string): TypeLegendLayer | undefined {
     let foundLayer: TypeLegendLayer | undefined;
@@ -657,8 +660,10 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Delete layer from legend layers.
-   * @param {string} mapId - The ID of the map.
+   * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path of the layer to change.
+   * @return {void}
+   * @static
    */
   static deleteLayerFromLegendLayers(mapId: string, layerPath: string): void {
     // Get legend layers to pass to recursive function
@@ -673,9 +678,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Delete layer from legend layers.
-   * @param {string} mapId - The ID of the map.
+   * @param {string} mapId - The map identifier
    * @param {TypeLegendLayer[]} legendLayers - The legend layers list to remove layer from.
    * @param {string} layerPath - The layer path of the layer to change.
+   * @return {void}
+   * @static
    * @private
    */
   static #deleteLayersFromLegendLayersAndChildren(mapId: string, legendLayers: TypeLegendLayer[], layerPath: string): void {
@@ -695,8 +702,10 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Delete layer.
-   * @param {string} mapId - The ID of the map.
+   * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path of the layer to change.
+   * @return {void}
+   * @static
    */
   static deleteLayer(mapId: string, layerPath: string): void {
     // Delete layer through layer API
@@ -705,8 +714,10 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Reload layer.
-   * @param {string} mapId - The ID of the map.
+   * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path of the layer to reload.
+   * @return {void}
+   * @static
    */
   static reloadLayer(mapId: string, layerPath: string): void {
     // Delete layer through layer API
@@ -715,7 +726,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Refresh layer and reset states.
-   * @param {string} mapId - The ID of the map.
+   * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path of the layer to refresh.
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
@@ -740,9 +751,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Set visibility of an item in legend layers.
-   * @param {string} mapId - The ID of the map.
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The layer path of the layer to change.
    * @param {TypeLegendItem} item - The item to change.
-   * @param {boolean} visibility - The new visibility.
+   * @param {boolean} [visibility=true] - The new visibility.
+   * @return {void}
+   * @static
    */
   static setItemVisibility(mapId: string, layerPath: string, item: TypeLegendItem, visibility: boolean = true): void {
     // Get current layer legends
@@ -769,9 +783,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Toggle visibility of an item.
-   * @param {string} mapId - The ID of the map.
+   * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path of the layer to change.
    * @param {TypeLegendItem} item - The item to change.
+   * @return {void}
+   * @static
    */
   static toggleItemVisibility(mapId: string, layerPath: string, item: TypeLegendItem): void {
     MapEventProcessor.getMapViewerLayerAPI(mapId).setItemVisibility(layerPath, item, !item.isVisible);
@@ -779,9 +795,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Sets the visibility of all items in the layer.
-   * @param {string} mapId - The ID of the map.
+   * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path of the layer to change.
    * @param {boolean} visibility - The visibility.
+   * @return {void}
+   * @static
    */
   static setAllItemsVisibility(mapId: string, layerPath: string, visibility: boolean): void {
     // Set layer to visible
@@ -811,11 +829,13 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Recursively updates the opacity in provided legend layers of a layer and its children.
-   * @param {string} mapId - The ID of the map.
+   * @param {string} mapId - The map identifier
    * @param {TypeLegendLayer[]} curLayers - The current legend layers.
    * @param {string} layerPath - The layer path.
    * @param {number} opacity - The opacity to set.
-   * @param {boolean} isChild - Is the layer a child layer.
+   * @param {boolean} [isChild=false] - Is the layer a child layer.
+   * @return {void}
+   * @static
    * @private
    */
   static #setOpacityInLayerAndChildren(
@@ -841,9 +861,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Sets the opacity of the layer and its children in the store.
-   * @param {string} mapId - The ID of the map.
+   * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path of the layer to change.
    * @param {number} opacity - The opacity to set.
+   * @return {void}
+   * @static
    */
   static setOpacityInStore(mapId: string, layerPath: string, opacity: number): void {
     const curLayers = this.getLayerState(mapId).legendLayers;
@@ -855,10 +877,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Sets the opacity of a layer.
-   * @param {string} mapId - The ID of the map.
+   * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path of the layer to change.
    * @param {number} opacity - The opacity to set.
-   * @param {boolean} updateLegendLayers - Whether to update the legend layers or not
+   * @param {boolean} [updateLegendLayers] - Whether to update the legend layers or not
+   * @return {void}
+   * @static
    */
   static setLayerOpacity(mapId: string, layerPath: string, opacity: number, updateLegendLayers?: boolean): void {
     // Redirect
@@ -868,11 +892,10 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   /**
    * Filters features based on their visibility settings defined in the layer's unique value or class break style configuration.
    *
-   * @param {string} mapId - The unique identifier of the map instance
+   * @param {string} mapId - The map identifier
    * @param {string} layerPath - The path to the layer in the map configuration
    * @param {TypeFeatureInfoEntry[]} features - Array of features to filter
-   *
-   * @returns {TypeFeatureInfoEntry[]} Filtered array of features based on their visibility settings
+   * @return {TypeFeatureInfoEntry[]} Filtered array of features based on their visibility settings
    *
    * @description
    * This function processes features based on the layer's unique value style configuration:
@@ -905,10 +928,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Processes features based on unique value style configuration to determine their visibility.
-   *
    * @param {TypeUniqueValueStyleConfig} uniqueValueStyle - The unique value style configuration
    * @param {TypeFeatureInfoEntry[]} features - Array of features to process
-   * @returns {TypeFeatureInfoEntry[]} Filtered array of features based on visibility rules
+   * @return {TypeFeatureInfoEntry[]} Filtered array of features based on visibility rules
    *
    * @description
    * This function filters features based on their field values and the unique value style configuration:
@@ -917,7 +939,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * - Determines feature visibility based on:
    *   - Explicit visibility rules in the style configuration
    *   - Default visibility for values not matching any style rule
-   *
    * @static
    * @private
    */
@@ -950,12 +971,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Processes features based on class break style configuration to determine their visibility.
-   *
-   * @private
-   *
    * @param {TypeClassBreakStyleConfig} classBreakStyle - The class break style configuration
    * @param {TypeFeatureInfoEntry[]} features - Array of features to process
-   * @returns {TypeFeatureInfoEntry[]} Filtered array of features based on class break visibility rules
+   * @return {TypeFeatureInfoEntry[]} Filtered array of features based on class break visibility rules
    *
    * @description
    * This function filters features based on numeric values falling within defined class breaks:
@@ -966,7 +984,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    *   - Whether the feature's value falls within a class break range
    *   - The visibility setting of the matching class break
    *   - Default visibility for values not matching any class break
-   *
    * @static
    * @private
    */
@@ -1044,8 +1061,10 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Sorts legend layers children recursively in given legend layers list.
-   * @param {string} mapId - The ID of the map.
+   * @param {string} mapId - The map identifier
    * @param {TypeLegendLayer[]} legendLayerList - The list to sort.
+   * @return {void}
+   * @static
    */
   static sortLegendLayersChildren = (mapId: string, legendLayerList: TypeLegendLayer[]): void => {
     legendLayerList.forEach((legendLayer) => {

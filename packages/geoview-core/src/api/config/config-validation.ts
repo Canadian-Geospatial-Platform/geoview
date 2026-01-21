@@ -52,6 +52,7 @@ export class ConfigValidation {
    * Print a trace to help locate schema errors.
    * @param {AnyValidateFunction<unknown>} validate - The Ajv validator.
    * @param {unknown} objectAffected - Object that was validated.
+   * @return {void}
    * @static
    * @private
    */
@@ -75,8 +76,7 @@ export class ConfigValidation {
    * @param {TypeGeoviewLayerType} geoviewLayerType - The GeoView layer type to validate.
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entry configurations to validate.
    * @param {Ajv} validator - The schema validator to use.
-   *
-   * @returns {TypeMapFeaturesConfig} A valid map features configuration.
+   * @return {TypeMapFeaturesConfig} A valid map features configuration.
    * @static
    * @private
    */
@@ -126,7 +126,7 @@ export class ConfigValidation {
   /**
    * Validate the map features configuration.
    * @param {MapConfigLayerEntry[]} listOfGeoviewLayerConfig - The map features configuration to validate.
-   * @returns {MapConfigLayerEntry[]} A valid map features configuration.
+   * @return {MapConfigLayerEntry[]} A valid map features configuration.
    * @static
    */
   static validateLayersConfigAgainstSchema(
@@ -170,8 +170,8 @@ export class ConfigValidation {
   /**
    * Validate and adjust the list of GeoView layer configuration.
    * Errors, when expected, are logged and not thrown so that each MapConfigLayerEntry can be processed independently.
-   * @param {MapConfigLayerEntry[]} listOfMapConfigLayerEntry - The list of GeoView layer configuration to adjust and
-   * validate.
+   * @param {MapConfigLayerEntry[]} [listOfMapConfigLayerEntry] - The list of GeoView layer configuration to adjust and validate.
+   * @return {void}
    */
   static validateListOfGeoviewLayerConfig(listOfMapConfigLayerEntry?: MapConfigLayerEntry[]): void {
     if (listOfMapConfigLayerEntry) {
@@ -217,8 +217,8 @@ export class ConfigValidation {
    *  - `geoviewLayerId` must always be defined.
    *  - For specific layer types (ESRI Dynamic, ESRI Feature, ESRI Image,
    *    OGC Feature, WFS, WMS), the `metadataAccessPath` property is mandatory.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer
-   *   configuration object to validate.
+   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration object to validate.
+   * @return {void}
    * @throws {LayerMissingGeoviewLayerIdError} When `geoviewLayerId` is missing.
    * @throws {LayerMetadataAccessPathMandatoryError} When `metadataAccessPath` is missing.
    * @private
@@ -257,9 +257,10 @@ export class ConfigValidation {
    * Process recursively the layer entries to create layers and layer groups.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration to adjust and validate.
    * @param {ConfigClassOrType[]} listOfLayerEntryConfig - The list of layer entry configurations to process.
-   * @param {GroupLayerEntryConfig} parentLayerConfig - The parent layer configuration of all the
-   * layer entry configurations found in the list of layer entries.
+   * @param {GroupLayerEntryConfig} [parentLayerConfig] - The parent layer configuration of all the layer entry configurations found in the list of layer entries.
+   * @return {void}
    * @private
+   * @static
    */
   static #processLayerEntryConfig(
     geoviewLayerConfig: TypeGeoviewLayerConfig,
@@ -385,9 +386,10 @@ export class ConfigValidation {
    * Process recursively the layer entries to set the parents of each entries.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration.
    * @param {ConfigClassOrType[]} listOfLayerEntryConfig - The list of layer entry configurations to process.
-   * @param {GroupLayerEntryConfig} parentLayerConfig - The parent layer configuration of all the
-   * layer configurations found in the list of layer entries.
+   * @param {GroupLayerEntryConfig} [parentLayerConfig] - The parent layer configuration of all the layer configurations found in the list of layer entries.
+   * @return {void}
    * @private
+   * @static
    */
   static #recursivelySetChildParent(
     geoviewLayerConfig: TypeGeoviewLayerConfig,

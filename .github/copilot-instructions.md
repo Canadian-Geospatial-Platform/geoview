@@ -17,6 +17,8 @@ GeoView is a lightweight React+TypeScript geospatial viewer built on OpenLayers 
 
 ## Critical Build & Dev Workflow
 
+**Requirements**: Node.js >= 20.11.0
+
 ### Rush Commands (NOT npm/pnpm directly)
 
 ```bash
@@ -61,10 +63,12 @@ Backend/Map Events → Event Processors → Zustand Store
   - **Vector**: `CSV`, `EsriFeature`, `GeoJSON`, `KML`, `OgcFeature`, `WFS`, `WKB`
   - **Note**: `GeoPackage` and `shapefile` are input formats auto-converted to vector types (typically GeoJSON/WKB)
 - **Layer Sets**: Reactive collections tracking legends/queries/state (see [layerset-architecture.md](../docs/programming/layerset-architecture.md))
-  - `LegendsLayerSet` - Tracks layer status and fetches legend/symbology data for all layers
-  - `FeatureInfoLayerSet` - Queries features at clicked map locations
-  - `AllFeatureInfoLayerSet` - Queries all features from layers (no spatial filter)
-  - `HoverFeatureInfoLayerSet` - Queries features under mouse cursor for hover tooltips
+  - **Primary Layer Set**:
+    - `LegendsLayerSet` - Tracks layer status and fetches legend/symbology data (used by Legend Panel)
+  - **Feature Query Layer Sets**:
+    - `FeatureInfoLayerSet` - Queries features at clicked map locations
+    - `AllFeatureInfoLayerSet` - Queries all features from layers (used by Data Table, export features)
+    - `HoverFeatureInfoLayerSet` - Queries features under mouse cursor for hover tooltips
   - Event-driven sync with layer changes via result sets
 
 ## TypeScript Conventions
@@ -163,6 +167,8 @@ Control via localStorage:
 
 **JSDoc format** (per [CONTRIBUTING.md](../CONTRIBUTING.md)):
 
+### Basic Template
+
 ```typescript
 /**
  * Main function description.
@@ -172,18 +178,79 @@ Control via localStorage:
  */
 ```
 
-- Use `@function` outside class contexts
-- For Promises, describe resolved type
-- Use `@private` for non-exposed functions
-- Generate TypeDoc: `npm run doc` in geoview-core
+### JSDoc Requirements
+
+**Required Tags:**
+
+- **All parameters must be documented** - Every function parameter requires a `@param` tag
+- **Optional parameters** - Use square brackets: `@param {string} [optionalParam]` or `@param {number} [height]`
+- **Return values** - Use `@returns` (or `@return`) for all functions that return values; describe what the Promise resolves to for async functions
+- **Thrown errors** - Use `@throws` to document error types: `@throws {MapViewerNotFoundError} When no map exists with the given ID`
+- **Access modifiers** - Use `@private` for private methods/properties, `@protected` for protected members, `@static` for static methods
+
+**Function Descriptions:**
+
+- Start with a clear, concise summary sentence
+- For complex functions, use "This method:" or "This function does:" followed by a bulleted list of steps:
+  ```typescript
+  /**
+   * Deletes a MapViewer instance and cleans up all associated resources.
+   * This method:
+   * - Calls the MapViewer's delete method to clean up OpenLayers resources
+   * - Removes the MapViewer from the API's collection
+   * - Unmounts the React component from the DOM
+   * - Removes the Zustand store and event processors
+   * - Optionally deletes the HTML container element
+   * @param {string} mapId - The unique identifier of the map to delete
+   * @param {boolean} deleteContainer - True to remove the div element
+   * @returns {Promise<void>} Promise that resolves when deletion is complete
+   */
+  ```
+- **Enhance, don't replace** - When existing descriptions exist, add more information or rephrase for clarity, but don't remove helpful details
+
+**Parameter Documentation:**
+
+- Format: `@param {Type} paramName - Description of what the parameter does`
+- Optional params: `@param {Type} [paramName] - Description` or `@param {Type} [paramName=defaultValue] - Description`
+- Always include descriptions explaining purpose and valid values
+
+**Context Tags:**
+
+- Use `@function` outside class contexts (methods auto-detected in classes)
+- For Promises, describe what the resolved value represents
+- Use `@exports` for exported classes/functions
+
+**Generate TypeDoc:** Run `npm run doc` in geoview-core package
 
 ## Testing & Quality
 
-- **Testing**: Use `geoview-test-suite` package to create and run tests (NOT Jest)
+- **Testing**: Use `geoview-test-suite` package to create and run tests
+  - **Do NOT use Jest** - it crashes due to too many dependencies in the monorepo (Jest config exists but is not functional)
 - **Never commit dead/commented code** - use Git history instead
 - Run `npm run format && npm run fix` before committing (from packages/)
 - Use descriptive variable names (`elementOfTheList` not `e`)
 - React Dev Tools + store inspection when `GEOVIEW_DEVTOOLS` localStorage key is set
+
+## Performance Optimization
+
+### React Component Optimization
+
+- **Memoization**: Use `useMemo` for expensive calculations, `useCallback` for event handlers passed to child components
+- **Avoid unnecessary re-renders**:
+  - Use specific store selectors (e.g., `useMapZoom()`) instead of selecting entire state slices
+  - Wrap child components in `React.memo()` when they receive stable props
+- **Virtual scrolling**: Large lists (Data Table, layer lists) use Material React Table's virtualization
+- **Debounce/throttle**: Heavy operations triggered by user input (e.g., hover queries, map interactions)
+
+### Rush/Webpack Build Performance
+
+- **Incremental builds**: `rush build` only rebuilds changed packages - don't use `rush rebuild` unless necessary
+- **Parallel execution**: Rush builds packages in parallel based on dependency graph
+- **Dev server**: `rush serve` uses webpack-dev-server with Hot Module Replacement (HMR) - avoid full page reloads
+- **Build optimization**:
+  - Webpack production build uses code splitting and tree shaking
+  - Run `rush build` before committing to catch build errors early
+  - Use `rush update --full` only when package-lock files are corrupted or after major dependency changes
 
 ## Key Files to Reference
 

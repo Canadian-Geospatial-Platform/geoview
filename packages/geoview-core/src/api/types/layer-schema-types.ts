@@ -499,7 +499,7 @@ export type ShapefileLayerConfig = {
 /**
  * Type guard that checks if a given map layer configuration entry is of type GeoCore.
  * @param {MapConfigLayerEntry} layerConfigEntryOption - The layer entry config to check
- * @returns {layerConfigEntryOption is GeoCoreLayerConfig} True if the layer is a GeoCore layer, narrowing the type to GeoCoreLayerConfig.
+ * @return {layerConfigEntryOption is GeoCoreLayerConfig} True if the layer is a GeoCore layer, narrowing the type to GeoCoreLayerConfig.
  */
 export const mapConfigLayerEntryIsGeoCore = (layerConfigEntryOption: MapConfigLayerEntry): layerConfigEntryOption is GeoCoreLayerConfig => {
   return layerConfigEntryOption.geoviewLayerType === CONST_LAYER_ENTRY_TYPES.GEOCORE;
@@ -508,7 +508,7 @@ export const mapConfigLayerEntryIsGeoCore = (layerConfigEntryOption: MapConfigLa
 /**
  * Type guard that checks if a given map layer configuration entry is of type GeoPackage.
  * @param {MapConfigLayerEntry} layerConfigEntryOption - The layer entry config to check
- * @returns {layerConfigEntryOption is GeoPackageLayerConfig} True if the layer is a GeoPackage layer, narrowing the type to GeoPackageLayerConfig.
+ * @return {layerConfigEntryOption is GeoPackageLayerConfig} True if the layer is a GeoPackage layer, narrowing the type to GeoPackageLayerConfig.
  */
 export const mapConfigLayerEntryIsGeoPackage = (
   layerConfigEntryOption: MapConfigLayerEntry
@@ -519,7 +519,7 @@ export const mapConfigLayerEntryIsGeoPackage = (
 /**
  * Type guard that checks if a given map layer configuration entry is of type Shapefile.
  * @param {MapConfigLayerEntry} layerConfigEntryOption - The layer entry config to check
- * @returns {layerConfigEntryOption is ShapefileLayerConfig} True if the layer is a Shapefile layer, narrowing the type to ShapefileLayerConfig.
+ * @return {layerConfigEntryOption is ShapefileLayerConfig} True if the layer is a Shapefile layer, narrowing the type to ShapefileLayerConfig.
  */
 export const mapConfigLayerEntryIsShapefile = (
   layerConfigEntryOption: MapConfigLayerEntry
@@ -530,7 +530,7 @@ export const mapConfigLayerEntryIsShapefile = (
 /**
  * Type guard that checks if a given map layer configuration entry is of type RCS.
  * @param {MapConfigLayerEntry} layerConfigEntryOption - The layer entry config to check
- * @returns {layerConfigEntryOption is RCSLayerConfig} True if the layer is a RCS layer, narrowing the type to RCSLayerConfig.
+ * @return {layerConfigEntryOption is RCSLayerConfig} True if the layer is a RCS layer, narrowing the type to RCSLayerConfig.
  */
 export const mapConfigLayerEntryIsRCS = (layerConfigEntryOption: MapConfigLayerEntry): layerConfigEntryOption is RCSLayerConfig => {
   return layerConfigEntryOption.geoviewLayerType === CONST_LAYER_ENTRY_TYPES.RCS;
@@ -544,7 +544,7 @@ export type MapConfigLayerEntry = SpecialLayerConfigs | TypeGeoviewLayerConfig;
 /**
  * Temporary? function to serialize a geoview layer configuration to be able to send it to the store
  * @param {MapConfigLayerEntry} geoviewLayerConfig - The geoviewlayer config to serialize
- * @returns {MapConfigLayerEntry} The serialized config as pure JSON
+ * @return {MapConfigLayerEntry} The serialized config as pure JSON
  */
 export const serializeTypeGeoviewLayerConfig = (geoviewLayerConfig: MapConfigLayerEntry): TypeGeoviewLayerConfig => {
   // If GeoCore layer entry

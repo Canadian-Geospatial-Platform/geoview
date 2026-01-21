@@ -37,7 +37,7 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {TypeLayerMetadataEsri | undefined} The strongly-typed layer metadata specific to this layer entry config.
+   * @return {TypeLayerMetadataEsri | undefined} The strongly-typed layer metadata specific to this layer entry config.
    */
   override getLayerMetadata(): TypeLayerMetadataEsri | undefined {
     return super.getLayerMetadata() as TypeLayerMetadataEsri | undefined;
@@ -45,7 +45,7 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Overrides the get geometry type to interpret the esri type name.
-   * @returns {TypeStyleGeometry | undefined} The geometry type, if it could be determined.
+   * @return {TypeStyleGeometry | undefined} The geometry type, if it could be determined.
    * @throws {NotSupportedError} When the geometry type is not supported.
    */
   protected override onGetGeometryType(): TypeStyleGeometry | undefined {

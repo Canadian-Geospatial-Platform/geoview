@@ -102,7 +102,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /**
    * Initializes the event processor and sets up subscriptions
    * @param {GeoviewStoreType} store - The store to initialize with
-   * @returns {Array<() => void>} Array of unsubscribe functions
+   * @return {Array<() => void>} Array of unsubscribe functions
    */
   override onInitialize(store: GeoviewStoreType): Array<() => void> {
     const { mapId } = store.getState();
@@ -140,10 +140,12 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Shortcut to get the Drawer state for a given map id
-   * @param {string} mapId - The mapId
-   * @returns {IDrawerState | undefined} The Drawer state. Forcing the return to also be 'undefined', because
+   * @param {string} mapId - The map identifier
+   * @return {IDrawerState | undefined} The Drawer state. Forcing the return to also be 'undefined', because
    *                                       there will be no drawerState if the Drawer plugin isn't active.
    *                                       This helps the developers making sure the existence is checked.
+   * @static
+   * @protected
    */
   protected static getDrawerState(mapId: string): IDrawerState | undefined {
     // Return the drawer state when it exists
@@ -152,9 +154,12 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Function for handling map projection changes to reproject the drawings
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
    * @param {TypeValidMapProjectionCodes} currentProjection - The current projection code
    * @param {TypeValidMapProjectionCodes} previousProjection - The previous projection code
+   * @return {void}
+   * @static
+   * @private
    */
   static #handleMapReprojection(
     mapId: string,
@@ -175,9 +180,11 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Gets all drawing features for a map
-   * @param {string} mapId - The map ID
-   * @returns {Feature[]} Array of features
+   * @param {string} mapId - The map identifier
+   * @return {Feature[]} Array of features
    * @throws {InvaliGeometryGroupIdError} If the provided geometry group id does not exist.
+   * @static
+   * @private
    */
   static #getDrawingFeatures(mapId: string): Feature[] {
     // Check if state exist and if draw instance is enable, solve error when switch lang and no draw instance
@@ -198,9 +205,11 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Gets a feature by it's id
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
    * @param {string} featureId - Feature ID we are looking for
-   * @returns {Feature | undefined} The found feature
+   * @return {Feature | undefined} The found feature
+   * @static
+   * @private
    */
   static #getFeatureById(mapId: string, featureId: string): Feature | undefined {
     const allDrawingFeatures = this.#getDrawingFeatures(mapId);
@@ -212,7 +221,10 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Updates all measurement tooltips for a map with the current language
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
+   * @return {void}
+   * @static
+   * @private
    */
   static #updateMeasurementTooltips(mapId: string): void {
     const displayLanguage = AppEventProcessor.getDisplayLanguage(mapId);
@@ -232,7 +244,10 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Sets the text value to the default text value of the current language
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
+   * @return {void}
+   * @static
+   * @private
    */
   static #updateDefaultText(mapId: string): void {
     const state = this.getDrawerState(mapId);
@@ -246,7 +261,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Calculates measurements for a geometry feature
    * @param {Geometry} geom - The geometry to measure
    * @param {string} displayLanguage - The display language
-   * @returns {Object} Object containing the formatted output text and tooltip coordinates
+   * @return {Object} Object containing the formatted output text and tooltip coordinates
+   * @static
+   * @private
    */
   static #getFeatureMeasurements(
     geom: Geometry,
@@ -287,8 +304,10 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Creates or updates a measurement tooltip for a feature
    * @param {Feature<Geometry>} feature - The feature to create a tooltip for
    * @param {boolean} hideMeasurements - Whether to hide the measurement tooltip
-   * @param {string} mapId - The map ID
-   * @returns {Overlay | undefined} The created or updated overlay, or undefined if creation failed
+   * @param {string} mapId - The map identifier
+   * @return {Overlay | undefined} The created or updated overlay, or undefined if creation failed
+   * @static
+   * @private
    */
   static #createMeasureTooltip(feature: Feature<Geometry>, hideMeasurements: boolean, mapId: string): Overlay | undefined {
     // Get current display language
@@ -334,7 +353,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Utility to convert SVG path to coordinates
    * @param {string} pathData - SVG path string
    * @param {number[]} center - Center coordinates
-   * @returns {number[][]} Array of coordinates
+   * @return {number[][]} Array of coordinates
+   * @static
+   * @private
    */
   static #svgPathToCoordinates = (pathData: string, center: number[]): number[][] => {
     const commands = pathData.match(/[MmLlHhVvCcSsQqTtAaZz][^MmLlHhVvCcSsQqTtAaZz]*/g) || [];
@@ -390,8 +411,10 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Utility to convert SVG path to coordinates with auto-centering
    * @param {string} svgPath - SVG path string
    * @param {SketchCoordType} coordinates - Circle coordinate (center and out edge)
-   * @param {SimpleGeometry} geometry - The intermediate geometry for display while expanding
-   * @returns {Polygon} The result polygon
+   * @param {SimpleGeometry} [geometry] - The intermediate geometry for display while expanding
+   * @return {Polygon} The result polygon
+   * @static
+   * @private
    */
   static #svgPathToGeometry = (svgPath: string, coordinates: SketchCoordType, geometry?: SimpleGeometry): Polygon => {
     const center = coordinates[0] as number[];
@@ -460,8 +483,11 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * @param {Feature} feature - The feature to set up
    * @param {string} geomType - The geometry type
    * @param {StyleProps} style - The style properties
-   * @param {string} iconSrc - The icon source for point features
-   * @param {string} featureId - Optional feature ID (generates one if not provided)
+   * @param {string} [iconSrc] - The icon source for point features
+   * @param {string} [featureId] - Optional feature ID (generates one if not provided)
+   * @return {void}
+   * @static
+   * @private
    */
   static #setFeatureProperties(feature: Feature, geomType: string, style: StyleProps, iconSrc?: string, featureId?: string): void {
     // Set up basic feature properties
@@ -493,7 +519,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Extracts style properties from a feature
    * @param {Feature} feature - The feature to extract properties from
    * @param {StyleProps} currentStyle - The current style properties to update
-   * @returns {StyleProps} The extracted style properties
+   * @return {StyleProps} The extracted style properties
+   * @static
+   * @private
    */
   static #getFeatureProperties(feature: Feature, currentStyle: StyleProps): StyleProps {
     const style: StyleProps = currentStyle;
@@ -532,7 +560,10 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Cleans up the temporary text transform interaction
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
+   * @return {void}
+   * @static
+   * @private
    */
   static #cleanupTempTransform(mapId: string): void {
     const tempTransform = this.#tempTransformInstances.get(mapId);
@@ -549,9 +580,11 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Starts a drawing operation with the specified geometry type
-   * @param {string} mapId - The map ID
-   * @param {string} geomType - The geometry type to draw (optional, uses current state if not provided)
-   * @param {StyleProps} styleInput - Optional style properties to use
+   * @param {string} mapId - The map identifier
+   * @param {string} [geomType] - The geometry type to draw (optional, uses current state if not provided)
+   * @param {StyleProps} [styleInput] - Optional style properties to use
+   * @return {void}
+   * @static
    */
   static startDrawing(mapId: string, geomType?: string, styleInput?: StyleProps): void {
     // Quickly clean up the temp transform if present
@@ -621,7 +654,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * The handler for Draw End events
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
+   * @static
+   * @private
    */
   static #handleDrawEnd(mapId: string) {
     return (_sender: unknown, event: DrawEvent): void => {
@@ -760,7 +795,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Stops the current drawing operation
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
+   * @return {void}
+   * @static
    */
   static stopDrawing(mapId: string): void {
     // Cleanup temp transforms
@@ -783,7 +820,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Toggles the drawing state
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
+   * @return {void}
+   * @static
    */
   static toggleDrawing(mapId: string): void {
     const state = this.getDrawerState(mapId);
@@ -800,7 +839,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Initiates editing interactions
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
+   * @return {void}
+   * @static
    */
   static startEditing(mapId: string): void {
     // Quickly clean up the temp transform if present
@@ -856,7 +897,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /**
    * Handler for Transform End events
    * The current transform action has ended and the new geometry and style are applied to the feature
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
+   * @static
+   * @private
    */
   static #handleTransformEnd(mapId: string) {
     return (_sender: unknown, event: TransformEvent): void => {
@@ -895,7 +938,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Handler of transform delete feature events
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
+   * @static
+   * @private
    */
   static #handleTransformDeleteFeature(mapId: string) {
     return (_sender: unknown, event: TransformDeleteFeatureEvent) => {
@@ -920,6 +965,8 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /**
    * The handler for transform selection change events
    * @param {string} mapId - The map Id
+   * @static
+   * @private
    */
   static #handleTransformSelectionChange(mapId: string) {
     return (_sender: unknown, event: TransformSelectionEvent) => {
@@ -1012,7 +1059,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Stops the editing interaction for all groups
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
+   * @return {void}
+   * @static
    */
   static stopEditing(mapId: string): void {
     const state = this.getDrawerState(mapId);
@@ -1032,7 +1081,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Function to toggle editing state
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
+   * @return {void}
+   * @static
    */
   static toggleEditing(mapId: string): void {
     const state = this.getDrawerState(mapId);
@@ -1050,7 +1101,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Starts snapping interactions
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
+   * @return {void}
+   * @static
    */
   static startSnapping(mapId: string): void {
     const state = this.getDrawerState(mapId);
@@ -1065,7 +1118,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Stops snapping interactions
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
+   * @return {void}
+   * @static
    */
   static stopSnapping(mapId: string): void {
     const state = this.getDrawerState(mapId);
@@ -1079,7 +1134,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Toggles snapping state
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
+   * @return {void}
+   * @static
    */
   static toggleSnapping(mapId: string): void {
     const state = this.getDrawerState(mapId);
@@ -1095,8 +1152,10 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Updates the style of any currently transforming features
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
    * @param {StyleProps} newStyle - The new style to apply
+   * @return {void}
+   * @static
    */
   static updateTransformingFeatureStyle(mapId: string, newStyle: StyleProps): void {
     const state = this.getDrawerState(mapId);
@@ -1167,8 +1226,10 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Delete a single drawing feature from the map
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
    * @param {string} featureId - The ID of the feature to be deleted
+   * @return {void}
+   * @static
    */
   static deleteSingleDrawing(mapId: string, featureId: string): void {
     const feature = this.#getFeatureById(mapId, featureId);
@@ -1185,7 +1246,10 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Clears all drawings from the map
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
+   * @param {boolean} [saveHistory=true] - Whether to save to history
+   * @return {void}
+   * @static
    */
   static clearDrawings(mapId: string, saveHistory: boolean = true): void {
     const state = this.getDrawerState(mapId);
@@ -1221,7 +1285,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Refreshes the interaction instances
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
+   * @return {void}
+   * @static
    */
   static refreshInteractionInstances(mapId: string): void {
     const state = this.getDrawerState(mapId);
@@ -1240,6 +1306,12 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     }
   }
 
+  /**
+   * Refreshes the snapping instance
+   * @param {string} mapId - The map identifier
+   * @return {void}
+   * @static
+   */
   static refreshSnappingInstance(mapId: string): void {
     const state = this.getDrawerState(mapId);
     if (!state) return;
@@ -1252,7 +1324,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Toggles the measurement overlays on the map
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
+   * @return {void}
+   * @static
    */
   static toggleHideMeasurements(mapId: string): void {
     const state = this.getDrawerState(mapId);
@@ -1282,7 +1356,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Downloads drawings as GeoJSON with embedded styles
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
+   * @return {void}
+   * @static
    */
   static downloadDrawings(mapId: string): void {
     const features = this.#getDrawingFeatures(mapId);
@@ -1364,8 +1440,10 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Uploads and loads drawings from GeoJSON file
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
    * @param {File} file - The GeoJSON file
+   * @return {void}
+   * @static
    */
   static uploadDrawings(mapId: string, file: File): void {
     const state = this.getDrawerState(mapId);
@@ -1478,9 +1556,12 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Saves an action to the drawer history.
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
    * @param {DrawerHistoryAction} action - The action to save
-   * @param {boolean} insertAtCurrentIndex - Whether to create the action as the next action / as a redo
+   * @param {boolean} [insertAtCurrentIndex=false] - Whether to create the action as the next action / as a redo
+   * @return {void}
+   * @static
+   * @private
    */
   static #saveToHistory(mapId: string, action: DrawerHistoryAction, insertAtCurrentIndex: boolean = false): void {
     if (!this.#drawerHistory.has(mapId)) {
@@ -1518,7 +1599,10 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Sets up keyboard event handling for undo/redo.
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
+   * @return {void}
+   * @static
+   * @private
    */
   static #setupKeyboardHandler(mapId: string): void {
     if (this.#keyboardHandlers.has(mapId)) return;
@@ -1548,8 +1632,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Undoes the last drawer action.
-   * @param {string} mapId - The map ID
-   * @returns {boolean} If the action was successful
+   * @param {string} mapId - The map identifier
+   * @return {boolean} If the action was successful
+   * @static
    */
   static undo(mapId: string): boolean {
     const state = this.getDrawerState(mapId);
@@ -1603,8 +1688,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Redoes the next drawer action.
-   * @param {string} mapId - The map ID
-   * @returns {boolean} If the action was successful
+   * @param {string} mapId - The map identifier
+   * @return {boolean} If the action was successful
+   * @static
    */
   static redo(mapId: string): boolean {
     const state = this.getDrawerState(mapId);
@@ -1670,8 +1756,11 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Re-add new features
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
    * @param {DrawerHistoryAction} action - The action that will be re-performed
+   * @return {void}
+   * @static
+   * @private
    */
   static #addFeaturesAction(mapId: string, action: DrawerHistoryAction): void {
     const viewer = MapEventProcessor.getMapViewer(mapId);
@@ -1701,9 +1790,12 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Re-delete deleted features
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
    * @param {DrawerHistoryAction} action - The action that will be re-performed
    * @throws {InvaliGeometryGroupIdError} If the provided geometry group id does not exist.
+   * @return {void}
+   * @static
+   * @private
    */
   static #deleteFeaturesAction(mapId: string, action: DrawerHistoryAction): void {
     const viewer = MapEventProcessor.getMapViewer(mapId);
@@ -1742,8 +1834,11 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Function that redoes a modify action
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
    * @param {DrawerHistoryAction} action - The action to be redone
+   * @return {void}
+   * @static
+   * @private
    */
   static #redoModifyAction(mapId: string, action: DrawerHistoryAction): void {
     const viewer = MapEventProcessor.getMapViewer(mapId);
@@ -1774,8 +1869,11 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Function that undoes a modify action
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
    * @param {DrawerHistoryAction} action - The action to be undone
+   * @return {void}
+   * @static
+   * @private
    */
   static #undoModifyAction(mapId: string, action: DrawerHistoryAction): void {
     const viewer = MapEventProcessor.getMapViewer(mapId);
@@ -1806,8 +1904,11 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Re-performs a select action. Note: deselect happens inside the transform-base undo
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
    * @param {DrawerHistoryAction} action - The select action to be applied
+   * @return {void}
+   * @static
+   * @private
    */
   static #selectFeaturesAction(mapId: string, action: DrawerHistoryAction): void {
     const state = this.getDrawerState(mapId);
@@ -1823,7 +1924,10 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Refreshes the undo / redo states depending on if we are currently editing
    * a feature since there is undo / redo functionality for both
    * drawer-event-processor and transform-base
-   * @param mapId - The map ID
+   * @param {string} mapId - The map identifier
+   * @return {void}
+   * @static
+   * @private
    */
   static #updateUndoRedoState(mapId: string): void {
     const state = this.getDrawerState(mapId);
@@ -1854,7 +1958,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Clean up resources for a map
-   * @param {string} mapId - The map ID
+   * @param {string} mapId - The map identifier
+   * @return {void}
+   * @static
    */
   static cleanup(mapId: string): void {
     // Remove keyboard handler

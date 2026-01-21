@@ -20,7 +20,8 @@ export abstract class NavBarPlugin extends AbstractPlugin {
 
   /**
    * Overridable function to create nav bar button props content
-   * @returns IconButtonPropsExtend The nav bar button props content
+   * @return {Record<string, TypeNavBarButtonConfig>} The nav bar button props content
+   * @protected
    */
   protected onCreateButtonConfigs(): Record<string, TypeNavBarButtonConfig> {
     logger.logInfo('NavBar Plugin - Default onCreateButtonProps');
@@ -53,6 +54,8 @@ export abstract class NavBarPlugin extends AbstractPlugin {
 
   /**
    * Called when a nav bar plugin is being added
+   * @return {void}
+   * @protected
    */
   protected onAdd(): void {
     // Create button props
@@ -87,6 +90,8 @@ export abstract class NavBarPlugin extends AbstractPlugin {
 
   /**
    * Called when a nav bar plugin is being removed
+   * @return {void}
+   * @protected
    */
   protected onRemove(): void {
     // Remove the button or button panel from the navbar

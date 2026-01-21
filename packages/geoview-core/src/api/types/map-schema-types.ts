@@ -992,7 +992,7 @@ export interface TypeAltitudeResponse {
  *
  * @param {TypeBaseVectorGeometryConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
  *
- * @returns {boolean} true if the type assertion is valid.
+ * @return {boolean} true if the type assertion is valid.
  */
 export const isLineStringVectorConfig = (verifyIfConfig: TypeBaseVectorGeometryConfig): verifyIfConfig is TypeLineStringVectorConfig => {
   return verifyIfConfig?.type === 'lineString';
@@ -1005,7 +1005,7 @@ export const isLineStringVectorConfig = (verifyIfConfig: TypeBaseVectorGeometryC
  *
  * @param {TypeBaseVectorGeometryConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
  *
- * @returns {boolean} true if the type assertion is valid.
+ * @return {boolean} true if the type assertion is valid.
  */
 export const isFilledPolygonVectorConfig = (verifyIfConfig: TypeBaseVectorGeometryConfig): verifyIfConfig is TypePolygonVectorConfig => {
   return verifyIfConfig?.type === 'filledPolygon';
@@ -1018,7 +1018,7 @@ export const isFilledPolygonVectorConfig = (verifyIfConfig: TypeBaseVectorGeomet
  *
  * @param {TypeBaseVectorGeometryConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
  *
- * @returns {boolean} true if the type assertion is valid.
+ * @return {boolean} true if the type assertion is valid.
  */
 export const isSimpleSymbolVectorConfig = (
   verifyIfConfig: TypeBaseVectorGeometryConfig
@@ -1033,7 +1033,7 @@ export const isSimpleSymbolVectorConfig = (
  *
  * @param {TypeBaseVectorGeometryConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
  *
- * @returns {boolean} true if the type assertion is valid.
+ * @return {boolean} true if the type assertion is valid.
  */
 export const isIconSymbolVectorConfig = (verifyIfConfig: TypeBaseVectorGeometryConfig): verifyIfConfig is TypeIconSymbolVectorConfig => {
   return verifyIfConfig?.type === 'iconSymbol';

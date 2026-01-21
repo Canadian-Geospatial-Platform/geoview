@@ -23,10 +23,14 @@ export abstract class AbstractEventProcessor {
   #subscriptionArr: Array<() => void> = [];
 
   /**
-   * Shortcut to get the store state for a given map id
-   *
-   * @param {string} mapId - The map id to retreive the state for
-   * @returns {IGeoviewState} the store state
+   * Retrieves the Zustand store state for the specified map.
+   * Provides synchronous access to the complete GeoView state including all store slices.
+   * Used by event processors to read and modify state in their static methods.
+   * @param {string} mapId - The unique identifier of the map to retrieve state for
+   * @return {IGeoviewState} The complete store state for the map
+   * @throws {GeoViewStoreOnMapNotFoundError} When no store exists for the given map ID
+   * @protected
+   * @static
    */
   protected static getState(mapId: string): IGeoviewState {
     // Get the GeoView Store for the given map
@@ -40,10 +44,15 @@ export abstract class AbstractEventProcessor {
   }
 
   /**
-   * Shortcut to get the store state for a given map id
-   *
-   * @param {string} mapId - The map id to retreive the state for
-   * @returns {IGeoviewState} the store state
+   * Asynchronously retrieves the Zustand store state for the specified map.
+   * Waits for the store to be available if it's still being created.
+   * Provides asynchronous access to the complete GeoView state including all store slices.
+   * Used by event processors during initialization when the store may not yet exist.
+   * @param {string} mapId - The unique identifier of the map to retrieve state for
+   * @return {Promise<IGeoviewState>} Promise resolving to the complete store state for the map
+   * @throws {GeoViewStoreOnMapNotFoundError} When no store exists for the given map ID after waiting
+   * @protected
+   * @static
    */
   protected static async getStateAsync(mapId: string): Promise<IGeoviewState> {
     // Get the GeoView Store for the given map
@@ -109,21 +118,25 @@ export abstract class AbstractEventProcessor {
   }
 
   /**
-   * Helper method to propagate in the layerDataArray in a batched manner.
-   * The propagation can be bypassed using 'layerPathBypass' parameter which tells the process to
-   * immediately batch out the array in the store for faster triggering of the state, for faster updating of the UI.
-   * @param {string} mapId - The map id
-   * @param {T[]} layerDataArray - The layer data array to hold in buffer during the batch
-   * @param {BatchedPropagationLayerDataArrayByMap<T>} batchPropagationObject - A reference to the BatchedPropagationLayerDataArrayByMap object used to hold all the layer data arrays in the buffer
-   * @param {number} timeDelayBetweenPropagations - The delay between actual propagations in the store
-   * @param {(layerDataArray: T[]) => void} onSetLayerDataArray - The store action callback used to store the layerDataArray in the actual store
-   * @param {string} traceProcessorIndication? - Simple parameter for logging purposes
-   * @param {string} layerPathBypass? - Indicates a layer path which, when processed, should bypass the buffer period and immediately trigger an update to the store
-   * @param {(layerPath: string) => void} onResetBypass? - The store action callback used to reset the layerPathBypass value in the store.
-   *                                                     This is used so that when the bypass occurred once, it's not occuring again for all subsequent checks in the period of batch propagations.
-   *                                                     It's up to the components to re-initialize the layerPathBypass at a certain time.
-   *                                                     When no onResetBypass is specified, once the bypass occurs, all subsequent propagations happen immediately.
-   * @returns {Promise<void>} Promise upon completion
+   * Batches layer data array propagations to the store for improved performance.
+   * This method:
+   * - Buffers layer data arrays to reduce store update frequency
+   * - Delays propagation to batch multiple updates together
+   * - Supports bypass mechanism for immediate propagation when needed
+   * - Propagates the most recent state after the delay period
+   * - Clears the buffer after propagation
+   * The bypass feature allows immediate store updates for specific layers (e.g., when query completes).
+   * @param {string} mapId - The unique identifier of the map
+   * @param {T[]} layerDataArray - The layer data array to buffer during batching
+   * @param {BatchedPropagationLayerDataArrayByMap<T>} batchPropagationObject - Reference to the batching buffer object holding all layer data arrays
+   * @param {number} timeDelayBetweenPropagations - Delay in milliseconds between actual store propagations
+   * @param {(layerDataArray: T[]) => void} onSetLayerDataArray - Store action callback to propagate the layerDataArray to the store
+   * @param {string} [traceProcessorIndication] - Optional identifier for logging and debugging purposes
+   * @param {string} [layerPathBypass] - Optional layer path that triggers immediate propagation when its query completes
+   * @param {(layerPath: string) => void} [onResetBypass] - Optional callback to reset the bypass flag after use; when omitted, all subsequent propagations become immediate
+   * @return {Promise<void>} Promise resolving when propagation is complete
+   * @protected
+   * @static
    */
   protected static async helperPropagateArrayStoreBatch<
     T extends TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry | TypeGeochartResultSetEntry,

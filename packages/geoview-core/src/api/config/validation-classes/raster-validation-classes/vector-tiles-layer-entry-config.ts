@@ -44,7 +44,7 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {TypeSourceTileInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   * @return {TypeSourceTileInitialConfig} The strongly-typed source configuration specific to this layer entry config.
    */
   override getSource(): TypeSourceTileInitialConfig {
     return super.getSource();
@@ -53,7 +53,7 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {TypeMetadataVectorTiles | undefined} The strongly-typed layer configuration specific to this layer entry config.
+   * @return {TypeMetadataVectorTiles | undefined} The strongly-typed layer configuration specific to this layer entry config.
    */
   override getServiceMetadata(): TypeMetadataVectorTiles | undefined {
     return super.getServiceMetadata() as TypeMetadataVectorTiles | undefined;
@@ -85,7 +85,7 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
   /**
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigVectorTilesClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
-   * @returns {string | undefined} The style url or undefined.
+   * @return {string | undefined} The style url or undefined.
    */
   static getClassOrTypeStyleUrl(layerConfig: ConfigVectorTilesClassOrType | undefined): string | undefined {
     if (layerConfig instanceof ConfigBaseClass) {

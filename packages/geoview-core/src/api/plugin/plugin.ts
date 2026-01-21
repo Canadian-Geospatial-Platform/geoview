@@ -18,7 +18,9 @@ import type { AbstractPlugin } from './abstract-plugin';
 export abstract class Plugin {
   /**
    * Load a package script on runtime
-   * @param {string} pluginId the package id to load
+   * @param {string} pluginId - The package id to load
+   * @return {Promise<typeof AbstractPlugin>} Promise resolving to the plugin class
+   * @static
    */
   static loadScript(pluginId: string): Promise<typeof AbstractPlugin> {
     return new Promise((resolve, reject) => {
@@ -56,8 +58,11 @@ export abstract class Plugin {
   /**
    * Utility function to call a promise callback resolve function once a plugin is actually available in window.geoviewPlugins property.
    * @param {string} pluginId - The plugin id to look for.
-   * @param {Function} resolve  - The resolve function to callback on.
+   * @param {Function} resolve - The resolve function to callback on.
    * @param {Function} reject - The reject function to callback on in case of failure.
+   * @return {void}
+   * @static
+   * @private
    */
   static #resolveWhenReady(pluginId: string, resolve: (plugin: typeof AbstractPlugin) => void, reject: (reason: Error) => void): void {
     whenThisThen(() => window.geoviewPlugins?.[pluginId])
@@ -73,12 +78,12 @@ export abstract class Plugin {
 
   /**
    * Add new plugin
-   *
    * @param {string} pluginId - The plugin id
    * @param {typeof AbstractPlugin} constructor - The plugin class (React Component)
    * @param {string} mapId - Id of map to add this plugin to
-   * @param {unknown} props - The plugin options
-   * @returns {Promise<AbstractPlugin>} A Promise which resolves with the Plugin instance.
+   * @param {unknown} [props] - The plugin options
+   * @return {Promise<AbstractPlugin>} A Promise which resolves with the Plugin instance.
+   * @static
    */
   static async addPlugin(pluginId: string, constructor: typeof AbstractPlugin, mapId: string, props?: unknown): Promise<AbstractPlugin> {
     // Get the MapViewer
@@ -187,9 +192,10 @@ export abstract class Plugin {
 
   /**
    * Delete a specific plugin loaded in a map
-   *
    * @param {string} pluginId - The id of the plugin to delete
    * @param {string} mapId - The map id to remove the plugin from
+   * @return {Promise<void>} Promise when the plugin is removed
+   * @static
    */
   static async removePlugin(pluginId: string, mapId: string): Promise<void> {
     // Get the plugin and remove it
@@ -200,8 +206,9 @@ export abstract class Plugin {
 
   /**
    * Delete all plugins loaded in a map
-   *
    * @param {string} mapId - The map id to remove the plugin from (if not provided then plugin will be removed from all maps)
+   * @return {Promise<void>} Promise when all plugins are removed
+   * @static
    */
   static async removePlugins(mapId: string): Promise<void> {
     const recordOfPlugins = await MapEventProcessor.getMapViewerPlugins(mapId);

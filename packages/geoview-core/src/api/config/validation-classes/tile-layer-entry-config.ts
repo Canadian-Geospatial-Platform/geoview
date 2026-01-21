@@ -24,7 +24,7 @@ export abstract class TileLayerEntryConfig extends AbstractBaseLayerEntryConfig 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {TypeSourceTileInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   * @return {TypeSourceTileInitialConfig} The strongly-typed source configuration specific to this layer entry config.
    */
   override getSource(): TypeSourceTileInitialConfig {
     return super.getSource();

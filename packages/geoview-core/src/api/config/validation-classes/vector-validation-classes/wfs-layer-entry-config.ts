@@ -27,7 +27,7 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {TypeMetadataWFS | undefined} The strongly-typed layer configuration specific to this layer entry config.
+   * @return {TypeMetadataWFS | undefined} The strongly-typed layer configuration specific to this layer entry config.
    */
   override getServiceMetadata(): TypeMetadataWFS | undefined {
     return super.getServiceMetadata() as TypeMetadataWFS | undefined;
@@ -36,7 +36,7 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
-   * @returns {TypeOutfields[] | undefined} The strongly-typed layer metadata specific to this layer entry config.
+   * @return {TypeOutfields[] | undefined} The strongly-typed layer metadata specific to this layer entry config.
    */
   override getLayerMetadata(): TypeOutfields[] | undefined {
     return super.getLayerMetadata() as TypeOutfields[] | undefined;
@@ -50,7 +50,7 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
    * Thrown when the WFS service metadata is missing or incomplete.
    * @throws {LayerEntryConfigLayerIdNotFoundError}
    * Thrown when no `FeatureType` entry matches this layer's `layerId`.
-   * @returns {TypeMetadataWFSFeatureTypeListFeatureType}
+   * @return {TypeMetadataWFSFeatureTypeListFeatureType}
    * The `FeatureType` metadata entry describing this layer, including supported
    * formats, bounding boxes, and feature schema.
    */
@@ -88,7 +88,7 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
    * an object with a `#text` property (common in XML-parsed responses),
    * the method returns the value of that property. Otherwise, it returns
    * `DefaultSRS` directly.
-   * @returns {string | undefined} The EPSG code or SRS string (e.g., 'EPSG:3857'),
+   * @return {string | undefined} The EPSG code or SRS string (e.g., 'EPSG:3857'),
    *          or `undefined` if the feature type or SRS cannot be determined.
    */
   getProjectionOfData(): string | undefined {
@@ -112,7 +112,7 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
    * Propagated from `getFeatureType()` if the metadata is missing or incomplete.
    * @throws {LayerEntryConfigLayerIdNotFoundError}
    * Propagated from `getFeatureType()` if the layer's feature type is not found.
-   * @returns {string[]}
+   * @return {string[]}
    * An array of MIME types / format identifiers supported by the WFS service for GetFeature responses.
    */
   getSupportedFormats(defaultWhenNone?: string): string[] {
@@ -148,7 +148,7 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Gets the version. Defaults to 1.3.0.
-   * @returns {string} The service version as read from the metadata attribute.
+   * @return {string} The service version as read from the metadata attribute.
    */
   getVersion(): string {
     // Redirect
@@ -157,7 +157,7 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Gets if the config has specified that we should fetch the styles from the WMS.
-   * @returns {boolean} True when the styles should be fetched from the WMS. True by default.
+   * @return {boolean} True when the styles should be fetched from the WMS. True by default.
    */
   getShouldFetchStylesFromWMS(): boolean {
     return (this.getGeoviewLayerConfig() as TypeWFSLayerConfig).fetchStylesOnWMS ?? true; // default: true
@@ -165,7 +165,7 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Gets the WMS styles layer id associated with this WFS layer entry config if any.
-   * @returns {string} The WMS styles layer id
+   * @return {string} The WMS styles layer id
    */
   getWmsStylesLayerId(): string {
     return this.layerEntryProps.wmsLayerId || this.layerId;

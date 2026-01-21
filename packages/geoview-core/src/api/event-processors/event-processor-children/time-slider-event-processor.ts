@@ -119,9 +119,10 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
 
   /**
    * Checks if the layer has time slider values. If there are, adds the time slider layer and applies filters.
-   * @param {string} mapId - The map id of the state to act on
+   * @param {string} mapId - The map identifier of the state to act on
    * @param {AbstractGVLayer} layer - The layer to add to the state
    * @param {TypeTimeSliderProps} [timesliderConfig] - Optional time slider configuration
+   * @return {void}
    * @static
    */
   static checkInitTimeSliderLayerAndApplyFilters(mapId: string, layer: AbstractGVLayer, timesliderConfig?: TypeTimeSliderProps): void {
@@ -146,11 +147,13 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
 
   /**
    * Adds a time slider layer to the state
-   * @param {string} mapId - The map id of the state to act on
+   * @param {string} mapId - The map identifier of the state to act on
    * @param {string} layerPath - The layer path of the layer to add to the state
    * @param {TypeTimeSliderValues} timeSliderValues - The time slider values to add and apply filters
+   * @return {void}
    * @throws {PluginStateUninitializedError} When the Time Slider plugin is uninitialized.
    * @static
+   * @private
    */
   static #addTimeSliderLayerAndApplyFilters(mapId: string, layerPath: string, timeSliderValues: TypeTimeSliderValues): void {
     // Get the timeslider state which is only initialized if the TimeSlider Plugin exists.

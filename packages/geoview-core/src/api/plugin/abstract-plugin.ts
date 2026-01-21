@@ -38,7 +38,8 @@ export abstract class AbstractPlugin {
    * Creates an instance of the plugin.
    * @param {string} pluginId - Unique identifier for the plugin instance.
    * @param {MapViewer} mapViewer - The map viewer
-   * @param {unknown | undefined} props - Optional plugin options and properties.
+   * @param {unknown} [props] - Optional plugin options and properties.
+   * @constructor
    */
   // GV Do not edit the constructor params without editing the plugin.ts dynamic constructor call looking like 'new (constructor as any)'
   constructor(pluginId: string, mapViewer: MapViewer, props: unknown | undefined) {
@@ -54,6 +55,7 @@ export abstract class AbstractPlugin {
   /**
    * Sets the config (which happens post creation)
    * @param {unknown} config - The config
+   * @return {void}
    */
   setConfig(config: unknown): void {
     this.#configObj = config;
@@ -61,7 +63,7 @@ export abstract class AbstractPlugin {
 
   /**
    * Gets the config
-   * @returns {unknown} The config
+   * @return {unknown} The config
    */
   getConfig(): unknown {
     return this.#configObj;
@@ -69,7 +71,7 @@ export abstract class AbstractPlugin {
 
   /**
    * Returns the language currently used by the 'translate' i18next component used by this Plugin
-   * @returns string The language, 'en' (English) by default.
+   * @return {string} The language, 'en' (English) by default.
    */
   displayLanguage(): string {
     return this.translate?.getI18n().language || 'en';
@@ -77,17 +79,19 @@ export abstract class AbstractPlugin {
 
   /**
    * Must override function to get the schema validator
+   * @return {unknown} The schema validator
    */
   abstract schema(): unknown;
 
   /**
    * Must override function to get the default config
+   * @return {unknown} The default config
    */
   abstract defaultConfig(): unknown;
 
   /**
    * Overridable function to get the translations object for the Plugin.
-   * @returns {Record<string, unknown>} The translations object
+   * @return {Record<string, unknown>} The translations object
    */
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   defaultTranslations(): Record<string, unknown> {
@@ -96,26 +100,35 @@ export abstract class AbstractPlugin {
 
   /**
    * Override this to do the actual adding
+   * @return {void}
+   * @protected
    */
   protected abstract onAdd(): void;
 
   /**
    * Optionally override this to do something when done adding
+   * @return {void}
+   * @protected
    */
   protected onAdded?(): void;
 
   /**
    * Override this to do the actual removal
+   * @return {void}
+   * @protected
    */
   protected abstract onRemove(): void;
 
   /**
    * Optionally override this to do something when done being removed
+   * @return {void}
+   * @protected
    */
   protected onRemoved?(): void;
 
   /**
    * This function is called when the plugin is added, used for finalizing initialization. See plugin.addPlugin for details.
+   * @return {void}
    */
   add(): void {
     // Log
@@ -133,6 +146,7 @@ export abstract class AbstractPlugin {
 
   /**
    * This function is called when the plugin is removed, used for clean up. See plugin.addPlugin for details.
+   * @return {void}
    */
   remove(): void {
     // Log

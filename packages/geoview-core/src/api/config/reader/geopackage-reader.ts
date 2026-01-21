@@ -54,8 +54,9 @@ export class GeoPackageReader {
   /**
    * Generates a WKB layer config from a GeoPackage.
    * @param {GeoPackageLayerConfig} layerConfig - the config to convert
-   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
-   * @returns {Promise<TypeWkbLayerConfig>} A WKB layer config
+   * @param {AbortSignal} [abortSignal] - Abort signal to handle cancelling of the process.
+   * @return {Promise<TypeWkbLayerConfig>} A WKB layer config
+   * @static
    */
   static async createLayerConfigFromGeoPackage(layerConfig: GeoPackageLayerConfig, abortSignal?: AbortSignal): Promise<TypeWkbLayerConfig> {
     // Set up WKB layer config so it can be used in layer entry configs
@@ -191,8 +192,9 @@ export class GeoPackageReader {
   /**
    * Fetches a GeoPackage and creates layer data from it.
    * @param {string} url - The URL of the GeoPackage.
-   * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
-   * @returns {Promise<LayerData[]>} Promise of the layer data.
+   * @param {AbortSignal} [abortSignal] - Abort signal to handle cancelling of the process.
+   * @return {Promise<GeoPackageLayerData[]>} Promise of the layer data.
+   * @static
    * @private
    */
   static async #getGeoPackageData(url: string, abortSignal?: AbortSignal): Promise<GeoPackageLayerData[]> {
@@ -271,7 +273,8 @@ export class GeoPackageReader {
   /**
    * Creates a GeoView style config from the provided SLD style.
    * @param {string | number | Uint8Array} sld - The SLD style associated with the layer
-   * @returns {TypeLayerStyleConfig} The created style config
+   * @return {TypeLayerStyleConfig} The created style config
+   * @static
    * @private
    */
   static #processGeopackageStyle(sld: string | number | Uint8Array): TypeLayerStyleConfig {
@@ -549,8 +552,9 @@ export class GeoPackageReader {
 
   /**
    * Creates a feature info config from provided fields.
-   * @param {initSqlJs.ParamsObject | undefined} fields An array of field names and its aliases.
-   * @returns {TypeFeatureInfoLayerConfig} The feature info config.
+   * @param {initSqlJs.ParamsObject | undefined} fields - An array of field names and its aliases.
+   * @return {TypeFeatureInfoLayerConfig} The feature info config.
+   * @static
    * @private
    */
   static #processFeatureInfoConfig(fields: initSqlJs.ParamsObject | undefined): TypeFeatureInfoLayerConfig {
@@ -594,7 +598,9 @@ export class GeoPackageReader {
   /**
    * Create a source configuration for the vector layer.
    * @param {Uint8Array} gpkgBinGeom - Binary geometry array to be parsed.
-   * @returns {Uint8Array} A subarray of inputted binary geometry array.
+   * @return {Uint8Array} A subarray of inputted binary geometry array.
+   * @static
+   * @private
    */
   static #parseGpkgGeom(gpkgBinGeom: Uint8Array): Uint8Array {
     const flags = gpkgBinGeom[3];

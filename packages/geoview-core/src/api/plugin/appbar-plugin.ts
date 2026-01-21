@@ -18,8 +18,8 @@ export abstract class AppBarPlugin extends AbstractPlugin {
 
   /**
    * Overrides the get config
+   * @return {AppBarPluginConfig} The config
    * @override
-   * @returns {AppBarPluginConfig} The config
    */
   override getConfig(): AppBarPluginConfig {
     return super.getConfig() as AppBarPluginConfig;
@@ -27,7 +27,8 @@ export abstract class AppBarPlugin extends AbstractPlugin {
 
   /**
    * Overridable function to create app bar button props content
-   * @returns IconButtonPropsExtend The app bar button props content
+   * @return {IconButtonPropsExtend} The app bar button props content
+   * @protected
    */
   protected onCreateButtonProps(): IconButtonPropsExtend {
     // Override this to create the button props..
@@ -49,7 +50,8 @@ export abstract class AppBarPlugin extends AbstractPlugin {
 
   /**
    * Overridable function to create app bar props content
-   * @returns TypePanelProps The app bar props content
+   * @return {TypePanelProps} The app bar props content
+   * @protected
    */
   protected onCreateContentProps(): TypePanelProps {
     // Override this to create the panel props..
@@ -65,7 +67,8 @@ export abstract class AppBarPlugin extends AbstractPlugin {
 
   /**
    * Overridable function to create app bar actual content
-   * @returns JSX.Element The app bar actual content
+   * @return {JSX.Element} The app bar actual content
+   * @protected
    */
   protected onCreateContent(): JSX.Element {
     // Override this to create panel..
@@ -76,6 +79,8 @@ export abstract class AppBarPlugin extends AbstractPlugin {
 
   /**
    * Called when an app bar plugin is being added
+   * @return {void}
+   * @protected
    */
   protected onAdd(): void {
     // Create button props
@@ -93,6 +98,8 @@ export abstract class AppBarPlugin extends AbstractPlugin {
 
   /**
    * Called when an app bar plugin is being removed
+   * @return {void}
+   * @protected
    */
   protected onRemove(): void {
     // If cgpv exists

@@ -11,7 +11,7 @@ export abstract class MapPlugin extends AbstractPlugin {
 
   /**
    * Overridable function to create map plugin actual content
-   * @returns JSX.Element The map plugin actual content
+   * @returns {JSX.Element} The map plugin actual content
    */
   protected onCreateContent(): JSX.Element {
     // Override this to create panel..
@@ -22,6 +22,8 @@ export abstract class MapPlugin extends AbstractPlugin {
 
   /**
    * Called when a map plugin is being added
+   * @return {void}
+   * @protected
    */
   protected onAdd(): void {
     // create the swiper container and insert it after top link
@@ -38,6 +40,8 @@ export abstract class MapPlugin extends AbstractPlugin {
 
   /**
    * Called when a map plugin is being removed
+   * @return {void}
+   * @protected
    */
   protected onRemove(): void {
     // Unmount the Map Plugin
