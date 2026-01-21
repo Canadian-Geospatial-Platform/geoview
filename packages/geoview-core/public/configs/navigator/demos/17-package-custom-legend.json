@@ -8,7 +8,60 @@
       "basemapId": "transport",
       "shaded": false,
       "labeled": true
-    }
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "wind-speed-direction",
+        "geoviewLayerName": "Wind Speed Direction (NOAA METAR)",
+        "geoviewLayerType": "esriFeature",
+        "metadataAccessPath": "https://services9.arcgis.com/RHVPKKiFTONKtxq3/ArcGIS/rest/services/NOAA_METAR_current_wind_speed_direction_v1/FeatureServer",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "initialSettings": {
+              "states": {
+                "visible": true,
+                "opacity": 1
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "active-fires",
+        "geoviewLayerName": "Active Fires",
+        "geoviewLayerType": "ogcWms",
+        "metadataAccessPath": "https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "activefires_current",
+            "initialSettings": {
+              "states": {
+                "visible": true,
+                "opacity": 1
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "cwfis-bigfoot",
+        "geoviewLayerName": "CWFIS BigFoot (restricted)",
+        "geoviewLayerType": "ogcWms",
+        "metadataAccessPath": "https://cwfis.cfs.nrcan.gc.ca/service/data/ows?service=wms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "fireops:bigfoot_fgp_current",
+            "initialSettings": {
+              "states": {
+                "visible": false,
+                "opacity": 0.8
+              }
+            }
+          }
+        ]
+      }
+    ]
   },
   "theme": "geo.ca",
   "components": ["north-arrow", "overview-map"],
@@ -22,25 +75,35 @@
     {
       "custom-legend": {
         "isOpen": true,
+        "title": {
+          "en": "Wild Fire Legend",
+          "fr": "Légende du feu sauvage"
+          },
         "legendList": [
           {
-            "legendTitle": "Urban Areas",
-            "symbolUrl": "https://raw.githubusercontent.com/CanFrenchGIS/sample-assets/main/legend/urban.png",
-            "description": "Built-up zones and cities"
+            "type": "header",
+            "text": {
+              "en": "Legend Header",
+              "fr": "En-tête de légende"
+            }
           },
           {
-            "legendTitle": "Water Bodies",
-            "symbolUrl": "https://raw.githubusercontent.com/CanFrenchGIS/sample-assets/main/legend/water.png",
-            "description": "Lakes and rivers"
+            "type": "legend",
+            "layerPath": "wind-speed-direction/0"
           },
           {
-            "legendTitle": "Forest",
-            "symbolUrl": "https://raw.githubusercontent.com/CanFrenchGIS/sample-assets/main/legend/forest.png"
-          },
-          {
-            "legendTitle": "Roads",
-            "symbolUrl": "https://raw.githubusercontent.com/CanFrenchGIS/sample-assets/main/legend/road.png",
-            "description": "Primary and secondary roads"
+            "type": "group",
+            "text": "Wildfire Layers",
+            "children": [
+              {
+                "type": "legend",
+                "layerPath": "active-fires/activefires_current"
+              },
+              {
+                "type": "legend",
+                "layerPath": "cwfis-bigfoot/fireops:bigfoot_fgp_current"
+              }
+            ]
           }
         ],
         "version": "1.0"

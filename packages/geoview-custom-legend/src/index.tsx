@@ -3,8 +3,8 @@ import { AppBarPlugin } from 'geoview-core/api/plugin/appbar-plugin';
 import { LegendIcon } from 'geoview-core/ui/icons';
 import type { IconButtonPropsExtend } from 'geoview-core/ui/icon-button/icon-button';
 import type { TypePanelProps } from 'geoview-core/ui/panel/panel-types';
-import type { TypeLegendProps } from './custom-legend';
-import { CustomLegendPanel } from './custom-legend';
+import type { TypeCustomLegendConfig } from './custom-legend-types';
+import { CustomLegendPanel } from './custom-legend-panel';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-custom-legend.json';
 
@@ -35,15 +35,19 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
    * @returns {Record<string, unknown>} - The translations object for the particular Plugin.
    */
   override defaultTranslations(): Record<string, unknown> {
+    const config = this.getConfig();
+    const textEn = typeof config.title === 'string' ? config.title : config.title?.en || 'Legend';
+    const textFr = typeof config.title === 'string' ? config.title : config.title?.fr || 'Légende';
+
     return {
       en: {
         CustomLegend: {
-          title: 'Custom Legend',
+          title: textEn,
         },
       },
       fr: {
         CustomLegend: {
-          title: 'Légende personnalisée',
+          title: textFr,
         },
       },
     };
@@ -51,11 +55,11 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
 
   /**
    * Overrides the getConfig in order to return the right type.
-   * @returns {TypeLegendProps} The Geochart config
+   * @returns {TypeCustomLegendConfig} The Geochart config
    */
-  override getConfig(): TypeLegendProps {
+  override getConfig(): TypeCustomLegendConfig {
     // Redirect
-    return super.getConfig() as TypeLegendProps;
+    return super.getConfig() as TypeCustomLegendConfig;
   }
 
   override onCreateButtonProps(): IconButtonPropsExtend {
@@ -66,6 +70,7 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
       tooltipPlacement: 'right',
       children: <LegendIcon />,
       visible: true,
+      'aria-label': 'Custom Legend',
     };
   }
 
