@@ -19,10 +19,10 @@ export class LayerFilters {
 
   /**
    * Constructor
-   * @param {string} initialFilter - The initial filter applied at the base level
-   * @param {string} classFilter - The filter regarding the class renderers
-   * @param {string} dataFilter - The filter regarding data
-   * @param {string} timeFilter - The filter regarding time
+   * @param {string} [initialFilter] - The initial filter applied at the base level
+   * @param {string} [classFilter] - The filter regarding the class renderers
+   * @param {string} [dataFilter] - The filter regarding data
+   * @param {string} [timeFilter] - The filter regarding time
    */
   constructor(initialFilter?: string, classFilter?: string, dataFilter?: string, timeFilter?: string) {
     // Keep attributes

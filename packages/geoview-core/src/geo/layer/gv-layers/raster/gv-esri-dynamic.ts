@@ -575,7 +575,7 @@ export class GVEsriDynamic extends AbstractGVRaster implements FilterCapable {
   }
 
   /**
-s   * Applies a time filter on a date range.
+   * Applies a time filter on a date range.
    * @param {string} date1 - The start date
    * @param {string} date2 - The end date
    */
