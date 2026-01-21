@@ -30,7 +30,7 @@ export function HeaderItem({ item, sxClasses }: HeaderItemProps): JSX.Element | 
       <Typography
         variant="h5"
         sx={{
-          fontSize: item.fontSize ? `${item.fontSize}px` : '18px',
+          fontSize: item.fontSize ? `${item.fontSize}` : '1.25rem',
           fontWeight: item.fontWeight || 'bold',
           padding: '8px 16px',
         }}

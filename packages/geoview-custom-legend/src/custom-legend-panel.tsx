@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 
-import { getSxClassesMain, getSxClasses } from './custom-legend-style';
+import { getSxClasses } from './custom-legend-style';
 import type { TypeCustomLegendConfig } from './custom-legend-types';
 import { generateLegendItemId } from './custom-legend-types';
 import { LegendItem } from './components';
@@ -27,12 +27,11 @@ export function CustomLegendPanel(props: CustomLegendPanelProps): JSX.Element {
 
   const theme = ui.useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-  const legendSxMain = getSxClassesMain();
 
   const appDisplayLanguage = useAppDisplayLanguage();
 
   return (
-    <Box sx={{ background: theme.palette.geoViewColor.bgColor.main, ...legendSxMain.container }}>
+    <Box sx={sxClasses.container}>
       {legendList.map((item, index) => {
         const itemId = generateLegendItemId(item, index, appDisplayLanguage);
         return <LegendItem key={itemId} item={item} sxClasses={sxClasses} itemPath={itemId} />;
