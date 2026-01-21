@@ -1541,6 +1541,13 @@ export abstract class WfsRenderer {
           const val = isNumeric(v) ? Number(v) : v;
           return equalTo(property, val);
         });
+
+        // OGC Or requires at least 2 operands
+        if (equals.length === 1) {
+          return equals[0];
+        }
+
+        // More than 1 operand, use the 'or' indeed
         return or(...equals);
       }
       case 'like': {

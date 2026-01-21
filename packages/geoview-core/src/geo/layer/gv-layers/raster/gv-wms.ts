@@ -956,6 +956,8 @@ export class GVWMS extends AbstractGVRaster implements FilterCapable {
     // Parse
     let currentDataFilter: string | undefined;
     let currentDatetimeFilter: string | undefined;
+    let newDataFilter: string | undefined;
+    let newDatetimeFilter: string | undefined;
     try {
       // Get the current data filter
       currentDataFilter = source.getParams()['FILTER'];
@@ -966,16 +968,20 @@ export class GVWMS extends AbstractGVRaster implements FilterCapable {
         sourceParams.FILTER = '';
 
         // Get the data filters if any
-        const dataFilters = filter?.getDataFilters();
+        newDataFilter = filter?.getDataFilters();
 
         // If filtering
-        if (dataFilters) {
+        if (newDataFilter) {
           // TODO: CLEAN - Leaving the comment here for now, to indicate we can also do it more simply when it comes to serverType() === qgis, but 'like' operations fail.
           // Use regular Filter
           // sourceParams.FILTER = layerConfig.layerId + ':' + dataFilters;
 
           // Build a OGC Filter for the filter
-          const ogcXmlFilter = WfsRenderer.sqlToOlFilterXml(dataFilters, layerConfig.getVersion(), layerConfig.getOutfields()?.[0]?.name!);
+          const ogcXmlFilter = WfsRenderer.sqlToOlFilterXml(
+            newDataFilter,
+            layerConfig.getVersion(),
+            layerConfig.getOutfields()?.[0]?.name!
+          );
 
           // Wrap the ogc filter request
           sourceParams.FILTER = WfsRenderer.wrapOGCFilter(ogcXmlFilter, 'wms', layerConfig.getVersion());
@@ -983,10 +989,10 @@ export class GVWMS extends AbstractGVRaster implements FilterCapable {
       }
 
       // Check the time filter
-      const timeFilter = filter?.getTimeFilter();
-      if (timeFilter) {
+      newDatetimeFilter = filter?.getTimeFilter();
+      if (newDatetimeFilter) {
         // Read the date filter
-        const queryElements = timeFilter.split(/(?<=\b)\s*=/);
+        const queryElements = newDatetimeFilter.split(/(?<=\b)\s*=/);
 
         // If there's a specific filter
         if (queryElements.length > 1) {
@@ -1024,8 +1030,8 @@ export class GVWMS extends AbstractGVRaster implements FilterCapable {
       throw new LayerInvalidLayerFilterError(
         layerConfig.layerPath,
         layerConfig.getLayerNameCascade(),
-        sourceParams.FILTER!,
-        currentDataFilter,
+        `data: ${newDataFilter}, datetime: ${newDatetimeFilter}`,
+        `data: ${currentDataFilter}, datetime: ${currentDatetimeFilter}`,
         formatError(error)
       );
     }

@@ -734,7 +734,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {TypeLegendItem} item - The item to change.
    */
   static toggleItemVisibility(mapId: string, layerPath: string, item: TypeLegendItem): void {
-    MapEventProcessor.getMapViewerLayerAPI(mapId).setItemVisibility(layerPath, item, !item.isVisible);
+    MapEventProcessor.getMapViewerLayerAPI(mapId).setItemVisibility(layerPath, item, !item.isVisible, true);
   }
 
   /**
@@ -764,6 +764,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       // Shadow-copy this specific array so that the hooks are triggered for this items array and this one only
       layer.items = [...layer.items];
     }
+
+    // Now that it's done, apply the layer visibility
+    MapEventProcessor.applyLayerFilters(mapId, layerPath);
 
     // Set updated legend layers
     this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);

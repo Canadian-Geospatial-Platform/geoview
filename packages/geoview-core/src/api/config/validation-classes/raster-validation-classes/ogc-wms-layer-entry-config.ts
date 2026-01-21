@@ -115,11 +115,11 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   // #region METHODS
 
   /**
-   * Gets the version. Defaults to 1.3.0.
+   * Gets the version. Defaults to 1.1.0.
    * @returns {string} The service version as read from the metadata attribute.
    */
   getVersion(): string {
-    return this.getServiceMetadata()?.version || '1.3.0';
+    return this.getServiceMetadata()?.version || '1.1.0';
   }
 
   /**
