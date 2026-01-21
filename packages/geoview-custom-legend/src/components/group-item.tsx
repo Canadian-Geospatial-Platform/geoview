@@ -39,7 +39,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
   return (
     <Box sx={sxClasses.groupItem}>
       <Box sx={sxClasses.groupHeader}>
-        <Typography variant="subtitle1" sx={{ fontWeight: 'bold', flex: 1 }}>
+        <Typography variant="h5" sx={{ fontWeight: 'bold', flex: 1 }}>
           {groupText}
         </Typography>
         <IconButton onClick={handleToggle} size="small" aria-label={collapsed ? 'Expand group' : 'Collapse group'}>
