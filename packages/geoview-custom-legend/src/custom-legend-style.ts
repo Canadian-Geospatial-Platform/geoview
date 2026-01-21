@@ -1,5 +1,3 @@
-import type { Theme } from '@mui/material/styles';
-
 type SxClasses = Record<string, object>;
 
 /**
@@ -24,7 +22,8 @@ export const getSxClassesMain = (): SxClasses => ({
  * @param {Theme} theme the theme object
  * @returns {Object} the sx classes object
  */
-export const getSxClasses = (theme: Theme): SxClasses => ({
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const getSxClasses = (theme: any): SxClasses => ({
   title: {
     textAlign: 'left',
     fontWeight: '600',
