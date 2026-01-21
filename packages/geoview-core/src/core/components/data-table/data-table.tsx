@@ -50,6 +50,7 @@ import { getSxClasses } from './data-table-style';
 import { useLightBox } from '@/core/components/common';
 import { NUMBER_FILTER, DATE_FILTER, STRING_FILTER } from '@/core/utils/constant';
 import type { DataTableProps, ColumnsType } from './data-table-types';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 /**
  * Build Data table from map.
@@ -59,7 +60,7 @@ import type { DataTableProps, ColumnsType } from './data-table-types';
  * @returns {JSX.Element} Data table as react element.
  */
 
-function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
+function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Element {
   const { t } = useTranslation();
 
   const sxtheme = useTheme();
@@ -97,6 +98,9 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
   // #endregion
 
   const { enableFocusTrap } = useUIStoreActions();
+
+  const mapId = useGeoViewMapId();
+  const tableDetailsButtonId = `table-details-${containerType}-${mapId}`;
 
   const handleDensityChange = (updaterOrValue: MRTDensityState | ((prevState: MRTDensityState) => MRTDensityState)): void => {
     setDensity(updaterOrValue);
@@ -424,7 +428,7 @@ function DataTable({ data, layerPath }: DataTableProps): JSX.Element {
             tooltipPlacement="top"
             onClick={() => {
               setSelectedFeature(feature);
-              enableFocusTrap({ activeElementId: 'featureDetailDataTable', callbackElementId: 'table-details' });
+              enableFocusTrap({ activeElementId: 'featureDetailDataTable', callbackElementId: tableDetailsButtonId });
             }}
           >
             <InfoOutlinedIcon />
