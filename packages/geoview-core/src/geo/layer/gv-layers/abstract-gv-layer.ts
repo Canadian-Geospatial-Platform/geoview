@@ -48,6 +48,7 @@ import { NotImplementedError, NotSupportedError } from '@/core/exceptions/core-e
 import { LayerNotQueryableError, LayerStatusErrorError } from '@/core/exceptions/layer-exceptions';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { GVVectorSource } from '@/geo/layer/source/vector-source';
+import { LayerFilters } from '@/core/types/layer-filters';
 import { delay, whenThisThen } from '@/core/utils/utilities';
 
 /**
@@ -75,6 +76,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
   /** Style to apply to the vector layer. */
   #layerStyle?: TypeLayerStyleConfig;
+
+  /** The layer filters currently applied on the layer, if any */
+  #layerFilters: LayerFilters;
 
   /** Indicates if the layer is currently queryable */
   #queryable: boolean;
@@ -131,6 +135,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     // If there is a layer style in the config, set it in the layer
     const style = layerConfig.getLayerStyle();
     if (style) this.setStyle(style);
+
+    // Create the layer filters object to empty. It'll be initialized properly later via 'initGVLayer' once the object is done being created.
+    this.#layerFilters = new LayerFilters();
   }
 
   // #region OVERRIDES
@@ -194,10 +201,11 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param {OLProjection} outProjection - The output projection for the extent.
    * @param {string} outfield - ID field to return for services that require a value in outfields.
    * @returns {Promise<Extent>} The extent of the features, if available
+   * @throws {NotImplementedError} When the function isn't overridden by the children class.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
-    // Not implemented
+    // Crash on purpose
     throw new NotImplementedError(`onGetExtentFromFeatures function not implemented for ${this.getLayerPath()}`);
   }
 
@@ -377,6 +385,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
    * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   * @throws {NotImplementedError} When the function isn't overridden by the children class.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getAllFeatureInfo(map: OLMap, abortController?: AbortController): Promise<TypeFeatureInfoEntry[]> {
@@ -409,6 +418,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   * @throws {NotImplementedError} When the function isn't overridden by the children class.
    */
   protected getFeatureInfoAtCoordinate(
     map: OLMap,
@@ -429,6 +439,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   * @throws {NotImplementedError} When the function isn't overridden by the children class.
    */
   protected getFeatureInfoAtLonLat(
     map: OLMap,
@@ -449,6 +460,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   * @throws {NotImplementedError} When the function isn't overridden by the children class.
    */
   protected getFeatureInfoUsingBBox(
     map: OLMap,
@@ -469,6 +481,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   * @throws {NotImplementedError} When the function isn't overridden by the children class.
    */
   protected getFeatureInfoUsingPolygon(
     map: OLMap,
@@ -514,9 +527,19 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     // By default, nothing to do here, check for overrides in children classes
   }
 
+  /**
+   * Overridable function to apply a view filter on the current layer.
+   * @param {LayerFilters} [filter] - The elaborate layer filters to be used.
+   * @returns {void}
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/class-methods-use-this
+  protected onSetLayerFilters(filter?: LayerFilters): void {
+    // Override this to set the filters on the layer
+  }
+
   // #endregion OVERRIDES
 
-  // #region METHODS
+  // #region PUBLIC METHODS
 
   /**
    * Initializes the GVLayer. This function checks if the source is ready and if so it calls onLoaded() to pursue initialization of the layer.
@@ -629,6 +652,22 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   }
 
   /**
+   * Builds and returns a filter expression derived from the layer's style configuration.
+   * This method delegates the filter extraction logic to {@link GeoviewRenderer.getFilterFromStyle},
+   * using the current layer configuration (outfields, style, and style settings).
+   * @returns {string | undefined} A filter expression string if one can be derived from the style,
+   * or `undefined` if no filter applies.
+   */
+  getFilterFromStyle(): string | undefined {
+    // Redirect
+    return GeoviewRenderer.getFilterFromStyle(
+      this.getLayerConfig().getOutfields(),
+      this.getLayerConfig().getLayerStyle(), // TODO: Use this.getStyle() once we progress in the refactoring, right now leaving it as-is was..
+      this.getLayerConfig().getLayerStyleSettings()
+    );
+  }
+
+  /**
    * Gets the bounds for the layer in the given projection.
    * @param {OLProjection} projection - The projection to get the bounds into.
    * @param {number} stops - The number of stops to use to generate the extent.
@@ -731,13 +770,55 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   }
 
   /**
-   * Gets the layerFilter that is associated to the layer.
-   * @returns {string | undefined} The filter associated to the layer or undefined.
+   * Gets the layer filters associated to the layer.
+   * @returns {LayerFilters} The filter associated to the layer or undefined.
    */
-  getLayerFilter(): string | undefined {
+  getLayerFilters(): LayerFilters {
+    // Return it
+    return this.#layerFilters;
+  }
+
+  /**
+   * Sets the layer filters associated to the layer.
+   * @param {LayerFilters | undefined} layerFilters - The filter layers associated to the layer or undefined.
+   * @returns {void}
+   */
+  // TODO: ALEX - Can we remove the refresh here and all overrides?
+  setLayerFilters(layerFilters: LayerFilters, refresh: boolean | undefined): void {
+    // Keep it
+    this.#layerFilters = layerFilters;
+
     // Redirect
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (this.getLayerConfig() as any)?.layerFilter;
+    this.onSetLayerFilters(layerFilters);
+
+    // If refreshing
+    if (refresh) {
+      // Refresh
+      this.getOLLayer().changed();
+    }
+
+    // Emit event
+    // TODO: LayerApi could listen to that event in case we need to update the store.
+    this.emitLayerFilterApplied({
+      filter: layerFilters?.getAllFilters() ?? '',
+    });
+  }
+
+  /**
+   * Applies a time filter on a date range.
+   * @param {string} date1 - The start date
+   * @param {string} date2 - The end date
+   */
+  setLayerFiltersDate(date1: string, date2: string): void {
+    // Get the time dimension field
+    const { field } = this.getTimeDimension()!;
+
+    // Tweak the current layer filters to modify the time filter (create a new layer filters if none currently exists)
+    const layerFilters = this.getLayerFilters();
+    layerFilters.setTimeFilter(`${field} >= date '${date1}' and ${field} <= date '${date2}'`);
+
+    // Redirect
+    this.setLayerFilters(layerFilters, true);
   }
 
   /**
@@ -892,7 +973,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param {number} timeout - A timeout for the period to wait for. Defaults to 30,000 ms.
    * @returns {Promise<void>} A Promise that resolves when the layer style has been applied.
    */
-  waitStyleApplied(timeout: number = 30000): Promise<TypeLayerStyleConfig | undefined> {
+  waitStyleApplied(timeout: number = 30000): Promise<TypeLayerStyleConfig> {
     // Create a promise and wait until the layer is first loaded
     return whenThisThen(() => {
       // If the layer is in error, abort the waiting
@@ -902,9 +983,13 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       }
 
       // If the layer was first loaded
-      return this.getStyle();
+      return this.getStyle()!;
     }, timeout);
   }
+
+  // #endregion PUBLIC METHODS
+
+  // #region PROTECTED METHODS
 
   /**
    * Gets and formats the value of the field with the name passed in parameter. Vector GeoView layers convert dates to milliseconds
@@ -945,7 +1030,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       true,
       (layerConfig.getLayerMetadata() as TypeLayerMetadataEsri | TypeLayerMetadataVector)?.fields,
       this.getStyle(),
-      layerConfig.getFilterEquation(),
+      this.getLayerFilters()?.getFilterEquation(),
       this.getFieldType.bind(this),
       this.onGetFieldDomain.bind(this),
       this.getFieldValue.bind(this)
@@ -979,12 +1064,16 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     this.#emitLayerMessage({ messageKey, messageParams, messageType, notification });
   }
 
+  // #endregion PROTECTED METHODS
+
+  // #region PRIVATE METHODS
+
   /**
    * Extracts the relevant image, tile, or dispatching_ object from the event based on its structure.
    * This method attempts to find the corresponding object (`image`, `tile`, or `dispatching_`) in the event.
    * @param event - The event object, which could contain either an `image`, `tile`, or `dispatching_` property.
-   * @returns {unknown} - The extracted object (either image, tile, or dispatching_).
-   * @throws {NotImplementedError} - If the event doesn't match the expected structures.
+   * @returns {any} - The extracted object (either image, tile, or dispatching_).
+   * @throws {NotSupportedError} - If the event doesn't match the expected structures.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   #findWrapperBetweenEventHandlers(event: unknown): any {
@@ -1005,7 +1094,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     }
 
     // Throw error
-    throw new NotImplementedError(`Not implemented event wrapper for layer ${this.getLayerPath()}`);
+    throw new NotSupportedError(`Not supported event wrapper for layer ${this.getLayerPath()}`);
   }
 
   /**
@@ -1075,7 +1164,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     }
   }
 
-  // #endregion METHODS
+  // #endregion PRIVATE METHODS
 
   // #region EVENTS
 

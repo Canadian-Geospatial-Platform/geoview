@@ -34,6 +34,7 @@ import type {
   TypeAliasLookup,
   TypeValidMapProjectionCodes,
   codedValueType,
+  TypeOutfields,
 } from '@/api/types/map-schema-types';
 import {
   isFilledPolygonVectorConfig,
@@ -74,6 +75,10 @@ const LEGEND_CANVAS_HEIGHT = 50;
 let colorCount = 0;
 
 export abstract class GeoviewRenderer {
+  // The default filter when all should be included
+  static DEFAULT_FILTER_1EQUALS1: string = '(1=1)';
+  static DEFAULT_FILTER_1EQUALS0: string = '(1=0)';
+
   /**
    * Get the default color using the default color index.
    *
@@ -1903,7 +1908,8 @@ export abstract class GeoviewRenderer {
       if (styleEntry !== undefined && (legendFilterIsOff || styleEntry.visible !== false))
         return this.processSimplePoint(styleEntry.settings, feature, { visualVariables });
 
-      // TODO: Check - Why look for styleSettings.info.length - 1?
+      // When using hasDefault, the last position is determinant in figuring out the style of an unprocessed feature
+      // TODO: This should be changed, because some services will not have the 'others' in their last position
       if (
         styleEntry === undefined &&
         hasDefault &&
@@ -1940,7 +1946,8 @@ export abstract class GeoviewRenderer {
       if (styleEntry !== undefined && (legendFilterIsOff || styleEntry.visible !== false))
         return this.processSimpleLineString(styleEntry.settings, feature, { visualVariables });
 
-      // TODO: Check - Why look for info.length - 1?
+      // When using hasDefault, the last position is determinant in figuring out the style of an unprocessed feature
+      // TODO: This should be changed, because some services will not have the 'others' in their last position
       if (styleEntry === undefined && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false))
         return this.processSimpleLineString(info[info.length - 1].settings, feature, { visualVariables });
     }
@@ -1972,7 +1979,8 @@ export abstract class GeoviewRenderer {
       if (styleEntry !== undefined && (legendFilterIsOff || styleEntry.visible !== false))
         return this.processSimplePolygon(styleEntry.settings, feature, { visualVariables });
 
-      // TODO: Check - Why look for info.length - 1?
+      // When using hasDefault, the last position is determinant in figuring out the style of an unprocessed feature
+      // TODO: This should be changed, because some services will not have the 'others' in their last position
       if (styleEntry === undefined && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false))
         return this.processSimplePolygon(info[info.length - 1].settings, feature, { visualVariables });
     }
@@ -2101,8 +2109,8 @@ export abstract class GeoviewRenderer {
         return this.processSimplePoint(foundClassBreakInfo.settings, feature, { visualVariables });
       }
 
-      // If not found a class break renderer that works, but we want default values
-      // TODO: Check - I'm not sure we should be using info[info.length - 1] to know if the default should be visible?
+      // When using hasDefault, the last position is determinant in figuring out the style of an unprocessed feature
+      // TODO: This should be changed, because some services will not have the 'others' in their last position
       if (!foundClassBreakInfo && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false)) {
         return this.processSimplePoint(info[info.length - 1].settings, feature, { visualVariables });
       }
@@ -2138,8 +2146,8 @@ export abstract class GeoviewRenderer {
         return this.processSimpleLineString(foundClassBreakInfo.settings, feature, { visualVariables });
       }
 
-      // If not found a class break renderer that works, but we want default values
-      // TODO: Check - I'm not sure we should be using info[info.length - 1] to know if the default should be visible?
+      // When using hasDefault, the last position is determinant in figuring out the style of an unprocessed feature
+      // TODO: This should be changed, because some services will not have the 'others' in their last position
       if (!foundClassBreakInfo && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false)) {
         return this.processSimpleLineString(info[info.length - 1].settings, feature, { visualVariables });
       }
@@ -2176,8 +2184,8 @@ export abstract class GeoviewRenderer {
         return this.processSimplePolygon(foundClassBreakInfo.settings, feature, { visualVariables });
       }
 
-      // If not found a class break renderer that works, but we want default values
-      // TODO: Check - I'm not sure we should be using info[info.length - 1] to know if the default should be visible?
+      // When using hasDefault, the last position is determinant in figuring out the style of an unprocessed feature
+      // TODO: This should be changed, because some services will not have the 'others' in their last position
       if (!foundClassBreakInfo && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false)) {
         return this.processSimplePolygon(info[info.length - 1].settings, feature, { visualVariables });
       }
@@ -2240,6 +2248,7 @@ export abstract class GeoviewRenderer {
         aliasLookup,
         visualVariables,
       };
+
       // TODO: Refactor - Rewrite this to use explicit function calls instead, for clarity and references finding
       const featureStyle = this.processStyle[type][geometryType](styleSettings, feature as Feature, options);
 
@@ -2918,5 +2927,307 @@ export abstract class GeoviewRenderer {
 
       return String(fieldValue);
     });
+  }
+
+  /**
+   * Builds a filter string (SQL-like or OGC-compliant) for a given layer and style configuration.
+   * This method supports:
+   * - **simple styles** → returns the base layer filter or a default `(1=1)` condition.
+   * - **unique value styles** → builds an optimized filter for visible categories.
+   * - **class breaks styles** → builds numeric range filters based on visibility flags.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration.
+   * @param {TypeLayerStyleConfig | undefined} style - The style configuration (optional).
+   * @returns {string | undefined} The filter expression, or `undefined` if not applicable.
+   */
+  static getFilterFromStyle(
+    outFields: TypeOutfields[] | undefined,
+    style: TypeLayerStyleConfig | undefined,
+    styleSettings: TypeLayerStyleSettings | undefined
+  ): string | undefined {
+    // No style, no filter on style
+    if (!style) return undefined;
+
+    // No style settings, default filter
+    if (!styleSettings) return undefined;
+
+    switch (styleSettings.type) {
+      case 'simple':
+        return undefined;
+
+      case 'uniqueValue': {
+        // Check if any fields were retrieved
+        if (!outFields) {
+          // Log warning, so we know
+          logger.logWarning(
+            'A style with filter capabilities was set on the layer, but no fields were read from vector data. Make sure source.featureInfo?.outfields has values.'
+          );
+          return undefined;
+        }
+
+        this.#normalizeVisibility(styleSettings);
+        if (this.#allFeaturesVisible(styleSettings.info)) return undefined;
+
+        // Build query
+        return this.#buildQueryUniqueValue(styleSettings, outFields);
+      }
+
+      case 'classBreaks': {
+        // Check if any fields were retrieved
+        if (!outFields) {
+          // Log warning, so we know
+          logger.logWarning(
+            'A style with filter capabilities was set on the layer, but no fields were read from vector data. Make sure source.featureInfo?.outfields has values.'
+          );
+          return undefined;
+        }
+
+        this.#normalizeVisibility(styleSettings);
+        if (this.#allFeaturesVisible(styleSettings.info)) return undefined;
+        return this.#buildQueryClassBreaksFilter(styleSettings, outFields);
+      }
+
+      default:
+        return undefined;
+    }
+  }
+
+  /**
+   * Normalizes a style configuration by ensuring that all visibility flags
+   * are explicitly set. Any undefined `visible` properties are defaulted to `true`
+   * (meaning the feature is considered visible).
+   * @param {TypeLayerStyleSettings} styleConfig - The style configuration object to normalize.
+   * @returns {void}
+   */
+  static #normalizeVisibility(styleConfig: TypeLayerStyleSettings): void {
+    styleConfig.info.forEach((s) => {
+      // eslint-disable-next-line no-param-reassign
+      if (s.visible === undefined) s.visible = true;
+    });
+  }
+
+  /**
+   * Determines whether all features in the style configuration are visible.
+   * This is used to skip building a filter expression when no filtering is needed.
+   * @param {TypeLayerStyleConfigInfo[]} settings - The style configuration entries defining visibility.
+   * @returns {boolean} `true` if all features are visible; `false` if any are hidden or filtered.
+   */
+  static #allFeaturesVisible(settings: TypeLayerStyleConfigInfo[]): boolean {
+    return settings.every((s) => s.visible);
+  }
+
+  /**
+   * Builds a filter expression for a **unique value renderer** based on the layer
+   * style configuration.
+   * If the style configuration defines a default renderer (`hasDefault === true`)
+   * **and** the default renderer is visible, the function instead builds a
+   * negative filter (`NOT (...)`) from the unchecked non-default entries, since
+   * the default renderer represents an implicit catch-all.
+   * @param {TypeLayerStyleSettings} styleSettings The layer style settings containing renderer definitions
+   * and visibility state.
+   * @param {TypeOutfields[]} outFields Optional layer field metadata used to properly format field
+   * values (e.g., quoting strings, numeric handling).
+   * @param {boolean} [useExtraSpacingInFilter] When `true`, adds extra spacing and quotes to
+   * improve readability or compatibility with certain filter consumers.
+   * @returns {string} A filter expression string suitable for use in SQL-like or OGC filter
+   * contexts. Returns a constant always-true (`1 = 1`) or always-false (`1 = 0`)
+   * expression when appropriate.
+   * @private
+   */
+  static #buildQueryUniqueValue(
+    styleSettings: TypeLayerStyleSettings,
+    outFields: TypeOutfields[],
+    useExtraSpacingInFilter: boolean = false
+  ): string {
+    const spacing = useExtraSpacingInFilter ? ' ' : '';
+    const quote = useExtraSpacingInFilter ? '"' : '';
+    const fieldName = styleSettings.fields[0];
+    const fieldNameTweaked = `${quote}${fieldName}${quote}`;
+
+    const { info, hasDefault } = styleSettings;
+
+    const defaultIndex = info.length - 1;
+    const defaultEntry = hasDefault ? info[defaultIndex] : undefined;
+    const defaultIsChecked = Boolean(defaultEntry?.visible);
+
+    // Decide strategy
+    const useNotPattern = hasDefault && defaultIsChecked;
+
+    const relevantInfos = useNotPattern
+      ? // Exclude unchecked non-default styles
+        info.slice(0, defaultIndex).filter((i) => !i.visible)
+      : // Include checked non-default styles
+        info.slice(0, hasDefault ? defaultIndex : info.length).filter((i) => i.visible);
+
+    // Default checked and nothing to exclude → everything matches
+    if (useNotPattern && relevantInfos.length === 0) {
+      return this.DEFAULT_FILTER_1EQUALS1;
+    }
+
+    const values = relevantInfos.map((entry) => this.#formatFieldValue(fieldName, entry.values[0], outFields));
+
+    // No values → nothing matches
+    if (values.length === 0) {
+      return this.DEFAULT_FILTER_1EQUALS0;
+    }
+
+    // Single value → equality
+    const inClause =
+      values.length === 1 ? `${fieldNameTweaked} = ${values[0]}` : `${fieldNameTweaked} in (${spacing}${values.join(`, `)}${spacing})`;
+
+    return useNotPattern ? `NOT (${inClause})` : inClause;
+  }
+
+  /**
+   * Builds a filter for "classBreaks" style types.
+   * @param {TypeLayerStyleSettings} styleSettings - The style configuration.
+   * @param {TypeOutfields[]} outfields - The feature info fields.
+   * @returns {string} A filter expression string suitable for use in SQL-like or OGC filter
+   * contexts. Returns a constant always-true (`1 = 1`) or always-false (`1 = 0`)
+   * expression when appropriate.
+   */
+  static #buildQueryClassBreaksFilter(styleSettings: TypeLayerStyleSettings, outfields: TypeOutfields[]): string {
+    const field = styleSettings.fields[0];
+    const { info } = styleSettings;
+    const { hasDefault } = styleSettings;
+    const featureInfo = outfields;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const fmt = (value: any): string => this.#formatFieldValue(field, value, featureInfo);
+
+    const filterArray: string[] = [];
+    let visibleWhenGreaterIndex = -1;
+
+    for (let i = 0; i < info.length; i++) {
+      const entry = info[i];
+      const comparer0: TypeLayerStyleValueCondition = entry.valuesConditions?.[0] || '>=';
+      const comparer1: TypeLayerStyleValueCondition = entry.valuesConditions?.[1] || '<=';
+
+      // Determine even/odd based on filterArray length
+      if (filterArray.length % 2 === 0) {
+        // Even index logic (first half of a range)
+        if (i === 0) {
+          // First entry
+          if (entry.visible !== false && (!hasDefault || (hasDefault && info[info.length - 1].visible === false))) {
+            // visible, default not visible
+            filterArray.push(`${field} ${comparer0} ${fmt(entry.values[0])}`);
+          } else if (entry.visible === false && hasDefault && info[info.length - 1].visible !== false) {
+            // not visible, default visible
+            filterArray.push(`${field} ${comparer0} ${fmt(entry.values[0])}`);
+            visibleWhenGreaterIndex = i;
+          }
+        } else {
+          if (entry.visible !== false && (!hasDefault || (hasDefault && info[info.length - 1].visible === false))) {
+            filterArray.push(`${field} ${comparer0} ${fmt(entry.values[0])}`);
+            if (i + 1 === info.length) {
+              filterArray.push(`${field} ${comparer1} ${fmt(entry.values[1])}`);
+            }
+          } else if (entry.visible === false && hasDefault && info[info.length - 1].visible !== false) {
+            filterArray.push(`${field} ${comparer0} ${fmt(entry.values[0])}`);
+            visibleWhenGreaterIndex = i;
+          }
+        }
+      } else {
+        // Odd index logic (closing half of a range)
+        if (!hasDefault || (hasDefault && info[info.length - 1].visible === false)) {
+          if (entry.visible === false) {
+            filterArray.push(`${field} ${comparer1} ${fmt(info[i - 1].values[1])}`);
+          } else if (i + 1 === info.length) {
+            filterArray.push(`${field} ${comparer1} ${fmt(entry.values[1])}`);
+          }
+        } else if (hasDefault && entry.visible !== false) {
+          filterArray.push(`${field} ${comparer1} ${fmt(info[i - 1].values[1])}`);
+          visibleWhenGreaterIndex = -1;
+        } else {
+          visibleWhenGreaterIndex = i;
+        }
+      }
+    }
+
+    // Final "greater than" clause
+    if (visibleWhenGreaterIndex !== -1) {
+      filterArray.push(`${field} > ${fmt(info[visibleWhenGreaterIndex].values[1])}`);
+    }
+
+    // Return the filter
+    return this.#buildClassBreakExpression(filterArray, hasDefault, info);
+  }
+
+  /**
+   * Builds the final SQL-like boolean filter expression used for "classBreaks" style rules.
+   * This function takes the list of already-constructed range conditions (`filterArray`)
+   * and assembles them into a properly parenthesized logical expression. The structure
+   * of the expression depends on whether the style has a “default” class and whether
+   * that default class is visible or not.
+   * Behavior:
+   * - If no filters exist, returns `(1=0)` which represents a false filter (select nothing).
+   * - If `hasDefault` is `true` **and** the last class in `info` is visible, the function
+   *   constructs an `OR`-based expression that mirrors the original ArcGIS classBreaks
+   *   logic where the default class is considered visible.
+   * - Otherwise (default not visible), constructs a nested sequence of `AND`/`OR` blocks
+   *   following the original Esri filtering algorithm, ensuring that non-visible classes
+   *   properly constrain the final range.
+   * @param {string[]} filterArray - The ordered list of base range expressions
+   *   (e.g., `["field >= 1", "field <= 5", "field > 10", "field <= 20"]`) produced by
+   *   the classBreaks preprocessing logic.
+   * @param {boolean} hasDefault - Indicates whether the style definition includes a
+   *   "default" class (the implicit class beyond the listed break ranges).
+   * @param {TypeLayerStyleConfigInfo[]} info - The style configuration entries. Used
+   *   primarily to determine visibility of the last class when `hasDefault` is true.
+   * @returns {string} A fully assembled boolean expression such as:
+   *   - `(1=0)` when nothing should match,
+   *   - `(field >= 1 and field <= 5)`,
+   *   - `((field >= 1 and field <= 5) or (field > 10 and field <= 20))`,
+   *   - or more complex nested expressions depending on break visibility.
+   */
+  static #buildClassBreakExpression(filterArray: string[], hasDefault: boolean, info: TypeLayerStyleConfigInfo[]): string {
+    if (filterArray.length === 0) return this.DEFAULT_FILTER_1EQUALS0;
+
+    // Default visible / has default AND last class visible
+    if (hasDefault && info[info.length - 1].visible !== false) {
+      const expr = `${filterArray.slice(0, -1).reduce((prev, node, i) => {
+        if (i === 0) return `(${node} or `;
+        if (i % 2 === 0) return `${prev} and ${node}) or `;
+        return `${prev}(${node}`;
+      }, '')}${filterArray.at(-1)})`;
+
+      return expr;
+    }
+
+    // Default not visible
+    return `${filterArray.reduce((prev, node, i) => {
+      if (i === 0) return `((${node} and `;
+      if (i % 2 === 0) return `${prev} or (${node} and `;
+      return `${prev}${node})`;
+    }, '')})`;
+  }
+
+  /**
+   * Formats the field value to use in the query.
+   * @param {string} fieldName - The field name.
+   * @param {unknown} rawValue - The unformatted field value.
+   * @param {TypeOutfields[] | undefined} outFields - The outfields information that knows the field type.
+   * @returns {string} The resulting field value.
+   * @private
+   */
+  static #formatFieldValue(fieldName: string, rawValue: unknown, outFields: TypeOutfields[] | undefined): string {
+    const fieldEntry = outFields?.find((outField) => outField.name === fieldName);
+    const fieldType = fieldEntry?.type;
+    switch (fieldType) {
+      case 'date':
+        return `date '${rawValue}'`;
+      case 'string': {
+        // Double the quotes
+        const value = `${rawValue}`.replaceAll("'", "''");
+        return `'${value}'`;
+      }
+      default: {
+        // Should be a number, check it in case...
+        const number = Number(rawValue);
+
+        // If is NaN
+        if (Number.isNaN(number)) return '0'; // We were tricked, it's not a numeric value, use 0 for now..
+        return `${number}`; // All good
+      }
+    }
   }
 } // END CLASS

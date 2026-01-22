@@ -6,9 +6,7 @@ import type { Projection as OLProjection } from 'ol/proj';
 
 import type { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
-import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { GeoUtilities } from '@/geo/utils/utilities';
-import type { TypeOutfieldsType } from '@/api/types/map-schema-types';
 import { Projection } from '@/geo/utils/projection';
 
 /**
@@ -66,16 +64,6 @@ export class GVXYZTiles extends AbstractGVTile {
   override getLayerConfig(): XYZTilesLayerEntryConfig {
     // Call parent and cast
     return super.getLayerConfig() as XYZTilesLayerEntryConfig;
-  }
-
-  /**
-   * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
-   * @param {string} fieldName - The field name for which we want to get the type.
-   * @returns {TypeOutfieldsType} The type of the field.
-   */
-  protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
-    // Redirect
-    return GVLayerUtilities.featureInfoGetFieldType(this.getLayerConfig(), fieldName);
   }
 
   /**

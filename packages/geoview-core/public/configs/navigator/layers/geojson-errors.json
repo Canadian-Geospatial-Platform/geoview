@@ -13,7 +13,7 @@
       {
         "geoviewLayerId": "geojsonLYR1",
         "geoviewLayerName": "Error metadata",
-        "metadataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadataERROR",
+        "metadataAccessPath": "./datasets/geojson/metadataERROR",
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
           {
@@ -45,7 +45,7 @@
       {
         "geoviewLayerId": "geojsonLYR2",
         "geoviewLayerName": "Error layerId",
-        "metadataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata",
+        "metadataAccessPath": "./datasets/geojson/metadata",
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
           {
@@ -61,7 +61,7 @@
       {
         "geoviewLayerId": "geojsonLYR3",
         "geoviewLayerName": "Error metadata (skipped .meta)",
-        "metadataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadataERROR.meta",
+        "metadataAccessPath": "./datasets/geojson/metadataERROR.meta",
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
           {

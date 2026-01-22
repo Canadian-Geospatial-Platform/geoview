@@ -1,3 +1,6 @@
+import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
+import { NodeType, type FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
+
 /**
  * Aggregates and composes the different filter fragments applied at various
  * levels of the application (initial load, class-level, data table, time slider).
@@ -17,6 +20,9 @@ export class LayerFilters {
   /** Filter on time */
   #timeFilter?: string;
 
+  /** The cached filter equation which changes every filter change */
+  #cachedFilterEquation?: FilterNodeType[];
+
   /**
    * Constructor
    * @param {string} [initialFilter] - The initial filter applied at the base level
@@ -30,6 +36,7 @@ export class LayerFilters {
     this.#classFilter = classFilter;
     this.#dataFilter = dataFilter;
     this.#timeFilter = timeFilter;
+    this.#refreshFilterEquation();
   }
 
   // #region PUBLIC METHODS
@@ -43,11 +50,37 @@ export class LayerFilters {
   }
 
   /**
+   * Gets if the layer has an initial base filter
+   * @returns {boolean} True when the layer has an initial base filter
+   */
+  hasInitialFilter(): boolean {
+    return !!this.#initialFilter;
+  }
+
+  /**
    * Gets the class renderer filter
    * @returns {string | undefined} The class renderer filter
    */
   getClassFilter(): string | undefined {
     return this.#classFilter;
+  }
+
+  /**
+   * Sets the class renderer filter
+   * @param {string | undefined} classFilter - The class renderer filter
+   * @returns {void}
+   */
+  setClassFilter(classFilter: string | undefined): void {
+    this.#classFilter = classFilter;
+    this.#refreshFilterEquation();
+  }
+
+  /**
+   * Gets if the layer has a class filter
+   * @returns {boolean} True when the layer has a class filter
+   */
+  hasClassFilter(): boolean {
+    return !!this.#classFilter;
   }
 
   /**
@@ -59,6 +92,24 @@ export class LayerFilters {
   }
 
   /**
+   * Sets the data filter
+   * @param {string | undefined} dataFilter - The data filter
+   * @returns {void}
+   */
+  setDataFilter(dataFilter: string | undefined): void {
+    this.#dataFilter = dataFilter;
+    this.#refreshFilterEquation();
+  }
+
+  /**
+   * Gets if the layer has a data filter
+   * @returns {boolean} True when the layer has a data filter
+   */
+  hasDataFilter(): boolean {
+    return !!this.#dataFilter;
+  }
+
+  /**
    * Gets the time filter
    * @returns {string | undefined} The time filter
    */
@@ -67,12 +118,30 @@ export class LayerFilters {
   }
 
   /**
+   * Sets the time filter
+   * @param {string | undefined} timeFilter - The time filter
+   * @returns {void}
+   */
+  setTimeFilter(timeFilter: string | undefined): void {
+    this.#timeFilter = timeFilter;
+    this.#refreshFilterEquation();
+  }
+
+  /**
+   * Gets if the layer has a time filter
+   * @returns {boolean} True when the layer has a time filter
+   */
+  hasTimeFilter(): boolean {
+    return !!this.#timeFilter;
+  }
+
+  /**
    * Returns all active data-related filters combined into a single expression
    * using the logical AND operator.
    * @returns {string} A combined data filter expression.
    */
-  getDataFilters(): string {
-    return this.#getDataFilters()
+  getDataRelatedFilters(): string {
+    return this.#getDataRelatedFilters()
       .map((v) => `( ${v} )`)
       .join(' AND ');
   }
@@ -88,6 +157,17 @@ export class LayerFilters {
       .join(' AND ');
   }
 
+  /**
+   * Returns the cached filter equation for this layer.
+   * The filter equation is represented as an array of {@link FilterNodeType}
+   * produced by parsing the combined layer filters.
+   * The value is cached and only recalculated when explicitly refreshed.
+   * @returns {FilterNodeType[] | undefined} The cached filter equation if any.
+   */
+  getFilterEquation(): FilterNodeType[] | undefined {
+    return this.#cachedFilterEquation;
+  }
+
   // #endregion PUBLIC METHODS
 
   // #region PRIVATE METHODS
@@ -98,7 +178,7 @@ export class LayerFilters {
    * @returns {string[]} An array of active data filter expressions.
    * @private
    */
-  #getDataFilters(): string[] {
+  #getDataRelatedFilters(): string[] {
     return [this.#initialFilter, this.#classFilter, this.#dataFilter].filter((v) => !!v) as string[];
   }
 
@@ -110,6 +190,21 @@ export class LayerFilters {
    */
   #getAllFilters(): string[] {
     return [this.#initialFilter, this.#classFilter, this.#dataFilter, this.#timeFilter].filter((v) => !!v) as string[];
+  }
+
+  /**
+   * Recomputes and updates the cached filter equation.
+   * This method combines all active filters, analyzes them, and stores the
+   * resulting filter equation for later reuse via {@link getFilterEquation}.
+   * It is intended for internal use when filter inputs change.
+   * @returns {void}
+   * @private
+   */
+  #refreshFilterEquation(): void {
+    // Recalculate and refresh the cached filter equation
+    this.#cachedFilterEquation = GeoviewRenderer.analyzeLayerFilter([
+      { nodeType: NodeType.unprocessedNode, nodeValue: this.getAllFilters() },
+    ]);
   }
 
   // #endregion PRIVATE METHODS
