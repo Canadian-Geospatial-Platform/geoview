@@ -25,7 +25,7 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
   const displayState = useLayerDisplayState();
   const [isLayoutEnlarged, setIsLayoutEnlarged] = useState<boolean>(false);
 
-  const { setSelectedFooterLayerListItemId } = useUIStoreActions();
+  const { setSelectedFooterLayerListItemId, disableFocusTrap } = useUIStoreActions();
 
   const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
 
@@ -98,6 +98,20 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
     [setIsLayoutEnlarged]
   );
 
+  /**
+   * Handles right panel close - restores focus to the layer list item that opened the panel
+   */
+  const handleRightPanelClosed = useCallback((): void => {
+    logger.logTraceUseCallback('LAYERS-PANEL - handleRightPanelClosed');
+
+    // If we have a selected layer, tell disableFocusTrap to focus it
+    if (selectedLayer?.layerId) {
+      disableFocusTrap(selectedLayer.layerId);
+    } else {
+      disableFocusTrap('no-focus');
+    }
+  }, [selectedLayer, disableFocusTrap]);
+
   return (
     <ResponsiveGridLayout
       ref={responsiveLayoutRef}
@@ -109,6 +123,7 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
       hideEnlargeBtn={displayState !== 'view'}
       containerType={containerType}
       onIsEnlargeClicked={handleIsEnlargeClicked}
+      onRightPanelClosed={handleRightPanelClosed}
     />
   );
 }
