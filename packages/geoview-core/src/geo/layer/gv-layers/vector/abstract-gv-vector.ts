@@ -11,30 +11,23 @@ import type { Extent } from 'ol/extent';
 import type { Pixel } from 'ol/pixel';
 import type { Projection as OLProjection } from 'ol/proj';
 
-import { deepEqual } from '@/core/utils/utilities';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
-import { NodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { logger } from '@/core/utils/logger';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import type { TypeFeatureInfoEntry, TypeOutfieldsType } from '@/api/types/map-schema-types';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import type { FilterCapable } from '@/geo/layer/gv-layers/interface-filter';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
-import { LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
 import { NoExtentError } from '@/core/exceptions/geoview-exceptions';
-import { formatError } from '@/core/exceptions/core-exceptions';
-import type { TypeDateFragments } from '@/core/utils/date-mgt';
-import { LayerFilters } from '@/core/types/layer-filters';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer vector type layer.
  */
-export abstract class AbstractGVVector extends AbstractGVLayer implements FilterCapable {
+export abstract class AbstractGVVector extends AbstractGVLayer {
   /** Indicates if the style has been applied on the layer yet */
   styleApplied: boolean = false;
 
@@ -63,7 +56,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer implements Filter
           feature,
           resolution,
           label,
-          layerConfig.getFilterEquation(),
+          this.getLayerFilters()?.getFilterEquation(),
           layerConfig.getLegendFilterIsOff()
         );
 
@@ -84,13 +77,6 @@ export abstract class AbstractGVVector extends AbstractGVLayer implements Filter
 
     // Init the layer options with initial settings
     AbstractGVVector.initOptionsWithInitialSettings(layerOptions, layerConfig);
-
-    // The filter for the initial view
-    // GV No need to set the classFilter, because it's already set in the config and the style() callback above takes care of it
-    const layerFilters = new LayerFilters(layerConfig.getLayerFilter());
-
-    // Apply the filter on the source right away, before the first load
-    AbstractGVVector.applyViewFilterOnConfig(layerConfig, layerConfig.getExternalFragmentsOrder(), undefined, layerFilters);
 
     // If the layer is initially not visible, make it visible until the style is set so we have a style for the legend
     this.onLayerFirstLoaded(() => {
@@ -139,11 +125,13 @@ export abstract class AbstractGVVector extends AbstractGVLayer implements Filter
   /**
    * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
    * @param {string} fieldName - The field name for which we want to get the type.
-   * @returns {TypeOutfieldsType} The type of the field.
+   * @returns {TypeOutfieldsType} The type of the field or 'string' when undefined.
    */
   protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
-    // Redirect
-    return GVLayerUtilities.featureInfoGetFieldType(this.getLayerConfig(), fieldName);
+    // By default, look into the layer metadata for information on the field types
+    const layerMetadata = this.getLayerConfig();
+    const fieldDefinitions = layerMetadata?.getOutfields()?.find((fieldDefinition) => fieldDefinition.name === fieldName);
+    return fieldDefinitions?.type || 'string';
   }
 
   /**
@@ -304,45 +292,6 @@ export abstract class AbstractGVVector extends AbstractGVLayer implements Filter
   // #region METHODS
 
   /**
-   * Applies a view filter to a Vector layer's configuration by updating the layerConfig.filterEquation parameter.
-   * @param {LayerFilters} [filter] - The raw filter string input (defaults to an empty string if not provided).
-   */
-  applyViewFilter(filter?: LayerFilters): void {
-    // Redirect
-    AbstractGVVector.applyViewFilterOnConfig(
-      this.getLayerConfig(),
-      this.getLayerConfig().getExternalFragmentsOrder(),
-      this,
-      filter,
-      (filterToUse: string) => {
-        // Emit event
-        this.emitLayerFilterApplied({
-          filter: filterToUse,
-        });
-      }
-    );
-  }
-
-  /**
-   * Applies a time filter on a date range.
-   * @param {string} date1 - The start date
-   * @param {string} date2 - The end date
-   */
-  applyDateFilter(date1: string, date2: string): void {
-    // Get the time dimension field
-    const { field } = this.getTimeDimension()!;
-
-    // Create an application filter for dates keeping the initial filter
-    const layerFilters = new LayerFilters(
-      this.getLayerConfig().getLayerFilter(),
-      `${field} >= date '${date1}' and ${field} <= date '${date2}'`
-    );
-
-    // Redirect
-    this.applyViewFilter(layerFilters);
-  }
-
-  /**
    * Sets the style applied flag indicating when a style has been applied for the AbstractGVVector via the style callback function.
    * @param {boolean} styleApplied - Indicates if the style has been applied on the AbstractGVVector.
    */
@@ -434,75 +383,6 @@ export abstract class AbstractGVVector extends AbstractGVLayer implements Filter
         });
       }
     );
-  }
-
-  /**
-   * Applies a view filter to a vector layer configuration. The resulting filter is parsed and stored in the layer
-   * config's `filterEquation`, and triggers a re-evaluation of feature styles if applicable.
-   * If the layer config is invalid or the filter has not changed, no action is taken. Date values in the filter are also
-   * parsed using external fragments if available.
-   * @param {VectorLayerEntryConfig} layerConfig - The vector layer configuration to apply the filter to.
-   * @param {TypeDateFragments | undefined} externalDateFragments - Optional date fragments used to parse time-based filters.
-   * @param {AbstractGVLayer | undefined} layer - Optional GeoView layer containing that will get its source updated to trigger a redraw.
-   * @param {string | undefined} filter - A raw filter string to override the layer's view filter (default is an empty string).
-   * @param {(filterToUse: string) => void} [callbackWhenUpdated] - Optional callback invoked with the final filter string if updated.
-   * @throws {LayerInvalidLayerFilterError} If the filter cannot be parsed or applied due to a syntax or runtime issue.
-   */
-  static applyViewFilterOnConfig(
-    layerConfig: VectorLayerEntryConfig,
-    externalDateFragments: TypeDateFragments | undefined,
-    layer: AbstractGVLayer | undefined,
-    filter: LayerFilters | undefined,
-    callbackWhenUpdated: ((filterToUse: string) => void) | undefined = undefined
-  ): void {
-    // Get the current filter
-    const currentFilter = layerConfig.getFilterEquation();
-
-    // Get the filter to use
-    let filterValueToUse: string = filter?.getAllFilters() || '';
-
-    try {
-      // Parse is some more for the dates
-      filterValueToUse = GVLayerUtilities.parseDateTimeValuesVector(filterValueToUse, externalDateFragments);
-
-      // Analyze the layer filter
-      const filterEquation = GeoviewRenderer.analyzeLayerFilter([{ nodeType: NodeType.unprocessedNode, nodeValue: filterValueToUse }]);
-
-      // Define what is considered the default filter
-      const isDefaultFilter = !filterValueToUse;
-
-      // Define what is a no operation
-      const isNewFilterEffectivelyNoop = isDefaultFilter && !currentFilter;
-
-      // Check whether the current filter is different from the new one
-      const filterChanged = !deepEqual(currentFilter, filterEquation);
-
-      // Determine if we should apply or reset filter
-      const shouldUpdateFilter = (filterChanged && !isNewFilterEffectivelyNoop) || (!!currentFilter && isDefaultFilter);
-
-      // If should update the filtering
-      if (shouldUpdateFilter) {
-        // Update the filter equation
-        layerConfig.setFilterEquation(filterEquation);
-
-        // Flag about the change.
-        // GV This will force a callback on the source style callback, which for us is the 'calculateStyleForFeature' function and
-        // GV since we've changed the filterEquation, the style will be recreated using that filterEquation.
-        layer?.getOLLayer().changed();
-
-        // Callback
-        callbackWhenUpdated?.(filterValueToUse);
-      }
-    } catch (error: unknown) {
-      // Failed
-      throw new LayerInvalidLayerFilterError(
-        layerConfig.layerPath,
-        layerConfig.getLayerNameCascade(),
-        filterValueToUse,
-        currentFilter?.join(','),
-        formatError(error)
-      );
-    }
   }
 
   // #endregion STATIC METHODS

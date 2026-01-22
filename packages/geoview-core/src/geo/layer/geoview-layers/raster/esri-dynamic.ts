@@ -14,7 +14,6 @@ import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { deepMergeObjects } from '@/core/utils/utilities';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
-import { LayerFilters } from '@/core/types/layer-filters';
 
 export interface TypeEsriDynamicLayerConfig extends TypeGeoviewLayerConfig {
   // TODO: Refactor - Layers - Get rid of the `geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_DYNAMIC` property in this interface and all others in other layers.
@@ -340,15 +339,6 @@ export class EsriDynamic extends AbstractGeoViewRaster {
       const params = olSource.getParams();
       olSource.updateParams({ ...params, layerDefs: '' });
     }
-
-    // The filter for the initial view
-    const layerFilters = new LayerFilters(
-      layerConfig.getLayerFilter(),
-      GVEsriDynamic.getFilterFromStyle(layerConfig, layerConfig.getLayerStyle())
-    );
-
-    // Apply the filter on the source right away, before the first load
-    GVEsriDynamic.applyViewFilterOnSource(layerConfig, olSource, layerConfig.getExternalFragmentsOrder(), undefined, layerFilters);
 
     // Return the source
     return olSource;

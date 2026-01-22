@@ -16,7 +16,6 @@ import type {
 import type { ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { TimeDimension } from '@/core/utils/date-mgt';
-import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { NoPrimaryKeyFieldError } from '@/core/exceptions/geoview-exceptions';
 import { GeoUtilities } from '@/geo/utils/utilities';
@@ -67,9 +66,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /** Filter to apply on feature of this layer. */
   #layerFilter?: string;
-
-  /** The calculated filter equation */
-  #filterEquation?: FilterNodeType[];
 
   /** Indicates if filter is on/off
    * @deprecated This attribute doesn't seem to be used (it's always false and doesn't change)
@@ -313,22 +309,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    */
   getLayerFilter(): string | undefined {
     return this.#layerFilter;
-  }
-
-  /**
-   * Gets the layer filter equation
-   * @returns {FilterNodeType[] | undefined} The filter equation if any
-   */
-  getFilterEquation(): FilterNodeType[] | undefined {
-    return this.#filterEquation;
-  }
-
-  /**
-   * Sets the layer filter equation
-   * @param {FilterNodeType[]?} filterEquation - The layer filter equation
-   */
-  setFilterEquation(filterEquation: FilterNodeType[] | undefined): void {
-    this.#filterEquation = filterEquation;
   }
 
   /**
