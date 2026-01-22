@@ -16,7 +16,7 @@ interface GroupItemProps {
 /**
  * Renders a group item with collapsible children.
  * @param {GroupItemProps} props - Component props
- * @returns {JSX.Element} The rendered group
+ * @returns {JSX.Element | undefined} The rendered group
  */
 export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.Element | undefined {
   const { cgpv } = window as TypeWindow;

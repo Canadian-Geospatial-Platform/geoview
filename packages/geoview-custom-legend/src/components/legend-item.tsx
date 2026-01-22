@@ -16,7 +16,7 @@ interface LegendItemProps {
  * Renders a single legend item based on its type.
  * @function LegendItem
  * @param {LegendItemProps} props - Component props
- * @returns {JSX.Element} The rendered item
+ * @returns {JSX.Element | undefined} The rendered item
  */
 export function LegendItem({ item, sxClasses, itemPath }: LegendItemProps): JSX.Element | undefined {
   const { cgpv } = window as TypeWindow;

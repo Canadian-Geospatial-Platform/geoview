@@ -13,7 +13,7 @@ interface HeaderItemProps {
 /**
  * Renders a header item.
  * @param {HeaderItemProps} props - Component props
- * @returns {JSX.Element} The rendered header
+ * @returns {JSX.Element | undefined} The rendered header
  */
 export function HeaderItem({ item, sxClasses }: HeaderItemProps): JSX.Element | undefined {
   const { cgpv } = window as TypeWindow;

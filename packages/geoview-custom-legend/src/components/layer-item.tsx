@@ -9,7 +9,7 @@ interface LegendLayerItemProps {
 /**
  * Renders a legend layer item from geoview-core.
  * @param {LegendLayerItemProps} props - Component props
- * @returns {JSX.Element} The rendered legend layer
+ * @returns {JSX.Element | undefined} The rendered legend layer
  */
 export function LegendLayerItem({ item }: LegendLayerItemProps): JSX.Element | undefined {
   if (!isLegendLayer(item)) return;
