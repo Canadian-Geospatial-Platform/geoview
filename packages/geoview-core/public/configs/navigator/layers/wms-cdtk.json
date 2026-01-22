@@ -45,7 +45,11 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "completed",
-            "layerFilter": "\"project_cat_en\" in ( 'Agriculture' , 'Construction' , 'Energy' )",
+            "initialSettings": {
+              "states": {
+                "visible": false
+              }
+            },
             "layerStyle": {
               "Point": {
                 "type": "uniqueValue",
@@ -102,6 +106,22 @@
                       ],
                       "opacity": 1,
                       "rotation": 0,
+                      "src": "iVBORw0KGgoAAAANSUhEUgAAABcAAAAXCAYAAADgKtSgAAADy0lEQVR4AbSTa0ybVRzGf30L5VIopcCA1QnbiG5ZXcZkDLeguOmmRDPndFMT8YLui1HUD/uiZibeo8m+mGjCZjKNl4EDt2mCGjSQiMwx5mVilMgGgwFrKZTb2tL37c55oR2lL/u2k/Occ57/85ynJ33PUbiO7ZrhOVTkZXLr4VRu8Aj4UynQxBxIxem1s7beTlnhtc5mGJ7LWmsGru80pnrtrK5awZNZRexNKqLaJGbLSqozMyl+yAzdNla3plGeg0GLC89nc8k0gYFsyiqd3G9J5yYULDFbTSRQ7CrDSWVCHlvLzbh77Ny2M8YkSEx4Fpu2zKC2FrInw8qNQjbuj7+0kZGhSV1MZgkFPJJmIfkrByVP68W5QZmbcXD7MpWJxnzuSTGJk0XqC2dX6VLWbFjKqOfyPEkhjzstJkwfZlNaEhGi4SHcDflss5mIlljY0uxJHDj6MI2f/L5Q0nk+21OC+I7oRAyKALlsclmwr08kQ9JF8e7nDxJSw5xsPmfoUbCQSuGKHMr2SIMihyCTr2ayTl9LboTHnt9AeWUR9R+fhrCRY7bmoJgAvhcl0wNVgmUp5EtuiJvX5fLyB3ejaWEaD3YaeiLFBHF2BUuR5Hq4IOmSGCE13cKBht0kWsz8c3qQla4llFQUROHItcZtU1BssqiHmzAnsUh78/AOnMvtuipvyaGfq4hgf+19TE8EdG3+YCZZPgyrHh5G9c8XI+tde9ezdeeqCI2Zg/4QNTuO4J8OxdQlUfEHxTylh4M6LkhMTxPXbosI7mjpJQL3xYmo550Xmujp8kT5/IWG5pN8Lpy//MQaJ8cCPHfvF1RXfBrF0IXZM/xQ10VD7Rm5Pw4aQTQu90tBDzdhrR2nS/JFkZ1n5ZaNTgbOj/HaU8cW9Y3zL4nYjkqDIodRfvt2ir5e+auSG2Hb7jXMzGjUPFBn+D/P7tHw0jk2QsfbkuvhcmEhq/oiTfFfR4oCd+1axXs1TXT/MSyYcR+mNZyMY59Q9WcWDR/h1+Yw2uv9HA+HFzxBmyMZn9dP/UfidYqdRn2YFgJ4PvNwqjaiR8NlYZTOt8C8/wL1IZWrt9NV6uSVqm+kJQ4aIQY4oQVwHxrjzyfmG2LCpeDl5BtmbNv7+LrfyxlUcZ72H3vEY5FXVzpmoTKDj7/p5ctLCuZHRfAzs8rVMS5cSiO0/TTBf8v8DD7bz7HWPvX4+UGafEM0q4N8P97Pib4BGtum+H/fBN25btrr5L6FMAyPmDy0H/Rx9g4vp5a7abNfoiXBzS8ZgheMcXazh473I16j+QoAAAD///khHBYAAAAGSURBVAMA7ew7Ps9cKdwAAAAASUVORK5CYII=",
+                      "type": "iconSymbol"
+                    }
+                  },
+                  {
+                    "visible": true,
+                    "label": "Others",
+                    "values": [],
+                    "settings": {
+                      "mimeType": "image/png",
+                      "offset": [
+                        0,
+                        0
+                      ],
+                      "opacity": 1,
+                      "rotation": 90,
                       "src": "iVBORw0KGgoAAAANSUhEUgAAABcAAAAXCAYAAADgKtSgAAADy0lEQVR4AbSTa0ybVRzGf30L5VIopcCA1QnbiG5ZXcZkDLeguOmmRDPndFMT8YLui1HUD/uiZibeo8m+mGjCZjKNl4EDt2mCGjSQiMwx5mVilMgGgwFrKZTb2tL37c55oR2lL/u2k/Occ57/85ynJ33PUbiO7ZrhOVTkZXLr4VRu8Aj4UynQxBxIxem1s7beTlnhtc5mGJ7LWmsGru80pnrtrK5awZNZRexNKqLaJGbLSqozMyl+yAzdNla3plGeg0GLC89nc8k0gYFsyiqd3G9J5yYULDFbTSRQ7CrDSWVCHlvLzbh77Ny2M8YkSEx4Fpu2zKC2FrInw8qNQjbuj7+0kZGhSV1MZgkFPJJmIfkrByVP68W5QZmbcXD7MpWJxnzuSTGJk0XqC2dX6VLWbFjKqOfyPEkhjzstJkwfZlNaEhGi4SHcDflss5mIlljY0uxJHDj6MI2f/L5Q0nk+21OC+I7oRAyKALlsclmwr08kQ9JF8e7nDxJSw5xsPmfoUbCQSuGKHMr2SIMihyCTr2ayTl9LboTHnt9AeWUR9R+fhrCRY7bmoJgAvhcl0wNVgmUp5EtuiJvX5fLyB3ejaWEaD3YaeiLFBHF2BUuR5Hq4IOmSGCE13cKBht0kWsz8c3qQla4llFQUROHItcZtU1BssqiHmzAnsUh78/AOnMvtuipvyaGfq4hgf+19TE8EdG3+YCZZPgyrHh5G9c8XI+tde9ezdeeqCI2Zg/4QNTuO4J8OxdQlUfEHxTylh4M6LkhMTxPXbosI7mjpJQL3xYmo550Xmujp8kT5/IWG5pN8Lpy//MQaJ8cCPHfvF1RXfBrF0IXZM/xQ10VD7Rm5Pw4aQTQu90tBDzdhrR2nS/JFkZ1n5ZaNTgbOj/HaU8cW9Y3zL4nYjkqDIodRfvt2ir5e+auSG2Hb7jXMzGjUPFBn+D/P7tHw0jk2QsfbkuvhcmEhq/oiTfFfR4oCd+1axXs1TXT/MSyYcR+mNZyMY59Q9WcWDR/h1+Yw2uv9HA+HFzxBmyMZn9dP/UfidYqdRn2YFgJ4PvNwqjaiR8NlYZTOt8C8/wL1IZWrt9NV6uSVqm+kJQ4aIQY4oQVwHxrjzyfmG2LCpeDl5BtmbNv7+LrfyxlUcZ72H3vEY5FXVzpmoTKDj7/p5ctLCuZHRfAzs8rVMS5cSiO0/TTBf8v8DD7bz7HWPvX4+UGafEM0q4N8P97Pib4BGtum+H/fBN25btrr5L6FMAyPmDy0H/Rx9g4vp5a7abNfoiXBzS8ZgheMcXazh473I16j+QoAAAD///khHBYAAAAGSURBVAMA7ew7Ps9cKdwAAAAASUVORK5CYII=",
                       "type": "iconSymbol"
                     }

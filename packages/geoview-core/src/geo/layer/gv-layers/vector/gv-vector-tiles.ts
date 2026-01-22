@@ -4,9 +4,7 @@ import type { VectorTile } from 'ol/source';
 import { applyStyle } from 'ol-mapbox-style';
 
 import type { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
-import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
-import type { TypeOutfieldsType } from '@/api/types/map-schema-types';
 
 /**
  * Manages a Vector Tiles layer.
@@ -44,16 +42,6 @@ export class GVVectorTiles extends AbstractGVVectorTile {
   override getLayerConfig(): VectorTilesLayerEntryConfig {
     // Call parent and cast
     return super.getLayerConfig() as VectorTilesLayerEntryConfig;
-  }
-
-  /**
-   * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
-   * @param {string} fieldName - The field name for which we want to get the type.
-   * @returns {TypeOutfieldsType} The type of the field.
-   */
-  protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
-    // Redirect
-    return GVLayerUtilities.featureInfoGetFieldType(this.getLayerConfig(), fieldName);
   }
 
   // #endregion OVERRIDES

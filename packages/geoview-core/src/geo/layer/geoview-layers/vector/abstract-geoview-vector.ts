@@ -10,10 +10,10 @@ import type { TypeOutfields } from '@/api/types/map-schema-types';
 import type { TypePostSettings } from '@/api/types/layer-schema-types';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { GVVectorSource } from '@/geo/layer/source/vector-source';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { GVVectorSource } from '@/geo/layer/source/vector-source';
 import { formatError } from '@/core/exceptions/core-exceptions';
 
 /**

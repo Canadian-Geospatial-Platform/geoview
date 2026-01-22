@@ -349,8 +349,7 @@ export abstract class GVAbstractTester extends AbstractTester {
   ];
 
   /** Geojson */
-  static readonly GEOJSON_METADATA_META: string =
-    'https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta';
+  static readonly GEOJSON_METADATA_META: string = './datasets/geojson/metadata.meta';
   static readonly GEOJSON_METADATA_META_FILE: string = 'metadata.meta';
   static readonly GEOJSON_POLYGONS: string = 'polygons.json';
   static readonly GEOJSON_POLYGONS_ICON_LIST: Partial<TypeLegendItem>[] = [
@@ -374,8 +373,7 @@ export abstract class GVAbstractTester extends AbstractTester {
     },
   ];
 
-  static readonly CSV_STATION_LIST: string =
-    'https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files/Station_List_Minus_HQ-MELCC.csv';
+  static readonly CSV_STATION_LIST: string = './datasets/csv-files/Station_List_Minus_HQ-MELCC.csv';
   static readonly CSV_STATION_LIST_FILE: string = 'Station_List_Minus_HQ-MELCC.csv';
 
   // GV: Can't add the icon property here, because it's a randomly generated color depending on the layers processed on the map
@@ -402,8 +400,7 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly WKB_SOUTH_AFRICA: string =
     '0103000000010000000500000054E3A59BC4602540643BDF4F8D1739C05C8FC2F5284C4140EC51B81E852B34C0D578E926316843406F1283C0CAD141C01B2FDD2406012B40A4703D0AD79343C054E3A59BC4602540643BDF4F8D1739C0';
 
-  static readonly KML_TORNADO: string =
-    'https://canadian-geospatial-platform.github.io/geoview/public/datasets/kml-files/CanadianNationalTornadoDatabase_1980-2009.kml';
+  static readonly KML_TORNADO: string = './datasets/kml-files/CanadianNationalTornadoDatabase_1980-2009.kml';
   static readonly KML_TORNADO_FILE: string = 'CanadianNationalTornadoDatabase_1980-2009.kml';
 
   static readonly GEOTIFF_VEGETATION: string =

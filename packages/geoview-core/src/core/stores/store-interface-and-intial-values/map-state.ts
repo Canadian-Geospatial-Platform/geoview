@@ -1166,7 +1166,6 @@ export const useMapExtent = (): Extent | undefined => useStore(useGeoViewStore()
 export const useMapFeatureHighlightColor = (): TypeHighlightColors =>
   useStore(useGeoViewStore(), (state) => state.mapState.featureHighlightColor);
 export const useMapFixNorth = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.fixNorth);
-// TODO: ALEX Get rid of this use and the initialFilters in the store - use straightforward layerConfig.getLayerFilter instead?
 export const useMapInitialFilters = (): Record<string, string> => useStore(useGeoViewStore(), (state) => state.mapState.initialFilters);
 export const useMapInitialView = (): TypeMapViewSettings => useStore(useGeoViewStore(), (state) => state.mapState.initialView);
 export const useMapInteraction = (): TypeInteraction => useStore(useGeoViewStore(), (state) => state.mapState.interaction);

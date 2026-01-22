@@ -62,9 +62,7 @@ import { getAppCrosshairsActive } from '@/core/stores/store-interface-and-intial
 import type { TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 
-import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
-import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import { isLayerViewFilterable } from '@/geo/layer/gv-layers/interface-filter';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { InvalidExtentError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
@@ -72,8 +70,6 @@ import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-lay
 import type { TimeDimension } from '@/core/utils/date-mgt';
 import { DateMgt } from '@/core/utils/date-mgt';
 import type { TypeTimeSliderProps } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import { LayerFilters } from '@/core/types/layer-filters';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
@@ -273,9 +269,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map id of the state to act on
    * @param {string} layerPath - The path of the layer
    * @returns {string | undefined} The initial filter(s) for the layer
-   * @deprecated
    */
-  // TODO: ALEX - get rid of this
   static getInitialFilter(mapId: string, layerPath: string): string | undefined {
     return this.getMapStateProtected(mapId).initialFilters[layerPath];
   }
@@ -1299,30 +1293,19 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map id.
    * @param {string} layerPath - The path for the layer to get filters from.
    */
-  // TODO: ALEX - rename this to getActiveFilters()
-  static getActiveVectorFilters(mapId: string, layerPath: string): LayerFilters {
-    // Get the layer config
-    const layerConfig = this.getMapViewerLayerAPI(mapId).getLayerEntryConfigRegular(layerPath);
+  static getActiveFilters(mapId: string, layerPath: string): LayerFilters {
+    // Get the layer and layer config
+    const layer = this.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath) as AbstractGVLayer;
+    const layerConfig = layer.getLayerConfig();
 
     // The initial filter
     const initialFilter = layerConfig.getLayerFilter();
 
-    // The data table filter
-    const dataTableFilter = DataTableEventProcessor.getTableFilter(mapId, layerPath);
-
     // The class breaks filter if any
-    let classFilter: string | undefined;
-    let dataFilter: string | undefined = dataTableFilter;
-    if (layerConfig instanceof EsriDynamicLayerEntryConfig || layerConfig instanceof OgcWmsLayerEntryConfig) {
-      // Get the filter
-      classFilter = GVEsriDynamic.getFilterFromStyle(layerConfig, layerConfig.getLayerStyle());
+    const classFilter = layer.getFilterFromStyle();
 
-      // If WMS layer
-      if (layerConfig instanceof OgcWmsLayerEntryConfig) {
-        // Tweak the data table filter
-        dataFilter = GVEsriDynamic.getFilterFromDataFilter(layerConfig, dataFilter);
-      }
-    }
+    // The data table filter if any
+    const dataFilter = DataTableEventProcessor.getTableFilter(mapId, layerPath);
 
     // If the TimeSlider is initialized
     let timeFilter: string | undefined;
@@ -1345,12 +1328,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
 
     // If found it and of right type
-    if (geoviewLayer && isLayerViewFilterable(geoviewLayer)) {
+    if (geoviewLayer instanceof AbstractGVLayer) {
       // Read filter information from the UI
-      const layerFilters = this.getActiveVectorFilters(mapId, layerPath);
+      const layerFilters = this.getActiveFilters(mapId, layerPath);
 
       // Apply the view filter on the layer
-      geoviewLayer.applyViewFilter(layerFilters);
+      geoviewLayer.setLayerFilters(layerFilters, true);
     }
   }
 
