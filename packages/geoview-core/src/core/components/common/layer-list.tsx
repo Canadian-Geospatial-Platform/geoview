@@ -63,10 +63,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
 
   // Constant for state
   const isDisabled = layer?.numOffeatures === 0 || layer?.isDisabled;
-  const isLoading =
-    layer.queryStatus === 'processing' ||
-    layer.layerStatus === 'loading' ||
-    layer.layerStatus === 'processing';
+  const isLoading = layer.queryStatus === 'processing' || layer.layerStatus === 'loading' || layer.layerStatus === 'processing';
 
   /**
    * Get layer status based on query status and layer status
@@ -110,9 +107,22 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
       arrow
       enterDelay={theme.transitions.duration.tooltipDelay}
       enterNextDelay={theme.transitions.duration.tooltipDelay}
+      slotProps={{
+        popper: {
+          modifiers: [
+            {
+              name: 'offset',
+              options: {
+                offset: [0, -8],
+              },
+            },
+          ],
+        },
+      }}
     >
-      <ListItem id={id} disablePadding className={containerClass}>
+      <ListItem disablePadding className={containerClass}>
         <ListItemButton
+          id={id}
           component="button"
           sx={sxClasses.listItemButton}
           onKeyDown={(e) => handleLayerKeyDown(e, layer)}
