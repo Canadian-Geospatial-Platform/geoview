@@ -1,8 +1,9 @@
+import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import type { TypeLegendItem } from '../custom-legend-types';
 import { isLegendLayer, isHeaderLayer, isGroupLayer } from '../custom-legend-types';
 import type { getSxClasses } from '../custom-legend-style';
 import { HeaderItem } from './header-item';
-import { LegendLayerItem } from './legend-layer-item';
+import { LegendLayerItem } from './layer-item';
 import { GroupItem } from './group-item';
 
 interface LegendItemProps {
@@ -18,8 +19,16 @@ interface LegendItemProps {
  * @returns {JSX.Element} The rendered item
  */
 export function LegendItem({ item, sxClasses, itemPath }: LegendItemProps): JSX.Element | undefined {
+  const { cgpv } = window as TypeWindow;
+  const { ui } = cgpv;
+  const { ListItem } = ui.elements;
+
   if (isLegendLayer(item)) {
-    return <LegendLayerItem item={item} />;
+    return (
+      <ListItem sx={sxClasses.legendListItem} disablePadding>
+        <LegendLayerItem item={item} />
+      </ListItem>
+    );
   }
 
   if (isHeaderLayer(item)) {

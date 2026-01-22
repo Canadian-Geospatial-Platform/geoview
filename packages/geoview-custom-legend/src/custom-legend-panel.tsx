@@ -1,12 +1,12 @@
 import { useMemo } from 'react';
 
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
+import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 
 import { getSxClasses } from './custom-legend-style';
 import type { TypeCustomLegendConfig } from './custom-legend-types';
 import { generateLegendItemId } from './custom-legend-types';
 import { LegendItem } from './components';
-import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 
 interface CustomLegendPanelProps {
   config: TypeCustomLegendConfig;
@@ -23,7 +23,7 @@ export function CustomLegendPanel(props: CustomLegendPanelProps): JSX.Element {
 
   const { cgpv } = window as TypeWindow;
   const { ui } = cgpv;
-  const { Box } = ui.elements;
+  const { Box, List } = ui.elements;
 
   const theme = ui.useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
@@ -32,10 +32,12 @@ export function CustomLegendPanel(props: CustomLegendPanelProps): JSX.Element {
 
   return (
     <Box sx={sxClasses.container}>
-      {legendList.map((item, index) => {
-        const itemId = generateLegendItemId(item, index, appDisplayLanguage);
-        return <LegendItem key={itemId} item={item} sxClasses={sxClasses} itemPath={itemId} />;
-      })}
+      <List className="legendList" sx={sxClasses.legendList}>
+        {legendList.map((item, index) => {
+          const itemId = generateLegendItemId(item, index, appDisplayLanguage);
+          return <LegendItem key={itemId} item={item} sxClasses={sxClasses} itemPath={itemId} />;
+        })}
+      </List>
     </Box>
   );
 }

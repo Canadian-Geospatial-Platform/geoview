@@ -85,7 +85,8 @@
             "text": {
               "en": "Legend Header",
               "fr": "En-tête de légende"
-            }
+            },
+            "fontSize": 20
           },
           {
             "type": "legend",
@@ -94,6 +95,7 @@
           {
             "type": "group",
             "text": "Wildfire Layers",
+            "collapsed": true,
             "children": [
               {
                 "type": "legend",

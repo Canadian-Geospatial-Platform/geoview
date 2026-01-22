@@ -43,11 +43,15 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
       en: {
         CustomLegend: {
           title: textEn,
+          layer: 'layer',
+          sublayers: 'sublayers',
         },
       },
       fr: {
         CustomLegend: {
           title: textFr,
+          layer: 'couche',
+          sublayers: 'sous-couches',
         },
       },
     };
@@ -70,7 +74,7 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
       tooltipPlacement: 'right',
       children: <LegendIcon />,
       visible: true,
-      'aria-label': 'Custom Legend',
+      'aria-label': 'CustomLegend.title',
     };
   }
 

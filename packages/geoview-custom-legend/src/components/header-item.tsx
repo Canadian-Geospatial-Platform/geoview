@@ -1,11 +1,12 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
-import type { TypeLegendItem } from '../custom-legend-types';
-import { getLocalizedText, isHeaderLayer } from '../custom-legend-types';
-import type { getSxClasses } from '../custom-legend-style';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 
+import type { TypeHeaderLayer } from '../custom-legend-types';
+import { isHeaderLayer, getLocalizedText } from '../custom-legend-types';
+import type { getSxClasses } from '../custom-legend-style';
+
 interface HeaderItemProps {
-  item: TypeLegendItem;
+  item: TypeHeaderLayer;
   sxClasses: ReturnType<typeof getSxClasses>;
 }
 
@@ -25,18 +26,15 @@ export function HeaderItem({ item, sxClasses }: HeaderItemProps): JSX.Element | 
 
   const headerText = getLocalizedText(item.text, appDisplayLanguage);
 
+  // Create the override object and if values are present, they will override the default values
+  const styleOverrides = {
+    ...(item.fontSize && { fontSize: `${item.fontSize}px` }),
+    ...(item.fontWeight && { fontWeight: item.fontWeight }),
+  };
+
   return (
     <Box sx={sxClasses.headerItem}>
-      <Typography
-        variant="h5"
-        sx={{
-          fontSize: item.fontSize ? `${item.fontSize}` : '1.25rem',
-          fontWeight: item.fontWeight || 'bold',
-          padding: '8px 16px',
-        }}
-      >
-        {headerText}
-      </Typography>
+      <Typography sx={{ ...sxClasses.headerText, ...styleOverrides }}>{headerText}</Typography>
     </Box>
   );
 }
