@@ -1151,3 +1151,14 @@ export function isLocalhost(): boolean {
   if (typeof window === 'undefined' || !window.location) return false;
   return window.location.hostname === 'localhost' && window.location.port === '8080';
 }
+
+/**
+ * Normalizes a WMS accesspath if it is from datacube.
+ * Left as 'datacube' to check for both datacube.services.geo.ca and datacube-prod-data-public.s3.ca-central-1.amazonaws.com/
+ * @param {string} path - The original access path.
+ * @returns {string} The normalized access path.
+ */
+export function normalizeDatacubeAccessPath(path: string): string {
+  //TODO: extract to list of exceptions / normalizations?
+  return path.toLowerCase().includes('datacube') ? path.replace('wrapper/ramp/ogc', 'wrapper/ogc').replace('/ows/', '/wrapper/ogc/') : path;
+}
