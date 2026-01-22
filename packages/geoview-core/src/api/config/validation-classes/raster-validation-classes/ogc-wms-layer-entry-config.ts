@@ -15,6 +15,7 @@ import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vec
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { TypeWMSLayerConfig } from '@/geo/layer/geoview-layers/raster/wms';
+import { normalizeDatacubeAccessPath } from '@/core/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
 
@@ -345,8 +346,9 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     // Get the metadata access path
     let metadataAccessPath = this.getMetadataAccessPath()!;
 
-    // Normalize it
-    metadataAccessPath = metadataAccessPath.replace('wrapper/ramp/ogc', 'wrapper/ogc');
+    // Normalize it - datacube specific normalization
+
+    metadataAccessPath = normalizeDatacubeAccessPath(metadataAccessPath);
 
     // Set the normalized url in the metadata access path
     this.setMetadataAccessPath(metadataAccessPath);
@@ -356,8 +358,8 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
     // If any, normalize it as well in case the provided one also needed to be normalized
     if (dataAccessPath) {
-      // Normalize it
-      dataAccessPath = dataAccessPath.replace('wrapper/ramp/ogc', 'wrapper/ogc');
+      // Normalize it - datacube specific normalization
+      dataAccessPath = normalizeDatacubeAccessPath(dataAccessPath);
     } else {
       // No data access path was provided, use the newly normalized metadata access path
       dataAccessPath = metadataAccessPath;
