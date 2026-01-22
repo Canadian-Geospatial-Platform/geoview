@@ -1,9 +1,10 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { useMapStoreActions } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 
-import type { TypeGroupLayer } from '../custom-legend-types';
-import { isGroupLayer, getLocalizedText, generateLegendItemId } from '../custom-legend-types';
+import type { TypeGroupLayer, TypeLegendItem } from '../custom-legend-types';
+import { isGroupLayer, getLocalizedText, generateLegendItemId, isLegendLayer } from '../custom-legend-types';
 import type { getSxClasses } from '../custom-legend-style';
 import { LegendItem } from './legend-item';
 
@@ -14,6 +15,26 @@ interface GroupItemProps {
 }
 
 /**
+ * Recursively collect all legend layer paths from group children.
+ * @param {TypeLegendItem[]} children - The children to collect from
+ * @returns {string[]} Array of layer paths
+ */
+function collectLayerPaths(children: TypeLegendItem[]): string[] {
+  const paths: string[] = [];
+
+  children.forEach((child) => {
+    if (isLegendLayer(child)) {
+      paths.push(child.layerPath);
+    } else if (isGroupLayer(child)) {
+      // Recursively collect from nested groups
+      paths.push(...collectLayerPaths(child.children));
+    }
+  });
+
+  return paths;
+}
+
+/**
  * Renders a group item with collapsible children.
  * @param {GroupItemProps} props - Component props
  * @returns {JSX.Element | undefined} The rendered group
@@ -21,7 +42,7 @@ interface GroupItemProps {
 export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.Element | undefined {
   const { cgpv } = window as TypeWindow;
   const { ui, reactUtilities } = cgpv;
-  const { useState } = reactUtilities.react;
+  const { useState, useMemo } = reactUtilities.react;
   const {
     Box,
     ListItem,
@@ -38,18 +59,33 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
   } = ui.elements;
 
   const displayLanguage = useAppDisplayLanguage();
+  const { setOrToggleLayerVisibility } = useMapStoreActions();
+
   const [collapsed, setCollapsed] = useState<boolean>(isGroupLayer(item) ? (item.collapsed ?? false) : false);
-  const [allVisible, setAllVisible] = useState<boolean>(true); // TODO: Track actual child visibility
+  const [allVisible, setAllVisible] = useState<boolean>(true);
+
+  // Collect all layer paths from children (memoized)
+  const layerPaths = useMemo(() => collectLayerPaths(item.children), [item.children]);
 
   if (!isGroupLayer(item)) return;
+
+  // TODO: Subscribe to layer visibility changes to update allVisible state
+  // This would require accessing the layer state from the store
 
   const handleToggleCollapse = (): void => {
     setCollapsed((prev) => !prev);
   };
 
   const handleToggleVisibility = (): void => {
-    // TODO: Implement visibility toggle for all children
-    setAllVisible((prev) => !prev);
+    const newVisibility = !allVisible;
+
+    // Toggle all child layers
+    layerPaths.forEach((layerPath) => {
+      setOrToggleLayerVisibility(layerPath, newVisibility);
+    });
+
+    // Update local state
+    setAllVisible(newVisibility);
   };
 
   // Get current item text and path for children
