@@ -14,6 +14,7 @@ import {
   useUIActiveFooterBarTabId,
   useUIFooterBarIsCollapsed,
   useUIActiveAppBarTab,
+  useUIStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import {
@@ -73,6 +74,7 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
   const queryableByLayerPath = useMapSelectorLayerQueryable(visibleInRangeLayers);
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
   const { addHighlightedFeature, removeHighlightedFeature, isLayerHiddenOnMap, getMapLayerParentHidden } = useMapStoreActions();
+  const { disableFocusTrap } = useUIStoreActions();
 
   // States
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState<number>(0);
@@ -471,7 +473,27 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
     if (currentFeature && !isFeatureInCheckedFeatures(currentFeature)) {
       removeHighlightedFeature(currentFeature);
     }
-  }, [removeHighlightedFeature, memoSelectedLayerData, currentFeatureIndex, isFeatureInCheckedFeatures]);
+
+    // Return focus to the layer list item that opened this panel
+    setTimeout(() => {
+      if (selectedLayerPath) {
+        // Construct the layer list item ID
+        const layerListItemId = `${mapId}-${TABS.DETAILS}-${selectedLayerPath}`;
+        disableFocusTrap(layerListItemId);
+      } else {
+        // No layer selected, don't move focus
+        disableFocusTrap('no-focus');
+      }
+    }, 0);
+  }, [
+    removeHighlightedFeature,
+    memoSelectedLayerData,
+    currentFeatureIndex,
+    isFeatureInCheckedFeatures,
+    selectedLayerPath,
+    mapId,
+    disableFocusTrap,
+  ]);
 
   /**
    * Handles when the right panel visibility changes in responsive layout.
@@ -601,6 +623,8 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
       if (!selectedLayerPath.length) {
         const selectedLayer = memoLayersList.find((layer) => !!layer.numOffeatures);
         setSelectedLayerPath(selectedLayer?.layerPath ?? '');
+        // Ensure the info panel is visible
+        layoutRef.current?.showRightPanel(true);
       }
 
       // Make sure the right panel is visible as long as the coordinates have changed from a user click

@@ -15,6 +15,7 @@ import {
   useUIActiveAppBarTab,
   useUIActiveFooterBarTabId,
   useUIAppbarComponents,
+  useUIStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import type { LayerListEntry } from '@/core/components/common';
@@ -58,6 +59,7 @@ export function Datapanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPan
   const { tabId, isOpen } = useUIActiveAppBarTab();
   const appBarComponents = useUIAppbarComponents();
   const showUnsymbolizedFeatures = useAppShowUnsymbolizedFeatures();
+  const { disableFocusTrap } = useUIStoreActions();
 
   // Create columns for data table.
   const mappedLayerData = useFeatureFieldInfos(layerData);
@@ -151,6 +153,24 @@ export function Datapanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPan
     },
     [getFeaturesOfLayer, isMapFilteredSelectedForLayer]
   );
+
+  /**
+   * Handles panel close - restores focus to the layer list item that opened the table
+   * @function handlePanelClosed
+   */
+  const handlePanelClosed = useCallback((): void => {
+    logger.logTraceUseCallback('DATA-PANEL - handlePanelClosed');
+
+    // If we have a selected layer, tell disableFocusTrap to focus it
+    if (selectedLayerPath) {
+      // Build the full layer list item ID that matches the DOM
+      // Format: {mapId}-{tabId}-{layerPath}
+      const layerListItemId = `${mapId}-${TABS.DATA_TABLE}-${selectedLayerPath}`;
+      disableFocusTrap(layerListItemId);
+    } else {
+      disableFocusTrap('no-focus');
+    }
+  }, [mapId, selectedLayerPath, disableFocusTrap]);
 
   /**
    * Checks if layer is disabled when layer is selected and features have null value.
@@ -302,6 +322,7 @@ export function Datapanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPan
         'dataTable.children.sortingAndReordering',
         'dataTable.children.keyboardNavigation',
       ]}
+      onRightPanelClosed={handlePanelClosed}
     >
       {renderContent()}
     </Layout>

@@ -396,12 +396,13 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     const isZoomToVisibleScaleCapable = !!((layerType as string) !== 'group' && !inVisibleRange);
 
     return (
-      <Box>
+      <>
         <IconButton
           edge="end"
           size="small"
           aria-label={t('layers.zoomVisibleScale')}
-          sx={{ display: isZoomToVisibleScaleCapable ? 'block' : 'none' }}
+          sx={{ display: isZoomToVisibleScaleCapable ? 'block' : 'none', height: 40, width: 40 }}
+          className="buttonOutline"
           onClick={handleZoomToLayerVisibleScale}
         >
           <CenterFocusScaleIcon />
@@ -418,7 +419,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
             {isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
           </IconButton>
         )}
-      </Box>
+      </>
     );
   }, [
     layerPath,
@@ -540,7 +541,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
   }, [displayState, selectedFooterLayerListItemId.length]);
 
   return (
-    <ListItem className={memoContainerClass} id={layerId} key={layerName} disablePadding={true} data-layer-depth={depth}>
+    <ListItem className={memoContainerClass} key={layerName} disablePadding={true} data-layer-depth={depth}>
       <Box>
         <Tooltip
           title={t('layers.selectLayer', { layerName })}
@@ -548,8 +549,21 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
           enterDelay={theme.transitions.duration.tooltipDelay}
           enterNextDelay={theme.transitions.duration.tooltipDelay}
           arrow
+          slotProps={{
+            popper: {
+              modifiers: [
+                {
+                  name: 'offset',
+                  options: {
+                    offset: [0, -8],
+                  },
+                },
+              ],
+            },
+          }}
         >
           <ListItemButton
+            id={layerId}
             onClick={handleLayerClick}
             selected={layerIsSelected || (layerChildIsSelected && !legendExpanded)}
             sx={{
