@@ -21,6 +21,7 @@
             "initialSettings": {
               "states": {
                 "visible": true,
+                "legendCollapsed": true,
                 "opacity": 1
               }
             }
