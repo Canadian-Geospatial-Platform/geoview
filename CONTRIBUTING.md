@@ -103,7 +103,7 @@ Documentation blocks for jsdoc should start with /\*\* and generally follow the 
  * - Optionally deletes the HTML container element
  * @param {string} mapId - The unique identifier of the map to delete
  * @param {boolean} [deleteContainer=true] - Optional true to remove the div element
- * @returns {Promise<void>} Promise that resolves when deletion is complete
+ * @return {Promise<void>} Promise that resolves when deletion is complete
  * @static
  */
 ```
@@ -133,20 +133,21 @@ Function Sample
 
 - Description (clear, concise summary sentence)
 - `@param` for ALL parameters (with `[]` for optional params, e.g., `@param {string} [optional]`)
-- `@return` or `@returns` for ALL functions (use `{void}` for void functions, `{Promise<void>}` for async void)
+- `@return` for ALL functions (use `{void}` for void functions, `{Promise<void>}` for async void)
 
 **Additionally REQUIRED based on context:**
 
 - `@static` - On ALL static methods
 - `@private` - On ALL private methods (starting with #)
 - `@protected` - On ALL protected methods
+- `@abstract` - On ALL abstract methods
 - `@throws` - When function throws specific error types
 
 **Tag Ordering (REQUIRED):**
 
 1. Description
 2. `@param` tags (all parameters)
-3. `@return` or `@returns`
+3. `@return`
 4. `@throws` (if applicable)
 5. **Modifiers LAST**: `@static`, `@protected`, `@private`, `@override`, `@constructor`
 

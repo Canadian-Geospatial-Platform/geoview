@@ -892,6 +892,7 @@ export abstract class ConfigBaseClass {
    * @param {ConfigBaseClass} layerConfig - The layer configuration for which we want to get the layer path.
    * @param {string} layerPath - Internal parameter used to build the layer path (should not be used by the user).
    * @return {string} Returns the layer path.
+   * @static
    */
   static #evaluateLayerPath(layerConfig: ConfigBaseClass, layerPath?: string): string {
     let pathEnding = layerPath;
@@ -913,6 +914,7 @@ export abstract class ConfigBaseClass {
    * @param {TypeLayerStatus} layerStatus - The layer status to compare with the internal value of the config.
    * @param {ConfigBaseClass[]} listOfLayerEntryConfig - The list of layer's configuration (default: this.listOfLayerEntryConfig).
    * @return {boolean} true when all layers are greater than or equal to the layerStatus parameter.
+   * @static
    */
   static allLayerStatusAreGreaterThanOrEqualTo(layerStatus: TypeLayerStatus, listOfLayerEntryConfig: ConfigBaseClass[]): boolean {
     // Try to find a layer that is not greater than or equal to the layerStatus parameter. If you can, return false
@@ -931,6 +933,7 @@ export abstract class ConfigBaseClass {
    * @param {TypeGeoviewLayerType} layerType - The GeoView layer type to convert.
    * @returns The corresponding layer entry type.
    * @throws {NotSupportedError} If the provided `layerType` is not supported for conversion.
+   * @static
    */
   static getLayerEntryTypeFromLayerType(layerType: TypeGeoviewLayerType): TypeLayerEntryType {
     switch (layerType) {
@@ -964,6 +967,7 @@ export abstract class ConfigBaseClass {
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
    * @return {TypeGeoviewLayerType | undefined} The schema tag or undefined.
+   * @static
    */
   static getClassOrTypeSchemaTag(layerConfig: ConfigClassOrType | undefined): TypeGeoviewLayerType | undefined {
     if (layerConfig instanceof ConfigBaseClass) {
@@ -977,6 +981,7 @@ export abstract class ConfigBaseClass {
    * @param {ConfigClassOrType} layerConfig - The layer config class instance or regular json object.
    * @param {TypeGeoviewLayerType} schemaTag - The schema tag.
    * @return {void}
+   * @static
    */
   static setClassOrTypeSchemaTag(layerConfig: ConfigClassOrType, schemaTag: TypeGeoviewLayerType): void {
     if (layerConfig instanceof ConfigBaseClass) {
