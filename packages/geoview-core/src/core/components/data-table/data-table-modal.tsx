@@ -175,6 +175,8 @@ export default function DataTableModal(): JSX.Element {
 
   return (
     <Modal
+      disableAutoFocus
+      disableRestoreFocus
       modalId="layerDataTable"
       open={activeModalId === 'layerDataTable'}
       onClose={() => disableFocusTrap()}
