@@ -158,6 +158,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   /**
    * Retrieves the default filter configuration from layer entry config.
    * Checks the layer entry configuration for a layerFilter property and returns its value.
+   *
+   * @description
+   * This method fetches the layer entry configuration for the specified layer path and checks if it contains a `layerFilter` property.
+   *
+   * If the property exists, its value is returned; otherwise, `undefined` is returned.
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The path to the layer
    * @return {string | undefined} The default filter string, or undefined if not available
@@ -173,6 +178,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   /**
    * Retrieves the projection code from the layer's service metadata.
    * Fetches the GeoView layer and calls getMetadataProjection if available to obtain the projection code.
+   *
+   * @description
+   * This method fetches the Geoview layer for the specified layer path and checks if it has a `getMetadataProjection` method.
+   * If the method exists, it retrieves the projection object and returns its code using the `getCode` method.
+   * If the projection or its code is not available, the method returns `undefined`.
+   *
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The path to the layer
    * @return {string | undefined} The projection code (e.g., 'EPSG:3857'), or undefined if not available
@@ -328,6 +339,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   /**
    * Retrieves the temporal dimension information for a layer if it supports time-based data.
    * Checks if the layer has a getTimeDimension method and returns its time dimension configuration.
+   *
+   * @description
+   * This method fetches the Geoview layer for the specified layer path (if it exists) and checks if it has a `getTimeDimension` method.
+   * If the method exists, it retrieves the temporal dimension information for the layer.
+   * If the layer doesn't support temporal dimensions, the method returns `undefined`.
+   *
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The path to the layer
    * @return {TimeDimension | undefined} The temporal dimension information, or undefined if not available
@@ -892,17 +909,17 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   /**
    * Filters features based on their visibility settings defined in the layer's unique value or class break style configuration.
    *
-   * @param {string} mapId - The map identifier
-   * @param {string} layerPath - The path to the layer in the map configuration
-   * @param {TypeFeatureInfoEntry[]} features - Array of features to filter
-   * @return {TypeFeatureInfoEntry[]} Filtered array of features based on their visibility settings
-   *
    * @description
    * This function processes features based on the layer's unique value style configuration:
    * - If the layer doesn't use unique value or class break styling, returns all features unchanged
    * - Features matching visible styles are included
    * - Features matching invisible styles are excluded
    * - Features with no matching style follow the defaultVisible setting
+   *
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The path to the layer in the map configuration
+   * @param {TypeFeatureInfoEntry[]} features - Array of features to filter
+   * @return {TypeFeatureInfoEntry[]} Filtered array of features based on their visibility settings
    * @static
    */
   static processClassVisibility(mapId: string, layerPath: string, features: TypeFeatureInfoEntry[]): TypeFeatureInfoEntry[] {
@@ -928,9 +945,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Processes features based on unique value style configuration to determine their visibility.
-   * @param {TypeUniqueValueStyleConfig} uniqueValueStyle - The unique value style configuration
-   * @param {TypeFeatureInfoEntry[]} features - Array of features to process
-   * @return {TypeFeatureInfoEntry[]} Filtered array of features based on visibility rules
    *
    * @description
    * This function filters features based on their field values and the unique value style configuration:
@@ -939,6 +953,10 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * - Determines feature visibility based on:
    *   - Explicit visibility rules in the style configuration
    *   - Default visibility for values not matching any style rule
+   *
+   * @param {TypeUniqueValueStyleConfig} uniqueValueStyle - The unique value style configuration
+   * @param {TypeFeatureInfoEntry[]} features - Array of features to process
+   * @return {TypeFeatureInfoEntry[]} Filtered array of features based on visibility rules
    * @static
    * @private
    */
@@ -971,9 +989,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Processes features based on class break style configuration to determine their visibility.
-   * @param {TypeClassBreakStyleConfig} classBreakStyle - The class break style configuration
-   * @param {TypeFeatureInfoEntry[]} features - Array of features to process
-   * @return {TypeFeatureInfoEntry[]} Filtered array of features based on class break visibility rules
    *
    * @description
    * This function filters features based on numeric values falling within defined class breaks:
@@ -984,6 +999,10 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    *   - Whether the feature's value falls within a class break range
    *   - The visibility setting of the matching class break
    *   - Default visibility for values not matching any class break
+   *
+   * @param {TypeClassBreakStyleConfig} classBreakStyle - The class break style configuration
+   * @param {TypeFeatureInfoEntry[]} features - Array of features to process
+   * @return {TypeFeatureInfoEntry[]} Filtered array of features based on class break visibility rules
    * @static
    * @private
    */

@@ -21,6 +21,7 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * The class constructor.
    * @param {EsriImageLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+   * @constructor
    */
   constructor(layerConfig: EsriImageLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.ESRI_IMAGE, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
@@ -30,8 +31,8 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @return {TypeSourceImageEsriInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   * @override
    */
   override getSource(): TypeSourceImageEsriInitialConfig {
     return super.getSource();
@@ -39,8 +40,8 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @return {TypeLayerMetadataEsri | undefined} The strongly-typed layer metadata specific to this layer entry config.
+   * @override
    */
   override getLayerMetadata(): TypeLayerMetadataEsri | undefined {
     return super.getLayerMetadata() as TypeLayerMetadataEsri | undefined;
@@ -55,7 +56,7 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * represents an Esri Image layer type.
    * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
    * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
-   * @returns `true` if the config is for an Esri Image layer; otherwise `false`.
+   * @returns {boolean} true if the config is for an Esri Image layer; otherwise false.
    * @static
    */
   static isClassOrTypeEsriImage(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeEsriImageLayerConfig {

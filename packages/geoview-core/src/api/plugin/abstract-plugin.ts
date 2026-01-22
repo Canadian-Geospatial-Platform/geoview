@@ -80,12 +80,14 @@ export abstract class AbstractPlugin {
   /**
    * Must override function to get the schema validator
    * @return {unknown} The schema validator
+   * @abstract
    */
   abstract schema(): unknown;
 
   /**
    * Must override function to get the default config
    * @return {unknown} The default config
+   * @abstract
    */
   abstract defaultConfig(): unknown;
 
@@ -102,6 +104,7 @@ export abstract class AbstractPlugin {
    * Override this to do the actual adding
    * @return {void}
    * @protected
+   * @abstract
    */
   protected abstract onAdd(): void;
 
@@ -116,6 +119,7 @@ export abstract class AbstractPlugin {
    * Override this to do the actual removal
    * @return {void}
    * @protected
+   * @abstract
    */
   protected abstract onRemove(): void;
 

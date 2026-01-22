@@ -1166,8 +1166,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   /**
    * Sets whether a layer is hoverable (responds to mouse hover events).
-   * Wreturn {void}
-   * @hen enabled, the layer will display feature information when the cursor hovers over features.
+   * when enabled, the layer will display feature information when the cursor hovers over features.
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The path of the layer
    * @param {boolean} hoverable - True to enable hover, false to disable
@@ -1178,8 +1177,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Sreturn {void}
-   * @ets the hover feature information for the map.
+   * Sets the hover feature information for the map.
    * Updates the feature details shown when hovering over map features.
    * @param {string} mapId - The map identifier
    * @param {TypeHoverFeatureInfo} hoverFeatureInfo - The hover feature information to set
@@ -1190,8 +1188,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Sreturn {void}
-   * @ets the ordered layer information array for the map.
+   * Sets the ordered layer information array for the map.
    * Updates the layer stacking order and recalculates z-indices for all layers.
    * @param {string} mapId - The map identifier
    * @param {TypeOrderedLayerInfo[]} orderedLayerInfo - The ordered array of layer information
@@ -1948,6 +1945,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {boolean | "hybrid"} overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults.
    * @return {MapConfigLayerEntry | undefined} Geoview layer config object.
    * @static
+   * @private
    */
   static #createGeoviewLayerConfig(
     mapId: string,

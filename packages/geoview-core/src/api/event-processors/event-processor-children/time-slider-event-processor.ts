@@ -201,7 +201,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * Determines temporal field, range, step size, and default values.
    * @param {string} mapId - The map identifier
    * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration containing temporal metadata
-   * @param {TypeTimeSliderProps} timesliderConfig - Optional configuration overrides from map config
+   * @param {TypeTimeSliderProps} [timesliderConfig] - Optional configuration overrides from map config
    * @return {TypeTimeSliderValues | undefined} Time slider configuration object, or undefined if layer has no temporal data
    * @throws {LayerNotFoundError} When the layer couldn't be found at the layer path in config
    * @throws {LayerWrongTypeError} When the specified layer is not a GV Layer type

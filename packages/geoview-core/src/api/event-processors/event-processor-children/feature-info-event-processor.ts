@@ -47,6 +47,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {GeoviewStoreType} store - The store associated with the Feature Info Event Processor
    * @return {Array<() => void> | void} Array of unsubscribe functions for cleanup
    * @protected
+   * @override
    */
   protected override onInitialize(store: GeoviewStoreType): Array<() => void> | void {
     // Checks for updated layers in layer data array and update the batched array consequently

@@ -172,6 +172,7 @@ export class ConfigValidation {
    * Errors, when expected, are logged and not thrown so that each MapConfigLayerEntry can be processed independently.
    * @param {MapConfigLayerEntry[]} [listOfMapConfigLayerEntry] - The list of GeoView layer configuration to adjust and validate.
    * @return {void}
+   * @static
    */
   static validateListOfGeoviewLayerConfig(listOfMapConfigLayerEntry?: MapConfigLayerEntry[]): void {
     if (listOfMapConfigLayerEntry) {

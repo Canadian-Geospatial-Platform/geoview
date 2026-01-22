@@ -21,6 +21,7 @@ export class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * The class constructor.
    * @param {GeoTIFFLayerEntryConfigProps} layerConfig -  The layer configuration we want to instanciate.
+   * @constructor
    */
   constructor(layerConfig: GeoTIFFLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.GEOTIFF, CONST_LAYER_ENTRY_TYPES.RASTER_TILE);
@@ -36,8 +37,8 @@ export class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @return {TypeSourceGeoTIFFInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   * @override
    */
   override getSource(): TypeSourceGeoTIFFInitialConfig {
     return super.getSource();
@@ -45,8 +46,8 @@ export class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @return {TypeMetadataGeoTIFF | undefined} The strongly-typed layer configuration specific to this layer entry config.
+   * @override
    */
   override getServiceMetadata(): TypeMetadataGeoTIFF | undefined {
     return super.getServiceMetadata() as TypeMetadataGeoTIFF | undefined;
@@ -60,7 +61,7 @@ export class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * Type guard that checks whether the given configuration (class instance or plain object) represents an GeoTIFF layer type.
    * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
    * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
-   * @returns `true` if the config is for a GeoTIFF layer; otherwise `false`.
+   * @returns {boolean} true if the config is for a GeoTIFF layer; otherwise false.
    * @static
    */
   static isClassOrTypeGeoTIFF(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeGeoTIFFLayerConfig {

@@ -12,6 +12,7 @@ export abstract class MapPlugin extends AbstractPlugin {
   /**
    * Overridable function to create map plugin actual content
    * @returns {JSX.Element} The map plugin actual content
+   * @protected
    */
   protected onCreateContent(): JSX.Element {
     // Override this to create panel..

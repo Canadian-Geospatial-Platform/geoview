@@ -12,6 +12,7 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
   /**
    * The class constructor.
    * @param {EsriFeatureLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+   * @constructor
    */
   constructor(layerConfig: EsriFeatureLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.ESRI_FEATURE);
@@ -36,8 +37,8 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @return {TypeLayerMetadataEsri | undefined} The strongly-typed layer metadata specific to this layer entry config.
+   * @override
    */
   override getLayerMetadata(): TypeLayerMetadataEsri | undefined {
     return super.getLayerMetadata() as TypeLayerMetadataEsri | undefined;
@@ -47,6 +48,8 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
    * Overrides the get geometry type to interpret the esri type name.
    * @return {TypeStyleGeometry | undefined} The geometry type, if it could be determined.
    * @throws {NotSupportedError} When the geometry type is not supported.
+   * @override
+   * @protected
    */
   protected override onGetGeometryType(): TypeStyleGeometry | undefined {
     // Get the geometry field
@@ -67,7 +70,7 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
    * represents a Esri Feature layer type.
    * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
    * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
-   * @returns `true` if the config is for a Esri Feature layer; otherwise `false`.
+   * @returns {boolean} true if the config is for a Esri Feature layer; otherwise false.
    * @static
    */
   static isClassOrTypeEsriFeature(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeEsriFeatureLayerConfig {

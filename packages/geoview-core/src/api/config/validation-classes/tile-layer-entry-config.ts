@@ -10,6 +10,8 @@ export abstract class TileLayerEntryConfig extends AbstractBaseLayerEntryConfig 
   /**
    * The class constructor.
    * @param {VectorLayerEntryConfigProps | TileLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
+   * @constructor
+   * @protected
    */
   protected constructor(
     layerConfig: VectorTilesLayerEntryConfigProps | XYZTilesLayerEntryConfigProps | TileLayerEntryConfig,
@@ -23,8 +25,8 @@ export abstract class TileLayerEntryConfig extends AbstractBaseLayerEntryConfig 
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @return {TypeSourceTileInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   * @override
    */
   override getSource(): TypeSourceTileInitialConfig {
     return super.getSource();

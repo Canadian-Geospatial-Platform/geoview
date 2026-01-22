@@ -989,9 +989,7 @@ export interface TypeAltitudeResponse {
  * Type guard function that redefines a TypeBaseVectorGeometryConfig as a TypeLineStringVectorConfig if the type attribute of the
  * verifyIfConfig parameter is 'lineString'. The type assertion applies only to the true block of the if clause that use
  * this function.
- *
  * @param {TypeBaseVectorGeometryConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
- *
  * @return {boolean} true if the type assertion is valid.
  */
 export const isLineStringVectorConfig = (verifyIfConfig: TypeBaseVectorGeometryConfig): verifyIfConfig is TypeLineStringVectorConfig => {
@@ -1002,9 +1000,7 @@ export const isLineStringVectorConfig = (verifyIfConfig: TypeBaseVectorGeometryC
  * Type guard function that redefines a TypeBaseVectorGeometryConfig as a TypePolygonVectorConfig if the type attribute of the
  * verifyIfConfig parameter is 'filledPolygon'. The type assertion applies only to the true block of the if clause that use
  * this function.
- *
  * @param {TypeBaseVectorGeometryConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
- *
  * @return {boolean} true if the type assertion is valid.
  */
 export const isFilledPolygonVectorConfig = (verifyIfConfig: TypeBaseVectorGeometryConfig): verifyIfConfig is TypePolygonVectorConfig => {
@@ -1015,9 +1011,7 @@ export const isFilledPolygonVectorConfig = (verifyIfConfig: TypeBaseVectorGeomet
  * Type guard function that redefines a TypeBaseVectorGeometryConfig as a TypeSimpleSymbolVectorConfig if the type attribute of the
  * verifyIfConfig parameter is 'simpleSymbol'. The type assertion applies only to the true block of the if clause that use
  * this function.
- *
  * @param {TypeBaseVectorGeometryConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
- *
  * @return {boolean} true if the type assertion is valid.
  */
 export const isSimpleSymbolVectorConfig = (
@@ -1030,9 +1024,7 @@ export const isSimpleSymbolVectorConfig = (
  * Type guard function that redefines a TypeBaseVectorGeometryConfig as a TypeIconSymbolVectorConfig if the type attribute of the
  * verifyIfConfig parameter is 'iconSymbol'. The type assertion applies only to the true block of the if clause that use
  * this function.
- *
  * @param {TypeBaseVectorGeometryConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
- *
  * @return {boolean} true if the type assertion is valid.
  */
 export const isIconSymbolVectorConfig = (verifyIfConfig: TypeBaseVectorGeometryConfig): verifyIfConfig is TypeIconSymbolVectorConfig => {

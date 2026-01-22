@@ -41,6 +41,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * @param {GeoviewStoreType} store - The store associated with the GeoChart Event Processor
    * @return {Array<() => void> | void} Array of unsubscribe functions for cleanup
    * @protected
+   * @override
    */
   protected override onInitialize(store: GeoviewStoreType): Array<() => void> | void {
     // Checks for updated layers in layer data array from the details state
@@ -271,9 +272,11 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Propagates layer data to the store in a batched manner with time delay between updates.
-   * Reduces UI update frequency by batching multiple rapid changes into fewer store updates.
-   * Supports bypass mechanism via layerDataArrayBatchLayerPathBypass for immediate propagation when needed.
+   * Propagates feature info layer sets to the store in a batched manner, every 'timeDelayBetweenPropagationsForBatch' millisecond.
+   * This is used to provide another 'layerDataArray', in the store, which updates less often so that we save a couple 'layerDataArray'
+   * update triggers in the components that are listening to the store array.
+   * The propagation can be bypassed using the store 'layerDataArrayBatchLayerPathBypass' state which tells the process to
+   * immediately batch out the array in the store for faster triggering of the state, for faster updating of the UI.
    * @param {string} mapId - The map identifier
    * @param {TypeGeochartResultSetEntry[]} layerDataArray - The layer data array to batch
    * @return {Promise<void>} Promise that resolves when batch propagation completes

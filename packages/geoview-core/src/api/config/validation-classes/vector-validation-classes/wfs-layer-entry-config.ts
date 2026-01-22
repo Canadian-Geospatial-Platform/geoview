@@ -19,6 +19,7 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
   /**
    * The class constructor.
    * @param {OgcWfsLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+   * @constructor
    */
   constructor(layerConfig: OgcWfsLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.WFS);
@@ -26,8 +27,8 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @return {TypeMetadataWFS | undefined} The strongly-typed layer configuration specific to this layer entry config.
+   * @override
    */
   override getServiceMetadata(): TypeMetadataWFS | undefined {
     return super.getServiceMetadata() as TypeMetadataWFS | undefined;
@@ -35,8 +36,8 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @return {TypeOutfields[] | undefined} The strongly-typed layer metadata specific to this layer entry config.
+   * @override
    */
   override getLayerMetadata(): TypeOutfields[] | undefined {
     return super.getLayerMetadata() as TypeOutfields[] | undefined;
@@ -46,13 +47,10 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
    * Retrieves the WFS `FeatureType` metadata entry corresponding to this layer.
    * This method searches the WFS `FeatureTypeList` inside the service metadata and
    * finds the feature type whose `Name` matches the layer's `layerId`.
-   * @throws {LayerServiceMetadataEmptyError}
-   * Thrown when the WFS service metadata is missing or incomplete.
-   * @throws {LayerEntryConfigLayerIdNotFoundError}
-   * Thrown when no `FeatureType` entry matches this layer's `layerId`.
-   * @return {TypeMetadataWFSFeatureTypeListFeatureType}
-   * The `FeatureType` metadata entry describing this layer, including supported
-   * formats, bounding boxes, and feature schema.
+   * @throws {LayerServiceMetadataEmptyError} Thrown when the WFS service metadata is missing or incomplete.
+   * @throws {LayerEntryConfigLayerIdNotFoundError} Thrown when no `FeatureType` entry matches this layer's `layerId`.
+   * @return {TypeMetadataWFSFeatureTypeListFeatureType} The `FeatureType` metadata entry describing this layer, including supported
+   *      formats, bounding boxes, and feature schema.
    */
   getFeatureType(): TypeMetadataWFSFeatureTypeListFeatureType {
     // The metadata
@@ -108,12 +106,9 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
    * An optional default format to return if no supported formats are found
    * in the metadata. If provided, this value will be returned as a single-item
    * array when no formats are found.
-   * @throws {LayerServiceMetadataEmptyError}
-   * Propagated from `getFeatureType()` if the metadata is missing or incomplete.
-   * @throws {LayerEntryConfigLayerIdNotFoundError}
-   * Propagated from `getFeatureType()` if the layer's feature type is not found.
-   * @return {string[]}
-   * An array of MIME types / format identifiers supported by the WFS service for GetFeature responses.
+   * @throws {LayerServiceMetadataEmptyError} Propagated from `getFeatureType()` if the metadata is missing or incomplete.
+   * @throws {LayerEntryConfigLayerIdNotFoundError} Propagated from `getFeatureType()` if the layer's feature type is not found.
+   * @return {string[]} An array of MIME types / format identifiers supported by the WFS service for GetFeature responses.
    */
   getSupportedFormats(defaultWhenNone?: string): string[] {
     // Get the feature type
@@ -176,7 +171,7 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
    * represents a WFS Feature layer type.
    * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
    * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
-   * @returns `true` if the config is for a WFS Feature layer; otherwise `false`.
+   * @returns {boolean} true if the config is for a WFS Feature layer; otherwise false.
    * @static
    */
   static isClassOrTypeWFSLayer(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeWFSLayerConfig {

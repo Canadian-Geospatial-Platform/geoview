@@ -100,6 +100,10 @@ export abstract class ConfigBaseClass {
   /**
    * The class constructor.
    * @param {ConfigClassOrType} layerConfig - The layer configuration we want to instanciate.
+   * @param {TypeGeoviewLayerType} schemaTag - The schema tag for the layer type.
+   * @param {TypeLayerEntryType} entryType - The entry type for the layer.
+   * @constructor
+   * @protected
    */
   // TODO: Refactor - There is an oddity inside LayerApi.addGeoviewLayer to the effect that it's calling validateListOfGeoviewLayerConfig even if it was already called in config-validation.
   // TO.DOCONT: Until this is fixed, this constructor supports sending a ConfigBaseClass in its typing, for now (ConfigClassOrType = ConfigBaseClassProps | ConfigBaseClass)... though it should only be a ConfigBaseClassProps eventually.
@@ -122,6 +126,7 @@ export abstract class ConfigBaseClass {
    * to update the service metadata on the current layer entry, including
    * any recursive behavior for child entries or associated sources.
    * @param {unknown} metadata - The service metadata to set.
+   * @return {void}
    * @protected
    * @abstract
    */
@@ -133,6 +138,7 @@ export abstract class ConfigBaseClass {
    * to update the data access path on the current layer entry, including
    * any recursive behavior for child entries or associated sources.
    * @param {string} dataAccessPath - The data access path to set.
+   * @return {void}
    * @protected
    * @abstract
    */
@@ -148,7 +154,7 @@ export abstract class ConfigBaseClass {
 
   /**
    * The layerId getter method for the ConfigBaseClass class and its descendant classes.
-   * @retuns {TypeLayerStatus} The layer status
+   * @return {TypeLayerStatus} The layer status
    */
   get layerStatus(): TypeLayerStatus {
     return this.#layerStatus;
@@ -159,6 +165,7 @@ export abstract class ConfigBaseClass {
    * fallbacks on the geoviewLayerName from the GeoViewLayerConfig or
    * fallbacks on the geoviewLayerId from the GeoViewLayerConfig or
    * fallsback on the layerPath.
+   * @return {string} The layer name or fallback values.
    */
   getLayerNameCascade(): string {
     return this.#layerName || this.getGeoviewLayerName() || this.getGeoviewLayerId() || this.layerPath;
@@ -166,6 +173,7 @@ export abstract class ConfigBaseClass {
 
   /**
    * Gets the layer name of the entry layer if any.
+   * @return {string | undefined} The layer name or undefined.
    */
   getLayerName(): string | undefined {
     return this.#layerName;
@@ -174,6 +182,7 @@ export abstract class ConfigBaseClass {
   /**
    * Sets the layer name of the entry layer.
    * @param {string} layerName - The layer name.
+   * @return {void}
    */
   setLayerName(layerName: string): void {
     // Validate the input is indeed a string (it happened that this was garbage)
@@ -193,6 +202,7 @@ export abstract class ConfigBaseClass {
   /**
    * Sets the schema tag for the layer entry config.
    * @param {TypeGeoviewLayerType} schemaTag - The schema tag.
+   * @return {void}
    */
   setSchemaTag(schemaTag: TypeGeoviewLayerType): void {
     this.#schemaTag = schemaTag;
@@ -209,6 +219,7 @@ export abstract class ConfigBaseClass {
   /**
    * Sets the layer entry type for the layer entry config.
    * @param {TypeLayerEntryType} entryType - The layer entry type.
+   * @return {void}
    */
   setEntryType(entryType: TypeLayerEntryType): void {
     this.#entryType = entryType;
@@ -241,6 +252,7 @@ export abstract class ConfigBaseClass {
   /**
    * Sets the parent layer configuration for this layer.
    * @param {GroupLayerEntryConfig} parentLayerConfig - The parent group layer configuration to assign.
+   * @return {void}
    */
   setParentLayerConfig(parentLayerConfig: GroupLayerEntryConfig): void {
     this.layerEntryProps.parentLayerConfig = parentLayerConfig;
@@ -273,6 +285,7 @@ export abstract class ConfigBaseClass {
   /**
    * Updates the metadata access path for this GeoView layer.
    * @param {string} metadataAccessPath - The new metadata access path to assign.
+   * @return {void}
    */
   setMetadataAccessPath(metadataAccessPath: string): void {
     this.getGeoviewLayerConfig().metadataAccessPath = metadataAccessPath;
@@ -280,6 +293,7 @@ export abstract class ConfigBaseClass {
 
   /**
    * Gets the layer indication for the metadata layer group.
+   * @return {boolean} True if this is a metadata layer group.
    */
   getIsMetadataLayerGroup(): boolean {
     return this.#isMetadataLayerGroup;
@@ -288,6 +302,7 @@ export abstract class ConfigBaseClass {
   /**
    * Sets the layer is metadata layer group indication.
    * @param {boolean} isMetadataLayerGroup - The indication if it's a metadata layer group.
+   * @return {void}
    */
   setIsMetadataLayerGroup(isMetadataLayerGroup: boolean): void {
     this.#isMetadataLayerGroup = isMetadataLayerGroup;
@@ -454,6 +469,7 @@ export abstract class ConfigBaseClass {
   /**
    * Initializes the initial settings configuration by filling the blanks in our config with the information from the metadata, if necessary.
    * @param {TypeLayerInitialSettings | undefined} initialSettingsMetadata - The initialSettings metadata to use to help fill the blanks in our initialSettings config, if any.
+   * @return {void}
    */
   initInitialSettingsFromMetadata(initialSettingsMetadata: TypeLayerInitialSettings | undefined): void {
     this.#initialSettings = deepMerge(initialSettingsMetadata, this.#initialSettings);
@@ -462,6 +478,7 @@ export abstract class ConfigBaseClass {
   /**
    * Validates and initializes the `visible` value in the `initialSettings` object, if necessary.
    * @param {number | undefined} visible - The candidate `visible` value to validate against the current setting, if any.
+   * @return {void}
    */
   initInitialSettingsStatesVisibleFromMetadata(visible: boolean | undefined): void {
     // Validate and update the extent initial settings
@@ -473,6 +490,7 @@ export abstract class ConfigBaseClass {
   /**
    * Initializes the minimum zoom level in the initial settings using metadata.
    * @param {number | undefined} minZoomMetadata - The minimum zoom value from metadata, if any.
+   * @return {void}
    */
   initInitialSettingsMinZoomFromMetadata(minZoomMetadata: number | undefined): void {
     // Redirect
@@ -482,6 +500,7 @@ export abstract class ConfigBaseClass {
   /**
    * Initializes the maximum zoom level in the initial settings using metadata.
    * @param {number | undefined} maxZoomMetadata - The maximum zoom value from metadata, if any.
+   * @return {void}
    */
   initInitialSettingsMaxZoomFromMetadata(maxZoomMetadata: number | undefined): void {
     // Redirect
@@ -490,7 +509,7 @@ export abstract class ConfigBaseClass {
 
   /**
    * Initializes the extent in the initial settings using the layer configuration, if any.
-   * @returns {void}
+   * @return {void}
    */
   initInitialSettingsExtentAndBoundsFromConfig(): void {
     // Redirect
@@ -501,6 +520,7 @@ export abstract class ConfigBaseClass {
   /**
    * Initializes the extent in the initial settings using metadata.
    * @param {Extent | undefined} extentToValidate - The extent from metadata to validate and apply, if any.
+   * @return {void}
    */
   // TODO: CHECK - This function isn't called, but I feel like it should be... What's the relationship between extent and bounds?
   initInitialSettingsExtentFromMetadata(extentToValidate: Extent | undefined): void {
@@ -511,6 +531,7 @@ export abstract class ConfigBaseClass {
   /**
    * Initializes the bounds in the initial settings using metadata.
    * @param {Extent | undefined} extentToValidate - The bounds from metadata to validate and apply, if any.
+   * @return {void}
    */
   initInitialSettingsBoundsFromMetadata(extentToValidate: Extent | undefined): void {
     // Redirect
@@ -543,6 +564,7 @@ export abstract class ConfigBaseClass {
    * Internally, it delegates the behavior to the `onSetServiceMetadata` method,
    * which can be overridden by subclasses to implement custom logic.
    * @param {unknown} metadata - The new service metadata to be used.
+   * @return {void}
    */
   setServiceMetadata(metadata: unknown): void {
     // Redirect
@@ -555,6 +577,7 @@ export abstract class ConfigBaseClass {
    * Internally, it delegates the behavior to the `onSetDataAccessPath` method,
    * which can be overridden by subclasses to implement custom logic.
    * @param {string} dataAccessPath - The new path to be used for accessing data.
+   * @return {void}
    */
   setDataAccessPath(dataAccessPath: string): void {
     // Redirect
@@ -563,6 +586,7 @@ export abstract class ConfigBaseClass {
 
   /**
    * Sets the layer status to registered.
+   * @return {void}
    */
   setLayerStatusRegistered(): void {
     // Redirect
@@ -571,6 +595,7 @@ export abstract class ConfigBaseClass {
 
   /**
    * Sets the layer status to processing.
+   * @return {void}
    */
   setLayerStatusProcessing(): void {
     // Redirect
@@ -579,6 +604,7 @@ export abstract class ConfigBaseClass {
 
   /**
    * Sets the layer status to processed.
+   * @return {void}
    */
   setLayerStatusProcessed(): void {
     // Redirect
@@ -587,6 +613,7 @@ export abstract class ConfigBaseClass {
 
   /**
    * Sets the layer status to loading.
+   * @return {void}
    */
   setLayerStatusLoading(): void {
     // Redirect
@@ -595,6 +622,7 @@ export abstract class ConfigBaseClass {
 
   /**
    * Sets the layer status to loaded.
+   * @return {void}
    */
   setLayerStatusLoaded(): void {
     // Redirect
@@ -603,6 +631,7 @@ export abstract class ConfigBaseClass {
 
   /**
    * Sets the layer status to error.
+   * @return {void}
    */
   setLayerStatusError(): void {
     // Redirect
@@ -612,6 +641,7 @@ export abstract class ConfigBaseClass {
   /**
    * Sets the layer status and emits an event when changed.
    * @param {string} newLayerStatus - The new layerId value.
+   * @return {void}
    */
   setLayerStatus(newLayerStatus: TypeLayerStatus): void {
     // Log
@@ -641,6 +671,7 @@ export abstract class ConfigBaseClass {
    * - If all siblings are in a 'loaded' state, it sets the parent layer status to 'loaded'.
    * - If all siblings are in an 'error' state, it sets the parent layer status to 'error'.
    * - If neither condition is met, the parent status remains unchanged.
+   * @return {void}
    */
   updateLayerStatusParent(): void {
     // Redirect
@@ -705,6 +736,7 @@ export abstract class ConfigBaseClass {
    * Ensures that the `minZoom` is not decreased unintentionally by keeping the more restrictive (higher) value
    * between the existing `minZoom` and the provided `minZoomToValidate`.
    * @param {number | undefined} minZoomToValidate - The candidate `minZoom` value to validate against the current setting, if any.
+   * @return {void}
    * @private
    */
   #initInitialSettingsMinZoom(minZoomToValidate: number | undefined): void {
@@ -720,6 +752,7 @@ export abstract class ConfigBaseClass {
    * Ensures that the `maxZoom` is not increased unintentionally by keeping the more restrictive (lower) value
    * between the existing `maxZoom` and the provided `maxZoomToValidate`.
    * @param {number | undefined} maxZoomToValidate - The candidate `maxZoom` value to validate against the current setting, if any.
+   * @return {void}
    * @private
    */
   #initInitialSettingsMaxZoom(maxZoomToValidate: number | undefined): void {
@@ -735,6 +768,7 @@ export abstract class ConfigBaseClass {
    * If no extent is explicitly provided, the current `initialSettings.extent` is used by default.
    * The provided extent (or existing one) is passed to `validateExtentWhenDefined()` to apply any required corrections.
    * @param {Extent | undefined} extentToValidate - The extent to validate and apply, if any.
+   * @return {void}
    * @private
    */
   #initInitialSettingsExtent(extentToValidate: Extent | undefined): void {
@@ -751,6 +785,7 @@ export abstract class ConfigBaseClass {
    * If no bounds is explicitly provided, the current `initialSettings.bounds` is used by default.
    * The provided bounds (or existing one) is passed to `validateExtentWhenDefined()` to apply any required corrections.
    * @param {Extent | undefined} boundsToValidate - The bounds to validate and apply, if any.
+   * @return {void}
    * @private
    */
   #initInitialSettingsBounds(boundsToValidate: Extent | undefined): void {
@@ -768,6 +803,7 @@ export abstract class ConfigBaseClass {
    * that were used to create this layer entry configuration. Modifying the returned
    * object will not affect the internal state of the layer.
    * @return {ConfigBaseClassProps} A deep-cloned copy of the layer entry properties.
+   * @protected
    */
   protected onCloneLayerProps(): ConfigBaseClassProps {
     // Return a cloned copy of the layer entry props that were used to create this layer entry config
@@ -800,6 +836,10 @@ export abstract class ConfigBaseClass {
    * - If all siblings are in a 'loaded' state, it sets the parent layer status to 'loaded'.
    * - If all siblings are in an 'error' state, it sets the parent layer status to 'error'.
    * - If neither condition is met, the parent status remains unchanged.
+   * @param {ConfigBaseClass} currentConfig - The current configuration.
+   * @return {void}
+   * @static
+   * @private
    */
   static #updateLayerStatusParentRec(currentConfig: ConfigBaseClass): void {
     // Get the parent config, if any
@@ -851,7 +891,6 @@ export abstract class ConfigBaseClass {
    * Getter for the layer Path of the layer configuration parameter.
    * @param {ConfigBaseClass} layerConfig - The layer configuration for which we want to get the layer path.
    * @param {string} layerPath - Internal parameter used to build the layer path (should not be used by the user).
-   *
    * @return {string} Returns the layer path.
    */
   static #evaluateLayerPath(layerConfig: ConfigBaseClass, layerPath?: string): string {
@@ -873,7 +912,6 @@ export abstract class ConfigBaseClass {
    *
    * @param {TypeLayerStatus} layerStatus - The layer status to compare with the internal value of the config.
    * @param {ConfigBaseClass[]} listOfLayerEntryConfig - The list of layer's configuration (default: this.listOfLayerEntryConfig).
-   *
    * @return {boolean} true when all layers are greater than or equal to the layerStatus parameter.
    */
   static allLayerStatusAreGreaterThanOrEqualTo(layerStatus: TypeLayerStatus, listOfLayerEntryConfig: ConfigBaseClass[]): boolean {
@@ -938,6 +976,7 @@ export abstract class ConfigBaseClass {
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigClassOrType} layerConfig - The layer config class instance or regular json object.
    * @param {TypeGeoviewLayerType} schemaTag - The schema tag.
+   * @return {void}
    */
   static setClassOrTypeSchemaTag(layerConfig: ConfigClassOrType, schemaTag: TypeGeoviewLayerType): void {
     if (layerConfig instanceof ConfigBaseClass) {
@@ -952,6 +991,7 @@ export abstract class ConfigBaseClass {
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
    * @return {TypeLayerEntryType | undefined} The layer entry type or undefined.
+   * @static
    */
   static getClassOrTypeEntryType(layerConfig: ConfigClassOrType | undefined): TypeLayerEntryType | undefined {
     if (layerConfig instanceof ConfigBaseClass) {
@@ -964,6 +1004,8 @@ export abstract class ConfigBaseClass {
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigClassOrType} layerConfig - The layer config class instance or regular json object.
    * @param {TypeLayerEntryType} entryType - The entry type.
+   * @return {void}
+   * @static
    */
   static setClassOrTypeEntryType(layerConfig: ConfigClassOrType, entryType: TypeLayerEntryType): void {
     if (layerConfig instanceof ConfigBaseClass) {
@@ -978,6 +1020,7 @@ export abstract class ConfigBaseClass {
    * Helper typeguard function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
    * @return {GroupLayerEntryConfig} The group layer entry config when the layerConfig is a group entry type.
+   * @static
    */
   static getClassOrTypeEntryTypeIsGroup(layerConfig: ConfigClassOrType | undefined): layerConfig is GroupLayerEntryConfig {
     return ConfigBaseClass.getClassOrTypeEntryType(layerConfig) === CONST_LAYER_ENTRY_TYPES.GROUP;
@@ -990,6 +1033,7 @@ export abstract class ConfigBaseClass {
    * @template T - A subtype of `ConfigBaseClassProps`.
    * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The configuration, which may be a class or a plain object.
    * @return {T} The extracted `layerEntryProps` cast to the expected type.
+   * @static
    */
   static getClassOrTypeLayerEntryProps<T extends ConfigBaseClassProps>(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): T {
     if (layerConfig instanceof ConfigBaseClass) {
@@ -1004,6 +1048,7 @@ export abstract class ConfigBaseClass {
    * Internally uses `getClassOrTypeLayerEntryProps()` to normalize access to the configuration structure.
    * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The configuration, which may be a class instance or a plain object.
    * @return {TypeGeoviewLayerConfig} The `geoviewLayerConfig` associated with the provided configuration.
+   * @static
    */
   static getClassOrTypeGeoviewLayerConfig(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): TypeGeoviewLayerConfig {
     return ConfigBaseClass.getClassOrTypeLayerEntryProps(layerConfig).geoviewLayerConfig;
@@ -1013,6 +1058,8 @@ export abstract class ConfigBaseClass {
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigClassOrType} layerConfig - The layer config class instance or regular json object.
    * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The geoviewLayerConfig to apply.
+   * @return {void}
+   * @static
    */
   static setClassOrTypeGeoviewLayerConfig(layerConfig: ConfigClassOrType, geoviewLayerConfig: TypeGeoviewLayerConfig): void {
     if (layerConfig instanceof ConfigBaseClass) {
@@ -1030,6 +1077,7 @@ export abstract class ConfigBaseClass {
    * `ConfigBaseClass` or a raw config type.
    * @param {ConfigClassOrType} layerConfig - The layer configuration to extract the parent from.
    * @return {GroupLayerEntryConfig | undefined} The parent group layer config, or `undefined` if this layer has no parent.
+   * @static
    */
   static getClassOrTypeParentLayerConfig(layerConfig: ConfigClassOrType): GroupLayerEntryConfig | undefined {
     return ConfigBaseClass.getClassOrTypeLayerEntryProps(layerConfig).parentLayerConfig;
@@ -1038,7 +1086,9 @@ export abstract class ConfigBaseClass {
   /**
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigClassOrType} layerConfig - The layer config class instance or regular json object.
-   * @param {GroupLayerEntryConfig} geoviewLayerConfig - The geoviewLayerConfig to apply.
+   * @param {GroupLayerEntryConfig | undefined} parentLayerConfig - The parent layer config to apply.
+   * @return {void}
+   * @static
    */
   static setClassOrTypeParentLayerConfig(layerConfig: ConfigClassOrType, parentLayerConfig: GroupLayerEntryConfig | undefined): void {
     if (layerConfig instanceof ConfigBaseClass) {
@@ -1054,6 +1104,7 @@ export abstract class ConfigBaseClass {
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
    * @return {string | undefined} The layer name or undefined.
+   * @static
    */
   static getClassOrTypeLayerName(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig | undefined): string | undefined {
     if (layerConfig instanceof ConfigBaseClass) {
@@ -1065,8 +1116,10 @@ export abstract class ConfigBaseClass {
 
   /**
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
-   * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
+   * @param {ConfigClassOrType | TypeGeoviewLayerConfig | undefined} layerConfig - The layer config class instance or regular json object.
    * @param {string} layerName - The layer name to apply.
+   * @return {void}
+   * @static
    */
   static setClassOrTypeLayerName(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig | undefined, layerName: string): void {
     if (layerConfig instanceof ConfigBaseClass) {
@@ -1081,6 +1134,7 @@ export abstract class ConfigBaseClass {
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
    * @return {number | undefined} The minimum scale or undefined.
+   * @static
    */
   static getClassOrTypeMinScale(layerConfig: ConfigClassOrType | undefined): number | undefined {
     if (layerConfig instanceof ConfigBaseClass) {
@@ -1093,6 +1147,8 @@ export abstract class ConfigBaseClass {
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigClassOrType} layerConfig - The layer config class instance or regular json object.
    * @param {number} minScale - The minimum scale to apply.
+   * @return {void}
+   * @static
    */
   static setClassOrTypeMinScale(layerConfig: ConfigClassOrType, minScale: number): void {
     if (layerConfig instanceof ConfigBaseClass) {
@@ -1107,6 +1163,7 @@ export abstract class ConfigBaseClass {
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
    * @return {number | undefined} The maximum scale or undefined.
+   * @static
    */
   static getClassOrTypeMaxScale(layerConfig: ConfigClassOrType | undefined): number | undefined {
     if (layerConfig instanceof ConfigBaseClass) {
@@ -1119,6 +1176,8 @@ export abstract class ConfigBaseClass {
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigClassOrType} layerConfig - The layer config class instance or regular json object.
    * @param {number} maxScale - The maximum scale to apply.
+   * @return {void}
+   * @static
    */
   static setClassOrTypeMaxScale(layerConfig: ConfigClassOrType, maxScale: number): void {
     if (layerConfig instanceof ConfigBaseClass) {
@@ -1133,6 +1192,7 @@ export abstract class ConfigBaseClass {
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigClassOrType | TypeGeoviewLayerConfig | undefined} layerConfig - The layer config class instance or regular json object.
    * @return {TypeLayerInitialSettings | undefined} The initial settings in the layer config or undefined.
+   * @static
    */
   static getClassOrTypeInitialSettings(
     layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig | undefined
@@ -1147,6 +1207,8 @@ export abstract class ConfigBaseClass {
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigClassOrType} layerConfig - The layer config class instance or regular json object.
    * @param {TypeLayerInitialSettings} initialSettings - The initial settings scale to apply.
+   * @return {void}
+   * @static
    */
   static setClassOrTypeInitialSettings(layerConfig: ConfigClassOrType, initialSettings: TypeLayerInitialSettings): void {
     if (layerConfig instanceof ConfigBaseClass) {
@@ -1162,6 +1224,7 @@ export abstract class ConfigBaseClass {
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
    * @return {boolean} The indication if the layer config is metadata layer group.
+   * @static
    */
   static getClassOrTypeIsMetadataLayerGroup(layerConfig: ConfigClassOrType | undefined): boolean {
     if (layerConfig instanceof ConfigBaseClass) {
@@ -1177,7 +1240,8 @@ export abstract class ConfigBaseClass {
    * represents a particular layer type.
    * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
    * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
-   * @returns `true` if the config is for a particular layer; otherwise `false`.
+   * @param {TypeGeoviewLayerType} layerType - The GeoView layer type expected.
+   * @returns {boolean} true if the config is for a particular layer; otherwise false.
    * @static
    * @protected
    */
@@ -1212,6 +1276,7 @@ export abstract class ConfigBaseClass {
   /**
    * Emits an event to all handlers.
    * @param {LayerStatusChangedEvent} event - The event to emit
+   * @return {void}
    * @private
    */
   #emitLayerStatusChanged(event: LayerStatusChangedEvent): void {
@@ -1222,6 +1287,7 @@ export abstract class ConfigBaseClass {
   /**
    * Registers a layer status changed event handler.
    * @param {LayerStatusChangedDelegate} callback - The callback to be executed whenever the event is emitted
+   * @return {void}
    */
   onLayerStatusChanged(callback: LayerStatusChangedDelegate): void {
     // Register the event handler
@@ -1231,6 +1297,7 @@ export abstract class ConfigBaseClass {
   /**
    * Unregisters a layer status changed event handler.
    * @param {LayerStatusChangedDelegate} callback - The callback to stop being called whenever the event is emitted
+   * @return {void}
    */
   offLayerStatusChanged(callback: LayerStatusChangedDelegate): void {
     // Unregister the event handler

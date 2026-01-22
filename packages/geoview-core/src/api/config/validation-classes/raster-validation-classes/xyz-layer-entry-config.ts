@@ -23,6 +23,7 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
   /**
    * The class constructor.
    * @param {XYZTilesLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+   * @constructor
    */
   constructor(layerConfig: XYZTilesLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.XYZ_TILES, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
@@ -40,8 +41,8 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @return {TypeSourceImageXYZTilesInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   * @override
    */
   override getSource(): TypeSourceImageXYZTilesInitialConfig {
     return super.getSource();
@@ -56,7 +57,7 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
    * represents a XYZTiles layer type.
    * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
    * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
-   * @returns `true` if the config is for a XYZTiles layer; otherwise `false`.
+   * @returns {boolean} true if the config is for a XYZTiles layer; otherwise false.
    * @static
    */
   static isClassOrTypeXYZTiles(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeXYZTilesConfig {

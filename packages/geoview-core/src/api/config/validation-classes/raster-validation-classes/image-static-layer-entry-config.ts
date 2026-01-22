@@ -16,6 +16,7 @@ export class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * The class constructor.
    * @param {ImageStaticLayerEntryConfigProps} layerConfig -  The layer configuration we want to instanciate.
+   * @constructor
    */
   constructor(layerConfig: ImageStaticLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.IMAGE_STATIC, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
@@ -38,8 +39,8 @@ export class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @return {TypeSourceImageStaticInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   * @override
    */
   override getSource(): TypeSourceImageStaticInitialConfig {
     return super.getSource();
@@ -54,7 +55,7 @@ export class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * represents an Image Static layer type.
    * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
    * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
-   * @returns `true` if the config is for an Image Static layer; otherwise `false`.
+   * @returns {boolean} true if the config is for an Image Static layer; otherwise false.
    * @static
    */
   static isClassOrTypeImageStatic(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeImageStaticLayerConfig {

@@ -13,6 +13,7 @@ export class WkbLayerEntryConfig extends VectorLayerEntryConfig {
   /**
    * The class constructor.
    * @param {WkbLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+   * @constructor
    */
   constructor(layerConfig: WkbLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.WKB);
@@ -22,8 +23,8 @@ export class WkbLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @return {TypeSourceWkbVectorInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   * @override
    */
   override getSource(): TypeSourceWkbVectorInitialConfig {
     return super.getSource();
@@ -38,7 +39,7 @@ export class WkbLayerEntryConfig extends VectorLayerEntryConfig {
    * represents a WKB Feature layer type.
    * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
    * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
-   * @returns `true` if the config is for a WKB Feature layer; otherwise `false`.
+   * @returns {boolean} true if the config is for a WKB Feature layer; otherwise false.
    * @static
    */
   static isClassOrTypeWKBLayer(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeWkbLayerConfig {

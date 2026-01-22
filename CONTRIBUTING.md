@@ -142,6 +142,14 @@ Function Sample
 - `@protected` - On ALL protected methods
 - `@throws` - When function throws specific error types
 
+**Tag Ordering (REQUIRED):**
+
+1. Description
+2. `@param` tags (all parameters)
+3. `@return` or `@returns`
+4. `@throws` (if applicable)
+5. **Modifiers LAST**: `@static`, `@protected`, `@private`, `@override`, `@constructor`
+
 **Examples:**
 
 ```typescript
@@ -190,9 +198,7 @@ Commit message format
 Each commit message consists of a header and a footer. The header has a special format that includes a type, scope and subject:
 
 ```html
-<type
-  >(<scope
-    >): <subject> <footer></footer></subject></scope
+<type>(<scope>): <subject>
 ></type>
 ```
 
@@ -354,11 +360,12 @@ You should refer to the [i18next](https://www.i18next.com/) localization library
 - Import the useTranslation to your file `import { useTranslation } from 'react-i18next';`
 - Create the translation object `const { t } = useTranslation();`
 - Call the object with the proper key
-  _ Directly inside JavaScript
-  `        const myValue = t('mapctrl.mouseposition.north')
-    `
-  _ Inside HTML object
-  `html
-        <ButtonGroup orientation="vertical" aria-label={t('mapnav.ariaNavbar')} variant="contained">
-     `
-  This object will return the appropriate key value for the language selected by the user.
+  - Directly inside JavaScript
+    ```
+    const myValue = t('mapctrl.mouseposition.north')
+    ```
+  - Inside HTML object
+    ```html
+    <ButtonGroup orientation="vertical" aria-label={t('mapnav.ariaNavbar')} variant="contained">
+    ```
+    This object will return the appropriate key value for the language selected by the user.

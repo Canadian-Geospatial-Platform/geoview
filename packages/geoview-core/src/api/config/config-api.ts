@@ -316,14 +316,23 @@ export class ConfigApi {
    * These defaults are applied when user-provided configuration is missing optional fields.
    * Includes default map view, projection, basemap, and component settings.
    * @return {MapFeatureConfig} A new instance of MapFeatureConfig with default values
-   * @statice
+   * @static
    */
   static getDefaultMapFeatureConfig(): MapFeatureConfig {
     return new MapFeatureConfig(DEFAULT_MAP_FEATURE_CONFIG);
   }
 
   /**
-   * Validates and sanitizes the user-provided map configuration.
+   * This method validates the configuration of map elements using the json string or json object supplied by the user.
+   * The returned value is a configuration object initialized only from the configuration passed as a parameter.
+   * Validation of the configuration based on metadata and application of default values is not performed here,
+   * but will be done later using another method.
+   *
+   * If the configuration is unreadable or generates a fatal error, the default configuration will be returned with
+   * the error flag raised and an error message logged in the console. When configuration processing is possible, if
+   * errors are detected, the configuration will be corrected to the best of our ability to avoid crashing the viewer,
+   * and all changes made will be logged in the console.
+
    * This method:
    * - Converts string configurations to JSON objects
    * - Validates against the JSON schema

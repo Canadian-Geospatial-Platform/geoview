@@ -18,6 +18,7 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
   /**
    * The class constructor.
    * @param {GroupLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+   * @constructor
    */
   // TO: Until this is fixed, this constructor supports sending a GroupLayerEntryConfig in its typing, for now (GroupLayerEntryConfigProps | GroupLayerEntryConfig)... though it should only be a GroupLayerEntryConfigProps eventually
   constructor(layerConfig: GroupLayerEntryConfigProps) {
@@ -61,6 +62,9 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
    * `metadata` to each entry in `listOfLayerEntryConfig`. It ensures that
    * all nested or child layer entries also receive the updated metadata.
    * @param {unknown} metadata - The new service metadata to be used.
+   * @return {void}
+   * @protected
+   * @override
    */
   protected override onSetServiceMetadata(metadata: unknown): void {
     // Recursively change the service metadata for each layer entries
@@ -76,6 +80,9 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
    * `dataAccessPath` to each entry in `listOfLayerEntryConfig`. It ensures that
    * all nested or child layer entries also receive the updated data access path.
    * @param {string} dataAccessPath - The new path to be used for accessing data.
+   * @return {void}
+   * @protected
+   * @override
    */
   protected override onSetDataAccessPath(dataAccessPath: string): void {
     // Recursively change the data access path for each layer entries
@@ -89,6 +96,8 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
    * Overrides the creation of the layer props and return a deep clone of the layer entry configuration properties.
    * This method calls the parent method and then copies the listOfLayerEntryConfig over.
    * @return {GroupLayerEntryConfigProps} A deep-cloned copy of the layer entry properties.
+   * @protected
+   * @override
    */
   protected override onCloneLayerProps(): GroupLayerEntryConfigProps {
     // Sure
@@ -105,6 +114,7 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
    * Overrides the toJson of the mother class
    * @return {T} The Json representation of the instance.
    * @protected
+   * @override
    */
   protected override onToJson<T>(): T {
     // Call parent

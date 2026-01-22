@@ -19,6 +19,8 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
   /**
    * The class constructor.
    * @param {VectorLayerEntryConfigProps | VectorLayerEntryConfig} layerConfig - The layer configuration we want to instanciate.
+   * @constructor
+   * @protected
    */
   protected constructor(layerConfig: VectorLayerEntryConfigProps | VectorLayerEntryConfig, schemaTag: TypeGeoviewLayerType) {
     super(layerConfig, schemaTag, CONST_LAYER_ENTRY_TYPES.VECTOR);
@@ -29,8 +31,8 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @return {TypeBaseVectorSourceInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   * @override
    */
   override getSource(): TypeBaseVectorSourceInitialConfig {
     return super.getSource();

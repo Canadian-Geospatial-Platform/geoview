@@ -188,6 +188,14 @@ Control via localStorage:
 - **Thrown errors** - Use `@throws` to document error types: `@throws {MapViewerNotFoundError} When no map exists with the given ID`
 - **Access modifiers** - Use `@private` for private methods/properties, `@protected` for protected members, `@static` for static methods
 
+**Tag Ordering:**
+
+1. Description
+2. `@param` tags (all parameters)
+3. `@return`/`@returns`
+4. `@throws` (if applicable)
+5. **Modifiers LAST**: `@static`, `@protected`, `@private`, `@override`, `@constructor`
+
 **Function Descriptions:**
 
 - Start with a clear, concise summary sentence
