@@ -108,7 +108,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Sets the service metadata for the layer.
    * @param {unknown} metadata - The service metadata to set
-   * @return {void}
+   * @returns {void}
    * @override
    */
   override onSetServiceMetadata(metadata: unknown): void {
@@ -119,7 +119,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * Sets the data access path for the source object.
    * This method is called when the data access path is being set.
    * @param {string} dataAccessPath - The path string used to access data.
-   * @return {void}
+   * @returns {void}
    * @override
    * @protected
    */
@@ -130,7 +130,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Overridable function get the geometry type based on the geometry field type.
    * It uses the WFS/WMS OGC standard (GML) to interpret the geometry type.
-   * @return {TypeStyleGeometry | undefined} The geometry type, if it could be determined
+   * @returns {TypeStyleGeometry | undefined} The geometry type, if it could be determined
    * @throws {NotSupportedError} When the geometry type is not supported.
    * @protected
    */
@@ -150,7 +150,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Overrides the toJson of the mother class
-   * @return {unknown} The Json representation of the instance.
+   * @returns {unknown} The Json representation of the instance.
    * @override
    * @protected
    */
@@ -175,7 +175,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Gets the service metadata that is associated to the service.
-   * @return {unknown | undefined} The service metadata or undefined.
+   * @returns {unknown | undefined} The service metadata or undefined.
    */
   getServiceMetadata(): unknown | undefined {
     return this.#serviceMetadata;
@@ -183,7 +183,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Gets the metadata that is associated to the layer.
-   * @return {unknown} The layer metadata or undefined.
+   * @returns {unknown} The layer metadata or undefined.
    */
   getLayerMetadata(): unknown | undefined {
     return this.#layerMetadata;
@@ -192,7 +192,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Sets the layer metadata for the layer.
    * @param {unknown} layerMetadata - The layer metadata to set
-   * @return {void}
+   * @returns {void}
    */
   setLayerMetadata(layerMetadata: unknown): void {
     this.#layerMetadata = layerMetadata;
@@ -200,7 +200,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Gets the metadata that is associated to the layer.
-   * @return {TypeLayerStyleConfig} The layer style or undefined.
+   * @returns {TypeLayerStyleConfig} The layer style or undefined.
    */
   getLayerStyle(): TypeLayerStyleConfig | undefined {
     return this.#layerStyle;
@@ -209,7 +209,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Sets the layer metadata for the layer.
    * @param {TypeLayerStyleConfig} layerStyle - The layer style
-   * @return {void}
+   * @returns {void}
    */
   setLayerStyle(layerStyle: TypeLayerStyleConfig): void {
     this.#layerStyle = layerStyle;
@@ -218,7 +218,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Initializes the layer style configuration by filling the blanks in our config with the information from the metadata
    * @param {TypeLayerStyleConfig} layerStyleMetadata - The layer style metadata to use to help fill the blanks in our layer style config.
-   * @return {void}
+   * @returns {void}
    */
   initLayerStyleFromMetadata(layerStyleMetadata: TypeLayerStyleConfig | undefined): void {
     this.#layerStyle = deepMerge(layerStyleMetadata, this.#layerStyle);
@@ -226,7 +226,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Gets the text metadata that is associated to the layer.
-   * @return {TypeLayerTextConfig} The layer text or undefined.
+   * @returns {TypeLayerTextConfig} The layer text or undefined.
    */
   getLayerText(): TypeLayerTextConfig | undefined {
     return this.#layerText;
@@ -235,7 +235,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Sets the layer text metadata for the layer.
    * @param {TypeLayerTextConfig} layerText - The layer text
-   * @return {void}
+   * @returns {void}
    */
   setLayerText(layerText: TypeLayerTextConfig): void {
     this.#layerText = layerText;
@@ -243,7 +243,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * The first TypeStyleSetting associated with the TypeStyleGeometry associated with the style as could be read from the layer config metadata.
-   * @return {TypeStyleSettings[]} The array of TypeStyleSettings
+   * @returns {TypeStyleSettings[]} The array of TypeStyleSettings
    */
   getLayerStyleSettings(): TypeLayerStyleSettings | undefined {
     // Get the layer style
@@ -273,7 +273,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Gets the temporal dimension, if any, that is associated to the layer.
-   * @return {TimeDimension | undefined} The temporal dimension or undefined.
+   * @returns {TimeDimension | undefined} The temporal dimension or undefined.
    */
   getTimeDimension(): TimeDimension | undefined {
     return this.#timeDimension;
@@ -282,7 +282,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Sets the temporal dimension that is associated to the layer.
    * @param {TimeDimension} timeDimension - The temporal dimension.
-   * @return {void}
+   * @returns {void}
    */
   setTimeDimension(timeDimension: TimeDimension): void {
     this.#timeDimension = timeDimension;
@@ -290,7 +290,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Gets the layer attributions
-   * @return {string[] | undefined} The layer attributions
+   * @returns {string[] | undefined} The layer attributions
    */
   getAttributions(): string[] | undefined {
     // If no attributions defined
@@ -318,7 +318,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Sets the layer attributions
    * @param {string[]} attributions - The layer attributions
-   * @return {void}
+   * @returns {void}
    */
   setAttributions(attributions: string[]): void {
     this.#attributions = attributions;
@@ -326,7 +326,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Gets the layer filter that is associated to the layer.
-   * @return {string} The layer filter or undefined.
+   * @returns {string} The layer filter or undefined.
    */
   getLayerFilter(): string | undefined {
     return this.#layerFilter;
@@ -335,7 +335,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Sets the layer filter for the layer.
    * @param {string} layerFilter - The layer filter
-   * @return {void}
+   * @returns {void}
    */
   setLayerFilter(layerFilter: string): void {
     this.#layerFilter = layerFilter;
@@ -343,7 +343,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Gets the layer filter equation
-   * @return {FilterNodeType[] | undefined} The filter equation if any
+   * @returns {FilterNodeType[] | undefined} The filter equation if any
    */
   getFilterEquation(): FilterNodeType[] | undefined {
     return this.#filterEquation;
@@ -352,7 +352,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Sets the layer filter equation
    * @param {FilterNodeType[]} [filterEquation] - The layer filter equation
-   * @return {void}
+   * @returns {void}
    */
   setFilterEquation(filterEquation: FilterNodeType[] | undefined): void {
     this.#filterEquation = filterEquation;
@@ -360,7 +360,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Gets the layer legend filter is off flag
-   * @return {boolean} The legend filter is off flag
+   * @returns {boolean} The legend filter is off flag
    * @deprecated This getter doesn't seem to be used as its corresponding attribute is always false and there's no setters
    */
   getLegendFilterIsOff(): boolean {
@@ -369,7 +369,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Gets the source object.
-   * @return {TypeBaseSourceInitialConfig} The source.
+   * @returns {TypeBaseSourceInitialConfig} The source.
    */
   getSource(): TypeBaseSourceInitialConfig {
     return this.#source;
@@ -378,7 +378,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Initializes the source configuration by filling the blanks in our config with the information from the metadata
    * @param {TypeBaseSourceInitialConfig | undefined} sourceMetadata - The source metadata to use to help fill the blanks in our source config.
-   * @return {void}
+   * @returns {void}
    */
   initSourceFromMetadata(sourceMetadata: TypeBaseSourceInitialConfig | undefined): void {
     this.#source = deepMerge(sourceMetadata, this.#source);
@@ -386,7 +386,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Returns a shallow-copy of the source object.
-   * @return {TypeBaseSourceInitialConfig} The shallow-copy of the source object.
+   * @returns {TypeBaseSourceInitialConfig} The shallow-copy of the source object.
    */
   cloneSource(): TypeBaseSourceInitialConfig {
     // Clone the source object
@@ -395,7 +395,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Indicates whether the source has a data access path defined.
-   * @return {boolean} `true` if a data access path is present; otherwise, `false`.
+   * @returns {boolean} `true` if a data access path is present; otherwise, `false`.
    */
   hasDataAccessPath(): boolean {
     return !!this.getSource().dataAccessPath;
@@ -404,7 +404,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Gets the source data access path from the source object.
    * @param {boolean} endsWithSlash - Indicates if the dataAccessPath received should end with a '/', because it's going to be dynamically used to create a url path.
-   * @return {string} The data access path.
+   * @returns {string} The data access path.
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    */
   getDataAccessPath(endsWithSlash: boolean = false): string {
@@ -429,7 +429,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * If the metadata source does not define a data access path, no action is taken.
    * @param {TypeBaseSourceInitialConfig | undefined} metadataSource
    * The metadata source configuration containing a data access path.
-   * @return {void}
+   * @returns {void}
    */
   overrideDataAccessPathFromMetadata(metadataSource: TypeBaseSourceInitialConfig | undefined): void {
     // If the source dataAccessPath doesn't exist
@@ -441,7 +441,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Gets the source feature info object.
-   * @return {TypeFeatureInfoLayerConfig} The feature info.
+   * @returns {TypeFeatureInfoLayerConfig} The feature info.
    */
   getFeatureInfo(): TypeFeatureInfoLayerConfig {
     return this.getSource().featureInfo!; // Always defined to something, minimally an empty object.
@@ -449,7 +449,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Gets the source projection.
-   * @return {TypeValidSourceProjectionCodes | undefined} The source projection.
+   * @returns {TypeValidSourceProjectionCodes | undefined} The source projection.
    */
   getProjection(): TypeValidSourceProjectionCodes | undefined {
     return this.getSource().projection;
@@ -457,7 +457,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Gets the source projection with the EPSG prefix.
-   * @return {string | undefined} The source projection with the EPSG prefix.
+   * @returns {string | undefined} The source projection with the EPSG prefix.
    */
   getProjectionWithEPSG(): string | undefined {
     return this.getProjection() ? `EPSG:${this.getProjection()}` : undefined;
@@ -466,7 +466,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Sets the source projection in the source object only if it's not already set and if the parameter is defined.
    * @param {TypeValidSourceProjectionCodes | undefined} projection - The source projection.
-   * @return {void}
+   * @returns {void}
    */
   initProjectionFromMetadata(projection: TypeValidSourceProjectionCodes | undefined): void {
     // If not projection, skip
@@ -478,7 +478,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Gets the source outfields from the source object.
-   * @return {TypeOutfields[] | undefined} The outfields.
+   * @returns {TypeOutfields[] | undefined} The outfields.
    */
   getOutfields(): TypeOutfields[] | undefined {
     return this.getFeatureInfo().outfields;
@@ -487,7 +487,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Sets the source outfields in the source object. The source.featureInfo object must already exist.
    * @param {TypeOutfields[]} outfields - The outfields.
-   * @return {void}
+   * @returns {void}
    */
   setOutfields(outfields: TypeOutfields[]): void {
     this.getFeatureInfo().outfields = outfields;
@@ -495,7 +495,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Indicates if the source has an out field which represents the primary key.
-   * @return {boolean} True if the outfield representing the primary key exists, false otherwise.
+   * @returns {boolean} True if the outfield representing the primary key exists, false otherwise.
    */
   hasOutfieldsPK(): boolean {
     return !!this.getOutfields()?.find((outfield) => outfield.type === 'oid');
@@ -503,7 +503,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Gets the out field which represents the primary key.
-   * @return {TypeOutfields} The outfield.
+   * @returns {TypeOutfields} The outfield.
    * @throws {NoPrimaryKeyFieldError} When the no outfields has the type 'oid'.
    */
   getOutfieldsPK(): TypeOutfields {
@@ -521,7 +521,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    * Gets the field name representing the primary key (OID) if available,
    * otherwise returns the provided default field name.
    * @param {string} defaultField - The field name to return if no OID field is found.
-   * @return {string} The primary key (OID) field name or the provided default value.
+   * @returns {string} The primary key (OID) field name or the provided default value.
    */
   getOutfieldsPKNameOrDefault(defaultField: string): string {
     // Get the oid field if any
@@ -533,7 +533,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Initializes any outfield aliases that's undefined using the name property as default.
-   * @return {void}
+   * @returns {void}
    */
   initOutfieldsAliases(): void {
     // For each outfield
@@ -545,7 +545,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Gets the source name field object.
-   * @return {string | undefined} The name field.
+   * @returns {string | undefined} The name field.
    */
   getNameField(): string | undefined {
     return this.getFeatureInfo().nameField;
@@ -554,7 +554,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Sets the source name field in the source object. The source.featureInfo object must already exist.
    * @param {string | undefined} nameField - The name field.
-   * @return {void}
+   * @returns {void}
    */
   setNameField(nameField: string | undefined): void {
     this.getFeatureInfo().nameField = nameField;
@@ -563,7 +563,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Sets the source name field in the source object only if it's not already set. The source.featureInfo object must already exist.
    * @param {string | undefined} nameField - The name field.
-   * @return {void}
+   * @returns {void}
    */
   initNameField(nameField: string | undefined): void {
     this.getFeatureInfo().nameField ??= nameField;
@@ -571,7 +571,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Gets the source queryable value.
-   * @return {boolean | undefined} The source queryable value.
+   * @returns {boolean | undefined} The source queryable value.
    */
   getQueryableSource(): boolean | undefined {
     return this.getFeatureInfo().queryable;
@@ -579,7 +579,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Gets the source queryable value. Defaults to true when couldn't be determined.
-   * @return {boolean} The source queryable value, defaulted if necessary.
+   * @returns {boolean} The source queryable value, defaulted if necessary.
    */
   getQueryableSourceDefaulted(): boolean {
     return this.getFeatureInfo().queryable ?? true; // default: true
@@ -588,7 +588,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Sets the source queryable in the source object. The source.featureInfo object must already exist.
    * @param {boolean | undefined} queryable - The source queryable value.
-   * @return {void}
+   * @returns {void}
    */
   setQueryableSource(queryable: boolean | undefined): void {
     this.getFeatureInfo().queryable = queryable;
@@ -597,7 +597,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Sets the source queryable in the source object only if it's not already set. The source.featureInfo object must already exist.
    * @param {boolean} queryable - The source queryable value.
-   * @return {void}
+   * @returns {void}
    */
   initQueryableSource(queryable: boolean | undefined): void {
     this.getFeatureInfo().queryable ??= queryable;
@@ -605,7 +605,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Gets the geometry field.
-   * @return {TypeOutfields | undefined} The geometry field.
+   * @returns {TypeOutfields | undefined} The geometry field.
    */
   getGeometryField(): TypeOutfields | undefined {
     return this.#geometryField;
@@ -614,7 +614,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Sets the geometry field.
    * @param {TypeOutfields | undefined} geometryField - The geometry field
-   * @return {void}
+   * @returns {void}
    */
   setGeometryField(geometryField: TypeOutfields | undefined): void {
     this.#geometryField = geometryField;
@@ -622,7 +622,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Returns the OpenLayers-compatible geometry type of this layer's geometry field.
-   * @return {TypeStyleGeometry | undefined} The OpenLayers geometry type (e.g., 'Point', 'LineString', 'Polygon'), if it could be determined.
+   * @returns {TypeStyleGeometry | undefined} The OpenLayers geometry type (e.g., 'Point', 'LineString', 'Polygon'), if it could be determined.
    */
   getGeometryType(): TypeStyleGeometry | undefined {
     return this.onGetGeometryType();
@@ -635,7 +635,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigAbstractBaseClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
-   * @return {string | undefined} The source or undefined.
+   * @returns {string | undefined} The source or undefined.
    * @static
    */
   static getClassOrTypeSource(layerConfig: ConfigClassOrType | undefined): TypeBaseSourceInitialConfig | undefined {
@@ -649,7 +649,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigAbstractBaseClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
-   * @return {string | undefined} The feature info or undefined.
+   * @returns {string | undefined} The feature info or undefined.
    * @static
    */
   static getClassOrTypeFeatureInfo(layerConfig: ConfigClassOrType | undefined): TypeFeatureInfoLayerConfig | undefined {
@@ -663,7 +663,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigAbstractBaseClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
-   * @return {string | undefined} The layer style or undefined.
+   * @returns {string | undefined} The layer style or undefined.
    * @static
    */
   static getClassOrTypeLayerStyle(layerConfig: ConfigClassOrType | undefined): TypeLayerStyleConfig | undefined {
@@ -677,7 +677,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
-   * @return {string | undefined} The layer filter or undefined.
+   * @returns {string | undefined} The layer filter or undefined.
    * @static
    */
   static getClassOrTypeLayerFilter(layerConfig: ConfigClassOrType | undefined): string | undefined {
@@ -691,7 +691,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
-   * @return {string | undefined} The layer attributions or undefined.
+   * @returns {string | undefined} The layer attributions or undefined.
    * @static
    */
   static getClassOrTypeLayerAttributions(layerConfig: ConfigClassOrType | undefined): string[] | undefined {
@@ -705,7 +705,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
-   * @return {TypeLayerTextConfig | undefined} The layer attributions or undefined.
+   * @returns {TypeLayerTextConfig | undefined} The layer attributions or undefined.
    * @static
    */
   static getClassOrTypeLayerText(layerConfig: ConfigClassOrType | undefined): TypeLayerTextConfig | undefined {

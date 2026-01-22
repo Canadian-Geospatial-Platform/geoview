@@ -55,7 +55,7 @@ export abstract class AbstractPlugin {
   /**
    * Sets the config (which happens post creation)
    * @param {unknown} config - The config
-   * @return {void}
+   * @returns {void}
    */
   setConfig(config: unknown): void {
     this.#configObj = config;
@@ -63,7 +63,7 @@ export abstract class AbstractPlugin {
 
   /**
    * Gets the config
-   * @return {unknown} The config
+   * @returns {unknown} The config
    */
   getConfig(): unknown {
     return this.#configObj;
@@ -71,7 +71,7 @@ export abstract class AbstractPlugin {
 
   /**
    * Returns the language currently used by the 'translate' i18next component used by this Plugin
-   * @return {string} The language, 'en' (English) by default.
+   * @returns {string} The language, 'en' (English) by default.
    */
   displayLanguage(): string {
     return this.translate?.getI18n().language || 'en';
@@ -79,21 +79,21 @@ export abstract class AbstractPlugin {
 
   /**
    * Must override function to get the schema validator
-   * @return {unknown} The schema validator
+   * @returns {unknown} The schema validator
    * @abstract
    */
   abstract schema(): unknown;
 
   /**
    * Must override function to get the default config
-   * @return {unknown} The default config
+   * @returns {unknown} The default config
    * @abstract
    */
   abstract defaultConfig(): unknown;
 
   /**
    * Overridable function to get the translations object for the Plugin.
-   * @return {Record<string, unknown>} The translations object
+   * @returns {Record<string, unknown>} The translations object
    */
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   defaultTranslations(): Record<string, unknown> {
@@ -102,7 +102,7 @@ export abstract class AbstractPlugin {
 
   /**
    * Override this to do the actual adding
-   * @return {void}
+   * @returns {void}
    * @protected
    * @abstract
    */
@@ -110,14 +110,14 @@ export abstract class AbstractPlugin {
 
   /**
    * Optionally override this to do something when done adding
-   * @return {void}
+   * @returns {void}
    * @protected
    */
   protected onAdded?(): void;
 
   /**
    * Override this to do the actual removal
-   * @return {void}
+   * @returns {void}
    * @protected
    * @abstract
    */
@@ -125,14 +125,14 @@ export abstract class AbstractPlugin {
 
   /**
    * Optionally override this to do something when done being removed
-   * @return {void}
+   * @returns {void}
    * @protected
    */
   protected onRemoved?(): void;
 
   /**
    * This function is called when the plugin is added, used for finalizing initialization. See plugin.addPlugin for details.
-   * @return {void}
+   * @returns {void}
    */
   add(): void {
     // Log
@@ -150,7 +150,7 @@ export abstract class AbstractPlugin {
 
   /**
    * This function is called when the plugin is removed, used for clean up. See plugin.addPlugin for details.
-   * @return {void}
+   * @returns {void}
    */
   remove(): void {
     // Log

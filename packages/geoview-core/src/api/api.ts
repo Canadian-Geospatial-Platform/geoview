@@ -65,7 +65,7 @@ export class API {
   /**
    * Retrieves the list of all map IDs currently registered in the API.
    * Useful for iterating through all active maps or checking which maps exist.
-   * @return {string[]} Array of map identifiers for all registered MapViewer instances
+   * @returns {string[]} Array of map identifiers for all registered MapViewer instances
    */
   getMapViewerIds(): string[] {
     return Object.keys(this.#maps);
@@ -75,7 +75,7 @@ export class API {
    * Checks if a MapViewer instance exists for the specified map ID.
    * Use this method before attempting to access a map to avoid errors.
    * @param {string} mapId - The unique identifier of the map to check
-   * @return {boolean} True if a MapViewer exists with the given ID, false otherwise
+   * @returns {boolean} True if a MapViewer exists with the given ID, false otherwise
    */
   hasMapViewer(mapId: string): boolean {
     return this.getMapViewerIds().includes(mapId);
@@ -86,7 +86,7 @@ export class API {
    * The MapViewer provides access to the OpenLayers map, layers, controls, and all map-related APIs.
    * Used throughout the application to interact with map functionality.
    * @param {string} mapId - The unique identifier of the map instance to retrieve
-   * @return {MapViewer} The MapViewer instance containing the map and its APIs
+   * @returns {MapViewer} The MapViewer instance containing the map and its APIs
    * @throws {MapViewerNotFoundError} When no map exists with the given ID
    */
   getMapViewer(mapId: string): MapViewer {
@@ -106,7 +106,7 @@ export class API {
    * Prevents duplicate map IDs to maintain uniqueness.
    * @param {string} mapId - The unique identifier to assign to this map
    * @param {MapViewer} mapViewer - The MapViewer instance to register
-   * @return {void}
+   * @returns {void}
    * @throws {MapViewerAlreadyExistsError} When a map with the given ID already exists
    */
   setMapViewer(mapId: string, mapViewer: MapViewer): void {
@@ -122,7 +122,7 @@ export class API {
    * Waits for the MapViewer to be available if it's still being created.
    * Useful when accessing a map immediately after creation or in initialization code.
    * @param {string} mapId - The unique identifier of the map instance to retrieve
-   * @return {Promise<MapViewer>} Promise resolving to the MapViewer instance when available
+   * @returns {Promise<MapViewer>} Promise resolving to the MapViewer instance when available
    * @throws {MapViewerNotFoundError} When no map exists with the given ID after waiting
    */
   async getMapViewerAsync(mapId: string): Promise<MapViewer> {
@@ -201,7 +201,7 @@ export class API {
    * @param {string} divId - ID of the div element to create map in (becomes the mapId)
    * @param {string} mapConfig - Configuration as JSON string or URL path to a config file
    * @param {number} [divHeight] - Optional height in pixels for the div (mandatory if the map reloads)
-   * @return {Promise<MapViewer>} Promise resolving to the MapViewer instance after onMapInit is triggered
+   * @returns {Promise<MapViewer>} Promise resolving to the MapViewer instance after onMapInit is triggered
    * @throws {InitDivNotExistError} When the specified div element doesn't exist
    * @throws {MapViewerAlreadyExistsError} When a map already exists with the given divId
    */
@@ -237,7 +237,7 @@ export class API {
    * - Creates a new MapViewer with the configuration
    * @param {string} mapId - The unique identifier of the map to reload
    * @param {TypeMapFeaturesConfig | TypeMapFeaturesInstance} [mapConfig] - Optional configuration to use for reload; if omitted, uses the stored original config
-   * @return {Promise<MapViewer>} Promise resolving to the newly created MapViewer instance
+   * @returns {Promise<MapViewer>} Promise resolving to the newly created MapViewer instance
    */
   async reload(mapId: string, mapConfig?: TypeMapFeaturesConfig | TypeMapFeaturesInstance): Promise<MapViewer> {
     // If no config is provided, get the original from the store
@@ -265,7 +265,7 @@ export class API {
    * Useful for preserving user changes (layer visibility, order, etc.) during reload.
    * @param {string} mapId - The unique identifier of the map to reload
    * @param {boolean} [maintainGeocoreLayerNames=true] - When true, preserves current geocore layer names; when false, resets to defaults (useful after language changes)
-   * @return {Promise<MapViewer>} Promise resolving to the newly created MapViewer instance
+   * @returns {Promise<MapViewer>} Promise resolving to the newly created MapViewer instance
    */
   reloadWithCurrentState(mapId: string, maintainGeocoreLayerNames: boolean = true): Promise<MapViewer> {
     // Get the map viewer
@@ -286,7 +286,7 @@ export class API {
    * - Enables/disables map crosshair based on map focus state
    * - Supports WCAG keyboard navigation requirements
    * Code adapted from: https://github.com/MaxMaeder/keyboardFocus.js
-   * @return {void}
+   * @returns {void}
    * @static
    * @private
    */

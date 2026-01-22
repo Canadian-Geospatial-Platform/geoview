@@ -20,7 +20,7 @@ export abstract class NavBarPlugin extends AbstractPlugin {
 
   /**
    * Overridable function to create nav bar button props content
-   * @return {Record<string, TypeNavBarButtonConfig>} The nav bar button props content
+   * @returns {Record<string, TypeNavBarButtonConfig>} The nav bar button props content
    * @protected
    */
   protected onCreateButtonConfigs(): Record<string, TypeNavBarButtonConfig> {
@@ -54,7 +54,7 @@ export abstract class NavBarPlugin extends AbstractPlugin {
 
   /**
    * Called when a nav bar plugin is being added
-   * @return {void}
+   * @returns {void}
    * @protected
    */
   protected onAdd(): void {
@@ -90,7 +90,7 @@ export abstract class NavBarPlugin extends AbstractPlugin {
 
   /**
    * Called when a nav bar plugin is being removed
-   * @return {void}
+   * @returns {void}
    * @protected
    */
   protected onRemove(): void {

@@ -41,7 +41,7 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @return {TypeSourceImageXYZTilesInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   * @returns {TypeSourceImageXYZTilesInitialConfig} The strongly-typed source configuration specific to this layer entry config.
    * @override
    */
   override getSource(): TypeSourceImageXYZTilesInitialConfig {

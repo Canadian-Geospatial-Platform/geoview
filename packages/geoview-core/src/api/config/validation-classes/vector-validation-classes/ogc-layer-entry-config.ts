@@ -18,7 +18,7 @@ export class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @return {TypeLayerMetadataOGC | undefined} The strongly-typed layer metadata specific to this layer entry config.
+   * @returns {TypeLayerMetadataOGC | undefined} The strongly-typed layer metadata specific to this layer entry config.
    * @override
    */
   override getLayerMetadata(): TypeLayerMetadataOGC | undefined {

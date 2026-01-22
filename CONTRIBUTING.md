@@ -103,7 +103,7 @@ Documentation blocks for jsdoc should start with /\*\* and generally follow the 
  * - Optionally deletes the HTML container element
  * @param {string} mapId - The unique identifier of the map to delete
  * @param {boolean} [deleteContainer=true] - Optional true to remove the div element
- * @return {Promise<void>} Promise that resolves when deletion is complete
+ * @returns {Promise<void>} Promise that resolves when deletion is complete
  * @static
  */
 ```
@@ -119,7 +119,7 @@ Function Sample
  * Add RCS config layers to configuration after startup has finished
  * @function rcsAddKeys
  * @param {Array}  keys    list of keys marking which layers to retrieve
- * @return {Promise} promise of full config nodes for newly added layers
+ * @returns {Promise} promise of full config nodes for newly added layers
  */
 ```
 
@@ -133,7 +133,7 @@ Function Sample
 
 - Description (clear, concise summary sentence)
 - `@param` for ALL parameters (with `[]` for optional params, e.g., `@param {string} [optional]`)
-- `@return` for ALL functions (use `{void}` for void functions, `{Promise<void>}` for async void)
+- `@returns` for ALL functions (use `{void}` for void functions, `{Promise<void>}` for async void)
 
 **Additionally REQUIRED based on context:**
 
@@ -147,27 +147,27 @@ Function Sample
 
 1. Description
 2. `@param` tags (all parameters)
-3. `@return`
+3. `@returns`
 4. `@throws` (if applicable)
 5. **Modifiers LAST**: `@static`, `@protected`, `@private`, `@override`, `@constructor`
 
 **Examples:**
 
 ```typescript
-// Void function - @return {void} REQUIRED
+// Void function - @returns {void} REQUIRED
 /**
  * Performs an action.
  * @param {string} id - The identifier
- * @return {void}
+ * @returns {void}
  * @static
  */
 static doSomething(id: string): void { }
 
-// Async void - @return {Promise<void>} REQUIRED
+// Async void - @returns {Promise<void>} REQUIRED
 /**
  * Loads data asynchronously.
  * @param {string} id - The identifier
- * @return {Promise<void>}
+ * @returns {Promise<void>}
  * @static
  */
 static async loadData(id: string): Promise<void> { }
@@ -176,7 +176,7 @@ static async loadData(id: string): Promise<void> { }
 /**
  * Internal helper method.
  * @param {string} id - The identifier
- * @return {void}
+ * @returns {void}
  * @static
  * @private
  */
@@ -187,7 +187,7 @@ static #helperMethod(id: string): void { }
  * Configures the component.
  * @param {string} id - The identifier
  * @param {boolean} [optional=false] - Optional flag with default value
- * @return {void}
+ * @returns {void}
  * @static
  */
 static configure(id: string, optional: boolean = false): void { }

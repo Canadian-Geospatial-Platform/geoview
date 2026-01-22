@@ -55,7 +55,7 @@ export class GeoPackageReader {
    * Generates a WKB layer config from a GeoPackage.
    * @param {GeoPackageLayerConfig} layerConfig - the config to convert
    * @param {AbortSignal} [abortSignal] - Abort signal to handle cancelling of the process.
-   * @return {Promise<TypeWkbLayerConfig>} A WKB layer config
+   * @returns {Promise<TypeWkbLayerConfig>} A WKB layer config
    * @static
    */
   static async createLayerConfigFromGeoPackage(layerConfig: GeoPackageLayerConfig, abortSignal?: AbortSignal): Promise<TypeWkbLayerConfig> {
@@ -193,7 +193,7 @@ export class GeoPackageReader {
    * Fetches a GeoPackage and creates layer data from it.
    * @param {string} url - The URL of the GeoPackage.
    * @param {AbortSignal} [abortSignal] - Abort signal to handle cancelling of the process.
-   * @return {Promise<GeoPackageLayerData[]>} Promise of the layer data.
+   * @returns {Promise<GeoPackageLayerData[]>} Promise of the layer data.
    * @static
    * @private
    */
@@ -273,7 +273,7 @@ export class GeoPackageReader {
   /**
    * Creates a GeoView style config from the provided SLD style.
    * @param {string | number | Uint8Array} sld - The SLD style associated with the layer
-   * @return {TypeLayerStyleConfig} The created style config
+   * @returns {TypeLayerStyleConfig} The created style config
    * @static
    * @private
    */
@@ -553,7 +553,7 @@ export class GeoPackageReader {
   /**
    * Creates a feature info config from provided fields.
    * @param {initSqlJs.ParamsObject | undefined} fields - An array of field names and its aliases.
-   * @return {TypeFeatureInfoLayerConfig} The feature info config.
+   * @returns {TypeFeatureInfoLayerConfig} The feature info config.
    * @static
    * @private
    */
@@ -598,7 +598,7 @@ export class GeoPackageReader {
   /**
    * Create a source configuration for the vector layer.
    * @param {Uint8Array} gpkgBinGeom - Binary geometry array to be parsed.
-   * @return {Uint8Array} A subarray of inputted binary geometry array.
+   * @returns {Uint8Array} A subarray of inputted binary geometry array.
    * @static
    * @private
    */

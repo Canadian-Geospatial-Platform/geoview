@@ -23,7 +23,7 @@ export abstract class MapPlugin extends AbstractPlugin {
 
   /**
    * Called when a map plugin is being added
-   * @return {void}
+   * @returns {void}
    * @protected
    */
   protected onAdd(): void {
@@ -41,7 +41,7 @@ export abstract class MapPlugin extends AbstractPlugin {
 
   /**
    * Called when a map plugin is being removed
-   * @return {void}
+   * @returns {void}
    * @protected
    */
   protected onRemove(): void {

@@ -45,7 +45,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * Subscribes to layer data array changes, click coordinates, and coordinate info enabled state.
    * Creates coordinate info layer if enabled on initialization.
    * @param {GeoviewStoreType} store - The store associated with the Feature Info Event Processor
-   * @return {Array<() => void> | void} Array of unsubscribe functions for cleanup
+   * @returns {Array<() => void> | void} Array of unsubscribe functions for cleanup
    * @protected
    * @override
    */
@@ -116,7 +116,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * Gets the feature info state slice from the store for the specified map.
    * Provides access to layer data arrays, selected layer path, and query status information.
    * @param {string} mapId - The map identifier
-   * @return {IFeatureInfoState} The feature info state slice
+   * @returns {IFeatureInfoState} The feature info state slice
    * @static
    * @protected
    */
@@ -128,7 +128,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   /**
    * Gets the currently selected layer path in the feature info panel.
    * @param {string} mapId - The map identifier
-   * @return {string} The selected layer path
+   * @returns {string} The selected layer path
    * @static
    */
   static getSelectedLayerPath(mapId: string): string {
@@ -140,7 +140,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * Logs a warning if the specified layer path is not found in the layer data array.
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path to select
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static setSelectedLayerPath(mapId: string, layerPath: string): void {
@@ -161,7 +161,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The path of the layer to find
    * @param {TypeFeatureInfoResultSetEntry[]} [layerDataArray] - Optional custom layer data array to search (defaults to store's array)
-   * @return {TypeFeatureInfoResultSetEntry | undefined} The layer data entry if found, undefined otherwise
+   * @returns {TypeFeatureInfoResultSetEntry | undefined} The layer data entry if found, undefined otherwise
    * @static
    */
   static findLayerDataFromLayerDataArray(
@@ -177,7 +177,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * Clears features array and removes highlights/marker if the layer is currently selected.
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path to reset features for
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static resetResultSet(mapId: string, layerPath: string): void {
@@ -200,7 +200,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * The array update triggers batched propagation automatically.
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path to delete
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static deleteFeatureInfo(mapId: string, layerPath: string): void {
@@ -232,7 +232,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {T[]} layerArray - The layer array to search and modify
    * @param {string} layerPath - The layer path to delete
    * @param {(layerArray: T[]) => void} onDeleteCallback - Callback executed with the updated array
-   * @return {void}
+   * @returns {void}
    * @static
    * @private
    */
@@ -260,7 +260,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * Also opens the details appbar tab if available.
    * @param {string} mapId - The map identifier
    * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static propagateFeatureInfoClickToStore(mapId: string, resultSetEntry: TypeFeatureInfoResultSetEntry): void {
@@ -294,7 +294,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * Adds result set entry to layer data array for updates like layer name changes.
    * @param {string} mapId - The map identifier
    * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static propagateFeatureInfoNameToStore(mapId: string, resultSetEntry: TypeFeatureInfoResultSetEntry): void {
@@ -315,7 +315,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * Supports bypass mechanism via layerDataArrayBatchLayerPathBypass for immediate propagation when needed.
    * @param {string} mapId - The map identifier
    * @param {TypeFeatureInfoResultSetEntry[]} layerDataArray - The layer data array to batch
-   * @return {Promise<void>} Promise that resolves when batch propagation completes
+   * @returns {Promise<void>} Promise that resolves when batch propagation completes
    * @static
    * @private
    */
@@ -346,7 +346,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * Adds a special layer entry containing coordinate details for the clicked location.
    * @param {string} mapId - The map identifier
    * @param {TypeFeatureInfoEntry[]} features - Array of coordinate information features (defaults to empty)
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static createCoordinateInfoLayer(mapId: string, features: TypeFeatureInfoEntry[] = []): void {
@@ -377,7 +377,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * Creates a coordinate info feature with all retrieved information and adds it to the feature info panel.
    * @param {string} mapId - The map identifier
    * @param {TypeMapMouseInfo} coordinates - The map mouse information containing lonlat coordinates
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static getCoordinateInfo(mapId: string, coordinates: TypeMapMouseInfo): void {

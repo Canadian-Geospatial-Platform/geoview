@@ -14,7 +14,7 @@ export abstract class FooterPlugin extends AbstractPlugin {
 
   /**
    * Overrides the get config
-   * @return {unknown} The config
+   * @returns {unknown} The config
    * @override
    */
   override getConfig(): unknown {
@@ -23,7 +23,7 @@ export abstract class FooterPlugin extends AbstractPlugin {
 
   /**
    * Overridable function to create footer props content
-   * @return {TypeTabs} The footer props content
+   * @returns {TypeTabs} The footer props content
    * @protected
    */
   protected onCreateContentProps(): TypeTabs {
@@ -40,7 +40,7 @@ export abstract class FooterPlugin extends AbstractPlugin {
 
   /**
    * Called when a footer plugin is being added
-   * @return {void}
+   * @returns {void}
    * @protected
    */
   protected onAdd(): void {
@@ -59,7 +59,7 @@ export abstract class FooterPlugin extends AbstractPlugin {
 
   /**
    * Called when a footer plugin is being removed
-   * @return {void}
+   * @returns {void}
    * @protected
    */
   protected onRemove(): void {
@@ -72,7 +72,7 @@ export abstract class FooterPlugin extends AbstractPlugin {
 
   /**
    * Selects the Plugin.
-   * @return {void}
+   * @returns {void}
    */
   select(): void {
     // Redirect
@@ -81,7 +81,7 @@ export abstract class FooterPlugin extends AbstractPlugin {
 
   /**
    * Overridable function called when the Plugin is being selected.
-   * @return {void}
+   * @returns {void}
    * @protected
    */
   // Added eslint-disable here, because we do want to override this method in children and keep 'this'.

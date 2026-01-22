@@ -990,7 +990,7 @@ export interface TypeAltitudeResponse {
  * verifyIfConfig parameter is 'lineString'. The type assertion applies only to the true block of the if clause that use
  * this function.
  * @param {TypeBaseVectorGeometryConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
- * @return {boolean} true if the type assertion is valid.
+ * @returns {boolean} true if the type assertion is valid.
  */
 export const isLineStringVectorConfig = (verifyIfConfig: TypeBaseVectorGeometryConfig): verifyIfConfig is TypeLineStringVectorConfig => {
   return verifyIfConfig?.type === 'lineString';
@@ -1001,7 +1001,7 @@ export const isLineStringVectorConfig = (verifyIfConfig: TypeBaseVectorGeometryC
  * verifyIfConfig parameter is 'filledPolygon'. The type assertion applies only to the true block of the if clause that use
  * this function.
  * @param {TypeBaseVectorGeometryConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
- * @return {boolean} true if the type assertion is valid.
+ * @returns {boolean} true if the type assertion is valid.
  */
 export const isFilledPolygonVectorConfig = (verifyIfConfig: TypeBaseVectorGeometryConfig): verifyIfConfig is TypePolygonVectorConfig => {
   return verifyIfConfig?.type === 'filledPolygon';
@@ -1012,7 +1012,7 @@ export const isFilledPolygonVectorConfig = (verifyIfConfig: TypeBaseVectorGeomet
  * verifyIfConfig parameter is 'simpleSymbol'. The type assertion applies only to the true block of the if clause that use
  * this function.
  * @param {TypeBaseVectorGeometryConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
- * @return {boolean} true if the type assertion is valid.
+ * @returns {boolean} true if the type assertion is valid.
  */
 export const isSimpleSymbolVectorConfig = (
   verifyIfConfig: TypeBaseVectorGeometryConfig
@@ -1025,7 +1025,7 @@ export const isSimpleSymbolVectorConfig = (
  * verifyIfConfig parameter is 'iconSymbol'. The type assertion applies only to the true block of the if clause that use
  * this function.
  * @param {TypeBaseVectorGeometryConfig} verifyIfConfig Polymorphic object to test in order to determine if the type assertion is valid.
- * @return {boolean} true if the type assertion is valid.
+ * @returns {boolean} true if the type assertion is valid.
  */
 export const isIconSymbolVectorConfig = (verifyIfConfig: TypeBaseVectorGeometryConfig): verifyIfConfig is TypeIconSymbolVectorConfig => {
   return verifyIfConfig?.type === 'iconSymbol';

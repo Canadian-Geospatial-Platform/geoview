@@ -102,7 +102,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /**
    * Initializes the event processor and sets up subscriptions
    * @param {GeoviewStoreType} store - The store to initialize with
-   * @return {Array<() => void>} Array of unsubscribe functions
+   * @returns {Array<() => void>} Array of unsubscribe functions
    * @override
    */
   override onInitialize(store: GeoviewStoreType): Array<() => void> {
@@ -142,7 +142,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /**
    * Shortcut to get the Drawer state for a given map id
    * @param {string} mapId - The map identifier
-   * @return {IDrawerState | undefined} The Drawer state. Forcing the return to also be 'undefined', because
+   * @returns {IDrawerState | undefined} The Drawer state. Forcing the return to also be 'undefined', because
    *                                       there will be no drawerState if the Drawer plugin isn't active.
    *                                       This helps the developers making sure the existence is checked.
    * @static
@@ -158,7 +158,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map identifier
    * @param {TypeValidMapProjectionCodes} currentProjection - The current projection code
    * @param {TypeValidMapProjectionCodes} previousProjection - The previous projection code
-   * @return {void}
+   * @returns {void}
    * @static
    * @private
    */
@@ -182,7 +182,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /**
    * Gets all drawing features for a map
    * @param {string} mapId - The map identifier
-   * @return {Feature[]} Array of features
+   * @returns {Feature[]} Array of features
    * @throws {InvaliGeometryGroupIdError} If the provided geometry group id does not exist.
    * @static
    * @private
@@ -208,7 +208,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Gets a feature by it's id
    * @param {string} mapId - The map identifier
    * @param {string} featureId - Feature ID we are looking for
-   * @return {Feature | undefined} The found feature
+   * @returns {Feature | undefined} The found feature
    * @static
    * @private
    */
@@ -223,7 +223,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /**
    * Updates all measurement tooltips for a map with the current language
    * @param {string} mapId - The map identifier
-   * @return {void}
+   * @returns {void}
    * @static
    * @private
    */
@@ -246,7 +246,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /**
    * Sets the text value to the default text value of the current language
    * @param {string} mapId - The map identifier
-   * @return {void}
+   * @returns {void}
    * @static
    * @private
    */
@@ -262,7 +262,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Calculates measurements for a geometry feature
    * @param {Geometry} geom - The geometry to measure
    * @param {string} displayLanguage - The display language
-   * @return {Object} Object containing the formatted output text and tooltip coordinates
+   * @returns {Object} Object containing the formatted output text and tooltip coordinates
    * @static
    * @private
    */
@@ -306,7 +306,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * @param {Feature<Geometry>} feature - The feature to create a tooltip for
    * @param {boolean} hideMeasurements - Whether to hide the measurement tooltip
    * @param {string} mapId - The map identifier
-   * @return {Overlay | undefined} The created or updated overlay, or undefined if creation failed
+   * @returns {Overlay | undefined} The created or updated overlay, or undefined if creation failed
    * @static
    * @private
    */
@@ -354,7 +354,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Utility to convert SVG path to coordinates
    * @param {string} pathData - SVG path string
    * @param {number[]} center - Center coordinates
-   * @return {number[][]} Array of coordinates
+   * @returns {number[][]} Array of coordinates
    * @static
    * @private
    */
@@ -413,7 +413,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * @param {string} svgPath - SVG path string
    * @param {SketchCoordType} coordinates - Circle coordinate (center and out edge)
    * @param {SimpleGeometry} [geometry] - The intermediate geometry for display while expanding
-   * @return {Polygon} The result polygon
+   * @returns {Polygon} The result polygon
    * @static
    * @private
    */
@@ -486,7 +486,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * @param {StyleProps} style - The style properties
    * @param {string} [iconSrc] - The icon source for point features
    * @param {string} [featureId] - Optional feature ID (generates one if not provided)
-   * @return {void}
+   * @returns {void}
    * @static
    * @private
    */
@@ -520,7 +520,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Extracts style properties from a feature
    * @param {Feature} feature - The feature to extract properties from
    * @param {StyleProps} currentStyle - The current style properties to update
-   * @return {StyleProps} The extracted style properties
+   * @returns {StyleProps} The extracted style properties
    * @static
    * @private
    */
@@ -562,7 +562,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /**
    * Cleans up the temporary text transform interaction
    * @param {string} mapId - The map identifier
-   * @return {void}
+   * @returns {void}
    * @static
    * @private
    */
@@ -584,7 +584,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map identifier
    * @param {string} [geomType] - The geometry type to draw (optional, uses current state if not provided)
    * @param {StyleProps} [styleInput] - Optional style properties to use
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static startDrawing(mapId: string, geomType?: string, styleInput?: StyleProps): void {
@@ -797,7 +797,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /**
    * Stops the current drawing operation
    * @param {string} mapId - The map identifier
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static stopDrawing(mapId: string): void {
@@ -822,7 +822,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /**
    * Toggles the drawing state
    * @param {string} mapId - The map identifier
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static toggleDrawing(mapId: string): void {
@@ -841,7 +841,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /**
    * Initiates editing interactions
    * @param {string} mapId - The map identifier
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static startEditing(mapId: string): void {
@@ -1061,7 +1061,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /**
    * Stops the editing interaction for all groups
    * @param {string} mapId - The map identifier
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static stopEditing(mapId: string): void {
@@ -1083,7 +1083,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /**
    * Function to toggle editing state
    * @param {string} mapId - The map identifier
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static toggleEditing(mapId: string): void {
@@ -1103,7 +1103,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /**
    * Starts snapping interactions
    * @param {string} mapId - The map identifier
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static startSnapping(mapId: string): void {
@@ -1120,7 +1120,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /**
    * Stops snapping interactions
    * @param {string} mapId - The map identifier
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static stopSnapping(mapId: string): void {
@@ -1136,7 +1136,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /**
    * Toggles snapping state
    * @param {string} mapId - The map identifier
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static toggleSnapping(mapId: string): void {
@@ -1155,7 +1155,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Updates the style of any currently transforming features
    * @param {string} mapId - The map identifier
    * @param {StyleProps} newStyle - The new style to apply
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static updateTransformingFeatureStyle(mapId: string, newStyle: StyleProps): void {
@@ -1229,7 +1229,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Delete a single drawing feature from the map
    * @param {string} mapId - The map identifier
    * @param {string} featureId - The ID of the feature to be deleted
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static deleteSingleDrawing(mapId: string, featureId: string): void {
@@ -1249,7 +1249,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Clears all drawings from the map
    * @param {string} mapId - The map identifier
    * @param {boolean} [saveHistory=true] - Whether to save to history
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static clearDrawings(mapId: string, saveHistory: boolean = true): void {
@@ -1287,7 +1287,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /**
    * Refreshes the interaction instances
    * @param {string} mapId - The map identifier
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static refreshInteractionInstances(mapId: string): void {
@@ -1310,7 +1310,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /**
    * Refreshes the snapping instance
    * @param {string} mapId - The map identifier
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static refreshSnappingInstance(mapId: string): void {
@@ -1326,7 +1326,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /**
    * Toggles the measurement overlays on the map
    * @param {string} mapId - The map identifier
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static toggleHideMeasurements(mapId: string): void {
@@ -1358,7 +1358,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /**
    * Downloads drawings as GeoJSON with embedded styles
    * @param {string} mapId - The map identifier
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static downloadDrawings(mapId: string): void {
@@ -1443,7 +1443,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Uploads and loads drawings from GeoJSON file
    * @param {string} mapId - The map identifier
    * @param {File} file - The GeoJSON file
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static uploadDrawings(mapId: string, file: File): void {
@@ -1560,7 +1560,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map identifier
    * @param {DrawerHistoryAction} action - The action to save
    * @param {boolean} [insertAtCurrentIndex=false] - Whether to create the action as the next action / as a redo
-   * @return {void}
+   * @returns {void}
    * @static
    * @private
    */
@@ -1601,7 +1601,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /**
    * Sets up keyboard event handling for undo/redo.
    * @param {string} mapId - The map identifier
-   * @return {void}
+   * @returns {void}
    * @static
    * @private
    */
@@ -1634,7 +1634,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /**
    * Undoes the last drawer action.
    * @param {string} mapId - The map identifier
-   * @return {boolean} If the action was successful
+   * @returns {boolean} If the action was successful
    * @static
    */
   static undo(mapId: string): boolean {
@@ -1690,7 +1690,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /**
    * Redoes the next drawer action.
    * @param {string} mapId - The map identifier
-   * @return {boolean} If the action was successful
+   * @returns {boolean} If the action was successful
    * @static
    */
   static redo(mapId: string): boolean {
@@ -1759,7 +1759,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Re-add new features
    * @param {string} mapId - The map identifier
    * @param {DrawerHistoryAction} action - The action that will be re-performed
-   * @return {void}
+   * @returns {void}
    * @static
    * @private
    */
@@ -1794,7 +1794,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map identifier
    * @param {DrawerHistoryAction} action - The action that will be re-performed
    * @throws {InvaliGeometryGroupIdError} If the provided geometry group id does not exist.
-   * @return {void}
+   * @returns {void}
    * @static
    * @private
    */
@@ -1837,7 +1837,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Function that redoes a modify action
    * @param {string} mapId - The map identifier
    * @param {DrawerHistoryAction} action - The action to be redone
-   * @return {void}
+   * @returns {void}
    * @static
    * @private
    */
@@ -1872,7 +1872,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Function that undoes a modify action
    * @param {string} mapId - The map identifier
    * @param {DrawerHistoryAction} action - The action to be undone
-   * @return {void}
+   * @returns {void}
    * @static
    * @private
    */
@@ -1907,7 +1907,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * Re-performs a select action. Note: deselect happens inside the transform-base undo
    * @param {string} mapId - The map identifier
    * @param {DrawerHistoryAction} action - The select action to be applied
-   * @return {void}
+   * @returns {void}
    * @static
    * @private
    */
@@ -1926,7 +1926,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
    * a feature since there is undo / redo functionality for both
    * drawer-event-processor and transform-base
    * @param {string} mapId - The map identifier
-   * @return {void}
+   * @returns {void}
    * @static
    * @private
    */
@@ -1960,7 +1960,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /**
    * Clean up resources for a map
    * @param {string} mapId - The map identifier
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static cleanup(mapId: string): void {

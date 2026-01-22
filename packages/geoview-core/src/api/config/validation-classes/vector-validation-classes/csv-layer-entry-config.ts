@@ -44,7 +44,7 @@ export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @return {TypeSourceCSVInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   * @returns {TypeSourceCSVInitialConfig} The strongly-typed source configuration specific to this layer entry config.
    * @override
    */
   override getSource(): TypeSourceCSVInitialConfig {

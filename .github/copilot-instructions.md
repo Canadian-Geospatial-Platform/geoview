@@ -174,7 +174,7 @@ Control via localStorage:
  * Main function description.
  * @function functionName
  * @param {Array} keys - List of keys
- * @return {Promise} Promise of config nodes
+ * @returns {Promise} Promise of config nodes
  */
 ```
 
@@ -184,7 +184,7 @@ Control via localStorage:
 
 - **All parameters must be documented** - Every function parameter requires a `@param` tag
 - **Optional parameters** - Use square brackets: `@param {string} [optionalParam]` or `@param {number} [height]`
-- **Return values** - Use `@return` for all functions that return values; describe what the Promise resolves to for async functions
+- **Return values** - Use `@returns` for all functions that return values; describe what the Promise resolves to for async functions
 - **Thrown errors** - Use `@throws` to document error types: `@throws {MapViewerNotFoundError} When no map exists with the given ID`
 - **Access modifiers** - Use `@private` for private methods/properties, `@protected` for protected members, `@static` for static methods, `@abstract` for absract methods, and other tags
 
@@ -192,7 +192,7 @@ Control via localStorage:
 
 1. Description
 2. `@param` tags (all parameters)
-3. `@return`
+3. `@returns`
 4. `@throws` (if applicable)
 5. **Modifiers LAST**: `@static`, `@protected`, `@private`, `@override`, `@constructor`, `@abstract`
 
@@ -211,7 +211,7 @@ Control via localStorage:
    * - Optionally deletes the HTML container element
    * @param {string} mapId - The unique identifier of the map to delete
    * @param {boolean} deleteContainer - True to remove the div element
-   * @return {Promise<void>} Promise that resolves when deletion is complete
+   * @returns {Promise<void>} Promise that resolves when deletion is complete
    */
   ```
 - **Enhance, don't replace** - When existing descriptions exist, add more information or rephrase for clarity, but don't remove helpful details

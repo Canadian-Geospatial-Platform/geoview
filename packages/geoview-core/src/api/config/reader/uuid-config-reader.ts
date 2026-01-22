@@ -37,7 +37,7 @@ export class UUIDmapConfigReader {
    * @param {TypeDisplayLanguage} lang - The language to get the config for
    * @param {string[]} uuids - A list of uuids to get the configurations for
    * @param {AbortSignal} [abortSignal] - Abort signal to handle cancelling of the process.
-   * @return {Promise<UUIDmapConfigReaderResponse>} Layers and Geocharts read and parsed from uuids results from GeoCore
+   * @returns {Promise<UUIDmapConfigReaderResponse>} Layers and Geocharts read and parsed from uuids results from GeoCore
    * @static
    */
   static async getGVConfigFromUUIDs(
@@ -74,7 +74,7 @@ export class UUIDmapConfigReader {
    * @param {TypeDisplayLanguage} lang - The language to get the config for
    * @param {string[]} uuids - A list of uuids to get the configurations for
    * @param {AbortSignal} [abortSignal] - Abort signal to handle cancelling of the process.
-   * @return {Promise<UUIDmapConfigReaderResponse>} Layers read and parsed from uuids results from Geonetwork RCS
+   * @returns {Promise<UUIDmapConfigReaderResponse>} Layers read and parsed from uuids results from Geonetwork RCS
    * @static
    */
   static async getGVConfigFromUUIDsRCS(
@@ -116,7 +116,7 @@ export class UUIDmapConfigReader {
    * @param {string[]} uuids - The uuids to read Geocore API for
    * @param {GeoCoreConfigResponseRoot} resultData - The uuid request result
    * @param {TypeDisplayLanguage} lang - The language to use
-   * @return {TypeGeoviewLayerConfig[]} The Layers parsed from uuid result
+   * @returns {TypeGeoviewLayerConfig[]} The Layers parsed from uuid result
    * @static
    * @private
    */
@@ -258,7 +258,7 @@ export class UUIDmapConfigReader {
    * Reads the layers config from uuid request result
    * @param {GeoCoreConfigResponseRoot} resultData - The uuid request result
    * @param {TypeDisplayLanguage} lang - The language to use to read results
-   * @return {GeoCoreConfigResponseGCSLayer | undefined} The layers snippet configs
+   * @returns {GeoCoreConfigResponseGCSLayer | undefined} The layers snippet configs
    * @static
    * @private
    */
@@ -281,7 +281,7 @@ export class UUIDmapConfigReader {
    * Reads and parses GeoChart configs from uuid request result
    * @param {GeoCoreConfigResponseRoot} resultData - The uuid request result
    * @param {TypeDisplayLanguage} lang - The language to use to read results
-   * @return {GeoViewGeoChartConfig[]} the list of GeoChart configs
+   * @returns {GeoViewGeoChartConfig[]} the list of GeoChart configs
    * @static
    * @private
    */

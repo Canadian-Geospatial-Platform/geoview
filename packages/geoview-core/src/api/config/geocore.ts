@@ -23,7 +23,7 @@ export class GeoCore {
    * @param {string} [mapId] - The optional map identifier.
    * @param {GeoCoreLayerConfig} [layerConfig] - The optional layer configuration.
    * @param {AbortSignal} [abortSignal] - Abort signal to handle cancelling of the process.
-   * @return {Promise<GeoCoreLayerConfigResponse>} List of layer configurations to add to the map.
+   * @returns {Promise<GeoCoreLayerConfigResponse>} List of layer configurations to add to the map.
    * @static
    */
   static async createLayerConfigFromUUID(
@@ -106,7 +106,7 @@ export class GeoCore {
    * @param {string} mapId - The optional map identifier.
    * @param {RCSLayerConfig} [layerConfig] - The optional layer configuration.
    * @param {AbortSignal} [abortSignal] - Abort signal to handle cancelling of fetch.
-   * @return {Promise<TypeGeoviewLayerConfig>} List of layer configurations to add to the map.
+   * @returns {Promise<TypeGeoviewLayerConfig>} List of layer configurations to add to the map.
    * @static
    */
   static async createLayerConfigFromRCSUUID(

@@ -22,7 +22,7 @@ export class UIEventProcessor extends AbstractEventProcessor {
    * Provides access to app bar, footer bar, navbar components and their visibility states.
    * Used by other processors and UI components to access current interface configuration.
    * @param {string} mapId - The map identifier
-   * @return {IUIState} The UI state slice containing all interface-related data
+   * @returns {IUIState} The UI state slice containing all interface-related data
    * @static
    * @protected
    */
@@ -37,7 +37,7 @@ export class UIEventProcessor extends AbstractEventProcessor {
    * Gets the identifier of the currently active footer bar tab.
    * Returns the tab ID that is currently selected and displayed in the footer bar.
    * @param {string} mapId - The map identifier
-   * @return {string | undefined} The active tab ID, or undefined if no tab is active
+   * @returns {string | undefined} The active tab ID, or undefined if no tab is active
    * @static
    */
   static getActiveFooterBarTab(mapId: string): string | undefined {
@@ -48,7 +48,7 @@ export class UIEventProcessor extends AbstractEventProcessor {
    * Gets the array of footer bar tab components registered for the map.
    * Returns component configurations for all tabs that appear in the bottom footer bar.
    * @param {string} mapId - The map identifier
-   * @return {TypeValidFooterBarTabsCoreProps[]} Array of footer bar component configurations
+   * @returns {TypeValidFooterBarTabsCoreProps[]} Array of footer bar component configurations
    * @static
    */
   static getFooterBarComponents(mapId: string): TypeValidFooterBarTabsCoreProps[] {
@@ -59,7 +59,7 @@ export class UIEventProcessor extends AbstractEventProcessor {
    * Gets the array of app bar button components registered for the map.
    * Returns component configurations for all buttons that appear in the main app bar.
    * @param {string} mapId - The map identifier
-   * @return {TypeValidAppBarCoreProps[]} Array of app bar component configurations
+   * @returns {TypeValidAppBarCoreProps[]} Array of app bar component configurations
    * @static
    */
   static getAppBarComponents(mapId: string): TypeValidAppBarCoreProps[] {
@@ -70,7 +70,7 @@ export class UIEventProcessor extends AbstractEventProcessor {
    * Gets the array of navigation bar components registered for the map.
    * Returns component configurations for zoom, home, and other navigation controls.
    * @param {string} mapId - The map identifier
-   * @return {TypeValidNavBarProps[]} Array of navbar component configurations
+   * @returns {TypeValidNavBarProps[]} Array of navbar component configurations
    * @static
    */
   static getNavBarComponents(mapId: string): TypeValidNavBarProps[] {
@@ -81,7 +81,7 @@ export class UIEventProcessor extends AbstractEventProcessor {
    * Gets the array of core package components registered for the map.
    * Returns configurations for essential GeoView core functionality packages.
    * @param {string} mapId - The map identifier
-   * @return {TypeValidMapCorePackageProps[]} Array of core package component configurations
+   * @returns {TypeValidMapCorePackageProps[]} Array of core package component configurations
    * @static
    */
   static getCorePackageComponents(mapId: string): TypeValidMapCorePackageProps[] {
@@ -92,7 +92,7 @@ export class UIEventProcessor extends AbstractEventProcessor {
    * Gets the collapsed state of the footer bar.
    * Returns true if the footer bar is currently hidden/collapsed, false if expanded/visible.
    * @param {string} mapId - The map identifier
-   * @return {boolean} True if footer bar is collapsed, false otherwise
+   * @returns {boolean} True if footer bar is collapsed, false otherwise
    * @static
    */
   static getFooterBarIsCollapsed(mapId: string): boolean {
@@ -112,7 +112,7 @@ export class UIEventProcessor extends AbstractEventProcessor {
    * If the tab is already hidden, no action is taken.
    * @param {string} mapId - The map identifier
    * @param {string} tab - The tab identifier to hide
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static hideTab(mapId: string, tab: string): void {
@@ -126,7 +126,7 @@ export class UIEventProcessor extends AbstractEventProcessor {
    * If the tab is already visible, no action is taken.
    * @param {string} mapId - The map identifier
    * @param {string} tab - The tab identifier to show
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static showTab(mapId: string, tab: string): void {
@@ -143,7 +143,7 @@ export class UIEventProcessor extends AbstractEventProcessor {
    * Switches the currently displayed footer bar tab to the specified tab ID.
    * @param {string} mapId - The map identifier
    * @param {string} id - The footer bar tab ID to activate
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static setActiveFooterBarTab(mapId: string, id: string): void {
@@ -158,7 +158,7 @@ export class UIEventProcessor extends AbstractEventProcessor {
    * @param {string} tabId - The app bar tab ID to activate
    * @param {boolean} isOpen - Whether the tab's panel should be open
    * @param {boolean} isFocusTrapped - Whether focus should be trapped in the panel for accessibility
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static setActiveAppBarTab(mapId: string, tabId: string, isOpen: boolean, isFocusTrapped: boolean): void {
@@ -169,7 +169,7 @@ export class UIEventProcessor extends AbstractEventProcessor {
    * Gets the currently active app bar tab and its state.
    * Returns an object containing the tab ID, whether it's open, and focus trap state.
    * @param {string} mapId - The map identifier
-   * @return {ActiveAppBarTabType} Object with tabId, isOpen, and isFocusTrapped properties
+   * @returns {ActiveAppBarTabType} Object with tabId, isOpen, and isFocusTrapped properties
    * @static
    */
   static getActiveAppBarTab(mapId: string): ActiveAppBarTabType {
@@ -181,7 +181,7 @@ export class UIEventProcessor extends AbstractEventProcessor {
    * Used to toggle the footer bar's visibility, typically via a collapse/expand button.
    * @param {string} mapId - The map identifier
    * @param {boolean} collapsed - True to collapse the footer bar, false to expand it
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static setFooterBarIsCollapsed(mapId: string, collapsed: boolean): void {

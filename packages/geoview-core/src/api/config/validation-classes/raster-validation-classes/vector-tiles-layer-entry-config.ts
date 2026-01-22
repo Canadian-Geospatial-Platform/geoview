@@ -44,7 +44,7 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @return {TypeSourceTileInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   * @returns {TypeSourceTileInitialConfig} The strongly-typed source configuration specific to this layer entry config.
    * @override
    */
   override getSource(): TypeSourceTileInitialConfig {
@@ -53,7 +53,7 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @return {TypeMetadataVectorTiles | undefined} The strongly-typed layer configuration specific to this layer entry config.
+   * @returns {TypeMetadataVectorTiles | undefined} The strongly-typed layer configuration specific to this layer entry config.
    * @override
    */
   override getServiceMetadata(): TypeMetadataVectorTiles | undefined {
@@ -66,7 +66,7 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
 
   /**
    * Gets the style url or undefined.
-   * @return {string | undefined} The style url or undefined.
+   * @returns {string | undefined} The style url or undefined.
    */
   getStyleUrl(): string | undefined {
     return this.#styleUrl;
@@ -75,7 +75,7 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
   /**
    * Sets the style url.
    * @param {string} styleUrl - The style url.
-   * @return {void}
+   * @returns {void}
    */
   setStyleUrl(styleUrl: string): void {
     this.#styleUrl = styleUrl;
@@ -88,7 +88,7 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
   /**
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigVectorTilesClassOrType | undefined} layerConfig - The layer config class instance or regular json object.
-   * @return {string | undefined} The style url or undefined.
+   * @returns {string | undefined} The style url or undefined.
    * @static
    */
   static getClassOrTypeStyleUrl(layerConfig: ConfigVectorTilesClassOrType | undefined): string | undefined {
@@ -102,7 +102,7 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
    * Helper function to support when a layerConfig is either a class instance or a regular json object.
    * @param {ConfigVectorTilesClassOrType} layerConfig - The layer config class instance or regular json object.
    * @param {string} styleUrl - The style url.
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static setClassOrTypeStyleUrl(layerConfig: ConfigVectorTilesClassOrType, styleUrl: string): void {

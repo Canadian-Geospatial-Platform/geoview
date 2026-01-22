@@ -42,7 +42,7 @@ export class GeoJSONLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @return {TypeSourceGeoJSONInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   * @returns {TypeSourceGeoJSONInitialConfig} The strongly-typed source configuration specific to this layer entry config.
    * @override
    */
   override getSource(): TypeSourceGeoJSONInitialConfig {

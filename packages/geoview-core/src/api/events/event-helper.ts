@@ -8,7 +8,7 @@ export default class EventHelper {
    * @param {T} sender - The object emitting the event
    * @param {EventDelegateBase<T, U, Z>[]} handlersList - The list of handlers to be called with the event
    * @param {U} event - The event to emit
-   * @return {Z[]} Array of results from all handlers
+   * @returns {Z[]} Array of results from all handlers
    * @static
    */
   static emitEvent<T, U, Z>(sender: T, handlersList: EventDelegateBase<T, U, Z>[], event: U): Z[] {
@@ -20,7 +20,7 @@ export default class EventHelper {
    * Adds an event handler callback in the provided handlersList.
    * @param {EventDelegateBase<T, U, Z>[]} handlersList - The list of handlers to be called with the event
    * @param {EventDelegateBase<T, U, Z>} callback - The callback to be executed whenever the event is raised
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static onEvent<T, U, Z>(handlersList: EventDelegateBase<T, U, Z>[], callback: EventDelegateBase<T, U, Z>): void {
@@ -32,7 +32,7 @@ export default class EventHelper {
    * Removes an event handler callback from the provided handlersList.
    * @param {EventDelegateBase<T, U, Z>[]} handlersList - The list of handlers on which to check to remove the handler
    * @param {EventDelegateBase<T, U, Z>} callback - The callback to stop being called whenever the event is emitted
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static offEvent<T, U, Z>(handlersList: EventDelegateBase<T, U, Z>[], callback: EventDelegateBase<T, U, Z>): void {

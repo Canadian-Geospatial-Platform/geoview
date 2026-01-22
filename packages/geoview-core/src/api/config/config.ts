@@ -26,7 +26,7 @@ export class Config {
    * Get a valid map configuration.
    * @param {MapConfigLayerEntry[]} listOfGeoviewLayerConfig - The list of Geoview layer config to validate.
    * @param {ErrorCallbackDelegate} onErrorCallback - Callback function for error handling.
-   * @return {MapConfigLayerEntry[]} A valid map config layer entry.
+   * @returns {MapConfigLayerEntry[]} A valid map config layer entry.
    * @static
    */
   static prevalidateGeoviewLayersConfig(
@@ -72,7 +72,7 @@ export class Config {
    * Initializes all layer entry type fields accordingly to the GeoView layer type.
    * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entry configuration to adjust.
    * @param {TypeGeoviewLayerType} geoviewLayerType - The GeoView layer type.
-   * @return {void}
+   * @returns {void}
    * @static
    * @private
    */
@@ -92,7 +92,7 @@ export class Config {
    * @param {string} mapId - The unique identifier for the map instance.
    * @param {MapConfigLayerEntry[]} listOfGeoviewLayerConfig - The list of layer configurations to validate and initialize.
    * @param {ErrorCallbackDelegate} onErrorCallback - A callback function invoked when a validation error occurs.
-   * @return {MapConfigLayerEntry[] | undefined} The validated list of layer configs, or `undefined` if invalid.
+   * @returns {MapConfigLayerEntry[] | undefined} The validated list of layer configs, or `undefined` if invalid.
    * @static
    */
   static initializeMapConfig(

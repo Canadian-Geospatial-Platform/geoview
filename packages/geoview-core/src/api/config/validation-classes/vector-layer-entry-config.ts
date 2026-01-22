@@ -31,7 +31,7 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @return {TypeBaseVectorSourceInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   * @returns {TypeBaseVectorSourceInitialConfig} The strongly-typed source configuration specific to this layer entry config.
    * @override
    */
   override getSource(): TypeBaseVectorSourceInitialConfig {
@@ -44,7 +44,7 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
 
   /**
    * Helper function to get the layer metadata casted as TypeLayerMetadataVector.
-   * @return {TypeLayerMetadataVector | undefined} The casted layer metadata in the right type.
+   * @returns {TypeLayerMetadataVector | undefined} The casted layer metadata in the right type.
    */
   getLayerMetadataCasted(): TypeLayerMetadataVector | undefined {
     // TODO: Refactor - Remove this function in favor of a generic to be used by the class signature itself:

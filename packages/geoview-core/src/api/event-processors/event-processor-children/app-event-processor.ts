@@ -23,7 +23,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
    * Gets the app state slice from the store for the specified map.
    * Provides access to application-level state including display language, theme, and notifications.
    * @param {string} mapId - The map identifier
-   * @return {IAppState} The app state slice
+   * @returns {IAppState} The app state slice
    * @protected
    * @static
    */
@@ -36,7 +36,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
    * Asynchronously gets the app state slice from the store for the specified map.
    * This method waits for the store to be available before returning the state.
    * @param {string} mapId - The map identifier
-   * @return {Promise<IAppState>} Promise that resolves with the app state slice
+   * @returns {Promise<IAppState>} Promise that resolves with the app state slice
    * @protected
    * @static
    */
@@ -48,7 +48,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
   /**
    * Gets the current display language setting for the map.
    * @param {string} mapId - The map identifier
-   * @return {TypeDisplayLanguage} The display language ('en' or 'fr')
+   * @returns {TypeDisplayLanguage} The display language ('en' or 'fr')
    * @static
    */
   static getDisplayLanguage(mapId: string): TypeDisplayLanguage {
@@ -58,7 +58,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
   /**
    * Gets the current display theme setting for the map.
    * @param {string} mapId - The map identifier
-   * @return {TypeDisplayTheme} The display theme ('dark', 'light' or 'geo-ca')
+   * @returns {TypeDisplayTheme} The display theme ('dark', 'light' or 'geo-ca')
    * @static
    */
   static getDisplayTheme(mapId: string): TypeDisplayTheme {
@@ -68,7 +68,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
   /**
    * Gets the root HTML element that contains the GeoView map instance.
    * @param {string} mapId - The map identifier
-   * @return {HTMLElement} The GeoView container HTML element
+   * @returns {HTMLElement} The GeoView container HTML element
    * @static
    */
   static getGeoviewHTMLElement(mapId: string): HTMLElement {
@@ -79,7 +79,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
    * Gets whether unsymbolized features should be displayed on the map.
    * When true, features without defined styles will still be rendered with default styling.
    * @param {string} mapId - The map identifier
-   * @return {boolean} True if unsymbolized features should be shown, false otherwise
+   * @returns {boolean} True if unsymbolized features should be shown, false otherwise
    * @static
    */
   static getShowUnsymbolizedFeatures(mapId: string): boolean {
@@ -94,7 +94,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
    * @param {string} messageKey - The translation key for the message
    * @param {string[]} [param] - Optional parameters to replace in the message string
    * @param {boolean} [notification=false] - True to add the message to notification panel (default false)
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static addMessage(mapId: string, type: SnackbarType, messageKey: string, param?: string[], notification: boolean = false): void {
@@ -122,7 +122,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
    * Checks if notification already exists and increments its count if found, otherwise adds new notification with count of 1.
    * @param {string} mapId - The map identifier
    * @param {NotificationDetailsType} notif - The notification details to add
-   * @return {Promise<void>} Promise that resolves when the notification is added
+   * @returns {Promise<void>} Promise that resolves when the notification is added
    * @static
    */
   static async addNotification(mapId: string, notif: NotificationDetailsType): Promise<void> {
@@ -148,7 +148,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
    * Removes a specific notification from the notification panel by its key.
    * @param {string} mapId - The map identifier
    * @param {string} key - The unique key of the notification to remove
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static removeNotification(mapId: string, key: string): void {
@@ -160,7 +160,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
   /**
    * Removes all notifications from the notification panel.
    * @param {string} mapId - The map identifier
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static removeAllNotifications(mapId: string): void {
@@ -172,7 +172,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
    * When crosshair is active, the map is focused and keyboard interactions are enabled.
    * @param {string} mapId - The map identifier
    * @param {boolean} isActive - True to activate crosshair, false to deactivate
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static setAppIsCrosshairActive(mapId: string, isActive: boolean): void {
@@ -187,7 +187,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
    * Changes i18n language, resets basemap, reloads guide, and clears notifications to prevent mixed language content.
    * @param {string} mapId - The map identifier
    * @param {TypeDisplayLanguage} lang - The language to set ('en' or 'fr')
-   * @return {Promise<void>} Promise that resolves when all language changes are complete
+   * @returns {Promise<void>} Promise that resolves when all language changes are complete
    * @static
    */
   static setDisplayLanguage(mapId: string, lang: TypeDisplayLanguage): Promise<void> {
@@ -224,7 +224,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
    * Sets the display theme for the map.
    * @param {string} mapId - The map identifier
    * @param {TypeDisplayTheme} theme - The theme to set ('dark' or 'geo-ca')
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static setDisplayTheme(mapId: string, theme: TypeDisplayTheme): void {
@@ -236,7 +236,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map identifier
    * @param {boolean} active - True to enter fullscreen, false to exit
    * @param {TypeHTMLElement} [element] - Optional HTML element to make fullscreen (defaults to map container)
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static setFullscreen(mapId: string, active: boolean, element?: TypeHTMLElement): void {
@@ -249,7 +249,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
    * Used to indicate loading states for async operations.
    * @param {string} mapId - The map identifier
    * @param {boolean} active - True to show progress indicator, false to hide
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static setCircularProgress(mapId: string, active: boolean): void {
@@ -260,7 +260,7 @@ export class AppEventProcessor extends AbstractEventProcessor {
    * Processes the guide markdown file and stores the parsed guide object in the app state.
    * Loads the guide content based on the current display language and logs performance metrics.
    * @param {string} mapId - The map identifier to create guide object for
-   * @return {Promise<void>} Promise that resolves when the guide is loaded and stored
+   * @returns {Promise<void>} Promise that resolves when the guide is loaded and stored
    * @static
    */
   static async setGuide(mapId: string): Promise<void> {

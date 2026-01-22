@@ -33,7 +33,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * Attempts to retrieve the time slider state and returns true if successful, false if uninitialized.
    * Use this before calling other Time Slider methods to avoid PluginStateUninitializedError.
    * @param {string} mapId - The map identifier
-   * @return {boolean} True when the Time Slider plugin is initialized and ready, false otherwise
+   * @returns {boolean} True when the Time Slider plugin is initialized and ready, false otherwise
    * @static
    */
   static isTimeSliderInitialized(mapId: string): boolean {
@@ -52,7 +52,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * Provides access to time slider layers, selected layer, filters, and temporal values.
    * Only available when the Time Slider plugin is active for the map.
    * @param {string} mapId - The map identifier
-   * @return {ITimeSliderState} The time slider state slice
+   * @returns {ITimeSliderState} The time slider state slice
    * @throws {PluginStateUninitializedError} When the Time Slider plugin is not initialized for this map
    * @static
    * @protected
@@ -72,7 +72,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * Retrieves the complete time slider layer set containing all layers with temporal dimensions.
    * Returns an object mapping layer paths to their time slider configurations and values.
    * @param {string} mapId - The map identifier
-   * @return {TimeSliderLayerSet} Object containing all time slider layer configurations
+   * @returns {TimeSliderLayerSet} Object containing all time slider layer configurations
    * @throws {PluginStateUninitializedError} When the Time Slider plugin is not initialized for this map
    * @static
    */
@@ -84,7 +84,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * Retrieves the layer path of the currently selected time slider layer.
    * Returns the active layer whose temporal controls are displayed in the time slider UI.
    * @param {string} mapId - The map identifier
-   * @return {string} The layer path of the selected time slider layer
+   * @returns {string} The layer path of the selected time slider layer
    * @throws {PluginStateUninitializedError} When the Time Slider plugin is not initialized for this map
    * @static
    */
@@ -96,7 +96,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * Retrieves all time slider filters for all layers.
    * Returns an object mapping layer paths to their current temporal filter strings.
    * @param {string} mapId - The map identifier
-   * @return {Record<string, string>} Object with layer paths as keys and filter strings as values
+   * @returns {Record<string, string>} Object with layer paths as keys and filter strings as values
    * @throws {PluginStateUninitializedError} When the Time Slider plugin is not initialized for this map
    * @static
    */
@@ -109,7 +109,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * Returns the current time-based filter expression applied to the layer.
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The unique path identifying the layer
-   * @return {string} The temporal filter string for the specified layer
+   * @returns {string} The temporal filter string for the specified layer
    * @throws {PluginStateUninitializedError} When the Time Slider plugin is not initialized for this map
    * @static
    */
@@ -122,7 +122,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map identifier of the state to act on
    * @param {AbstractGVLayer} layer - The layer to add to the state
    * @param {TypeTimeSliderProps} [timesliderConfig] - Optional time slider configuration
-   * @return {void}
+   * @returns {void}
    * @static
    */
   static checkInitTimeSliderLayerAndApplyFilters(mapId: string, layer: AbstractGVLayer, timesliderConfig?: TypeTimeSliderProps): void {
@@ -150,7 +150,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map identifier of the state to act on
    * @param {string} layerPath - The layer path of the layer to add to the state
    * @param {TypeTimeSliderValues} timeSliderValues - The time slider values to add and apply filters
-   * @return {void}
+   * @returns {void}
    * @throws {PluginStateUninitializedError} When the Time Slider plugin is uninitialized.
    * @static
    * @private
@@ -177,7 +177,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * Removes the layer's time slider configuration and hides the time slider tab if no layers remain.
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The unique path identifying the layer to remove
-   * @return {void}
+   * @returns {void}
    * @throws {PluginStateUninitializedError} When the Time Slider plugin is not initialized for this map
    * @static
    */
@@ -202,7 +202,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map identifier
    * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration containing temporal metadata
    * @param {TypeTimeSliderProps} [timesliderConfig] - Optional configuration overrides from map config
-   * @return {TypeTimeSliderValues | undefined} Time slider configuration object, or undefined if layer has no temporal data
+   * @returns {TypeTimeSliderValues | undefined} Time slider configuration object, or undefined if layer has no temporal data
    * @throws {LayerNotFoundError} When the layer couldn't be found at the layer path in config
    * @throws {LayerWrongTypeError} When the specified layer is not a GV Layer type
    * @static
@@ -302,7 +302,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * Returns undefined for ranges less than 2 months (continuous slider).
    * @param {number} minValue - The minimum temporal value in milliseconds
    * @param {number} maxValue - The maximum temporal value in milliseconds
-   * @return {number | undefined} The estimated step size in milliseconds, or undefined for continuous ranges
+   * @returns {number | undefined} The estimated step size in milliseconds, or undefined for continuous ranges
    * @static
    */
   static guessEstimatedStep(minValue: number, maxValue: number): number | undefined {
@@ -326,7 +326,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * The selected layer's temporal controls are displayed and can be adjusted by the user.
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The unique path identifying the layer to select
-   * @return {void}
+   * @returns {void}
    * @throws {PluginStateUninitializedError} When the Time Slider plugin is not initialized for this map
    * @static
    */
@@ -341,7 +341,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The unique path identifying the layer
    * @param {string} filter - The temporal filter expression to store
-   * @return {void}
+   * @returns {void}
    * @throws {PluginStateUninitializedError} When the Time Slider plugin is not initialized for this map
    * @static
    */
@@ -369,7 +369,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    * @param {boolean} filtering - Whether filtering is active or should revert to full temporal range
    * @param {number[]} minAndMax - Array containing min and max temporal values in milliseconds [min, max]
    * @param {number[]} values - Current slider values in milliseconds (1 or 2 values for single/range)
-   * @return {void}
+   * @returns {void}
    * @throws {PluginStateUninitializedError} When the Time Slider plugin is not initialized for this map
    * @static
    */

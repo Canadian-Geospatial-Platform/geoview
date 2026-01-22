@@ -27,7 +27,7 @@ export abstract class AbstractEventProcessor {
    * Provides synchronous access to the complete GeoView state including all store slices.
    * Used by event processors to read and modify state in their static methods.
    * @param {string} mapId - The unique identifier of the map to retrieve state for
-   * @return {IGeoviewState} The complete store state for the map
+   * @returns {IGeoviewState} The complete store state for the map
    * @throws {GeoViewStoreOnMapNotFoundError} When no store exists for the given map ID
    * @protected
    * @static
@@ -49,7 +49,7 @@ export abstract class AbstractEventProcessor {
    * Provides asynchronous access to the complete GeoView state including all store slices.
    * Used by event processors during initialization when the store may not yet exist.
    * @param {string} mapId - The unique identifier of the map to retrieve state for
-   * @return {Promise<IGeoviewState>} Promise resolving to the complete store state for the map
+   * @returns {Promise<IGeoviewState>} Promise resolving to the complete store state for the map
    * @throws {GeoViewStoreOnMapNotFoundError} When no store exists for the given map ID after waiting
    * @protected
    * @static
@@ -70,7 +70,7 @@ export abstract class AbstractEventProcessor {
    * This method calls the onInitialize hook which allows derived classes to register their store subscriptions.
    * All returned subscriptions are stored for cleanup during destruction.
    * @param {GeoviewStoreType} store - The GeoView store instance to initialize the processor with
-   * @return {void}
+   * @returns {void}
    */
   initialize(store: GeoviewStoreType): void {
     // Call on initialize for the inherited classes to initialize and return their subscribtions
@@ -83,7 +83,7 @@ export abstract class AbstractEventProcessor {
    * Override this method in derived event processors to register subscriptions to store state changes.
    * Return an array of unsubscribe functions that will be automatically cleaned up on destroy.
    * @param {GeoviewStoreType} store - The GeoView store instance for setting up subscriptions
-   * @return {Array<() => void> | void} Array of unsubscribe functions for cleanup, or void if no subscriptions
+   * @returns {Array<() => void> | void} Array of unsubscribe functions for cleanup, or void if no subscriptions
    * @protected
    */
   // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
@@ -98,7 +98,7 @@ export abstract class AbstractEventProcessor {
    * Destroys the event processor by cleaning up all subscriptions and calling the onDestroy hook.
    * This method automatically unsubscribes from all store subscriptions that were registered during initialization.
    * Derived classes can override onDestroy to perform additional cleanup operations.
-   * @return {void}
+   * @returns {void}
    */
   destroy(): void {
     // Call onDestroy for the inherited classes to destroy themselves. Their subscriptions returned upon initializations will already be destroyed.
@@ -109,7 +109,7 @@ export abstract class AbstractEventProcessor {
    * Hook called during destruction to allow derived classes to perform cleanup operations.
    * Override this method in derived event processors to clean up resources, timers, or other state.
    * The base implementation automatically unsubscribes from all store subscriptions registered during initialization.
-   * @return {void}
+   * @returns {void}
    * @protected
    */
   protected onDestroy(): void {
@@ -134,7 +134,7 @@ export abstract class AbstractEventProcessor {
    * @param {string} [traceProcessorIndication] - Optional identifier for logging and debugging purposes
    * @param {string} [layerPathBypass] - Optional layer path that triggers immediate propagation when its query completes
    * @param {(layerPath: string) => void} [onResetBypass] - Optional callback to reset the bypass flag after use; when omitted, all subsequent propagations become immediate
-   * @return {Promise<void>} Promise resolving when propagation is complete
+   * @returns {Promise<void>} Promise resolving when propagation is complete
    * @protected
    * @static
    */
