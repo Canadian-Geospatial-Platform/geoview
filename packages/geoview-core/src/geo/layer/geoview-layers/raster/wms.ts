@@ -560,7 +560,7 @@ export class WMS extends AbstractGeoViewRaster {
     this.setMetadataAccessPath(metadata.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource['@attributes']['xlink:href']);
 
     // Normalize it - datacube specific normalization
-    this.metadataAccessPath = normalizeDatacubeAccessPath(this.metadataAccessPath);
+    this.setMetadataAccessPath(normalizeDatacubeAccessPath(this.getMetadataAccessPath()));
 
     // Propagate the metadata access path to all data access path of the layers underneath
     this.listOfLayerEntryConfig.forEach((layerEntry) => {
