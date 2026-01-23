@@ -25,13 +25,6 @@ const MAP_INFO_BASE_STYLES = {
 
 const FLEX_STYLE = { flexGrow: 1, height: '100%' };
 
-const STATIC_CONTAINER_STYLES = {
-  ...MAP_INFO_BASE_STYLES,
-  height: '40px',
-  background: 'transparent',
-  width: 'fit-content',
-} as const;
-
 interface MapInfoProps {
   onScrollShellIntoView: () => void;
 }
@@ -67,13 +60,23 @@ export const MapInfo = memo(function MapInfo({ onScrollShellIntoView }: MapInfoP
     [expanded, theme.palette.geoViewColor.bgColor]
   );
 
+  const staticContainerStyles = useMemo(
+    () => ({
+      ...MAP_INFO_BASE_STYLES,
+      height: '40px',
+      background: theme.palette.geoViewColor.grey.lighten(0.8, 0.8),
+      width: 'fit-content',
+    }),
+    [theme.palette.geoViewColor.grey]
+  );
+
   const handleExpand = useCallback((value: boolean) => {
     logger.logTraceUseCallback('MAP INFO - expand', value);
     setExpanded(value);
   }, []);
 
   return (
-    <Box id={`${mapId}-mapInfo`} sx={interaction === 'dynamic' ? containerStyles : STATIC_CONTAINER_STYLES} onClick={onScrollShellIntoView}>
+    <Box id={`${mapId}-mapInfo`} sx={interaction === 'dynamic' ? containerStyles : staticContainerStyles} onClick={onScrollShellIntoView}>
       {interaction === 'dynamic' && <MapInfoExpandButton onExpand={handleExpand} expanded={expanded} />}
       <Attribution />
       {interaction === 'dynamic' && (
