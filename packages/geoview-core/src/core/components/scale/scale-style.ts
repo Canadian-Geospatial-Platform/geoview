@@ -20,10 +20,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       backgroundColor: 'transparent',
       color: theme.palette.geoViewColor.white,
     },
-    '&.interaction-static': {
-      padding: '5px',
-      backdropFilter: 'blur(5px)',
-    },
   },
   scaleExpandedContainer: {
     display: 'flex',

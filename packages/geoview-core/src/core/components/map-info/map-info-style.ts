@@ -15,23 +15,6 @@ export const getSxClasses = (): SxStyles => ({
       margin: 'auto 0 auto auto',
     },
     justifyContent: 'end',
-    '&.interaction-static': {
-      backdropFilter: 'unset',
-      backgroundColor: 'unset',
-      color: `black !important`,
-      fill: `black !important`,
-      position: 'absolute',
-      width: 'calc(100% - 60px)',
-      bottom: 0,
-      left: '60px',
-
-      '& button svg': {
-        fill: `black !important`,
-      },
-      '& button span': {
-        color: `black !important`,
-      },
-    },
   },
   rotationControlsContainer: {
     display: 'flex',
