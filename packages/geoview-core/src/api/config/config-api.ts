@@ -471,6 +471,7 @@ export class ConfigApi {
       // For GeoCore, we build the Config from the Geocore service
       const response = await GeoCore.createLayerConfigFromUUID(layerURL, language || 'en', mapId, undefined, abortSignal);
       const layerConfigFromGeocore = response.config;
+      // TODO: We are dropping response.geochart here, so the layers that end up being added will not have a chart, even if they should
 
       // Get the layer entries that GeoCore has configured
       const layerIdsFromGeocoreEntries = layerConfigFromGeocore.listOfLayerEntryConfig?.map((layerEntry) => layerEntry.layerId);

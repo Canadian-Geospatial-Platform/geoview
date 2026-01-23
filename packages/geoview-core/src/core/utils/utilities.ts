@@ -1274,3 +1274,14 @@ export function formatArea(area: number, displayLanguage: string): string {
   const value = Math.round(area * 100) / 100;
   return `${formatMeasurementValue(value, displayLanguage)} m<sup>2</sup>`;
 }
+
+/**
+ * Normalizes a WMS accesspath if it is from datacube.
+ * Left as 'datacube' to check for both datacube.services.geo.ca and datacube-prod-data-public.s3.ca-central-1.amazonaws.com/
+ * @param {string} path - The original access path.
+ * @returns {string} The normalized access path.
+ */
+export function normalizeDatacubeAccessPath(path: string): string {
+  //TODO: extract to list of exceptions / normalizations?
+  return path.toLowerCase().includes('datacube') ? path.replace('wrapper/ramp/ogc', 'wrapper/ogc').replace('/ows/', '/wrapper/ogc/') : path;
+}

@@ -12,7 +12,7 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "airborne_radioactivity",
-        "geoviewLayerName": "Airborne Radioactivity",
+        "geoviewLayerName": "Airborne Radioactivity - ESRI Dynamic",
         "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer",
         "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [
@@ -20,6 +20,11 @@
             "layerId": "1"
           }
         ]
+      },
+      {
+        "geoviewLayerId": "21b821cf-0f1c-40ee-8925-eab12d357668",
+        "geoviewLayerName": "Airborne Radioactivity - GeoCore",
+        "geoviewLayerType": "geoCore"
       },
       {
         "geoviewLayerId": "tritium_agol",

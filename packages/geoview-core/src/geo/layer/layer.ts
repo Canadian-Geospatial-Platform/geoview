@@ -2726,7 +2726,17 @@ export class LayerApi {
     let promise: Promise<TypeGeoviewLayerConfig>;
     if (mapConfigLayerEntryIsGeoCore(entry)) {
       // Working with a GeoCore layer
-      promise = GeoCore.createLayerConfigFromUUID(entry.geoviewLayerId, language, mapId, entry).then((response) => response.config);
+      promise = GeoCore.createLayerConfigFromUUID(entry.geoviewLayerId, language, mapId, entry).then((response) => {
+        // If a Geochart is initialized
+        if (GeochartEventProcessor.isGeochartInitialized(mapId)) {
+          // For each geocharts configuration
+          Object.entries(response.geocharts).forEach(([layerPath, geochartConfig]) => {
+            // Add a GeoChart configuration on-the-fly
+            GeochartEventProcessor.addGeochartChart(mapId, layerPath, geochartConfig);
+          });
+        }
+        return response.config;
+      });
     } else if (mapConfigLayerEntryIsGeoPackage(entry)) {
       // Working with a geopackage layer
       promise = GeoPackageReader.createLayerConfigFromGeoPackage(entry as GeoPackageLayerConfig);

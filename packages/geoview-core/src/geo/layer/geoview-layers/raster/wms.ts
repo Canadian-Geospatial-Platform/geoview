@@ -32,7 +32,7 @@ import {
   LayerEntryConfigLayerIdNotFoundError,
   LayerEntryConfigWMSSubLayerNotFoundError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
-import { deepMergeObjects } from '@/core/utils/utilities';
+import { deepMergeObjects, normalizeDatacubeAccessPath } from '@/core/utils/utilities';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
@@ -558,6 +558,9 @@ export class WMS extends AbstractGeoViewRaster {
 
     // Set the metadata access path
     this.setMetadataAccessPath(metadata.Capability.Request.GetMap.DCPType[0].HTTP.Get.OnlineResource['@attributes']['xlink:href']);
+
+    // Normalize it - datacube specific normalization
+    this.metadataAccessPath = normalizeDatacubeAccessPath(this.metadataAccessPath);
 
     // Propagate the metadata access path to all data access path of the layers underneath
     this.listOfLayerEntryConfig.forEach((layerEntry) => {
