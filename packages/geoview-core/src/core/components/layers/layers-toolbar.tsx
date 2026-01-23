@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material';
 import { useCallback, useEffect, useRef } from 'react';
-import { Box, AddCircleOutlineIcon, ButtonGroup, DeleteOutlineIcon, HandleIcon, VisibilityOutlinedIcon, Button } from '@/ui';
+import { Box, AddCircleOutlineIcon, ButtonGroup, HandleIcon, VisibilityOutlinedIcon, Button } from '@/ui';
 import { ToggleAll } from '../toggle-all/toggle-all';
 import {
   useLayerStoreActions,
@@ -131,18 +131,6 @@ export function LayersToolbar(): JSX.Element {
           onClick={() => handleSetDisplayState('order')}
         >
           {t('legend.sort')}
-        </Button>
-        <Button
-          makeResponsive
-          type="text"
-          disabled={!legendLayers.length}
-          size="small"
-          tooltip={t('legend.removeLayer')!}
-          variant={displayState === 'remove' ? 'contained' : 'outlined'}
-          startIcon={<DeleteOutlineIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />}
-          onClick={() => handleSetDisplayState('remove')}
-        >
-          {t('general.remove')}
         </Button>
       </ButtonGroup>
       <ToggleAll source="layers" />

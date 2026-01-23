@@ -193,8 +193,12 @@ export class ConfigValidation {
             // Validate the geoview layer config, will throw an exception when invalid
             ConfigValidation.#validateGeoviewLayerConfig(geoviewLayerConfig);
 
-            // Process the layer entry config
-            ConfigValidation.#processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
+            // Process the layer entry config, pass geoviewLayerConfig as parent to cascade its initialSettings
+            ConfigValidation.#processLayerEntryConfig(
+              geoviewLayerConfig,
+              geoviewLayerConfig.listOfLayerEntryConfig,
+              geoviewLayerConfig as unknown as GroupLayerEntryConfig
+            );
 
             // Add it as a valid entry
             validConfigs.push(geoviewLayerConfig);
@@ -320,6 +324,18 @@ export class ConfigValidation {
 
         // Merge the rest of parent and child settings
         ConfigBaseClass.setClassOrTypeInitialSettings(layerConfig, deepMerge(parentInitialSettingsClone, initialSettings));
+
+        // Cascade remove control: if parent is not removable, children cannot be removable
+        const mergedSettings = ConfigBaseClass.getClassOrTypeInitialSettings(layerConfig);
+        if (parentInitialSettings.controls?.remove === false) {
+          if (!mergedSettings) {
+            ConfigBaseClass.setClassOrTypeInitialSettings(layerConfig, { controls: { remove: false } });
+          } else if (!mergedSettings.controls) {
+            mergedSettings.controls = { remove: false };
+          } else {
+            mergedSettings.controls.remove = false;
+          }
+        }
       }
 
       // Get the properties to be able to create the config object

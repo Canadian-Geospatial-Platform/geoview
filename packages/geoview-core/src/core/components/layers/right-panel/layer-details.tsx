@@ -51,6 +51,7 @@ import {
 import { useTimeSliderLayers, useTimeSliderStoreActions } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { DeleteUndoButton } from '@/core/components/layers/left-panel/delete-undo-button';
 
 // TODO: WCAG Issue #3108 - Fix layers.moreInfo button (button nested within a button)
 // TODO: WCAG Issue #3108 - Check all disabled buttons. They may need special treatment. Need to find instance in UI first)
@@ -452,9 +453,25 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     return <Box />;
   }
 
+  function renderDeleteButton(): JSX.Element | null {
+    // Only render delete button if layer is removable (controls.remove must be explicitly true)
+    const isRemovable = layerDetails.controls?.remove ?? false;
+    if (!isRemovable) return null;
+
+    return (
+      <DeleteUndoButton
+        key={`delete-undo-${layerDetails.layerPath}`}
+        layerPath={layerDetails.layerPath}
+        layerId={layerDetails.layerId}
+        layerRemovable={isRemovable}
+      />
+    );
+  }
+
   function renderLayerButtons(): JSX.Element {
     const timeSliderButton = renderTimeSliderButton();
     const hasDataTable = datatableSettings[layerDetails.layerPath];
+    const deleteButton = renderDeleteButton();
     const showDivider = hasDataTable || timeSliderButton;
 
     return (
@@ -467,6 +484,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         </IconButton>
         {renderHighlightButton()}
         {renderZoomButton()}
+        {deleteButton && <Box sx={sxClasses.verticalDivider} />}
+        {deleteButton}
       </Box>
     );
   }

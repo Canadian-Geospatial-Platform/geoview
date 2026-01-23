@@ -1,10 +1,4 @@
-import { useEffect } from 'react';
-import {
-  useLayerDeleteInProgress,
-  useLayerDisplayState,
-  useLayerLegendLayers,
-  useLayerStoreActions,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerDisplayState, useLayerLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LayersList } from './layers-list';
 import { AddNewLayer } from './add-new-layer/add-new-layer';
 import { logger } from '@/core/utils/logger';
@@ -21,19 +15,6 @@ export function LeftPanel({ showLayerDetailsPanel, isLayoutEnlarged }: LeftPanel
   // get from the store
   const legendLayers = useLayerLegendLayers();
   const displayState = useLayerDisplayState();
-  const layerDeleteInProgress = useLayerDeleteInProgress();
-  const { deleteLayer } = useLayerStoreActions();
-
-  // TODO: This triggers twice on layers added through add layers tab being removed early.
-  // TO.DOCONT: Ie. through view on layers in error, or switching layers tabs after starting.
-  // TO.DOCONT: The second time happens before layerDeleteInProgress can be reset.
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('LEFT-PANEL - deleteLayer, displayState, layerDeleteInProgress');
-
-    // Delete layer if layerDeleteInProgress is active and user clicks to a different tab.
-    if (displayState !== 'remove' && layerDeleteInProgress) deleteLayer(layerDeleteInProgress);
-  }, [deleteLayer, displayState, layerDeleteInProgress]);
 
   if (displayState === 'add') {
     return <AddNewLayer />;

@@ -45,7 +45,6 @@ import { useDataTableStoreActions } from '@/core/stores/store-interface-and-inti
 import { ArrowDownwardIcon, ArrowUpIcon, CenterFocusScaleIcon, LoopIcon } from '@/ui/icons';
 import { Divider } from '@/ui/divider/divider';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { useUISelectedFooterLayerListItemId } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { TypeLayerControls } from '@/api/types/layer-schema-types';
 import { scrollListItemIntoView } from '@/core/utils/utilities';
 
@@ -78,7 +77,6 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
   const displayState = useLayerDisplayState();
   const layerIsSelected = layerPath === selectedLayerPath && displayState === 'view';
   const selectedLayerSortingArrowId = useLayerSelectedLayerSortingArrowId();
-  const selectedFooterLayerListItemId = useUISelectedFooterLayerListItemId();
 
   useDataTableStoreActions();
 
@@ -290,9 +288,6 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     // Log
     logger.logTraceUseMemo('SINGLE-LAYER - memoEditModeButtons', layerPath);
 
-    if (displayState === 'remove') {
-      return <DeleteUndoButton layerPath={layerPath} layerId={layerId!} layerRemovable={layerControls?.remove !== false} />;
-    }
     if (displayState === 'order') {
       return (
         <>
@@ -341,8 +336,6 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     isFirst,
     isLast,
     layerChildren,
-    layerControls,
-    layerId,
     layerPath,
     mapId,
     reorderLayer,
@@ -524,20 +517,6 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
       }
     }
   }, [selectedLayerSortingArrowId]);
-
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('SINGLE-LAYER - displayState, selectedFooterLayerListItemId');
-
-    // set the focus to first layer, after layer has been deleted.
-    if (displayState === 'remove' && selectedFooterLayerListItemId.length) {
-      const firstLayer = document.getElementById('layers-left-panel');
-      if (firstLayer?.getElementsByTagName('li')) {
-        const listItems = firstLayer?.getElementsByTagName('li');
-        listItems[0]?.focus();
-      }
-    }
-  }, [displayState, selectedFooterLayerListItemId.length]);
 
   return (
     <ListItem className={memoContainerClass} id={layerId} key={layerName} disablePadding={true} data-layer-depth={depth}>
