@@ -1,6 +1,9 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
-import { useMapStoreActions } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
+import {
+  useMapStoreActions,
+  useMapSelectorLayerArrayVisibility,
+} from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 
 import type { TypeGroupLayer, TypeLegendItem } from '../custom-legend-types';
@@ -62,15 +65,14 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
   const { setOrToggleLayerVisibility } = useMapStoreActions();
 
   const [collapsed, setCollapsed] = useState<boolean>(isGroupLayer(item) ? (item.collapsed ?? false) : false);
-  const [allVisible, setAllVisible] = useState<boolean>(true);
 
-  // Collect all layer paths from children (memoized)
+  // Collect all layer paths from children
   const layerPaths = useMemo(() => collectLayerPaths(item.children), [item.children]);
 
-  if (!isGroupLayer(item)) return;
+  // Check if all child layers are visible
+  const allVisible = useMapSelectorLayerArrayVisibility(layerPaths);
 
-  // TODO: Subscribe to layer visibility changes to update allVisible state
-  // This would require accessing the layer state from the store
+  if (!isGroupLayer(item)) return;
 
   const handleToggleCollapse = (): void => {
     setCollapsed((prev) => !prev);
@@ -83,9 +85,6 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
     layerPaths.forEach((layerPath) => {
       setOrToggleLayerVisibility(layerPath, newVisibility);
     });
-
-    // Update local state
-    setAllVisible(newVisibility);
   };
 
   // Get current item text and path for children
