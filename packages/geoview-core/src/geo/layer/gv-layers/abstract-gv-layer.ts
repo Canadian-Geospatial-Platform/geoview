@@ -39,7 +39,7 @@ import type {
 } from '@/api/types/layer-schema-types';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import type { TypeLegendItem } from '@/core/components/layers/types';
-import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
+import { GeoviewRenderer, type TypeStyleProcessorOptions } from '@/geo/utils/renderer/geoview-renderer';
 import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
@@ -1577,7 +1577,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param {Record<string, string | undefined>} imageSourceDict - A dictionary used to cache and reuse image sources by style key.
    * @returns {string | undefined} The image source string representing the feature's style, or `undefined` if generation fails.
    */
-  static getImageSource(
+  static getFeatureIconSource(
     feature: Feature,
     layerStyle: TypeLayerStyleConfig,
     filterEquation: FilterNodeType[] | undefined,
@@ -1589,16 +1589,19 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       ? (feature.getGeometry()!.getType() as TypeStyleGeometry)
       : (Object.keys(layerStyle)[0] as TypeStyleGeometry);
 
+    // We want to retrieve the image symbol no matter if the config says it's presently visible or not
+    const bypassVisibility = true;
+
     if (!layerStyle[geometryType]) {
-      return GeoviewRenderer.getFeatureImageSource(feature, layerStyle, filterEquation, true, domainsLookup, aliasLookup);
+      return GeoviewRenderer.getFeatureIconSource(feature, layerStyle, filterEquation, bypassVisibility, domainsLookup, aliasLookup);
     }
 
     const styleSettings = layerStyle[geometryType];
     const { type } = styleSettings;
 
-    const options = {
+    const options: TypeStyleProcessorOptions = {
       filterEquation,
-      legendFilterIsOff: true,
+      bypassVisibility,
       domainsLookup,
       aliasLookup,
     };
@@ -1606,7 +1609,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     const featureStyle = GeoviewRenderer.processStyle[type][geometryType](styleSettings, feature, options);
 
     if (!featureStyle) {
-      return GeoviewRenderer.getFeatureImageSource(feature, layerStyle, filterEquation, true, domainsLookup, aliasLookup);
+      return GeoviewRenderer.getFeatureIconSource(feature, layerStyle, filterEquation, bypassVisibility, domainsLookup, aliasLookup);
     }
 
     // Clone the style
@@ -1616,11 +1619,11 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
     if (!imageSourceDict[styleKey]) {
       // eslint-disable-next-line no-param-reassign
-      imageSourceDict[styleKey] = GeoviewRenderer.getFeatureImageSource(
+      imageSourceDict[styleKey] = GeoviewRenderer.getFeatureIconSource(
         feature,
         layerStyle,
         filterEquation,
-        true,
+        bypassVisibility,
         domainsLookup,
         aliasLookup
       );
@@ -1679,7 +1682,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       for (const feature of features) {
         // Get the image source for a feature using styling information and cache it
         const imageSource = layerStyle
-          ? AbstractGVLayer.getImageSource(feature, layerStyle, filterEquation, domainsLookup, aliasLookup, imageSourceDict)
+          ? AbstractGVLayer.getFeatureIconSource(feature, layerStyle, filterEquation, domainsLookup, aliasLookup, imageSourceDict)
           : undefined;
 
         // Get the extent
