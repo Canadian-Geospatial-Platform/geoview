@@ -1,7 +1,7 @@
 import { useTheme } from '@mui/material';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ToggleAll } from '../toggle-all/toggle-all';
+import { ToggleAll } from '@/core/components/toggle-all/toggle-all';
 import { Box, List, Typography } from '@/ui';
 import { useGeoViewMapId, useUIActiveAppBarTab, useUIActiveFooterBarTabId, useLayerLegendLayers } from '@/core/stores/';
 import { logger } from '@/core/utils/logger';

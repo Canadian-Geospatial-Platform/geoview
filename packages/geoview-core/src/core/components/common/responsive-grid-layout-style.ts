@@ -18,6 +18,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   topRow: {
     '& .responsive-layout-left-top': {
       alignItems: 'end',
+      width: '100%',
       '&.MuiGrid-grid-xs-auto': {
         width: '100%',
       },

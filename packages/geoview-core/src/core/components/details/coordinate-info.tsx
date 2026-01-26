@@ -28,7 +28,7 @@ interface CoordinateInfoSwitchProps {
 
 export function CoordinateInfoSwitch({ disabled }: CoordinateInfoSwitchProps): JSX.Element {
   // Log
-  logger.logTraceRender('components/toggle-all/toggle');
+  logger.logTraceRender('components/details/coordinate-info');
 
   const { t } = useTranslation();
   const theme = useTheme();

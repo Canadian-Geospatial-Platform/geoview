@@ -257,8 +257,6 @@ L’onglet **Couches** comprend les sous-menus suivants :
 
 - Vue
 - Ajouter
-- Trier
-- Retirer
 
 =3!view=
 
@@ -325,8 +323,8 @@ _N.B. : Les paramètres accessibles dépendent de plusieurs facteurs, comme le t
 | <img src="{{assetsURL}}/img/guide/layers/refresh_60.svg" alt="Une icône représentant la fonction « Réinitialiser la couche »" />   | Réinitialiser la couche               | Réinitialiser la couche dans sont état initial.                                                                                                                                                             |
 | <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" alt="Une icône représentant la fonction « Couche mise en évidence »" /> | Couche mise en évidence               | Place la couche au premier plan, diminue l'opacité des autres couches et affiche le périmètre de la couche.                                                                                                 |
 | <img src="{{assetsURL}}/img/guide/layers/zoom_60.svg" alt="Une icône représentant la fonction « Zoom sur la couche »" />           | Zoom sur la couche                    | Déplace la carte et fait un zoom pour que le périmètre de la couche soit visible.                                                                                                                           |
+| <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt="Une icône représentant la fonction Retirer" />                      | Retirer                             | Retirer cette couche de la carte.                  |
 | Curseur                                                                                                                            | Opacité                               | Curseur permettant d'augmenter ou de diminuer l'opacité de la couche.                                                                                                                                       |
-| <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt="Une icône représentant la fonction Retirer" />                      | Retirer                             | Retirer uns couche de la carte.                  |
 
 _N.B. : Lorsque la couche est cachée, les fonctions affectant la couche sur la carte sont désactivées._
 

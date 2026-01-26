@@ -51,7 +51,7 @@ import {
 import { useTimeSliderLayers, useTimeSliderStoreActions } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { DeleteUndoButton } from '@/core/components/layers/left-panel/delete-undo-button';
+import { DeleteUndoButton } from '@/core/components/layers/right-panel/delete-undo-button';
 
 // TODO: WCAG Issue #3108 - Fix layers.moreInfo button (button nested within a button)
 // TODO: WCAG Issue #3108 - Check all disabled buttons. They may need special treatment. Need to find instance in UI first)
@@ -428,17 +428,17 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     return null;
   }
 
-  function renderHighlightButton(): JSX.Element {
+  function renderHighlightButton(): JSX.Element | null {
     if (isLayerHighlightCapable)
       return (
         <IconButton aria-label={t('legend.highlightLayer')} onClick={handleHighlightLayer} className="buttonOutline" disabled={layerHidden}>
           {highlightedLayer === layerDetails.layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
         </IconButton>
       );
-    return <Box />;
+    return null;
   }
 
-  function renderZoomButton(): JSX.Element {
+  function renderZoomButton(): JSX.Element | null {
     if (isLayerZoomToExtentCapable)
       return (
         <IconButton
@@ -450,7 +450,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           <ZoomInSearchIcon />
         </IconButton>
       );
-    return <Box />;
+    return null;
   }
 
   function renderDeleteButton(): JSX.Element | null {
