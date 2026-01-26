@@ -193,12 +193,8 @@ export class ConfigValidation {
             // Validate the geoview layer config, will throw an exception when invalid
             ConfigValidation.#validateGeoviewLayerConfig(geoviewLayerConfig);
 
-            // Process the layer entry config, pass geoviewLayerConfig as parent to cascade its initialSettings
-            ConfigValidation.#processLayerEntryConfig(
-              geoviewLayerConfig,
-              geoviewLayerConfig.listOfLayerEntryConfig,
-              geoviewLayerConfig as unknown as GroupLayerEntryConfig
-            );
+            // Process the layer entry config
+            ConfigValidation.#processLayerEntryConfig(geoviewLayerConfig, geoviewLayerConfig.listOfLayerEntryConfig);
 
             // Add it as a valid entry
             validConfigs.push(geoviewLayerConfig);
@@ -280,8 +276,10 @@ export class ConfigValidation {
       // layerConfig.initialSettings attributes that are not defined inherits parent layer settings that are defined.
       const initialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(layerConfig);
 
-      // Get the parent initial settings
-      const parentInitialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(parentLayerConfig);
+      // Get the parent initial settings from parentLayerConfig, or from geoviewLayerConfig if at root level
+      const parentInitialSettings = parentLayerConfig
+        ? ConfigBaseClass.getClassOrTypeInitialSettings(parentLayerConfig)
+        : geoviewLayerConfig.initialSettings;
 
       // If the minZoom is set, validate it with the parent
       if (initialSettings?.minZoom !== undefined) {

@@ -291,6 +291,10 @@ Les couches qui ne sont pas actuellement affichées sur la carte sont grisées e
 
 Si une couche est toujours visible, ou pour les couches dont le couche parent est caché, l'icône d'affichage (œil) est désactivée (grisée) <img src="{{assetsURL}}/img/guide/footer/eye_disabled.svg" alt="Une icône représentant la fonction Œil désactivé" />.
 
+**Trier les couches**
+
+Vous pouvez facilement modifier l'ordre des couches en cliquant sur les flèches directionnelles. Notez que ces icônes ne deviennent visibles qu'une fois qu'une couche spécifique est sélectionné.
+
 **Types de couches pris en charge**
 
 Les couches peuvent être en format de trame ou vectoriel. Voici les types de couches pris en charge :
@@ -322,6 +326,7 @@ _N.B. : Les paramètres accessibles dépendent de plusieurs facteurs, comme le t
 | <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" alt="Une icône représentant la fonction « Couche mise en évidence »" /> | Couche mise en évidence               | Place la couche au premier plan, diminue l'opacité des autres couches et affiche le périmètre de la couche.                                                                                                 |
 | <img src="{{assetsURL}}/img/guide/layers/zoom_60.svg" alt="Une icône représentant la fonction « Zoom sur la couche »" />           | Zoom sur la couche                    | Déplace la carte et fait un zoom pour que le périmètre de la couche soit visible.                                                                                                                           |
 | Curseur                                                                                                                            | Opacité                               | Curseur permettant d'augmenter ou de diminuer l'opacité de la couche.                                                                                                                                       |
+| <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt="Une icône représentant la fonction Retirer" />                      | Retirer                             | Retirer uns couche de la carte.                  |
 
 _N.B. : Lorsque la couche est cachée, les fonctions affectant la couche sur la carte sont désactivées._
 
@@ -362,18 +367,6 @@ Marche à suivre :
 - Cliquez sur le bouton **Continuer** pour insérer la couche dans la carte.
 
 Le visualiseur passe automatiquement à la fonction **Vue**.
-
-=3!sort=
-
-### <img src="{{assetsURL}}/img/guide/layers/sort_25.svg" alt="Icône trier" /> Trier
-
-Pour trier les couches, vous n’avez qu’à utiliser les flèches vers le haut et le bas dans l’encadré de chaque couche.
-
-=3!remove=
-
-### <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt="Icône retirer" /> Retirer
-
-Pour retirer une couche, cliquez sur l'icône de suppression <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt="Une icône représentant la fonction Retirer" /> à droite de celle-ci dans le sous-menu **Retirer**.
 
 =2!details=
 
