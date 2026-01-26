@@ -404,4 +404,11 @@ export declare function formatLength(length: number, displayLanguage: string): s
  * @returns {string} The formatted area string
  */
 export declare function formatArea(area: number, displayLanguage: string): string;
+/**
+ * Normalizes a WMS accesspath if it is from datacube.
+ * Left as 'datacube' to check for both datacube.services.geo.ca and datacube-prod-data-public.s3.ca-central-1.amazonaws.com/
+ * @param {string} path - The original access path.
+ * @returns {string} The normalized access path.
+ */
+export declare function normalizeDatacubeAccessPath(path: string): string;
 //# sourceMappingURL=utilities.d.ts.map

@@ -6,7 +6,7 @@ import type { DataTableProps } from './data-table-types';
  * @param {string} layerKey key of the layer.
  * @returns {JSX.Element} Data table as react element.
  */
-declare function DataTable({ data, layerPath }: DataTableProps): JSX.Element;
+declare function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Element;
 declare const _default: import("react").MemoExoticComponent<typeof DataTable>;
 export default _default;
 //# sourceMappingURL=data-table.d.ts.map

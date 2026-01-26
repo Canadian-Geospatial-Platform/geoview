@@ -17,6 +17,7 @@ interface ResponsiveGridLayoutProps {
 interface ResponsiveGridLayoutExposedMethods {
     setIsRightPanelVisible: (isVisible: boolean) => void;
     setRightPanelFocus: () => void;
+    closeBtnRef?: React.RefObject<HTMLButtonElement>;
 }
 declare const ResponsiveGridLayout: import("react").ForwardRefExoticComponent<ResponsiveGridLayoutProps & import("react").RefAttributes<ResponsiveGridLayoutExposedMethods>>;
 export { ResponsiveGridLayout };
