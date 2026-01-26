@@ -51,10 +51,9 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     '& .MuiListItemText-primary': {
       fontWeight: '600',
       fontSize: `${theme.palette.geoViewFontSize.default} !important`,
-      display: '-webkit-box',
-      WebkitLineClamp: '3',
-      WebkitBoxOrient: 'vertical',
-      whiteSpace: 'normal',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap',
+      textOverflow: 'ellipsis',
     },
 
     '& .layer-panel': {

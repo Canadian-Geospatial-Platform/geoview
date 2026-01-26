@@ -257,8 +257,6 @@ The **Layers** tab has the following submenu options:
 
 - View
 - Add
-- Sort
-- Remove
 
 =3!view=
 
@@ -325,8 +323,8 @@ _Note: Some settings may not be available depending on various factors such as l
 | <img src="{{assetsURL}}/img/guide/layers/refresh_60.svg" alt="An icon representing the Reset layer function" />       | Reset layer               | Reset the layer to its initial state.                                                                                                                                                    |
 | <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" alt="An icon representing the Highlight layer function" /> | Highlight layer           | Brings layer to the top, decreases opacity of other layers and displays layer boundary.                                                                                                  |
 | <img src="{{assetsURL}}/img/guide/layers/zoom_60.svg" alt="An icon representing the Zoom to layer function" />        | Zoom to layer             | Pans and zooms the map so that the layer boundary is in view.                                                                                                                            |
+| <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt="An icon representing the Remove function" />              | Remove                     | Remove the layer from the map. |
 | Slider                                                                                                                  | Opacity                   | Slider to increase/decrease layer opacity.                                                                                                                                               |
-| <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt="An icon representing the Remove function" />              | Remove                     | Remove a layer from the map.
 
 _Note: When the layer is hidden, functions affecting the layer on the map will be disabled._
 

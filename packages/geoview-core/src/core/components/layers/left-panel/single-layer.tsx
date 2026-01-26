@@ -37,7 +37,7 @@ import {
   useMapSelectorLayerInVisibleRange,
   useMapSelectorLayerParentHidden,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { DeleteUndoButton } from './delete-undo-button';
+import { DeleteUndoButton } from '@/core/components/layers/right-panel/delete-undo-button';
 import { LayersList } from './layers-list';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { logger } from '@/core/utils/logger';
