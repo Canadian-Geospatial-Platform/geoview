@@ -291,6 +291,10 @@ Layers that are not currently displayed on the map will be greyed out and their 
 
 For layers that are always displayed, or for layers whose parent layer is hidden, the visibility (eye) icon is disabled (greyed out) <img src="{{assetsURL}}/img/guide/footer/eye_disabled.svg" alt="An icon representing the Eye disabled function" />.
 
+**Layer Sorting**
+
+You can easily adjust the layer order by clicking the directional arrows. Note that these icons only become visible once a specific layer is selected.
+
 **Supported Layer Types**
 
 Layers can either be in raster format or vector format. The following layer types are supported.
@@ -322,6 +326,7 @@ _Note: Some settings may not be available depending on various factors such as l
 | <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" alt="An icon representing the Highlight layer function" /> | Highlight layer           | Brings layer to the top, decreases opacity of other layers and displays layer boundary.                                                                                                  |
 | <img src="{{assetsURL}}/img/guide/layers/zoom_60.svg" alt="An icon representing the Zoom to layer function" />        | Zoom to layer             | Pans and zooms the map so that the layer boundary is in view.                                                                                                                            |
 | Slider                                                                                                                  | Opacity                   | Slider to increase/decrease layer opacity.                                                                                                                                               |
+| <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt="An icon representing the Remove function" />              | Remove                     | Remove a layer from the map.
 
 _Note: When the layer is hidden, functions affecting the layer on the map will be disabled._
 
@@ -362,18 +367,6 @@ Usage:
 - Click the 'Continue' button to insert the layer into the map.
 
 The viewer will automatically switch to the view function.
-
-=3!sort=
-
-### <img src="{{assetsURL}}/img/guide/layers/sort_25.svg" alt="Sort icon" /> Sort
-
-To sort the layers you can simply click the up or down arrows on each layer panel.
-
-=3!remove=
-
-### <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt="Remove icon" /> Remove
-
-To remove a layer, click on the delete icon <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt="An icon representing the Remove function" /> to the right of the layer after selecting the 'Remove' submenu.
 
 =2!details=
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { getSxClasses } from '@/core/components/common/layer-list-style';
@@ -68,6 +68,9 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+
+  // Create ref for scrolling into view
+  const layerItemRef = useRef<HTMLLIElement>(null);
 
   // Get store states
   const { reloadLayer, setSelectedLayerPath, setSelectedLayerSortingArrowId, zoomToLayerVisibleScale } = useLayerStoreActions();
@@ -183,28 +186,30 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     showLayerDetailsPanel?.(layerId || '');
   }, [layerPath, layerId, layerStatus, setSelectedLayerPath, showLayerDetailsPanel]);
 
-  const handleIconButtonUpKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLButtonElement>) => {
+  const handleArrowClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>, direction: number) => {
       // Log
-      logger.logTraceUseCallback('SINGLE-LAYER - handleIconButtonUpKeyDown');
+      logger.logTraceUseCallback('SINGLE-LAYER - handleArrowClick');
 
-      if (event.key === 'Enter') {
-        setSelectedLayerSortingArrowId(`${mapId}-${layerPath}-up-order`);
-        reorderLayer(layerPath, -1);
-        event.preventDefault();
-      }
+      // Prevent triggering parent onClick
+      event.stopPropagation();
+
+      const arrowId = direction === -1 ? 'up-order' : 'down-order';
+      setSelectedLayerSortingArrowId(`${mapId}-${layerPath}-${arrowId}`);
+      reorderLayer(layerPath, direction);
     },
     [layerPath, mapId, reorderLayer, setSelectedLayerSortingArrowId]
   );
 
-  const handleIconButtonDownKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLButtonElement>) => {
+  const handleArrowKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLButtonElement>, direction: number) => {
       // Log
-      logger.logTraceUseCallback('SINGLE-LAYER - handleIconButtonDownKeyDown');
+      logger.logTraceUseCallback('SINGLE-LAYER - handleArrowKeyDown');
 
       if (event.key === 'Enter') {
-        setSelectedLayerSortingArrowId(`${mapId}-${layerPath}-down-order`);
-        reorderLayer(layerPath, 1);
+        const arrowId = direction === -1 ? 'up-order' : 'down-order';
+        setSelectedLayerSortingArrowId(`${mapId}-${layerPath}-${arrowId}`);
+        reorderLayer(layerPath, direction);
         event.preventDefault();
       }
     },
@@ -288,29 +293,17 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     // Log
     logger.logTraceUseMemo('SINGLE-LAYER - memoEditModeButtons', layerPath);
 
-    if (displayState === 'order') {
+    if (layerIsSelected && displayState === 'view') {
       return (
         <>
-          {layerChildren && layerChildren.length > 0 && (
-            <Divider
-              orientation="vertical"
-              sx={{
-                marginLeft: '0.4rem',
-                height: '1.5rem',
-                backgroundColor: theme.palette.geoViewColor.bgColor.dark[300],
-              }}
-              variant="middle"
-              flexItem
-            />
-          )}
           <IconButton
             id={`${mapId}-${layerPath}-up-order`}
             aria-label={t('layers.moveLayerUp')}
             disabled={isFirst}
             edge="end"
             size="small"
-            onKeyDown={handleIconButtonUpKeyDown}
-            onClick={() => reorderLayer(layerPath, -1)}
+            onKeyDown={(e) => handleArrowKeyDown(e, -1)}
+            onClick={(e) => handleArrowClick(e, -1)}
           >
             <ArrowUpIcon />
           </IconButton>
@@ -320,25 +313,34 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
             disabled={isLast}
             edge="end"
             size="small"
-            onKeyDown={handleIconButtonDownKeyDown}
-            onClick={() => reorderLayer(layerPath, 1)}
+            onKeyDown={(e) => handleArrowKeyDown(e, 1)}
+            onClick={(e) => handleArrowClick(e, 1)}
           >
             <ArrowDownwardIcon />
           </IconButton>
+          <Divider
+            orientation="vertical"
+            sx={{
+              marginLeft: '0.4rem',
+              height: '1.5rem',
+              backgroundColor: theme.palette.geoViewColor.bgColor.dark[300],
+            }}
+            variant="middle"
+            flexItem
+          />
         </>
       );
     }
     return null;
   }, [
+    layerIsSelected,
     displayState,
-    handleIconButtonDownKeyDown,
-    handleIconButtonUpKeyDown,
+    handleArrowClick,
+    handleArrowKeyDown,
     isFirst,
     isLast,
-    layerChildren,
     layerPath,
     mapId,
-    reorderLayer,
     t,
     theme.palette.geoViewColor.bgColor.dark,
   ]);
@@ -518,8 +520,18 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     }
   }, [selectedLayerSortingArrowId]);
 
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('SINGLE-LAYER - layerIsSelected');
+
+    // Scroll into view when layer is selected
+    if (layerIsSelected) {
+      layerItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+    }
+  }, [layerIsSelected]);
+
   return (
-    <ListItem className={memoContainerClass} id={layerId} key={layerName} disablePadding={true} data-layer-depth={depth}>
+    <ListItem ref={layerItemRef} className={memoContainerClass} id={layerId} key={layerName} disablePadding={true} data-layer-depth={depth}>
       <Box>
         <Tooltip
           title={t('layers.selectLayer', { layerName })}
@@ -543,9 +555,9 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
         </Tooltip>
         {!isLayoutEnlarged && (
           <Box className="rightIcons-container" role="group" aria-label={t('layers.layerControls')!}>
+            {memoEditModeButtons}
             {memoMoreLayerButtons}
             {memoArrowButtons}
-            {memoEditModeButtons}
           </Box>
         )}
         {layerStatus === 'loading' && (

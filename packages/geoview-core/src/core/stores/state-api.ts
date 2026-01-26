@@ -115,6 +115,13 @@ export class StateApi {
     const orderedLayers = [...MapEventProcessor.getMapOrderedLayerInfo(this.mapId)];
     let startingIndex = -1;
     for (let i = 0; i < orderedLayers.length; i++) if (orderedLayers[i].layerPath === layerPath) startingIndex = i;
+
+    // If layer not found, exit early
+    if (startingIndex === -1) {
+      logger.logError(`Layer ${layerPath} not found in ordered layers`);
+      return;
+    }
+
     const layerInfo = orderedLayers[startingIndex];
     const movedLayers = MapEventProcessor.findMapLayerAndChildrenFromOrderedInfo(mapId, layerPath, orderedLayers);
     orderedLayers.splice(startingIndex, movedLayers.length);

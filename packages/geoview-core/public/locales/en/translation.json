@@ -103,8 +103,6 @@
     "removeLayer": "Remove layer",
     "zoomTo": "Zoom to layer",
     "addLayer": "Add layer",
-    "sortLayers": "Sort layers",
-    "sort": "Sort",
     "layerError": "Layer has an error...",
     "layerLoading": "Layer is loading...",
     "tableDetails": "Table details",

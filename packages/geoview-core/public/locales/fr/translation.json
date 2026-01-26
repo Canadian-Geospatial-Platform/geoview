@@ -103,8 +103,6 @@
     "removeLayer": "Retirer la couche",
     "zoomTo": "Zoom sur la couche",
     "addLayer": "Ajouter une couche",
-    "sortLayers": "Trier les couches",
-    "sort": "Trier",
     "layerError": "La couche a une erreur...",
     "layerLoading": "La couche se charge...",
     "tableDetails": "Table détaillée",

@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material';
 import { useCallback, useEffect, useRef } from 'react';
-import { Box, AddCircleOutlineIcon, ButtonGroup, HandleIcon, VisibilityOutlinedIcon, Button } from '@/ui';
+import { Box, AddCircleOutlineIcon, ButtonGroup, VisibilityOutlinedIcon, Button } from '@/ui';
 import { ToggleAll } from '../toggle-all/toggle-all';
 import {
   useLayerStoreActions,
@@ -120,18 +120,7 @@ export function LayersToolbar(): JSX.Element {
         >
           {t('general.add')}
         </Button>
-        <Button
-          makeResponsive
-          type="text"
-          disabled={!legendLayers.length}
-          size="small"
-          tooltip={t('legend.sortLayers')!}
-          variant={displayState === 'order' ? 'contained' : 'outlined'}
-          startIcon={<HandleIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />}
-          onClick={() => handleSetDisplayState('order')}
-        >
-          {t('legend.sort')}
-        </Button>
+        {/* Sort button hidden - sorting is now done on selected layers */}
       </ButtonGroup>
       <ToggleAll source="layers" />
     </Box>
