@@ -58,9 +58,12 @@ type TypeStyleProcessor = (
 /**
  * Options object for processing styles with optional parameters
  */
-type TypeStyleProcessorOptions = {
+export type TypeStyleProcessorOptions = {
   filterEquation?: FilterNodeType[];
-  legendFilterIsOff?: boolean;
+
+  /** Indicates if we want to return the symbol even if the symbol visibility is false */
+  bypassVisibility?: boolean;
+
   domainsLookup?: TypeLayerMetadataFields[];
   aliasLookup?: TypeAliasLookup;
   visualVariables?: TypeLayerStyleVisualVariable[];
@@ -1896,7 +1899,7 @@ export abstract class GeoviewRenderer {
     feature?: Feature,
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
-    const { filterEquation, legendFilterIsOff, domainsLookup, aliasLookup, visualVariables } = options || {};
+    const { filterEquation, bypassVisibility, domainsLookup, aliasLookup, visualVariables } = options || {};
 
     if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
       if (this.featureIsNotVisible(feature, filterEquation)) return undefined;
@@ -1905,7 +1908,7 @@ export abstract class GeoviewRenderer {
       const { hasDefault, fields, info } = styleSettings;
       const styleEntry = this.searchUniqueValueEntry(fields, info, feature, domainsLookup, aliasLookup);
 
-      if (styleEntry !== undefined && (legendFilterIsOff || styleEntry.visible !== false))
+      if (styleEntry !== undefined && (bypassVisibility || styleEntry.visible !== false))
         return this.processSimplePoint(styleEntry.settings, feature, { visualVariables });
 
       // When using hasDefault, the last position is determinant in figuring out the style of an unprocessed feature
@@ -1913,7 +1916,7 @@ export abstract class GeoviewRenderer {
       if (
         styleEntry === undefined &&
         hasDefault &&
-        (legendFilterIsOff || styleSettings.info[styleSettings.info.length - 1].visible !== false)
+        (bypassVisibility || styleSettings.info[styleSettings.info.length - 1].visible !== false)
       )
         return this.processSimplePoint(styleSettings.info[styleSettings.info.length - 1].settings, feature, { visualVariables });
     }
@@ -1934,7 +1937,7 @@ export abstract class GeoviewRenderer {
     feature?: Feature,
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
-    const { filterEquation, legendFilterIsOff, domainsLookup, aliasLookup, visualVariables } = options || {};
+    const { filterEquation, bypassVisibility, domainsLookup, aliasLookup, visualVariables } = options || {};
 
     if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
       if (this.featureIsNotVisible(feature, filterEquation)) return undefined;
@@ -1943,12 +1946,12 @@ export abstract class GeoviewRenderer {
       const { hasDefault, fields, info } = styleSettings;
       const styleEntry = this.searchUniqueValueEntry(fields, info, feature, domainsLookup, aliasLookup);
 
-      if (styleEntry !== undefined && (legendFilterIsOff || styleEntry.visible !== false))
+      if (styleEntry !== undefined && (bypassVisibility || styleEntry.visible !== false))
         return this.processSimpleLineString(styleEntry.settings, feature, { visualVariables });
 
       // When using hasDefault, the last position is determinant in figuring out the style of an unprocessed feature
       // TODO: This should be changed, because some services will not have the 'others' in their last position
-      if (styleEntry === undefined && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false))
+      if (styleEntry === undefined && hasDefault && (bypassVisibility || info[info.length - 1].visible !== false))
         return this.processSimpleLineString(info[info.length - 1].settings, feature, { visualVariables });
     }
     return undefined;
@@ -1968,7 +1971,7 @@ export abstract class GeoviewRenderer {
     feature?: Feature,
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
-    const { filterEquation, legendFilterIsOff, domainsLookup, aliasLookup, visualVariables } = options || {};
+    const { filterEquation, bypassVisibility, domainsLookup, aliasLookup, visualVariables } = options || {};
 
     if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
       if (this.featureIsNotVisible(feature, filterEquation)) return undefined;
@@ -1976,12 +1979,12 @@ export abstract class GeoviewRenderer {
     if (styleSettings.type === 'uniqueValue') {
       const { hasDefault, fields, info } = styleSettings;
       const styleEntry = this.searchUniqueValueEntry(fields, info, feature, domainsLookup, aliasLookup);
-      if (styleEntry !== undefined && (legendFilterIsOff || styleEntry.visible !== false))
+      if (styleEntry !== undefined && (bypassVisibility || styleEntry.visible !== false))
         return this.processSimplePolygon(styleEntry.settings, feature, { visualVariables });
 
       // When using hasDefault, the last position is determinant in figuring out the style of an unprocessed feature
       // TODO: This should be changed, because some services will not have the 'others' in their last position
-      if (styleEntry === undefined && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false))
+      if (styleEntry === undefined && hasDefault && (bypassVisibility || info[info.length - 1].visible !== false))
         return this.processSimplePolygon(info[info.length - 1].settings, feature, { visualVariables });
     }
     return undefined;
@@ -2094,7 +2097,7 @@ export abstract class GeoviewRenderer {
     feature?: Feature,
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
-    const { filterEquation, legendFilterIsOff, aliasLookup, visualVariables } = options || {};
+    const { filterEquation, bypassVisibility, aliasLookup, visualVariables } = options || {};
 
     if (filterEquation !== undefined && filterEquation.length !== 0 && feature) {
       if (this.featureIsNotVisible(feature, filterEquation)) return undefined;
@@ -2105,13 +2108,13 @@ export abstract class GeoviewRenderer {
       const foundClassBreakInfo = this.searchClassBreakEntry(fields[0], info, feature!, aliasLookup);
 
       // If found a class break renderer that works for the value of the feature
-      if (foundClassBreakInfo && (legendFilterIsOff || foundClassBreakInfo.visible !== false)) {
+      if (foundClassBreakInfo && (bypassVisibility || foundClassBreakInfo.visible !== false)) {
         return this.processSimplePoint(foundClassBreakInfo.settings, feature, { visualVariables });
       }
 
       // When using hasDefault, the last position is determinant in figuring out the style of an unprocessed feature
       // TODO: This should be changed, because some services will not have the 'others' in their last position
-      if (!foundClassBreakInfo && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false)) {
+      if (!foundClassBreakInfo && hasDefault && (bypassVisibility || info[info.length - 1].visible !== false)) {
         return this.processSimplePoint(info[info.length - 1].settings, feature, { visualVariables });
       }
     }
@@ -2132,7 +2135,7 @@ export abstract class GeoviewRenderer {
     feature?: Feature,
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
-    const { filterEquation, legendFilterIsOff, aliasLookup, visualVariables } = options || {};
+    const { filterEquation, bypassVisibility, aliasLookup, visualVariables } = options || {};
     if (filterEquation !== undefined && filterEquation.length !== 0 && feature) {
       if (this.featureIsNotVisible(feature, filterEquation)) return undefined;
     }
@@ -2142,13 +2145,13 @@ export abstract class GeoviewRenderer {
       const foundClassBreakInfo = this.searchClassBreakEntry(fields[0], info, feature!, aliasLookup);
 
       // If found a class break renderer that works for the value of the feature
-      if (foundClassBreakInfo && (legendFilterIsOff || foundClassBreakInfo.visible !== false)) {
+      if (foundClassBreakInfo && (bypassVisibility || foundClassBreakInfo.visible !== false)) {
         return this.processSimpleLineString(foundClassBreakInfo.settings, feature, { visualVariables });
       }
 
       // When using hasDefault, the last position is determinant in figuring out the style of an unprocessed feature
       // TODO: This should be changed, because some services will not have the 'others' in their last position
-      if (!foundClassBreakInfo && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false)) {
+      if (!foundClassBreakInfo && hasDefault && (bypassVisibility || info[info.length - 1].visible !== false)) {
         return this.processSimpleLineString(info[info.length - 1].settings, feature, { visualVariables });
       }
     }
@@ -2169,7 +2172,7 @@ export abstract class GeoviewRenderer {
     feature?: Feature,
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
-    const { filterEquation, legendFilterIsOff, aliasLookup, visualVariables } = options || {};
+    const { filterEquation, bypassVisibility, aliasLookup, visualVariables } = options || {};
 
     if (filterEquation !== undefined && filterEquation.length !== 0 && feature) {
       if (this.featureIsNotVisible(feature, filterEquation)) return undefined;
@@ -2180,13 +2183,13 @@ export abstract class GeoviewRenderer {
       const foundClassBreakInfo = this.searchClassBreakEntry(fields[0], info, feature!, aliasLookup);
 
       // If found a class break renderer that works for the value of the feature
-      if (foundClassBreakInfo && (legendFilterIsOff || foundClassBreakInfo.visible !== false)) {
+      if (foundClassBreakInfo && (bypassVisibility || foundClassBreakInfo.visible !== false)) {
         return this.processSimplePolygon(foundClassBreakInfo.settings, feature, { visualVariables });
       }
 
       // When using hasDefault, the last position is determinant in figuring out the style of an unprocessed feature
       // TODO: This should be changed, because some services will not have the 'others' in their last position
-      if (!foundClassBreakInfo && hasDefault && (legendFilterIsOff || info[info.length - 1].visible !== false)) {
+      if (!foundClassBreakInfo && hasDefault && (bypassVisibility || info[info.length - 1].visible !== false)) {
         return this.processSimplePolygon(info[info.length - 1].settings, feature, { visualVariables });
       }
     }
@@ -2201,7 +2204,6 @@ export abstract class GeoviewRenderer {
    * @param {TypeStyleConfig} style - The style to use
    * @param {string} label - The style label when one has to be created
    * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
-   * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
    * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
    * @param {TypeLayerTextConfig?} layerText - An optional text configuration to apply to the feature
    * @param {() => Promise<string | null>} callbackWhenCreatingStyle - An optional callback to execute when a new style had to be created
@@ -2214,7 +2216,6 @@ export abstract class GeoviewRenderer {
     style: TypeLayerStyleConfig,
     label: string,
     filterEquation?: FilterNodeType[],
-    legendFilterIsOff?: boolean,
     aliasLookup?: TypeAliasLookup,
     layerText?: TypeLayerTextConfig,
     callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeLayerStyleConfigInfo) => void
@@ -2244,7 +2245,6 @@ export abstract class GeoviewRenderer {
       const { type, visualVariables } = styleSettings;
       const options: TypeStyleProcessorOptions = {
         filterEquation,
-        legendFilterIsOff,
         aliasLookup,
         visualVariables,
       };
@@ -2268,17 +2268,17 @@ export abstract class GeoviewRenderer {
    * @param {Feature} feature - The feature that need its icon to be defined.
    * @param {TypeStyleConfig} style - The style to use
    * @param {FilterNodeType[]?} filterEquation - Filter equation associated to the layer.
-   * @param {boolean?} legendFilterIsOff - When true, do not apply legend filter.
+   * @param {boolean?} bypassVisibility - When true, returns the symbol even if the config says it's not visible.
    * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
    * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
    * @returns {string} The icon associated to the feature or a default empty one.
    * @static
    */
-  static getFeatureImageSource(
+  static getFeatureIconSource(
     feature: Feature,
     style: TypeLayerStyleConfig,
     filterEquation?: FilterNodeType[],
-    legendFilterIsOff?: boolean,
+    bypassVisibility?: boolean,
     domainsLookup?: TypeLayerMetadataFields[],
     aliasLookup?: TypeAliasLookup
   ): string | undefined {
@@ -2305,14 +2305,14 @@ export abstract class GeoviewRenderer {
         //       styleSettings,
         //       feature as Feature,
         //       filterEquation,
-        //       legendFilterIsOff
+        //       bypassVisibility
         //     );
         //     resolve(processedStyle);
         //   });
         // });
         const options: TypeStyleProcessorOptions = {
           filterEquation,
-          legendFilterIsOff,
+          bypassVisibility,
           domainsLookup,
           aliasLookup,
           visualVariables,

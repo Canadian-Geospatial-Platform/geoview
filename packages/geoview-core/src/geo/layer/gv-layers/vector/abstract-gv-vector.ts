@@ -13,10 +13,10 @@ import type { Projection as OLProjection } from 'ol/proj';
 
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
-import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { logger } from '@/core/utils/logger';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import type { TypeFeatureInfoEntry, TypeOutfieldsType } from '@/api/types/map-schema-types';
+import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -56,8 +56,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
           feature,
           resolution,
           label,
-          this.getLayerFilters()?.getFilterEquation(),
-          layerConfig.getLegendFilterIsOff()
+          this.getLayerFilters()?.getFilterEquation()
         );
 
         // Set the style applied, throwing a style applied event in the process
@@ -343,7 +342,6 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param {FeatureLike} feature - Feature that need its style to be defined.
    * @param {string} label - The style label when one has to be created
    * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
-   * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
    * @returns {Style} The style for the feature
    */
   static calculateStyleForFeature(
@@ -351,16 +349,15 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     feature: FeatureLike,
     resolution: number,
     label: string,
-    filterEquation?: FilterNodeType[],
-    legendFilterIsOff?: boolean
+    filterEquation?: FilterNodeType[]
   ): Style | undefined {
     // Get the style
     const style = layer.getStyle() || {};
 
     // Create lookup dictionary of names to alias
     const outfields = layer.getLayerConfig().getOutfields();
-    const layerText = layer.getLayerConfig().getLayerText();
     const aliasLookup = GVLayerUtilities.createAliasLookup(outfields);
+    const layerText = layer.getLayerConfig().getLayerText();
 
     // Get and create Feature style if necessary
     return GeoviewRenderer.getAndCreateFeatureStyle(
@@ -369,7 +366,6 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
       style,
       label,
       filterEquation,
-      legendFilterIsOff,
       aliasLookup,
       layerText,
       (geometryType, theStyle) => {

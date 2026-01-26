@@ -23,6 +23,9 @@ export class LayerFilters {
   /** The cached filter equation which changes every filter change */
   #cachedFilterEquation?: FilterNodeType[];
 
+  /** Indicates the extra spacing to add, if any */
+  #extraSpacing = '';
+
   /**
    * Constructor
    * @param {string} [initialFilter] - The initial filter applied at the base level
@@ -142,7 +145,7 @@ export class LayerFilters {
    */
   getDataRelatedFilters(): string {
     return this.#getDataRelatedFilters()
-      .map((v) => `( ${v} )`)
+      .map((v) => `(${this.#extraSpacing}${v}${this.#extraSpacing})`)
       .join(' AND ');
   }
 
@@ -153,7 +156,7 @@ export class LayerFilters {
    */
   getAllFilters(): string {
     return this.#getAllFilters()
-      .map((v) => `( ${v} )`)
+      .map((v) => `(${this.#extraSpacing}${v}${this.#extraSpacing})`)
       .join(' AND ');
   }
 
