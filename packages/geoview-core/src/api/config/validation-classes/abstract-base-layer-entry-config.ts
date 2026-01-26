@@ -67,11 +67,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /** Filter to apply on feature of this layer. */
   #layerFilter?: string;
 
-  /** Indicates if filter is on/off
-   * @deprecated This attribute doesn't seem to be used (it's always false and doesn't change)
-   */
-  #legendFilterIsOff: boolean = false;
-
   /**
    * The class constructor.
    * @param {AbstractBaseLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
@@ -309,15 +304,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    */
   getLayerFilter(): string | undefined {
     return this.#layerFilter;
-  }
-
-  /**
-   * Gets the layer legend filter is off flag
-   * @returns {boolean} The legend filter is off flag
-   * @deprecated This getter doesn't seem to be used as its corresponding attribute is always false and there's no setters
-   */
-  getLegendFilterIsOff(): boolean {
-    return this.#legendFilterIsOff;
   }
 
   /**
