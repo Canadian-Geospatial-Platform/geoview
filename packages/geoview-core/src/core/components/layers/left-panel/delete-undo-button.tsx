@@ -41,7 +41,7 @@ function UndoButtonWithProgress(props: UndoButtonProps): JSX.Element {
           justifyContent: 'center',
         }}
       >
-        <IconButton aria-label={t('layers.undoLayer')} edge="end" size="small" onKeyDown={(e) => handleKeyDown(e)}>
+        <IconButton aria-label={t('layers.undoLayer')} edge="end" size="small" onKeyDown={handleKeyDown}>
           <UndoIcon />
         </IconButton>
       </Box>
@@ -130,13 +130,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   // Never hide the remove icon, so user can remove forever loading/processing layers.
   if (!inUndoState && layerRemovable && !getLayerDeleteInProgress()) {
     return (
-      <IconButton
-        onClick={handleDeleteClick}
-        edge="end"
-        size="small"
-        onKeyDown={(e) => handleDeleteKeyDown(e)}
-        aria-label={t('layers.deleteLayer')}
-      >
+      <IconButton onClick={handleDeleteClick} edge="end" size="small" onKeyDown={handleDeleteKeyDown} aria-label={t('layers.deleteLayer')}>
         <DeleteOutlineIcon color="error" />
       </IconButton>
     );
