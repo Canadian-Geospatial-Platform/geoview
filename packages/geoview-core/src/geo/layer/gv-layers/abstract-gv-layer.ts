@@ -48,7 +48,7 @@ import { NotImplementedError, NotSupportedError } from '@/core/exceptions/core-e
 import { LayerNotQueryableError, LayerStatusErrorError } from '@/core/exceptions/layer-exceptions';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { GVVectorSource } from '@/geo/layer/source/vector-source';
-import { LayerFilters } from '@/core/types/layer-filters';
+import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 import { delay, whenThisThen } from '@/core/utils/utilities';
 
 /**
@@ -675,7 +675,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    */
   getBounds(projection: OLProjection, stops: number): Extent | undefined {
     // Redirect to overridable method
-    // TODO: REFACTOR - ALEX - Review all onGetBounds() to see how they can be optimized now that the initialSettings extent and bounds have been clarified
+    // TODO: REFACTOR - Review all onGetBounds() to see how they can be optimized now that the initialSettings extent and bounds have been clarified
     return this.onGetBounds(projection, stops);
   }
 
@@ -783,7 +783,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param {LayerFilters | undefined} layerFilters - The filter layers associated to the layer or undefined.
    * @returns {void}
    */
-  // TODO: ALEX - Can we remove the refresh here and all overrides?
   setLayerFilters(layerFilters: LayerFilters, refresh: boolean | undefined): void {
     // Keep it
     this.#layerFilters = layerFilters;

@@ -269,7 +269,7 @@ export class WFS extends AbstractGeoViewVector {
 
     // TODO: WMS - Add support for other formats. Not quite the GV issue #3134, but similar
 
-    // TODO: ALEX - FIX THIS EXCEPTION - Exception, the geo.weather.gc.ca/geomet service says it supports application/json, but it doesn't in reality
+    // TODO: FIX THIS EXCEPTION - Exception, the geo.weather.gc.ca/geomet service says it supports application/json, but it doesn't in reality
     if (layerConfig.getDataAccessPath().includes('//geo.weather.gc.ca/geomet')) outputFormat = undefined;
 
     // Check if url contains metadata parameters for the getCapabilities request and reformat the urls
