@@ -116,6 +116,17 @@
             ]
           }
         ]
+      },
+      {
+        "geoviewLayerId": "historical-flood-dynamic",
+        "geoviewLayerName": "Hist. Flood Events - EsriDynamic",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
       }
     ]
   },
@@ -128,7 +139,7 @@
   },
   "footerBar": {
     "tabs": {
-      "core": ["layers", "details", "data-table"]
+      "core": ["layers", "details", "data-table", "time-slider"]
     }
   },
   "corePackages": ["swiper"]
