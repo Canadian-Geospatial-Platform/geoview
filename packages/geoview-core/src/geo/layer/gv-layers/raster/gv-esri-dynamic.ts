@@ -42,7 +42,7 @@ import { NoFeaturesPropertyError } from '@/core/exceptions/geoview-exceptions';
 import { formatError, RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
 import type { TypeDateFragments } from '@/core/utils/date-mgt';
-import type { LayerFilters } from '@/core/types/layer-filters';
+import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 
 /**
  * Manages an Esri Dynamic layer.
