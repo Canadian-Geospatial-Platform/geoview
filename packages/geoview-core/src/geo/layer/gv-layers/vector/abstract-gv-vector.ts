@@ -20,6 +20,7 @@ import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { NoExtentError } from '@/core/exceptions/geoview-exceptions';
@@ -136,15 +137,21 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   /**
    * Overrides the get all feature information for all the features stored in the layer.
    * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
+   * @param {LayerFilters} layerFilters - The layer filters to apply when querying the features.
    * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected override getAllFeatureInfo(map: OLMap, abortController?: AbortController): Promise<TypeFeatureInfoEntry[]> {
+
+  protected override getAllFeatureInfo(
+    map: OLMap,
+    layerFilters: LayerFilters,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    abortController?: AbortController
+  ): Promise<TypeFeatureInfoEntry[]> {
     // Get the layer config in a loaded phase
     const layerConfig = this.getLayerConfig();
     const features = this.getOLSource().getFeatures();
-    return Promise.resolve(this.formatFeatureInfoResult(features, layerConfig));
+    return Promise.resolve(this.formatFeatureInfoResult(features, layerConfig, layerFilters));
   }
 
   /**
@@ -171,7 +178,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     }) as Feature[];
 
     // Format and return the features
-    return Promise.resolve(this.formatFeatureInfoResult(features, this.getLayerConfig()));
+    return Promise.resolve(this.formatFeatureInfoResult(features, this.getLayerConfig(), this.getLayerFilters()));
   }
 
   /**

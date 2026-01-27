@@ -383,12 +383,13 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   /**
    * Overridable function to get all feature information for all the features stored in the layer.
    * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
+   * @param {LayerFilters} layerFilters - The layer filters to apply when querying the features.
    * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    * @throws {NotImplementedError} When the function isn't overridden by the children class.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected getAllFeatureInfo(map: OLMap, abortController?: AbortController): Promise<TypeFeatureInfoEntry[]> {
+  protected getAllFeatureInfo(map: OLMap, layerFilters: LayerFilters, abortController?: AbortController): Promise<TypeFeatureInfoEntry[]> {
     // Crash on purpose
     throw new NotImplementedError(`getAllFeatureInfo not implemented on layer path ${this.getLayerPath()}`);
   }
@@ -843,9 +844,14 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
     let promiseGetFeature: Promise<TypeFeatureInfoEntry[]>;
     switch (queryType) {
-      case 'all':
-        promiseGetFeature = this.getAllFeatureInfo(map, abortController);
+      case 'all': {
+        // Create the filter on the initial filter only, get everything else.
+        const layerFilters = new LayerFilters(this.getLayerFilters().getInitialFilter());
+
+        // Get all feature info
+        promiseGetFeature = this.getAllFeatureInfo(map, layerFilters, abortController);
         break;
+      }
       case 'at_pixel':
         promiseGetFeature = this.getFeatureInfoAtPixel(map, location as Pixel, queryGeometry, abortController);
         break;
@@ -1017,7 +1023,8 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    */
   protected formatFeatureInfoResult(
     features: Feature[],
-    layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig
+    layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig,
+    layerFilters: LayerFilters
   ): TypeFeatureInfoEntry[] {
     // Redirect
     return AbstractGVLayer.helperFormatFeatureInfoResult(
@@ -1029,7 +1036,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       true,
       (layerConfig.getLayerMetadata() as TypeLayerMetadataEsri | TypeLayerMetadataVector)?.fields,
       this.getStyle(),
-      this.getLayerFilters()?.getFilterEquation(),
+      layerFilters.getFilterEquation(),
       this.getFieldType.bind(this),
       this.onGetFieldDomain.bind(this),
       this.getFieldValue.bind(this)
