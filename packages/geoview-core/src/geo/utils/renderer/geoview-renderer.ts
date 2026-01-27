@@ -3040,8 +3040,9 @@ export abstract class GeoviewRenderer {
   ): string {
     const spacing = useExtraSpacingInFilter ? ' ' : '';
     const quote = useExtraSpacingInFilter ? '"' : '';
-    const fieldName = styleSettings.fields[0];
-    const fieldNameTweaked = `${quote}${fieldName}${quote}`;
+
+    const fields = styleSettings.fields.map((f) => `${quote}${f}${quote}`);
+    const fieldCount = fields.length;
 
     const { info, hasDefault } = styleSettings;
 
@@ -3049,7 +3050,7 @@ export abstract class GeoviewRenderer {
     const defaultEntry = hasDefault ? info[defaultIndex] : undefined;
     const defaultIsChecked = Boolean(defaultEntry?.visible);
 
-    // Decide strategy
+    // Decide strategy: include OR exclude
     const useNotPattern = hasDefault && defaultIsChecked;
 
     const relevantInfos = useNotPattern
@@ -3063,18 +3064,37 @@ export abstract class GeoviewRenderer {
       return this.DEFAULT_FILTER_1EQUALS1;
     }
 
-    const values = relevantInfos.map((entry) => this.#formatFieldValue(fieldName, entry.values[0], outFields));
+    // Build predicate per entry
+    const predicates = relevantInfos.map((entry) => {
+      // Safety check
+      if (entry.values.length !== fieldCount) {
+        throw new Error(`Unique value entry has ${entry.values.length} values but ${fieldCount} fields were defined`);
+      }
 
-    // No values → nothing matches
-    if (values.length === 0) {
+      // Single-field → allow IN / =
+      if (fieldCount === 1) {
+        const value = this.#formatFieldValue(fields[0], entry.values[0], outFields);
+        return `${fields[0]} = ${value}`;
+      }
+
+      // Multi-field → tuple-style AND predicate
+      const parts = fields.map((field, idx) => {
+        const value = this.#formatFieldValue(field, entry.values[idx], outFields);
+        return `${field} = ${value}`;
+      });
+
+      return `(${parts.join(' AND ')})`;
+    });
+
+    // No predicates → nothing matches
+    if (predicates.length === 0) {
       return this.DEFAULT_FILTER_1EQUALS0;
     }
 
-    // Single value → equality
-    const inClause =
-      values.length === 1 ? `${fieldNameTweaked} = ${values[0]}` : `${fieldNameTweaked} in (${spacing}${values.join(`, `)}${spacing})`;
+    // Combine predicates
+    const combined = predicates.length === 1 ? predicates[0] : `(${spacing}${predicates.join(` OR `)}${spacing})`;
 
-    return useNotPattern ? `NOT (${inClause})` : inClause;
+    return useNotPattern ? `NOT ${combined}` : combined;
   }
 
   /**
