@@ -53,10 +53,20 @@
     <hr />
     <div class="demo-section">
       <span>Showing active filters for layer path:
-        <input id="filter-input" type="text" change="onFilterLayerPathChanged" style="width:400px;" />
-        <div style="font-style:italic;font-size:small;margin-bottom:10px;">
-          Shortcuts: geojsonLYR1/base-group/polygons.json | f4c51eaa-a6ca-48b9-a1fc-b0651da20509/base-group/0 | historical-flood-dynamic/0
-        </div>
+        <input
+          id="filter-input"
+          list="filterLayerPaths"
+          class="form-control"
+          style="width: 400px"
+          placeholder="Select or enter a layer path"
+          value="geojsonLYR1/base-group/polygons.json"
+        />
+        <datalist id="filterLayerPaths">
+          <option value="geojsonLYR1/base-group/polygons.json"></option>
+          <option value="historical-flood-dynamic/0"></option>
+          <option value="uniqueValueId/1"></option>
+          <option value="f4c51eaa-a6ca-48b9-a1fc-b0651da20509/base-group/0"></option>
+        </datalist>
       </span>
       <div class="filters">
         <div class="filter">
@@ -498,9 +508,95 @@
       // Initialize cgpv
       cgpv.init();
 
+      const addLayerButton = document.getElementById('Add-layer');
+      const filterLayerPathInput = document.getElementById('filter-input');
+      const filterInitialTextarea = document.getElementById('filter-initial');
+      const filterClassTextarea = document.getElementById('filter-class');
+      const filterDataTextarea = document.getElementById('filter-data');
+      const filterTimeTextarea = document.getElementById('filter-time');
+      const filterAllTextarea = document.getElementById('filter-all');
+      const removeLayerButton = document.getElementById('Remove-layer');
+      const removeAllLayersButton = document.getElementById('Remove-all-layers');
+      const toggleVisibilityButton = document.getElementById('Toggle-visibility');
+      const setAllVisibleButton = document.getElementById('Set-all-visible');
+      const setAllNotVisibleButton = document.getElementById('Set-all-not-visible');
+      const renameLayerButton = document.getElementById('Rename-layer');
+      const placeMarkerButton = document.getElementById('Place-marker');
+      const zoomExtentButton = document.getElementById('Zoom-extent');
+      const zoomCoordinateButton = document.getElementById('Zoom-coordinate');
+      const extentToPolygonButton = document.getElementById('Extent-to-polygon');
+      const polygonToExtentButton = document.getElementById('Polygon-to-extent');
+      const redefineAliasFieldsButton = document.getElementById('Redefine-alias-fields');
+      const openDetailsButton = document.getElementById('Open-details');
+      const openGeolocatorButton = document.getElementById('Open-geolocator');
+      const disableHoverButton = document.getElementById('Disable-hover');
+      const enableHoverButton = document.getElementById('Enable-hover');
+      const disableFeatureInfoButton = document.getElementById('Disable-feature-info');
+      const enableFeatureInfoButton = document.getElementById('Enable-feature-info');
+      const showCollapsedStateButton = document.getElementById('Show-collapsed-state');
+      const toggleCollapseButton = document.getElementById('Toggle-collapse');
+      const showLayerInfoButton = document.getElementById('Show-layer-info');
+      const changeLanguageEnglishButton = document.getElementById('Language-en');
+      const changeLanguageFrenchButton = document.getElementById('Language-fr');
+      const changeBasemapButton = document.getElementById('Change-basemap');
+      const setLayerButton = document.getElementById('Set-layer');
+      const swiperAddButton = document.getElementById('Swiper-add');
+      const swiperRemoveButton = document.getElementById('Swiper-remove');
+      const calculateDistanceButton = document.getElementById('Calc-dist');
+      const getConfigButton = document.getElementById('Get-config');
+      const reloadMapButton = document.getElementById('Reload-map');
+      const addMarkerButton = document.getElementById('Add-marker');
+      const removeMarkerButton = document.getElementById('Remove-marker');
+      const zoomToMarkersButton = document.getElementById('Zoom-to-markers');
+      const zoomToMarkerGroupButton = document.getElementById('Zoom-to-marker-group');
+      const createFooterTabButton = document.getElementById('Create-footer-tab');
+      const proj = document.getElementById('Dist-proj');
+      const geometryString = document.getElementById('Dist-geom');
+
+      const markers = [
+        {
+          id: '1',
+          coordinate: [-100, 60],
+          color: 'blue',
+          opacity: 0.5,
+        },
+        {
+          id: '2',
+          coordinate: [-80, 65],
+          color: 'rgb(0, 226, 0)',
+        },
+        {
+          id: '3',
+          coordinate: [-115, 66],
+          color: '#C52022',
+        },
+      ];
+
+
+      // Filters ===================================================================
+      function loadFiltersUI() {
+        // Reset
+        filterInitialTextarea.value = '';
+        filterClassTextarea.value = '';
+        filterDataTextarea.value = '';
+        filterTimeTextarea.value = '';
+        filterAllTextarea.value = '';
+
+        // Get the layer path from the input
+        const layerPath = filterLayerPathInput.value?.trim() ?? '';
+        const gvLayer = cgpv.api.getMapViewer(mapId).layer.getGeoviewLayerIfExists(layerPath);
+        if (gvLayer) {
+          const layerFilters = gvLayer.getLayerFilters();
+          filterInitialTextarea.value = layerFilters.getInitialFilter() ?? '';
+          filterClassTextarea.value = layerFilters.getClassFilter() ?? '';
+          filterDataTextarea.value = layerFilters.getDataFilter() ?? '';
+          filterTimeTextarea.value = layerFilters.getTimeFilter() ?? '';
+          filterAllTextarea.value = layerFilters.getAllFilters() ?? '';
+        }
+      }
+
       // Add WMS Button======================================================================================================
       // find the button element by ID
-      var addLayerButton = document.getElementById('Add-layer');
       const config = {
         geoviewLayerId: 'wmsLYR1-msi',
         geoviewLayerName: 'MSI',
@@ -537,9 +633,6 @@
       });
 
       // Remove GeoJSON Button======================================================================================================
-      // find the button element by ID
-      var removeLayerButton = document.getElementById('Remove-layer');
-
       // add an event listener when a button is clicked
       removeLayerButton.addEventListener('click', async () => {
         const geojsonLayerAlreadyExists = cgpv.api.getMapViewer(mapId).layer.getLayerEntryLayerPaths().includes('geojsonLYR1/base-group');
@@ -548,63 +641,42 @@
       });
 
       // Remove All Button==========================================================================================================
-      // find the button element by ID
-      var removeAllLayersButton = document.getElementById('Remove-all-layers');
-
       // add an event listener when a button is clicked
       removeAllLayersButton.addEventListener('click', async () => {
         cgpv.api.getMapViewer(mapId).layer.removeAllGeoviewLayers();
       });
 
       // Toggle Visibility Button===================================================================================================
-      // find the button element by ID
-      var toggleVisibilityButton = document.getElementById('Toggle-visibility');
-
       // add an event listener when a button is clicked
       toggleVisibilityButton.addEventListener('click', async () => {
         cgpv.api.getMapViewer(mapId).layer.setOrToggleLayerVisibility(LYR_PATH_FEATURE);
       });
 
       // Set All Visible Button=====================================================================================================
-      // find the button element by ID
-      var setAllVisibleButton = document.getElementById('Set-all-visible');
-
       // add an event listener when a button is clicked
       setAllVisibleButton.addEventListener('click', async () => {
         cgpv.api.getMapViewer(mapId).layer.setAllLayersVisibility(true);
       });
 
       // Set All Not Visible Button=================================================================================================
-      // find the button element by ID
-      var setAllNotVisibleButton = document.getElementById('Set-all-not-visible');
-
       // add an event listener when a button is clicked
       setAllNotVisibleButton.addEventListener('click', async () => {
         cgpv.api.getMapViewer(mapId).layer.setAllLayersVisibility(false);
       });
 
       // Rename Layer Button========================================================================================================
-      // find the button element by ID
-      var renameLayerButton = document.getElementById('Rename-layer');
-
       // add an event listener when a button is clicked
       renameLayerButton.addEventListener('click', async () => {
         cgpv.api.getMapViewer(mapId).layer.setLayerName(LYR_PATH_UNIQUE, 'Water Quantity');
       });
 
       // Place Marker Button========================================================================================================
-      // find the button element by ID
-      var placeMarkerButton = document.getElementById('Place-marker');
-
       // add an event listener when a button is clicked
       placeMarkerButton.addEventListener('click', async () => {
         cgpv.api.getMapViewer(mapId).clickMarkerIconShow({ lonlat: [-90, 60] });
       });
 
       // Zoom to Extent Button========================================================================================================
-      // find the button element by ID
-      var zoomExtentButton = document.getElementById('Zoom-extent');
-
       // add an event listener when a button is clicked
       zoomExtentButton.addEventListener('click', async () => {
         cgpv.api
@@ -613,18 +685,12 @@
       });
 
       // Zoom to Coordinate Button========================================================================================================
-      // find the button element by ID
-      var zoomCoordinateButton = document.getElementById('Zoom-coordinate');
-
       // add an event listener when a button is clicked
       zoomCoordinateButton.addEventListener('click', async () => {
         cgpv.api.getMapViewer(mapId).zoomToLonLatExtentOrCoordinate([-90, 60]);
       });
 
       // Extent to Polygon Button========================================================================================================
-      // find the button element by ID
-      var extentToPolygonButton = document.getElementById('Extent-to-polygon');
-
       // add an event listener when a button is clicked
       extentToPolygonButton.addEventListener('click', async () => {
         console.log(
@@ -633,9 +699,6 @@
       });
 
       // Polygon to Extent Button========================================================================================================
-      // find the button element by ID
-      var polygonToExtentButton = document.getElementById('Polygon-to-extent');
-
       const polygon = cgpv.api.utilities.geo.extentToPolygon([
         -87.77486341686723, 51.62285357468582, -84.57727128084842, 53.833354975551075,
       ]);
@@ -646,9 +709,6 @@
       });
 
       // Redefine alias fields Button========================================================================================================
-      // find the button element by ID
-      var redefineAliasFieldsButton = document.getElementById('Redefine-alias-fields');
-
       // add an event listener when a button is clicked
       redefineAliasFieldsButton.addEventListener('click', async () => {
         cgpv.api
@@ -657,108 +717,72 @@
       });
 
       // Open details Button========================================================================================================
-      // find the button element by ID
-      var openDetailsButton = document.getElementById('Open-details');
-
       // add an event listener when a button is clicked
       openDetailsButton.addEventListener('click', async () => {
         cgpv.api.getMapViewer(mapId).footerBarApi.selectTab('details');
       });
 
       // Open geolocator Button========================================================================================================
-      // find the button element by ID
-      var openGeolocatorButton = document.getElementById('Open-geolocator');
-
       // add an event listener when a button is clicked
       openGeolocatorButton.addEventListener('click', async () => {
         cgpv.api.getMapViewer(mapId).appBarApi.selectTab('geolocator');
       });
 
       // Disable hover Button========================================================================================================
-      // find the button element by ID
-      var disableHoverButton = document.getElementById('Disable-hover');
-
       // add an event listener when a button is clicked
       disableHoverButton.addEventListener('click', async () => {
         cgpv.api.getMapViewer(mapId).layer.setLayerHoverable(LYR_PATH_FEATURE, false);
       });
 
       // Enable hover Button========================================================================================================
-      // find the button element by ID
-      var enableHoverButton = document.getElementById('Enable-hover');
-
       // add an event listener when a button is clicked
       enableHoverButton.addEventListener('click', async () => {
         cgpv.api.getMapViewer(mapId).layer.setLayerHoverable(LYR_PATH_FEATURE, true);
       });
 
       // Disable feature info Button=================================================================================================
-      // find the button element by ID
-      var disableFeatureInfoButton = document.getElementById('Disable-feature-info');
-
       // add an event listener when a button is clicked
       disableFeatureInfoButton.addEventListener('click', async () => {
         cgpv.api.getMapViewer(mapId).layer.setLayerQueryable(LYR_PATH_FEATURE, false);
       });
 
       // Enable feature info Button==================================================================================================
-      // find the button element by ID
-      var enableFeatureInfoButton = document.getElementById('Enable-feature-info');
-
       // add an event listener when a button is clicked
       enableFeatureInfoButton.addEventListener('click', async () => {
         cgpv.api.getMapViewer(mapId).layer.setLayerQueryable(LYR_PATH_FEATURE, true);
       });
 
       // Enable show collapsed state Button==========================================================================================
-      // find the button element by ID
-      var showCollapsedStateButton = document.getElementById('Show-collapsed-state');
-
       // add an event listener when a button is clicked
       showCollapsedStateButton.addEventListener('click', async () => {
         console.log(cgpv.api.getMapViewer(mapId).stateApi.getLegendCollapsedState(LYR_PATH_GEOCORE));
       });
 
       // Enable toggle collapse state Button==========================================================================================
-      // find the button element by ID
-      var toggleCollapseButton = document.getElementById('Toggle-collapse');
-
       // add an event listener when a button is clicked
       toggleCollapseButton.addEventListener('click', async () => {
         cgpv.api.getMapViewer(mapId).stateApi.setLegendCollapsedState(LYR_PATH_GEOCORE, !cgpv.api.getMapViewer(mapId).stateApi.getLegendCollapsedState(LYR_PATH_GEOCORE));
       });
 
       // Enable show layer info Button================================================================================================
-      // find the button element by ID
-      var showLayerInfoButton = document.getElementById('Show-layer-info');
-
       // add an event listener when a button is clicked
       showLayerInfoButton.addEventListener('click', async () => {
         console.log(cgpv.api.getMapViewer(mapId).getMapLayerOrderInfo());
       });
 
       // Enable language en Button================================================================================================
-      // find the button element by ID
-      var changeLanguageEnglishButton = document.getElementById('Language-en');
-
       // add an event listener when a button is clicked
       changeLanguageEnglishButton.addEventListener('click', async () => {
         cgpv.api.getMapViewer(mapId).setLanguage('en');
       });
 
       // Enable language fr Button================================================================================================
-      // find the button element by ID
-      var changeLanguageFrenchButton = document.getElementById('Language-fr');
-
       // add an event listener when a button is clicked
       changeLanguageFrenchButton.addEventListener('click', async () => {
         cgpv.api.getMapViewer(mapId).setLanguage('fr');
       });
 
       // Change basemap Button================================================================================================
-      // find the button element by ID
-      var changeBasemapButton = document.getElementById('Change-basemap');
-
       // add an event listener when a button is clicked
       changeBasemapButton.addEventListener('click', async () => {
         // Create basemap
@@ -768,43 +792,26 @@
       });
 
       // Set layer Button================================================================================================
-      // find the button element by ID
-      var setLayerButton = document.getElementById('Set-layer');
-
       // add an event listener when a button is clicked
       setLayerButton.addEventListener('click', async () => {
         cgpv.api.getMapViewer(mapId).stateApi.setSelectedLayersTabLayer(LYR_PATH_NON_METAL);
       });
 
       // Swiper add Button================================================================================================
-      // find the button element by ID
-      var swiperAddButton = document.getElementById('Swiper-add');
-
       // add an event listener when a button is clicked
       swiperAddButton.addEventListener('click', async () => {
         cgpv.api.getMapViewer(mapId).plugins['swiper'].activateForLayer(LYR_PATH_NON_METAL);
       });
 
       // Swiper remove Button================================================================================================
-      // find the button element by ID
-      var swiperRemoveButton = document.getElementById('Swiper-remove');
-
       // add an event listener when a button is clicked
       swiperRemoveButton.addEventListener('click', async () => {
         cgpv.api.getMapViewer(mapId).plugins['swiper'].deActivateForLayer(LYR_PATH_NON_METAL);
       });
 
       // Calculate distance Button================================================================================================
-      // find the button element by ID
-      const calculateDistanceButton = document.getElementById('Calc-dist');
-
       // add an event listener when a button is clicked
       calculateDistanceButton.addEventListener('click', () => {
-        // Get the proj
-        const proj = document.getElementById('Dist-proj');
-
-        // get the input for the group name
-        const geometryString = document.getElementById('Dist-geom');
         const geom = geometryString.value.replaceAll('],[', ';').replaceAll('[[', '').replaceAll(']]', '').split(';');
         const arr = [];
         geom.forEach((point) => {
@@ -816,82 +823,42 @@
       });
 
       // Get map config Button================================================================================================
-      // find the button element by ID
-      var getConfigButton = document.getElementById('Get-config');
-
       // add an event listener when a button is clicked
       getConfigButton.addEventListener('click', () => {
         console.log(cgpv.api.getMapViewer(mapId).createMapConfigFromMapState());
       });
 
       // Reload-map Button================================================================================================
-      // find the button element by ID
-      var reloadMapButton = document.getElementById('Reload-map');
-
       // add an event listener when a button is clicked
       reloadMapButton.addEventListener('click', () => {
         cgpv.api.reloadWithCurrentState(mapId);
       });
 
       // Add-marker Button================================================================================================
-      // find the button element by ID
-      var addMarkerButton = document.getElementById('Add-marker');
-
-      const markers = [
-        {
-          id: '1',
-          coordinate: [-100, 60],
-          color: 'blue',
-          opacity: 0.5,
-        },
-        {
-          id: '2',
-          coordinate: [-80, 65],
-          color: 'rgb(0, 226, 0)',
-        },
-        {
-          id: '3',
-          coordinate: [-115, 66],
-          color: '#C52022',
-        },
-      ];
-
       // add an event listener when a button is clicked
       addMarkerButton.addEventListener('click', () => {
         cgpv.api.getMapViewer(mapId).layer.featureHighlight.pointMarkers.addPointMarkers('group1', markers);
       });
 
       // Remove-marker Button================================================================================================
-      // find the button element by ID
-      var removeMarkerButton = document.getElementById('Remove-marker');
-
       // add an event listener when a button is clicked
       removeMarkerButton.addEventListener('click', () => {
         cgpv.api.getMapViewer(mapId).layer.featureHighlight.pointMarkers.removePointMarkersOrGroup('group1');
       });
 
       // Zoom-to-markers Button================================================================================================
-      // find the button element by ID
-      var zoomToMarkersButton = document.getElementById('Zoom-to-markers');
-
       // add an event listener when a button is clicked
       zoomToMarkersButton.addEventListener('click', () => {
         cgpv.api.getMapViewer(mapId).layer.featureHighlight.pointMarkers.zoomToPointMarkers('group1', ['1', '3']);
       });
 
       // Zoom-to-marker-group Button================================================================================================
-      // find the button element by ID
-      var zoomToMarkerGroupButton = document.getElementById('Zoom-to-marker-group');
-
       // add an event listener when a button is clicked
       zoomToMarkerGroupButton.addEventListener('click', () => {
         cgpv.api.getMapViewer(mapId).layer.featureHighlight.pointMarkers.zoomToPointMarkerGroup('group1');
       });
 
       // Create-footer-tab Button================================================================================================
-      // find the button element by ID
-      var createFooterTabButton = document.getElementById('Create-footer-tab');
-
       // add an event listener when a button is clicked
       createFooterTabButton.addEventListener('click', () => {
         cgpv.api.getMapViewer(mapId).footerBarApi.createTab({
@@ -901,32 +868,7 @@
         });
       });
 
-
-      // Filters ===================================================================
-      function loadFiltersUI() {
-        // Reset
-        document.getElementById('filter-initial').value = '';
-        document.getElementById('filter-class').value = '';
-        document.getElementById('filter-data').value = '';
-        document.getElementById('filter-time').value = '';
-        document.getElementById('filter-all').value = '';
-
-        // Get the layer path from the input
-        const layerPath = document.getElementById('filter-input').value?.trim() ?? '';
-        const gvLayer = cgpv.api.getMapViewer(mapId).layer.getGeoviewLayerIfExists(layerPath);
-        if (gvLayer) {
-          const layerFilters = gvLayer.getLayerFilters();
-          document.getElementById('filter-initial').value = layerFilters.getInitialFilter() ?? '';
-          document.getElementById('filter-class').value = layerFilters.getClassFilter() ?? '';
-          document.getElementById('filter-data').value = layerFilters.getDataFilter() ?? '';
-          document.getElementById('filter-time').value = layerFilters.getTimeFilter() ?? '';
-          document.getElementById('filter-all').value = layerFilters.getAllFilters() ?? '';
-        }
-      }
-
-      // add an event listener when a button is clicked
-      var filterLayerPathInput = document.getElementById('filter-input');
-      filterLayerPathInput.value = LYR_PATH_GEOJSON;
+      // add an event listener when a layer path filter input is changed
       filterLayerPathInput.addEventListener('input', () => {
         loadFiltersUI();
       });
