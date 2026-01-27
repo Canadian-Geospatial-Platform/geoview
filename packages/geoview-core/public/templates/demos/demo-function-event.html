@@ -13,6 +13,23 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
     <link rel="stylesheet" href="css/style.css" />
+    <style>
+      .filters {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+      }
+
+      .filter {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .filter textarea {
+        width: 200px;   /* adjust as needed */
+        height: 100px;
+      }
+    </style>
   </head>
 
   <body>
@@ -34,6 +51,41 @@
     <div id="map1" class="geoview-map" data-lang="en" data-config-url="./configs/OSDP/function-event.json"></div>
 
     <hr />
+    <div class="demo-section">
+      <span>Showing active filters for layer path:
+        <input id="filter-input" type="text" change="onFilterLayerPathChanged" style="width:400px;" />
+        <div style="font-style:italic;font-size:small;margin-bottom:10px;">
+          Shortcuts: geojsonLYR1/base-group/polygons.json | f4c51eaa-a6ca-48b9-a1fc-b0651da20509/base-group/0 | historical-flood-dynamic/0
+        </div>
+      </span>
+      <div class="filters">
+        <div class="filter">
+          <label for="filter-initial">Initial filter</label>
+          <textarea id="filter-initial"></textarea>
+        </div>
+
+        <div class="filter">
+          <label for="filter-class">Class filter</label>
+          <textarea id="filter-class"></textarea>
+        </div>
+
+        <div class="filter">
+          <label for="filter-data">Data filter</label>
+          <textarea id="filter-data"></textarea>
+        </div>
+
+        <div class="filter">
+          <label for="filter-time">Time filter</label>
+          <textarea id="filter-time"></textarea>
+        </div>
+
+        <div class="filter">
+          <label for="filter-all">All filters</label>
+          <textarea id="filter-all"></textarea>
+        </div>
+      </div>
+    </div>
+    </div>
     <div class="demo-section">
       <h4>API Functions:</h4>
       <ul class="demo-function-list">
@@ -245,6 +297,7 @@
       const LYR_PATH_FEATURE = 'esriFeatureLYR5/0';
       const LYR_PATH_AIRBORNE = 'airborne_radioactivity/1';
       const LYR_PATH_GEOCORE = 'f4c51eaa-a6ca-48b9-a1fc-b0651da20509/base-group';
+      const LYR_PATH_GEOJSON = 'geojsonLYR1/base-group/polygons.json';
 
       var CNT_GENERIC_STATUS_CHANGE = 0;
       var CNT_SPECIFIC_STATUS_CHANGE = 0;
@@ -330,6 +383,12 @@
               mapViewer.notifications.addNotificationSuccess('Layer: Airborne has fallen in error while rendering. Error ' + payload.error);
             });
           }
+
+          // Prepare handler when the layer filter change
+          payload.layer.onLayerFilterApplied((sender, payload) => {
+            // Load the filters ui
+            loadFiltersUI();
+          });
         });
 
         // listen to layer loaded events
@@ -383,30 +442,34 @@
 
           // listen to layer visibility changed event (individual geoview layer)
           mapViewer.layer.getGeoviewLayer(LYR_PATH_UNIQUE).onVisibleChanged((sender, payload) => {
-            mapViewer.notifications.addNotificationSuccess(`Layer: ${LYR_PATH_UNIQUE} visibility set to ${payload.visible} - individual`);
+            mapViewer.notifications.addNotificationSuccess(`Layer: ${sender.getLayerPath()} visibility set to ${payload.visible} - individual`);
           });
 
           // listen to layer opacity changed event
           mapViewer.layer.getGeoviewLayer(LYR_PATH_UNIQUE).onLayerOpacityChanged((sender, payload) => {
-            mapViewer.notifications.addNotificationSuccess(`Layer: ${payload.layerPath} opacity changed to ${payload.opacity}`);
+            mapViewer.notifications.addNotificationSuccess(`Layer: ${sender.getLayerPath()} opacity changed to ${payload.opacity}`);
           });
 
           // listen to layer filter applied event
           mapViewer.layer.getGeoviewLayer(LYR_PATH_UNIQUE).onLayerFilterApplied((sender, payload) => {
-            mapViewer.notifications.addNotificationSuccess(`Layer: Filter ${payload.filter} applied to ${payload.layerPath}`);
+            mapViewer.notifications.addNotificationSuccess(`Layer: ${sender.getLayerPath()} filter changed to ${payload.filter.getAllFilters()}`);
           });
 
           // listen to layer visibility changed event (individual geoview layer)
           mapViewer.layer.getGeoviewLayer(LYR_PATH_GEOCORE).onVisibleChanged((sender, payload) => {
             mapViewer.notifications.addNotificationSuccess(
-              `Layer: layer ${payload.layerPath} visibility set to ${payload.visible} - individual`
+              `Layer: layer ${sender.getLayerPath()} visibility set to ${payload.visible} - individual`
             );
           });
 
           // Add more registrations of listeners when the layers have been loaded here...
+
+          // Load the filters on load
+          loadFiltersUI();
         });
 
         // Add more registrations of listeners when the map has been initialized here...
+
       });
 
       // Register a handler when the map is ready / ALL layers have been registered
@@ -836,6 +899,36 @@
           label: 'My Custom Tab',
           content: '<br><div><ul><li>How to export map coordinate data to: GeoJSON, or CSV.</li></ul></div>',
         });
+      });
+
+
+      // Filters ===================================================================
+      function loadFiltersUI() {
+        // Reset
+        document.getElementById('filter-initial').value = '';
+        document.getElementById('filter-class').value = '';
+        document.getElementById('filter-data').value = '';
+        document.getElementById('filter-time').value = '';
+        document.getElementById('filter-all').value = '';
+
+        // Get the layer path from the input
+        const layerPath = document.getElementById('filter-input').value?.trim() ?? '';
+        const gvLayer = cgpv.api.getMapViewer(mapId).layer.getGeoviewLayerIfExists(layerPath);
+        if (gvLayer) {
+          const layerFilters = gvLayer.getLayerFilters();
+          document.getElementById('filter-initial').value = layerFilters.getInitialFilter() ?? '';
+          document.getElementById('filter-class').value = layerFilters.getClassFilter() ?? '';
+          document.getElementById('filter-data').value = layerFilters.getDataFilter() ?? '';
+          document.getElementById('filter-time').value = layerFilters.getTimeFilter() ?? '';
+          document.getElementById('filter-all').value = layerFilters.getAllFilters() ?? '';
+        }
+      }
+
+      // add an event listener when a button is clicked
+      var filterLayerPathInput = document.getElementById('filter-input');
+      filterLayerPathInput.value = LYR_PATH_GEOJSON;
+      filterLayerPathInput.addEventListener('input', () => {
+        loadFiltersUI();
       });
 
       // create snippets

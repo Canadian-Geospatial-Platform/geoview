@@ -799,7 +799,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     // Emit event
     // TODO: LayerApi could listen to that event in case we need to update the store.
     this.emitLayerFilterApplied({
-      filter: layerFilters?.getAllFilters() ?? '',
+      filter: layerFilters,
     });
   }
 
@@ -1889,7 +1889,7 @@ export type LegendQueriedDelegate = EventDelegateBase<AbstractGVLayer, LegendQue
  */
 export type LayerFilterAppliedEvent = {
   // The filter
-  filter: string;
+  filter: LayerFilters;
 };
 
 /**
