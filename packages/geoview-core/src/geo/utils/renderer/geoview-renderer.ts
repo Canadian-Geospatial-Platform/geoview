@@ -3022,11 +3022,11 @@ export abstract class GeoviewRenderer {
    * **and** the default renderer is visible, the function instead builds a
    * negative filter (`NOT (...)`) from the unchecked non-default entries, since
    * the default renderer represents an implicit catch-all.
-   * @param {TypeLayerStyleSettings} styleSettings The layer style settings containing renderer definitions
+   * @param {TypeLayerStyleSettings} styleSettings - The layer style settings containing renderer definitions
    * and visibility state.
-   * @param {TypeOutfields[]} outFields Optional layer field metadata used to properly format field
+   * @param {TypeOutfields[]} outFields - Optional layer field metadata used to properly format field
    * values (e.g., quoting strings, numeric handling).
-   * @param {boolean} [useExtraSpacingInFilter] When `true`, adds extra spacing and quotes to
+   * @param {boolean} [useExtraSpacingInFilter] - When `true`, adds extra spacing and quotes to
    * improve readability or compatibility with certain filter consumers.
    * @returns {string} A filter expression string suitable for use in SQL-like or OGC filter
    * contexts. Returns a constant always-true (`1 = 1`) or always-false (`1 = 0`)
