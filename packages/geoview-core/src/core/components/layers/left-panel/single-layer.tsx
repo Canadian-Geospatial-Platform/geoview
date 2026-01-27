@@ -216,6 +216,24 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     [layerPath, mapId, reorderLayer, setSelectedLayerSortingArrowId]
   );
 
+  const handleArrowKeyDownWrapper = useCallback(
+    (event: React.KeyboardEvent<HTMLButtonElement>) => {
+      // Determine direction from button id
+      const direction = event.currentTarget.id.includes('up-order') ? -1 : 1;
+      handleArrowKeyDown(event, direction);
+    },
+    [handleArrowKeyDown]
+  );
+
+  const handleArrowClickWrapper = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      // Determine direction from button id
+      const direction = event.currentTarget.id.includes('up-order') ? -1 : 1;
+      handleArrowClick(event, direction);
+    },
+    [handleArrowClick]
+  );
+
   const handleToggleVisibility = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>): void => {
       // Log
@@ -302,8 +320,8 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
             disabled={isFirst}
             edge="end"
             size="small"
-            onKeyDown={(e) => handleArrowKeyDown(e, -1)}
-            onClick={(e) => handleArrowClick(e, -1)}
+            onKeyDown={handleArrowKeyDownWrapper}
+            onClick={handleArrowClickWrapper}
           >
             <ArrowUpIcon />
           </IconButton>
@@ -313,8 +331,8 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
             disabled={isLast}
             edge="end"
             size="small"
-            onKeyDown={(e) => handleArrowKeyDown(e, 1)}
-            onClick={(e) => handleArrowClick(e, 1)}
+            onKeyDown={handleArrowKeyDownWrapper}
+            onClick={handleArrowClickWrapper}
           >
             <ArrowDownwardIcon />
           </IconButton>
@@ -335,8 +353,8 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
   }, [
     layerIsSelected,
     displayState,
-    handleArrowClick,
-    handleArrowKeyDown,
+    handleArrowClickWrapper,
+    handleArrowKeyDownWrapper,
     isFirst,
     isLast,
     layerPath,
