@@ -155,7 +155,7 @@
               onChange: (dates) => {
                 mapViewer.layer
                   .getGeoviewLayer('historical-flood/0')
-                  .applyDateFilter(dates[0] + '-01-01', dates[1] + '-12-31');
+                  .setLayerFiltersDate(dates[0] + '-01-01', dates[1] + '-12-31');
               },
             })
           );

@@ -70,7 +70,7 @@ import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-lay
 import type { TimeDimension } from '@/core/utils/date-mgt';
 import { DateMgt } from '@/core/utils/date-mgt';
 import type { TypeTimeSliderProps } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import { LayerFilters } from '@/core/types/layer-filters';
+import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
 // GV MapState provides: 'state values', 'actions' and 'setterActions'.

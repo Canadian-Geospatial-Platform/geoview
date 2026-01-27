@@ -20,7 +20,7 @@ import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values
 import { Projection } from '@/geo/utils/projection';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
-import type { LayerFilters } from '@/core/types/layer-filters';
+import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 
 /**
  * Manages an Esri Image layer.

@@ -31,7 +31,7 @@ import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { WfsRenderer } from '@/geo/utils/renderer/wfs-renderer';
 import { NoExtentError } from '@/core/exceptions/geoview-exceptions';
-import type { LayerFilters } from '@/core/types/layer-filters';
+import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 
 /**
  * Manages a WMS layer.

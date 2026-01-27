@@ -38,7 +38,7 @@ import { CancelledError, ResponseEmptyError, PromiseRejectErrorWrapper, formatEr
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
-import { LayerFilters } from '@/core/types/layer-filters';
+import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 
 // Constant used to define the default layer names
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {

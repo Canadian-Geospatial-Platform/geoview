@@ -48,7 +48,7 @@ import { NotImplementedError, NotSupportedError } from '@/core/exceptions/core-e
 import { LayerNotQueryableError, LayerStatusErrorError } from '@/core/exceptions/layer-exceptions';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { GVVectorSource } from '@/geo/layer/source/vector-source';
-import { LayerFilters } from '@/core/types/layer-filters';
+import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 import { delay, whenThisThen } from '@/core/utils/utilities';
 
 /**
