@@ -468,30 +468,34 @@ export abstract class GeoviewRenderer {
                 nodeValue: operand1.nodeValue === null ? null : `${operand1.nodeValue}${operand2.nodeValue}`,
               });
             break;
-          case 'like':
-            if ((typeof operand1.nodeValue !== 'string' && operand1.nodeValue !== null) || typeof operand2.nodeValue !== 'string')
-              throw new Error(`like operator error`);
-            else {
-              const value = operand1.nodeValue;
-              const likePattern = operand2.nodeValue;
+          case 'like': {
+            // Pattern must be a string
+            if (typeof operand2.nodeValue !== 'string') throw new Error(`like operator error`);
 
-              // Escape all RegExp metacharacters except SQL wildcards
-              const escapedPattern = likePattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-              // Convert SQL LIKE wildcards to RegExp equivalents
-              const regexPattern = '^' + escapedPattern.replaceAll('%', '.*').replaceAll('_', '.') + '$';
-
-              // Case-insensitive match and multiline
-              const regex = new RegExp(regexPattern, 'is');
-
-              const matches = value && regex.test(value);
-
-              dataStack.push({
-                nodeType: NodeType.variable,
-                nodeValue: matches,
-              });
+            // SQL: NULL LIKE ... => NULL
+            if (operand1.nodeValue === null) {
+              dataStack.push({ nodeType: NodeType.variable, nodeValue: null });
+              break;
             }
+
+            // SQL implicit cast to text
+            const value = String(operand1.nodeValue);
+            const likePattern = operand2.nodeValue;
+
+            // Escape RegExp metacharacters except SQL wildcards
+            const escapedPattern = likePattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+            // Convert SQL LIKE → RegExp
+            const regexPattern = '^' + escapedPattern.replaceAll('%', '.*').replaceAll('_', '.') + '$';
+
+            const regex = new RegExp(regexPattern, 'is');
+
+            dataStack.push({
+              nodeType: NodeType.variable,
+              nodeValue: regex.test(value),
+            });
             break;
+          }
           case ',':
             valueToPush = {
               nodeType: NodeType.variable,
