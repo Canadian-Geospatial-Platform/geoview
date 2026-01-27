@@ -136,6 +136,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   gridLeftMain: {
     height: '100%',
     overflowY: 'auto',
+    marginTo: '30px',
     '&.MuiGrid-grid-xs-auto': {
       '& .layer-panel': {
         width: '52px',

@@ -183,7 +183,7 @@ Les résultats d'une recherche d'emplacement s'affichent dans un panneau sous le
 
 Vous pouvez télécharger une image de la carte avec ses couches visibles, la légende, le titre, la flèche du nord, la barre d'échelle et un horodatage.
 
-**Remarque :** Le bouton Télécharger est désactivé pendant le chargement des couches. Il devient actif une fois que toutes les couches sont complètement chargées.
+**N.B. :** Le bouton Télécharger est désactivé pendant le chargement des couches. Il devient actif une fois que toutes les couches sont complètement chargées.
 
 Lorsque vous cliquez sur le bouton **Télécharger**, une fenêtre de dialogue s'ouvre avec les options suivantes :
 
@@ -253,14 +253,14 @@ _N.B. : Lorsque la couche est cachée, les fonctions affectant la couche sur la 
 
 ## <img src="{{assetsURL}}/img/guide/footer/layers_30.svg" alt="Icône couches" /> Couches <a href="#footerSection">Haut de page</a>
 
-L’onglet **Couches** comprend les sous-menus suivants :
+L’onglet **Couches** comprend les vues suivantes :
 
-- Vue
-- Ajouter
+- Vue des couches (défault)
+- Ajouter une couche (basculer en cliquant sur le bouton « Ajouter une couche »)
 
 =3!view=
 
-### <img src="{{assetsURL}}/img/guide/footer/view_25.svg" alt="Icône vue" /> Vue
+### <img src="{{assetsURL}}/img/guide/footer/view_25.svg" alt="Icône vue" /> Vue des couches
 
 _**N.B. : Cliquez sur une couche pour afficher ses information dans la section de droite.**_
 
@@ -271,7 +271,7 @@ Si l'icône de visibilité (œil) d'une couche est désactivée (grisée) <img s
 - Cependant, après avoir effectué un zoom, il se peut que vous ne voyiez pas immédiatement les éléments s'il n'y a pas de données dans la zone de visualisation actuelle.
 - Dans ce cas, vous devrez peut-être effectuer un déplacement de la carte pour localiser les éléments.
 
-Le sous-menu **Vue** de l’onglet **Couches** se divise en deux sections. La section de gauche présente les couches affichées sur la carte. Si vous cliquez sur une couche, ses paramètres (options accessibles pour la couche) s’afficheront dans la section de droite.
+La **vue par défault** de l’onglet **Couches** se divise en deux sections. La section de gauche présente les couches affichées sur la carte. Si vous cliquez sur une couche, ses paramètres (options accessibles pour la couche) s’afficheront dans la section de droite.
 
 **Icônes de couche**
 
@@ -312,7 +312,7 @@ _N.B. : Si une couche ne se charge pas correctement, un message d’erreur s’a
 
 #### Paramètres des couches
 
-Dans l’onglet **Vue**, si vous cliquez sur une couche dans la section de gauche, ses paramètres s’afficheront dans celle de droite.
+Si vous cliquez sur une couche dans la section de gauche, ses paramètres s’afficheront dans celle de droite.
 
 _N.B. : Les paramètres accessibles dépendent de plusieurs facteurs, comme le type de couche et la configuration._
 
@@ -349,9 +349,9 @@ Si des informations d'attribution sont disponibles pour la couche, elles seront 
 
 =3!add=
 
-### <img src="{{assetsURL}}/img/guide/layers/add_25.svg" alt="Icône ajouter" /> Ajouter
+### <img src="{{assetsURL}}/img/guide/layers/add_25.svg" alt="Icône ajouter" /> Ajouter une couche
 
-Vous pouvez ajouter des couches au visualiseur de cartes dans le sous-menu **Ajouter** de l’onglet **Couches**.
+Vous pouvez ajouter des couches au visualiseur de cartes en cliquant sur **Ajouter une couche** de l’onglet **Couches**.
 
 Marche à suivre :
 
@@ -364,7 +364,7 @@ Marche à suivre :
 - Selon le type d’ensemble de données ajouté, vous pourrez configurer différents paramètres à l’étape finale.
 - Cliquez sur le bouton **Continuer** pour insérer la couche dans la carte.
 
-Le visualiseur passe automatiquement à la fonction **Vue**.
+Le visualiseur passe automatiquement à la vue par défault.
 
 =2!details=
 
