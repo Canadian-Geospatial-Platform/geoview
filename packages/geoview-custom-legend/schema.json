@@ -16,7 +16,8 @@
           "default": false
         },
         "title": {
-          "$ref": "#/definitions/TypeCustomLegendText"
+          "type": "string",
+          "description": "The text for the legend title"
         },
         "legendList": {
           "type": "array",
@@ -48,7 +49,7 @@
       "additionalProperties": false,
       "properties": {
         "type": {
-          "const": "legend",
+          "const": "layer",
           "description": "Discriminator field for legend layer items."
         },
         "layerPath": {
@@ -73,8 +74,12 @@
           "description": "Discriminator field for header items."
         },
         "text": {
-          "description": "The header layer text",
-          "$ref": "#/definitions/TypeCustomLegendText"
+          "type": "string",
+          "description": "The header layer text"
+        },
+        "description": {
+          "type": "string",
+          "description": "Descriptive text that will display below the header text if present"
         },
         "fontSize": {
           "type": "number",
@@ -101,8 +106,12 @@
           "description": "Discriminator field for group items."
         },
         "text": {
-          "description": "The group layer text",
-          "$ref": "#/definitions/TypeCustomLegendText"
+          "type": "string",
+          "description": "The group layer text"
+        },
+        "description": {
+          "type": "string",
+          "description": "Descriptive text that will display below the group text if present"
         },
         "collapsed": {
           "type": "boolean",
@@ -119,37 +128,7 @@
         }
       },
       "required": ["type", "groupTitle", "children"]
-    },
-    "TypeCustomLegendText": {
-      "description": "Text that can be either a simple string or an object with English and French values.",
-      "oneOf": [
-        {
-          "type": "string",
-          "description": "Simple text string (not translated)"
-        },
-        {
-          "$ref": "#/definitions/TypeLegendTextLanguages",
-          "description": "Translated text with English and French values"
-        }
-      ],
-      "default": ""
-    },
-    "TypeLegendTextLanguages": {
-        "description": "The English and French text values",
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "en": {
-            "type": "string",
-            "description": "The French Text value"
-          },
-          "fr": {
-            "type": "string",
-            "description": "The English Text value"
-          }
-        },
-        "required": ["en", "fr"]
-      }
+    }
   },
   "description": "Root schema for custom legend configuration."
 }

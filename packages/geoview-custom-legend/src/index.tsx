@@ -35,23 +35,25 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
    * @returns {Record<string, unknown>} - The translations object for the particular Plugin.
    */
   override defaultTranslations(): Record<string, unknown> {
-    const config = this.getConfig();
-    const textEn = typeof config.title === 'string' ? config.title : config.title?.en || 'Legend';
-    const textFr = typeof config.title === 'string' ? config.title : config.title?.fr || 'Légende';
-
     return {
       en: {
         CustomLegend: {
-          title: textEn,
+          title: 'Legend',
           layer: 'layer',
           sublayers: 'sublayers',
+          descriptionToggle: 'Toggle description',
+          showDescription: 'Show description',
+          hideDescription: 'Hide description',
         },
       },
       fr: {
         CustomLegend: {
-          title: textFr,
+          title: 'Légende',
           layer: 'couche',
           sublayers: 'sous-couches',
+          descriptionToggle: 'Basculer la description',
+          showDescription: 'Afficher la description',
+          hideDescription: 'Masquer la description',
         },
       },
     };
@@ -80,11 +82,12 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
 
   override onCreateContentProps(): TypePanelProps {
     // Panel props
+    const config = this.getConfig();
     return {
-      title: 'CustomLegend.title',
+      title: config.title ?? 'CustomLegend.title',
       icon: <LegendIcon />,
       width: '350px',
-      status: this.getConfig().isOpen,
+      status: config.isOpen,
     };
   }
 

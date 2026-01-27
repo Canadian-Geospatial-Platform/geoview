@@ -7,16 +7,9 @@ export type TypeLegendItem = TypeLegendLayer | TypeHeaderLayer | TypeGroupLayer;
  * A reference to an existing layer from geoview-core.
  */
 export interface TypeLegendLayer {
-  type: 'legend';
+  type: 'layer';
   layerPath: string;
   visible?: boolean;
-}
-
-export type TypeLegendText = string | TypeLegendTextLanguages;
-
-export interface TypeLegendTextLanguages {
-  en: string;
-  fr: string;
 }
 
 /**
@@ -25,7 +18,8 @@ export interface TypeLegendTextLanguages {
 export interface TypeHeaderLayer {
   itemId?: string;
   type: 'header';
-  text: TypeLegendText;
+  text: string;
+  description?: string;
   fontSize?: number;
   fontWeight?: 'normal' | 'bold';
 }
@@ -36,7 +30,8 @@ export interface TypeHeaderLayer {
 export interface TypeGroupLayer {
   itemId?: string;
   type: 'group';
-  text: TypeLegendText;
+  text: string;
+  description?: string;
   collapsed?: boolean;
   children: TypeLegendItem[];
 }
@@ -46,7 +41,7 @@ export interface TypeGroupLayer {
  */
 export interface TypeCustomLegendConfig {
   isOpen: boolean;
-  title: TypeLegendText;
+  title: string;
   legendList: TypeLegendItem[];
   version?: string;
 }
@@ -55,7 +50,7 @@ export interface TypeCustomLegendConfig {
  * Type guards for discriminating union types.
  */
 export const isLegendLayer = (item: TypeLegendItem): item is TypeLegendLayer => {
-  return item.type === 'legend';
+  return item.type === 'layer';
 };
 
 export const isHeaderLayer = (item: TypeLegendItem): item is TypeHeaderLayer => {
@@ -65,19 +60,6 @@ export const isHeaderLayer = (item: TypeLegendItem): item is TypeHeaderLayer => 
 export const isGroupLayer = (item: TypeLegendItem): item is TypeGroupLayer => {
   return item.type === 'group';
 };
-
-/**
- * Extract text in the current language from TypeLegendText.
- * @param {TypeLegendText} text - The text object or string
- * @param {string} language - Current language ('en' or 'fr')
- * @returns {string} The extracted text
- */
-export function getLocalizedText(text: TypeLegendText, language: 'en' | 'fr'): string {
-  if (typeof text === 'string') {
-    return text;
-  }
-  return text[language] || '';
-}
 
 /**
  * Generate a unique ID for a legend item based on its content and position.
@@ -97,14 +79,12 @@ export function generateLegendItemId(item: TypeLegendItem, index: number, langua
 
   if (isHeaderLayer(item)) {
     // Use itemId if provided, otherwise generate from text + index
-    const text = getLocalizedText(item.text, language);
-    return item.itemId || `${basePath}header-${text.toLowerCase().replace(/\s+/g, '-')}-${index}`;
+    return item.itemId || `${basePath}header-${item.text.toLowerCase().replace(/\s+/g, '-')}-${index}`;
   }
 
   if (isGroupLayer(item)) {
     // Use itemId if provided, otherwise generate from title + index
-    const text = getLocalizedText(item.text, language);
-    return item.itemId || `${basePath}group-${text.toLowerCase().replace(/\s+/g, '-')}-${index}`;
+    return item.itemId || `${basePath}group-${item.text.toLowerCase().replace(/\s+/g, '-')}-${index}`;
   }
 
   // Fallback

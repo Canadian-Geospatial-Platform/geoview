@@ -1,8 +1,8 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
-import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 
+import { DescriptionText } from './description-text';
 import type { TypeHeaderLayer } from '../custom-legend-types';
-import { isHeaderLayer, getLocalizedText } from '../custom-legend-types';
+import { isHeaderLayer } from '../custom-legend-types';
 import type { getSxClasses } from '../custom-legend-style';
 
 interface HeaderItemProps {
@@ -20,11 +20,7 @@ export function HeaderItem({ item, sxClasses }: HeaderItemProps): JSX.Element | 
   const { ui } = cgpv;
   const { Box, Typography } = ui.elements;
 
-  const appDisplayLanguage = useAppDisplayLanguage();
-
   if (!isHeaderLayer(item)) return;
-
-  const headerText = getLocalizedText(item.text, appDisplayLanguage);
 
   // Create the override object and if values are present, they will override the default values
   const styleOverrides = {
@@ -34,7 +30,8 @@ export function HeaderItem({ item, sxClasses }: HeaderItemProps): JSX.Element | 
 
   return (
     <Box sx={sxClasses.headerItem}>
-      <Typography sx={{ ...sxClasses.headerText, ...styleOverrides }}>{headerText}</Typography>
+      <Typography sx={{ ...sxClasses.headerText, ...styleOverrides }}>{item.text}</Typography>
+      {item.description && <DescriptionText description={item.description} sxClasses={sxClasses} />}
     </Box>
   );
 }

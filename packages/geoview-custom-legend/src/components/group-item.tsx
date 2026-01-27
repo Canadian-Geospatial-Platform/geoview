@@ -7,9 +7,10 @@ import {
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 
 import type { TypeGroupLayer, TypeLegendItem } from '../custom-legend-types';
-import { isGroupLayer, getLocalizedText, generateLegendItemId, isLegendLayer } from '../custom-legend-types';
+import { isGroupLayer, generateLegendItemId, isLegendLayer } from '../custom-legend-types';
 import type { getSxClasses } from '../custom-legend-style';
 import { LegendItem } from './legend-item';
+import { DescriptionText } from './description-text';
 
 interface GroupItemProps {
   item: TypeGroupLayer;
@@ -88,8 +89,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
   };
 
   // Get current item text and path for children
-  const groupText = getLocalizedText(item.text, displayLanguage);
-  const currentPath = itemPath || item.itemId || `group-${groupText.toLowerCase().replace(/\s+/g, '-')}`;
+  const currentPath = itemPath || item.itemId || `group-${item.text.toLowerCase().replace(/\s+/g, '-')}`;
 
   return (
     <ListItem sx={sxClasses.legendListItem} disablePadding className="layerListItem groupItem">
@@ -108,8 +108,15 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
           <Box sx={{ flex: 1 }}>
             {/* Group title */}
             <Typography noWrap sx={sxClasses.groupTitle}>
-              {groupText}
+              {item.text}
             </Typography>
+
+            {/* Description */}
+            {item.description && (
+              <Box sx={{ mt: 0.5 }}>
+                <DescriptionText description={item.description} sxClasses={sxClasses} />
+              </Box>
+            )}
 
             {/* Sublayer count */}
             <Typography variant="caption" sx={sxClasses.groupSubLayerCount}>

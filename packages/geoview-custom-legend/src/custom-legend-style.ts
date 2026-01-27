@@ -38,7 +38,8 @@ export const getSxClasses = (theme: any): SxClasses => ({
   headerItem: {
     width: '100%',
     display: 'flex',
-    alignItems: 'center',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
     borderBottom: `1px solid ${theme.palette.geoViewColor.grey.light[800]}`,
     padding: '8px 4px',
   },
@@ -120,5 +121,33 @@ export const getSxClasses = (theme: any): SxClasses => ({
   groupCollapseButton: {
     display: 'flex',
     alignItems: 'center',
+  },
+
+  descriptionToggleRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+  },
+
+  descriptionToggleButton: {
+    padding: 0,
+  },
+
+  descriptionToggleText: {
+    fontSize: '0.75rem',
+    fontStyle: 'italic',
+    fontWeight: 300,
+    color: theme.palette.geoViewColor.textColor.light,
+    cursor: 'pointer',
+  },
+
+  descriptionText: {
+    fontSize: '0.875rem',
+    fontStyle: 'italic',
+    fontWeight: 300,
+    color: theme.palette.geoViewColor.textColor.light,
+    marginTop: '4px',
+    marginLeft: '24px',
+    maxWidth: '400px',
   },
 });
