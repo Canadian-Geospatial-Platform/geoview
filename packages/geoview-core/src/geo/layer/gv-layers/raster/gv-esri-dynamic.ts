@@ -309,10 +309,15 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Overrides the get all feature information for all the features stored in the layer.
    * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
+   * @param {LayerFilters} layerFilters - The layer filters to apply when querying the features.
    * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    */
-  protected override async getAllFeatureInfo(map: OLMap, abortController?: AbortController): Promise<TypeFeatureInfoEntry[]> {
+  protected override async getAllFeatureInfo(
+    map: OLMap,
+    layerFilters: LayerFilters,
+    abortController?: AbortController
+  ): Promise<TypeFeatureInfoEntry[]> {
     // Get the layer config in a loaded phase
     const layerConfig = this.getLayerConfig();
 
@@ -338,7 +343,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // Format and return the result
       // Not having geometry have an effect on the style as it use the geometry to define wich one to use
       // The formatFeatureInfoResult (abstact-geoview-layer) / getFeatureCanvas (geoview-renderer) use geometry stored in style
-      return this.formatFeatureInfoResult(features, layerConfig);
+      return this.formatFeatureInfoResult(features, layerConfig, layerFilters);
     }
 
     // Error
@@ -442,7 +447,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // TO.DOCONT: geometry assignement must not be in an async function.
     // Transform the features in an OL feature - at this point, there is no geometry associated with the feature
     const features = new EsriJSON().readFeatures({ features: identifyJsonResponse.results });
-    const arrayOfFeatureInfoEntries = this.formatFeatureInfoResult(features, layerConfig);
+    const arrayOfFeatureInfoEntries = this.formatFeatureInfoResult(features, layerConfig, this.getLayerFilters());
 
     // If cancelled
     // Explicitely checking the abort condition here, after reading the features, because the processing above is time consuming and maybe things have become aborted meanwhile.
