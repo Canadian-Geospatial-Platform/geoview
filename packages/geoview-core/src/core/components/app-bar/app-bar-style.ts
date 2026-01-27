@@ -30,6 +30,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         '&>div>ul>li': {
           backgroundColor: theme.palette.geoViewColor.grey.lighten(0.8, 0.8),
           padding: '0px',
+          borderRadius: '50%',
         },
         '&>div>ul>li::before': {
           display: 'none',

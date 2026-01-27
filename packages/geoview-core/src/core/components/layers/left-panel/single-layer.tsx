@@ -73,7 +73,14 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
   const layerItemRef = useRef<HTMLLIElement>(null);
 
   // Get store states
-  const { reloadLayer, setSelectedLayerPath, setSelectedLayerSortingArrowId, zoomToLayerVisibleScale } = useLayerStoreActions();
+  const {
+    deleteLayer,
+    reloadLayer,
+    setSelectedLayerPath,
+    setSelectedLayerSortingArrowId,
+    zoomToLayerVisibleScale,
+    getLayerDeleteInProgress,
+  } = useLayerStoreActions();
   const { setOrToggleLayerVisibility, toggleLegendCollapsed, reorderLayer } = useMapStoreActions();
   const mapId = useGeoViewMapId();
   const selectedLayerPath = useLayerSelectedLayerPath();
@@ -176,6 +183,13 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     // Log
     logger.logTraceUseCallback('SINGLE-LAYER - handleLayerClick');
 
+    // Check if there's a delete in progress on another layer
+    const layerDeleteInProgress = getLayerDeleteInProgress();
+    if (layerDeleteInProgress && layerDeleteInProgress !== layerPath) {
+      // Complete the delete for the other layer
+      deleteLayer(layerDeleteInProgress);
+    }
+
     // Only clickable if the layer status is processed or loaded
     if (!['processed', 'loaded'].includes(layerStatus!)) {
       return;
@@ -184,7 +198,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     // Set selected layer path
     setSelectedLayerPath(layerPath);
     showLayerDetailsPanel?.(layerId || '');
-  }, [layerPath, layerId, layerStatus, setSelectedLayerPath, showLayerDetailsPanel]);
+  }, [layerPath, layerId, layerStatus, setSelectedLayerPath, showLayerDetailsPanel, getLayerDeleteInProgress, deleteLayer]);
 
   const handleArrowClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>, direction: number) => {

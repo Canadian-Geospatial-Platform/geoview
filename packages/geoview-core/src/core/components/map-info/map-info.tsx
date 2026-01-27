@@ -66,6 +66,7 @@ export const MapInfo = memo(function MapInfo({ onScrollShellIntoView }: MapInfoP
       height: '40px',
       background: theme.palette.geoViewColor.grey.lighten(0.8, 0.8),
       width: 'fit-content',
+      borderRadius: '70px',
     }),
     [theme.palette.geoViewColor.grey]
   );
