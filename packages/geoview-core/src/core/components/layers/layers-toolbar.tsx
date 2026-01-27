@@ -22,9 +22,9 @@ export function LayersToolbar(): JSX.Element {
   const userClickedAdd = useRef(false);
 
   const layerToolbarStyle = {
-    padding: '0 18px 4px 0',
     display: 'inline-flex',
-    '& .MuiButton-startIcon': { [theme.breakpoints.down('md')]: { margin: 0, padding: '0 0.25rem' } },
+    '&>button': { padding: '10px 15px' },
+    '& .MuiButton-startIcon': { [theme.breakpoints.down('sm')]: { margin: 0, padding: '0 0.25rem' } },
     '& .MuiButtonGroup-root': { backgroundColor: theme.palette.geoViewColor.bgColor.light[300] },
   };
 
