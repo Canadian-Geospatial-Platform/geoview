@@ -38,7 +38,7 @@ import { CancelledError, ResponseEmptyError, PromiseRejectErrorWrapper, formatEr
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
-import { LayerFilters } from '@/core/types/layer-filters';
+import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 
 // Constant used to define the default layer names
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
@@ -223,11 +223,10 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Overridable method to process a layer entry and return a Promise of an Open Layer Base Layer object.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
-   * @returns {Promise<BaseLayer>} The Open Layer Base Layer that has been created.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - Information needed to create the GeoView layer.
+   * @returns {Promise<AbstractGVLayer>} The Geoview Layer that has been created.
    */
-  // TODO: ALEX - Change return type to Promise<AbstractGVLayer> here and overrides
-  protected onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseGVLayer> {
+  protected onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractGVLayer> {
     // Redirect
     const layer = this.createGVLayer(layerConfig);
 
@@ -987,11 +986,11 @@ export abstract class AbstractGeoViewLayer {
   /**
    * Processes a layer entry and returns a Promise of an Open Layer Base Layer object.
    * This method sets the 'loading' status on the layer config and then calls the overridable method 'onProcessOneLayerEntry'.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
-   * @returns {Promise<BaseLayer>} The Open Layer Base Layer that has been created.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - Information needed to create the GeoView layer.
+   * @returns {Promise<AbstractGVLayer>} The Geoview Layer that has been created.
    * @private
    */
-  #processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseGVLayer> {
+  #processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractGVLayer> {
     // Process
     return this.onProcessOneLayerEntry(layerConfig);
   }
