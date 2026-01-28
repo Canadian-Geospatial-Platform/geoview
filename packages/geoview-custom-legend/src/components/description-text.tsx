@@ -45,7 +45,7 @@ export function DescriptionText({ description, sxClasses }: DescriptionTextProps
             : getLocalizedMessage(displayLanguage, 'CustomLegend.showDescription')}
         </Typography>
       </Box>
-      <Collapse in={expanded}>
+      <Collapse in={expanded} sx={sxClasses.descriptionCollapse}>
         <Typography sx={sxClasses.descriptionText}>{description}</Typography>
       </Collapse>
     </Box>

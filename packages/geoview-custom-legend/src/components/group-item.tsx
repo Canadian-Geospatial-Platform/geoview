@@ -112,11 +112,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
             </Typography>
 
             {/* Description */}
-            {item.description && (
-              <Box sx={{ mt: 0.5 }}>
-                <DescriptionText description={item.description} sxClasses={sxClasses} />
-              </Box>
-            )}
+            {item.description && <DescriptionText description={item.description} sxClasses={sxClasses} />}
 
             {/* Sublayer count */}
             <Typography variant="caption" sx={sxClasses.groupSubLayerCount}>

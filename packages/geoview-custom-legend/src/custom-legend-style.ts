@@ -49,6 +49,7 @@ export const getSxClasses = (theme: any): SxClasses => ({
     fontSize: theme.palette.geoViewFontSize.md,
     fontWeight: '600',
     color: theme.palette.geoViewColor.textColor.main,
+    maxWidth: '400px',
   },
 
   // Group children container
@@ -63,11 +64,13 @@ export const getSxClasses = (theme: any): SxClasses => ({
 
   // Group title styling
   groupTitle: {
+    textWrapMode: 'wrap',
     fontSize: '1.125rem', // 18px
     fontWeight: '700',
     lineHeight: 1.2,
     textOverflow: 'ellipsis',
     color: theme.palette.geoViewColor.textColor.main,
+    maxWidth: '400px',
   },
 
   // Group item button
@@ -123,6 +126,11 @@ export const getSxClasses = (theme: any): SxClasses => ({
     alignItems: 'center',
   },
 
+  descriptionContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+  },
+
   descriptionToggleRow: {
     display: 'flex',
     alignItems: 'center',
@@ -147,7 +155,15 @@ export const getSxClasses = (theme: any): SxClasses => ({
     fontWeight: 300,
     color: theme.palette.geoViewColor.textColor.light,
     marginTop: '4px',
-    marginLeft: '24px',
+    marginLeft: '16px',
     maxWidth: '400px',
+  },
+
+  // Reset margins for description text (important for group descriptions)
+  descriptionCollapse: {
+    marginLeft: '0 !important',
+    '& .MuiCollapse-vertical': {
+      marginLeft: '0 !important',
+    },
   },
 });
