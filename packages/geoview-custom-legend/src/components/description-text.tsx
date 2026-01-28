@@ -5,9 +5,10 @@ import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 
 import type { getSxClasses } from '../custom-legend-style';
+import type { TypeDescription } from '../custom-legend-types';
 
 interface DescriptionTextProps {
-  description: string;
+  description: TypeDescription;
   sxClasses: ReturnType<typeof getSxClasses>;
 }
 
@@ -22,7 +23,7 @@ export function DescriptionText({ description, sxClasses }: DescriptionTextProps
   const { Box, Typography, KeyboardArrowDownIcon, KeyboardArrowUpIcon, IconButton, Collapse } = ui.elements;
 
   const displayLanguage = useAppDisplayLanguage();
-  const [expanded, setExpanded] = useState<boolean>(true);
+  const [expanded, setExpanded] = useState<boolean>(!description.collapsed);
 
   const handleToggle = (): void => {
     setExpanded(!expanded);
@@ -46,7 +47,7 @@ export function DescriptionText({ description, sxClasses }: DescriptionTextProps
         </Typography>
       </Box>
       <Collapse in={expanded} sx={sxClasses.descriptionCollapse}>
-        <Typography sx={sxClasses.descriptionText}>{description}</Typography>
+        <Typography sx={sxClasses.descriptionText}>{description.text}</Typography>
       </Collapse>
     </Box>
   );

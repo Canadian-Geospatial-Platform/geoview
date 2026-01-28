@@ -2456,7 +2456,7 @@ interface TypeLegendLayer {
 interface TypeHeaderLayer {
   type: "header";
   text: string;
-  description?: string;
+  description?: TypeDescription;
   fontSize?: number;
   fontWeight?: "normal" | "bold";
 }
@@ -2464,9 +2464,14 @@ interface TypeHeaderLayer {
 interface TypeGroupLayer {
   type: "group";
   text: string;
-  description?: string;
+  description?: TypeDescription;
   collapsed?: boolean;
   children: Array<TypeLegendItem>;
+}
+
+interface TypeDescription {
+  text: string;
+  collapsed?: boolean;
 }
 ```
 
@@ -2488,7 +2493,9 @@ interface TypeGroupLayer {
 
 - **type** (Required): Must be `"header"`
 - **text** (Required): Header text to display
-- **description**: Optional descriptive text below header
+- **description**: Optional description object with:
+  - **text** (Required): Descriptive text to display below header
+  - **collapsed** (Optional): Whether description starts collapsed (default: false)
 - **fontSize**: Font size in pixels (range: 8-32, default: 16)
 - **fontWeight**: Font weight (`"normal"` or `"bold"`, default: "bold")
 
@@ -2496,137 +2503,160 @@ interface TypeGroupLayer {
 
 - **type** (Required): Must be `"group"`
 - **text** (Required): Group title text
-- **description**: Optional descriptive text below group title
-- **collapsed**: Initial collapsed state (default: false)
+- **description**: Optional description object with:
+  - **text** (Required): Descriptive text to display below group title
+  - **collapsed** (Optional): Whether description starts collapsed (default: false)
+- **collapsed**: Initial collapsed state of the group itself (default: false)
 - **children** (Required): Array of child legend items (must have at least 1)
 
 #### Examples
 
 **Basic Custom Legend:**
 
-```typescript
-corePackagesConfig: [
-  {
-    "custom-legend": {
-      isOpen: false,
-      title: "Map Layers",
-      legendList: [
-        {
-          type: "layer",
-          layerPath: "weather-layer/temperature"
-        },
-        {
-          type: "layer",
-          layerPath: "weather-layer/precipitation"
-        }
-      ]
+```json
+{
+  "corePackagesConfig": [
+    {
+      "custom-legend": {
+        "isOpen": false,
+        "title": "Map Layers",
+        "legendList": [
+          {
+            "type": "layer",
+            "layerPath": "weather-layer/temperature"
+          },
+          {
+            "type": "layer",
+            "layerPath": "weather-layer/precipitation"
+          }
+        ]
+      }
     }
-  }
-];
+  ]
+}
 ```
 
 **With Headers and Groups:**
 
-```typescript
-corePackagesConfig: [
-  {
-    "custom-legend": {
-      isOpen: true,
-      title: "Environmental Data",
-      legendList: [
-        {
-          type: "header",
-          text: "Weather Layers",
-          description: "Current weather conditions",
-          fontSize: 18,
-          fontWeight: "bold",
-        },
-        {
-          type: "group",
-          text: "Temperature Data",
-          description: "Temperature forecasts and historical data",
-          collapsed: false,
-          children: [
-            {
-              type: "layer",
-              layerPath: "weather/current-temp"
+```json
+{
+  "corePackagesConfig": [
+    {
+      "custom-legend": {
+        "isOpen": true,
+        "title": "Environmental Data",
+        "legendList": [
+          {
+            "type": "header",
+            "text": "Weather Layers",
+            "description": {
+              "text": "Current weather conditions and forecasts",
+              "collapsed": false
             },
-            {
-              type: "layer",
-              layerPath: "weather/forecast-temp"
-            }
-          ]
-        },
-        {
-          type: "header",
-          text: "Administrative Boundaries",
-          fontSize: 16,
-        },
-        {
-          type: "layer",
-          layerPath: "boundaries/provinces"
-        }
-      ]
+            "fontSize": 18,
+            "fontWeight": "bold"
+          },
+          {
+            "type": "group",
+            "text": "Temperature Data",
+            "description": {
+              "text": "Temperature forecasts and historical data",
+              "collapsed": true
+            },
+            "collapsed": false,
+            "children": [
+              {
+                "type": "layer",
+                "layerPath": "weather/current-temp"
+              },
+              {
+                "type": "layer",
+                "layerPath": "weather/forecast-temp"
+              }
+            ]
+          },
+          {
+            "type": "header",
+            "text": "Administrative Boundaries",
+            "fontSize": 16
+          },
+          {
+            "type": "layer",
+            "layerPath": "boundaries/provinces"
+          }
+        ]
+      }
     }
-  }
-];
+  ]
+}
 ```
 
 **Nested Groups:**
 
-```typescript
-corePackagesConfig: [
-  {
-    "custom-legend": {
-      legendList: [
-        {
-          type: "group",
-          text: "Environmental",
-          collapsed: false,
-          children: [
-            {
-              type: "group",
-              text: "Weather",
-              collapsed: true,
-              children: [
-                {
-                  type: "layer",
-                  layerPath: "weather/temperature"
+```json
+{
+  "corePackagesConfig": [
+    {
+      "custom-legend": {
+        "legendList": [
+          {
+            "type": "group",
+            "text": "Environmental",
+            "collapsed": false,
+            "children": [
+              {
+                "type": "group",
+                "text": "Weather",
+                "description": {
+                  "text": "Real-time weather data and forecasts",
+                  "collapsed": false
                 },
-                {
-                  type: "layer",
-                  layerPath: "weather/precipitation"
-                }
-              ]
-            },
-            {
-              type: "group",
-              text: "Air Quality",
-              collapsed: true,
-              children: [
-                {
-                  type: "layer",
-                  layerPath: "air-quality/pm25"
+                "collapsed": true,
+                "children": [
+                  {
+                    "type": "layer",
+                    "layerPath": "weather/temperature"
+                  },
+                  {
+                    "type": "layer",
+                    "layerPath": "weather/precipitation"
+                  }
+                ]
+              },
+              {
+                "type": "group",
+                "text": "Air Quality",
+                "description": {
+                  "text": "Air quality monitoring stations and measurements",
+                  "collapsed": true
                 },
-                {
-                  type: "layer",
-                  layerPath: "air-quality/ozone"
-                }
-              ]
-            }
-          ]
-        }
-      ]
+                "collapsed": true,
+                "children": [
+                  {
+                    "type": "layer",
+                    "layerPath": "air-quality/pm25"
+                  },
+                  {
+                    "type": "layer",
+                    "layerPath": "air-quality/ozone"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
     }
-  }
-];
+  ]
+}
 ```
 
 #### Notes
 
 - Layer paths must reference existing layers in your map configuration
 - Groups can be nested within other groups
-- Headers and groups support optional descriptions for additional context
+- Headers and groups support optional descriptions with collapsible state
+- Description text provides additional context and can be toggled by users
 - The legend list order determines display order in the panel
 
 ---

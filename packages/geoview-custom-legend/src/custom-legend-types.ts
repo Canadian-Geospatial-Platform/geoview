@@ -1,43 +1,39 @@
-/**
- * Union type for all possible legend item types.
- */
+/** Union type for all possible legend item types. */
 export type TypeLegendItem = TypeLegendLayer | TypeHeaderLayer | TypeGroupLayer;
 
-/**
- * A reference to an existing layer from geoview-core.
- */
+/**  A description item with text and collapsed states */
+export interface TypeDescription {
+  text: string;
+  collapsed?: boolean;
+}
+
+/** A reference to an existing layer from geoview-core. */
 export interface TypeLegendLayer {
   type: 'layer';
   layerPath: string;
 }
 
-/**
- * A header text item for organizing legend sections.
- */
+/** A header text item for organizing legend sections. */
 export interface TypeHeaderLayer {
   itemId?: string;
   type: 'header';
   text: string;
-  description?: string;
+  description?: TypeDescription;
   fontSize?: number;
   fontWeight?: 'normal' | 'bold';
 }
 
-/**
- * A collapsible group containing other legend items.
- */
+/** A collapsible group containing other legend items. */
 export interface TypeGroupLayer {
   itemId?: string;
   type: 'group';
   text: string;
-  description?: string;
+  description?: TypeDescription;
   collapsed?: boolean;
   children: TypeLegendItem[];
 }
 
-/**
- * Main configuration for custom legend.
- */
+/** Main configuration for custom legend. */
 export interface TypeCustomLegendConfig {
   isOpen: boolean;
   title: string;
@@ -45,9 +41,7 @@ export interface TypeCustomLegendConfig {
   version?: string;
 }
 
-/**
- * Type guards for discriminating union types.
- */
+/** Type guards for discriminating union types. */
 export const isLegendLayer = (item: TypeLegendItem): item is TypeLegendLayer => {
   return item.type === 'layer';
 };

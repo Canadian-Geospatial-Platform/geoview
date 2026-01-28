@@ -593,7 +593,7 @@ interface TypeLegendLayer {
 interface TypeHeaderLayer {
   type: "header";
   text: string;
-  description?: string;
+  description?: TypeDescription;
   fontSize?: number;
   fontWeight?: "normal" | "bold";
 }
@@ -601,9 +601,14 @@ interface TypeHeaderLayer {
 interface TypeGroupLayer {
   type: "group";
   text: string;
-  description?: string;
+  description?: TypeDescription;
   collapsed?: boolean;
   children: Array<TypeLegendItem>;
+}
+
+interface TypeDescription {
+  text: string;
+  collapsed?: boolean;
 }
 ```
 
@@ -625,15 +630,19 @@ interface TypeGroupLayer {
 2. **TypeHeaderLayer** - Display a text header for organizing sections:
    - **type** (required): Must be `"header"`
    - **text** (required): Header text to display
-   - **description** (optional): Descriptive text displayed below the header
+   - **description**: Optional description object with:
+     - **text** (required): Descriptive text to display below header
+     - **collapsed** (optional): Whether description starts collapsed (default: false)
    - **fontSize** (number, range: 8-32, default: 16): Font size in pixels
    - **fontWeight** (string, default: "bold"): Font weight ("normal" or "bold")
 
 3. **TypeGroupLayer** - Display a collapsible group of legend items:
    - **type** (required): Must be `"group"`
    - **text** (required): Group title text
-   - **description** (optional): Descriptive text displayed below the group title
-   - **collapsed** (boolean, default: false): Initial collapsed state
+   - **description**: Optional description object with:
+     - **text** (required): Descriptive text to display below group title
+     - **collapsed** (optional): Whether description starts collapsed (default: false)
+   - **collapsed** (boolean, default: false): Initial collapsed state of the group itself
    - **children** (required): Array of child legend items (minimum 1 item)
 
 ### Configuration Examples
@@ -686,14 +695,20 @@ interface TypeGroupLayer {
           {
             "type": "header",
             "text": "Weather Layers",
-            "description": "Current weather conditions and forecasts",
+            "description": {
+              "text": "Current weather conditions and forecasts",
+              "collapsed": false
+            },
             "fontSize": 18,
             "fontWeight": "bold"
           },
           {
             "type": "group",
             "text": "Temperature Data",
-            "description": "Temperature forecasts and historical data",
+            "description": {
+              "text": "Temperature forecasts and historical data",
+              "collapsed": true
+            },
             "collapsed": false,
             "children": [
               {
@@ -744,7 +759,10 @@ interface TypeGroupLayer {
               {
                 "type": "group",
                 "text": "Weather",
-                "description": "Weather data layers",
+                "description": {
+                  "text": "Real-time weather data and forecasts",
+                  "collapsed": false
+                },
                 "collapsed": true,
                 "children": [
                   {
@@ -760,7 +778,10 @@ interface TypeGroupLayer {
               {
                 "type": "group",
                 "text": "Air Quality",
-                "description": "Air quality monitoring",
+                "description": {
+                  "text": "Air quality monitoring stations and measurements",
+                  "collapsed": true
+                },
                 "collapsed": true,
                 "children": [
                   {
@@ -788,6 +809,7 @@ interface TypeGroupLayer {
 - **Groups:** Can be nested within other groups for hierarchical organization
 - **Headers:** Useful for visually separating sections of related layers
 - **Descriptions:** Optional text that provides additional context for headers and groups
+- **Description Collapsing:** Each description can be independently toggled by users
 - **Order:** Legend items appear in the order specified in the `legendList` array
 
 ### Common Use Cases
@@ -887,6 +909,9 @@ interface TypeGroupLayer {
   ]
 }
 ```
+
+**See Also:** 
+- [Configuration Reference - Custom Legend](app/config/configuration-reference.md#custom-legend-package)
 
 ---
 

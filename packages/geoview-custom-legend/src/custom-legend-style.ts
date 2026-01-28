@@ -32,6 +32,9 @@ export const getSxClasses = (theme: any): SxClasses => ({
     '& .MuiCollapse-vertical': {
       marginLeft: '6px',
     },
+    '& .MuiListItemButton-root:hover': {
+      backgroundColor: 'transparent',
+    },
   },
 
   // Used by HeaderItem component
@@ -145,7 +148,7 @@ export const getSxClasses = (theme: any): SxClasses => ({
     fontSize: '0.75rem',
     fontStyle: 'italic',
     fontWeight: 300,
-    color: theme.palette.geoViewColor.textColor.light,
+    color: theme.palette.geoViewColor.textColor.dark,
     cursor: 'pointer',
   },
 
@@ -153,7 +156,7 @@ export const getSxClasses = (theme: any): SxClasses => ({
     fontSize: '0.875rem',
     fontStyle: 'italic',
     fontWeight: 300,
-    color: theme.palette.geoViewColor.textColor.light,
+    color: theme.palette.geoViewColor.textColor.dark,
     marginTop: '4px',
     marginLeft: '16px',
     maxWidth: '400px',

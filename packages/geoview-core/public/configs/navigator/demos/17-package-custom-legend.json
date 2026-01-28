@@ -81,7 +81,9 @@
           {
             "type": "header",
             "text": "Legend Header",
-            "description": "The legend header where a description can be included for extra context. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam sed felis sed eros interdum luctus. Donec pulvinar urna enim, ut pharetra mi iaculis nec. Suspendisse potenti. Praesent ornare in purus ac congue. Phasellus accumsan diam sed urna sollicitudin tincidunt. Sed dignissim sodales quam quis molestie. Proin faucibus tincidunt sodales. Phasellus eleifend tellus erat, ac feugiat purus condimentum pellentesque. Praesent laoreet auctor velit, et pulvinar mauris convallis non. Pellentesque laoreet lectus ut nunc auctor cursus.",
+            "description": {
+              "text": "The legend header where a description can be included for extra context. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam sed felis sed eros interdum luctus. Donec pulvinar urna enim, ut pharetra mi iaculis nec. Suspendisse potenti. Praesent ornare in purus ac congue. Phasellus accumsan diam sed urna sollicitudin tincidunt. Sed dignissim sodales quam quis molestie. Proin faucibus tincidunt sodales. Phasellus eleifend tellus erat, ac feugiat purus condimentum pellentesque. Praesent laoreet auctor velit, et pulvinar mauris convallis non. Pellentesque laoreet lectus ut nunc auctor cursus."
+            },
             "fontSize": 20
           },
           {
@@ -91,7 +93,10 @@
           {
             "type": "group",
             "text": "Wildfire Layers",
-            "description": "The group layer description for extra context about what's inside the group",
+            "description": {
+              "text": "The group layer description for extra context about what's inside the group",
+              "collapsed": true
+            },
             "collapsed": true,
             "children": [
               {

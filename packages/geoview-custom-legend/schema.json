@@ -73,8 +73,7 @@
           "description": "The header layer text"
         },
         "description": {
-          "type": "string",
-          "description": "Descriptive text that will display below the header text if present"
+          "$ref": "#/definitions/TypeDescription"
         },
         "fontSize": {
           "type": "number",
@@ -105,8 +104,7 @@
           "description": "The group layer text"
         },
         "description": {
-          "type": "string",
-          "description": "Descriptive text that will display below the group text if present"
+          "$ref": "#/definitions/TypeDescription"
         },
         "collapsed": {
           "type": "boolean",
@@ -123,6 +121,22 @@
         }
       },
       "required": ["type", "groupTitle", "children"]
+    },
+    "TypeDescription": {
+      "description": "The description configuration",
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The text for the description that will be displayed"
+        },
+        "collpased": {
+          "type": "boolean",
+          "description": "Whether the description should be collapsed by default",
+          "default": false
+        }
+      },
+      "required": ["text"]
     }
   },
   "description": "Root schema for custom legend configuration."
