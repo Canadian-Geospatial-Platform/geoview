@@ -571,7 +571,7 @@ const ResponsiveGridLayout = forwardRef(
           sx={{
             flexGrow: 1,
             overflow: 'hidden',
-            paddingTop: '0',
+            paddingTop: '30px', // TODO: To prevent the right panel toolbar to be hidden on first click og group layer. There is still a jump onn first selection
           }}
         >
           <ResponsiveGrid.Left
