@@ -143,7 +143,9 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    */
 
   protected override getAllFeatureInfo(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     map: OLMap,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     layerFilters: LayerFilters,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortController?: AbortController
@@ -151,7 +153,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     // Get the layer config in a loaded phase
     const layerConfig = this.getLayerConfig();
     const features = this.getOLSource().getFeatures();
-    return Promise.resolve(this.formatFeatureInfoResult(features, layerConfig, layerFilters));
+    return Promise.resolve(this.formatFeatureInfoResult(features, layerConfig));
   }
 
   /**
@@ -178,7 +180,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     }) as Feature[];
 
     // Format and return the features
-    return Promise.resolve(this.formatFeatureInfoResult(features, this.getLayerConfig(), this.getLayerFilters()));
+    return Promise.resolve(this.formatFeatureInfoResult(features, this.getLayerConfig()));
   }
 
   /**
