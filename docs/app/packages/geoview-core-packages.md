@@ -588,7 +588,6 @@ type TypeLegendItem = TypeLegendLayer | TypeHeaderLayer | TypeGroupLayer;
 interface TypeLegendLayer {
   type: "layer";
   layerPath: string;
-  visible?: boolean;
 }
 
 interface TypeHeaderLayer {
@@ -622,7 +621,6 @@ interface TypeGroupLayer {
 1. **TypeLegendLayer** - Display a standard GeoView layer legend:
    - **type** (required): Must be `"layer"`
    - **layerPath** (required): Layer path identifying the layer (e.g., "layerId/sublayerId")
-   - **visible** (boolean, default: true): Initial visibility state
 
 2. **TypeHeaderLayer** - Display a text header for organizing sections:
    - **type** (required): Must be `"header"`
@@ -657,13 +655,11 @@ interface TypeGroupLayer {
         "legendList": [
           {
             "type": "layer",
-            "layerPath": "weather-layer/temperature",
-            "visible": true
+            "layerPath": "weather-layer/temperature"
           },
           {
             "type": "layer",
-            "layerPath": "weather-layer/precipitation",
-            "visible": false
+            "layerPath": "weather-layer/precipitation"
           }
         ]
       }
@@ -702,13 +698,11 @@ interface TypeGroupLayer {
             "children": [
               {
                 "type": "layer",
-                "layerPath": "weather/current-temp",
-                "visible": true
+                "layerPath": "weather/current-temp"
               },
               {
                 "type": "layer",
-                "layerPath": "weather/forecast-temp",
-                "visible": false
+                "layerPath": "weather/forecast-temp"
               }
             ]
           },
@@ -719,8 +713,7 @@ interface TypeGroupLayer {
           },
           {
             "type": "layer",
-            "layerPath": "boundaries/provinces",
-            "visible": true
+            "layerPath": "boundaries/provinces"
           }
         ]
       }
@@ -796,7 +789,6 @@ interface TypeGroupLayer {
 - **Headers:** Useful for visually separating sections of related layers
 - **Descriptions:** Optional text that provides additional context for headers and groups
 - **Order:** Legend items appear in the order specified in the `legendList` array
-- **Visibility:** Layer visibility can be toggled by users regardless of initial `visible` setting
 
 ### Common Use Cases
 

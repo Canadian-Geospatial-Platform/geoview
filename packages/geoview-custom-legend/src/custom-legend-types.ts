@@ -9,7 +9,6 @@ export type TypeLegendItem = TypeLegendLayer | TypeHeaderLayer | TypeGroupLayer;
 export interface TypeLegendLayer {
   type: 'layer';
   layerPath: string;
-  visible?: boolean;
 }
 
 /**

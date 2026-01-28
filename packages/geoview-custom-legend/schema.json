@@ -55,11 +55,6 @@
         "layerPath": {
           "type": "string",
           "description": "The layer path for the layer"
-        },
-        "visible": {
-          "type": "boolean",
-          "description": "Whether this legend item is initially visible.",
-          "default": true
         }
       },
       "required": ["type", "layerPath"]

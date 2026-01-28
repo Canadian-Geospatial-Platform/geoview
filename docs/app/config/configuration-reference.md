@@ -2451,7 +2451,6 @@ type TypeLegendItem = TypeLegendLayer | TypeHeaderLayer | TypeGroupLayer;
 interface TypeLegendLayer {
   type: "layer";
   layerPath: string;
-  visible?: boolean;
 }
 
 interface TypeHeaderLayer {
@@ -2484,7 +2483,6 @@ interface TypeGroupLayer {
 
 - **type** (Required): Must be `"layer"`
 - **layerPath** (Required): Layer path identifying the layer
-- **visible**: Initial visibility (default: true)
 
 **TypeHeaderLayer** - Display a text header for organizing sections:
 
@@ -2515,17 +2513,15 @@ corePackagesConfig: [
       legendList: [
         {
           type: "layer",
-          layerPath: "weather-layer/temperature",
-          visible: true,
+          layerPath: "weather-layer/temperature"
         },
         {
           type: "layer",
-          layerPath: "weather-layer/precipitation",
-          visible: false,
-        },
-      ],
-    },
-  },
+          layerPath: "weather-layer/precipitation"
+        }
+      ]
+    }
+  }
 ];
 ```
 
@@ -2553,15 +2549,13 @@ corePackagesConfig: [
           children: [
             {
               type: "layer",
-              layerPath: "weather/current-temp",
-              visible: true,
+              layerPath: "weather/current-temp"
             },
             {
               type: "layer",
-              layerPath: "weather/forecast-temp",
-              visible: false,
-            },
-          ],
+              layerPath: "weather/forecast-temp"
+            }
+          ]
         },
         {
           type: "header",
@@ -2570,12 +2564,11 @@ corePackagesConfig: [
         },
         {
           type: "layer",
-          layerPath: "boundaries/provinces",
-          visible: true,
-        },
-      ],
-    },
-  },
+          layerPath: "boundaries/provinces"
+        }
+      ]
+    }
+  }
 ];
 ```
 
@@ -2598,13 +2591,13 @@ corePackagesConfig: [
               children: [
                 {
                   type: "layer",
-                  layerPath: "weather/temperature",
+                  layerPath: "weather/temperature"
                 },
                 {
                   type: "layer",
-                  layerPath: "weather/precipitation",
-                },
-              ],
+                  layerPath: "weather/precipitation"
+                }
+              ]
             },
             {
               type: "group",
@@ -2613,19 +2606,19 @@ corePackagesConfig: [
               children: [
                 {
                   type: "layer",
-                  layerPath: "air-quality/pm25",
+                  layerPath: "air-quality/pm25"
                 },
                 {
                   type: "layer",
-                  layerPath: "air-quality/ozone",
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-  },
+                  layerPath: "air-quality/ozone"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
 ];
 ```
 
