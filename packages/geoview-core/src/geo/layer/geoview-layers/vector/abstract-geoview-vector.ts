@@ -114,10 +114,9 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         const features = await this.onCreateVectorSourceLoadFeatures(layerConfig, sourceOptions, options);
 
         // Only keep the features that fit the initial filter
-        // const layerFilters = new LayerFilters(layerConfig.getLayerFilter());
-        // const filterEquation = layerFilters.getFilterEquation();
-        const featuresFiltered = features;
-        // const featuresFiltered = features.filter((feature) => GeoviewRenderer.featureRespectsFilterEquation(feature, filterEquation));
+        const layerFilters = new LayerFilters(layerConfig.getLayerFilter());
+        const filterEquation = layerFilters.getFilterEquation();
+        const featuresFiltered = features.filter((feature) => GeoviewRenderer.featureRespectsFilterEquation(feature, filterEquation));
 
         // Parse the feature metadata
         AbstractGeoViewVector.#processFeatureMetadata(featuresFiltered, layerConfig);

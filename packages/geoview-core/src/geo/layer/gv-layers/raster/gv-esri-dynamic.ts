@@ -343,7 +343,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // Format and return the result
       // Not having geometry have an effect on the style as it use the geometry to define wich one to use
       // The formatFeatureInfoResult (abstact-geoview-layer) / getFeatureCanvas (geoview-renderer) use geometry stored in style
-      return this.formatFeatureInfoResult(features, layerConfig, layerFilters);
+      return this.formatFeatureInfoResult(features, layerConfig);
     }
 
     // Error
@@ -447,7 +447,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     // TO.DOCONT: geometry assignement must not be in an async function.
     // Transform the features in an OL feature - at this point, there is no geometry associated with the feature
     const features = new EsriJSON().readFeatures({ features: identifyJsonResponse.results });
-    const arrayOfFeatureInfoEntries = this.formatFeatureInfoResult(features, layerConfig, this.getLayerFilters());
+    const arrayOfFeatureInfoEntries = this.formatFeatureInfoResult(features, layerConfig);
 
     // If cancelled
     // Explicitely checking the abort condition here, after reading the features, because the processing above is time consuming and maybe things have become aborted meanwhile.

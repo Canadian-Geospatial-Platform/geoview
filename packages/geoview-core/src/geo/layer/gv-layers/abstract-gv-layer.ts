@@ -40,7 +40,6 @@ import type {
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import type { TypeLegendItem } from '@/core/components/layers/types';
 import { GeoviewRenderer, type TypeStyleProcessorOptions } from '@/geo/utils/renderer/geoview-renderer';
-import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { SnackbarType } from '@/core/utils/notifications';
@@ -1023,8 +1022,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    */
   protected formatFeatureInfoResult(
     features: Feature[],
-    layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig,
-    layerFilters: LayerFilters
+    layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig
   ): TypeFeatureInfoEntry[] {
     // Redirect
     return AbstractGVLayer.helperFormatFeatureInfoResult(
@@ -1036,7 +1034,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       true,
       (layerConfig.getLayerMetadata() as TypeLayerMetadataEsri | TypeLayerMetadataVector)?.fields,
       this.getStyle(),
-      layerFilters.getFilterEquation(),
       this.getFieldType.bind(this),
       this.onGetFieldDomain.bind(this),
       this.getFieldValue.bind(this)
@@ -1586,7 +1583,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   static getFeatureIconSource(
     feature: Feature,
     layerStyle: TypeLayerStyleConfig,
-    filterEquation: FilterNodeType[] | undefined,
     domainsLookup: TypeLayerMetadataFields[] | undefined,
     aliasLookup: Record<string, string>,
     imageSourceDict: Record<string, string | undefined>
@@ -1595,11 +1591,11 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       ? (feature.getGeometry()!.getType() as TypeStyleGeometry)
       : (Object.keys(layerStyle)[0] as TypeStyleGeometry);
 
-    // We want to retrieve the image symbol no matter if the config says it's presently visible or not
-    const bypassVisibility = true;
+    // No filter equation, because we want the icon even if technically the feature would be filtered out
+    const filterEquation = undefined;
 
     if (!layerStyle[geometryType]) {
-      return GeoviewRenderer.getFeatureIconSource(feature, layerStyle, filterEquation, bypassVisibility, domainsLookup, aliasLookup);
+      return GeoviewRenderer.getFeatureIconSource(feature, layerStyle, filterEquation, domainsLookup, aliasLookup);
     }
 
     const styleSettings = layerStyle[geometryType];
@@ -1607,7 +1603,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
     const options: TypeStyleProcessorOptions = {
       filterEquation,
-      bypassVisibility,
       domainsLookup,
       aliasLookup,
     };
@@ -1615,7 +1610,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     const featureStyle = GeoviewRenderer.processStyle[type][geometryType](styleSettings, feature, options);
 
     if (!featureStyle) {
-      return GeoviewRenderer.getFeatureIconSource(feature, layerStyle, filterEquation, bypassVisibility, domainsLookup, aliasLookup);
+      return GeoviewRenderer.getFeatureIconSource(feature, layerStyle, filterEquation, domainsLookup, aliasLookup);
     }
 
     // Clone the style
@@ -1625,14 +1620,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
     if (!imageSourceDict[styleKey]) {
       // eslint-disable-next-line no-param-reassign
-      imageSourceDict[styleKey] = GeoviewRenderer.getFeatureIconSource(
-        feature,
-        layerStyle,
-        filterEquation,
-        bypassVisibility,
-        domainsLookup,
-        aliasLookup
-      );
+      imageSourceDict[styleKey] = GeoviewRenderer.getFeatureIconSource(feature, layerStyle, filterEquation, domainsLookup, aliasLookup);
     }
 
     return imageSourceDict[styleKey];
@@ -1666,7 +1654,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     supportZoomTo: boolean,
     domainsLookup: TypeLayerMetadataFields[] | undefined,
     layerStyle: Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>> | undefined,
-    filterEquation: FilterNodeType[] | undefined,
     callbackGetFieldType: (fieldName: string) => TypeOutfieldsType,
     callbackGetFieldDomain: (fieldName: string) => codedValueType | rangeDomainType | null,
     callbackGetFieldValue: (feature: Feature, fieldName: string, fieldType: TypeOutfieldsType) => string | number | Date
@@ -1688,7 +1675,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       for (const feature of features) {
         // Get the image source for a feature using styling information and cache it
         const imageSource = layerStyle
-          ? AbstractGVLayer.getFeatureIconSource(feature, layerStyle, filterEquation, domainsLookup, aliasLookup, imageSourceDict)
+          ? AbstractGVLayer.getFeatureIconSource(feature, layerStyle, domainsLookup, aliasLookup, imageSourceDict)
           : undefined;
 
         // Get the extent
