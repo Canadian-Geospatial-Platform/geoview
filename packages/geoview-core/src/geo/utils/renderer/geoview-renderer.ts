@@ -649,14 +649,13 @@ export abstract class GeoviewRenderer {
 
   /**
    * Handles opening and closing group tokens (parentheses).
-   *
    * Opening parenthesis is pushed onto both stacks as a marker.
    * Closing parenthesis triggers execution of operators until the
    * matching opening parenthesis is encountered.
-   *
    * @param {FilterNodeType} token - The group token ('(' or ')').
    * @param {FilterNodeType[]} operators - Operator stack.
    * @param {FilterNodeType[]} values - Value stack.
+   * @returns {void}
    */
   static #frfeHandleGroupToken(token: FilterNodeType, operators: FilterNodeType[], values: FilterNodeType[]): void {
     if (token.nodeValue === '(') {
@@ -676,10 +675,8 @@ export abstract class GeoviewRenderer {
 
   /**
    * Pushes an operator onto the operator stack while respecting precedence.
-   *
    * Operators with higher precedence already on the stack are executed
    * before pushing the new operator.
-   *
    * @param {FilterNodeType} token - Operator token to push.
    * @param {FilterNodeType[]} operators - Operator stack.
    * @param {FilterNodeType[]} values - Value stack.
@@ -705,9 +702,9 @@ export abstract class GeoviewRenderer {
 
   /**
    * Executes all remaining operators after token processing is complete.
-   *
    * @param {FilterNodeType[]} operators - Operator stack.
    * @param {FilterNodeType[]} values - Value stack.
+   * @returns {void}
    */
   static #frfeDrainOperators(operators: FilterNodeType[], values: FilterNodeType[]): void {
     while (operators.length && operators.at(-1)?.nodeValue !== '(') {
@@ -720,12 +717,11 @@ export abstract class GeoviewRenderer {
 
   /**
    * Validates syntax rules for unary operators such as UPPER() and LOWER().
-   *
    * These operators must be immediately followed by an opening parenthesis.
-   *
    * @param {FilterNodeType} token - The operator token.
    * @param {FilterNodeType[]} equation - Full filter equation token list.
    * @param {number} index - Index of the current token.
+   * @returns {void}
    * @throws {Error} If the syntax is invalid.
    */
   static #frfeValidateUnarySyntax(token: FilterNodeType, equation: FilterNodeType[], index: number): void {
@@ -739,9 +735,7 @@ export abstract class GeoviewRenderer {
 
   /**
    * Returns the precedence priority of an operator.
-   *
    * Higher numbers indicate higher precedence.
-   *
    * @param {FilterNodeType} token - Operator token.
    * @returns {number} Operator priority, or -1 if not found.
    */
