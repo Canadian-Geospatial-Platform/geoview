@@ -83,6 +83,7 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "ms:cities",
+            "layerFilter": "POPULATION >= 250000",
             "wmsLayerId": "cities",
             "source": {
               "featureInfo": {

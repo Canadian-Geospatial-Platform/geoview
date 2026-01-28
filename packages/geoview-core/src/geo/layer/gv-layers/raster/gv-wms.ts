@@ -596,7 +596,6 @@ export class GVWMS extends AbstractGVRaster {
       wmsLayerConfig.hasOutfieldsPK(),
       undefined, // TODO: Support domains?
       wmsLayerConfig.getLayerStyle(), // The styles as read from the WMS layer config (not WFS in case it was overridden in the WMS)
-      undefined, // TODO: Sending no filter equation for WMS here?
       (fieldName) => GVWFS.getFieldType(wfsLayerConfig.getLayerMetadata(), fieldName),
       () => null,
       (feature, fieldName, fieldType) => {

@@ -60,10 +60,6 @@ type TypeStyleProcessor = (
  */
 export type TypeStyleProcessorOptions = {
   filterEquation?: FilterNodeType[];
-
-  /** Indicates if we want to return the symbol even if the symbol visibility is false */
-  bypassVisibility?: boolean;
-
   domainsLookup?: TypeLayerMetadataFields[];
   aliasLookup?: TypeAliasLookup;
   visualVariables?: TypeLayerStyleVisualVariable[];
@@ -950,15 +946,11 @@ export abstract class GeoviewRenderer {
     feature?: Feature,
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
-    // If no feature, no style
-    debugger;
-    if (!feature) return undefined;
-
     // Read options
-    const { filterEquation, bypassVisibility, visualVariables } = options || {};
+    const { filterEquation, visualVariables } = options || {};
 
     // If feature doesn't respect filter, no style
-    if (!bypassVisibility && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
+    if (feature && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
 
     const settings = (styleSettings.type === 'simple' ? styleSettings.info[0].settings : styleSettings) as TypeKindOfVectorSettings;
     let style: Style | undefined;
@@ -972,7 +964,7 @@ export abstract class GeoviewRenderer {
     // Apply visual variables if feature and style exist
     const visualVarsToApply = visualVariables || ('visualVariables' in styleSettings ? styleSettings.visualVariables : undefined);
 
-    if (style && visualVarsToApply) {
+    if (feature && style && visualVarsToApply) {
       style = this.#applyVisualVariables(style, feature, visualVarsToApply);
     }
 
@@ -994,17 +986,14 @@ export abstract class GeoviewRenderer {
     feature?: Feature,
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
-    // If no feature, no style
-    if (!feature) return undefined;
-
     // Read options
-    const { filterEquation, bypassVisibility, visualVariables } = options || {};
+    const { filterEquation, visualVariables } = options || {};
 
     // If feature doesn't respect filter, no style
-    if (!bypassVisibility && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
+    if (feature && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
 
     const settings = (styleSettings.type === 'simple' ? styleSettings.info[0].settings : styleSettings) as TypeKindOfVectorSettings;
-    const geometry = feature.getGeometry() as Geometry;
+    const geometry = feature?.getGeometry() as Geometry;
 
     let style: Style | undefined;
     if (isLineStringVectorConfig(settings)) {
@@ -1015,7 +1004,7 @@ export abstract class GeoviewRenderer {
     // Apply visual variables if feature and style exist
     const visualVarsToApply = visualVariables || ('visualVariables' in styleSettings ? styleSettings.visualVariables : undefined);
 
-    if (style && visualVarsToApply) {
+    if (feature && style && visualVarsToApply) {
       style = this.#applyVisualVariables(style, feature, visualVarsToApply);
     }
 
@@ -1234,17 +1223,14 @@ export abstract class GeoviewRenderer {
     feature?: Feature,
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
-    // If no feature, no style
-    if (!feature) return undefined;
-
     // Read options
-    const { filterEquation, bypassVisibility, visualVariables } = options || {};
+    const { filterEquation, visualVariables } = options || {};
 
     // If feature doesn't respect filter, no style
-    if (!bypassVisibility && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
+    if (feature && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
 
     const settings = (styleSettings.type === 'simple' ? styleSettings.info[0].settings : styleSettings) as TypeKindOfVectorSettings;
-    const geometry = feature.getGeometry() as Geometry;
+    const geometry = feature?.getGeometry() as Geometry;
 
     let style: Style | undefined;
     if (isFilledPolygonVectorConfig(settings)) {
@@ -1259,7 +1245,7 @@ export abstract class GeoviewRenderer {
     // Apply visual variables if feature and style exist
     const visualVarsToApply = visualVariables || ('visualVariables' in styleSettings ? styleSettings.visualVariables : undefined);
 
-    if (style && feature && visualVarsToApply) {
+    if (feature && style && visualVarsToApply) {
       style = this.#applyVisualVariables(style, feature, visualVarsToApply);
     }
 
@@ -2013,14 +1999,11 @@ export abstract class GeoviewRenderer {
     feature?: Feature,
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
-    // If no feature, no style
-    if (!feature) return undefined;
-
     // Read options
-    const { filterEquation, bypassVisibility, domainsLookup, aliasLookup, visualVariables } = options || {};
+    const { filterEquation, domainsLookup, aliasLookup, visualVariables } = options || {};
 
     // If feature doesn't respect filter, no style
-    if (!bypassVisibility && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
+    if (feature && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
 
     if (styleSettings.type === 'uniqueValue') {
       const { hasDefault, fields, info } = styleSettings;
@@ -2050,14 +2033,11 @@ export abstract class GeoviewRenderer {
     feature?: Feature,
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
-    // If no feature, no style
-    if (!feature) return undefined;
-
     // Read options
-    const { filterEquation, bypassVisibility, domainsLookup, aliasLookup, visualVariables } = options || {};
+    const { filterEquation, domainsLookup, aliasLookup, visualVariables } = options || {};
 
     // If feature doesn't respect filter, no style
-    if (!bypassVisibility && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
+    if (feature && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
 
     if (styleSettings.type === 'uniqueValue') {
       const { hasDefault, fields, info } = styleSettings;
@@ -2088,14 +2068,11 @@ export abstract class GeoviewRenderer {
     feature?: Feature,
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
-    // If no feature, no style
-    if (!feature) return undefined;
-
     // Read options
-    const { filterEquation, bypassVisibility, domainsLookup, aliasLookup, visualVariables } = options || {};
+    const { filterEquation, domainsLookup, aliasLookup, visualVariables } = options || {};
 
     // If feature doesn't respect filter, no style
-    if (!bypassVisibility && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
+    if (feature && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
 
     if (styleSettings.type === 'uniqueValue') {
       const { hasDefault, fields, info } = styleSettings;
@@ -2218,18 +2195,15 @@ export abstract class GeoviewRenderer {
     feature?: Feature,
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
-    // If no feature, no style
-    if (!feature) return undefined;
-
     // Read options
-    const { filterEquation, bypassVisibility, aliasLookup, visualVariables } = options || {};
+    const { filterEquation, aliasLookup, visualVariables } = options || {};
 
     // If feature doesn't respect filter, no style
-    if (!bypassVisibility && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
+    if (feature && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
 
     if (styleSettings.type === 'classBreaks') {
       const { hasDefault, fields, info } = styleSettings;
-      const foundClassBreakInfo = this.searchClassBreakEntry(fields[0], info, feature, aliasLookup);
+      const foundClassBreakInfo = feature && this.searchClassBreakEntry(fields[0], info, feature, aliasLookup);
 
       // If found a class break renderer that works for the value of the feature
       if (foundClassBreakInfo && foundClassBreakInfo.visible !== false) {
@@ -2259,18 +2233,15 @@ export abstract class GeoviewRenderer {
     feature?: Feature,
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
-    // If no feature, no style
-    if (!feature) return undefined;
-
     // Read options
-    const { filterEquation, bypassVisibility, aliasLookup, visualVariables } = options || {};
+    const { filterEquation, aliasLookup, visualVariables } = options || {};
 
     // If feature doesn't respect filter, no style
-    if (!bypassVisibility && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
+    if (feature && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
 
     if (styleSettings.type === 'classBreaks') {
       const { hasDefault, fields, info } = styleSettings;
-      const foundClassBreakInfo = this.searchClassBreakEntry(fields[0], info, feature, aliasLookup);
+      const foundClassBreakInfo = feature && this.searchClassBreakEntry(fields[0], info, feature, aliasLookup);
 
       // If found a class break renderer that works for the value of the feature
       if (foundClassBreakInfo && foundClassBreakInfo.visible !== false) {
@@ -2300,18 +2271,15 @@ export abstract class GeoviewRenderer {
     feature?: Feature,
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
-    // If no feature, no style
-    if (!feature) return undefined;
-
     // Read options
-    const { filterEquation, bypassVisibility, aliasLookup, visualVariables } = options || {};
+    const { filterEquation, aliasLookup, visualVariables } = options || {};
 
     // If feature doesn't respect filter, no style
-    if (!bypassVisibility && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
+    if (feature && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
 
     if (styleSettings.type === 'classBreaks') {
       const { hasDefault, fields, info } = styleSettings;
-      const foundClassBreakInfo = this.searchClassBreakEntry(fields[0], info, feature, aliasLookup);
+      const foundClassBreakInfo = feature && this.searchClassBreakEntry(fields[0], info, feature, aliasLookup);
 
       // If found a class break renderer that works for the value of the feature
       if (foundClassBreakInfo && foundClassBreakInfo.visible !== false) {
@@ -2399,7 +2367,6 @@ export abstract class GeoviewRenderer {
    * @param {Feature} feature - The feature that need its icon to be defined.
    * @param {TypeStyleConfig} style - The style to use
    * @param {FilterNodeType[]?} filterEquation - Filter equation associated to the layer.
-   * @param {boolean?} bypassVisibility - When true, returns the symbol even if the config says it's not visible.
    * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
    * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
    * @returns {string} The icon associated to the feature or a default empty one.
@@ -2409,7 +2376,6 @@ export abstract class GeoviewRenderer {
     feature: Feature,
     style: TypeLayerStyleConfig,
     filterEquation?: FilterNodeType[],
-    bypassVisibility?: boolean,
     domainsLookup?: TypeLayerMetadataFields[],
     aliasLookup?: TypeAliasLookup
   ): string | undefined {
@@ -2436,14 +2402,12 @@ export abstract class GeoviewRenderer {
         //       styleSettings,
         //       feature as Feature,
         //       filterEquation,
-        //       bypassVisibility
         //     );
         //     resolve(processedStyle);
         //   });
         // });
         const options: TypeStyleProcessorOptions = {
           filterEquation,
-          bypassVisibility,
           domainsLookup,
           aliasLookup,
           visualVariables,
@@ -3197,11 +3161,6 @@ export abstract class GeoviewRenderer {
 
     // Build predicate per entry
     const predicates = relevantInfos.map((entry) => {
-      // Safety check
-      if (entry.values.length !== fieldCount) {
-        throw new Error(`Unique value entry has ${entry.values.length} values but ${fieldCount} fields were defined`);
-      }
-
       // Single-field => allow IN / =
       if (fieldCount === 1) {
         const value = this.#formatFieldValue(fields[0], entry.values[0], outFields);
