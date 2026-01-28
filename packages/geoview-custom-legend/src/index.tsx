@@ -3,8 +3,8 @@ import { AppBarPlugin } from 'geoview-core/api/plugin/appbar-plugin';
 import { LegendIcon } from 'geoview-core/ui/icons';
 import type { IconButtonPropsExtend } from 'geoview-core/ui/icon-button/icon-button';
 import type { TypePanelProps } from 'geoview-core/ui/panel/panel-types';
-import type { TypeLegendProps } from './custom-legend';
-import { CustomLegendPanel } from './custom-legend';
+import type { TypeCustomLegendConfig } from './custom-legend-types';
+import { CustomLegendPanel } from './custom-legend-panel';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-custom-legend.json';
 
@@ -38,12 +38,22 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
     return {
       en: {
         CustomLegend: {
-          title: 'Custom Legend',
+          title: 'Legend',
+          layer: 'layer',
+          sublayers: 'sublayers',
+          descriptionToggle: 'Toggle description',
+          showDescription: 'Show description',
+          hideDescription: 'Hide description',
         },
       },
       fr: {
         CustomLegend: {
-          title: 'Légende personnalisée',
+          title: 'Légende',
+          layer: 'couche',
+          sublayers: 'sous-couches',
+          descriptionToggle: 'Basculer la description',
+          showDescription: 'Afficher la description',
+          hideDescription: 'Masquer la description',
         },
       },
     };
@@ -51,31 +61,33 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
 
   /**
    * Overrides the getConfig in order to return the right type.
-   * @returns {TypeLegendProps} The Geochart config
+   * @returns {TypeCustomLegendConfig} The Geochart config
    */
-  override getConfig(): TypeLegendProps {
+  override getConfig(): TypeCustomLegendConfig {
     // Redirect
-    return super.getConfig() as TypeLegendProps;
+    return super.getConfig() as TypeCustomLegendConfig;
   }
 
   override onCreateButtonProps(): IconButtonPropsExtend {
     // Button props
     return {
       id: `custom-legend`,
-      'aria-label': 'CustomLegend.title',
+      tooltip: 'CustomLegend.title',
       tooltipPlacement: 'right',
       children: <LegendIcon />,
       visible: true,
+      'aria-label': 'CustomLegend.title',
     };
   }
 
   override onCreateContentProps(): TypePanelProps {
     // Panel props
+    const config = this.getConfig();
     return {
-      title: 'CustomLegend.title',
+      title: config.title ?? 'CustomLegend.title',
       icon: <LegendIcon />,
-      width: 350,
-      status: this.getConfig().isOpen,
+      width: '350px',
+      status: config.isOpen,
     };
   }
 

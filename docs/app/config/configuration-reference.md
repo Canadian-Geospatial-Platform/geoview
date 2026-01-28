@@ -2431,30 +2431,233 @@ corePackagesConfig: [
 
 ### Custom Legend Package
 
-Custom legend panel for displaying layer legends.
+Custom legend panel for displaying a customized legend with headers, groups, and layer legends.
 
-**Loading:** Custom legend functionality (configuration varies based on implementation).
+**Loading:** Include `"custom-legend"` in `appBar.tabs.core` array to enable this package.
 
 #### Schema
 
 ```typescript
 interface CustomLegendConfig {
-  // Custom legend configuration properties
+  // Optional
+  isOpen?: boolean;
+  title?: string;
+  legendList?: Array<TypeLegendItem>;
   version?: string;
+}
+
+type TypeLegendItem = TypeLegendLayer | TypeHeaderLayer | TypeGroupLayer;
+
+interface TypeLegendLayer {
+  type: "layer";
+  layerPath: string;
+}
+
+interface TypeHeaderLayer {
+  type: "header";
+  text: string;
+  description?: TypeDescription;
+  fontSize?: number;
+  fontWeight?: "normal" | "bold";
+}
+
+interface TypeGroupLayer {
+  type: "group";
+  text: string;
+  description?: TypeDescription;
+  collapsed?: boolean;
+  children: Array<TypeLegendItem>;
+}
+
+interface TypeDescription {
+  text: string;
+  collapsed?: boolean;
 }
 ```
 
-#### Example
+#### Properties
 
-```typescript
-corePackagesConfig: [
-  {
-    "custom-legend": {
-      version: "1.0",
-    },
-  },
-];
+- **isOpen**: Initial panel state (default: false)
+- **title**: Custom title text for the legend panel
+- **legendList**: Ordered array of legend items to display
+- **version**: Schema version (default: "1.0")
+
+#### Legend Item Types
+
+**TypeLegendLayer** - Display a standard legend from a GeoView layer:
+
+- **type** (Required): Must be `"layer"`
+- **layerPath** (Required): Layer path identifying the layer
+
+**TypeHeaderLayer** - Display a text header for organizing sections:
+
+- **type** (Required): Must be `"header"`
+- **text** (Required): Header text to display
+- **description**: Optional description object with:
+  - **text** (Required): Descriptive text to display below header
+  - **collapsed** (Optional): Whether description starts collapsed (default: false)
+- **fontSize**: Font size in pixels (range: 8-32, default: 16)
+- **fontWeight**: Font weight (`"normal"` or `"bold"`, default: "bold")
+
+**TypeGroupLayer** - Display a collapsible group of legend items:
+
+- **type** (Required): Must be `"group"`
+- **text** (Required): Group title text
+- **description**: Optional description object with:
+  - **text** (Required): Descriptive text to display below group title
+  - **collapsed** (Optional): Whether description starts collapsed (default: false)
+- **collapsed**: Initial collapsed state of the group itself (default: false)
+- **children** (Required): Array of child legend items (must have at least 1)
+
+#### Examples
+
+**Basic Custom Legend:**
+
+```json
+{
+  "corePackagesConfig": [
+    {
+      "custom-legend": {
+        "isOpen": false,
+        "title": "Map Layers",
+        "legendList": [
+          {
+            "type": "layer",
+            "layerPath": "weather-layer/temperature"
+          },
+          {
+            "type": "layer",
+            "layerPath": "weather-layer/precipitation"
+          }
+        ]
+      }
+    }
+  ]
+}
 ```
+
+**With Headers and Groups:**
+
+```json
+{
+  "corePackagesConfig": [
+    {
+      "custom-legend": {
+        "isOpen": true,
+        "title": "Environmental Data",
+        "legendList": [
+          {
+            "type": "header",
+            "text": "Weather Layers",
+            "description": {
+              "text": "Current weather conditions and forecasts",
+              "collapsed": false
+            },
+            "fontSize": 18,
+            "fontWeight": "bold"
+          },
+          {
+            "type": "group",
+            "text": "Temperature Data",
+            "description": {
+              "text": "Temperature forecasts and historical data",
+              "collapsed": true
+            },
+            "collapsed": false,
+            "children": [
+              {
+                "type": "layer",
+                "layerPath": "weather/current-temp"
+              },
+              {
+                "type": "layer",
+                "layerPath": "weather/forecast-temp"
+              }
+            ]
+          },
+          {
+            "type": "header",
+            "text": "Administrative Boundaries",
+            "fontSize": 16
+          },
+          {
+            "type": "layer",
+            "layerPath": "boundaries/provinces"
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+**Nested Groups:**
+
+```json
+{
+  "corePackagesConfig": [
+    {
+      "custom-legend": {
+        "legendList": [
+          {
+            "type": "group",
+            "text": "Environmental",
+            "collapsed": false,
+            "children": [
+              {
+                "type": "group",
+                "text": "Weather",
+                "description": {
+                  "text": "Real-time weather data and forecasts",
+                  "collapsed": false
+                },
+                "collapsed": true,
+                "children": [
+                  {
+                    "type": "layer",
+                    "layerPath": "weather/temperature"
+                  },
+                  {
+                    "type": "layer",
+                    "layerPath": "weather/precipitation"
+                  }
+                ]
+              },
+              {
+                "type": "group",
+                "text": "Air Quality",
+                "description": {
+                  "text": "Air quality monitoring stations and measurements",
+                  "collapsed": true
+                },
+                "collapsed": true,
+                "children": [
+                  {
+                    "type": "layer",
+                    "layerPath": "air-quality/pm25"
+                  },
+                  {
+                    "type": "layer",
+                    "layerPath": "air-quality/ozone"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+#### Notes
+
+- Layer paths must reference existing layers in your map configuration
+- Groups can be nested within other groups
+- Headers and groups support optional descriptions with collapsible state
+- Description text provides additional context and can be toggled by users
+- The legend list order determines display order in the panel
 
 ---
 

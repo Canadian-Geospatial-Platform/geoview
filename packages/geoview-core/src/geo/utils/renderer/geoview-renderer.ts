@@ -1452,7 +1452,7 @@ export abstract class GeoviewRenderer {
       });
 
       // Safety check: only allow numbers, operators, and whitespace
-      if (!/^[\d+\-*/().%^ \t\r\n]+$/i.test(evaluableExpression)) {
+      if (!/^[\d+\-*/().%^ \t\r\n$[\]"'_\w]+$/i.test(evaluableExpression)) {
         logger.logWarning('Invalid characters in expression:', expression);
         return null;
       }

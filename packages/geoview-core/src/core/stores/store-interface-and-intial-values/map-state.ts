@@ -1212,6 +1212,15 @@ export const useMapSelectorLayerVisibility = (layerPath: string): boolean => {
     (state) => MapEventProcessor.findMapLayerFromOrderedInfo(state.mapId, layerPath, state.mapState.orderedLayerInfo)?.visible || false
   );
 };
+// Check visibility for multiple layer paths (custom-legend)
+export const useMapSelectorLayerArrayVisibility = (layerPaths: string[]): boolean => {
+  return useStore(useGeoViewStore(), (state) => {
+    // Return true if all layers are visible (or don't exist yet)
+    return layerPaths.some((layerPath) => {
+      return MapEventProcessor.findMapLayerFromOrderedInfo(state.mapId, layerPath, state.mapState.orderedLayerInfo)?.visible || false;
+    });
+  });
+};
 export const useMapSelectorLayerParentHidden = (layerPath: string): boolean => {
   return useStore(useGeoViewStore(), (state) => MapEventProcessor.getMapLayerParentHidden(state.mapId, layerPath));
 };

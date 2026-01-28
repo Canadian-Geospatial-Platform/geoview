@@ -1,39 +1,143 @@
 {
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://cgpv/custom-legend-schema",
+  "title": "GeoView Custom Legend Config Schema",
   "type": "object",
-  "properties": {
-    "id": {
-      "type": "string"
-    },
-    "enabled": {
-      "type": "boolean"
-    },
-    "isOpen": {
-      "type": "boolean"
-    },
-    "legendList": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "legendTitle": {
-            "type": "string"
-          },
-          "iconUrl": {
-            "type": "string"
-          },
-          "layerId": {
-            "type": "string"
-          },
-          "visibility": {
-            "type": "boolean"
-          }
+  "version": 1.0,
+  "comments": "Configuration for the GeoView custom legend package.",
+  "definitions": {
+    "TypeCustomLegendConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "isOpen": {
+          "type": "boolean",
+          "description": "Whether the custom legend panel is initially open.",
+          "default": false
         },
-        "required": ["legendTitle", "layerId"]
-      }
+        "title": {
+          "type": "string",
+          "description": "The text for the legend title"
+        },
+        "legendList": {
+          "type": "array",
+          "description": "Ordered list of custom legend items to render.",
+          "items": {
+            "$ref": "#/definitions/TypeLegendItem"
+          },
+          "default": []
+        },
+        "version": {
+          "type": "string",
+          "enum": ["1.0"],
+          "description": "Schema version used to validate this configuration."
+        }
+      },
+      "required": ["legendList"]
     },
-    "version": {
-      "type": "string"
+    "TypeLegendItem": {
+      "description": "Union type for all possible legend item types.",
+      "oneOf": [
+        { "$ref": "#/definitions/TypeLegendLayer" },
+        { "$ref": "#/definitions/TypeHeaderLayer" },
+        { "$ref": "#/definitions/TypeGroupLayer" }
+      ]
+    },
+    "TypeLegendLayer": {
+      "description": "A standard legend item from geoview-core.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "layer",
+          "description": "Discriminator field for legend layer items."
+        },
+        "layerPath": {
+          "type": "string",
+          "description": "The layer path for the layer"
+        }
+      },
+      "required": ["type", "layerPath"]
+    },
+    "TypeHeaderLayer": {
+      "description": "A header text item for organizing legend sections.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "header",
+          "description": "Discriminator field for header items."
+        },
+        "text": {
+          "type": "string",
+          "description": "The header layer text"
+        },
+        "description": {
+          "$ref": "#/definitions/TypeDescription"
+        },
+        "fontSize": {
+          "type": "number",
+          "description": "Font size in pixels.",
+          "default": 16,
+          "minimum": 8,
+          "maximum": 32
+        },
+        "fontWeight": {
+          "type": "string",
+          "enum": ["normal", "bold"],
+          "default": "bold"
+        }
+      },
+      "required": ["type", "headerText"]
+    },
+    "TypeGroupLayer": {
+      "description": "A collapsible group containing other legend items.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "group",
+          "description": "Discriminator field for group items."
+        },
+        "text": {
+          "type": "string",
+          "description": "The group layer text"
+        },
+        "description": {
+          "$ref": "#/definitions/TypeDescription"
+        },
+        "collapsed": {
+          "type": "boolean",
+          "description": "Whether the group is initially collapsed.",
+          "default": false
+        },
+        "children": {
+          "type": "array",
+          "description": "Child legend items within this group.",
+          "items": {
+            "$ref": "#/definitions/TypeLegendItem"
+          },
+          "minItems": 1
+        }
+      },
+      "required": ["type", "groupTitle", "children"]
+    },
+    "TypeDescription": {
+      "description": "The description configuration",
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The text for the description that will be displayed"
+        },
+        "collpased": {
+          "type": "boolean",
+          "description": "Whether the description should be collapsed by default",
+          "default": false
+        }
+      },
+      "required": ["text"]
     }
   },
-  "required": ["id", "legendList"]
+  "description": "Root schema for custom legend configuration."
 }
