@@ -322,7 +322,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     const layerConfig = this.getLayerConfig();
 
     // Fetch the features with worker
-    const jsonResponse = await this.#fetchAllFeatureInfoWithWorker(layerConfig);
+    const jsonResponse = await this.#fetchAllFeatureInfoWithWorker(layerConfig, layerFilters.getInitialFilter());
 
     // If was aborted
     // Explicitely checking the abort condition here, after the fetch in the worker, because we can't send the abortController in a fetch happening inside a worker.
@@ -457,7 +457,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     }
 
     // If geometry is needed, use web worker to query and assign geometry later
-    if (queryGeometry)
+    if (queryGeometry) {
       // TODO: REFACTOR - Here, we're launching another async task to query the geometries, but the original promise will resolve first, by design.
       // TO.DOCONT: We should carry this extra promise with the first response so that the caller of 'getFeatureInfoAtLonLat' can know
       // TO.DOCONT: when the geometries will be done fetching on the features that they've already received as 'resolved'. Carrying the promise
@@ -465,9 +465,12 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // TO.DOCONT: handle on the promise, the caller of 'getFeatureInfoAtLonLat' have no idea of the 'fetchFeatureInfoGeometryWithWorker.catch()' here.
       // TO.DOCONT: However, this would mean change the 'getFeatureInfoAtLonLat' function signature with regards to its return type (and affect ALL other sibling classes)
 
+      // Get the initial filters where clause
+      const whereClause = this.getLayerFilters().getInitialFilter();
+
       // TODO: Performance - We may need to use chunk and process 50 geom at a time. When we query 500 features (points) we have CORS issue with
       // TO.DOCONT: the esri query (was working with identify). But identify was failing on huge geometry...
-      this.#fetchFeatureInfoGeometryWithWorker(layerConfig, objectIds.map(Number), true, mapProjNumber, maxAllowableOffset)
+      this.#fetchFeatureInfoGeometryWithWorker(layerConfig, objectIds.map(Number), whereClause, true, mapProjNumber, maxAllowableOffset)
         .then((featuresJSON) => {
           featuresJSON.features.forEach((feat, index: number) => {
             // If cancelled
@@ -511,6 +514,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
           // Log error
           logger.logError('The Worker to get the feature geometries has failed', error);
         });
+    }
 
     return arrayOfFeatureInfoEntries;
   }
@@ -575,7 +579,11 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @returns {Promise<EsriFeaturesJsonResponse>} A promise of esri response for query.
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    */
-  #fetchAllFeatureInfoWithWorker(layerConfig: EsriDynamicLayerEntryConfig): Promise<EsriFeaturesJsonResponse> {
+  #fetchAllFeatureInfoWithWorker(
+    layerConfig: EsriDynamicLayerEntryConfig,
+    whereClause: string | undefined
+  ): Promise<EsriFeaturesJsonResponse> {
+    // Create the params clause
     const params: QueryParams = {
       url: layerConfig.getDataAccessPath(true) + layerConfig.layerId,
       geometryType: 'Point',
@@ -584,6 +592,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       projection: 4326,
       maxAllowableOffset: 6,
       maxRecordCount: layerConfig.maxRecordCount || 1000,
+      where: whereClause ?? '1=1',
     };
 
     // Launch
@@ -603,10 +612,12 @@ export class GVEsriDynamic extends AbstractGVRaster {
   #fetchFeatureInfoGeometryWithWorker(
     layerConfig: EsriDynamicLayerEntryConfig,
     objectIds: number[],
+    whereClause: string | undefined,
     queryGeometry: boolean,
     projection: number,
     maxAllowableOffset: number
   ): Promise<EsriFeaturesJsonResponse> {
+    // Create the params clause
     const params: QueryParams = {
       url: layerConfig.getDataAccessPath(true) + layerConfig.layerId,
       geometryType: layerConfig.getLayerMetadata()!.geometryType.replace('esriGeometry', ''),
@@ -615,6 +626,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       projection,
       maxAllowableOffset,
       maxRecordCount: layerConfig.maxRecordCount || 1000,
+      where: whereClause ?? '1=1',
     };
 
     // Launch
