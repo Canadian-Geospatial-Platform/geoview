@@ -1,0 +1,53 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "ESRIImageLYR1",
+        "geoviewLayerName": "Error metadata",
+        "geoviewLayerType": "esriImage",
+        "metadataAccessPath": "https://www5.agr.gc.ca/atlas/rest/services/app_agclimate_agclimat/agclimate_tx/ImageServerERROR",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "agclimate_tx",
+            "layerName": "Max Temperature"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "ESRIImageLYR2",
+        "geoviewLayerName": "Error layerId",
+        "geoviewLayerType": "esriImage",
+        "metadataAccessPath": "https://www5.agr.gc.ca/atlas/rest/services/app_agclimate_agclimat/agclimate_tx/ImageServer",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "ERROR",
+            "layerName": "Max Temperature"
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map", "north-arrow"],
+  "overviewMap": { "hideOnZoom": 7 },
+  "footerBar": {
+    "tabs": {
+      "core": ["layers", "data-table"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "legend", "details", "export"]
+    }
+  }
+}

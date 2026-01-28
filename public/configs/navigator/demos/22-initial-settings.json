@@ -1,0 +1,214 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "geojsonLYR1",
+        "geoviewLayerName": "Root Settings Layer",
+        "metadataAccessPath": "./datasets/geojson/metadata.meta",
+        "geoviewLayerType": "GeoJSON",
+        "initialSettings": {
+          "controls": {
+            "highlight": false,
+            "zoom": false
+          }
+        },
+        "listOfLayerEntryConfig": [
+          {
+            "entryType": "group",
+            "layerId": "line-polygon-group",
+            "layerName": "Line Polygon Group",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "lines.json",
+                "layerName": "Lines"
+              },
+              {
+                "layerId": "polygons.json",
+                "layerName": "Polygons"
+              }
+            ]
+          },
+          {
+            "entryType": "group",
+            "layerId": "point-feature-group",
+            "layerName": "point-feature-group",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "icon_points.json",
+                "layerName": "Icons",
+                "initialSettings": {
+                  "controls": {
+                    "remove": false
+                  }
+                }
+              },
+              {
+                "layerId": "points.json",
+                "layerName": "Points"
+              },
+              {
+                "layerId": "points_1.json",
+                "layerName": "Points 1"
+              },
+              {
+                "layerId": "points_2.json",
+                "layerName": "Points 2"
+              },
+              {
+                "layerId": "points_3.json",
+                "layerName": "Points 3"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR2",
+        "geoviewLayerName": "Group Layer Setting Sample",
+        "metadataAccessPath": "./datasets/geojson/metadata.meta",
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "entryType": "group",
+            "layerId": "line-polygon-group",
+            "layerName": "Line Polygon Group",
+            "initialSettings": {
+              "controls": {
+                "highlight": false,
+                "zoom": false
+              }
+            },
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "lines.json",
+                "layerName": "Lines"
+              },
+              {
+                "layerId": "polygons.json",
+                "layerName": "Polygons"
+              }
+            ]
+          },
+          {
+            "entryType": "group",
+            "layerId": "point-feature-group",
+            "layerName": "point-feature-group",
+            "initialSettings": {
+              "controls": {
+                "remove": false
+              }
+            },
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "icon_points.json",
+                "layerName": "Icons"
+              },
+              {
+                "layerId": "points.json",
+                "layerName": "Points"
+              },
+              {
+                "layerId": "points_1.json",
+                "layerName": "Points 1"
+              },
+              {
+                "layerId": "points_2.json",
+                "layerName": "Points 2"
+              },
+              {
+                "layerId": "points_3.json",
+                "layerName": "Points 3"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR3",
+        "geoviewLayerName": "SubLayer Setting Sample",
+        "metadataAccessPath": "./datasets/geojson/metadata.meta",
+        "geoviewLayerType": "GeoJSON",
+        "initialSettings": {
+          "controls": {
+            "remove": false
+          }
+        },
+        "listOfLayerEntryConfig": [
+          {
+            "entryType": "group",
+            "layerId": "line-polygon-group",
+            "layerName": "Line Polygon Group",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "lines.json",
+                "layerName": "Lines",
+                "initialSettings": {
+                  "controls": {
+                    "highlight": false,
+                    "zoom": false
+                  }
+                }
+              },
+              {
+                "layerId": "polygons.json",
+                "layerName": "Polygons"
+              }
+            ]
+          },
+          {
+            "entryType": "group",
+            "layerId": "point-feature-group",
+            "layerName": "point-feature-group",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "icon_points.json",
+                "layerName": "Icons"
+              },
+              {
+                "layerId": "points.json",
+                "layerName": "Points"
+              },
+              {
+                "layerId": "points_1.json",
+                "layerName": "Points 1"
+              },
+              {
+                "layerId": "points_2.json",
+                "layerName": "Points 2"
+              },
+              {
+                "layerId": "points_3.json",
+                "layerName": "Points 3"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map", "north-arrow"],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "footerBar": {
+    "tabs": {
+      "core": ["layers", "data-table", "time-slider"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "legend", "details", "export"]
+    }
+  }
+}

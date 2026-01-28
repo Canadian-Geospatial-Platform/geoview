@@ -1,0 +1,286 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "LYR1-qgis",
+        "geoviewLayerName": "Airborne",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/hc/airborne_radioactivity_en",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "AIRB_RAD"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR3-qgis",
+        "geoviewLayerName": "Completed Inventory",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/iaac/assessment_inventory_en",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "completed",
+            "source": {
+              "featureInfo": {
+                "nameField": "project_name_en"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR3-qgis-custom",
+        "geoviewLayerName": "Completed Inventory Custom Style (known issue (at large) icons broken in DataTable)",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/iaac/assessment_inventory_en",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "completed",
+            "layerFilter": "\"project_cat_en\" in ( 'Agriculture' , 'Construction' , 'Energy' )",
+            "layerStyle": {
+              "Point": {
+                "type": "uniqueValue",
+                "fields": ["project_cat_en"],
+                "hasDefault": true,
+                "info": [
+                  {
+                    "visible": true,
+                    "label": "Agriculture",
+                    "values": [
+                      "Agriculture"
+                    ],
+                    "settings": {
+                      "mimeType": "image/png",
+                      "offset": [
+                        0,
+                        0
+                      ],
+                      "opacity": 1,
+                      "rotation": 0,
+                      "src": "iVBORw0KGgoAAAANSUhEUgAAABcAAAAXCAYAAADgKtSgAAAEaElEQVR4AbSTa2yTVRjHf33bde3Kuq7s0jlwEwqK4mQyyIQgDCMYgiiKgh8AdSJRjPESSYwkqKAxATQkJAaHGPGDchcBgwgzLOEmOMyGIg4HG5u7tOvWXbtubT3ntHt3lW+8Oc/z/P/P7Zyc57wat/G7ZfNU5riSmfp1AmO8QgIJZIWF7U4g0+cgZ6+D/OxbnW3E5unk2JKYfDRMR5WDSSvG8fxoNy/Huyk0CGseT2FyMrlLjFBhZ1LJKGalMsI3rHkGM/M66a5NIX9BJo+bE5mIhnlQqQETiYwnkwUmF4/MMuKpdPDQ4kFJgmhC9DWaGXN7CJVkszTJxp26X4Kps7PYV7aase5kSXWxkEYWy0aZsXznJO9FPSCAJkQtJw+PDdF2MIPHrAZxMuWMqRSXja3fP8uE+9PYdfoF7E5LLNJnNFwUmA0YtqUwPa/fG0O9eA5kMM9uEJfAkG/NxgISHdGGzjQbr34wZ0hGlGYw3xrEvzvKiHZKZ8ZkM44H40jq8+vWbDHyxMoHdC7B4sJcLAkmCQeJhpkEsselkr9UBjSpgrSvS2aKwpIPFPfkNIymwSGL1cTdU1wD03TsJJdu/G9Ih6oKEcy3kiH5MPE3dQ3zSceNq03SDBOTOLuG2S0DqrkgiZKMJLXXW7hSWjcodPbEdf5vU5moodmjVmgDxnhi36yFE9hduoqnVuWiqa1h05vHY1HoCYbY8nY/f/SZSRQVL2fZa9P0HCMW+WPYVHmEUECPCHBProv1XyzkaOXrTCvI4reSara+W0w4HGHDKz9SUdaIWzzL/eWr2bxnCdMLsolEIqIyukIEggJ1qOYQahVErcYaHXJHVhLbf14uhpfOzk9OM9f1KYd2/k5yipWik8txi2GrIqHqb/bXhQn7hSv6FAUoD+AVBq5dbiQY6FVYKqPRwIc7F0lIs6dT2TUbCnCmJijcp8rP1SgYJkiYLkXUyQ3Yilr5UwVDvRHkwBSJKXlNsxdNVMyZbuNJ8c4Viam/LtXja4xu3MpV4rDvlyFNqmZ+PdJBdZXcVfLNbx0XyR0S6pKTn6nwfXkZxMWpMsU724NsFHNQRJzZR2lLExc/llzPMjO68F+OqfuorvCxLG8H5edrZY4Se+z3T3JaFZeq+pqPFTO/0vMaKIlYcK4VMTVdvXkTZ09GCL9fww9i7hEaxIBk4XsrD1F5xUtcvEnUQLw1Dk9dO1veOcHTOdvVy5GBBk7RjfcbLxeKJJeiN5ekmdKPwLj+Jnt7QwQIhyIc2VXG4ns/Z9u6X2QKxQeuMG/MZ+zafJZgV6+4iF5qORzuxvNlC2UrVVJMDWoufT7ObzBin1/NvhoflwiJ80i/V5xW2mZvl3jv4vHSg58/qOLbRg3jc6LxSzI+UIY1l8EmzhS38ffYAHWrajhUUsPhG3Uc89dzMlTHT62CV9dy8EwH/6xtoyLdw7k9sm6ojNi8L8nLuR1+Ls/2ceEuD2ccjZwyeTidJHhWC5dnerm4qS93JPsfAAAA//91joJXAAAABklEQVQDAOlHbj5S36UbAAAAAElFTkSuQmCC",
+                      "type": "iconSymbol"
+                    }
+                  },
+                  {
+                    "visible": true,
+                    "label": "Construction",
+                    "values": [
+                      "Construction"
+                    ],
+                    "settings": {
+                      "mimeType": "image/png",
+                      "offset": [
+                        0,
+                        0
+                      ],
+                      "opacity": 1,
+                      "rotation": 0,
+                      "src": "iVBORw0KGgoAAAANSUhEUgAAABcAAAAXCAYAAADgKtSgAAADo0lEQVR4AbSTb2xTVRjGf73dLvvbdRtzbQbbYAO3hGwM6yibwBiJQ8REExP8k0zj1E8m/vnAF02cIZIYv2pmwvZB/YCAShSNaERZoxPcnInCEiUSNzuKa1fWdYO29N56zmW30O528Qsn97nv+zznfZ972nOOwh0cK5pX0eUq5573i1gTEogVUaeLGC+iJuyk5bgTb/1Ka7M0r6aluIxNX+osTjpp7l3P05WNPL+qkT6biGoDfeXltD1qh4sOmn0lbK/CYiwzd9PpuUZ8ejXevTU8pJayEQU1o9VGHqU0UMPePBe7t9sJXnKy7ZGMIkEUgfRTSUf3DTRfPfvLiqlN6yslBdxFHY+VqBR8VIHnmdtrFZNUsGOtRvSEmz2FNrEyUzdj8xYXnq46A9hM1YwKLnapNmzvrKbdc0tdypIEP3Vzv8Mm/gSyhlpgp6nNxdiZSWamo7R3W++jm57CBJGjZrsik2o6Nqk4t+RTJukytG5bw5MvbmXoTC/9g/u4t8vaXEGliPr1VXj3SxNFvhIsvFbOZiOXPBtNbW4i4euGnEqBq9Z6EbKggjbiRF6SuWGokfAW4pbcEsHLUfq6Pkjjm2MXKHZkniCzMU+sXUFtlNwwF6RUEisUlarGSs3NlFHTUux6uMmq3NAUFIdMDHMb9lXkGJ17Gnj5rd0Mfd+bxsBXT3Cf0HO0YKdA/qxiwzyFFstVuGPfRsup9u51lroUNWIJERcNc9DmBbF8zn17iVbbwWV44cEjbGittuzR0SNyYsmc32OEJM/A3ZurmRi/kqGZZGI8QMvWGpOmo04Cnet+KRjmNooPzzMheQY6ehp49d0HjPMtz3gGxB7I/choEGSeP8jH8YlIb17Hq/z8xSJTk/KrUiwsyTcMe1/x4tlZlxNyP+QHazdUyDYBnTDjc7OMHRLkprlMVCr7LnMqKXMtqTMqrvrRgV8YeMOXE4OHfjDqri3I/YN/8aUKqDggPMRV45b5LD+dTqH3+/k8FY8lea9/+H8jFFgQxsPECX0YYvSwMDcexXgvva4y/ibYX/+H40mN2JK6ctBJMs1JPU5waI7fnrq9OsNcToQ5d9COo2eKj/1hfkUT65F6NjRuEOECkxyZUbA/Loyfza5ZZi4LZhn5Lsqfa2MEnvPzmc/Pyb8DnIpc4bQW4Ot5waemOTGyyF8HolysDnL2mOzLhqW5WRTi7GCE8zvDjK4LMuKcYTgvyI9lgtfNcb4zxNjbZq1V/A8AAP//CbFlAAAAAAZJREFUAwCGIUg+vh52+AAAAABJRU5ErkJggg==",
+                      "type": "iconSymbol"
+                    }
+                  },
+                  {
+                    "visible": true,
+                    "label": "Energy",
+                    "values": [
+                      "Energy"
+                    ],
+                    "settings": {
+                      "mimeType": "image/png",
+                      "offset": [
+                        0,
+                        0
+                      ],
+                      "opacity": 1,
+                      "rotation": 0,
+                      "src": "iVBORw0KGgoAAAANSUhEUgAAABcAAAAXCAYAAADgKtSgAAADy0lEQVR4AbSTa0ybVRzGf30L5VIopcCA1QnbiG5ZXcZkDLeguOmmRDPndFMT8YLui1HUD/uiZibeo8m+mGjCZjKNl4EDt2mCGjSQiMwx5mVilMgGgwFrKZTb2tL37c55oR2lL/u2k/Occ57/85ynJ33PUbiO7ZrhOVTkZXLr4VRu8Aj4UynQxBxIxem1s7beTlnhtc5mGJ7LWmsGru80pnrtrK5awZNZRexNKqLaJGbLSqozMyl+yAzdNla3plGeg0GLC89nc8k0gYFsyiqd3G9J5yYULDFbTSRQ7CrDSWVCHlvLzbh77Ny2M8YkSEx4Fpu2zKC2FrInw8qNQjbuj7+0kZGhSV1MZgkFPJJmIfkrByVP68W5QZmbcXD7MpWJxnzuSTGJk0XqC2dX6VLWbFjKqOfyPEkhjzstJkwfZlNaEhGi4SHcDflss5mIlljY0uxJHDj6MI2f/L5Q0nk+21OC+I7oRAyKALlsclmwr08kQ9JF8e7nDxJSw5xsPmfoUbCQSuGKHMr2SIMihyCTr2ayTl9LboTHnt9AeWUR9R+fhrCRY7bmoJgAvhcl0wNVgmUp5EtuiJvX5fLyB3ejaWEaD3YaeiLFBHF2BUuR5Hq4IOmSGCE13cKBht0kWsz8c3qQla4llFQUROHItcZtU1BssqiHmzAnsUh78/AOnMvtuipvyaGfq4hgf+19TE8EdG3+YCZZPgyrHh5G9c8XI+tde9ezdeeqCI2Zg/4QNTuO4J8OxdQlUfEHxTylh4M6LkhMTxPXbosI7mjpJQL3xYmo550Xmujp8kT5/IWG5pN8Lpy//MQaJ8cCPHfvF1RXfBrF0IXZM/xQ10VD7Rm5Pw4aQTQu90tBDzdhrR2nS/JFkZ1n5ZaNTgbOj/HaU8cW9Y3zL4nYjkqDIodRfvt2ir5e+auSG2Hb7jXMzGjUPFBn+D/P7tHw0jk2QsfbkuvhcmEhq/oiTfFfR4oCd+1axXs1TXT/MSyYcR+mNZyMY59Q9WcWDR/h1+Yw2uv9HA+HFzxBmyMZn9dP/UfidYqdRn2YFgJ4PvNwqjaiR8NlYZTOt8C8/wL1IZWrt9NV6uSVqm+kJQ4aIQY4oQVwHxrjzyfmG2LCpeDl5BtmbNv7+LrfyxlUcZ72H3vEY5FXVzpmoTKDj7/p5ctLCuZHRfAzs8rVMS5cSiO0/TTBf8v8DD7bz7HWPvX4+UGafEM0q4N8P97Pib4BGtum+H/fBN25btrr5L6FMAyPmDy0H/Rx9g4vp5a7abNfoiXBzS8ZgheMcXazh473I16j+QoAAAD///khHBYAAAAGSURBVAMA7ew7Ps9cKdwAAAAASUVORK5CYII=",
+                      "type": "iconSymbol"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR4-qgis",
+        "geoviewLayerName": "Charging Corridor",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/charging_corridor_en",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "Corridor Public Charging Planning Map",
+            "wfsLayerId": "Corridor_Public_Charging_Planning_Map"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR5-qgis",
+        "geoviewLayerName": "Critical Minerals",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/critical_minerals_en",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "mines"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR5-aban-qgis",
+        "geoviewLayerName": "Abandoned Orphaned Mines",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/oam_en",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "oam"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR6-qgis",
+        "geoviewLayerName": "Earthquakes 2000-2010",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/earthquakes_en",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "earthquakes_2000-2010",
+            "source": {
+              "featureInfo": {
+                "nameField": "magnitude"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR7-qgis",
+        "geoviewLayerName": "GSC Photo Collection",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/GSC_Seabed_Photo_Collection_en",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "seabed-photo"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR8-qgis",
+        "geoviewLayerName": "Pacific Seismic Reflection",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/GSC_Seismic_Reflection_en",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "pacific"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR9-qgis",
+        "geoviewLayerName": "Surficial Geology",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/gsc_surficial_geology_en",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "DMF"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR10-qgis",
+        "geoviewLayerName": "Lidar Point Cloud Elevation",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/lidar_point_cloud_canelevation_en",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "lidar-projects"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR11-qgis",
+        "geoviewLayerName": "Wind Turbine",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/wind_turbine_database_en",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "QC"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR12-qgis",
+        "geoviewLayerName": "Regions",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/phys_reg_en",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "regions"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR99-qgis",
+        "geoviewLayerName": "Major Projects",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/major_projects_inventory_en",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "mpi-point"
+          },
+          {
+            "layerId": "mpi-line"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR100-qgis",
+        "geoviewLayerName": "Stations (no WFS at all)",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/fpsn_station_en",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "fpsn_stations_93f70155_ff12_4ab2_8100_53763727cbe4"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR16-qgis",
+        "geoviewLayerName": "Landcover (WFS exists, but layer id not there)",
+        "metadataAccessPath": "https://qgis-stage.cdtk.geogc.ca/ows/nrcan/landcover_2010_15_20_en",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "landcover_2010_19classes"
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map", "north-arrow"],
+  "overviewMap": { "hideOnZoom": 7 },
+  "footerBar": {
+    "tabs": {
+      "core": ["layers", "data-table"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "legend", "details", "export"]
+    }
+  },
+  "globalSettings": {
+    "showUnsymbolizedFeatures": true
+  }
+}

@@ -1,0 +1,54 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Demos Navigator - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main back-to-main-flex"><a href="./index.html?tab=navigators" class="btn btn-primary">← Back to Main</a> <a href="./layers-navigator.html" class="btn btn-success">Layers Navigator →</a></div><div class="demo-section"><h4>Demos Navigator</h4><p>Interactive navigator to explore and test different GeoView demo configurations. Select a demo from the dropdown to load its configuration and visualize it on the map.</p></div></div><div class="demo-section"><h4>Select Configuration</h4><div class="selector-container navigator-selector-row"><label for="configLoader" class="navigator-label-nowrap">Configuration to load:</label> <select name="Config Loader" id="configLoader" class="navigator-select"><option value="">--select--</option><option value="./configs/navigator/demos/00-basic-footer-appbar-combo.json">Basic map with app bar footer bar combo</option><option value="./configs/navigator/demos/01-basemap-LCC-TLS.json">Basemap LCC Transport-Labeled-Shaded</option><option value="./configs/navigator/demos/02-basemap-LCC-SL.json">Basemap LCC Simple-Labeled (overview map hide on zoom 7 and lower)</option><option value="./configs/navigator/demos/03-projection-WM.json">Basemap WM</option><option value="./configs/navigator/demos/04-restrict-zoom.json">Restricted zoom [6, 8]</option><option value="./configs/navigator/demos/05-max-extent-override.json">Unrestricted zoom map extent for WM zoom north</option><option value="./configs/navigator/demos/06-zoom-layer.json">Zoom on layer extent</option><option value="./configs/navigator/demos/07-layer-zoom-levels.json">Zoom and Scale Settings</option><option value="./configs/navigator/demos/08-all-layer-zoom-levels.json">All Layer Type Zoom and Scale</option><option value="./configs/navigator/demos/09-basic-footer-layers-tab.json">Basic map with footer - Layers Default</option><option value="./configs/navigator/demos/10-basic-appbar-data-table-tab.json">Basic map with app bar - Data Table Default</option><option value="./configs/navigator/demos/11-package-time-slider.json">Package - Time Slider</option><option value="./configs/navigator/demos/12-package-time-slider-custom.json">Package - Time Slider - Custom config</option><option value="./configs/navigator/demos/13-package-geochart.json">Package - Geochart</option><option value="./configs/navigator/demos/13-package-geochart-cdtk.json">Package - Geochart - CDTK</option><option value="./configs/navigator/demos/14-package-swiper.json">Package - Swiper</option><option value="./configs/navigator/demos/15-package-drawer.json">Package - Drawer</option><option value="./configs/navigator/demos/16-package-area-of-interest.json">Package - Area of interest</option><option value="./configs/navigator/demos/17-package-custom-legend.json">Package - Custom Legend</option><option value="./configs/navigator/demos/18-global-settings.json">Global Settings Options</option><option value="./configs/navigator/demos/19-export-map-large-legend.json">Map Export - Large Legend</option><option value="./configs/navigator/demos/20-export-map-bad-legend.json">Map Export - Bad Legend</option><option value="./configs/navigator/demos/21-circumpolar.json">Circumpolar View</option><option value="./configs/navigator/demos/22-initial-settings.json">Initial Settings</option><option value="./configs/navigator/demos/23-configured-feature-labels.json">Layer Text / Label Settings</option><option value="./configs/navigator/demos/24-feature-visual-variables.json">Feature Visual Variables from Renderer</option></select></div></div><div class="demo-section"><h4>Display Options</h4><div class="selector-container navigator-selector-wrap"><div class="navigator-option-group"><label for="switchLang" class="navigator-label">Language:</label> <select name="Switch Language" id="switchLang" class="navigator-select"><option value="en">English</option><option value="fr">French</option><option value="unsupported">Not Supported</option></select></div><div class="navigator-option-group-narrow"><input type="checkbox" id="resetLayer" name="resetLayer" checked="checked" class="navigator-checkbox"/> <label for="resetLayer" class="navigator-checkbox">Reset Layers</label></div><div class="navigator-option-group"><label for="switchTheme" class="navigator-label">Theme:</label> <select name="Switch Theme" id="switchTheme" class="navigator-select"><option value="geo.ca">Geo.ca</option><option value="light">Light</option><option value="dark">Dark</option><option value="unsupported">Not Supported</option></select></div><div class="navigator-option-group"><label for="switchProjection" class="navigator-label">Projection:</label> <select name="Switch Projection" id="switchProjection" class="navigator-select"><option value="3978">LCC (3978)</option><option value="3857">Web Mercator (3857)</option><option value="unsupported">Not Supported</option></select></div></div></div><div class="demo-section"><h4>Map Viewer</h4><button type="button" class="collapsible">Layers Status</button><pre id="sandboxMap-state" class="panel map-title-holder"></pre><div id="mapSection" class="navigator-map-section"><div id="map1"></div></div><p><em>This map loads its configuration from the selected configuration file.</em></p></div><div class="editor"><div class="line-numbers"><span></span></div><textarea id="configGeoview" name="configuration" rows="30" cols="150">
+        Select a configuration file to see its content...
+      </textarea></div><div class="navigator-toolbar"><button id="Reload-Button" class="btn btn-primary btn-large">Reload Map</button> <button id="Remove-Button" class="btn btn-danger btn-large">Remove Map</button></div><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script>insertPageHeader();
+
+      const configLoader = document.getElementById('configLoader');
+      const switchLang = document.getElementById('switchLang');
+      const resetLayer = document.getElementById('resetLayer');
+      const switchThemeElem = document.getElementById('switchTheme');
+      const switchProjectioneElem = document.getElementById('switchProjection');
+      const reload = document.getElementById('Reload-Button');
+      const remove = document.getElementById('Remove-Button');
+      const urlParams = new URLSearchParams(window.location.search);
+      const config = urlParams.get('config');
+      const mapId = 'map1';
+
+      // ------------------ CONFIG SELECTOR SECTION START -----------------------------------------
+      configLoader.addEventListener('change', async (e) => {
+        onConfigChange(mapId, e);
+      });
+      // ------------------ CONFIG SELECTOR SECTION END -----------------------------------------
+
+      // If there's a config
+      if (config) {
+        configLoader.value = config;
+        configLoader.dispatchEvent(new Event('change'));
+      }
+
+      // ------------------ SWITCHER SECTION START -----------------------------------------
+      switchLang.addEventListener('change', (e) => {
+        cgpv.api.getMapViewer(mapId).setLanguage(e.target.value, resetLayer.checked);
+      });
+
+      switchThemeElem.addEventListener('change', (e) => {
+        cgpv.api.getMapViewer(mapId).setTheme(e.target.value);
+      });
+
+      switchProjectioneElem.addEventListener('change', (e) => {
+        cgpv.api.getMapViewer(mapId).setProjection(e.target.value);
+      });
+      // ------------------ SWITCHER SECTION END -----------------------------------------
+
+      reload.addEventListener('click', (e) => {
+        cgpv.api.reload(mapId);
+      });
+
+      remove.addEventListener('click', (e) => {
+        cgpv.api.deleteMapViewer(mapId, true);
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

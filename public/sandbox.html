@@ -1,0 +1,576 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Sandbox - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div><div id="page-header"></div><div class="back-to-main"><a href="./index.html?tab=sandbox">← Back to Main</a></div><div class="demo-section"><h4>Interactive Sandbox</h4><p>Experiment with GeoView in a live sandbox environment. Test configurations, explore features, and prototype your solutions. Edit the JSON configuration below and click "Reload" to see your changes.</p></div></div><div class="editor"><div class="line-numbers"><span></span></div><textarea id="configGeoview" name="configuration" rows="30" cols="150">
+{
+  'map': {
+    'interaction': 'dynamic',
+    'viewSettings': {
+      'projection': 3978
+    },
+    'basemapOptions': {
+      'basemapId': 'transport',
+      'shaded': false,
+      'labeled': true
+    },
+    'listOfGeoviewLayerConfig': [{
+      'geoviewLayerId':'airborne_radioactivity',
+      'geoviewLayerName':'Airborne Radioactivity',
+      'metadataAccessPath':'https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer',
+      'geoviewLayerType':'esriDynamic',
+      'listOfLayerEntryConfig': [
+        {
+            'layerId':'0'
+        }
+      ]
+  }]
+  },
+  'components': ['overview-map', 'north-arrow'],
+  'footerBar': {
+    'tabs': {
+      'core': ['layers', 'data-table', 'geochart']
+    }
+  },
+  'appBar': {
+    'tabs': {
+      'core': ['legend', 'details', 'geolocator', 'export']
+    }
+  },
+  'corePackages': [],
+  'corePackagesConfig':[
+    {
+      'geochart': { 'charts': [
+        {
+          'layers':[{
+            'layerId':'airborne_radioactivity/0/1',
+            'propertyValue': 'OBJECTID',
+            'propertyDisplay': 'Location_Emplacement'
+          }],
+          'chart': 'line',
+          'query': {
+            'type': 'esriRegular',
+            'url': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/HC/airborne_radioactivity_en/MapServer/3',
+            'queryOptions': {
+              'whereClauses': [
+                {
+                  'field': 'Location_Emplacement',
+                  'prefix': '\u0027',
+                  'valueFrom': 'Location_Emplacement',
+                  'suffix': '\u0027'
+                }
+              ],
+              'orderByField': 'CollectionStart_DebutPrelevement'
+            }
+          },
+          'geochart': {
+            'xAxis': {
+              'type': 'time',
+              'property': 'CollectionStart_DebutPrelevement',
+              'label': 'Collected date'
+            },
+            'yAxis': {
+              'type': 'linear',
+              'property': 'Activity_Activite_mBqm3',
+              'label': 'Activity (mBqm3)',
+              'tooltipSuffix': 'mBqm3'
+            },
+            'borderWidth': 1
+          },
+          'category': {
+            'property': 'Radionuclide_Radionucleide',
+            'usePalette': false
+          },
+          'ui': {
+            'xSlider': {
+              'display': true
+            },
+            'ySlider': {
+              'display': true
+            },
+            'stepsSwitcher': true,
+            'description': 'This is a description text',
+            'download': true
+          }
+        }
+      ]}
+    }
+  ],
+  'theme': 'geo.ca'
+}
+      </textarea></div><div class="navigator-toolbar"><button id="validateConfig" class="btn btn-success btn-large">Validate</button> <button id="createMap" class="btn btn-primary btn-large">Create Map</button> <button id="deleteMap" class="btn btn-danger btn-large">Delete Map</button> <span id="validationMessage" class="sandbox-validation-msg">File not validated...</span></div><div class="demo-section"><h4>Custom Map Size</h4><div class="selector-container navigator-selector-wrap"><div class="navigator-option-group"><label for="mapWidth" class="navigator-label">Width:</label> <input placeholder="Width (px)" id="mapWidth" class="sandbox-input-short"/></div><div class="navigator-option-group"><label for="mapHeight" class="navigator-label">Height:</label> <input placeholder="Height (px)" id="mapHeight" class="sandbox-input-short"/></div><button type="button" id="applyMapSize" disabled="disabled" class="btn btn-primary">Apply Size</button></div></div><div class="demo-section"><h4 id="HLCONF1">Sandbox Map</h4></div><button type="button" class="collapsible">Layers Status</button><pre id="sandboxMap-state" class="panel map-title-holder"></pre><div id="mapSection" class="navigator-map-section"></div><div class="demo-section"><p><em>This map loads its configuration from the text area above.</em></p></div><div class="tabs"><button class="tab-button active" onclick="openTab(event, 'basemap-options')">Basemap Options</button> <button class="tab-button" onclick="openTab(event, 'view-settings')">View Settings</button> <button class="tab-button" onclick="openTab(event, 'other-map-settings')">Other Map Settings</button> <button class="tab-button" onclick="openTab(event, 'ui-components')">UI Components</button> <button class="tab-button" onclick="openTab(event, 'other-geoview-config')">Other GeoView Config</button></div><div id="basemap-options" class="tab-content active"><div class="demo-section"><h4>Basemap Options</h4><p>Configure the basemap settings for your map. These options control the appearance and type of the base layer.</p><h5>Available Options (TypeBasemapOptions):</h5><div class="option-item"><p><strong>basemapId</strong> <code>string</code> <em style="color: #d73a49">*required</em></p><p>The identifier for the basemap to use.</p><p><strong>Valid values:</strong></p><ul><li><code>'transport'</code> - Transportation basemap (default)</li><li><code>'osm'</code> - OpenStreetMap basemap</li><li><code>'simple'</code> - Simple basemap</li><li><code>'nogeom'</code> - No geometry basemap</li><li><code>'shaded'</code> - Shaded relief basemap</li><li><code>'imagery'</code> - Imagery/satellite basemap</li></ul></div><div class="option-item"><p><strong>shaded</strong> <code>boolean</code> <em style="color: #d73a49">*required</em></p><p>Enable or disable shaded basemap. If basemap id is set to 'shaded', this should be false.</p><p><strong>Default:</strong> <code>true</code></p><ul><li><code>true</code> - Enable shaded relief</li><li><code>false</code> - Disable shaded relief</li></ul></div><div class="option-item"><p><strong>labeled</strong> <code>boolean</code> <em style="color: #d73a49">*required</em></p><p>Enable or disable basemap labels (place names, roads, etc.).</p><p><strong>Default:</strong> <code>true</code></p><ul><li><code>true</code> - Show labels on basemap</li><li><code>false</code> - Hide all labels</li></ul></div><div class="option-item"><p><strong>labelZIndex</strong> <code>number</code> <em style="color: #6c757d">optional</em></p><p>Z-index of the basemap labels to control layer stacking order.</p><p><strong>Default:</strong> <code>0</code></p></div><button type="button" class="collapsible">Example Configurations</button><div class="panel"><h3>Basic Configuration:</h3><pre id="basemap-example-1"><code>
+{
+  "map": {
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true,
+      "labelZIndex": 0
+    }
+  }
+}
+            </code></pre><h3>Imagery Basemap Without Labels:</h3><pre id="basemap-example-2"><code>
+{
+  "basemapOptions": {
+    "basemapId": "imagery",
+    "shaded": true,
+    "labeled": false
+  }
+}
+            </code></pre><h3>Shaded Relief Basemap:</h3><pre id="basemap-example-3"><code>
+{
+  "basemapOptions": {
+    "basemapId": "shaded",
+    "shaded": false,  // false because basemap IS shaded
+    "labeled": true
+  }
+}
+            </code></pre></div></div></div><div id="view-settings" class="tab-content"><div class="demo-section"><h4>View Settings</h4><p>Configure the view settings for your map. These options control the projection, zoom levels, rotation, and initial view area.</p><h5>Available Options (TypeViewSettings):</h5><div class="option-item"><p><strong>projection</strong> <code>number</code> <em style="color: #d73a49">*required</em></p><p>Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada.</p><p><strong>Valid values:</strong></p><ul><li><code>3978</code> - Lambert Conical Conform Canada (default)</li><li><code>3857</code> - Web Mercator</li></ul></div><div class="option-item"><p><strong>initialView</strong> <code>object</code> <em style="color: #6c757d">optional</em></p><p>Settings for the initial view for map. You can specify either <code>zoomAndCenter</code>, <code>extent</code>, or <code>layerIds</code>.</p><p><strong>Properties (TypeMapViewSettings):</strong></p><ul><li><code>zoomAndCenter</code> - Array of [zoom, [longitude, latitude]]<ul><li>Zoom level: 0-28</li><li>Center coordinates depend on the projection:<ul><li><strong>EPSG:3978</strong> - Longitude: [-140 to -60], Latitude: [40 to 90]</li><li><strong>EPSG:3857</strong> - Longitude: [-180 to 180], Latitude: [-90 to 90]</li></ul></li></ul></li><li><code>extent</code> - Array of [minX, minY, maxX, maxY] extent coordinates (values depend on projection)</li><li><code>layerIds</code> - Array of Geoview layer IDs or layer paths to use as initial map focus<ul><li>If empty array <code>[]</code>, will use all layers</li><li>Format: <code>["geoviewLayerId"]</code> or <code>["geoviewLayerId/layerPath"]</code></li></ul></li></ul></div><div class="option-item"><p><strong>homeView</strong> <code>object</code> <em style="color: #6c757d">optional</em></p><p>Settings for the home nav bar button. Uses the same structure as <code>initialView</code> (TypeMapViewSettings).</p></div><div class="option-item"><p><strong>enableRotation</strong> <code>boolean</code> <em style="color: #6c757d">optional</em></p><p>Enable rotation. If false, a rotation constraint that always sets the rotation to zero is used.</p><p><strong>Default:</strong> <code>true</code></p></div><div class="option-item"><p><strong>rotation</strong> <code>number</code> <em style="color: #6c757d">optional</em></p><p>The initial rotation for the view in degrees (positive rotation clockwise, 0 means North). Will be converted to radians by the viewer.</p><p><strong>Range:</strong> 0 to 360</p><p><strong>Default:</strong> <code>0</code></p></div><div class="option-item"><p><strong>maxExtent</strong> <code>array</code> <em style="color: #6c757d">optional</em></p><p>The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates.</p><p><strong>Note:</strong> Coordinate values depend on the projection.</p><p><strong>Default for EPSG:3978:</strong> <code>[-150, -10, -30, 90]</code></p><p><strong>Default for EPSG:3857:</strong> <code>[-180, 0, 80, 84]</code></p></div><div class="option-item"><p><strong>minZoom</strong> <code>number</code> <em style="color: #6c757d">optional</em></p><p>The minimum zoom level used to determine the resolution constraint. If not set, will use default from basemap.</p><p><strong>Range:</strong> 0 to 20</p><p><strong>Default:</strong> <code>0</code></p></div><div class="option-item"><p><strong>maxZoom</strong> <code>number</code> <em style="color: #6c757d">optional</em></p><p>The maximum zoom level used to determine the resolution constraint. If not set, will use default from basemap.</p><p><strong>Range:</strong> 0 to 20</p><p><strong>Default:</strong> <code>20</code></p></div><button type="button" class="collapsible">Example Configurations</button><div class="panel"><h3>Basic Configuration with Zoom and Center (EPSG:3978):</h3><pre id="view-example-1"><code>
+{
+  "map": {
+    "viewSettings": {
+      "projection": 3978,
+      "initialView": {
+        "zoomAndCenter": [4.5, [-90, 60]]
+      },
+      "enableRotation": true,
+      "rotation": 0,
+      "minZoom": 0,
+      "maxZoom": 20,
+      "maxExtent": [-150, -10, -30, 90]
+    }
+  }
+}
+            </code></pre><h3>Configuration with Extent (EPSG:3857):</h3><pre id="view-example-2"><code>
+{
+  "viewSettings": {
+    "projection": 3857,
+    "initialView": {
+      "extent": [-180, 0, 80, 84]
+    },
+    "minZoom": 2,
+    "maxZoom": 18,
+    "maxExtent": [-180, 0, 80, 84]
+  }
+}
+            </code></pre><h3>Zoom to All Layers:</h3><pre id="view-example-3"><code>
+{
+  "viewSettings": {
+    "projection": 3978,
+    "initialView": {
+      "layerIds": []
+    },
+    "homeView": {
+      "zoomAndCenter": [5, [-95, 62]]
+    }
+  }
+}
+            </code></pre><h3>Zoom to Specific Layers:</h3><pre id="view-example-4"><code>
+{
+  "viewSettings": {
+    "projection": 3978,
+    "initialView": {
+      "layerIds": ["airborne_radioactivity", "earthquakes/0"]
+    }
+  }
+}
+            </code></pre></div></div></div><div id="other-map-settings" class="tab-content"><div class="demo-section"><h4>Other Map Settings</h4><p>Additional configuration options for map interaction, feature highlighting, and overlay objects.</p><h5>Available Options:</h5><div class="option-item"><p><strong>interaction</strong> <code>string</code> <em style="color: #d73a49">*required</em> (TypeInteraction)</p><p>Type of map interaction. Determines if the map is dynamic (pan/zoom enabled) or static to act as a thumbnail (no component).</p><p><strong>Valid values:</strong></p><ul><li><code>'dynamic'</code> - Interactive map with pan/zoom capabilities (default)</li><li><code>'static'</code> - Static map acting as a thumbnail, no component</li></ul></div><div class="option-item"><p><strong>highlightColor</strong> <code>string</code> <em style="color: #6c757d">optional</em> (TypeHighlightColors)</p><p>Color to use for feature highlights when features are selected or hovered over.</p><p><strong>Valid values:</strong></p><ul><li><code>'aqua'</code> - Aqua highlight (default)</li><li><code>'black'</code> - Black highlight</li><li><code>'white'</code> - White highlight</li><li><code>'red'</code> - Red highlight</li><li><code>'green'</code> - Green highlight</li></ul><p><strong>Default:</strong> <code>'aqua'</code></p></div><div class="option-item"><p><strong>overlayObjects</strong> <code>object</code> <em style="color: #6c757d">optional</em> (TypeOverlayObjects)</p><p>Non-interactive markers and overlay objects to add to the map. Only point markers are supported for now...</p><p><strong>Properties:</strong></p><ul><li><code>pointMarkers</code> - Object containing groups of point markers<ul><li>Key: Group name (string)</li><li>Value: Array of TypePointMarker objects</li></ul></li></ul><p><strong>TypePointMarker properties:</strong></p><ul><li><code>id</code> <em style="color: #d73a49">*required</em> - Unique ID for the marker within its group</li><li><code>coordinate</code> <em style="color: #d73a49">*required</em> - Marker coordinates [x, y]</li><li><code>color</code> <em style="color: #6c757d">optional</em> - Marker color (CSS color string)</li><li><code>opacity</code> <em style="color: #6c757d">optional</em> - Marker opacity (0 to 1)</li><li><code>projectionCode</code> <em style="color: #6c757d">optional</em> - EPSG code if coordinates are not in lon/lat</li></ul></div><button type="button" class="collapsible">Example Configurations</button><div class="panel"><h3>Dynamic Map with Red Highlights:</h3><pre id="other-example-1"><code>
+{
+  "map": {
+    "interaction": "dynamic",
+    "highlightColor": "red",
+    ... other map settings ...
+  }
+}
+            </code></pre><h3>Static Map (Thumbnail):</h3><pre id="other-example-2"><code>
+{
+  "map": {
+    "interaction": "static",
+    ... other map settings ...
+}
+            </code></pre><h3>Map with Point Markers (Lon/Lat):</h3><pre id="other-example-3"><code>
+{
+  "map": {
+    "interaction": "dynamic",
+    "highlightColor": "green",
+    "overlayObjects": {
+      "pointMarkers": {
+        "cities": [
+          {
+            "id": "ottawa",
+            "coordinate": [-75.6972, 45.4215],
+            "color": "#FF0000",
+            "opacity": 0.8
+          },
+          {
+            "id": "toronto",
+            "coordinate": [-79.3832, 43.6532],
+            "color": "#0000FF",
+            "opacity": 0.8
+          }
+        ]
+      }
+    },
+    ... other map settings ...
+  }
+}
+            </code></pre><h3>Map with Point Markers (Projected Coordinates):</h3><pre id="other-example-4"><code>
+{
+  "map": {
+    "overlayObjects": {
+      "pointMarkers": {
+        "locations": [
+          {
+            "id": "point1",
+            "coordinate": [500000, 5500000],
+            "projectionCode": 3857,
+            "color": "#00FF00",
+            "opacity": 1
+          },
+          {
+            "id": "point2",
+            "coordinate": [600000, 5600000],
+            "projectionCode": 3857,
+            "color": "#FFFF00",
+            "opacity": 0.9
+          }
+        ]
+      }
+    },
+    "interaction": "dynamic",
+    ... other map settings ...
+  }
+}
+            </code></pre><h3>Multiple Marker Groups:</h3><pre id="other-example-5"><code>
+{
+  "map": {
+    "overlayObjects": {
+      "pointMarkers": {
+        "cities": [
+          {
+            "id": "ottawa",
+            "coordinate": [-75.6972, 45.4215],
+            "color": "#FF0000"
+          }
+        ],
+        "landmarks": [
+          {
+            "id": "cn_tower",
+            "coordinate": [-79.3871, 43.6426],
+            "color": "#0000FF",
+            "opacity": 0.7
+          }
+        ]
+      }
+    },
+    "interaction": "dynamic",
+    ... other map settings ...  
+  }
+}
+            </code></pre></div></div></div><div id="ui-components" class="tab-content"><div class="demo-section"><h4>UI Components Configuration</h4><p>Configure the user interface components including navigation bar, app bar, footer bar, overview map, and other map components.</p><h5>Available Options:</h5><div class="option-item"><p><strong>navBar</strong> <code>array</code> <em style="color: #6c757d">optional</em> (TypeValidNavBarProps[])</p><p>List of navigation bar buttons to display. Controls which navigation tools are available to the user.</p><p><strong>Valid values:</strong></p><ul><li><code>'zoom'</code> - Zoom in/out buttons</li><li><code>'rotation'</code> - Map rotation button</li><li><code>'fullscreen'</code> - Fullscreen toggle button</li><li><code>'home'</code> - Return to home view button</li><li><code>'location'</code> - User location button</li><li><code>'basemap-select'</code> - Basemap selector</li><li><code>'measure'</code> - Measurement tools</li><li><code>'projection'</code> - Projection selector</li><li><code>'drawer'</code> - Drawing tools</li></ul><p><strong>Default:</strong> <code>['zoom', 'fullscreen', 'home', 'basemap-select']</code></p></div><div class="option-item"><p><strong>appBar</strong> <code>object</code> <em style="color: #6c757d">optional</em> (TypeAppBarProps)</p><p>Configuration for the application bar (side panel). The about GeoView and notification buttons are always present.</p><p><strong>Properties:</strong></p><ul><li><code>tabs.core</code> - Array of core tab names to display<ul><li><code>'geolocator'</code> - Address search and geolocation</li><li><code>'export'</code> - Export functionality</li><li><code>'aoi-panel'</code> - Area of Interest panel</li><li><code>'guide'</code> - User guide</li><li><code>'legend'</code> - Map legend</li><li><code>'layers'</code> - Layers panel</li><li><code>'details'</code> - Feature details</li><li><code>'data-table'</code> - Data table view</li></ul></li><li><code>collapsed</code> - Whether the app bar starts collapsed</li><li><code>selectedTab</code> - Initially selected tab</li><li><code>selectedLayersLayerPath</code> - Initial selected layer in layers tab</li><li><code>selectedDataTableLayerPath</code> - Initially selected layer in data table tab</li><li><code>selectedTimeSliderLayerPath</code> - Initially selected layer in time slider tab</li></ul><p><strong>Default:</strong> <code>{ tabs: { core: ['geolocator', 'legend', 'details', 'export'] } }</code></p></div><div class="option-item"><p><strong>footerBar</strong> <code>object</code> <em style="color: #6c757d">optional</em> (TypeFooterBarProps)</p><p>Configuration for the footer bar (bottom panel).</p><p><strong>Properties:</strong></p><ul><li><code>tabs.core</code> - Array of core tab names to display<ul><li><code>'legend'</code> - Map legend</li><li><code>'layers'</code> - Layers panel</li><li><code>'details'</code> - Feature details</li><li><code>'data-table'</code> - Data table view</li><li><code>'time-slider'</code> - Time slider control</li><li><code>'geochart'</code> - GeoChart visualization</li><li><code>'guide'</code> - User guide</li></ul></li><li><code>tabs.custom</code> - Array of custom tab objects with <code>id</code>, <code>label</code>, and <code>contentHTML</code></li><li><code>collapsed</code> - Whether the footer bar starts collapsed</li><li><code>selectedTab</code> - Initially selected tab</li><li><code>selectedLayersLayerPath</code> - Initial selected layer in layers tab</li><li><code>selectedDataTableLayerPath</code> - Initially selected layer in data table tab</li><li><code>selectedTimeSliderLayerPath</code> - Initially selected layer in time slider tab</li></ul><p><strong>Default:</strong> <code>{ tabs: { core: ['layers', 'data-table'], custom: [] }, collapsed: false }</code></p></div><div class="option-item"><p><strong>overviewMap</strong> <code>object</code> <em style="color: #6c757d">optional</em> (TypeOverviewMapProps)</p><p>Configuration for the overview map component.</p><p><strong>Properties:</strong></p><ul><li><code>hideOnZoom</code> - Zoom level at which to hide the overview map (0 = always show, suggested value to hide when zoomed out: 7)</li></ul><p><strong>Default:</strong> <code>{ hideOnZoom: 0 }</code></p></div><div class="option-item"><p><strong>components</strong> <code>array</code> <em style="color: #6c757d">optional</em> (TypeValidMapComponentProps[])</p><p>List of map components to display on the map.</p><p><strong>Valid values:</strong></p><ul><li><code>'overview-map'</code> - Overview/mini map showing full extent</li><li><code>'north-arrow'</code> - North arrow indicator</li></ul><p><strong>Default:</strong> <code>['north-arrow', 'overview-map']</code></p></div><button type="button" class="collapsible">Example Configurations</button><div class="panel"><h3>Basic UI Configuration:</h3><pre id="ui-example-1"><code>
+{
+  "navBar": ["zoom", "fullscreen", "home", "basemap-select"],
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator"]
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": ["legend", "layers", "details", "data-table"],
+      "custom": []
+    },
+    "collapsed": false
+  },
+  "components": ["north-arrow", "overview-map"],
+  "overviewMap": {
+    "hideOnZoom": 0
+  }
+}
+              </code></pre><h3>Minimal UI (No Nav Bar, Limited Panels):</h3><pre id="ui-example-2"><code>
+{
+  "navBar": [],
+  "appBar": {
+    "tabs": {
+      "core": []
+    }
+  },
+  "footerBar": {
+    "tabs": {
+      "core": ["legend"],
+      "custom": []
+    },
+    "collapsed": true
+  },
+  "components": []
+}
+            </code></pre><h3>Full-Featured UI:</h3><pre id="ui-example-3"><code>
+{
+  "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select", "projection", "drawer"],
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "export", "legend", "layers", "details", "data-table", "guide"]
+    },
+    "collapsed": false,
+    "selectedTab": "geolocator"
+  },
+  "footerBar": {
+    "tabs": {
+      "core": ["legend", "layers", "details", "data-table", "time-slider", "geochart", "guide"],
+      "custom": []
+    },
+    "collapsed": false,
+    "selectedTab": "legend"
+  },
+  "components": ["overview-map", "north-arrow"],
+  "overviewMap": {
+    "hideOnZoom": 10
+  }
+}
+            </code></pre><h3>Custom Footer Bar Tab:</h3><pre id="ui-example-4"><code>
+{
+  "footerBar": {
+    "tabs": {
+      "core": ["legend", "layers"],
+      "custom": [
+        {
+          "id": "custom-info",
+          "label": "About",
+          "contentHTML": "&lt;div&gt;&lt;h3&gt;Custom Information&lt;/h3&gt;&lt;p&gt;This is a custom tab with HTML content.&lt;/p&gt;&lt;/div&gt;"
+        }
+      ]
+    },
+    "collapsed": false,
+    "selectedTab": "custom-info"
+  }
+}
+            </code></pre><h3>App Bar with Specific Tools:</h3><pre id="ui-example-5"><code>
+{
+  "navBar": ["zoom", "home"],
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "layers", "data-table"]
+    },
+    "selectedTab": "layers"
+  },
+  "components": ["north-arrow"]
+}
+            </code></pre></div></div></div><div id="other-geoview-config" class="tab-content"><div class="demo-section"><h4>Other GeoView Configuration</h4><p>Additional configuration options for theme, service URLs, and global settings.</p><h5>Available Options:</h5><div class="option-item"><p><strong>theme</strong> <code>string</code> <em style="color: #6c757d">optional</em> (TypeDisplayTheme)</p><p>Display theme for the viewer.</p><p><strong>Valid values:</strong></p><ul><li><code>'geo.ca'</code> - Geo.ca theme (default)</li><li><code>'dark'</code> - Dark theme</li><li><code>'light'</code> - Light theme</li></ul><p><strong>Default:</strong> <code>'geo.ca'</code></p></div><div class="option-item"><p><strong>serviceUrls</strong> <code>object</code> <em style="color: #d73a49">*required</em> (TypeServiceUrls)</p><p>Service endpoint URLs for various GeoView services.</p><p><strong>Properties:</strong></p><ul><li><code>geocoreUrl</code> <em style="color: #d73a49">*required</em> - Service endpoint to access API for layers specification<ul><li>Default: <code>'https://geocore.api.geo.ca'</code></li></ul></li><li><code>rcsUrl</code> <em style="color: #6c757d">optional</em> - Service endpoint for RCS gcGeo layers<ul><li>Default: <code>'https://gcgeo.gc.ca/geonetwork/srv/api/v2/docs'</code></li></ul></li><li><code>proxyUrl</code> <em style="color: #6c757d">optional</em> - Proxy for dealing with same-origin issues<ul><li>Default: <code>'https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy'</code></li></ul></li><li><code>geolocatorUrl</code> <em style="color: #6c757d">optional</em> - Geolocator service for address search<ul><li>Default: <code>'https://geolocator.api.geo.ca?keys=geonames,nominatim,locate'</code></li></ul></li><li><code>metadataUrl</code> <em style="color: #6c757d">optional</em> - Metadata service endpoint for UUID layers<ul><li>Default: <code>''</code> (empty, must be set by config)</li></ul></li><li><code>utmZoneUrl</code> <em style="color: #6c757d">optional</em> - UTM zone service endpoint<ul><li>Default: <code>'https://geogratis.gc.ca/services/delimitation/en/utmzone'</code></li></ul></li><li><code>ntsSheetUrl</code> <em style="color: #6c757d">optional</em> - NTS sheet service endpoint<ul><li>Default: <code>'https://geogratis.gc.ca/services/delimitation/en/nts'</code></li></ul></li><li><code>altitudeUrl</code> <em style="color: #6c757d">optional</em> - Altitude service endpoint<ul><li>Default: <code>'https://geogratis.gc.ca/services/elevation/cdem/altitude'</code></li></ul></li></ul></div><div class="option-item"><p><strong>globalSettings</strong> <code>object</code> <em style="color: #6c757d">optional</em> (TypeGlobalSettings)</p><p>Global settings that affect the behavior of the viewer.</p><p><strong>Properties:</strong></p><ul><li><code>canRemoveSublayers</code> <em style="color: #6c757d">optional</em> - Whether sublayers can be removed from layer groups<ul><li>Type: <code>boolean</code></li><li>Default: <code>true</code></li></ul></li><li><code>disabledLayerTypes</code> <em style="color: #6c757d">optional</em> - Layer types that should be disabled<ul><li>Type: <code>array</code> of TypeGeoviewLayerType</li><li>Default: <code>[]</code></li></ul></li><li><code>showUnsymbolizedFeatures</code> <em style="color: #6c757d">optional</em> - Display unsymbolized features in datatable and other components<ul><li>Type: <code>boolean</code></li><li>Default: <code>false</code></li></ul></li><li><code>coordinateInfoEnabled</code> <em style="color: #6c757d">optional</em> - Initial state of the coordinate info tool<ul><li>Type: <code>boolean</code></li><li>Default: <code>false</code></li></ul></li><li><code>hideCoordinateInfoSwitch</code> <em style="color: #6c757d">optional</em> - Remove coordinate info tool from UI<ul><li>Type: <code>boolean</code></li><li>Default: <code>false</code></li></ul></li></ul></div><div class="option-item"><p><strong>schemaVersionUsed</strong> <code>string</code> <em style="color: #6c757d">optional</em> (TypeValidVersions)</p><p>The schema version used to validate the configuration file.</p><p><strong>Valid values:</strong></p><ul><li><code>'1.0'</code> - Version 1.0 (default and only accepted version)</li></ul><p><strong>Default:</strong> <code>'1.0'</code></p></div><button type="button" class="collapsible">Example Configurations</button><div class="panel"><h5>Basic Configuration with Default Service URLs:</h5><pre id="geoview-example-1"><code>
+{
+  "theme": "geo.ca",
+  "serviceUrls": {
+    "geocoreUrl": "https://geocore.api.geo.ca",
+    "rcsUrl": "https://gcgeo.gc.ca/geonetwork/srv/api/v2/docs",
+    "geolocatorUrl": "https://geolocator.api.geo.ca?keys=geonames,nominatim,locate",
+    "proxyUrl": "https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy",
+    "utmZoneUrl": "https://geogratis.gc.ca/services/delimitation/en/utmzone",
+    "ntsSheetUrl": "https://geogratis.gc.ca/services/delimitation/en/nts",
+    "altitudeUrl": "https://geogratis.gc.ca/services/elevation/cdem/altitude"
+  },
+  "schemaVersionUsed": "1.0"
+}
+            </code></pre><h3>Dark Theme Configuration:</h3><pre id="geoview-example-2"><code>
+{
+  "theme": "dark",
+  "serviceUrls": {
+    "geocoreUrl": "https://geocore.api.geo.ca"
+  }
+}
+            </code></pre><h3>Global Settings Configuration:</h3><pre id="geoview-example-3"><code>
+{
+  "globalSettings": {
+    "canRemoveSublayers": false,
+    "disabledLayerTypes": ["esriDynamic", "esriFeature"],
+    "showUnsymbolizedFeatures": true,
+    "coordinateInfoEnabled": true,
+    "hideCoordinateInfoSwitch": false
+  },
+  "serviceUrls": {
+    "geocoreUrl": "https://geocore.api.geo.ca"
+  }
+}
+            </code></pre><h3>Complete Configuration:</h3><pre id="geoview-example-4"><code>
+{
+  "theme": "geo.ca",
+  "serviceUrls": {
+    "geocoreUrl": "https://geocore.api.geo.ca",
+    "rcsUrl": "https://gcgeo.gc.ca/geonetwork/srv/api/v2/docs",
+    "proxyUrl": "https://maps.canada.ca/wmsproxy/ws/wmsproxy/executeFromProxy",
+    "geolocatorUrl": "https://geolocator.api.geo.ca?keys=geonames,nominatim,locate",
+    "metadataUrl": "https://metadata.example.com",
+    "utmZoneUrl": "https://geogratis.gc.ca/services/delimitation/en/utmzone",
+    "ntsSheetUrl": "https://geogratis.gc.ca/services/delimitation/en/nts",
+    "altitudeUrl": "https://geogratis.gc.ca/services/elevation/cdem/altitude"
+  },
+  "globalSettings": {
+    "canRemoveSublayers": true,
+    "disabledLayerTypes": [],
+    "showUnsymbolizedFeatures": false,
+    "coordinateInfoEnabled": true,
+    "hideCoordinateInfoSwitch": false
+  },
+  "schemaVersionUsed": "1.0"
+}
+            </code></pre></div></div></div><script src="codedoc.js"></script><script>insertPageHeader();
+
+      function openTab(evt, tabName) {
+        // Hide all tab contents
+        var tabContents = document.getElementsByClassName('tab-content');
+        for (var i = 0; i < tabContents.length; i++) {
+          tabContents[i].classList.remove('active');
+        }
+
+        // Remove active class from all tab buttons
+        var tabButtons = document.getElementsByClassName('tab-button');
+        for (var i = 0; i < tabButtons.length; i++) {
+          tabButtons[i].classList.remove('active');
+        }
+
+        // Show the current tab and mark button as active
+        document.getElementById(tabName).classList.add('active');
+        evt.currentTarget.classList.add('active');
+      }
+
+      // Initialize collapsible buttons after DOM is loaded
+      document.addEventListener('DOMContentLoaded', function () {
+        createCollapsible();
+      });
+
+      const isValid = false;
+
+      // Validate Button============================================================================================================
+      const validateJSONButton = document.getElementById('validateConfig');
+
+      // add an event listener when a button is clicked
+      validateJSONButton.addEventListener('click', function (e) {
+        // get message element
+        const message = document.getElementById('validationMessage');
+
+        try {
+          // get config and test if JSON is valid
+          const configArea = document.getElementById('configGeoview');
+          const regexExp = /(?<!\\)'/g;
+          // Replace single quotes with double quotes
+          const configJSON = JSON.parse(configArea.value.replace(regexExp, '"'));
+
+          const validConfig = cgpv.api.config.validateMapConfig(configJSON, 'en');
+
+          // set class and message
+          message.classList.add('config-json-valid');
+          message.classList.remove('config-error');
+          message.innerHTML = 'File seems valid, see console for details...';
+          document.getElementById('createMap').disabled = 0;
+        } catch (error) {
+          // set class and message
+          message.classList.add('config-error');
+          message.classList.remove('config-json-valid');
+          message.innerHTML = cgpv.api.utilities.core.escapeRegExp(error.message);
+          document.getElementById('createMap').disabled = true;
+        }
+      });
+
+      // Create Button============================================================================================================
+      const createMapButton = document.getElementById('createMap');
+
+      // add an event listener when a button is clicked
+      createMapButton.addEventListener('click', async function (e) {
+        // Delete previous map if existing
+        if (cgpv.api.hasMapViewer('map1')) {
+          await cgpv.api.deleteMapViewer('map1', true);
+        }
+
+        // create new map in a new dom node
+        const newDiv = document.createElement('div');
+        const a = document.createAttribute('id');
+        a.value = 'map1';
+        newDiv.setAttributeNode(a);
+
+        const mapWidth = `${document.getElementById('mapWidth')?.value}px`;
+        const mapHeight = `${document.getElementById('mapHeight')?.value}px`;
+
+        newDiv.style.width = mapWidth;
+        newDiv.style.height = mapHeight;
+
+        newDiv.dataset.height = mapHeight;
+
+        document.getElementById('mapSection').appendChild(newDiv);
+
+        // Regex expression to capture all single quotes (') except those preceded by a backslash (\)
+        const regexExp = /(?<!\\)'/g;
+
+        // create map
+        try {
+          const configArea = document.getElementById('configGeoview');
+          // Replace single quotes with double quotes to make valid JSON
+          const mapViewer = await cgpv.api.createMapFromConfig('map1', configArea.value.replace(regexExp, '"'));
+          listenToLegendLayerSetChanges('sandboxMap-state', mapViewer);
+        } catch (error) {
+          console.error('Failed to create map from config', error);
+        }
+      });
+
+      // Map Size=====================Start==================================
+      const applyMapSizeBtn = document.getElementById('applyMapSize');
+      const mapWidthInput = document.getElementById('mapWidth');
+      const mapHeightInput = document.getElementById('mapHeight');
+
+      applyMapSizeBtn.addEventListener('click', () => {
+        const mapWidth = document.getElementById('mapWidth')?.value;
+        const mapHeight = document.getElementById('mapHeight')?.value;
+
+        /**
+         * ===========================================================================
+         *  MIN WIDTH and MIN HEIGHT should be greater than 0
+         * ===========================================================================
+         */
+        if (parseInt(mapWidth) > 0 && parseInt(mapHeight) > 0) {
+          createMapButton.dispatchEvent(new Event('click'));
+        }
+      });
+
+      mapWidthInput.addEventListener('input', () => {
+        applyMapSizeBtn.removeAttribute('disabled');
+      });
+
+      mapHeightInput.addEventListener('input', () => {
+        applyMapSizeBtn.removeAttribute('disabled');
+      });
+
+      const widthInput = document.getElementById('mapWidth');
+      const heightInput = document.getElementById('mapHeight');
+
+      // Set the map width input value based on map section width.
+      if (widthInput) {
+        const mapSection = document.getElementById('mapSection');
+        widthInput.value = mapSection.clientWidth;
+      }
+
+      document.getElementById('mapHeight').value = '900';
+
+      const sandboxMap = document.getElementById('map1');
+      if (sandboxMap) {
+        sandboxMap.dataset.height = '900px';
+      }
+
+      // Map Size=====================End==================================
+
+      const deleteMapButton = document.getElementById('deleteMap');
+
+      // add an event listener when a button is clicked
+      deleteMapButton.addEventListener('click', function (e) {
+        // Delete the map
+        cgpv.api.deleteMapViewer('map1', true);
+      });
+
+      // Editor script section===================================================================================================
+      const textarea = document.querySelector('textarea');
+      const lineNumbers = document.querySelector('.line-numbers');
+
+      // set default number of lines
+      const numberOfLines = textarea.value.split('\n').length;
+      lineNumbers.innerHTML = Array(numberOfLines).fill('<span></span>').join('');
+
+      textarea.addEventListener('keyup', (event) => {
+        const numberOfLines = event.target.value.split('\n').length;
+        lineNumbers.innerHTML = Array(numberOfLines).fill('<span></span>').join('');
+      });
+
+      textarea.addEventListener('input', (event) => {
+        document.getElementById('createMap').disabled = true;
+      });</script></body></html>

@@ -1,0 +1,117 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "wind-speed-direction",
+        "geoviewLayerName": "Wind Speed Direction (NOAA METAR)",
+        "geoviewLayerType": "esriFeature",
+        "metadataAccessPath": "https://services9.arcgis.com/RHVPKKiFTONKtxq3/ArcGIS/rest/services/NOAA_METAR_current_wind_speed_direction_v1/FeatureServer",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "initialSettings": {
+              "states": {
+                "visible": true,
+                "legendCollapsed": true,
+                "opacity": 1
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "active-fires",
+        "geoviewLayerName": "Active Fires",
+        "geoviewLayerType": "ogcWms",
+        "metadataAccessPath": "https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "activefires_current",
+            "initialSettings": {
+              "states": {
+                "visible": true,
+                "opacity": 1
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "cwfis-bigfoot",
+        "geoviewLayerName": "CWFIS BigFoot (restricted)",
+        "geoviewLayerType": "ogcWms",
+        "metadataAccessPath": "https://cwfis.cfs.nrcan.gc.ca/service/data/ows?service=wms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "fireops:bigfoot_fgp_current",
+            "initialSettings": {
+              "states": {
+                "visible": false,
+                "opacity": 0.8
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "theme": "geo.ca",
+  "components": ["north-arrow", "overview-map"],
+  "corePackages": [],
+  "appBar": {
+    "tabs": {
+      "core": ["custom-legend"]
+    }
+  },
+  "corePackagesConfig": [
+    {
+      "custom-legend": {
+        "isOpen": true,
+        "title": "Wild Fire Legend",
+        "legendList": [
+          {
+            "type": "header",
+            "text": "Legend Header",
+            "description": {
+              "text": "The legend header where a description can be included for extra context. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam sed felis sed eros interdum luctus. Donec pulvinar urna enim, ut pharetra mi iaculis nec. Suspendisse potenti. Praesent ornare in purus ac congue. Phasellus accumsan diam sed urna sollicitudin tincidunt. Sed dignissim sodales quam quis molestie. Proin faucibus tincidunt sodales. Phasellus eleifend tellus erat, ac feugiat purus condimentum pellentesque. Praesent laoreet auctor velit, et pulvinar mauris convallis non. Pellentesque laoreet lectus ut nunc auctor cursus."
+            },
+            "fontSize": 20
+          },
+          {
+            "type": "layer",
+            "layerPath": "wind-speed-direction/0"
+          },
+          {
+            "type": "group",
+            "text": "Wildfire Layers",
+            "description": {
+              "text": "The group layer description for extra context about what's inside the group",
+              "collapsed": true
+            },
+            "collapsed": true,
+            "children": [
+              {
+                "type": "layer",
+                "layerPath": "active-fires/activefires_current"
+              },
+              {
+                "type": "layer",
+                "layerPath": "cwfis-bigfoot/fireops:bigfoot_fgp_current"
+              }
+            ]
+          }
+        ],
+        "version": "1.0"
+      }
+    }
+  ]
+}
