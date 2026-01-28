@@ -232,8 +232,5 @@
     "tabs": {
       "core": ["geolocator", "legend", "details", "export"]
     }
-  },
-  "globalSettings": {
-    "showUnsymbolizedFeatures": true
   }
 }
