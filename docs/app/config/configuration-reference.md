@@ -2431,30 +2431,210 @@ corePackagesConfig: [
 
 ### Custom Legend Package
 
-Custom legend panel for displaying layer legends.
+Custom legend panel for displaying a customized legend with headers, groups, and layer legends.
 
-**Loading:** Custom legend functionality (configuration varies based on implementation).
+**Loading:** Include `"custom-legend"` in `appBar.tabs.core` array to enable this package.
 
 #### Schema
 
 ```typescript
 interface CustomLegendConfig {
-  // Custom legend configuration properties
+  // Optional
+  isOpen?: boolean;
+  title?: string;
+  legendList?: Array<TypeLegendItem>;
   version?: string;
+}
+
+type TypeLegendItem = TypeLegendLayer | TypeHeaderLayer | TypeGroupLayer;
+
+interface TypeLegendLayer {
+  type: "layer";
+  layerPath: string;
+  visible?: boolean;
+}
+
+interface TypeHeaderLayer {
+  type: "header";
+  text: string;
+  description?: string;
+  fontSize?: number;
+  fontWeight?: "normal" | "bold";
+}
+
+interface TypeGroupLayer {
+  type: "group";
+  text: string;
+  description?: string;
+  collapsed?: boolean;
+  children: Array<TypeLegendItem>;
 }
 ```
 
-#### Example
+#### Properties
+
+- **isOpen**: Initial panel state (default: false)
+- **title**: Custom title text for the legend panel
+- **legendList**: Ordered array of legend items to display
+- **version**: Schema version (default: "1.0")
+
+#### Legend Item Types
+
+**TypeLegendLayer** - Display a standard legend from a GeoView layer:
+
+- **type** (Required): Must be `"layer"`
+- **layerPath** (Required): Layer path identifying the layer
+- **visible**: Initial visibility (default: true)
+
+**TypeHeaderLayer** - Display a text header for organizing sections:
+
+- **type** (Required): Must be `"header"`
+- **text** (Required): Header text to display
+- **description**: Optional descriptive text below header
+- **fontSize**: Font size in pixels (range: 8-32, default: 16)
+- **fontWeight**: Font weight (`"normal"` or `"bold"`, default: "bold")
+
+**TypeGroupLayer** - Display a collapsible group of legend items:
+
+- **type** (Required): Must be `"group"`
+- **text** (Required): Group title text
+- **description**: Optional descriptive text below group title
+- **collapsed**: Initial collapsed state (default: false)
+- **children** (Required): Array of child legend items (must have at least 1)
+
+#### Examples
+
+**Basic Custom Legend:**
 
 ```typescript
 corePackagesConfig: [
   {
     "custom-legend": {
-      version: "1.0",
+      isOpen: false,
+      title: "Map Layers",
+      legendList: [
+        {
+          type: "layer",
+          layerPath: "weather-layer/temperature",
+          visible: true,
+        },
+        {
+          type: "layer",
+          layerPath: "weather-layer/precipitation",
+          visible: false,
+        },
+      ],
     },
   },
 ];
 ```
+
+**With Headers and Groups:**
+
+```typescript
+corePackagesConfig: [
+  {
+    "custom-legend": {
+      isOpen: true,
+      title: "Environmental Data",
+      legendList: [
+        {
+          type: "header",
+          text: "Weather Layers",
+          description: "Current weather conditions",
+          fontSize: 18,
+          fontWeight: "bold",
+        },
+        {
+          type: "group",
+          text: "Temperature Data",
+          description: "Temperature forecasts and historical data",
+          collapsed: false,
+          children: [
+            {
+              type: "layer",
+              layerPath: "weather/current-temp",
+              visible: true,
+            },
+            {
+              type: "layer",
+              layerPath: "weather/forecast-temp",
+              visible: false,
+            },
+          ],
+        },
+        {
+          type: "header",
+          text: "Administrative Boundaries",
+          fontSize: 16,
+        },
+        {
+          type: "layer",
+          layerPath: "boundaries/provinces",
+          visible: true,
+        },
+      ],
+    },
+  },
+];
+```
+
+**Nested Groups:**
+
+```typescript
+corePackagesConfig: [
+  {
+    "custom-legend": {
+      legendList: [
+        {
+          type: "group",
+          text: "Environmental",
+          collapsed: false,
+          children: [
+            {
+              type: "group",
+              text: "Weather",
+              collapsed: true,
+              children: [
+                {
+                  type: "layer",
+                  layerPath: "weather/temperature",
+                },
+                {
+                  type: "layer",
+                  layerPath: "weather/precipitation",
+                },
+              ],
+            },
+            {
+              type: "group",
+              text: "Air Quality",
+              collapsed: true,
+              children: [
+                {
+                  type: "layer",
+                  layerPath: "air-quality/pm25",
+                },
+                {
+                  type: "layer",
+                  layerPath: "air-quality/ozone",
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  },
+];
+```
+
+#### Notes
+
+- Layer paths must reference existing layers in your map configuration
+- Groups can be nested within other groups
+- Headers and groups support optional descriptions for additional context
+- The legend list order determines display order in the panel
 
 ---
 

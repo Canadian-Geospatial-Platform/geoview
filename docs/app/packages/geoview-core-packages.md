@@ -101,12 +101,6 @@ if (TimeSliderEventProcessor.isTimeSliderInitialized("mapId")) {
             "source": {
               "featureInfo": {
                 "queryable": true
-              },
-              "timeDimension": {
-                "field": "time",
-                "default": "2024-01-01",
-                "range": ["2024-01-01", "2024-12-31"],
-                "step": "P1D"
               }
             }
           }
@@ -119,7 +113,24 @@ if (TimeSliderEventProcessor.isTimeSliderInitialized("mapId")) {
       "core": ["time-slider"]
     },
     "selectedTab": "time-slider"
-  }
+  },
+  "corePackagesConfig": [
+    {
+      "time-slider": {
+        "sliders": [
+          {
+            "layerPaths": ["wmsTimeLayer/temperature"],
+            "timeDimension": {
+              "field": "time",
+              "default": ["2024-01-01"],
+              "range": ["2024-01-01", "2024-12-31"],
+              "step": "P1D"
+            }
+          }
+        ]
+      }
+    }
+  ]
 }
 ```
 
@@ -525,7 +536,7 @@ const geojson = DrawerEventProcessor.exportAsGeoJSON("mapId");
 
 ## 6. geoview-custom-legend
 
-**Description:** A package for creating custom legend configurations with advanced styling and filtering options.
+**Description:** A customizable legend panel that allows users to create highly customized legend layouts with headers, groups, and standard layer legends organized in a specific order.
 
 **Version:** 2.0.x
 
@@ -533,11 +544,13 @@ const geojson = DrawerEventProcessor.exportAsGeoJSON("mapId");
 
 **Features:**
 
-- Custom legend item styling
-- Advanced legend layouts
-- Legend filtering and grouping
-- Dynamic legend updates
-- Export legend as image
+- Custom legend organization with headers and groups
+- Collapsible group sections
+- Layer legend integration from GeoView core
+- Custom text descriptions for headers and groups
+- Configurable typography (font size, weight)
+- Nested group support
+- Layer visibility control
 
 **Dependencies:**
 
@@ -559,9 +572,329 @@ const geojson = DrawerEventProcessor.exportAsGeoJSON("mapId");
 }
 ```
 
-### Configuration Example
+### Configuration Schema
 
-... To come
+```typescript
+interface CustomLegendConfig {
+  // Optional
+  isOpen?: boolean;
+  title?: string;
+  legendList?: Array<TypeLegendItem>;
+  version?: string;
+}
+
+type TypeLegendItem = TypeLegendLayer | TypeHeaderLayer | TypeGroupLayer;
+
+interface TypeLegendLayer {
+  type: "layer";
+  layerPath: string;
+  visible?: boolean;
+}
+
+interface TypeHeaderLayer {
+  type: "header";
+  text: string;
+  description?: string;
+  fontSize?: number;
+  fontWeight?: "normal" | "bold";
+}
+
+interface TypeGroupLayer {
+  type: "group";
+  text: string;
+  description?: string;
+  collapsed?: boolean;
+  children: Array<TypeLegendItem>;
+}
+```
+
+### Configuration Properties
+
+**Root Configuration:**
+
+- **isOpen** (boolean, default: false): Initial panel open state
+- **title** (string): Custom title for the legend panel
+- **legendList** (array): Ordered list of legend items to display
+- **version** (string, default: "1.0"): Schema version
+
+**Legend Item Types:**
+
+1. **TypeLegendLayer** - Display a standard GeoView layer legend:
+   - **type** (required): Must be `"layer"`
+   - **layerPath** (required): Layer path identifying the layer (e.g., "layerId/sublayerId")
+   - **visible** (boolean, default: true): Initial visibility state
+
+2. **TypeHeaderLayer** - Display a text header for organizing sections:
+   - **type** (required): Must be `"header"`
+   - **text** (required): Header text to display
+   - **description** (optional): Descriptive text displayed below the header
+   - **fontSize** (number, range: 8-32, default: 16): Font size in pixels
+   - **fontWeight** (string, default: "bold"): Font weight ("normal" or "bold")
+
+3. **TypeGroupLayer** - Display a collapsible group of legend items:
+   - **type** (required): Must be `"group"`
+   - **text** (required): Group title text
+   - **description** (optional): Descriptive text displayed below the group title
+   - **collapsed** (boolean, default: false): Initial collapsed state
+   - **children** (required): Array of child legend items (minimum 1 item)
+
+### Configuration Examples
+
+**Basic Custom Legend:**
+
+```json
+{
+  "appBar": {
+    "tabs": {
+      "core": ["custom-legend"]
+    }
+  },
+  "corePackagesConfig": [
+    {
+      "custom-legend": {
+        "isOpen": false,
+        "title": "Map Layers",
+        "legendList": [
+          {
+            "type": "layer",
+            "layerPath": "weather-layer/temperature",
+            "visible": true
+          },
+          {
+            "type": "layer",
+            "layerPath": "weather-layer/precipitation",
+            "visible": false
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+**With Headers and Groups:**
+
+```json
+{
+  "appBar": {
+    "tabs": {
+      "core": ["custom-legend"]
+    }
+  },
+  "corePackagesConfig": [
+    {
+      "custom-legend": {
+        "isOpen": true,
+        "title": "Environmental Data",
+        "legendList": [
+          {
+            "type": "header",
+            "text": "Weather Layers",
+            "description": "Current weather conditions and forecasts",
+            "fontSize": 18,
+            "fontWeight": "bold"
+          },
+          {
+            "type": "group",
+            "text": "Temperature Data",
+            "description": "Temperature forecasts and historical data",
+            "collapsed": false,
+            "children": [
+              {
+                "type": "layer",
+                "layerPath": "weather/current-temp",
+                "visible": true
+              },
+              {
+                "type": "layer",
+                "layerPath": "weather/forecast-temp",
+                "visible": false
+              }
+            ]
+          },
+          {
+            "type": "header",
+            "text": "Administrative Boundaries",
+            "fontSize": 16
+          },
+          {
+            "type": "layer",
+            "layerPath": "boundaries/provinces",
+            "visible": true
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+**Nested Groups:**
+
+```json
+{
+  "appBar": {
+    "tabs": {
+      "core": ["custom-legend"]
+    }
+  },
+  "corePackagesConfig": [
+    {
+      "custom-legend": {
+        "title": "Advanced Legend",
+        "legendList": [
+          {
+            "type": "group",
+            "text": "Environmental",
+            "collapsed": false,
+            "children": [
+              {
+                "type": "group",
+                "text": "Weather",
+                "description": "Weather data layers",
+                "collapsed": true,
+                "children": [
+                  {
+                    "type": "layer",
+                    "layerPath": "weather/temperature"
+                  },
+                  {
+                    "type": "layer",
+                    "layerPath": "weather/precipitation"
+                  }
+                ]
+              },
+              {
+                "type": "group",
+                "text": "Air Quality",
+                "description": "Air quality monitoring",
+                "collapsed": true,
+                "children": [
+                  {
+                    "type": "layer",
+                    "layerPath": "air-quality/pm25"
+                  },
+                  {
+                    "type": "layer",
+                    "layerPath": "air-quality/ozone"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+### Usage Notes
+
+- **Layer Paths:** Must reference existing layers in your map configuration
+- **Groups:** Can be nested within other groups for hierarchical organization
+- **Headers:** Useful for visually separating sections of related layers
+- **Descriptions:** Optional text that provides additional context for headers and groups
+- **Order:** Legend items appear in the order specified in the `legendList` array
+- **Visibility:** Layer visibility can be toggled by users regardless of initial `visible` setting
+
+### Common Use Cases
+
+**1. Organizing by Data Type:**
+
+```json
+{
+  "legendList": [
+    {
+      "type": "header",
+      "text": "Satellite Imagery"
+    },
+    {
+      "type": "layer",
+      "layerPath": "satellite/2024"
+    },
+    {
+      "type": "layer",
+      "layerPath": "satellite/2020"
+    },
+    {
+      "type": "header",
+      "text": "Reference Layers"
+    },
+    {
+      "type": "layer",
+      "layerPath": "boundaries/provinces"
+    }
+  ]
+}
+```
+
+**2. Thematic Grouping:**
+
+```json
+{
+  "legendList": [
+    {
+      "type": "group",
+      "text": "Transportation",
+      "children": [
+        {
+          "type": "layer",
+          "layerPath": "transport/roads"
+        },
+        {
+          "type": "layer",
+          "layerPath": "transport/railways"
+        },
+        {
+          "type": "layer",
+          "layerPath": "transport/airports"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**3. Multi-Level Organization:**
+
+```json
+{
+  "legendList": [
+    {
+      "type": "group",
+      "text": "Base Maps",
+      "collapsed": false,
+      "children": [
+        {
+          "type": "group",
+          "text": "Topographic",
+          "children": [
+            {
+              "type": "layer",
+              "layerPath": "basemap/topo-light"
+            },
+            {
+              "type": "layer",
+              "layerPath": "basemap/topo-dark"
+            }
+          ]
+        },
+        {
+          "type": "group",
+          "text": "Satellite",
+          "children": [
+            {
+              "type": "layer",
+              "layerPath": "basemap/satellite"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
 
 ---
 
