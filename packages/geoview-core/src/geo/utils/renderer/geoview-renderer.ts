@@ -60,6 +60,10 @@ type TypeStyleProcessor = (
  */
 export type TypeStyleProcessorOptions = {
   filterEquation?: FilterNodeType[];
+
+  /** Indicates if we want to return the symbol even if the symbol visibility is false */
+  bypassVisibility?: boolean;
+
   domainsLookup?: TypeLayerMetadataFields[];
   aliasLookup?: TypeAliasLookup;
   visualVariables?: TypeLayerStyleVisualVariable[];
@@ -101,15 +105,13 @@ export abstract class GeoviewRenderer {
   /**
    * This method returns the type of geometry. It removes the Multi prefix because for the geoviewRenderer, a MultiPoint has
    * the same behaviour than a Point.
-   *
    * @param {FeatureLike} feature - The feature to check
-   *
+   * @param {TypeLayerStyleConfig} defaultLayerStyleConfig - The default layer style config to use when the feature has no geometry
    * @returns {TypeStyleGeometry} The type of geometry (Point, LineString, Polygon).
    * @static
    */
-  static getGeometryType(feature: FeatureLike): TypeStyleGeometry {
-    const geometryType = feature.getGeometry()?.getType();
-    if (!geometryType) throw new Error('Features must have a geometry type.');
+  static readGeometryTypeSimplified(feature: FeatureLike, defaultLayerStyleConfig: TypeLayerStyleConfig): TypeStyleGeometry {
+    const geometryType = feature.getGeometry()?.getType() ?? Object.keys(defaultLayerStyleConfig)[0];
     return (geometryType.startsWith('Multi') ? geometryType.slice(5) : geometryType) as TypeStyleGeometry;
   }
 
@@ -2000,7 +2002,7 @@ export abstract class GeoviewRenderer {
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
     // Read options
-    const { filterEquation, domainsLookup, aliasLookup, visualVariables } = options || {};
+    const { filterEquation, bypassVisibility, domainsLookup, aliasLookup, visualVariables } = options || {};
 
     // If feature doesn't respect filter, no style
     if (feature && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
@@ -2009,11 +2011,12 @@ export abstract class GeoviewRenderer {
       const { hasDefault, fields, info } = styleSettings;
       const styleEntry = this.searchUniqueValueEntry(fields, info, feature, domainsLookup, aliasLookup);
 
-      if (styleEntry && styleEntry.visible !== false) return this.processSimplePoint(styleEntry.settings, feature, { visualVariables });
+      if (styleEntry && (bypassVisibility || styleEntry.visible !== false))
+        return this.processSimplePoint(styleEntry.settings, feature, { visualVariables });
 
       // When using hasDefault, the last position is determinant in figuring out the style of an unprocessed feature
       // TODO: This should be changed, because some services will not have the 'others' in their last position
-      if (!styleEntry && hasDefault && styleSettings.info[styleSettings.info.length - 1].visible !== false)
+      if (!styleEntry && hasDefault && (bypassVisibility || styleSettings.info[styleSettings.info.length - 1].visible !== false))
         return this.processSimplePoint(styleSettings.info[styleSettings.info.length - 1].settings, feature, { visualVariables });
     }
     return undefined;
@@ -2034,7 +2037,7 @@ export abstract class GeoviewRenderer {
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
     // Read options
-    const { filterEquation, domainsLookup, aliasLookup, visualVariables } = options || {};
+    const { filterEquation, bypassVisibility, domainsLookup, aliasLookup, visualVariables } = options || {};
 
     // If feature doesn't respect filter, no style
     if (feature && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
@@ -2043,12 +2046,12 @@ export abstract class GeoviewRenderer {
       const { hasDefault, fields, info } = styleSettings;
       const styleEntry = this.searchUniqueValueEntry(fields, info, feature, domainsLookup, aliasLookup);
 
-      if (styleEntry && styleEntry.visible !== false)
+      if (styleEntry && (bypassVisibility || styleEntry.visible !== false))
         return this.processSimpleLineString(styleEntry.settings, feature, { visualVariables });
 
       // When using hasDefault, the last position is determinant in figuring out the style of an unprocessed feature
       // TODO: This should be changed, because some services will not have the 'others' in their last position
-      if (styleEntry === undefined && hasDefault && info[info.length - 1].visible !== false)
+      if (!styleEntry && hasDefault && (bypassVisibility || info[info.length - 1].visible !== false))
         return this.processSimpleLineString(info[info.length - 1].settings, feature, { visualVariables });
     }
     return undefined;
@@ -2069,7 +2072,7 @@ export abstract class GeoviewRenderer {
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
     // Read options
-    const { filterEquation, domainsLookup, aliasLookup, visualVariables } = options || {};
+    const { filterEquation, bypassVisibility, domainsLookup, aliasLookup, visualVariables } = options || {};
 
     // If feature doesn't respect filter, no style
     if (feature && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
@@ -2077,12 +2080,13 @@ export abstract class GeoviewRenderer {
     if (styleSettings.type === 'uniqueValue') {
       const { hasDefault, fields, info } = styleSettings;
       const styleEntry = this.searchUniqueValueEntry(fields, info, feature, domainsLookup, aliasLookup);
-      if (styleEntry !== undefined && styleEntry.visible !== false)
+
+      if (styleEntry && (bypassVisibility || styleEntry.visible !== false))
         return this.processSimplePolygon(styleEntry.settings, feature, { visualVariables });
 
       // When using hasDefault, the last position is determinant in figuring out the style of an unprocessed feature
       // TODO: This should be changed, because some services will not have the 'others' in their last position
-      if (styleEntry === undefined && hasDefault && info[info.length - 1].visible !== false)
+      if (!styleEntry && hasDefault && (bypassVisibility || info[info.length - 1].visible !== false))
         return this.processSimplePolygon(info[info.length - 1].settings, feature, { visualVariables });
     }
     return undefined;
@@ -2196,7 +2200,7 @@ export abstract class GeoviewRenderer {
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
     // Read options
-    const { filterEquation, aliasLookup, visualVariables } = options || {};
+    const { filterEquation, bypassVisibility, aliasLookup, visualVariables } = options || {};
 
     // If feature doesn't respect filter, no style
     if (feature && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
@@ -2206,13 +2210,13 @@ export abstract class GeoviewRenderer {
       const foundClassBreakInfo = feature && this.searchClassBreakEntry(fields[0], info, feature, aliasLookup);
 
       // If found a class break renderer that works for the value of the feature
-      if (foundClassBreakInfo && foundClassBreakInfo.visible !== false) {
+      if (foundClassBreakInfo && (bypassVisibility || foundClassBreakInfo.visible !== false)) {
         return this.processSimplePoint(foundClassBreakInfo.settings, feature, { visualVariables });
       }
 
       // When using hasDefault, the last position is determinant in figuring out the style of an unprocessed feature
       // TODO: This should be changed, because some services will not have the 'others' in their last position
-      if (!foundClassBreakInfo && hasDefault && info[info.length - 1].visible !== false) {
+      if (!foundClassBreakInfo && hasDefault && (bypassVisibility || info[info.length - 1].visible !== false)) {
         return this.processSimplePoint(info[info.length - 1].settings, feature, { visualVariables });
       }
     }
@@ -2234,7 +2238,7 @@ export abstract class GeoviewRenderer {
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
     // Read options
-    const { filterEquation, aliasLookup, visualVariables } = options || {};
+    const { filterEquation, bypassVisibility, aliasLookup, visualVariables } = options || {};
 
     // If feature doesn't respect filter, no style
     if (feature && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
@@ -2244,13 +2248,13 @@ export abstract class GeoviewRenderer {
       const foundClassBreakInfo = feature && this.searchClassBreakEntry(fields[0], info, feature, aliasLookup);
 
       // If found a class break renderer that works for the value of the feature
-      if (foundClassBreakInfo && foundClassBreakInfo.visible !== false) {
+      if (foundClassBreakInfo && (bypassVisibility || foundClassBreakInfo.visible !== false)) {
         return this.processSimpleLineString(foundClassBreakInfo.settings, feature, { visualVariables });
       }
 
       // When using hasDefault, the last position is determinant in figuring out the style of an unprocessed feature
       // TODO: This should be changed, because some services will not have the 'others' in their last position
-      if (!foundClassBreakInfo && hasDefault && info[info.length - 1].visible !== false) {
+      if (!foundClassBreakInfo && hasDefault && (bypassVisibility || info[info.length - 1].visible !== false)) {
         return this.processSimpleLineString(info[info.length - 1].settings, feature, { visualVariables });
       }
     }
@@ -2272,7 +2276,7 @@ export abstract class GeoviewRenderer {
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
     // Read options
-    const { filterEquation, aliasLookup, visualVariables } = options || {};
+    const { filterEquation, bypassVisibility, aliasLookup, visualVariables } = options || {};
 
     // If feature doesn't respect filter, no style
     if (feature && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
@@ -2282,13 +2286,13 @@ export abstract class GeoviewRenderer {
       const foundClassBreakInfo = feature && this.searchClassBreakEntry(fields[0], info, feature, aliasLookup);
 
       // If found a class break renderer that works for the value of the feature
-      if (foundClassBreakInfo && foundClassBreakInfo.visible !== false) {
+      if (foundClassBreakInfo && (bypassVisibility || foundClassBreakInfo.visible !== false)) {
         return this.processSimplePolygon(foundClassBreakInfo.settings, feature, { visualVariables });
       }
 
       // When using hasDefault, the last position is determinant in figuring out the style of an unprocessed feature
       // TODO: This should be changed, because some services will not have the 'others' in their last position
-      if (!foundClassBreakInfo && hasDefault && info[info.length - 1].visible !== false) {
+      if (!foundClassBreakInfo && hasDefault && (bypassVisibility || info[info.length - 1].visible !== false)) {
         return this.processSimplePolygon(info[info.length - 1].settings, feature, { visualVariables });
       }
     }
@@ -2300,7 +2304,7 @@ export abstract class GeoviewRenderer {
    * create it using the default style strategy.
    * @param {FeatureLike} feature - Feature that need its style to be defined.
    * @param {number} resolution - The resolution of the map
-   * @param {TypeStyleConfig} style - The style to use
+   * @param {TypeStyleConfig} layerStyle - The style to use
    * @param {string} label - The style label when one has to be created
    * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
    * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
@@ -2312,54 +2316,54 @@ export abstract class GeoviewRenderer {
   static getAndCreateFeatureStyle(
     feature: FeatureLike,
     resolution: number,
-    style: TypeLayerStyleConfig,
+    layerStyle: TypeLayerStyleConfig,
     label: string,
     filterEquation?: FilterNodeType[],
     aliasLookup?: TypeAliasLookup,
     layerText?: TypeLayerTextConfig,
     callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeLayerStyleConfigInfo) => void
   ): Style | undefined {
-    // Get the geometry type
-    const geometryType = this.getGeometryType(feature);
+    // Determine geometry type, favoring the feature itself
+    const geometryType = this.readGeometryTypeSimplified(feature, layerStyle);
 
-    // The style to work on
-    let styleWorkOn = style;
+    // Ensure a style exists for this geometry type
+    let styleSettings = layerStyle?.[geometryType];
 
-    // If style does not exist for the geometryType, create it.
-    if (!style || !style[geometryType]) {
-      // Create a style on-the-fly for the geometry type, because the layer config didn't have one already
-      const styleConfig = this.createDefaultStyle(geometryType, label);
+    if (!styleSettings) {
+      const createdStyle = this.createDefaultStyle(geometryType, label);
+      if (!createdStyle) return undefined;
 
-      // If a style has been created on-the-fly
-      if (styleConfig) {
-        if (style) styleWorkOn[geometryType] = styleConfig;
-        else styleWorkOn = { [geometryType]: styleConfig };
-        callbackWhenCreatingStyle?.(geometryType, styleConfig.info[0]);
-      }
+      // Mutate layerStyle intentionally: we are extending configuration
+      // eslint-disable-next-line no-param-reassign
+      layerStyle[geometryType] = createdStyle;
+      styleSettings = createdStyle;
+
+      callbackWhenCreatingStyle?.(geometryType, createdStyle.info[0]);
     }
 
-    // Get the style according to its type and geometry.
-    if (styleWorkOn[geometryType]) {
-      const styleSettings = style[geometryType]!;
-      const { type, visualVariables } = styleSettings;
-      const options: TypeStyleProcessorOptions = {
-        filterEquation,
-        aliasLookup,
-        visualVariables,
-      };
+    // Prepare style processor options
+    const options: TypeStyleProcessorOptions = {
+      filterEquation,
+      aliasLookup,
+      visualVariables: styleSettings.visualVariables,
+    };
 
-      // TODO: Refactor - Rewrite this to use explicit function calls instead, for clarity and references finding
-      const featureStyle = this.processStyle[type][geometryType](styleSettings, feature as Feature, options);
+    // Resolve style processor explicitly
+    const processor = this.processStyle[styleSettings.type]?.[geometryType];
+    if (!processor) return undefined;
 
-      const textStyle = GeoviewRenderer.getTextStyle(feature, resolution, styleSettings, layerText, aliasLookup);
-      if (textStyle && featureStyle) {
-        featureStyle.setText(textStyle);
-      }
+    // Create feature style
+    const featureStyle = processor(styleSettings, feature as Feature, options);
+    if (!featureStyle) return undefined;
 
-      return featureStyle;
+    // Apply text styling if applicable
+    const textStyle = GeoviewRenderer.getTextStyle(feature, resolution, styleSettings, layerText, aliasLookup);
+
+    if (textStyle) {
+      featureStyle.setText(textStyle);
     }
 
-    return undefined;
+    return featureStyle;
   }
 
   /**
@@ -2373,72 +2377,34 @@ export abstract class GeoviewRenderer {
    * @static
    */
   static getFeatureIconSource(
-    feature: Feature,
-    style: TypeLayerStyleConfig,
-    filterEquation?: FilterNodeType[],
-    domainsLookup?: TypeLayerMetadataFields[],
-    aliasLookup?: TypeAliasLookup
+    style: Style | undefined,
+    geometryType: TypeStyleGeometry,
+    styleSettings: TypeLayerStyleSettings | undefined
   ): string | undefined {
     // The image source that will be returned (if calculated successfully)
     let imageSource: string | undefined;
 
-    // GV: Sometimes, the feature will have no geometry e.g. esriDynamic as we fetch geometry only when needed
-    // GV: We need to extract geometry from style instead. For esriDynamic there is only one geometry at a time
-    // If the feature has a geometry or Style has a geometry
-    if (feature.getGeometry() || Object.keys(style)[0]) {
-      const geometryType = feature.getGeometry() ? this.getGeometryType(feature) : (Object.keys(style)[0] as TypeStyleGeometry);
-
-      // Get the style accordingly to its type and geometry.
-      if (style[geometryType]) {
-        const styleSettings = style[geometryType];
-        const { type, visualVariables } = styleSettings;
-
-        // TODO: Performance #2688 - Wrap the style processing in a Promise to prevent blocking, Use requestAnimationFrame to process style during next frame
-        // Wrap the style processing in a Promise to prevent blocking
-        // return new Promise((resolve) => {
-        //   // Use requestAnimationFrame to process style during next frame
-        //   requestAnimationFrame(() => {
-        //     const processedStyle = processStyle[type][geometryType](
-        //       styleSettings,
-        //       feature as Feature,
-        //       filterEquation,
-        //     );
-        //     resolve(processedStyle);
-        //   });
-        // });
-        const options: TypeStyleProcessorOptions = {
-          filterEquation,
-          domainsLookup,
-          aliasLookup,
-          visualVariables,
-        };
-
-        const featureStyle = this.processStyle[type][geometryType](styleSettings, feature, options);
-
-        if (featureStyle) {
-          if (geometryType === 'Point') {
-            if (
-              (styleSettings.type === 'simple' && !(featureStyle.getImage() instanceof Icon)) ||
-              (styleSettings.type === 'uniqueValue' && !(featureStyle.getImage() instanceof Icon)) ||
-              (styleSettings.type === 'classBreaks' && !(featureStyle.getImage() instanceof Icon))
-            ) {
-              imageSource = this.createPointCanvas(featureStyle).toDataURL();
-            } else {
-              imageSource = (featureStyle.getImage() as Icon).getSrc() || undefined;
-            }
-          } else if (geometryType === 'LineString') {
-            imageSource = this.createLineStringCanvas(featureStyle).toDataURL();
-          } else {
-            imageSource = this.createPolygonCanvas(featureStyle).toDataURL();
-          }
+    // If style and style settings are defined
+    if (style && styleSettings) {
+      if (geometryType === 'Point') {
+        if (
+          (styleSettings.type === 'simple' && !(style.getImage() instanceof Icon)) ||
+          (styleSettings.type === 'uniqueValue' && !(style.getImage() instanceof Icon)) ||
+          (styleSettings.type === 'classBreaks' && !(style.getImage() instanceof Icon))
+        ) {
+          imageSource = this.createPointCanvas(style).toDataURL();
+        } else {
+          imageSource = (style.getImage() as Icon).getSrc() || undefined;
         }
+      } else if (geometryType === 'LineString') {
+        imageSource = this.createLineStringCanvas(style).toDataURL();
+      } else {
+        imageSource = this.createPolygonCanvas(style).toDataURL();
       }
     }
 
-    // If set, all good
-    if (imageSource) return imageSource;
-
-    return undefined;
+    // Return the image source
+    return imageSource;
   }
 
   /**

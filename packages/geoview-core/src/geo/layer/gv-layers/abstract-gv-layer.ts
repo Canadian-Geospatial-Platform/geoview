@@ -1574,7 +1574,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * Caches results in the `imageSourceDict` to avoid redundant processing.
    * @param {Feature} feature - The feature whose visual representation is to be retrieved.
    * @param {TypeLayerStyleConfig} layerStyle - Style configuration grouped by geometry type (e.g., Point, LineString, Polygon).
-   * @param {OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig} layerConfig - The configuration for the layer containing the feature.
    * @param {TypeLayerMetadataFields[]?} domainsLookup - Optional domain information for interpreting coded values.
    * @param {Record<string, string>} aliasLookup - A mapping of original field names to their aliases.
    * @param {Record<string, string | undefined>} imageSourceDict - A dictionary used to cache and reuse image sources by style key.
@@ -1587,30 +1586,40 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     aliasLookup: Record<string, string>,
     imageSourceDict: Record<string, string | undefined>
   ): string | undefined {
-    const geometryType = feature.getGeometry()
-      ? (feature.getGeometry()!.getType() as TypeStyleGeometry)
-      : (Object.keys(layerStyle)[0] as TypeStyleGeometry);
+    // Read the simplified geometry type, favoring the feature itself
+    const geometryType = GeoviewRenderer.readGeometryTypeSimplified(feature, layerStyle);
+
+    // If no style for the geometry type
+    if (!layerStyle[geometryType]) {
+      // No style
+      return undefined;
+    }
+
+    // Read the style settings
+    const styleSettings = layerStyle[geometryType];
+    const { type } = styleSettings;
 
     // No filter equation, because we want the icon even if technically the feature would be filtered out
     const filterEquation = undefined;
 
-    if (!layerStyle[geometryType]) {
-      return GeoviewRenderer.getFeatureIconSource(feature, layerStyle, filterEquation, domainsLookup, aliasLookup);
-    }
+    // Bypass the class visibility, because we want the icon even if technically the feature class visibility is not visible
+    const bypassVisibility = true;
 
-    const styleSettings = layerStyle[geometryType];
-    const { type } = styleSettings;
-
+    // Create the options to process the style
     const options: TypeStyleProcessorOptions = {
       filterEquation,
+      bypassVisibility,
       domainsLookup,
       aliasLookup,
     };
 
+    // Process the feature style
     const featureStyle = GeoviewRenderer.processStyle[type][geometryType](styleSettings, feature, options);
 
+    // If no feature style generated
     if (!featureStyle) {
-      return GeoviewRenderer.getFeatureIconSource(feature, layerStyle, filterEquation, domainsLookup, aliasLookup);
+      // No style
+      return undefined;
     }
 
     // Clone the style
@@ -1620,9 +1629,10 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
     if (!imageSourceDict[styleKey]) {
       // eslint-disable-next-line no-param-reassign
-      imageSourceDict[styleKey] = GeoviewRenderer.getFeatureIconSource(feature, layerStyle, filterEquation, domainsLookup, aliasLookup);
+      imageSourceDict[styleKey] = GeoviewRenderer.getFeatureIconSource(featureStyle, geometryType, styleSettings);
     }
 
+    // Return the style
     return imageSourceDict[styleKey];
   }
 
