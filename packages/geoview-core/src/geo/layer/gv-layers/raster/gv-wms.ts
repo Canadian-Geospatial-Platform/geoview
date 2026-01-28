@@ -264,6 +264,8 @@ export class GVWMS extends AbstractGVRaster {
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
    * @throws {NetworkError} When a network issue happened.
+   * @protected
+   * @override
    */
   protected override getAllFeatureInfo(
     map: OLMap,

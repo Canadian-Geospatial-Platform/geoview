@@ -656,6 +656,8 @@ export abstract class GeoviewRenderer {
    * @param {FilterNodeType[]} operators - Operator stack.
    * @param {FilterNodeType[]} values - Value stack.
    * @returns {void}
+   * @static
+   * @private
    */
   static #frfeHandleGroupToken(token: FilterNodeType, operators: FilterNodeType[], values: FilterNodeType[]): void {
     if (token.nodeValue === '(') {
@@ -680,6 +682,8 @@ export abstract class GeoviewRenderer {
    * @param {FilterNodeType} token - Operator token to push.
    * @param {FilterNodeType[]} operators - Operator stack.
    * @param {FilterNodeType[]} values - Value stack.
+   * @static
+   * @private
    */
   static #frfePushOperator(token: FilterNodeType, operators: FilterNodeType[], values: FilterNodeType[]): void {
     // Unary operators are pushed directly
@@ -705,6 +709,8 @@ export abstract class GeoviewRenderer {
    * @param {FilterNodeType[]} operators - Operator stack.
    * @param {FilterNodeType[]} values - Value stack.
    * @returns {void}
+   * @static
+   * @private
    */
   static #frfeDrainOperators(operators: FilterNodeType[], values: FilterNodeType[]): void {
     while (operators.length && operators.at(-1)?.nodeValue !== '(') {
@@ -723,6 +729,8 @@ export abstract class GeoviewRenderer {
    * @param {number} index - Index of the current token.
    * @returns {void}
    * @throws {Error} If the syntax is invalid.
+   * @static
+   * @private
    */
   static #frfeValidateUnarySyntax(token: FilterNodeType, equation: FilterNodeType[], index: number): void {
     if (
@@ -738,6 +746,8 @@ export abstract class GeoviewRenderer {
    * Higher numbers indicate higher precedence.
    * @param {FilterNodeType} token - Operator token.
    * @returns {number} Operator priority, or -1 if not found.
+   * @static
+   * @private
    */
   static #frfeGetPriority(token: FilterNodeType): number {
     return operatorPriority.find((p) => p.key === token.nodeValue)?.priority ?? -1;

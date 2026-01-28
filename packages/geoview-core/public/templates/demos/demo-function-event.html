@@ -258,6 +258,15 @@
             CSV.&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;'});</code
           >
         </li>
+        <li>
+          <button class="btn btn-primary" id="Get-Current-Filters">Get the current filters</button><br />
+          <code>cgpv.api.getMapViewer('map1').layer.getGeoviewLayer('geojsonLYR1/base-group/polygons.json').getLayerFilters().getAllFilters();</code>
+          <code>cgpv.api.getMapViewer('map1').layer.getGeoviewLayer('geojsonLYR1/base-group/polygons.json').getLayerFilters().getInitialFilter();</code>
+          <code>cgpv.api.getMapViewer('map1').layer.getGeoviewLayer('geojsonLYR1/base-group/polygons.json').getLayerFilters().getClassFilter();</code>
+          <code>cgpv.api.getMapViewer('map1').layer.getGeoviewLayer('geojsonLYR1/base-group/polygons.json').getLayerFilters().getDataFilter();</code>
+          <code>cgpv.api.getMapViewer('map1').layer.getGeoviewLayer('geojsonLYR1/base-group/polygons.json').getLayerFilters().getTimeFilter();</code>
+          <code>cgpv.api.getMapViewer('map1').layer.getGeoviewLayer('geojsonLYR1/base-group/polygons.json').getLayerFilters().getFilterEquation();</code>
+        </li>
       </ul>
     </div>
 
@@ -550,6 +559,7 @@
       const zoomToMarkersButton = document.getElementById('Zoom-to-markers');
       const zoomToMarkerGroupButton = document.getElementById('Zoom-to-marker-group');
       const createFooterTabButton = document.getElementById('Create-footer-tab');
+      const getCurrentFiltersButton = document.getElementById('Get-Current-Filters');
       const proj = document.getElementById('Dist-proj');
       const geometryString = document.getElementById('Dist-geom');
 
@@ -866,6 +876,12 @@
           label: 'My Custom Tab',
           content: '<br><div><ul><li>How to export map coordinate data to: GeoJSON, or CSV.</li></ul></div>',
         });
+      });
+
+      // Get-Current-Filters Button================================================================================================
+      // add an event listener when a button is clicked
+      getCurrentFiltersButton.addEventListener('click', () => {
+        console.log(cgpv.api.getMapViewer('map1').layer.getGeoviewLayer('geojsonLYR1/base-group/polygons.json').getLayerFilters().getAllFilters());
       });
 
       // add an event listener when a layer path filter input is changed
