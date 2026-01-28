@@ -140,8 +140,9 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param {LayerFilters} layerFilters - The layer filters to apply when querying the features.
    * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   * @protected
+   * @override
    */
-
   protected override getAllFeatureInfo(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     map: OLMap,

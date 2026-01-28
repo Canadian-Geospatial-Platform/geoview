@@ -386,6 +386,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
    * @throws {NotImplementedError} When the function isn't overridden by the children class.
+   * @protected
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected getAllFeatureInfo(map: OLMap, layerFilters: LayerFilters, abortController?: AbortController): Promise<TypeFeatureInfoEntry[]> {
