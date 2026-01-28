@@ -82,6 +82,9 @@ export abstract class GeoviewRenderer {
   static DEFAULT_FILTER_1EQUALS1: string = '(1=1)';
   static DEFAULT_FILTER_1EQUALS0: string = '(1=0)';
 
+  /** Unary operators for the featureRespectsFilterEquation function */
+  static readonly #UNARY_OPERATORS = new Set(['not', 'upper', 'lower']);
+
   /**
    * Get the default color using the default color index.
    *
@@ -572,83 +575,180 @@ export abstract class GeoviewRenderer {
   }
 
   /**
-   * Use the filter equation and the feature fields to determine if the feature is visible.
-   *
-   * @param {Feature} feature - Feature used to find the visibility value to return.
-   * @param {FilterNodeType[]} filterEquation - Filter used to find the visibility value to return.
-   *
-   * @returns {boolean | undefined} The visibility flag for the feature specified.
+   * Evaluates whether a feature satisfies a parsed filter equation.
+   * The filter equation is expected to be in infix order and is evaluated using
+   * a stack-based (shunting-yard–style) algorithm that respects operator
+   * precedence and grouping.
+   * @param {Feature} feature - The feature whose attributes are used to resolve variable nodes.
+   * @param {FilterNodeType[] | undefined} [filterEquation] - Parsed filter expression tokens.
+   * @returns {boolean | undefined} True if the feature satisfies the filter, false otherwise.
+   * @throws {Error} If the filter expression is invalid or cannot be evaluated.
    * @static
    */
-  static featureIsNotVisible(feature: Feature, filterEquation: FilterNodeType[]): boolean | undefined {
-    const operatorStack: FilterNodeType[] = [];
-    const dataStack: FilterNodeType[] = [];
+  static featureRespectsFilterEquation(feature: Feature, filterEquation?: FilterNodeType[]): boolean {
+    // No filter means the feature is visible by default
+    if (!filterEquation?.length) return true;
 
-    const operatorAt = (index: number, stack: FilterNodeType[]): FilterNodeType | undefined => {
-      if (index < 0 && stack.length + index >= 0) return stack[stack.length + index];
-      if (index > 0 && index < stack.length) return stack[index];
-      return undefined;
-    };
+    // Operator stack (AND, OR, =, LIKE, etc.)
+    const operators: FilterNodeType[] = [];
 
-    const findPriority = (target: FilterNodeType): number => {
-      const i = operatorPriority.findIndex((element) => element.key === target.nodeValue);
-      if (i === -1) return -1;
-      return operatorPriority[i].priority;
-    };
+    // Value stack (resolved variables, literals, intermediate results)
+    const values: FilterNodeType[] = [];
 
     try {
       for (let i = 0; i < filterEquation.length; i++) {
-        if (filterEquation[i].nodeType === NodeType.variable) {
-          const fieldValue = feature.get(filterEquation[i].nodeValue as string);
-          dataStack.push({ nodeType: NodeType.variable, nodeValue: fieldValue || null });
-        } else if ([NodeType.string, NodeType.number].includes(filterEquation[i].nodeType)) dataStack.push({ ...filterEquation[i] });
-        else if (filterEquation[i].nodeType === NodeType.group)
-          if (filterEquation[i].nodeValue === '(') {
-            operatorStack.push({ ...filterEquation[i] });
-            dataStack.push({ ...filterEquation[i] });
-          } else {
-            let operatorOnTop1 = operatorAt(-1, operatorStack);
-            for (; operatorOnTop1 && operatorOnTop1.nodeValue !== '('; this.executeOperator(operatorStack.pop()!, dataStack))
-              operatorOnTop1 = operatorAt(-2, operatorStack);
-            operatorStack.pop();
-            if (operatorOnTop1 && operatorOnTop1.nodeValue === '(') {
-              const dataOnTop = dataStack.pop();
-              dataStack.pop();
-              dataStack.push(dataOnTop!);
-            }
-          }
-        else {
-          // Validate the UPPER and LOWER syntax (i.e.: must be followed by an opening parenthesis)
-          if (
-            ['upper', 'lower'].includes(filterEquation[i].nodeValue as string) &&
-            (filterEquation.length === i + 1 ||
-              (filterEquation[i + 1].nodeType !== NodeType.group && filterEquation[i + 1].nodeValue !== '('))
-          )
-            throw new Error(`Invalid vector layer filter (${(filterEquation[i].nodeValue as string).toUpperCase()} syntax error).`);
+        const token = filterEquation[i];
 
-          for (
-            let operatorOnTop2 = operatorAt(-1, operatorStack);
-            operatorOnTop2 && operatorOnTop2.nodeValue !== '(' && findPriority(operatorOnTop2) > findPriority(filterEquation[i]);
-            this.executeOperator(operatorStack.pop()!, dataStack)
-          )
-            operatorOnTop2 = operatorAt(-2, operatorStack);
-          operatorStack.push({ ...filterEquation[i] });
+        switch (token.nodeType) {
+          case NodeType.variable: {
+            // Resolve variable against feature attributes
+            const fieldValue = feature.get(token.nodeValue as string);
+
+            // Use nullish coalescing to preserve valid falsy values (0, false, '')
+            values.push({
+              nodeType: NodeType.variable,
+              nodeValue: fieldValue ?? null,
+            });
+            break;
+          }
+
+          case NodeType.string:
+          case NodeType.number:
+            // Literal values are pushed directly to the value stack
+            values.push({ ...token });
+            break;
+
+          case NodeType.group:
+            // Handle opening and closing parentheses
+            this.#frfeHandleGroupToken(token, operators, values);
+            break;
+
+          default:
+            // Validate syntax for unary operators like UPPER() and LOWER()
+            this.#frfeValidateUnarySyntax(token, filterEquation, i);
+
+            // Push operator while respecting precedence rules
+            this.#frfePushOperator(token, operators, values);
         }
       }
-      for (
-        let operatorOnTop3 = operatorAt(-1, operatorStack);
-        operatorOnTop3 && operatorOnTop3.nodeValue !== '(';
-        this.executeOperator(operatorStack.pop()!, dataStack)
-      )
-        operatorOnTop3 = operatorAt(-2, operatorStack);
-      operatorStack.pop();
-    } catch (error: unknown) {
-      throw new Error(`Invalid vector layer filter (${error}.`);
+
+      // Drain any remaining operators once all tokens are processed
+      this.#frfeDrainOperators(operators, values);
+    } catch (err) {
+      // Normalize error messages and preserve readability
+      const message = err instanceof Error ? err.message : String(err);
+      throw new Error(`Invalid vector layer filter (${message})`);
     }
-    if (dataStack.length !== 1 || dataStack[0].nodeType !== NodeType.variable)
-      throw new Error(`Invalid vector layer filter (invalid structure).`);
-    const dataStackTop = dataStack.pop();
-    return dataStackTop ? !(dataStackTop.nodeValue as boolean) : undefined;
+
+    // A valid expression must result in exactly one value on the stack
+    if (values.length !== 1 || values[0].nodeType !== NodeType.variable) {
+      throw new Error(`Invalid vector layer filter (invalid structure)`);
+    }
+
+    // Final result must be boolean; Boolean() enforces truthiness semantics
+    return Boolean(values[0].nodeValue);
+  }
+
+  /**
+   * Handles opening and closing group tokens (parentheses).
+   *
+   * Opening parenthesis is pushed onto both stacks as a marker.
+   * Closing parenthesis triggers execution of operators until the
+   * matching opening parenthesis is encountered.
+   *
+   * @param {FilterNodeType} token - The group token ('(' or ')').
+   * @param {FilterNodeType[]} operators - Operator stack.
+   * @param {FilterNodeType[]} values - Value stack.
+   */
+  static #frfeHandleGroupToken(token: FilterNodeType, operators: FilterNodeType[], values: FilterNodeType[]): void {
+    if (token.nodeValue === '(') {
+      // Parentheses are control tokens only
+      operators.push(token);
+      return;
+    }
+
+    // Execute until matching '('
+    while (operators.length && operators.at(-1)?.nodeValue !== '(') {
+      this.executeOperator(operators.pop()!, values);
+    }
+
+    // Remove '(' from operator stack
+    operators.pop();
+  }
+
+  /**
+   * Pushes an operator onto the operator stack while respecting precedence.
+   *
+   * Operators with higher precedence already on the stack are executed
+   * before pushing the new operator.
+   *
+   * @param {FilterNodeType} token - Operator token to push.
+   * @param {FilterNodeType[]} operators - Operator stack.
+   * @param {FilterNodeType[]} values - Value stack.
+   */
+  static #frfePushOperator(token: FilterNodeType, operators: FilterNodeType[], values: FilterNodeType[]): void {
+    // Unary operators are pushed directly
+    if (this.#UNARY_OPERATORS.has(token.nodeValue as string)) {
+      operators.push(token);
+      return;
+    }
+
+    // Binary operator precedence handling
+    while (
+      operators.length &&
+      operators.at(-1)?.nodeValue !== '(' &&
+      this.#frfeGetPriority(operators.at(-1)!) > this.#frfeGetPriority(token)
+    ) {
+      this.executeOperator(operators.pop()!, values);
+    }
+
+    operators.push(token);
+  }
+
+  /**
+   * Executes all remaining operators after token processing is complete.
+   *
+   * @param {FilterNodeType[]} operators - Operator stack.
+   * @param {FilterNodeType[]} values - Value stack.
+   */
+  static #frfeDrainOperators(operators: FilterNodeType[], values: FilterNodeType[]): void {
+    while (operators.length && operators.at(-1)?.nodeValue !== '(') {
+      this.executeOperator(operators.pop()!, values);
+    }
+
+    // Remove any leftover '(' marker
+    operators.pop();
+  }
+
+  /**
+   * Validates syntax rules for unary operators such as UPPER() and LOWER().
+   *
+   * These operators must be immediately followed by an opening parenthesis.
+   *
+   * @param {FilterNodeType} token - The operator token.
+   * @param {FilterNodeType[]} equation - Full filter equation token list.
+   * @param {number} index - Index of the current token.
+   * @throws {Error} If the syntax is invalid.
+   */
+  static #frfeValidateUnarySyntax(token: FilterNodeType, equation: FilterNodeType[], index: number): void {
+    if (
+      ['upper', 'lower'].includes(token.nodeValue as string) &&
+      (!equation[index + 1] || equation[index + 1].nodeType !== NodeType.group || equation[index + 1].nodeValue !== '(')
+    ) {
+      throw new Error(`${String(token.nodeValue).toUpperCase()} syntax error`);
+    }
+  }
+
+  /**
+   * Returns the precedence priority of an operator.
+   *
+   * Higher numbers indicate higher precedence.
+   *
+   * @param {FilterNodeType} token - Operator token.
+   * @returns {number} Operator priority, or -1 if not found.
+   */
+  static #frfeGetPriority(token: FilterNodeType): number {
+    return operatorPriority.find((p) => p.key === token.nodeValue)?.priority ?? -1;
   }
 
   // #region PROCESS RENDERER
@@ -850,10 +950,15 @@ export abstract class GeoviewRenderer {
     feature?: Feature,
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
-    const { filterEquation, visualVariables } = options || {};
+    // If no feature, no style
+    debugger;
+    if (!feature) return undefined;
 
-    if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
-      if (this.featureIsNotVisible(feature, filterEquation)) return undefined;
+    // Read options
+    const { filterEquation, bypassVisibility, visualVariables } = options || {};
+
+    // If feature doesn't respect filter, no style
+    if (!bypassVisibility && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
 
     const settings = (styleSettings.type === 'simple' ? styleSettings.info[0].settings : styleSettings) as TypeKindOfVectorSettings;
     let style: Style | undefined;
@@ -867,7 +972,7 @@ export abstract class GeoviewRenderer {
     // Apply visual variables if feature and style exist
     const visualVarsToApply = visualVariables || ('visualVariables' in styleSettings ? styleSettings.visualVariables : undefined);
 
-    if (style && feature && visualVarsToApply) {
+    if (style && visualVarsToApply) {
       style = this.#applyVisualVariables(style, feature, visualVarsToApply);
     }
 
@@ -889,16 +994,18 @@ export abstract class GeoviewRenderer {
     feature?: Feature,
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
-    const { filterEquation, visualVariables } = options || {};
+    // If no feature, no style
+    if (!feature) return undefined;
 
-    if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
-      if (this.featureIsNotVisible(feature, filterEquation)) return undefined;
+    // Read options
+    const { filterEquation, bypassVisibility, visualVariables } = options || {};
+
+    // If feature doesn't respect filter, no style
+    if (!bypassVisibility && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
 
     const settings = (styleSettings.type === 'simple' ? styleSettings.info[0].settings : styleSettings) as TypeKindOfVectorSettings;
-    let geometry;
-    if (feature) {
-      geometry = feature.getGeometry() as Geometry;
-    }
+    const geometry = feature.getGeometry() as Geometry;
+
     let style: Style | undefined;
     if (isLineStringVectorConfig(settings)) {
       const strokeOptions: StrokeOptions = this.createStrokeOptions(settings);
@@ -908,7 +1015,7 @@ export abstract class GeoviewRenderer {
     // Apply visual variables if feature and style exist
     const visualVarsToApply = visualVariables || ('visualVariables' in styleSettings ? styleSettings.visualVariables : undefined);
 
-    if (style && feature && visualVarsToApply) {
+    if (style && visualVarsToApply) {
       style = this.#applyVisualVariables(style, feature, visualVarsToApply);
     }
 
@@ -1127,16 +1234,18 @@ export abstract class GeoviewRenderer {
     feature?: Feature,
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
-    const { filterEquation, visualVariables } = options || {};
+    // If no feature, no style
+    if (!feature) return undefined;
 
-    if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
-      if (this.featureIsNotVisible(feature, filterEquation)) return undefined;
+    // Read options
+    const { filterEquation, bypassVisibility, visualVariables } = options || {};
+
+    // If feature doesn't respect filter, no style
+    if (!bypassVisibility && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
 
     const settings = (styleSettings.type === 'simple' ? styleSettings.info[0].settings : styleSettings) as TypeKindOfVectorSettings;
-    let geometry;
-    if (feature) {
-      geometry = feature.getGeometry() as Geometry;
-    }
+    const geometry = feature.getGeometry() as Geometry;
+
     let style: Style | undefined;
     if (isFilledPolygonVectorConfig(settings)) {
       const { fillStyle } = settings; // TODO: refactor - introduce by moving to config map schema type
@@ -1904,25 +2013,24 @@ export abstract class GeoviewRenderer {
     feature?: Feature,
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
+    // If no feature, no style
+    if (!feature) return undefined;
+
+    // Read options
     const { filterEquation, bypassVisibility, domainsLookup, aliasLookup, visualVariables } = options || {};
 
-    if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
-      if (this.featureIsNotVisible(feature, filterEquation)) return undefined;
+    // If feature doesn't respect filter, no style
+    if (!bypassVisibility && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
 
     if (styleSettings.type === 'uniqueValue') {
       const { hasDefault, fields, info } = styleSettings;
       const styleEntry = this.searchUniqueValueEntry(fields, info, feature, domainsLookup, aliasLookup);
 
-      if (styleEntry !== undefined && (bypassVisibility || styleEntry.visible !== false))
-        return this.processSimplePoint(styleEntry.settings, feature, { visualVariables });
+      if (styleEntry && styleEntry.visible !== false) return this.processSimplePoint(styleEntry.settings, feature, { visualVariables });
 
       // When using hasDefault, the last position is determinant in figuring out the style of an unprocessed feature
       // TODO: This should be changed, because some services will not have the 'others' in their last position
-      if (
-        styleEntry === undefined &&
-        hasDefault &&
-        (bypassVisibility || styleSettings.info[styleSettings.info.length - 1].visible !== false)
-      )
+      if (!styleEntry && hasDefault && styleSettings.info[styleSettings.info.length - 1].visible !== false)
         return this.processSimplePoint(styleSettings.info[styleSettings.info.length - 1].settings, feature, { visualVariables });
     }
     return undefined;
@@ -1942,21 +2050,25 @@ export abstract class GeoviewRenderer {
     feature?: Feature,
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
+    // If no feature, no style
+    if (!feature) return undefined;
+
+    // Read options
     const { filterEquation, bypassVisibility, domainsLookup, aliasLookup, visualVariables } = options || {};
 
-    if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
-      if (this.featureIsNotVisible(feature, filterEquation)) return undefined;
+    // If feature doesn't respect filter, no style
+    if (!bypassVisibility && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
 
     if (styleSettings.type === 'uniqueValue') {
       const { hasDefault, fields, info } = styleSettings;
       const styleEntry = this.searchUniqueValueEntry(fields, info, feature, domainsLookup, aliasLookup);
 
-      if (styleEntry !== undefined && (bypassVisibility || styleEntry.visible !== false))
+      if (styleEntry && styleEntry.visible !== false)
         return this.processSimpleLineString(styleEntry.settings, feature, { visualVariables });
 
       // When using hasDefault, the last position is determinant in figuring out the style of an unprocessed feature
       // TODO: This should be changed, because some services will not have the 'others' in their last position
-      if (styleEntry === undefined && hasDefault && (bypassVisibility || info[info.length - 1].visible !== false))
+      if (styleEntry === undefined && hasDefault && info[info.length - 1].visible !== false)
         return this.processSimpleLineString(info[info.length - 1].settings, feature, { visualVariables });
     }
     return undefined;
@@ -1976,20 +2088,24 @@ export abstract class GeoviewRenderer {
     feature?: Feature,
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
+    // If no feature, no style
+    if (!feature) return undefined;
+
+    // Read options
     const { filterEquation, bypassVisibility, domainsLookup, aliasLookup, visualVariables } = options || {};
 
-    if (filterEquation !== undefined && filterEquation.length !== 0 && feature)
-      if (this.featureIsNotVisible(feature, filterEquation)) return undefined;
+    // If feature doesn't respect filter, no style
+    if (!bypassVisibility && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
 
     if (styleSettings.type === 'uniqueValue') {
       const { hasDefault, fields, info } = styleSettings;
       const styleEntry = this.searchUniqueValueEntry(fields, info, feature, domainsLookup, aliasLookup);
-      if (styleEntry !== undefined && (bypassVisibility || styleEntry.visible !== false))
+      if (styleEntry !== undefined && styleEntry.visible !== false)
         return this.processSimplePolygon(styleEntry.settings, feature, { visualVariables });
 
       // When using hasDefault, the last position is determinant in figuring out the style of an unprocessed feature
       // TODO: This should be changed, because some services will not have the 'others' in their last position
-      if (styleEntry === undefined && hasDefault && (bypassVisibility || info[info.length - 1].visible !== false))
+      if (styleEntry === undefined && hasDefault && info[info.length - 1].visible !== false)
         return this.processSimplePolygon(info[info.length - 1].settings, feature, { visualVariables });
     }
     return undefined;
@@ -2102,24 +2218,27 @@ export abstract class GeoviewRenderer {
     feature?: Feature,
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
+    // If no feature, no style
+    if (!feature) return undefined;
+
+    // Read options
     const { filterEquation, bypassVisibility, aliasLookup, visualVariables } = options || {};
 
-    if (filterEquation !== undefined && filterEquation.length !== 0 && feature) {
-      if (this.featureIsNotVisible(feature, filterEquation)) return undefined;
-    }
+    // If feature doesn't respect filter, no style
+    if (!bypassVisibility && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
 
     if (styleSettings.type === 'classBreaks') {
       const { hasDefault, fields, info } = styleSettings;
-      const foundClassBreakInfo = this.searchClassBreakEntry(fields[0], info, feature!, aliasLookup);
+      const foundClassBreakInfo = this.searchClassBreakEntry(fields[0], info, feature, aliasLookup);
 
       // If found a class break renderer that works for the value of the feature
-      if (foundClassBreakInfo && (bypassVisibility || foundClassBreakInfo.visible !== false)) {
+      if (foundClassBreakInfo && foundClassBreakInfo.visible !== false) {
         return this.processSimplePoint(foundClassBreakInfo.settings, feature, { visualVariables });
       }
 
       // When using hasDefault, the last position is determinant in figuring out the style of an unprocessed feature
       // TODO: This should be changed, because some services will not have the 'others' in their last position
-      if (!foundClassBreakInfo && hasDefault && (bypassVisibility || info[info.length - 1].visible !== false)) {
+      if (!foundClassBreakInfo && hasDefault && info[info.length - 1].visible !== false) {
         return this.processSimplePoint(info[info.length - 1].settings, feature, { visualVariables });
       }
     }
@@ -2140,23 +2259,27 @@ export abstract class GeoviewRenderer {
     feature?: Feature,
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
+    // If no feature, no style
+    if (!feature) return undefined;
+
+    // Read options
     const { filterEquation, bypassVisibility, aliasLookup, visualVariables } = options || {};
-    if (filterEquation !== undefined && filterEquation.length !== 0 && feature) {
-      if (this.featureIsNotVisible(feature, filterEquation)) return undefined;
-    }
+
+    // If feature doesn't respect filter, no style
+    if (!bypassVisibility && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
 
     if (styleSettings.type === 'classBreaks') {
       const { hasDefault, fields, info } = styleSettings;
-      const foundClassBreakInfo = this.searchClassBreakEntry(fields[0], info, feature!, aliasLookup);
+      const foundClassBreakInfo = this.searchClassBreakEntry(fields[0], info, feature, aliasLookup);
 
       // If found a class break renderer that works for the value of the feature
-      if (foundClassBreakInfo && (bypassVisibility || foundClassBreakInfo.visible !== false)) {
+      if (foundClassBreakInfo && foundClassBreakInfo.visible !== false) {
         return this.processSimpleLineString(foundClassBreakInfo.settings, feature, { visualVariables });
       }
 
       // When using hasDefault, the last position is determinant in figuring out the style of an unprocessed feature
       // TODO: This should be changed, because some services will not have the 'others' in their last position
-      if (!foundClassBreakInfo && hasDefault && (bypassVisibility || info[info.length - 1].visible !== false)) {
+      if (!foundClassBreakInfo && hasDefault && info[info.length - 1].visible !== false) {
         return this.processSimpleLineString(info[info.length - 1].settings, feature, { visualVariables });
       }
     }
@@ -2177,24 +2300,27 @@ export abstract class GeoviewRenderer {
     feature?: Feature,
     options?: TypeStyleProcessorOptions
   ): Style | undefined {
+    // If no feature, no style
+    if (!feature) return undefined;
+
+    // Read options
     const { filterEquation, bypassVisibility, aliasLookup, visualVariables } = options || {};
 
-    if (filterEquation !== undefined && filterEquation.length !== 0 && feature) {
-      if (this.featureIsNotVisible(feature, filterEquation)) return undefined;
-    }
+    // If feature doesn't respect filter, no style
+    if (!bypassVisibility && !this.featureRespectsFilterEquation(feature, filterEquation)) return undefined;
 
     if (styleSettings.type === 'classBreaks') {
       const { hasDefault, fields, info } = styleSettings;
-      const foundClassBreakInfo = this.searchClassBreakEntry(fields[0], info, feature!, aliasLookup);
+      const foundClassBreakInfo = this.searchClassBreakEntry(fields[0], info, feature, aliasLookup);
 
       // If found a class break renderer that works for the value of the feature
-      if (foundClassBreakInfo && (bypassVisibility || foundClassBreakInfo.visible !== false)) {
+      if (foundClassBreakInfo && foundClassBreakInfo.visible !== false) {
         return this.processSimplePolygon(foundClassBreakInfo.settings, feature, { visualVariables });
       }
 
       // When using hasDefault, the last position is determinant in figuring out the style of an unprocessed feature
       // TODO: This should be changed, because some services will not have the 'others' in their last position
-      if (!foundClassBreakInfo && hasDefault && (bypassVisibility || info[info.length - 1].visible !== false)) {
+      if (!foundClassBreakInfo && hasDefault && info[info.length - 1].visible !== false) {
         return this.processSimplePolygon(info[info.length - 1].settings, feature, { visualVariables });
       }
     }
