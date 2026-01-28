@@ -310,6 +310,8 @@ function ModalUI(props: DialogPropsExtend): JSX.Element {
   return (
     (modalProps && createdModal(modalProps)) || (
       <Dialog
+        disableAutoFocus
+        disableRestoreFocus
         open={open}
         onClose={onClose}
         maxWidth="xl"

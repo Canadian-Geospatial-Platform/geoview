@@ -14,14 +14,9 @@ import { logger } from '@/core/utils/logger';
 import { ArrowBackIcon, ArrowForwardIcon, CloseIcon, QuestionMarkIcon } from '@/ui/icons';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useAppGuide, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
-import {
-  useUIActiveTrapGeoView,
-  useUISelectedFooterLayerListItemId,
-  useUIActiveFocusItem,
-} from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIActiveTrapGeoView, useUIActiveFocusItem } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
-import { handleEscapeKey } from '@/core/utils/utilities';
 import { FocusTrap } from '@/ui';
 
 interface ResponsiveGridLayoutProps {
@@ -85,7 +80,6 @@ const ResponsiveGridLayout = forwardRef(
     // Store
     const mapId = useGeoViewMapId();
     const guide = useAppGuide();
-    const selectedFooterLayerListItemId = useUISelectedFooterLayerListItemId();
     const isFocusTrap = useUIActiveTrapGeoView();
     const focusItem = useUIActiveFocusItem();
 
@@ -113,20 +107,12 @@ const ResponsiveGridLayout = forwardRef(
           setRightPanelFocus: () => {
             if (isGuideOpen) return;
 
-            // Focus close button if available, otherwise focus main content
-            if (closeBtnRef.current) {
-              // Use  requestAnimationFrame to ensure DOM is fully painted
-              requestAnimationFrame(() => {
-                closeBtnRef.current?.focus();
-              });
-            } else if (rightMainRef.current) {
-              requestAnimationFrame(() => {
-                if (rightMainRef.current) {
-                  rightMainRef.current.tabIndex = 0;
-                  rightMainRef.current.focus();
-                }
-              });
-            }
+            // Focus close button if available and attached to DOM
+            requestAnimationFrame(() => {
+              if (closeBtnRef.current && document.contains(closeBtnRef.current)) {
+                closeBtnRef.current.focus();
+              }
+            });
           },
           closeBtnRef,
         };
@@ -148,22 +134,6 @@ const ResponsiveGridLayout = forwardRef(
       onGuideIsOpen?.(isGuideOpen);
     }, [isGuideOpen, onGuideIsOpen]);
 
-    // Auto-focus Close selection button when panel opens with content
-    useEffect(() => {
-      // Don't auto-focus on Close selection button if a modal is open (prevents stealing focus from modal restoration)
-      // activeElementId is truthy (non-empty string) when a modal is active
-      if (focusItem.activeElementId && focusItem.activeElementId !== '') {
-        return;
-      }
-
-      // Only focus when: panel visible, has content, not showing guide, and close button exists
-      if (isRightPanelVisible && hasContent && !isGuideOpen && closeBtnRef.current) {
-        requestAnimationFrame(() => {
-          closeBtnRef.current?.focus();
-        });
-      }
-    }, [isRightPanelVisible, hasContent, isGuideOpen, focusItem.activeElementId]);
-
     useEffect(() => {
       // if hideEnlargeBtn changes to true and isEnlarged is true, set isEnlarged to false
       if (hideEnlargeBtn && isEnlarged) {
@@ -180,8 +150,7 @@ const ResponsiveGridLayout = forwardRef(
         return;
       }
 
-      // Check if the sub-panel close button is available (indicating the right panel is open and can be closed)
-      // Close button is visible when there's feature content, the right panel is visible, and WCAG mode is on
+      // Check if the sub-panel close button is available
       const shouldCloseSubPanel = hasContent && isRightPanelVisible && isFocusTrap;
 
       if (shouldCloseSubPanel) {
@@ -193,34 +162,8 @@ const ResponsiveGridLayout = forwardRef(
           setIsRightPanelVisible(false);
           onRightPanelClosed?.();
         }
-      } else if (rightMainRef.current && selectedFooterLayerListItemId.length) {
-        // Fall back to original focus management behavior (allows parent to handle closing the main panel)
-        rightMainRef.current.tabIndex = -1;
       }
-    }, [isGuideOpen, hasContent, isRightPanelVisible, isFocusTrap, closeBtnRef, selectedFooterLayerListItemId, onRightPanelClosed]);
-
-    const handleKeyDown = useCallback(
-      (event: KeyboardEvent): void => {
-        // Check if we're in fullscreen mode - if so, don't handle escape here
-        // The fullscreen dialog will handle it
-        if (isFullScreen) {
-          return;
-        }
-        handleEscapeKey(event.key, selectedFooterLayerListItemId, true, handleEscapeKeyCallback);
-      },
-      [handleEscapeKeyCallback, selectedFooterLayerListItemId, isFullScreen]
-    );
-
-    // return back the focus to layeritem for which right panel was opened.
-    useEffect(() => {
-      const rightPanel = rightMainRef.current;
-      rightPanel?.addEventListener('keydown', handleKeyDown);
-
-      return () => {
-        rightPanel?.removeEventListener('keydown', handleKeyDown);
-      };
-    }, [handleKeyDown]);
-
+    }, [isGuideOpen, hasContent, isRightPanelVisible, isFocusTrap, closeBtnRef, onRightPanelClosed]);
     /**
      * Handles click on the Enlarge button.
      *
@@ -275,6 +218,15 @@ const ResponsiveGridLayout = forwardRef(
       }, 200);
     }, []);
 
+    // Focus the close button when the right panel becomes visible with content
+    useEffect(() => {
+      if (isRightPanelVisible && hasContent && !isGuideOpen && closeBtnRef.current) {
+        requestAnimationFrame(() => {
+          closeBtnRef.current?.focus();
+        });
+      }
+    }, [isRightPanelVisible, hasContent, isGuideOpen]);
+
     // Add keyboard handler for guide
     const handleGuideKeyDown = useCallback(
       (event: React.KeyboardEvent<HTMLDivElement>): void => {
@@ -290,6 +242,26 @@ const ResponsiveGridLayout = forwardRef(
         }
       },
       [isFullScreen, isFocusTrap, hasContent, handleCloseGuide]
+    );
+
+    // Keyboard handler for right panel (handles escape key for panel close)
+    const handlePanelKeyDown = useCallback(
+      (event: React.KeyboardEvent<HTMLDivElement>): void => {
+        // Only handle ESC when not in fullscreen (fullscreen dialog handles its own ESC)
+        if (event.key === 'Escape' && !isFullScreen) {
+          // Don't handle if guide is open - let guide handle it
+          if (!isGuideOpen) {
+            // Only trap ESC when the right panel can actually be closed via keyboard
+            if (isFocusTrap && hasContent) {
+              event.stopPropagation();
+              event.preventDefault();
+              handleEscapeKeyCallback();
+            }
+            // Otherwise, let ESC bubble up to parent handlers (e.g., main panel close)
+          }
+        }
+      },
+      [isFullScreen, isGuideOpen, isFocusTrap, hasContent, handleEscapeKeyCallback]
     );
 
     // If we're on mobile
@@ -470,38 +442,33 @@ const ResponsiveGridLayout = forwardRef(
       // Only trap focus when: WCAG mode on, right panel is visible, not fullscreen, has feature content, AND no modal is open
       const shouldTrapFocus = isFocusTrap && isRightPanelVisible && !isFullScreen && hasContent && !focusItem.activeElementId;
 
-      // Build the main content box
-      const mainContentBox = (
-        <Box
-          ref={isGuideOpen ? undefined : rightMainRef}
-          tabIndex={shouldTrapFocus ? -1 : undefined} // MUI will throw an error and automatically set this to -1 when box is focused
-          sx={sxClasses.rightMainContent}
-          className={`responsive-layout-right-main-content ${isGuideOpen ? 'guide-container' : ''}`}
-        >
-          <Box sx={sxClasses.rightButtonsContainer} className="guide-button-container">
-            <ButtonGroup size="small" variant="outlined" aria-label={t('details.guideControls')!} className="guide-button-group">
-              {!toggleMode && !hideEnlargeBtn && renderEnlargeButton()}
-              {!!guideContentIds?.length && renderGuideButton()}
-              {!isMapFullScreen && renderFullScreenButton()}
-              {!!(leftMain || leftTop) && renderCloseButton()}
-            </ButtonGroup>
-          </Box>
-          {!isGuideOpen && (
-            <Box className="panel-content-container">
-              {content || <Typography className="noSelection">{t('layers.noSelection')}</Typography>}
+      // Wrap the content box in FocusTrap - control activation via 'open' prop
+      // disableAutoFocus is used to prevent modals fighting for focus when opened
+      const wrappedMainContent = (
+        <FocusTrap open={shouldTrapFocus} disableAutoFocus>
+          <Box
+            ref={isGuideOpen ? undefined : rightMainRef}
+            tabIndex={shouldTrapFocus ? -1 : undefined} // MUI will throw an error and automatically set this to -1 when box is focused
+            sx={sxClasses.rightMainContent}
+            className={`responsive-layout-right-main-content ${isGuideOpen ? 'guide-container' : ''}`}
+            onKeyDown={handlePanelKeyDown}
+          >
+            <Box sx={sxClasses.rightButtonsContainer} className="guide-button-container">
+              <ButtonGroup size="small" variant="outlined" aria-label={t('details.guideControls')!} className="guide-button-group">
+                {!toggleMode && !hideEnlargeBtn && renderEnlargeButton()}
+                {!!guideContentIds?.length && renderGuideButton()}
+                {!isMapFullScreen && renderFullScreenButton()}
+                {!!(leftMain || leftTop) && renderCloseButton()}
+              </ButtonGroup>
             </Box>
-          )}
-          {isGuideOpen && (content || <Typography className="noSelection">{t('layers.noSelection')}</Typography>)}
-        </Box>
-      );
-
-      // Wrap the content box in FocusTrap if conditions are met
-      const wrappedMainContent = shouldTrapFocus ? (
-        <FocusTrap open={true} disableAutoFocus>
-          {mainContentBox}
+            {!isGuideOpen && (
+              <Box className="panel-content-container">
+                {content || <Typography className="noSelection">{t('layers.noSelection')}</Typography>}
+              </Box>
+            )}
+            {isGuideOpen && (content || <Typography className="noSelection">{t('layers.noSelection')}</Typography>)}
+          </Box>
         </FocusTrap>
-      ) : (
-        mainContentBox
       );
 
       return (

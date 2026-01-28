@@ -82,6 +82,8 @@ const Layout = forwardRef(
 
         // Show the panel (hiding the layers list in the process if we're on mobile)
         responsiveLayoutRef.current?.setIsRightPanelVisible(true);
+        
+        // Focus is deferred inside setRightPanelFocus with requestAnimationFrame
         responsiveLayoutRef.current?.setRightPanelFocus();
 
         // set the focus item when layer item clicked.

@@ -50,6 +50,18 @@ const LegendListItem = memo(
           placement="top"
           enterDelay={theme.transitions.duration.tooltipDelay}
           enterNextDelay={theme.transitions.duration.tooltipDelay}
+          slotProps={{
+            popper: {
+              modifiers: [
+                {
+                  name: 'offset',
+                  options: {
+                    offset: [0, -20],
+                  },
+                },
+              ],
+            },
+          }}
         >
           <ListItemButton
             id={id}

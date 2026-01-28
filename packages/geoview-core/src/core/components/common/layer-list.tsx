@@ -110,9 +110,22 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
       arrow
       enterDelay={theme.transitions.duration.tooltipDelay}
       enterNextDelay={theme.transitions.duration.tooltipDelay}
+      slotProps={{
+          popper: {
+            modifiers: [
+              {
+                name: 'offset',
+                options: {
+                  offset: [0, -8],
+                },
+              },
+            ],
+          },
+        }}
     >
-      <ListItem id={id} disablePadding className={containerClass}>
+      <ListItem disablePadding className={containerClass}>
         <ListItemButton
+          id={id}
           component="button"
           sx={sxClasses.listItemButton}
           onKeyDown={(e) => handleLayerKeyDown(e, layer)}
