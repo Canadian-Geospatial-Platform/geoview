@@ -3,7 +3,7 @@ import type { TypeLayerStyleConfig, TypeStyleGeometry } from '@/api/types/map-sc
 import type { TypeGeoviewLayerType, TypeLayerControls, TypeLayerStatus } from '@/api/types/layer-schema-types';
 import type { LegendQueryStatus } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
-export type TypeLayersViewDisplayState = 'remove' | 'add' | 'order' | 'view';
+export type TypeLayersViewDisplayState = 'add' | 'view';
 
 export type TypeLegendLayerItem = {
   geometryType?: TypeStyleGeometry;

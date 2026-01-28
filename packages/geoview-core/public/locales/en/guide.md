@@ -77,13 +77,13 @@ Click-hold on the box in the overview map and drag it to change the extent of th
 
 Keyboard functionality is provided as an alternative for users who are unable to use a mouse. Use the **Tab** key to navigate forward to links and controls on the page. Press **Shift** and **Tab** keys to go back one step. Use the **Enter** or **Spacebar** keys to activate links and controls.
 
-Using the **Tab** key to navigate to the map and the **Keyboard Navigation** prompt will appears. Select Enable and press Enter to use keyboard navigation.
+Using the **Tab** key to navigate to the map and the **Keyboard Navigation** prompt will appears. Select **Enable** and press **Enter** to use keyboard navigation.
 
 When the map gains focus, a crosshair is displayed in the center of the map:
 
 <img src="{{assetsURL}}/img/guide/navigation/crosshair.svg" alt="Crosshair marker displayed in the center of the map for keyboard navigation" style="width: 90%; height: 100px;"/>
 
-Use the **arrow** keys to move the map and **+** / **-** keys to zoom in and out. Press **Enter** to select a feature under the crosshairs and display associated data in the Details panel.
+Use the **arrow** keys to move the map and **+** / **-** keys to zoom in and out. Press **Enter** to select a feature under the crosshairs and display associated data in the **Details** panel.
 
 Information will be shown for supported features when the crosshair is positioned over them.
 
@@ -253,16 +253,14 @@ _Note: When the layer is hidden, functions affecting the layer on the map will b
 
 ## <img src="{{assetsURL}}/img/guide/footer/layers_30.svg" alt="Layers icon" /> Layers <a href="#footerSection">Top</a>
 
-The **Layers** tab has the following submenu options:
+The **Layers** tab has the following display state:
 
-- View
-- Add
-- Sort
-- Remove
+- View the layers (default)
+- Add a layer (toggle by clicking the "Add a layer" button)
 
 =3!view=
 
-### <img src="{{assetsURL}}/img/guide/footer/view_25.svg" alt="View icon" /> View
+### <img src="{{assetsURL}}/img/guide/footer/view_25.svg" alt="View icon" /> View the layers
 
 _**Note: Click on a layer to display its Layer information in the right section.**_
 
@@ -273,7 +271,7 @@ If a layer's visibility (eye) icon is disabled (greyed out) <img src="{{assetsUR
 - However, after zooming, you may not immediately see any features if there is no data within the current view extent.
 - In this case, you may need to pan the map to locate the features.
 
-The _View_ submenu option under the _Layers_ tab consists of two sections. The left section lists all the layers displayed on the map. Click on a layer and the right section lists will show the layer settings (available options for that layer).
+The **default view** of the **Layers** tab consists of two sections. The left section lists all the layers displayed on the map. Click on a layer and the right section lists will show the layer settings (available options for that layer).
 
 **Layer Icons**
 
@@ -290,6 +288,10 @@ Select the eye icon, next to each layer, to toggle visibililty on <img src="{{as
 Layers that are not currently displayed on the map will be greyed out and their text will be in italics.
 
 For layers that are always displayed, or for layers whose parent layer is hidden, the visibility (eye) icon is disabled (greyed out) <img src="{{assetsURL}}/img/guide/footer/eye_disabled.svg" alt="An icon representing the Eye disabled function" />.
+
+**Layer Sorting**
+
+You can easily adjust the layer order by clicking the directional arrows. Note that these icons only become visible once a specific layer is selected.
 
 **Supported Layer Types**
 
@@ -321,6 +323,7 @@ _Note: Some settings may not be available depending on various factors such as l
 | <img src="{{assetsURL}}/img/guide/layers/refresh_60.svg" alt="An icon representing the Reset layer function" />       | Reset layer               | Reset the layer to its initial state.                                                                                                                                                    |
 | <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" alt="An icon representing the Highlight layer function" /> | Highlight layer           | Brings layer to the top, decreases opacity of other layers and displays layer boundary.                                                                                                  |
 | <img src="{{assetsURL}}/img/guide/layers/zoom_60.svg" alt="An icon representing the Zoom to layer function" />        | Zoom to layer             | Pans and zooms the map so that the layer boundary is in view.                                                                                                                            |
+| <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt="An icon representing the Remove function" />              | Remove                     | Remove the layer from the map. |
 | Slider                                                                                                                  | Opacity                   | Slider to increase/decrease layer opacity.                                                                                                                                               |
 
 _Note: When the layer is hidden, functions affecting the layer on the map will be disabled._
@@ -346,34 +349,22 @@ If attribution information is available for the layer, it will be displayed in t
 
 =3!add=
 
-### <img src="{{assetsURL}}/img/guide/layers/add_25.svg" alt="Add icon" /> Add
+### <img src="{{assetsURL}}/img/guide/layers/add_25.svg" alt="Add icon" /> Add a layer
 
-Additional layers can be added to the map viewer through the _Add_ submenu in the **Layers** tab.
+Additional layers can be added to the map viewer by clicking **Add a layer** button in the **Layers** tab.
 
 Usage:
 
-- If you wish to add a file, you can do so by dragging the file over the import wizard, by clicking on the 'Choose a File' button and selecting the file, or by providing the URL to the file.
+- If you wish to add a file, you can do so by dragging the file over the import wizard, by clicking on the **Choose a File** button and selecting the file, or by providing the URL to the file.
 - Accepted file types are GeoJSON files (.json or .geojson), GeoPackages (.gpkg), comma separated value files (.csv) with coordinate values, shapefiles (.shp), or ZIP files (.zip) containing a shapefile.
 - If you wish to add a service, you can do so by entering the service URL into the text box.
-- Click the 'Continue' button to proceed.
+- Click the **Continue** button to proceed.
 - Ensure the the correct file or service type is selected from the dropdown menu. If the wrong type is selected, an error will be displayed prompting you to try a different type.
-- Click the 'Continue' button to proceed. The file type (eg. CSV) may be displayed.
+- Click the **Continue** button to proceed. The file type (eg. CSV) may be displayed.
 - Depending on the type of dataset being loaded, various parameters can be set in this final phase.
-- Click the 'Continue' button to insert the layer into the map.
+- Click the **Continue** button to insert the layer into the map.
 
-The viewer will automatically switch to the view function.
-
-=3!sort=
-
-### <img src="{{assetsURL}}/img/guide/layers/sort_25.svg" alt="Sort icon" /> Sort
-
-To sort the layers you can simply click the up or down arrows on each layer panel.
-
-=3!remove=
-
-### <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt="Remove icon" /> Remove
-
-To remove a layer, click on the delete icon <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt="An icon representing the Remove function" /> to the right of the layer after selecting the 'Remove' submenu.
+The viewer will automatically switch to the default view.
 
 =2!details=
 
@@ -458,7 +449,7 @@ _Note: Some options may not be available or are preselected depending on various
 | <img src="{{assetsURL}}/img/guide/datatable/density.svg" alt="An icon representing the Density function" />             | Toggle density    | Toggle the height of the rows in the data table.                                                                     |
 | <img src="{{assetsURL}}/img/guide/datatable/export.svg" alt="An icon representing the Download function" />             | Download          | Download data table as CSV or GeoJSON. May not work as intended on mobile due to limitations with downloading files. |
 
-The first three columns of the data table are Icon, Zoom and Details. The remaining columns vary depending on the layer selected.
+The first three columns of the data table are **Icon**, **Zoom** and **Details**. The remaining columns vary depending on the layer selected.
 
 In addition to scrolling data, it is possible to:
 
@@ -553,11 +544,11 @@ _**Note: A feature on the map must be selected to enable the layer in the list. 
 
 The **Chart** tab on the Footer Bar has two sections. Layers with a chart are listed in the left section. Select a feature on the map to display its chart in the right section.
 
-The Feature dropdown (upper left of the chart section), can be used to select a feature. This is useful when features are close together on the map, making it difficult to click on the desired one.
+The **Feature** dropdown (upper left of the chart section), can be used to select a feature. This is useful when features are close together on the map, making it difficult to click on the desired one.
 
 The visibility of data displayed on the chart can be toggled by clicking the checkbox <img src="{{assetsURL}}/img/guide/layers/check.png" alt="An icon representing the Checkbox function" /> next to the data name shown above the chart (only for layers with multiple data items).
 
-Select from the Download dropdown (upper right of chart section) to download chart data in JSON format. Select Download All for all data and Download Visible for only data currently visible on the chart.
+Select from the **Download** dropdown (upper right of chart section) to download chart data in JSON format. Select **Download All** for all data and **Download Visible** for only data currently visible on the chart.
 
 =3!chartTypes=
 

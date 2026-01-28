@@ -88,7 +88,7 @@ export function Map(props: MapProps): JSX.Element {
         </>
       )}
       {layersAreLoading && (
-        <Box sx={sxClasses.progressBar}>
+        <Box sx={{ ...sxClasses.progressBar, bottom: mapInteraction === 'static' ? 0 : 40 }}>
           <ProgressBar />
         </Box>
       )}

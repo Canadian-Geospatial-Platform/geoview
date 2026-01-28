@@ -276,8 +276,10 @@ export class ConfigValidation {
       // layerConfig.initialSettings attributes that are not defined inherits parent layer settings that are defined.
       const initialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(layerConfig);
 
-      // Get the parent initial settings
-      const parentInitialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(parentLayerConfig);
+      // Get the parent initial settings from parentLayerConfig, or from geoviewLayerConfig if at root level
+      const parentInitialSettings = parentLayerConfig
+        ? ConfigBaseClass.getClassOrTypeInitialSettings(parentLayerConfig)
+        : geoviewLayerConfig.initialSettings;
 
       // If the minZoom is set, validate it with the parent
       if (initialSettings?.minZoom !== undefined) {
@@ -320,6 +322,18 @@ export class ConfigValidation {
 
         // Merge the rest of parent and child settings
         ConfigBaseClass.setClassOrTypeInitialSettings(layerConfig, deepMerge(parentInitialSettingsClone, initialSettings));
+
+        // Cascade remove control: if parent is not removable, children cannot be removable
+        const mergedSettings = ConfigBaseClass.getClassOrTypeInitialSettings(layerConfig);
+        if (parentInitialSettings.controls?.remove === false) {
+          if (!mergedSettings) {
+            ConfigBaseClass.setClassOrTypeInitialSettings(layerConfig, { controls: { remove: false } });
+          } else if (!mergedSettings.controls) {
+            mergedSettings.controls = { remove: false };
+          } else {
+            mergedSettings.controls.remove = false;
+          }
+        }
       }
 
       // Get the properties to be able to create the config object

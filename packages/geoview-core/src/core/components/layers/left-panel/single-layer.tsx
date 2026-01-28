@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { getSxClasses } from '@/core/components/common/layer-list-style';
@@ -37,7 +37,7 @@ import {
   useMapSelectorLayerInVisibleRange,
   useMapSelectorLayerParentHidden,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { DeleteUndoButton } from './delete-undo-button';
+import { DeleteUndoButton } from '@/core/components/layers/right-panel/delete-undo-button';
 import { LayersList } from './layers-list';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { logger } from '@/core/utils/logger';
@@ -45,7 +45,6 @@ import { useDataTableStoreActions } from '@/core/stores/store-interface-and-inti
 import { ArrowDownwardIcon, ArrowUpIcon, CenterFocusScaleIcon, LoopIcon } from '@/ui/icons';
 import { Divider } from '@/ui/divider/divider';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { useUISelectedFooterLayerListItemId } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { TypeLayerControls } from '@/api/types/layer-schema-types';
 import { scrollListItemIntoView } from '@/core/utils/utilities';
 
@@ -70,15 +69,24 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
+  // Create ref for scrolling into view
+  const layerItemRef = useRef<HTMLLIElement>(null);
+
   // Get store states
-  const { reloadLayer, setSelectedLayerPath, setSelectedLayerSortingArrowId, zoomToLayerVisibleScale } = useLayerStoreActions();
+  const {
+    deleteLayer,
+    reloadLayer,
+    setSelectedLayerPath,
+    setSelectedLayerSortingArrowId,
+    zoomToLayerVisibleScale,
+    getLayerDeleteInProgress,
+  } = useLayerStoreActions();
   const { setOrToggleLayerVisibility, toggleLegendCollapsed, reorderLayer } = useMapStoreActions();
   const mapId = useGeoViewMapId();
   const selectedLayerPath = useLayerSelectedLayerPath();
   const displayState = useLayerDisplayState();
   const layerIsSelected = layerPath === selectedLayerPath && displayState === 'view';
   const selectedLayerSortingArrowId = useLayerSelectedLayerSortingArrowId();
-  const selectedFooterLayerListItemId = useUISelectedFooterLayerListItemId();
 
   useDataTableStoreActions();
 
@@ -175,6 +183,13 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     // Log
     logger.logTraceUseCallback('SINGLE-LAYER - handleLayerClick');
 
+    // Check if there's a delete in progress on another layer
+    const layerDeleteInProgress = getLayerDeleteInProgress();
+    if (layerDeleteInProgress && layerDeleteInProgress !== layerPath) {
+      // Complete the delete for the other layer
+      deleteLayer(layerDeleteInProgress);
+    }
+
     // Only clickable if the layer status is processed or loaded
     if (!['processed', 'loaded'].includes(layerStatus!)) {
       return;
@@ -183,34 +198,54 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     // Set selected layer path
     setSelectedLayerPath(layerPath);
     showLayerDetailsPanel?.(layerId || '');
-  }, [layerPath, layerId, layerStatus, setSelectedLayerPath, showLayerDetailsPanel]);
+  }, [layerPath, layerId, layerStatus, setSelectedLayerPath, showLayerDetailsPanel, getLayerDeleteInProgress, deleteLayer]);
 
-  const handleIconButtonUpKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLButtonElement>) => {
+  const handleArrowClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>, direction: number) => {
       // Log
-      logger.logTraceUseCallback('SINGLE-LAYER - handleIconButtonUpKeyDown');
+      logger.logTraceUseCallback('SINGLE-LAYER - handleArrowClick');
+
+      // Prevent triggering parent onClick
+      event.stopPropagation();
+
+      const arrowId = direction === -1 ? 'up-order' : 'down-order';
+      setSelectedLayerSortingArrowId(`${mapId}-${layerPath}-${arrowId}`);
+      reorderLayer(layerPath, direction);
+    },
+    [layerPath, mapId, reorderLayer, setSelectedLayerSortingArrowId]
+  );
+
+  const handleArrowKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLButtonElement>, direction: number) => {
+      // Log
+      logger.logTraceUseCallback('SINGLE-LAYER - handleArrowKeyDown');
 
       if (event.key === 'Enter') {
-        setSelectedLayerSortingArrowId(`${mapId}-${layerPath}-up-order`);
-        reorderLayer(layerPath, -1);
+        const arrowId = direction === -1 ? 'up-order' : 'down-order';
+        setSelectedLayerSortingArrowId(`${mapId}-${layerPath}-${arrowId}`);
+        reorderLayer(layerPath, direction);
         event.preventDefault();
       }
     },
     [layerPath, mapId, reorderLayer, setSelectedLayerSortingArrowId]
   );
 
-  const handleIconButtonDownKeyDown = useCallback(
+  const handleArrowKeyDownWrapper = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>) => {
-      // Log
-      logger.logTraceUseCallback('SINGLE-LAYER - handleIconButtonDownKeyDown');
-
-      if (event.key === 'Enter') {
-        setSelectedLayerSortingArrowId(`${mapId}-${layerPath}-down-order`);
-        reorderLayer(layerPath, 1);
-        event.preventDefault();
-      }
+      // Determine direction from button id
+      const direction = event.currentTarget.id.includes('up-order') ? -1 : 1;
+      handleArrowKeyDown(event, direction);
     },
-    [layerPath, mapId, reorderLayer, setSelectedLayerSortingArrowId]
+    [handleArrowKeyDown]
+  );
+
+  const handleArrowClickWrapper = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      // Determine direction from button id
+      const direction = event.currentTarget.id.includes('up-order') ? -1 : 1;
+      handleArrowClick(event, direction);
+    },
+    [handleArrowClick]
   );
 
   const handleToggleVisibility = useCallback(
@@ -290,32 +325,17 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     // Log
     logger.logTraceUseMemo('SINGLE-LAYER - memoEditModeButtons', layerPath);
 
-    if (displayState === 'remove') {
-      return <DeleteUndoButton layerPath={layerPath} layerId={layerId!} layerRemovable={layerControls?.remove !== false} />;
-    }
-    if (displayState === 'order') {
+    if (layerIsSelected && displayState === 'view') {
       return (
         <>
-          {layerChildren && layerChildren.length > 0 && (
-            <Divider
-              orientation="vertical"
-              sx={{
-                marginLeft: '0.4rem',
-                height: '1.5rem',
-                backgroundColor: theme.palette.geoViewColor.bgColor.dark[300],
-              }}
-              variant="middle"
-              flexItem
-            />
-          )}
           <IconButton
             id={`${mapId}-${layerPath}-up-order`}
             aria-label={t('layers.moveLayerUp')}
             disabled={isFirst}
             edge="end"
             size="small"
-            onKeyDown={handleIconButtonUpKeyDown}
-            onClick={() => reorderLayer(layerPath, -1)}
+            onKeyDown={handleArrowKeyDownWrapper}
+            onClick={handleArrowClickWrapper}
           >
             <ArrowUpIcon />
           </IconButton>
@@ -325,27 +345,34 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
             disabled={isLast}
             edge="end"
             size="small"
-            onKeyDown={handleIconButtonDownKeyDown}
-            onClick={() => reorderLayer(layerPath, 1)}
+            onKeyDown={handleArrowKeyDownWrapper}
+            onClick={handleArrowClickWrapper}
           >
             <ArrowDownwardIcon />
           </IconButton>
+          <Divider
+            orientation="vertical"
+            sx={{
+              marginLeft: '0.4rem',
+              height: '1.5rem',
+              backgroundColor: theme.palette.geoViewColor.bgColor.dark[300],
+            }}
+            variant="middle"
+            flexItem
+          />
         </>
       );
     }
     return null;
   }, [
+    layerIsSelected,
     displayState,
-    handleIconButtonDownKeyDown,
-    handleIconButtonUpKeyDown,
+    handleArrowClickWrapper,
+    handleArrowKeyDownWrapper,
     isFirst,
     isLast,
-    layerChildren,
-    layerControls,
-    layerId,
     layerPath,
     mapId,
-    reorderLayer,
     t,
     theme.palette.geoViewColor.bgColor.dark,
   ]);
@@ -527,20 +554,16 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('SINGLE-LAYER - displayState, selectedFooterLayerListItemId');
+    logger.logTraceUseEffect('SINGLE-LAYER - layerIsSelected');
 
-    // set the focus to first layer, after layer has been deleted.
-    if (displayState === 'remove' && selectedFooterLayerListItemId.length) {
-      const firstLayer = document.getElementById('layers-left-panel');
-      if (firstLayer?.getElementsByTagName('li')) {
-        const listItems = firstLayer?.getElementsByTagName('li');
-        listItems[0]?.focus();
-      }
+    // Scroll into view when layer is selected
+    if (layerIsSelected) {
+      layerItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
     }
-  }, [displayState, selectedFooterLayerListItemId.length]);
+  }, [layerIsSelected]);
 
   return (
-    <ListItem className={memoContainerClass} id={layerId} key={layerName} disablePadding={true} data-layer-depth={depth}>
+    <ListItem ref={layerItemRef} className={memoContainerClass} id={layerId} key={layerName} disablePadding={true} data-layer-depth={depth}>
       <Box>
         <Tooltip
           title={t('layers.selectLayer', { layerName })}
@@ -564,9 +587,9 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
         </Tooltip>
         {!isLayoutEnlarged && (
           <Box className="rightIcons-container" role="group" aria-label={t('layers.layerControls')!}>
+            {memoEditModeButtons}
             {memoMoreLayerButtons}
             {memoArrowButtons}
-            {memoEditModeButtons}
           </Box>
         )}
         {layerStatus === 'loading' && (

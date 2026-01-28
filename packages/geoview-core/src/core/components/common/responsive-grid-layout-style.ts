@@ -18,6 +18,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   topRow: {
     '& .responsive-layout-left-top': {
       alignItems: 'end',
+      width: '100%',
       '&.MuiGrid-grid-xs-auto': {
         width: '100%',
       },
@@ -135,6 +136,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   gridLeftMain: {
     height: '100%',
     overflowY: 'auto',
+    marginTop: '30px', // To align left list with right panel box (below 30px right panel toolbar)
     '&.MuiGrid-grid-xs-auto': {
       '& .layer-panel': {
         width: '52px',

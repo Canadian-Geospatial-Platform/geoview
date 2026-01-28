@@ -21,7 +21,7 @@ interface UndoButtonProps {
 
 function UndoButtonWithProgress(props: UndoButtonProps): JSX.Element {
   // Log
-  logger.logTraceRender('components/layers/left-panel/delete-undo-button/UndoButtonWithProgress');
+  logger.logTraceRender('components/layers/right-panel/delete-undo-button/UndoButtonWithProgress');
 
   const { t } = useTranslation<string>();
 
@@ -51,7 +51,7 @@ function UndoButtonWithProgress(props: UndoButtonProps): JSX.Element {
 
 export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   // Log
-  logger.logTraceRender('components/layers/left-panel/delete-undo-button/DeleteUndoButton');
+  logger.logTraceRender('components/layers/right-panel/delete-undo-button/DeleteUndoButton');
 
   const { layerPath, layerId, layerRemovable } = props;
 

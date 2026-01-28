@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material';
 import { useCallback, useEffect, useRef } from 'react';
-import { Box, AddCircleOutlineIcon, ButtonGroup, DeleteOutlineIcon, HandleIcon, VisibilityOutlinedIcon, Button } from '@/ui';
-import { ToggleAll } from '../toggle-all/toggle-all';
+import { Box, AddCircleOutlineIcon, Button } from '@/ui';
+import { ToggleAll } from '@/core/components/toggle-all/toggle-all';
 import {
   useLayerStoreActions,
   useLayerDisplayState,
@@ -22,8 +22,9 @@ export function LayersToolbar(): JSX.Element {
   const userClickedAdd = useRef(false);
 
   const layerToolbarStyle = {
-    padding: '0 18px 4px 0',
-    '& .MuiButton-startIcon': { [theme.breakpoints.down('md')]: { margin: 0, padding: '0 0.25rem' } },
+    display: 'inline-flex',
+    '&>button': { padding: '10px 15px' },
+    '& .MuiButton-startIcon': { [theme.breakpoints.down('sm')]: { margin: 0, padding: '0 0.25rem' } },
     '& .MuiButtonGroup-root': { backgroundColor: theme.palette.geoViewColor.bgColor.light[300] },
   };
 
@@ -95,56 +96,18 @@ export function LayersToolbar(): JSX.Element {
 
   return (
     <Box id="layers-toolbar" sx={layerToolbarStyle}>
-      <ButtonGroup size="small" variant="outlined" aria-label={t('layers.layerControls')!}>
-        <Button
-          makeResponsive
-          type="text"
-          disabled={!legendLayers.length}
-          size="small"
-          tooltip={t('general.view')!}
-          variant={displayState === 'view' ? 'contained' : 'outlined'}
-          startIcon={<VisibilityOutlinedIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />}
-          onClick={() => handleSetDisplayState('view')}
-        >
-          {t('general.view')}
-        </Button>
-        <Button
-          ref={addButtonRef}
-          makeResponsive
-          type="text"
-          size="small"
-          tooltip={t('legend.addLayer')!}
-          variant={displayState === 'add' ? 'contained' : 'outlined'}
-          startIcon={<AddCircleOutlineIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />}
-          onClick={() => handleSetDisplayState('add')}
-        >
-          {t('general.add')}
-        </Button>
-        <Button
-          makeResponsive
-          type="text"
-          disabled={!legendLayers.length}
-          size="small"
-          tooltip={t('legend.sortLayers')!}
-          variant={displayState === 'order' ? 'contained' : 'outlined'}
-          startIcon={<HandleIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />}
-          onClick={() => handleSetDisplayState('order')}
-        >
-          {t('legend.sort')}
-        </Button>
-        <Button
-          makeResponsive
-          type="text"
-          disabled={!legendLayers.length}
-          size="small"
-          tooltip={t('legend.removeLayer')!}
-          variant={displayState === 'remove' ? 'contained' : 'outlined'}
-          startIcon={<DeleteOutlineIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />}
-          onClick={() => handleSetDisplayState('remove')}
-        >
-          {t('general.remove')}
-        </Button>
-      </ButtonGroup>
+      <Button
+        ref={addButtonRef}
+        makeResponsive
+        type="text"
+        size="small"
+        tooltip={t('legend.addLayer')!}
+        variant={displayState === 'add' ? 'contained' : 'outlined'}
+        startIcon={<AddCircleOutlineIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />}
+        onClick={() => handleSetDisplayState('add')}
+      >
+        {t('legend.addLayer')}
+      </Button>
       <ToggleAll source="layers" />
     </Box>
   );

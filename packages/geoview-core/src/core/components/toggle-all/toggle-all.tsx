@@ -66,7 +66,7 @@ export function ToggleAll({ source = 'legend' }: ToggleAllProps): JSX.Element {
           </span>
         </Tooltip>
       )}
-      {hasCollapsibleLayers && (
+      {hasCollapsibleLayers && (source === 'legend' || displayState === 'view') && (
         <Tooltip title={t('toggleAll.collapseTooltip')}>
           <span>
             <Switch

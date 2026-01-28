@@ -98,6 +98,36 @@ import { MapEventProcessor } from "@/api/event-processors";
 - Downcast only after `instanceof` check or type guard function
 - Avoid spreading objects with deep nesting - use `lodash.cloneDeep` instead
 
+### React Performance Patterns
+
+**Avoid inline arrow functions in event handlers** - they create new function references on every render:
+
+```typescript
+// ❌ Bad: Creates new functions on each render
+<IconButton onClick={(e) => handleClick(e, -1)} />
+<IconButton onClick={(e) => handleClick(e, 1)} />
+
+// ✅ Good: Create wrapper with stable reference
+const handleClickWrapper = useCallback(
+  (event: React.MouseEvent<HTMLButtonElement>) => {
+    // Determine parameter from element id/data attribute
+    const direction = event.currentTarget.id.includes('up') ? -1 : 1;
+    handleClick(event, direction);
+  },
+  [handleClick]
+);
+
+<IconButton id="btn-up" onClick={handleClickWrapper} />
+<IconButton id="btn-down" onClick={handleClickWrapper} />
+```
+
+**Key principles:**
+
+- Use `useCallback` with minimal dependencies for stable function references
+- Derive parameters from event target (id, data attributes) instead of closure
+- Apply to both `onClick`, `onKeyDown`, and other event handlers
+- Reduces unnecessary re-renders of memoized child components
+
 ## State Management (Zustand Store)
 
 **No Store Leakage in .ts Files** - pattern from [using-store.md](../docs/programming/using-store.md):
@@ -176,6 +206,7 @@ Control via localStorage:
 - [adding-layer-types.md](../docs/programming/adding-layer-types.md) - Extending layer support
 - [best-practices.md](../docs/programming/best-practices.md) - Code style & patterns
 - [using-store.md](../docs/programming/using-store.md) - Zustand usage patterns
+
 ## File Structure Quick Reference
 
 ```

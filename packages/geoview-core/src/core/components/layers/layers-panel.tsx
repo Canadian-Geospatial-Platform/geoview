@@ -54,12 +54,6 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
     if (displayState === 'view') {
       return ['layers.children.view', 'layers.children.layerSettings'];
     }
-    if (displayState === 'remove') {
-      return ['layers.children.remove'];
-    }
-    if (displayState === 'order') {
-      return ['layers.children.sort'];
-    }
     if (displayState === 'add') {
       return ['layers.children.add'];
     }

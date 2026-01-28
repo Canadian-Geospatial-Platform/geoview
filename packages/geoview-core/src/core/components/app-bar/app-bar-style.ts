@@ -24,9 +24,17 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       height: '100%',
       backgroundColor: 'unset',
       border: 'unset',
-      paddingBottom: '60px',
-      '&>div': {
+      paddingBottom: '0px',
+      '&>nav': {
         border: 'unset !important',
+        '&>div>ul>li': {
+          backgroundColor: theme.palette.geoViewColor.grey.lighten(0.8, 0.8),
+          padding: '0px',
+          borderRadius: '50%',
+        },
+        '&>div>ul>li::before': {
+          display: 'none',
+        },
       },
     },
   },
