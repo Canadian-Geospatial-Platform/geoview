@@ -213,6 +213,8 @@
     "hideAllLayers": "Masquer toutes les couches",
     "showLayer": "Afficher la couche {{name}}",
     "hideLayer": "Masquer la couche {{name}}",
+    "showClass": "Afficher la classe {{name}}",
+    "hideClass": "Masquer la classe {{name}}",
     "tableViewNone": "Tableau (indisponible)",
     "moveLayerUp": "Déplacer la couche vers le haut",
     "moveLayerDown": "Déplacer la couche vers le bas",

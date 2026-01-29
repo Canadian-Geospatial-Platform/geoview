@@ -213,6 +213,8 @@
     "hideAllLayers": "Hide all layers",
     "showLayer": "Show {{name}} layer",
     "hideLayer": "Hide {{name}} layer",
+    "showClass": "Show {{name}} class",
+    "hideClass": "Hide {{name}} class",
     "tableViewNone": "Table (unavailable)",
     "moveLayerUp": "Move layer up",
     "moveLayerDown": "Move layer down",

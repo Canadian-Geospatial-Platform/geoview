@@ -317,7 +317,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       <IconButton
         role="checkbox"
         color="primary"
-        aria-label={item.isVisible ? t('layers.hideLayer', { name: item.name }) : t('layers.showLayer', { name: item.name })}
+        aria-label={item.isVisible ? t('layers.hideClass', { name: item.name }) : t('layers.showClass', { name: item.name })}
         aria-checked={item.isVisible === true}
         tooltipPlacement="left"
         onClick={() => toggleItemVisibility(layerDetails.layerPath, item)}
