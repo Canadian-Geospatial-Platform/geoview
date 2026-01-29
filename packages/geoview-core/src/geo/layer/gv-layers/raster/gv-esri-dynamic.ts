@@ -702,6 +702,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
     try {
       // Parse the filter value to use
+      const fieldNames = layerConfig.getOutfields()?.map((f) => f.name) || [];
+      filterValueToUse = GVLayerUtilities.parseLikeOperationsEsriDynamic(filterValueToUse, fieldNames);
       filterValueToUse = GVLayerUtilities.parseDateTimeValuesEsriDynamic(filterValueToUse, externalDateFragments);
 
       // Create the source parameter to update

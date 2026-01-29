@@ -120,6 +120,51 @@ export class GVLayerUtilities {
 
     return aliasLookup;
   }
+
+  /**
+   * Rewrites SQL `LIKE` operations into case-insensitive equivalents for
+   * Esri Dynamic (MapServer) services by wrapping the field in `UPPER()`
+   * and uppercasing the comparison pattern.
+   * Example:
+   * ```
+   * StationName like '%riv%'
+   * ```
+   * becomes:
+   * ```
+   * UPPER(StationName) LIKE '%RIV%'
+   * ```
+   * Only the provided field names are transformed; all other expressions remain untouched.
+   * @param {string} filter - The original SQL-like filter string.
+   * @param {string[]} fieldNames - List of field names allowed to be rewritten for case-insensitive LIKE matching.
+   * @returns {string} The transformed filter string with case-insensitive LIKE operations applied.
+   * @static
+   */
+  static parseLikeOperationsEsriDynamic(filter: string, fieldNames: string[]): string {
+    let filterValueToUse = filter;
+
+    if (!filter || fieldNames.length === 0) return filterValueToUse;
+
+    // Escape field names for regex usage
+    const escapedFields = fieldNames.map((f) => f.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+
+    /**
+     * Regex explanation:
+     * 1. (field)        => capture the field name
+     * 2. \s+like\s+     => LIKE operator (case-insensitive)
+     * 3. ('...')        => SQL string literal (single quotes)
+     */
+    const likeRegex = new RegExp(`\\b(${escapedFields.join('|')})\\b\\s+like\\s+('([^']*)')`, 'gi');
+
+    // Proceed
+    filterValueToUse = filterValueToUse.replace(likeRegex, (_match, field: string, quotedValue: string, rawValue: string) => {
+      // Uppercase the literal content, not the quotes
+      const upperValue = rawValue.toUpperCase();
+      return `UPPER(${field}) LIKE '${upperValue}'`;
+    });
+
+    // Return the result
+    return filterValueToUse;
+  }
 }
 
 export type EsriRelatedRecordsJsonResponse = {
