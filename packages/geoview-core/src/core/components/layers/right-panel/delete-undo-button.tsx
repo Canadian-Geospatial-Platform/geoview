@@ -11,6 +11,7 @@ interface DeleteUndoButtonProps {
   layerPath: string;
   layerId: string;
   layerRemovable: boolean;
+  focusTargetIdAfterDelete?: string;
 }
 
 interface UndoButtonProps {
@@ -53,7 +54,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/right-panel/delete-undo-button/DeleteUndoButton');
 
-  const { layerPath, layerId, layerRemovable } = props;
+  const { layerPath, layerId, layerRemovable, focusTargetIdAfterDelete } = props;
 
   const { t } = useTranslation<string>();
 
@@ -63,7 +64,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   // get store actions
   const { deleteLayer, setLayerDeleteInProgress, getLayerDeleteInProgress } = useLayerStoreActions();
   const { setOrToggleLayerVisibility, removeLayerHighlights } = useMapStoreActions();
-  const { setSelectedFooterLayerListItemId } = useUIStoreActions();
+  const { setSelectedFooterLayerListItemId, disableFocusTrap } = useUIStoreActions();
   const isVisible = useMapSelectorLayerVisibility(layerPath);
 
   const handleDeleteClick = (): void => {
@@ -109,6 +110,9 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     if (progress === 100) {
       deleteLayer(layerPath);
       setInUndoState(false);
+
+      // set focus after deletion
+      disableFocusTrap(focusTargetIdAfterDelete || 'no-focus');
     }
     return undefined;
     // eslint-disable-next-line react-hooks/exhaustive-deps

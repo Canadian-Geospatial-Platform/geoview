@@ -214,7 +214,20 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
 
     const tabPanel = tabPanelRef?.current;
     const handleFooterbarEscapeKey = (event: KeyboardEvent): void => {
-      if (!isCollapsed) {
+      if (!isCollapsed && event.key === 'Escape') {
+        // Check if ESC originated from within the right panel content
+        // where ResponsiveGridLayout's handler would manage focus
+        const target = event.target as HTMLElement;
+        const isFromRightPanel = target.closest('.responsive-layout-right-main-content');
+
+        if (isFromRightPanel) {
+          // ESC is from right panel - ResponsiveGridLayout will handle it
+          // (including proper focus restoration to layer list item when close button is visible)
+          return;
+        }
+
+        // ESC is from elsewhere (e.g., left panel/layer list when right panel is closed)
+        // Handle it the traditional way - focus the tab button
         handleEscapeKey(event.key, tabs[selectedTab ?? 0]?.id, true, () => {
           onCloseKeyboard?.();
         });

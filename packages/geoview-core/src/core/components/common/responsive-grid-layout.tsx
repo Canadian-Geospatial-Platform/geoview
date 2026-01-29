@@ -321,9 +321,9 @@ const ResponsiveGridLayout = forwardRef(
             setIsRightPanelVisible(false);
             onRightPanelClosed?.();
           }}
-          tooltip={t('details.closeSelection')!}
+          tooltip={t('general.closeSelection')!}
         >
-          {t('dataTable.close')}
+          {t('general.close')}
         </Button>
       );
     };
@@ -439,8 +439,9 @@ const ResponsiveGridLayout = forwardRef(
     const renderRightContent = (): JSX.Element => {
       const content = !isGuideOpen ? rightMain : renderGuide();
 
-      // Only trap focus when: WCAG mode on, right panel is visible, not fullscreen, has feature content, AND no modal is open
-      const shouldTrapFocus = isFocusTrap && isRightPanelVisible && !isFullScreen && hasContent && !focusItem.activeElementId;
+      // Only trap focus when: WCAG mode on, right panel is visible, not fullscreen, has feature content, AND no modal is open within it
+      const isModalOpen = focusItem.activeElementId === 'layerDataTable' || focusItem.activeElementId === 'featureDetailDataTable';
+      const shouldTrapFocus = isFocusTrap && isRightPanelVisible && !isFullScreen && hasContent && !isModalOpen;
 
       // Wrap the content box in FocusTrap - control activation via 'open' prop
       // disableAutoFocus is used to prevent modals fighting for focus when opened

@@ -96,10 +96,10 @@ export const Guide = memo(function GuidePanel({ containerType = CONTAINER_TYPE.F
         layerStatus: 'loaded',
         queryStatus: 'processed',
         content: createMarkdownComponent(content),
-        layerUniqueId: `${mapId}-${TABS.GUIDE}-${item ?? ''}`,
+        layerUniqueId: `${mapId}-${containerType}-${TABS.GUIDE}-${item ?? ''}`,
       };
     });
-  }, [guide, mapId, createMarkdownComponent]);
+  }, [guide, mapId, createMarkdownComponent, containerType]);
 
   /**
    * Memo version of layer list with markdown content

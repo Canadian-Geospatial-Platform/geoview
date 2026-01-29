@@ -6,6 +6,7 @@ import { logger } from '@/core/utils/logger';
 import { useUIActiveFocusItem, useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 interface FocusTrapContainerProps {
   children: ReactNode;
@@ -43,6 +44,7 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
   const { disableFocusTrap, enableFocusTrap } = useUIStoreActions();
   const activeTrapGeoView = useUIActiveTrapGeoView();
   const focusItem = useUIActiveFocusItem();
+  const mapId = useGeoViewMapId();
 
   // Callbacks
   const handleClose = useCallback((): void => {
@@ -65,6 +67,9 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
   }, [disableFocusTrap, enableFocusTrap, id, containerType]);
 
   // Memoize
+
+  const exitBtnId = `${mapId}-${CONTAINER_TYPE.FOOTER_BAR}-${id}-panel-close-btn`;
+
   const isActive = useMemo(() => {
     // Log
     logger.logTraceUseMemo('FOCUS-TRAP-ELEMENT - isActive');
@@ -109,9 +114,9 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
       logger.logTraceUseEffect('FOCUS-TRAP-ELEMENT - focusItem', focusItem);
 
       // SetTimeout with a delay of 0 to force the rendering
-      setTimeout(() => document.getElementById(`${id}-exit-btn`)?.focus(), TIMEOUT.focusDelay);
+      setTimeout(() => document.getElementById(exitBtnId)?.focus(), TIMEOUT.focusDelay);
     }
-  }, [focusItem, id]);
+  }, [focusItem, id, exitBtnId]);
 
   // For footer panels, auto-activate focus trap when panel becomes active
   useEffect(() => {
@@ -157,7 +162,7 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
     <FocusTrap open={isActive} disableAutoFocus disableRestoreFocus>
       <Box tabIndex={-1} sx={{ height: '100%' }}>
         {showExitButton && (
-          <Button id={`${id}-exit-btn`} type="text" autoFocus onClick={handleClose} sx={exitButtonStyles}>
+          <Button id={exitBtnId} type="text" autoFocus onClick={handleClose} sx={exitButtonStyles}>
             {t('general.exit')}
           </Button>
         )}

@@ -47,7 +47,8 @@ import { Divider } from '@/ui/divider/divider';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import type { TypeLayerControls } from '@/api/types/layer-schema-types';
 import { scrollListItemIntoView } from '@/core/utils/utilities';
-import { TIMEOUT } from '@/core/utils/constant';
+import { TIMEOUT, TABS } from '@/core/utils/constant';
+import type { TypeContainerBox } from '@/core/types/global-types';
 
 // TODO: WCAG Issue #3108 - Check all disabled buttons. They may need special treatment. Need to find instance in UI first)
 // TODO: WCAG Issue #3108 - Check all icon buttons for "state related" aria values (i.e aria-checked, aria-disabled, etc.)
@@ -59,9 +60,18 @@ interface SingleLayerProps {
   isFirst: boolean;
   isLast: boolean;
   isLayoutEnlarged: boolean;
+  containerType?: TypeContainerBox;
 }
 
-export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, isLast, isLayoutEnlarged }: SingleLayerProps): JSX.Element {
+export function SingleLayer({
+  depth,
+  layerPath,
+  showLayerDetailsPanel,
+  isFirst,
+  isLast,
+  isLayoutEnlarged,
+  containerType,
+}: SingleLayerProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/left-panel/single-layer', layerPath);
 
@@ -350,7 +360,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
         <>
           <IconButton
             className="buttonOutline"
-            id={`${mapId}-${layerPath}-up-order`}
+            id={`${mapId}-${containerType}-${layerPath}-up-order`}
             aria-label={t('layers.moveLayerUp')}
             disabled={isFirst}
             edge="end"
@@ -362,7 +372,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
           </IconButton>
           <IconButton
             className="buttonOutline"
-            id={`${mapId}-${layerPath}-down-order`}
+            id={`${mapId}-${containerType}-${layerPath}-down-order`}
             aria-label={t('layers.moveLayerDown')}
             disabled={isLast}
             edge="end"
@@ -397,6 +407,7 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     mapId,
     t,
     theme.palette.geoViewColor.bgColor.dark,
+    containerType,
   ]);
 
   // Memoize the MoreLayerButtons component section
@@ -407,7 +418,14 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     if ((layerStatus === 'processing' || layerStatus === 'loading') && displayState === 'view') {
       // Show delete button after 5 seconds for loading layers
       if (showDeleteOnLoading) {
-        return <DeleteUndoButton layerPath={layerPath} layerId={layerId!} layerRemovable={layerControls?.remove !== false} />;
+        return (
+          <DeleteUndoButton
+            layerPath={layerPath}
+            layerId={layerId!}
+            layerRemovable={layerControls?.remove !== false}
+            focusTargetIdAfterDelete={`${mapId}-${containerType}-${TABS.LAYERS}-panel-close-btn`}
+          />
+        );
       }
       return null;
     }
@@ -426,7 +444,12 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
           >
             <LoopIcon />
           </IconButton>
-          <DeleteUndoButton layerPath={layerPath} layerId={layerId!} layerRemovable={layerControls?.remove !== false} />
+          <DeleteUndoButton
+            layerPath={layerPath}
+            layerId={layerId!}
+            layerRemovable={layerControls?.remove !== false}
+            focusTargetIdAfterDelete={`${mapId}-${containerType}-${TABS.LAYERS}-panel-close-btn`}
+          />
         </>
       );
     }
@@ -495,6 +518,8 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     layerChildren,
     handleReload,
     parentHidden,
+    containerType,
+    mapId,
   ]);
 
   // Memoize the arrow buttons component section
@@ -536,10 +561,11 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
           layersList={layerChildren}
           isLayoutEnlarged={isLayoutEnlarged}
           showLayerDetailsPanel={showLayerDetailsPanel}
+          containerType={containerType}
         />
       </Collapse>
     );
-  }, [depth, isLayoutEnlarged, layerChildren, legendExpanded, showLayerDetailsPanel]);
+  }, [depth, isLayoutEnlarged, layerChildren, legendExpanded, showLayerDetailsPanel, containerType]);
 
   // Memoize the container class section
   const memoContainerClass = useMemo(() => {
@@ -593,6 +619,9 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     }
   }, [layerIsSelected]);
 
+  // Build unique ID format
+  const layerListItemId = `${mapId}-${containerType}-${TABS.LAYERS}-${layerPath}`;
+
   return (
     <ListItem ref={layerItemRef} className={memoContainerClass} key={layerName} disablePadding={true} data-layer-depth={depth}>
       <Box>
@@ -616,7 +645,9 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
           }}
         >
           <ListItemButton
-            id={layerId}
+            // TODO: WCAG Issue #3116 - The ID is not using store value selectedFooterLayerListItemId (id={layerId}). Check if this is correct...
+            // TODO: WCAG Issue #3116 - ... layers-list was previously mutating the layer.layerId value is any case: (layer.layerId = `${mapId}-${TABS.LAYERS}-${layer.layerPath}`;
+            id={layerListItemId}
             onClick={handleLayerClick}
             selected={layerIsSelected || (layerChildIsSelected && !legendExpanded)}
             sx={{

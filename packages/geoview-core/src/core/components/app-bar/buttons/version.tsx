@@ -10,7 +10,7 @@ import { useMapInteraction } from '@/core/stores/store-interface-and-intial-valu
 import { GitHubIcon } from '@/ui/icons';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { FocusTrapContainer } from '@/core/components/common/focus-trap-container';
-import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import type { SxStyles } from '@/ui/style/types';
@@ -92,6 +92,7 @@ export default function Version(): JSX.Element {
   // Store
   const interaction = useMapInteraction();
   const activeTrapGeoView = useUIActiveTrapGeoView();
+  const { enableFocusTrap, disableFocusTrap } = useUIStoreActions();
 
   // Get container
   const mapId = useGeoViewMapId();
@@ -101,23 +102,39 @@ export default function Version(): JSX.Element {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [open, setOpen] = useState(false);
 
+  // Button ID for focus restoration
+  const versionButtonId = `version-button-${mapId}`;
+
   // Handlers
-  const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-    logger.logTraceUseCallback('VERSION - open');
-    setAnchorEl(event.currentTarget);
-    setOpen((prev) => !prev);
-  }, []);
+  const handleOpenPopover = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      logger.logTraceUseCallback('VERSION - open');
+      setAnchorEl(event.currentTarget);
+      setOpen((prev) => !prev);
+
+      // Register focus trap with button as the return target
+      enableFocusTrap({
+        activeElementId: `${mapId}-version`,
+        callbackElementId: versionButtonId,
+      });
+    },
+    [mapId, versionButtonId, enableFocusTrap]
+  );
 
   const handleClickAway = useCallback(() => {
     logger.logTraceUseCallback('VERSION - close');
-    if (open) setOpen(false);
-  }, [open]);
+    if (open) {
+      setOpen(false);
+      // Restore focus to the button that opened the panel
+      disableFocusTrap();
+    }
+  }, [open, disableFocusTrap]); // ← Update dependencies
 
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
       <Box sx={{ padding: interaction === 'dynamic' ? 'none' : '5px' }}>
         <IconButton
-          id={`version-button-${mapId}`}
+          id={versionButtonId}
           aria-controls={open ? `version-dialog-${mapId}` : undefined}
           aria-expanded={open ? 'true' : 'false'}
           aria-haspopup="dialog"
