@@ -144,9 +144,7 @@ export class LayerFilters {
    * @returns {string} A combined data filter expression.
    */
   getDataRelatedFilters(): string {
-    return this.#getDataRelatedFilters()
-      .map((v) => `(${this.#extraSpacing}${v}${this.#extraSpacing})`)
-      .join(' AND ');
+    return LayerFilters.joinWithAnd(this.#getDataRelatedFilters(), this.#extraSpacing);
   }
 
   /**
@@ -155,9 +153,7 @@ export class LayerFilters {
    * @returns {string} A combined filter expression.
    */
   getAllFilters(): string {
-    return this.#getAllFilters()
-      .map((v) => `(${this.#extraSpacing}${v}${this.#extraSpacing})`)
-      .join(' AND ');
+    return LayerFilters.joinWithAnd(this.#getAllFilters(), this.#extraSpacing);
   }
 
   /**
@@ -181,8 +177,8 @@ export class LayerFilters {
    * @returns {string[]} An array of active data filter expressions.
    * @private
    */
-  #getDataRelatedFilters(): string[] {
-    return [this.#initialFilter, this.#classFilter, this.#dataFilter].filter((v) => !!v) as string[];
+  #getDataRelatedFilters(): (string | undefined)[] {
+    return [this.#initialFilter, this.#classFilter, this.#dataFilter];
   }
 
   /**
@@ -191,8 +187,8 @@ export class LayerFilters {
    * @returns {string[]} An array of all active filter expressions.
    * @private
    */
-  #getAllFilters(): string[] {
-    return [this.#initialFilter, this.#classFilter, this.#dataFilter, this.#timeFilter].filter((v) => !!v) as string[];
+  #getAllFilters(): (string | undefined)[] {
+    return [this.#initialFilter, this.#classFilter, this.#dataFilter, this.#timeFilter];
   }
 
   /**
@@ -209,4 +205,24 @@ export class LayerFilters {
   }
 
   // #endregion PRIVATE METHODS
+
+  // #region STATIC METHODS
+
+  /**
+   * Joins multiple SQL filter fragments using the AND operator.
+   * - Ignores undefined, null, empty, or whitespace-only filters.
+   * - Returns an empty string if no valid filters are provided.
+   * - Returns the single filter as-is if only one is valid (no extra parentheses).
+   * - Wraps each filter in parentheses when combining multiple filters
+   *   to preserve logical precedence.
+   * @param {Array<string | undefined>} filters - List of optional SQL filter fragments.
+   * @returns {string} A combined SQL filter string joined with AND, or an empty string
+   *   if no valid filters exist.
+   */
+  static joinWithAnd(filters: (string | undefined)[], extraSpacing: string = ''): string {
+    const valid = filters.filter((f): f is string => !!f && f.trim().length > 0);
+    return valid.length <= 1 ? (valid[0] ?? '') : valid.map((f) => `(${extraSpacing}${f}${extraSpacing})`).join(' AND ');
+  }
+
+  // #endregion STATIC METHODS
 }

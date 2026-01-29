@@ -53,6 +53,7 @@ import { NUMBER_FILTER, DATE_FILTER, STRING_FILTER } from '@/core/utils/constant
 import type { DataTableProps, ColumnsType } from './data-table-types';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
+import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 
 /**
  * Build Data table from map.
@@ -416,13 +417,12 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     logger.logTraceUseMemo('DATA-TABLE - rows', data.features);
 
     // In addition, filter on the class renderer filters and the time slider filter
-    const layerFilterClassAndTime = [layerClassFilter, layerTimeFilter]
-      .filter((f): f is string => typeof f === 'string' && f.trim().length > 0)
-      .map((f) => `(${f})`)
-      .join(' AND ');
+    const layerFilterClassAndTime = LayerFilters.joinWithAnd([layerClassFilter, layerTimeFilter]);
+
+    // Create the filter equation equivalent of the combined filter
     const layerFilterEquation = GeoviewRenderer.createFilterNodeFromFilter(layerFilterClassAndTime);
 
-    // Filter it
+    // Filter each features
     let filterArray =
       data?.features?.filter((f) => {
         return f.feature && GeoviewRenderer.featureRespectsFilterEquation(f.feature, layerFilterEquation);
