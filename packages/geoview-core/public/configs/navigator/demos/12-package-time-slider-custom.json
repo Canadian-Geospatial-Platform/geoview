@@ -77,6 +77,18 @@
           }
         ],
         "metadataAccessPath": "https://maps-cartes.services.geo.ca/egs_sgu/rest/services/Flood_Inondation/EGS_Flood_Product_Current_en/MapServer"
+      },
+      {
+        "geoviewLayerId": "df168bcf-4abc-4756",
+        "geoviewLayerName": "Wireless Data Network 2013-2024",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "Wireless Data Network 2013-2024"
+          }
+        ],
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Wireless_Data_Network_Reseau_donnees_sans_fil/MapServer/"
       }
     ]
   },
@@ -131,7 +143,45 @@
               },
               "singleHandle": false
             }
-          }
+          },
+          {
+            "layerPaths": [
+                "df168bcf-4abc-4756/0"
+            ],
+            "delay": 2000,
+            "fields": [
+                "Year"
+            ],
+            "filtering": true,
+            "timeDimension": {
+                "field": "Year",
+                "default": [
+                    "2013-01-01T05:00:00Z"
+                ],
+                "nearestValues": "discrete",
+                "displayPattern": [
+                    "year"
+                ],
+                "rangeItems": {
+                    "type": "",
+                    "range": [
+                        "2013-01-01T05:00:00Z",
+                        "2014-01-01T05:00:00Z",
+                        "2015-01-01T05:00:00Z",
+                        "2016-01-01T05:00:00Z",
+                        "2017-01-01T05:00:00Z",
+                        "2018-01-01T05:00:00Z",
+                        "2019-01-01T05:00:00Z",
+                        "2020-01-01T05:00:00Z",
+                        "2021-01-01T05:00:00Z",
+                        "2022-01-01T05:00:00Z",
+                        "2023-01-01T05:00:00Z",
+                        "2024-01-01T05:00:00Z"
+                    ]
+                },
+                "singleHandle": true
+            }
+        }
         ]
       }
     }
