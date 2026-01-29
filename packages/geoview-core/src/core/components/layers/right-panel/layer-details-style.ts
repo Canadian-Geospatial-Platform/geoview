@@ -80,14 +80,14 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   layerMoreInfoFilters: {
     listStyleType: 'disc',
-    listStylePosition: 'inside',
-    pl: 3,
+    listStylePosition: 'outside',
+    paddingLeft: '20px',
   },
   layerMoreInfoFiltersItem: {
     display: 'list-item',
     paddingTop: '0px',
     paddingBottom: '0px',
-    py: 0,
+    paddingLeft: '0px',
     '& .MuiListItemText-root': {
       margin: 0,
       '& .MuiTypography-root': {

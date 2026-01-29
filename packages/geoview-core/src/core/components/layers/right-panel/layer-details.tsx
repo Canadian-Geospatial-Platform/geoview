@@ -609,7 +609,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           <Box>
             <Box>
               {t('layers.layerActiveFilters')}
-              <List dense sx={sxClasses.layerMoreInfoFilters}>
+              <List sx={sxClasses.layerMoreInfoFilters}>
                 {layerFilter && (
                   <ListItem sx={sxClasses.layerMoreInfoFiltersItem}>
                     <ListItemText primary={`${t('layers.layerDefaultFilter')}${layerFilter}`} />
