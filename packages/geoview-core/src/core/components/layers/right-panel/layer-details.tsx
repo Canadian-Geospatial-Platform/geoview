@@ -630,7 +630,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
                     <ListItemText primary={`${t('layers.layerTimeFilter')}${timeFilter}`} />
                   </ListItem>
                 )}
-                {!layerFilter && !dataFilter && !timeFilter && (
+                {!layerFilter && !classFilter && !dataFilter && !timeFilter && (
                   <ListItem sx={sxClasses.layerMoreInfoFiltersItem}>
                     <ListItemText primary={t('layers.layerActiveFiltersNone')} />
                   </ListItem>
