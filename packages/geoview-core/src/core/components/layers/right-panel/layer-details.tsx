@@ -22,10 +22,17 @@ import {
   Typography,
   ZoomInSearchIcon,
 } from '@/ui';
-import { useLayerHighlightedLayer, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { ListItemText } from '@/ui/list';
+import {
+  useLayerHighlightedLayer,
+  useLayerSelectorFilter,
+  useLayerSelectorFilterClass,
+  useLayerStoreActions,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import {
   useDataTableAllFeaturesDataArray,
+  useDataTableFilterSelector,
   useDataTableLayerSettings,
   useDataTableStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
@@ -48,7 +55,11 @@ import {
   useMapStoreActions,
   useMapSelectorLayerParentHidden,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useTimeSliderLayers, useTimeSliderStoreActions } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import {
+  useTimeSliderFiltersSelector,
+  useTimeSliderLayers,
+  useTimeSliderStoreActions,
+} from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { DeleteUndoButton } from '@/core/components/layers/right-panel/delete-undo-button';
@@ -133,7 +144,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     refreshLayer,
     zoomToLayerExtent,
     getLayerBounds,
-    getLayerDefaultFilter,
     getLayerServiceProjection,
     getLayerTimeDimension,
     setLayerHoverable,
@@ -147,7 +157,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const layersData = useDataTableAllFeaturesDataArray();
   const language = useAppDisplayLanguage();
   const metadataUrl = useAppMetadataServiceURL();
-  const layerFilter = getLayerDefaultFilter(layerDetails.layerPath);
+  const layerFilter = useLayerSelectorFilter(layerDetails.layerPath);
+  const classFilter = useLayerSelectorFilterClass(layerDetails.layerPath);
+  const dataFilter = useDataTableFilterSelector(layerDetails.layerPath);
+  const timeFilter = useTimeSliderFiltersSelector(layerDetails.layerPath);
   const layerTimeDimension = getLayerTimeDimension(layerDetails.layerPath);
   const layerNativeProjection = getLayerServiceProjection(layerDetails.layerPath);
   const layerVisible = useMapSelectorLayerVisibility(layerDetails.layerPath);
@@ -593,7 +606,38 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         <Collapse in={isInfoCollapse} sx={sxClasses.layerInfo}>
           <Box>{`${t('layers.layerType')}${localizedTypeName}`}</Box>
           {layerNativeProjection && <Box>{`${t('layers.layerServiceProjection')}${layerNativeProjection}`}</Box>}
-          {layerFilter && <Box>{`${t('layers.layerDefaultFilter')}${layerFilter}`}</Box>}
+          <Box>
+            <Box>
+              {t('layers.layerActiveFilters')}
+              <List dense sx={sxClasses.layerMoreInfoFilters}>
+                {layerFilter && (
+                  <ListItem sx={sxClasses.layerMoreInfoFiltersItem}>
+                    <ListItemText primary={`${t('layers.layerDefaultFilter')}${layerFilter}`} />
+                  </ListItem>
+                )}
+                {classFilter && (
+                  <ListItem sx={sxClasses.layerMoreInfoFiltersItem}>
+                    <ListItemText primary={`${t('layers.layerClassFilter')}${classFilter}`} />
+                  </ListItem>
+                )}
+                {dataFilter && (
+                  <ListItem sx={sxClasses.layerMoreInfoFiltersItem}>
+                    <ListItemText primary={`${t('layers.layerDataTableFilter')}${dataFilter}`} />
+                  </ListItem>
+                )}
+                {timeFilter && (
+                  <ListItem sx={sxClasses.layerMoreInfoFiltersItem}>
+                    <ListItemText primary={`${t('layers.layerTimeFilter')}${timeFilter}`} />
+                  </ListItem>
+                )}
+                {!layerFilter && !dataFilter && !timeFilter && (
+                  <ListItem sx={sxClasses.layerMoreInfoFiltersItem}>
+                    <ListItemText primary={t('layers.layerActiveFiltersNone')} />
+                  </ListItem>
+                )}
+              </List>
+            </Box>
+          </Box>
           {layerTimeDimension && (
             <Box>{`${t('layers.layerTimeDimension')}${t('layers.layerTimeDimensionField')} - ${layerTimeDimension.field} -, min - ${layerTimeDimension.rangeItems.range[0]} / max - ${layerTimeDimension.rangeItems.range[layerTimeDimension.rangeItems.range.length - 1]}`}</Box>
           )}

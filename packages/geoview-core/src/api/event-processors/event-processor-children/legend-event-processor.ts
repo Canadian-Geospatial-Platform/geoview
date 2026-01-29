@@ -130,24 +130,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Retrieves the default filter configuration for a specific layer entry.
-   *
-   * @param {string} mapId - The unique identifier of the map instance.
-   * @param {string} layerPath - The path to the layer in the map configuration.
-   * @returns {string | undefined} - The default filter for the layer entry, or `undefined` if not available.
-   *
-   * @description
-   * This method fetches the layer entry configuration for the specified layer path and checks if it contains a `layerFilter` property.
-   * If the property exists, its value is returned; otherwise, `undefined` is returned.
-   */
-  static getLayerEntryConfigDefaultFilter(mapId: string, layerPath: string): string | undefined {
-    const entryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfigIfExists(layerPath);
-
-    // Check if entryConfig exists and has layerFilter property
-    return entryConfig && 'layerFilter' in entryConfig ? (entryConfig.layerFilter as string) : undefined;
-  }
-
-  /**
    * Retrieves the projection code for a specific layer.
    *
    * @param {string} mapId - The unique identifier of the map instance.
@@ -516,6 +498,13 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           icons: icons || [],
           url: layerConfig.getMetadataAccessPath(),
         };
+
+        // If layer is regular (not group)
+        if (layer instanceof AbstractGVLayer) {
+          // Store the layer filter
+          legendLayerEntry.layerFilter = layer.getLayerFilters().getInitialFilter();
+          legendLayerEntry.layerFilterClass = layer.getLayerFilters().getClassFilter();
+        }
 
         // Add the icons as items on the layer entry
         legendLayerEntry.icons.forEach((legendLayerItem) => {

@@ -298,6 +298,9 @@ export type TypeAllFeatureInfoResultSet = TypeResultSet<TypeAllFeatureInfoResult
 export const useDataTableAllFeaturesDataArray = (): TypeAllFeatureInfoResultSetEntry[] =>
   useStore(useGeoViewStore(), (state) => state.dataTableState.allFeaturesDataArray);
 export const useDataTableFilters = (): Record<string, string> => useStore(useGeoViewStore(), (state) => state.dataTableState.tableFilters);
+export const useDataTableFilterSelector = (layerPath: string): string | undefined => {
+  return useStore(useGeoViewStore(), (state) => state.dataTableState.tableFilters[layerPath]);
+};
 export const useDataTableSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.dataTableState.selectedLayerPath);
 export const useDataTableLayerSettings = (): Record<string, IDataTableSettings> =>
   useStore(useGeoViewStore(), (state) => state.dataTableState.layersDataTableSetting);

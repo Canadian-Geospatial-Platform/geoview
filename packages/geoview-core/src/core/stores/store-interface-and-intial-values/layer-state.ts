@@ -42,7 +42,6 @@ export interface ILayerState {
     queryLayerEsriDynamic: (layerPath: string, objectIDs: number[]) => Promise<TypeFeatureInfoEntryPartial[]>;
     getLayer: (layerPath: string) => TypeLegendLayer | undefined;
     getLayerBounds: (layerPath: string) => number[] | undefined;
-    getLayerDefaultFilter: (layerPath: string) => string | undefined;
     getLayerDeleteInProgress: () => string;
     getLayerServiceProjection: (layerPath: string) => string | undefined;
     getLayerTimeDimension: (layerPath: string) => TimeDimension | undefined;
@@ -158,16 +157,6 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       getLayerBounds: (layerPath: string): Extent | undefined => {
         // Redirect to processor
         return LegendEventProcessor.getLayerBounds(get().mapId, layerPath);
-      },
-
-      /**
-       * Gets the default filter of the layer.
-       * @param {string} layerPath - The layer path of the layer to get the default filter for.
-       * @returns {string | undefined} The default filter or undefined
-       */
-      getLayerDefaultFilter: (layerPath: string): string | undefined => {
-        // Redirect to pProcessor
-        return LegendEventProcessor.getLayerEntryConfigDefaultFilter(get().mapId, layerPath);
       },
 
       /**
@@ -504,6 +493,8 @@ function createLayerSelectorHook<K extends keyof TypeLegendLayer>(key: K) {
 export const useLayerSelectorId = createLayerSelectorHook('layerId');
 export const useLayerSelectorName = createLayerSelectorHook('layerName');
 export const useLayerSelectorStatus = createLayerSelectorHook('layerStatus');
+export const useLayerSelectorFilter = createLayerSelectorHook('layerFilter');
+export const useLayerSelectorFilterClass = createLayerSelectorHook('layerFilterClass');
 export const useLayerSelectorType = createLayerSelectorHook('type');
 export const useLayerSelectorControls = createLayerSelectorHook('controls');
 export const useLayerSelectorChildren = createLayerSelectorHook('children');
