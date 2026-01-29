@@ -37,6 +37,7 @@ export interface QueryParams {
   projection: number;
   maxAllowableOffset: number;
   maxRecordCount: number;
+  where: string;
 }
 
 // Initialize the worker logger
@@ -147,7 +148,7 @@ const processBatch = async (
 async function queryAllEsriFeatures(params: QueryParams): Promise<unknown> {
   const resultRecordCount = params.maxRecordCount > 10000 ? 10000 : params.maxRecordCount;
   const maxConcurrentRequests = Math.min(10, navigator.hardwareConcurrency * 2);
-  const baseUrl = `${params.url}/query?where=1=1&outFields=*&f=json&returnGeometry=${params.queryGeometry}&resultRecordCount=${resultRecordCount}`;
+  const baseUrl = `${params.url}/query?where=${params.where}&outFields=*&f=json&returnGeometry=${params.queryGeometry}&resultRecordCount=${resultRecordCount}`;
 
   try {
     // Send message for starting fetching
@@ -158,7 +159,7 @@ async function queryAllEsriFeatures(params: QueryParams): Promise<unknown> {
 
     // Get total count with a timeout. This is a simple query and if it takes more then 7 seconds it means
     // the server is unresponsive and we should not continue. This will throw an error...
-    const countUrl = `${params.url}/query?where=1=1&returnCountOnly=true&f=json`;
+    const countUrl = `${params.url}/query?where=${params.where}&returnCountOnly=true&f=json`;
     const { count: totalCount } = await fetchWithTimeout<{ count: number }>(countUrl);
     logger.logTrace('Total features count:', totalCount);
 

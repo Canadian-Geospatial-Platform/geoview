@@ -47,7 +47,7 @@
             "layerStyle": {
               "Point": {
                 "type": "uniqueValue",
-                "hasDefault": true,
+                "hasDefault": false,
                 "fields": ["E_Regulated", "E_SampleType", "E_Overall_Condition"],
                 "info": [
                   {
@@ -196,7 +196,7 @@
                   {
                     "visible": true,
                     "label": "Regulated, Yearly, Normal",
-                    "values": [],
+                    "values": ["Regulated", "Yearly", "Normal"],
                     "settings": {
                       "mimeType": "image/png",
                       "offset": [0, 0],

@@ -12,7 +12,7 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "kmlLYR1",
-        "metadataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/kml-files/",
+        "metadataAccessPath": "./datasets/kml-files/",
         "geoviewLayerType": "KML",
         "listOfLayerEntryConfig": [
           {
@@ -28,7 +28,7 @@
           {
             "layerId": "CanadianNationalTornadoDatabase_1980-2009",
             "source": {
-              "dataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/kml-files/CanadianNationalTornadoDatabase_1980-2009.kml"
+              "dataAccessPath": "./datasets/kml-files/CanadianNationalTornadoDatabase_1980-2009.kml"
             }
           }
         ]

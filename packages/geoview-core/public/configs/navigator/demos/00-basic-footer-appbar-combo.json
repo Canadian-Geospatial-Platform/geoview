@@ -94,7 +94,7 @@
       {
         "geoviewLayerId": "geojsonLYR1",
         "geoviewLayerName": "GeoJSON Sample",
-        "metadataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta",
+        "metadataAccessPath": "./datasets/geojson/metadata.meta",
         "geoviewLayerType": "GeoJSON",
         "listOfLayerEntryConfig": [
           {
@@ -106,7 +106,7 @@
       {
         "geoviewLayerId": "csvLYR1",
         "geoviewLayerName": "NPRI",
-        "metadataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files/",
+        "metadataAccessPath": "./datasets/csv-files/",
         "geoviewLayerType": "CSV",
         "listOfLayerEntryConfig": [
           {

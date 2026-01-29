@@ -21,11 +21,9 @@ import type {
   codedValueType,
   TypeLayerStyleConfig,
   TypeLayerStyleConfigInfo,
-  TypeLayerStyleValueCondition,
   TypeOutfieldsType,
   TypeValidMapProjectionCodes,
   TypeIconSymbolVectorConfig,
-  TypeOutfields,
   TypeFeatureInfoEntryPartial,
 } from '@/api/types/map-schema-types';
 import type { TypeLayerMetadataEsriExtent } from '@/api/types/layer-schema-types';
@@ -44,7 +42,7 @@ import { NoFeaturesPropertyError } from '@/core/exceptions/geoview-exceptions';
 import { formatError, RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
 import type { TypeDateFragments } from '@/core/utils/date-mgt';
-import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 
 /**
  * Manages an Esri Dynamic layer.
@@ -58,9 +56,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   // The default hit tolerance the query should be using
   static override DEFAULT_HIT_TOLERANCE: number = 7;
-
-  // The default filter when all should be included
-  static DEFAULT_FILTER_1EQUALS1: string = '(1=1)';
 
   /**
    * Constructs a GVEsriDynamic layer to manage an OpenLayer layer.
@@ -314,15 +309,22 @@ export class GVEsriDynamic extends AbstractGVRaster {
   /**
    * Overrides the get all feature information for all the features stored in the layer.
    * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
+   * @param {LayerFilters} layerFilters - The layer filters to apply when querying the features.
    * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   * @protected
+   * @override
    */
-  protected override async getAllFeatureInfo(map: OLMap, abortController?: AbortController): Promise<TypeFeatureInfoEntry[]> {
+  protected override async getAllFeatureInfo(
+    map: OLMap,
+    layerFilters: LayerFilters,
+    abortController?: AbortController
+  ): Promise<TypeFeatureInfoEntry[]> {
     // Get the layer config in a loaded phase
     const layerConfig = this.getLayerConfig();
 
     // Fetch the features with worker
-    const jsonResponse = await this.#fetchAllFeatureInfoWithWorker(layerConfig);
+    const jsonResponse = await this.#fetchAllFeatureInfoWithWorker(layerConfig, layerFilters.getInitialFilter());
 
     // If was aborted
     // Explicitely checking the abort condition here, after the fetch in the worker, because we can't send the abortController in a fetch happening inside a worker.
@@ -457,7 +459,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
     }
 
     // If geometry is needed, use web worker to query and assign geometry later
-    if (queryGeometry)
+    if (queryGeometry) {
       // TODO: REFACTOR - Here, we're launching another async task to query the geometries, but the original promise will resolve first, by design.
       // TO.DOCONT: We should carry this extra promise with the first response so that the caller of 'getFeatureInfoAtLonLat' can know
       // TO.DOCONT: when the geometries will be done fetching on the features that they've already received as 'resolved'. Carrying the promise
@@ -465,9 +467,12 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // TO.DOCONT: handle on the promise, the caller of 'getFeatureInfoAtLonLat' have no idea of the 'fetchFeatureInfoGeometryWithWorker.catch()' here.
       // TO.DOCONT: However, this would mean change the 'getFeatureInfoAtLonLat' function signature with regards to its return type (and affect ALL other sibling classes)
 
+      // Get the initial filters where clause
+      const whereClause = this.getLayerFilters().getInitialFilter();
+
       // TODO: Performance - We may need to use chunk and process 50 geom at a time. When we query 500 features (points) we have CORS issue with
       // TO.DOCONT: the esri query (was working with identify). But identify was failing on huge geometry...
-      this.#fetchFeatureInfoGeometryWithWorker(layerConfig, objectIds.map(Number), true, mapProjNumber, maxAllowableOffset)
+      this.#fetchFeatureInfoGeometryWithWorker(layerConfig, objectIds.map(Number), whereClause, true, mapProjNumber, maxAllowableOffset)
         .then((featuresJSON) => {
           featuresJSON.features.forEach((feat, index: number) => {
             // If cancelled
@@ -511,13 +516,28 @@ export class GVEsriDynamic extends AbstractGVRaster {
           // Log error
           logger.logError('The Worker to get the feature geometries has failed', error);
         });
+    }
 
     return arrayOfFeatureInfoEntries;
   }
 
+  /**
+   * Overrides the way an EsriDynamic layer applies a view filter. It does so by updating the source layerDefs parameter.
+   * @param {LayerFilters} [filter] - The raw filter string input (defaults to an empty string if not provided).
+   */
+  protected override onSetLayerFilters(filter?: LayerFilters): void {
+    // Redirect
+    GVEsriDynamic.applyViewFilterOnSource(
+      this.getLayerConfig(),
+      this.getOLSource(),
+      this.getLayerConfig().getExternalFragmentsOrder(),
+      filter
+    );
+  }
+
   // #endregion OVERRIDES
 
-  // #region METHODS
+  // #region PUBLIC METHODS
 
   /**
    * Retrieves feature records from the layer using their Object IDs (OIDs).
@@ -551,30 +571,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
     );
   }
 
-  /**
-   * Applies a view filter to an Esri Dynamic layer's source by updating the `layerDefs` parameter.
-   * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
-   */
-  applyViewFilter(filter: string | undefined = ''): void {
-    // Log
-    logger.logTraceCore('GV-ESRI-DYNAMIC - applyViewFilterOnSource', this.getLayerPath());
+  // #endregion PUBLIC METHODS
 
-    // Redirect
-    GVEsriDynamic.applyViewFilterOnSource(
-      this.getLayerConfig(),
-      this.getOLSource(),
-      this.getStyle(),
-      this.getLayerConfig().getExternalFragmentsOrder(),
-      this,
-      filter,
-      (filterToUse: string) => {
-        // Emit event
-        this.emitLayerFilterApplied({
-          filter: filterToUse,
-        });
-      }
-    );
-  }
+  // #region PRIVATE METHODS
 
   /**
    * Query all features with a web worker
@@ -582,7 +581,11 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @returns {Promise<EsriFeaturesJsonResponse>} A promise of esri response for query.
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    */
-  #fetchAllFeatureInfoWithWorker(layerConfig: EsriDynamicLayerEntryConfig): Promise<EsriFeaturesJsonResponse> {
+  #fetchAllFeatureInfoWithWorker(
+    layerConfig: EsriDynamicLayerEntryConfig,
+    whereClause: string | undefined
+  ): Promise<EsriFeaturesJsonResponse> {
+    // Create the params clause
     const params: QueryParams = {
       url: layerConfig.getDataAccessPath(true) + layerConfig.layerId,
       geometryType: 'Point',
@@ -591,6 +594,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       projection: 4326,
       maxAllowableOffset: 6,
       maxRecordCount: layerConfig.maxRecordCount || 1000,
+      where: whereClause ?? '1=1',
     };
 
     // Launch
@@ -610,10 +614,12 @@ export class GVEsriDynamic extends AbstractGVRaster {
   #fetchFeatureInfoGeometryWithWorker(
     layerConfig: EsriDynamicLayerEntryConfig,
     objectIds: number[],
+    whereClause: string | undefined,
     queryGeometry: boolean,
     projection: number,
     maxAllowableOffset: number
   ): Promise<EsriFeaturesJsonResponse> {
+    // Create the params clause
     const params: QueryParams = {
       url: layerConfig.getDataAccessPath(true) + layerConfig.layerId,
       geometryType: layerConfig.getLayerMetadata()!.geometryType.replace('esriGeometry', ''),
@@ -622,6 +628,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
       projection,
       maxAllowableOffset,
       maxRecordCount: layerConfig.maxRecordCount || 1000,
+      where: whereClause ?? '1=1',
     };
 
     // Launch
@@ -666,9 +673,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
     }
   }
 
-  // #endregion METHODS
+  // #endregion PRIVATE METHODS
 
-  // #region STATICMETHODS
+  // #region STATIC METHODS
 
   /**
    * Applies a view filter to an Esri Dynamic layer's source by updating the `layerDefs` parameter.
@@ -678,39 +685,32 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {ImageArcGISRest} source - The OpenLayers `ImageArcGISRest` source instance to which the filter will be applied.
    * @param {TypeLayerStyleConfig | undefined} style - Optional style configuration that may influence filter expression generation.
    * @param {TypeDateFragments | undefined} externalDateFragments - Optional external date fragments used to assist in formatting time-based filters.
-   * @param {GVEsriDynamic | undefined} layer - Optional GeoView layer containing the source (if exists) in order to trigger a redraw.
    * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
-   * @param {Function?} callbackWhenUpdated - Optional callback that is invoked with the final filter string if the layer was updated.
    * @throws {LayerInvalidLayerFilterError} If the filter expression fails to parse or cannot be applied.
    */
   static applyViewFilterOnSource(
     layerConfig: EsriDynamicLayerEntryConfig,
     source: ImageArcGISRest,
-    style: TypeLayerStyleConfig | undefined,
     externalDateFragments: TypeDateFragments | undefined,
-    layer: GVEsriDynamic | undefined,
-    filter: string | undefined = '',
-    callbackWhenUpdated: ((filterToUse: string) => void) | undefined = undefined
+    filter: LayerFilters | undefined
   ): void {
-    // Parse the filter value to use
-    let filterValueToUse = filter.replaceAll(/\s{2,}/g, ' ').trim();
+    // Get the filter to use
+    let filterValueToUse = filter?.getAllFilters() || '';
 
     // Get the current filter
     const currentFilter = source.getParams().layerDefs;
 
     try {
-      // Update the layer config information (not ideal to do this here at this stage...)
-      layerConfig.setLayerFilter(filterValueToUse);
-      filterValueToUse = this.getFilterFromStyle(layerConfig, style) || '';
-
       // Parse the filter value to use
+      const fieldNames = layerConfig.getOutfields()?.map((f) => f.name) || [];
+      filterValueToUse = GVLayerUtilities.parseLikeOperationsEsriDynamic(filterValueToUse, fieldNames);
       filterValueToUse = GVLayerUtilities.parseDateTimeValuesEsriDynamic(filterValueToUse, externalDateFragments);
 
       // Create the source parameter to update
       const layerDefs = layerConfig.getLayerMetadata()?.type === 'Raster Layer' ? '' : `{"${layerConfig.layerId}": "${filterValueToUse}"}`;
 
       // Define what is considered the default filter (e.g., "1=1")
-      const isDefaultFilter = filterValueToUse === this.DEFAULT_FILTER_1EQUALS1;
+      const isDefaultFilter = filterValueToUse === GeoviewRenderer.DEFAULT_FILTER_1EQUALS1;
 
       // Define what is a no operation
       const isNewFilterEffectivelyNoop = isDefaultFilter && !currentFilter;
@@ -725,10 +725,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
       if (shouldUpdateFilter) {
         // Update the source params
         source.updateParams({ layerDefs });
-        layer?.getOLLayer().changed();
-
-        // Callback
-        callbackWhenUpdated?.(filterValueToUse);
       }
     } catch (error: unknown) {
       // Failed
@@ -739,438 +735,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
         currentFilter,
         formatError(error)
       );
-    }
-  }
-
-  /**
-   * Builds a filter string (SQL-like or OGC-compliant) for a given layer and style configuration.
-   * This method supports:
-   * - **simple styles** → returns the base layer filter or a default `(1=1)` condition.
-   * - **unique value styles** → builds an optimized filter for visible categories.
-   * - **class breaks styles** → builds numeric range filters based on visibility flags.
-   * @param {EsriDynamicLayerEntryConfig | OgcWmsLayerEntryConfig} layerConfig - The layer configuration.
-   * @param {TypeLayerStyleConfig | undefined} style - The style configuration (optional).
-   * @returns {string | undefined} The filter expression, or `undefined` if not applicable.
-   */
-  static getFilterFromStyle(
-    layerConfig: EsriDynamicLayerEntryConfig | OgcWmsLayerEntryConfig,
-    style: TypeLayerStyleConfig | undefined
-  ): string | undefined {
-    // No style, no filter on style
-    if (!style) return undefined;
-
-    const isWMS = layerConfig instanceof OgcWmsLayerEntryConfig;
-    const defaultFilter = isWMS ? undefined : this.DEFAULT_FILTER_1EQUALS1;
-    const layerFilter = layerConfig.getLayerFilter();
-
-    const styleSettings = layerConfig.getLayerStyleSettings();
-    if (!styleSettings) return this.#appendLayerFilter(defaultFilter, layerFilter, isWMS);
-
-    // Get the outfields
-    const outfields = layerConfig.getOutfields();
-
-    switch (styleSettings.type) {
-      case 'simple':
-        return this.#appendLayerFilter(defaultFilter, layerFilter, isWMS);
-
-      case 'uniqueValue': {
-        // Check if any fields were retrieved
-        if (!outfields) {
-          // Log warning, so we know
-          logger.logWarning(
-            'A style with filter capabilities was set on the layer, but no fields were read from vector data. Make sure source.featureInfo?.outfields has values.'
-          );
-          return this.#appendLayerFilter(defaultFilter, layerFilter, isWMS);
-        }
-
-        this.#normalizeVisibility(styleSettings);
-        if (this.#allFeaturesVisible(styleSettings.info)) return this.#appendLayerFilter(defaultFilter, layerFilter, isWMS);
-
-        const fieldCounts = this.#countFieldOfTheSameValue(styleSettings);
-        const fieldOrder = this.#sortFieldOfTheSameValue(styleSettings, fieldCounts);
-        const queryTree = this.#getQueryTree(styleSettings, fieldCounts, fieldOrder);
-        const query = this.#buildQueryUniqueValue(queryTree, 0, fieldOrder, styleSettings, outfields, isWMS);
-        return this.#appendLayerFilter(query, layerFilter, isWMS);
-      }
-
-      case 'classBreaks': {
-        // Check if any fields were retrieved
-        if (!outfields) {
-          // Log warning, so we know
-          logger.logWarning(
-            'A style with filter capabilities was set on the layer, but no fields were read from vector data. Make sure source.featureInfo?.outfields has values.'
-          );
-          return this.#appendLayerFilter(defaultFilter, layerFilter, isWMS);
-        }
-
-        this.#normalizeVisibility(styleSettings);
-        if (this.#allFeaturesVisible(styleSettings.info)) return this.#appendLayerFilter(defaultFilter, layerFilter, isWMS);
-
-        const filterExpression = this.#buildQueryClassBreaksFilter(styleSettings, outfields);
-        return this.#appendLayerFilter(filterExpression, layerFilter, isWMS);
-      }
-
-      default:
-        return defaultFilter;
-    }
-  }
-
-  /**
-   * Normalizes a style configuration by ensuring that all visibility flags
-   * are explicitly set. Any undefined `visible` properties are defaulted to `true`
-   * (meaning the feature is considered visible).
-   * @param {TypeLayerStyleSettings} styleConfig - The style configuration object to normalize.
-   * @returns {void}
-   */
-  static #normalizeVisibility(styleConfig: TypeLayerStyleSettings): void {
-    styleConfig.info.forEach((s) => {
-      // eslint-disable-next-line no-param-reassign
-      if (s.visible === undefined) s.visible = true;
-    });
-  }
-
-  /**
-   * Determines whether all features in the style configuration are visible.
-   * This is used to skip building a filter expression when no filtering is needed.
-   * @param {TypeLayerStyleConfigInfo[]} settings - The style configuration entries defining visibility.
-   * @returns {boolean} `true` if all features are visible; `false` if any are hidden or filtered.
-   */
-  static #allFeaturesVisible(settings: TypeLayerStyleConfigInfo[]): boolean {
-    return settings.every((s) => s.visible);
-  }
-  /**
-   * Combines a base style-derived filter expression with an optional
-   * layer-level filter, using the logical `AND` operator.
-   * @param {string | undefined} baseFilter - The base filter expression derived from style settings.
-   * @param {string | undefined} layerFilter - An optional additional filter to append.
-   * @param {boolean} useExtraSpacingInFilter - Indicate if we need extra spaces around characters (WMS limitation).
-   * @returns {string | undefined} The combined filter expression, or `undefined` if none apply.
-   */
-  static #appendLayerFilter(
-    baseFilter: string | undefined,
-    layerFilter: string | undefined,
-    useExtraSpacingInFilter: boolean
-  ): string | undefined {
-    if (!baseFilter && !layerFilter) return undefined;
-    if (!baseFilter) return layerFilter!;
-    if (!layerFilter) return baseFilter;
-    const spacing = useExtraSpacingInFilter ? ' ' : '';
-    return `${baseFilter} and (${spacing}${layerFilter}${spacing})`;
-  }
-
-  /**
-   * Builds a filter for "classBreaks" style types.
-   * @param styleSettings - The style configuration.
-   * @param outfields - The feature info fields.
-   */
-  static #buildQueryClassBreaksFilter(styleSettings: TypeLayerStyleSettings, outfields: TypeOutfields[] | undefined): string | undefined {
-    const field = styleSettings.fields[0];
-    const { info } = styleSettings;
-    const { hasDefault } = styleSettings;
-    const featureInfo = outfields;
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const fmt = (value: any): string => this.#formatFieldValue(field, value, featureInfo);
-
-    const filterArray: string[] = [];
-    let visibleWhenGreaterIndex = -1;
-
-    for (let i = 0; i < info.length; i++) {
-      const entry = info[i];
-      const comparer0: TypeLayerStyleValueCondition = entry.valuesConditions?.[0] || '>=';
-      const comparer1: TypeLayerStyleValueCondition = entry.valuesConditions?.[1] || '<=';
-
-      // Determine even/odd based on filterArray length
-      if (filterArray.length % 2 === 0) {
-        // Even index logic (first half of a range)
-        if (i === 0) {
-          // First entry
-          if (entry.visible !== false && (!hasDefault || (hasDefault && info[info.length - 1].visible === false))) {
-            // visible, default not visible
-            filterArray.push(`${field} ${comparer0} ${fmt(entry.values[0])}`);
-          } else if (entry.visible === false && hasDefault && info[info.length - 1].visible !== false) {
-            // not visible, default visible
-            filterArray.push(`${field} ${comparer0} ${fmt(entry.values[0])}`);
-            visibleWhenGreaterIndex = i;
-          }
-        } else {
-          if (entry.visible !== false && (!hasDefault || (hasDefault && info[info.length - 1].visible === false))) {
-            filterArray.push(`${field} ${comparer0} ${fmt(entry.values[0])}`);
-            if (i + 1 === info.length) {
-              filterArray.push(`${field} ${comparer1} ${fmt(entry.values[1])}`);
-            }
-          } else if (entry.visible === false && hasDefault && info[info.length - 1].visible !== false) {
-            filterArray.push(`${field} ${comparer0} ${fmt(entry.values[0])}`);
-            visibleWhenGreaterIndex = i;
-          }
-        }
-      } else {
-        // Odd index logic (closing half of a range)
-        if (!hasDefault || (hasDefault && info[info.length - 1].visible === false)) {
-          if (entry.visible === false) {
-            filterArray.push(`${field} ${comparer1} ${fmt(info[i - 1].values[1])}`);
-          } else if (i + 1 === info.length) {
-            filterArray.push(`${field} ${comparer1} ${fmt(entry.values[1])}`);
-          }
-        } else if (hasDefault && entry.visible !== false) {
-          filterArray.push(`${field} ${comparer1} ${fmt(info[i - 1].values[1])}`);
-          visibleWhenGreaterIndex = -1;
-        } else {
-          visibleWhenGreaterIndex = i;
-        }
-      }
-    }
-
-    // Final "greater than" clause
-    if (visibleWhenGreaterIndex !== -1) {
-      filterArray.push(`${field} > ${fmt(info[visibleWhenGreaterIndex].values[1])}`);
-    }
-
-    // Return the filter
-    return this.#buildClassBreakExpression(filterArray, hasDefault, info);
-  }
-
-  /**
-   * Builds the final SQL-like boolean filter expression used for "classBreaks" style rules.
-   * This function takes the list of already-constructed range conditions (`filterArray`)
-   * and assembles them into a properly parenthesized logical expression. The structure
-   * of the expression depends on whether the style has a “default” class and whether
-   * that default class is visible or not.
-   * Behavior:
-   * - If no filters exist, returns `(1=0)` which represents a false filter (select nothing).
-   * - If `hasDefault` is `true` **and** the last class in `info` is visible, the function
-   *   constructs an `OR`-based expression that mirrors the original ArcGIS classBreaks
-   *   logic where the default class is considered visible.
-   * - Otherwise (default not visible), constructs a nested sequence of `AND`/`OR` blocks
-   *   following the original Esri filtering algorithm, ensuring that non-visible classes
-   *   properly constrain the final range.
-   * @param {string[]} filterArray - The ordered list of base range expressions
-   *   (e.g., `["field >= 1", "field <= 5", "field > 10", "field <= 20"]`) produced by
-   *   the classBreaks preprocessing logic.
-   * @param {boolean} hasDefault - Indicates whether the style definition includes a
-   *   "default" class (the implicit class beyond the listed break ranges).
-   * @param {TypeLayerStyleConfigInfo[]} info - The style configuration entries. Used
-   *   primarily to determine visibility of the last class when `hasDefault` is true.
-   * @returns {string} A fully assembled boolean expression such as:
-   *   - `(1=0)` when nothing should match,
-   *   - `(field >= 1 and field <= 5)`,
-   *   - `((field >= 1 and field <= 5) or (field > 10 and field <= 20))`,
-   *   - or more complex nested expressions depending on break visibility.
-   */
-  static #buildClassBreakExpression(filterArray: string[], hasDefault: boolean, info: TypeLayerStyleConfigInfo[]): string {
-    if (filterArray.length === 0) return '(1=0)';
-
-    // Default visible / has default AND last class visible
-    if (hasDefault && info[info.length - 1].visible !== false) {
-      const expr = `${filterArray.slice(0, -1).reduce((prev, node, i) => {
-        if (i === 0) return `(${node} or `;
-        if (i % 2 === 0) return `${prev} and ${node}) or `;
-        return `${prev}(${node}`;
-      }, '')}${filterArray.at(-1)})`;
-
-      return expr;
-    }
-
-    // Default not visible
-    return `${filterArray.reduce((prev, node, i) => {
-      if (i === 0) return `((${node} and `;
-      if (i % 2 === 0) return `${prev} or (${node} and `;
-      return `${prev}${node})`;
-    }, '')})`;
-  }
-
-  /**
-   * Counts the number of times the value of a field is used by the unique value style information object. Depending on the
-   * visibility of the default, we count visible or invisible settings.
-   * @param {TypeLayerStyleSettings} styleSettings - The unique value style settings to evaluate.
-   * @returns {TypeFieldOfTheSameValue[][]} The result of the evaluation. The first index of the array corresponds to the field's
-   * index in the style settings and the second one to the number of different values the field may have based on visibility of
-   * the feature.
-   * @private
-   */
-  static #countFieldOfTheSameValue(styleSettings: TypeLayerStyleSettings): TypeFieldOfTheSameValue[][] {
-    return styleSettings.info.reduce<TypeFieldOfTheSameValue[][]>(
-      (counter, styleEntry): TypeFieldOfTheSameValue[][] => {
-        if (styleEntry.visible !== false) {
-          styleEntry.values.forEach((styleValue, i) => {
-            const valueExist = counter[i]?.find((counterEntry) => counterEntry.value === styleValue);
-            if (valueExist) valueExist.nbOccurence++;
-            else if (counter[i]) counter[i].push({ value: styleValue, nbOccurence: 1 });
-            // eslint-disable-next-line no-param-reassign
-            else counter[i] = [{ value: styleValue, nbOccurence: 1 }];
-          });
-        }
-
-        return counter;
-      },
-      styleSettings.fields.map<TypeFieldOfTheSameValue[]>(() => [])
-    );
-  }
-
-  /**
-   * Sorts the number of times the value of a field is used by the unique value style information object. Depending on the
-   * visibility of the default value, we count the visible or invisible parameters. The order goes from the highest number of
-   * occurrences to the lowest number of occurrences.
-   * @param {TypeLayerStyleSettings} styleSettings - The unique value style settings to evaluate.
-   * @param {TypeFieldOfTheSameValue[][]} fieldOfTheSameValue - The count information that contains the number of occurrences
-   * of a value.
-   * @returns {number[]} An array that gives the field order to use to build the query tree.
-   * @private
-   */
-  static #sortFieldOfTheSameValue(styleSettings: TypeLayerStyleSettings, fieldOfTheSameValue: TypeFieldOfTheSameValue[][]): number[] {
-    const fieldNotUsed = styleSettings.fields.map(() => true);
-    const fieldOrder: number[] = [];
-    for (let entrySelected = 0; entrySelected !== -1; entrySelected = fieldNotUsed.findIndex((flag) => flag)) {
-      let entrySelectedTotalEntryCount = fieldOfTheSameValue[entrySelected].reduce((accumulator, fieldEntry) => {
-        return accumulator + fieldEntry.nbOccurence;
-      }, 0);
-      for (let i = 0; i < styleSettings.fields.length; i++) {
-        if (fieldNotUsed[i] && i !== entrySelected) {
-          const newEntrySelectedTotalEntryCount = fieldOfTheSameValue[i].reduce((accumulator, fieldEntry) => {
-            return accumulator + fieldEntry.nbOccurence;
-          }, 0);
-          if (
-            fieldOfTheSameValue[entrySelected].length > fieldOfTheSameValue[i].length ||
-            (fieldOfTheSameValue[entrySelected].length === fieldOfTheSameValue[i].length &&
-              entrySelectedTotalEntryCount < newEntrySelectedTotalEntryCount)
-          ) {
-            entrySelected = i;
-            entrySelectedTotalEntryCount = newEntrySelectedTotalEntryCount;
-          }
-        }
-      }
-      fieldNotUsed[entrySelected] = false;
-      fieldOrder.push(entrySelected);
-    }
-
-    return fieldOrder;
-  }
-
-  /**
-   * Gets the query tree. The tree structure is a representation of the optimized query we have to create. It contains the field
-   * values in the order specified by the fieldOrder parameter. The optimization is based on the distributivity and associativity
-   * of the Boolean algebra. The form is the following:
-   *
-   * (f1 = v11 and (f2 = v21 and f3 in (v31, v32) or f2 = v22 and f3 in (v31, v32, v33)) or f1 = v12 and (f2 = v21 and ...)))
-   *
-   * which is equivalent to:
-   * f1 = v11 and f2 = v21 and f3 = v31 or f1 = v11 and f2 = v21 and f3 = v32 or f1 = v11 and f2 = v22 and f3 = v31 ...
-   *
-   * @param {TypeLayerStyleSettings} styleSettings - The unique value style settings to evaluate.
-   * @param {TypeFieldOfTheSameValue[][]} fieldOfTheSameValue - The count information that contains the number of occurrences
-   * of a value.
-   * @param {number[]} fieldOrder - The field order to use when building the tree.
-   * @returns {TypeQueryTree} The query tree to use when building the final query string.
-   * @private
-   */
-  static #getQueryTree(
-    styleSettings: TypeLayerStyleSettings,
-    fieldOfTheSameValue: TypeFieldOfTheSameValue[][],
-    fieldOrder: number[]
-  ): TypeQueryTree {
-    const queryTree: TypeQueryTree = [];
-    styleSettings.info.forEach((styleEntry) => {
-      if (styleEntry.visible !== false) {
-        let levelToSearch = queryTree;
-        for (let i = 0; i < fieldOrder.length; i++) {
-          if (fieldOfTheSameValue[fieldOrder[i]].find((field) => field.value === styleEntry.values[fieldOrder[i]])) {
-            const treeElementFound = levelToSearch.find((treeElement) => styleEntry.values[fieldOrder[i]] === treeElement.fieldValue);
-            if (!treeElementFound) {
-              levelToSearch.push({ fieldValue: styleEntry.values[fieldOrder[i]], nextField: [] });
-              levelToSearch = levelToSearch[levelToSearch.length - 1].nextField;
-            } else levelToSearch = treeElementFound.nextField;
-          }
-        }
-      }
-    });
-
-    return queryTree;
-  }
-
-  /**
-   * Builds the query using the provided query tree.
-   * @param {TypeQueryTree} queryTree - The query tree to use.
-   * @param {number} level - The level to use for solving the tree.
-   * @param {number[]} fieldOrder - The field order to use for solving the tree.
-   * @param {TypeLayerStyleSettings} styleSettings - The unique value style settings to evaluate.
-   * @param {TypeOutfields[]} outfields - The outfields information that knows the field type.
-   * @returns {string} The resulting query.
-   * @private
-   */
-  static #buildQueryUniqueValue(
-    queryTree: TypeQueryTree,
-    level: number,
-    fieldOrder: number[],
-    styleSettings: TypeLayerStyleSettings,
-    outFields: TypeOutfields[] | undefined,
-    useExtraSpacingInFilter: boolean
-  ): string {
-    // The spacing to be used
-    const spacing = useExtraSpacingInFilter ? ' ' : '';
-    const withQuotes = useExtraSpacingInFilter ? '"' : '';
-
-    // TODO COMMENTED CODE - The code below was previously causing the classes to be reversed by adding a 'not' to the query
-    // TO.DO Need to confirm that the 'not' is no longer needed
-    // TO.DO Changed on 2025-05-29 in PR 2916
-    // let queryString = styleSettings.info[styleSettings.info.length - 1].visible !== false && !level ? 'not (' : '(';
-    let queryString = `(${spacing}`;
-    for (let i = 0; i < queryTree.length; i++) {
-      // Read the value
-      const value = this.#formatFieldValue(styleSettings.fields[fieldOrder[level]], queryTree[i].fieldValue, outFields);
-
-      // The nextField array is not empty, then it is is not the last field
-      if (queryTree[i].nextField.length) {
-        // If i > 0 (true) then we add a OR clause
-        if (i) queryString = `${queryString} or `;
-        // Add to the query the 'fieldName = value and ' + the result of the recursive call to buildQuery using the next field and level
-        queryString = `${queryString}${withQuotes}${styleSettings.fields[fieldOrder[level]]}${withQuotes} = ${value} and ${this.#buildQueryUniqueValue(
-          queryTree[i].nextField,
-          level + 1,
-          fieldOrder,
-          styleSettings,
-          outFields,
-          useExtraSpacingInFilter
-        )}`;
-      } else {
-        // We have reached the last field and i = 0 (false) we concatenate 'fieldName in (value' else we concatenate ', value'
-        queryString = i
-          ? `${queryString}${spacing}, ${value}`
-          : `${withQuotes}${styleSettings.fields[fieldOrder[level]]}${withQuotes} in (${spacing}${value}`;
-      }
-      // If i points to the last element of the queryTree, close the parenthesis.
-      if (i === queryTree.length - 1) queryString = `${queryString}${spacing})`;
-    }
-
-    return queryString === `(${spacing}` ? `(${spacing}1${spacing}=${spacing}0${spacing})` : queryString;
-  }
-
-  /**
-   * Formats the field value to use in the query.
-   * @param {string} fieldName - The field name.
-   * @param {unknown} rawValue - The unformatted field value.
-   * @param {TypeOutfields[] | undefined} outfields - The outfields information that knows the field type.
-   * @returns {string} The resulting field value.
-   * @private
-   */
-  static #formatFieldValue(fieldName: string, rawValue: unknown, outfields: TypeOutfields[] | undefined): string {
-    const fieldEntry = outfields?.find((outfield) => outfield.name === fieldName);
-    const fieldType = fieldEntry?.type;
-    switch (fieldType) {
-      case 'date':
-        return `date '${rawValue}'`;
-      case 'string': {
-        // Double the quotes
-        const value = `${rawValue}`.replaceAll("'", "''");
-        return `'${value}'`;
-      }
-      default: {
-        // Should be a number, check it in case...
-        const number = Number(rawValue);
-
-        // If is NaN
-        if (Number.isNaN(number)) return '0'; // We were tricked, it's not a numeric value, use 0 for now..
-        return `${number}`; // All good
-      }
     }
   }
 
@@ -1193,7 +757,3 @@ export type EsriIdentifyJsonResponseAttribute = {
   attributes: Record<string, unknown>;
   geometry: GeometryJson;
 };
-
-type TypeFieldOfTheSameValue = { value: string | number | Date; nbOccurence: number };
-
-type TypeQueryTree = { fieldValue: string | number | Date; nextField: TypeQueryTree }[];

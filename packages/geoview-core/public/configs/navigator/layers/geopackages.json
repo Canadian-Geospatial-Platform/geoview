@@ -19,7 +19,7 @@
             "layerId": "Test.gpkg",
             "layerName": "Class breaks",
             "source": {
-              "dataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geopackages"
+              "dataAccessPath": "./datasets/geopackages"
             }
           }
         ]
@@ -33,14 +33,14 @@
             "layerId": "QGIS Packaged Layers (D+S Canal).gpkg",
             "layerName": "D+S Canal",
             "source": {
-              "dataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geopackages"
+              "dataAccessPath": "./datasets/geopackages"
             }
           },
           {
             "layerId": "rivers.gpkg",
             "layerName": "Rivers",
             "source": {
-              "dataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geopackages"
+              "dataAccessPath": "./datasets/geopackages"
             }
           }
         ]
@@ -67,7 +67,7 @@
               }
             ],
             "source": {
-              "dataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geopackages"
+              "dataAccessPath": "./datasets/geopackages"
             }
           }
         ]

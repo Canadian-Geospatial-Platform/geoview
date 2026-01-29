@@ -315,6 +315,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     return undefined;
   }
 
+  /**
+   * Gets the legend icon images for a given layer legend
+   * @param {TypeLegend | null | undefined} layerLegend - The legend of the layer
+   * @returns {TypeLegendLayerItem[] | undefined} The legend icon images details
+   */
   static getLayerIconImage(layerLegend: TypeLegend | null | undefined): TypeLegendLayerItem[] | undefined {
     // TODO: Refactor - Move this function to a utility class instead of at the 'processor' level so it's safer to call from a layer framework level class
     const iconDetails: TypeLegendLayerItem[] = [];
@@ -734,7 +739,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {TypeLegendItem} item - The item to change.
    */
   static toggleItemVisibility(mapId: string, layerPath: string, item: TypeLegendItem): void {
-    MapEventProcessor.getMapViewerLayerAPI(mapId).setItemVisibility(layerPath, item, !item.isVisible);
+    MapEventProcessor.getMapViewerLayerAPI(mapId).setItemVisibility(layerPath, item, !item.isVisible, true);
   }
 
   /**
@@ -764,6 +769,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       // Shadow-copy this specific array so that the hooks are triggered for this items array and this one only
       layer.items = [...layer.items];
     }
+
+    // Now that it's done, apply the layer visibility
+    MapEventProcessor.applyLayerFilters(mapId, layerPath);
 
     // Set updated legend layers
     this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);

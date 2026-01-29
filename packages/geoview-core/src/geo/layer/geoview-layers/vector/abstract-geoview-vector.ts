@@ -10,11 +10,13 @@ import type { TypeOutfields } from '@/api/types/map-schema-types';
 import type { TypePostSettings } from '@/api/types/layer-schema-types';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
+import { GVVectorSource } from '@/geo/layer/source/vector-source';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { GVVectorSource } from '@/geo/layer/source/vector-source';
 import { formatError } from '@/core/exceptions/core-exceptions';
+import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 
 /**
  * The AbstractGeoViewVector class.
@@ -111,11 +113,16 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         // Grab the features to load in the source
         const features = await this.onCreateVectorSourceLoadFeatures(layerConfig, sourceOptions, options);
 
+        // Only keep the features that fit the initial filter
+        const layerFilters = new LayerFilters(layerConfig.getLayerFilter());
+        const filterEquation = layerFilters.getFilterEquation();
+        const featuresFiltered = features.filter((feature) => GeoviewRenderer.featureRespectsFilterEquation(feature, filterEquation));
+
         // Parse the feature metadata
-        AbstractGeoViewVector.#processFeatureMetadata(features, layerConfig);
+        AbstractGeoViewVector.#processFeatureMetadata(featuresFiltered, layerConfig);
 
         // Normalize the date fields
-        this.#normalizeDateFields(features, layerConfig);
+        this.#normalizeDateFields(featuresFiltered, layerConfig);
 
         // If the strategy is 'bbox'
         if (sourceOptions.strategy === bbox) {
@@ -125,11 +132,11 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
         }
 
         // Add the features in the source
-        vectorSource.addFeatures(features);
+        vectorSource.addFeatures(featuresFiltered);
 
         // Call the success callback with the features. This will trigger the onLoaded callback on the layer object (though it
         // seems not to call it everytime, OL issue? if issue persists, maybe we want to setLayerStatus to loaded here?)
-        successCallback?.(features);
+        successCallback?.(featuresFiltered);
       } catch (error: unknown) {
         // Set the error
         vectorSource.setLoaderError(formatError(error));

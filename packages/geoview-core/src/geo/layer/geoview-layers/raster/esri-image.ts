@@ -10,7 +10,6 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
-import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 
 export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
@@ -254,16 +253,6 @@ export class EsriImage extends AbstractGeoViewRaster {
 
     // Create the source
     const olSource = new ImageArcGISRest(sourceOptions);
-
-    // Apply the filter on the source right away, before the first load
-    GVWMS.applyViewFilterOnSource(
-      layerConfig,
-      olSource,
-      undefined,
-      layerConfig.getExternalFragmentsOrder(),
-      undefined,
-      layerConfig.getLayerFilter()
-    );
 
     // Return the source
     return olSource;

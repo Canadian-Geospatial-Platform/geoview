@@ -269,7 +269,7 @@ export class WFS extends AbstractGeoViewVector {
 
     // TODO: WMS - Add support for other formats. Not quite the GV issue #3134, but similar
 
-    // TODO: ALEX - FIX THIS EXCEPTION - Exception, the geo.weather.gc.ca/geomet service says it supports application/json, but it doesn't in reality
+    // TODO: FIX THIS EXCEPTION - Exception, the geo.weather.gc.ca/geomet service says it supports application/json, but it doesn't in reality
     if (layerConfig.getDataAccessPath().includes('//geo.weather.gc.ca/geomet')) outputFormat = undefined;
 
     // Check if url contains metadata parameters for the getCapabilities request and reformat the urls
@@ -647,7 +647,7 @@ export class WFS extends AbstractGeoViewVector {
 
     const fieldEntryType = fieldDefinition.type.split(':').slice(-1)[0];
     if (fieldEntryType === 'date') return 'date';
-    if (['int', 'number'].includes(fieldEntryType)) return 'number';
+    if (['int', 'integer', 'number', 'decimal', 'long', 'short', 'float', 'double'].includes(fieldEntryType)) return 'number';
 
     // Default: string
     return 'string';
