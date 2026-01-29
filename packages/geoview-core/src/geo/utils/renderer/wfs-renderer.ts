@@ -1314,8 +1314,34 @@ export abstract class WfsRenderer {
       .map((child) => new XMLSerializer().serializeToString(child))
       .join('');
 
+    // Redecode in case we had improper literals, we had to do this to support earthquakes layer and the '>=6' class render
+    const childrenXmlDecoded = this.#unescapeComparisonOperatorsInLiterals(childrenXml);
+
     // Return it
-    return childrenXml;
+    return childrenXmlDecoded;
+  }
+
+  /**
+   * Unescapes comparison operators inside OGC <Literal> elements.
+   * XMLSerializer always escapes ">" and "<" characters in text nodes
+   * (producing "&gt;" and "&lt;"). While this is correct XML behavior,
+   * some WMS / OGC servers (e.g. QGIS WMS) expect raw comparison operators
+   * such as ">=6" to appear directly inside <Literal> values.
+   * This function post-processes the serialized XML string and converts
+   * "&gt;" and "&lt;" back to their literal characters, but **only**
+   * within <Literal> elements, leaving the rest of the XML untouched.
+   * @param {string} xml - Serialized OGC Filter XML.
+   * @returns {string} The XML string with comparison operators unescaped
+   *                   inside <Literal> elements.
+   * @private
+   * @static
+   */
+  static #unescapeComparisonOperatorsInLiterals(xml: string): string {
+    return xml.replace(/<Literal>([\s\S]*?)<\/Literal>/g, (match, literalContent) => {
+      const fixed = literalContent.replace(/&gt;/g, '>').replace(/&lt;/g, '<');
+
+      return `<Literal>${fixed}</Literal>`;
+    });
   }
 
   /**

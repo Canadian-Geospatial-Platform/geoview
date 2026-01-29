@@ -1288,7 +1288,7 @@ export class LayerApi {
    * @throws {LayerWrongTypeError} When the layer is of the wrong type (a group layer).
    */
   setItemVisibility(layerPath: string, item: TypeLegendItem, visibility: boolean, refresh: boolean = true): void {
-    // Get registered layer config
+    // Get registered layer
     const layer = this.getGeoviewLayer(layerPath);
 
     // Check if wrong type
@@ -1299,11 +1299,12 @@ export class LayerApi {
 
     // TODO: REFACTOR - This current function should probably end here and the setting of the store happen in an event hook on the
     // TO.DOCONT: style item visibility. Refer to pattern of setLayerName, setLayerOpacity, setLayerQueryable, etc
-    // Update the legend layers if necessary
-    if (refresh) LegendEventProcessor.setItemVisibility(this.getMapId(), layerPath, item, visibility);
-
     // Apply filter to layer
     if (refresh) MapEventProcessor.applyLayerFilters(this.getMapId(), layerPath);
+
+    // Update the legend layers if necessary
+    if (refresh)
+      LegendEventProcessor.setItemVisibility(this.getMapId(), layerPath, item, visibility, layer.getLayerFilters().getClassFilter());
 
     // Emit event
     this.#emitLayerItemVisibilityToggled({ layerPath, itemName: item.name, visibility });

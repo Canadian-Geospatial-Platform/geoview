@@ -1,5 +1,5 @@
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
-import { NodeType, type FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
+import { type FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 
 /**
  * Aggregates and composes the different filter fragments applied at various
@@ -205,9 +205,7 @@ export class LayerFilters {
    */
   #refreshFilterEquation(): void {
     // Recalculate and refresh the cached filter equation
-    this.#cachedFilterEquation = GeoviewRenderer.analyzeLayerFilter([
-      { nodeType: NodeType.unprocessedNode, nodeValue: this.getAllFilters() },
-    ]);
+    this.#cachedFilterEquation = GeoviewRenderer.createFilterNodeFromFilter(this.getAllFilters());
   }
 
   // #endregion PRIVATE METHODS

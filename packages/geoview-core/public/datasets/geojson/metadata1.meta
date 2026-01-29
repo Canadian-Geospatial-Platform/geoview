@@ -21,7 +21,7 @@
       "layerStyle": {
         "Point": {
           "type": "uniqueValue",
-          "fields": ["Program"],
+          "fields": ["program"],
           "hasDefault": true,
           "info": [
             {
@@ -59,7 +59,7 @@
         "Polygon": {
           "type": "uniqueValue",
           "hasDefault": true,
-          "fields": ["Program"],
+          "fields": ["program"],
           "info": [
             {
               "label": "EGP",

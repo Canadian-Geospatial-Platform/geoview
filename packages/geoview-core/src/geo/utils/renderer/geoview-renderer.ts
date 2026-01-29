@@ -106,12 +106,26 @@ export abstract class GeoviewRenderer {
    * This method returns the type of geometry. It removes the Multi prefix because for the geoviewRenderer, a MultiPoint has
    * the same behaviour than a Point.
    * @param {FeatureLike} feature - The feature to check
-   * @param {TypeLayerStyleConfig} defaultLayerStyleConfig - The default layer style config to use when the feature has no geometry
+   * @param {TypeLayerStyleConfig} defaultLayerStyle - The default layer style config to use when the feature has no geometry
    * @returns {TypeStyleGeometry} The type of geometry (Point, LineString, Polygon).
    * @static
    */
-  static readGeometryTypeSimplified(feature: FeatureLike, defaultLayerStyleConfig: TypeLayerStyleConfig): TypeStyleGeometry {
-    const geometryType = feature.getGeometry()?.getType() ?? Object.keys(defaultLayerStyleConfig)[0];
+  static readGeometryTypeSimplifiedFromFeature(feature: FeatureLike, defaultLayerStyle: TypeLayerStyleConfig): TypeStyleGeometry {
+    // Get the geometry type
+    const geometryType = feature.getGeometry()?.getType() ?? Object.keys(defaultLayerStyle)[0];
+
+    // Return the geometry type simplified
+    return this.readGeometryTypeSimplified(geometryType as TypeStyleGeometry);
+  }
+
+  /**
+   * This method returns the type of geometry. It removes the Multi prefix because for the geoviewRenderer, a MultiPoint has
+   * the same behaviour than a Point.
+   * @param {TypeStyleGeometry} geometryType - The feature to check
+   * @returns {TypeStyleGeometry} The type of geometry (Point, LineString, Polygon).
+   * @static
+   */
+  static readGeometryTypeSimplified(geometryType: TypeStyleGeometry): TypeStyleGeometry {
     return (geometryType.startsWith('Multi') ? geometryType.slice(5) : geometryType) as TypeStyleGeometry;
   }
 
@@ -2328,7 +2342,7 @@ export abstract class GeoviewRenderer {
     callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeLayerStyleConfigInfo) => void
   ): Style | undefined {
     // Determine geometry type, favoring the feature itself
-    const geometryType = this.readGeometryTypeSimplified(feature, layerStyle);
+    const geometryType = this.readGeometryTypeSimplifiedFromFeature(feature, layerStyle);
 
     // Ensure a style exists for this geometry type
     let styleSettings = layerStyle?.[geometryType];
@@ -2553,11 +2567,20 @@ export abstract class GeoviewRenderer {
   }
 
   /**
+   * Creates a filter equation from a filter string.
+   * @param {string} filter - The filter string to convert.
+   * @returns {FilterNodeType[]} The filter equation as an array of FilterNodeType.
+   * @static
+   */
+  static createFilterNodeFromFilter(filter: string): FilterNodeType[] {
+    // Redirect
+    return this.analyzeLayerFilter([{ nodeType: NodeType.unprocessedNode, nodeValue: filter }]);
+  }
+
+  /**
    * Analyse the filter and split it in syntaxique nodes.  If a problem is detected, an error object is thrown with an
    * explanatory message.
-   *
    * @param {FilterNodeType[]} filterNodeArrayType - Node array to analyse.
-   *
    * @returns {FilterNodeType[]} The new node array with all nodes classified.
    * @static
    */

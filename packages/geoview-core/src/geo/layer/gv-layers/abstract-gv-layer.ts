@@ -1588,7 +1588,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     imageSourceDict: Record<string, string | undefined>
   ): string | undefined {
     // Read the simplified geometry type, favoring the feature itself
-    const geometryType = GeoviewRenderer.readGeometryTypeSimplified(feature, layerStyle);
+    const geometryType = GeoviewRenderer.readGeometryTypeSimplifiedFromFeature(feature, layerStyle);
 
     // If no style for the geometry type
     if (!layerStyle[geometryType]) {

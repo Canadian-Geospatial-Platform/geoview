@@ -35,8 +35,9 @@ import {
 
 import TopToolbar from './top-toolbar';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerSelectorFilterClass, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useDataTableStoreActions, useDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useTimeSliderFiltersSelector } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useAppDisplayLanguage, useAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -51,6 +52,7 @@ import { useLightBox } from '@/core/components/common';
 import { NUMBER_FILTER, DATE_FILTER, STRING_FILTER } from '@/core/utils/constant';
 import type { DataTableProps, ColumnsType } from './data-table-types';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 
 /**
  * Build Data table from map.
@@ -69,12 +71,13 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   // get store actions and values
   const { zoomToExtent, highlightBBox, transformPoints, showClickMarker, addHighlightedFeature, removeHighlightedFeature } =
     useMapStoreActions();
-  const { applyMapFilters, setSelectedFeature, setColumnsFiltersVisibility, getFilteredDataFromLegendVisibility } =
-    useDataTableStoreActions();
+  const { applyMapFilters, setSelectedFeature, setColumnsFiltersVisibility } = useDataTableStoreActions();
   const { getExtentFromFeatures } = useLayerStoreActions();
   const language = useAppDisplayLanguage();
   const datatableSettings = useDataTableLayerSettings();
   const showUnsymbolizedFeatures = useAppShowUnsymbolizedFeatures();
+  const layerClassFilter = useLayerSelectorFilterClass(layerPath);
+  const layerTimeFilter = useTimeSliderFiltersSelector(layerPath);
 
   // internal state
   const [density, setDensity] = useState<MRTDensityState>('compact');
@@ -412,8 +415,18 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     // Log
     logger.logTraceUseMemo('DATA-TABLE - rows', data.features);
 
-    // get filtered feature for unique value info style so non visible class is not in the table
-    let filterArray = getFilteredDataFromLegendVisibility(data.layerPath, data?.features ?? []);
+    // In addition, filter on the class renderer filters and the time slider filter
+    const layerFilterClassAndTime = [layerClassFilter, layerTimeFilter]
+      .filter((f): f is string => typeof f === 'string' && f.trim().length > 0)
+      .map((f) => `(${f})`)
+      .join(' AND ');
+    const layerFilterEquation = GeoviewRenderer.createFilterNodeFromFilter(layerFilterClassAndTime);
+
+    // Filter it
+    let filterArray =
+      data?.features?.filter((f) => {
+        return f.feature && GeoviewRenderer.featureRespectsFilterEquation(f.feature, layerFilterEquation);
+      }) ?? [];
 
     // Filter out unsymbolized features if the showUnsymbolizedFeatures config is false
     if (!showUnsymbolizedFeatures) {
@@ -464,7 +477,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
       return featureInfo;
     }) as unknown as ColumnsType[];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.features, handleZoomIn]);
+  }, [data.features, layerClassFilter, layerTimeFilter, handleZoomIn]);
 
   // TODO: The table is triggering many useless callback. With max-height of 5000px, it is slower to create but faster scroll.
   // TO.DOCONT: The x scroll is at the bottom, this is not good. We can set at the top with CSS below.

@@ -220,6 +220,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * The first TypeStyleSetting associated with the TypeStyleGeometry associated with the style as could be read from the layer config metadata.
    * @returns {TypeStyleSettings[]} The array of TypeStyleSettings
+   * @deprecated This function should be deleted, because it can introduce issues when multiple geometry types are set on a layer style. See GeoJSON - Multi template to reproduce the issue.
    */
   getLayerStyleSettings(): TypeLayerStyleSettings | undefined {
     // Get the layer style

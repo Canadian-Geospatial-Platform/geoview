@@ -80,6 +80,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
   layerMoreInfoFilters: {
     listStyleType: 'disc',
+    listStylePosition: 'inside',
     pl: 3,
   },
   layerMoreInfoFiltersItem: {
