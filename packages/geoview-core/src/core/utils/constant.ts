@@ -109,6 +109,7 @@ export const TIMEOUT: Record<string, number> = {
 
   guideReturnFocus: 200,
   exportPreview: 200,
+  topLinkFocusDelay: 200,
 
   focusDelayLightbox: 250,
   guideSearchSectionExpand: 300,

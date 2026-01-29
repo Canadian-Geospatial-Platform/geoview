@@ -419,11 +419,16 @@ export function AppBar(props: AppBarProps): JSX.Element {
               }
               onGeneralClose={() => {
                 handleGeneralCloseClicked(buttonPanel.button?.id ?? '');
-                // Match ESC key behavior - return focus to the panel button
+
                 if (isFocusTrapped) {
-                  // Defer focus until after React updates DOM and completes paint cycle
+                  // Double RAF ensures React state updates and DOM mutations complete before focus attempt
                   requestAnimationFrame(() => {
-                    document.getElementById(`${tabId}-panel-btn-${mapId}`)?.focus();
+                    requestAnimationFrame(() => {
+                      const targetButton = document.getElementById(`${tabId}-panel-btn-${mapId}`) as HTMLButtonElement;
+                      if (targetButton) {
+                        targetButton.focus();
+                      }
+                    });
                   });
                 }
               }}

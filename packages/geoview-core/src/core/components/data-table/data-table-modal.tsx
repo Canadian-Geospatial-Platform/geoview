@@ -11,6 +11,7 @@ import {
   useUIStoreActions,
   useUIFooterBarComponents,
   useUIAppbarComponents,
+  useUIActiveTrapGeoView,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useLayerSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useDataTableStoreActions } from '@/core/stores/store-interface-and-intial-values/data-table-state';
@@ -49,6 +50,7 @@ export default function DataTableModal(): JSX.Element {
   const footerBarComponents = useUIFooterBarComponents();
   const appBarComponents = useUIAppbarComponents();
   const { setSelectedLayerPath: setDataTableSelectedLayerPath } = useDataTableStoreActions();
+  const isFocusTrap = useUIActiveTrapGeoView();
 
   const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
 
@@ -197,7 +199,7 @@ export default function DataTableModal(): JSX.Element {
           )}
           {!isLoading && (
             <>
-              {hasDataTableTab && selectedLayer && (
+              {hasDataTableTab && selectedLayer && !isFocusTrap && (
                 <Box sx={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 2 }}>
                   <Button
                     variant="outlined"

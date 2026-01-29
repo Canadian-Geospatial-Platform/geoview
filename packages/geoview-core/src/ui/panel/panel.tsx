@@ -19,6 +19,7 @@ import { FocusTrapContainer } from '@/core/components/common';
 import { delay } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { CONTAINER_TYPE } from '@/core/utils/constant';
 
 /**
  * Interface for panel properties
@@ -103,7 +104,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
       id={`appbar-panel-${panel.panelId || ''}-${mapId}`}
       className={`appbar-panel appbar-panel-${panelId}`}
     >
-      <FocusTrapContainer open={isFocusTrapped} id="app-bar-focus-trap">
+      <FocusTrapContainer open={isFocusTrapped} id="app-bar-focus-trap" containerType={CONTAINER_TYPE.APP_BAR}>
         <Card
           sx={{
             ...sxClasses.panelCard,
@@ -127,6 +128,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
             action={
               open ? (
                 <IconButton
+                  id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-${panel.panelId || ''}-panel-close-btn`}
                   aria-label={t('general.close')}
                   tooltipPlacement="right"
                   size="small"

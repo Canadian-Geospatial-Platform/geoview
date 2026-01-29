@@ -23,7 +23,11 @@ import {
   useLayerSelectorControls,
   useLayerSelectorStatus,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useUIFooterBarComponents, useUIAppbarComponents } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import {
+  useUIFooterBarComponents,
+  useUIAppbarComponents,
+  useUIActiveTrapGeoView,
+} from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
 import {
   useMapStoreActions,
@@ -37,6 +41,7 @@ import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to
 
 // TODO: WCAG Issue #3108 - Check all icon buttons for aria-label clarity and translations
 // TODO: WCAG Issue #3108 - Check all icon buttons for "state related" aria values (i.e aria-checked, aria-disabled, etc.)
+// TODO: WCAG - Consider showing Show in Time Slider button in WCAG mode (requires re-working WCAG UX)
 
 interface SecondaryControlsProps {
   layerPath: string;
@@ -130,6 +135,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
   const isInVisibleRange = useMapSelectorLayerInVisibleRange(layerPath);
   const parentHidden = useMapSelectorLayerParentHidden(layerPath);
   const highlightedLayer = useLayerHighlightedLayer();
+  const isFocusTrap = useUIActiveTrapGeoView();
 
   // Is visibility button disabled?
   const isLayerVisibleCapable = layerControls?.visibility ?? false;
@@ -151,8 +157,10 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
     <Stack direction="row" alignItems="center" sx={sxClasses.layerStackIcons}>
       {!!subTitle.length && <Typography fontSize={14}>{subTitle}</Typography>}
       <Box sx={{ ...sxClasses.subtitle, display: 'flex', alignItems: 'center' }}>
-        {/* Button to select layer in panel and scroll to footer */}
-        {hasLayersTab && (
+        {/* Button to select layer in panel and scroll to footer
+            Hidden in WCAG mode - keyboard users can Tab to layer panel instead
+          */}
+        {hasLayersTab && !isFocusTrap && (
           <Box sx={sxClasses.buttonDivider}>
             <IconButton
               aria-label={t('legend.selectLayerAndScroll')}

@@ -10,10 +10,11 @@ import { getSxClassesMain, getSxClasses } from './legend-styles';
 import { LegendLayer } from './legend-layer';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
+import type { TypeContainerBox } from '@/core/types/global-types';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 
 interface LegendType {
-  containerType?: 'appBar' | 'footerBar';
+  containerType: TypeContainerBox;
 }
 
 // Constant style outside of render (styles)
@@ -44,7 +45,7 @@ const responsiveWidths = {
   },
 } as const;
 
-export function Legend({ containerType = CONTAINER_TYPE.FOOTER_BAR }: LegendType): JSX.Element | null {
+export function Legend({ containerType }: LegendType): JSX.Element | null {
   logger.logTraceRender('components/legend/legend');
 
   // Hooks
