@@ -152,8 +152,11 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
     return undefined;
   }, [containerType, activeTrapGeoView, open, id, focusItem.activeElementId, enableFocusTrap]);
 
+  // disableAutoFocus: to allow autoFocus on exit button to work. Without this, First item inside FocusTrap (<Box>) gets focus first.
+  // disableRestoreFocus: to prevent fighting for focus between multiple FocusTraps
+  // <Box tabIndex={-1}: MUI will add this automatically if not set. Adding here to prevent console log noise
   return (
-    <FocusTrap open={isActive} disableAutoFocus>
+    <FocusTrap open={isActive} disableAutoFocus disableRestoreFocus>
       <Box tabIndex={-1} sx={{ height: '100%' }}>
         {showExitButton && (
           <Button id={`${id}-exit-btn`} type="text" autoFocus onClick={handleClose} sx={exitButtonStyles}>
