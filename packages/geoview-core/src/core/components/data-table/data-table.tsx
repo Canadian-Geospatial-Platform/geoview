@@ -420,9 +420,11 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
       .filter((f): f is string => typeof f === 'string' && f.trim().length > 0)
       .map((f) => `(${f})`)
       .join(' AND ');
+
+    // Create the filter equation equivalent of the combined filter
     const layerFilterEquation = GeoviewRenderer.createFilterNodeFromFilter(layerFilterClassAndTime);
 
-    // Filter it
+    // Filter each features
     let filterArray =
       data?.features?.filter((f) => {
         return f.feature && GeoviewRenderer.featureRespectsFilterEquation(f.feature, layerFilterEquation);
