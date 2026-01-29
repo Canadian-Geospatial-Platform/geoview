@@ -23,7 +23,7 @@ interface LayoutProps {
   onGuideIsOpen?: (isGuideOpen: boolean) => void;
   onRightPanelClosed?: () => void;
   onRightPanelVisibilityChanged?: (isVisible: boolean) => void;
-  containerType?: TypeContainerBox;
+  containerType: TypeContainerBox;
   hideEnlargeBtn?: boolean;
   toggleMode?: boolean;
 }
@@ -54,7 +54,7 @@ const Layout = forwardRef(
       onGuideIsOpen,
       onRightPanelClosed,
       onRightPanelVisibilityChanged,
-      containerType = CONTAINER_TYPE.FOOTER_BAR,
+      containerType,
       hideEnlargeBtn,
       toggleMode = false,
     }: LayoutProps,

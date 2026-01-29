@@ -8,7 +8,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { Modal, Button } from '@/ui';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { getFocusTrapSxClasses } from './containers-style';
-import { ARROW_KEY_CODES } from '@/core/utils/constant';
+import { ARROW_KEY_CODES, TIMEOUT } from '@/core/utils/constant';
 import { useAppGeoviewHTMLElement, useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
@@ -74,6 +74,79 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     logger.logTraceUseEffect('FOCUS-TRAP - shellElementRef');
     shellElementRef.current = geoviewElement.querySelector('.geoview-shell') as HTMLElement;
   }, [geoviewElement]);
+
+  /**
+   * Add effects to intercept first Tab key press and make sure focus goes to the top link
+   * When the app loads and focus is inside the map container, keyboard users won't see the Keyboard navigation dialog
+   * This sets focus to top link and ensures keyboard users will tab into the dialog
+   */
+  const hasBeenPromptedRef = useRef(false);
+
+  // Set initial focus to toplink on mount
+  useEffect(() => {
+    logger.logTraceUseEffect('FOCUS-TRAP - initial focus setup');
+
+    // Small delay to ensure DOM is ready and other components have initialized
+    const focusTimeout = setTimeout(() => {
+      const topLink = document.getElementById(`toplink-${focusTrapId}`);
+
+      if (topLink && !activeTrapGeoView && !hasBeenPromptedRef.current) {
+        const currentFocus = document.activeElement;
+
+        // Only set focus if current focus is within the geoview container
+        // This prevents stealing focus from elements outside the viewer
+        if (geoviewElement.contains(currentFocus)) {
+          topLink.focus();
+          hasBeenPromptedRef.current = true;
+        }
+      }
+    }, TIMEOUT.topLinkFocusDelay); // Delay to let panels initialize
+
+    return () => clearTimeout(focusTimeout);
+  }, [focusTrapId, activeTrapGeoView, geoviewElement]);
+
+  // Intercept Tab navigation within geoview container to ensure toplink is visited
+  useEffect(() => {
+    logger.logTraceUseEffect('FOCUS-TRAP - Tab navigation guard');
+
+    const handleTabNavigation = (evt: KeyboardEvent): void => {
+      // Only intercept Tab key
+      if (evt.key !== 'Tab' || activeTrapGeoView || hasBeenPromptedRef.current) {
+        return;
+      }
+
+      const topLink = document.getElementById(`toplink-${focusTrapId}`);
+      const bottomLink = document.getElementById(`bottomlink-${focusTrapId}`);
+      const currentFocus = document.activeElement;
+
+      // Only intercept if focus is within geoview container
+      if (!currentFocus || !geoviewElement.contains(currentFocus)) {
+        return;
+      }
+
+      // Always redirect to toplink when NOT on toplink or bottomlink
+      // This ensures keyboard users encounter the navigation dialog
+      if (currentFocus !== topLink && currentFocus !== bottomLink) {
+        evt.preventDefault();
+        topLink?.focus();
+      }
+    };
+
+    // Use capture phase to intercept before other handlers
+    // Scope to geoviewElement to avoid conflicts with other maps
+    geoviewElement.addEventListener('keydown', handleTabNavigation, { capture: true });
+
+    return () => {
+      geoviewElement.removeEventListener('keydown', handleTabNavigation, { capture: true });
+    };
+  }, [focusTrapId, geoviewElement, activeTrapGeoView]);
+
+  // Reset prompt flag when modal is dismissed (user made a choice)
+  useEffect(() => {
+    if (open) {
+      hasBeenPromptedRef.current = true;
+    }
+  }, [open]);
 
   /**
    * Disable scrolling on keydown space, so that screen doesnt scroll down.

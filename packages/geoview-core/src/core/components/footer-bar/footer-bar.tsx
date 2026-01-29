@@ -134,11 +134,11 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     logger.logTraceUseMemo('FOOTER-BAR - memoTabs');
 
     return {
-      legend: { icon: <LegendIcon />, content: <Legend /> },
+      legend: { icon: <LegendIcon />, content: <Legend containerType={CONTAINER_TYPE.FOOTER_BAR} /> },
       layers: { icon: <LayersOutlinedIcon />, content: <LayersPanel containerType={CONTAINER_TYPE.FOOTER_BAR} /> },
-      details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel /> },
-      'data-table': { icon: <StorageIcon />, content: <Datapanel /> },
-      guide: { icon: <QuestionMarkIcon />, content: <Guide /> },
+      details: { icon: <InfoOutlinedIcon />, content: <DetailsPanel containerType={CONTAINER_TYPE.FOOTER_BAR} /> },
+      'data-table': { icon: <StorageIcon />, content: <Datapanel containerType={CONTAINER_TYPE.FOOTER_BAR} /> },
+      guide: { icon: <QuestionMarkIcon />, content: <Guide containerType={CONTAINER_TYPE.FOOTER_BAR} /> },
     } as Record<string, Tab>;
   }, []);
 

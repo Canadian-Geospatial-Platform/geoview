@@ -29,7 +29,7 @@ import {
   useLayerSelectorFilterClass,
   useLayerStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIStoreActions, useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import {
   useDataTableAllFeaturesDataArray,
   useDataTableFilterSelector,
@@ -40,7 +40,7 @@ import { generateId, isValidUUID } from '@/core/utils/utilities';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { LayerOpacityControl } from './layer-opacity-control/layer-opacity-control';
 import { logger } from '@/core/utils/logger';
-import { LAYER_STATUS } from '@/core/utils/constant';
+import { LAYER_STATUS, TABS } from '@/core/utils/constant';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { Collapse } from '@/ui/collapse/collapse';
 import { Button } from '@/ui/button/button';
@@ -63,6 +63,7 @@ import {
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { DeleteUndoButton } from '@/core/components/layers/right-panel/delete-undo-button';
+import type { TypeContainerBox } from '@/core/types/global-types';
 
 // TODO: WCAG Issue #3108 - Fix layers.moreInfo button (button nested within a button)
 // TODO: WCAG Issue #3108 - Check all disabled buttons. They may need special treatment. Need to find instance in UI first)
@@ -70,7 +71,7 @@ import { DeleteUndoButton } from '@/core/components/layers/right-panel/delete-un
 
 interface LayerDetailsProps {
   layerDetails: TypeLegendLayer;
-  containerType?: 'appBar' | 'footerBar';
+  containerType: TypeContainerBox;
 }
 
 interface SubLayerProps {
@@ -123,7 +124,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/right-panel/layer-details');
 
-  const { layerDetails, containerType = 'footerBar' } = props;
+  const { layerDetails, containerType } = props;
 
   const { t } = useTranslation<string>();
 
@@ -168,6 +169,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const layerHidden = useMapSelectorIsLayerHiddenOnMap(layerDetails.layerPath);
   const timeSliderLayers = useTimeSliderLayers();
   const timeSliderActions = useTimeSliderStoreActions();
+  const isFocusTrap = useUIActiveTrapGeoView();
 
   // Use navigate hook for time slider (only if time slider state exists)
   const navigateToTimeSlider = useNavigateToTab(
@@ -423,7 +425,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     const isLayerInTimeSlider = timeSliderLayers && timeSliderLayers[layerDetails.layerPath];
     const isDisabled = layerHidden || parentHidden;
 
-    if (isLayerInTimeSlider) {
+    // Button to navigate to Time Slider panel and select this layer
+    // Hidden in WCAG mode - keyboard users can Tab to Time Slider Panel instead
+    // TODO: WCAG - Consider showing button in WCAG mode (requires re-working WCAG UX)
+    if (isLayerInTimeSlider && !isFocusTrap) {
       return (
         <IconButton
           aria-label={t('layers.selectLayerAndScrollTimeSlider')}
@@ -477,6 +482,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         layerPath={layerDetails.layerPath}
         layerId={layerDetails.layerId}
         layerRemovable={isRemovable}
+        focusTargetIdAfterDelete={`${mapId}-${containerType}-${TABS.LAYERS}-panel-close-btn`}
       />
     );
   }

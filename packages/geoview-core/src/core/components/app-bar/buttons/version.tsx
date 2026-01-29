@@ -3,14 +3,14 @@ import { useTranslation } from 'react-i18next';
 import type { Theme } from '@mui/material';
 import { Typography, Box, Link, SvgIcon, ClickAwayListener, List, Paper, useTheme } from '@mui/material';
 
-import { GITHUB_REPO, GEO_URL_TEXT } from '@/core/utils/constant';
+import { GITHUB_REPO, GEO_URL_TEXT, CONTAINER_TYPE } from '@/core/utils/constant';
 import { GeoCaIcon, IconButton, Popper, CloseIcon } from '@/ui';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { GitHubIcon } from '@/ui/icons';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { FocusTrapContainer } from '@/core/components/common/focus-trap-container';
-import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import type { SxStyles } from '@/ui/style/types';
@@ -92,6 +92,7 @@ export default function Version(): JSX.Element {
   // Store
   const interaction = useMapInteraction();
   const activeTrapGeoView = useUIActiveTrapGeoView();
+  const { enableFocusTrap, disableFocusTrap } = useUIStoreActions();
 
   // Get container
   const mapId = useGeoViewMapId();
@@ -102,16 +103,29 @@ export default function Version(): JSX.Element {
   const [open, setOpen] = useState(false);
 
   // Handlers
-  const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-    logger.logTraceUseCallback('VERSION - open');
-    setAnchorEl(event.currentTarget);
-    setOpen((prev) => !prev);
-  }, []);
+  const handleOpenPopover = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      logger.logTraceUseCallback('VERSION - open');
+      setAnchorEl(event.currentTarget);
+      setOpen((prev) => !prev);
+
+      // Register focus trap with button as the return target
+      enableFocusTrap({
+        activeElementId: `${mapId}-version`,
+        callbackElementId: `version-button-${mapId}`,
+      });
+    },
+    [mapId, enableFocusTrap]
+  );
 
   const handleClickAway = useCallback(() => {
     logger.logTraceUseCallback('VERSION - close');
-    if (open) setOpen(false);
-  }, [open]);
+    if (open) {
+      setOpen(false);
+      // Restore focus to the button that opened the panel
+      disableFocusTrap();
+    }
+  }, [open, disableFocusTrap]);
 
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
@@ -155,7 +169,7 @@ export default function Version(): JSX.Element {
           }}
           handleKeyDown={(key, callBackFn) => handleEscapeKey(key, '', false, callBackFn)}
         >
-          <FocusTrapContainer id={`${mapId}-version`} open={open && activeTrapGeoView}>
+          <FocusTrapContainer id={`${mapId}-version`} open={open && activeTrapGeoView} containerType={CONTAINER_TYPE.APP_BAR}>
             <Paper component="section" sx={sxClasses.versionInfoPanel}>
               <Box component="header" sx={sxClasses.versionHeading}>
                 <Typography sx={sxClasses.versionsInfoTitle} component="h2" id="version-info-title">

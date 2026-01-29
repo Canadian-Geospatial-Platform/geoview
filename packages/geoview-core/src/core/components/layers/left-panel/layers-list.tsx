@@ -1,21 +1,22 @@
 import { useCallback, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { List } from '@/ui';
-import { useGeoViewMapId, useMapOrderedLayers } from '@/core/stores';
+import { useMapOrderedLayers } from '@/core/stores';
 import { logger } from '@/core/utils/logger';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
-import { TABS } from '@/core/utils/constant';
 import { SingleLayer } from './single-layer';
 import { getSxClasses } from './left-panel-styles';
+import type { TypeContainerBox } from '@/core/types/global-types';
 
 interface LayerListProps {
   depth: number;
   layersList: TypeLegendLayer[];
   showLayerDetailsPanel: (layerId: string) => void;
   isLayoutEnlarged: boolean;
+  containerType: TypeContainerBox;
 }
 
-export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged, depth }: LayerListProps): JSX.Element {
+export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged, depth, containerType }: LayerListProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/left-panel/layers-list', `Count ${layersList.length}`);
 
@@ -24,7 +25,6 @@ export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store
-  const mapId = useGeoViewMapId();
   const layerPathOrder = useMapOrderedLayers();
 
   // ? I doubt we want to define an explicit type for style properties?
@@ -49,10 +49,6 @@ export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged
       const isFirst = index === 0;
       const isLast = index === sortedLayers.length - 1;
 
-      // TODO: Check - What is this for!? Set the layerId
-      // eslint-disable-next-line no-param-reassign
-      layer.layerId = `${mapId}-${TABS.LAYERS}-${layer.layerPath}`;
-
       return (
         <SingleLayer
           key={layer.layerPath}
@@ -62,10 +58,11 @@ export function LayersList({ layersList, showLayerDetailsPanel, isLayoutEnlarged
           isFirst={isFirst}
           isLast={isLast}
           isLayoutEnlarged={isLayoutEnlarged}
+          containerType={containerType}
         />
       );
     });
-  }, [depth, isLayoutEnlarged, mapId, showLayerDetailsPanel, layersList, layerPathOrder]);
+  }, [depth, isLayoutEnlarged, showLayerDetailsPanel, layersList, layerPathOrder, containerType]);
 
   return <List sx={getListClass()}>{memoLegendItems}</List>;
 }

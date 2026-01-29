@@ -36,7 +36,7 @@ import { CoordinateInfo, CoordinateInfoSwitch } from './coordinate-info';
 import type { TypeContainerBox } from '@/core/types/global-types';
 
 interface DetailsPanelType {
-  containerType?: TypeContainerBox;
+  containerType: TypeContainerBox;
 }
 
 /**
@@ -45,7 +45,7 @@ interface DetailsPanelType {
  * @param {DetailsPanelProps} props The properties passed to LayersListFooter
  * @returns {JSX.Element} the layers list
  */
-export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: DetailsPanelType): JSX.Element {
+export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   logger.logTraceRender('components/details/details-panel');
 
   // Hooks

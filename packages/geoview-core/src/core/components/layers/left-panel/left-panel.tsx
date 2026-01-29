@@ -2,13 +2,15 @@ import { useLayerDisplayState, useLayerLegendLayers } from '@/core/stores/store-
 import { LayersList } from './layers-list';
 import { AddNewLayer } from './add-new-layer/add-new-layer';
 import { logger } from '@/core/utils/logger';
+import type { TypeContainerBox } from '@/core/types/global-types';
 
 interface LeftPanelProps {
   showLayerDetailsPanel: (layerId: string) => void;
   isLayoutEnlarged: boolean;
+  containerType: TypeContainerBox;
 }
 
-export function LeftPanel({ showLayerDetailsPanel, isLayoutEnlarged }: LeftPanelProps): JSX.Element {
+export function LeftPanel({ showLayerDetailsPanel, isLayoutEnlarged, containerType }: LeftPanelProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/left-panel/left-panel');
 
@@ -21,6 +23,12 @@ export function LeftPanel({ showLayerDetailsPanel, isLayoutEnlarged }: LeftPanel
   }
 
   return (
-    <LayersList layersList={legendLayers} depth={0} showLayerDetailsPanel={showLayerDetailsPanel} isLayoutEnlarged={isLayoutEnlarged} />
+    <LayersList
+      layersList={legendLayers}
+      depth={0}
+      showLayerDetailsPanel={showLayerDetailsPanel}
+      isLayoutEnlarged={isLayoutEnlarged}
+      containerType={containerType}
+    />
   );
 }

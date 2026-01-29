@@ -38,7 +38,7 @@ import Notifications from '@/core/components/notifications/notifications';
 import Version from './buttons/version';
 import { getSxClasses } from './app-bar-style';
 import { enforceArrayOrder, helpClosePanelById, helpOpenPanelById } from './app-bar-helper';
-import { CONTAINER_TYPE } from '@/core/utils/constant';
+import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
 import type { TypeValidAppBarCoreProps } from '@/api/types/map-schema-types';
 import { DEFAULT_APPBAR_CORE, DEFAULT_APPBAR_TABS_ORDER } from '@/api/types/map-schema-types';
 import { camelCase, handleEscapeKey } from '@/core/utils/utilities';
@@ -424,12 +424,15 @@ export function AppBar(props: AppBarProps): JSX.Element {
               }
               onGeneralClose={() => {
                 handleGeneralCloseClicked(buttonPanel.button?.id ?? '');
-                // Match ESC key behavior - return focus to the panel button
+
                 if (isFocusTrapped) {
-                  // Defer focus until after React updates DOM and completes paint cycle
-                  requestAnimationFrame(() => {
-                    document.getElementById(`${tabId}-panel-btn-${mapId}`)?.focus();
-                  });
+                  // use same timeout value as handleEscapeKey to align with panel close timing
+                  setTimeout(() => {
+                    const targetButton = document.getElementById(`${tabId}-panel-btn-${mapId}`) as HTMLButtonElement;
+                    if (targetButton) {
+                      targetButton.focus();
+                    }
+                  }, TIMEOUT.handleEsc);
                 }
               }}
             />

@@ -30,7 +30,7 @@ interface ResponsiveGridLayoutProps {
   onRightPanelClosed?: () => void;
   onRightPanelVisibilityChanged?: (isVisible: boolean) => void;
   hideEnlargeBtn?: boolean;
-  containerType?: TypeContainerBox;
+  containerType: TypeContainerBox;
   toggleMode?: boolean;
 }
 
@@ -39,6 +39,13 @@ interface ResponsiveGridLayoutExposedMethods {
   setRightPanelFocus: () => void;
   closeBtnRef?: React.RefObject<HTMLButtonElement>;
 }
+
+/**
+ * GV modal element IDs that can open within the right panel. Update this list as new modals are added.
+ * These modals should prevent focus trapping when active to avoid
+ * conflicts between the FocusTrap and modal's own focus management.
+ */
+const MODAL_ELEMENT_IDS = ['layerDataTable', 'featureDetailDataTable'] as const;
 
 const ResponsiveGridLayout = forwardRef(
   (
@@ -321,9 +328,9 @@ const ResponsiveGridLayout = forwardRef(
             setIsRightPanelVisible(false);
             onRightPanelClosed?.();
           }}
-          tooltip={t('details.closeSelection')!}
+          tooltip={t('general.closeSelection')!}
         >
-          {t('dataTable.close')}
+          {t('general.close')}
         </Button>
       );
     };
@@ -439,8 +446,12 @@ const ResponsiveGridLayout = forwardRef(
     const renderRightContent = (): JSX.Element => {
       const content = !isGuideOpen ? rightMain : renderGuide();
 
-      // Only trap focus when: WCAG mode on, right panel is visible, not fullscreen, has feature content, AND no modal is open
-      const shouldTrapFocus = isFocusTrap && isRightPanelVisible && !isFullScreen && hasContent && !focusItem.activeElementId;
+      // Check if a modal is currently open within the right panel
+      const isModalOpen =
+        focusItem.activeElementId !== false && (MODAL_ELEMENT_IDS as readonly string[]).includes(focusItem.activeElementId);
+
+      // Only trap focus when: WCAG mode on, right panel is visible, not fullscreen, has feature content, AND no modal is open within it
+      const shouldTrapFocus = isFocusTrap && isRightPanelVisible && !isFullScreen && hasContent && !isModalOpen;
 
       // Wrap the content box in FocusTrap - control activation via 'open' prop
       // disableAutoFocus is used to prevent modals fighting for focus when opened

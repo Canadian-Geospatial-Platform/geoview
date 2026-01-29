@@ -179,7 +179,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         });
       },
       // TODO: WCAG Issue #3222 RAF seems to be working well for timing purposes
-      // (RAF ensures that modal transitions, focal trap releases, and DOM updates, are completed before focus restoration takes place)
+      // (RAF ensures that modal transitions, focus trap releases, and DOM updates, are completed before focus restoration takes place)
       // Try removing setTimeout from all instances of disableFocusTrap as that might now be redundant
       // See issue #3222 for more detail.
       disableFocusTrap: (callBackElementId: string) => {

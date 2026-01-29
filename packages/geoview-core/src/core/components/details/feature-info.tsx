@@ -25,6 +25,7 @@ import { GeoUtilities } from '@/geo/utils/utilities';
 import type { TypeFeatureInfoEntry, TypeFieldEntry } from '@/api/types/map-schema-types';
 import { FeatureInfoTable } from './feature-info-table';
 import { getSxClasses } from './details-style';
+import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 interface FeatureInfoProps {
   feature: TypeFeatureInfoEntry;
@@ -80,6 +81,7 @@ const FeatureHeader = memo(function FeatureHeader({
   const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const isFocusTrap = useUIActiveTrapGeoView();
 
   return (
     <Box sx={HEADER_STYLES.container}>
@@ -110,7 +112,8 @@ const FeatureHeader = memo(function FeatureHeader({
           [theme.breakpoints.down('sm')]: { display: 'none' },
         }}
       >
-        {hasGeochart && (
+        {/* Hidden in WCAG mode - keyboard users can Tab to layer panel instead */}
+        {hasGeochart && !isFocusTrap && (
           <IconButton
             color="primary"
             aria-label={t('details.selectLayerAndScrollChart')}

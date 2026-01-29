@@ -14,7 +14,7 @@ import { useGeolocator } from '@/core/components/geolocator/hooks/use-geolocator
 import { GeolocatorBar } from '@/core/components/geolocator/geolocator-bar';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { TIMEOUT } from '@/core/utils/constant';
+import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
 
 export interface GeoListItem {
   key: string;
@@ -132,7 +132,11 @@ export function Geolocator(): JSX.Element {
       className="appbar-panel-geolocator-search"
       id={`appbar-panel-geolocator-${mapId}`}
     >
-      <FocusTrapContainer open={tabId === DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen && activeTrapGeoView} id="geolocator-focus-trap">
+      <FocusTrapContainer
+        open={tabId === DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen && activeTrapGeoView}
+        id="geolocator-focus-trap"
+        containerType={CONTAINER_TYPE.APP_BAR}
+      >
         <Box sx={sxClasses.geolocator}>
           <GeolocatorBar
             searchValue={searchValue}

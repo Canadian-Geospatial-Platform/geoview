@@ -29,14 +29,14 @@ import type { TypeContainerBox } from '@/core/types/global-types';
 import DataSkeleton from './data-skeleton';
 
 interface DataPanelType {
-  containerType?: TypeContainerBox;
+  containerType: TypeContainerBox;
 }
 /**
  * Build Data panel from map.
  * @returns {JSX.Element} Data table as react element.
  */
 
-export function Datapanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPanelType): JSX.Element {
+export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   // Log
   logger.logTraceRender('components/data-table/data-panel');
 
@@ -165,13 +165,12 @@ export function Datapanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPan
     // If we have a selected layer, tell disableFocusTrap to focus it
     if (selectedLayerPath) {
       // Build the full layer list item ID that matches the DOM
-      // Format: {mapId}-{tabId}-{layerPath}
-      const layerListItemId = `${mapId}-${TABS.DATA_TABLE}-${selectedLayerPath}`;
+      const layerListItemId = `${mapId}-${containerType}-${TABS.DATA_TABLE}-${selectedLayerPath}`;
       disableFocusTrap(layerListItemId);
     } else {
       disableFocusTrap('no-focus');
     }
-  }, [mapId, selectedLayerPath, disableFocusTrap]);
+  }, [mapId, selectedLayerPath, disableFocusTrap, containerType]);
 
   /**
    * Checks if layer is disabled when layer is selected and features have null value.
@@ -304,7 +303,7 @@ export function Datapanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPan
 
     return orderedLayerData.map((layer) => ({
       ...layer,
-      layerUniqueId: `${mapId}-${TABS.DATA_TABLE}-${layer.layerPath}`,
+      layerUniqueId: `${mapId}-${containerType}-${TABS.DATA_TABLE}-${layer.layerPath}`,
       layerFeatures: getFeaturesOfLayer(layer.layerPath),
       tooltip: getLayerTooltip(layer.layerName ?? '', layer.layerPath),
       mapFilteredIcon: isMapFilteredSelectedForLayer(layer.layerPath) && (

@@ -20,7 +20,7 @@ import {
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 import { logger } from 'geoview-core/core/utils/logger';
-import { TABS } from 'geoview-core/core/utils/constant';
+import { CONTAINER_TYPE, TABS } from 'geoview-core/core/utils/constant';
 
 import { GeoChart } from './geochart';
 import type { GeoViewGeoChartRootConfig } from './geochart-types';
@@ -278,6 +278,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
           onLayerListClicked={handleLayerChange}
           onIsEnlargeClicked={handleIsEnlargeClicked}
           guideContentIds={['chart', 'chart.children.chartTypes', 'chart.children.chartControls']}
+          containerType={CONTAINER_TYPE.FOOTER_BAR}
         >
           {selectedLayerPath && (
             <Box sx={{ '& .MuiButtonGroup-groupedHorizontal.MuiButton-textSizeMedium': { fontSize: '0.9rem' } }}>

@@ -104,7 +104,6 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   const { enableFocusTrap } = useUIStoreActions();
 
   const mapId = useGeoViewMapId();
-  const tableDetailsButtonId = `table-details-${containerType}-${mapId}`;
 
   const handleDensityChange = (updaterOrValue: MRTDensityState | ((prevState: MRTDensityState) => MRTDensityState)): void => {
     setDensity(updaterOrValue);
@@ -433,7 +432,10 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
       filterArray = filterArray.filter((record) => record.featureIcon);
     }
 
-    return (filterArray ?? []).map((feature) => {
+    return (filterArray ?? []).map((feature, featureIndex) => {
+      // Create unique button ID per feature
+      const featureDetailsButtonId = `${mapId}-${containerType}-table-details-btn-${featureIndex}`;
+
       const icon = feature.featureIcon ? (
         <Box component="img" alt={feature?.nameField ?? ''} src={feature.featureIcon} className="layer-icon" />
       ) : (
@@ -460,12 +462,13 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
         ),
         DETAILS: (
           <IconButton
+            id={featureDetailsButtonId}
             color="primary"
             aria-label={t('dataTable.details')}
             tooltipPlacement="top"
             onClick={() => {
               setSelectedFeature(feature);
-              enableFocusTrap({ activeElementId: 'featureDetailDataTable', callbackElementId: tableDetailsButtonId });
+              enableFocusTrap({ activeElementId: 'featureDetailDataTable', callbackElementId: featureDetailsButtonId });
             }}
           >
             <InfoOutlinedIcon />

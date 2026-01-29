@@ -11,7 +11,7 @@ import { useMapStoreActions, useMapAllVisibleandInRangeLayers } from 'geoview-co
 import { useLayerLegendLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import { Box } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
-import { TABS } from 'geoview-core/core/utils/constant';
+import { CONTAINER_TYPE, TABS } from 'geoview-core/core/utils/constant';
 
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';
 import { TimeSlider } from './time-slider';
@@ -164,6 +164,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       onLayerListClicked={handleClickLayerList}
       layerList={memoLayersList}
       guideContentIds={['timeSlider']}
+      containerType={CONTAINER_TYPE.FOOTER_BAR}
     >
       {renderContent()}
     </Layout>

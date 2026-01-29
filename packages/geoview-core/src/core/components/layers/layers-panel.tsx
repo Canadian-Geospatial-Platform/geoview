@@ -11,9 +11,11 @@ import { ResponsiveGridLayout } from '@/core/components/common/responsive-grid-l
 import { Typography } from '@/ui/typography/typography';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { TABS } from '@/core/utils/constant';
+import { useGeoViewMapId } from '@/core/stores';
 
 interface TypeLayersPanel {
-  containerType?: TypeContainerBox;
+  containerType: TypeContainerBox;
 }
 
 export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
@@ -28,13 +30,13 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
   const { setSelectedFooterLayerListItemId, disableFocusTrap } = useUIStoreActions();
 
   const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
+  const mapId = useGeoViewMapId();
 
   const showLayerDetailsPanel = useCallback(
     (layerId: string): void => {
       // Log
       logger.logTraceUseCallback('LAYERS-PANEL - showLayerDetailsPanel');
 
-      // Just set visibility - focus will be handled automatically by useEffect
       responsiveLayoutRef.current?.setIsRightPanelVisible(true);
       responsiveLayoutRef.current?.setRightPanelFocus();
       setSelectedFooterLayerListItemId(`${layerId}`);
@@ -44,8 +46,8 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
 
   const leftPanel = (): JSX.Element => {
     return (
-      <Box id="layers-left-panel">
-        <LeftPanel showLayerDetailsPanel={showLayerDetailsPanel} isLayoutEnlarged={isLayoutEnlarged} />
+      <Box>
+        <LeftPanel showLayerDetailsPanel={showLayerDetailsPanel} isLayoutEnlarged={isLayoutEnlarged} containerType={containerType} />
       </Box>
     );
   };
@@ -99,12 +101,13 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
     logger.logTraceUseCallback('LAYERS-PANEL - handleRightPanelClosed');
 
     // If we have a selected layer, tell disableFocusTrap to focus it
-    if (selectedLayer?.layerId) {
-      disableFocusTrap(selectedLayer.layerId);
+    if (selectedLayer?.layerPath) {
+      const layerListItemId = `${mapId}-${containerType}-${TABS.LAYERS}-${selectedLayer.layerPath}`;
+      disableFocusTrap(layerListItemId);
     } else {
       disableFocusTrap('no-focus');
     }
-  }, [selectedLayer, disableFocusTrap]);
+  }, [mapId, selectedLayer, disableFocusTrap, containerType]);
 
   return (
     <ResponsiveGridLayout

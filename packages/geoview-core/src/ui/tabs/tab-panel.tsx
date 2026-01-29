@@ -13,7 +13,7 @@ export interface TypeTabPanelProps {
   value: number;
   id: string;
   children?: ReactNode;
-  containerType?: TypeContainerBox;
+  containerType: TypeContainerBox;
   tabId: string;
   className?: string;
 }
