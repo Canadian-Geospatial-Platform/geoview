@@ -252,7 +252,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
     // If the current tab is not 'details' nor 'geochart', switch to details
     if (
       UIEventProcessor.getActiveFooterBarTab(mapId) === undefined ||
-      (!['details', 'geochart'].includes(UIEventProcessor.getActiveFooterBarTab(mapId)!) &&
+      (!['details', 'geochart'].includes(UIEventProcessor.getActiveFooterBarTab(mapId).tabId) &&
         UIEventProcessor.getFooterBarComponents(mapId).includes('details'))
     ) {
       UIEventProcessor.setActiveFooterBarTab(mapId, 'details');
