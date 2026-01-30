@@ -381,7 +381,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
         const { range } = timeSliderValues;
         const nextIdx = range.findIndex((entry) => DateMgt.convertToMilliseconds(entry) > values[0]);
 
-        if (nextIdx < range.length) {
+        if (nextIdx !== -1 && nextIdx < range.length) {
           const nextDate =
             typeof range[nextIdx] === 'string' ? range[nextIdx] : DateMgt.formatDateToISO(DateMgt.convertToMilliseconds(range[nextIdx]));
           filter = `${field} >= date '${startDate}' and ${field} < date '${nextDate}'`;
