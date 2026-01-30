@@ -35,12 +35,11 @@ import { logger } from '@/core/utils/logger';
 import { createPDFMapUrl } from '@/core/components/export/pdf-layout';
 import { createCanvasMapUrls } from '@/core/components/export/canvas-layout';
 import { getSxClasses } from '@/core/components/export/export-modal-style';
+import { TIMEOUT } from '@/core/utils/constant';
 
 type FileFormat = 'pdf' | 'png' | 'jpeg';
 
 const QUALITY_OPTIONS = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
-
-const PREVIEW_TIMEOUT = 200;
 
 export interface FileExportProps {
   exportTitle: string;
@@ -165,7 +164,7 @@ export default function ExportModal(): JSX.Element {
 
     const timer = setTimeout(() => {
       generatePreview().catch((error) => logger.logError(error));
-    }, PREVIEW_TIMEOUT);
+    }, TIMEOUT.exportPreview);
 
     return () => {
       clearTimeout(timer);
@@ -183,7 +182,8 @@ export default function ExportModal(): JSX.Element {
     // (which uses the callbackElementId to re-focus the export button in the app bar).
     setTimeout(() => {
       disableFocusTrap();
-    }, 0);
+    }, TIMEOUT.deferExecution);
+
     // Clear preview content so skeleton shows on next open
     setPngPreviewUrls([]);
     setIsMapLoading(false);

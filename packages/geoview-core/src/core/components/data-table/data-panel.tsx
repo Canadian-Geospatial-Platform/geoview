@@ -22,7 +22,7 @@ import type { LayerListEntry } from '@/core/components/common';
 import { Layout } from '@/core/components/common';
 import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
-import { CONTAINER_TYPE, LAYER_STATUS, TABS } from '@/core/utils/constant';
+import { CONTAINER_TYPE, LAYER_STATUS, TABS, TIMEOUT } from '@/core/utils/constant';
 import type { MappedLayerDataType } from './data-table-types';
 import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';
 import type { TypeContainerBox } from '@/core/types/global-types';
@@ -200,7 +200,7 @@ export function Datapanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPan
 
     const clearLoading = setTimeout(() => {
       setIsLoading(false);
-    }, 100);
+    }, TIMEOUT.dataPanelLoading);
     return () => clearTimeout(clearLoading);
   }, [isLoading, selectedLayerPath]);
 

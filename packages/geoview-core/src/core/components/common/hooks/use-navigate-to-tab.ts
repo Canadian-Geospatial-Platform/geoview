@@ -76,6 +76,7 @@ export function useNavigateToTab(tabId: string, onNavigate?: (layerPath: string)
         setActiveFooterBarTab(tabId as TypeValidFooterBarTabsCoreProps);
         if (isFooterCollapsed) setFooterBarIsCollapsed(false);
 
+        // TODO: seems the option for time out is never used
         setTimeout(() => {
           // Execute callback if provided
           if (onNavigate && layerPath) {

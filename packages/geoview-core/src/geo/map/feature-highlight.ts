@@ -14,6 +14,7 @@ import { logger } from '@/core/utils/logger';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { PointMarkers } from './point-markers';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { TIMEOUT } from '@/core/utils/constant';
 
 /**
  * A class to handle highlighting of features
@@ -225,7 +226,7 @@ export class FeatureHighlight {
     if (!isLayerHighlight)
       this.#bboxTimeout = setTimeout(
         () => this.highlightSource.removeFeature(this.highlightSource.getFeatureById('geoLocatorFeature') as Feature),
-        5000
+        TIMEOUT.featureHighlight
       );
   }
 

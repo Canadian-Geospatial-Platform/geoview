@@ -16,6 +16,7 @@ import { getCenter } from 'ol/extent';
 import { TransformEvent, TransformSelectionEvent, TransformDeleteFeatureEvent } from './transform-events';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import type { MapViewer } from '@/geo/map/map-viewer';
+import { TIMEOUT } from '@/core/utils/constant';
 
 // #region Constants
 
@@ -1706,7 +1707,7 @@ export class OLTransform extends OLPointer {
           selection.addRange(range);
         }
       }
-    }, 100);
+    }, TIMEOUT.interactionFocusText);
   }
 
   /**
