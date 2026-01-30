@@ -1,0 +1,118 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Outlier Style Layers - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div><div id="page-header"></div><div class="back-to-main"><a href="./outliers.html">← Back to Outliers</a></div><div class="demo-section"><h4>Outlier Layers with Style Issues</h4><p>This page showcases layers with unusual styling properties and outliers that have been identified and tracked.</p></div></div><button class="collapsible">Layers Status</button><pre id="Hmap1-state" class="panel map-title-holder"></pre><hr/><div id="map1" class="geoview-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3978
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': false,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'geojsonlyr2',
+              'geoviewLayerName': 'Point and Polygon Layer',
+              'geoviewLayerType': 'GeoJSON',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'projects.json',
+                  'layerName': 'Point and Polygon Layer',
+                  'initialSettings': {
+                    'states': {
+                      'visible': false
+                    }
+                  },
+                  'source': {
+                    'dataAccessPath': './datasets/geojson/projects.json'
+                  }
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'HRDEM-dsm-hillshade',
+              'geoviewLayerName': 'DSM Hillshade',
+              'metadataAccessPath': 'https://datacube.services.geo.ca/ows/elevation',
+              'geoviewLayerType': 'ogcWms',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'dsm-hillshade',
+                  'layerName': 'DSM-Hillshade',
+                  'initialSettings': {
+                    'states': {
+                      'visible': false
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'cesi',
+              'geoviewLayerName': 'CESI',
+              'metadataAccessPath': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/',
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '32',
+                  'layerName': 'CESI',
+                  'initialSettings': {
+                    'states': {
+                      'visible': false
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'FSI',
+              'geoviewLayerName': 'Flood susceptibility index',
+              'metadataAccessPath': 'https://datacube.services.geo.ca/web/flood-susceptibility.xml',
+              'geoviewLayerType': 'ogcWms',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'FS-national-2015-index',
+                  'layerName': 'Flood susceptibility index'
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'Canadian Disasters, by Event Type***38633a35',
+              'geoviewLayerName': 'Canadian Disasters, by Event Type',
+              'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/PS/canadian_disasters_en/MapServer',
+              'geoviewLayerType': 'esriFeature',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0',
+                  'initialSettings': {
+                    'states': {
+                      'visible': false
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['overview-map'],
+        'footerBar': {
+          'tabs': {
+            'core': ['legend', 'layers', 'details', 'data-table']
+          }
+        },
+        'corePackages': [],
+        'theme': 'geo.ca'
+      }"></div><hr/><div class="demo-section"><h4>Known Outlier Layers</h4><ul class="demo-list"><li><strong>Point and Polygon Layer</strong> - Style for only one geometry was used - Issue #2017</li><li><strong>DSM Hillshade</strong> - Error from service not providing style - Issue #1891</li><li><strong>CESI</strong> - Conserved areas layer was not showing in legend (layer moved - now appears as empty layer) - Issue #1816</li><li><strong>Flood Susceptibility Index</strong> - No default style, so no image legend - Issue #2220</li><li><strong>Canadian Disasters, by Event Type</strong> - 45 icons, exceeds OpenLayers cache size - Issue #2112</li></ul></div><script src="codedoc.js"></script><script>insertPageHeader();
+
+      // Register handler when map has been initialized
+      cgpv.onMapInit((mapViewer) => {
+        listenToLegendLayerSetChanges(`H${mapViewer.mapId}-state`, mapViewer);
+      });
+
+      // initialize cgpv
+      cgpv.init();
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

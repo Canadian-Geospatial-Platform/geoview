@@ -1,0 +1,112 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "initialView": { "zoomAndCenter": [10, [-75.370748, 45.001058]] },
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "wfsLYR1",
+        "geoviewLayerName": "US States",
+        "metadataAccessPath": "https://ahocevar.com/geoserver/wfs",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "usa:states",
+            "layerFilter": "STATE_ABBR = 'NY'"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wfsLYR2",
+        "geoviewLayerName": "Current Conditions",
+        "metadataAccessPath": "https://geo.weather.gc.ca/geomet",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "ec-msc:CURRENT_CONDITIONS"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wfsLYR4",
+        "geoviewLayerName": "USGS mrds bbox",
+        "metadataAccessPath": "https://mrdata.usgs.gov/services/wfs/mrds?version=1.1.0",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "mrds",
+            "source": { "strategy": "bbox" }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR13-qgis",
+        "geoviewLayerName": "BC Wells (known issue, have to zoom to BC for the style to kick in and features to get loaded)",
+        "metadataAccessPath": "https://openmaps.gov.bc.ca/geo/ows",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "pub:WHSE_WATER_MANAGEMENT.GW_WATER_WELLS_WRBC_SVW"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR14-qgis",
+        "geoviewLayerName": "Cities Basic",
+        "metadataAccessPath": "https://demo.mapserver.org/cgi-bin/wfs",
+        "geoviewLayerType": "ogcWfs",
+        "fetchStylesOnWMS": false,
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "ms:cities",
+            "layerFilter": "POPULATION >= 250000",
+            "source": {
+              "featureInfo": {
+                "nameField": "NAME"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "LYR15-qgis",
+        "geoviewLayerName": "Cities Experimental",
+        "metadataAccessPath": "https://demo.mapserver.org/cgi-bin/wfs",
+        "geoviewLayerType": "ogcWfs",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "ms:cities",
+            "layerFilter": "POPULATION >= 250000",
+            "wmsLayerId": "cities",
+            "source": {
+              "featureInfo": {
+                "nameField": "NAME"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map", "north-arrow"],
+  "overviewMap": { "hideOnZoom": 7 },
+  "footerBar": {
+    "tabs": {
+      "core": ["layers", "data-table"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "legend", "details", "export"]
+    }
+  }
+}

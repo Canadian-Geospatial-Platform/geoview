@@ -1,0 +1,98 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Add Layers Panel - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><style>li.source-link {
+        cursor: pointer;
+        color: #6082b6;
+      }
+
+      .sourceLinkCopied {
+        position: fixed;
+        top: 6px;
+        right: 6px;
+        background-color: darkblue;
+        color: white;
+        padding: 16px;
+        font-size: 16px;
+        min-width: 150px;
+        text-align: center;
+        border-radius: 5px;
+        z-index: 1;
+      }</style><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./index.html?tab=demos">← Back to Main</a></div><div class="demo-section"><h4>Add Layers Panel</h4><p>This page is used to showcase loading "Layers Panel" with the ability to add various layer types.</p></div></div><div class="form-group"><label for="projections" class="form-label">Projection:</label> <select name="projections" id="projections" class="form-select"><option value="3857">Web Mercator (3857)</option><option value="3978">LCC (3978)</option></select> <button type="button" onclick="reloadMap()" class="btn btn-primary">Set Projection</button></div><div id="map1" class="geoview-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3857
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': true,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': []
+        },
+        'theme': 'geo.ca',
+        'components': [],
+        'footerBar': {
+          'tabs': {
+            'core': ['legend', 'layers', 'details', 'data-table', 'geochart', 'time-slider']
+          }
+        },
+        'corePackages': [],
+        'externalPackages': [],
+        'navBar': ['home', 'basemap-select', 'projection', 'fullscreen'],
+        'appBar': {
+          'tabs': {
+            'core': ['legend', 'layers', 'details', 'data-table', 'geochart']
+          }
+        }
+      }"></div><h4>Add Layer Examples</h4><div style="font-size: smaller"><div>ESRI Feature Service Layer<ul><li class="source-link">https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/forest_industry_hotspots_en/MapServer/0</li></ul></div><div>ESRI Dynamic Service Layer<ul><li class="source-link">https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer</li><li class="source-link">https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/forest_industry_hotspots_en/MapServer</li><li class="source-link">https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer</li></ul></div><div>ESRI Image Layer<ul><li class="source-link">https://agriculture.canada.ca/imagery-images/rest/services/agclimate/precipitation_percentile/ImageServer</li><li class="source-link">https://agriculture.canada.ca/imagery-images/rest/services/climate_normals/ImageServer</li><li class="source-link">https://agriculture.canada.ca/imagery-images/rest/services/agclimate/heat_wave/ImageServer</li><li class="source-link">https://ws.geoservices.lrc.gov.on.ca/arcgis5/rest/services/Elevation/FRI_CHM_SPL/ImageServer</li><li class="source-link">https://agriculture.canada.ca/imagery-images/rest/services/landuse_30m/2010/ImageServer</li></ul></div><div>Vector Tiles Layer (???)<ul><li class="source-link">https://tiles.arcgis.com/tiles/HsjBaDykC1mjhXz9/arcgis/rest/services/CBMT_CBCT_3978_V_OSM/VectorTileServer</li></ul></div><div>WMS Layer<ul><li class="source-link">https://ows.mundialis.de/services/service</li><li class="source-link">https://datacube.services.geo.ca/ows/msi?request=GetCapabilities&service=wms&version=1.3.0&layers=msi</li><li class="source-link">https://geo.weather.gc.ca/geomet</li></ul></div><div>WFS Layer<ul><li class="source-link">https://ahocevar.com/geoserver/wfs?REQUEST=GetCapabilities&VERSION=2.0.0&SERVICE=WFS</li></ul></div><div>XYZ Layer<ul><li class="source-link">https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}</li></ul></div><div>GeoJson Layer<ul><li class="source-link">https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/polygons.json</li><li class="source-link">https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/lines.json</li><li class="source-link">https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/points.json</li></ul></div><div>GeoTIFF Layer<ul><li class="source-link">https://datacube-prod-data-public.s3.ca-central-1.amazonaws.com/store/eo4ce/vegetation/vegetation-2020-fCOVER.tif</li></ul></div><div>KML Layer<ul><li class="source-link">https://canadian-geospatial-platform.github.io/geoview/public/datasets/kml-files/bcairzones.kml</li><li class="source-link">https://canadian-geospatial-platform.github.io/geoview/public/datasets/kml-files/CanadianNationalTornadoDatabase_1980-2009.kml</li></ul></div><div>OGC API Feature Layer<ul><li class="source-link">https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev</li><li class="source-link">https://b6ryuvakk5.execute-api.us-east-1.amazonaws.com/dev/collections/lakes</li></ul></div><div>GeoPackage Layer<ul><li class="source-link">https://canadian-geospatial-platform.github.io/geoview/public/datasets/geopackages/rivers.gpkg</li></ul></div><div>Shapefile Layer<ul><li class="source-link">https://canadian-geospatial-platform.github.io/geoview/public/datasets/shapefiles/PLAN_CrownHarvestPlans_SHP_UT83.zip</li></ul></div><div>CSV Layer<ul><li class="source-link">https://canadian-geospatial-platform.github.io/geoview/public/datasets/csv-files/Station_List_Minus_HQ-MELCC.csv</li></ul></div><div style="margin-bottom: 20px"><div class="form-label" style="margin-bottom: 10px">GeoCore UUID Layer</div><div class="form-group" style="margin-left: 20px"><input id="selectGeoCore" list="geocoreids" class="form-control" style="width: 400px" placeholder="Select or enter a GeoCore UUID"/><datalist id="geocoreids" value="1dcd28aa-99da-4f62-b157-15631379b170"><option value="1dcd28aa-99da-4f62-b157-15631379b170"></option><option value="fd4369a4-21fe-4070-914a-067474da0fd6"></option><option value="9d96e8c9-22fe-4ad2-b5e8-94a6991b744b"></option><option value="21b821cf-0f1c-40ee-8925-eab12d357668"></option><option value="ccc75c12-5acc-4a6a-959f-ef6f621147b9"></option><option value="0fca08b5-e9d0-414b-a3c4-092ff9c5e326"></option><option value="03ccfb5c-a06e-43e3-80fd-09d4f8f69703"></option><option value="ea4c0bdb-a63f-49a4-b14a-09c1560aad0b"></option><option value="0fe65119-e96e-4a57-8bfe-9d9245fba06b"></option><option value="ed9b204b-590c-4b17-9703-f6e167acd6c6"></option><option value="fe83a604-aa5a-4e46-903c-685f8b0cc33c"></option></datalist><button type="button" onclick="addGeocore()" class="btn btn-success">Add layer</button></div></div><hr/><script src="codedoc.js"></script><script>insertPageHeader();
+
+      function addGeocore() {
+        // Precond
+        if (!document.getElementById('selectGeoCore').value) return;
+
+        // Add the layer on the map
+        cgpv.api.getMapViewer('map1').layer.addGeoviewLayerByGeoCoreUUID(document.getElementById('selectGeoCore').value);
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        var sourceLinks = document.querySelectorAll('li.source-link');
+
+        sourceLinks.forEach(function (link) {
+          link.addEventListener('click', function () {
+            // Get the content to copy
+            var contentToCopy = link.innerHTML;
+
+            // Create a temporary textarea element to copy the content
+            var textarea = document.createElement('textarea');
+            textarea.value = contentToCopy;
+            document.body.appendChild(textarea);
+
+            // Select the content and copy it to the clipboard
+            textarea.select();
+            document.execCommand('copy');
+
+            // Remove the temporary textarea
+            document.body.removeChild(textarea);
+
+            // Show a message for 5 seconds
+            var message = document.createElement('div');
+            message.classList.add('sourceLinkCopied');
+            message.innerHTML = 'Copied to clipboard';
+            document.body.appendChild(message);
+            setTimeout(function () {
+              // Remove the message after 5 seconds
+              document.body.removeChild(message);
+            }, 2000);
+          });
+        });
+      });</script><script>function reloadMap() {
+        cgpv.api.getMapViewer('map1').setProjection(Number(document.getElementById('projections').value));
+      }
+
+      // initialize cgpv
+      cgpv.init();
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></div></body></html>

@@ -1,0 +1,109 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "geojsonLYR1",
+        "geoviewLayerName": "Error metadata",
+        "metadataAccessPath": "./datasets/geojson/metadataERROR",
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "polygons.json",
+            "layerName": "Polygons"
+          },
+          {
+            "layerId": "lines.json",
+            "layerName": "Lines"
+          },
+          {
+            "entryType": "group",
+            "layerId": "point-feature-group",
+            "layerName": "point-feature-group",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "icon_points.json",
+                "layerName": "Icons",
+                "initialSettings": { "states": { "visible": false } }
+              },
+              {
+                "layerId": "points.json",
+                "layerName": "Points"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR2",
+        "geoviewLayerName": "Error layerId",
+        "metadataAccessPath": "./datasets/geojson/metadata",
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "polygonsERROR.json",
+            "layerName": "Polygons"
+          },
+          {
+            "layerId": "linesERROR.json",
+            "layerName": "Lines"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR3",
+        "geoviewLayerName": "Error metadata (skipped .meta)",
+        "metadataAccessPath": "./datasets/geojson/metadataERROR.meta",
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "polygons.json",
+            "layerName": "Polygons"
+          },
+          {
+            "layerId": "lines.json",
+            "layerName": "Lines"
+          },
+          {
+            "entryType": "group",
+            "layerId": "point-feature-group",
+            "layerName": "point-feature-group",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "icon_points.json",
+                "layerName": "Icons",
+                "initialSettings": { "states": { "visible": false } }
+              },
+              {
+                "layerId": "points.json",
+                "layerName": "Points"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map", "north-arrow"],
+  "overviewMap": { "hideOnZoom": 7 },
+  "footerBar": {
+    "tabs": {
+      "core": ["layers", "data-table"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "legend", "details", "export"]
+    }
+  }
+}

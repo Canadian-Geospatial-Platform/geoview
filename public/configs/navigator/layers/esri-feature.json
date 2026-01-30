@@ -1,0 +1,293 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "FeatureServerLyr1",
+        "metadataAccessPath": "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/Toronto_Neighbourhoods/FeatureServer/",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "Toronto Neighbourhoods",
+            "source": {
+              "featureInfo": {
+                "queryable": true,
+                "nameField": "AREA_NA7"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "FeatureServerLyr2",
+        "metadataAccessPath": "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/U2/FeatureServer/",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "U2 Tour Locations",
+            "source": {
+              "featureInfo": {
+                "queryable": true,
+                "nameField": "Venue",
+                "outfields": [
+                  { "name": "Venue", "alias": "Venue", "type": "string", "domain": null },
+                  { "name": "Event", "alias": "Event", "type": "string", "domain": null },
+                  { "name": "Tour", "alias": "Tour", "type": "string", "domain": null },
+                  { "name": "City", "alias": "City", "type": "string", "domain": null },
+                  { "name": "Date", "alias": "Date", "type": "date", "domain": null }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "uniqueValueId",
+        "geoviewLayerName": "uniqueValue",
+        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "historical-flood",
+        "geoviewLayerName": "Historical Flood Events (HFE)",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "classBreaksId",
+        "geoviewLayerName": "classBreaks",
+        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/DMS/CSO_volume/MapServer/",
+        "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "8",
+            "layerFilter": "Total_CSO_Volume > 5000000",
+            "layerStyle": {
+              "Point": {
+                "type": "classBreaks",
+                "hasDefault": true,
+                "fields": ["Total_CSO_Volume"],
+                "info": [
+                  {
+                    "label": "0 m3",
+                    "values": [0, 0],
+                    "visible": true,
+                    "settings": {
+                      "symbol": "circle",
+                      "type": "simpleSymbol",
+                      "color": "rgba(76,230,0,1)",
+                      "offset": [0, 0],
+                      "rotation": 0,
+                      "size": 2.6679999999999997,
+                      "stroke": {
+                        "color": "rgba(0,0,0,1)",
+                        "lineStyle": "solid",
+                        "width": 0.5
+                      }
+                    }
+                  },
+                  {
+                    "label": "0.0001 - ≤ 5,000,000 m3",
+                    "values": [0.0001, 5000000],
+                    "visible": true,
+                    "settings": {
+                      "symbol": "circle",
+                      "type": "simpleSymbol",
+                      "color": "rgba(226,176,255,1)",
+                      "offset": [0, 0],
+                      "rotation": 0,
+                      "size": 5.114407777777778,
+                      "stroke": {
+                        "color": "rgba(0,0,0,1)",
+                        "lineStyle": "solid",
+                        "width": 0.5
+                      }
+                    }
+                  },
+                  {
+                    "label": "> 5,000,000 - ≤ 10,000,000 m3",
+                    "values": [5000000, 10000000],
+                    "visible": true,
+                    "settings": {
+                      "symbol": "circle",
+                      "type": "simpleSymbol",
+                      "color": "rgba(217,151,255,1)",
+                      "offset": [0, 0],
+                      "rotation": 0,
+                      "size": 7.560815555555555,
+                      "stroke": {
+                        "color": "rgba(0,0,0,1)",
+                        "lineStyle": "solid",
+                        "width": 0.5
+                      }
+                    }
+                  },
+                  {
+                    "label": "> 10,000,000 - ≤ 15,000,000 m3",
+                    "values": [10000000, 15000000],
+                    "visible": true,
+                    "settings": {
+                      "symbol": "circle",
+                      "type": "simpleSymbol",
+                      "color": "rgba(207,125,255,1)",
+                      "offset": [0, 0],
+                      "rotation": 0,
+                      "size": 10.007223333333332,
+                      "stroke": {
+                        "color": "rgba(0,0,0,1)",
+                        "lineStyle": "solid",
+                        "width": 0.5
+                      }
+                    }
+                  },
+                  {
+                    "label": "> 15,000,000 - ≤ 20,000,000 m3",
+                    "values": [15000000, 20000000],
+                    "visible": true,
+                    "settings": {
+                      "symbol": "circle",
+                      "type": "simpleSymbol",
+                      "color": "rgba(200,105,255,1)",
+                      "offset": [0, 0],
+                      "rotation": 0,
+                      "size": 12.453631111111111,
+                      "stroke": {
+                        "color": "rgba(0,0,0,1)",
+                        "lineStyle": "solid",
+                        "width": 0.5
+                      }
+                    }
+                  },
+                  {
+                    "label": "> 20,000,000 - ≤ 25,000,000 m3",
+                    "values": [20000000, 25000000],
+                    "visible": true,
+                    "settings": {
+                      "symbol": "circle",
+                      "type": "simpleSymbol",
+                      "color": "rgba(190,80,255,1)",
+                      "offset": [0, 0],
+                      "rotation": 0,
+                      "size": 14.90003888888889,
+                      "stroke": {
+                        "color": "rgba(0,0,0,1)",
+                        "lineStyle": "solid",
+                        "width": 0.5
+                      }
+                    }
+                  },
+                  {
+                    "label": "> 25,000,000 - ≤ 30,000,000 m3",
+                    "values": [25000000, 30000000],
+                    "visible": true,
+                    "settings": {
+                      "symbol": "circle",
+                      "type": "simpleSymbol",
+                      "color": "rgba(183,58,255,1)",
+                      "offset": [0, 0],
+                      "rotation": 0,
+                      "size": 17.346446666666665,
+                      "stroke": {
+                        "color": "rgba(0,0,0,1)",
+                        "lineStyle": "solid",
+                        "width": 0.5
+                      }
+                    }
+                  },
+                  {
+                    "label": "> 30,000,000 - ≤ 35,000,000 m3",
+                    "values": [30000000, 35000000],
+                    "visible": true,
+                    "settings": {
+                      "symbol": "circle",
+                      "type": "simpleSymbol",
+                      "color": "rgba(175,37,255,1)",
+                      "offset": [0, 0],
+                      "rotation": 0,
+                      "size": 19.792854444444444,
+                      "stroke": {
+                        "color": "rgba(0,0,0,1)",
+                        "lineStyle": "solid",
+                        "width": 0.5
+                      }
+                    }
+                  },
+                  {
+                    "label": "> 35,000,000 m3",
+                    "values": [35000000, 999000000],
+                    "visible": true,
+                    "settings": {
+                      "symbol": "circle",
+                      "type": "simpleSymbol",
+                      "color": "rgba(165,11,255,1)",
+                      "offset": [0, 0],
+                      "rotation": 0,
+                      "size": 22.239262222222223,
+                      "stroke": {
+                        "color": "rgba(0,0,0,1)",
+                        "lineStyle": "solid",
+                        "width": 0.5
+                      }
+                    }
+                  },
+                  {
+                    "label": "Pas de données de volume / No volume data",
+                    "values": [],
+                    "visible": true,
+                    "settings": {
+                      "symbol": "circle",
+                      "type": "simpleSymbol",
+                      "color": "rgba(255,127,127,1)",
+                      "offset": [0, 0],
+                      "rotation": 0,
+                      "size": 2.0010000000000003,
+                      "stroke": {
+                        "color": "rgba(0,0,0,1)",
+                        "lineStyle": "solid",
+                        "width": 0.5
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map", "north-arrow"],
+  "overviewMap": { "hideOnZoom": 7 },
+  "footerBar": {
+    "tabs": {
+      "core": ["layers", "data-table", "time-slider"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "legend", "details", "export"]
+    }
+  }
+}

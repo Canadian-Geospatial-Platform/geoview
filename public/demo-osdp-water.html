@@ -1,0 +1,15 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>OSDP Water Demo - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./index.html?tab=specific-demos">← Back to Main</a></div><div class="demo-section"><h4>OSDP Water Demo</h4><p>Demonstration of Open Science Data Portal - Water in GeoView</p><ul class="demo-list"><li><a href="https://osdp-psdo.canada.ca/en/learn-about/water" target="_blank">Original RAMP Water</a></li></ul></div></div><div class="demo-section"><h4 id="HMap1">Water (English)</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible">Layers Status</button><pre id="HMap1-state" class="panel map-title-holder"></pre><div id="Map1" class="geoview-map" data-lang="en" data-config-url="./configs/OSDP/osdp-water_en.json"></div><div class="demo-section"><h4 id="HMap2">Water (French)</h4><a class="ref-link" href="#top">Top</a></div><button class="collapsible">Layers Status</button><pre id="HMap2-state" class="panel map-title-holder"></pre><div id="Map2" class="geoview-map" data-lang="fr" data-config-url="./configs/OSDP/osdp-water_fr.json"></div><script src="codedoc.js"></script><script>insertPageHeader();
+
+      // Register handler when map has been initialized
+      cgpv.onMapInit((mapViewer) => {
+        listenToLegendLayerSetChanges(`H${mapViewer.mapId}-state`, mapViewer);
+      });
+
+      // initialize cgpv
+      cgpv.init();
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

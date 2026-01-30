@@ -1,0 +1,152 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "shpLYR1",
+        "geoviewLayerName": "Crown lands",
+        "geoviewLayerType": "shapefile",
+        "metadataAccessPath": "./datasets/shapefiles/PLAN_CrownHarvestPlans_SHP_UT83.zip"
+      },
+      {
+        "geoviewLayerId": "shpLYR2",
+        "geoviewLayerType": "shapefile",
+        "geoviewLayerName": "Sunchild Aquafier",
+        "metadataAccessPath": "./datasets/shapefiles/DIG_2012_0028.zip",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "sunchild_aquifer_py_tm",
+            "initialSettings": {
+              "states": {
+                "visible": false
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "shpLYR3",
+        "geoviewLayerName": "Wildfire HotSpots",
+        "metadataAccessPath": "https://cwfis.cfs.nrcan.gc.ca/downloads/hotspots/hotspots.shp",
+        "geoviewLayerType": "shapefile",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "hotspots",
+            "layerStyle": {
+              "Point": {
+                "type": "uniqueValue",
+                "fields": [
+                  "SOURCE"
+                ],
+                "hasDefault": true,
+                "info": [
+                  {
+                    "label": "NASA3",
+                    "visible": true,
+                    "values": [
+                      "NASA3"
+                    ],
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "rotation": 0,
+                      "color": "rgba(255,130,0,0.851)",
+                      "stroke": {
+                        "color": "rgba(255,255,255,0.502)",
+                        "lineStyle": "solid",
+                        "width": 0.998
+                      },
+                      "size": 4.002000000000001,
+                      "symbol": "circle",
+                      "offset": [
+                        0,
+                        0
+                      ]
+                    }
+                  },
+                  {
+                    "label": "NASA_Can",
+                    "visible": true,
+                    "values": [
+                      "NASA_Can"
+                    ],
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "rotation": 0,
+                      "color": "rgba(130,130,0,0.851)",
+                      "stroke": {
+                        "color": "rgba(255,255,255,0.502)",
+                        "lineStyle": "solid",
+                        "width": 0.998
+                      },
+                      "size": 4.002000000000001,
+                      "symbol": "circle",
+                      "offset": [
+                        0,
+                        0
+                      ]
+                    }
+                  },
+                  {
+                    "label": "Other",
+                    "visible": true,
+                    "values": [],
+                    "settings": {
+                      "type": "simpleSymbol",
+                      "rotation": 0,
+                      "color": "rgba(0,130,100,0.851)",
+                      "stroke": {
+                        "color": "rgba(255,255,255,0.502)",
+                        "lineStyle": "solid",
+                        "width": 0.998
+                      },
+                      "size": 4.002000000000001,
+                      "symbol": "circle",
+                      "offset": [
+                        0,
+                        0
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": [
+    "overview-map"
+  ],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "legend",
+        "layers",
+        "details",
+        "data-table"
+      ]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "export"
+      ]
+    }
+  }
+}

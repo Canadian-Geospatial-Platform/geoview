@@ -1,0 +1,124 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Outlier Geometry Layers - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div><div id="page-header"></div><div class="back-to-main"><a href="./outliers.html">← Back to Outliers</a></div><div class="demo-section"><h4>Outlier Geometry Layers</h4><p>This page showcases layers with unusual geometries or features that have been identified and tracked.</p></div></div><button class="collapsible">Layers Status</button><pre id="Hmap1-state" class="panel map-title-holder"></pre><hr/><div id="map1" class="geoview-map" data-lang="fr" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3978
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': false,
+            'labeled': true
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'EPSG:4617',
+              'geoviewLayerName': 'CSRS Layer (EPSG: 4617)',
+              'metadataAccessPath': 'https://data.sac-isc.gc.ca/geomatics/rest/services/Donnees_Ouvertes-Open_Data/Communaute_inuite_Inuit_Community/MapServer',
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0',
+                  'layerName': 'CSRS Layer',
+                  'initialSettings': {
+                    'states': {
+                      'visible': true
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'geojsonlyr1',
+              'geoviewLayerName': 'Multi Polygon Layer',
+              'geoviewLayerType': 'GeoJSON',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'multipolygons',
+                  'layerName': 'Multi Polygon Layer',
+                  'initialSettings': {
+                    'states': {
+                      'visible': false
+                    }
+                  },
+                  'source': {
+                    'dataAccessPath': './datasets/geojson/multipolygons.geojson'
+                  }
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'featureInfo',
+              'geoviewLayerName': 'Coral Sponge 2016',
+              'metadataAccessPath': 'https://gisp.dfo-mpo.gc.ca/arcgis/rest/services/FGP/KDE_Analyses_Coral_Sponge_2016_EN/MapServer',
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0',
+                  'layerName': 'Coral Sponge 2016',
+                  'initialSettings': {
+                    'states': {
+                      'visible': false
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'cpcad',
+              'geoviewLayerName': 'Protected and conserved area',
+              'metadataAccessPath': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CWS_SCF/CPCAD/MapServer/',
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0',
+                  'layerName': 'Protected and conserved area',
+                  'initialSettings': {
+                    'states': {
+                      'visible': false
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'layerDef',
+              'geoviewLayerName': 'IACC FR',
+              'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/IAAC/assessment_inventory_fr/MapServer/',
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '0',
+                  'layerName': 'IACC FR',
+                  'initialSettings': {
+                    'states': {
+                      'visible': true
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['overview-map'],
+        'footerBar': {
+          'tabs': {
+            'core': ['legend', 'layers', 'details', 'data-table']
+          }
+        },
+        'corePackages': [],
+        'theme': 'geo.ca'
+      }"></div><hr/><div class="demo-section"><h4>Known Outlier Geometry Layers</h4><ul class="demo-list"><li><strong>CSRS Layer</strong> - EPSG: 4617 - Issue #1798</li><li><strong>Multi Polygon Layer</strong> - Ensure multi polygon is working - Issue #550</li><li><strong>Coral Sponge</strong> - Had issues with get feature info - Issue #1996</li><li><strong>Protected and Conserved Area</strong> - Esri dynamic data table not fetching because of geometry in URL - Issue #2200</li><li><strong>Impact Assessment Agency of Canada – Environmental and Impact Assessments (French)</strong> - Esri layer definition character in French - Issue #2413</li></ul></div><script src="codedoc.js"></script><script>insertPageHeader();
+
+      // Register handler when map has been initialized
+      cgpv.onMapInit((mapViewer) => {
+        listenToLegendLayerSetChanges(`H${mapViewer.mapId}-state`, mapViewer);
+      });
+
+      // initialize cgpv
+      cgpv.init();
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

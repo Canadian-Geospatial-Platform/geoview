@@ -1,0 +1,83 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "Province": "Ontario",
+        "creationDate": "14/02/2020T19:00:00-05:00",
+        "myImages": "https://cdn.photoswipe.com/photoswipe-demo-images/photos/1/img-2500.jpg;https://cdn.photoswipe.com/photoswipe-demo-images/photos/2/img-2500.jpg;https://cdn.photoswipe.com/photoswipe-demo-images/photos/3/img-2500.jpg"
+       },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-89, 54],
+            [-85, 55],
+            [-85, 52],
+            [-89, 52],
+            [-89, 54]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Province": "Ontario",
+        "creationDate": "23/05/2020T12:00:00-05:00",
+        "myImages": "https://cdn.photoswipe.com/photoswipe-demo-images/photos/1/img-2500.jpg;https://cdn.photoswipe.com/photoswipe-demo-images/photos/2/img-2500.jpg;https://cdn.photoswipe.com/photoswipe-demo-images/photos/3/img-2500.jpg"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-90, 52],
+            [-84, 53],
+            [-84, 50],
+            [-90, 50],
+            [-90, 52]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Province": "Quebec",
+        "creationDate": "24/06/2020T17:00:00-05:00"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-73, 50],
+            [-73, 45.5],
+            [-74.25, 45.5],
+            [-74.25, 50],
+            [-73, 50]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Province": "Alberta",
+        "creationDate": "15/02/2021T13:00:00-05:00"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-115, 55],
+            [-110.25, 55],
+            [-111, 49.5],
+            [-114, 49.6],
+            [-115, 55]
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,145 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Load Test - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./index.html?tab=testing">← Back to Main</a></div><div class="demo-section"><h4>Load Test</h4><p>This page is used to showcase rendering time</p></div><div class="demo-section"><h4>Add GeoJSON Features</h4><div id="jsonFeatures" class="navigator-option-group navigator-selector-wrap"><label for="jsonfeaturetype" class="navigator-label">Geometry:</label> <select name="jsonfeaturetype" id="jsonfeaturetype" class="navigator-select"><option value="jsonPoint">Point</option><option value="jsonLine">Line</option><option value="jsonPolygon">Polygon</option></select> <label for="featureCnt" class="navigator-label">Count:</label> <input id="featureCnt" class="sandbox-input-short" type="number" placeholder="Count"/> <button id="load-features-btn" class="btn btn-success">Load Data</button></div><div class="sandbox-section-spacing"><div><strong>Time to render:</strong> <span id="timer">-</span></div><div><strong>Time to zoom:</strong> <span id="zoomtime">-</span></div></div></div></div><div id="map1" class="geoview-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3978
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': false,
+            'labeled': true
+          }
+        },
+        'components': [],
+        'corePackages': [],
+        'theme': 'geo.ca'
+      }"></div><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script>insertPageHeader();
+
+      let tzoom0 = 0;
+      const jsonFeatureOptionValues = ['jsonPoint', 'jsonLine', 'jsonPolygon'];
+
+      // Register handler when map has been initialized
+      cgpv.onMapInit((mapViewer) => {
+        if (mapViewer.mapId === 'map1') {
+          setTimeout(() => mapViewer.map.on('movestart', () => (tzoom0 = performance.now())), 1000);
+          setTimeout(
+            () =>
+              mapViewer.map.on('moveend', () => {
+                var tzoom1 = performance.now();
+                document.getElementById('zoomtime').innerText = Math.round(tzoom1 - tzoom0) / 1000 + ' Seconds';
+              }),
+            1000
+          );
+        }
+      });
+
+      // initialize cgpv
+      cgpv.init();
+
+      // ADD GEOJSON FEATURE SECTION
+      var addFeatureButton = document.getElementById('load-features-btn');
+      addFeatureButton.addEventListener('click', function (e) {
+        var t0 = performance.now();
+
+        switch (jsonFeatureOptionValues[document.getElementById('jsonfeaturetype').selectedIndex]) {
+          case 'jsonPoint':
+            addJSONPoint();
+            break;
+          case 'jsonLine':
+            addJSONLine();
+            break;
+          default:
+            addJSONPolygon();
+        }
+
+        var t1 = performance.now();
+        document.getElementById('timer').innerText = Math.round(t1 - t0) / 1000 + ' Seconds';
+      });
+
+      function addJSONPoint() {
+        for (j = 0; j < parseInt(document.getElementById('featureCnt').value); j++) {
+          const coord = generateRandomCoord();
+
+          // call an api function to draw a polygon
+          const circle = cgpv.api.getMapViewer('map1').layer.geometry.addCircle([coord[0], coord[1]], {
+            style: {
+              strokeColor: 'red',
+              strokeOpacity: 0.15,
+              fillColor: '#f03',
+              fillOpacity: 0.15,
+              radius: 4,
+            },
+          });
+        }
+      }
+
+      function addJSONLine() {
+        for (j = 0; j < parseInt(document.getElementById('featureCnt').value); j++) {
+          const ptStart = generateRandomCoord();
+          const ptEnd = generateRandomCoord();
+          const line = [];
+
+          // add 10 vertices
+          for (k = 0; k < 10; k++) {
+            line.push(
+              generateRandomCoord(
+                ptStart[0] < ptEnd[0] ? ptStart[0] : ptEnd[0],
+                Math.abs(ptStart[1] < ptEnd[1] ? ptStart[1] : ptEnd[1]),
+                ptEnd[0] > ptStart[0] ? ptEnd[0] : ptStart[0],
+                Math.abs(ptEnd[1] > ptStart[1] ? ptEnd[1] : ptStart[1])
+              )
+            );
+          }
+          line.push(ptEnd);
+          line.unshift(ptStart);
+
+          const polyline = cgpv.api.getMapViewer('map1').layer.geometry.addPolyline(line, {
+            style: {
+              strokeColor: '#000',
+              strokeWidth: 1,
+              strokeOpacity: 0.8,
+            },
+          });
+        }
+      }
+
+      function addJSONPolygon() {
+        for (j = 0; j < parseInt(document.getElementById('featureCnt').value); j++) {
+          const center = generateRandomCoord();
+          const factor = (Math.random() * 100 + 1) / 10;
+
+          // call an api function to draw a polygon
+          const polygon = cgpv.api.getMapViewer('map1').layer.geometry.addPolygon(
+            [
+              [
+                [center[0] + factor / 2, center[1] + factor],
+                [center[0] + factor / 2, center[1] - factor],
+                [center[0] - factor / 2, center[1] - factor],
+                [center[0] - factor / 2, center[1] + factor],
+              ],
+            ],
+            {
+              style: {
+                strokeColor: '#000',
+                strokeWidth: 1,
+                strokeOpacity: 0.8,
+                fillColor: '#666',
+                fillOpacity: 0.2,
+              },
+            }
+          );
+        }
+      }
+
+      function generateRandomCoord(minY = 40, minX = 45, maxY = 85, maxX = 140) {
+        const lat = parseFloat(((Math.random() * (maxY * 100 - minY * 100 + 1) + minY * 100) / 100).toFixed(3));
+        const long = parseFloat(((Math.random() * (maxX * 100 - minX * 100 + 1) + minX * 100) / 100).toFixed(3));
+
+        return [-long, lat];
+      }
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

@@ -1,0 +1,56 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "xyzTilesLYR1",
+        "geoviewLayerName": "Error metadata",
+        "metadataAccessPath": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServerERROR/",
+        "geoviewLayerType": "xyzTiles",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "World Topo Map",
+            "initialSettings": { "minZoom": 3, "maxZoom": 8 }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "xyzTilesLYR2",
+        "geoviewLayerName": "Error layerId",
+        "metadataAccessPath": "https://maps.gnosis.earth/ogcapi/collections/blueMarble/map/tiles/WebMercatorQuad",
+        "geoviewLayerType": "xyzTiles",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "blueMarbleERROR",
+            "layerName": "GNOSIS Blue Marble",
+            "source": {
+              "dataAccessPath": "https://maps.gnosis.earth/ogcapi/collections/blueMarble/map/tiles/WebMercatorQuad/{z}/{y}/{x}.jpg"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map"],
+  "footerBar": {
+    "tabs": {
+      "core": ["legend", "layers", "details"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "export"]
+    }
+  }
+}

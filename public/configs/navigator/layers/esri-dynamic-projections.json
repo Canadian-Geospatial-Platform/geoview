@@ -1,0 +1,105 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "initialView": { "zoomAndCenter": [5, [-90, 50]] },
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "uniqueValueId-ol",
+        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "7",
+            "layerName": "(OL) Labels",
+            "source": {
+              "forceServiceProjection": true
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "uniqueValueId-server",
+        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "7",
+            "layerName": "(Server) Labels 3978"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "unemployed-ol",
+        "metadataAccessPath": "https://egisp.dfo-mpo.gc.ca/arcgis/rest/services/open_data_donnees_ouvertes/canada_nature_fund_cnfasar_priority_places_priority_marine_threats/MapServer/",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1",
+            "layerName": "(OL) Canada Nat.",
+            "source": {
+              "forceServiceProjection": true
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "unemployed-server",
+        "metadataAccessPath": "https://egisp.dfo-mpo.gc.ca/arcgis/rest/services/open_data_donnees_ouvertes/canada_nature_fund_cnfasar_priority_places_priority_marine_threats/MapServer/",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "1",
+            "layerName": "(Server) Canada Nat. 3857"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "cpcad-ol",
+        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CWS_SCF/CPCAD/MapServer/",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "(OL) Protected.",
+            "source": {
+              "forceServiceProjection": true
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "cpcad-server",
+        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CWS_SCF/CPCAD/MapServer/",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "(Server) Protected. 3978"
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map", "north-arrow"],
+  "overviewMap": { "hideOnZoom": 7 },
+  "footerBar": {
+    "tabs": {
+      "core": ["layers", "data-table"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "legend", "details", "export"]
+    }
+  }
+}

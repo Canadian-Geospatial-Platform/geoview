@@ -1,0 +1,54 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Layers Navigator - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main back-to-main-flex"><a href="./index.html?tab=navigators" class="btn btn-primary">← Back to Main</a> <a href="./demos-navigator.html" class="btn btn-success">Demos Navigator →</a></div><div class="demo-section"><h4>Layers Navigator</h4><p>Interactive navigator to explore and test different GeoView layer types and configurations. Select a layer configuration from the dropdown to load and visualize it on the map.</p></div></div><div class="demo-section"><h4>Select Configuration</h4><div class="selector-container navigator-selector-row"><label for="configLoader" class="navigator-label-nowrap">Configuration to load:</label> <select name="Config Loader" id="configLoader" class="navigator-select"><option value="">--select--</option><option value="./configs/navigator/layers/all-layers.json">All Layer Types</option><option value="./configs/navigator/layers/csv.json">CSV</option><option value="./configs/navigator/layers/esri-dynamic.json">ESRI Dynamic</option><option value="./configs/navigator/layers/esri-dynamic-group-of-groups.json">ESRI Dynamic - group of groups</option><option value="./configs/navigator/layers/esri-dynamic-projections.json">ESRI Dynamic - projections</option><option value="./configs/navigator/layers/esri-dynamic-errors.json">ESRI Dynamic - errors</option><option value="./configs/navigator/layers/esri-feature.json">ESRI Feature</option><option value="./configs/navigator/layers/esri-feature-errors.json">ESRI Feature - errors</option><option value="./configs/navigator/layers/esri-image.json">ESRI Image</option><option value="./configs/navigator/layers/esri-image-errors.json">ESRI Image - errors</option><option value="./configs/navigator/layers/geojson.json">GeoJSON</option><option value="./configs/navigator/layers/geojson-multi.json">GeoJSON MutiPolygon</option><option value="./configs/navigator/layers/geojson-errors.json">GeoJSON - errors</option><option value="./configs/navigator/layers/geopackages.json">GeoPackages</option><option value="./configs/navigator/layers/geotiff.json">GeoTIFF</option><option value="./configs/navigator/layers/geotiff-errors.json">GeoTIFF - errors</option><option value="./configs/navigator/layers/kml.json">KML</option><option value="./configs/navigator/layers/ogc-feature-api.json">OGC Feature API</option><option value="./configs/navigator/layers/ogc-feature-api-errors.json">OGC Feature API - errors</option><option value="./configs/navigator/layers/shapefile.json">Shapefile</option><option value="./configs/navigator/layers/static-image.json">Static Image</option><option value="./configs/navigator/layers/static-image-errors.json">Static Image - errors</option><option value="./configs/navigator/layers/vector-tile.json">Vector Tile</option><option value="./configs/navigator/layers/wfs.json">WFS</option><option value="./configs/navigator/layers/wfs-cdtk-basic.json">WFS - CDTK (VPN) - Basic</option><option value="./configs/navigator/layers/wfs-cdtk.json">WFS - CDTK (VPN) - Experimental</option><option value="./configs/navigator/layers/wfs-errors.json">WFS - errors</option><option value="./configs/navigator/layers/wkb.json">WKB</option><option value="./configs/navigator/layers/wms.json">WMS</option><option value="./configs/navigator/layers/wms-cdtk-basic.json">WMS - CDTK (VPN) - Basic</option><option value="./configs/navigator/layers/wms-cdtk.json">WMS - CDTK (VPN) - Experimental</option><option value="./configs/navigator/layers/wms-errors.json">WMS - errors</option><option value="./configs/navigator/layers/xyz-tile.json">XYZ Tile</option><option value="./configs/navigator/layers/xyz-tile-errors.json">XYZ Tile - errors</option><option value="./configs/navigator/layers/geocore.json">GeoCore</option><option value="./configs/navigator/layers/geocore-custom.json">GeoCore Custom Config</option><option value="./configs/navigator/layers/geocore-custom-inline-config.json">GeoCore Custom Inline Config</option><option value="./configs/navigator/layers/geocore-duplicates.json">Duplicate GeoCore Config</option><option value="./configs/navigator/layers/geocore-errors.json">GeoCore - errors</option><option value="./configs/navigator/layers/rcs-gcgeo.json">gcGeo RCS - VPN</option></select></div></div><div class="demo-section"><h4>Display Options</h4><div class="selector-container navigator-selector-wrap"><div class="navigator-option-group"><label for="switchLang" class="navigator-label">Language:</label> <select name="Switch Language" id="switchLang" class="navigator-select"><option value="en">English</option><option value="fr">French</option><option value="unsupported">Not Supported</option></select></div><div class="navigator-option-group-narrow"><input type="checkbox" id="resetLayer" name="resetLayer" checked="checked" class="navigator-checkbox"/> <label for="resetLayer" class="navigator-checkbox">Reset Layers</label></div><div class="navigator-option-group"><label for="switchTheme" class="navigator-label">Theme:</label> <select name="Switch Theme" id="switchTheme" class="navigator-select"><option value="geo.ca">Geo.ca</option><option value="light">Light</option><option value="dark">Dark</option><option value="unsupported">Not Supported</option></select></div><div class="navigator-option-group"><label for="switchProjection" class="navigator-label">Projection:</label> <select name="Switch Projection" id="switchProjection" class="navigator-select"><option value="3978">LCC (3978)</option><option value="3857">Web Mercator (3857)</option><option value="unsupported">Not Supported</option></select></div></div></div><div class="demo-section"><h4>Map Viewer</h4><button type="button" class="collapsible">Layers Status</button><pre id="sandboxMap-state" class="panel map-title-holder"></pre><div id="mapSection" class="navigator-map-section"><div id="map1"></div></div><p><em>This map loads its configuration from the selected configuration file.</em></p></div><div class="editor"><div class="line-numbers"><span></span></div><textarea id="configGeoview" name="configuration" rows="30" cols="150">
+        Select a configuration file to see its content...
+      </textarea></div><div class="navigator-toolbar"><button id="Reload-Button" class="btn btn-primary btn-large">Reload Map</button> <button id="Remove-Button" class="btn btn-danger btn-large">Remove Map</button></div><hr/><button type="button" class="collapsible">Code Snippet</button><pre id="codeSnippet" class="panel"></pre><script src="codedoc.js"></script><script>insertPageHeader();
+
+      const configLoader = document.getElementById('configLoader');
+      const switchLang = document.getElementById('switchLang');
+      const resetLayer = document.getElementById('resetLayer');
+      const switchThemeElem = document.getElementById('switchTheme');
+      const switchProjectioneElem = document.getElementById('switchProjection');
+      const reload = document.getElementById('Reload-Button');
+      const remove = document.getElementById('Remove-Button');
+      const urlParams = new URLSearchParams(window.location.search);
+      const config = urlParams.get('config');
+      const mapId = 'map1';
+
+      // ------------------ CONFIG SELECTOR SECTION START -----------------------------------------
+      configLoader.addEventListener('change', async (e) => {
+        onConfigChange(mapId, e);
+      });
+      // ------------------ CONFIG SELECTOR SECTION END -----------------------------------------
+
+      // If there's a config
+      if (config) {
+        configLoader.value = config;
+        configLoader.dispatchEvent(new Event('change'));
+      }
+
+      // ------------------ SWITCHER SECTION START -----------------------------------------
+      switchLang.addEventListener('change', (e) => {
+        cgpv.api.getMapViewer(mapId).setLanguage(e.target.value, resetLayer.checked);
+      });
+
+      switchThemeElem.addEventListener('change', (e) => {
+        cgpv.api.getMapViewer(mapId).setTheme(e.target.value);
+      });
+
+      switchProjectioneElem.addEventListener('change', (e) => {
+        cgpv.api.getMapViewer(mapId).setProjection(e.target.value);
+      });
+      // ------------------ SWITCHER SECTION END -----------------------------------------
+
+      reload.addEventListener('click', (e) => {
+        cgpv.api.reload(mapId);
+      });
+
+      remove.addEventListener('click', (e) => {
+        cgpv.api.deleteMapViewer(mapId, true);
+      });
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

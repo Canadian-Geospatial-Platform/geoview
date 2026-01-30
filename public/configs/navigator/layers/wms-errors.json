@@ -1,0 +1,75 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "Hydro",
+        "geoviewLayerName": "Error metadata",
+        "metadataAccessPath": "https://maps.geogratis.gc.ca/wms/hydro_network_enERROR",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "nhn:nhn",
+            "layerName": "National Hydro Network (NHN)"
+          },
+          {
+            "layerId": "nhn:nhnda",
+            "layerName": "Drainage Areas"
+          },
+          {
+            "layerId": "nhn:toponyms",
+            "layerName": "Toponyms"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "Hydro2",
+        "geoviewLayerName": "Error layerId",
+        "metadataAccessPath": "https://maps.geogratis.gc.ca/wms/hydro_network_en",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "nhn:nhnERROR",
+            "layerName": "National Hydro2 Network (NHN)"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wmsLYR1-Root",
+        "geoviewLayerName": "Error Empty Group",
+        "metadataAccessPath": "https://geo.weather.gc.ca/geomet",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "entryType": "group",
+            "layerId": "wmsLYR1-Group",
+            "layerName": "Group",
+            "listOfLayerEntryConfig": []
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map", "north-arrow"],
+  "overviewMap": { "hideOnZoom": 7 },
+  "footerBar": {
+    "tabs": {
+      "core": ["layers", "data-table"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "legend", "details", "export"]
+    }
+  }
+}

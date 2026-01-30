@@ -1,0 +1,133 @@
+{
+  "schemaVersionUsed": "1,0",
+  "copyrightText": "© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources",
+  "listOfLayerEntryConfig": [
+    {
+      "layerId": "projects.json",
+      "layerName": "Projects",
+      "source": {
+        "featureInfo": {
+          "queryable": true,
+          "nameField": "Project",
+          "outfields": [
+            { "name": "program", "alias": "Program", "type": "string", "domain": null },
+            { "name": "project_id", "alias": "Project ID", "type": "string", "domain": null },
+            { "name": "geom_type", "alias": "Geometry type", "type": "string", "domain": null },
+            { "name": "geom_area", "alias": "Geometry area", "type": "string", "domain": null },
+            { "name": "SRID", "alias": "SRID", "type": "string", "domain": null }
+          ]
+        }
+      },
+      "layerStyle": {
+        "Point": {
+          "type": "uniqueValue",
+          "fields": ["program"],
+          "hasDefault": true,
+          "info": [
+            {
+              "label": "EGP",
+              "visible": true,
+              "settings": {
+                "type": "simpleSymbol",
+                "color": "rgba(0,255,0,0.10)",
+                "symbol": "circle"
+              },
+              "values": ["EGP"]
+            },
+            {
+              "label": "TGI",
+              "visible": true,
+              "settings": {
+                "type": "simpleSymbol",
+                "color": "rgba(0,128,128,0.10)",
+                "symbol": "star"
+              },
+              "values": ["TGI"]
+            },
+            {
+              "label": "Other point projects",
+              "visible": true,
+              "settings": {
+                "type": "simpleSymbol",
+                "color": "rgba(0,0,255,0.10)",
+                "symbol": "X"
+              },
+              "values": ["TGI"]
+            }
+          ]
+        },
+        "Polygon": {
+          "type": "uniqueValue",
+          "hasDefault": true,
+          "fields": ["program"],
+          "info": [
+            {
+              "label": "EGP",
+              "settings": {
+                "type": "filledPolygon",
+                "color": "rgba(255,0,0,0.10)",
+                "patternSize": 10,
+                "patternWidth": 2,
+                "fillStyle": "diagonalCross",
+                "stroke": {
+                  "color": "rgba(255,0,0,1)",
+                  "lineStyle": "dot"
+                }
+              },
+              "values": ["EGP"],
+              "visible": true
+            },
+            {
+              "label": "TGI",
+              "settings": {
+                "type": "filledPolygon",
+                "color": "rgba(0,128,128,0.10)",
+                "patternSize": 10,
+                "patternWidth": 2,
+                "fillStyle": "diagonalCross",
+                "stroke": {
+                  "color": "rgba(0,128,128,1)",
+                  "lineStyle": "dot"
+                }
+              },
+              "values": ["TGI"],
+              "visible": true
+            },
+            {
+              "label": "GGN",
+              "settings": {
+                "type": "filledPolygon",
+                "color": "rgba(255,0,255,0.10)",
+                "patternSize": 10,
+                "patternWidth": 2,
+                "fillStyle": "diagonalCross",
+                "stroke": {
+                  "color": "rgba(255,0,255,1)",
+                  "lineStyle": "dot"
+                }
+              },
+              "values": ["GGN"],
+              "visible": true
+            },
+            {
+              "label": "Other projects",
+              "settings": {
+                "type": "filledPolygon",
+                "color": "rgba(0,0,255,0.10)",
+                "patternSize": 10,
+                "patternWidth": 2,
+                "fillStyle": "diagonalCross",
+                "stroke": {
+                  "color": "rgba(0,0,255,1)",
+                  "lineStyle": "dot"
+                }
+              },
+              "values": [],
+              "visible": true
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

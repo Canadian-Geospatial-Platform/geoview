@@ -1,0 +1,86 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "wmsLYR1",
+        "geoviewLayerName": "earthquakes",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/earthquakes_en/MapServer/",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "Limited by Scale - Earthquakes 1980 - 1990, by Magnitude",
+            "minScale": 10000000
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "89d44ba6-7236-48ed-afab-f25a98c846ef",
+        "geoviewLayerType": "geoCore",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "pub:WHSE_IMAGERY_AND_BASE_MAPS.MOT_CULVERTS_SP",
+            "layerName": "Limited by Service - BC Ministry of Transportation Culverts"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "ae385105-e48c-4b54-bd0f-dfb7303301cb",
+        "geoviewLayerType": "geoCore"
+      },
+      {
+        "geoviewLayerId": "uniqueValueId",
+        "geoviewLayerName": "uniqueValue",
+        "metadataAccessPath": "https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer/",
+        "geoviewLayerType": "esriDynamic",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "4",
+            "layerName": "Limited by Zoom - Water Quality",
+            "entryType": "group",
+            "initialSettings": {
+              "minZoom": 5
+            },
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "5",
+                "initialSettings": {
+                  "minZoom": 7,
+                  "maxZoom": 10
+                }
+              },
+              {
+                "layerId": "6"
+              },
+              {
+                "layerId": "7"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map", "north-arrow"],
+  "footerBar": {
+    "tabs": {
+      "core": ["layers", "data-table"]
+    }
+  },
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "legend", "details", "export"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}

@@ -1,0 +1,57 @@
+{
+  "map": {
+    "interaction": "static",
+    "viewSettings": {
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": false,
+      "labeled": true
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "wmsLYR1",
+        "geoviewLayerName": "Première Nation / First Nation",
+        "metadataAccessPath": "https://services.aadnc-aandc.gc.ca/geomatics/services/Donnees_Ouvertes-Open_Data/Premiere_Nation_First_Nation/MapServer/WMSServer",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "geojsonLYR4",
+        "geoviewLayerName": "GeoJSON Line",
+        "metadataAccessPath": "./datasets/geojson/metadata.meta",
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "points.json"
+          },
+          {
+            "layerId": "lines.json"
+          },
+          {
+            "layerId": "polygons.json"
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "wmsLYR7",
+        "geoviewLayerName": "Geomet",
+        "metadataAccessPath": "https://geo.weather.gc.ca/geomet",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "RAQDPS-FW.CE_PM2.5-DIFF-YAvg"
+          }
+        ]
+      }
+    ]
+  },
+  "theme": "geo.ca",
+  "components": [],
+  "corePackages": []
+}

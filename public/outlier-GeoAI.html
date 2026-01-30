@@ -1,0 +1,65 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>High Detail Layer - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet"/><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div><div id="page-header"></div><div class="back-to-main"><a href="./outliers.html">← Back to Outliers</a></div><div class="demo-section"><h4>High Detail Layer</h4><p>This page is used to showcase a highly detailed layer that causes slow down.</p></div></div><button class="collapsible">Layers Status</button><pre id="Hmap1-state" class="panel map-title-holder"></pre><hr/><div id="map1" class="geoview-map" data-lang="en" data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'projection': 3978,
+            'initialView': {
+              'zoomAndCenter': [12, [-71.26, 46.8]]
+            },
+            'homeView': {
+              'zoomAndCenter': [8, [-71.26, 46.8]]
+            }
+          },
+          'basemapOptions': {
+            'basemapId': 'transport',
+            'shaded': true,
+            'labeled': false
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'quebec-2006',
+              'geoviewLayerName': 'Québec 2006',
+              'metadataAccessPath': 'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/GeoAI_UseCase_en/MapServer',
+              'geoviewLayerType': 'esriDynamic',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': '8',
+                  'layerName': 'Québec 2006',
+                  'initialSettings': {
+                    'states': {
+                      'visible': true
+                      }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        'theme': 'geo.ca',
+        'components': ['north-arrow'],
+        'corePackages': [],
+        'appBar': {
+          'tabs': {
+            'core': ['legend', 'export']
+          }
+        },
+        'footerBar': {
+          'tabs': {
+            'core': ['legend', 'layers', 'details', 'data-table']
+          }
+        }
+      }"></div><hr/><script src="codedoc.js"></script><script>insertPageHeader();
+
+      // Register handler when map has been initialized
+      cgpv.onMapInit((mapViewer) => {
+        listenToLegendLayerSetChanges(`H${mapViewer.mapId}-state`, mapViewer);
+      });
+
+      // initialize cgpv
+      cgpv.init();
+
+      // create snippets
+      window.addEventListener('load', () => {
+        createCodeSnippet();
+        createConfigSnippet();
+      });</script></body></html>

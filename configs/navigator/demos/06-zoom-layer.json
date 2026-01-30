@@ -1,0 +1,100 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "initialView": {
+        "layerIds": [
+          "geojsonLYR1/base-group/polygons.json",
+          "geojsonLYR1/base-group/lines.json"
+        ]
+      },
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "osm",
+      "shaded": false,
+      "labeled": false
+    },
+    "highlightColor": "red",
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "geojsonLYR1",
+        "geoviewLayerName": "GeoJSON Sample",
+        "metadataAccessPath": "https://canadian-geospatial-platform.github.io/geoview/public/datasets/geojson/metadata.meta",
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "polygons.json",
+            "layerName": "Polygons"
+          },
+          {
+            "layerId": "lines.json",
+            "layerName": "Lines"
+          },
+          {
+            "entryType": "group",
+            "layerId": "point-feature-group",
+            "layerName": "point-feature-group",
+            "listOfLayerEntryConfig": [
+              {
+                "layerId": "icon_points.json",
+                "layerName": "Icons",
+                "initialSettings": {
+                  "controls": {
+                    "visibility": false
+                  }
+                }
+              },
+              {
+                "layerId": "points.json",
+                "layerName": "Points"
+              },
+              {
+                "layerId": "points_1.json",
+                "layerName": "Points 1"
+              },
+              {
+                "layerId": "points_2.json",
+                "layerName": "Points 2"
+              },
+              {
+                "layerId": "points_3.json",
+                "layerName": "Points 3"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": [
+        "geolocator",
+        "export"
+      ]
+    }
+  },
+  "navBar": [
+    "zoom",
+    "fullscreen",
+    "home",
+    "location"
+  ],
+  "footerBar": {
+    "tabs": {
+      "core": [
+        "legend",
+        "layers",
+        "details",
+        "data-table"
+      ]
+    }
+  },
+  "components": [
+    "north-arrow"
+  ],
+  "corePackages": [],
+  "externalPackages": []
+}

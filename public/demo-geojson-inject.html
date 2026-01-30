@@ -1,0 +1,161 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Empty GeoJson Layer - Canadian Geospatial Platform Viewer</title><link rel="shortcut icon" href="./favicon.ico"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="msapplication-config" content="./img/browserconfig.xml"/><meta name="theme-color" content="#ffffff"/><meta name="msapplication-TileColor" content="#da532c"/><meta name="theme-color" content="#ffffff"/><link rel="stylesheet" href="css/style.css"/><script src="cgpv-main.js"></script></head><body><div id="page-header"></div><div><div class="back-to-main"><a href="./index.html?tab=specific-demos">← Back to Main</a></div><div class="demo-section"><h4>Empty GeoJSON Layer Demo</h4><p>This page demonstrates injecting GeoJSON features into existing layers</p></div></div><div id="map1" class="geoview-map" data-lang="en" data-config-url="./configs/geojson-inject.json"></div><div class="demo-section"><h4>API Functions:</h4><ul class="demo-function-list"><li><button class="btn btn-primary" id="Add-points1">Place points set 1</button><br/><code>cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points1);</code></li><li><button class="btn btn-primary" id="Add-points2">Place points set 2</button><br/><code>cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points2);</code></li><li><button class="btn btn-primary" id="Add-points3">Place points set 3</button><br/><code>cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points3);</code></li><li><button class="btn btn-primary" id="Replace-outfields">Replace feature outfields</button><br/><code>cgpv.api.getMapViewer('map1').layer.replaceFeatureOutfields('geojsonLYR1/blank.json', ['string', 'string', 'string'], ['program', 'title_en', 'project_id'], ['Program', 'Title', 'ID']);</code></li></ul></div><script src="codedoc.js"></script><script>insertPageHeader();
+
+      // initialize cgpv
+      cgpv.init();
+
+      // Add points 1 button ====================================================================================
+      // find the button element by ID
+      var addPoints1Button = document.getElementById('Add-points1');
+
+      const points1 = {
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            properties: {
+              program: 'GEP',
+              project_id:
+                '1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              title_en:
+                '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              project_leader:
+                '3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              geo_scope: '????',
+            },
+            geometry: {
+              type: 'Point',
+              coordinates: [-120, 57],
+            },
+          },
+          {
+            type: 'Feature',
+            properties: {
+              program: 'GGN',
+              project_id:
+                '1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              title_en:
+                '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              project_leader:
+                '3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              geo_scope: '????',
+            },
+            geometry: {
+              type: 'Point',
+              coordinates: [-117, 65],
+            },
+          },
+          {
+            type: 'Feature',
+            properties: {
+              program: 'GGP',
+              project_id:
+                '1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              title_en:
+                '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              project_leader:
+                '3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              geo_scope: '????',
+            },
+            geometry: {
+              type: 'Point',
+              coordinates: [-83, 54],
+            },
+          },
+        ],
+      };
+      // add an event listener when a button is clicked
+      addPoints1Button.addEventListener('click', () => {
+        cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points1);
+      });
+
+      // Add points 2 button ====================================================================================
+      // find the button element by ID
+      var addPoints2Button = document.getElementById('Add-points2');
+
+      const points2 =
+        '{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"program":"MarineGeo","project_id":"six","title_en":"good project","project_leader":"good leader","geo_scope":"good scope"},"geometry":{"type":"Point","coordinates":[-141,52]}},{"type":"Feature","properties":{"program":"NHCCGP","project_id":"six","title_en":"good project","project_leader":"good leader","geo_scope":"good scope"},"geometry":{"type":"Point","coordinates":[-141,83]}},{"type":"Feature","properties":{"program":"TGI","project_id":"six","title_en":"good project","project_leader":"good leader","geo_scope":"good scope"},"geometry":{"type":"Point","coordinates":[-53,83]}},{"type":"Feature","properties":{"program":"two","project_id":"six","title_en":"good project","project_leader":"good leader","geo_scope":"good scope"},"geometry":{"type":"Point","coordinates":[-53,49]}},{"type":"Feature","properties":{"program":"two","project_id":"six","title_en":"good project","project_leader":"good leader","geo_scope":"good scope"},"geometry":{"type":"Point","coordinates":[-100,57]}},{"type":"Feature","properties":{"program":"two","project_id":"six","title_en":"good project","project_leader":"good leader","geo_scope":"good scope"},"geometry":{"type":"Point","coordinates":[-113,55]}},{"type":"Feature","properties":{"program":"two","project_id":"six","title_en":"good project","project_leader":"good leader","geo_scope":"good scope"},"geometry":{"type":"Point","coordinates":[-72.33, 46.33]}}]}';
+
+      // add an event listener when a button is clicked
+      addPoints2Button.addEventListener('click', () => {
+        cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points2);
+      });
+
+      // Add points 3 button ====================================================================================
+      // find the button element by ID
+      var addPoints3Button = document.getElementById('Add-points3');
+
+      const points3 = {
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            properties: {
+              program: 'CMGD',
+              project_id:
+                '1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              title_en:
+                '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              project_leader:
+                '3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              geo_scope: '????',
+            },
+            geometry: {
+              type: 'Point',
+              coordinates: [-95, 49],
+            },
+          },
+          {
+            type: 'Feature',
+            properties: {
+              program: 'EGP',
+              project_id:
+                '1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              title_en:
+                '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              project_leader:
+                '3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              geo_scope: '????',
+            },
+            geometry: {
+              type: 'Point',
+              coordinates: [-135, 60],
+            },
+          },
+          {
+            type: 'Feature',
+            properties: {
+              program: 'EGP2024',
+              project_id:
+                '1 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              title_en:
+                '2 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              project_leader:
+                '3 Start, this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text.this is very long text. END',
+              geo_scope: '????',
+            },
+            geometry: {
+              type: 'Point',
+              coordinates: [-125, 49.5],
+            },
+          },
+        ],
+      };
+      // add an event listener when a button is clicked
+      addPoints3Button.addEventListener('click', () => {
+        cgpv.api.getMapViewer('map1').layer.setGeojsonSource('geojsonLYR1/blank.json', points3);
+      });
+      // Add replace fields button ====================================================================================
+      // find the button element by ID
+      var replaceFieldsButton = document.getElementById('Replace-outfields');
+
+      // add an event listener when a button is clicked
+      replaceFieldsButton.addEventListener('click', () => {
+        cgpv.api
+          .getMapViewer('map1')
+          .layer.replaceFeatureOutfields(
+            'geojsonLYR1/blank.json',
+            ['string', 'string', 'string'],
+            ['program', 'title_en', 'project_id'],
+            ['Program', 'Title', 'ID']
+          );
+      });</script></body></html>

@@ -1,0 +1,54 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "initialView": {
+        "layerIds": ["geojsonLYR1/blank.json"]
+      },
+      "projection": 3978
+    },
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "geojsonLYR1",
+        "geoviewLayerName": "GeoJSON Sample",
+        "metadataAccessPath": "./datasets/geojson/metadata_genericBlank_featureInfo5_20250217.meta",
+        "geoviewLayerType": "GeoJSON",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "blank.json"
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map"],
+  "overviewMap": {
+    "hideOnZoom": 7
+  },
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "export", "layers", "legend", "details", "guide"]
+    }
+  },
+  "navBar": ["zoom", "fullscreen", "home"],
+  "footerBar": {
+    "tabs": {
+      "core": ["data-table"],
+      "custom": [
+        {
+          "id": "download-map-data",
+          "label": "How to download map data",
+          "contentHTML": "<div><ul><li>How to export map coordinate data to: GeoJSON, or CSV.</li></ul></div>"
+        }
+      ]
+    },
+    "collapsed": true
+  },
+  "corePackages": [],
+  "theme": "geo.ca"
+}
