@@ -379,11 +379,8 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       } else if (timeSliderValues.discreteValues) {
         // Discrete mode with single handle - use current and next value in range
         const { range } = timeSliderValues;
-        const currentIdx = range.findIndex((entry) => {
-          const timestamp = DateMgt.convertToMilliseconds(entry);
-          return timestamp === values[0];
-        });
-        const nextIdx = currentIdx + 1;
+        const nextIdx = range.findIndex((entry) => DateMgt.convertToMilliseconds(entry) > values[0]);
+
         if (nextIdx < range.length) {
           const nextDate =
             typeof range[nextIdx] === 'string' ? range[nextIdx] : DateMgt.formatDateToISO(DateMgt.convertToMilliseconds(range[nextIdx]));
