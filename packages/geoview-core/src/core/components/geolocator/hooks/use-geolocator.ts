@@ -5,6 +5,7 @@ import type { GeoListItem } from '@/core/components/geolocator/geolocator';
 import { logger } from '@/core/utils/logger';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
+import { TIMEOUT } from '@/core/utils/constant';
 
 interface UseGeolocatorReturn {
   /** Array of geolocation results */
@@ -22,8 +23,6 @@ interface UseGeolocatorReturn {
   /** Function to reset the hook state */
   resetState: () => void;
 }
-
-const TIMEOUT_DELAY = 15000;
 
 export const useGeolocator = (): UseGeolocatorReturn => {
   logger.logTraceCore('GEOLOCATOR - useGeolocator');
@@ -70,7 +69,7 @@ export const useGeolocator = (): UseGeolocatorReturn => {
         setTheError(true);
         setIsLoading(false);
         logger.logError('GEOLOCATOR - search timeout error');
-      }, TIMEOUT_DELAY);
+      }, TIMEOUT.geolocationReturn);
 
       fetchTimerRef.current = timer;
 

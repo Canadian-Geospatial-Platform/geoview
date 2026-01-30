@@ -29,6 +29,7 @@ import { useShake } from '@/core/utils/useSpringAnimations';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { SxStyles } from '@/ui/style/types';
+import { TIMEOUT } from '@/core/utils/constant';
 
 export type NotificationDetailsType = {
   key: string;
@@ -217,7 +218,7 @@ export default memo(function Notifications(): JSX.Element {
       timerRef.current = setTimeout(() => {
         setHasNewNotification(false);
         timerRef.current = undefined;
-      }, 1000);
+      }, TIMEOUT.notification);
     }
 
     setNotificationsCount(curNotificationCount);

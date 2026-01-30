@@ -97,3 +97,26 @@ export const CONTAINER_TYPE = {
   APP_BAR: 'appBar',
   FOOTER_BAR: 'footerBar',
 } as const;
+
+export const TIMEOUT: Record<string, number> = {
+  deferExecution: 0,
+  focusDelay: 0,
+
+  dataPanelLoading: 100,
+  handleEsc: 100,
+  interactionFocusText: 100,
+  guideSearchVisibility: 100,
+
+  guideReturnFocus: 200,
+  exportPreview: 200,
+
+  focusDelayLightbox: 250,
+  guideSearchSectionExpand: 300,
+  modalFocusClose: 500,
+  projectionSwitchRepeatQuery: 1000,
+  notification: 1000,
+
+  featureHighlight: 5000,
+  geolocationReturn: 10000,
+  deleteLayerLoading: 10000,
+};

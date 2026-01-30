@@ -35,7 +35,7 @@ import { Layout } from '@/core/components/common';
 import { checkSelectedLayerPathList } from '@/core/components/common/comp-common';
 import { getSxClasses } from './details-style';
 import { FeatureInfo } from './feature-info';
-import { CONTAINER_TYPE, FEATURE_INFO_STATUS, TABS } from '@/core/utils/constant';
+import { CONTAINER_TYPE, FEATURE_INFO_STATUS, TABS, TIMEOUT } from '@/core/utils/constant';
 import { DetailsSkeleton } from './details-skeleton';
 import { CoordinateInfo, CoordinateInfoSwitch } from './coordinate-info';
 import type { TypeContainerBox } from '@/core/types/global-types';
@@ -560,7 +560,7 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
         if (featureToHighlight && hasValidGeometry(featureToHighlight)) {
           addHighlightedFeature(featureToHighlight);
         }
-      }, 0);
+      }, TIMEOUT.deferExecution);
     },
     [setSelectedLayerPath, arrayOfLayerDataBatch, hasValidGeometry, addHighlightedFeature]
   );

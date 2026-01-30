@@ -12,6 +12,7 @@ import { useAppStoreActions } from '@/core/stores/store-interface-and-intial-val
 import { useMapProjection } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
+import { TIMEOUT } from '@/core/utils/constant';
 
 interface JSONExportButtonProps {
   rows: unknown[];
@@ -174,7 +175,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
           // Defers execution to the next event loop iteration. This allows other pending micro
           // and macro tasks to execute, preventing long-running operations from blocking the main thread.
           // eslint-disable-next-line no-promise-executor-return, no-await-in-loop
-          await new Promise((resolve) => setTimeout(resolve, 0));
+          await new Promise((resolve) => setTimeout(resolve, TIMEOUT.deferExecution));
         }
         yield ']}';
       } finally {

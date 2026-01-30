@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { getSxClasses } from '@/core/components/common/layer-list-style';
@@ -47,6 +47,7 @@ import { Divider } from '@/ui/divider/divider';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import type { TypeLayerControls } from '@/api/types/layer-schema-types';
 import { scrollListItemIntoView } from '@/core/utils/utilities';
+import { TIMEOUT } from '@/core/utils/constant';
 
 // TODO: WCAG Issue #3108 - Check all disabled buttons. They may need special treatment. Need to find instance in UI first)
 // TODO: WCAG Issue #3108 - Check all icon buttons for "state related" aria values (i.e aria-checked, aria-disabled, etc.)
@@ -103,8 +104,27 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
   const layerChildren = useLayerSelectorChildren(layerPath);
   const layerItems = useLayerSelectorItems(layerPath);
 
+  // State to track if delete button should show for loading layers
+  const [showDeleteOnLoading, setShowDeleteOnLoading] = useState(false);
+
   // Is visibility button disabled?
   const isLayerVisibleCapable = layerControls?.visibility;
+
+  // Timer to show delete button after a delay for loading/processing layers so user can remove them to enable collapse/show all
+  useEffect(() => {
+    if (layerStatus === 'processing' || layerStatus === 'loading') {
+      const timer = setTimeout(() => {
+        setShowDeleteOnLoading(true);
+      }, TIMEOUT.deleteLayerLoading);
+
+      return () => {
+        clearTimeout(timer);
+        setShowDeleteOnLoading(false);
+      };
+    }
+    setShowDeleteOnLoading(false);
+    return undefined;
+  }, [layerStatus]);
 
   // Scroll this list item into view if selected
   useEffect(() => {
@@ -384,7 +404,14 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     // Log
     logger.logTraceUseMemo('SINGLE-LAYER - memoMoreLayerButtons', layerPath);
 
-    if (layerStatus === 'processing' || layerStatus === 'loading' || displayState !== 'view') {
+    if ((layerStatus === 'processing' || layerStatus === 'loading') && displayState === 'view') {
+      // Show delete button after 5 seconds for loading layers
+      if (showDeleteOnLoading) {
+        return <DeleteUndoButton layerPath={layerPath} layerId={layerId!} layerRemovable={layerControls?.remove !== false} />;
+      }
+      return null;
+    }
+    if (displayState !== 'view') {
       return null;
     }
     if (layerStatus === 'error') {
@@ -454,6 +481,9 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     layerPath,
     layerStatus,
     displayState,
+    showDeleteOnLoading,
+    layerId,
+    layerControls?.remove,
     isLayerAlwaysVisible,
     layerType,
     inVisibleRange,
@@ -464,8 +494,6 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
     isVisible,
     layerChildren,
     handleReload,
-    layerId,
-    layerControls?.remove,
     parentHidden,
   ]);
 

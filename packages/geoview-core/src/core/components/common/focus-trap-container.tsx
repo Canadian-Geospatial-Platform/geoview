@@ -5,7 +5,7 @@ import { FocusTrap, Box, Button } from '@/ui';
 import { logger } from '@/core/utils/logger';
 import { useUIActiveFocusItem, useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { TypeContainerBox } from '@/core/types/global-types';
-import { CONTAINER_TYPE } from '@/core/utils/constant';
+import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
 
 interface FocusTrapContainerProps {
   children: ReactNode;
@@ -19,8 +19,6 @@ const EXIT_BUTTON_STYLES = {
   width: '95%',
   margin: '10px auto',
 } as const;
-
-const FOCUS_DELAY = 0;
 
 /**
  * Focus trap container which will trap the focus when navigating through keyboard tab.
@@ -60,7 +58,7 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
         if (tabSelector) {
           tabSelector.focus();
         }
-      }, 0);
+      }, TIMEOUT.focusDelay);
     } else {
       disableFocusTrap(id);
     }
@@ -111,7 +109,7 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
       logger.logTraceUseEffect('FOCUS-TRAP-ELEMENT - focusItem', focusItem);
 
       // SetTimeout with a delay of 0 to force the rendering
-      setTimeout(() => document.getElementById(`${id}-exit-btn`)?.focus(), FOCUS_DELAY);
+      setTimeout(() => document.getElementById(`${id}-exit-btn`)?.focus(), TIMEOUT.focusDelay);
     }
   }, [focusItem, id]);
 

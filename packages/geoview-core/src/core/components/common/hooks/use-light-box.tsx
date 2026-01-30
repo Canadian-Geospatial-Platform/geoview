@@ -4,9 +4,9 @@ import type { LightBoxSlides} from '@/core/components/lightbox/lightbox';
 import { LightboxImg } from '@/core/components/lightbox/lightbox';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
+import { TIMEOUT } from '@/core/utils/constant';
 
 // Constants outside component to prevent recreating every render
-const FOCUS_DELAY = 250;
 const BASE64_IMAGE_PATTERN = /^data:image\/(png|jpeg|gif|webp);base64/;
 const MIN_SCALE = 1;
 
@@ -106,7 +106,7 @@ const BaseLightBoxComponent = memo(function BaseLightBoxComponent({
         element.focus();
         element.classList.add('keyboard-focused');
       }
-    }, FOCUS_DELAY);
+    }, TIMEOUT.focusDelayLightbox);
   }, [activeTrapGeoView, aliasIndex, onExit]);
 
   if (!isLightBoxOpen) return <Box />;

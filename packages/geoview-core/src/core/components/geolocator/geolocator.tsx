@@ -14,6 +14,7 @@ import { useGeolocator } from '@/core/components/geolocator/hooks/use-geolocator
 import { GeolocatorBar } from '@/core/components/geolocator/geolocator-bar';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { TIMEOUT } from '@/core/utils/constant';
 
 export interface GeoListItem {
   key: string;
@@ -69,7 +70,7 @@ export function Geolocator(): JSX.Element {
     setActiveAppBarTab(DEFAULT_APPBAR_CORE.GEOLOCATOR, false, false);
     setTimeout(() => {
       disableFocusTrap(`${DEFAULT_APPBAR_CORE.GEOLOCATOR}-panel-btn-${mapId}`);
-    }, 0);
+    }, TIMEOUT.deferExecution);
   }, [setActiveAppBarTab, setSearchValue, disableFocusTrap, mapId]);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {

@@ -14,6 +14,7 @@ import { useMapOverviewMapHideZoom, useMapZoom } from '@/core/stores/store-inter
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { Box } from '@/ui/layout';
+import { TIMEOUT } from '@/core/utils/constant';
 
 /**
  * Creates an overview map control and adds it to the map
@@ -70,7 +71,7 @@ export function OverviewMap(): JSX.Element {
 
       // Set initialized to true after everything is set up
       setIsInitialized(true);
-    }, 0);
+    }, TIMEOUT.deferExecution);
 
     // Cleanup
     return () => {
@@ -81,7 +82,7 @@ export function OverviewMap(): JSX.Element {
           root.unmount();
           root = null;
         }
-      }, 0);
+      }, TIMEOUT.deferExecution);
       setIsInitialized(false);
     };
   }, [mapId, displayLanguage, i18n]);

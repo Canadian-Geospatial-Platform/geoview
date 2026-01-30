@@ -16,7 +16,7 @@ import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useAppGuide, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useUIActiveTrapGeoView, useUIActiveFocusItem } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { TypeContainerBox } from '@/core/types/global-types';
-import { CONTAINER_TYPE } from '@/core/utils/constant';
+import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
 import { FocusTrap } from '@/ui';
 
 interface ResponsiveGridLayoutProps {
@@ -215,7 +215,7 @@ const ResponsiveGridLayout = forwardRef(
       setIsGuideOpen(false);
       setTimeout(() => {
         guideToggleBtnRef.current?.focus();
-      }, 200);
+      }, TIMEOUT.guideReturnFocus);
     }, []);
 
     // Focus the close button when the right panel becomes visible with content

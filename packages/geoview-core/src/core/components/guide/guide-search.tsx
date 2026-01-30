@@ -8,6 +8,7 @@ import { SearchIcon, CloseIcon, KeyboardArrowUpIcon, KeyboardArrowDownIcon } fro
 import type { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from '@/core/utils/logger';
 import { getSxClasses } from './guide-style';
+import { TIMEOUT } from '@/core/utils/constant';
 
 interface GuideSearchProps {
   guide: TypeGuideObject | undefined;
@@ -400,8 +401,8 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
           if (currentMatchElement) {
             currentMatchElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
-        }, 100);
-      }, 300);
+        }, TIMEOUT.guideSearchVisibility);
+      }, TIMEOUT.guideSearchSectionExpand);
     },
     [allMatches, onSectionChange]
   );
@@ -438,7 +439,7 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
     setSearchTerm('');
     setCurrentMatchIndex(0);
     setAllMatches([]);
-    setTimeout(() => searchInputRef.current?.focus(), 0);
+    setTimeout(() => searchInputRef.current?.focus(), TIMEOUT.deferExtencution);
   }, []);
 
   /**

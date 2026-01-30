@@ -18,6 +18,19 @@ export const getSxClasses = (theme: Theme): SxStyles =>
           border: '2px solid inherit',
         },
       },
+    },
+    rightPanelContainer: {
+      color: theme.palette.geoViewColor.textColor.main,
+      '& .search-highlight': {
+        backgroundColor: theme.palette.warning.light,
+        padding: '2px 4px',
+        borderRadius: '2px',
+      },
+      '& .current-match': {
+        backgroundColor: theme.palette.warning.main,
+        color: 'white',
+        fontWeight: 'bold',
+      },
       // Scope all guide-specific styles under .guideBox to prevent collision with other components
       '& .guideBox': {
         color: theme.palette.geoViewColor.grey.dark[800],
@@ -85,19 +98,6 @@ export const getSxClasses = (theme: Theme): SxStyles =>
         '& table': {
           marginBottom: '15px',
         },
-      },
-    },
-    rightPanelContainer: {
-      color: theme.palette.geoViewColor.textColor.main,
-      '& .search-highlight': {
-        backgroundColor: theme.palette.warning.light,
-        padding: '2px 4px',
-        borderRadius: '2px',
-      },
-      '& .current-match': {
-        backgroundColor: theme.palette.warning.main,
-        color: 'white',
-        fontWeight: 'bold',
       },
     },
     footerGuideListItemText: {
