@@ -15,6 +15,7 @@ import { useMapSize, useMapVisibleLayers } from 'geoview-core/core/stores/store-
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { getSxClasses } from './swiper-style';
 import { useMemo } from 'react';
+import { TIMEOUT } from 'geoview-core/core/utils/constant';
 
 type SwiperProps = {
   viewer: MapViewer;
@@ -114,7 +115,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
       // https://github.com/openlayers/openlayers/issues/10096
       setTimeout(() => {
         ctx.restore();
-      }, 0);
+      }, TIMEOUT.deferExecution);
     } else {
       ctx.restore();
     }

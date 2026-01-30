@@ -11,6 +11,7 @@ import { useMapNorthArrowElement, useMapProjection, useMapStoreActions } from '@
 import { useManageArrow } from './hooks/useManageArrow';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
+import { TIMEOUT } from '@/core/utils/constant';
 
 /**
  * Create a north arrow component
@@ -73,7 +74,7 @@ export const NorthPoleFlag = memo(function NorthPoleFlag(): JSX.Element {
   // Store
   const mapProjection = useMapProjection();
   const { setOverlayNorthMarkerRef } = useMapStoreActions();
-  setTimeout(() => setOverlayNorthMarkerRef(northPoleRef.current as HTMLElement), 0); // set marker reference
+  setTimeout(() => setOverlayNorthMarkerRef(northPoleRef.current as HTMLElement), TIMEOUT.deferExecution); // set marker reference
 
   const isVisible = `EPSG:${mapProjection}` === Projection.PROJECTION_NAMES.LCC;
 

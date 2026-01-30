@@ -145,6 +145,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               size="small"
               edge="end"
               color="inherit"
+              className="buttonOutline"
               aria-label={t('geolocator.clearFilters')}
               onClick={handleClearFilters}
               disabled={!geoLocationData.length}

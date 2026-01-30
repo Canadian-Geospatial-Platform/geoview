@@ -8,6 +8,7 @@ import { SearchIcon, CloseIcon, KeyboardArrowUpIcon, KeyboardArrowDownIcon } fro
 import type { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from '@/core/utils/logger';
 import { getSxClasses } from './guide-style';
+import { TIMEOUT } from '@/core/utils/constant';
 
 interface GuideSearchProps {
   guide: TypeGuideObject | undefined;
@@ -400,8 +401,8 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
           if (currentMatchElement) {
             currentMatchElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
-        }, 100);
-      }, 300);
+        }, TIMEOUT.guideSearchVisibility);
+      }, TIMEOUT.guideSearchSectionExpand);
     },
     [allMatches, onSectionChange]
   );
@@ -438,7 +439,7 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
     setSearchTerm('');
     setCurrentMatchIndex(0);
     setAllMatches([]);
-    setTimeout(() => searchInputRef.current?.focus(), 0);
+    setTimeout(() => searchInputRef.current?.focus(), TIMEOUT.deferExtencution);
   }, []);
 
   /**
@@ -498,12 +499,19 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
                         <IconButton
                           size="small"
                           aria-label={t('guide.arrowUp')}
+                          className="buttonOutline"
                           onClick={handlePrevious}
                           disabled={allMatches.length === 0}
                         >
                           <KeyboardArrowUpIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />
                         </IconButton>
-                        <IconButton size="small" aria-label={t('guide.arrowDown')} onClick={handleNext} disabled={allMatches.length === 0}>
+                        <IconButton
+                          size="small"
+                          aria-label={t('guide.arrowDown')}
+                          className="buttonOutline"
+                          onClick={handleNext}
+                          disabled={allMatches.length === 0}
+                        >
                           <KeyboardArrowDownIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />
                         </IconButton>
                       </>
@@ -512,6 +520,7 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
                       size="small"
                       edge="end"
                       color="inherit"
+                      className="buttonOutline"
                       aria-label={t('general.clearSearch')}
                       onClick={handleClear}
                       onKeyDown={(e) => {

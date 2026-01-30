@@ -28,8 +28,7 @@
   "footerBar": {
     "tabs": {
       "core": ["legend", "layers"]
-    },
-    "collapsed": false
+    }
   },
   "corePackages": [],
   "externalPackages": []

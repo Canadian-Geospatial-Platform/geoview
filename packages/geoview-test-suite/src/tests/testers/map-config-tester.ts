@@ -46,8 +46,8 @@ export class MapConfigTester extends GVAbstractTester {
       (test) => {
         // Verify the footer bar tab is selected
         test.addStep('Verifying data-table tab is selected in footer bar...');
-        const activeTab = UIEventProcessor.getActiveFooterBarTab(mapId);
-        Test.assertIsEqual(activeTab, 'data-table');
+        const { tabId } = UIEventProcessor.getActiveFooterBarTab(mapId);
+        Test.assertIsEqual(tabId, 'data-table');
 
         // Verify the selected layer path in data table store
         test.addStep('Verifying selectedLayerPath in data table store...');

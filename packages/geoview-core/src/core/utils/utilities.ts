@@ -8,6 +8,7 @@ import i18n from '@/core/translation/i18n';
 import type { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { Fetch } from '@/core/utils/fetch-helper';
 import type { TypeHTMLElement } from '@/core/types/global-types';
+import { TIMEOUT } from '@/core/utils/constant';
 
 /** The observers to monitor element removals from the DOM tree */
 const observers: Record<string, MutationObserver> = {};
@@ -1124,7 +1125,7 @@ export function handleEscapeKey(key: string, callbackId: string, isFocusTrapped?
     if (isFocusTrapped && callbackId) {
       setTimeout(() => {
         document.getElementById(callbackId ?? '')?.focus();
-      }, 100);
+      }, TIMEOUT.handleEsc);
     }
     cb?.();
   }

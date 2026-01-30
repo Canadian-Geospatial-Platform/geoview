@@ -126,6 +126,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
             <Box sx={sxClasses.groupButtonRow}>
               <IconButton
                 onClick={handleToggleVisibility}
+                className="buttonOutline"
                 size="small"
                 aria-label={getLocalizedMessage(displayLanguage, 'layers.toggleVisibility')}
                 sx={{ padding: '4px' }}
@@ -140,6 +141,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
             <IconButton
               onClick={handleToggleCollapse}
               size="small"
+              className="buttonOutline"
               aria-label={getLocalizedMessage(displayLanguage, 'layers.toggleCollapse')}
               sx={{ padding: '4px' }}
             >

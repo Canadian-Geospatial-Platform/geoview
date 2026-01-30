@@ -158,15 +158,10 @@
           },
           "additionalProperties": false
         },
-        "collapsed": {
-          "description": "State of footer bar when map is loaded (expanded or collapsed)",
-          "type": "boolean",
-          "default": true
-        },
         "selectedTab": {
           "type": "string",
           "enum": ["", "legend", "layers", "details", "data-table", "time-slider", "geochart"],
-          "description": "Footer tab to be selected at map load"
+          "description": "Footer tab to be selected at map load, it will expand the footer"
         },
         "selectedDataTableLayerPath": {
           "type": "string",
@@ -209,15 +204,10 @@
           },
           "additionalProperties": false
         },
-        "collapsed": {
-          "description": "State of app bar when map is loaded (expanded or collapsed)",
-          "type": "boolean",
-          "default": true
-        },
         "selectedTab": {
           "type": "string",
           "enum": ["", "geolocator", "geochart", "details", "legend", "guide", "data-table", "layers", "aoi-panel"],
-          "description": "App bar tab to be selected at map load"
+          "description": "App bar tab to be selected at map load, it will open the panel"
         },
         "selectedDataTableLayerPath": {
           "type": "string",

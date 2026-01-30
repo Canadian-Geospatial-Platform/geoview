@@ -13,7 +13,7 @@ import { useAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-an
 import { useMapStoreActions, useMapAllVisibleandInRangeLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
   useUIActiveAppBarTab,
-  useUIActiveFooterBarTabId,
+  useUIActiveFooterBarTab,
   useUIAppbarComponents,
   useUIStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
@@ -22,7 +22,7 @@ import type { LayerListEntry } from '@/core/components/common';
 import { Layout } from '@/core/components/common';
 import { logger } from '@/core/utils/logger';
 import { useFeatureFieldInfos } from './hooks';
-import { CONTAINER_TYPE, LAYER_STATUS, TABS } from '@/core/utils/constant';
+import { CONTAINER_TYPE, LAYER_STATUS, TABS, TIMEOUT } from '@/core/utils/constant';
 import type { MappedLayerDataType } from './data-table-types';
 import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';
 import type { TypeContainerBox } from '@/core/types/global-types';
@@ -54,9 +54,9 @@ export function Datapanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPan
   const { setSelectedLayerPath } = useDataTableStoreActions();
   const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
   const { isLayerHiddenOnMap } = useMapStoreActions();
-  const selectedTab = useUIActiveFooterBarTabId();
   const visibleInRangeLayers = useMapAllVisibleandInRangeLayers();
-  const { tabId, isOpen } = useUIActiveAppBarTab();
+  const activeFooterBarTab = useUIActiveFooterBarTab();
+  const activeAppBarTab = useUIActiveAppBarTab();
   const appBarComponents = useUIAppbarComponents();
   const showUnsymbolizedFeatures = useAppShowUnsymbolizedFeatures();
   const { disableFocusTrap } = useUIStoreActions();
@@ -200,7 +200,7 @@ export function Datapanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPan
 
     const clearLoading = setTimeout(() => {
       setIsLoading(false);
-    }, 100);
+    }, TIMEOUT.dataPanelLoading);
     return () => clearTimeout(clearLoading);
   }, [isLoading, selectedLayerPath]);
 
@@ -213,11 +213,11 @@ export function Datapanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPan
 
     // NOTE: Reason for not using component unmount, because we are not mounting and unmounting components
     // when we switch tabs.
-    if (selectedTab !== TABS.DATA_TABLE && containerType !== CONTAINER_TYPE.APP_BAR) {
+    if (activeFooterBarTab.tabId !== TABS.DATA_TABLE && containerType !== CONTAINER_TYPE.APP_BAR) {
       setSelectedLayerPath('');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedTab]);
+  }, [activeFooterBarTab]);
 
   /**
    * This effect will only run when appbar will have data table as component
@@ -225,12 +225,15 @@ export function Datapanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: DataPan
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('DATA-PANEL - isOpen', isOpen);
+    logger.logTraceUseEffect('DATA-PANEL - isOpen', activeAppBarTab.isOpen);
 
-    if ((tabId !== DEFAULT_APPBAR_CORE.DATA_TABLE || !isOpen) && appBarComponents.includes(DEFAULT_APPBAR_CORE.DATA_TABLE)) {
+    if (
+      (activeAppBarTab.tabId !== DEFAULT_APPBAR_CORE.DATA_TABLE || !activeAppBarTab.isOpen) &&
+      appBarComponents.includes(DEFAULT_APPBAR_CORE.DATA_TABLE)
+    ) {
       setSelectedLayerPath('');
     }
-  }, [tabId, isOpen, setSelectedLayerPath, appBarComponents]);
+  }, [activeAppBarTab, setSelectedLayerPath, appBarComponents]);
 
   // If has selected layer on load and the data for selectedLayerPath is empty, trigger a query
   // TODO Occasionally, setting the default selected layer can have unexpected behaviours.

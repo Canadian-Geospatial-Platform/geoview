@@ -43,7 +43,7 @@ import type { PluginsContainer } from '@/api/plugin/plugin-types';
 import { Projection } from '@/geo/utils/projection';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
-import { DEFAULT_OL_FITOPTIONS, NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
+import { DEFAULT_OL_FITOPTIONS, NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_PADDING, TIMEOUT } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { delay, isValidUUID, whenThisThen } from '@/core/utils/utilities';
 
@@ -566,7 +566,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
       // Repeat last query for layer features after a delay to allow projection change to propagate
       // TODO: Optimize this with event listener instead of timeout - need to find/create an event that signals reprojection is done
-      setTimeout(() => this.getMapViewer(mapId).layer.repeatLastQuery(), 1000);
+      setTimeout(() => this.getMapViewer(mapId).layer.repeatLastQuery(), TIMEOUT.projectionSwitchRepeatQuery);
     } finally {
       // Remove circular progress as refresh is done
       AppEventProcessor.setCircularProgress(mapId, false);
@@ -1692,7 +1692,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // Set app bar tab settings
       if (newMapConfig.appBar) {
         newMapConfig.appBar.selectedTab = UIEventProcessor.getActiveAppBarTab(mapId).tabId as TypeValidAppBarCoreProps;
-        newMapConfig.appBar.collapsed = !UIEventProcessor.getActiveAppBarTab(mapId).isOpen;
 
         const selectedDataTableLayerPath = DataTableEventProcessor.getSingleDataTableState(mapId, 'selectedLayerPath');
         if (selectedDataTableLayerPath) newMapConfig.appBar.selectedDataTableLayerPath = selectedDataTableLayerPath as string;
@@ -1702,8 +1701,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
       // Set footer bar tab settings
       if (newMapConfig.footerBar) {
-        newMapConfig.footerBar.selectedTab = UIEventProcessor.getActiveFooterBarTab(mapId) as TypeValidFooterBarTabsCoreProps;
-        newMapConfig.footerBar.collapsed = UIEventProcessor.getFooterBarIsCollapsed(mapId);
+        newMapConfig.footerBar.selectedTab = UIEventProcessor.getActiveFooterBarTab(mapId).tabId as TypeValidFooterBarTabsCoreProps;
 
         const selectedDataTableLayerPath = DataTableEventProcessor.getSingleDataTableState(mapId, 'selectedLayerPath');
         if (selectedDataTableLayerPath) newMapConfig.footerBar.selectedDataTableLayerPath = selectedDataTableLayerPath as string;

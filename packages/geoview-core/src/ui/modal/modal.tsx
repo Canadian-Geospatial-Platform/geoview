@@ -14,6 +14,7 @@ import { CloseIcon } from '@/ui/icons/index';
 import { getSxClasses } from '@/ui/modal/modal-style';
 import { useFadeIn } from '@/core/utils/useSpringAnimations';
 import { logger } from '@/core/utils/logger';
+import { TIMEOUT } from '@/core/utils/constant';
 
 /**
  * Properties for the Modal component extending Material-UI's DialogProps
@@ -215,7 +216,7 @@ function ModalUI(props: DialogPropsExtend): JSX.Element {
         if (closeButton) {
           closeButton.focus();
         }
-      }, 500);
+      }, TIMEOUT.modalFocusClose);
       return () => clearTimeout(timer);
     }
 

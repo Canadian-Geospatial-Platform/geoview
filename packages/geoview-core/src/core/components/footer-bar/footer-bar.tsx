@@ -10,11 +10,10 @@ import { ResizeFooterPanel } from '@/core/components/footer-bar/hooks/resize-foo
 import { useAppFullscreenActive, useAppHeight, useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useDetailsLayerDataArrayBatch } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import {
-  useUIActiveFooterBarTabId,
+  useUIActiveFooterBarTab,
   useUIFooterPanelResizeValue,
   useUIStoreActions,
   useUIActiveTrapGeoView,
-  useUIFooterBarIsCollapsed,
   useUIHiddenTabs,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { FooterBarApi, FooterTabCreatedEvent, FooterTabRemovedEvent } from '@/core/components';
@@ -69,11 +68,10 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   // Store
   const mapId = useGeoViewMapId();
   const arrayOfLayerDataBatch = useDetailsLayerDataArrayBatch();
-  const selectedTab = useUIActiveFooterBarTabId();
+  const activeFooterBarTab = useUIActiveFooterBarTab();
   const activeTrapGeoView = useUIActiveTrapGeoView();
-  const isCollapsed = useUIFooterBarIsCollapsed();
   const shellContainer = useAppShellContainer();
-  const { setActiveFooterBarTab, enableFocusTrap, disableFocusTrap, setFooterBarIsCollapsed } = useUIStoreActions();
+  const { setActiveFooterBarTab, enableFocusTrap, disableFocusTrap, setFooterBarIsOpen } = useUIStoreActions();
   const backupAppHeight: number = useAppHeight();
   const appHeight = document.getElementById(mapId)?.getAttribute('data-footer-height') ?? `${backupAppHeight}px`;
   const hiddenTabs: string[] = useUIHiddenTabs();
@@ -210,7 +208,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
 
   // Update the active footer tab based on footer tabs created from configuration.
   useEffect(() => {
-    if (!selectedTab && !isCollapsed) setActiveFooterBarTab(memoFooterBarTabs?.[0]?.id ?? '');
+    if (!activeFooterBarTab.tabId && activeFooterBarTab.isOpen) setActiveFooterBarTab(memoFooterBarTabs?.[0]?.id ?? '');
     // No need to update when selected tab changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [memoFooterBarTabs, setActiveFooterBarTab]);
@@ -220,18 +218,18 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('FOOTER-TABS - arrayOfLayerDataBatch', arrayOfLayerDataBatch, selectedTab, isCollapsed);
+    logger.logTraceUseEffect('FOOTER-TABS - arrayOfLayerDataBatch', arrayOfLayerDataBatch, activeFooterBarTab);
 
     // If the details tab is not in the footer bar tabs config, return
     if (footerBarTabsConfig && !footerBarTabsConfig.tabs.core.includes('details')) return;
 
     // If we're on the details panel and the footer is collapsed
-    if (selectedTab === 'details' && isCollapsed) {
+    if (activeFooterBarTab.tabId === 'details' && !activeFooterBarTab.isOpen) {
       // Uncollapse it
-      setFooterBarIsCollapsed(false);
+      setFooterBarIsOpen(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [arrayOfLayerDataBatch, selectedTab, setFooterBarIsCollapsed]);
+  }, [arrayOfLayerDataBatch, activeFooterBarTab, setFooterBarIsOpen]);
   // Don't add isCollapsed in the dependency array, because it'll retrigger the useEffect
 
   /**
@@ -239,26 +237,26 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('FOOTER-BAR - isCollapsed', isCollapsed);
+    logger.logTraceUseEffect('FOOTER-BAR - isFooterBarOpen', activeFooterBarTab.isOpen);
 
     if (tabsContainerRef.current) {
       const tabsContainer = tabsContainerRef.current;
       tabsContainer.style.height = 'fit-content';
       const lastChild = tabsContainer.firstElementChild?.lastElementChild as HTMLElement | null;
       if (lastChild) {
-        lastChild.style.overflow = isCollapsed ? 'unset' : '';
-        lastChild.style.height = isCollapsed ? '0px' : '';
+        lastChild.style.overflow = !activeFooterBarTab.isOpen ? 'unset' : '';
+        lastChild.style.height = !activeFooterBarTab.isOpen ? '0px' : '';
       }
       tabsContainerRef.current = tabsContainer;
     }
-  }, [isCollapsed, setActiveFooterBarTab]);
+  }, [activeFooterBarTab.isOpen, setActiveFooterBarTab]);
 
   /**
    * Handle a collapse, expand event for the tabs component
    */
   const handleToggleCollapse = (): void => {
-    if (!isCollapsed) setActiveFooterBarTab(undefined);
-    setFooterBarIsCollapsed(!isCollapsed);
+    if (activeFooterBarTab.isOpen) setActiveFooterBarTab(undefined);
+    setFooterBarIsOpen(!activeFooterBarTab.isOpen);
   };
 
   /**
@@ -267,7 +265,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
    */
   const handleSelectedTabChanged = (tab: TypeTabs): void => {
     setActiveFooterBarTab(tab.id);
-    setFooterBarIsCollapsed(false);
+    setFooterBarIsOpen(true);
   };
 
   /**
@@ -278,32 +276,32 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       return;
     }
 
-    logger.logTraceUseEffect('FOOTER-BAR - handle full screen resize', isCollapsed);
+    logger.logTraceUseEffect('FOOTER-BAR - handle full screen resize', activeFooterBarTab.isOpen);
 
     // default values as set by the height of the div
     let footerHeight = 'fit-content';
 
     // adjust values from px to % to accomodate fullscreen plus page zoom
-    if (isMapFullScreen && !isCollapsed) {
+    if (isMapFullScreen && activeFooterBarTab.isOpen) {
       footerHeight = `${footerPanelResizeValue}%`;
     }
 
     tabsContainerRef.current.style.height = footerHeight;
-  }, [tabsContainerRef, isCollapsed, isMapFullScreen, footerPanelResizeValue]);
+  }, [tabsContainerRef, activeFooterBarTab.isOpen, isMapFullScreen, footerPanelResizeValue]);
 
   /**
    * Add plugins
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('FOOTER-BAR - selectedTab', selectedTab);
+    logger.logTraceUseEffect('FOOTER-BAR - selectedTab', activeFooterBarTab);
 
     // If clicked on a tab with a plugin
     MapEventProcessor.getMapViewerPlugins(mapId)
       .then((plugins) => {
-        if (selectedTab && plugins[selectedTab]) {
+        if (activeFooterBarTab.tabId && plugins[activeFooterBarTab.tabId]) {
           // Get the plugin
-          const theSelectedPlugin = plugins[selectedTab];
+          const theSelectedPlugin = plugins[activeFooterBarTab.tabId];
 
           // If the Plugin is a FooterPlugin
           if (theSelectedPlugin instanceof FooterPlugin) {
@@ -315,7 +313,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         // Log
         logger.logPromiseFailed('getMapViewerPluginsInstance in useEffect in footer-bar', error);
       });
-  }, [mapId, selectedTab]);
+  }, [mapId, activeFooterBarTab]);
 
   /**
    * Manage the tab 'create', 'remove'
@@ -424,17 +422,17 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       <Tabs
         shellContainer={shellContainer}
         activeTrap={activeTrapGeoView}
-        isCollapsed={isCollapsed}
+        isCollapsed={!activeFooterBarTab.isOpen}
         onToggleCollapse={handleToggleCollapse}
         onSelectedTabChanged={handleSelectedTabChanged}
         onOpenKeyboard={enableFocusTrap}
         onCloseKeyboard={disableFocusTrap}
-        selectedTab={memoFooterBarTabs.findIndex((t) => t.id === selectedTab)}
+        selectedTab={memoFooterBarTabs.findIndex((t) => t.id === activeFooterBarTab.tabId)}
         tabProps={{ disableRipple: true }}
         tabs={memoFooterBarTabs}
-        TabContentVisibilty={!isCollapsed ? 'visible' : 'hidden'}
+        TabContentVisibilty={activeFooterBarTab.isOpen ? 'visible' : 'hidden'}
         containerType={CONTAINER_TYPE.FOOTER_BAR}
-        rightButtons={!isCollapsed && isMapFullScreen && <ResizeFooterPanel />}
+        rightButtons={activeFooterBarTab.isOpen && isMapFullScreen && <ResizeFooterPanel />}
         appHeight={appHeight}
         hiddenTabs={hiddenTabs}
         isFullScreen={isMapFullScreen}

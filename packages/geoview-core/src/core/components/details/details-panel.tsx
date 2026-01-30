@@ -10,12 +10,7 @@ import {
   useDetailsSelectedLayerPath,
   useDetailsCoordinateInfoEnabled,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import {
-  useUIActiveFooterBarTabId,
-  useUIFooterBarIsCollapsed,
-  useUIActiveAppBarTab,
-  useUIStoreActions,
-} from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIActiveAppBarTab, useUIActiveFooterBarTab, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import {
   useMapStoreActions,
@@ -35,7 +30,7 @@ import { Layout } from '@/core/components/common';
 import { checkSelectedLayerPathList } from '@/core/components/common/comp-common';
 import { getSxClasses } from './details-style';
 import { FeatureInfo } from './feature-info';
-import { CONTAINER_TYPE, FEATURE_INFO_STATUS, TABS } from '@/core/utils/constant';
+import { CONTAINER_TYPE, FEATURE_INFO_STATUS, TABS, TIMEOUT } from '@/core/utils/constant';
 import { DetailsSkeleton } from './details-skeleton';
 import { CoordinateInfo, CoordinateInfoSwitch } from './coordinate-info';
 import type { TypeContainerBox } from '@/core/types/global-types';
@@ -68,9 +63,8 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
   const visibleInRangeLayers = useMapAllVisibleandInRangeLayers();
   const orderedLayers = useMapOrderedLayers();
   const mapClickCoordinates = useMapClickCoordinates();
-  const selectedTab = useUIActiveFooterBarTabId();
-  const isCollapsed = useUIFooterBarIsCollapsed();
   const activeAppBarTab = useUIActiveAppBarTab();
+  const activeFooterBarTab = useUIActiveFooterBarTab();
   const queryableByLayerPath = useMapSelectorLayerQueryable(visibleInRangeLayers);
   const { setSelectedLayerPath, removeCheckedFeature, setLayerDataArrayBatchLayerPathBypass } = useDetailsStoreActions();
   const { addHighlightedFeature, removeHighlightedFeature, isLayerHiddenOnMap, getMapLayerParentHidden } = useMapStoreActions();
@@ -162,13 +156,13 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
    */
   const isPanelOpen = useMemo(() => {
     if (containerType === CONTAINER_TYPE.FOOTER_BAR) {
-      return selectedTab === TABS.DETAILS && !isCollapsed && isRightPanelVisible;
+      return activeFooterBarTab.tabId === TABS.DETAILS && activeFooterBarTab.isOpen && isRightPanelVisible;
     }
     if (containerType === CONTAINER_TYPE.APP_BAR) {
       return activeAppBarTab.tabId === 'details' && activeAppBarTab.isOpen && isRightPanelVisible;
     }
     return false;
-  }, [containerType, selectedTab, isCollapsed, activeAppBarTab, isRightPanelVisible]);
+  }, [containerType, activeFooterBarTab, activeAppBarTab, isRightPanelVisible]);
 
   /**
    * Memoizes the layers list for the LayerList component and centralizing indexing purposes.
@@ -560,7 +554,7 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
         if (featureToHighlight && hasValidGeometry(featureToHighlight)) {
           addHighlightedFeature(featureToHighlight);
         }
-      }, 0);
+      }, TIMEOUT.deferExecution);
     },
     [setSelectedLayerPath, arrayOfLayerDataBatch, hasValidGeometry, addHighlightedFeature]
   );
@@ -651,13 +645,13 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('DETAILS-PANEL - panel closed check', selectedTab, isCollapsed, activeAppBarTab, containerType);
+    logger.logTraceUseEffect('DETAILS-PANEL - panel closed check', activeFooterBarTab, activeAppBarTab, containerType);
 
     let shouldClear = false;
 
     if (containerType === CONTAINER_TYPE.FOOTER_BAR) {
       // For footer bar: clear when not on details tab or footer is collapsed
-      shouldClear = selectedTab !== TABS.DETAILS || isCollapsed;
+      shouldClear = activeFooterBarTab.tabId !== TABS.DETAILS || !activeFooterBarTab.isOpen;
     } else if (containerType === CONTAINER_TYPE.APP_BAR) {
       // For app bar: clear when details panel is closed (tabId === 'details' and isOpen === false)
       shouldClear = activeAppBarTab.tabId === TABS.DETAILS && !activeAppBarTab.isOpen;
@@ -672,7 +666,7 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
       removeCheckedFeature('all');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedTab, isCollapsed, activeAppBarTab, containerType]);
+  }, [activeFooterBarTab, activeAppBarTab, containerType]);
 
   /**
    * Check all layers status is processed while querying
@@ -691,11 +685,11 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
    */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('DETAILS-PANEL - check for auto-guide display', activeAppBarTab, selectedTab, arrayOfLayerDataBatch);
+    logger.logTraceUseEffect('DETAILS-PANEL - check for auto-guide display', activeAppBarTab, activeFooterBarTab, arrayOfLayerDataBatch);
 
     // Check if details panel just opened (from AppBar or Footer)
     const isDetailsActive =
-      (containerType === CONTAINER_TYPE.FOOTER_BAR && selectedTab === TABS.DETAILS && !isCollapsed) ||
+      (containerType === CONTAINER_TYPE.FOOTER_BAR && activeFooterBarTab.tabId === TABS.DETAILS && activeFooterBarTab.isOpen) ||
       (containerType === CONTAINER_TYPE.APP_BAR && activeAppBarTab.tabId === TABS.DETAILS && activeAppBarTab.isOpen);
 
     // Only run when details is active
@@ -718,8 +712,7 @@ export function DetailsPanel({ containerType = CONTAINER_TYPE.FOOTER_BAR }: Deta
     }
   }, [
     activeAppBarTab,
-    selectedTab,
-    isCollapsed,
+    activeFooterBarTab,
     containerType,
     arrayOfLayerDataBatch,
     memoIsAllLayersQueryStatusProcessed,
