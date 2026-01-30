@@ -48,7 +48,14 @@ export function GeolocatorBar({ searchValue, onChange, onSearch, onReset, isLoad
             inputRef={inputRef}
           />
           <Box sx={{ display: 'flex', marginLeft: 'auto', alignItems: 'center' }}>
-            <IconButton edge="end" aria-label={t('geolocator.searchClose')} size="small" sx={{ mr: 2, ml: 4 }} onClick={onReset}>
+            <IconButton
+              edge="end"
+              aria-label={t('geolocator.searchClose')}
+              className="buttonOutline"
+              size="small"
+              sx={{ mr: 2, ml: 4 }}
+              onClick={onReset}
+            >
               <CloseIcon />
             </IconButton>
           </Box>

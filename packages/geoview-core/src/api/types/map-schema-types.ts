@@ -89,7 +89,6 @@ export type TypeFooterBarProps = {
     core: TypeValidFooterBarTabsCoreProps[];
     custom: TypeFooterBarTabsCustomProps[]; // TODO: support custom tab by creating a Typeobject for it
   };
-  collapsed: boolean;
   selectedTab: TypeValidFooterBarTabsCoreProps;
   selectedLayersLayerPath: string;
   selectedDataTableLayerPath: string;
@@ -113,7 +112,6 @@ export type TypeAppBarProps = {
   tabs: {
     core: TypeValidAppBarCoreProps[];
   };
-  collapsed: boolean;
   selectedTab: TypeValidAppBarCoreProps;
   selectedLayersLayerPath: string;
   selectedDataTableLayerPath: string;
@@ -475,7 +473,6 @@ export const DEFAULT_MAP_FEATURE_CONFIG = {
       core: ['layers', 'data-table'],
       custom: [],
     },
-    collapsed: true,
   },
   components: ['north-arrow', 'overview-map'],
   appBar: { tabs: { core: ['geolocator', 'legend', 'details', 'export'] } },

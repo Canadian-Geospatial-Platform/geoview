@@ -39,7 +39,7 @@ export class GeochartTester extends GVAbstractTester {
         // Perform assertions
         // Check that geochart is the active footer bar
         test.addStep("Verifying 'geochart' is the selected footer tab...");
-        Test.assertIsEqual(UIEventProcessor.getActiveFooterBarTab(this.getMapId()), 'geochart');
+        Test.assertIsEqual(UIEventProcessor.getActiveFooterBarTab(this.getMapId()).tabId, 'geochart');
 
         // Check that layer path is selected
         test.addStep('Verifying ' + layerPath + ' is the selected layer for the geochart...');
@@ -132,7 +132,7 @@ export class GeochartTester extends GVAbstractTester {
 
         // Check that geochart is the active footer bar
         test.addStep("Verifying 'geochart' is the selected footer tab...");
-        Test.assertIsEqual(UIEventProcessor.getActiveFooterBarTab(this.getMapId()), 'geochart');
+        Test.assertIsEqual(UIEventProcessor.getActiveFooterBarTab(this.getMapId()).tabId, 'geochart');
 
         // Check that layer path is selected
         test.addStep('Verifying ' + layerPathAdd + ' is the selected layer for the geochart...');

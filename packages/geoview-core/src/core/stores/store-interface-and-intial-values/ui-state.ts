@@ -23,18 +23,22 @@ export type ActiveAppBarTabType = {
   isFocusTrapped?: boolean;
 };
 
+export type ActiveFooterBarTabType = {
+  tabId: string;
+  isOpen: boolean;
+  isFocusTrapped?: boolean;
+};
 export interface IUIState {
-  activeFooterBarTabId: string | undefined;
   activeTrapGeoView: boolean;
-  activeAppBarTab: ActiveAppBarTabType;
   appBarComponents: TypeValidAppBarCoreProps[];
+  activeAppBarTab: ActiveAppBarTabType;
   footerBarComponents: TypeValidFooterBarTabsCoreProps[];
+  activeFooterBarTab: ActiveFooterBarTabType;
   corePackagesComponents: TypeValidMapCorePackageProps[];
   focusItem: FocusItemProps;
   hiddenTabs: string[];
   navBarComponents: TypeValidNavBarProps[];
   footerPanelResizeValue: number;
-  footerBarIsCollapsed: boolean;
   selectedFooterLayerListItemId: string;
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
@@ -47,7 +51,7 @@ export interface IUIState {
     setActiveAppBarTab: (tabId: string, isOpen: boolean, isFocusTrapped: boolean) => void;
     setActiveTrapGeoView: (active: boolean) => void;
     setFooterPanelResizeValue: (value: number) => void;
-    setFooterBarIsCollapsed: (collapsed: boolean) => void;
+    setFooterBarIsOpen: (open: boolean) => void;
     setSelectedFooterLayerListItemId: (layerListItemId: string) => void;
   };
 
@@ -59,7 +63,7 @@ export interface IUIState {
     setActiveTrapGeoView: (active: boolean) => void;
     setFooterPanelResizeValue: (value: number) => void;
     setHiddenTabs: (hiddenTabs: string[]) => void;
-    setFooterBarIsCollapsed: (collapsed: boolean) => void;
+    setFooterBarIsOpen: (open: boolean) => void;
     setSelectedFooterLayerListItemId: (layerListItemId: string) => void;
   };
 }
@@ -75,35 +79,43 @@ export interface IUIState {
 export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIState {
   const init = {
     appBarComponents: ['geolocator'],
-    activeFooterBarTabId: '',
     activeAppBarTab: { tabId: '', isOpen: false, isFocusTrapped: false },
+    footerBarComponents: [],
+    activeFooterBarTab: { tabId: '', isOpen: false, isFocusTrapped: false },
+    navBarComponents: [],
     activeTrapGeoView: false,
     corePackagesComponents: [],
     focusItem: { activeElementId: false, callbackElementId: false },
     hiddenTabs: ['data-table', 'time-slider', 'geochart'],
-    navBarComponents: [],
-    footerBarComponents: [],
     footerPanelResizeValue: 35,
-    footerBarIsCollapsed: false,
     selectedFooterLayerListItemId: '',
     selectedAppBarLayerListItemId: '',
 
     // initialize default stores section from config information when store receive configuration file
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
+      // App bar and footer bar state rules:
+      // - selectedTab set → open
+      // - selectedTab unset → close
+      const isAppBarOpen = !!geoviewConfig.appBar?.selectedTab;
+      const isFooterBarOpen = !!geoviewConfig.footerBar?.selectedTab;
+
       set({
         uiState: {
           ...get().uiState,
           appBarComponents: geoviewConfig.appBar?.tabs.core || [],
           activeAppBarTab: {
             tabId: geoviewConfig.appBar?.selectedTab || '',
-            isOpen: geoviewConfig.appBar?.collapsed !== undefined ? !geoviewConfig.appBar.collapsed : true,
+            isOpen: isAppBarOpen,
             isFocusTrapped: false,
           },
           footerBarComponents: geoviewConfig.footerBar?.tabs.core || [],
-          activeFooterBarTabId: geoviewConfig.footerBar?.selectedTab || '',
+          activeFooterBarTab: {
+            tabId: geoviewConfig.footerBar?.selectedTab || '',
+            isOpen: isFooterBarOpen,
+            isFocusTrapped: false,
+          },
           corePackagesComponents: geoviewConfig.corePackages || [],
           navBarComponents: geoviewConfig.navBar || [],
-          footerBarIsCollapsed: geoviewConfig.footerBar?.collapsed !== undefined ? geoviewConfig.footerBar.collapsed : true,
           selectedFooterLayerListItemId:
             geoviewConfig.footerBar?.selectedLayersLayerPath || geoviewConfig.appBar?.selectedLayersLayerPath
               ? `${get().mapId}-${geoviewConfig.footerBar?.selectedTab || geoviewConfig.appBar?.selectedTab}-${geoviewConfig.footerBar?.selectedLayersLayerPath || geoviewConfig.appBar?.selectedLayersLayerPath}`
@@ -143,9 +155,9 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         // Redirect to setter
         get().uiState.setterActions.setFooterPanelResizeValue(value);
       },
-      setFooterBarIsCollapsed: (collapsed: boolean) => {
+      setFooterBarIsOpen: (open: boolean) => {
         // Redirect to setter
-        get().uiState.setterActions.setFooterBarIsCollapsed(collapsed);
+        get().uiState.setterActions.setFooterBarIsOpen(open);
       },
       setActiveAppBarTab: (tabId: string, isOpen: boolean, isFocusTrapped: boolean) => {
         // Redirect to setter
@@ -192,7 +204,10 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         set({
           uiState: {
             ...get().uiState,
-            activeFooterBarTabId: id,
+            activeFooterBarTab: {
+              ...get().uiState.activeFooterBarTab,
+              tabId: id || '',
+            },
           },
         });
       },
@@ -220,11 +235,14 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           },
         });
       },
-      setFooterBarIsCollapsed: (collapsed: boolean) => {
+      setFooterBarIsOpen: (open: boolean) => {
         set({
           uiState: {
             ...get().uiState,
-            footerBarIsCollapsed: collapsed,
+            activeFooterBarTab: {
+              ...get().uiState.activeFooterBarTab,
+              isOpen: open,
+            },
           },
         });
       },
@@ -232,7 +250,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
         // Gv Side effect with focus trap and side panel app bar open
         // We need to check if the viewer is in keyboard navigation mode. If not, we don't apply the focus trap.
         // Focus trap has side effect when a app bar panel is open. It does not let user use their mouse
-        // to pan the map. Even scroll is difficult, user needs to click outside the brower then come back for
+        // to pan the map. Even scroll is difficult, user needs to click outside the browser then come back for
         // the mouse wheel to work
         const isFocusTrappedAndKeyboardNavigation = get().uiState.activeTrapGeoView ? isFocusTrapped : false;
         set({
@@ -271,9 +289,9 @@ type FocusItemProps = {
 // UI state selectors
 // **********************************************************
 export const useUIActiveFocusItem = (): FocusItemProps => useStore(useGeoViewStore(), (state) => state.uiState.focusItem);
-export const useUIActiveFooterBarTabId = (): string | undefined =>
-  useStore(useGeoViewStore(), (state) => state.uiState.activeFooterBarTabId);
 export const useUIActiveAppBarTab = (): ActiveAppBarTabType => useStore(useGeoViewStore(), (state) => state.uiState.activeAppBarTab);
+export const useUIActiveFooterBarTab = (): ActiveFooterBarTabType =>
+  useStore(useGeoViewStore(), (state) => state.uiState.activeFooterBarTab);
 export const useUIActiveTrapGeoView = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.activeTrapGeoView);
 export const useUIAppbarComponents = (): TypeValidAppBarCoreProps[] =>
   useStore(useGeoViewStore(), (state) => state.uiState.appBarComponents);
@@ -284,7 +302,6 @@ export const useUICorePackagesComponents = (): TypeValidMapCorePackageProps[] =>
 export const useUIFooterPanelResizeValue = (): number => useStore(useGeoViewStore(), (state) => state.uiState.footerPanelResizeValue);
 export const useUIHiddenTabs = (): string[] => useStore(useGeoViewStore(), (state) => state.uiState.hiddenTabs);
 export const useUINavbarComponents = (): TypeValidNavBarProps[] => useStore(useGeoViewStore(), (state) => state.uiState.navBarComponents);
-export const useUIFooterBarIsCollapsed = (): boolean => useStore(useGeoViewStore(), (state) => state.uiState.footerBarIsCollapsed);
 export const useUISelectedFooterLayerListItemId = (): string =>
   useStore(useGeoViewStore(), (state) => state.uiState.selectedFooterLayerListItemId);
 

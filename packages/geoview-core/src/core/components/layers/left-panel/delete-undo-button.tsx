@@ -130,14 +130,28 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   // Never hide the remove icon, so user can remove forever loading/processing layers.
   if (!inUndoState && layerRemovable && !getLayerDeleteInProgress()) {
     return (
-      <IconButton onClick={handleDeleteClick} edge="end" size="small" onKeyDown={handleDeleteKeyDown} aria-label={t('layers.deleteLayer')}>
+      <IconButton
+        onClick={handleDeleteClick}
+        className="buttonOutline"
+        edge="end"
+        size="small"
+        onKeyDown={handleDeleteKeyDown}
+        aria-label={t('layers.deleteLayer')}
+      >
         <DeleteOutlineIcon color="error" />
       </IconButton>
     );
   }
   if (!inUndoState) {
     return (
-      <IconButton aria-label={t('layers.deleteLayer')} onClick={handleDeleteClick} edge="end" size="small" disabled>
+      <IconButton
+        aria-label={t('layers.deleteLayer')}
+        onClick={handleDeleteClick}
+        className="buttonOutline"
+        edge="end"
+        size="small"
+        disabled
+      >
         <DeleteOutlineIcon color="disabled" />
       </IconButton>
     );

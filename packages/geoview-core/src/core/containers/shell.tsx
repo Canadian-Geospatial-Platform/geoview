@@ -25,7 +25,7 @@ import {
   useUIActiveFocusItem,
   useUIActiveTrapGeoView,
   useUIFooterPanelResizeValue,
-  useUIFooterBarIsCollapsed,
+  useUIActiveFooterBarTab,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import ExportModal from '@/core/components/export/export-modal';
 import DataTableModal from '@/core/components/data-table/data-table-modal';
@@ -87,7 +87,7 @@ export function Shell(props: ShellProps): JSX.Element {
   const focusItem = useUIActiveFocusItem();
   const isMapFullScreen = useAppFullscreenActive();
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
-  const isFooterBarCollapsed = useUIFooterBarIsCollapsed();
+  const { isOpen } = useUIActiveFooterBarTab();
   const geoviewElement = useAppGeoviewHTMLElement();
   const appHeight = useAppHeight();
   const footerTabContainer = geoviewElement.querySelector(`[id^="${mapId}-tabsContainer"]`) as HTMLElement;
@@ -99,7 +99,7 @@ export function Shell(props: ShellProps): JSX.Element {
   // Ref for container height
   const { mapShellContainerRef } = useMapResize({
     isMapFullScreen,
-    isFooterBarCollapsed,
+    isFooterBarOpen: isOpen,
     footerPanelResizeValue,
     isFooterBar: !!geoviewConfig?.footerBar,
     geoviewElement,

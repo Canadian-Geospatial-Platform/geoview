@@ -252,8 +252,7 @@
   "footerBar": {
     "tabs": {
       "core": ["layers", "data-table"]
-    },
-    "collapsed": true
+    }
   },
   "appBar": {
     "tabs": {

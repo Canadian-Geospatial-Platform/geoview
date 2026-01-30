@@ -5,7 +5,7 @@ import type {
   TypeValidNavBarProps,
 } from '@/api/types/map-schema-types';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import type { IUIState, ActiveAppBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import type { IUIState, ActiveAppBarTabType, ActiveFooterBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -28,8 +28,8 @@ export class UIEventProcessor extends AbstractEventProcessor {
   }
 
   // #region
-  static getActiveFooterBarTab(mapId: string): string | undefined {
-    return this.getUIStateProtected(mapId).activeFooterBarTabId;
+  static getActiveFooterBarTab(mapId: string): ActiveFooterBarTabType {
+    return this.getUIStateProtected(mapId).activeFooterBarTab;
   }
 
   static getFooterBarComponents(mapId: string): TypeValidFooterBarTabsCoreProps[] {
@@ -46,10 +46,6 @@ export class UIEventProcessor extends AbstractEventProcessor {
 
   static getCorePackageComponents(mapId: string): TypeValidMapCorePackageProps[] {
     return this.getUIStateProtected(mapId).corePackagesComponents;
-  }
-
-  static getFooterBarIsCollapsed(mapId: string): boolean {
-    return this.getUIStateProtected(mapId).footerBarIsCollapsed;
   }
   // #endregion
 
@@ -84,7 +80,7 @@ export class UIEventProcessor extends AbstractEventProcessor {
     return this.getUIStateProtected(mapId).activeAppBarTab;
   }
 
-  static setFooterBarIsCollapsed(mapId: string, collapsed: boolean): void {
-    this.getUIStateProtected(mapId).setterActions.setFooterBarIsCollapsed(collapsed);
+  static setFooterBarIsOpen(mapId: string, isOpen: boolean): void {
+    this.getUIStateProtected(mapId).setterActions.setFooterBarIsOpen(isOpen);
   }
 }
