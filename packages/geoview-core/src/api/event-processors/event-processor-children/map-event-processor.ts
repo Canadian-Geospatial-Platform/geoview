@@ -1571,7 +1571,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
           const timeDimension: TimeDimension = {
             field,
             default: values.map((value) => DateMgt.formatDateToISO(value)),
-            nearestValues: discreteValues ? 'discrete' : 'absolute',
+            nearestValues: discreteValues ? 'discrete' : 'continuous',
             displayPattern,
             rangeItems: {
               type: '',
