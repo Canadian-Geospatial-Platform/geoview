@@ -316,6 +316,10 @@ export const useTimeSliderSelectedLayerPath = (): string => useStore(useGeoViewS
 export const useTimeSliderFilters = (): Record<string, string> =>
   useStore(useGeoViewStore(), (state) => state.timeSliderState?.sliderFilters);
 
+export const useTimeSliderFiltersSelector = (layerPath: string): string | undefined => {
+  return useStore(useGeoViewStore(), (state) => state.timeSliderState?.sliderFilters[layerPath]);
+};
+
 // Store Actions
 export const useTimeSliderStoreActions = (): TimeSliderActions | undefined =>
   useStore(useGeoViewStore(), (state) => state.timeSliderState?.actions);

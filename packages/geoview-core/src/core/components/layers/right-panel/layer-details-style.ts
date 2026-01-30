@@ -78,4 +78,21 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     height: '30px',
     backgroundColor: theme.palette.geoViewColor.bgColor.dark[300],
   },
+  layerMoreInfoFilters: {
+    listStyleType: 'disc',
+    listStylePosition: 'outside',
+    paddingLeft: '20px',
+  },
+  layerMoreInfoFiltersItem: {
+    display: 'list-item',
+    paddingTop: '0px',
+    paddingBottom: '0px',
+    paddingLeft: '0px',
+    '& .MuiListItemText-root': {
+      margin: 0,
+      '& .MuiTypography-root': {
+        whiteSpace: 'normal',
+      },
+    },
+  },
 });

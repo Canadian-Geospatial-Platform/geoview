@@ -340,16 +340,6 @@ export class WMS extends AbstractGeoViewRaster {
     // Create the source
     const olSource = new ImageWMS(sourceOptions);
 
-    // Apply the filter on the source right away, before the first load
-    GVWMS.applyViewFilterOnSource(
-      layerConfig,
-      olSource,
-      layerConfig.getLayerStyle(),
-      layerConfig.getExternalFragmentsOrder(),
-      undefined,
-      layerConfig.getLayerFilter()
-    );
-
     // Return the source
     return olSource;
   }

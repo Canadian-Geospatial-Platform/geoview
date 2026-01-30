@@ -20,6 +20,7 @@ import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values
 import { Projection } from '@/geo/utils/projection';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
+import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 
 /**
  * Manages an Esri Image layer.
@@ -180,37 +181,20 @@ export class GVEsriImage extends AbstractGVRaster {
     return metadataExtent;
   }
 
+  /**
+   * Overrides the way a WMS layer applies a view filter. It does so by updating the source TIME parameters.
+   * @param {LayerFilters} [filter] - An optional filter to be used in place of the getViewFilter value.
+   */
+  protected override onSetLayerFilters(filter?: LayerFilters): void {
+    // Process the layer filtering using the static method shared between EsriImage and WMS
+    GVWMS.applyViewFilterOnSource(this.getLayerConfig(), this.getOLSource(), this.getLayerConfig().getExternalFragmentsOrder(), filter);
+  }
+
   // #endregion OVERRIDES
 
   // #region METHODS
 
-  /**
-   * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter parameter is used alone to display
-   * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
-   * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
-   * is done.
-   * @param {string} filter - An optional filter to be used in place of the getViewFilter value.
-   */
-  applyViewFilter(filter: string | undefined = ''): void {
-    // Log
-    logger.logTraceCore('GV-ESRI-IMAGE - applyViewFilter', this.getLayerPath());
-
-    // Process the layer filtering using the static method shared between EsriImage and WMS
-    GVWMS.applyViewFilterOnSource(
-      this.getLayerConfig(),
-      this.getOLSource(),
-      undefined,
-      this.getLayerConfig().getExternalFragmentsOrder(),
-      this,
-      filter,
-      (filterToUse: string) => {
-        // Emit event
-        this.emitLayerFilterApplied({
-          filter: filterToUse,
-        });
-      }
-    );
-  }
+  // WRITE FUNCTIONS HERE..
 
   // #endregion METHODS
 }

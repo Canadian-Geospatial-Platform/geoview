@@ -1,4 +1,4 @@
-import { and, or, not, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo, equalTo, between } from 'ol/format/filter';
+import { and, or, not, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo, equalTo, between, like } from 'ol/format/filter';
 import type Filter from 'ol/format/filter/Filter';
 import { writeFilter } from 'ol/format/WFS';
 
@@ -1287,39 +1287,24 @@ export abstract class WfsRenderer {
    * Only the inner children of the `<Filter>` element are returned; you can wrap them
    * in `<ogc:Filter>` as needed for a full WFS request.
    * @param {string} filterStr - The SQL-like filter expression to convert.
-   * @param {string} version - The WFS version to target (only '1.0.0', '1.1.0', '2.0.0' supported; defaults to '2.0.0').
-   * @param {string | undefined} fieldNameForNegativeQueries - The field name to use in "always false" filters (required when filterStr is `1=0` or `false`).
+   * @param {string} version - The WFS version to target (only '1.0.0', '1.1.0', '2.0.0' supported; defaults to '1.1.0').
+   * @param {string} fieldNameForNegativeQueries - The field name to use in "always false" filters (cases of 1=0 and such).
    * @returns {string} An XML string representing the inner contents of an OGC `<Filter>` element.
    *                   This can be directly used inside a WFS GetFeature request's `<Filter>` element.
    * @static
    */
-  static sqlToOlWfsFilterXml(filterStr: string, version: string, fieldNameForNegativeQueries: string | undefined): string {
+  static sqlToOlFilterXml(filterStr: string, version: string, fieldNameForNegativeQueries: string): string {
     // Trim the filter
     const filterStrTrimmed = filterStr.trim();
-
-    // Patterns meaning no features
-    const alwaysFalse =
-      filterStrTrimmed === '1=0' || filterStrTrimmed === '(1=0)' || filterStrTrimmed === 'false' || filterStrTrimmed === '(false)';
-
-    // If we just wanted always false clause
-    if (alwaysFalse) {
-      // Return a valid OGC "false" equivalent
-      return `
-        <ogc:PropertyIsEqualTo>
-          <ogc:PropertyName>${fieldNameForNegativeQueries}</ogc:PropertyName>
-          <ogc:Literal>__NO__MATCH__</ogc:Literal>
-        </ogc:PropertyIsEqualTo>
-    `.trim();
-    }
 
     // Parse the SQL-like filter expression
     const ast = this.#sqlToOlWfsFilterXmlParse(filterStrTrimmed);
 
     // Convert into filter object
-    const olFilter = this.#astToOlFilter(ast);
+    const olFilter = this.#astToOlFilter(ast, fieldNameForNegativeQueries);
 
-    // Make sure the version we want is supported by OpenLayers which only support 1.0.0, 1.1.0 and 2.0.0, default to 2.0.0
-    const sanitizedVersion = ['1.0.0', '1.1.0', '2.0.0'].includes(version) ? version : '2.0.0';
+    // Make sure the version we want is supported by OpenLayers which only support 1.0.0, 1.1.0 and 2.0.0, default to 1.1.0
+    const sanitizedVersion = ['1.0.0', '1.1.0', '2.0.0'].includes(version) ? version : '1.1.0';
 
     // Create the filter in XML format
     const filterNode = writeFilter(olFilter, sanitizedVersion);
@@ -1329,8 +1314,34 @@ export abstract class WfsRenderer {
       .map((child) => new XMLSerializer().serializeToString(child))
       .join('');
 
+    // Redecode in case we had improper literals, we had to do this to support earthquakes layer and the '>=6' class render
+    const childrenXmlDecoded = this.#unescapeComparisonOperatorsInLiterals(childrenXml);
+
     // Return it
-    return childrenXml;
+    return childrenXmlDecoded;
+  }
+
+  /**
+   * Unescapes comparison operators inside OGC <Literal> elements.
+   * XMLSerializer always escapes ">" and "<" characters in text nodes
+   * (producing "&gt;" and "&lt;"). While this is correct XML behavior,
+   * some WMS / OGC servers (e.g. QGIS WMS) expect raw comparison operators
+   * such as ">=6" to appear directly inside <Literal> values.
+   * This function post-processes the serialized XML string and converts
+   * "&gt;" and "&lt;" back to their literal characters, but **only**
+   * within <Literal> elements, leaving the rest of the XML untouched.
+   * @param {string} xml - Serialized OGC Filter XML.
+   * @returns {string} The XML string with comparison operators unescaped
+   *                   inside <Literal> elements.
+   * @private
+   * @static
+   */
+  static #unescapeComparisonOperatorsInLiterals(xml: string): string {
+    return xml.replace(/<Literal>([\s\S]*?)<\/Literal>/g, (match, literalContent) => {
+      const fixed = literalContent.replace(/&gt;/g, '>').replace(/&lt;/g, '<');
+
+      return `<Literal>${fixed}</Literal>`;
+    });
   }
 
   /**
@@ -1432,21 +1443,41 @@ export abstract class WfsRenderer {
       return { type: 'in', property: prop, values: vals };
     }
 
+    // LIKE operator
+    const likeRegex = /^\s*("?)([A-Za-z0-9_.]+)\1\s+like\s+'([^']+)'\s*$/i;
+    const mLike = sqlString.match(likeRegex);
+    if (mLike) {
+      return {
+        type: 'like',
+        property: mLike[2],
+        pattern: mLike[3], // e.g. "%a%"
+      };
+    }
+
     // BETWEEN
-    const betweenRegex = /^\s*("?)([A-Za-z0-9_.]+)\1\s+between\s+'([^']+)'\s+and\s+'([^']+)'\s*$/i;
+    const numberPattern = '[-+]?(?:\\d+\\.?\\d*|\\.\\d+)(?:[eE][-+]?\\d+)?';
+    const betweenRegex = new RegExp(
+      `^\\s*("?)([A-Za-z0-9_.]+)\\1\\s+between\\s+` +
+        `(?:'([^']+)'|(${numberPattern}))\\s+and\\s+` +
+        `(?:'([^']+)'|(${numberPattern}))\\s*$`,
+      'i'
+    );
     const mBetween = sqlString.match(betweenRegex);
     if (mBetween) {
+      const lit1 = mBetween[3] ?? mBetween[4];
+      const lit2 = mBetween[5] ?? mBetween[6];
+
       return {
         type: 'cmp',
         op: 'between',
         property: mBetween[2],
-        literal1: mBetween[3],
-        literal2: mBetween[4],
+        literal1: isNumeric(lit1) ? Number(lit1) : lit1,
+        literal2: isNumeric(lit2) ? Number(lit2) : lit2,
       };
     }
 
     // Comparisons (>, <, =, etc.)
-    const cmpRegex = /^\s*("?)([A-Za-z0-9_.]+)\1\s*(<=|>=|<|>|=)\s*(?:'(.*?)'|([0-9]+))\s*$/;
+    const cmpRegex = /^\s*("?)([A-Za-z0-9_.]+)\1\s*(<=|>=|<|>|=)\s*(?:'(.*?)'|([0-9]+(?:\.[0-9]+)?))\s*$/;
     const m = sqlString.match(cmpRegex);
     if (!m) {
       throw new Error('Cannot parse filter: ' + sqlString);
@@ -1480,6 +1511,9 @@ export abstract class WfsRenderer {
    * • **in** — SQL `IN` list:
    *    Produces an OR of multiple `equalTo()` filters:
    *    `property IN (a, b, c)` → `or(equalTo(a), equalTo(b), equalTo(c))`
+   * • **like** — SQL `LIKE` list:
+   *    Produces a LIKE operation for strings:
+   *    `property IN (a, b, c)` → `or(equalTo(a), equalTo(b), equalTo(c))`
    * • **and** — Logical AND:
    *    Recursively maps children to `and(left, right)`
    * • **or** — Logical OR:
@@ -1497,10 +1531,17 @@ export abstract class WfsRenderer {
    * @private
    * @static
    */
-  static #astToOlFilter(node: AST): Filter {
+  static #astToOlFilter(node: AST, fieldNameForNegativeQueries: string): Filter {
     switch (node.type) {
       case 'cmp': {
         const { property, op, literal1, literal2 } = node;
+
+        // GV Special case when we send 1=0 it means we want a 'no match'
+        if (property === '1' && op === '=' && literal1 === 0) {
+          // Always false
+          return equalTo(fieldNameForNegativeQueries, '__NO__MATCH__');
+        }
+
         switch (op) {
           case '>':
             return greaterThan(property, Number(literal1));
@@ -1526,20 +1567,32 @@ export abstract class WfsRenderer {
           const val = isNumeric(v) ? Number(v) : v;
           return equalTo(property, val);
         });
+
+        // OGC Or requires at least 2 operands
+        if (equals.length === 1) {
+          return equals[0];
+        }
+
+        // More than 1 operand, use the 'or' indeed
         return or(...equals);
       }
+      case 'like': {
+        const { property, pattern } = node;
+        const ogcPattern = pattern.replace(/%/g, '*').replace(/_/g, '?');
+        return like(property, ogcPattern, '*', '?', '\\', false);
+      }
       case 'and': {
-        const left = this.#astToOlFilter(node.left);
-        const right = this.#astToOlFilter(node.right);
+        const left = this.#astToOlFilter(node.left, fieldNameForNegativeQueries);
+        const right = this.#astToOlFilter(node.right, fieldNameForNegativeQueries);
         return and(left, right);
       }
       case 'or': {
-        const left = this.#astToOlFilter(node.left);
-        const right = this.#astToOlFilter(node.right);
+        const left = this.#astToOlFilter(node.left, fieldNameForNegativeQueries);
+        const right = this.#astToOlFilter(node.right, fieldNameForNegativeQueries);
         return or(left, right);
       }
       case 'not': {
-        const inner = this.#astToOlFilter(node.inner);
+        const inner = this.#astToOlFilter(node.inner, fieldNameForNegativeQueries);
         return not(inner);
       }
       default:
@@ -1563,30 +1616,67 @@ export abstract class WfsRenderer {
 
     // If only one is present, wrap in <ogc:Filter>
     if (spatialFilter && !attributeFilter) {
-      return `
-      <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">
-        ${spatialFilter}
-      </ogc:Filter>
-    `.trim();
+      return spatialFilter;
     }
 
     if (!spatialFilter && attributeFilter) {
-      return `
-      <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">
-        ${attributeFilter}
-      </ogc:Filter>
-    `.trim();
+      return attributeFilter;
     }
 
     // Combine both under <And>
     return `
-    <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">
       <ogc:And>
         ${attributeFilter}
         ${spatialFilter}
       </ogc:And>
-    </ogc:Filter>
   `.trim();
+  }
+
+  /**
+   * Wraps the ogc/fes filter with the appropriate XML node, based on if the service is WMS or WFS and the version of the service.
+   *
+   * WMS
+   * └── FE 1.1
+   *     └── ogc:Filter only
+   * WFS ≤ 1.1
+   * └── FE 1.1
+   *     └── ogc:Filter
+   * WFS 2.0
+   * └── FES 2.0
+   *     └── fes:Filter
+   * @param ogcFilterToWrap
+   * @param wmsOrWfs
+   * @param version
+   * @returns
+   */
+  static wrapOGCFilter(ogcFilterToWrap: string | undefined, wmsOrWfs: 'wms' | 'wfs', version: string): string | undefined {
+    // If nothing to wrap
+    if (!ogcFilterToWrap) return undefined;
+
+    // WMS only supports ogc:Filter
+    if (wmsOrWfs === 'wms') {
+      return `
+        <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">
+          ${ogcFilterToWrap}
+        </ogc:Filter>
+        `.trim();
+    }
+
+    // If the version is 1.3.0 or 2.0.0, use FES 2.0 filter
+    switch (version) {
+      case '2.0.0':
+        return `
+        <fes:Filter xmlns:fes="http://www.opengis.net/fes/2.0" xmlns:gml="http://www.opengis.net/gml">
+          ${ogcFilterToWrap}
+        </fes:Filter>
+        `.trim();
+      default:
+        return `
+        <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml">
+          ${ogcFilterToWrap}
+        </ogc:Filter>
+        `.trim();
+    }
   }
 
   // #endregion
@@ -1609,7 +1699,7 @@ type FilterInfo = {
   valuesConditions?: TypeLayerStyleValueCondition[];
 };
 
-type AST = ComparisonNode | LogicalNode | NotNode | InNode;
+type AST = ComparisonNode | LogicalNode | NotNode | InNode | LikeNode;
 
 interface ComparisonNode {
   type: 'cmp';
@@ -1617,6 +1707,12 @@ interface ComparisonNode {
   op: '>' | '>=' | '<' | '<=' | '=' | 'between';
   literal1: string | number;
   literal2?: string | number;
+}
+
+interface LikeNode {
+  type: 'like';
+  property: string;
+  pattern: string;
 }
 
 interface LogicalNode {

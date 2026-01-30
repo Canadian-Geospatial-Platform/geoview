@@ -38,6 +38,7 @@ import { CancelledError, ResponseEmptyError, PromiseRejectErrorWrapper, formatEr
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
+import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 
 // Constant used to define the default layer names
 const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
@@ -222,15 +223,28 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Overridable method to process a layer entry and return a Promise of an Open Layer Base Layer object.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
-   * @returns {Promise<BaseLayer>} The Open Layer Base Layer that has been created.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - Information needed to create the GeoView layer.
+   * @returns {Promise<AbstractGVLayer>} The Geoview Layer that has been created.
    */
-  protected onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseGVLayer> {
+  protected onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractGVLayer> {
     // Redirect
     const layer = this.createGVLayer(layerConfig);
 
+    // Initialize the GV Layer
+    this.initGVLayer(layer);
+
     // Return the layer
     return Promise.resolve(layer);
+  }
+
+  /**
+   * Overridable function to perform additional initialization on the created GV Layer.
+   * @param {AbstractGVLayer} layer - The GV layer to initialize
+   * @returns {void}
+   */
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
+  protected onInitGVLayer(layer: AbstractGVLayer): void {
+    // Override this function to do something...
   }
 
   // #endregion OVERRIDES
@@ -530,6 +544,22 @@ export abstract class AbstractGeoViewLayer {
 
     // Return it
     return layer;
+  }
+
+  /**
+   * Initializes the GV Layer.
+   * @param {AbstractGVLayer} layer - The layer to initialize.
+   * @returns {void}
+   */
+  initGVLayer(layer: AbstractGVLayer): void {
+    // Get the layer config
+    const layerConfig = layer.getLayerConfig();
+
+    // Set the layer filters right away for the initial view
+    layer.setLayerFilters(new LayerFilters(layerConfig.getLayerFilter(), layer.getFilterFromStyle()), false);
+
+    // Redirect
+    this.onInitGVLayer(layer);
   }
 
   /**
@@ -956,11 +986,11 @@ export abstract class AbstractGeoViewLayer {
   /**
    * Processes a layer entry and returns a Promise of an Open Layer Base Layer object.
    * This method sets the 'loading' status on the layer config and then calls the overridable method 'onProcessOneLayerEntry'.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
-   * @returns {Promise<BaseLayer>} The Open Layer Base Layer that has been created.
+   * @param {AbstractBaseLayerEntryConfig} layerConfig - Information needed to create the GeoView layer.
+   * @returns {Promise<AbstractGVLayer>} The Geoview Layer that has been created.
    * @private
    */
-  #processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseGVLayer> {
+  #processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractGVLayer> {
     // Process
     return this.onProcessOneLayerEntry(layerConfig);
   }

@@ -1284,11 +1284,11 @@ export class LayerApi {
    * @param {string} layerPath - The layer path of the layer to change.
    * @param {TypeLegendItem} item - The item to change.
    * @param {boolean} visibility - The visibility to set.
-   * @param {boolean} updateLegendLayers - Should legend layers be updated (here to avoid repeated rerendering when setting all items in layer).
+   * @param {boolean} [refresh=true] - When true, the ui will immediately try to refresh and apply the view filter on the layer. Use 'false' to process things in batch. Default: true
    * @throws {LayerWrongTypeError} When the layer is of the wrong type (a group layer).
    */
-  setItemVisibility(layerPath: string, item: TypeLegendItem, visibility: boolean, updateLegendLayers: boolean = true): void {
-    // Get registered layer config
+  setItemVisibility(layerPath: string, item: TypeLegendItem, visibility: boolean, refresh: boolean = true): void {
+    // Get registered layer
     const layer = this.getGeoviewLayer(layerPath);
 
     // Check if wrong type
@@ -1299,11 +1299,12 @@ export class LayerApi {
 
     // TODO: REFACTOR - This current function should probably end here and the setting of the store happen in an event hook on the
     // TO.DOCONT: style item visibility. Refer to pattern of setLayerName, setLayerOpacity, setLayerQueryable, etc
-    // Update the legend layers if necessary
-    if (updateLegendLayers) LegendEventProcessor.setItemVisibility(this.getMapId(), layerPath, item, visibility);
-
     // Apply filter to layer
-    MapEventProcessor.applyLayerFilters(this.getMapId(), layerPath);
+    if (refresh) MapEventProcessor.applyLayerFilters(this.getMapId(), layerPath);
+
+    // Update the legend layers if necessary
+    if (refresh)
+      LegendEventProcessor.setItemVisibility(this.getMapId(), layerPath, item, visibility, layer.getLayerFilters().getClassFilter());
 
     // Emit event
     this.#emitLayerItemVisibilityToggled({ layerPath, itemName: item.name, visibility });

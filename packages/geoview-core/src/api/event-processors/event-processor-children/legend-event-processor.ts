@@ -1,4 +1,4 @@
-import type { Extent, TypeLayerStyleSettings, TypeFeatureInfoEntry, TypeStyleGeometry } from '@/api/types/map-schema-types';
+import type { Extent, TypeStyleGeometry } from '@/api/types/map-schema-types';
 import type { TimeDimension } from '@/core/utils/date-mgt';
 import type { TypeGeoviewLayerType, TypeLayerControls } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
@@ -127,24 +127,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         this.getLayerState(mapId).setterActions.setLegendLayers(layers);
       }
     }
-  }
-
-  /**
-   * Retrieves the default filter configuration for a specific layer entry.
-   *
-   * @param {string} mapId - The unique identifier of the map instance.
-   * @param {string} layerPath - The path to the layer in the map configuration.
-   * @returns {string | undefined} - The default filter for the layer entry, or `undefined` if not available.
-   *
-   * @description
-   * This method fetches the layer entry configuration for the specified layer path and checks if it contains a `layerFilter` property.
-   * If the property exists, its value is returned; otherwise, `undefined` is returned.
-   */
-  static getLayerEntryConfigDefaultFilter(mapId: string, layerPath: string): string | undefined {
-    const entryConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfigIfExists(layerPath);
-
-    // Check if entryConfig exists and has layerFilter property
-    return entryConfig && 'layerFilter' in entryConfig ? (entryConfig.layerFilter as string) : undefined;
   }
 
   /**
@@ -315,6 +297,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     return undefined;
   }
 
+  /**
+   * Gets the legend icon images for a given layer legend
+   * @param {TypeLegend | null | undefined} layerLegend - The legend of the layer
+   * @returns {TypeLegendLayerItem[] | undefined} The legend icon images details
+   */
   static getLayerIconImage(layerLegend: TypeLegend | null | undefined): TypeLegendLayerItem[] | undefined {
     // TODO: Refactor - Move this function to a utility class instead of at the 'processor' level so it's safer to call from a layer framework level class
     const iconDetails: TypeLegendLayerItem[] = [];
@@ -512,6 +499,13 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           url: layerConfig.getMetadataAccessPath(),
         };
 
+        // If layer is regular (not group)
+        if (layer instanceof AbstractGVLayer) {
+          // Store the layer filter
+          legendLayerEntry.layerFilter = layer.getLayerFilters().getInitialFilter();
+          legendLayerEntry.layerFilterClass = layer.getLayerFilters().getClassFilter();
+        }
+
         // Add the icons as items on the layer entry
         legendLayerEntry.icons.forEach((legendLayerItem) => {
           if (legendLayerItem.iconList)
@@ -703,8 +697,15 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The ID of the map.
    * @param {TypeLegendItem} item - The item to change.
    * @param {boolean} visibility - The new visibility.
+   * @param {string | undefined} classFilter - The new class filter.
    */
-  static setItemVisibility(mapId: string, layerPath: string, item: TypeLegendItem, visibility: boolean = true): void {
+  static setItemVisibility(
+    mapId: string,
+    layerPath: string,
+    item: TypeLegendItem,
+    visibility: boolean,
+    classFilter: string | undefined
+  ): void {
     // Get current layer legends
     const curLayers = this.getLayerState(mapId).legendLayers;
 
@@ -721,6 +722,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
       // Shadow-copy this specific array so that the hooks are triggered for this items array and this one only
       layer.items = [...layer.items];
+      layer.layerFilterClass = classFilter;
     }
 
     // Set updated legend layers
@@ -734,7 +736,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {TypeLegendItem} item - The item to change.
    */
   static toggleItemVisibility(mapId: string, layerPath: string, item: TypeLegendItem): void {
-    MapEventProcessor.getMapViewerLayerAPI(mapId).setItemVisibility(layerPath, item, !item.isVisible);
+    MapEventProcessor.getMapViewerLayerAPI(mapId).setItemVisibility(layerPath, item, !item.isVisible, true);
   }
 
   /**
@@ -764,6 +766,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       // Shadow-copy this specific array so that the hooks are triggered for this items array and this one only
       layer.items = [...layer.items];
     }
+
+    // Now that it's done, apply the layer visibility
+    MapEventProcessor.applyLayerFilters(mapId, layerPath);
 
     // Set updated legend layers
     this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);
@@ -823,183 +828,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   static setLayerOpacity(mapId: string, layerPath: string, opacity: number, updateLegendLayers?: boolean): void {
     // Redirect
     MapEventProcessor.getMapViewerLayerAPI(mapId).setLayerOpacity(layerPath, opacity, updateLegendLayers);
-  }
-
-  /**
-   * Filters features based on their visibility settings defined in the layer's unique value or class break style configuration.
-   *
-   * @param {string} mapId - The unique identifier of the map instance
-   * @param {string} layerPath - The path to the layer in the map configuration
-   * @param {TypeFeatureInfoEntry[]} features - Array of features to filter
-   *
-   * @returns {TypeFeatureInfoEntry[]} Filtered array of features based on their visibility settings
-   *
-   * @description
-   * This function processes features based on the layer's unique value style configuration:
-   * - If the layer doesn't use unique value or class break styling, returns all features unchanged
-   * - Features matching visible styles are included
-   * - Features matching invisible styles are excluded
-   * - Features with no matching style follow the defaultVisible setting
-   * @static
-   */
-  static processClassVisibility(mapId: string, layerPath: string, features: TypeFeatureInfoEntry[]): TypeFeatureInfoEntry[] {
-    // Get the layer config and geometry type
-    const layerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfigRegular(layerPath);
-
-    // Get the layer style settings
-    const layerStyleSettings = layerConfig.getLayerStyleSettings();
-
-    // If has geometry field
-    let filteredFeatures = features;
-    if (layerStyleSettings) {
-      if (layerStyleSettings.type === 'uniqueValue') {
-        filteredFeatures = this.#processClassVisibilityUniqueValue(layerStyleSettings, features);
-      } else if (layerStyleSettings.type === 'classBreaks') {
-        filteredFeatures = this.#processClassVisibilityClassBreak(layerStyleSettings, features);
-      }
-    }
-
-    // Return the filtered features
-    return filteredFeatures;
-  }
-
-  /**
-   * Processes features based on unique value style configuration to determine their visibility.
-   *
-   * @param {TypeUniqueValueStyleConfig} uniqueValueStyle - The unique value style configuration
-   * @param {TypeFeatureInfoEntry[]} features - Array of features to process
-   * @returns {TypeFeatureInfoEntry[]} Filtered array of features based on visibility rules
-   *
-   * @description
-   * This function filters features based on their field values and the unique value style configuration:
-   * - Creates sets of visible and invisible values for efficient lookup
-   * - Combines multiple field values using semicolon separator
-   * - Determines feature visibility based on:
-   *   - Explicit visibility rules in the style configuration
-   *   - Default visibility for values not matching any style rule
-   *
-   * @static
-   * @private
-   */
-  static #processClassVisibilityUniqueValue(
-    uniqueValueStyle: TypeLayerStyleSettings,
-    features: TypeFeatureInfoEntry[]
-  ): TypeFeatureInfoEntry[] {
-    const styleUnique = uniqueValueStyle.info;
-
-    // Create sets for visible and invisible values for faster lookup
-    const visibleValues = new Set(styleUnique.filter((style) => style.visible).map((style) => style.values.join(';')));
-    const unvisibleValues = new Set(styleUnique.filter((style) => !style.visible).map((style) => style.values.join(';')));
-
-    // TODO: COMMENTED CODE - This seems to be unnecessary now, commenting it for testing (2025-11-24)
-    // // GV: Some esri layer has uniqueValue renderer but there is no field define in their metadata (i.e. e2424b6c-db0c-4996-9bc0-2ca2e6714d71).
-    // // TODO: The fields contain undefined, it should be empty. Check in new config api
-    // // TODO: This is a workaround
-    // if (uniqueValueStyle.fields[0] === undefined) uniqueValueStyle.fields.pop();
-
-    // Filter features based on visibility
-    return features.filter((feature) => {
-      const fieldValues = uniqueValueStyle.fields.map((field) => feature.fieldInfo[field]?.value).join(';');
-
-      return (
-        visibleValues.has(fieldValues.toString()) ||
-        (uniqueValueStyle.info[uniqueValueStyle.info.length - 1].visible && !unvisibleValues.has(fieldValues.toString()))
-      );
-    });
-  }
-
-  /**
-   * Processes features based on class break style configuration to determine their visibility.
-   *
-   * @private
-   *
-   * @param {TypeClassBreakStyleConfig} classBreakStyle - The class break style configuration
-   * @param {TypeFeatureInfoEntry[]} features - Array of features to process
-   * @returns {TypeFeatureInfoEntry[]} Filtered array of features based on class break visibility rules
-   *
-   * @description
-   * This function filters features based on numeric values falling within defined class breaks:
-   * - Sorts class breaks by minimum value for efficient binary search
-   * - Creates optimized lookup structure for break points
-   * - Uses binary search to find the appropriate class break for each feature
-   * - Determines feature visibility based on:
-   *   - Whether the feature's value falls within a class break range
-   *   - The visibility setting of the matching class break
-   *   - Default visibility for values not matching any class break
-   *
-   * @static
-   * @private
-   */
-  static #processClassVisibilityClassBreak(
-    classBreakStyle: TypeLayerStyleSettings,
-    features: TypeFeatureInfoEntry[]
-  ): TypeFeatureInfoEntry[] {
-    const classBreaks = classBreakStyle.info;
-
-    // Sort class breaks by minValue for binary search
-    // GV: Values can be number, date, string, null or undefined. Should it be only Date or Number
-    // GV: undefined or null should not be allowed in class break style
-    const sortedBreaks = [...classBreaks].sort((a, b) => (a.values[0] as number) - (b.values[0] as number));
-
-    // Create an optimized lookup structure
-    interface ClassBreakPoint {
-      minValue: number;
-      maxValue: number;
-      visible: boolean;
-    }
-    const breakPoints = sortedBreaks.map(
-      (brk): ClassBreakPoint => ({
-        minValue: brk.values[0] as number,
-        maxValue: brk.values[1] as number,
-        visible: brk.visible,
-      })
-    );
-
-    // Binary search function to find the appropriate class break
-    const findClassBreak = (value: number): ClassBreakPoint | null => {
-      let left = 0;
-      let right = breakPoints.length - 1;
-
-      // Binary search through sorted break points to find matching class break
-      while (left <= right) {
-        // Calculate middle index to divide search space
-        const mid = Math.floor((left + right) / 2);
-        const breakPoint = breakPoints[mid];
-
-        // Check if value falls within current break point's range
-        if (value >= breakPoint.minValue && value <= breakPoint.maxValue) {
-          // Found matching break point, return it
-          return breakPoint;
-        }
-
-        // If value is less than current break point's minimum,
-        // search in lower half of remaining range
-        if (value < breakPoint.minValue) {
-          right = mid - 1;
-        } else {
-          // If value is greater than current break point's maximum,
-          // search in upper half of remaining range
-          left = mid + 1;
-        }
-      }
-
-      return null;
-    };
-
-    // Filter features using binary search
-    return features.filter((feature) => {
-      const val = feature.fieldInfo[String(classBreakStyle.fields[0])]?.value;
-      // eslint-disable-next-line eqeqeq
-      const fieldValue = val != null ? parseFloat(String(val)) : 0;
-
-      // eslint-disable-next-line no-restricted-globals
-      if (isNaN(fieldValue)) {
-        return classBreakStyle.info[classBreakStyle.info.length - 1].visible;
-      }
-
-      const matchingBreak = findClassBreak(fieldValue);
-      return matchingBreak ? matchingBreak.visible : classBreakStyle.info[classBreakStyle.info.length - 1].visible;
-    });
   }
 
   /**

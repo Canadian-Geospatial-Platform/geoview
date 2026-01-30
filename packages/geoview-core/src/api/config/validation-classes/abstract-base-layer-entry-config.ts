@@ -16,7 +16,6 @@ import type {
 import type { ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { TimeDimension } from '@/core/utils/date-mgt';
-import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { LayerDataAccessPathMandatoryError } from '@/core/exceptions/layer-exceptions';
 import { NoPrimaryKeyFieldError } from '@/core/exceptions/geoview-exceptions';
 import { GeoUtilities } from '@/geo/utils/utilities';
@@ -67,14 +66,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
 
   /** Filter to apply on feature of this layer. */
   #layerFilter?: string;
-
-  /** The calculated filter equation */
-  #filterEquation?: FilterNodeType[];
-
-  /** Indicates if filter is on/off
-   * @deprecated This attribute doesn't seem to be used (it's always false and doesn't change)
-   */
-  #legendFilterIsOff: boolean = false;
 
   /**
    * The class constructor.
@@ -229,6 +220,7 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
   /**
    * The first TypeStyleSetting associated with the TypeStyleGeometry associated with the style as could be read from the layer config metadata.
    * @returns {TypeStyleSettings[]} The array of TypeStyleSettings
+   * @deprecated This function should be deleted, because it can introduce issues when multiple geometry types are set on a layer style. See GeoJSON - Multi template to reproduce the issue.
    */
   getLayerStyleSettings(): TypeLayerStyleSettings | undefined {
     // Get the layer style
@@ -313,39 +305,6 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
    */
   getLayerFilter(): string | undefined {
     return this.#layerFilter;
-  }
-
-  /**
-   * Sets the layer filter for the layer.
-   * @param {string} layerFilter - The layer filter
-   */
-  setLayerFilter(layerFilter: string): void {
-    this.#layerFilter = layerFilter;
-  }
-
-  /**
-   * Gets the layer filter equation
-   * @returns {FilterNodeType[] | undefined} The filter equation if any
-   */
-  getFilterEquation(): FilterNodeType[] | undefined {
-    return this.#filterEquation;
-  }
-
-  /**
-   * Sets the layer filter equation
-   * @param {FilterNodeType[]?} filterEquation - The layer filter equation
-   */
-  setFilterEquation(filterEquation: FilterNodeType[] | undefined): void {
-    this.#filterEquation = filterEquation;
-  }
-
-  /**
-   * Gets the layer legend filter is off flag
-   * @returns {boolean} The legend filter is off flag
-   * @deprecated This getter doesn't seem to be used as its corresponding attribute is always false and there's no setters
-   */
-  getLegendFilterIsOff(): boolean {
-    return this.#legendFilterIsOff;
   }
 
   /**
