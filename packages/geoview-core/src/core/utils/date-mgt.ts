@@ -86,7 +86,7 @@ export type TimeDimension = {
   default: string[];
   unitSymbol?: string;
   rangeItems: RangeItems;
-  nearestValues: 'discrete' | 'absolute';
+  nearestValues: 'discrete' | 'continuous';
   singleHandle: boolean;
   displayPattern: [DatePrecision | undefined, TimePrecision | undefined];
   isValid: boolean;
@@ -376,7 +376,7 @@ export abstract class DateMgt {
         : [rangeItems.range[0], rangeItems.range[rangeItems.range.length - 1]],
       unitSymbol: '',
       rangeItems,
-      nearestValues: startTimeField === '' ? 'absolute' : 'discrete',
+      nearestValues: startTimeField === '' ? 'continuous' : 'discrete',
       singleHandle,
       displayPattern: DateMgt.guessDisplayPattern(rangeItems.range),
       isValid: rangeItems.range.length >= 1 && rangeItems.range[0] !== rangeItems.range[rangeItems.range.length - 1],
@@ -398,7 +398,7 @@ export abstract class DateMgt {
       default: [dimensionObject.default || rangeItems.range[0]],
       unitSymbol: dimensionObject.unitSymbol || '',
       rangeItems,
-      nearestValues: dimensionObject.nearestValues !== false ? 'absolute' : 'discrete',
+      nearestValues: dimensionObject.nearestValues === false ? 'continuous' : 'discrete',
       singleHandle: true,
       displayPattern: DateMgt.guessDisplayPattern(rangeItems.range),
       isValid: rangeItems.range.length >= 1 && rangeItems.range[0] !== rangeItems.range[rangeItems.range.length - 1],

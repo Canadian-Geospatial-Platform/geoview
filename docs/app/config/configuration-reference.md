@@ -2281,10 +2281,16 @@ interface SliderConfig {
   timeDimension?: {
     field?: string;
     default?: Array<string>;
+    nearestValues?: 'discrete' | 'continuous';
+    singleHandle?: boolean;
     displayPattern?: Array<{
       datePrecision?: "" | "year" | "month" | "day";
       timePrecision?: "" | "hour" | "minute" | "second";
     }>;
+    rangeItems?: {
+      type?: string;
+      range: Array<string>;
+    };
   };
 }
 ```
@@ -2299,7 +2305,31 @@ interface SliderConfig {
 - **filtering**: Enable/disable filtering (default: true)
 - **locked**: Lock slider handles (default: false)
 - **reversed**: Reverse animation direction (default: false)
-- **timeDimension**: OGC time dimension configuration
+- **timeDimension**: Temporal dimension configuration
+  - **field**: Field name for temporal filtering
+  - **default**: Default date value(s) to display
+  - **nearestValues**: Slider behavior mode
+    - `'discrete'` - Slider snaps only to values in the range array (default)
+    - `'continuous'` - Slider allows any value between min/max, uses step for filtering
+  - **singleHandle**: Use single handle (true) or range handles (false)
+  - **displayPattern**: Date/time display format configuration
+  - **rangeItems**: Temporal range definition
+    - **type**: Range type ('discrete', 'relative', or 'continuous')
+    - **range**: Array of date strings defining available time points
+
+#### Temporal Modes
+
+**Discrete Mode** (`nearestValues: 'discrete'`):
+- Slider handle snaps only to values defined in the `range` array
+- Best for data with distinct time points (e.g., yearly data, specific dates)
+- Step selector is hidden (not applicable)
+- Filter uses exact range values: `Year >= '2015-01-01' AND Year < '2016-01-01'`
+
+**Continuous Mode** (`nearestValues: 'continuous'`):
+- Slider allows free movement between min and max values
+- Best for data with dense temporal coverage (e.g., hourly, daily)
+- Step selector visible to control filter range
+- Filter uses step-based ranges: `Year >= '2015-06-15T14:30:00Z' AND Year < '2015-06-15T15:30:00Z'`
 
 #### Example
 
@@ -2309,23 +2339,107 @@ corePackagesConfig: [
     "time-slider": {
       sliders: [
         {
-          layerPaths: [
-            "weather-layer/temperature",
-            "weather-layer/precipitation",
-          ],
-          fields: ["timestamp", "date"],
-          title: "Weather Data Timeline",
-          description: "Filter weather data by time",
+          // Discrete mode example (yearly data)
+          layerPaths: ["yearly-data-layer"],
+          title: "Yearly Temperature Data",
+          description: "Annual temperature measurements from 2010-2020",
+          filtering: true,
+          timeDimension: {
+            field: "Year",
+            nearestValues: "discrete",
+            singleHandle: true,
+            rangeItems: {
+              type: "discrete",
+              range: [
+                "2010-01-01T00:00:00Z",
+                "2011-01-01T00:00:00Z",
+                "2012-01-01T00:00:00Z",
+                "2013-01-01T00:00:00Z",
+                "2014-01-01T00:00:00Z",
+                "2015-01-01T00:00:00Z",
+                "2016-01-01T00:00:00Z",
+                "2017-01-01T00:00:00Z",
+                "2018-01-01T00:00:00Z",
+                "2019-01-01T00:00:00Z",
+                "2020-01-01T00:00:00Z"
+              ]
+            }
+          }
+        },
+        {
+          // Continuous mode example (hourly data)
+          layerPaths: ["weather-layer/temperature"],
+          fields: ["timestamp"],
+          title: "Hourly Weather Data",
+          description: "Real-time temperature measurements",
           delay: 1000,
           filtering: true,
           locked: false,
           reversed: false,
+          timeDimension: {
+            field: "timestamp",
+            nearestValues: "continuous",
+            singleHandle: true,
+            rangeItems: {
+              type: "continuous",
+              range: [
+                "2024-01-01T00:00:00Z",
+                "2024-01-31T23:59:59Z"
+              ]
+            }
+          }
         },
-      ],
-    },
-  },
+        {
+          // Multi-layer example with range handles
+          layerPaths: [
+            "weather-layer/temperature",
+            "weather-layer/precipitation"
+          ],
+          fields: ["timestamp", "date"],
+          title: "Weather Data Timeline",
+          description: "Filter multiple weather layers by time range",
+          delay: 1500,
+          filtering: true,
+          locked: false,
+          reversed: false,
+          timeDimension: {
+            nearestValues: "discrete",
+            singleHandle: false,
+            displayPattern: [
+              { datePrecision: "day" },
+              { timePrecision: "hour" }
+            ]
+          }
+        }
+      ]
+    }
+  }
 ];
 ```
+
+#### Configuration Tips
+
+**When to use Discrete Mode:**
+- Yearly, quarterly, or monthly data
+- Data with specific collection dates (satellite imagery dates)
+- When you want users to select from predefined time points
+- When step-based filtering doesn't make sense for your data
+
+**When to use Continuous Mode:**
+- Hourly, daily data with dense temporal coverage
+- Streaming or real-time data
+- When you want flexible time range selection
+- When step-based filtering is appropriate (e.g., "show last 6 hours")
+
+**Display Pattern:**
+- Use `datePrecision` alone for date-only data (`"year"`, `"month"`, `"day"`)
+- Add `timePrecision` for time-of-day display (`"hour"`, `"minute"`, `"second"`)
+- Leave both undefined for automatic detection based on data
+
+**Performance:**
+- Discrete mode with many time points (>50) may require optimization
+- Continuous mode works well for any range size
+- Consider using `delay` to control animation speed based on data density
 
 ---
 
