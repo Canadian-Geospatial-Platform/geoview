@@ -444,7 +444,6 @@ interface TypeTimeSliderValues {
   reversed?: boolean;               // Is animation reversed
   singleHandle: boolean;            // Single vs range selection
   title?: string;                   // Display title
-  
   // Data
   minAndMax: number[];              // [min, max] timestamps (ms)
   range: string[];                  // Array of ISO date strings
