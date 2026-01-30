@@ -103,7 +103,7 @@
                 }
               },
               "nearestValues": {
-                "enum": ["discrete", "absolute"]
+                "enum": ["discrete", "continuous"]
               },
               "singleHandle": {
                 "type": "boolean"

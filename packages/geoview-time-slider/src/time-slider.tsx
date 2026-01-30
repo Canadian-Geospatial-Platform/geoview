@@ -157,7 +157,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
         return;
       }
 
-      // Handle single handle case with ABSOLUTE values (continuous)
+      // Handle single handle case with continuous values
       if (singleHandle && !discreteValues) {
         const interval = step || (minAndMax[1] - minAndMax[0]) / 20;
         let newPosition = values[0] + interval * stepMove;
@@ -328,9 +328,15 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       clearTimeout(playIntervalRef.current);
       setIsPlaying(false);
       sliderDeltaRef.current = undefined;
-      setValues(layerPath, newValues as number[]);
+      if (discreteValues && singleHandle) {
+        const value = Array.isArray(newValues) ? newValues[0] : newValues;
+        const nearest = timeStampRange.reduce((prev, curr) => (Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev));
+        setValues(layerPath, [nearest]);
+      } else {
+        setValues(layerPath, newValues as number[]);
+      }
     },
-    [layerPath, setValues]
+    [discreteValues, layerPath, setValues, singleHandle, timeStampRange]
   );
 
   /**
@@ -406,7 +412,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
               max={minAndMax[1]}
               value={values}
               marks={sliderMarks}
-              step={discreteValues ? step || 0.1 : null}
+              step={discreteValues ? null : step || (minAndMax[1] - minAndMax[0]) / 20}
               onChangeCommitted={handleSliderChange}
               onValueLabelFormat={handleLabelFormat}
             />
@@ -499,7 +505,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
               </FormControl>
             </Box>
 
-            {singleHandle && discreteValues && (
+            {singleHandle && !discreteValues && (
               <Box component="span" sx={{ paddingLeft: '10px' }}>
                 <FormControl sx={{ width: '100px' }}>
                   <InputLabel variant="standard">{getLocalizedMessage(displayLanguage, 'timeSlider.slider.stepValue')}</InputLabel>

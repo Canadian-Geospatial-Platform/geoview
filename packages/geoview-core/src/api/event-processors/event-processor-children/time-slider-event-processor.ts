@@ -254,7 +254,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
 
     // If using absolute axis
     let step: number | undefined;
-    if (nearestValues === 'absolute') {
+    if (nearestValues === 'continuous') {
       // Try to guess the steps that should be used
       step = TimeSliderEventProcessor.guessEstimatedStep(minAndMax[0], minAndMax[1]);
     }
