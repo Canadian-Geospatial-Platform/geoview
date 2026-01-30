@@ -2314,7 +2314,7 @@ interface SliderConfig {
   - **singleHandle**: Use single handle (true) or range handles (false)
   - **displayPattern**: Date/time display format configuration
   - **rangeItems**: Temporal range definition
-    - **type**: Range type ('discrete', 'relative', or 'continuous')
+    - **type**: Range type ('discrete', 'continuous')
     - **range**: Array of date strings defining available time points
 
 #### Temporal Modes
