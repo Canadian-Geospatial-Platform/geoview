@@ -326,8 +326,8 @@ export class MapTester extends GVAbstractTester {
       },
       (test, result) => {
         test.addStep('Verifying tab is selected...');
-        const activeTab = UIEventProcessor.getActiveFooterBarTab(this.getMapId());
-        Test.assertIsEqual(activeTab, result);
+        const { tabId } = UIEventProcessor.getActiveFooterBarTab(this.getMapId());
+        Test.assertIsEqual(tabId, result);
       }
     );
   }

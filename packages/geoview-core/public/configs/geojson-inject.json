@@ -46,8 +46,7 @@
           "contentHTML": "<div><ul><li>How to export map coordinate data to: GeoJSON, or CSV.</li></ul></div>"
         }
       ]
-    },
-    "collapsed": true
+    }
   },
   "corePackages": [],
   "theme": "geo.ca"

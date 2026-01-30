@@ -1690,7 +1690,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // Set app bar tab settings
       if (newMapConfig.appBar) {
         newMapConfig.appBar.selectedTab = UIEventProcessor.getActiveAppBarTab(mapId).tabId as TypeValidAppBarCoreProps;
-        newMapConfig.appBar.collapsed = !UIEventProcessor.getActiveAppBarTab(mapId).isOpen;
 
         const selectedDataTableLayerPath = DataTableEventProcessor.getSingleDataTableState(mapId, 'selectedLayerPath');
         if (selectedDataTableLayerPath) newMapConfig.appBar.selectedDataTableLayerPath = selectedDataTableLayerPath as string;
@@ -1700,8 +1699,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
       // Set footer bar tab settings
       if (newMapConfig.footerBar) {
-        newMapConfig.footerBar.selectedTab = UIEventProcessor.getActiveFooterBarTab(mapId) as TypeValidFooterBarTabsCoreProps;
-        newMapConfig.footerBar.collapsed = UIEventProcessor.getFooterBarIsCollapsed(mapId);
+        newMapConfig.footerBar.selectedTab = UIEventProcessor.getActiveFooterBarTab(mapId).tabId as TypeValidFooterBarTabsCoreProps;
 
         const selectedDataTableLayerPath = DataTableEventProcessor.getSingleDataTableState(mapId, 'selectedLayerPath');
         if (selectedDataTableLayerPath) newMapConfig.footerBar.selectedDataTableLayerPath = selectedDataTableLayerPath as string;

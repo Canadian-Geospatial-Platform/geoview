@@ -499,12 +499,19 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
                         <IconButton
                           size="small"
                           aria-label={t('guide.arrowUp')}
+                          className="buttonOutline"
                           onClick={handlePrevious}
                           disabled={allMatches.length === 0}
                         >
                           <KeyboardArrowUpIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />
                         </IconButton>
-                        <IconButton size="small" aria-label={t('guide.arrowDown')} onClick={handleNext} disabled={allMatches.length === 0}>
+                        <IconButton
+                          size="small"
+                          aria-label={t('guide.arrowDown')}
+                          className="buttonOutline"
+                          onClick={handleNext}
+                          disabled={allMatches.length === 0}
+                        >
                           <KeyboardArrowDownIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />
                         </IconButton>
                       </>
@@ -513,6 +520,7 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
                       size="small"
                       edge="end"
                       color="inherit"
+                      className="buttonOutline"
                       aria-label={t('general.clearSearch')}
                       onClick={handleClear}
                       onKeyDown={(e) => {

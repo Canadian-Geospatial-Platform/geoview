@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ToggleAll } from '@/core/components/toggle-all/toggle-all';
 import { Box, List, Typography } from '@/ui';
-import { useGeoViewMapId, useUIActiveAppBarTab, useUIActiveFooterBarTabId, useLayerLegendLayers } from '@/core/stores/';
+import { useGeoViewMapId, useUIActiveAppBarTab, useUIActiveFooterBarTab, useLayerLegendLayers } from '@/core/stores/';
 import { logger } from '@/core/utils/logger';
 
 import { getSxClassesMain, getSxClasses } from './legend-styles';
@@ -58,8 +58,8 @@ export function Legend({ containerType = CONTAINER_TYPE.FOOTER_BAR }: LegendType
 
   // Store
   const mapId = useGeoViewMapId();
-  const footerId = useUIActiveFooterBarTabId();
-  const appBarId = useUIActiveAppBarTab();
+  const activeFooterBarTab = useUIActiveFooterBarTab();
+  const activeAppBarTab = useUIActiveAppBarTab();
   const layersList = useLayerLegendLayers();
 
   // Memoize breakpoint values
@@ -176,7 +176,7 @@ export function Legend({ containerType = CONTAINER_TYPE.FOOTER_BAR }: LegendType
   }, [formattedLegendLayerList, noLayersContent, containerType]);
 
   // Early return with empty fragment if not the active tab
-  if (footerId !== 'legend' && appBarId.tabId !== 'legend') return null;
+  if (activeFooterBarTab.tabId !== 'legend' && activeAppBarTab.tabId !== 'legend') return null;
 
   return (
     <>

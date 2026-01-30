@@ -628,7 +628,6 @@
                 <li><code>'data-table'</code> - Data table view</li>
               </ul>
             </li>
-            <li><code>collapsed</code> - Whether the app bar starts collapsed</li>
             <li><code>selectedTab</code> - Initially selected tab</li>
             <li><code>selectedLayersLayerPath</code> - Initial selected layer in layers tab</li>
             <li><code>selectedDataTableLayerPath</code> - Initially selected layer in data table tab</li>
@@ -657,13 +656,12 @@
             <li>
               <code>tabs.custom</code> - Array of custom tab objects with <code>id</code>, <code>label</code>, and <code>contentHTML</code>
             </li>
-            <li><code>collapsed</code> - Whether the footer bar starts collapsed</li>
             <li><code>selectedTab</code> - Initially selected tab</li>
             <li><code>selectedLayersLayerPath</code> - Initial selected layer in layers tab</li>
             <li><code>selectedDataTableLayerPath</code> - Initially selected layer in data table tab</li>
             <li><code>selectedTimeSliderLayerPath</code> - Initially selected layer in time slider tab</li>
           </ul>
-          <p><strong>Default:</strong> <code>{ tabs: { core: ['layers', 'data-table'], custom: [] }, collapsed: false }</code></p>
+          <p><strong>Default:</strong> <code>{ tabs: { core: ['layers', 'data-table'], custom: [] } }</code></p>
         </div>
 
         <div class="option-item">
@@ -705,8 +703,7 @@
     "tabs": {
       "core": ["legend", "layers", "details", "data-table"],
       "custom": []
-    },
-    "collapsed": false
+    }
   },
   "components": ["north-arrow", "overview-map"],
   "overviewMap": {
@@ -727,8 +724,7 @@
     "tabs": {
       "core": ["legend"],
       "custom": []
-    },
-    "collapsed": true
+    }
   },
   "components": []
 }
@@ -741,7 +737,6 @@
     "tabs": {
       "core": ["geolocator", "export", "legend", "layers", "details", "data-table", "guide"]
     },
-    "collapsed": false,
     "selectedTab": "geolocator"
   },
   "footerBar": {
@@ -749,7 +744,6 @@
       "core": ["legend", "layers", "details", "data-table", "time-slider", "geochart", "guide"],
       "custom": []
     },
-    "collapsed": false,
     "selectedTab": "legend"
   },
   "components": ["overview-map", "north-arrow"],
@@ -772,7 +766,6 @@
         }
       ]
     },
-    "collapsed": false,
     "selectedTab": "custom-info"
   }
 }

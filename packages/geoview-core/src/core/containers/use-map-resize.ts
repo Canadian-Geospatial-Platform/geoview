@@ -4,7 +4,7 @@ import { logger } from '@/core/utils/logger';
 // #region USE MAP RESIZE
 interface UseMapResizeProps {
   isMapFullScreen: boolean;
-  isFooterBarCollapsed: boolean;
+  isFooterBarOpen: boolean;
   footerPanelResizeValue: number;
   isFooterBar: boolean;
   geoviewElement: HTMLElement;
@@ -18,7 +18,7 @@ type TypeUseMapResize = {
 
 export const useMapResize = ({
   isMapFullScreen,
-  isFooterBarCollapsed,
+  isFooterBarOpen,
   footerPanelResizeValue,
   isFooterBar,
   geoviewElement,
@@ -46,7 +46,7 @@ export const useMapResize = ({
       const tabHeight = footerTabContainer?.clientHeight ?? 0;
 
       // by default the footerbar is collapsed when a user goes fullscreen
-      if (isFooterBarCollapsed) {
+      if (!isFooterBarOpen) {
         containerHeight = `calc(100% - ${tabHeight}px)`;
       } else {
         containerHeight = `${100 - footerPanelResizeValue}%`;
@@ -61,7 +61,7 @@ export const useMapResize = ({
 
     mapShellContainerRef.current.style.visibility = visibility;
     mapShellContainerRef.current.style.height = containerHeight;
-  }, [footerTabContainer, footerPanelResizeValue, isFooterBarCollapsed, isMapFullScreen, appHeight]);
+  }, [footerTabContainer, footerPanelResizeValue, isFooterBarOpen, isMapFullScreen, appHeight]);
 
   useEffect(() => {
     logger.logTraceUseEffect('USE MAP RESIZE - adjust geoviewElement height for Footerbar');
