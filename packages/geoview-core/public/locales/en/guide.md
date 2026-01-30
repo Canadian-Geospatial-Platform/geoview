@@ -136,7 +136,7 @@ _Note: Some tools in the Side Bar are also available as tabs in the Footer Bar, 
 
 <a id="geolocatorSection">
 
-## <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" alt="Geolocator icon"/> Geolocator
+## <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" alt="Geolocator icon" /> Geolocator
 
 The geolocator component functions to allow users to search for places in Canada. When the geolocator icon <img src="{{assetsURL}}/img/guide/geosearch/geolocator.svg" alt="Geolocator icon" /> in the Side Bar is clicked, an input field for search keywords will appear on the map.
 
