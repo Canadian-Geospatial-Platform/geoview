@@ -133,27 +133,43 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       const isForward = direction === 'forward';
       const stepMove = isForward ? 1 : -1;
 
-      // Handle single handle case with no discrete values
-      if (singleHandle && !discreteValues) {
-        const currentIndex = timeStampRange.indexOf(values[0]);
-        const newIndex =
-          // eslint-disable-next-line no-nested-ternary
-          currentIndex === (isForward ? timeStampRange.length - 1 : 0)
-            ? isForward
-              ? 0
-              : timeStampRange.length - 1
-            : currentIndex + stepMove;
+      // Handle single handle case with DISCRETE values
+      if (singleHandle && discreteValues) {
+        // Find current index in the discrete range array
+        const currentIndex = timeStampRange.findIndex((timestamp) => timestamp === values[0]);
+
+        if (currentIndex === -1) {
+          // Value not found - snap to nearest
+          const nearest = timeStampRange.reduce((prev, curr) => (Math.abs(curr - values[0]) < Math.abs(prev - values[0]) ? curr : prev));
+          setValues(layerPath, [nearest]);
+          return;
+        }
+
+        // Move to next/previous discrete value (with wrapping)
+        let newIndex = currentIndex + stepMove;
+        if (newIndex >= timeStampRange.length) {
+          newIndex = 0; // Wrap to start
+        } else if (newIndex < 0) {
+          newIndex = timeStampRange.length - 1; // Wrap to end
+        }
+
         setValues(layerPath, [timeStampRange[newIndex]]);
         return;
       }
 
-      // Handle single handle case with discrete values
-      if (singleHandle) {
+      // Handle single handle case with continuous values
+      if (singleHandle && !discreteValues) {
         const interval = step || (minAndMax[1] - minAndMax[0]) / 20;
-        const newPosition = values[0] + interval * stepMove;
+        let newPosition = values[0] + interval * stepMove;
 
-        // eslint-disable-next-line no-nested-ternary
-        setValues(layerPath, [newPosition > minAndMax[1] ? minAndMax[0] : newPosition < minAndMax[0] ? minAndMax[1] : newPosition]);
+        // Wrap around at boundaries
+        if (newPosition > minAndMax[1]) {
+          newPosition = minAndMax[0];
+        } else if (newPosition < minAndMax[0]) {
+          newPosition = minAndMax[1];
+        }
+
+        setValues(layerPath, [newPosition]);
         return;
       }
 
@@ -312,9 +328,15 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       clearTimeout(playIntervalRef.current);
       setIsPlaying(false);
       sliderDeltaRef.current = undefined;
-      setValues(layerPath, newValues as number[]);
+      if (discreteValues && singleHandle) {
+        const value = Array.isArray(newValues) ? newValues[0] : newValues;
+        const nearest = timeStampRange.reduce((prev, curr) => (Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev));
+        setValues(layerPath, [nearest]);
+      } else {
+        setValues(layerPath, newValues as number[]);
+      }
     },
-    [layerPath, setValues]
+    [discreteValues, layerPath, setValues, singleHandle, timeStampRange]
   );
 
   /**
@@ -390,7 +412,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
               max={minAndMax[1]}
               value={values}
               marks={sliderMarks}
-              step={discreteValues ? step || 0.1 : null}
+              step={discreteValues ? null : step || (minAndMax[1] - minAndMax[0]) / 20}
               onChangeCommitted={handleSliderChange}
               onValueLabelFormat={handleLabelFormat}
             />
@@ -483,7 +505,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
               </FormControl>
             </Box>
 
-            {singleHandle && discreteValues && (
+            {singleHandle && !discreteValues && (
               <Box component="span" sx={{ paddingLeft: '10px' }}>
                 <FormControl sx={{ width: '100px' }}>
                   <InputLabel variant="standard">{getLocalizedMessage(displayLanguage, 'timeSlider.slider.stepValue')}</InputLabel>

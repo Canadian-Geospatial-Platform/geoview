@@ -252,9 +252,9 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
 
     const values = defaultDates.map((date) => DateMgt.convertToMilliseconds(date));
 
-    // If using discrete axis
+    // If using absolute axis
     let step: number | undefined;
-    if (nearestValues === 'discrete') {
+    if (nearestValues === 'continuous') {
       // Try to guess the steps that should be used
       step = TimeSliderEventProcessor.guessEstimatedStep(minAndMax[0], minAndMax[1]);
     }
@@ -370,20 +370,41 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
         filter = `time=${minAndMax[0]},${DateMgt.formatDateToISO(minAndMax[1])}`;
       }
     } else if (filtering) {
-      filter = `${field} >= date '${DateMgt.formatDateToISO(values[0])}'`;
+      const timeSliderValues = this.getTimeSliderLayers(mapId)[layerPath];
+      const startDate = DateMgt.formatDateToISO(values[0]);
+
       if (values.length > 1) {
-        filter += ` and ${field} <= date '${DateMgt.formatDateToISO(values[1])}'`;
-      }
-    } else {
-      filter = `${field} >= date '${DateMgt.formatDateToISO(minAndMax[0])}'`;
-      if (values.length > 1) {
-        filter += `and ${field} <= date '${DateMgt.formatDateToISO(minAndMax[1])}'`;
+        // Range handle (two handles) - use range filter
+        filter = `${field} >= date '${startDate}' and ${field} <= date '${DateMgt.formatDateToISO(values[1])}'`;
+      } else if (timeSliderValues.discreteValues) {
+        // Discrete mode with single handle - use current and next value in range
+        const { range } = timeSliderValues;
+        const nextIdx = range.findIndex((entry) => DateMgt.convertToMilliseconds(entry) > values[0]);
+
+        if (nextIdx !== -1 && nextIdx < range.length) {
+          const nextDate =
+            typeof range[nextIdx] === 'string' ? range[nextIdx] : DateMgt.formatDateToISO(DateMgt.convertToMilliseconds(range[nextIdx]));
+          filter = `${field} >= date '${startDate}' and ${field} < date '${nextDate}'`;
+        } else {
+          // Last value
+          filter = `${field} >= date '${startDate}'`;
+        }
+      } else {
+        // Absolute mode with single handle - range based on step
+        const step = timeSliderValues.step || this.guessEstimatedStep(minAndMax[0], minAndMax[1]);
+        if (step) {
+          const endDate = DateMgt.formatDateToISO(values[0] + step);
+          filter = `${field} >= date '${startDate}' and ${field} < date '${endDate}'`;
+        } else {
+          // Fallback to exact match if step can't be determined
+          filter = `${field} = date '${startDate}'`;
+        }
       }
     }
 
     this.getTimeSliderState(mapId).setterActions.setFiltering(layerPath, filtering);
     this.getTimeSliderState(mapId).setterActions.setValues(layerPath, values);
-    this.addOrUpdateSliderFilter(mapId, layerPath, filter);
+    this.addOrUpdateSliderFilter(mapId, layerPath, filter!);
 
     MapEventProcessor.applyLayerFilters(mapId, layerPath);
   }

@@ -15,7 +15,7 @@ This document provides comprehensive API reference and configuration details for
 
 ## 1. geoview-time-slider
 
-**Description:** A time slider package that provides temporal navigation and filtering capabilities for layers with time dimensions (WMS and ESRI Image layers).
+**Description:** A time slider package that provides temporal navigation and filtering capabilities for layers with time dimensions (WMS and ESRI Image layers). Supports both discrete and continuous temporal modes.
 
 **Version:** 2.0.x
 
@@ -27,10 +27,13 @@ This document provides comprehensive API reference and configuration details for
 
 - Time slider UI in footer panel
 - Support for WMS and ESRI Image layers with time dimensions
-- Single and range time selection
+- **Discrete mode**: Snap to predefined time points (e.g., yearly data)
+- **Continuous mode**: Free movement with step-based filtering (e.g., hourly data)
+- Single handle and range (two-handle) selection modes
 - Play/pause animation controls
-- Time step configuration
-- Temporal filtering synchronized across layers
+- Configurable time step for continuous mode
+- Temporal filtering synchronized across multiple layers
+- Automatic timezone handling (UTC)
 
 **Dependencies:**
 
@@ -58,14 +61,22 @@ The time slider is typically included in the GeoView build. To use it:
 
 ```json
 "corePackagesConfig": [
+  {
+    "time-slider": {
+      "sliders": [
         {
-            "time-slider": {
-                "sliders": [
-                    {
-                      ...
-                    }]
+          "layerPaths": ["layer-path"],
+          "timeDimension": {
+            "nearestValues": "discrete",  // or "continuous"
+            "rangeItems": {
+              "range": ["2020-01-01T00:00:00Z", "2021-01-01T00:00:00Z"]
             }
-        }]
+          }
+        }
+      ]
+    }
+  }
+]
 ```
 
 **Programmatic:**
@@ -84,14 +95,194 @@ if (TimeSliderEventProcessor.isTimeSliderInitialized("mapId")) {
 }
 ```
 
-### Configuration Example
+### Temporal Modes
+
+The time slider supports two distinct modes for handling temporal data:
+
+#### Discrete Mode (`nearestValues: 'discrete'`)
+
+**Use When:**
+- Data has distinct, predefined time points (e.g., yearly, monthly, specific dates)
+- Satellite imagery with specific collection dates
+- Model outputs at scheduled intervals
+- Census data for specific years
+
+**Behavior:**
+- Slider handle snaps only to values in the `range` array
+- No in-between positions allowed
+- Step selector is hidden (not applicable)
+- Animation moves through discrete time points
+- Filter uses exact range boundaries
+
+**Example Configuration:**
+
+```json
+{
+  "time-slider": {
+    "sliders": [
+      {
+        "layerPaths": ["census-data"],
+        "title": "Census Years",
+        "timeDimension": {
+          "field": "Year",
+          "nearestValues": "discrete",
+          "singleHandle": true,
+          "rangeItems": {
+            "type": "discrete",
+            "range": [
+              "2000-01-01T00:00:00Z",
+              "2005-01-01T00:00:00Z",
+              "2010-01-01T00:00:00Z",
+              "2015-01-01T00:00:00Z",
+              "2020-01-01T00:00:00Z"
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
+**Generated Filter:**
+```sql
+Year >= date '2010-01-01T00:00:00Z' AND Year < date '2015-01-01T00:00:00Z'
+```
+
+---
+
+#### Continuous Mode (`nearestValues: 'continuous'`)
+
+**Use When:**
+- Data has dense temporal coverage (hourly, daily measurements)
+- Streaming or real-time data
+- Weather data with frequent updates
+- Sensor data with continuous readings
+
+**Behavior:**
+- Slider allows free movement between min and max
+- Step selector visible to control filter range
+- User can position handle anywhere on timeline
+- Filter uses step-based ranges (e.g., "show data within 1 hour")
+- Animation advances by configured step
+
+**Example Configuration:**
+
+```json
+{
+  "time-slider": {
+    "sliders": [
+      {
+        "layerPaths": ["weather-data/temperature"],
+        "title": "Hourly Temperature",
+        "timeDimension": {
+          "field": "timestamp",
+          "nearestValues": "continuous",
+          "singleHandle": true,
+          "rangeItems": {
+            "type": "relative",
+            "range": [
+              "2024-01-01T00:00:00Z",
+              "2024-01-31T23:59:59Z"
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
+**Generated Filter (with 1-hour step):**
+```sql
+timestamp >= date '2024-01-15T14:30:00Z' AND timestamp < date '2024-01-15T15:30:00Z'
+```
+
+**Step Options (Continuous Mode Only):**
+- 1 hour (`3600000` ms)
+- 1 day (`86400000` ms)
+- 1 week (`604800000` ms)
+- 1 month (`2592000000` ms)
+- 1 year (`31536000000` ms)
+
+---
+
+### Configuration Examples
+
+**Example 1: Discrete Mode - Yearly Satellite Imagery**
 
 ```json
 {
   "map": {
     "listOfGeoviewLayerConfig": [
       {
-        "geoviewLayerId": "wmsTimeLayer",
+        "geoviewLayerId": "satellite-yearly",
+        "geoviewLayerType": "esriImage",
+        "metadataAccessPath": "https://example.com/arcgis/rest/services/Satellite",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "layerName": "Annual Imagery"
+          }
+        ]
+      }
+    ]
+  },
+  "footerBar": {
+    "tabs": {
+      "core": ["time-slider"]
+    },
+    "selectedTab": "time-slider"
+  },
+  "corePackagesConfig": [
+    {
+      "time-slider": {
+        "sliders": [
+          {
+            "layerPaths": ["satellite-yearly/0"],
+            "title": "Satellite Imagery by Year",
+            "description": "Annual satellite imagery from 2015-2024",
+            "delay": 2000,
+            "filtering": true,
+            "timeDimension": {
+              "field": "AcquisitionDate",
+              "nearestValues": "discrete",
+              "singleHandle": true,
+              "displayPattern": [
+                { "datePrecision": "year" }
+              ],
+              "rangeItems": {
+                "type": "discrete",
+                "range": [
+                  "2015-01-01T00:00:00Z",
+                  "2016-01-01T00:00:00Z",
+                  "2017-01-01T00:00:00Z",
+                  "2018-01-01T00:00:00Z",
+                  "2019-01-01T00:00:00Z",
+                  "2020-01-01T00:00:00Z",
+                  "2021-01-01T00:00:00Z",
+                  "2022-01-01T00:00:00Z",
+                  "2023-01-01T00:00:00Z",
+                  "2024-01-01T00:00:00Z"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+**Example 2: Continuous Mode - Hourly Weather Data**
+
+```json
+{
+  "map": {
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerId": "weather-wms",
         "geoviewLayerType": "ogcWms",
         "metadataAccessPath": "https://example.com/wms",
         "listOfLayerEntryConfig": [
@@ -119,12 +310,78 @@ if (TimeSliderEventProcessor.isTimeSliderInitialized("mapId")) {
       "time-slider": {
         "sliders": [
           {
-            "layerPaths": ["wmsTimeLayer/temperature"],
+            "layerPaths": ["weather-wms/temperature"],
+            "title": "Hourly Temperature Forecast",
+            "description": "7-day temperature forecast with hourly resolution",
+            "delay": 500,
+            "filtering": true,
             "timeDimension": {
               "field": "time",
-              "default": ["2024-01-01"],
-              "range": ["2024-01-01", "2024-12-31"],
-              "step": "P1D"
+              "nearestValues": "continuous",
+              "singleHandle": true,
+              "displayPattern": [
+                { "datePrecision": "day" },
+                { "timePrecision": "hour" }
+              ],
+              "rangeItems": {
+                "type": "relative",
+                "range": [
+                  "2024-01-01T00:00:00Z",
+                  "2024-01-07T23:00:00Z"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+**Example 3: Multiple Layers with Range Handles (Discrete)**
+
+```json
+{
+  "corePackagesConfig": [
+    {
+      "time-slider": {
+        "sliders": [
+          {
+            "layerPaths": [
+              "temperature-layer/data",
+              "precipitation-layer/data"
+            ],
+            "fields": ["timestamp", "date"],
+            "title": "Climate Data Time Range",
+            "description": "Select a time range for temperature and precipitation",
+            "delay": 1000,
+            "filtering": true,
+            "locked": false,
+            "reversed": false,
+            "timeDimension": {
+              "nearestValues": "discrete",
+              "singleHandle": false,
+              "displayPattern": [
+                { "datePrecision": "month" }
+              ],
+              "rangeItems": {
+                "type": "discrete",
+                "range": [
+                  "2023-01-01T00:00:00Z",
+                  "2023-02-01T00:00:00Z",
+                  "2023-03-01T00:00:00Z",
+                  "2023-04-01T00:00:00Z",
+                  "2023-05-01T00:00:00Z",
+                  "2023-06-01T00:00:00Z",
+                  "2023-07-01T00:00:00Z",
+                  "2023-08-01T00:00:00Z",
+                  "2023-09-01T00:00:00Z",
+                  "2023-10-01T00:00:00Z",
+                  "2023-11-01T00:00:00Z",
+                  "2023-12-01T00:00:00Z"
+                ]
+              }
             }
           }
         ]
@@ -144,19 +401,85 @@ const isInitialized = TimeSliderEventProcessor.isTimeSliderInitialized("mapId");
 
 // Get time-enabled layers
 const timeLayers = TimeSliderEventProcessor.getTimeSliderLayers("mapId");
+// Returns: { [layerPath: string]: TypeTimeSliderValues }
 
 // Get selected layer
-const selectedLayer =
-  TimeSliderEventProcessor.getTimeSliderSelectedLayer("mapId");
+const selectedLayer = TimeSliderEventProcessor.getTimeSliderSelectedLayer("mapId");
+// Returns: string (layer path)
 
 // Get all filters
 const filters = TimeSliderEventProcessor.getTimeSliderFilters("mapId");
+// Returns: { [layerPath: string]: string } (CQL filter strings)
 
-// Get time values
-const timeValues = TimeSliderEventProcessor.getTimeSliderValues("mapId");
+// Get filter for specific layer
+const layerFilter = TimeSliderEventProcessor.getTimeSliderFilter("mapId", "layerPath");
+// Returns: string (CQL filter)
+
+// Update filters (called automatically by UI, but can be called programmatically)
+TimeSliderEventProcessor.updateFilters(
+  "mapId",
+  "layerPath",
+  "field",
+  true,  // filtering enabled
+  [minTimestamp, maxTimestamp],  // minAndMax
+  [currentTimestamp]  // values
+);
 ```
 
-**See Also:** [TimeSliderEventProcessor](app/events/event-processors.md#3-timeslidereventprocessor)
+### TypeTimeSliderValues Interface
+
+```typescript
+interface TypeTimeSliderValues {
+  // Configuration
+  additionalLayerpaths?: string[];  // Linked layers
+  delay: number;                    // Animation delay (ms)
+  description?: string;             // Display description
+  discreteValues: boolean;          // true = discrete mode, false = continuous mode
+  step?: number;                    // Step size for continuous mode (ms)
+  field: string;                    // Field name for filtering
+  fieldAlias: string;               // Display name for field
+  filtering: boolean;               // Is filtering active
+  isMainLayerPath: boolean;         // Is this the primary layer
+  locked?: boolean;                 // Are handles locked together
+  reversed?: boolean;               // Is animation reversed
+  singleHandle: boolean;            // Single vs range selection
+  title?: string;                   // Display title
+  // Data
+  minAndMax: number[];              // [min, max] timestamps (ms)
+  range: string[];                  // Array of ISO date strings
+  values: number[];                 // Current position(s) (ms)
+  displayPattern: [DatePrecision, TimePrecision]; // Display format
+}
+```
+
+### Best Practices
+
+**Choosing the Right Mode:**
+
+| Data Characteristic | Recommended Mode |
+|---------------------|------------------|
+| Yearly, quarterly, monthly data | Discrete |
+| Specific collection dates | Discrete |
+| Model outputs at scheduled intervals | Discrete |
+| Hourly, minute-level data | Continuous |
+| Real-time/streaming data | Continuous |
+| Dense temporal coverage | Continuous |
+| Sparse, irregular intervals | Discrete |
+
+**Performance Considerations:**
+
+- **Discrete mode**: Works efficiently with 50-100 time points
+- **Continuous mode**: Works well for any range size
+- Use appropriate `delay` based on data density (slower for many points)
+- Consider layer caching for frequently accessed time periods
+
+**UI/UX Tips:**
+
+- Provide clear `title` and `description` for user context
+- Use appropriate `displayPattern` for your data's temporal resolution
+- Set `delay` based on desired animation speed (500ms-5000ms)
+- Use `locked` handles for synchronized comparison in range mode
+- Consider `reversed` animation for countdown scenarios
 
 ---
 

@@ -9,7 +9,6 @@ import {
 } from 'geoview-core/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useMapStoreActions, useMapAllVisibleandInRangeLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 import { useLayerLegendLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
-import { LegendEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/legend-event-processor';
 import { Box } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 import { TABS } from 'geoview-core/core/utils/constant';
@@ -102,21 +101,38 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       );
     };
 
+    // Create lookup map to replace finds
+    const legendLayersMap = new Map(legendLayers.map((layer) => [layer.layerPath, layer]));
+
     // Return the layers
     return visibleInRangeLayers
       .map((layerPath) => {
         return { layerPath, timeSliderLayerInfo: timeSliderLayers?.[layerPath] };
       })
-      .filter((layer) => layer?.timeSliderLayerInfo && !isLayerHiddenOnMap(layer.layerPath) && layer.timeSliderLayerInfo.isMainLayerPath)
+      .filter((layer) => {
+        if (!layer?.timeSliderLayerInfo || isLayerHiddenOnMap(layer.layerPath) || !layer.timeSliderLayerInfo.isMainLayerPath) {
+          return false;
+        }
+
+        // Check if layer is in error
+        const legendLayer = legendLayersMap.get(layer.layerPath);
+        if (legendLayer?.layerStatus === 'error') {
+          return false;
+        }
+
+        return true;
+      })
       .map((layer) => {
-        const additionalNames = layer.timeSliderLayerInfo.additionalLayerpaths?.map(
-          (additionalLayerPath) => LegendEventProcessor.findLayerByPath(legendLayers, additionalLayerPath)?.layerName
-        );
+        const legendLayer = legendLayersMap.get(layer.layerPath);
+        const additionalNames = layer.timeSliderLayerInfo.additionalLayerpaths
+          ?.map((additionalLayerPath) => {
+            const additionalLayer = legendLayersMap.get(additionalLayerPath);
+            return additionalLayer?.layerName;
+          })
+          .filter(Boolean);
+
         const combinedAdditionalNames = additionalNames ? `, ${additionalNames.join(', ')}` : '';
-        const layerName =
-          layer.timeSliderLayerInfo.title ||
-          `${LegendEventProcessor.findLayerByPath(legendLayers, layer.layerPath)?.layerName}${combinedAdditionalNames}` ||
-          '';
+        const layerName = layer.timeSliderLayerInfo.title || `${legendLayer?.layerName || ''}${combinedAdditionalNames}` || '';
         return {
           layerName,
           layerPath: layer.layerPath,

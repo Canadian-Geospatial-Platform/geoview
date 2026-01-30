@@ -3405,7 +3405,7 @@ export abstract class LayerMockup {
           '2024-05-23T22:54:00Z',
         ],
       },
-      nearestValues: 'absolute',
+      nearestValues: 'continuous',
       singleHandle: true,
     } as TimeDimension;
   }
@@ -3637,7 +3637,7 @@ export abstract class LayerMockup {
           '2023-08-15T00:00:00Z',
         ],
       },
-      nearestValues: 'absolute',
+      nearestValues: 'continuous',
       singleHandle: true,
     } as TimeDimension;
   }
