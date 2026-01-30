@@ -235,6 +235,7 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           },
         });
       },
+      // TODO: the setter for footer bar is still split in 2 instead of following app bar. Ken, can you set it up correclty with your PR for footer....
       setFooterBarIsOpen: (open: boolean) => {
         set({
           uiState: {
