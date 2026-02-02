@@ -12,23 +12,7 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerType": "geoCore",
-        "geoviewLayerId": "1dcd28aa-99da-4f62-b157-15631379b170"
-      },
-      {
-        "geoviewLayerType": "geoCore",
-        "geoviewLayerId": "ccc75c12-5acc-4a6a-959f-ef6f621147b9"
-      },
-      {
-        "geoviewLayerType": "geoCore",
-        "geoviewLayerId": "0fca08b5-e9d0-414b-a3c4-092ff9c5e326"
-      },
-      {
-        "geoviewLayerType": "geoCore",
-        "geoviewLayerId": "03ccfb5c-a06e-43e3-80fd-09d4f8f69703"
-      },
-      {
-        "geoviewLayerType": "geoCore",
-        "geoviewLayerId": "6433173f-bca8-44e6-be8e-3e8a19d3c299"
+        "geoviewLayerId": "f129611d-7ca1-418b-8390-ebac5adf958e"
       },
       {
         "geoviewLayerType": "geoCore",
@@ -36,7 +20,31 @@
       },
       {
         "geoviewLayerType": "geoCore",
-        "geoviewLayerId": "9d96e8c9-22fe-4ad2-b5e8-94a6991b744b"
+        "geoviewLayerId": "7a5cda52-c7df-427f-9ced-26f19a8a64d6"
+      },
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerId": "d8fa9a38-c4df-442a-8319-9bbcbdc29060"
+      },
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerId": "0fe65119-e96e-4a57-8bfe-9d9245fba06b"
+      },
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerId": "df106e11-4cee-425d-bd38-7e51ac674128"
+      },
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerId": "cf29bdb2-bbdb-48c3-b09f-118600801836"
+      },
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerId": "d7b177e0-274a-4be9-b69a-2030faf83c78"
+      },
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerId": "d708877c-56b8-4255-99e3-3c4abc54597d"
       }
     ]
   },
