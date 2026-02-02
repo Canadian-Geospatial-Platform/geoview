@@ -25,6 +25,7 @@ export interface QueryParams {
     projection: number;
     maxAllowableOffset: number;
     maxRecordCount: number;
+    where: string;
 }
 declare const _default: typeof Worker & {
     new (): Worker;

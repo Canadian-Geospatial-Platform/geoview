@@ -38,13 +38,13 @@ export declare abstract class WfsRenderer {
      * Only the inner children of the `<Filter>` element are returned; you can wrap them
      * in `<ogc:Filter>` as needed for a full WFS request.
      * @param {string} filterStr - The SQL-like filter expression to convert.
-     * @param {string} version - The WFS version to target (only '1.0.0', '1.1.0', '2.0.0' supported; defaults to '2.0.0').
-     * @param {string | undefined} fieldNameForNegativeQueries - The field name to use in "always false" filters (required when filterStr is `1=0` or `false`).
+     * @param {string} version - The WFS version to target (only '1.0.0', '1.1.0', '2.0.0' supported; defaults to '1.1.0').
+     * @param {string} fieldNameForNegativeQueries - The field name to use in "always false" filters (cases of 1=0 and such).
      * @returns {string} An XML string representing the inner contents of an OGC `<Filter>` element.
      *                   This can be directly used inside a WFS GetFeature request's `<Filter>` element.
      * @static
      */
-    static sqlToOlWfsFilterXml(filterStr: string, version: string, fieldNameForNegativeQueries: string | undefined): string;
+    static sqlToOlFilterXml(filterStr: string, version: string, fieldNameForNegativeQueries: string): string;
     /**
      * Combine a spatial GML filter and an attribute GML filter
      * into a single OGC <Filter> with <And>.
@@ -53,5 +53,23 @@ export declare abstract class WfsRenderer {
      * @returns {string | undefined} Combined XML <ogc:Filter> or undefined if nothing to combine
      */
     static combineGmlFilters(spatialFilter?: string, attributeFilter?: string): string | undefined;
+    /**
+     * Wraps the ogc/fes filter with the appropriate XML node, based on if the service is WMS or WFS and the version of the service.
+     *
+     * WMS
+     * └── FE 1.1
+     *     └── ogc:Filter only
+     * WFS ≤ 1.1
+     * └── FE 1.1
+     *     └── ogc:Filter
+     * WFS 2.0
+     * └── FES 2.0
+     *     └── fes:Filter
+     * @param ogcFilterToWrap
+     * @param wmsOrWfs
+     * @param version
+     * @returns
+     */
+    static wrapOGCFilter(ogcFilterToWrap: string | undefined, wmsOrWfs: 'wms' | 'wfs', version: string): string | undefined;
 }
 //# sourceMappingURL=wfs-renderer.d.ts.map

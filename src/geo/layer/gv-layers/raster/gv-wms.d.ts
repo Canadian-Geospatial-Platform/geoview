@@ -8,11 +8,11 @@ import { type EventDelegateBase } from '@/api/events/event-helper';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
-import type { TypeFeatureInfoEntry, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
-import type { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { type TypeDateFragments } from '@/core/utils/date-mgt';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 /**
  * Manages a WMS layer.
  *
@@ -79,6 +79,7 @@ export declare class GVWMS extends AbstractGVRaster {
      * Overrides the get all feature information for all the features stored in the layer.
      * This function performs a WFS 'GetFeature' query operation using the WFS layer configuration embedded in the WMS layer configuration.
      * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
+     * @param {LayerFilters} layerFilters - The layer filters to apply when querying the features.
      * @param {AbortController?} [abortController] - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
      * @throws {LayerConfigWFSMissingError} If no WFS layer configuration is defined for this WMS layer.
@@ -87,8 +88,10 @@ export declare class GVWMS extends AbstractGVRaster {
      * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
      * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
      * @throws {NetworkError} When a network issue happened.
+     * @protected
+     * @override
      */
-    protected getAllFeatureInfo(map: OLMap, abortController?: AbortController): Promise<TypeFeatureInfoEntry[]>;
+    protected getAllFeatureInfo(map: OLMap, layerFilters: LayerFilters, abortController?: AbortController): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overrides the fetching of the legend for a WMS layer.
      * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
@@ -120,6 +123,11 @@ export declare class GVWMS extends AbstractGVRaster {
      * @override
      */
     onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
+    /**
+     * Overrides the way a WMS layer applies a view filter. It does so by updating the source FILTER and TIME parameters.
+     * @param {LayerFilters} [filter] - An optional filter to be used in place of the getViewFilter value.
+     */
+    protected onSetLayerFilters(filter?: LayerFilters): void;
     /**
      * Gets if the CRS is to be overridden, because the layer struggles with the current map projection.
      * @returns {CRSOverride | undefined} The CRS Override properties if any.
@@ -184,28 +192,17 @@ export declare class GVWMS extends AbstractGVRaster {
      */
     static fetchAndParseFeaturesFromWFSUrl(urlWithOutputJson: string, wmsLayerConfig: OgcWmsLayerEntryConfig, wfsLayerConfig: OgcWfsLayerEntryConfig, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
-     * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter parameter is used alone to display
-     * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
-     * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
-     * is done.
-     * TODO ! The combination of the legend filter and the dimension filter probably does not apply to WMS. The code can be simplified.
-     * @param {string} filter - An optional filter to be used in place of the getViewFilter value.
-     */
-    applyViewFilter(filter?: string | undefined): void;
-    /**
      * Applies a view filter to a WMS or an Esri Image layer's source by updating the source parameters.
      * This function is responsible for generating the appropriate filter expression based on the layer configuration,
      * optional style, and time-based fragments. It ensures the filter is only applied if it has changed or needs to be reset.
      * @param {OgcWmsLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig - The configuration object for the WMS or Esri Image layer.
      * @param {ImageWMS | ImageArcGISRest} source - The OpenLayers `ImageWMS` or `ImageArcGISRest` source instance to which the filter will be applied.
      * @param {TypeDateFragments | undefined} externalDateFragments - Optional external date fragments used to assist in formatting time-based filters.
-     * @param {GVWMS | GVEsriImage | undefined} layer - Optional GeoView layer containing the source (if exists) in order to trigger a redraw.
      * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
-     * @param {Function?} callbackWhenUpdated - Optional callback that is invoked with the final filter string if the layer was updated.
      * @throws {LayerInvalidLayerFilterError} If the filter expression fails to parse or cannot be applied.
      * @static
      */
-    static applyViewFilterOnSource(layerConfig: OgcWmsLayerEntryConfig | EsriImageLayerEntryConfig, source: ImageWMS | ImageArcGISRest, style: TypeLayerStyleConfig | undefined, externalDateFragments: TypeDateFragments | undefined, layer: GVWMS | GVEsriImage | undefined, filter?: string | undefined, callbackWhenUpdated?: ((filterToUse: string) => void) | undefined): void;
+    static applyViewFilterOnSource(layerConfig: OgcWmsLayerEntryConfig | EsriImageLayerEntryConfig, source: ImageWMS | ImageArcGISRest, externalDateFragments: TypeDateFragments | undefined, filter: LayerFilters | undefined): void;
     /**
      * Registers an image load callback event handler.
      * @param {ImageLoadRescueDelegate} callback - The callback to be executed whenever the event is emitted

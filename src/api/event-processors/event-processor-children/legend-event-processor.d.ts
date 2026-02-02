@@ -1,4 +1,4 @@
-import type { Extent, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
+import type { Extent } from '@/api/types/map-schema-types';
 import type { TimeDimension } from '@/core/utils/date-mgt';
 import type { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import type { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -54,18 +54,6 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      *   bounds should be calculated and stored.
      */
     static calculateLayerBoundsAndSaveToStore(mapId: string, layerPath: string): void;
-    /**
-     * Retrieves the default filter configuration for a specific layer entry.
-     *
-     * @param {string} mapId - The unique identifier of the map instance.
-     * @param {string} layerPath - The path to the layer in the map configuration.
-     * @returns {string | undefined} - The default filter for the layer entry, or `undefined` if not available.
-     *
-     * @description
-     * This method fetches the layer entry configuration for the specified layer path and checks if it contains a `layerFilter` property.
-     * If the property exists, its value is returned; otherwise, `undefined` is returned.
-     */
-    static getLayerEntryConfigDefaultFilter(mapId: string, layerPath: string): string | undefined;
     /**
      * Retrieves the projection code for a specific layer.
      *
@@ -148,6 +136,11 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      * If the layer doesn't support temporal dimensions, the method returns `undefined`.
      */
     static getLayerTimeDimension(mapId: string, layerPath: string): TimeDimension | undefined;
+    /**
+     * Gets the legend icon images for a given layer legend
+     * @param {TypeLegend | null | undefined} layerLegend - The legend of the layer
+     * @returns {TypeLegendLayerItem[] | undefined} The legend icon images details
+     */
     static getLayerIconImage(layerLegend: TypeLegend | null | undefined): TypeLegendLayerItem[] | undefined;
     /**
      * This method propagates the information stored in the legend layer set to the store.
@@ -199,8 +192,9 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      * @param {string} mapId - The ID of the map.
      * @param {TypeLegendItem} item - The item to change.
      * @param {boolean} visibility - The new visibility.
+     * @param {string | undefined} classFilter - The new class filter.
      */
-    static setItemVisibility(mapId: string, layerPath: string, item: TypeLegendItem, visibility?: boolean): void;
+    static setItemVisibility(mapId: string, layerPath: string, item: TypeLegendItem, visibility: boolean, classFilter: string | undefined): void;
     /**
      * Toggle visibility of an item.
      * @param {string} mapId - The ID of the map.
@@ -230,24 +224,6 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      * @param {boolean} updateLegendLayers - Whether to update the legend layers or not
      */
     static setLayerOpacity(mapId: string, layerPath: string, opacity: number, updateLegendLayers?: boolean): void;
-    /**
-     * Filters features based on their visibility settings defined in the layer's unique value or class break style configuration.
-     *
-     * @param {string} mapId - The unique identifier of the map instance
-     * @param {string} layerPath - The path to the layer in the map configuration
-     * @param {TypeFeatureInfoEntry[]} features - Array of features to filter
-     *
-     * @returns {TypeFeatureInfoEntry[]} Filtered array of features based on their visibility settings
-     *
-     * @description
-     * This function processes features based on the layer's unique value style configuration:
-     * - If the layer doesn't use unique value or class break styling, returns all features unchanged
-     * - Features matching visible styles are included
-     * - Features matching invisible styles are excluded
-     * - Features with no matching style follow the defaultVisible setting
-     * @static
-     */
-    static processClassVisibility(mapId: string, layerPath: string, features: TypeFeatureInfoEntry[]): TypeFeatureInfoEntry[];
     /**
      * Sorts legend layers children recursively in given legend layers list.
      * @param {string} mapId - The ID of the map.

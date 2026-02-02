@@ -21,6 +21,7 @@ import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-pr
 import type { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import type { TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 export declare class MapEventProcessor extends AbstractEventProcessor {
     #private;
     /** The minimal delay to wait for the zoom, to be sure.. */
@@ -328,10 +329,9 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      * @param {string} mapId - The map id.
      * @param {string} layerPath - The path for the layer to get filters from.
      */
-    static getActiveVectorFilters(mapId: string, layerPath: string): (string | undefined)[] | undefined;
+    static getActiveFilters(mapId: string, layerPath: string): LayerFilters;
     /**
      * Apply all available filters to layer.
-     *
      * @param {string} mapId - The map id.
      * @param {string} layerPath - The path of the layer to apply filters to.
      */

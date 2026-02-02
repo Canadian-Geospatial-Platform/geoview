@@ -13,7 +13,6 @@ export interface IDataTableState {
     actions: {
         addOrUpdateTableFilter(layerPath: string, filter: string): void;
         applyMapFilters: (filterStrings: string) => void;
-        getFilteredDataFromLegendVisibility: (layerPath: string, features: TypeFeatureInfoEntry[]) => TypeFeatureInfoEntry[];
         setActiveLayersData: (layers: TypeLayerData[]) => void;
         setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
         setColumnsFiltersVisibility: (visible: boolean, layerPath: string) => void;
@@ -64,6 +63,7 @@ export type TypeAllFeatureInfoResultSetEntry = TypeResultSetEntry & TypeLayerDat
 export type TypeAllFeatureInfoResultSet = TypeResultSet<TypeAllFeatureInfoResultSetEntry>;
 export declare const useDataTableAllFeaturesDataArray: () => TypeAllFeatureInfoResultSetEntry[];
 export declare const useDataTableFilters: () => Record<string, string>;
+export declare const useDataTableFilterSelector: (layerPath: string) => string | undefined;
 export declare const useDataTableSelectedLayerPath: () => string;
 export declare const useDataTableLayerSettings: () => Record<string, IDataTableSettings>;
 export declare const useDataTableSelectedFeature: () => TypeFeatureInfoEntry | null;

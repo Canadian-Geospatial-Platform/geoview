@@ -4,7 +4,6 @@ import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { GeoTIFFLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/geotiff-layer-entry-config';
 import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
-import type { TypeOutfieldsType } from '@/api/types/map-schema-types';
 import { type TypeLegend } from '@/index';
 /**
  * Manages a GeoTIFF layer.
@@ -37,12 +36,6 @@ export declare class GVGeoTIFF extends AbstractGVTile {
      * @returns {GeoTIFFLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
      */
     getLayerConfig(): GeoTIFFLayerEntryConfig;
-    /**
-     * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
-     * @param {string} fieldName - The field name for which we want to get the type.
-     * @returns {TypeOutfieldsType} The type of the field.
-     */
-    protected onGetFieldType(fieldName: string): TypeOutfieldsType;
     /**
      * Overrides the way to get the bounds for this layer type.
      * @param {OLProjection} projection - The projection to get the bounds into.

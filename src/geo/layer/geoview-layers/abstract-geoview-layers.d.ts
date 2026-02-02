@@ -8,7 +8,6 @@ import type { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerStatus } fr
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { SnackbarType } from '@/core/utils/notifications';
-import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 /**
@@ -84,10 +83,16 @@ export declare abstract class AbstractGeoViewLayer {
     protected onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void;
     /**
      * Overridable method to process a layer entry and return a Promise of an Open Layer Base Layer object.
-     * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
-     * @returns {Promise<BaseLayer>} The Open Layer Base Layer that has been created.
+     * @param {AbstractBaseLayerEntryConfig} layerConfig - Information needed to create the GeoView layer.
+     * @returns {Promise<AbstractGVLayer>} The Geoview Layer that has been created.
      */
-    protected onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractBaseGVLayer>;
+    protected onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractGVLayer>;
+    /**
+     * Overridable function to perform additional initialization on the created GV Layer.
+     * @param {AbstractGVLayer} layer - The GV layer to initialize
+     * @returns {void}
+     */
+    protected onInitGVLayer(layer: AbstractGVLayer): void;
     /**
      * Overridable method to get the metadata.
      * Override this function to return the more precise type (covariant return).
@@ -215,6 +220,12 @@ export declare abstract class AbstractGeoViewLayer {
      * @returns {AbstractGVLayer} The GV Layer that has been created.
      */
     createGVLayer(layerConfig: AbstractBaseLayerEntryConfig): AbstractGVLayer;
+    /**
+     * Initializes the GV Layer.
+     * @param {AbstractGVLayer} layer - The layer to initialize.
+     * @returns {void}
+     */
+    initGVLayer(layer: AbstractGVLayer): void;
     /**
      * Emits a layer-specific message event with localization support
      * @protected

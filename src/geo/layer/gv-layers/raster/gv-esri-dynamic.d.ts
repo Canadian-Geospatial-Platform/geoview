@@ -5,13 +5,13 @@ import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { Map as OLMap } from 'ol';
 import type { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import type { TypeFeatureInfoEntry, rangeDomainType, codedValueType, TypeLayerStyleConfig, TypeOutfieldsType, TypeFeatureInfoEntryPartial } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoEntry, rangeDomainType, codedValueType, TypeOutfieldsType, TypeFeatureInfoEntryPartial } from '@/api/types/map-schema-types';
 import type { TypeLayerMetadataEsriExtent } from '@/api/types/layer-schema-types';
 import type { GeometryJson } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeDateFragments } from '@/core/utils/date-mgt';
-import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 /**
  * Manages an Esri Dynamic layer.
  *
@@ -21,7 +21,6 @@ import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-v
 export declare class GVEsriDynamic extends AbstractGVRaster {
     #private;
     static DEFAULT_HIT_TOLERANCE: number;
-    static DEFAULT_FILTER_1EQUALS1: string;
     /**
      * Constructs a GVEsriDynamic layer to manage an OpenLayer layer.
      * @param {ImageArcGISRest} olSource - The OpenLayer source.
@@ -104,10 +103,13 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
     /**
      * Overrides the get all feature information for all the features stored in the layer.
      * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
+     * @param {LayerFilters} layerFilters - The layer filters to apply when querying the features.
      * @param {AbortController?} [abortController] - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+     * @protected
+     * @override
      */
-    protected getAllFeatureInfo(map: OLMap, abortController?: AbortController): Promise<TypeFeatureInfoEntry[]>;
+    protected getAllFeatureInfo(map: OLMap, layerFilters: LayerFilters, abortController?: AbortController): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overrides the return of feature information at a given coordinate.
      * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.
@@ -128,6 +130,11 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
      */
     protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
+     * Overrides the way an EsriDynamic layer applies a view filter. It does so by updating the source layerDefs parameter.
+     * @param {LayerFilters} [filter] - The raw filter string input (defaults to an empty string if not provided).
+     */
+    protected onSetLayerFilters(filter?: LayerFilters): void;
+    /**
      * Retrieves feature records from the layer using their Object IDs (OIDs).
      * This method queries the underlying layer for the specified object IDs and returns
      * a Promise resolving to an array of partial feature info entries.
@@ -141,34 +148,16 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
     getRecordsByOIDs(objectIDs: number[], outSR?: number | undefined): Promise<TypeFeatureInfoEntryPartial[]>;
     /**
      * Applies a view filter to an Esri Dynamic layer's source by updating the `layerDefs` parameter.
-     * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
-     */
-    applyViewFilter(filter?: string | undefined): void;
-    /**
-     * Applies a view filter to an Esri Dynamic layer's source by updating the `layerDefs` parameter.
      * This function is responsible for generating the appropriate filter expression based on the layer configuration,
      * optional style, and time-based fragments. It ensures the filter is only applied if it has changed or needs to be reset.
      * @param {EsriDynamicLayerEntryConfig} layerConfig - The configuration object for the Esri Dynamic layer.
      * @param {ImageArcGISRest} source - The OpenLayers `ImageArcGISRest` source instance to which the filter will be applied.
      * @param {TypeLayerStyleConfig | undefined} style - Optional style configuration that may influence filter expression generation.
      * @param {TypeDateFragments | undefined} externalDateFragments - Optional external date fragments used to assist in formatting time-based filters.
-     * @param {GVEsriDynamic | undefined} layer - Optional GeoView layer containing the source (if exists) in order to trigger a redraw.
      * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
-     * @param {Function?} callbackWhenUpdated - Optional callback that is invoked with the final filter string if the layer was updated.
      * @throws {LayerInvalidLayerFilterError} If the filter expression fails to parse or cannot be applied.
      */
-    static applyViewFilterOnSource(layerConfig: EsriDynamicLayerEntryConfig, source: ImageArcGISRest, style: TypeLayerStyleConfig | undefined, externalDateFragments: TypeDateFragments | undefined, layer: GVEsriDynamic | undefined, filter?: string | undefined, callbackWhenUpdated?: ((filterToUse: string) => void) | undefined): void;
-    /**
-     * Builds a filter string (SQL-like or OGC-compliant) for a given layer and style configuration.
-     * This method supports:
-     * - **simple styles** → returns the base layer filter or a default `(1=1)` condition.
-     * - **unique value styles** → builds an optimized filter for visible categories.
-     * - **class breaks styles** → builds numeric range filters based on visibility flags.
-     * @param {EsriDynamicLayerEntryConfig | OgcWmsLayerEntryConfig} layerConfig - The layer configuration.
-     * @param {TypeLayerStyleConfig | undefined} style - The style configuration (optional).
-     * @returns {string | undefined} The filter expression, or `undefined` if not applicable.
-     */
-    static getFilterFromStyle(layerConfig: EsriDynamicLayerEntryConfig | OgcWmsLayerEntryConfig, style: TypeLayerStyleConfig | undefined): string | undefined;
+    static applyViewFilterOnSource(layerConfig: EsriDynamicLayerEntryConfig, source: ImageArcGISRest, externalDateFragments: TypeDateFragments | undefined, filter: LayerFilters | undefined): void;
 }
 export type EsriQueryJsonResponse = {
     extent: TypeLayerMetadataEsriExtent;

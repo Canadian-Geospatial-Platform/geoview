@@ -3,7 +3,6 @@ import type { ConfigClassOrType, TypeBaseSourceInitialConfig, TypeFeatureInfoLay
 import type { ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { TimeDimension } from '@/core/utils/date-mgt';
-import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 export interface AbstractBaseLayerEntryConfigProps extends ConfigBaseClassProps {
     /** Source settings to apply to the GeoView layer source at creation time. */
     source?: TypeBaseSourceInitialConfig;
@@ -93,6 +92,7 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
     /**
      * The first TypeStyleSetting associated with the TypeStyleGeometry associated with the style as could be read from the layer config metadata.
      * @returns {TypeStyleSettings[]} The array of TypeStyleSettings
+     * @deprecated This function should be deleted, because it can introduce issues when multiple geometry types are set on a layer style. See GeoJSON - Multi template to reproduce the issue.
      */
     getLayerStyleSettings(): TypeLayerStyleSettings | undefined;
     /**
@@ -120,27 +120,6 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      * @returns {string} The layer filter or undefined.
      */
     getLayerFilter(): string | undefined;
-    /**
-     * Sets the layer filter for the layer.
-     * @param {string} layerFilter - The layer filter
-     */
-    setLayerFilter(layerFilter: string): void;
-    /**
-     * Gets the layer filter equation
-     * @returns {FilterNodeType[] | undefined} The filter equation if any
-     */
-    getFilterEquation(): FilterNodeType[] | undefined;
-    /**
-     * Sets the layer filter equation
-     * @param {FilterNodeType[]?} filterEquation - The layer filter equation
-     */
-    setFilterEquation(filterEquation: FilterNodeType[] | undefined): void;
-    /**
-     * Gets the layer legend filter is off flag
-     * @returns {boolean} The legend filter is off flag
-     * @deprecated This getter doesn't seem to be used as its corresponding attribute is always false and there's no setters
-     */
-    getLegendFilterIsOff(): boolean;
     /**
      * Gets the source object.
      * @returns {TypeBaseSourceInitialConfig} The source.

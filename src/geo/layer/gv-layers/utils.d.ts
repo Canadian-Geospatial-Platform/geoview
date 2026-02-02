@@ -1,16 +1,7 @@
 import type { Coordinate } from 'ol/coordinate';
 import type { TypeDateFragments } from '@/core/utils/date-mgt';
-import type { TypeOutfieldsType, TypeAliasLookup, TypeOutfields } from '@/api/types/map-schema-types';
-import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { TypeAliasLookup, TypeOutfields } from '@/api/types/map-schema-types';
 export declare class GVLayerUtilities {
-    /**
-     * Returns the type of the specified field.
-     * @param {AbstractBaseLayerEntryConfig} layerConfig The layer config
-     * @param {string} fieldName field name for which we want to get the type.
-     * @returns {TypeOutfieldsType} The type of the field.
-     * @deprecated This function seems deprecated, it's called, but where it's called doesn't seem to be called anywhere, remove it and remove where it's called?
-     */
-    static featureInfoGetFieldType(layerConfig: AbstractBaseLayerEntryConfig, fieldName: string): TypeOutfieldsType;
     /**
      * Parses a datetime filter for use in a Vector Geoviewlayer.
      *
@@ -33,6 +24,25 @@ export declare class GVLayerUtilities {
      */
     static parseDateTimeValuesEsriImageOrWMS(filter: string, externalFragmentsOrder: TypeDateFragments | undefined): string;
     static createAliasLookup(outfields: TypeOutfields[] | undefined): TypeAliasLookup;
+    /**
+     * Rewrites SQL `LIKE` operations into case-insensitive equivalents for
+     * Esri Dynamic (MapServer) services by wrapping the field in `UPPER()`
+     * and uppercasing the comparison pattern.
+     * Example:
+     * ```
+     * StationName like '%riv%'
+     * ```
+     * becomes:
+     * ```
+     * UPPER(StationName) LIKE '%RIV%'
+     * ```
+     * Only the provided field names are transformed; all other expressions remain untouched.
+     * @param {string} filter - The original SQL-like filter string.
+     * @param {string[]} fieldNames - List of field names allowed to be rewritten for case-insensitive LIKE matching.
+     * @returns {string} The transformed filter string with case-insensitive LIKE operations applied.
+     * @static
+     */
+    static parseLikeOperationsEsriDynamic(filter: string, fieldNames: string[]): string;
 }
 export type EsriRelatedRecordsJsonResponse = {
     features: EsriRelatedRecordsJsonResponseRelatedRecord[];

@@ -79,6 +79,7 @@ export type TypeTimeSliderProps = {
 export declare const useTimeSliderLayers: () => TimeSliderLayerSet | undefined;
 export declare const useTimeSliderSelectedLayerPath: () => string;
 export declare const useTimeSliderFilters: () => Record<string, string>;
+export declare const useTimeSliderFiltersSelector: (layerPath: string) => string | undefined;
 export declare const useTimeSliderStoreActions: () => TimeSliderActions | undefined;
 export {};
 //# sourceMappingURL=time-slider-state.d.ts.map

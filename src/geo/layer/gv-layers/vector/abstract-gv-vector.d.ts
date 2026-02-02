@@ -9,11 +9,11 @@ import type { Extent } from 'ol/extent';
 import type { Pixel } from 'ol/pixel';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { EventDelegateBase } from '@/api/events/event-helper';
-import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import type { TypeFeatureInfoEntry, TypeOutfieldsType } from '@/api/types/map-schema-types';
+import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import type { TypeDateFragments } from '@/core/utils/date-mgt';
+import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 /**
  * Abstract Geoview Layer managing an OpenLayer vector type layer.
  */
@@ -48,16 +48,19 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
     /**
      * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
      * @param {string} fieldName - The field name for which we want to get the type.
-     * @returns {TypeOutfieldsType} The type of the field.
+     * @returns {TypeOutfieldsType} The type of the field or 'string' when undefined.
      */
     protected onGetFieldType(fieldName: string): TypeOutfieldsType;
     /**
      * Overrides the get all feature information for all the features stored in the layer.
      * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
+     * @param {LayerFilters} layerFilters - The layer filters to apply when querying the features.
      * @param {AbortController?} [abortController] - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+     * @protected
+     * @override
      */
-    protected getAllFeatureInfo(map: OLMap, abortController?: AbortController): Promise<TypeFeatureInfoEntry[]>;
+    protected getAllFeatureInfo(map: OLMap, layerFilters: LayerFilters, abortController?: AbortController): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overrides the return of feature information at a given pixel location.
      * @param {OLMap} map - The Map where to get Feature Info At Pixel from.
@@ -102,11 +105,6 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      */
     onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
     /**
-     * Applies a view filter to a Vector layer's configuration by updating the layerConfig.filterEquation parameter.
-     * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
-     */
-    applyViewFilter(filter?: string | undefined): void;
-    /**
      * Sets the style applied flag indicating when a style has been applied for the AbstractGVVector via the style callback function.
      * @param {boolean} styleApplied - Indicates if the style has been applied on the AbstractGVVector.
      */
@@ -127,23 +125,9 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
      * @param {FeatureLike} feature - Feature that need its style to be defined.
      * @param {string} label - The style label when one has to be created
      * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
-     * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
      * @returns {Style} The style for the feature
      */
-    static calculateStyleForFeature(layer: AbstractGVLayer, feature: FeatureLike, resolution: number, label: string, filterEquation?: FilterNodeType[], legendFilterIsOff?: boolean): Style | undefined;
-    /**
-     * Applies a view filter to a vector layer configuration. The resulting filter is parsed and stored in the layer
-     * config's `filterEquation`, and triggers a re-evaluation of feature styles if applicable.
-     * If the layer config is invalid or the filter has not changed, no action is taken. Date values in the filter are also
-     * parsed using external fragments if available.
-     * @param {VectorLayerEntryConfig} layerConfig - The vector layer configuration to apply the filter to.
-     * @param {TypeDateFragments | undefined} externalDateFragments - Optional date fragments used to parse time-based filters.
-     * @param {AbstractGVLayer | undefined} layer - Optional GeoView layer containing that will get its source updated to trigger a redraw.
-     * @param {string | undefined} filter - A raw filter string to override the layer's view filter (default is an empty string).
-     * @param {(filterToUse: string) => void} [callbackWhenUpdated] - Optional callback invoked with the final filter string if updated.
-     * @throws {LayerInvalidLayerFilterError} If the filter cannot be parsed or applied due to a syntax or runtime issue.
-     */
-    static applyViewFilterOnConfig(layerConfig: VectorLayerEntryConfig, externalDateFragments: TypeDateFragments | undefined, layer: AbstractGVLayer | undefined, filter?: string | undefined, callbackWhenUpdated?: ((filterToUse: string) => void) | undefined): void;
+    static calculateStyleForFeature(layer: AbstractGVLayer, feature: FeatureLike, resolution: number, label: string, filterEquation?: FilterNodeType[]): Style | undefined;
 }
 /**
  * Define an event for the delegate

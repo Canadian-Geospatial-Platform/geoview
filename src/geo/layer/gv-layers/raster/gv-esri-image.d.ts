@@ -5,6 +5,7 @@ import type { Projection as OLProjection } from 'ol/proj';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 /**
  * Manages an Esri Image layer.
  *
@@ -57,13 +58,10 @@ export declare class GVEsriImage extends AbstractGVRaster {
      */
     onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
     /**
-     * Applies a view filter to the layer. When the combineLegendFilter flag is false, the filter parameter is used alone to display
-     * the features. Otherwise, the legend filter and the filter parameter are combined together to define the view filter. The
-     * legend filters are derived from the uniqueValue or classBreaks style of the layer. When the layer config is invalid, nothing
-     * is done.
-     * @param {string} filter - An optional filter to be used in place of the getViewFilter value.
+     * Overrides the way a WMS layer applies a view filter. It does so by updating the source TIME parameters.
+     * @param {LayerFilters} [filter] - An optional filter to be used in place of the getViewFilter value.
      */
-    applyViewFilter(filter?: string | undefined): void;
+    protected onSetLayerFilters(filter?: LayerFilters): void;
 }
 export type TypeEsriImageLayerLegend = {
     layers: TypeEsriImageLayerLegendLayer[];
