@@ -14,7 +14,6 @@ import { VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
 import { XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
-import { LayerApi } from '@/geo/layer/layer';
 
 import {
   LayerGeoCoreInvalidResponseError,
@@ -196,7 +195,7 @@ export class UUIDmapConfigReader {
               serverType,
               layerIsTimeAware,
               layerEntries,
-              LayerApi.DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS
+              true
             );
           } else if (layerType === CONST_LAYER_TYPES.WFS) {
             // Redirect

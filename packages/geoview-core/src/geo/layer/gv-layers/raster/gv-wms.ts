@@ -337,6 +337,11 @@ export class GVWMS extends AbstractGVRaster {
         }
       }
     } catch (error: unknown) {
+      this.emitMessage(
+        'error.layer.noWMSLegend',
+        [this.getLayerConfig().getLayerName() || this.getLayerConfig().layerId, formatError(error).name],
+        'warning'
+      );
       // Depending on the error
       if (error instanceof ResponseContentError) {
         // Log warning

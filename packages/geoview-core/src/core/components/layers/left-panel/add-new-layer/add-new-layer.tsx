@@ -388,7 +388,7 @@ export function AddNewLayer(): JSX.Element {
       emitErrorNone();
     }
 
-    const guessedLayerType = ConfigApi.guessLayerType(displayURL);
+    const guessedLayerType = ConfigApi.guessLayerType(displayURL) || '';
     const layerTypeIsAllowed = setLayerTypeIfAllowed(guessedLayerType as TypeGeoviewLayerType);
     if (valid && layerTypeIsAllowed) {
       setActiveStep(1);

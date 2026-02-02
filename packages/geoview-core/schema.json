@@ -1062,7 +1062,7 @@
         }
       }
     },
-     "TypeLayerTextConfig": {
+    "TypeLayerTextConfig": {
       "description": "The text / label properties for a layer or specific style",
       "additionalProperties": false,
       "minProperties": 1,
@@ -1114,10 +1114,7 @@
         },
         "scale": {
           "description": "For scaling up or down text",
-          "oneOf": [
-            {"type": "number"},
-            {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2}
-          ]
+          "oneOf": [{ "type": "number" }, { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 }]
         },
         "rotateWithView": {
           "description": "Whether to rotate the text with the view",
@@ -1133,10 +1130,7 @@
         },
         "text": {
           "description": "Text value to apply to feature labels. Will be overwritten if 'field' is set. Can be set to more complicated text strings with values inside {} being replaced with their field values.",
-          "oneOf": [
-            {"type": "string"},
-            {"type": "array", "items": {"type": "string"}, "minItems": 2}
-          ]
+          "oneOf": [{ "type": "string" }, { "type": "array", "items": { "type": "string" }, "minItems": 2 }]
         },
         "textAlign": {
           "description": "Text alignment. The default is 'center'",
@@ -1175,7 +1169,7 @@
         "padding": {
           "description": "Padding in pixels around the text for decluttering and background. Values are: [top,right,bottom,left]",
           "type": "array",
-          "items": {"type": "number"},
+          "items": { "type": "number" },
           "minItems": 4,
           "maxItems": 4
         },
@@ -1189,7 +1183,7 @@
           "type": "number"
         },
         "maxZoomLevel": {
-          "description": "Maximum zoom level to show labels (higher values = more zoomed in)", 
+          "description": "Maximum zoom level to show labels (higher values = more zoomed in)",
           "type": "number"
         },
         "wrap": {
@@ -2414,6 +2408,11 @@
         },
         "fetchStylesOnWMS": {
           "description": "Flag used by WFS layers to indicate if the layer should get the styling information from a WMS.",
+          "type": "boolean",
+          "default": true
+        },
+        "useFullWmsSublayers": {
+          "description": "Flag used by WMS layers to indicate if the layer should display all the sublayers of the layer by default.",
           "type": "boolean",
           "default": true
         },
