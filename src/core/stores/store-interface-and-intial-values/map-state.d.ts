@@ -187,6 +187,7 @@ export declare const useMapZoom: () => number;
 export declare const getMapPointerPosition: (mapId: string) => TypeMapMouseInfo | undefined;
 export declare const useMapAllVisibleandInRangeLayers: () => string[];
 export declare const useMapSelectorLayerVisibility: (layerPath: string) => boolean;
+export declare const useMapSelectorLayerArrayVisibility: (layerPaths: string[]) => boolean;
 export declare const useMapSelectorLayerParentHidden: (layerPath: string) => boolean;
 export declare const useMapSelectorLayerInVisibleRange: (layerPath: string) => boolean;
 export declare const useMapSelectorIsLayerHiddenOnMap: (layerPath: string) => boolean;

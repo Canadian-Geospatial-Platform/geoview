@@ -3,7 +3,7 @@ import type { Geometry } from 'ol/geom';
 import type { Options as StrokeOptions } from 'ol/style/Stroke';
 import type { FeatureLike } from 'ol/Feature';
 import type Feature from 'ol/Feature';
-import type { TypeLayerStyleConfigType, TypePolygonVectorConfig, TypeIconSymbolVectorConfig, TypeLineStyle, TypeLineStringVectorConfig, TypeSimpleSymbolVectorConfig, TypeKindOfVectorSettings, TypeStyleGeometry, TypeLayerStyleSettings, TypeLayerStyleConfig, TypeLayerStyleConfigInfo, TypeLayerStyleValueCondition, TypeLayerTextConfig, TypeLayerStyleVisualVariable, TypeAliasLookup, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
+import type { TypeLayerStyleConfigType, TypePolygonVectorConfig, TypeIconSymbolVectorConfig, TypeLineStyle, TypeLineStringVectorConfig, TypeSimpleSymbolVectorConfig, TypeKindOfVectorSettings, TypeStyleGeometry, TypeLayerStyleSettings, TypeLayerStyleConfig, TypeLayerStyleConfigInfo, TypeLayerStyleValueCondition, TypeLayerTextConfig, TypeLayerStyleVisualVariable, TypeAliasLookup, TypeValidMapProjectionCodes, TypeOutfields } from '@/api/types/map-schema-types';
 import type { TypeLayerMetadataFields } from '@/api/types/layer-schema-types';
 import type { FillPatternLine, FillPatternSettings, FilterNodeType } from './geoview-renderer-types';
 import type { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -11,15 +11,18 @@ type TypeStyleProcessor = (styleSettings: TypeLayerStyleSettings | TypeKindOfVec
 /**
  * Options object for processing styles with optional parameters
  */
-type TypeStyleProcessorOptions = {
+export type TypeStyleProcessorOptions = {
     filterEquation?: FilterNodeType[];
-    legendFilterIsOff?: boolean;
+    /** Indicates if we want to return the symbol even if the symbol visibility is false */
+    bypassVisibility?: boolean;
     domainsLookup?: TypeLayerMetadataFields[];
     aliasLookup?: TypeAliasLookup;
     visualVariables?: TypeLayerStyleVisualVariable[];
 };
 export declare abstract class GeoviewRenderer {
     #private;
+    static DEFAULT_FILTER_1EQUALS1: string;
+    static DEFAULT_FILTER_1EQUALS0: string;
     /**
      * Get the default color using the default color index.
      *
@@ -33,13 +36,20 @@ export declare abstract class GeoviewRenderer {
     /**
      * This method returns the type of geometry. It removes the Multi prefix because for the geoviewRenderer, a MultiPoint has
      * the same behaviour than a Point.
-     *
      * @param {FeatureLike} feature - The feature to check
-     *
+     * @param {TypeLayerStyleConfig} defaultLayerStyle - The default layer style config to use when the feature has no geometry
      * @returns {TypeStyleGeometry} The type of geometry (Point, LineString, Polygon).
      * @static
      */
-    static getGeometryType(feature: FeatureLike): TypeStyleGeometry;
+    static readGeometryTypeSimplifiedFromFeature(feature: FeatureLike, defaultLayerStyle: TypeLayerStyleConfig): TypeStyleGeometry;
+    /**
+     * This method returns the type of geometry. It removes the Multi prefix because for the geoviewRenderer, a MultiPoint has
+     * the same behaviour than a Point.
+     * @param {TypeStyleGeometry} geometryType - The feature to check
+     * @returns {TypeStyleGeometry} The type of geometry (Point, LineString, Polygon).
+     * @static
+     */
+    static readGeometryTypeSimplified(geometryType: TypeStyleGeometry): TypeStyleGeometry;
     /**
      * Decodes a base64-encoded SVG string and replaces parameterized placeholders
      * (e.g., `param(fill)` or `param(outline)`) with actual values provided
@@ -132,15 +142,17 @@ export declare abstract class GeoviewRenderer {
      */
     static executeOperator(operator: FilterNodeType, dataStack: FilterNodeType[]): void;
     /**
-     * Use the filter equation and the feature fields to determine if the feature is visible.
-     *
-     * @param {Feature} feature - Feature used to find the visibility value to return.
-     * @param {FilterNodeType[]} filterEquation - Filter used to find the visibility value to return.
-     *
-     * @returns {boolean | undefined} The visibility flag for the feature specified.
+     * Evaluates whether a feature satisfies a parsed filter equation.
+     * The filter equation is expected to be in infix order and is evaluated using
+     * a stack-based (shunting-yard–style) algorithm that respects operator
+     * precedence and grouping.
+     * @param {Feature} feature - The feature whose attributes are used to resolve variable nodes.
+     * @param {FilterNodeType[] | undefined} [filterEquation] - Parsed filter expression tokens.
+     * @returns {boolean | undefined} True if the feature satisfies the filter, false otherwise.
+     * @throws {Error} If the filter expression is invalid or cannot be evaluated.
      * @static
      */
-    static featureIsNotVisible(feature: Feature, filterEquation: FilterNodeType[]): boolean | undefined;
+    static featureRespectsFilterEquation(feature: Feature, filterEquation?: FilterNodeType[]): boolean;
     /**
      * Process a circle symbol using the settings.
      *
@@ -527,29 +539,27 @@ export declare abstract class GeoviewRenderer {
      * create it using the default style strategy.
      * @param {FeatureLike} feature - Feature that need its style to be defined.
      * @param {number} resolution - The resolution of the map
-     * @param {TypeStyleConfig} style - The style to use
+     * @param {TypeStyleConfig} layerStyle - The style to use
      * @param {string} label - The style label when one has to be created
      * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
-     * @param {boolean} legendFilterIsOff - When true, do not apply legend filter.
      * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
      * @param {TypeLayerTextConfig?} layerText - An optional text configuration to apply to the feature
      * @param {() => Promise<string | null>} callbackWhenCreatingStyle - An optional callback to execute when a new style had to be created
      * @returns {Style | undefined} The style applied to the feature or undefined if not found.
      * @static
      */
-    static getAndCreateFeatureStyle(feature: FeatureLike, resolution: number, style: TypeLayerStyleConfig, label: string, filterEquation?: FilterNodeType[], legendFilterIsOff?: boolean, aliasLookup?: TypeAliasLookup, layerText?: TypeLayerTextConfig, callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeLayerStyleConfigInfo) => void): Style | undefined;
+    static getAndCreateFeatureStyle(feature: FeatureLike, resolution: number, layerStyle: TypeLayerStyleConfig, label: string, filterEquation?: FilterNodeType[], aliasLookup?: TypeAliasLookup, layerText?: TypeLayerTextConfig, callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeLayerStyleConfigInfo) => void): Style | undefined;
     /**
      * This method gets the image source from the style of the feature using the layer entry config.
      * @param {Feature} feature - The feature that need its icon to be defined.
      * @param {TypeStyleConfig} style - The style to use
      * @param {FilterNodeType[]?} filterEquation - Filter equation associated to the layer.
-     * @param {boolean?} legendFilterIsOff - When true, do not apply legend filter.
      * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
      * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
      * @returns {string} The icon associated to the feature or a default empty one.
      * @static
      */
-    static getFeatureImageSource(feature: Feature, style: TypeLayerStyleConfig, filterEquation?: FilterNodeType[], legendFilterIsOff?: boolean, domainsLookup?: TypeLayerMetadataFields[], aliasLookup?: TypeAliasLookup): string | undefined;
+    static getFeatureIconSource(style: Style | undefined, geometryType: TypeStyleGeometry, styleSettings: TypeLayerStyleSettings | undefined): string | undefined;
     /**
      * Classify the remaining nodes to complete the classification. The plus and minus can be a unary or a binary operator. It is
      * only at the end that we can determine there node type. Nodes that start with a number are numbers, otherwise they are
@@ -585,11 +595,16 @@ export declare abstract class GeoviewRenderer {
      */
     static extractStrings(keywordArray: FilterNodeType[]): FilterNodeType[];
     /**
+     * Creates a filter equation from a filter string.
+     * @param {string} filter - The filter string to convert.
+     * @returns {FilterNodeType[]} The filter equation as an array of FilterNodeType.
+     * @static
+     */
+    static createFilterNodeFromFilter(filter: string): FilterNodeType[];
+    /**
      * Analyse the filter and split it in syntaxique nodes.  If a problem is detected, an error object is thrown with an
      * explanatory message.
-     *
      * @param {FilterNodeType[]} filterNodeArrayType - Node array to analyse.
-     *
      * @returns {FilterNodeType[]} The new node array with all nodes classified.
      * @static
      */
@@ -653,6 +668,17 @@ export declare abstract class GeoviewRenderer {
      * @static
      */
     static processTextTemplate(template: string, feature: FeatureLike): string;
+    /**
+     * Builds a filter string (SQL-like or OGC-compliant) for a given layer and style configuration.
+     * This method supports:
+     * - **simple styles** → returns the base layer filter or a default `(1=1)` condition.
+     * - **unique value styles** → builds an optimized filter for visible categories.
+     * - **class breaks styles** → builds numeric range filters based on visibility flags.
+     * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration.
+     * @param {TypeLayerStyleConfig | undefined} style - The style configuration (optional).
+     * @returns {string | undefined} The filter expression, or `undefined` if not applicable.
+     */
+    static getFilterFromStyle(outFields: TypeOutfields[] | undefined, style: TypeLayerStyleConfig | undefined, styleSettings: TypeLayerStyleSettings | undefined): string | undefined;
 }
 export {};
 //# sourceMappingURL=geoview-renderer.d.ts.map

@@ -16,10 +16,10 @@ import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { TypeLayerStyleConfig, TypeFeatureInfoEntry, codedValueType, rangeDomainType, TypeLocation, QueryType, TypeStyleGeometry, TypeOutfieldsType, TypeOutfields, TypeLayerStyleSettings } from '@/api/types/map-schema-types';
 import type { TypeLayerMetadataFields, TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
 import type { TypeLegendItem } from '@/core/components/layers/types';
-import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { SnackbarType } from '@/core/utils/notifications';
+import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
  */
@@ -77,6 +77,7 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @param {OLProjection} outProjection - The output projection for the extent.
      * @param {string} outfield - ID field to return for services that require a value in outfields.
      * @returns {Promise<Extent>} The extent of the features, if available
+     * @throws {NotImplementedError} When the function isn't overridden by the children class.
      */
     protected onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
     /**
@@ -113,10 +114,13 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     /**
      * Overridable function to get all feature information for all the features stored in the layer.
      * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
+     * @param {LayerFilters} layerFilters - The layer filters to apply when querying the features.
      * @param {AbortController?} [abortController] - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+     * @throws {NotImplementedError} When the function isn't overridden by the children class.
+     * @protected
      */
-    protected getAllFeatureInfo(map: OLMap, abortController?: AbortController): Promise<TypeFeatureInfoEntry[]>;
+    protected getAllFeatureInfo(map: OLMap, layerFilters: LayerFilters, abortController?: AbortController): Promise<TypeFeatureInfoEntry[]>;
     /**
      * Overridable function to return of feature information at a given pixel location.
      * @param {OLMap} map - The Map where to get Feature Info At Pixel from.
@@ -133,6 +137,7 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
      * @param {AbortController?} [abortController] - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+     * @throws {NotImplementedError} When the function isn't overridden by the children class.
      */
     protected getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
@@ -142,6 +147,7 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
      * @param {AbortController?} [abortController] - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+     * @throws {NotImplementedError} When the function isn't overridden by the children class.
      */
     protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
@@ -151,6 +157,7 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
      * @param {AbortController?} [abortController] - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+     * @throws {NotImplementedError} When the function isn't overridden by the children class.
      */
     protected getFeatureInfoUsingBBox(map: OLMap, location: Coordinate[], queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
@@ -160,6 +167,7 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
      * @param {AbortController?} [abortController] - The optional abort controller.
      * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+     * @throws {NotImplementedError} When the function isn't overridden by the children class.
      */
     protected getFeatureInfoUsingPolygon(map: OLMap, location: Coordinate[], queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
     /**
@@ -179,6 +187,12 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @param {TypeLegend} legend - The fetched legend information
      */
     onSetStyleAccordingToLegend(legend: TypeLegend): void;
+    /**
+     * Overridable function to apply a view filter on the current layer.
+     * @param {LayerFilters} [filter] - The elaborate layer filters to be used.
+     * @returns {void}
+     */
+    protected onSetLayerFilters(filter?: LayerFilters): void;
     /**
      * Initializes the GVLayer. This function checks if the source is ready and if so it calls onLoaded() to pursue initialization of the layer.
      * If the source isn't ready, it registers to the source ready event to pursue initialization of the layer once its source is ready.
@@ -226,6 +240,14 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @param {boolean} visibility - The visibility of the style item
      */
     setStyleItemVisibility(item: TypeLegendItem, visibility: boolean): void;
+    /**
+     * Builds and returns a filter expression derived from the layer's style configuration.
+     * This method delegates the filter extraction logic to {@link GeoviewRenderer.getFilterFromStyle},
+     * using the current layer configuration (outfields, style, and style settings).
+     * @returns {string | undefined} A filter expression string if one can be derived from the style,
+     * or `undefined` if no filter applies.
+     */
+    getFilterFromStyle(): string | undefined;
     /**
      * Gets the bounds for the layer in the given projection.
      * @param {OLProjection} projection - The projection to get the bounds into.
@@ -284,10 +306,22 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      */
     getFieldType(fieldName: string): TypeOutfieldsType;
     /**
-     * Gets the layerFilter that is associated to the layer.
-     * @returns {string | undefined} The filter associated to the layer or undefined.
+     * Gets the layer filters associated to the layer.
+     * @returns {LayerFilters} The filter associated to the layer or undefined.
      */
-    getLayerFilter(): string | undefined;
+    getLayerFilters(): LayerFilters;
+    /**
+     * Sets the layer filters associated to the layer.
+     * @param {LayerFilters | undefined} layerFilters - The filter layers associated to the layer or undefined.
+     * @returns {void}
+     */
+    setLayerFilters(layerFilters: LayerFilters, refresh: boolean | undefined): void;
+    /**
+     * Applies a time filter on a date range.
+     * @param {string} date1 - The start date
+     * @param {string} date2 - The end date
+     */
+    setLayerFiltersDate(date1: string, date2: string): void;
     /**
      * Returns feature information for the layer specified.
      * @param {OLMap} map - The Map to get feature info from.
@@ -327,7 +361,7 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @param {number} timeout - A timeout for the period to wait for. Defaults to 30,000 ms.
      * @returns {Promise<void>} A Promise that resolves when the layer style has been applied.
      */
-    waitStyleApplied(timeout?: number): Promise<TypeLayerStyleConfig | undefined>;
+    waitStyleApplied(timeout?: number): Promise<TypeLayerStyleConfig>;
     /**
      * Gets and formats the value of the field with the name passed in parameter. Vector GeoView layers convert dates to milliseconds
      * since the base date. Vector feature dates must be in ISO format.
@@ -506,13 +540,12 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * Caches results in the `imageSourceDict` to avoid redundant processing.
      * @param {Feature} feature - The feature whose visual representation is to be retrieved.
      * @param {TypeLayerStyleConfig} layerStyle - Style configuration grouped by geometry type (e.g., Point, LineString, Polygon).
-     * @param {OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig} layerConfig - The configuration for the layer containing the feature.
      * @param {TypeLayerMetadataFields[]?} domainsLookup - Optional domain information for interpreting coded values.
      * @param {Record<string, string>} aliasLookup - A mapping of original field names to their aliases.
      * @param {Record<string, string | undefined>} imageSourceDict - A dictionary used to cache and reuse image sources by style key.
      * @returns {string | undefined} The image source string representing the feature's style, or `undefined` if generation fails.
      */
-    static getImageSource(feature: Feature, layerPath: string, layerStyle: TypeLayerStyleConfig, filterEquation: FilterNodeType[] | undefined, domainsLookup: TypeLayerMetadataFields[] | undefined, aliasLookup: Record<string, string>, imageSourceDict: Record<string, string | undefined>): string | undefined;
+    static getFeatureIconSource(feature: Feature, layerStyle: TypeLayerStyleConfig, domainsLookup: TypeLayerMetadataFields[] | undefined, aliasLookup: Record<string, string>, imageSourceDict: Record<string, string | undefined>): string | undefined;
     /**
      * Formats a set of OpenLayers features into a structured array of feature info entries.
      * Each feature is enriched with geometry, extent, field information, and optional styling.
@@ -532,7 +565,7 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @description
      * Will not throw; errors are caught and logged. Returns an empty array if processing fails.
      */
-    static helperFormatFeatureInfoResult(features: Feature[], layerPath: string, schemaTag: TypeGeoviewLayerType, nameField: string | undefined, outFields: TypeOutfields[] | undefined, supportZoomTo: boolean, domainsLookup: TypeLayerMetadataFields[] | undefined, layerStyle: Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>> | undefined, filterEquation: FilterNodeType[] | undefined, callbackGetFieldType: (fieldName: string) => TypeOutfieldsType, callbackGetFieldDomain: (fieldName: string) => codedValueType | rangeDomainType | null, callbackGetFieldValue: (feature: Feature, fieldName: string, fieldType: TypeOutfieldsType) => string | number | Date): TypeFeatureInfoEntry[];
+    static helperFormatFeatureInfoResult(features: Feature[], layerPath: string, schemaTag: TypeGeoviewLayerType, nameField: string | undefined, outFields: TypeOutfields[] | undefined, supportZoomTo: boolean, domainsLookup: TypeLayerMetadataFields[] | undefined, layerStyle: Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>> | undefined, callbackGetFieldType: (fieldName: string) => TypeOutfieldsType, callbackGetFieldDomain: (fieldName: string) => codedValueType | rangeDomainType | null, callbackGetFieldValue: (feature: Feature, fieldName: string, fieldType: TypeOutfieldsType) => string | number | Date): TypeFeatureInfoEntry[];
     /**
      * Gets and formats the value of a field from a feature.
      * For vector GeoView layers, dates are converted from milliseconds since the base date.
@@ -580,7 +613,7 @@ export type LegendQueriedDelegate = EventDelegateBase<AbstractGVLayer, LegendQue
  * Define an event for the delegate
  */
 export type LayerFilterAppliedEvent = {
-    filter: string;
+    filter: LayerFilters;
 };
 /**
  * Define a delegate for the event handler function signature

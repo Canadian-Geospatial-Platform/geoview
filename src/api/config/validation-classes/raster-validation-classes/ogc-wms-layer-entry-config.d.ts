@@ -45,7 +45,7 @@ export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig
      */
     getAttributions(): string[] | undefined;
     /**
-     * Gets the version. Defaults to 1.3.0.
+     * Gets the version. Defaults to 1.1.0.
      * @returns {string} The service version as read from the metadata attribute.
      */
     getVersion(): string;

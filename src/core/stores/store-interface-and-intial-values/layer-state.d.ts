@@ -23,7 +23,6 @@ export interface ILayerState {
         queryLayerEsriDynamic: (layerPath: string, objectIDs: number[]) => Promise<TypeFeatureInfoEntryPartial[]>;
         getLayer: (layerPath: string) => TypeLegendLayer | undefined;
         getLayerBounds: (layerPath: string) => number[] | undefined;
-        getLayerDefaultFilter: (layerPath: string) => string | undefined;
         getLayerDeleteInProgress: () => string;
         getLayerServiceProjection: (layerPath: string) => string | undefined;
         getLayerTimeDimension: (layerPath: string) => TimeDimension | undefined;
@@ -84,6 +83,8 @@ export declare const useLayerIconLayerSet: (layerPath: string) => string[];
 export declare const useLayerSelectorId: (layerPath: string) => string | undefined;
 export declare const useLayerSelectorName: (layerPath: string) => string | undefined;
 export declare const useLayerSelectorStatus: (layerPath: string) => import("@/api/types/layer-schema-types").TypeLayerStatus | undefined;
+export declare const useLayerSelectorFilter: (layerPath: string) => string | undefined;
+export declare const useLayerSelectorFilterClass: (layerPath: string) => string | undefined;
 export declare const useLayerSelectorType: (layerPath: string) => TypeGeoviewLayerType | undefined;
 export declare const useLayerSelectorControls: (layerPath: string) => import("@/api/types/layer-schema-types").TypeLayerControls | undefined;
 export declare const useLayerSelectorChildren: (layerPath: string) => TypeLegendLayer[] | undefined;
