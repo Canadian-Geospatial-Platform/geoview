@@ -108,6 +108,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
     if (
       layerTree.geoviewLayerType === 'esriDynamic' ||
       layerTree.geoviewLayerType === 'ogcWfs' ||
+      layerTree.geoviewLayerType === 'ogcWms' ||
       layerTree.geoviewLayerType === 'ogcFeature'
     ) {
       return layerTree.listOfLayerEntryConfig.map((layer) => renderTreeItem(layer));

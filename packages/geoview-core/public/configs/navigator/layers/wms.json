@@ -170,6 +170,7 @@
         "geoviewLayerName": "Nfi Plot Summaries",
         "metadataAccessPath": "https://nfi.nfis.org/mapserver/cgi-bin/nfi_plot_summaries_en.cgi",
         "geoviewLayerType": "ogcWms",
+        "useFullWmsSublayers": false,
         "listOfLayerEntryConfig": [
           {
             "layerId": "Photo_Plot",

@@ -238,7 +238,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     }
 
     // Look for a legend URL in the selected style, preferring PNG format
-    return selectedStyle?.LegendURL?.find((url) => url.Format === 'image/png')?.OnlineResource['@attributes']['xlink:href'];
+    return selectedStyle?.LegendURL?.find((url) => url.Format === 'image/png')?.OnlineResource?.['@attributes']?.['xlink:href'];
   }
 
   /**
