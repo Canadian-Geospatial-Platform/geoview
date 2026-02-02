@@ -40,7 +40,6 @@ import { UUIDmapConfigReader } from '@/api/config/reader/uuid-config-reader';
 import { GeoPackageReader } from '@/api/config/reader/geopackage-reader';
 import { ShapefileReader } from '@/api/config/reader/shapefile-reader';
 
-import { LayerApi } from '@/geo/layer/layer';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { EsriRenderer } from '@/geo/utils/renderer/esri-renderer';
 import { WfsRenderer } from '@/geo/utils/renderer/wfs-renderer';
@@ -521,7 +520,7 @@ export class ConfigApi {
       case 'vectorTiles':
         return VectorTiles.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'ogcWms':
-        return WMS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, false, isTimeAware);
+        return WMS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'xyzTiles':
         return XYZTiles.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'CSV':
@@ -602,14 +601,7 @@ export class ConfigApi {
       case 'vectorTiles':
         return VectorTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
       case 'ogcWms':
-        return WMS.processGeoviewLayerConfig(
-          geoviewLayerId,
-          geoviewLayerName,
-          layerURL,
-          layerIds as number[],
-          false,
-          LayerApi.DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS
-        );
+        return WMS.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[], false);
       case 'xyzTiles':
         return XYZTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
       case 'CSV':
