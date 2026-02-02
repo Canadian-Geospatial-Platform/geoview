@@ -29,6 +29,14 @@
       {
         "geoviewLayerType": "geoCore",
         "geoviewLayerId": "6433173f-bca8-44e6-be8e-3e8a19d3c299"
+      },
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerId": "a4b190fe-e090-4e6d-881e-b87956c07977"
+      },
+      {
+        "geoviewLayerType": "geoCore",
+        "geoviewLayerId": "9d96e8c9-22fe-4ad2-b5e8-94a6991b744b"
       }
     ]
   },

@@ -137,10 +137,6 @@ import type { TypeTimeSliderProps } from '@/core/stores/store-interface-and-inti
 export class LayerApi {
   /** Maximum time duration to wait when registering a layer for the time slider */
   static readonly #MAX_WAIT_TIME_SLIDER_REGISTRATION = 20000;
-
-  /** Temporary debugging flag indicating if we want the WMS group layers to have their sub layers fully blown up */
-  static readonly DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS = false;
-
   /** Reference on the map viewer */
   mapViewer: MapViewer;
 
@@ -2905,7 +2901,7 @@ export class LayerApi {
       return new WKB(geoviewLayerConfig);
     }
     if (OgcWmsLayerEntryConfig.isClassOrTypeWMS(geoviewLayerConfig)) {
-      return new WMS(geoviewLayerConfig, LayerApi.DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS);
+      return new WMS(geoviewLayerConfig);
     }
     if (XYZTilesLayerEntryConfig.isClassOrTypeXYZTiles(geoviewLayerConfig)) {
       return new XYZTiles(geoviewLayerConfig);
