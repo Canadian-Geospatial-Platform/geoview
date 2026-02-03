@@ -146,10 +146,8 @@ export abstract class Plugin {
             pluginConfigObj = result;
           }
         } catch (error: unknown) {
-          // Log warning
+          // Log warning but do not notify because most of the time config will be injected later or present in corePackages from main config
           logger.logWarning(`Config not found.`, error);
-          // Notify with a warning
-          mapViewer.notifications.addNotificationWarning('error.map.pluginConfigNotFound', [pluginId, mapId, configPath]);
         }
       }
 

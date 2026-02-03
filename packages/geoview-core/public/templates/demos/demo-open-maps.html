@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Open Maps Demo - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./index.html?tab=specific-demos">← Back to Main</a>
+      </div>
+    </div>
+
+    <!-- IMPORTANT HTML CODE SECTION - START -->
+    <!-- This is the div for the map (same config EN and FR) -->
+    <div id="MapEN" class="geoview-map" data-lang="en" data-config-url="./configs/open-maps/open-maps-config.json"></div>
+
+    <div style="border-bottom: 3px solid #515ba5; margin: 20px 0;"></div>
+
+     <!-- This is the div for the map (same config EN and FR) -->
+    <div id="MapFR" class="geoview-map" data-lang="fr" data-config-url="./configs/open-maps/open-maps-config.json"></div>
+
+    <!-- Link to Geoview, to replace by release hosted version https://viewer-visualiseur.services.geo.ca/apps/GeoView/2.1.2/cgpv-main.js -->
+    <!-- <script src="https://canadian-geospatial-platform.github.io/geoview/public/cgpv-main.js"></script> -->
+    <!-- IMPORTANT HTML CODE SECTION - END -->
+
+    <!-- JUST FOR DEMO -->
+    <script src="codedoc.js"></script>
+    <script>
+      // JUST FOR DEMO
+      insertPageHeader();
+
+      // CUSTOM CODE FOR KEYS INJECTION - START
+
+      // Register handler when map has been initialized
+      cgpv.onMapInit((mapViewer) => {
+        // Turn keys into an array, pass them to the map
+        let keys = '6c343726-1e92-451a-876a-76e17d398a1c';
+        let keysArr = keys.split(',')
+        keysArr.forEach((uuid) => {
+          cgpv.api.getMapViewer(mapViewer.mapId).layer.addGeoviewLayerByGeoCoreUUID(uuid);
+        });
+      });
+
+      // initialize cgpv
+      cgpv.init();
+
+      // CUSTOM CODE FOR KEYS INJECTION - END
+    </script>
+  </body>
+</html>
