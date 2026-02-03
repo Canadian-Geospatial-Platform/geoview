@@ -8,6 +8,7 @@ import {
 import { scrollIfNotVisible } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import type { TypeValidAppBarCoreProps, TypeValidFooterBarTabsCoreProps } from '@/api/types/map-schema-types';
+import { TIMEOUT } from '@/core/utils/constant';
 
 /**
  * Options for navigating to a tab
@@ -63,7 +64,8 @@ export function useNavigateToTab(tabId: string, onNavigate?: (layerPath: string)
       // Log
       logger.logTraceUseCallback('USE-NAVIGATE-TO-TAB', tabId, options);
 
-      const { layerPath, delay = 350 } = options;
+      // TODO: seems the option for time out is never used different than default, consider removing it
+      const { layerPath, delay = TIMEOUT.shortcutToTab } = options;
 
       if (!hasTab) {
         logger.logWarning(`Tab "${tabId}" not found in footer or appbar components`);
@@ -76,7 +78,6 @@ export function useNavigateToTab(tabId: string, onNavigate?: (layerPath: string)
         setActiveFooterBarTab(tabId as TypeValidFooterBarTabsCoreProps);
         if (!isFooterOpen) setFooterBarIsOpen(true);
 
-        // TODO: seems the option for time out is never used
         setTimeout(() => {
           // Execute callback if provided
           if (onNavigate && layerPath) {
