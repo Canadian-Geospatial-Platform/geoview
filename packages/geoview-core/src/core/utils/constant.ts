@@ -112,6 +112,7 @@ export const TIMEOUT: Record<string, number> = {
 
   focusDelayLightbox: 250,
   guideSearchSectionExpand: 300,
+
   modalFocusClose: 500,
   projectionSwitchRepeatQuery: 1000,
   notification: 1000,
