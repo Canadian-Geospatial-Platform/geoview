@@ -12,7 +12,7 @@ const appBarWidth = 50;
  */
 export const getSxClasses = (theme: Theme, open: boolean, panelWidth: string | number): SxStyles => ({
   panelContainer: {
-    height: `calc(100%  - 40px)`,
+    height: `calc(100% - 40px)`,
     width: open ? `calc(${panelWidth}% - ${appBarWidth}px)` : 0,
     [theme.breakpoints.up('sm')]: {
       minWidth: open ? '420px' : 0,
@@ -78,6 +78,7 @@ export const getSxClasses = (theme: Theme, open: boolean, panelWidth: string | n
     },
   },
   panelCardContent: {
+    padding: '0px',
     position: 'relative',
     overflow: 'hidden',
     '&:last-child': {

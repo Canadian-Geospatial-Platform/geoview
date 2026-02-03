@@ -74,7 +74,7 @@ class AoiPanelPlugin extends AppBarPlugin {
     return {
       title: 'AoiPanel.title',
       icon: <AoiIcon />,
-      width: 350,
+      width: 30, // use as %
       status: this.getConfig().isOpen,
     };
   }

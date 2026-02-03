@@ -13,7 +13,7 @@ export const getSxClasses = (theme: any): SxClasses => ({
     padding: '16px',
     display: 'flex',
     flexDirection: 'column',
-    height: 'calc(100% - 47px)',
+    height: '100%',
     overflowY: 'auto',
     overflowX: 'hidden',
     background: theme.palette.geoViewColor.bgColor.main,
@@ -73,7 +73,6 @@ export const getSxClasses = (theme: any): SxClasses => ({
     lineHeight: 1.2,
     textOverflow: 'ellipsis',
     color: theme.palette.geoViewColor.textColor.main,
-    maxWidth: '400px',
   },
 
   // Group item button
@@ -159,7 +158,6 @@ export const getSxClasses = (theme: any): SxClasses => ({
     color: theme.palette.geoViewColor.textColor.dark,
     marginTop: '4px',
     marginLeft: '16px',
-    maxWidth: '400px',
   },
 
   // Reset margins for description text (important for group descriptions)

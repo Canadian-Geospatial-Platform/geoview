@@ -64,7 +64,7 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
     return {
       title: 'chartPanel.title',
       icon: <ChartIcon />,
-      width: '80vw',
+      width: '30%',
     };
   }
 

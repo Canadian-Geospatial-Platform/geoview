@@ -20,7 +20,6 @@ const MAP_INFO_BASE_STYLES = {
   left: '50px',
   right: 0,
   px: '1rem',
-  zIndex: 1000,
 } as const;
 
 const FLEX_STYLE = { flexGrow: 1, height: '100%' };
@@ -56,8 +55,9 @@ export const MapInfo = memo(function MapInfo({ onScrollShellIntoView }: MapInfoP
       background: theme.palette.geoViewColor.bgColor.dark[650],
       color: theme.palette.geoViewColor.bgColor.light[800],
       width: 'calc(100% - 50px)',
+      zIndex: theme.zIndex.appBar + 100, // Above app-bar panels
     }),
-    [expanded, theme.palette.geoViewColor.bgColor]
+    [expanded, theme.palette.geoViewColor.bgColor, theme.zIndex.appBar]
   );
 
   const staticContainerStyles = useMemo(
