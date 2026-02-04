@@ -2,6 +2,7 @@
   "general": {
     "add": "Add",
     "close": "Close",
+    "cancel": "Cancel",
     "exit": "Exit",
     "layers": "Layers",
     "name": "Name",
@@ -321,7 +322,6 @@
   },
   "exportModal": {
     "title": "Map preview",
-    "cancelBtn": "Cancel",
     "exportBtn": "Download",
     "formatBtn": "Format",
     "dpiBtn": "DPI",

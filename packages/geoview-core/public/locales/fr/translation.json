@@ -2,6 +2,7 @@
   "general": {
     "add": "Ajouter",
     "close": "Fermer",
+    "cancel": "Annuler",
     "layers": "Couches",
     "name": "Nom",
     "exit": "Sortir",
@@ -321,7 +322,6 @@
   },
   "exportModal": {
     "title": "Aperçu de la carte",
-    "cancelBtn": "Annuler",
     "exportBtn": "Télécharger",
     "formatBtn": "Format",
     "dpiBtn": "PPP",
