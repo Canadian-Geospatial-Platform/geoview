@@ -98,7 +98,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   );
 
   let timeMarks: number[] = [];
-  if (range.length < 4 && discreteValues) {
+  if (range.length < 4 && !discreteValues) {
     const interval = (DateMgt.convertToMilliseconds(range[range.length - 1]) - DateMgt.convertToMilliseconds(range[0])) / 4;
     timeMarks = [minAndMax[0], minAndMax[0] + interval, minAndMax[0] + interval * 2, minAndMax[0] + interval * 3, minAndMax[1]];
   } else if (range.length < 6 || singleHandle || !discreteValues) timeMarks = timeStampRange;

@@ -15,7 +15,6 @@ import { CONTAINER_TYPE, TABS } from 'geoview-core/core/utils/constant';
 
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';
 import { TimeSlider } from './time-slider';
-
 interface TypeTimeSliderProps {
   mapId: string;
 }
@@ -30,7 +29,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const { mapId } = props;
   const { cgpv } = window as TypeWindow;
   const { reactUtilities } = cgpv;
-  const { useCallback, useMemo } = reactUtilities.react;
+  const { useCallback, useMemo, useEffect } = reactUtilities.react;
 
   // get values from store
   const visibleInRangeLayers = useMapAllVisibleandInRangeLayers();
@@ -101,8 +100,38 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       );
     };
 
-    // Create lookup map to replace finds
-    const legendLayersMap = new Map(legendLayers.map((layer) => [layer.layerPath, layer]));
+    /**
+     * Recursively find a layer by path in legendLayers, searching through children
+     * @param {string} targetPath - Layer path to find
+     * @param {typeof legendLayers} layers - Array of legend layers to search
+     * @returns {typeof legendLayers[number] | undefined} Found layer or undefined
+     */
+    const findLayerInLegend = (targetPath: string, layers: typeof legendLayers): (typeof legendLayers)[number] | undefined => {
+      for (const layer of layers) {
+        // Check if this is the layer we're looking for
+        if (layer.layerPath === targetPath && (!layer.children || layer.children.length === 0)) {
+          return layer;
+        }
+
+        // If this layer has children, search recursively in children
+        if (layer.children && layer.children.length > 0) {
+          const found = findLayerInLegend(targetPath, layer.children);
+          if (found) {
+            return found;
+          }
+        }
+      }
+      return undefined;
+    };
+
+    // Create lookup map by looping through timeSliderLayers and finding each in legendLayers
+    const legendLayersMap = new Map<string, (typeof legendLayers)[number]>();
+    Object.keys(timeSliderLayers).forEach((layerPath) => {
+      const layer = findLayerInLegend(layerPath, legendLayers);
+      if (layer) {
+        legendLayersMap.set(layerPath, layer);
+      }
+    });
 
     // Return the layers
     return visibleInRangeLayers
@@ -110,8 +139,27 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
         return { layerPath, timeSliderLayerInfo: timeSliderLayers?.[layerPath] };
       })
       .filter((layer) => {
-        if (!layer?.timeSliderLayerInfo || isLayerHiddenOnMap(layer.layerPath) || !layer.timeSliderLayerInfo.isMainLayerPath) {
+        if (!layer?.timeSliderLayerInfo || !layer.timeSliderLayerInfo.isMainLayerPath) {
           return false;
+        }
+
+        // Check if main layer is hidden (includes out of scale check)
+        const mainLayerHidden = isLayerHiddenOnMap(layer.layerPath);
+
+        // For custom time slider with additional layers, check if any additional layer is visible
+        if (layer.timeSliderLayerInfo.additionalLayerpaths && layer.timeSliderLayerInfo.additionalLayerpaths.length > 0) {
+          const hasVisibleAdditionalLayer = layer.timeSliderLayerInfo.additionalLayerpaths.some(
+            (layerPath) => !isLayerHiddenOnMap(layerPath)
+          );
+          // Show if main layer is visible OR any additional layer is visible
+          if (mainLayerHidden && !hasVisibleAdditionalLayer) {
+            return false;
+          }
+        } else {
+          // No additional layers, just check main layer
+          if (mainLayerHidden) {
+            return false;
+          }
         }
 
         // Check if layer is in error
@@ -144,6 +192,17 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
         } as LayerListEntry;
       });
   }, [legendLayers, timeSliderLayers, visibleInRangeLayers, mapId, isLayerHiddenOnMap]);
+
+  // Unselect layer if it's removed from visibility array
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('TIME-SLIDER-PANEL - check selected layer visibility');
+
+    if (selectedLayerPath && !memoLayersList.some((layer) => layer.layerPath === selectedLayerPath)) {
+      // Selected layer is no longer in the visible layers list, unselect it
+      setSelectedLayerPath?.('');
+    }
+  }, [selectedLayerPath, memoLayersList, setSelectedLayerPath]);
 
   /**
    * Renders the right panel content based on selected Layer path of time slider.
