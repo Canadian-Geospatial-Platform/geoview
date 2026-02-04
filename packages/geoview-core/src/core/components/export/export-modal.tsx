@@ -319,7 +319,7 @@ export default function ExportModal(): JSX.Element {
       </DialogContent>
       <DialogActions sx={sxClasses.dialogActions}>
         <Button onClick={handleCloseModal} type="text" size="small" sx={sxClasses.buttonOutlined}>
-          {t('exportModal.cancelBtn')}
+          {t('general.cancel')}
         </Button>
 
         {/* Format Selection Menu */}

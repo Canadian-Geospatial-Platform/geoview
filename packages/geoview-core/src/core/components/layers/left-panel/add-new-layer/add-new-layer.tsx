@@ -809,6 +809,11 @@ export function AddNewLayer(): JSX.Element {
             {t('layers.back')}
           </Button>
         )}
+        {isFirst && (
+          <Button variant="contained" className="buttonOutlineFilled" size="small" type="text" onClick={() => setDisplayState('view')}>
+            {t('general.cancel')}
+          </Button>
+        )}
       </ButtonGroup>
     );
   }
