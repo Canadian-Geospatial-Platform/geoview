@@ -31,11 +31,11 @@ import type {
   TypeOutfields,
   TypeLayerStyleSettings,
 } from '@/api/types/map-schema-types';
-import type {
-  TypeLayerMetadataFields,
-  TypeLayerMetadataEsri,
-  TypeLayerMetadataVector,
-  TypeGeoviewLayerType,
+import {
+  type TypeLayerMetadataFields,
+  type TypeLayerMetadataEsri,
+  type TypeLayerMetadataVector,
+  type TypeGeoviewLayerType,
 } from '@/api/types/layer-schema-types';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import type { TypeLegendItem } from '@/core/components/layers/types';
@@ -331,7 +331,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * Overridable method called when the layer image is in error and couldn't be loaded correctly.
    * @param {Event} event - The event which is being triggered.
    */
-  protected onImageLoadError(event: Event): void {
+  protected onImageLoadError(event: Event, errorCode: string = 'layers.errorImageLoad'): void {
     // Log
     logger.logError(`Error loading source image for layer: ${this.getLayerPath()}.`, event);
 
@@ -347,7 +347,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       this.getLayerConfig().updateLayerStatusParent();
 
       // Emit about the error
-      this.#emitError(event, 'layers.errorImageLoad');
+      this.#emitError(event, errorCode);
     } else {
       // We've already emitted an error to the user about the layer being in error, skip
     }
