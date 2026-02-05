@@ -4,12 +4,13 @@ This document provides comprehensive API reference and configuration details for
 
 ## Table of Contents
 
-1. [geoview-time-slider](#1-geoview-time-slider)
-2. [geoview-geochart](#2-geoview-geochart)
-3. [geoview-swiper](#3-geoview-swiper)
-4. [geoview-drawer](#4-geoview-drawer)
-5. [geoview-aoi-panel](#5-geoview-aoi-panel)
-6. [geoview-custom-legend](#6-geoview-custom-legend)
+1. [geoview-time-slider](#_1-geoview-time-slider)
+2. [geoview-geochart](#_2-geoview-geochart)
+3. [geoview-swiper](#_3-geoview-swiper)
+4. [geoview-drawer](#_4-geoview-drawer)
+5. [geoview-aoi-panel](#_5-geoview-aoi-panel)
+6. [geoview-custom-legend](#_6-geoview-custom-legend)
+7. [geoview-about-panel](#_7-geoview-about-panel)
 
 ---
 
@@ -1235,6 +1236,329 @@ interface TypeDescription {
 
 **See Also:** 
 - [Configuration Reference - Custom Legend](app/config/configuration-reference.md#custom-legend-package)
+
+---
+
+---
+
+## 7. geoview-about-panel
+
+**Description:** An information panel package that displays content about the map or application. Supports multiple content formats including Markdown documents, custom content arrays, or structured information with title, logo, description, and links.
+
+**Version:** 2.0.x
+
+**Repository:** `packages/geoview-about-panel/`
+
+**Features:**
+
+- Display Markdown documents from file paths
+- Render arrays of Markdown content strings
+- Show structured content (title, logo, description, link)
+- Custom icon support for panel button
+- Flexible content priority system
+- Fully customizable panel header
+- Empty panel support (for placeholder configurations)
+
+**Dependencies:**
+
+- `geoview-core`: ^2.0.0
+- `markdown-to-jsx`: ^7.5.0
+- `react`: ^18.3.1
+- `zustand`: ~5.0.0
+
+### Installation
+
+**Via Configuration:**
+
+```json
+{
+  "appBar": {
+    "tabs": {
+      "core": ["about-panel"]
+    }
+  }
+}
+```
+
+**Programmatic:**
+
+```typescript
+// About Panel is automatically loaded when included in appBar.tabs.core
+// Access via AppBar tabs
+const appBarApi = cgpv.api.maps['mapId'].appBar;
+```
+
+### Content Formats
+
+The About Panel supports three content formats with the following priority:
+
+1. **Markdown File Path** (`mdPath`) - Highest priority, displays content from a Markdown document
+2. **Markdown Content Array** (`mdContent`) - Displays multiple Markdown strings as separate sections
+3. **Default Content** (`title`, `logoPath`, `description`, `link`) - Lowest priority, displays structured content
+
+If no content is configured, an empty panel will be displayed.
+
+### Configuration Schema
+
+```typescript
+interface AboutPanelConfig {
+  // Optional
+  isOpen?: boolean;
+  aboutTitle?: string;
+  iconPath?: string;
+  mdPath?: string;
+  mdContent?: string[];
+  title?: string;
+  logoPath?: string;
+  description?: string;
+  link?: string;
+  version?: string;
+}
+```
+
+### Configuration Properties
+
+- **isOpen** (boolean, default: false): Initial panel open state
+- **aboutTitle** (string, default: "About"): Text for aria-label and panel header
+- **iconPath** (string): Custom icon path for the about button (uses default PublicIcon if not provided)
+- **mdPath** (string): Path to Markdown file to display (highest priority)
+- **mdContent** (string[]): Array of Markdown strings to display as sections
+- **title** (string): Title for default content view
+- **logoPath** (string): Path to logo image for default content view
+- **description** (string): Description text for default content view
+- **link** (string): URL link for default content view
+- **version** (string, default: "1.0"): Schema version
+
+### Configuration Examples
+
+**Example 1: Markdown File**
+
+```json
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3978
+    }
+  },
+  "appBar": {
+    "tabs": {
+      "core": ["about-panel"]
+    }
+  },
+  "corePackagesConfig": [
+    {
+      "about-panel": {
+        "isOpen": true,
+        "aboutTitle": "About Atlas of Canada",
+        "iconPath": "../../../img/canada-icon.png",
+        "mdPath": "../../../docs/about-atlas.md"
+      }
+    }
+  ]
+}
+```
+
+**Example 2: Markdown Content Array**
+
+```json
+{
+  "appBar": {
+    "tabs": {
+      "core": ["about-panel"]
+    }
+  },
+  "corePackagesConfig": [
+    {
+      "about-panel": {
+        "isOpen": false,
+        "mdContent": [
+          "# Atlas of Canada\n\n![Atlas Banner](../../../img/atlas_banner.png)",
+          "## Discover Canada through geography\n\nThe Atlas of Canada provides interactive and static maps of Canada.",
+          "## Key Features\n\n- **Interactive Maps** - Dynamic maps with multiple layers\n- **Historical Archive** - Digitized atlas editions from 1906\n- **Educational Resources** - Teaching materials and data",
+          "## Learn More\n\n[Visit the Atlas of Canada →](https://natural-resources.canada.ca/maps-tools-publications/maps/atlas-canada)"
+        ]
+      }
+    }
+  ]
+}
+```
+
+**Example 3: Default Content (Structured)**
+
+```json
+{
+  "appBar": {
+    "tabs": {
+      "core": ["about-panel"]
+    }
+  },
+  "corePackagesConfig": [
+    {
+      "about-panel": {
+        "isOpen": false,
+        "title": "GeoView Mapping Application",
+        "logoPath": "./assets/logo.png",
+        "description": "A powerful and flexible geospatial viewer for the Canadian Geospatial Platform. Explore maps, analyze data, and discover geographic insights.",
+        "link": "https://canadian-geospatial-platform.github.io/geoview/"
+      }
+    }
+  ]
+}
+```
+
+**Example 4: Minimal Configuration**
+
+```json
+{
+  "appBar": {
+    "tabs": {
+      "core": ["about-panel"]
+    }
+  },
+  "corePackagesConfig": [
+    {
+      "about-panel": {
+        "title": "About This Map"
+      }
+    }
+  ]
+}
+```
+
+### Markdown Support
+
+When using `mdPath` or `mdContent`, the About Panel supports standard Markdown syntax including:
+
+- **Headers** - `# H1`, `## H2`, etc.
+- **Emphasis** - `**bold**`, `*italic*`
+- **Links** - `[text](url)`
+- **Images** - `![alt](path)`
+- **Lists** - `- item` or `1. item`
+- **Code** - `` `inline` `` or ` ```block``` `
+- **Line Breaks** - `\n` for new lines in strings
+
+**Markdown Example File:**
+
+```markdown
+# Atlas of Canada
+
+![Atlas Banner](../img/atlas_banner.png)
+
+## Discover Canada through geography
+
+The Atlas of Canada provides interactive and static maps of Canada, from past to present.
+
+## Key Features
+
+- **Interactive Maps** - Explore dynamic maps with layers covering physical geography, demographics, economy, and more
+- **Historical Archive** - Access digitized versions of atlas editions dating back to 1906
+- **Thematic Collections** - Browse curated map collections on topics like climate and natural resources
+
+## Learn More
+
+Visit the full Atlas of Canada and discover the stories told through maps:
+
+[Visit the Atlas of Canada →](https://natural-resources.canada.ca/maps-tools-publications/maps/atlas-canada)
+
+---
+
+*Mapping Canada's past, present, and future since 1906*
+```
+
+### Usage Notes
+
+- **Content Priority:** Only one content format will be displayed based on priority (mdPath > mdContent > default)
+- **Markdown Paths:** Can be relative or absolute paths
+- **Image Paths:** In Markdown, images use paths relative to the HTML page location
+- **Custom Icons:** Should be 24x24 pixels for optimal display in the app bar
+- **aboutTitle:** Customizes both the panel header text and accessibility label
+- **Empty Panel:** If no content is provided, the panel will be empty but functional
+
+### Common Use Cases
+
+**1. Simple About Page:**
+
+```json
+{
+  "about-panel": {
+    "title": "My Mapping Application",
+    "description": "A custom GeoView application for environmental monitoring.",
+    "link": "https://example.com/help"
+  }
+}
+```
+
+**2. Documentation from Markdown File:**
+
+```json
+{
+  "about-panel": {
+    "isOpen": false,
+    "aboutTitle": "User Guide",
+    "mdPath": "./docs/user-guide.md"
+  }
+}
+```
+
+**3. Multi-Section Content:**
+
+```json
+{
+  "about-panel": {
+    "isOpen": true,
+    "mdContent": [
+      "# About This Map\n\nWelcome to our interactive mapping application.",
+      "## Data Sources\n\n- Natural Resources Canada\n- Statistics Canada",
+      "## Terms of Use\n\nThis application is provided as-is..."
+    ]
+  }
+}
+```
+
+**4. Atlas of Canada Example:**
+
+```json
+{
+  "about-panel": {
+    "isOpen": true,
+    "title": "Atlas of Canada",
+    "logoPath": "../../../img/atlas_banner.png",
+    "description": "The Atlas of Canada provides interactive and static maps of Canada, from past to present. Find, explore and download a variety of maps and discover other sources of Canadian geographic information.",
+    "link": "https://natural-resources.canada.ca/maps-tools-publications/maps/atlas-canada"
+  }
+}
+```
+
+### Accessibility
+
+The About Panel includes:
+
+- Proper ARIA labels via `aboutTitle` property
+- Keyboard navigation support
+- Screen reader compatibility
+- Semantic HTML structure in rendered Markdown
+- Focus management when panel opens/closes
+
+### Performance Considerations
+
+- **Markdown Files:** Fetched asynchronously on panel open
+- **Large Content:** Markdown rendering is optimized but very large files may impact initial render
+- **Images:** Consider image size and format for optimal loading
+- **Caching:** Markdown files are cached after first load
+
+### Error Handling
+
+The panel gracefully handles:
+
+- **Missing Markdown Files:** Displays error message if `mdPath` fails to load
+- **Invalid Markdown:** Renders as plain text if parsing fails
+- **Missing Images:** Shows broken image placeholder
+- **Empty Configuration:** Displays empty panel (not an error)
+
+**See Also:**
+- [Configuration Reference - About Panel](app/config/configuration-reference.md#about-panel-package)
+- [AppBar Plugins](app/ui/appbar.md)
 
 ---
 

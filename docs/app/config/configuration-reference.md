@@ -547,7 +547,7 @@ appBar?: {
   selectedTimeSliderLayerPath: string;
 };
 
-TypeValidAppBarCoreProps = "geolocator" | "export" | "aoi-panel" | "custom-legend" | "guide" | "legend" | "details" | "data-table" | "layers";
+TypeValidAppBarCoreProps = "about-panel" | "geolocator" | "export" | "aoi-panel" | "custom-legend" | "guide" | "legend" | "details" | "data-table" | "layers";
 ```
 
 **Properties:**
@@ -555,6 +555,7 @@ TypeValidAppBarCoreProps = "geolocator" | "export" | "aoi-panel" | "custom-legen
 - **tabs** (Required): Tab configuration
 
   - **core** (Required): Array of core tab identifiers
+    - `"about-panel"` - **About Panel package** - Panel for adding panel with information about the map
     - `"geolocator"` - Location search and navigation
     - `"export"` - Map export functionality
     - `"aoi-panel"` - **AOI Panel package** - Area of interest selection
@@ -582,7 +583,7 @@ TypeValidAppBarCoreProps = "geolocator" | "export" | "aoi-panel" | "custom-legen
 ```typescript
 appBar: {
   tabs: {
-    core: ["geolocator", "export", "aoi-panel", "custom-legend"]
+    core: ["about-panel", "geolocator", "export", "aoi-panel", "custom-legend"]
   },
   collapsed: false,
   selectedTab: "geolocator"
@@ -2180,11 +2181,13 @@ Temporal layers automatically work with the Time Slider package. See [Packages](
 
 Configuration schemas for GeoView packages. Packages are loaded and configured through different sections of the map configuration:
 
-- **Swiper**: Configured in `corePackages` and `corePackagesConfig`
-- **GeoChart**: Loaded via `footerBar.tabs.core: ["geochart"]`
-- **Time Slider**: Loaded via `footerBar.tabs.core: ["time-slider"]`
-- **AOI Panel**: Loaded via `appBar.tabs.core: ["aoi-panel"]`
-- **Drawer**: Loaded via `navBar: ["drawer"]`
+- **[Swiper](#swiper-package)**: Configured in `corePackages` and `corePackagesConfig`
+- **[GeoChart](#geochart-package)**: Loaded via `footerBar.tabs.core: ["geochart"]`
+- **[Time Slider](#time-slider-package)**: Loaded via `footerBar.tabs.core: ["time-slider"]`
+- **[AOI Panel](#area-of-interest-aoi-panel-package)**: Loaded via `appBar.tabs.core: ["aoi-panel"]`
+- **[Custom Legend](#custom-legend-package)**: Loaded via `appBar.tabs.core: ["custom-legend"]`
+- **[Drawer](#drawer-package)**: Loaded via `navBar: ["drawer"]`
+- **[About Panel](#about-panel-package)**: Loaded via `appBar.tabs.core: ["about-panel"]`
 
 ### Package Configuration Methods
 
@@ -2205,6 +2208,51 @@ corePackagesConfig: [
 #### Method 2: Tab-based Loading (GeoChart, Time Slider, AOI Panel, Drawer)
 
 These packages are automatically loaded when included in their respective UI sections and configured through their default config files or via the package-specific configuration mechanisms.
+
+---
+
+### Swiper Package
+
+Layer comparison package using a swipe control.
+
+**Loading:** Include `"swiper"` in `corePackages` array and provide configuration in `corePackagesConfig`.
+
+#### Schema
+
+```typescript
+interface SwiperConfig {
+  // Required
+  orientation: "vertical" | "horizontal";
+  layers: Array<string>;
+
+  // Optional
+  keyboardOffset?: number;
+  version?: string;
+}
+```
+
+#### Properties
+
+- **orientation** (Required): Swiper bar orientation
+  - `"vertical"` - Vertical swipe bar
+  - `"horizontal"` - Horizontal swipe bar
+- **layers** (Required): Array of layer IDs to include in swiper
+- **keyboardOffset**: Pixel offset when using keyboard (default: 10, range: 10-100)
+- **version**: Schema version (default: "1.0")
+
+#### Example
+
+```typescript
+corePackagesConfig: [
+  {
+    swiper: {
+      orientation: "vertical",
+      layers: ["satellite-imagery", "street-map"],
+      keyboardOffset: 20,
+    },
+  },
+];
+```
 
 ---
 
@@ -2440,51 +2488,6 @@ corePackagesConfig: [
 - Discrete mode with many time points (>50) may require optimization
 - Continuous mode works well for any range size
 - Consider using `delay` to control animation speed based on data density
-
----
-
-### Swiper Package
-
-Layer comparison package using a swipe control.
-
-**Loading:** Include `"swiper"` in `corePackages` array and provide configuration in `corePackagesConfig`.
-
-#### Schema
-
-```typescript
-interface SwiperConfig {
-  // Required
-  orientation: "vertical" | "horizontal";
-  layers: Array<string>;
-
-  // Optional
-  keyboardOffset?: number;
-  version?: string;
-}
-```
-
-#### Properties
-
-- **orientation** (Required): Swiper bar orientation
-  - `"vertical"` - Vertical swipe bar
-  - `"horizontal"` - Horizontal swipe bar
-- **layers** (Required): Array of layer IDs to include in swiper
-- **keyboardOffset**: Pixel offset when using keyboard (default: 10, range: 10-100)
-- **version**: Schema version (default: "1.0")
-
-#### Example
-
-```typescript
-corePackagesConfig: [
-  {
-    swiper: {
-      orientation: "vertical",
-      layers: ["satellite-imagery", "street-map"],
-      keyboardOffset: 20,
-    },
-  },
-];
-```
 
 ---
 
@@ -2801,6 +2804,139 @@ corePackagesConfig: [
   },
 ];
 ```
+
+---
+
+### About Panel Package
+
+Information panel for displaying content about the map or application.
+
+**Loading:** Include `"about-panel"` in `appBar.tabs.core` array to enable this package.
+
+#### Schema
+
+```typescript
+interface AboutPanelConfig {
+  // Optional
+  isOpen?: boolean;
+  aboutTitle?: string;
+  iconPath?: string;
+  mdPath?: string;
+  mdContent?: Array<string>;
+  title?: string;
+  logoPath?: string;
+  description?: string;
+  link?: string;
+  version?: string;
+}
+```
+
+#### Properties
+
+- **isOpen**: Initial panel state (default: false)
+- **aboutTitle**: Text for aria-label and panel header (default: "About")
+- **iconPath**: Custom icon path for the about button (uses default if not provided)
+- **mdPath**: Path to Markdown file to display (highest priority)
+- **mdContent**: Array of Markdown strings to display as sections
+- **title**: Title for default content view
+- **logoPath**: Path to logo image for default content view
+- **description**: Description text for default content view
+- **link**: URL link for default content view
+- **version**: Schema version (default: "1.0")
+
+#### Content Priority
+
+The About Panel supports three content formats with the following priority:
+
+1. **Markdown File** (`mdPath`) - Highest priority, displays content from a Markdown document
+2. **Markdown Content Array** (`mdContent`) - Displays multiple Markdown strings as separate sections
+3. **Default Content** (`title`, `logoPath`, `description`, `link`) - Lowest priority, displays structured content
+
+If no content is configured, an empty panel will be displayed.
+
+#### Examples
+
+**Markdown File:**
+
+```typescript
+corePackagesConfig: [
+  {
+    "about-panel": {
+      isOpen: true,
+      aboutTitle: "About Atlas of Canada",
+      iconPath: "../../../img/canada-icon.png",
+      mdPath: "../../../docs/about-atlas.md"
+    }
+  }
+];
+```
+
+**Markdown Content Array:**
+
+```typescript
+corePackagesConfig: [
+  {
+    "about-panel": {
+      isOpen: false,
+      mdContent: [
+        "# Atlas of Canada\n\n![Atlas Banner](../../../img/atlas_banner.png)",
+        "## Discover Canada through geography\n\nThe Atlas of Canada provides interactive and static maps of Canada.",
+        "## Key Features\n\n- **Interactive Maps** - Dynamic maps with multiple layers\n- **Historical Archive** - Digitized atlas editions from 1906\n- **Educational Resources** - Teaching materials and data",
+        "## Learn More\n\n[Visit the Atlas of Canada →](https://natural-resources.canada.ca/maps-tools-publications/maps/atlas-canada)"
+      ]
+    }
+  }
+];
+```
+
+**Default Content:**
+
+```typescript
+corePackagesConfig: [
+  {
+    "about-panel": {
+      isOpen: false,
+      title: "GeoView Mapping Application",
+      logoPath: "./assets/logo.png",
+      description: "A powerful and flexible geospatial viewer for the Canadian Geospatial Platform. Explore maps, analyze data, and discover geographic insights.",
+      link: "https://canadian-geospatial-platform.github.io/geoview/"
+    }
+  }
+];
+```
+
+**Minimal Configuration:**
+
+```typescript
+corePackagesConfig: [
+  {
+    "about-panel": {
+      title: "About This Map"
+    }
+  }
+];
+```
+
+#### Markdown Support
+
+When using `mdPath` or `mdContent`, the About Panel supports standard Markdown syntax including:
+
+- **Headers** - `# H1`, `## H2`, etc.
+- **Emphasis** - `**bold**`, `*italic*`
+- **Links** - `[text](url)`
+- **Images** - `![alt](path)`
+- **Lists** - `- item` or `1. item`
+- **Code** - `` `inline` `` or ` ```block``` `
+- **Line Breaks** - `\n` for new lines in strings
+
+#### Notes
+
+- Only one content format will be displayed based on priority (mdPath > mdContent > default)
+- Markdown paths can be relative or absolute
+- Images in Markdown use paths relative to the HTML page
+- The `aboutTitle` property customizes the panel header and accessibility label
+- Custom icons should be 24x24 pixels for best display
+- If no content is provided, the panel will be empty but functional
 
 ---
 

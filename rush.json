@@ -19,8 +19,8 @@
   },
   "projects": [
     {
-      "packageName": "geoview-custom-legend",
-      "projectFolder": "packages/geoview-custom-legend"
+      "packageName": "geoview-about-panel",
+      "projectFolder": "packages/geoview-about-panel"
     },
     {
       "packageName": "geoview-aoi-panel",
@@ -29,6 +29,14 @@
     {
       "packageName": "geoview-core",
       "projectFolder": "packages/geoview-core"
+    },
+    {
+      "packageName": "geoview-custom-legend",
+      "projectFolder": "packages/geoview-custom-legend"
+    },
+    {
+      "packageName": "geoview-drawer",
+      "projectFolder": "packages/geoview-drawer"
     },
     {
       "packageName": "geoview-geochart",
@@ -45,10 +53,6 @@
     {
       "packageName": "geoview-time-slider",
       "projectFolder": "packages/geoview-time-slider"
-    },
-    {
-      "packageName": "geoview-drawer",
-      "projectFolder": "packages/geoview-drawer"
     },
     {
       "packageName": "eslint-and-prettier-config",

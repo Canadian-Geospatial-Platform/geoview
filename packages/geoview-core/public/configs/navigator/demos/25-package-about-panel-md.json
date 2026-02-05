@@ -15,7 +15,17 @@
   "corePackages": [],
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "export", "about-panel", "aoi-panel", "custom-legend", "guide", "details", "data-table", "layers"]
+      "core": ["about-panel"]
     }
-  }
+  },
+  "corePackagesConfig": [
+    {
+      "about-panel": {
+        "isOpen": true,
+        "aboutTitle": "About Atlas of Canada",
+        "iconPath": "../../../img/canada-icon.png",
+        "mdPath": "../../../img/about-sample.md"
+      }
+    }
+  ]
 }

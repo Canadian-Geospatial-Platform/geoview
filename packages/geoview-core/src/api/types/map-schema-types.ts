@@ -100,6 +100,7 @@ export type TypeValidAppBarCoreProps =
   | 'geolocator'
   | 'export'
   | 'aoi-panel'
+  | 'about-panel'
   | 'custom-legend'
   | 'guide'
   | 'legend'
@@ -503,7 +504,17 @@ export const DEFAULT_MAP_FEATURE_CONFIG = {
 /**
  * Definition of the default order of the tabs inside appbar
  */
-export const DEFAULT_APPBAR_TABS_ORDER = ['geolocator', 'aoi-panel', 'legend', 'custom-legend', 'layers', 'details', 'data-table', 'guide'];
+export const DEFAULT_APPBAR_TABS_ORDER = [
+  'about-panel',
+  'geolocator',
+  'aoi-panel',
+  'legend',
+  'custom-legend',
+  'layers',
+  'details',
+  'data-table',
+  'guide',
+];
 
 export const DEFAULT_APPBAR_CORE = {
   GEOLOCATOR: 'geolocator',

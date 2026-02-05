@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GeoView About Panel Schema",
+  "type": "object",
+  "version": "1.0",
+  "comments": "Configuration for About Panel package.",
+  "additionalProperties": false,
+  "properties": {
+    "isOpen": {
+      "description": "Specifies whether the about panel is initially open or closed",
+      "type": "boolean",
+      "default": false
+    },
+    "aboutTitle": {
+      "description": "The text that shows in the aria-label and at the bery top of the About Panel",
+      "type": "string"
+    },
+    "iconPath": {
+      "description": "A path to an icon that will be used instead of the default icon for the about button",
+      "type": "string"
+    },
+    "mdPath": {
+      "description": "The relative path to a Markdown document to be embedded. Will override other configs.",
+      "type": "string"
+    },
+    "mdContent": {
+      "description": "A list of markdown items to add to the page",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "title": {
+      "description": "The title for the about page",
+      "type": "string"
+    },
+    "logoPath": {
+      "description": "A relative path to an image logo to be placed under the title",
+      "type": "string"
+    },
+    "description": {
+      "description": "A description for the about panel",
+      "type": "string"
+    },
+    "link": {
+      "description": "A link to a website or page to direct users",
+      "type": "string"
+    },
+    "version": {
+      "type": "string",
+      "enum": ["1.0"],
+      "description": "The schema version used to validate the configuration file. The schema should enumerate the list of versions accepted by this version of the viewer.",
+      "default": "1.0"
+    }
+  }
+}

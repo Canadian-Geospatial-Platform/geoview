@@ -63,6 +63,11 @@ const config = {
       dependOn: 'cgpv-main',
       filename: 'corePackages/[name].js',
     },
+    'geoview-about-panel': {
+      import: '../geoview-about-panel/src/index.tsx',
+      dependOn: 'cgpv-main',
+      filename: 'corePackages/[name].js',
+    },
     'geoview-aoi-panel': {
       import: '../geoview-aoi-panel/src/index.tsx',
       dependOn: 'cgpv-main',

@@ -181,7 +181,7 @@
     "TypeValidAppBarCoreProps": {
       "description": "Valid values for the app bar tabs core array.",
       "additionalProperties": false,
-      "enum": ["geolocator", "export", "geochart", "details", "legend", "guide", "data-table", "layers", "aoi-panel", "custom-legend"]
+      "enum": ["about-panel", "geolocator", "export", "geochart", "details", "legend", "guide", "data-table", "layers", "aoi-panel", "custom-legend"]
     },
     "TypeAppBarProps": {
       "type": "object",

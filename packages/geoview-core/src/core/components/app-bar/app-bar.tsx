@@ -255,24 +255,29 @@ export function AppBar(props: AppBarProps): JSX.Element {
     // Log
     logger.logTraceUseEffect('APP-BAR - appBarConfig');
 
-    const processPlugin = (pluginName: TypeValidAppBarCoreProps): void => {
-      // Packages tab
-      if (appBarConfig && appBarConfig.tabs.core.includes(pluginName)) {
+    // Get built-in core components
+    const builtInCoreComponents = Object.values(DEFAULT_APPBAR_CORE) as TypeValidAppBarCoreProps[];
+
+    // Process all configured plugins dynamically
+    if (appBarConfig?.tabs.core) {
+      appBarConfig.tabs.core.forEach((pluginName) => {
+        // Skip built-in components
+        if (builtInCoreComponents.includes(pluginName)) {
+          return;
+        }
+
+        // Load and add the plugin
         Plugin.loadScript(pluginName)
           .then((typePlugin) => {
             Plugin.addPlugin(pluginName, typePlugin, mapId).catch((error: unknown) => {
-              // Log
               logger.logPromiseFailed(`api.plugin.addPlugin in useEffect in app-bar for ${pluginName}`, error);
             });
           })
           .catch((error: unknown) => {
-            // Log
-            logger.logPromiseFailed('api.plugin.loadScript in useEffect in app-bar', error);
+            logger.logPromiseFailed(`api.plugin.loadScript in useEffect in app-bar for ${pluginName}`, error);
           });
-      }
-    };
-    processPlugin('aoi-panel');
-    processPlugin('custom-legend');
+      });
+    }
   }, [appBarConfig, mapId]);
 
   useEffect(() => {
