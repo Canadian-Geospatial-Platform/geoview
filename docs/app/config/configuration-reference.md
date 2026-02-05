@@ -2864,8 +2864,8 @@ corePackagesConfig: [
     "about-panel": {
       isOpen: true,
       aboutTitle: "About Atlas of Canada",
-      iconPath: "../../../img/canada-icon.png",
-      mdPath: "../../../docs/about-atlas.md"
+      iconPath: "./img/canada-icon.png",
+      mdPath: "./img/about-atlas.md"
     }
   }
 ];
@@ -2879,7 +2879,7 @@ corePackagesConfig: [
     "about-panel": {
       isOpen: false,
       mdContent: [
-        "# Atlas of Canada\n\n![Atlas Banner](../../../img/atlas_banner.png)",
+        "# Atlas of Canada\n\n![Atlas Banner](./img/atlas_banner.png)",
         "## Discover Canada through geography\n\nThe Atlas of Canada provides interactive and static maps of Canada.",
         "## Key Features\n\n- **Interactive Maps** - Dynamic maps with multiple layers\n- **Historical Archive** - Digitized atlas editions from 1906\n- **Educational Resources** - Teaching materials and data",
         "## Learn More\n\n[Visit the Atlas of Canada →](https://natural-resources.canada.ca/maps-tools-publications/maps/atlas-canada)"
@@ -2897,7 +2897,7 @@ corePackagesConfig: [
     "about-panel": {
       isOpen: false,
       title: "GeoView Mapping Application",
-      logoPath: "./assets/logo.png",
+      logoPath: "./img/logo.png",
       description: "A powerful and flexible geospatial viewer for the Canadian Geospatial Platform. Explore maps, analyze data, and discover geographic insights.",
       link: "https://canadian-geospatial-platform.github.io/geoview/"
     }

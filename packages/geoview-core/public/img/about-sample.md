@@ -1,6 +1,6 @@
 # Atlas of Canada
 
-![Atlas of Canada Banner](../img/atlas_banner.png)
+![Atlas of Canada Banner](./img/atlas_banner.png)
 
 ## Discover Canada through geography
 
