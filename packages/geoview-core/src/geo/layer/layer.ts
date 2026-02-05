@@ -852,11 +852,12 @@ export class LayerApi {
   reloadLayer(layerPath: string): void {
     const layerEntryConfig = this.getLayerEntryConfig(layerPath);
     const geoviewLayer = layerEntryConfig ? this.#geoviewLayers[layerEntryConfig.getGeoviewLayerId()] : undefined;
+    const gvLayer = this.getGeoviewLayerIfExists(layerPath);
 
     if (geoviewLayer) {
-      if (layerEntryConfig instanceof GroupLayerEntryConfig) {
+      if (gvLayer instanceof GVGroupLayer) {
         // Reload each sub layers that are in error
-        layerEntryConfig.listOfLayerEntryConfig.forEach((sublayerEntryConfig) => {
+        (layerEntryConfig as GroupLayerEntryConfig).listOfLayerEntryConfig.forEach((sublayerEntryConfig) => {
           if (sublayerEntryConfig.layerStatus === 'error') this.reloadLayer(sublayerEntryConfig.layerPath);
         });
       } else {
