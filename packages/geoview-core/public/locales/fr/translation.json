@@ -166,6 +166,8 @@
     "errorServer": "La source du __param__ n'est pas valide.",
     "errorNotLoaded": "Une erreur est survenue avec la couche '__param__'.",
     "errorImageLoad": "Une erreur est survenue avec l'image source pour la couche '__param__'.",
+    "errorImageLoadSizeLimitExceeded": "L'image source demandée pour la couche '__param__' dépasse la taille maximale autorisée par le serveur.",
+    "errorImageLoadNoImageReturned": "Aucune image n'a été renvoyée par le serveur pour la couche '__param__'.",
     "errorProj": "Projection __param__ invalide.",
     "errorResponseNoFeaturesProperty": "La réponse du service ne contient pas de propriété 'features'.",
     "errorNoPrimaryKeyField": "Aucun champ de clé primaire trouvé pour la couche '__param__'.",

@@ -31,11 +31,11 @@ import type {
   TypeOutfields,
   TypeLayerStyleSettings,
 } from '@/api/types/map-schema-types';
-import type {
-  TypeLayerMetadataFields,
-  TypeLayerMetadataEsri,
-  TypeLayerMetadataVector,
-  TypeGeoviewLayerType,
+import {
+  type TypeLayerMetadataFields,
+  type TypeLayerMetadataEsri,
+  type TypeLayerMetadataVector,
+  type TypeGeoviewLayerType,
 } from '@/api/types/layer-schema-types';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import type { TypeLegendItem } from '@/core/components/layers/types';
@@ -328,6 +328,17 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   }
 
   /**
+   * Overridable method called to get a more specific error code for image load errors.
+   * @param {Event} event - The event which is being triggered.
+   * @returns {string} The error code to use for the error message to the user, default is 'layers.errorImageLoad'.
+   */
+  // We need to keep the 'this' context and the event param for overrides.
+  // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
+  protected onImageLoadErrorDecipherError(event: Event): string {
+    return 'layers.errorImageLoad';
+  }
+
+  /**
    * Overridable method called when the layer image is in error and couldn't be loaded correctly.
    * @param {Event} event - The event which is being triggered.
    */
@@ -338,6 +349,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     // Check the layer status before
     const layerStatusBefore = this.getLayerConfig().layerStatus;
 
+    // Decipher the error code to use for the message to the user, allowing children classes to be more specific (ex: WMS GetMap specific errors)
+    const errorCode = this.onImageLoadErrorDecipherError(event);
+
     // If we were not error before
     if (layerStatusBefore !== 'error') {
       // Set the layer config status to error to keep mirroring the AbstractGeoViewLayer for now
@@ -347,7 +361,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       this.getLayerConfig().updateLayerStatusParent();
 
       // Emit about the error
-      this.#emitError(event, 'layers.errorImageLoad');
+      this.#emitError(event, errorCode);
     } else {
       // We've already emitted an error to the user about the layer being in error, skip
     }

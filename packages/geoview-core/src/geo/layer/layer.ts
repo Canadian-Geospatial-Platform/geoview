@@ -854,9 +854,9 @@ export class LayerApi {
     const geoviewLayer = layerEntryConfig ? this.#geoviewLayers[layerEntryConfig.getGeoviewLayerId()] : undefined;
 
     if (geoviewLayer) {
-      if (layerEntryConfig instanceof GroupLayerEntryConfig) {
+      if ((layerEntryConfig as GroupLayerEntryConfig).listOfLayerEntryConfig?.length) {
         // Reload each sub layers that are in error
-        layerEntryConfig.listOfLayerEntryConfig.forEach((sublayerEntryConfig) => {
+        (layerEntryConfig as GroupLayerEntryConfig).listOfLayerEntryConfig.forEach((sublayerEntryConfig) => {
           if (sublayerEntryConfig.layerStatus === 'error') this.reloadLayer(sublayerEntryConfig.layerPath);
         });
       } else {

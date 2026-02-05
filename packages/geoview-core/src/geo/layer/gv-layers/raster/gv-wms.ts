@@ -2,6 +2,7 @@ import ImageLayer from 'ol/layer/Image';
 import type { Options as ImageOptions } from 'ol/layer/BaseImage';
 import type { Coordinate } from 'ol/coordinate';
 import type { ImageArcGISRest, ImageWMS } from 'ol/source';
+import type { ImageSourceEvent } from 'ol/source/Image';
 import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection, ProjectionLike } from 'ol/proj';
 import type { Map as OLMap } from 'ol';
@@ -138,6 +139,34 @@ export class GVWMS extends AbstractGVRaster {
     return super.getLayerConfig() as OgcWmsLayerEntryConfig;
   }
 
+  protected override onImageLoadErrorDecipherError(event: Event): string {
+    // Checks for more specific errors
+    const maxWidth = this.getLayerConfig().getServiceMetadata()?.Service.MaxWidth;
+    const maxHeight = this.getLayerConfig().getServiceMetadata()?.Service.MaxHeight;
+    const image = (event as unknown as ImageSourceEvent).image?.getImage();
+
+    // Check for size limit exceeded
+    if (image && (!!maxWidth || !!maxHeight)) {
+      // Use the currentSrc to get the actual image URL with parameters
+      const imageSrc = image instanceof HTMLImageElement ? image.currentSrc : undefined;
+      if (imageSrc) {
+        // Get width and height from URL parameters
+        const width = Number(imageSrc.split('WIDTH=')[1]?.split('&')[0]);
+        const height = Number(imageSrc.split('HEIGHT=')[1]?.split('&')[0]);
+
+        // Check against max allowed
+        if ((maxWidth && width > maxWidth) || (maxHeight && height > maxHeight)) {
+          return 'layers.errorImageLoadSizeLimitExceeded';
+        }
+      }
+    } else if (image.height === 0 || image.width === 0) {
+      // No image returned, update the error code
+      return 'layers.errorImageLoadNoImageReturned';
+    }
+
+    return 'layers.errorImageLoad';
+  }
+
   /**
    * Overrides when the layer image is in error and couldn't be loaded correctly.
    * @param {Event} event - The event which is being triggered.
@@ -150,7 +179,7 @@ export class GVWMS extends AbstractGVRaster {
     if (rescued.length > 0 && rescued[0]) {
       // We've rescued(?) the situation, eat the error for now
     } else {
-      // Not rescued, call parent
+      // Call parent with the determined error code
       super.onImageLoadError(event);
     }
   }

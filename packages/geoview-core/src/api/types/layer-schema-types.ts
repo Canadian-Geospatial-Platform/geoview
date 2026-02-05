@@ -757,6 +757,8 @@ export interface TypeMetadataWMSService {
   Title: string;
   KeywordList: TypeMetadataWMSServiceKeyword;
   OnlineResource: TypeOnlineResourceWMS;
+  MaxWidth?: number;
+  MaxHeight?: number;
 }
 
 export interface TypeMetadataWMSServiceKeyword {
