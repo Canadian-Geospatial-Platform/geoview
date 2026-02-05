@@ -6,6 +6,7 @@ import type { Extent } from 'ol/extent';
 import type Feature from 'ol/Feature';
 import type { Layer } from 'ol/layer';
 import type Source from 'ol/source/Source';
+import type { ImageSourceEvent } from 'ol/source/Image';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { Map as OLMap } from 'ol';
 import { getUid } from 'ol';
@@ -31,11 +32,13 @@ import type {
   TypeOutfields,
   TypeLayerStyleSettings,
 } from '@/api/types/map-schema-types';
-import type {
-  TypeLayerMetadataFields,
-  TypeLayerMetadataEsri,
-  TypeLayerMetadataVector,
-  TypeGeoviewLayerType,
+import {
+  type TypeLayerMetadataFields,
+  type TypeLayerMetadataEsri,
+  type TypeLayerMetadataVector,
+  type TypeGeoviewLayerType,
+  type TypeMetadataWMS,
+  CONST_LAYER_TYPES,
 } from '@/api/types/layer-schema-types';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import type { TypeLegendItem } from '@/core/components/layers/types';
@@ -335,6 +338,34 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     // Log
     logger.logError(`Error loading source image for layer: ${this.getLayerPath()}.`, event);
 
+    let errorCode = 'layers.errorImageLoad';
+
+    // Special WMS checks for more specific errors
+    if (this.getLayerConfig().getSchemaTag() === CONST_LAYER_TYPES.WMS) {
+      const maxWidth = (this.getLayerConfig().getServiceMetadata() as TypeMetadataWMS).Service.MaxWidth;
+      const maxHeight = (this.getLayerConfig().getServiceMetadata() as TypeMetadataWMS).Service.MaxHeight;
+      const image = (event as unknown as ImageSourceEvent).image?.getImage();
+
+      // Check for size limit exceeded
+      if (image && (!!maxWidth || !!maxHeight)) {
+        // Use the currentSrc to get the actual image URL with parameters
+        const imageSrc = image instanceof HTMLImageElement ? image.currentSrc : undefined;
+        if (imageSrc) {
+          // Get width and height from URL parameters
+          const width = Number(imageSrc.split('WIDTH=')[1]?.split('&')[0]);
+          const height = Number(imageSrc.split('HEIGHT=')[1]?.split('&')[0]);
+
+          // Check against max allowed
+          if ((maxWidth && width > maxWidth) || (maxHeight && height > maxHeight)) {
+            errorCode = 'layers.errorImageLoadSizeLimitExceeded';
+          }
+        }
+      } else if (image.height === 0 || image.width === 0) {
+        // No image returned, update the error code
+        errorCode = 'layers.errorImageLoadNoImageReturned';
+      }
+    }
+
     // Check the layer status before
     const layerStatusBefore = this.getLayerConfig().layerStatus;
 
@@ -347,7 +378,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       this.getLayerConfig().updateLayerStatusParent();
 
       // Emit about the error
-      this.#emitError(event, 'layers.errorImageLoad');
+      this.#emitError(event, errorCode);
     } else {
       // We've already emitted an error to the user about the layer being in error, skip
     }

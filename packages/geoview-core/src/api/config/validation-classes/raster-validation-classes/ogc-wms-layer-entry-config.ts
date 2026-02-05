@@ -360,7 +360,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    */
   #normalizeMetadataAndDataAccessPaths(): void {
     // Get the metadata access path
-    let metadataAccessPath = this.getMetadataAccessPath()!;
+    let metadataAccessPath = this.getMetadataAccessPath()!.toLowerCase().split('?request=getcapabilities')[0];
 
     // Normalize it - datacube specific normalization
 
@@ -370,7 +370,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     this.setMetadataAccessPath(metadataAccessPath);
 
     // Get the data access path
-    let dataAccessPath = this.getDataAccessPath();
+    let dataAccessPath = this.getDataAccessPath().toLowerCase().split('?request=getcapabilities')[0];
 
     // If any, normalize it as well in case the provided one also needed to be normalized
     if (dataAccessPath) {
