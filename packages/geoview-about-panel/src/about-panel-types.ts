@@ -36,3 +36,18 @@ export interface TypeAboutPanelProps {
   /** Schema version */
   version?: string;
 }
+
+export type TypeMarkdownFromPathProps = {
+  mdPath: string;
+};
+
+export type TypeMarkdownFromContentProps = {
+  mdContent: string[];
+};
+
+export type TypeDefaultContentProps = {
+  title?: string;
+  logoPath?: string;
+  description?: string;
+  link?: string;
+};

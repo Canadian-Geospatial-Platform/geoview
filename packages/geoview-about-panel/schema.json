@@ -12,7 +12,7 @@
       "default": false
     },
     "aboutTitle": {
-      "description": "The text that shows in the aria-label and at the bery top of the About Panel",
+      "description": "The text that shows in the aria-label and at the very top of the About Panel",
       "type": "string"
     },
     "iconPath": {

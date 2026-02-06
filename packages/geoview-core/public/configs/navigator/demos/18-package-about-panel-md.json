@@ -24,7 +24,7 @@
         "isOpen": true,
         "aboutTitle": "About Atlas of Canada",
         "iconPath": "./img/canada-icon.png",
-        "mdPath": "./img/about-sample.md"
+        "mdPath": "./configs/md/about-sample.md"
       }
     }
   ]

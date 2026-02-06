@@ -40,6 +40,8 @@ class AboutPanelPlugin extends AppBarPlugin {
       en: {
         AboutPanel: {
           title: 'About',
+          failed: 'Failed to load content: ',
+          loading: 'Loading...',
         },
       },
       fr: {

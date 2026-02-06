@@ -1,19 +1,32 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
-import Markdown from 'markdown-to-jsx';
-import { getSxClasses } from './about-panel-style';
+import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
+import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from 'geoview-core/core/utils/logger';
 
-import type { AboutPanelProps } from './about-panel-types';
+import { getSxClasses } from './about-panel-style';
+import Markdown from 'markdown-to-jsx';
+
+import type {
+  AboutPanelProps,
+  TypeDefaultContentProps,
+  TypeMarkdownFromContentProps,
+  TypeMarkdownFromPathProps,
+} from './about-panel-types';
 
 /**
- * Component to render markdown content from a file path
+ * Component to render markdown content from a file path / markdown document
+ * @param {TypeMarkdownFromPathProps} props - The component props
+ * @returns {JSX.Element} The created JSX Element from the MD document
  */
-function MarkdownFromPath({ mdPath }: { mdPath: string }): JSX.Element {
+function MarkdownFromPath(props: TypeMarkdownFromPathProps): JSX.Element {
+  const { mdPath } = props;
   const { cgpv } = window as TypeWindow;
   const { ui, reactUtilities } = cgpv;
   const { react } = reactUtilities;
   const { useEffect, useState } = react;
   const { Box, Typography } = ui.elements;
+
+  const displayLanguage = useAppDisplayLanguage();
 
   const [content, setContent] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +56,10 @@ function MarkdownFromPath({ mdPath }: { mdPath: string }): JSX.Element {
   if (error) {
     return (
       <Box sx={sxClasses.errorContainer}>
-        <Typography color="error">Failed to load content: {error}</Typography>
+        <Typography color="error">
+          {getLocalizedMessage(displayLanguage, 'AboutPanel.failed')}
+          {error}
+        </Typography>
       </Box>
     );
   }
@@ -51,7 +67,7 @@ function MarkdownFromPath({ mdPath }: { mdPath: string }): JSX.Element {
   if (!content) {
     return (
       <Box sx={sxClasses.loadingContainer}>
-        <Typography>Loading...</Typography>
+        <Typography>{getLocalizedMessage(displayLanguage, 'AboutPanel.loading')}</Typography>
       </Box>
     );
   }
@@ -65,8 +81,11 @@ function MarkdownFromPath({ mdPath }: { mdPath: string }): JSX.Element {
 
 /**
  * Component to render markdown content from an array of strings
+ * @param {TypeMarkdownFromContentProps} props - The component props
+ * @returns {JSX.Element} The created JSX Element from the MD Content
  */
-function MarkdownFromContent({ mdContent }: { mdContent: string[] }): JSX.Element {
+function MarkdownFromContent(props: TypeMarkdownFromContentProps): JSX.Element {
+  const { mdContent } = props;
   const { cgpv } = window as TypeWindow;
   const { ui } = cgpv;
   const { Box } = ui.elements;
@@ -88,18 +107,11 @@ function MarkdownFromContent({ mdContent }: { mdContent: string[] }): JSX.Elemen
 
 /**
  * Component to render default about panel content
+ * @param {TypeDefaultContentProps} props - The component props
+ * @returns {JSX.Element} The created JSX Element from the configuration options
  */
-function DefaultContent({
-  title,
-  logoPath,
-  description,
-  link,
-}: {
-  title?: string;
-  logoPath?: string;
-  description?: string;
-  link?: string;
-}): JSX.Element {
+function DefaultContent(props: TypeDefaultContentProps): JSX.Element {
+  const { title, logoPath, description, link } = props;
   const { cgpv } = window as TypeWindow;
   const { ui } = cgpv;
   const { Box, Typography, Link } = ui.elements;
@@ -129,7 +141,7 @@ function DefaultContent({
 
       {link && (
         <Box sx={sxClasses.linkContainer}>
-          <Link href={link} target="_blank" rel="noopener noreferrer" underline="hover">
+          <Link href={link} underline="hover">
             {link}
           </Link>
         </Box>
@@ -141,6 +153,8 @@ function DefaultContent({
 /**
  * Main About Panel component
  * Renders markdown content from path, array of strings, or default content
+ * @param {AboutPanelProps} props - The component props
+ * @returns {JSX.Element} The returned About Panel element
  */
 export function AboutPanel(props: AboutPanelProps): JSX.Element {
   const { config } = props;
