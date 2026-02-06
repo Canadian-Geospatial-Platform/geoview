@@ -105,6 +105,7 @@
     "zoomTo": "Zoom to layer",
     "addLayer": "Add a layer",
     "layerError": "Layer has an error...",
+    "layerRegister": "Layer is accessing metadata...",
     "layerLoading": "Layer is loading...",
     "tableDetails": "Table details",
     "refreshLayer": "Reset layer",

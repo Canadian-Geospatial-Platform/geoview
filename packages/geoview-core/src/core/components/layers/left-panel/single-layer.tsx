@@ -307,6 +307,10 @@ export function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, 
       return t('legend.layerError');
     }
 
+    if (layerStatus === 'registered') {
+      return t('legend.layerRegister');
+    }
+
     if (parentHidden) return t('layers.parentHidden');
 
     if (layerChildren && layerChildren.length > 0) {
