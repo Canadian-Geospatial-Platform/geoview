@@ -351,6 +351,14 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
                   color: geoViewColors.info.main,
                 },
               },
+              // for handling registered layer status - means we are not able to query metadata, server is slow
+              '&.registered': {
+                background: geoViewColors.grey.lighten(0.7, 0.6),
+                '& .MuiListItemText-secondary': {
+                  fontWeight: 'bold',
+                  color: geoViewColors.info.main,
+                },
+              },
             },
           },
         },

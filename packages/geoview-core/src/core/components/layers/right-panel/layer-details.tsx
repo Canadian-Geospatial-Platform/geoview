@@ -472,12 +472,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     if (!isRemovable) return null;
 
     return (
-      <DeleteUndoButton
-        key={`delete-undo-${layerDetails.layerPath}`}
-        layerPath={layerDetails.layerPath}
-        layerId={layerDetails.layerId}
-        layerRemovable={isRemovable}
-      />
+      <DeleteUndoButton key={`delete-undo-${layerDetails.layerPath}`} layerPath={layerDetails.layerPath} layerRemovable={isRemovable} />
     );
   }
 

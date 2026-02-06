@@ -82,6 +82,32 @@ function SliderUI(props: SliderProps): JSX.Element {
   const [value, setValue] = useState<number[] | number>(parentValue);
   const [activeThumb, setActiveThumb] = useState<number>(-1);
 
+  // TODO: Refactor - when refactor time slider, re work logic for marks and label to have all of them inside slider (geochart-time slider)
+  // Limit visible marks to max 20
+  const processedMarks = useMemo(() => {
+    if (!marks || marks.length === 0) return marks;
+
+    const maxVisibleMarks = 20;
+
+    // If we have 20 or fewer marks, show them all
+    if (marks.length <= maxVisibleMarks) {
+      return marks;
+    }
+
+    // Calculate which marks should show labels (evenly distributed)
+    const visibleIndices = new Set<number>();
+    for (let i = 0; i < maxVisibleMarks; i++) {
+      const index = Math.round((i / (maxVisibleMarks - 1)) * (marks.length - 1));
+      visibleIndices.add(index);
+    }
+
+    // Keep all marks but only show labels on visible ones
+    return marks.map((mark, index) => ({
+      value: mark.value,
+      label: visibleIndices.has(index) ? mark.label : undefined,
+    }));
+  }, [marks]);
+
   // Memoize the className calculation
   const finalClassName = useMemo(() => {
     const shouldSpreadLabel = Array.isArray(value) && value.length >= 2 && (!orientation || orientation === 'horizontal');
@@ -161,6 +187,42 @@ function SliderUI(props: SliderProps): JSX.Element {
   }, []);
 
   /**
+   * Hides marks that exceed the maximum visible limit.
+   *
+   * @description
+   * This function hides slider tick marks when there are more than 20 marks total.
+   * It keeps all marks in the DOM for proper slider snapping behavior, but visually
+   * hides marks (those beyond the 20 visible limit).
+   * This maintains slider functionality while reducing visual clutter.
+   */
+  const hideExcessMarks = useCallback((): void => {
+    logger.logTraceUseCallback('UI.SLIDER - hideExcessMarks');
+
+    // Get slider container
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    // Get all marks and labels
+    const marksOri = container.getElementsByClassName('MuiSlider-mark');
+    const labels = container.getElementsByClassName('MuiSlider-markLabel');
+    const marksArray = Array.from(marksOri) as HTMLElement[];
+    const labelsArray = Array.from(labels) as HTMLElement[];
+
+    // Get the positions of all labels
+    const labelPositions = new Set(labelsArray.map((label) => parseFloat(label.style.left || '0')));
+
+    // Hide marks that don't have a corresponding label
+    marksArray.forEach((mark) => {
+      const markPosition = parseFloat(mark.style.left || '0');
+      if (labelPositions.has(markPosition)) {
+        mark.classList.remove('MuiSlider-mark-hidden');
+      } else {
+        mark.classList.add('MuiSlider-mark-hidden');
+      }
+    });
+  }, [containerId]);
+
+  /**
    * Removes overlapping labels in a slider component.
    *
    * @description
@@ -220,7 +282,10 @@ function SliderUI(props: SliderProps): JSX.Element {
     if (lastVisible !== 0 && lastVisible !== n - 1 && checkOverlap(markerArray[lastVisible], markerArray[n - 1], orientationIn)) {
       markerArray[lastVisible].classList.add('MuiSlider-markLabel-overlap');
     }
-  }, [checkOverlap, containerId]);
+
+    // Hide marks that exceed the visible limit
+    hideExcessMarks();
+  }, [checkOverlap, containerId, hideExcessMarks]);
   useEventListener<Window>('resize', removeLabelOverlap, window);
 
   // Add this new effect to handle slider value changes
@@ -241,7 +306,7 @@ function SliderUI(props: SliderProps): JSX.Element {
       value={value}
       min={min}
       max={max}
-      marks={marks}
+      marks={processedMarks}
       disableSwap
       valueLabelDisplay={valueLabelDisplayOption}
       valueLabelFormat={onValueLabelFormat}

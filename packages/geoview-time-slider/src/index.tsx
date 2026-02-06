@@ -147,6 +147,9 @@ class TimeSliderPlugin extends FooterPlugin {
     } else {
       this.mapViewer.onMapReady(() => {
         this.initTimeSliderPlugin();
+
+        // TODO: Refactor - check for layers loaded event to add slow layer to time slider
+        // this.mapViewer.layer.onLayerLoaded....
       });
     }
 

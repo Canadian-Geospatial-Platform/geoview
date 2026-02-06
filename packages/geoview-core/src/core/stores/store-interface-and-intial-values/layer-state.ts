@@ -32,7 +32,6 @@ export interface ILayerState {
   legendLayers: TypeLegendLayer[];
   displayState: TypeLayersViewDisplayState;
   layerDeleteInProgress: string;
-  selectedLayerSortingArrowId: string;
   layersAreLoading: boolean;
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
@@ -58,7 +57,6 @@ export interface ILayerState {
     toggleItemVisibility: (layerPath: string, item: TypeLegendItem) => void;
     zoomToLayerExtent: (layerPath: string) => Promise<void>;
     zoomToLayerVisibleScale: (layerPath: string) => void;
-    setSelectedLayerSortingArrowId: (layerId: string) => void;
   };
 
   setterActions: {
@@ -67,7 +65,6 @@ export interface ILayerState {
     setLayerDeleteInProgress: (newVal: string) => void;
     setLegendLayers: (legendLayers: TypeLegendLayer[]) => void;
     setSelectedLayerPath: (layerPath: string) => void;
-    setSelectedLayerSortingArrowId: (arrowId: string) => void;
     setLayersAreLoading: (areLoading: boolean) => void;
   };
 }
@@ -85,7 +82,6 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
     selectedLayerPath: null,
     displayState: 'view',
     layerDeleteInProgress: '',
-    selectedLayerSortingArrowId: '',
 
     // Initialize default
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
@@ -312,11 +308,6 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         // Redirect
         MapEventProcessor.zoomToLayerVisibleScale(get().mapId, layerPath);
       },
-
-      setSelectedLayerSortingArrowId: (arrowId: string): void => {
-        // Redirect to setter
-        get().layerState.setterActions.setSelectedLayerSortingArrowId(arrowId);
-      },
     },
 
     setterActions: {
@@ -395,15 +386,6 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         });
       },
 
-      setSelectedLayerSortingArrowId: (arrowId: string): void => {
-        set({
-          layerState: {
-            ...get().layerState,
-            selectedLayerSortingArrowId: arrowId,
-          },
-        });
-      },
-
       setLayersAreLoading: (areLoading: boolean): void => {
         set({
           layerState: {
@@ -445,8 +427,6 @@ export const useLayerSelectedLayerPath = (): string | null | undefined =>
   useStore(useGeoViewStore(), (state) => state.layerState.selectedLayerPath);
 export const useLayerDisplayState = (): TypeLayersViewDisplayState => useStore(useGeoViewStore(), (state) => state.layerState.displayState);
 export const useLayerDeleteInProgress = (): string => useStore(useGeoViewStore(), (state) => state.layerState.layerDeleteInProgress);
-export const useLayerSelectedLayerSortingArrowId = (): string =>
-  useStore(useGeoViewStore(), (state) => state.layerState.selectedLayerSortingArrowId);
 export const useLayerAreLayersLoading = (): boolean => useStore(useGeoViewStore(), (state) => state.layerState.layersAreLoading);
 
 // computed gets

@@ -9,7 +9,6 @@ import { ResponsiveGridLayout } from './responsive-grid-layout';
 import { Tooltip, Typography } from '@/ui';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
-import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useLayerSelectorName } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 interface LayoutProps {
@@ -67,9 +66,6 @@ const Layout = forwardRef(
     const theme = useTheme();
     const layerName = useLayerSelectorName(selectedLayerPath!);
 
-    // Store
-    const { setSelectedFooterLayerListItemId } = useUIStoreActions();
-
     // Callbacks
     /**
      * Handles clicks to layers in left panel. Sets selected layer.
@@ -85,11 +81,8 @@ const Layout = forwardRef(
 
         // Focus is deferred inside setRightPanelFocus with requestAnimationFrame
         responsiveLayoutRef.current?.setRightPanelFocus();
-
-        // set the focus item when layer item clicked.
-        setSelectedFooterLayerListItemId(`${layer.layerUniqueId}`);
       },
-      [onLayerListClicked, setSelectedFooterLayerListItemId]
+      [onLayerListClicked]
     );
 
     /**
