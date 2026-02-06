@@ -74,6 +74,10 @@ class AboutPanelPlugin extends AppBarPlugin {
     return config.iconPath ? <img src={config.iconPath} alt="About" style={{ width: '24px', height: '24px' }} /> : <PublicIcon />;
   }
 
+  /**
+   * Overrides the onCreateButtonProps to pass the correct props
+   * @returns {IconButtonPropsExtend} The icon button props
+   */
   override onCreateButtonProps(): IconButtonPropsExtend {
     // Button props
     return {
@@ -105,14 +109,6 @@ class AboutPanelPlugin extends AppBarPlugin {
   override onCreateContent = (): JSX.Element => {
     return <AboutPanel config={this.getConfig()} />;
   };
-
-  /**
-   * Overrides the addition of the AboutPanel AppBar Plugin.
-   */
-  override onAdd(): void {
-    // Call parent
-    super.onAdd();
-  }
 }
 
 export default AboutPanelPlugin;

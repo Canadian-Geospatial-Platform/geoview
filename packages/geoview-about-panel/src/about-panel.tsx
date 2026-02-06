@@ -166,8 +166,6 @@ export function AboutPanel(props: AboutPanelProps): JSX.Element {
   const theme = ui.useTheme();
   const sxClasses = getSxClasses(theme);
 
-  logger.logDebug('AboutPanel config:', config);
-
   // Priority 1: Markdown file path
   if (config.mdPath) {
     return (
