@@ -555,7 +555,7 @@ TypeValidAppBarCoreProps = "about-panel" | "geolocator" | "export" | "aoi-panel"
 - **tabs** (Required): Tab configuration
 
   - **core** (Required): Array of core tab identifiers
-    - `"about-panel"` - **About Panel package** - Panel for adding panel with information about the map
+    - `"about-panel"` - **About Panel package** - Package for adding a panel with information about the map
     - `"geolocator"` - Location search and navigation
     - `"export"` - Map export functionality
     - `"aoi-panel"` - **AOI Panel package** - Area of interest selection
