@@ -9,13 +9,13 @@ import {
   useDetailsLayerDataArrayBatch,
   useDetailsSelectedLayerPath,
   useDetailsCoordinateInfoEnabled,
+  useMapHideCoordinateInfoSwitch,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useUIActiveAppBarTab, useUIActiveFooterBarTab, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import {
   useMapStoreActions,
   useMapClickCoordinates,
-  useMapHideCoordinateInfoSwitch,
   useMapAllVisibleandInRangeLayers,
   useMapOrderedLayers,
   useMapSelectorLayerQueryable,

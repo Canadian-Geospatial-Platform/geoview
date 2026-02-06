@@ -106,6 +106,7 @@
     "zoomTo": "Zoom sur la couche",
     "addLayer": "Ajouter une couche",
     "layerError": "La couche a une erreur...",
+    "layerRegister": "La couche accède aux métadonnées...",
     "layerLoading": "La couche se charge...",
     "tableDetails": "Table détaillée",
     "refreshLayer": "Réinitialiser la couche",

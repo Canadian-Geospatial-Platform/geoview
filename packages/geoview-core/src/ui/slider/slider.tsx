@@ -83,23 +83,39 @@ function SliderUI(props: SliderProps): JSX.Element {
   const [activeThumb, setActiveThumb] = useState<number>(-1);
 
   // TODO: Refactor - when refactor time slider, re work logic for marks and label to have all of them inside slider (geochart-time slider)
-  // Limit visible marks to max 20
+  // Limit visible marks to max 30
   const processedMarks = useMemo(() => {
     if (!marks || marks.length === 0) return marks;
 
-    const maxVisibleMarks = 20;
+    const maxVisibleMarks = 30;
 
-    // If we have 20 or fewer marks, show them all
+    // If we have fewer marks than the limit, show them all
     if (marks.length <= maxVisibleMarks) {
       return marks;
     }
 
-    // Calculate which marks should show labels (evenly distributed)
+    // Get min and max values
+    const minValue = Math.min(...marks.map((m) => m.value));
+    const maxValue = Math.max(...marks.map((m) => m.value));
+
+    // Calculate minimum spacing to ensure even distribution
+    const minSpacing = (maxValue - minValue) / (maxVisibleMarks - 1);
+
+    // Select marks with minimum spacing
     const visibleIndices = new Set<number>();
-    for (let i = 0; i < maxVisibleMarks; i++) {
-      const index = Math.round((i / (maxVisibleMarks - 1)) * (marks.length - 1));
-      visibleIndices.add(index);
+    visibleIndices.add(0); // Always include first mark
+
+    let lastValue = marks[0].value;
+    for (let i = 1; i < marks.length - 1; i++) {
+      // If this mark is far enough from the last selected mark
+      if (marks[i].value - lastValue >= minSpacing) {
+        visibleIndices.add(i);
+        lastValue = marks[i].value;
+      }
     }
+
+    // Always include last mark
+    visibleIndices.add(marks.length - 1);
 
     // Keep all marks but only show labels on visible ones
     return marks.map((mark, index) => ({

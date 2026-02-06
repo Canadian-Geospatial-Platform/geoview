@@ -135,7 +135,7 @@
             "timeDimension": {
               "field": "DATE_",
               "default": ["2023-04-19T00:00:00Z", "2025-09-15T00:00:00Z"],
-              "nearestValues": "discrete",
+              "nearestValues": "continuous",
               "displayPattern": ["day", null],
               "rangeItems": {
                 "type": "",

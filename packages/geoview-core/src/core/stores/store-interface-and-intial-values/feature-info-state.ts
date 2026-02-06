@@ -26,6 +26,7 @@ export interface IFeatureInfoState {
   layerDataArrayBatchLayerPathBypass: string;
   selectedLayerPath: string;
   coordinateInfoEnabled: boolean;
+  hideCoordinateInfoSwitch: boolean;
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
@@ -65,6 +66,7 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
     layerDataArrayBatchLayerPathBypass: '',
     selectedLayerPath: '',
     coordinateInfoEnabled: false,
+    hideCoordinateInfoSwitch: false,
 
     // Initialize default
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
@@ -73,6 +75,7 @@ export function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFea
           ...get().detailsState,
           coordinateInfoEnabled:
             (geoviewConfig.globalSettings?.coordinateInfoEnabled && !geoviewConfig.globalSettings?.hideCoordinateInfoSwitch) || false,
+          hideCoordinateInfoSwitch: geoviewConfig.globalSettings?.hideCoordinateInfoSwitch || false,
         },
       });
     },
@@ -221,6 +224,8 @@ export const useDetailsLayerDataArrayBatch = (): TypeFeatureInfoResultSetEntry[]
 export const useDetailsSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.detailsState.selectedLayerPath);
 export const useDetailsCoordinateInfoEnabled = (): boolean =>
   useStore(useGeoViewStore(), (state) => state.detailsState.coordinateInfoEnabled);
+export const useMapHideCoordinateInfoSwitch = (): boolean =>
+  useStore(useGeoViewStore(), (state) => state.detailsState.hideCoordinateInfoSwitch);
 
 // Store Actions
 export const useDetailsStoreActions = (): FeatureInfoActions => useStore(useGeoViewStore(), (state) => state.detailsState.actions);
