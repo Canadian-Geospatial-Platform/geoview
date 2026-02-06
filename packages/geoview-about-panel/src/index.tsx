@@ -47,6 +47,8 @@ class AboutPanelPlugin extends AppBarPlugin {
       fr: {
         AboutPanel: {
           title: 'À propos',
+          failed: 'Impossible de charger le contenu: ',
+          loading: 'Chargement...',
         },
       },
     };
