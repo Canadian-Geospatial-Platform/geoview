@@ -1,6 +1,6 @@
 import type { TypeValidAppBarCoreProps, TypeValidFooterBarTabsCoreProps, TypeValidMapCorePackageProps, TypeValidNavBarProps } from '@/api/types/map-schema-types';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import type { IUIState, ActiveAppBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import type { IUIState, ActiveAppBarTabType, ActiveFooterBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
 export declare class UIEventProcessor extends AbstractEventProcessor {
     /**
      * Shortcut to get the UI state for a given map id
@@ -8,17 +8,16 @@ export declare class UIEventProcessor extends AbstractEventProcessor {
      * @returns {IUIState} The UI state.
      */
     protected static getUIStateProtected(mapId: string): IUIState;
-    static getActiveFooterBarTab(mapId: string): string | undefined;
+    static getActiveFooterBarTab(mapId: string): ActiveFooterBarTabType;
     static getFooterBarComponents(mapId: string): TypeValidFooterBarTabsCoreProps[];
     static getAppBarComponents(mapId: string): TypeValidAppBarCoreProps[];
     static getNavBarComponents(mapId: string): TypeValidNavBarProps[];
     static getCorePackageComponents(mapId: string): TypeValidMapCorePackageProps[];
-    static getFooterBarIsCollapsed(mapId: string): boolean;
     static hideTabButton(mapId: string, tab: string): void;
     static showTabButton(mapId: string, tab: string): void;
     static setActiveFooterBarTab(mapId: string, id: string): void;
     static setActiveAppBarTab(mapId: string, tabId: string, isOpen: boolean, isFocusTrapped: boolean): void;
     static getActiveAppBarTab(mapId: string): ActiveAppBarTabType;
-    static setFooterBarIsCollapsed(mapId: string, collapsed: boolean): void;
+    static setFooterBarIsOpen(mapId: string, isOpen: boolean): void;
 }
 //# sourceMappingURL=ui-event-processor.d.ts.map

@@ -7,18 +7,22 @@ export type ActiveAppBarTabType = {
     isOpen: boolean;
     isFocusTrapped?: boolean;
 };
+export type ActiveFooterBarTabType = {
+    tabId: string;
+    isOpen: boolean;
+    isFocusTrapped?: boolean;
+};
 export interface IUIState {
-    activeFooterBarTabId: string | undefined;
     activeTrapGeoView: boolean;
-    activeAppBarTab: ActiveAppBarTabType;
     appBarComponents: TypeValidAppBarCoreProps[];
+    activeAppBarTab: ActiveAppBarTabType;
     footerBarComponents: TypeValidFooterBarTabsCoreProps[];
+    activeFooterBarTab: ActiveFooterBarTabType;
     corePackagesComponents: TypeValidMapCorePackageProps[];
     focusItem: FocusItemProps;
     hiddenTabs: string[];
     navBarComponents: TypeValidNavBarProps[];
     footerPanelResizeValue: number;
-    footerBarIsCollapsed: boolean;
     selectedFooterLayerListItemId: string;
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
     actions: {
@@ -30,7 +34,7 @@ export interface IUIState {
         setActiveAppBarTab: (tabId: string, isOpen: boolean, isFocusTrapped: boolean) => void;
         setActiveTrapGeoView: (active: boolean) => void;
         setFooterPanelResizeValue: (value: number) => void;
-        setFooterBarIsCollapsed: (collapsed: boolean) => void;
+        setFooterBarIsOpen: (open: boolean) => void;
         setSelectedFooterLayerListItemId: (layerListItemId: string) => void;
     };
     setterActions: {
@@ -41,7 +45,7 @@ export interface IUIState {
         setActiveTrapGeoView: (active: boolean) => void;
         setFooterPanelResizeValue: (value: number) => void;
         setHiddenTabs: (hiddenTabs: string[]) => void;
-        setFooterBarIsCollapsed: (collapsed: boolean) => void;
+        setFooterBarIsOpen: (open: boolean) => void;
         setSelectedFooterLayerListItemId: (layerListItemId: string) => void;
     };
 }
@@ -57,8 +61,8 @@ type FocusItemProps = {
     callbackElementId: string | false;
 };
 export declare const useUIActiveFocusItem: () => FocusItemProps;
-export declare const useUIActiveFooterBarTabId: () => string | undefined;
 export declare const useUIActiveAppBarTab: () => ActiveAppBarTabType;
+export declare const useUIActiveFooterBarTab: () => ActiveFooterBarTabType;
 export declare const useUIActiveTrapGeoView: () => boolean;
 export declare const useUIAppbarComponents: () => TypeValidAppBarCoreProps[];
 export declare const useUIFooterBarComponents: () => TypeValidFooterBarTabsCoreProps[];
@@ -66,7 +70,6 @@ export declare const useUICorePackagesComponents: () => TypeValidMapCorePackageP
 export declare const useUIFooterPanelResizeValue: () => number;
 export declare const useUIHiddenTabs: () => string[];
 export declare const useUINavbarComponents: () => TypeValidNavBarProps[];
-export declare const useUIFooterBarIsCollapsed: () => boolean;
 export declare const useUISelectedFooterLayerListItemId: () => string;
 export declare const useUIStoreActions: () => UIActions;
 export {};

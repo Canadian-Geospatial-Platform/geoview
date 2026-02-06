@@ -45,4 +45,5 @@ export declare const CONTAINER_TYPE: {
     readonly APP_BAR: "appBar";
     readonly FOOTER_BAR: "footerBar";
 };
+export declare const TIMEOUT: Record<string, number>;
 //# sourceMappingURL=constant.d.ts.map
