@@ -27,22 +27,19 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
   const displayState = useLayerDisplayState();
   const [isLayoutEnlarged, setIsLayoutEnlarged] = useState<boolean>(false);
 
-  const { setSelectedFooterLayerListItemId, disableFocusTrap } = useUIStoreActions();
+  const { disableFocusTrap } = useUIStoreActions();
 
   const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
   const mapId = useGeoViewMapId();
 
-  const showLayerDetailsPanel = useCallback(
-    (layerId: string): void => {
-      // Log
-      logger.logTraceUseCallback('LAYERS-PANEL - showLayerDetailsPanel');
+  const showLayerDetailsPanel = useCallback((): void => {
+    // Log
+    logger.logTraceUseCallback('LAYERS-PANEL - showLayerDetailsPanel');
 
-      responsiveLayoutRef.current?.setIsRightPanelVisible(true);
-      responsiveLayoutRef.current?.setRightPanelFocus();
-      setSelectedFooterLayerListItemId(`${layerId}`);
-    },
-    [setSelectedFooterLayerListItemId]
-  );
+    // Just set visibility - focus will be handled automatically by useEffect
+    responsiveLayoutRef.current?.setIsRightPanelVisible(true);
+    responsiveLayoutRef.current?.setRightPanelFocus();
+  }, []);
 
   const leftPanel = (): JSX.Element => {
     return (

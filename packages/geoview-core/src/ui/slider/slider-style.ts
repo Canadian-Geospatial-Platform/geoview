@@ -62,5 +62,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     '& .MuiSlider-markLabel-overlap': {
       display: 'none !important',
     },
+    '& .MuiSlider-mark-hidden': {
+      opacity: 0,
+      pointerEvents: 'none',
+    },
   },
 });

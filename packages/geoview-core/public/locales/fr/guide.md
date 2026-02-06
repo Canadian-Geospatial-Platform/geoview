@@ -12,6 +12,8 @@ Pendant le chargement initial des couches cartographiques, une barre de progress
 
 Dans le panneau **Légende** ou **Couches**, chaque couche affiche une icône de chargement (spinner) à gauche (à la place de l’icône de couche habituelle) tant qu’elle est en cours de traitement. Une fois la couche rendue correctement pour la première fois, le spinner est remplacé par l’icône correspondante.
 
+- Chaque couche enregistrée dans l'onglet **couches** deviendra grise lorsque Geoview tentera de récupérer les métadonnées. Le statut de la couche passera à « en cours de traitement » lorsque les métadonnées auront été lues, et la case deviendra verte. Lorsque la couche sera prête, la case deviendra blanche. Une option de suppression sera ajoutée si la couche se charge lentement.
+
 ## Rechargement des couches
 
 Chaque fois que la carte est **déplacée** ou **zoomée**, certaines couches peuvent repasser en état de chargement. Lorsque cela se produit :
@@ -273,6 +275,12 @@ Si l'icône de visibilité (œil) d'une couche est désactivée (grisée) <img s
 
 La **vue par défault** de l’onglet **Couches** se divise en deux sections. La section de gauche présente les couches affichées sur la carte. Si vous cliquez sur une couche, ses paramètres (options accessibles pour la couche) s’afficheront dans la section de droite.
 
+**Chargement des couches pour la première fois**
+- Toutes les couches enregistrées dans l'onglet **couches** deviendront **grises** lorsque Geoview tentera de récupérer les métadonnées.
+- Le statut de la couche passera à « en cours de traitement » lorsque les métadonnées auront été lues, et la case deviendra **verte**.
+- Lorsque la couche sera prête, la case deviendra **blanche**.
+- Une option de suppression sera ajoutée si la couche se charge lentement.
+
 **Icônes de couche**
 
 Chaque couche a ses symboles. Pour les couches à éléments simples, il n'y a qu'une seule icône <img src="{{assetsURL}}/img/guide/footer/icon_single.png" alt="Une icône représentant une couche Simple" /> à côté du nom de la couche. Pour celles à éléments complexes (plusieurs symboles par couche), les icônes prennent la forme d'une pile (placez votre pointeur sur la pile pour voir les icônes <img src="{{assetsURL}}/img/guide/footer/icon_multiple.png" alt="Une icône représentant une Pile de couches" />).
@@ -340,6 +348,7 @@ Des détails techniques supplémentaires sur la couche sont affichés dans cette
 
 - **Type** : Le type de couche (p. ex., service dynamique ESRI, GeoJSON, WMS)
 - **Projection du service** : Le système de référence de coordonnées utilisé par le service (p. ex., EPSG:3978, EPSG:3857)
+- **Filtres actifs** : les filtres actifs appliqués à la couche
 - **Dimension temporelle** : Si la couche contient des données temporelles, cela indique le nom du champ et la plage de dates minimum/maximum
 - **Ressource** : L'URL ou le chemin vers la source de données
 

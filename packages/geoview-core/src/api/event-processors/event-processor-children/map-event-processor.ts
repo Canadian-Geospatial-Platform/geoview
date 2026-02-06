@@ -279,6 +279,15 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Gets geolocator search area
+   * @param {string} mapId - The mapId
+   * @returns {{ coords: Coordinate; bbox?: Extent } | undefined} The geolocator search area with coordinates and optional bounding box
+   */
+  static getGeolocatorSearchArea(mapId: string): { coords: Coordinate; bbox?: Extent } | undefined {
+    return this.getMapStateProtected(mapId).geolocatorSearchArea;
+  }
+
+  /**
    * Gets feature highlight color.
    * @param {string} mapId - The ID of the map
    * @returns {TypeHighlightColors} The highlight color
@@ -1113,6 +1122,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   static async zoomToGeoLocatorLocation(mapId: string, coords: Coordinate, bbox?: Extent): Promise<void> {
+    // Set the map state store with the location use for the zoom to location
+    this.getMapStateProtected(mapId).setterActions.setGeolocatorSearchArea({ coords, bbox });
+
     const indicatorBox = document.getElementsByClassName('ol-overviewmap-box');
     for (let i = 0; i < indicatorBox.length; i++) {
       (indicatorBox[i] as HTMLElement).style.display = 'none';

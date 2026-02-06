@@ -51,6 +51,7 @@ export interface IMapState {
   currentProjection: TypeValidMapProjectionCodes;
   featureHighlightColor: TypeHighlightColors;
   fixNorth: boolean;
+  geolocatorSearchArea: { coords: Coordinate; bbox?: Extent } | undefined;
   hideCoordinateInfoSwitch: boolean;
   highlightedFeatures: TypeFeatureInfoEntry[];
   homeView: TypeMapViewSettings | undefined;
@@ -132,6 +133,7 @@ export interface IMapState {
     setAttribution: (attribution: string[]) => void;
     setInitialFilters: (filters: Record<string, string>) => void;
     setInitialView: (view: TypeZoomAndCenter | Extent) => void;
+    setGeolocatorSearchArea: (area: { coords: Coordinate; bbox?: Extent } | undefined) => void;
     setHomeView: (view: TypeMapViewSettings) => void;
     setInteraction: (interaction: TypeInteraction) => void;
     setIsMouseInsideMap: (isMouseInsideMap: boolean) => void;
@@ -183,6 +185,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     currentBasemapOptions: { basemapId: 'transport', shaded: true, labeled: true },
     currentProjection: DEFAULT_PROJECTION,
     featureHighlightColor: DEFAULT_HIGHLIGHT_COLOR,
+    geolocatorSearchArea: undefined,
     fixNorth: false,
     hideCoordinateInfoSwitch: false,
     highlightedFeatures: [],
@@ -232,6 +235,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           currentProjection: geoviewConfig.map.viewSettings.projection,
           currentBasemapOptions: geoviewConfig.map.basemapOptions,
           featureHighlightColor: geoviewConfig.map.highlightColor || DEFAULT_HIGHLIGHT_COLOR,
+          geolocatorSearchArea: undefined,
           hideCoordinateInfoSwitch: geoviewConfig.globalSettings?.hideCoordinateInfoSwitch || false,
           homeView: geoviewConfig.map.viewSettings.homeView ||
             geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [MAP_ZOOM_LEVEL[3857], MAP_CENTER[3857]] },
@@ -762,6 +766,21 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           mapState: {
             ...get().mapState,
             initialView: viewType,
+          },
+        });
+      },
+
+      /**
+       * Sets the geolocator search area with coordinates and optional bounding box.
+       * @param {Object | undefined} area - The search area object containing coordinates and optional bounding box, or undefined to clear.
+       * @param {Coordinate} area.coords - The coordinates of the search location.
+       * @param {Extent} [area.bbox] - Optional bounding box extent for the search area.
+       */
+      setGeolocatorSearchArea: (area: { coords: Coordinate; bbox?: Extent } | undefined): void => {
+        set({
+          mapState: {
+            ...get().mapState,
+            geolocatorSearchArea: area,
           },
         });
       },

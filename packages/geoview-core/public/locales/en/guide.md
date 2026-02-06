@@ -12,6 +12,8 @@ While the map layers are loading for the first time, a progress bar will be disp
 
 In the **Legend** or **Layers** panel, each layer displays a spinner icon on the left (in place of the standard layer icon) while it is loading. Once a layer is fully processed and rendered for the first time, the spinner will be replaced with the layer’s corresponding icon.
 
+- Every registered layer in the **layers** tab will turn grey when Geoview attempts to retrieve the metadata. The layer status will change to processing when the metadata has been read, and the box will turn green. When layer is ready, the box will turn white. A delete option will be added if the layer loads slowly.
+
 ## Layers reloading
 
 Any time the map is **panned** or **zoomed**, certain layers may re-enter a loading state. When this occurs:
@@ -273,6 +275,12 @@ If a layer's visibility (eye) icon is disabled (greyed out) <img src="{{assetsUR
 
 The **default view** of the **Layers** tab consists of two sections. The left section lists all the layers displayed on the map. Click on a layer and the right section lists will show the layer settings (available options for that layer).
 
+**Layers Loading First Time**
+- Every registered layer in the **layers** tab will turn **grey** when Geoview attempts to retrieve the metadata.
+- The layer status will change to processing when the metadata has been read, and the box will turn **green**.
+- When layer is ready, the box will turn **white**.
+- A delete option will be added if the layer loads slowly.
+
 **Layer Icons**
 
 Each layer has some symbology associated with it. For simple feature layers a single icon <img src="{{assetsURL}}/img/guide/footer/icon_single.png" alt="An icon representing a Single layer" /> will be present next to the layer name. For complex feature layers (i.e. those with multiple symbols used per layer) the icon will show as a stack (hover to reveal more than one icon <img src="{{assetsURL}}/img/guide/footer/icon_multiple.png" alt="An icon representing a Stack of layers" />).
@@ -340,6 +348,7 @@ Additional technical details about the layer are displayed in this section, whic
 
 - **Type**: The layer type (e.g., ESRI Dynamic Service, GeoJSON, WMS)
 - **Service projection**: The coordinate reference system used by the service (e.g., EPSG:3978, EPSG:3857)
+- **Active filters**: The active filters applied to the layer
 - **Temporal dimension**: If the layer has time-based data, this shows the field name and the minimum/maximum date range
 - **Resource**: The URL or path to the data source
 

@@ -4,12 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { Box, CircularProgressBase, DeleteOutlineIcon, IconButton, UndoIcon } from '@/ui';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useMapStoreActions, useMapSelectorLayerVisibility } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
+import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 interface DeleteUndoButtonProps {
   layerPath: string;
-  layerId: string;
   layerRemovable: boolean;
   focusTargetIdAfterDelete?: string;
 }
@@ -54,7 +53,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/left-panel/delete-undo-button/DeleteUndoButton');
 
-  const { layerPath, layerId, layerRemovable, focusTargetIdAfterDelete } = props;
+  const { layerPath, layerRemovable, focusTargetIdAfterDelete } = props;
 
   const { t } = useTranslation<string>();
 
@@ -64,7 +63,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   // get store actions
   const { deleteLayer, setLayerDeleteInProgress, getLayerDeleteInProgress } = useLayerStoreActions();
   const { setOrToggleLayerVisibility, removeLayerHighlights } = useMapStoreActions();
-  const { setSelectedFooterLayerListItemId, disableFocusTrap } = useUIStoreActions();
+  const { disableFocusTrap } = useUIStoreActions();
   const isVisible = useMapSelectorLayerVisibility(layerPath);
 
   const handleDeleteClick = (): void => {
@@ -84,14 +83,12 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     if (event.key === 'Enter') {
       event.preventDefault();
       handleDeleteClick();
-      setSelectedFooterLayerListItemId(layerId);
     }
   };
 
   const handleUndoDeleteKeyDown = (event: KeyboardEvent): void => {
     if (event.key === 'Enter') {
       handleUndoClick();
-      setSelectedFooterLayerListItemId('');
       event.preventDefault();
     }
   };

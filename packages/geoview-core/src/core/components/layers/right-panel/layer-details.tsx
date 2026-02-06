@@ -480,7 +480,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       <DeleteUndoButton
         key={`delete-undo-${layerDetails.layerPath}`}
         layerPath={layerDetails.layerPath}
-        layerId={layerDetails.layerId}
         layerRemovable={isRemovable}
         focusTargetIdAfterDelete={`${mapId}-${containerType}-${TABS.LAYERS}-panel-close-btn`}
       />

@@ -39,7 +39,6 @@ export interface IUIState {
   hiddenTabs: string[];
   navBarComponents: TypeValidNavBarProps[];
   footerPanelResizeValue: number;
-  selectedFooterLayerListItemId: string;
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
@@ -52,7 +51,6 @@ export interface IUIState {
     setActiveTrapGeoView: (active: boolean) => void;
     setFooterPanelResizeValue: (value: number) => void;
     setFooterBarIsOpen: (open: boolean) => void;
-    setSelectedFooterLayerListItemId: (layerListItemId: string) => void;
   };
 
   setterActions: {
@@ -64,7 +62,6 @@ export interface IUIState {
     setFooterPanelResizeValue: (value: number) => void;
     setHiddenTabs: (hiddenTabs: string[]) => void;
     setFooterBarIsOpen: (open: boolean) => void;
-    setSelectedFooterLayerListItemId: (layerListItemId: string) => void;
   };
 }
 
@@ -88,8 +85,6 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
     focusItem: { activeElementId: false, callbackElementId: false },
     hiddenTabs: ['data-table', 'time-slider', 'geochart'],
     footerPanelResizeValue: 35,
-    selectedFooterLayerListItemId: '',
-    selectedAppBarLayerListItemId: '',
 
     // initialize default stores section from config information when store receive configuration file
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
@@ -116,10 +111,6 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           },
           corePackagesComponents: geoviewConfig.corePackages || [],
           navBarComponents: geoviewConfig.navBar || [],
-          selectedFooterLayerListItemId:
-            geoviewConfig.footerBar?.selectedLayersLayerPath || geoviewConfig.appBar?.selectedLayersLayerPath
-              ? `${get().mapId}-${geoviewConfig.footerBar?.selectedTab || geoviewConfig.appBar?.selectedTab}-${geoviewConfig.footerBar?.selectedLayersLayerPath || geoviewConfig.appBar?.selectedLayersLayerPath}`
-              : '',
         },
       });
     },
@@ -162,10 +153,6 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
       setActiveAppBarTab: (tabId: string, isOpen: boolean, isFocusTrapped: boolean) => {
         // Redirect to setter
         get().uiState.setterActions.setActiveAppBarTab(tabId, isOpen, isFocusTrapped);
-      },
-      setSelectedFooterLayerListItemId: (layerListItemId: string) => {
-        // Redirect to setter
-        get().uiState.setterActions.setSelectedFooterLayerListItemId(layerListItemId);
       },
     },
 
@@ -265,14 +252,6 @@ export function initializeUIState(set: TypeSetStore, get: TypeGetStore): IUIStat
           },
         });
       },
-      setSelectedFooterLayerListItemId: (layerListItemId: string) => {
-        set({
-          uiState: {
-            ...get().uiState,
-            selectedFooterLayerListItemId: layerListItemId,
-          },
-        });
-      },
     },
 
     // #endregion ACTIONS
@@ -303,8 +282,6 @@ export const useUICorePackagesComponents = (): TypeValidMapCorePackageProps[] =>
 export const useUIFooterPanelResizeValue = (): number => useStore(useGeoViewStore(), (state) => state.uiState.footerPanelResizeValue);
 export const useUIHiddenTabs = (): string[] => useStore(useGeoViewStore(), (state) => state.uiState.hiddenTabs);
 export const useUINavbarComponents = (): TypeValidNavBarProps[] => useStore(useGeoViewStore(), (state) => state.uiState.navBarComponents);
-export const useUISelectedFooterLayerListItemId = (): string =>
-  useStore(useGeoViewStore(), (state) => state.uiState.selectedFooterLayerListItemId);
 
 // Store Actions
 export const useUIStoreActions = (): UIActions => useStore(useGeoViewStore(), (state) => state.uiState.actions);
