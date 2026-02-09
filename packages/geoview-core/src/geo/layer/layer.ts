@@ -135,8 +135,6 @@ import type { TypeTimeSliderProps } from '@/core/stores/store-interface-and-inti
  * @class LayerApi
  */
 export class LayerApi {
-  /** Maximum time duration to wait when registering a layer for the time slider */
-  static readonly #MAX_WAIT_TIME_SLIDER_REGISTRATION = 20000;
   /** Reference on the map viewer */
   mapViewer: MapViewer;
 
@@ -904,12 +902,6 @@ export class LayerApi {
     // Register for ordered layer information
     this.#registerForOrderedLayerInfo(layerConfig as TypeLayerEntryConfig);
 
-    // Register for TimeSlider
-    this.#registerForTimeSlider(layerConfig as TypeLayerEntryConfig).catch((error: unknown) => {
-      // Log
-      logger.logPromiseFailed('in registration of layer for the time slider', error);
-    });
-
     // Tell the layer sets about it
     this.#allLayerSets.forEach((layerSet) => {
       // Register the config to the layer set
@@ -921,22 +913,6 @@ export class LayerApi {
 
     // Set the layer status to registered
     layerConfig.setLayerStatusRegistered();
-  }
-
-  /**
-   * Registers the layer in the LayerApi layer-sets to start managing it.
-   * This function may be used to start managing a layer in the UI when said layer has been created outside of the regular config->layer flow.
-   * @param {AbstractGVLayer} layer - The layer to register
-   */
-  registerLayerInLayerSets(layer: AbstractGVLayer): void {
-    // Tell the layer sets about it
-    this.#allLayerSets.forEach((layerSet) => {
-      // Register the layer to the layer set
-      layerSet.registerLayer(layer).catch((error: unknown) => {
-        // Log
-        logger.logPromiseFailed('in registerLayer in registerLayerUpdate', error);
-      });
-    });
   }
 
   /**
@@ -1761,6 +1737,12 @@ export class LayerApi {
         this.#emitLayerAllLoaded({ config: layerConfig });
       }
     }
+
+    // If the layer status is at least 'loaded'
+    if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('loaded', [layerConfig])) {
+      // Time to register the layer in the time-slider
+      this.#registerForTimeSlider(layerConfig);
+    }
   }
 
   /**
@@ -2273,12 +2255,12 @@ export class LayerApi {
   /**
    * Registers layer information for TimeSlider.
    * @param {ConfigBaseClass} layerConfig - The layer configuration to be registered.
+   * @returns {void}
    * @private
    */
-  async #registerForTimeSlider(layerConfig: ConfigBaseClass): Promise<void> {
+  #registerForTimeSlider(layerConfig: ConfigBaseClass): void {
     try {
-      // Wait until the layer is loaded (or processed?)
-      await whenThisThen(() => layerConfig.isGreaterThanOrEqualTo('processed'), LayerApi.#MAX_WAIT_TIME_SLIDER_REGISTRATION);
+      // Get the layer
       const geoviewLayer = this.getGeoviewLayer(layerConfig.layerPath);
 
       // Get time slider config if present in map config
@@ -2294,10 +2276,10 @@ export class LayerApi {
         // Check (if dimension is valid) and add time slider layer when needed
         TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.getMapId(), geoviewLayer, layerSliderConfig);
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error: unknown) {
+      // Log error
+      logger.logError(error);
       // Layer failed to load, abandon it for the TimeSlider registration, too bad.
-      // The error itself, regarding the loaded failure, is already being taken care of elsewhere.
       // Here, we haven't even made it to a possible layer registration for a possible Time Slider, because we couldn't even get the layer to load anyways.
     }
   }
