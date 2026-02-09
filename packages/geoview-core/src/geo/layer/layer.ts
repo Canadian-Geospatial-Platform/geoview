@@ -2262,7 +2262,7 @@ export class LayerApi {
    */
   #registerForTimeSlider(layerConfig: ConfigBaseClass): void {
     try {
-      // Wait until the layer is loaded (or processed?)
+      // Get the layer
       const geoviewLayer = this.getGeoviewLayer(layerConfig.layerPath);
 
       // Get time slider config if present in map config
