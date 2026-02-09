@@ -193,6 +193,7 @@ export abstract class AbstractLayerSet {
 
     // Wait a maximum of 20 seconds for the layer to get to loaded state so that it can get registered, otherwise another attempt will have to be made
     // This await is important when devs call this method directly to register ad-hoc layers.
+    // TODO: REFACTOR - Remove this await? Seems useless now?
     await whenThisThen(() => layer.getLayerStatus() === 'loaded', 20000);
 
     // Update the registration of all layer sets
