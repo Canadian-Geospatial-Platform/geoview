@@ -145,6 +145,10 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     '&.checked.Mui-focusVisible': {
       borderLeft: `5px solid ${theme.palette.geoViewColor.bgColor.dark[600]} !important`,
     },
+    '&.Mui-disabled': {
+      borderLeft: '5px solid transparent',
+      opacity: 1,
+    },
   },
 
   collapsibleContainer: {
