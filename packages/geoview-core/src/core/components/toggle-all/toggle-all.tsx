@@ -74,7 +74,6 @@ export function ToggleAll({ source = 'legend' }: ToggleAllProps): JSX.Element {
               checked={allLayersCollapsed}
               onChange={handleCollapseToggle}
               label={t('toggleAll.collapse') || undefined}
-              disabled={layersAreLoading}
             />
           </span>
         </Tooltip>

@@ -27,6 +27,7 @@ import { logger } from '@/core/utils/logger';
 
 interface LegendLayerProps {
   layerPath: string;
+  hideControls?: boolean;
 }
 
 interface LegendLayerHeaderProps {
@@ -34,13 +35,14 @@ interface LegendLayerHeaderProps {
   tooltip: string;
   onExpandClick: (event: React.MouseEvent) => void;
   sxClasses: ReturnType<typeof getSxClasses>;
+  hideControls?: boolean;
 }
 
 // Length at which the tooltip should be shown
 const CONST_NAME_LENGTH_TOOLTIP = 50;
 
 // Extracted Header Component
-const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick, sxClasses }: LegendLayerHeaderProps): JSX.Element => {
+const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick, sxClasses, hideControls }: LegendLayerHeaderProps): JSX.Element => {
   // Log
   logger.logTraceUseMemo('components/legend/legend-layer - LegendLayerHeader', layerPath);
 
@@ -73,7 +75,7 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick, sxClasses }
         sx={sxClasses.legendTitle}
         className="legendTitle"
         disableTypography
-        secondary={<SecondaryControls layerPath={layerPath} />}
+        secondary={!hideControls ? <SecondaryControls layerPath={layerPath} /> : undefined}
       />
       {((layerChildren && layerChildren.length > 0) || (layerItems && layerItems.length > 1) || layerType === CONST_LAYER_TYPES.WMS) && (
         <IconButton className="buttonOutline" onClick={onExpandClick} edge="end" size="small" aria-label={tooltip}>
@@ -101,7 +103,7 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick, sxClasses }
 LegendLayerHeader.displayName = 'LegendLayerHeader';
 
 // Main LegendLayer component
-export function LegendLayer({ layerPath }: LegendLayerProps): JSX.Element {
+export function LegendLayer({ layerPath, hideControls, forceCollapse }: LegendLayerProps): JSX.Element {
   // Log
   logger.logTraceRender('components/legend/legend-layer', layerPath);
 
@@ -132,8 +134,15 @@ export function LegendLayer({ layerPath }: LegendLayerProps): JSX.Element {
         tooltip={t('layers.toggleCollapse')}
         onExpandClick={handleExpandGroupClick}
         sxClasses={sxClasses}
+        hideControls={hideControls}
       />
-      <CollapsibleContent layerPath={layerPath} initLightBox={initLightBox} LegendLayerComponent={LegendLayer} />
+      <CollapsibleContent
+        layerPath={layerPath}
+        initLightBox={initLightBox}
+        LegendLayerComponent={LegendLayer}
+        hideControls={hideControls}
+        forceCollapse={forceCollapse}
+      />
       <LightBoxComponent />
     </ListItem>
   );

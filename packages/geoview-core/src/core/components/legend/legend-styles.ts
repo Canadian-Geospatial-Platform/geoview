@@ -175,6 +175,9 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[100]}`,
     paddingTop: '8px',
     paddingLeft: '8px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   buttonDivider: {
     display: 'flex',
