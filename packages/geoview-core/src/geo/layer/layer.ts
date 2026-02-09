@@ -1737,19 +1737,6 @@ export class LayerApi {
         this.#emitLayerAllLoaded({ config: layerConfig });
       }
     }
-
-    // If the layer status is at least 'loaded'
-    if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('loaded', [layerConfig])) {
-      // Get the layer
-      // TODO: ALEX - Change this to getGeoviewLayerRegularIfExists once other PR is merged in
-      const layer = this.getGeoviewLayer(layerConfig.layerPath);
-
-      // If layer is of the right type
-      if (layer instanceof AbstractGVLayer) {
-        // Time to register the layer in the time-slider
-        this.#registerForTimeSlider(layer);
-      }
-    }
   }
 
   /**
@@ -1930,6 +1917,9 @@ export class LayerApi {
     if (legendLayerInfo && !legendLayerInfo.bounds) {
       LegendEventProcessor.calculateLayerBoundsAndSaveToStore(this.getMapId(), layer.getLayerPath());
     }
+
+    // Register the layer in the time-slider if it must
+    this.#registerForTimeSlider(layer);
 
     // Emit about it
     this.#emitLayerFirstLoaded({ layer });
