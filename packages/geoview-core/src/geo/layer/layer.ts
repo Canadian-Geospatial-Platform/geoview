@@ -2262,7 +2262,7 @@ export class LayerApi {
    */
   #registerForTimeSlider(layerConfig: ConfigBaseClass): void {
     try {
-      // Wait until the layer is loaded (or processed?)
+      // Get the layer
       const geoviewLayer = this.getGeoviewLayer(layerConfig.layerPath);
 
       // Get time slider config if present in map config
@@ -2280,7 +2280,7 @@ export class LayerApi {
       }
     } catch (error: unknown) {
       // Log error
-      logger.logDebug(error);
+      logger.logError(error);
       // Layer failed to load, abandon it for the TimeSlider registration, too bad.
       // Here, we haven't even made it to a possible layer registration for a possible Time Slider, because we couldn't even get the layer to load anyways.
     }
