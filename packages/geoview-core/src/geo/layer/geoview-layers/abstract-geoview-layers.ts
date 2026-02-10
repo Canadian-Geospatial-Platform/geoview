@@ -1096,6 +1096,17 @@ export abstract class AbstractGeoViewLayer {
         // Emit message
         this.emitMessage('warning.layer.metadataTakingLongTime', [this.getLayerEntryNameOrGeoviewLayerName()], 'warning');
 
+        const intervalId = setInterval(() => {
+          // Check if the layer configs were all at least processed, we're done
+          if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('processed', this.listOfLayerEntryConfig)) {
+            clearInterval(intervalId);
+            return;
+          }
+
+          // Emit message
+          this.emitMessage('warning.layer.metadataTakingLongTime', [this.getLayerEntryNameOrGeoviewLayerName()], 'warning');
+        }, 2 * AbstractGeoViewLayer.DEFAULT_WAIT_PERIOD_METADATA_WARNING);
+
         return false;
       },
       (error: unknown) => logger.logPromiseFailed('Delay in #startMetadataFetchWatcher failed', error)

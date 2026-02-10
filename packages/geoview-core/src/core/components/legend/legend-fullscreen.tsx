@@ -230,27 +230,22 @@ export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onC
     <FullScreenDialog
       open={isOpen}
       onClose={onClose}
+      title={t('legend.title')}
       onExited={() => {
         // Use onExited callback to restore focus to the fullscreen button after the dialog exit animation completes
         fullScreenBtnRef.current?.focus();
       }}
     >
-      <Box sx={{ width: '100%' }}>
-        <div
-          style={{
-            background: theme.palette.geoViewColor.bgColor.main,
-            pointerEvents: 'none',
-            userSelect: 'none',
-            display: 'flex',
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-          }}
-          id={`${mapId}-${containerType}-legendContainer-fullscreen`}
+      <Box
+        sx={sxClasses.fullscreenContainer}
+        id={`${mapId}-${containerType}-legendContainer-fullscreen`}
+        {...({
           // @ts-ignore - inert is a valid HTML attribute but not in React types yet
-          inert=""
-        >
-          {fullscreenContent}
-        </div>
+          inert: '',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any)}
+      >
+        {fullscreenContent}
       </Box>
     </FullScreenDialog>
   );

@@ -316,6 +316,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   return (
     <Layout
       containerType={containerType}
+      titleFullscreen={t('dataTable.title')}
       selectedLayerPath={selectedLayerPath}
       layerList={memoLayerList}
       onLayerListClicked={handleLayerChange}

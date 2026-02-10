@@ -279,6 +279,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
           onIsEnlargeClicked={handleIsEnlargeClicked}
           guideContentIds={['chart', 'chart.children.chartTypes', 'chart.children.chartControls']}
           containerType={CONTAINER_TYPE.FOOTER_BAR}
+          titleFullscreen={getLocalizedMessage(displayLanguage, 'geochart.title')}
         >
           {selectedLayerPath && (
             <Box sx={{ '& .MuiButtonGroup-groupedHorizontal.MuiButton-textSizeMedium': { fontSize: '0.9rem' } }}>

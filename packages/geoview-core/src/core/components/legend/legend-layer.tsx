@@ -82,20 +82,6 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick, sxClasses, 
           {!isCollapsed ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
         </IconButton>
       )}
-      {layerStatus === 'loading' && (
-        <Box
-          sx={{
-            position: 'absolute !important',
-            display: 'block !important',
-            bottom: '0',
-            width: '100%',
-            height: 'auto !important',
-            span: { height: '2px' },
-          }}
-        >
-          <ProgressBar />
-        </Box>
-      )}
     </Box>
   );
 });
@@ -103,7 +89,7 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick, sxClasses, 
 LegendLayerHeader.displayName = 'LegendLayerHeader';
 
 // Main LegendLayer component
-export function LegendLayer({ layerPath, hideControls, forceCollapse }: LegendLayerProps): JSX.Element {
+export function LegendLayer({ layerPath, hideControls }: LegendLayerProps): JSX.Element {
   // Log
   logger.logTraceRender('components/legend/legend-layer', layerPath);
 
@@ -113,6 +99,7 @@ export function LegendLayer({ layerPath, hideControls, forceCollapse }: LegendLa
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Stores
+  const layerStatus = useLayerSelectorStatus(layerPath);
   const { initLightBox, LightBoxComponent } = useLightBox();
   const { toggleLegendCollapsed } = useMapStoreActions();
 
@@ -136,12 +123,24 @@ export function LegendLayer({ layerPath, hideControls, forceCollapse }: LegendLa
         sxClasses={sxClasses}
         hideControls={hideControls}
       />
+      {layerStatus === 'loading' && (
+        <Box
+          sx={{
+            display: 'block !important',
+            bottom: '0',
+            width: '100%',
+            height: 'auto !important',
+            span: { height: '2px' },
+          }}
+        >
+          <ProgressBar />
+        </Box>
+      )}
       <CollapsibleContent
         layerPath={layerPath}
         initLightBox={initLightBox}
         LegendLayerComponent={LegendLayer}
         hideControls={hideControls}
-        forceCollapse={forceCollapse}
       />
       <LightBoxComponent />
     </ListItem>

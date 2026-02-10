@@ -1,4 +1,5 @@
 import { useRef, useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material';
 import { Box } from '@/ui';
 import { useLayerDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -22,6 +23,8 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
   const theme = useTheme();
   // Log
   logger.logTraceRender('components/layers/layers-panel');
+
+  const { t } = useTranslation();
 
   const selectedLayer = useSelectedLayer(); // get store value
   const displayState = useLayerDisplayState();
@@ -116,6 +119,7 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
       guideContentIds={guideContent()}
       hideEnlargeBtn={displayState !== 'view'}
       containerType={containerType}
+      titleFullscreen={t('layers.title')}
       onIsEnlargeClicked={handleIsEnlargeClicked}
       onRightPanelClosed={handleRightPanelClosed}
     />

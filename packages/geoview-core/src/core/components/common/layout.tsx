@@ -23,6 +23,7 @@ interface LayoutProps {
   onRightPanelClosed?: () => void;
   onRightPanelVisibilityChanged?: (isVisible: boolean) => void;
   containerType: TypeContainerBox;
+  titleFullscreen: string;
   hideEnlargeBtn?: boolean;
   toggleMode?: boolean;
 }
@@ -54,6 +55,7 @@ const Layout = forwardRef(
       onRightPanelClosed,
       onRightPanelVisibilityChanged,
       containerType,
+      titleFullscreen,
       hideEnlargeBtn,
       toggleMode = false,
     }: LayoutProps,
@@ -140,6 +142,7 @@ const Layout = forwardRef(
         onRightPanelVisibilityChanged={onRightPanelVisibilityChanged}
         hideEnlargeBtn={hideEnlargeBtn}
         containerType={containerType}
+        titleFullscreen={titleFullscreen}
         toggleMode={toggleMode}
       />
     );

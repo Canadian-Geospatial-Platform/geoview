@@ -199,4 +199,12 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
       backgroundColor: theme.palette.geoViewColor.bgColor.dark[300],
     },
   },
+  fullscreenContainer: {
+    background: 'transparent',
+    pointerEvents: 'none',
+    userSelect: 'none',
+    display: 'flex',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
 });

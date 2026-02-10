@@ -72,7 +72,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   // get store actions and values
   const { zoomToExtent, highlightBBox, transformPoints, showClickMarker, addHighlightedFeature, removeHighlightedFeature } =
     useMapStoreActions();
-  const { applyMapFilters, setSelectedFeature, setColumnsFiltersVisibility } = useDataTableStoreActions();
+  const { applyMapFilters, setSelectedFeature, setColumnsFiltersVisibility, setColumnFilterModesEntry } = useDataTableStoreActions();
   const { getExtentFromFeatures } = useLayerStoreActions();
   const language = useAppDisplayLanguage();
   const datatableSettings = useDataTableLayerSettings();
@@ -86,6 +86,9 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   const rowVirtualizerInstanceRef = useRef<MRTRowVirtualizer>(null);
   const columnVirtualizerInstanceRef = useRef<MRTColumnVirtualizer>(null);
   const [sorting, setSorting] = useState<MRTSortingState>([]);
+  const [columnFilterFns, setColumnFilterFns] = useState<Record<string, string>>(
+    datatableSettings[layerPath]?.columnFilterModesRecord || {}
+  );
 
   const dataTableLocalization = language === 'fr' ? MRTLocalizationFR : MRTLocalizationEN;
 
@@ -109,9 +112,10 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     setDensity(updaterOrValue);
   };
 
-  const handleToggleColumnFilters = (): void => {
-    setShowColumnFilters((prev) => !prev);
-    setColumnsFiltersVisibility(false, layerPath);
+  const handleToggleColumnFilters = (updaterOrValue: boolean | ((prev: boolean) => boolean)): void => {
+    const newValue = typeof updaterOrValue === 'function' ? updaterOrValue(showColumnFilters) : updaterOrValue;
+    setShowColumnFilters(newValue);
+    setColumnsFiltersVisibility(newValue, layerPath);
   };
 
   /**
@@ -241,21 +245,10 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
         header: value.alias,
         visibleInShowHideMenu: value.id === 'icon' || value.id === 'zoom' || value.id === 'details' ? false : true,
         filterFn: 'contains',
-        columnFilterModeOptions: ['contains', 'startsWith', 'endsWith', 'empty', 'notEmpty'],
+        columnFilterModeOptions: ['contains', 'startsWith', 'endsWith'], // String columns: contains, startsWith, endsWith, empty, notEmpty
         ...((value.dataType === 'number' || value.dataType === 'oid') && {
           filterFn: 'between',
-          columnFilterModeOptions: [
-            'equals',
-            'notEquals',
-            'between',
-            'betweenInclusive',
-            'lessThan',
-            'greaterThan',
-            'lessThanOrEqualTo',
-            'greaterThanOrEqualTo',
-            'empty',
-            'notEmpty',
-          ],
+          columnFilterModeOptions: ['between', 'betweenInclusive'],
         }),
         Header: ({ column }) => getTableHeader(column.columnDef.header),
         Cell: ({ cell }) => getCellValueWithTooltip(cell.getValue() as string | number | JSX.Element, cell.id),
@@ -276,18 +269,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
               },
             },
           },
-          columnFilterModeOptions: [
-            'equals',
-            'notEquals',
-            'between',
-            'betweenInclusive',
-            'lessThan',
-            'greaterThan',
-            'lessThanOrEqualTo',
-            'greaterThanOrEqualTo',
-            'empty',
-            'notEmpty',
-          ],
+          columnFilterModeOptions: ['between', 'betweenInclusive'], // Number/OID/Date columns: equals, notEquals, between, betweenInclusive, lessThan, greaterThan, lessThanOrEqualTo, greaterThanOrEqualTo, empty, notEmpty
         }),
         ...([t('dataTable.icon'), t('dataTable.zoom'), t('dataTable.details')].includes(value.alias)
           ? (() => {
@@ -315,6 +297,31 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     // TODO: CLEANUP REACT - Uncomment all disable react-hooks/exhaustive-deps from this file and fix all dependencies!
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [density]);
+
+  /**
+   * Initialize default filter modes for columns using first available option
+   */
+  const initialColumnFilterModes = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('DATA-TABLE - initialColumnFilterModes');
+
+    // If we have stored filter modes, use them
+    if (
+      datatableSettings[layerPath]?.columnFilterModesRecord &&
+      Object.keys(datatableSettings[layerPath].columnFilterModesRecord).length > 0
+    ) {
+      return datatableSettings[layerPath].columnFilterModesRecord;
+    }
+
+    // Otherwise, initialize with first available mode for each column
+    const defaultModes: Record<string, string> = {};
+    columns.forEach((column) => {
+      if (column.id && column.columnFilterModeOptions && column.columnFilterModeOptions.length > 0) {
+        defaultModes[column.id] = column.columnFilterModeOptions[0];
+      }
+    });
+    return defaultModes;
+  }, [columns, datatableSettings, layerPath]);
 
   /**
    * Utility function to check if a particular columnId has numerical filters.
@@ -517,6 +524,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
       showColumnFilters,
       columnPinning: { left: ['ICON', 'ZOOM', 'DETAILS'] },
       globalFilter,
+      columnFilterFns,
     },
     icons: {
       FilterListOffIcon: ClearFiltersIcon,
@@ -527,6 +535,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
+    onColumnFilterFnsChange: setColumnFilterFns,
     enableBottomToolbar: false,
     positionToolbarAlertBanner: 'none', // hide existing row count
     renderTopToolbar: useCallback(
@@ -598,7 +607,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     // Improve global filter accessibility
     muiSearchTextFieldProps: {
       inputProps: {
-        type: 'search',
+        type: 'text',
         'aria-label': t('dataTable.searchInputLabel')!,
       },
     },
@@ -624,6 +633,18 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sorting]);
+
+  // Set default column filter modes when columns are available
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DATA-TABLE - initialColumnFilterModes', initialColumnFilterModes);
+
+    // Only set defaults if we don't have stored values and columns are now available
+    if (Object.keys(columnFilterFns).length === 0 && Object.keys(initialColumnFilterModes).length > 0) {
+      setColumnFilterFns(initialColumnFilterModes);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialColumnFilterModes]);
 
   /**
    * Convert the filter list from the Column Filter state to filter the map.
@@ -717,6 +738,15 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [columnFilters]);
+
+  // Save column filter modes to store when they change
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DATA-TABLE - columnFilterFns', columnFilterFns);
+
+    setColumnFilterModesEntry(columnFilterFns, layerPath);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [columnFilterFns]);
 
   // Update map when filter map switch is toggled.
   useEffect(() => {

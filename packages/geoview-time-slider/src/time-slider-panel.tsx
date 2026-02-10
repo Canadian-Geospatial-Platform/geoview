@@ -7,9 +7,11 @@ import {
   useTimeSliderSelectedLayerPath,
   useTimeSliderStoreActions,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/time-slider-state';
+import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { useMapStoreActions, useMapAllVisibleandInRangeLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 import { useLayerLegendLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import { Box } from 'geoview-core/ui';
+import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 import { logger } from 'geoview-core/core/utils/logger';
 import { CONTAINER_TYPE, TABS } from 'geoview-core/core/utils/constant';
 
@@ -32,6 +34,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const { useCallback, useMemo, useEffect } = reactUtilities.react;
 
   // get values from store
+  const displayLanguage = useAppDisplayLanguage();
   const visibleInRangeLayers = useMapAllVisibleandInRangeLayers();
   // timeSliderLayers will always be present here, ! used to ignore possibility of it being undefined
   const timeSliderLayers = useTimeSliderLayers()!;
@@ -224,6 +227,7 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       layerList={memoLayersList}
       guideContentIds={['timeSlider']}
       containerType={CONTAINER_TYPE.FOOTER_BAR}
+      titleFullscreen={getLocalizedMessage(displayLanguage, 'timeSlider.title')}
     >
       {renderContent()}
     </Layout>

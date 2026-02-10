@@ -1,13 +1,15 @@
 import type { ReactNode } from 'react';
 import { memo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '@mui/material/styles';
 import type { DialogProps } from '@mui/material';
-import { CloseIcon, Dialog, DialogContent, IconButton } from '@/ui';
+import { CloseIcon, Dialog, DialogTitle, DialogContent, IconButton, Box } from '@/ui';
 
 interface FullScreenDialogProps extends DialogProps {
   open: boolean;
   onClose: (event?: {}, reason?: 'backdropClick' | 'escapeKeyDown') => void; // Callback fired when dialog closes. Matches MUI Dialog signature.
   onExited?: () => void; // Callback when dialog exit animation completes
+  title: string;
   children: ReactNode;
 }
 
@@ -19,7 +21,7 @@ const DIALOG_CONTENT_STYLES = {
 } as const;
 
 const CLOSE_BUTTON_STYLES = {
-  marginBottom: '1.5rem',
+  margin: '10px',
 } as const;
 
 // Memoizes entire component, preventing re-renders if props haven't changed
@@ -28,6 +30,7 @@ export const FullScreenDialog = memo(function FullScreenDialog({
   open,
   onClose,
   onExited,
+  title,
   children,
   ...dialogProps
 }: FullScreenDialogProps): JSX.Element {
@@ -36,6 +39,7 @@ export const FullScreenDialog = memo(function FullScreenDialog({
 
   // Hooks
   const { t } = useTranslation<string>();
+  const theme = useTheme();
 
   return (
     <Dialog
@@ -65,7 +69,10 @@ export const FullScreenDialog = memo(function FullScreenDialog({
       {...dialogProps}
       sx={{ maxHeight: '100% !important' }}
     >
-      <DialogContent sx={DIALOG_CONTENT_STYLES}>
+      <Box sx={{display: 'flex', justifyContent: 'space-between', borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[300]}`}}>
+        <DialogTitle sx={{fontSize: theme.palette.geoViewFontSize.lg, fontWeight: '600'}}>
+          {title}
+        </DialogTitle>
         <IconButton
           iconRef={closeButtonRef}
           onClick={(event) => onClose(event, 'backdropClick')}
@@ -76,6 +83,8 @@ export const FullScreenDialog = memo(function FullScreenDialog({
         >
           <CloseIcon />
         </IconButton>
+      </Box>
+      <DialogContent sx={DIALOG_CONTENT_STYLES}>
         {children}
       </DialogContent>
     </Dialog>

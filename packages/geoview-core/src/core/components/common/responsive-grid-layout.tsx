@@ -31,6 +31,7 @@ interface ResponsiveGridLayoutProps {
   onRightPanelVisibilityChanged?: (isVisible: boolean) => void;
   hideEnlargeBtn?: boolean;
   containerType: TypeContainerBox;
+  titleFullscreen: string;
   toggleMode?: boolean;
 }
 
@@ -61,6 +62,7 @@ const ResponsiveGridLayout = forwardRef(
       onRightPanelVisibilityChanged,
       hideEnlargeBtn = false,
       containerType,
+      titleFullscreen,
       toggleMode = false,
     }: ResponsiveGridLayoutProps,
     ref: Ref<ResponsiveGridLayoutExposedMethods>
@@ -489,6 +491,7 @@ const ResponsiveGridLayout = forwardRef(
             onClose={() => {
               setIsFullScreen(false);
             }}
+            title={isGuideOpen ? `${t('guide.title')} - ${titleFullscreen}` : titleFullscreen}
             onExited={() => {
               // Use onExited callback to restore focus to the fullscreen button after the dialog exit animation completes
               fullScreenBtnRef.current?.focus();

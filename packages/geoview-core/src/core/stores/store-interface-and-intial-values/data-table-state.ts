@@ -26,6 +26,7 @@ export interface IDataTableState {
     applyMapFilters: (filterStrings: string) => void;
     setActiveLayersData: (layers: TypeLayerData[]) => void;
     setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
+    setColumnFilterModesEntry: (filterModes: Record<string, string>, layerPath: string) => void;
     setColumnsFiltersVisibility: (visible: boolean, layerPath: string) => void;
     setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
     setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
@@ -40,6 +41,7 @@ export interface IDataTableState {
     setActiveLayersData: (layers: TypeLayerData[]) => void;
     setAllFeaturesDataArray: (allFeaturesDataArray: TypeAllFeatureInfoResultSetEntry[]) => void;
     setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
+    setColumnFilterModesEntry: (filterModes: Record<string, string>, layerPath: string) => void;
     setColumnsFiltersVisibility: (visible: boolean, layerPath: string) => void;
     setInitiallayerDataTableSetting: (layerPath: string) => void;
     setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
@@ -102,6 +104,10 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
         // Redirect to setter
         get().dataTableState.setterActions.setColumnFiltersEntry(filtered, layerPath);
       },
+      setColumnFilterModesEntry: (filterModes: Record<string, string>, layerPath: string) => {
+        // Redirect to setter
+        get().dataTableState.setterActions.setColumnFilterModesEntry(filterModes, layerPath);
+      },
       setColumnsFiltersVisibility: (visible: boolean, layerPath: string) => {
         // Redirect to setter
         get().dataTableState.setterActions.setColumnsFiltersVisibility(visible, layerPath);
@@ -156,6 +162,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
       setInitiallayerDataTableSetting: (layerPath: string) => {
         const layerSettings = {
           columnFiltersRecord: [],
+          columnFilterModesRecord: {},
           columnsFiltersVisibility: false,
           mapFilteredRecord: true,
           rowsFilteredRecord: 0,
@@ -173,6 +180,17 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
       setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => {
         const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
         layerSettings.columnFiltersRecord = filtered;
+
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            layersDataTableSetting: { ...get().dataTableState.layersDataTableSetting, [layerPath]: layerSettings },
+          },
+        });
+      },
+      setColumnFilterModesEntry: (filterModes: Record<string, string>, layerPath: string) => {
+        const layerSettings = get().dataTableState.layersDataTableSetting[layerPath];
+        layerSettings.columnFilterModesRecord = filterModes;
 
         set({
           dataTableState: {
@@ -276,6 +294,7 @@ export interface ColumnFilter {
 
 export interface IDataTableSettings {
   columnFiltersRecord: TypeColumnFiltersState;
+  columnFilterModesRecord: Record<string, string>;
   columnsFiltersVisibility: boolean;
   mapFilteredRecord: boolean;
   rowsFilteredRecord: number;

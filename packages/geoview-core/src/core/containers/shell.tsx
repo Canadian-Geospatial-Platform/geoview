@@ -350,7 +350,7 @@ export function Shell(props: ShellProps): JSX.Element {
             {interaction === 'dynamic' && <NavBar api={mapViewer.navBarApi} />}
             <MapInfo onScrollShellIntoView={handleScrollShellIntoView} />
             <Snackbar
-              snackBarId={mapViewer.mapId}
+              snackBarId={`${mapViewer.mapId}-snackbar`}
               message={snackbarMessage}
               open={snackbarOpen}
               type={snackbarType}

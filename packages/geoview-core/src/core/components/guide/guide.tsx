@@ -225,6 +225,7 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
       <Box sx={{ flex: 1, minHeight: 0 }}>
         <Layout
           containerType={containerType}
+          titleFullscreen={t('guide.title')}
           selectedLayerPath={selectedLayerPath}
           layoutSwitch={<GuideSearch guide={guide} onSectionChange={handleSectionChange} onSearchStateChange={handleSearchStateChange} />}
           layerList={layersList}

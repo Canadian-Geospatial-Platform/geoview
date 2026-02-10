@@ -819,6 +819,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     <Layout
       ref={layoutRef}
       containerType={containerType}
+      titleFullscreen={t('details.title')}
       layoutSwitch={
         <Box sx={sxClasses.layoutSwitch}>
           {!hideCoordinateInfoSwitch && <CoordinateInfoSwitch disabled={!mapClickCoordinates} />}
