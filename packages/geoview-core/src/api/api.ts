@@ -193,9 +193,9 @@ export class API {
     // Init by function call
     const mapViewer = await initMapDivFromFunctionCall(mapDiv, mapConfig);
 
-    // Wait for onMapInit to be triggered
+    // Wait for onMapReady to be triggered
     await new Promise<void>((resolve) => {
-      mapViewer.onMapInit(() => resolve());
+      mapViewer.onMapReady(() => resolve());
     });
 
     return mapViewer;
