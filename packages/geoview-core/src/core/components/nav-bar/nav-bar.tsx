@@ -209,8 +209,9 @@ export function NavBar(props: NavBarProps): JSX.Element {
     }
 
     // GV This is specific for NavBar Button Plugins
-    // Check if children is a React component that returns a button and return that
-    if (isValidElement(buttonPanel.button.children) && !buttonPanel.panel) {
+    // Check if children is a React component that returns a complete button (not just an icon with onClick)
+    // If there's an onClick handler, we need to wrap the children in an IconButton
+    if (isValidElement(buttonPanel.button.children) && !buttonPanel.panel && !buttonPanel.button.onClick) {
       return <Fragment key={`${key}-component`}>{buttonPanel.button.children}</Fragment>;
     }
 
