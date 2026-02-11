@@ -96,6 +96,7 @@
       "vectorTiles"
     ],
     "showUnsymbolizedFeatures": true,
+    "showLayerHighlightLayerBbox": false,
     "coordinateInfoEnabled": true,
     "hideCoordinateInfoSwitch": false
   }

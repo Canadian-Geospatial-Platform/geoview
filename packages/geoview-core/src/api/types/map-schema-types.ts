@@ -206,6 +206,8 @@ export type TypeGlobalSettings = {
   canRemoveSublayers?: boolean;
   /** Whether a certain layer type should be disabled */
   disabledLayerTypes?: TypeGeoviewLayerType[];
+  /** Whether to show the bounding box of the highlighted layer. Default = true */
+  showLayerHighlightLayerBbox?: boolean;
   /** Whether to display unsymbolized features in the datatable and other components */
   showUnsymbolizedFeatures?: boolean;
   /** Whether the initial state of the coordinate info tool should be enabled */
@@ -495,6 +497,7 @@ export const DEFAULT_MAP_FEATURE_CONFIG = {
     canRemoveSublayers: true,
     disabledLayerTypes: [],
     showUnsymbolizedFeatures: false,
+    showLayerHighlightLayerBbox: true,
     coordinateInfoEnabled: false,
     hideCoordinateInfoSwitch: false,
   },

@@ -76,6 +76,15 @@ export class AppEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Shortcut to get if the bounding box of the highlighted layer should be shown
+   * @param {string} mapId - The mapId
+   * @returns {boolean} Whether to show the bounding box of the highlighted layer
+   */
+  static getShowLayerHighlightLayerBbox(mapId: string): boolean {
+    return this.getAppState(mapId).showLayerHighlightLayerBbox;
+  }
+
+  /**
    * Adds a snackbar message (optional add to notification).
    * @param {SnackbarType} type - The type of message.
    * @param {string} messageKey - The message key.

@@ -382,6 +382,11 @@
           "description": "Whether or not to show unsymbolized features.",
           "default": false
         },
+        "showLayerHighlightLayerBbox": {
+          "type": "boolean",
+          "description": "Whether or not to show the bounding box of the highlighted layer.",
+          "default": true
+        },
         "coordinateInfoEnabled": {
           "type": "boolean",
           "description": "Whether or not the coordinate information too should be enabled.",

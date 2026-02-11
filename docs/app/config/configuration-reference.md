@@ -766,6 +766,10 @@ TypeGlobalSettings = {
 
   - **Type:** `boolean`
 
+- **showLayerHighlightLayerBbox** (Optional): Whether to display bbox when layer is highlighted
+
+  - **Type** `boolean`
+
 - **coordinateInfoEnabled** (Optional): Whether the initial state of the coordinate info tool should be enabled
 
   - **Type:** `boolean`
@@ -780,6 +784,7 @@ globalSettings: {
   canRemoveSublayers: true,
   disabledLayerTypes: ["ogcWfs", "CSV"],
   showUnsymbolizedFeatures: false,
+  showLayerHighlightLayerBbox: true,
   coordinateInfoEnabled: true,
   hideCoordinateInfoSwitch: false
 }

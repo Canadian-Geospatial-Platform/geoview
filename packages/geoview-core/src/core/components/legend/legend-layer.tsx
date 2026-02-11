@@ -27,7 +27,7 @@ import { logger } from '@/core/utils/logger';
 
 interface LegendLayerProps {
   layerPath: string;
-  showControls?: boolean;
+  showControls: boolean;
 }
 
 interface LegendLayerHeaderProps {
@@ -35,7 +35,7 @@ interface LegendLayerHeaderProps {
   tooltip: string;
   onExpandClick: (event: React.MouseEvent) => void;
   sxClasses: ReturnType<typeof getSxClasses>;
-  showControls?: boolean;
+  showControls: boolean;
 }
 
 // Length at which the tooltip should be shown

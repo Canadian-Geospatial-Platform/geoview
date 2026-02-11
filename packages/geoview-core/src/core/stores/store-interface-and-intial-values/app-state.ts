@@ -33,6 +33,7 @@ export interface IAppState {
   isFullscreenActive: boolean;
   notifications: Array<NotificationDetailsType>;
   showUnsymbolizedFeatures: boolean;
+  showLayerHighlightLayerBbox: boolean;
 
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
@@ -82,6 +83,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     isFullscreenActive: false,
     notifications: [],
     showUnsymbolizedFeatures: false,
+    showLayerHighlightLayerBbox: true,
 
     // initialize default stores section from config information when store receive configuration file
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
@@ -101,6 +103,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
           geoviewHTMLElement,
           height: geoviewHTMLElement?.clientHeight || 600,
           showUnsymbolizedFeatures: geoviewConfig.globalSettings?.showUnsymbolizedFeatures || false,
+          showLayerHighlightLayerBbox: geoviewConfig.globalSettings?.showLayerHighlightLayerBbox ?? true,
         },
       });
     },

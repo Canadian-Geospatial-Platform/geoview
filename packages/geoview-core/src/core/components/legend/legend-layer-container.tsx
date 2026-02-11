@@ -20,7 +20,7 @@ interface CollapsibleContentProps {
   layerPath: string;
   initLightBox: (imgSrc: string, title: string, index: number, total: number) => void;
   LegendLayerComponent: typeof LegendLayer;
-  showControls?: boolean;
+  showControls: boolean;
 }
 
 interface WMSLegendImageProps {

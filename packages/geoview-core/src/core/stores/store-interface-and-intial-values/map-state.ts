@@ -51,7 +51,7 @@ export interface IMapState {
   currentProjection: TypeValidMapProjectionCodes;
   featureHighlightColor: TypeHighlightColors;
   fixNorth: boolean;
-  geolocatorSearchArea: { coords: Coordinate; bbox?: Extent } | undefined;
+  geolocatorSearchArea: { searchItem: string; coords: Coordinate; bbox?: Extent } | undefined;
   highlightedFeatures: TypeFeatureInfoEntry[];
   homeView: TypeMapViewSettings | undefined;
   hoverFeatureInfo: TypeHoverFeatureInfo | undefined | null;
@@ -114,7 +114,7 @@ export interface IMapState {
     setRotation: (rotation: number) => void;
     zoomToExtent: (extent: Extent, options?: FitOptions) => Promise<void>;
     zoomToInitialExtent: () => Promise<void>;
-    zoomToGeoLocatorLocation: (coords: [number, number], bbox?: [number, number, number, number]) => Promise<void>;
+    zoomToGeoLocatorLocation: (searchItem: string, coords: [number, number], bbox?: [number, number, number, number]) => Promise<void>;
     zoomToMyLocation: (position: GeolocationPosition) => Promise<void>;
     transformPoints: (coords: Coordinate[], outputProjection: number) => Coordinate[];
     setClickCoordinates: (pointerPosition: TypeMapMouseInfo) => void;
@@ -132,7 +132,7 @@ export interface IMapState {
     setAttribution: (attribution: string[]) => void;
     setInitialFilters: (filters: Record<string, string>) => void;
     setInitialView: (view: TypeZoomAndCenter | Extent) => void;
-    setGeolocatorSearchArea: (area: { coords: Coordinate; bbox?: Extent } | undefined) => void;
+    setGeolocatorSearchArea: (area: { searchItem: string; coords: Coordinate; bbox?: Extent } | undefined) => void;
     setHomeView: (view: TypeMapViewSettings) => void;
     setInteraction: (interaction: TypeInteraction) => void;
     setIsMouseInsideMap: (isMouseInsideMap: boolean) => void;
@@ -585,13 +585,14 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
 
       /**
        * Zooms to the specified geographic locator location.
+       * @param {string} searchItem - The search item description.
        * @param {Coordinate} coords - The coordinates to zoom to.
        * @param {Extent} [bbox] - The bounding box.
        * @returns {Promise<void>} A promise that resolves when the zoom operation completes.
        */
-      zoomToGeoLocatorLocation: (coords: Coordinate, bbox?: Extent): Promise<void> => {
+      zoomToGeoLocatorLocation: (searchItem: string, coords: Coordinate, bbox?: Extent): Promise<void> => {
         // Redirect to processor and return the result
-        return MapEventProcessor.zoomToGeoLocatorLocation(get().mapId, coords, bbox);
+        return MapEventProcessor.zoomToGeoLocatorLocation(get().mapId, searchItem, coords, bbox);
       },
 
       /**
@@ -770,10 +771,11 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       /**
        * Sets the geolocator search area with coordinates and optional bounding box.
        * @param {Object | undefined} area - The search area object containing coordinates and optional bounding box, or undefined to clear.
+       * @param {string} area.searchItem - The search item description.
        * @param {Coordinate} area.coords - The coordinates of the search location.
        * @param {Extent} [area.bbox] - Optional bounding box extent for the search area.
        */
-      setGeolocatorSearchArea: (area: { coords: Coordinate; bbox?: Extent } | undefined): void => {
+      setGeolocatorSearchArea: (area: { searchItem: string; coords: Coordinate; bbox?: Extent } | undefined): void => {
         set({
           mapState: {
             ...get().mapState,

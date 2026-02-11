@@ -832,9 +832,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Redirect to layer to highlight
     MapEventProcessor.getMapViewerLayerAPI(mapId).highlightLayer(layerPath);
 
-    // Get bounds and highlight a bounding box for the layer
+    // Get bounds and highlight a bounding box for the layer (if true in global settings)
     const bounds = LegendEventProcessor.getLayerBounds(mapId, layerPath);
-    if (bounds) this.getMapStateProtected(mapId).actions.highlightBBox(bounds, true);
+    if (bounds && AppEventProcessor.getShowLayerHighlightLayerBbox(mapId))
+      this.getMapStateProtected(mapId).actions.highlightBBox(bounds, true);
 
     return layerPath;
   }
@@ -1121,9 +1122,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
     throw new InvalidExtentError(extent);
   }
 
-  static async zoomToGeoLocatorLocation(mapId: string, coords: Coordinate, bbox?: Extent): Promise<void> {
+  static async zoomToGeoLocatorLocation(mapId: string, searchItem: string, coords: Coordinate, bbox?: Extent): Promise<void> {
     // Set the map state store with the location use for the zoom to location
-    this.getMapStateProtected(mapId).setterActions.setGeolocatorSearchArea({ coords, bbox });
+    this.getMapStateProtected(mapId).setterActions.setGeolocatorSearchArea({ searchItem, coords, bbox });
 
     const indicatorBox = document.getElementsByClassName('ol-overviewmap-box');
     for (let i = 0; i < indicatorBox.length; i++) {

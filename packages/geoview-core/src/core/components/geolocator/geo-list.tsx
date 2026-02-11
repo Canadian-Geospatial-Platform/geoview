@@ -32,8 +32,8 @@ export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Elemen
 
   // Handle the zoom to geolocation
   const handleZoomToGeoLocator = useCallback(
-    (latLng: [number, number], bbox: [number, number, number, number]): void => {
-      zoomToGeoLocatorLocation(latLng, bbox).catch((error: unknown) => {
+    (searchItem: string, latLng: [number, number], bbox: [number, number, number, number]): void => {
+      zoomToGeoLocatorLocation(searchItem, latLng, bbox).catch((error: unknown) => {
         logger.logPromiseFailed('Failed to zoomToGeoLocatorLocation in GeoList', error);
       });
     },
@@ -68,7 +68,15 @@ export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Elemen
           describeChild
         >
           <ListItem disablePadding>
-            <ListItemButton onClick={() => handleZoomToGeoLocator([geoListItem.lng, geoListItem.lat], geoListItem.bbox)}>
+            <ListItemButton
+              onClick={() =>
+                handleZoomToGeoLocator(
+                  `${geoListItem.name}, ${geoListItem.province}, ${geoListItem.category}`,
+                  [geoListItem.lng, geoListItem.lat],
+                  geoListItem.bbox
+                )
+              }
+            >
               <Grid container sx={{ width: '100%' }}>
                 <Grid size={{ xs: 12, sm: 8 }}>
                   <Typography component="div" sx={sxClassesList.listStyle}>
