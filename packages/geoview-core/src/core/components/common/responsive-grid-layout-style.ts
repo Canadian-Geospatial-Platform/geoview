@@ -137,7 +137,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     height: '100%',
     overflowY: 'auto',
     marginTop: '30px', // To align left list with right panel box (below 30px right panel toolbar)
-    paddingBottom: '25px', // To ensure last item can be fully scrolled up above the toolbar
+    paddingBottom: '25px', // To ensure last item can be fully scrolled up to be fully visible
     '&.MuiGrid-grid-xs-auto': {
       '& .layer-panel': {
         width: '52px',

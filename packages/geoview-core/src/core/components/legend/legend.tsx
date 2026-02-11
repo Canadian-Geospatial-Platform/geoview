@@ -8,7 +8,7 @@ import { logger } from '@/core/utils/logger';
 
 import { getSxClassesMain, getSxClasses } from './legend-styles';
 import { LegendLayer } from './legend-layer';
-import { LegendFullscreen, FullscreenButton } from './legend-fullscreen';
+import { LegendFullscreen, LegendFullscreenButton } from './legend-fullscreen';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import type { TypeContainerBox } from '@/core/types/global-types';
@@ -193,7 +193,7 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
 
       <Box sx={sxClasses.toggleBar}>
         <ToggleAll />
-        <FullscreenButton containerType={containerType} onClick={() => setIsFullScreen(true)} />
+        <LegendFullscreenButton containerType={containerType} onClick={() => setIsFullScreen(true)} />
       </Box>
       <Box
         sx={{ background: theme.palette.geoViewColor.bgColor.main, ...sxClassesMain.container }}

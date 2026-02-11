@@ -14,6 +14,15 @@ import type { TypeContainerBox } from '@/core/types/global-types';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 import { FullScreenDialog } from '@/core/components/common/full-screen-dialog';
 
+/**
+ * Properties for the LegendFullscreen component.
+ * @interface LegendFullscreenProps
+ * @property {TypeLegendLayer[]} layersList - Array of legend layers to display in fullscreen mode.
+ * @property {string} mapId - The unique identifier of the map.
+ * @property {TypeContainerBox} containerType - The type of container where the legend is displayed.
+ * @property {boolean} isOpen - Controls whether the fullscreen dialog is open.
+ * @property {() => void} onClose - Callback function invoked when the fullscreen dialog is closed.
+ */
 interface LegendFullscreenProps {
   layersList: TypeLegendLayer[];
   mapId: string;
@@ -22,6 +31,12 @@ interface LegendFullscreenProps {
   onClose: () => void;
 }
 
+/**
+ * Properties for the LegendFullscreenButton component.
+ * @interface FullscreenButtonProps
+ * @property {TypeContainerBox} containerType - The type of container where the button is displayed.
+ * @property {() => void} onClick - Callback function invoked when the button is clicked.
+ */
 interface FullscreenButtonProps {
   containerType: TypeContainerBox;
   onClick: () => void;
@@ -49,7 +64,18 @@ const responsiveWidths = {
   },
 } as const;
 
-export function FullscreenButton({ containerType, onClick }: FullscreenButtonProps): JSX.Element | null {
+/**
+ * Renders a button that opens the legend in fullscreen mode.
+ * Only displays when the legend is shown in the app bar container.
+ * @param {FullscreenButtonProps} props - The component properties.
+ * @param {TypeContainerBox} props.containerType - The type of container where the button is displayed.
+ * @param {() => void} props.onClick - Callback function invoked when the fullscreen button is clicked.
+ * @returns {JSX.Element | null} The fullscreen button element, or null if not in the app bar.
+ */
+export function LegendFullscreenButton({ containerType, onClick }: FullscreenButtonProps): JSX.Element | null {
+  logger.logTraceRender('components/legend/legend-fullscreen-button');
+
+  // Hooks
   const { t } = useTranslation<string>();
 
   // Only show in app bar
@@ -69,6 +95,18 @@ export function FullscreenButton({ containerType, onClick }: FullscreenButtonPro
   );
 }
 
+/**
+ * Renders the legend in a fullscreen dialog with responsive multi-column layout.
+ * Manages layer collapse state by expanding all layers when entering fullscreen and
+ * restoring the previous collapse state when exiting.
+ * @param {LegendFullscreenProps} props - The component properties.
+ * @param {TypeLegendLayer[]} props.layersList - Array of legend layers to display.
+ * @param {string} props.mapId - The unique identifier of the map.
+ * @param {TypeContainerBox} props.containerType - The type of container where the legend is displayed.
+ * @param {boolean} props.isOpen - Controls whether the fullscreen dialog is open.
+ * @param {() => void} props.onClose - Callback function invoked when the dialog is closed.
+ * @returns {JSX.Element} The fullscreen legend dialog component.
+ */
 export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onClose }: LegendFullscreenProps): JSX.Element {
   logger.logTraceRender('components/legend/legend-fullscreen');
 
@@ -97,7 +135,13 @@ export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onC
   }, [theme.breakpoints.values]);
 
   /**
-   * Get the size of list based on window size for fullscreen mode.
+   * Calculates the number of columns for the fullscreen legend layout based on the current window width.
+   * Uses responsive breakpoints to determine column count:
+   * - Mobile (< sm): 1 column
+   * - Tablet (sm - md): 2 columns
+   * - Desktop (md - lg): 3 columns
+   * - Large (>= lg): 4 columns
+   * @returns {number} The number of columns to display.
    */
   const getFullscreenLayerListSize = useCallback(() => {
     const { innerWidth } = window;
@@ -108,9 +152,11 @@ export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onC
   }, [breakpoints]);
 
   /**
-   * Transform the list of the legends into subsets for fullscreen display.
-   * @param {TypeLegendLayer} layers array of layers.
-   * @returns List of array of layers
+   * Distributes legend layers across multiple columns for fullscreen display.
+   * Uses a round-robin algorithm to evenly distribute layers across the available columns
+   * determined by the current window size.
+   * @param {TypeLegendLayer[]} layers - Array of legend layers to distribute.
+   * @returns {void}
    */
   const updateFullscreenLayerListByWindowSize = useCallback(
     (layers: TypeLegendLayer[]): void => {
@@ -240,6 +286,7 @@ export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onC
         sx={sxClasses.fullscreenContainer}
         id={`${mapId}-${containerType}-legendContainer-fullscreen`}
         {...({
+          // To set the content behind the dialog as inert to remove access to content
           // @ts-ignore - inert is a valid HTML attribute but not in React types yet
           inert: '',
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
