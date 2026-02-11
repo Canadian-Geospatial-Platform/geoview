@@ -20,7 +20,7 @@ interface CollapsibleContentProps {
   layerPath: string;
   initLightBox: (imgSrc: string, title: string, index: number, total: number) => void;
   LegendLayerComponent: typeof LegendLayer;
-  hideControls?: boolean;
+  showControls?: boolean;
 }
 
 interface WMSLegendImageProps {
@@ -61,7 +61,7 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   layerPath,
   initLightBox,
   LegendLayerComponent,
-  hideControls,
+  showControls,
 }: CollapsibleContentProps): JSX.Element | null {
   // Hooks
   const { t } = useTranslation();
@@ -99,7 +99,7 @@ export const CollapsibleContent = memo(function CollapsibleContent({
     <Collapse in={!isCollapsed} sx={sxClasses.collapsibleContainer} timeout="auto" unmountOnExit>
       <List>
         {layerChildren &&
-          layerChildren.map((item) => <LegendLayerComponent layerPath={item.layerPath} key={item.layerPath} hideControls={hideControls} />)}
+          layerChildren.map((item) => <LegendLayerComponent layerPath={item.layerPath} key={item.layerPath} showControls={showControls} />)}
       </List>
       <ItemsList items={layerItems || []} layerPath={layerPath} />
     </Collapse>

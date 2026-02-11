@@ -14,5 +14,5 @@ interface LegendLayerItemProps {
 export function LegendLayerItem({ item }: LegendLayerItemProps): JSX.Element | undefined {
   if (!isLegendLayer(item)) return;
 
-  return <LegendLayer layerPath={item.layerPath} />;
+  return <LegendLayer layerPath={item.layerPath} showControls={true} />;
 }

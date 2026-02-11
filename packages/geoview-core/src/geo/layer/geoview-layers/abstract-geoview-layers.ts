@@ -4,7 +4,7 @@ import type { Projection as OLProjection } from 'ol/proj';
 import Collection from 'ol/Collection';
 import LayerGroup from 'ol/layer/Group';
 
-import { delay } from '@/core/utils/utilities';
+import { delay, doUntil } from '@/core/utils/utilities';
 import type { TypeDateFragments } from '@/core/utils/date-mgt';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
@@ -80,6 +80,7 @@ export abstract class AbstractGeoViewLayer {
 
   /** The default waiting time before showing a warning about the metadata taking a long time to get processed */
   static readonly DEFAULT_WAIT_PERIOD_METADATA_WARNING: number = 10 * 1000; // 10 seconds
+  static readonly DEFAULT_WAIT_PERIOD_METADATA_WARNING_RECALL: number = 20 * 1000; // 20 seconds
 
   /** The default hit tolerance */
   hitTolerance: number = AbstractGeoViewLayer.DEFAULT_HIT_TOLERANCE;
@@ -1082,7 +1083,8 @@ export abstract class AbstractGeoViewLayer {
    * Monitors the metadata fetch process for this GeoView layer.
    * After a predefined wait period (`DEFAULT_WAIT_PERIOD_METADATA_WARNING`), it verifies whether all layer configurations
    * have reached at least the 'processed' status. If not, it emits a warning message indicating that metadata loading
-   * is taking longer than expected.
+   * is taking longer than expected. The warning continues to emit at regular intervals (`DEFAULT_WAIT_PERIOD_METADATA_WARNING_RECALL`)
+   * until processing is complete.
    *
    * This helps notify users or the system of potential delays in loading metadata.
    * @private
@@ -1096,16 +1098,17 @@ export abstract class AbstractGeoViewLayer {
         // Emit message
         this.emitMessage('warning.layer.metadataTakingLongTime', [this.getLayerEntryNameOrGeoviewLayerName()], 'warning');
 
-        const intervalId = setInterval(() => {
+        // Use doUntil to emit warnings until processing is complete
+        doUntil(() => {
           // Check if the layer configs were all at least processed, we're done
           if (ConfigBaseClass.allLayerStatusAreGreaterThanOrEqualTo('processed', this.listOfLayerEntryConfig)) {
-            clearInterval(intervalId);
-            return;
+            return true; // Stop the interval
           }
 
           // Emit message
           this.emitMessage('warning.layer.metadataTakingLongTime', [this.getLayerEntryNameOrGeoviewLayerName()], 'warning');
-        }, 2 * AbstractGeoViewLayer.DEFAULT_WAIT_PERIOD_METADATA_WARNING);
+          return false; // Continue the interval
+        }, AbstractGeoViewLayer.DEFAULT_WAIT_PERIOD_METADATA_WARNING_RECALL);
 
         return false;
       },

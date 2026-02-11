@@ -171,7 +171,7 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
         }}
       >
         {layers.map((layer) => (
-          <LegendLayer layerPath={layer.layerPath} key={layer.layerPath} />
+          <LegendLayer layerPath={layer.layerPath} key={layer.layerPath} showControls={true} />
         ))}
       </List>
     ));

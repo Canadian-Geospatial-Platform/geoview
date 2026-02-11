@@ -54,6 +54,13 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
   legendList: {
     paddingRight: '0.65rem',
   },
+  loading: {
+    display: 'block !important',
+    bottom: '0',
+    width: '100%',
+    height: 'auto !important',
+    span: { height: '2px' },
+  },
   legendListItem: {
     padding: '6px 4px',
     flexDirection: 'column',

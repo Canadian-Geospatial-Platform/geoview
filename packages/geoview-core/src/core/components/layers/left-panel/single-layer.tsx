@@ -188,6 +188,9 @@ export function SingleLayer({
    * This ensures hasFocusWithin state is properly cleared on other layers.
    */
   const blurOtherLayerButtons = useCallback((): void => {
+    // Log
+    logger.logTraceUseCallback('SINGLE-LAYER - blurOtherLayerButtons');
+
     const activeElement = document.activeElement as HTMLElement;
     if (activeElement && activeElement.tagName === 'BUTTON' && !layerItemRef.current?.contains(activeElement)) {
       activeElement.blur();
@@ -198,6 +201,9 @@ export function SingleLayer({
    * Select the layer if not already selected and status is valid.
    */
   const selectLayerIfNeeded = useCallback((): void => {
+    // Log
+    logger.logTraceUseCallback('SINGLE-LAYER - selectLayerIfNeeded');
+
     if (!layerIsSelected && ['processed', 'loaded'].includes(layerStatus!)) {
       setSelectedLayerPath(layerPath);
       showLayerDetailsPanel?.(layerId || '');

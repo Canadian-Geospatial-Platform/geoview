@@ -27,7 +27,7 @@ import { logger } from '@/core/utils/logger';
 
 interface LegendLayerProps {
   layerPath: string;
-  hideControls?: boolean;
+  showControls?: boolean;
 }
 
 interface LegendLayerHeaderProps {
@@ -35,14 +35,14 @@ interface LegendLayerHeaderProps {
   tooltip: string;
   onExpandClick: (event: React.MouseEvent) => void;
   sxClasses: ReturnType<typeof getSxClasses>;
-  hideControls?: boolean;
+  showControls?: boolean;
 }
 
 // Length at which the tooltip should be shown
 const CONST_NAME_LENGTH_TOOLTIP = 50;
 
 // Extracted Header Component
-const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick, sxClasses, hideControls }: LegendLayerHeaderProps): JSX.Element => {
+const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick, sxClasses, showControls }: LegendLayerHeaderProps): JSX.Element => {
   // Log
   logger.logTraceUseMemo('components/legend/legend-layer - LegendLayerHeader', layerPath);
 
@@ -75,7 +75,7 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick, sxClasses, 
         sx={sxClasses.legendTitle}
         className="legendTitle"
         disableTypography
-        secondary={!hideControls ? <SecondaryControls layerPath={layerPath} /> : undefined}
+        secondary={showControls ? <SecondaryControls layerPath={layerPath} /> : undefined}
       />
       {((layerChildren && layerChildren.length > 0) || (layerItems && layerItems.length > 1) || layerType === CONST_LAYER_TYPES.WMS) && (
         <IconButton className="buttonOutline" onClick={onExpandClick} edge="end" size="small" aria-label={tooltip}>
@@ -89,7 +89,7 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick, sxClasses, 
 LegendLayerHeader.displayName = 'LegendLayerHeader';
 
 // Main LegendLayer component
-export function LegendLayer({ layerPath, hideControls }: LegendLayerProps): JSX.Element {
+export function LegendLayer({ layerPath, showControls }: LegendLayerProps): JSX.Element {
   // Log
   logger.logTraceRender('components/legend/legend-layer', layerPath);
 
@@ -121,18 +121,10 @@ export function LegendLayer({ layerPath, hideControls }: LegendLayerProps): JSX.
         tooltip={t('layers.toggleCollapse')}
         onExpandClick={handleExpandGroupClick}
         sxClasses={sxClasses}
-        hideControls={hideControls}
+        showControls={showControls}
       />
       {layerStatus === 'loading' && (
-        <Box
-          sx={{
-            display: 'block !important',
-            bottom: '0',
-            width: '100%',
-            height: 'auto !important',
-            span: { height: '2px' },
-          }}
-        >
+        <Box sx={sxClasses.loading}>
           <ProgressBar />
         </Box>
       )}
@@ -140,7 +132,7 @@ export function LegendLayer({ layerPath, hideControls }: LegendLayerProps): JSX.
         layerPath={layerPath}
         initLightBox={initLightBox}
         LegendLayerComponent={LegendLayer}
-        hideControls={hideControls}
+        showControls={showControls}
       />
       <LightBoxComponent />
     </ListItem>

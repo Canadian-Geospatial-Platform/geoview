@@ -265,7 +265,7 @@ export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onC
         }}
       >
         {layers.map((layer) => (
-          <LegendLayer layerPath={layer.layerPath} key={layer.layerPath} hideControls />
+          <LegendLayer layerPath={layer.layerPath} key={layer.layerPath} showControls={false} />
         ))}
       </List>
     ));
