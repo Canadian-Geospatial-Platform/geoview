@@ -439,7 +439,7 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
     setSearchTerm('');
     setCurrentMatchIndex(0);
     setAllMatches([]);
-    setTimeout(() => searchInputRef.current?.focus(), TIMEOUT.deferExtencution);
+    setTimeout(() => searchInputRef.current?.focus(), TIMEOUT.deferExecution);
   }, []);
 
   /**
@@ -471,6 +471,7 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
     <Box sx={sxClasses.guideSearch}>
       <form role="search" aria-label={t('guide.searchFormLabel')!}>
         <TextField
+          inputRef={searchInputRef}
           fullWidth
           size="small"
           placeholder={t('guide.search')!}
@@ -482,7 +483,6 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
               'aria-label': t('guide.searchInputLabel')!,
             },
             input: {
-              ref: searchInputRef,
               startAdornment: (
                 <InputAdornment position="start">
                   <SearchIcon />

@@ -45,12 +45,8 @@ import { ArrowDownwardIcon, ArrowUpIcon, CenterFocusScaleIcon, LoopIcon } from '
 import { Divider } from '@/ui/divider/divider';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import type { TypeLayerControls } from '@/api/types/layer-schema-types';
-import { scrollListItemIntoView } from '@/core/utils/utilities';
 import { TIMEOUT, TABS } from '@/core/utils/constant';
 import type { TypeContainerBox } from '@/core/types/global-types';
-
-// TODO: WCAG Issue #3108 - Check all disabled buttons. They may need special treatment. Need to find instance in UI first)
-// TODO: WCAG Issue #3108 - Check all icon buttons for "state related" aria values (i.e aria-checked, aria-disabled, etc.)
 
 interface SingleLayerProps {
   layerPath: string;
@@ -80,7 +76,16 @@ export function SingleLayer({
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Create ref for scrolling into view
-  const layerItemRef = useRef<HTMLLIElement>(null);
+  const layerListItemRef = useRef<HTMLLIElement>(null);
+
+  // Ref for ListItemButton to restore focus after zoom button disappears
+  const layerListItemButtonRef = useRef<HTMLDivElement>(null);
+
+  // Track previous inVisibleRange to detect transitions
+  const prevInVisibleRangeRef = useRef<boolean>(false);
+
+  // Track if zoom button was clicked to restore focus after button unmounts
+  const zoomButtonClickedRef = useRef<boolean>(false);
 
   // Get store states
   const { deleteLayer, reloadLayer, setSelectedLayerPath, zoomToLayerVisibleScale, getLayerDeleteInProgress } = useLayerStoreActions();
@@ -127,15 +132,34 @@ export function SingleLayer({
     return undefined;
   }, [layerStatus]);
 
-  // Scroll this list item into view if selected
+  // Restore focus to layerListItemButton when zoom button disappears after successful zoom
   useEffect(() => {
-    if (layerIsSelected && layerId) {
-      const listItem = document.getElementById(layerId);
-      if (listItem) {
-        scrollListItemIntoView(listItem);
-      }
-    }
-  }, [layerIsSelected, layerId]);
+    // Log
+    logger.logTraceUseEffect('SINGLE-LAYER - focus after zoom to visible');
+
+    // Track state for next render
+    const previouslyOutOfRange = prevInVisibleRangeRef.current === false;
+    prevInVisibleRangeRef.current = inVisibleRange;
+
+    // Early exit: Only act on transition from out-of-range -> in-range
+    if (!previouslyOutOfRange || !inVisibleRange) return undefined;
+
+    // Early exit: Only restore focus if zoom button was clicked
+    if (!zoomButtonClickedRef.current) return undefined;
+
+    // Early exit: Ref must exist
+    if (!layerListItemButtonRef.current) return undefined;
+
+    // Focus was on this layer's zoom button (now unmounted) - restore to layer item
+    requestAnimationFrame(() => {
+      layerListItemButtonRef.current?.focus();
+    });
+
+    // Reset the flag
+    zoomButtonClickedRef.current = false;
+
+    return undefined;
+  }, [inVisibleRange]);
 
   // if any of the child layers is selected return true
   const isLayerChildSelected = useCallback(
@@ -269,6 +293,11 @@ export function SingleLayer({
       selectLayerIfNeeded();
 
       reorderLayer(layerPath, direction);
+
+      // Scroll into view after DOM updates (scrollListItemIntoView utility does work well for this)
+      requestAnimationFrame(() => {
+        layerListItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+      });
     },
     [layerPath, selectLayerIfNeeded, reorderLayer]
   );
@@ -281,6 +310,11 @@ export function SingleLayer({
       if (event.key === 'Enter') {
         reorderLayer(layerPath, direction);
         event.preventDefault();
+
+        // Scroll into view after DOM updates (scrollListItemIntoView utility does work well for this)
+        requestAnimationFrame(() => {
+          layerListItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+        });
       }
     },
     [layerPath, reorderLayer]
@@ -290,9 +324,17 @@ export function SingleLayer({
     (event: React.KeyboardEvent<HTMLButtonElement>) => {
       // Determine direction from button id
       const direction = event.currentTarget.id.includes('up-order') ? -1 : 1;
+
+      // Guard: only prevent Enter key when at boundary (allow Tab and other keys)
+      if (event.key === 'Enter' && ((direction === -1 && isFirst) || (direction === 1 && isLast))) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+
       handleArrowKeyDown(event, direction);
     },
-    [handleArrowKeyDown]
+    [handleArrowKeyDown, isFirst, isLast]
   );
 
   const handleArrowClickWrapper = useCallback(
@@ -385,11 +427,16 @@ export function SingleLayer({
             className="buttonOutline"
             id={`${mapId}-${containerType}-${layerPath}-up-order`}
             aria-label={t('layers.moveLayerUp')}
-            disabled={isFirst}
+            aria-disabled={isFirst}
             edge="end"
             size="small"
             onKeyDown={handleArrowKeyDownWrapper}
             onClick={handleArrowClickWrapper}
+            sx={{
+              opacity: isFirst ? 0.5 : 1,
+              cursor: isFirst ? 'not-allowed' : 'pointer',
+              pointerEvents: isFirst ? 'none' : 'auto',
+            }}
           >
             <ArrowUpIcon />
           </IconButton>
@@ -397,11 +444,16 @@ export function SingleLayer({
             className="buttonOutline"
             id={`${mapId}-${containerType}-${layerPath}-down-order`}
             aria-label={t('layers.moveLayerDown')}
-            disabled={isLast}
+            aria-disabled={isLast}
             edge="end"
             size="small"
             onKeyDown={handleArrowKeyDownWrapper}
             onClick={handleArrowClickWrapper}
+            sx={{
+              opacity: isLast ? 0.5 : 1,
+              cursor: isLast ? 'not-allowed' : 'pointer',
+              pointerEvents: isLast ? 'none' : 'auto',
+            }}
           >
             <ArrowDownwardIcon />
           </IconButton>
@@ -497,22 +549,25 @@ export function SingleLayer({
 
     return (
       <>
-        <IconButton
-          edge="end"
-          size="small"
-          aria-label={t('layers.zoomVisibleScale')}
-          sx={{ display: isZoomToVisibleScaleCapable ? 'block' : 'none', height: 40, width: 40 }}
-          className="buttonOutline"
-          onClick={handleZoomToLayerVisibleScale}
-        >
-          <CenterFocusScaleIcon />
-        </IconButton>
+        {isZoomToVisibleScaleCapable && (
+          <IconButton
+            edge="end"
+            size="small"
+            aria-label={t('layers.zoomVisibleScale')}
+            sx={{ height: 40, width: 40 }}
+            className="buttonOutline"
+            onClick={handleZoomToLayerVisibleScale}
+          >
+            <CenterFocusScaleIcon />
+          </IconButton>
+        )}
         {isLayerVisibleCapable && (
           <IconButton
-            edge={inVisibleRange ? false : 'end'}
+            edge={isZoomToVisibleScaleCapable ? false : 'end'}
             size="small"
             onClick={handleToggleVisibility}
             aria-label={t('layers.toggleVisibility')}
+            aria-pressed={!isVisible}
             className="buttonOutline"
             disabled={!inVisibleRange || parentHidden}
           >
@@ -555,6 +610,7 @@ export function SingleLayer({
           size="small"
           onClick={handleExpandGroupClick}
           aria-label={t('layers.toggleCollapse')}
+          aria-pressed={!legendExpanded}
           className="buttonOutline"
         >
           {legendExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
@@ -610,18 +666,8 @@ export function SingleLayer({
     return result.join(' ');
   }, [depth, layerStatus, layerChildIsSelected, layerIsSelected, legendExpanded]);
 
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('SINGLE-LAYER - layerIsSelected');
-
-    // Scroll into view when layer is selected
-    if (layerIsSelected) {
-      layerItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
-    }
-  }, [layerIsSelected]);
-
   // Build unique ID format
-  const layerListItemId = `${mapId}-${containerType}-${TABS.LAYERS}-${layerPath}`;
+  const layerListItemButtonId = `${mapId}-${containerType}-${TABS.LAYERS}-${layerPath}`;
 
   return (
     <ListItem ref={layerItemRef} className={memoContainerClass} key={layerName} disablePadding={true} data-layer-depth={depth}>
@@ -646,9 +692,8 @@ export function SingleLayer({
           }}
         >
           <ListItemButton
-            // TODO: WCAG Issue #3116 - The ID is not using store value selectedFooterLayerListItemId (id={layerId}). Check if this is correct...
-            // TODO: WCAG Issue #3116 - ... layers-list was previously mutating the layer.layerId value is any case: (layer.layerId = `${mapId}-${TABS.LAYERS}-${layer.layerPath}`;
-            id={layerListItemId}
+            ref={layerListItemButtonRef}
+            id={layerListItemButtonId}
             onClick={handleLayerClick}
             selected={layerIsSelected || (layerChildIsSelected && !legendExpanded)}
             sx={{
