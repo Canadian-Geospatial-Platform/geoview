@@ -20,6 +20,7 @@ import { LayerServiceMetadataUnableToFetchError } from '@/core/exceptions/layer-
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
 
 export interface TypeWkbLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.WKB;
@@ -135,12 +136,15 @@ export class WKB extends AbstractGeoViewVector {
   /**
    * Overrides the way the layer metadata is processed.
    * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
    * @param {OLProjection?} [mapProjection] - The map projection.
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
   protected override onProcessLayerMetadata(
     layerConfig: VectorLayerEntryConfig,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    displayDateMode: DisplayDateMode,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     mapProjection?: OLProjection,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

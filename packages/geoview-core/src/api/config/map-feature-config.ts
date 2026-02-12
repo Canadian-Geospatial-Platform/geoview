@@ -108,8 +108,8 @@ export class MapFeatureConfig {
     this.corePackages = [...(userMapFeatureConfig.corePackages ?? DEFAULT_MAP_FEATURE_CONFIG.corePackages ?? [])];
     this.corePackagesConfig = [...(userMapFeatureConfig.corePackagesConfig ?? DEFAULT_MAP_FEATURE_CONFIG.corePackagesConfig ?? [])];
     this.externalPackages = [...(userMapFeatureConfig.externalPackages ?? DEFAULT_MAP_FEATURE_CONFIG.externalPackages ?? [])];
-    this.globalSettings = userMapFeatureConfig.globalSettings || DEFAULT_MAP_FEATURE_CONFIG.globalSettings;
-    this.schemaVersionUsed = userMapFeatureConfig.schemaVersionUsed || DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed;
+    this.globalSettings = userMapFeatureConfig.globalSettings ?? DEFAULT_MAP_FEATURE_CONFIG.globalSettings;
+    this.schemaVersionUsed = userMapFeatureConfig.schemaVersionUsed ?? DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed;
   }
 
   /**

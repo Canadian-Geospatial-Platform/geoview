@@ -75,11 +75,13 @@ export interface IAppState {
  */
 export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppState {
   return {
-    disabledLayerTypes: [],
-    displayLanguage: 'en' as TypeDisplayLanguage,
-    displayDateMode: 'long' as DisplayDateMode,
-    displayDateTimezone: 'local' as TimeIANA,
-    displayTheme: 'geo.ca',
+    // TODO: REFACTOR - There's confusion on where the actual default values are coming from, some are coming from DEFAULT_MAP_FEATURE_CONFIG and some are hardcoded here and some are elsewhere.
+    // TO.DOCONT: We should standardize this so that all default values are coming from the same source of truth.
+    disabledLayerTypes: [], // GV This value is irrelevant, because the real default value is coming from DEFAULT_MAP_FEATURE_CONFIG
+    displayLanguage: 'en', // GV This value is irrelevant, because it's being defaulted to 'en' in multiple places throughout the code base, including in 'app.tsx.getMapConfig()' and app.tsx.renderMap() where in some cases the default is taken from
+    displayDateMode: 'iso', // GV This value is irrelevant, because the real default value is coming from DEFAULT_MAP_FEATURE_CONFIG
+    displayDateTimezone: 'local', // GV This is the actual default value
+    displayTheme: 'geo.ca', // GV This value is irrelevant, because the real default value is coming somewhere, NOT in DEFAULT_MAP_FEATURE_CONFIG !?
     guide: {},
     geolocatorServiceURL: '',
     metadataServiceURL: '',
@@ -95,23 +97,20 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
 
     // initialize default stores section from config information when store receive configuration file
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
-      const lang = VALID_DISPLAY_LANGUAGE.includes(geoviewConfig.displayLanguage as TypeDisplayLanguage)
-        ? geoviewConfig.displayLanguage
-        : 'en';
+      const lang = VALID_DISPLAY_LANGUAGE.includes(geoviewConfig.displayLanguage!) ? geoviewConfig.displayLanguage! : 'en';
       const geoviewHTMLElement = document.getElementById(get().mapId)!;
-
       set({
         appState: {
           ...get().appState,
-          disabledLayerTypes: geoviewConfig.globalSettings?.disabledLayerTypes || [],
-          displayLanguage: lang as TypeDisplayLanguage,
-          displayDateMode: geoviewConfig.globalSettings?.displayDateMode ?? 'long',
-          displayTheme: geoviewConfig.theme || 'geo.ca',
+          disabledLayerTypes: geoviewConfig.globalSettings?.disabledLayerTypes!, // Was defaulted so can use '!'
+          displayLanguage: lang,
+          displayDateMode: geoviewConfig.globalSettings?.displayDateMode!, // Was defaulted so can use '!'
+          displayTheme: geoviewConfig.theme!, // Was defaulted so can use '!'
           geolocatorServiceURL: geoviewConfig.serviceUrls?.geolocatorUrl,
           metadataServiceURL: geoviewConfig.serviceUrls?.metadataUrl,
           geoviewHTMLElement,
           height: geoviewHTMLElement?.clientHeight || 600,
-          showUnsymbolizedFeatures: geoviewConfig.globalSettings?.showUnsymbolizedFeatures || false,
+          showUnsymbolizedFeatures: geoviewConfig.globalSettings?.showUnsymbolizedFeatures!, // Was defaulted so can use '!'
           showLayerHighlightLayerBbox: geoviewConfig.globalSettings?.showLayerHighlightLayerBbox ?? true,
         },
       });

@@ -14,6 +14,7 @@ import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { deepMergeObjects } from '@/core/utils/utilities';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
 
 export interface TypeEsriDynamicLayerConfig extends TypeGeoviewLayerConfig {
   // TODO: Refactor - Layers - Get rid of the `geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_DYNAMIC` property in this interface and all others in other layers.
@@ -107,16 +108,18 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   /**
    * Overrides the way the layer metadata is processed.
    * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
    * @param {OLProjection?} [mapProjection] - The map projection.
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<EsriDynamicLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
   protected override onProcessLayerMetadata(
     layerConfig: EsriDynamicLayerEntryConfig,
+    displayDateMode: DisplayDateMode,
     mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<EsriDynamicLayerEntryConfig> {
-    return EsriUtilities.commonProcessLayerMetadata(this, layerConfig, abortSignal);
+    return EsriUtilities.commonProcessLayerMetadata(this, layerConfig, displayDateMode, abortSignal);
   }
 
   /**

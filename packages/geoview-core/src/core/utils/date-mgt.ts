@@ -28,6 +28,9 @@ export type DateLike = Date | number | string;
 /** The type to specify a date format for each supported language */
 export type TypeDisplayDateFormat = Record<TypeDisplayLanguage, string>;
 
+/** The type to specify the default date and datetime formats for each supported display date mode */
+export type TypeDisplayDateDefaults = { dateFormat: TypeDisplayDateFormat; datetimeFormat: TypeDisplayDateFormat };
+
 /**
  * The possibly time zones the date to read is at.
  * This can be any supported IANA time zone, e.g.: 'America/Toronto', 'Europe/Paris', 'UTC' or even 'local' to let the system determine the local TimeIANA on-the-fly.
@@ -198,35 +201,23 @@ export abstract class DateMgt {
   // #region STATIC PUBLIC METHODS
 
   /**
-   * Initializes the default date and datetime display formats
-   * based on the specified display mode.
-   * This method configures the static default formatting used
-   * throughout the application for date-only and datetime values.
-   * Supported modes:
-   * - `'long'`: Uses localized, human-readable formats
-   *   (e.g., "MMM D, YYYY" in English).
-   * - Any other value (or `undefined`): Uses ISO-like numeric formats
-   *   (e.g., "YYYY-MM-DD").
-   * @param {DisplayDateMode} displayDateMode - The desired display date mode.
-   *                          If `'long'`, long localized formats are used.
-   *                          Otherwise, default numeric formats are applied.
+   * Gets the default date and datetime formats based on the display date mode.
+   * @param {DisplayDateMode | undefined} displayDateMode - The display date mode, e.g., 'long' or undefined for default.
+   * @returns {TypeDisplayDateDefaults} The default date and datetime formats for the given mode.
    * @static
    */
-  static initialize(displayDateMode: DisplayDateMode | undefined): void {
+  static getDisplayDateDefaults(displayDateMode: DisplayDateMode | undefined): TypeDisplayDateDefaults {
     // Depending on the display date mode
     switch (displayDateMode) {
       case 'long':
-        DateMgt.DEFAULT_DATE_FORMAT = DateMgt.LONG_DISPLAY_DATE_FORMAT;
-        DateMgt.DEFAULT_DATETIME_FORMAT = DateMgt.LONG_DISPLAY_DATETIME_FORMAT;
-        break;
+        return { dateFormat: DateMgt.LONG_DISPLAY_DATE_FORMAT, datetimeFormat: DateMgt.LONG_DISPLAY_DATETIME_FORMAT };
 
       default:
-        DateMgt.DEFAULT_DATE_FORMAT = DateMgt.ISO_DISPLAY_DATE_FORMAT_MINUTES;
-        DateMgt.DEFAULT_DATETIME_FORMAT = DateMgt.ISO_DISPLAY_DATETIME_FORMAT_MINUTES;
-        break;
+        return {
+          dateFormat: DateMgt.ISO_DISPLAY_DATE_FORMAT_MINUTES,
+          datetimeFormat: DateMgt.ISO_DISPLAY_DATETIME_FORMAT_MINUTES,
+        };
     }
-    DateMgt.DEFAULT_TIME_FORMAT = DateMgt.ISO_DISPLAY_TIME_FORMAT_MINUTES;
-    DateMgt.DEFAULT_DATE_YEAR_ONLY_FORMAT = DateMgt.ISO_DISPLAY_YEAR_ONLY_FORMAT;
   }
 
   /**
@@ -695,12 +686,18 @@ export abstract class DateMgt {
    * - This function relies on heuristics and may not be correct for all datasets.
    * - Errors during parsing are logged and do not propagate.
    */
-  static guessDisplayDateInformationFromTimeDimension(dates: DateLike[]): GuessedTimeInformation | undefined {
+  static guessDisplayDateInformationFromTimeDimension(
+    dates: DateLike[],
+    displayDateMode: DisplayDateMode | undefined
+  ): GuessedTimeInformation | undefined {
     try {
       // Check if it is a valid dates array
       const validDates = dates.map((date) => {
         return this.createDate(date);
       });
+
+      // Get the defaults for the displayDateMode
+      const defaults = this.getDisplayDateDefaults(displayDateMode);
 
       // If more than 1 date
       if (validDates.length > 1) {
@@ -711,7 +708,7 @@ export abstract class DateMgt {
         if (timeDelta <= this.MILLISECONDS_IN_1_DAY) {
           // We assume it's in local time and instant temporal mode and only hours:minutes that we're interested in
           return {
-            displayDateFormat: this.DEFAULT_DATETIME_FORMAT,
+            displayDateFormat: defaults.datetimeFormat,
             displayDateFormatShort: this.DEFAULT_TIME_FORMAT,
             serviceDateTemporalMode: 'instant',
           };
@@ -721,7 +718,7 @@ export abstract class DateMgt {
         if (timeDelta >= this.MILLISECONDS_IN_1_YEAR * 10) {
           // We assume we want the years only, not caring about the months
           return {
-            displayDateFormat: this.DEFAULT_DATE_FORMAT,
+            displayDateFormat: defaults.dateFormat,
             displayDateFormatShort: this.DEFAULT_DATE_YEAR_ONLY_FORMAT,
           };
         }
@@ -739,7 +736,7 @@ export abstract class DateMgt {
         // If all dates share the exact same time-of-day
         if (allSameTimeOfDay) {
           return {
-            displayDateFormat: this.DEFAULT_DATE_FORMAT,
+            displayDateFormat: defaults.dateFormat,
           };
         }
       }
@@ -784,7 +781,11 @@ export abstract class DateMgt {
    * @throws {InvalidDateError} When input has invalid dates.
    * @static
    */
-  static createDimensionFromESRI(timeDimensionESRI: TimeDimensionESRI, singleHandle: boolean = false): TimeDimension {
+  static createDimensionFromESRI(
+    timeDimensionESRI: TimeDimensionESRI,
+    displayDateMode: DisplayDateMode | undefined,
+    singleHandle: boolean = false
+  ): TimeDimension {
     const { startTimeField, timeExtent, timeInterval, timeIntervalUnits } = timeDimensionESRI;
 
     // create interval string
@@ -804,7 +805,7 @@ export abstract class DateMgt {
     const rangeItems = this.createRangeOGC(dimensionValues);
 
     // Guess the display time information
-    const guessedInfo = this.guessDisplayDateInformationFromTimeDimension(rangeItems.range);
+    const guessedInfo = this.guessDisplayDateInformationFromTimeDimension(rangeItems.range, displayDateMode);
 
     const timeDimension: TimeDimension = {
       field: startTimeField,
@@ -833,12 +834,15 @@ export abstract class DateMgt {
    * @throws {InvalidDateError} When input has invalid dates.
    * @static
    */
-  static createDimensionFromOGC(ogcTimeDimension: TypeMetadataWMSCapabilityLayerDimension | string): TimeDimension {
+  static createDimensionFromOGC(
+    ogcTimeDimension: TypeMetadataWMSCapabilityLayerDimension | string,
+    displayDateMode: DisplayDateMode | undefined
+  ): TimeDimension {
     const dimensionObject = typeof ogcTimeDimension === 'object' ? ogcTimeDimension : JSON.parse(ogcTimeDimension);
     const rangeItems = this.createRangeOGC(dimensionObject.values);
 
     // Guess the display time information
-    const guessedInfo = this.guessDisplayDateInformationFromTimeDimension(rangeItems.range);
+    const guessedInfo = this.guessDisplayDateInformationFromTimeDimension(rangeItems.range, displayDateMode);
 
     const timeDimension: TimeDimension = {
       field: dimensionObject.name,

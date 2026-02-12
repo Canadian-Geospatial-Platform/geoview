@@ -16,6 +16,7 @@ import {
 import { GVXYZTiles } from '@/geo/layer/gv-layers/tile/gv-xyz-tiles';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
 
 // ? Do we keep this TODO ? Dynamic parameters can be placed on the dataAccessPath and initial settings can be used on xyz-tiles.
 // TODO: Implement method to validate XYZ tile service
@@ -118,12 +119,15 @@ export class XYZTiles extends AbstractGeoViewRaster {
   /**
    * Overrides the way the layer metadata is processed.
    * @param {XYZTilesLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
    * @param {OLProjection?} [mapProjection] - The map projection.
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<XYZTilesLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
   protected override onProcessLayerMetadata(
     layerConfig: XYZTilesLayerEntryConfig,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    displayDateMode: DisplayDateMode,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     mapProjection?: OLProjection,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

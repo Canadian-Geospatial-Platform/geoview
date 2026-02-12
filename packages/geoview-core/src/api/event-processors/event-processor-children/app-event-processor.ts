@@ -1,10 +1,10 @@
-import type { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
+import type { DisplayDateMode, TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
 import type { IAppState } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import type { NotificationDetailsType } from '@/core/components';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import type { TypeHTMLElement } from '@/core/types/global-types';
-import type { TimeIANA } from '@/core/utils/date-mgt';
+import { DateMgt, type TimeIANA, type TypeDisplayDateDefaults } from '@/core/utils/date-mgt';
 import { createGuideObject } from '@/core/utils/utilities';
 import { MapEventProcessor } from './map-event-processor';
 import type { SnackbarType } from '@/core/utils/notifications';
@@ -47,6 +47,24 @@ export class AppEventProcessor extends AbstractEventProcessor {
    */
   static getDisplayLanguage(mapId: string): TypeDisplayLanguage {
     return this.getAppState(mapId).displayLanguage;
+  }
+
+  /**
+   * Shortcut to get the display date mode for a given map id
+   * @param {string} mapId - The mapId
+   * @returns {DisplayDateMode} The display date mode.
+   */
+  static getDisplayDateMode(mapId: string): DisplayDateMode {
+    return this.getAppState(mapId).displayDateMode;
+  }
+
+  /**
+   * Shortcut to get the display date mode for a given map id
+   * @param {string} mapId - The mapId
+   * @returns {TypeDisplayDateDefaults} The display date mode.
+   */
+  static getDisplayDateFormatDefault(mapId: string): TypeDisplayDateDefaults {
+    return DateMgt.getDisplayDateDefaults(this.getDisplayDateMode(mapId));
   }
 
   /**

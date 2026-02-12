@@ -25,6 +25,7 @@ import {
   LayerEntryNotSupportingProjectionError,
 } from '@/core/exceptions/layer-entry-config-exceptions';
 import { GVVectorTiles } from '@/geo/layer/gv-layers/vector/gv-vector-tiles';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
 
 // TODO: Implement method to validate Vector Tiles service
 // TODO: Add more customization (minZoom, maxZoom, TMS)
@@ -82,12 +83,14 @@ export class VectorTiles extends AbstractGeoViewRaster {
   /**
    * Overrides the way the layer metadata is processed.
    * @param {VectorTilesLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
    * @param {OLProjection?} [mapProjection] - The map projection.
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<VectorTilesLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
   protected override async onProcessLayerMetadata(
     layerConfig: VectorTilesLayerEntryConfig,
+    displayDateMode: DisplayDateMode,
     mapProjection?: OLProjection,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     abortSignal?: AbortSignal

@@ -509,7 +509,7 @@ export const useLayerDisplayDateFormats = (): Record<string, TypeDisplayDateForm
 
       state.layerState.legendLayers.forEach((layer) => {
         if (layer.layerPath) {
-          modes[layer.layerPath] = layer.displayDateFormat ?? DateMgt.DEFAULT_DATETIME_FORMAT;
+          modes[layer.layerPath] = layer.displayDateFormat ?? AppEventProcessor.getDisplayDateFormatDefault(state.mapId).datetimeFormat;
         }
       });
 
@@ -533,7 +533,8 @@ export const useLayerDisplayDateFormat = (layerPath: string): TypeDisplayDateFor
   // Hook
   return useStore(useGeoViewStore(), (state) => {
     return (
-      LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.displayDateFormat ?? DateMgt.DEFAULT_DATETIME_FORMAT
+      LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.displayDateFormat ??
+      AppEventProcessor.getDisplayDateFormatDefault(state.mapId).datetimeFormat
     );
   });
 };
@@ -554,7 +555,7 @@ export const useLayerDisplayDateFormatShort = (layerPath: string): TypeDisplayDa
     return (
       LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.displayDateFormatShort ??
       LegendEventProcessor.findLayerByPath(state.layerState.legendLayers, layerPath)?.displayDateFormat ??
-      DateMgt.DEFAULT_DATETIME_FORMAT
+      AppEventProcessor.getDisplayDateFormatDefault(state.mapId).datetimeFormat
     );
   });
 };

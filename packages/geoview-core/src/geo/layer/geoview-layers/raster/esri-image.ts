@@ -11,6 +11,7 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
 
 export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_IMAGE;
@@ -58,16 +59,18 @@ export class EsriImage extends AbstractGeoViewRaster {
   /**
    * Overrides the way the layer metadata is processed.
    * @param {EsriImageLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
    * @param {OLProjection?} [mapProjection] - The map projection.
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<EsriImageLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
   protected override onProcessLayerMetadata(
     layerConfig: EsriImageLayerEntryConfig,
+    displayDateMode: DisplayDateMode,
     mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<EsriImageLayerEntryConfig> {
-    return EsriUtilities.commonProcessLayerMetadata(this, layerConfig, abortSignal);
+    return EsriUtilities.commonProcessLayerMetadata(this, layerConfig, displayDateMode, abortSignal);
   }
 
   /**

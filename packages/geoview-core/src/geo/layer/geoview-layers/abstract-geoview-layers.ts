@@ -10,7 +10,7 @@ import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-class
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
-import type { TypeStyleGeometry } from '@/api/types/map-schema-types';
+import type { DisplayDateMode, TypeStyleGeometry } from '@/api/types/map-schema-types';
 import type {
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
@@ -150,12 +150,14 @@ export abstract class AbstractGeoViewLayer {
   /**
    * Must override method to process a layer entry and return a Promise of an Open Layer Base Layer object.
    * @param {AbstractBaseLayerEntryConfig} layerConfig - Information needed to create the GeoView layer.
+   * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
    * @param {OLProjection?} [mapProjection] - The map projection.
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<AbstractBaseLayerEntryConfig>} The Promise that the config metadata has been processed.
    */
   protected abstract onProcessLayerMetadata(
     layerConfig: AbstractBaseLayerEntryConfig,
+    displayDateMode: DisplayDateMode,
     mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<AbstractBaseLayerEntryConfig>;
@@ -367,11 +369,16 @@ export abstract class AbstractGeoViewLayer {
    * is queryable, it will subscribe to the details-panel and every time the user clicks on the map, the panel will ask the layer
    * to return the descriptive information of all the features in a tolerance radius. This information will be used to populate
    * the details-panel.
+   * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
    * @param {OLProjection?} [mapProjection] - The map projection.
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<ConfigBaseClass[]>} A promise of the config base classes created.
    */
-  async createGeoViewLayers(mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<ConfigBaseClass[]> {
+  async createGeoViewLayers(
+    displayDateMode: DisplayDateMode,
+    mapProjection?: OLProjection,
+    abortSignal?: AbortSignal
+  ): Promise<ConfigBaseClass[]> {
     // Log
     logger.logTraceCore('ABSTRACT-GEOVIEW-LAYERS - createGeoViewLayers', this.listOfLayerEntryConfig);
 
@@ -407,6 +414,7 @@ export abstract class AbstractGeoViewLayer {
             configBaseClassCreated.push(event.config);
           }
         },
+        displayDateMode,
         mapProjection,
         abortSignal
       );
@@ -693,6 +701,7 @@ export abstract class AbstractGeoViewLayer {
    * Recursively processes the metadata of each layer in the "layer list" configuration.
    * @param {ConfigBaseClass[]} listOfLayerEntryConfig - The list of layers to process.
    * @param {LayerConfigCreatedDelegate} callbackLayerConfigCreated - Callback when a layer config has been created.
+   * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
    * @param {OLProjection?} [mapProjection] - The map projection.
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<void>} A promise that the execution is completed.
@@ -701,6 +710,7 @@ export abstract class AbstractGeoViewLayer {
   async #processListOfLayerMetadata(
     listOfLayerEntryConfig: ConfigBaseClass[],
     callbackLayerConfigCreated: LayerConfigCreatedDelegate,
+    displayDateMode: DisplayDateMode,
     mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<void> {
@@ -712,7 +722,7 @@ export abstract class AbstractGeoViewLayer {
 
     // Create a promise for each metadata layer found throughout the recursive config
     const allPromises: Promise<ConfigBaseClass>[] = [];
-    this.#processLayerMetadataRec(listOfLayerEntryConfig, allPromises, mapProjection, abortSignal);
+    this.#processLayerMetadataRec(listOfLayerEntryConfig, allPromises, displayDateMode, mapProjection, abortSignal);
 
     // Wait for all the layers to be processed
     const arrayOfLayerConfigs = await Promise.allSettled(allPromises);
@@ -761,6 +771,7 @@ export abstract class AbstractGeoViewLayer {
    * Recursively gathers all the promises of layer metadata for all the layer entry configs.
    * @param {ConfigBaseClass[]} listOfLayerEntryConfig - The list of layer entry config currently being processed.
    * @param {Promise<ConfigBaseClass>[]} promisesEntryMetadata - The gathered promises as the recursive function is called.
+   * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
    * @param {OLProjection?} [mapProjection] - The map projection.
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @private
@@ -768,6 +779,7 @@ export abstract class AbstractGeoViewLayer {
   #processLayerMetadataRec(
     listOfLayerEntryConfig: ConfigBaseClass[],
     promisesEntryMetadata: Promise<ConfigBaseClass>[],
+    displayDateMode: DisplayDateMode,
     mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): void {
@@ -779,10 +791,18 @@ export abstract class AbstractGeoViewLayer {
         promisesEntryMetadata.push(Promise.resolve(layerConfig));
 
         // Go recursively in the group
-        this.#processLayerMetadataRec(layerConfig.listOfLayerEntryConfig, promisesEntryMetadata, mapProjection, abortSignal);
+        this.#processLayerMetadataRec(
+          layerConfig.listOfLayerEntryConfig,
+          promisesEntryMetadata,
+          displayDateMode,
+          mapProjection,
+          abortSignal
+        );
       } else {
         // Not a group layer, process the layer metadata normally
-        promisesEntryMetadata.push(this.#processLayerMetadata(layerConfig as AbstractBaseLayerEntryConfig, mapProjection, abortSignal));
+        promisesEntryMetadata.push(
+          this.#processLayerMetadata(layerConfig as AbstractBaseLayerEntryConfig, displayDateMode, mapProjection, abortSignal)
+        );
       }
     });
   }
@@ -791,6 +811,7 @@ export abstract class AbstractGeoViewLayer {
    * Processes the layer metadata. It will fill the empty outfields and aliasFields properties of the
    * layer configuration when applicable.
    * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
+   * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
    * @param {OLProjection?} [mapProjection] - The map projection.
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the AbstractBaseLayerEntryConfig has its metadata processed.
@@ -800,6 +821,7 @@ export abstract class AbstractGeoViewLayer {
    */
   async #processLayerMetadata(
     layerConfig: AbstractBaseLayerEntryConfig,
+    displayDateMode: DisplayDateMode,
     mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<AbstractBaseLayerEntryConfig> {
@@ -807,7 +829,7 @@ export abstract class AbstractGeoViewLayer {
       // If no errors already happened on the layer path being processed
       if (layerConfig.layerStatus !== 'error') {
         // Process and, yes, keep the await here, because we want the try/catch to work nicely here.
-        return await this.onProcessLayerMetadata(layerConfig, mapProjection, abortSignal);
+        return await this.onProcessLayerMetadata(layerConfig, displayDateMode, mapProjection, abortSignal);
       }
 
       // Return as-is
@@ -1278,7 +1300,7 @@ export abstract class AbstractGeoViewLayer {
   protected static processConfig(layer: AbstractGeoViewLayer): Promise<ConfigBaseClass[]> {
     // Create a promise that the layer config will be created
     const promise = new Promise<ConfigBaseClass[]>((resolve, reject) => {
-      // Register a handler when the layer config has been created for this config
+      // (Extra) Register a handler when the layer config has been created for this config
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       layer.onLayerConfigCreated((geoviewLayer: AbstractGeoViewLayer, event: LayerConfigCreatedEvent) => {
         // A Layer Config was created
@@ -1303,8 +1325,9 @@ export abstract class AbstractGeoViewLayer {
       });
 
       // Start the geoview-layers config process
+      // Uses 'long' as displayDateMode by default just to generate a config
       layer
-        .createGeoViewLayers()
+        .createGeoViewLayers('long')
         .then((configs) => {
           // Resolve with the configurations
           resolve(configs);

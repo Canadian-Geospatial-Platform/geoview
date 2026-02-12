@@ -262,13 +262,6 @@ export class MapViewer {
     this.mapId = mapFeaturesConfig.mapId;
     this.mapFeaturesConfig = mapFeaturesConfig;
 
-    // Initialize the default date time for the whole application
-    // FIXME: This sets the displayDateMode for all GeoView, across all maps (if more than one is displayed on the page), but we need
-    // to do it at this level because the display date mode is used in the layer metadata parsing and the layers have
-    // no idea to know about the map globalSettings configuration at the moment.
-    // We should find a way to make this more flexible and less global in the future.
-    DateMgt.initialize(mapFeaturesConfig.globalSettings?.displayDateMode);
-
     this.#i18nInstance = i18instance;
 
     this.iconImageCacheSize = 1;

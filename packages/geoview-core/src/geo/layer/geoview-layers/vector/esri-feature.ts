@@ -17,6 +17,7 @@ import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { GeoUtilities } from '@/geo/utils/utilities';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
 
 export interface TypeEsriFeatureLayerConfig extends TypeGeoviewLayerConfig {
   geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_FEATURE;
@@ -149,6 +150,7 @@ export class EsriFeature extends AbstractGeoViewVector {
   /**
    * Overrides the way the layer metadata is processed.
    * @param {EsriFeatureLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
    * @param {OLProjection?} [mapProjection] - The map projection.
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<EsriFeatureLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
@@ -156,10 +158,11 @@ export class EsriFeature extends AbstractGeoViewVector {
    */
   protected override onProcessLayerMetadata(
     layerConfig: EsriFeatureLayerEntryConfig,
+    displayDateMode: DisplayDateMode,
     mapProjection?: OLProjection,
     abortSignal?: AbortSignal
   ): Promise<EsriFeatureLayerEntryConfig> {
-    return EsriUtilities.commonProcessLayerMetadata(this, layerConfig, abortSignal);
+    return EsriUtilities.commonProcessLayerMetadata(this, layerConfig, displayDateMode, abortSignal);
   }
 
   /**

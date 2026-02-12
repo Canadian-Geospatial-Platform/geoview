@@ -15,6 +15,7 @@ import { logger } from '@/core/utils/logger';
 import { Projection, type TypeProjection } from '@/geo/utils/projection';
 import { generateId } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
 
 export interface TypeGeoTIFFLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
   geoviewLayerType: typeof CONST_LAYER_TYPES.GEOTIFF;
@@ -104,12 +105,15 @@ export class GeoTIFF extends AbstractGeoViewRaster {
   /**
    * Overrides the way the layer metadata is processed.
    * @param {GeoTIFFLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
    * @param {OLProjection?} [mapProjection] - The map projection.
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<GeoTIFFLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    */
   protected override onProcessLayerMetadata(
     layerConfig: GeoTIFFLayerEntryConfig,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    displayDateMode: DisplayDateMode,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     mapProjection?: OLProjection,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

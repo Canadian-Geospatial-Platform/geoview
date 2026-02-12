@@ -11,7 +11,7 @@ import type {
   TypeMetadataWMSCapabilityLayer,
   TypeStylesWMS,
 } from '@/api/types/layer-schema-types';
-import type { TypeLayerStyleSettings, TypeStyleGeometry } from '@/api/types/map-schema-types';
+import type { DisplayDateMode, TypeLayerStyleSettings, TypeStyleGeometry } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES, CONST_LAYER_ENTRY_TYPES } from '@/api/types/layer-schema-types';
 import { DateMgt } from '@/core/utils/date-mgt';
 import type { CallbackNewMetadataDelegate } from '@/geo/utils/utilities';
@@ -200,6 +200,7 @@ export class WMS extends AbstractGeoViewRaster {
   /**
    * Overrides the way the layer metadata is processed.
    * @param {OgcWmsLayerEntryConfig} layerConfig - The layer entry configuration to process.
+   * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
    * @param {OLProjection?} [mapProjection] - The map projection.
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<OgcWmsLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
@@ -208,6 +209,7 @@ export class WMS extends AbstractGeoViewRaster {
    */
   protected override async onProcessLayerMetadata(
     layerConfig: OgcWmsLayerEntryConfig,
+    displayDateMode: DisplayDateMode,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     mapProjection?: OLProjection,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -251,7 +253,7 @@ export class WMS extends AbstractGeoViewRaster {
 
         // If a temporal dimension was found
         if (timeDimension) {
-          layerConfig.setTimeDimension(DateMgt.createDimensionFromOGC(timeDimension));
+          layerConfig.setTimeDimension(DateMgt.createDimensionFromOGC(timeDimension, displayDateMode));
         }
       }
 

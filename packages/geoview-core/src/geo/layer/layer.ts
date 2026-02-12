@@ -103,12 +103,13 @@ import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-int
 import { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
+import type { TypeLegendItem } from '@/core/components/layers/types';
+import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
 import { SwiperEventProcessor } from '@/api/event-processors/event-processor-children/swiper-event-processor';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
-import type { TypeLegendItem } from '@/core/components/layers/types';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { GeoViewError, LayerConfigNotFoundError } from '@/core/exceptions/geoview-exceptions';
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
@@ -759,7 +760,7 @@ export class LayerApi {
     const promiseLayer = new Promise<void>((resolve, reject) => {
       // Continue the addition process
       layerBeingAdded
-        .createGeoViewLayers(this.mapViewer.getProjection(), abortSignal)
+        .createGeoViewLayers(AppEventProcessor.getDisplayDateMode(this.getMapId()), this.mapViewer.getProjection(), abortSignal)
         .then(() => {
           // Add the layer on the map
           this.#addToMap(layerBeingAdded, geoviewLayerConfig);
