@@ -51,6 +51,7 @@ export interface TypeLegendLayer {
   items: TypeLegendItem[];
   children: TypeLegendLayer[];
 
+  rasterFunction: string | undefined; // Active raster function for ESRI Image layers
   opacity?: number;
   opacityMaxFromParent?: number;
   zoom?: number;

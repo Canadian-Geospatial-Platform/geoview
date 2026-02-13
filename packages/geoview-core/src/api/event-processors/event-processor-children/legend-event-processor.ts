@@ -2,7 +2,7 @@ import type { Projection as OLProjection } from 'ol/proj';
 
 import type { Extent } from '@/api/types/map-schema-types';
 import type { TemporalMode, TimeDimension, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
-import type { TypeLayerControls, TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { TypeLayerControls, TypeLayerStatus, TypeMetadataEsriRasterFunctionInfos } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import { MapViewer } from '@/geo/map/map-viewer';
@@ -201,6 +201,71 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       // Advance to parent
       current = current.getParent();
     }
+  }
+
+  /**
+   * Retrieves the layer's rasterFunctionInfos
+   *
+   * @param {string} mapId - The unique identifier of the map instance.
+   * @param {string} layerPath - The path to the layer.
+   * @returns {TypeMetadataEsriRasterFunctionInfos[] | undefined} - The projection code of the layer, or `undefined` if not available.
+   *
+   * @description
+   * This method fetches the Geoview layer for the specified layer path and checks if it has a `getMetadataRasterFunctionInfos` method.
+   * If the method exists, it retrieves the rasterFunctionInfos and returns the list of TypeMetadataEsriRasterFunctionInfo.
+   * If the rasterFunctionInfos is not available, the method returns `undefined`.
+   */
+  static getLayerRasterFunctionInfos(mapId: string, layerPath: string): TypeMetadataEsriRasterFunctionInfos[] | undefined {
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
+
+    if (
+      geoviewLayer &&
+      'getMetadataRasterFunctionInfos' in geoviewLayer &&
+      typeof geoviewLayer.getMetadataRasterFunctionInfos === 'function'
+    ) {
+      return geoviewLayer.getMetadataRasterFunctionInfos();
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Sets the active raster function for a layer.
+   * @param {string} mapId - The map identifier.
+   * @param {string} layerPath - The layer path.
+   * @param {string | undefined} rasterFunctionId - The raster function identifier to set.
+   */
+  static setLayerRasterFunction(mapId: string, layerPath: string, rasterFunctionId: string | undefined): void {
+    MapEventProcessor.getMapViewerLayerAPI(mapId).setLayerRasterFunction(layerPath, rasterFunctionId);
+  }
+
+  /**
+   * Updates the active raster function for a layer in the store.
+   * @param {string} mapId - The map identifier.
+   * @param {string} layerPath - The layer path.
+   * @param {string | undefined} rasterFunctionId - The raster function identifier to set.
+   */
+  static setLayerRasterFunctionInStore(mapId: string, layerPath: string, rasterFunctionId: string | undefined): void {
+    // Find the layer for the given layer path
+    const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
+    const layer = this.findLayerByPath(layers, layerPath);
+
+    if (layer) {
+      // Set layer rasterFunction
+      layer.rasterFunction = rasterFunctionId;
+      // Set updated legend layers
+      this.getLayerState(mapId).setterActions.setLegendLayers(layers);
+    }
+  }
+
+  /**
+   * Gets the active raster function for a layer.
+   * @param {string} mapId - The map identifier.
+   * @param {string} layerPath - The layer path.
+   * @returns {string | undefined} The active raster function identifier.
+   */
+  static getLayerRasterFunction(mapId: string, layerPath: string): string | undefined {
+    return LegendEventProcessor.getLegendLayerInfo(mapId, layerPath)?.rasterFunction;
   }
 
   /**
@@ -628,6 +693,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             icons: [] as TypeLegendLayerItem[],
             items: [] as TypeLegendItem[],
             children: [] as TypeLegendLayer[],
+            rasterFunction: undefined,
           };
 
           existingEntries.push(legendLayerEntry);
@@ -687,6 +753,10 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           children: [] as TypeLegendLayer[],
           items,
           icons,
+          rasterFunction:
+            'getRasterFunction' in layerConfig && typeof layerConfig.getRasterFunction === 'function'
+              ? layerConfig.getRasterFunction()
+              : undefined,
         };
 
         // If layer is regular (not group)

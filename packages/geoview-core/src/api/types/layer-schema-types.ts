@@ -937,8 +937,36 @@ export interface TypeMetadataGeoTIFFAsset {
   type: string;
 }
 
+/**
+ * Represents layer metadata as read from an Esri layer service.
+ */
+export interface TypeLayerMetadataEsri {
+  type: string;
+  capabilities: string;
+  geometryField: TypeLayerMetadataEsriField;
+  displayField: string;
+  defaultVisibility: boolean;
+  minScale: number;
+  maxScale: number;
+  maxRecordCount: number;
+  spatialReference: TypeProjection;
+  sourceSpatialReference: TypeProjection;
+  extent: TypeLayerMetadataEsriExtent;
+  drawingInfo: TypeLayerMetadataEsriDrawingInfo;
+  rasterFunctionInfos: TypeMetadataEsriRasterFunctionInfos[];
+  timeInfo: TimeDimensionESRI;
+  geometryType: string;
+  fields: TypeLayerMetadataFields[];
+}
+
 export interface TypeLayerMetadataEsriDrawingInfo {
   renderer: EsriBaseRenderer;
+}
+
+export interface TypeMetadataEsriRasterFunctionInfos {
+  name: string;
+  description: string;
+  help: string;
 }
 
 export interface TypeLayerMetadataEsriExtent {

@@ -3,6 +3,7 @@ import type {
   TypeGeoviewLayerConfig,
   TypeMetadataEsriImage,
   TypeSourceImageEsriInitialConfig,
+  TypeMetadataEsriRasterFunctionInfos,
 } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
@@ -12,12 +13,19 @@ import type { TypeEsriImageLayerConfig } from '@/geo/layer/geoview-layers/raster
 export interface EsriImageLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
   /** Source settings to apply to the GeoView layer source at creation time. */
   source?: TypeSourceImageEsriInitialConfig;
+  rasterFunction?: string; // Initial raster function for ESRI Image layers
+  rasterFunctionInfos?: TypeMetadataEsriRasterFunctionInfos[];
 }
 
 /**
  * Type used to define a GeoView image layer to display on the map.
  */
 export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
+  /** The raster function to apply to the layer. */
+  #rasterFunction?: string;
+  /** The raster function infos with the listof available raster functions */
+  #rasterFunctionInfos?: TypeMetadataEsriRasterFunctionInfos[];
+
   /**
    * The class constructor.
    *
@@ -25,6 +33,8 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    */
   constructor(layerConfig: EsriImageLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.ESRI_IMAGE, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
+
+    if (layerConfig.rasterFunction) this.#rasterFunction = layerConfig.rasterFunction;
   }
 
   // #region OVERRIDES
@@ -67,6 +77,30 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   }
 
   // #endregion OVERRIDES
+
+  // #region METHODS
+
+  getRasterFunctionInfos(): TypeMetadataEsriRasterFunctionInfos[] | undefined {
+    return this.#rasterFunctionInfos;
+  }
+
+  /**
+   * Gets the active raster function identifier
+   * @returns {string | undefined} The raster function identifier
+   */
+  getRasterFunction(): string | undefined {
+    return this.#rasterFunction;
+  }
+
+  /**
+   * Sets the active raster function identifier
+   * @param {string | undefined} rasterFunctionId - The raster function identifier to set
+   */
+  setRasterFunction(rasterFunctionId: string | undefined): void {
+    this.#rasterFunction = rasterFunctionId;
+  }
+
+  // #endregion METHODS
 
   // #region STATIC METHODS
 
