@@ -19,6 +19,9 @@
           "controls": {
             "highlight": false,
             "zoom": false
+          },
+          "states": {
+            "visible": false
           }
         },
         "listOfLayerEntryConfig": [

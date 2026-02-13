@@ -102,6 +102,7 @@ export {
   School as SchoolIcon,
   Search as SearchIcon,
   Send as SendIcon,
+  Share as ShareIcon,
   ShapeLine as ShapeLineIcon,
   ShowChart as ShowChartIcon,
   Signpost as SignpostIcon,

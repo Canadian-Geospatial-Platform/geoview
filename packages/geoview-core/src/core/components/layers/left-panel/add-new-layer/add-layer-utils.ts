@@ -20,6 +20,7 @@ type BuildGeoViewLayerInput = {
   layerType: string;
   layerURL: string;
   layerTree: TypeGeoviewLayerConfig;
+  isGeoCore: boolean;
 };
 
 type LayerEntryConfigShell = {
@@ -219,13 +220,16 @@ export class UtilAddLayer {
    * @returns {MapConfigLayerEntry} The geoview layer config
    */
   static buildGeoLayerToAdd(inputProps: BuildGeoViewLayerInput): MapConfigLayerEntry {
-    const { layerIdsToAdd, layerName, layerType, layerURL, layerTree } = inputProps;
+    const { layerIdsToAdd, layerName, layerType, layerURL, layerTree, isGeoCore } = inputProps;
     logger.logDebug(layerTree, layerIdsToAdd);
+
+    // Generate layer id or keep id from geocore layer type
+    const geoviewLayerId = isGeoCore ? layerTree.geoviewLayerId : generateId(18);
 
     if (layerType === 'shapefile') {
       return {
         geoviewLayerName: layerName,
-        geoviewLayerId: generateId(18),
+        geoviewLayerId: geoviewLayerId,
         geoviewLayerType: 'shapefile',
         metadataAccessPath: layerURL,
       } as ShapefileLayerConfig;
@@ -234,7 +238,7 @@ export class UtilAddLayer {
     if (layerType === 'GeoPackage') {
       return {
         geoviewLayerName: layerName,
-        geoviewLayerId: generateId(18),
+        geoviewLayerId: geoviewLayerId,
         geoviewLayerType: 'GeoPackage',
         metadataAccessPath: layerURL,
       } as GeoPackageLayerConfig;
@@ -247,7 +251,7 @@ export class UtilAddLayer {
     if (layersToAdd.length === 1 && layersToAdd[0].listOfLayerEntryConfig?.length > 0) {
       // Return it
       return {
-        geoviewLayerId: generateId(18),
+        geoviewLayerId: geoviewLayerId,
         geoviewLayerName: layerName,
         geoviewLayerType: layerType as TypeGeoviewLayerType,
         metadataAccessPath: layerURL,
@@ -300,7 +304,7 @@ export class UtilAddLayer {
 
     // Return it
     return {
-      geoviewLayerId: generateId(18),
+      geoviewLayerId: geoviewLayerId,
       geoviewLayerName: layerName,
       geoviewLayerType: layerType as TypeGeoviewLayerType,
       metadataAccessPath: layerURL,

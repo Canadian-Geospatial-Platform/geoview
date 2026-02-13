@@ -91,6 +91,7 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
   let mapConfig: MapFeatureConfig = api.config.getDefaultMapFeatureConfig();
 
   // check what type of config is provided (data-config, data-config-url or data-shared)
+  // Priority: data-config or data-config-url over data-shared...
   if (mapElement.hasAttribute('data-config')) {
     // configurations from inline div is provided
     let mapConfigStr = mapElement.getAttribute('data-config');
@@ -102,10 +103,44 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
     const configUrl = mapElement.getAttribute('data-config-url');
     const configObj = await Fetch.fetchJson<MapFeatureConfig>(configUrl!);
     mapConfig = ConfigApi.validateMapConfig(configObj);
-  } else if (mapElement.getAttribute('data-shared')) {
+  } else if (mapElement.hasAttribute('data-shared')) {
     // configurations from the URL parameters is provided, extract then process (replace HTLM characters , && :)
     const urlParam = new URLSearchParams(window.location.search).toString().replace(/%2C/g, ',').replace(/%3A/g, ':') || '';
-    mapConfig = await api.config.getConfigFromUrl(urlParam);
+    mapConfig = api.config.getConfigFromUrl(urlParam);
+    mapConfig = ConfigApi.validateMapConfig(mapConfig);
+  }
+
+  // If data-shared is present along with data-config or data-config-url, apply URL parameters to override specific config values
+  if (mapElement.hasAttribute('data-shared') && (mapElement.hasAttribute('data-config') || mapElement.hasAttribute('data-config-url'))) {
+    // Get URL parameters and merge them into the existing config
+    const urlParam = new URLSearchParams(window.location.search).toString().replace(/%2C/g, ',').replace(/%3A/g, ':') || '';
+    const existingUuids = mapConfig.map.listOfGeoviewLayerConfig
+      .filter((layer) => layer.geoviewLayerType === 'geoCore')
+      .map((layer) => layer.geoviewLayerId);
+    const urlConfig = api.config.getConfigFromUrl(urlParam, existingUuids);
+
+    // Selectively merge URL parameters into the base config, preserving the base config structure
+    // Update only the properties that are defined in the URL parameters
+    if (urlConfig.map) {
+      if (urlConfig.map.viewSettings) {
+        if (urlConfig.map.viewSettings.projection) {
+          mapConfig.map.viewSettings.projection = urlConfig.map.viewSettings.projection;
+        }
+        if (urlConfig.map.viewSettings.initialView?.zoomAndCenter) {
+          mapConfig.map.viewSettings.initialView = mapConfig.map.viewSettings.initialView || {};
+          mapConfig.map.viewSettings.initialView.zoomAndCenter = urlConfig.map.viewSettings.initialView.zoomAndCenter;
+        }
+      }
+      if (urlConfig.map.basemapOptions) {
+        mapConfig.map.basemapOptions = urlConfig.map.basemapOptions;
+      }
+      if (urlConfig.map.listOfGeoviewLayerConfig && urlConfig.map.listOfGeoviewLayerConfig.length > 0) {
+        // Append URL layers to existing config layers instead of replacing them
+        mapConfig.map.listOfGeoviewLayerConfig.push(...urlConfig.map.listOfGeoviewLayerConfig);
+      }
+    }
+
+    // Validate the merged config
     mapConfig = ConfigApi.validateMapConfig(mapConfig);
   }
 
@@ -130,6 +165,7 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
   const id = mapElement.getAttribute('id')!;
   mapConfigExtend.mapId = id;
   mapConfigExtend.displayLanguage = lang;
+  mapConfigExtend.sharedMode = mapElement.hasAttribute('data-shared');
 
   return mapConfigExtend as unknown as TypeMapFeaturesConfig;
 }

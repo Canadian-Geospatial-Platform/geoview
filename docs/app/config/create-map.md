@@ -92,14 +92,16 @@ The `data-footer-height` attribute allows for manually setting the height of the
 
 ##### `data-shared`
 
-When set to `true`, the map will load configuration from URL parameters if they are present. This is especially useful for sharing specific map views or configurations via links.
+When set, the map will load configuration from URL parameters if they are present. This is especially useful for sharing specific map views or configurations via links.
+
+When `data-shared` is used together with `data-config` or `data-config-url`, the base configuration from those attributes is preserved, and URL parameters selectively update specific properties (projection, zoom, center, basemap options). Layers from URL parameters are appended to existing config layers, not replaced.
 
 ```html
 <div
   id="myMap"
   class="geoview-map"
   data-lang="en"
-  data-shared="true"
+  data-shared
   style="width: 100%; height: 400px;"
 ></div>
 ```
@@ -108,7 +110,7 @@ With this setup, you can share a link with URL parameters to load a specific map
 
 Example URL with parameters:
 ```
-https://example.com/geoview/default-config.html?p=3857&z=4&c=-100,40&l=en&t=dark&b={id:transport,shaded:false,labeled:true}&i=dynamic&cc=overview-map&keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9#HLCONF5
+https://example.com/geoview/default-config.html?p=3857&z=4&c=-100,40&l=en&t=dark&b=id:transport,s:off,l:on&i=dynamic&cc=overview-map&keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9#HLCONF5
 ```
 
 Supported URL parameters:
@@ -119,16 +121,15 @@ Supported URL parameters:
 | `p` | Projection | `3857`, `3978` |
 | `c` | Center coordinates [longitude, latitude] | `-100,40` |
 | `l` | Language | `en`, `fr` |
-| `t` | Theme | `dark`, `light` |
-| `b` | Basemap options | `{id:transport,shaded:false,labeled:true}` |
-| `cp` | Core packages to load | `time-slider,swiper,geochart` |
+| `t` | Theme | `dark`, `light`, `geo.ca` |
+| `b` | Basemap options | `id:transport,s:off,l:on}` |
 | `keys` | Geocore layer UUID keys (comma separated) | `12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9` |
 
 **How it works:**
 1. When the page loads with URL parameters, the app looks for map elements with the `geoview-map` class
-2. For each map found, it checks if the element has `data-shared="true"`
-3. If `data-shared` is true, the map will load the configuration from the URL parameters
-4. If multiple maps on the page have `data-shared="true"`, all of them will use the same URL parameters configuration
+2. For each map found, it checks if the element has `data-shared`
+3. If `data-shared` is present, the map will load the configuration from the URL parameters
+4. If multiple maps on the page have `data-shared`, all of them will use the same URL parameters configuration
 
 #### Configuration Structure
 

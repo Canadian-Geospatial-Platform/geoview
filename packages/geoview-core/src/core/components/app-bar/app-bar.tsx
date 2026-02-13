@@ -36,6 +36,7 @@ import { Guide, Legend, DetailsPanel, Datapanel, LayersPanel } from '@/core/comp
 import Notifications from '@/core/components/notifications/notifications';
 
 import Version from './buttons/version';
+import Share from './buttons/share';
 import { getSxClasses } from './app-bar-style';
 import { enforceArrayOrder, helpClosePanelById, helpOpenPanelById } from './app-bar-helper';
 import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
@@ -395,6 +396,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
                 />
               </ListItem>
             )}
+            <ListItem>
+              <Share />
+            </ListItem>
             <ListItem sx={sxClasses.appBarSeparator}>
               <Notifications />
             </ListItem>

@@ -23,9 +23,8 @@
           'c=-100,40&' +
           'l=en&' +
           't=dark&' +
-          'b=basemapId:transport,shaded:false,labeled:true&' +
+          'b=id:transport,s:off,l:on&' +
           'i=dynamic&' +
-          'cc=overview-map&' +
           'keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9';
     </script>
   </head>
@@ -160,11 +159,12 @@
       <h4 id="HLCONF5A">5.A. Load config from URL params</h4>
       <a class="ref-link" href="#top">Top</a>
     </div>
-    <div id="map5A" class="geoview-map" data-lang="en" data-shared="true"></div>
+    <div id="map5A" class="geoview-map" data-lang="en" data-shared></div>
     <p>
       This map loads its configurations from the URL parameters by providing a <strong>data-shared</strong> attribute. If a
-      <strong>data-config</strong> attribute was also provided then the later will have its configuration overriden with config from url
-      parameters.
+      <strong>data-config</strong> or <strong>data-config-url</strong> attribute is also provided, the base configuration is preserved 
+      and URL parameters selectively update specific properties (projection, zoom, center, basemap options). Layers from URL parameters 
+      are appended to existing config layers, not replaced.
     </p>
 
     <div class="demo-section">
