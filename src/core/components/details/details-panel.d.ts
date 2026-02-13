@@ -1,6 +1,6 @@
 import type { TypeContainerBox } from '@/core/types/global-types';
 interface DetailsPanelType {
-    containerType?: TypeContainerBox;
+    containerType: TypeContainerBox;
 }
 /**
  * layers list

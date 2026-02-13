@@ -24,7 +24,11 @@ export interface IMapState {
     currentProjection: TypeValidMapProjectionCodes;
     featureHighlightColor: TypeHighlightColors;
     fixNorth: boolean;
-    hideCoordinateInfoSwitch: boolean;
+    geolocatorSearchArea: {
+        searchItem: string;
+        coords: Coordinate;
+        bbox?: Extent;
+    } | undefined;
     highlightedFeatures: TypeFeatureInfoEntry[];
     homeView: TypeMapViewSettings | undefined;
     hoverFeatureInfo: TypeHoverFeatureInfo | undefined | null;
@@ -85,7 +89,7 @@ export interface IMapState {
         setRotation: (rotation: number) => void;
         zoomToExtent: (extent: Extent, options?: FitOptions) => Promise<void>;
         zoomToInitialExtent: () => Promise<void>;
-        zoomToGeoLocatorLocation: (coords: [number, number], bbox?: [number, number, number, number]) => Promise<void>;
+        zoomToGeoLocatorLocation: (searchItem: string, coords: [number, number], bbox?: [number, number, number, number]) => Promise<void>;
         zoomToMyLocation: (position: GeolocationPosition) => Promise<void>;
         transformPoints: (coords: Coordinate[], outputProjection: number) => Coordinate[];
         setClickCoordinates: (pointerPosition: TypeMapMouseInfo) => void;
@@ -102,6 +106,11 @@ export interface IMapState {
         setAttribution: (attribution: string[]) => void;
         setInitialFilters: (filters: Record<string, string>) => void;
         setInitialView: (view: TypeZoomAndCenter | Extent) => void;
+        setGeolocatorSearchArea: (area: {
+            searchItem: string;
+            coords: Coordinate;
+            bbox?: Extent;
+        } | undefined) => void;
         setHomeView: (view: TypeMapViewSettings) => void;
         setInteraction: (interaction: TypeInteraction) => void;
         setIsMouseInsideMap: (isMouseInsideMap: boolean) => void;
@@ -167,7 +176,6 @@ export declare const useMapInitialFilters: () => Record<string, string>;
 export declare const useMapInitialView: () => TypeMapViewSettings;
 export declare const useMapInteraction: () => TypeInteraction;
 export declare const useMapIsMouseInsideMap: () => boolean;
-export declare const useMapHideCoordinateInfoSwitch: () => boolean;
 export declare const useMapHoverFeatureInfo: () => TypeHoverFeatureInfo;
 export declare const useMapLoaded: () => boolean;
 export declare const useMapDisplayed: () => boolean;

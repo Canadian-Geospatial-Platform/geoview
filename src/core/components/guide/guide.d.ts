@@ -1,6 +1,6 @@
 import type { TypeContainerBox } from '@/core/types/global-types';
 interface GuideType {
-    containerType?: TypeContainerBox;
+    containerType: TypeContainerBox;
 }
 /**
  * Guide component to display help content

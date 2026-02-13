@@ -162,6 +162,8 @@ export type TypeGlobalSettings = {
     canRemoveSublayers?: boolean;
     /** Whether a certain layer type should be disabled */
     disabledLayerTypes?: TypeGeoviewLayerType[];
+    /** Whether to show the bounding box of the highlighted layer. Default = true */
+    showLayerHighlightLayerBbox?: boolean;
     /** Whether to display unsymbolized features in the datatable and other components */
     showUnsymbolizedFeatures?: boolean;
     /** Whether the initial state of the coordinate info tool should be enabled */

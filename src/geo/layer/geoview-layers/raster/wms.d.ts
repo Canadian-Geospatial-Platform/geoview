@@ -12,6 +12,7 @@ import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.WMS;
     fetchVectorsOnWFS?: boolean;
+    useFullWmsSublayers?: boolean;
     listOfLayerEntryConfig: OgcWmsLayerEntryConfig[];
 }
 /**
@@ -22,12 +23,11 @@ export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
  */
 export declare class WMS extends AbstractGeoViewRaster {
     #private;
-    fullSubLayers: boolean;
     /**
      * Constructs a WMS Layer configuration processor.
      * @param {TypeWMSLayerConfig} layerConfig the layer configuration
      */
-    constructor(layerConfig: TypeWMSLayerConfig, fullSubLayers: boolean);
+    constructor(layerConfig: TypeWMSLayerConfig);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      * @override
@@ -151,12 +151,12 @@ export declare class WMS extends AbstractGeoViewRaster {
      * @param {string} geoviewLayerId - A unique identifier for the layer.
      * @param {string} geoviewLayerName - The display name of the layer.
      * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
-     * @param {boolean} fullSubLayers - Indicates if we want the full sublayers of all wms or grouped (default is grouped).
      * @param {boolean?} [isTimeAware] - Indicates whether the layer supports time-based filtering.
+     * @param {boolean} [useFullWmsSublayers] - Indicates if we want the full sublayers of all wms or grouped (default is all sublayers).
      * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
      * @static
      */
-    static initGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, fullSubLayers: boolean, isTimeAware?: boolean): Promise<TypeGeoviewLayerConfig>;
+    static initGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware?: boolean, useFullWmsSublayers?: boolean): Promise<TypeGeoviewLayerConfig>;
     /**
      * Creates a complete configuration object for a WMS GeoView layer.
      * This function constructs a `TypeWMSLayerConfig` object that defines a WMS layer and its associated
@@ -167,12 +167,12 @@ export declare class WMS extends AbstractGeoViewRaster {
      * @param {TypeOfServer | undefined} serverType - The type of WMS server (e.g., 'geoserver', 'mapserver').
      * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
      * @param {TypeLayerEntryShell[]} layerEntries - The root array of parsed layer entries (may include nested groups).
-     * @param {boolean} fullSubLayers - If false, will simulate legacy behavior and skip deeper layers after the first.
+     * @param {boolean} [useFullWmsSublayers] - Indicates if we want the full sublayers of all wms or grouped (default is all sublayers).
      * @param {unknown} [customGeocoreLayerConfig={}] - Optional custom layer configuration to merge into leaf layers.
      * @returns {TypeWMSLayerConfig} The fully constructed WMS layer configuration object.
      * @static
      */
-    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, serverType: TypeOfServer | undefined, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[], fullSubLayers: boolean, customGeocoreLayerConfig?: unknown): TypeWMSLayerConfig;
+    static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, serverType: TypeOfServer | undefined, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[], useFullWmsSublayers?: boolean, customGeocoreLayerConfig?: unknown): TypeWMSLayerConfig;
     /**
      * Processes a WMS GeoviewLayerConfig and returns a promise
      * that resolves to an array of `ConfigBaseClass` layer entry configurations.
@@ -186,10 +186,11 @@ export declare class WMS extends AbstractGeoViewRaster {
      * @param {string} url - The URL of the service endpoint.
      * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
      * @param {boolean} isTimeAware - Indicates if the layer is time aware.
+     * @param {boolean} [useFullWmsSublayers] - Indicates if we want the full sublayers of all wms or grouped (default is all sublayers).
      * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
      * @static
      */
-    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: number[], isTimeAware: boolean, fullSubLayers: boolean): Promise<ConfigBaseClass[]>;
+    static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: number[], isTimeAware: boolean, useFullWmsSublayers?: boolean): Promise<ConfigBaseClass[]>;
 }
 /** Delegate type for the callback when processing group layers */
 export type GroupLayerCreatedDelegate = (config: ConfigBaseClass) => void;

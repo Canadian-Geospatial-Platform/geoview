@@ -15,6 +15,7 @@ export interface IDataTableState {
         applyMapFilters: (filterStrings: string) => void;
         setActiveLayersData: (layers: TypeLayerData[]) => void;
         setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
+        setColumnFilterModesEntry: (filterModes: Record<string, string>, layerPath: string) => void;
         setColumnsFiltersVisibility: (visible: boolean, layerPath: string) => void;
         setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
         setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
@@ -28,6 +29,7 @@ export interface IDataTableState {
         setActiveLayersData: (layers: TypeLayerData[]) => void;
         setAllFeaturesDataArray: (allFeaturesDataArray: TypeAllFeatureInfoResultSetEntry[]) => void;
         setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
+        setColumnFilterModesEntry: (filterModes: Record<string, string>, layerPath: string) => void;
         setColumnsFiltersVisibility: (visible: boolean, layerPath: string) => void;
         setInitiallayerDataTableSetting: (layerPath: string) => void;
         setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
@@ -53,6 +55,7 @@ export interface ColumnFilter {
 }
 export interface IDataTableSettings {
     columnFiltersRecord: TypeColumnFiltersState;
+    columnFilterModesRecord: Record<string, string>;
     columnsFiltersVisibility: boolean;
     mapFilteredRecord: boolean;
     rowsFilteredRecord: number;

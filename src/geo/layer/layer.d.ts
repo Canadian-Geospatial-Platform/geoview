@@ -27,8 +27,6 @@ import type { TypeLegendItem } from '@/core/components/layers/types';
  */
 export declare class LayerApi {
     #private;
-    /** Temporary debugging flag indicating if we want the WMS group layers to have their sub layers fully blown up */
-    static readonly DEBUG_WMS_LAYER_GROUP_FULL_SUB_LAYERS = false;
     /** Reference on the map viewer */
     mapViewer: MapViewer;
     /** Used to access geometry API to create and manage geometries */
@@ -204,12 +202,6 @@ export declare class LayerApi {
      * @param {ConfigBaseClass} layerConfig - The layer entry config to register
      */
     registerLayerConfigInit(layerConfig: ConfigBaseClass): void;
-    /**
-     * Registers the layer in the LayerApi layer-sets to start managing it.
-     * This function may be used to start managing a layer in the UI when said layer has been created outside of the regular config->layer flow.
-     * @param {AbstractGVLayer} layer - The layer to register
-     */
-    registerLayerInLayerSets(layer: AbstractGVLayer): void;
     /**
      * Unregisters the layer in the LayerApi to stop managing it.
      * @param {ConfigBaseClass} layerConfig - The layer entry config to unregister

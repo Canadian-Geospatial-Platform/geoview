@@ -10,6 +10,7 @@ export interface IFeatureInfoState {
     layerDataArrayBatchLayerPathBypass: string;
     selectedLayerPath: string;
     coordinateInfoEnabled: boolean;
+    hideCoordinateInfoSwitch: boolean;
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
     actions: {
         addCheckedFeature: (feature: TypeFeatureInfoEntry) => void;
@@ -60,6 +61,7 @@ export declare const useDetailsLayerDataArray: () => TypeFeatureInfoResultSetEnt
 export declare const useDetailsLayerDataArrayBatch: () => TypeFeatureInfoResultSetEntry[];
 export declare const useDetailsSelectedLayerPath: () => string;
 export declare const useDetailsCoordinateInfoEnabled: () => boolean;
+export declare const useMapHideCoordinateInfoSwitch: () => boolean;
 export declare const useDetailsStoreActions: () => FeatureInfoActions;
 export {};
 //# sourceMappingURL=feature-info-state.d.ts.map

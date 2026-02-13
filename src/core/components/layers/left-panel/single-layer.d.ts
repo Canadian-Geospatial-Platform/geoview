@@ -1,3 +1,4 @@
+import type { TypeContainerBox } from '@/core/types/global-types';
 interface SingleLayerProps {
     layerPath: string;
     depth: number;
@@ -5,7 +6,8 @@ interface SingleLayerProps {
     isFirst: boolean;
     isLast: boolean;
     isLayoutEnlarged: boolean;
+    containerType: TypeContainerBox;
 }
-export declare function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, isLast, isLayoutEnlarged }: SingleLayerProps): JSX.Element;
+export declare function SingleLayer({ depth, layerPath, showLayerDetailsPanel, isFirst, isLast, isLayoutEnlarged, containerType, }: SingleLayerProps): JSX.Element;
 export {};
 //# sourceMappingURL=single-layer.d.ts.map

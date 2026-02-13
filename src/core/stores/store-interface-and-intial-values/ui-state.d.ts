@@ -23,7 +23,6 @@ export interface IUIState {
     hiddenTabs: string[];
     navBarComponents: TypeValidNavBarProps[];
     footerPanelResizeValue: number;
-    selectedFooterLayerListItemId: string;
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
     actions: {
         hideTabButton: (tab: string) => void;
@@ -35,7 +34,6 @@ export interface IUIState {
         setActiveTrapGeoView: (active: boolean) => void;
         setFooterPanelResizeValue: (value: number) => void;
         setFooterBarIsOpen: (open: boolean) => void;
-        setSelectedFooterLayerListItemId: (layerListItemId: string) => void;
     };
     setterActions: {
         enableFocusTrap: (uiFocus: FocusItemProps) => void;
@@ -46,7 +44,6 @@ export interface IUIState {
         setFooterPanelResizeValue: (value: number) => void;
         setHiddenTabs: (hiddenTabs: string[]) => void;
         setFooterBarIsOpen: (open: boolean) => void;
-        setSelectedFooterLayerListItemId: (layerListItemId: string) => void;
     };
 }
 /**
@@ -70,7 +67,6 @@ export declare const useUICorePackagesComponents: () => TypeValidMapCorePackageP
 export declare const useUIFooterPanelResizeValue: () => number;
 export declare const useUIHiddenTabs: () => string[];
 export declare const useUINavbarComponents: () => TypeValidNavBarProps[];
-export declare const useUISelectedFooterLayerListItemId: () => string;
 export declare const useUIStoreActions: () => UIActions;
 export {};
 //# sourceMappingURL=ui-state.d.ts.map

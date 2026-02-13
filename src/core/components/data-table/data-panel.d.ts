@@ -1,6 +1,6 @@
 import type { TypeContainerBox } from '@/core/types/global-types';
 interface DataPanelType {
-    containerType?: TypeContainerBox;
+    containerType: TypeContainerBox;
 }
 /**
  * Build Data panel from map.
