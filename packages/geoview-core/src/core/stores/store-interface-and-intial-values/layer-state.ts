@@ -176,7 +176,6 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        * Gets the layer time dimension initial configuration.
        * @param {string} layerPath - The layer path
        * @returns {TimeDimension | undefined} Time dimension information
-       * @deprecated Deprecated, because it's using the deprecated function LegendEventProcessor.getLayerTimeDimension.
        */
       getLayerTimeDimension: (layerPath: string): TimeDimension | undefined => {
         try {
@@ -460,8 +459,19 @@ export const useLayerIconLayerSet = (layerPath: string): string[] => {
 };
 
 /**
+ * React hook that returns if the time dimension for a layer.
+ * @returns {TimeDimension | undefined} - The time dimension for the layer if any.
+ */
+export const useLayerTimeDimension = (layerPath: string): TimeDimension | undefined => {
+  // Hook
+  return useStore(useGeoViewStore(), (state) => {
+    return LegendEventProcessor.getLayerTimeDimension(state.mapId, layerPath);
+  });
+};
+
+/**
  * React hook that returns if the temporal modes for the layers.
- * @returns {Record<string, TemporalMode | undefined>} - The temporal mode of the dates for the layer.
+ * @returns {Record<string, TemporalMode>} - The temporal mode of the dates for the layer.
  */
 export const useLayerDateTemporalModes = (): Record<string, TemporalMode> => {
   // Hook

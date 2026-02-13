@@ -1,7 +1,7 @@
 import { pdf } from '@react-pdf/renderer';
 
 import { Document, Page, Text, View, Image, Svg, Path } from '@react-pdf/renderer';
-import { DateMgt } from '@/core/utils/date-mgt';
+import { type TemporalMode, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { FlattenedLegendItem, ElementFactory } from '@/core/components/export/utilities';
 import { ExportUtilities } from '@/core/components/export/utilities';
 import type { FileExportProps } from '@/core/components/export/export-modal';
@@ -21,7 +21,8 @@ interface ExportDocumentProps {
   northArrowRotation: number;
   disclaimer: string;
   attributions: string[];
-  date: string;
+  layerDateFormats: Record<string, TypeDisplayDateFormat>;
+  layerDateTemporalModes: Record<string, TemporalMode>;
   fittedColumns: FlattenedLegendItem[][];
   columnWidths?: number[];
   canvasWidth: number;
@@ -42,12 +43,28 @@ const pdfElementFactory: ElementFactory = {
  * Render legend items in columns for PDF export
  * @param {FlattenedLegendItem[][]} columns - Pre-organized legend items grouped into columns
  * @param {any} styles - Scaled styles for the PDF layout
- * @param {number[]} columnWidths - Optional array of column widths in pixels
+ * @param {Record<string, TypeDisplayDateFormat>} layerDateFormats - Date formats for layers
+ * @param {Record<string, TemporalMode>} layerDateTemporalModes - Temporal modes for layers
+ * @param {number[]} [columnWidths] - Optional array of column widths in pixels
  * @returns {JSX.Element} The rendered legend columns as JSX
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const renderLegendInRows = (columns: FlattenedLegendItem[][], styles: any, columnWidths?: number[]): JSX.Element => {
-  return ExportUtilities.renderLegendColumns(columns, pdfElementFactory, styles, PDF_STYLES, columnWidths);
+const renderLegendInRows = (
+  columns: FlattenedLegendItem[][],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  styles: any,
+  layerDateFormats: Record<string, TypeDisplayDateFormat>,
+  layerDateTemporalModes: Record<string, TemporalMode>,
+  columnWidths?: number[]
+): JSX.Element => {
+  return ExportUtilities.renderLegendColumns(
+    columns,
+    pdfElementFactory,
+    styles,
+    PDF_STYLES,
+    layerDateFormats,
+    layerDateTemporalModes,
+    columnWidths
+  );
 };
 
 /**
@@ -64,7 +81,8 @@ export function ExportDocument({
   northArrowRotation,
   disclaimer,
   attributions,
-  date,
+  layerDateFormats,
+  layerDateTemporalModes,
   fittedColumns,
   columnWidths,
   canvasWidth,
@@ -97,10 +115,12 @@ export function ExportDocument({
         <View style={PDF_STYLES.divider} />
 
         {fittedColumns && fittedColumns.length > 0 && (
-          <View style={PDF_STYLES.legendContainer}>{renderLegendInRows(fittedColumns, scaledStyles, columnWidths)}</View>
+          <View style={PDF_STYLES.legendContainer}>
+            {renderLegendInRows(fittedColumns, scaledStyles, layerDateFormats, layerDateTemporalModes, columnWidths)}
+          </View>
         )}
 
-        {ExportUtilities.renderFooter(disclaimer, attributions, date, pdfElementFactory, scaledStyles)}
+        {ExportUtilities.renderFooter(disclaimer, attributions, pdfElementFactory, scaledStyles)}
       </Page>
     </Document>
   );
@@ -113,8 +133,8 @@ export function ExportDocument({
  * @returns {Promise<string>} A string URL for the document
  */
 export async function createPDFMapUrl(mapId: string, params: FileExportProps): Promise<string> {
-  const { exportTitle, disclaimer } = params;
-  const mapInfo = await ExportUtilities.getMapInfo(mapId, exportTitle, disclaimer);
+  const { exportTitle, disclaimer, layerDateFormats, layerDateTemporalModes } = params;
+  const mapInfo = await ExportUtilities.getMapInfo(mapId, exportTitle, disclaimer, layerDateFormats, layerDateTemporalModes);
 
   // Use pre-calculated canvas height from getMapInfo (measured during preview)
   const blob = await pdf(
@@ -122,7 +142,8 @@ export async function createPDFMapUrl(mapId: string, params: FileExportProps): P
       {...mapInfo}
       exportTitle={exportTitle}
       disclaimer={disclaimer}
-      date={DateMgt.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A')}
+      layerDateFormats={layerDateFormats}
+      layerDateTemporalModes={layerDateTemporalModes}
       canvasWidth={mapInfo.canvasWidth}
       canvasHeight={mapInfo.canvasHeight}
     />

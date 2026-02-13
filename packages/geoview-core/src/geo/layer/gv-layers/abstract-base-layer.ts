@@ -310,7 +310,7 @@ export abstract class AbstractBaseGVLayer {
    * the group that directly contains this layer. If the layer is nested
    * inside multiple groups, only the immediate parent group is returned.
    * @param {GVGroupLayer[]} groupLayers - The root-level group layers to
-   *   search through when looking for this layer’s parent.
+   *   search through when looking for this layer's parent.
    * @returns {GVGroupLayer | undefined} The direct parent group layer, or
    *   `undefined` if this layer is not a child of any group.
    */

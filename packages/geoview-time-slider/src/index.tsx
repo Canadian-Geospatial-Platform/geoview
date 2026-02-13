@@ -185,9 +185,28 @@ class TimeSliderPlugin extends FooterPlugin {
    * @param layerPath - Path identifying the target layer
    * @param displayDateFormat - Date format configuration to apply
    */
-  setDisplayDateFormat(layerPath: string, displayDateFormat: TypeDisplayDateFormat): void {
+  setDisplayDateFormat(layerPath: string, displayDateFormat: TypeDisplayDateFormat | string): void {
+    // Make sure of the input format
+    let displayDateFormatToSet: TypeDisplayDateFormat = displayDateFormat as TypeDisplayDateFormat;
+    if (typeof displayDateFormat === 'string') displayDateFormatToSet = { en: displayDateFormat, fr: displayDateFormat };
+
     // Redirect to processor
-    TimeSliderEventProcessor.setDisplayDateFormat(this.mapViewer.mapId, layerPath, displayDateFormat);
+    TimeSliderEventProcessor.setDisplayDateFormat(this.mapViewer.mapId, layerPath, displayDateFormatToSet);
+  }
+
+  /**
+   * Sets the date display format for a given layer.
+   * This controls how date values are rendered in the time slider UI.
+   * @param layerPath - Path identifying the target layer
+   * @param displayDateFormatShort - Date format configuration to apply
+   */
+  setDisplayDateFormatShort(layerPath: string, displayDateFormatShort: TypeDisplayDateFormat | string): void {
+    // Make sure of the input format
+    let displayDateFormatToSet: TypeDisplayDateFormat = displayDateFormatShort as TypeDisplayDateFormat;
+    if (typeof displayDateFormatShort === 'string') displayDateFormatToSet = { en: displayDateFormatShort, fr: displayDateFormatShort };
+
+    // Redirect to processor
+    TimeSliderEventProcessor.setDisplayDateFormatShort(this.mapViewer.mapId, layerPath, displayDateFormatToSet);
   }
 
   /**

@@ -1395,9 +1395,13 @@ export class LayerApi {
    * @param {TypeDisplayDateFormat} displayDateFormat - The date format to apply
    * for displaying date values associated with this layer.
    */
-  setLayerDisplayDateFormat(layerPath: string, displayDateFormat: TypeDisplayDateFormat): void {
+  setLayerDisplayDateFormat(layerPath: string, displayDateFormat: TypeDisplayDateFormat | string): void {
+    // Make sure of the input format
+    let displayDateFormatToSet: TypeDisplayDateFormat = displayDateFormat as TypeDisplayDateFormat;
+    if (typeof displayDateFormat === 'string') displayDateFormatToSet = { en: displayDateFormat, fr: displayDateFormat };
+
     // Redirect
-    LegendEventProcessor.setLayerDisplayDateFormatInStore(this.getMapId(), layerPath, displayDateFormat);
+    LegendEventProcessor.setLayerDisplayDateFormatInStore(this.getMapId(), layerPath, displayDateFormatToSet);
   }
 
   /**
@@ -1409,9 +1413,13 @@ export class LayerApi {
    * @param {TypeDisplayDateFormat} displayDateFormat - The date format to apply
    * for displaying date values associated with this layer.
    */
-  setLayerDisplayDateFormatShort(layerPath: string, displayDateFormat: TypeDisplayDateFormat): void {
+  setLayerDisplayDateFormatShort(layerPath: string, displayDateFormat: TypeDisplayDateFormat | string): void {
+    // Make sure of the input format
+    let displayDateFormatToSet: TypeDisplayDateFormat = displayDateFormat as TypeDisplayDateFormat;
+    if (typeof displayDateFormat === 'string') displayDateFormatToSet = { en: displayDateFormat, fr: displayDateFormat };
+
     // Redirect
-    LegendEventProcessor.setLayerDisplayDateFormatShortInStore(this.getMapId(), layerPath, displayDateFormat);
+    LegendEventProcessor.setLayerDisplayDateFormatShortInStore(this.getMapId(), layerPath, displayDateFormatToSet);
   }
 
   /**
@@ -1828,7 +1836,7 @@ export class LayerApi {
    *     indexed by their `layerPath`.
    *  2. Registers internal event handlers for the new layer.
    *  3. Emits a "layer created" event so external code can bind to it immediately.
-   *  4. Calls the layer’s `init()` method to finalize initialization.
+   *  4. Calls the layer's `init()` method to finalize initialization.
    * @param {AbstractGeoViewLayer} geoviewLayer - The parent or context
    *   GeoView layer associated with this creation event.
    * @param {LayerGVCreatedEvent} event - The event containing the newly

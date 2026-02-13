@@ -6,11 +6,6 @@ import type { TypeAliasLookup, TypeOutfields } from '@/api/types/map-schema-type
 
 export class GVLayerUtilities {
   /**
-  /** Regular expression for matching ISO date strings */
-  static readonly REGEX_ISO_DATE = /date\s*'(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z|[+-][0-2]\d:[0-5]\d)?)'/gi;
-  static readonly REGEX_ISO_DATE_NO_PREFIX = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})/gi;
-
-  /**
    * Normalizes ISO 8601 datetime literals in a filter string for use with
    * ESRI Dynamic (MapServer) layers.
    * This function:
@@ -40,7 +35,7 @@ export class GVLayerUtilities {
   static parseDateTimeValuesEsriDynamic(filter: string, timezone?: TimeIANA, inputTemporalMode?: TemporalMode): string {
     // Match ISO 8601 datetimes with optional milliseconds + timezone
     let filterValueToUse = filter;
-    const matches = [...filterValueToUse.matchAll(this.REGEX_ISO_DATE)];
+    const matches = [...filterValueToUse.matchAll(DateMgt.REGEX_ISO_DATE_WITH_PREFIX)];
 
     // Replace from end to start to preserve indexes
     matches.reverse().forEach((match) => {
@@ -97,7 +92,7 @@ export class GVLayerUtilities {
   static parseDateTimeValuesEsriImageOrWMS(filter: string, timezone?: TimeIANA, inputTemporalMode?: TemporalMode): string {
     // Match ISO 8601 datetimes with optional milliseconds + timezone
     let filterValueToUse = filter;
-    const matches = [...filterValueToUse.matchAll(this.REGEX_ISO_DATE)];
+    const matches = [...filterValueToUse.matchAll(DateMgt.REGEX_ISO_DATE_WITH_PREFIX)];
 
     // Replace from end to start to preserve indexes
     matches.reverse().forEach((match) => {

@@ -128,8 +128,10 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     setColumnsFiltersVisibility(newValue, layerPath);
   };
 
+  // TODO: ALEX - Uncouple dayjs from data-table
   const isDayjs = (v: unknown): v is Dayjs => typeof v === 'object' && v !== null && 'isValid' in v;
 
+  // TODO: ALEX - Uncouple dayjs from data-table
   const isDateRange = useCallback((v: unknown): v is [Dayjs | null, Dayjs | null] => Array.isArray(v) && v.some(isDayjs), []);
 
   /**
@@ -283,7 +285,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
           filterVariant: 'date',
           muiFilterDatePickerProps: {
             timezone: displayDateTimezone,
-            format: 'YYYY-MM-DD',
+            format: 'YYYY-MM-DD', // TODO: ALEX - CHECK which format muiFilterDatePickerProps supports and see if we can use the same as the application
             // NOTE: reason for type cast as undefined as x-mui-datepicker prop type saying Date cant be assigned to undefined.
             minDate: DateMgt.createDayjs('1600-01-01') as unknown as undefined,
             slotProps: {

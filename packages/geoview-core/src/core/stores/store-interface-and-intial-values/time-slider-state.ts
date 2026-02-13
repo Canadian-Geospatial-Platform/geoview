@@ -24,6 +24,7 @@ export interface ITimeSliderState {
     setDescription: (layerPath: string, description: string) => void;
     setDelay: (layerPath: string, delay: number) => void;
     setDisplayDateFormat: (layerPath: string, displayDateFormat: TypeDisplayDateFormat) => void;
+    setDisplayDateFormatShort: (layerPath: string, displayDateFormatShort: TypeDisplayDateFormat) => void;
     setDisplayDateTimezone: (layerPath: string, displayDateTimezone: TimeIANA) => void;
     setFiltering: (layerPath: string, filter: boolean) => void;
     setLocked: (layerPath: string, locked: boolean) => void;
@@ -40,6 +41,7 @@ export interface ITimeSliderState {
     setDescription: (layerPath: string, description: string) => void;
     setDelay: (layerPath: string, delay: number) => void;
     setDisplayDateFormat: (layerPath: string, displayDateFormat: TypeDisplayDateFormat) => void;
+    setDisplayDateFormatShort: (layerPath: string, displayDateFormatShort: TypeDisplayDateFormat) => void;
     setDisplayDateTimezone: (layerPath: string, displayDateTimezone: TimeIANA) => void;
     setFiltering: (layerPath: string, filter: boolean) => void;
     setLocked: (layerPath: string, locked: boolean) => void;
@@ -104,6 +106,16 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
       setDisplayDateFormat: (layerPath: string, displayDateFormat: TypeDisplayDateFormat): void => {
         // Redirect to processor
         return TimeSliderEventProcessor.setDisplayDateFormat(get().mapId, layerPath, displayDateFormat);
+      },
+
+      /**
+       * Sets the display date format short.
+       * @param {TypeDisplayDateFormat} displayDateFormatShort - The display date format short.
+       * @returns {void}
+       */
+      setDisplayDateFormatShort: (layerPath: string, displayDateFormatShort: TypeDisplayDateFormat): void => {
+        // Redirect to processor
+        return TimeSliderEventProcessor.setDisplayDateFormatShort(get().mapId, layerPath, displayDateFormatShort);
       },
 
       /**
@@ -212,6 +224,17 @@ export function initializeTimeSliderState(set: TypeSetStore, get: TypeGetStore):
       setDisplayDateFormat: (layerPath: string, displayDateFormat: TypeDisplayDateFormat): void => {
         const sliderLayers = get().timeSliderState.timeSliderLayers;
         sliderLayers[layerPath].displayDateFormat = displayDateFormat;
+        set({
+          timeSliderState: {
+            ...get().timeSliderState,
+            timeSliderLayers: { ...sliderLayers },
+          },
+        });
+      },
+
+      setDisplayDateFormatShort: (layerPath: string, displayDateFormatShort: TypeDisplayDateFormat): void => {
+        const sliderLayers = get().timeSliderState.timeSliderLayers;
+        sliderLayers[layerPath].displayDateFormatShort = displayDateFormatShort;
         set({
           timeSliderState: {
             ...get().timeSliderState,

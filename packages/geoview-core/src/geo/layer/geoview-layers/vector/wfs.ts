@@ -632,7 +632,7 @@ export class WFS extends AbstractGeoViewVector {
 
   /**
    * Determines the simplified data type of a specified field from a WFS layer configuration.
-   * Extracts the field definition from the layer’s metadata, interprets its WFS type
+   * Extracts the field definition from the layer's metadata, interprets its WFS type
    * (e.g., `xsd:int`, `xsd:date`), and maps it to a normalized internal type
    * (`'string'`, `'number'`, or `'date'`).
    * @param {string} fieldName - The name of the field whose type should be retrieved.

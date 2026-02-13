@@ -267,6 +267,55 @@
           <code>cgpv.api.getMapViewer('map1').layer.getGeoviewLayer('geojsonLYR1/base-group/polygons.json').getLayerFilters().getTimeFilter();</code>
           <code>cgpv.api.getMapViewer('map1').layer.getGeoviewLayer('geojsonLYR1/base-group/polygons.json').getLayerFilters().getFilterEquation();</code>
         </li>
+        <li>
+          <button class="btn btn-primary" id="changeDisplayDateTimezoneUTC">Set Display Date Timezone UTC</button>
+          <button class="btn btn-primary" id="changeDisplayDateTimezoneLocal">Set Display Date Timezone local</button>
+          <button class="btn btn-primary" id="changeDisplayDateTimezoneEdmonton">Set Display Date Timezone America/Edmonton</button>
+          <br />
+          <code>cgpv.api.getMapViewer('map1').setDisplayDateTimezone('UTC');</code>
+          <code>cgpv.api.getMapViewer('map1').setDisplayDateTimezone('local');</code>
+          <code>cgpv.api.getMapViewer('map1').setDisplayDateTimezone('America/Edmonton');</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="changeDisplayDateFormatLong">Set Display Date Format to Long</button>
+          <button class="btn btn-primary" id="changeDisplayDateFormatNoTime">Set Display Date Format to long no time</button>
+          <button class="btn btn-primary" id="changeDisplayDateFormatToYMDTime">Set Display Date Format to YYYY-MM-DD @ HH:mm</button>
+          <button class="btn btn-primary" id="changeDisplayDateFormatShortToYOnly">Set Display Date Format to YYYY</button>
+          <br />
+          <code>cgpv.api.getMapViewer('map1').layer.setLayerDisplayDateFormat('geojsonLYR1/base-group/polygons.json', { en: 'MMM D, YYYY @ HH:mm', fr: 'D MMM, YYYY  @ HH:mm'});</code>
+          <code>cgpv.api.getMapViewer('map1').layer.setLayerDisplayDateFormat('geojsonLYR1/base-group/polygons.json', { en: 'MMM D, YYYY', fr: 'D MMM, YYYY'});</code>
+          <code>cgpv.api.getMapViewer('map1').layer.setLayerDisplayDateFormat('geojsonLYR1/base-group/polygons.json', 'YYYY-MM-DD @ HH:mm');</code>
+          <code>cgpv.api.getMapViewer('map1').layer.setLayerDisplayDateFormatShort('geojsonLYR1/base-group/polygons.json', 'YYYY');</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="changeDisplayDateTemporalInstant">Set Display Date Temporal mode to instant</button>
+          <button class="btn btn-primary" id="changeDisplayDateTemporalCalendar">Set Display Date Temporal mode to calendar</button>
+          <br />
+          <code>cgpv.api.getMapViewer('map1').layer.setLayerDateTemporalMode('geojsonLYR1/base-group/polygons.json', 'instant');</code>
+          <code>cgpv.api.getMapViewer('map1').layer.setLayerDateTemporalMode('geojsonLYR1/base-group/polygons.json', 'calendar');</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="changeTimeSliderDateDisplayFormatLong">Set Time Slider Date Display Format to Long</button>
+          <button class="btn btn-primary" id="changeTimeSliderDateDisplayFormatIsoWithTime">Set Time Slider Date Display Format to ISO with Time</button>
+          <button class="btn btn-primary" id="changeTimeSliderDateDisplayFormatShortToIsoDate">Set Time Slider Date Display Format Short to ISO Date</button>
+          <button class="btn btn-primary" id="changeTimeSliderDateDisplayFormatShortToIsoYearOnly">Set Time Slider Date Display Format Short to ISO Year Only</button>
+          <br />
+          <code>cgpv.api.getMapViewer('map1').getPlugin('time-slider').setDisplayDateFormat('historical-flood-dynamic/0', { en: 'MMM D, YYYY @ HH:mm', fr: 'D MMM YYYY @ HH:mm'});</code>
+          <code>cgpv.api.getMapViewer('map1').getPlugin('time-slider').setDisplayDateFormat('historical-flood-dynamic/0', 'YYYY-MM-DD @ HH:mm');</code>
+          <code>cgpv.api.getMapViewer('map1').getPlugin('time-slider').setDisplayDateFormatShort('historical-flood-dynamic/0', 'YYYY-MM-DD');</code>
+          <code>cgpv.api.getMapViewer('map1').getPlugin('time-slider').setDisplayDateFormatShort('historical-flood-dynamic/0', 'YYYY');</code>
+        </li>
+        <li>
+          <button class="btn btn-primary" id="changeTimeSliderDateDisplayTimezoneUTC">Set Time Slider Date Display Timezone to UTC</button>
+          <button class="btn btn-primary" id="changeTimeSliderDateDisplayTimezoneEdmonton">Set Time Slider Date Display Timezone to Edmonton</button>
+          <button class="btn btn-primary" id="changeTimeSliderDateDisplayTimezoneLocal">Set Time Slider Date Display Timezone to local</button>
+          <br />
+          <span style="font-size: small;font-style: italic;">* In calendar temporal mode, this will have no effect</span>
+          <br />
+          <code>cgpv.api.getMapViewer('map1').getPlugin('time-slider').setDisplayDateTimezone('historical-flood-dynamic/0', 'UTC');</code>
+          <code>cgpv.api.getMapViewer('map1').getPlugin('time-slider').setDisplayDateTimezone('historical-flood-dynamic/0', 'America/Edmonton');</code>
+          <code>cgpv.api.getMapViewer('map1').getPlugin('time-slider').setDisplayDateTimezone('historical-flood-dynamic/0', 'local');</code>
+        </li>
       </ul>
     </div>
 
@@ -562,6 +611,22 @@
       const getCurrentFiltersButton = document.getElementById('Get-Current-Filters');
       const proj = document.getElementById('Dist-proj');
       const geometryString = document.getElementById('Dist-geom');
+      const changeDisplayDateTimezoneUTC = document.getElementById('changeDisplayDateTimezoneUTC');
+      const changeDisplayDateTimezoneLocal = document.getElementById('changeDisplayDateTimezoneLocal');
+      const changeDisplayDateTimezoneEdmonton = document.getElementById('changeDisplayDateTimezoneEdmonton');
+      const changeDisplayDateFormatLong = document.getElementById('changeDisplayDateFormatLong');
+      const changeDisplayDateFormatNoTime = document.getElementById('changeDisplayDateFormatNoTime');
+      const changeDisplayDateFormatToYMDTime = document.getElementById('changeDisplayDateFormatToYMDTime');
+      const changeDisplayDateFormatShortToYOnly = document.getElementById('changeDisplayDateFormatShortToYOnly');
+      const changeDisplayDateTemporalInstant = document.getElementById('changeDisplayDateTemporalInstant');
+      const changeDisplayDateTemporalCalendar = document.getElementById('changeDisplayDateTemporalCalendar');
+      const changeTimeSliderDateDisplayFormatLong = document.getElementById('changeTimeSliderDateDisplayFormatLong');
+      const changeTimeSliderDateDisplayFormatIsoWithTime = document.getElementById('changeTimeSliderDateDisplayFormatIsoWithTime');
+      const changeTimeSliderDateDisplayFormatShortToIsoDate = document.getElementById('changeTimeSliderDateDisplayFormatShortToIsoDate');
+      const changeTimeSliderDateDisplayFormatShortToIsoYearOnly = document.getElementById('changeTimeSliderDateDisplayFormatShortToIsoYearOnly');
+      const changeTimeSliderDateDisplayTimezoneUTC = document.getElementById('changeTimeSliderDateDisplayTimezoneUTC');
+      const changeTimeSliderDateDisplayTimezoneEdmonton = document.getElementById('changeTimeSliderDateDisplayTimezoneEdmonton');
+      const changeTimeSliderDateDisplayTimezoneLocal = document.getElementById('changeTimeSliderDateDisplayTimezoneLocal');
 
       const markers = [
         {
@@ -881,12 +946,70 @@
       // Get-Current-Filters Button================================================================================================
       // add an event listener when a button is clicked
       getCurrentFiltersButton.addEventListener('click', () => {
-        console.log(cgpv.api.getMapViewer('map1').layer.getGeoviewLayer('geojsonLYR1/base-group/polygons.json').getLayerFilters().getAllFilters());
+        console.log(cgpv.api.getMapViewer(mapId).layer.getGeoviewLayer('geojsonLYR1/base-group/polygons.json').getLayerFilters().getAllFilters());
       });
 
       // add an event listener when a layer path filter input is changed
       filterLayerPathInput.addEventListener('input', () => {
         loadFiltersUI();
+      });
+
+      // Change display date timezone================================================================================================
+      changeDisplayDateTimezoneUTC.addEventListener('click', () => {
+        cgpv.api.getMapViewer(mapId).setDisplayDateTimezone('UTC');
+      });
+      changeDisplayDateTimezoneLocal.addEventListener('click', () => {
+        cgpv.api.getMapViewer(mapId).setDisplayDateTimezone('local');
+      });
+      changeDisplayDateTimezoneEdmonton.addEventListener('click', () => {
+        cgpv.api.getMapViewer(mapId).setDisplayDateTimezone('America/Edmonton');
+      });
+
+      // Change display date format================================================================================================
+      changeDisplayDateFormatLong.addEventListener('click', () => {
+        cgpv.api.getMapViewer(mapId).layer.setLayerDisplayDateFormat('geojsonLYR1/base-group/polygons.json', { en: 'MMM D, YYYY @ HH:mm', fr: 'D MMM, YYYY  @ HH:mm' });
+      });
+      changeDisplayDateFormatNoTime.addEventListener('click', () => {
+        cgpv.api.getMapViewer(mapId).layer.setLayerDisplayDateFormat('geojsonLYR1/base-group/polygons.json', { en: 'MMM D, YYYY', fr: 'D MMM, YYYY' });
+      });
+      changeDisplayDateFormatToYMDTime.addEventListener('click', () => {
+        cgpv.api.getMapViewer(mapId).layer.setLayerDisplayDateFormat('geojsonLYR1/base-group/polygons.json', 'YYYY-MM-DD @ HH:mm');
+      });
+      changeDisplayDateFormatShortToYOnly.addEventListener('click', () => {
+        cgpv.api.getMapViewer(mapId).layer.setLayerDisplayDateFormatShort('geojsonLYR1/base-group/polygons.json', 'YYYY');
+      });
+
+      // Change display date temporal mode================================================================================================
+      changeDisplayDateTemporalInstant.addEventListener('click', () => {
+        cgpv.api.getMapViewer(mapId).layer.setLayerDateTemporalMode('geojsonLYR1/base-group/polygons.json', 'instant');
+      });
+      changeDisplayDateTemporalCalendar.addEventListener('click', () => {
+        cgpv.api.getMapViewer(mapId).layer.setLayerDateTemporalMode('geojsonLYR1/base-group/polygons.json', 'calendar');
+      });
+
+      // Change Time Slider display date format================================================================================================
+      changeTimeSliderDateDisplayFormatLong.addEventListener('click', () => {
+        cgpv.api.getMapViewer(mapId).getPlugin('time-slider').setDisplayDateFormat('historical-flood-dynamic/0', { en: 'MMM D, YYYY', fr: 'D MMM, YYYY' });
+      });
+      changeTimeSliderDateDisplayFormatIsoWithTime.addEventListener('click', () => {
+        cgpv.api.getMapViewer(mapId).getPlugin('time-slider').setDisplayDateFormat('historical-flood-dynamic/0', 'YYYY-MM-DD @ HH:mm');
+      });
+      changeTimeSliderDateDisplayFormatShortToIsoDate.addEventListener('click', () => {
+        cgpv.api.getMapViewer(mapId).getPlugin('time-slider').setDisplayDateFormatShort('historical-flood-dynamic/0', 'YYYY-MM-DD');
+      });
+      changeTimeSliderDateDisplayFormatShortToIsoYearOnly.addEventListener('click', () => {
+        cgpv.api.getMapViewer(mapId).getPlugin('time-slider').setDisplayDateFormatShort('historical-flood-dynamic/0', 'YYYY');
+      });
+
+      // Change Time Slider display timezone================================================================================================
+      changeTimeSliderDateDisplayTimezoneUTC.addEventListener('click', () => {
+        cgpv.api.getMapViewer(mapId).getPlugin('time-slider').setDisplayDateTimezone('historical-flood-dynamic/0', 'UTC');
+      });
+      changeTimeSliderDateDisplayTimezoneEdmonton.addEventListener('click', () => {
+        cgpv.api.getMapViewer(mapId).getPlugin('time-slider').setDisplayDateTimezone('historical-flood-dynamic/0', 'America/Edmonton');
+      });
+      changeTimeSliderDateDisplayTimezoneLocal.addEventListener('click', () => {
+        cgpv.api.getMapViewer(mapId).getPlugin('time-slider').setDisplayDateTimezone('historical-flood-dynamic/0', 'local');
       });
 
       // create snippets

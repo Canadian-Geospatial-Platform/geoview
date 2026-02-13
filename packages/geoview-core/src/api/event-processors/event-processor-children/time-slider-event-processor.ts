@@ -229,18 +229,6 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     const singleHandle = configTimeDimension?.singleHandle ?? timeDimensionInfo?.singleHandle ?? false;
     const nearestValues = configTimeDimension?.nearestValues ?? timeDimensionInfo?.nearestValues;
 
-    // The date temporal mode prioritized: plugin config > time dimension config
-    const serviceDateTemporalMode = configTimeDimension?.serviceDateTemporalMode ?? timeDimensionInfo?.serviceDateTemporalMode;
-
-    // The display date format prioritized: plugin config > time dimension config
-    const displayDateFormat = configTimeDimension?.displayDateFormat ?? timeDimensionInfo?.displayDateFormat;
-
-    // The display date format prioritized: plugin config > time dimension config
-    const displayDateFormatShort = configTimeDimension?.displayDateFormatShort ?? timeDimensionInfo?.displayDateFormatShort;
-
-    // The display date timezone prioritized: plugin config > time dimension config
-    const displayDateTimezone = configTimeDimension?.displayDateTimezone ?? timeDimensionInfo?.displayDateTimezone;
-
     // Check if the time slider info is associated with another time slider
     const isMainLayerPath = timesliderConfig ? timesliderConfig.layerPaths[0] === layerConfig.layerPath : true;
 
@@ -276,10 +264,10 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       delay: timesliderConfig?.delay || 1000,
       discreteValues: nearestValues === 'discrete',
       description: timesliderConfig?.description,
-      displayDateFormat,
-      displayDateFormatShort,
-      serviceDateTemporalMode,
-      displayDateTimezone,
+      displayDateFormat: configTimeDimension?.displayDateFormat,
+      displayDateFormatShort: configTimeDimension?.displayDateFormatShort,
+      serviceDateTemporalMode: configTimeDimension?.serviceDateTemporalMode,
+      displayDateTimezone: configTimeDimension?.displayDateTimezone,
       field,
       fieldAlias,
       filtering: timesliderConfig?.filtering !== false,
@@ -328,6 +316,16 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
    */
   static setDisplayDateFormat(mapId: string, layerPath: string, displayDateFormat: TypeDisplayDateFormat): void {
     this.getTimeSliderState(mapId).setterActions.setDisplayDateFormat(layerPath, displayDateFormat);
+  }
+
+  /**
+   * Updates the display date format for a specific layer in the time slider state.
+   * @param mapId - Identifier of the map viewer instance
+   * @param layerPath - Path identifying the target layer
+   * @param displayDateFormatShort - Date format configuration to store
+   */
+  static setDisplayDateFormatShort(mapId: string, layerPath: string, displayDateFormatShort: TypeDisplayDateFormat): void {
+    this.getTimeSliderState(mapId).setterActions.setDisplayDateFormatShort(layerPath, displayDateFormatShort);
   }
 
   /**

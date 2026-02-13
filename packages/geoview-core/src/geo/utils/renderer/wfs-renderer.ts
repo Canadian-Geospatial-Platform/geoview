@@ -958,7 +958,7 @@ export abstract class WfsRenderer {
   /**
    * Computes the bounding box–based `viewBox` for a given SVG string.
    * This method parses the provided SVG markup, temporarily attaches it to
-   * an off-screen DOM element, and uses the browser’s native `getBBox()` API
+   * an off-screen DOM element, and uses the browser's native `getBBox()` API
    * to measure the actual drawing extent of all SVG contents.
    * The result can be used directly as a `viewBox` value for re-rendering or
    * scaling the SVG proportionally.

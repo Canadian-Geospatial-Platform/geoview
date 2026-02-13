@@ -103,8 +103,5 @@
     "selectedTimeSliderLayerPath": "historical-flood-dynamic/0"
   },
   "corePackages": [],
-  "externalPackages": [],
-  "globalSettings": {
-    "displayDateMode": "iso"
-  }
+  "externalPackages": []
 }

@@ -99,8 +99,11 @@ export type TimeDimensionESRI = {
 };
 
 /** Utility functions */
+/** Discrete is when the values are all written down specifically with comma separator */
 const isDiscreteRange = (ogcTimeDimension: string): boolean => ogcTimeDimension.split(',').length > 1;
+/** Absolute is start/end/interval */
 const isAbsoluteRange = (ogcTimeDimension: string): boolean => ogcTimeDimension.split('/').length === 3;
+/** Relative is start/end without intervals */
 const isRelativeRange = (ogcTimeDimension: string): boolean => ogcTimeDimension.split('/').length === 2;
 
 /**
@@ -133,7 +136,7 @@ export abstract class DateMgt {
   static readonly ISO_DATETIME_FORMAT_MINUTES = 'YYYY-MM-DDTHH:mm';
 
   /** The display format for international ISO date only for English and French */
-  static readonly ISO_DISPLAY_DATE_FORMAT_MINUTES: TypeDisplayDateFormat = { en: 'YYYY-MM-DD', fr: 'YYYY-MM-DD' };
+  static readonly ISO_DISPLAY_DATE_FORMAT: TypeDisplayDateFormat = { en: 'YYYY-MM-DD', fr: 'YYYY-MM-DD' };
 
   /** A Default time only format for English and French */
   static readonly ISO_DISPLAY_YEAR_ONLY_FORMAT: TypeDisplayDateFormat = { en: 'YYYY', fr: 'YYYY' };
@@ -162,11 +165,16 @@ export abstract class DateMgt {
   /** Static constant indicating the local IANA time zone. */
   static readonly TIME_IANA_LOCAL = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+  /** Regular expression for matching ISO date strings */
+  static readonly REGEX_ISO_DATE = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})/gi;
+  static readonly REGEX_ISO_DATE_WITH_PREFIX =
+    /date\s*'(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z|[+-][0-2]\d:[0-5]\d)?)'/gi;
+
   /** Regex used to spot a timezone inside a date input */
-  static readonly #HAS_TIMEZONE_IN_DATE_REGEX = /([Zz]|[+-]\d{2}:\d{2})$/;
+  static readonly #REGEX_HAS_TIMEZONE_IN_DATE = /([Zz]|[+-]\d{2}:\d{2})$/;
 
   /** Regex used to spot a time component inside a date format string */
-  static readonly #HAS_TIMEZONE_IN_FORMAT_REGEX =
+  static readonly #REGEX_HAS_TIME_COMPONENTS_IN_FORMAT =
     /(\[[^\]]*?])|(?:^|[^A-Za-z])(H{1,2}|h{1,2}|k{1,2}|m{1,2}|s{1,2}|S{1,3}|A|a|X|x)(?=[^A-Za-z]|$)/;
 
   /** The default input formats to append to the specific input formats when trying to read a date in a non-ISO format */
@@ -214,7 +222,7 @@ export abstract class DateMgt {
 
       default:
         return {
-          dateFormat: DateMgt.ISO_DISPLAY_DATE_FORMAT_MINUTES,
+          dateFormat: DateMgt.ISO_DISPLAY_DATE_FORMAT,
           datetimeFormat: DateMgt.ISO_DISPLAY_DATETIME_FORMAT_MINUTES,
         };
     }
@@ -310,7 +318,7 @@ export abstract class DateMgt {
     let parsed = this.#createDayjsFixCustomParser(date, formats, strict);
 
     // Check if the date string has an explicit timezone
-    const hasTZ = this.#HAS_TIMEZONE_IN_DATE_REGEX.test(date);
+    const hasTZ = this.#REGEX_HAS_TIMEZONE_IN_DATE.test(date);
 
     // If no explicit timezone, assign the one in input
     if (!hasTZ) {
@@ -348,7 +356,7 @@ export abstract class DateMgt {
     let parsed = this.#createDayjsFixCustomParser(date, formats, strict);
 
     // Check if the date string has an explicit timezone
-    const hasTZ = this.#HAS_TIMEZONE_IN_DATE_REGEX.test(date);
+    const hasTZ = this.#REGEX_HAS_TIMEZONE_IN_DATE.test(date);
 
     // If has explicit timezone, transform to UTC timezone for the calendar mode
     if (hasTZ) {
@@ -561,8 +569,8 @@ export abstract class DateMgt {
    * representing the range in the format "date1 / date2".
    * @param {DateLike} date1 - The first date (or the only date) to format.
    * @param {TypeDisplayDateFormat} dateFormat - Object containing the display format for each language.
-   * @param {TypeDisplayLanguage} language - Language code to select the correct format from `dateFormat`.
-   * @param {TimeIANA} dateTimezone - The IANA timezone to use for output formatting.
+   * @param {TypeDisplayLanguage} locale - Language code to select the correct format from `dateFormat`.
+   * @param {TimeIANA} outputTimezone - The IANA timezone to use for output formatting.
    * @param {TemporalMode} inputTemporalMode - Whether to interpret the input as 'calendar' or 'instant'.
    * @param {DateLike} [date2] - Optional second date for formatting a date range.
    * @returns {string} A formatted date string or a formatted date range string.
@@ -571,21 +579,53 @@ export abstract class DateMgt {
   static formatDateOrDateRange(
     date1: DateLike,
     dateFormat: TypeDisplayDateFormat,
-    language: TypeDisplayLanguage,
-    dateTimezone: TimeIANA,
-    inputTemporalMode: TemporalMode,
+    locale: TypeDisplayLanguage,
+    outputTimezone?: TimeIANA,
+    inputTemporalMode?: TemporalMode,
     date2?: DateLike
   ): string {
     // Read the display date format
-    const format = dateFormat[language];
+    const format = dateFormat[locale];
 
     // If no second date
     if (!date2) {
-      return `${DateMgt.formatDate(date1, format, language, dateTimezone, inputTemporalMode)}`;
+      return `${DateMgt.formatDate(date1, format, locale, outputTimezone, inputTemporalMode)}`;
     }
 
     // Return a range
-    return `${DateMgt.formatDate(date1, format, language, dateTimezone, inputTemporalMode)} / ${DateMgt.formatDate(date2, format, language, dateTimezone, inputTemporalMode)}`;
+    return `${DateMgt.formatDate(date1, format, locale, outputTimezone, inputTemporalMode)} / ${DateMgt.formatDate(date2, format, locale, outputTimezone, inputTemporalMode)}`;
+  }
+
+  /**
+   * Formats a single date or a date range according to the specified
+   * display format, language, timezone, and temporal mode.
+   * If a second date is provided, the function returns a string
+   * representing the range in the format "date1 / date2".
+   * @param {DateLike} date1 - The first date (or the only date) to format.
+   * @param {TypeDisplayDateFormat} dateFormat - Object containing the display format for each language.
+   * @param {TemporalMode} inputTemporalMode - Whether to interpret the input as 'calendar' or 'instant'.
+   * @param {DateLike} [date2] - Optional second date for formatting a date range.
+   * @returns {string} A formatted date string or a formatted date range string.
+   * @static
+   */
+  static formatISODateOrDateRange(
+    date1: DateLike,
+    referenceFormat: TypeDisplayDateFormat,
+    inputTemporalMode?: TemporalMode,
+    date2?: DateLike
+  ): string {
+    // If the reference format has time components
+    let isoFormat = DateMgt.ISO_DISPLAY_DATE_FORMAT;
+    if (
+      this.#REGEX_HAS_TIME_COMPONENTS_IN_FORMAT.test(referenceFormat.en) ||
+      this.#REGEX_HAS_TIME_COMPONENTS_IN_FORMAT.test(referenceFormat.fr)
+    ) {
+      // We want an iso format with time components
+      isoFormat = DateMgt.ISO_DISPLAY_DATETIME_FORMAT_MINUTES;
+    }
+
+    // Redirect
+    return this.formatDateOrDateRange(date1, isoFormat, 'en', DateMgt.TIME_UTC, inputTemporalMode, date2);
   }
 
   /**
@@ -642,7 +682,7 @@ export abstract class DateMgt {
   static guessDisplayDateInformationFromServiceDateFormat(serviceDateFormat: string | undefined): GuessedTimeInformation | undefined {
     try {
       // If the serviceDateFormat has time components
-      if (serviceDateFormat && this.#HAS_TIMEZONE_IN_FORMAT_REGEX.test(serviceDateFormat)) {
+      if (serviceDateFormat && this.#REGEX_HAS_TIME_COMPONENTS_IN_FORMAT.test(serviceDateFormat)) {
         // We assume it's in local time and instant temporal mode
         return {
           serviceDateTemporalMode: 'instant',
@@ -930,9 +970,9 @@ export abstract class DateMgt {
   /**
    * Fixes an issue when using the customParser plugin and the 'Z' suffix in the date input not being recognized as meaning UTC timezone.
    * To reproduce the issue, try calling:
-   * const toto = dayjs('2026-01-19T17:54:00Z', this.DEFAULT_INPUT_FORMATS).toDate();
-   * const tata = dayjs('2026-01-19T17:54:00Z').toDate();
-   * toto will be read as 17:54 local time, whereas tata will be read correctly as 17h54 UTC time.
+   * const test1 = dayjs('2026-01-19T17:54:00Z', this.DEFAULT_INPUT_FORMATS).toDate();
+   * const test2 = dayjs('2026-01-19T17:54:00Z').toDate();
+   * test1 will be read as 17:54 local time, whereas test2 will be read correctly as 17h54 UTC time.
    * @param {string} date
    * @param {string[]} formats
    * @param {boolean} strict
@@ -1140,5 +1180,3 @@ export abstract class DateMgt {
 
   // #endregion STATIC PRIVATE METHODS
 }
-
-// TEMPORARY NOTES

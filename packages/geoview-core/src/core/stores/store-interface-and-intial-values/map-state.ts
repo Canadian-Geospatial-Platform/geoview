@@ -227,26 +227,24 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         mapState: {
           ...get().mapState,
           basemapOptions: geoviewConfig.map.basemapOptions,
-          centerCoordinates: geoviewConfig.map.viewSettings.initialView?.zoomAndCenter
-            ? (geoviewConfig.map.viewSettings.initialView.zoomAndCenter[1] as Coordinate)
-            : MAP_CENTER[geoviewConfig.map.viewSettings.projection],
+          centerCoordinates:
+            (geoviewConfig.map.viewSettings.initialView?.zoomAndCenter?.[1] as Coordinate) ??
+            MAP_CENTER[geoviewConfig.map.viewSettings.projection],
           currentProjection: geoviewConfig.map.viewSettings.projection,
           currentBasemapOptions: geoviewConfig.map.basemapOptions,
-          featureHighlightColor: geoviewConfig.map.highlightColor || DEFAULT_HIGHLIGHT_COLOR,
+          featureHighlightColor: geoviewConfig.map.highlightColor ?? DEFAULT_HIGHLIGHT_COLOR,
           geolocatorSearchArea: undefined,
-          homeView: geoviewConfig.map.viewSettings.homeView ||
-            geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [MAP_ZOOM_LEVEL[3857], MAP_CENTER[3857]] },
-          initialView: geoviewConfig.map.viewSettings.initialView || { zoomAndCenter: [MAP_ZOOM_LEVEL[3857], MAP_CENTER[3857]] },
-          interaction: geoviewConfig.map.interaction || 'dynamic',
+          homeView: geoviewConfig.map.viewSettings.homeView ??
+            geoviewConfig.map.viewSettings.initialView ?? { zoomAndCenter: [MAP_ZOOM_LEVEL[3857], MAP_CENTER[3857]] },
+          initialView: geoviewConfig.map.viewSettings.initialView ?? { zoomAndCenter: [MAP_ZOOM_LEVEL[3857], MAP_CENTER[3857]] },
+          interaction: geoviewConfig.map.interaction ?? 'dynamic',
           mapExtent: geoviewConfig.map.viewSettings.maxExtent,
-          northArrow: geoviewConfig.components!.indexOf('north-arrow') > -1 || false,
-          overviewMap: geoviewConfig.components!.indexOf('overview-map') > -1 || false,
-          overviewMapHideZoom: geoviewConfig.overviewMap !== undefined ? geoviewConfig.overviewMap.hideOnZoom : 0,
-          pointMarkers: geoviewConfig.map.overlayObjects?.pointMarkers || {},
-          rotation: geoviewConfig.map.viewSettings.rotation || 0,
-          zoom: geoviewConfig.map.viewSettings.initialView?.zoomAndCenter
-            ? geoviewConfig.map.viewSettings.initialView.zoomAndCenter[0]
-            : 4.5,
+          northArrow: geoviewConfig.components!.indexOf('north-arrow') >= 0 || false, // Was defaulted so can use '!'
+          overviewMap: geoviewConfig.components!.indexOf('overview-map') >= 0 || false, // Was defaulted so can use '!'
+          overviewMapHideZoom: geoviewConfig.overviewMap?.hideOnZoom ?? 0,
+          pointMarkers: geoviewConfig.map.overlayObjects?.pointMarkers ?? {},
+          rotation: geoviewConfig.map.viewSettings.rotation ?? 0,
+          zoom: geoviewConfig.map.viewSettings.initialView?.zoomAndCenter?.[0] ?? 4.5,
         },
       });
     },

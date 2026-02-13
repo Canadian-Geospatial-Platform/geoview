@@ -3006,7 +3006,10 @@ export abstract class GeoviewRenderer {
       // If format is specified, try to format as date
       if (format) {
         try {
-          // TODO: CHECK DATETIME - Assuming the fieldValue to always be UTC, okay?
+          // TODO: CHECK DATETIME - Here, it's assuming 2 things to check:
+          // TO.DOCONT: (1) that when a 'format' is specified it's always a date format, okay?
+          // TO.DOCONT: (2) the fieldValue, when it's a date, will always be a UTC date. Is this okay or should the function
+          // TO.DOCONT: be made aware that the layer config might have defined another timezone for its data via serviceDateTimezone ?
           return DateMgt.formatDate(fieldValue, format);
         } catch (e) {
           // Fall back to string conversion if date parsing fails

@@ -381,9 +381,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * This method fetches the Geoview layer for the specified layer path (if it exists) and checks if it has a `getTimeDimension` method.
    * If the method exists, it retrieves the temporal dimension information for the layer.
    * If the layer doesn't support temporal dimensions, the method returns `undefined`.
-   * @deprecated This function shouldn't be used anymore, because there's processing happening in the time-slider
-   * (see TimeSliderEventProcessor.getInitialTimeSliderValues) which adds and processes further information on the
-   * time dimension that aren't replicated back here. The information returned by this function gets outdated.
+   * @remarks This function returns the layer time dimension unrelated to the processing in the time-slider
+   * (see TimeSliderEventProcessor.getInitialTimeSliderValues).
    */
   static getLayerTimeDimension(mapId: string, layerPath: string): TimeDimension | undefined {
     // Get the layer api

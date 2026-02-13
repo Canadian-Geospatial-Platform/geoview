@@ -1407,7 +1407,7 @@ export class GVWMS extends AbstractGVRaster {
           const dataType: TypeOutfieldsType = 'string';
           const dataValue: unknown = value;
 
-          // TODO: EXPERIMENT - Try parsing dates to dynamically 'spot' date values inside date fields?
+          // TODO: EXPERIMENT - Try parsing dates to dynamically 'spot' date values inside data?
           // // If the value is a string
           // if (typeof value === 'string') {
           //   const dateDate = DateMgt.tryParseDate(value);

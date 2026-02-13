@@ -142,7 +142,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   for (let i = 0; i < timeMarks.length; i++) {
     sliderMarks.push({
       value: timeMarks[i],
-      // If timeframe is a single day, use time. If it is a single year, drop year from dates.
+      // Format the date using displayDateFormatShort
       label: DateMgt.formatDate(
         timeMarks[i],
         displayDateFormatShort[displayLanguage],
@@ -379,7 +379,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       // Log
       logger.logTraceUseCallback('TIME-SLIDER - handleLabelFormat', displayDateFormat);
 
-      // If timeframe is a single day, use time. If it is a single year, drop year from dates.
+      // Format the date using displayDateFormat.
       return DateMgt.formatDate(
         theValue,
         displayDateFormat[displayLanguage],

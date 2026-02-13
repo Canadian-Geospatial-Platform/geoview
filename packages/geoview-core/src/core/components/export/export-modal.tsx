@@ -29,16 +29,15 @@ import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Loading
 import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useAppGeoviewHTMLElement, useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useAppDisplayLanguage, useDisplayDateTimezone } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useLayerDateTemporalModes } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerDateTemporalModes, useLayerDisplayDateFormats } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { exportFile } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
+import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { createPDFMapUrl } from '@/core/components/export/pdf-layout';
 import { createCanvasMapUrls } from '@/core/components/export/canvas-layout';
 import { getSxClasses } from '@/core/components/export/export-modal-style';
 import { TIMEOUT } from '@/core/utils/constant';
-import { ExportUtilities } from './utilities';
 
 type FileFormat = 'pdf' | 'png' | 'jpeg';
 
@@ -50,6 +49,8 @@ export interface FileExportProps {
   dpi: number;
   jpegQuality?: number;
   format: FileFormat;
+  layerDateFormats: Record<string, TypeDisplayDateFormat>;
+  layerDateTemporalModes: Record<string, TemporalMode>;
 }
 
 /**
@@ -72,11 +73,8 @@ export default function ExportModal(): JSX.Element {
   const { disableFocusTrap } = useUIStoreActions();
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const shellContainer = useAppShellContainer();
-
-  // Set the export utilities date formatting settings based on the app settings (with fallbacks to defaults in utilities)
-  ExportUtilities.DISPLAY_DATE_LANGUAGE = useAppDisplayLanguage();
-  ExportUtilities.DISPLAY_DATE_TIMEZONE = useDisplayDateTimezone();
-  ExportUtilities.DISPLAY_DATE_TEMPORAL_MODES = useLayerDateTemporalModes();
+  const layerDateFormats = useLayerDisplayDateFormats();
+  const layerDateTemporalModes = useLayerDateTemporalModes();
 
   // State & refs
   const [isMapLoading, setIsMapLoading] = useState(true);
@@ -107,7 +105,14 @@ export default function ExportModal(): JSX.Element {
       const disclaimer = t('mapctrl.disclaimer.message');
       // Always generate at 300 DPI for best quality, browser will downsample for display
       // Export regenerates canvas at user-selected DPI anyway
-      const pngUrl = await createCanvasMapUrls(mapId, { exportTitle: '', disclaimer, dpi: 300, format: 'jpeg' });
+      const pngUrl = await createCanvasMapUrls(mapId, {
+        exportTitle: '',
+        disclaimer,
+        dpi: 300,
+        format: 'jpeg',
+        layerDateFormats,
+        layerDateTemporalModes,
+      });
       setPngPreviewUrls([pngUrl]);
       URL.revokeObjectURL(pngUrl);
     } catch (error) {
@@ -116,7 +121,7 @@ export default function ExportModal(): JSX.Element {
       setIsMapLoading(false);
       setIsLegendLoading(false);
     }
-  }, [t, mapId]);
+  }, [t, mapId, layerDateFormats, layerDateTemporalModes]);
 
   // Export the requested file
   const performExport = useCallback(async () => {
@@ -136,7 +141,14 @@ export default function ExportModal(): JSX.Element {
       // TODO Find a way to use sx in the pdf/canvas-layout files.
       // TO.DO Probably would need to pass the theme to the createPDFMapUrl and createCanvasMapUrls here and in above generatePreview
       if (exportFormat === 'pdf') {
-        const pdfUrl = await createPDFMapUrl(mapId, { exportTitle, disclaimer, dpi, format: exportFormat });
+        const pdfUrl = await createPDFMapUrl(mapId, {
+          exportTitle,
+          disclaimer,
+          dpi,
+          format: exportFormat,
+          layerDateFormats,
+          layerDateTemporalModes,
+        });
         exportFile(pdfUrl, filename, exportFormat);
         URL.revokeObjectURL(pdfUrl);
       } else {
@@ -146,6 +158,8 @@ export default function ExportModal(): JSX.Element {
           dpi,
           jpegQuality,
           format: exportFormat,
+          layerDateFormats,
+          layerDateTemporalModes,
         });
         exportFile(imageUrl, filename, exportFormat);
         URL.revokeObjectURL(imageUrl);
@@ -156,7 +170,18 @@ export default function ExportModal(): JSX.Element {
       setIsMapExporting(false);
       disableFocusTrap();
     }
-  }, [disableFocusTrap, exportFormat, exportMapResolution, exportTitle, fileExportDefaultPrefixName, jpegQuality, mapId, t]);
+  }, [
+    disableFocusTrap,
+    exportFormat,
+    exportMapResolution,
+    exportTitle,
+    fileExportDefaultPrefixName,
+    jpegQuality,
+    layerDateFormats,
+    layerDateTemporalModes,
+    mapId,
+    t,
+  ]);
 
   // Use Effect to generate the image preview on load
   useEffect(() => {

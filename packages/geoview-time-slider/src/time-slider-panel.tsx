@@ -76,6 +76,9 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
    */
   const getFilterInfo = useCallback(
     (layerPath: string, timeSliderLayerInfo: TypeTimeSliderValues, language: TypeDisplayLanguage): string | null => {
+      // Log
+      logger.logTraceUseCallback('TIME-SLIDER-PANEL - getFilterInfo', layerPath, language);
+
       if (timeSliderLayerInfo.filtering) {
         const { values } = timeSliderLayerInfo;
 

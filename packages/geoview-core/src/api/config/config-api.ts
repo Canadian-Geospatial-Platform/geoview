@@ -248,6 +248,8 @@ export class ConfigApi {
       if (urlParams.keys) {
         try {
           // Get the GeoView layer configurations from the GeoCore UUIDs provided (urlParams.keys is a CSV string of UUIDs).
+          // TODO: CHECK - We're using 'DEFAULT_MAP_FEATURE_CONFIG.serviceUrls.geocoreUrl' as the geocoreUrl, but
+          // TO.DOCONT: that's the default value, what another was provided in the config, it'll not be used?
           const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(
             DEFAULT_MAP_FEATURE_CONFIG.serviceUrls.geocoreUrl,
             displayLanguage,

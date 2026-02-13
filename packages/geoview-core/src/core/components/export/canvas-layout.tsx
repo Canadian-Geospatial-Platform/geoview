@@ -1,7 +1,7 @@
 import { renderToString } from 'react-dom/server';
 import * as html2canvas from '@html2canvas/html2canvas';
 
-import { DateMgt } from '@/core/utils/date-mgt';
+import { type TemporalMode, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { FileExportProps } from '@/core/components/export/export-modal';
 import type { FlattenedLegendItem, ElementFactory } from '@/core/components/export/utilities';
 import { ExportUtilities, EXPORT_CONSTANTS } from '@/core/components/export/utilities';
@@ -21,7 +21,8 @@ interface CanvasDocumentProps {
   northArrowRotation: number;
   disclaimer: string;
   attributions: string[];
-  date: string;
+  layerDateFormats: Record<string, TypeDisplayDateFormat>;
+  layerDateTemporalModes: Record<string, TemporalMode>;
   fittedColumns: FlattenedLegendItem[][];
   columnWidths?: number[];
   canvasWidth: number;
@@ -41,12 +42,26 @@ const canvasElementFactory: ElementFactory = {
  * Render legend items in columns for canvas export
  * @param {FlattenedLegendItem[][]} columns - Pre-organized legend items grouped into columns
  * @param {number} canvasWidth - The width of the canvas in pixels
- * @param {number[]} columnWidths - Optional array of column widths in pixels
+ * @param {number[]} [columnWidths] - Optional array of column widths in pixels
  * @returns {JSX.Element} The rendered legend columns as JSX
  */
-const renderCanvasLegendInRows = (columns: FlattenedLegendItem[][], canvasWidth: number, columnWidths?: number[]): JSX.Element => {
+const renderCanvasLegendInRows = (
+  columns: FlattenedLegendItem[][],
+  canvasWidth: number,
+  layerDateFormats: Record<string, TypeDisplayDateFormat>,
+  layerDateTemporalModes: Record<string, TemporalMode>,
+  columnWidths?: number[]
+): JSX.Element => {
   const scaledStyles = getScaledCanvasStyles(canvasWidth);
-  return ExportUtilities.renderLegendColumns(columns, canvasElementFactory, scaledStyles, CANVAS_STYLES, columnWidths);
+  return ExportUtilities.renderLegendColumns(
+    columns,
+    canvasElementFactory,
+    scaledStyles,
+    CANVAS_STYLES,
+    layerDateFormats,
+    layerDateTemporalModes,
+    columnWidths
+  );
 };
 
 /**
@@ -65,7 +80,8 @@ export function CanvasDocument({
   columnWidths,
   disclaimer,
   attributions,
-  date,
+  layerDateFormats,
+  layerDateTemporalModes,
   canvasWidth,
 }: CanvasDocumentProps): JSX.Element {
   const scaledStyles = getScaledCanvasStyles(canvasWidth);
@@ -89,11 +105,13 @@ export function CanvasDocument({
 
       {/* Legend */}
       {fittedColumns && fittedColumns.length > 0 && (
-        <div style={CANVAS_STYLES.legendContainer}>{renderCanvasLegendInRows(fittedColumns, canvasWidth, columnWidths)}</div>
+        <div style={CANVAS_STYLES.legendContainer}>
+          {renderCanvasLegendInRows(fittedColumns, canvasWidth, layerDateFormats, layerDateTemporalModes, columnWidths)}
+        </div>
       )}
 
       {/* Footer */}
-      {ExportUtilities.renderFooter(disclaimer, attributions, date, canvasElementFactory, scaledStyles)}
+      {ExportUtilities.renderFooter(disclaimer, attributions, canvasElementFactory, scaledStyles)}
     </div>
   );
 }
@@ -105,18 +123,18 @@ export function CanvasDocument({
  * @returns {Promise<string>} A data URL for the exported image
  */
 export async function createCanvasMapUrls(mapId: string, props: FileExportProps): Promise<string> {
-  const { exportTitle, disclaimer, dpi, jpegQuality, format } = props;
+  const { exportTitle, disclaimer, dpi, jpegQuality, format, layerDateFormats, layerDateTemporalModes } = props;
 
   // Get map info with title/disclaimer for accurate height calculation
-  const mapInfo = await ExportUtilities.getMapInfo(mapId, exportTitle, disclaimer);
-
+  const mapInfo = await ExportUtilities.getMapInfo(mapId, exportTitle, disclaimer, layerDateFormats, layerDateTemporalModes);
   // Create main page HTML
   const mainPageHtml = renderToString(
     <CanvasDocument
       {...mapInfo}
       exportTitle={exportTitle}
       disclaimer={disclaimer}
-      date={DateMgt.formatDate(new Date(), 'YYYY-MM-DD, hh:mm:ss A')}
+      layerDateFormats={layerDateFormats}
+      layerDateTemporalModes={layerDateTemporalModes}
       canvasWidth={mapInfo.canvasWidth}
     />
   );

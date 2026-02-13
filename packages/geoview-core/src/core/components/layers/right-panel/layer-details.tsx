@@ -32,6 +32,7 @@ import {
   useLayerSelectorFilter,
   useLayerSelectorFilterClass,
   useLayerStoreActions,
+  useLayerTimeDimension,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useUIStoreActions, useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import {
@@ -170,7 +171,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const layerDisplayDateFormatShort = useLayerDisplayDateFormatShort(layerDetails.layerPath);
   const layerDateTemporalMode = useLayerDateTemporalMode(layerDetails.layerPath);
   const layerDisplayDateTimezone = useLayerDisplayDateTimezone(layerDetails.layerPath);
-  const layerTimeDimension = useTimeSliderLayersSelector(layerDetails.layerPath);
+  const layerTimeDimension = useLayerTimeDimension(layerDetails.layerPath);
+  const timeSliderDimension = useTimeSliderLayersSelector(layerDetails.layerPath);
   const layerNativeProjection = getLayerServiceProjection(layerDetails.layerPath);
   const layerVisible = useMapSelectorLayerVisibility(layerDetails.layerPath);
   const parentHidden = useMapSelectorLayerParentHidden(layerDetails.layerPath);
@@ -675,38 +677,45 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
                     <ListItemText primary={`${t('layers.layerDisplayDateTimezone')}${layerDisplayDateTimezone}`} />
                   </ListItem>
                 )}
-                {layerTimeDimension?.field && (
-                  <ListItem sx={sxClasses.layerDetailsListItem}>
-                    <ListItemText primary={`${t('layers.layerTimeDimensionField')}${layerTimeDimension.field}`} />
-                  </ListItem>
-                )}
-                {layerTimeDimension?.range?.[0] && (
+                {layerTimeDimension?.rangeItems?.range?.[0] && (
                   <ListItem sx={sxClasses.layerDetailsListItem}>
                     <ListItemText
-                      primary={`${'Min/Max: '}${layerTimeDimension.range[0]} / ${layerTimeDimension.range[layerTimeDimension.range.length - 1]}`}
+                      primary={`${'Min/Max: '}${layerTimeDimension.rangeItems.range[0]} / ${layerTimeDimension.rangeItems.range[layerTimeDimension.rangeItems.range.length - 1]}`}
                     />
                   </ListItem>
                 )}
               </List>
             </Box>
           </Box>
-          {layerTimeDimension && (
+          {timeSliderDimension && (
             <Box>
               {t('layers.layerTimeDimension')}
               <List sx={sxClasses.layerDetailsListGroup}>
-                {layerTimeDimension.displayDateFormat?.[language] && (
+                {timeSliderDimension.displayDateFormat?.[language] && (
                   <ListItem sx={sxClasses.layerDetailsListItem}>
-                    <ListItemText primary={`${t('layers.layerDisplayDateFormat')}${layerTimeDimension.displayDateFormat?.[language]}`} />
+                    <ListItemText primary={`${t('layers.layerDisplayDateFormat')}${timeSliderDimension.displayDateFormat?.[language]}`} />
                   </ListItem>
                 )}
-                {layerTimeDimension.serviceDateTemporalMode && (
+                {timeSliderDimension.serviceDateTemporalMode && (
                   <ListItem sx={sxClasses.layerDetailsListItem}>
-                    <ListItemText primary={`${t('layers.layerDateTemporalMode')}${layerTimeDimension.serviceDateTemporalMode}`} />
+                    <ListItemText primary={`${t('layers.layerDateTemporalMode')}${timeSliderDimension.serviceDateTemporalMode}`} />
                   </ListItem>
                 )}
-                {layerTimeDimension.displayDateTimezone && (
+                {timeSliderDimension.displayDateTimezone && (
                   <ListItem sx={sxClasses.layerDetailsListItem}>
-                    <ListItemText primary={`${t('layers.layerDisplayDateTimezone')}${layerTimeDimension.displayDateTimezone}`} />
+                    <ListItemText primary={`${t('layers.layerDisplayDateTimezone')}${timeSliderDimension.displayDateTimezone}`} />
+                  </ListItem>
+                )}
+                {timeSliderDimension?.field && (
+                  <ListItem sx={sxClasses.layerDetailsListItem}>
+                    <ListItemText primary={`${t('layers.layerTimeDimensionField')}${timeSliderDimension.field}`} />
+                  </ListItem>
+                )}
+                {timeSliderDimension?.range?.[0] && (
+                  <ListItem sx={sxClasses.layerDetailsListItem}>
+                    <ListItemText
+                      primary={`${'Min/Max: '}${timeSliderDimension.range[0]} / ${timeSliderDimension.range[timeSliderDimension.range.length - 1]}`}
+                    />
                   </ListItem>
                 )}
               </List>

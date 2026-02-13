@@ -351,6 +351,7 @@ export const useAppCrosshairsActive = (): boolean => useStore(useGeoViewStore(),
 export const useAppDisabledLayerTypes = (): TypeInitialGeoviewLayerType[] =>
   useStore(useGeoViewStore(), (state) => state.appState.disabledLayerTypes);
 export const useAppDisplayLanguage = (): TypeDisplayLanguage => useStore(useGeoViewStore(), (state) => state.appState.displayLanguage);
+export const useAppDisplayDateMode = (): DisplayDateMode => useStore(useGeoViewStore(), (state) => state.appState.displayDateMode);
 export const useDisplayDateTimezone = (): TimeIANA => useStore(useGeoViewStore(), (state) => state.appState.displayDateTimezone);
 export const useAppDisplayTheme = (): TypeDisplayTheme => useStore(useGeoViewStore(), (state) => state.appState.displayTheme);
 export const useAppFullscreenActive = (): boolean => useStore(useGeoViewStore(), (state) => state.appState.isFullscreenActive);
