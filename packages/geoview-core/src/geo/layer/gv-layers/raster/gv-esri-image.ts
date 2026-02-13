@@ -21,6 +21,7 @@ import { Projection } from '@/geo/utils/projection';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
+import type { TypeMetadataEsriRasterFunctionInfos } from '@/api/types/layer-schema-types';
 
 /**
  * Manages an Esri Image layer.
@@ -194,7 +195,38 @@ export class GVEsriImage extends AbstractGVRaster {
 
   // #region METHODS
 
-  // WRITE FUNCTIONS HERE..
+  /**
+   * Gets the list of rasterFunctionInfos that are available in the ImageServer
+   * @returns {TypeMetadataEsriRasterFunctionInfo[]} The ImageServer's rasterFunctionInfos
+   */
+  protected getMetadataRasterFunctionInfos(): TypeMetadataEsriRasterFunctionInfos[] | undefined {
+    const config = this.getLayerConfig();
+    const metadata = config?.getLayerMetadata();
+
+    if (metadata && metadata.rasterFunctionInfos) {
+      return metadata.rasterFunctionInfos;
+    }
+    return;
+  }
+
+  /**
+   * Updates the raster function for the layer
+   * @param {string | undefined} rasterFunctionId - The raster function ID to apply
+   */
+  updateRasterFunction(rasterFunctionId: string | undefined): void {
+    // Update the config
+    this.getLayerConfig().setRasterFunction(rasterFunctionId);
+
+    // Prepare the renderingRule / rasterFunction parameter
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const params: Record<string, any> = {};
+    if (rasterFunctionId) {
+      params.renderingRule = JSON.stringify({ rasterFunction: rasterFunctionId });
+    }
+
+    // Update the OpenLayers source
+    this.getOLSource().updateParams(params);
+  }
 
   // #endregion METHODS
 }

@@ -10,7 +10,7 @@ import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { type TypeGetStore, type TypeSetStore, type IGeoviewState, useStableSelector } from '@/core/stores/geoview-store';
 import type { TypeFeatureInfoEntryPartial, TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
 import { DateMgt, type TemporalMode, type TimeDimension, type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
-import type { TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerType, TypeMetadataEsriRasterFunctionInfos } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -46,6 +46,8 @@ export interface ILayerState {
     getLayerDeleteInProgress: () => string;
     getLayerServiceProjection: (layerPath: string) => string | undefined;
     getLayerTimeDimension: (layerPath: string) => TimeDimension | undefined;
+    getLayerRasterFunctionInfos: (layerPath: string) => TypeMetadataEsriRasterFunctionInfos[] | undefined;
+    getLayerRasterFunction: (layerPath: string) => string | undefined;
     refreshLayer: (layerPath: string) => void;
     reloadLayer: (layerPath: string) => void;
     setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
@@ -55,6 +57,7 @@ export interface ILayerState {
     setLayerOpacity: (layerPath: string, opacity: number, updateLegendLayers?: boolean) => void;
     setLayerHoverable: (layerPath: string, enable: boolean) => void;
     setLayerQueryable: (layerPath: string, enable: boolean) => void;
+    setLayerRasterFunction: (layerPath: string, rasterFunctionId: string) => void;
     setSelectedLayerPath: (layerPath: string) => void;
     toggleItemVisibility: (layerPath: string, item: TypeLegendItem) => void;
     zoomToLayerExtent: (layerPath: string) => Promise<void>;
@@ -187,6 +190,29 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       },
 
       /**
+       * Gets the raster function info options of the layer.
+       * @param {string} layerPath - The layer path of the layer to get the options
+       * @returns {TypeMetadataEsriRasterFunctionInfos[] | undefined} The rasterFunctionInfos list of undefined
+       */
+      getLayerRasterFunctionInfos: (layerPath: string): TypeMetadataEsriRasterFunctionInfos[] | undefined => {
+        try {
+          return LegendEventProcessor.getLayerRasterFunctionInfos(get().mapId, layerPath);
+        } catch (error: unknown) {
+          logger.logError(`Error getting temporal dimension for layer ${layerPath}`, error);
+        }
+        return undefined;
+      },
+
+      /**
+       * Gets the active raster function for a layer.
+       * @param {string} layerPath - The layer path.
+       * @returns {string | undefined} The active raster function identifier.
+       */
+      getLayerRasterFunction: (layerPath: string): string | undefined => {
+        return LegendEventProcessor.getLayerRasterFunction(get().mapId, layerPath);
+      },
+
+      /**
        * Refresh layer and set states to original values.
        * @param {string} layerPath - The layer path of the layer to change.
        */
@@ -270,6 +296,15 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       setLayerQueryable: (layerPath: string, enable: boolean): void => {
         // Redirect to event processor
         LegendEventProcessor.setLayerQueryable(get().mapId, layerPath, enable);
+      },
+
+      /**
+       * Sets the active raster function for a layer.
+       * @param {string} layerPath - The layer path.
+       * @param {string | undefined} rasterFunctionId - The raster function identifier.
+       */
+      setLayerRasterFunction: (layerPath: string, rasterFunctionId: string | undefined): void => {
+        LegendEventProcessor.setLayerRasterFunction(get().mapId, layerPath, rasterFunctionId);
       },
 
       /**
@@ -652,6 +687,7 @@ export const useLayerSelectorChildren = createLayerSelectorHook('children');
 export const useLayerSelectorItems = createLayerSelectorHook('items');
 export const useLayerSelectorIcons = createLayerSelectorHook('icons');
 export const useLayerSelectorLegendQueryStatus = createLayerSelectorHook('legendQueryStatus');
+export const useLayerSelectorRasterFunction = createLayerSelectorHook('rasterFunction');
 
 // Store Actions
 export const useLayerStoreActions = (): LayerActions => useStore(useGeoViewStore(), (state) => state.layerState.actions);
