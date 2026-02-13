@@ -130,6 +130,7 @@ import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-v
 import { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import type { TypeTimeSliderProps } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import { GVEsriImage } from './gv-layers/raster/gv-esri-image';
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
@@ -1435,6 +1436,27 @@ export class LayerApi {
   setLayerDateTemporalMode(layerPath: string, temporalMode: TemporalMode): void {
     // Redirect
     LegendEventProcessor.setLayerDateTemporalInStore(this.getMapId(), layerPath, temporalMode);
+  }
+
+  /**
+   * Updates the raster function for an ESRI Image layer.
+   * @param {string} layerPath - The path of the layer.
+   * @param {string | undefined} rasterFunctionId - The raster function ID to apply.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+   * @throws {LayerWrongTypeError} When the layer is not an ESRI Image layer.
+   */
+  setLayerRasterFunction(layerPath: string, rasterFunctionId: string | undefined): void {
+    // Get the layer
+    const layer = this.getGeoviewLayer(layerPath);
+
+    // Check if it's the right type
+    if (!(layer instanceof GVEsriImage)) throw new LayerWrongTypeError(layerPath, layer.getLayerName());
+
+    // Update the raster function
+    layer.updateRasterFunction(rasterFunctionId);
+
+    // Update the store
+    LegendEventProcessor.setLayerRasterFunctionInStore(this.getMapId(), layerPath, rasterFunctionId);
   }
 
   /**
