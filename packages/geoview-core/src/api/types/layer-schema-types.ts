@@ -931,6 +931,7 @@ export interface TypeLayerMetadataEsri {
   sourceSpatialReference: TypeProjection;
   extent: TypeLayerMetadataEsriExtent;
   drawingInfo: TypeLayerMetadataEsriDrawingInfo;
+  rasterFunctionInfos: TypeMetadataEsriRasterFunctionInfos[];
   timeInfo: TimeDimensionESRI;
   geometryType: string;
   fields: TypeLayerMetadataFields[];
@@ -938,6 +939,12 @@ export interface TypeLayerMetadataEsri {
 
 export interface TypeLayerMetadataEsriDrawingInfo {
   renderer: EsriBaseRenderer;
+}
+
+export interface TypeMetadataEsriRasterFunctionInfos {
+  name: string;
+  description: string;
+  help: string;
 }
 
 export interface TypeLayerMetadataEsriExtent {
