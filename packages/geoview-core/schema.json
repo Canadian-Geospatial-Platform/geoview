@@ -1909,6 +1909,10 @@
         "layerStyle": {
           "$ref": "#/definitions/TypeLayerStyleConfig"
         },
+        "rasterFunction": {
+          "type": "string",
+          "description": "The raster function to be applied to the ESRI Image layer"
+        },
         "not": {
           "listOfLayerEntryConfig": {
             "$ref": "#/definitions/TypeListOfLayerEntryConfig",
