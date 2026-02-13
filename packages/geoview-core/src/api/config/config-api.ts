@@ -3,16 +3,14 @@ import addErrors from 'ajv-errors';
 
 import { MapFeatureConfig } from '@/api/config/map-feature-config';
 import type {
-  TypeBasemapOptions,
   TypeDisplayLanguage,
   TypeInteraction,
   TypeMapFeaturesInstance,
-  TypeValidMapComponentProps,
-  TypeValidMapCorePackageProps,
   TypeValidMapProjectionCodes,
   TypeZoomAndCenter,
   TypeValidVersions,
   TypeLayerStyleConfig,
+  TypeBasemapId,
 } from '@/api/types/map-schema-types';
 import {
   DEFAULT_MAP_FEATURE_CONFIG,
@@ -36,7 +34,6 @@ import { isJsonString, isValidUUID, parseXMLToJson, removeCommentsFromJSON } fro
 import { logger } from '@/core/utils/logger';
 import { GeoCore } from '@/api/config/geocore';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
-import { UUIDmapConfigReader } from '@/api/config/reader/uuid-config-reader';
 import { GeoPackageReader } from '@/api/config/reader/geopackage-reader';
 import { ShapefileReader } from '@/api/config/reader/shapefile-reader';
 
@@ -139,42 +136,6 @@ export class ConfigApi {
   }
 
   /**
-   * Gets url parameters from url param search string.
-   * @param {objStr} objStr the url parameter string.
-   * @returns {unknown} an object containing url parameters.
-   * @static @private
-   */
-  static #parseObjectFromUrl(objStr: string): unknown {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const obj: any = {};
-
-    if (objStr && objStr.length) {
-      // first { is kept with regex, remove
-      const objProps = objStr.split(',');
-
-      if (objProps) {
-        for (let i = 0; i < objProps.length; i += 1) {
-          const prop = objProps[i].split(':');
-          if (prop && prop.length) {
-            const key: string = prop[0];
-            const value: string = prop[1];
-
-            if (prop[1] === 'true') {
-              obj[key] = true;
-            } else if (prop[1] === 'false') {
-              obj[key] = false;
-            } else {
-              obj[key] = value;
-            }
-          }
-        }
-      }
-    }
-
-    return obj;
-  }
-
-  /**
    * Converts the stringMapFeatureConfig to a json object. Comments will be removed from the string.
    * @param {string} stringMapFeatureConfig The map configuration string to convert to JSON format.
    * @returns {MapFeatureConfig | undefined} A JSON map feature configuration object.
@@ -201,22 +162,20 @@ export class ConfigApi {
   /**
    * Gets a map feature config from url parameters.
    * @param {string} urlStringParams The url parameters.
+   * @param {string[]} existingUuids Optional array of existing layer UUIDs to check for duplicates.
    *
-   * @returns {Promise<MapFeatureConfig>} A map feature configuration object generated from url parameters.
-   * @static @async
+   * @returns {MapFeatureConfig} A map feature configuration object generated from url parameters.
+   * @static
    */
-  static async getConfigFromUrl(urlStringParams: string): Promise<MapFeatureConfig> {
+  static getConfigFromUrl(urlStringParams: string, existingUuids?: string[]): MapFeatureConfig {
     // return the parameters as an object if url contains any params
     const urlParams = ConfigApi.#getMapPropsFromUrlParams(urlStringParams);
 
     // if user provided any url parameters update
     const jsonConfig = {} as TypeMapFeaturesInstance;
 
-    // update the language if provided from the map configuration.
-    const displayLanguage = (urlParams.l as TypeDisplayLanguage) || 'en';
-
     if (Object.keys(urlParams).length && !urlParams.geoms) {
-      // Ex: p=3857&z=4&c=40,-100&l=en&t=dark&b=basemapId:transport,shaded:false,labeled:true&i=dynamic&cp=details-panel,layers-panel&cc=overview-map&keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9
+      // Ex: p=3857&z=4&c=40,-100&l=en&t=dark&b=id:transport,s:off,l:on&i=dynamic&keys=12acd145-626a-49eb-b850-0a59c9bc7506,ccc75c12-5acc-4a6a-959f-ef6f621147b9
 
       // get center
       let center: string[] = [];
@@ -231,15 +190,27 @@ export class ConfigApi {
       let zoom = DEFAULT_MAP_FEATURE_CONFIG.map.viewSettings.initialView!.zoomAndCenter![0].toString();
       if (urlParams.z) zoom = urlParams.z as string;
 
+      // get basemap options
+      const { basemapOptions } = DEFAULT_MAP_FEATURE_CONFIG.map;
+      if (urlParams.b) {
+        const values = urlParams.b.split(',');
+        values.forEach((value: string) => {
+          const items = value.split(':');
+          if (items[0] === 'id') basemapOptions.basemapId = items[1] as TypeBasemapId;
+          else if (items[0] === 's') basemapOptions.shaded = items[1] === 'on' ? true : false;
+          else if (items[0] === 'l') basemapOptions.labeled = items[1] === 'on' ? true : false;
+        });
+      }
+
       jsonConfig.map = {
         interaction: urlParams.i as TypeInteraction,
         viewSettings: {
           initialView: {
             zoomAndCenter: [parseInt(zoom, 10), [parseInt(center[0], 10), parseInt(center[1], 10)]] as TypeZoomAndCenter,
           },
-          projection: parseInt(urlParams.p as string, 10) as TypeValidMapProjectionCodes,
+          projection: urlParams.p as TypeValidMapProjectionCodes,
         },
-        basemapOptions: ConfigApi.#parseObjectFromUrl(urlParams.b as string) as TypeBasemapOptions,
+        basemapOptions,
         listOfGeoviewLayerConfig: [] as MapConfigLayerEntry[],
       };
 
@@ -247,22 +218,25 @@ export class ConfigApi {
       // and store it in the listOfGeoviewLayerConfig of the map.
       if (urlParams.keys) {
         try {
-          // Get the GeoView layer configurations from the GeoCore UUIDs provided (urlParams.keys is a CSV string of UUIDs).
-          // TODO: CHECK - We're using 'DEFAULT_MAP_FEATURE_CONFIG.serviceUrls.geocoreUrl' as the geocoreUrl, but
+          // TODO: CHECK - Code changed but problem still exist - We're using 'DEFAULT_MAP_FEATURE_CONFIG.serviceUrls.geocoreUrl' as the geocoreUrl, but
           // TO.DOCONT: that's the default value, what if another was provided in the config, it'll not be used?
-          const response = await UUIDmapConfigReader.getGVConfigFromUUIDs(
-            DEFAULT_MAP_FEATURE_CONFIG.serviceUrls.geocoreUrl,
-            displayLanguage,
-            urlParams.keys.toString().split(',')
-          );
+          // Parse keys to extract UUIDs
+          const keysArray = urlParams.keys.toString().split(',');
+          const listOfGeoviewLayerConfig: TypeGeoviewLayerConfig[] = [];
 
-          // Focus on the layers in the response
-          const listOfGeoviewLayerConfig = response.layers;
+          keysArray.forEach((key: string) => {
+            // Skip if this UUID already exists in the existing layers
+            if (existingUuids?.includes(key)) {
+              return;
+            }
 
-          // The listOfGeoviewLayerConfig returned by the previous call appended 'rcs.' at the beginning and
-          // '.en' or '.fr' at the end of the UUIDs. We want to restore the ids as they were before.
-          listOfGeoviewLayerConfig.forEach((layerConfig, i) => {
-            listOfGeoviewLayerConfig[i].geoviewLayerId = layerConfig.geoviewLayerId.slice(4, -3);
+            // Create simple layer config for GeoCore layer
+            const layerConfig: MapConfigLayerEntry = {
+              geoviewLayerType: 'geoCore',
+              geoviewLayerId: key,
+            } as MapConfigLayerEntry;
+
+            listOfGeoviewLayerConfig.push(layerConfig as TypeGeoviewLayerConfig);
           });
 
           // Store the new computed listOfGeoviewLayerConfig in the map.
@@ -271,16 +245,6 @@ export class ConfigApi {
           // Log the error. The listOfGeoviewLayerConfig returned will be [].
           logger.logError('Failed to get the GeoView layers from url keys', urlParams.keys, error);
         }
-      }
-
-      // get core components
-      if (urlParams.cc) {
-        jsonConfig.components = (urlParams.cc as string).split(',') as TypeValidMapComponentProps[];
-      }
-
-      // get core packages if any
-      if (urlParams.cp) {
-        jsonConfig.corePackages = (urlParams.cp as string).split(',') as TypeValidMapCorePackageProps[];
       }
 
       // update the version if provided from the map configuration.

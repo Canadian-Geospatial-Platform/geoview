@@ -181,7 +181,7 @@
     "TypeValidAppBarCoreProps": {
       "description": "Valid values for the app bar tabs core array.",
       "additionalProperties": false,
-      "enum": ["about-panel", "geolocator", "export", "geochart", "details", "legend", "guide", "data-table", "layers", "aoi-panel", "custom-legend"]
+      "enum": ["about-panel", "geolocator", "export", "geochart", "details", "legend", "guide", "data-table", "layers", "share","aoi-panel", "custom-legend"]
     },
     "TypeAppBarProps": {
       "type": "object",
@@ -499,7 +499,7 @@
       "description": "Display languages supported."
     },
     "TypeHighlightColors": {
-      "enum": ["black", "white", "red", "green"],
+      "enum": ["black", "white", "red", "green", "aqua"],
       "default": "black",
       "description": "Color to use for feature highlights."
     },

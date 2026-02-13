@@ -1174,6 +1174,8 @@ export interface TypeOrderedLayerInfo {
 // **********************************************************
 export const useMapAttribution = (): string[] => useStore(useGeoViewStore(), (state) => state.mapState.attribution);
 export const useMapBasemapOptions = (): TypeBasemapOptions => useStore(useGeoViewStore(), (state) => state.mapState.basemapOptions);
+export const useMapCurrentBasemapOptions = (): TypeBasemapOptions =>
+  useStore(useGeoViewStore(), (state) => state.mapState.currentBasemapOptions);
 export const useMapCenterCoordinates = (): Coordinate => useStore(useGeoViewStore(), (state) => state.mapState.centerCoordinates);
 export const useMapClickMarker = (): TypeClickMarker | undefined => useStore(useGeoViewStore(), (state) => state.mapState.clickMarker);
 export const useMapClickCoordinates = (): TypeMapMouseInfo | undefined =>

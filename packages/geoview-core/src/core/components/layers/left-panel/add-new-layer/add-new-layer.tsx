@@ -276,6 +276,7 @@ export function AddNewLayer(): JSX.Element {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [stepButtonEnabled, setStepButtonEnabled] = useState<boolean>(false);
   const [abortController, setAbortController] = useState<AbortController>(new AbortController());
+  const [isGeoCore, setIsGeoCore] = useState<boolean>(false);
   const isSingle = !isMultiple;
 
   // Ref
@@ -418,6 +419,11 @@ export function AddNewLayer(): JSX.Element {
           mapId,
           abortController.signal
         );
+
+        // Capture if this is a GeoCore layer before changing the type
+        if (curlayerType === 'geoCore') {
+          setIsGeoCore(true);
+        }
 
         // Set the layer type as it may have changed in the case of GeoCore for example
         setLayerType(geoviewLayerConfig.geoviewLayerType);
@@ -603,6 +609,7 @@ export function AddNewLayer(): JSX.Element {
       layerType,
       layerURL,
       layerTree: layerTree!,
+      isGeoCore,
     });
 
     if (newGeoViewLayer)
@@ -645,6 +652,7 @@ export function AddNewLayer(): JSX.Element {
     setLayerType(event.target.value as TypeInitialGeoviewLayerType);
     setLayerTree(undefined);
     setLayerIdsToAdd([]);
+    setIsGeoCore(false);
 
     setStepButtonEnabled(true);
   };
@@ -713,6 +721,7 @@ export function AddNewLayer(): JSX.Element {
     setLayerTree(undefined);
     setLayerName(fileName.split('/').pop()?.split('.')[0] || fileName.split('.')[0]);
     setLayerIdsToAdd([]);
+    setIsGeoCore(false);
     setStepButtonEnabled(true);
   };
 
@@ -730,6 +739,7 @@ export function AddNewLayer(): JSX.Element {
     setLayerTree(undefined);
     setLayerName(url.split('/').pop()?.split('.')[0] || url.split('.')[0]);
     setLayerIdsToAdd([]);
+    setIsGeoCore(false);
   };
 
   // #endregion
