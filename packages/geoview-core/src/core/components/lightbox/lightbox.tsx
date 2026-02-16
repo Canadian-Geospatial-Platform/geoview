@@ -10,6 +10,7 @@ import 'yet-another-react-lightbox/styles.css';
 import { CloseIcon, ArrowRightIcon, ArrowLeftIcon, DownloadIcon, Tooltip } from '@/ui';
 import { logger } from '@/core/utils/logger';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { LIGHTBOX_SELECTORS } from '@/core/utils/constant';
 
 /**
  * Interface used for lightbox properties and slides
@@ -95,8 +96,11 @@ export const LightboxImg = memo(function LightboxImg({
       labels={labels}
       on={{
         entered: () => {
-          // document.getElementsByClassName('yarl__button')[1] does not work, use main container
-          document.getElementsByClassName('yarl__root')[0].getElementsByTagName('button')[1].focus();
+          const rootElement = document.querySelector(LIGHTBOX_SELECTORS.ROOT);
+          const buttons = rootElement?.getElementsByTagName('button');
+          if (buttons && buttons.length > 1) {
+            buttons[1].focus();
+          }
         },
         exited,
         view: (props: ViewCallbackProps) => onSlideChange?.(props.index),

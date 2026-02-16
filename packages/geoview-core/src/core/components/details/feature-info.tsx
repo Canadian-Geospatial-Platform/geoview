@@ -23,12 +23,14 @@ import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to
 import { logger } from '@/core/utils/logger';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import type { TypeFeatureInfoEntry, TypeFieldEntry } from '@/api/types/map-schema-types';
+import type { TypeContainerBox } from '@/core/types/global-types';
 import { FeatureInfoTable } from './feature-info-table';
 import { getSxClasses } from './details-style';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 interface FeatureInfoProps {
   feature: TypeFeatureInfoEntry;
+  containerType: TypeContainerBox;
 }
 
 interface FeatureHeaderProps {
@@ -151,7 +153,7 @@ const FeatureHeader = memo(function FeatureHeader({
   );
 });
 
-export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
+export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.Element | null {
   logger.logTraceRender('components/details/feature-info', feature);
 
   // Hooks
@@ -291,7 +293,7 @@ export function FeatureInfo({ feature }: FeatureInfoProps): JSX.Element | null {
       />
 
       <Box sx={sxClasses.featureInfoListContainer}>
-        <FeatureInfoTable layerPath={feature.layerPath} featureInfoList={featureInfoList} />
+        <FeatureInfoTable layerPath={feature.layerPath} featureInfoList={featureInfoList} containerType={containerType} />
       </Box>
     </Paper>
   );

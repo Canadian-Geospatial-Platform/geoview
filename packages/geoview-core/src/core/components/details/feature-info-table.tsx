@@ -14,31 +14,39 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
 import type { TypeDisplayLanguage, TypeFieldEntry } from '@/api/types/map-schema-types';
+import type { TypeContainerBox } from '@/core/types/global-types';
 import { DateMgt, type TemporalMode, type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { useLightBox } from '@/core/components/common';
 import { Button } from '@/ui/button/button';
 import { getSxClasses } from './details-style';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 interface FeatureInfoTableProps {
   layerPath: string;
   featureInfoList: TypeFieldEntry[];
+  containerType: TypeContainerBox;
 }
 
 interface FeatureItemProps {
   item: string;
   alias: string;
   index: number;
+  uniqueItemId: string;
+  mapId: string;
+  containerType: TypeContainerBox;
   featureInfoItem: TypeFieldEntry;
-  onInitLightBox: (value: string, alias: string, index: number) => void;
+  onInitLightBox: (value: string, elementId: string, index: number) => void;
 }
 
 interface FeatureRowProps {
   featureInfoItem: TypeFieldEntry;
-  onInitLightBox: (value: string, alias: string, index: number) => void;
+  onInitLightBox: (value: string, elementId: string, index: number) => void;
   language: TypeDisplayLanguage;
   layerDateTemporalMode: TemporalMode;
   displayDateFormat: TypeDisplayDateFormat;
   displayDateTimezone: TimeIANA;
+  mapId: string;
+  containerType: TypeContainerBox;
 }
 
 // Extracted FeatureItem component
@@ -46,6 +54,9 @@ export const FeatureItem = memo(function FeatureItem({
   item,
   alias,
   index,
+  uniqueItemId,
+  mapId,
+  containerType,
   featureInfoItem,
   onInitLightBox,
 }: FeatureItemProps): JSX.Element {
@@ -78,27 +89,31 @@ export const FeatureItem = memo(function FeatureItem({
   }
 
   if (typeof item === 'string' && isImage(item)) {
+    const imageElementId = `${mapId}-${containerType}-img-${uniqueItemId}`;
+    const buttonElementId = `${mapId}-${containerType}-btn-${uniqueItemId}`;
+
     return (
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginBottom: '5px' }}>
         <CardMedia
           key={generateId()}
+          id={imageElementId}
           sx={{ ...sxClasses.featureInfoItemValue, cursor: 'pointer' }}
           alt={`${alias} ${index}`}
-          className={`returnLightboxFocusItem-${index}`}
           src={item}
           tabIndex={0}
           title={t('general.clickEnlarge')!}
-          onClick={() => onInitLightBox(featureInfoItem.value as string, featureInfoItem.alias, index)}
+          onClick={() => onInitLightBox(featureInfoItem.value as string, imageElementId, index)}
           onKeyDown={(event: React.KeyboardEvent) => {
             if (event.key === 'Enter') {
-              onInitLightBox(featureInfoItem.value as string, `${index}_${featureInfoItem.alias}`, index);
+              onInitLightBox(featureInfoItem.value as string, imageElementId, index);
             }
           }}
         />
         <Button
+          id={buttonElementId}
           type="text"
           sx={{ fontSize: theme.palette.geoViewFontSize.xs }}
-          onClick={() => onInitLightBox(featureInfoItem.value as string, featureInfoItem.alias, index)}
+          onClick={() => onInitLightBox(featureInfoItem.value as string, buttonElementId, index)}
         >
           {t('general.clickEnlarge')!}
         </Button>
@@ -121,6 +136,8 @@ export const FeatureRow = memo(function FeatureRow({
   layerDateTemporalMode,
   displayDateFormat,
   displayDateTimezone,
+  mapId,
+  containerType,
 }: FeatureRowProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
@@ -145,8 +162,13 @@ export const FeatureRow = memo(function FeatureRow({
     stringValues = [DateMgt.formatDate(value, displayDateFormat[language], language, displayDateTimezone, layerDateTemporalMode)];
   }
 
-  // Generate stable IDs for each item when component mounts
-  const itemIds = useMemo(() => stringValues.map(() => generateId()), [stringValues]);
+  // Generate stable deterministic IDs for each item: {fieldKey}-{index}
+  // Using fieldKey and index ensures IDs remain stable across re-renders
+  // Full ID format will be: {mapId}-{containerType}-{elementType}-{fieldKey}-{index}
+  const itemIds = useMemo(
+    () => stringValues.map((_, idx) => `${featureInfoItem.fieldKey}-${idx}`),
+    [stringValues, featureInfoItem.fieldKey]
+  );
 
   return (
     <Grid container spacing={5} className="feature-info-row" sx={sxClasses.featureInfoRow}>
@@ -177,6 +199,9 @@ export const FeatureRow = memo(function FeatureRow({
             item={item}
             alias={alias}
             index={idx}
+            uniqueItemId={itemIds[idx]}
+            mapId={mapId}
+            containerType={containerType}
             featureInfoItem={featureInfoItem}
             onInitLightBox={onInitLightBox}
           />
@@ -186,7 +211,11 @@ export const FeatureRow = memo(function FeatureRow({
   );
 });
 
-export const FeatureInfoTable = memo(function FeatureInfoTable({ layerPath, featureInfoList }: FeatureInfoTableProps): JSX.Element {
+export const FeatureInfoTable = memo(function FeatureInfoTable({
+  layerPath,
+  featureInfoList,
+  containerType,
+}: FeatureInfoTableProps): JSX.Element {
   logger.logTraceRender('components/details/feature-info-table');
 
   // Hooks
@@ -200,9 +229,10 @@ export const FeatureInfoTable = memo(function FeatureInfoTable({ layerPath, feat
   const displayDateTimezone = useLayerDisplayDateTimezone(layerPath);
 
   // Store
+  const mapId = useGeoViewMapId();
   const { initLightBox, LightBoxComponent } = useLightBox();
 
-  // Remove last item who is the internall geoviewID field
+  // Remove last item who is the internal geoviewID field
   if (featureInfoList.length > 0 && featureInfoList[featureInfoList.length - 1].alias === 'geoviewID') featureInfoList.pop();
 
   return (
@@ -216,6 +246,8 @@ export const FeatureInfoTable = memo(function FeatureInfoTable({ layerPath, feat
           displayDateFormat={displayDateFormat}
           displayDateTimezone={displayDateTimezone}
           onInitLightBox={initLightBox}
+          mapId={mapId}
+          containerType={containerType}
         />
       ))}
       <LightBoxComponent />
