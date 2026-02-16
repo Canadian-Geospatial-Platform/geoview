@@ -806,7 +806,11 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
             )}
           </Grid>
 
-          <FeatureInfo key={`${currentFeature?.uid}-${currentFeature?.geometry ? 'with-geo' : 'no-geo'}`} feature={currentFeature} />
+          <FeatureInfo
+            key={`${currentFeature?.uid}-${currentFeature?.geometry ? 'with-geo' : 'no-geo'}`}
+            feature={currentFeature}
+            containerType={containerType}
+          />
         </Box>
       );
     }

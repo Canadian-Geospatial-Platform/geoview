@@ -43,6 +43,8 @@ export const FullScreenDialog = memo(function FullScreenDialog({
 
   return (
     <Dialog
+      disableAutoFocus
+      disableRestoreFocus
       fullScreen
       maxWidth="xl"
       open={open}
@@ -54,7 +56,6 @@ export const FullScreenDialog = memo(function FullScreenDialog({
         // Focus restoration after closing is handled separately via onExited callback.
         onClose(event, reason);
       }}
-      onTransitionExited={onExited}
       slotProps={{
         transition: {
           onEntered: () => {
@@ -63,6 +64,7 @@ export const FullScreenDialog = memo(function FullScreenDialog({
             // with Enter/Space (or ESC key which is handled by Material-UI automatically).
             closeButtonRef.current?.focus();
           },
+          onExited,
         },
       }}
       disablePortal={false}

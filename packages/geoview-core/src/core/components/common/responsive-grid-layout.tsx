@@ -13,7 +13,7 @@ import { FullScreenDialog } from './full-screen-dialog';
 import { logger } from '@/core/utils/logger';
 import { ArrowBackIcon, ArrowForwardIcon, CloseIcon, QuestionMarkIcon } from '@/ui/icons';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { useAppGuide, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppGuide, useAppFullscreenActive, useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useUIActiveTrapGeoView, useUIActiveFocusItem } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
@@ -47,6 +47,11 @@ interface ResponsiveGridLayoutExposedMethods {
  * conflicts between the FocusTrap and modal's own focus management.
  */
 const MODAL_ELEMENT_IDS = ['layerDataTable', 'featureDetailDataTable'] as const;
+
+// Root selector for lightbox - used to check if lightbox is open and should be ignored for ESC key handling.
+// If the lightbox root element exists in the DOM, we consider the lightbox to be open.
+// This is necessary because the lightbox also uses ESC for closing, and we don't want to trigger layout-level ESC handlers when the lightbox is open.
+const LIGHTBOX_ROOT_SELECTOR = '.yarl__root';
 
 const ResponsiveGridLayout = forwardRef(
   (
@@ -91,6 +96,7 @@ const ResponsiveGridLayout = forwardRef(
     const guide = useAppGuide();
     const isFocusTrap = useUIActiveTrapGeoView();
     const focusItem = useUIActiveFocusItem();
+    const shellContainer = useAppShellContainer();
 
     // States
     const [isRightPanelVisible, setIsRightPanelVisible] = useState(false);
@@ -156,6 +162,12 @@ const ResponsiveGridLayout = forwardRef(
     const handleEscapeKeyCallback = useCallback((): void => {
       // Don't close sub panel if guide is open - let the guide handle its own ESC
       if (isGuideOpen) {
+        return;
+      }
+
+      // Check if lightbox is open - if so, don't close sub panel (lightbox will handle its own ESC)
+      const isLightboxOpen = document.querySelector(LIGHTBOX_ROOT_SELECTOR) !== null;
+      if (isLightboxOpen) {
         return;
       }
 
@@ -445,12 +457,11 @@ const ResponsiveGridLayout = forwardRef(
       );
     };
 
+    // Check if a modal is currently open within the right panel
+    const isModalOpen = focusItem.activeElementId !== false && (MODAL_ELEMENT_IDS as readonly string[]).includes(focusItem.activeElementId);
+
     const renderRightContent = (): JSX.Element => {
       const content = !isGuideOpen ? rightMain : renderGuide();
-
-      // Check if a modal is currently open within the right panel
-      const isModalOpen =
-        focusItem.activeElementId !== false && (MODAL_ELEMENT_IDS as readonly string[]).includes(focusItem.activeElementId);
 
       // Only trap focus when: WCAG mode on, right panel is visible, not fullscreen, has feature content, AND no modal is open within it
       const shouldTrapFocus = isFocusTrap && isRightPanelVisible && !isFullScreen && hasContent && !isModalOpen;
@@ -484,11 +495,24 @@ const ResponsiveGridLayout = forwardRef(
         </FocusTrap>
       );
 
+      // Conditionally render EITHER fullscreen OR regular content to prevent duplicate IDs in the DOM
+      // Keep dialog mounted during exit transition by always rendering it
       return (
         <>
           <FullScreenDialog
             open={isFullScreen}
-            onClose={() => {
+            onClose={(event, reason) => {
+              // Don't close fullscreen if ESC was pressed while lightbox is open
+              // The lightbox should handle ESC, not the fullscreen dialog
+              if (reason === 'escapeKeyDown') {
+                const isLightboxOpen = document.querySelector(LIGHTBOX_ROOT_SELECTOR) !== null;
+                if (isLightboxOpen) {
+                  // Let lightbox handle ESC - don't close fullscreen
+                  return;
+                }
+              }
+
+              // Otherwise, close fullscreen normally
               setIsFullScreen(false);
             }}
             title={isGuideOpen ? `${t('guide.title')} - ${titleFullscreen}` : titleFullscreen}
@@ -496,13 +520,14 @@ const ResponsiveGridLayout = forwardRef(
               // Use onExited callback to restore focus to the fullscreen button after the dialog exit animation completes
               fullScreenBtnRef.current?.focus();
             }}
+            container={shellContainer}
+            disableEnforceFocus={true}
           >
             <Box sx={sxClasses.rightMainContent} className="responsive-layout-right-main-content fullscreen-mode">
               {content}
             </Box>
           </FullScreenDialog>
-
-          {wrappedMainContent}
+          {!isFullScreen && wrappedMainContent}
         </>
       );
     };

@@ -101,10 +101,12 @@ const BaseLightBoxComponent = memo(function BaseLightBoxComponent({
     if (!activeTrapGeoView) return;
 
     setTimeout(() => {
-      const element = document.querySelector(`.returnLightboxFocusItem-${aliasIndex}`) as HTMLElement;
+      const element = document.getElementById(aliasIndex);
       if (element) {
         element.focus();
         element.classList.add('keyboard-focused');
+      } else {
+        logger.logWarning(`LightBox focus restoration failed: element "${aliasIndex}" not found`);
       }
     }, TIMEOUT.focusDelayLightbox);
   }, [activeTrapGeoView, aliasIndex, onExit]);
@@ -158,7 +160,7 @@ export function useLightBox(): UseLightBoxReturnType {
       setSlides(createSlidesList(images, alias));
       setSlidesIndex(index ?? 0);
       setImgScale(scale);
-      setAliasIndex(alias.split('_')[0]);
+      setAliasIndex(alias);
     },
     [createSlidesList]
   );
