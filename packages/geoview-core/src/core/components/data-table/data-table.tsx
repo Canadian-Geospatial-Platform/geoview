@@ -164,13 +164,15 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
       // Log
       logger.logTraceUseCallback('DATA-TABLE - createLightBoxButton');
 
+      const uniqueButtonId = `${mapId}-${containerType}-btn-${cellId}`;
+
       if (typeof cellValue === 'string' && isImage(cellValue)) {
         return (
           <Button
             type="text"
             size="small"
-            className={`returnLightboxFocusItem-${cellId.split('_')[0]}`}
-            onClick={() => initLightBox(cellValue, cellId, 0)}
+            id={uniqueButtonId}
+            onClick={() => initLightBox(cellValue, uniqueButtonId, 0)}
             sx={{ height: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem', textTransform: 'none' }}
           >
             {t('dataTable.images')}
@@ -185,7 +187,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
         cellValue
       );
     },
-    [initLightBox, t]
+    [initLightBox, t, containerType, mapId]
   );
 
   /**
@@ -631,7 +633,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     // Improve global filter accessibility
     muiSearchTextFieldProps: {
       inputProps: {
-        type: 'text',
+        type: 'search',
         'aria-label': t('dataTable.searchInputLabel')!,
       },
       sx: {
