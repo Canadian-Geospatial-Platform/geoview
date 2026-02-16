@@ -236,7 +236,9 @@
     "moveLayerDown": "Move layer down",
     "layerControls": "Layers controls",
     "selectLayerAndScrollTimeSlider": "Show in Time Slider panel",
-    "selectLayer": "Select {{layerName}}"
+    "selectLayer": "Select {{layerName}}",
+    "settings": "Layer settings",
+    "selectRasterFunction": "Select raster function"
   },
   "details": {
     "title": "Details",
