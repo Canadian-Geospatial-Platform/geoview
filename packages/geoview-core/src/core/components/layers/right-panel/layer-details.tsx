@@ -44,6 +44,7 @@ import {
 import { generateId, isValidUUID } from '@/core/utils/utilities';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { LayerOpacityControl } from './layer-opacity-control/layer-opacity-control';
+import { LayerSettings } from './layer-settings/layer-settings';
 import { logger } from '@/core/utils/logger';
 import { LAYER_STATUS, TABS } from '@/core/utils/constant';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
@@ -152,6 +153,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     zoomToLayerExtent,
     getLayerBounds,
     getLayerServiceProjection,
+    getLayerSettings,
     setLayerHoverable,
     setLayerQueryable,
   } = useLayerStoreActions();
@@ -496,10 +498,19 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     );
   }
 
+  function renderSettingsButton(): JSX.Element | null {
+    const settings = getLayerSettings(layerDetails.layerPath);
+
+    if (!settings || settings.length === 0) return null;
+
+    return <LayerSettings layerDetails={layerDetails} />;
+  }
+
   function renderLayerButtons(): JSX.Element {
     const timeSliderButton = renderTimeSliderButton();
     const hasDataTable = datatableSettings[layerDetails.layerPath];
     const deleteButton = renderDeleteButton();
+    const layerSettingsButton = renderSettingsButton();
     const showDivider = hasDataTable || timeSliderButton;
 
     return (
@@ -512,6 +523,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         </IconButton>
         {renderHighlightButton()}
         {renderZoomButton()}
+        {layerSettingsButton}
         {deleteButton && <Box sx={sxClasses.verticalDivider} />}
         {deleteButton}
       </Box>

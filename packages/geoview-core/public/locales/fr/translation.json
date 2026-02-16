@@ -230,7 +230,9 @@
     "moveLayerDown": "Déplacer la couche vers le bas",
     "layerControls": "Commandes des couches",
     "selectLayerAndScrollTimeSlider": "Voir dans le panneau Curseur Temporel",
-    "selectLayer": "Sélectionner {{layerName}}"
+    "selectLayer": "Sélectionner {{layerName}}",
+    "settings": "Paramètres de couche",
+    "selectRasterFunction": "Sélectionnez la fonction raster"
   },
   "details": {
     "title": "Détails",
