@@ -122,3 +122,13 @@ export const TIMEOUT: Record<string, number> = {
   geolocationReturn: 10000,
   deleteLayerLoading: 10000,
 };
+
+/**
+ * Lightbox DOM selectors for yet-another-react-lightbox components.
+ * ROOT: Use for state detection (checking if lightbox is open)
+ * CONTAINER: Use for dimension calculations only
+ */
+export const LIGHTBOX_SELECTORS = {
+  ROOT: '.yarl__root',
+  CONTAINER: '.yarl__container',
+} as const;

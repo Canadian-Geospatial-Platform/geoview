@@ -631,7 +631,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     // Improve global filter accessibility
     muiSearchTextFieldProps: {
       inputProps: {
-        type: 'text',
+        type: 'search',
         'aria-label': t('dataTable.searchInputLabel')!,
       },
       sx: {
