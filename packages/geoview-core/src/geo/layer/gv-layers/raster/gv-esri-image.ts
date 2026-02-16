@@ -30,6 +30,8 @@ import type { TypeMetadataEsriRasterFunctionInfos } from '@/api/types/layer-sche
  * @class GVEsriImage
  */
 export class GVEsriImage extends AbstractGVRaster {
+  #rasterFunctionPreviewCache = new Map<string, string>();
+
   /**
    * Constructs a GVEsriImage layer to manage an OpenLayer layer.
    * @param {ImageArcGISRest} olSource - The OpenLayer source.
@@ -229,6 +231,64 @@ export class GVEsriImage extends AbstractGVRaster {
 
     // Update the OpenLayers source
     this.getOLSource().updateParams(params);
+  }
+
+  /**
+   * Gets individual preview promises for each raster function
+   * @param {number} [size=400] - The size of the preview image (width and height)
+   * @returns {Map<string, Promise<string>>} Map of raster function names to preview promises
+   */
+  getRasterFunctionPreviews(size: number = 400): Map<string, Promise<string>> {
+    const promises = new Map<string, Promise<string>>();
+    const rasterFunctionInfos = this.getMetadataRasterFunctionInfos();
+    const layerConfig = this.getLayerConfig();
+
+    if (!rasterFunctionInfos || !layerConfig) return promises;
+
+    const bounds = this.getMetadataExtent();
+    if (!bounds) return promises;
+
+    const baseUrl = layerConfig.getMetadataAccessPath();
+    const bbox = bounds.join(',');
+
+    rasterFunctionInfos.forEach((info) => {
+      // Check cache first
+      if (this.#rasterFunctionPreviewCache.has(info.name)) {
+        promises.set(info.name, Promise.resolve(this.#rasterFunctionPreviewCache.get(info.name)!));
+        return;
+      }
+
+      // Create individual promise
+      const promise = (async () => {
+        try {
+          const renderingRule = encodeURIComponent(JSON.stringify({ rasterFunction: info.name }));
+          const previewUrl = `${baseUrl}/exportImage?bbox=${bbox}&size=${size},${size}&f=image&renderingRule=${renderingRule}`;
+
+          const response = await fetch(previewUrl);
+          if (response.ok) {
+            const blob = await response.blob();
+            const base64 = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result as string);
+              reader.onerror = reject;
+              reader.readAsDataURL(blob);
+            });
+
+            // Cache the result
+            this.#rasterFunctionPreviewCache.set(info.name, base64);
+            return base64;
+          }
+          throw new Error('Failed to fetch');
+        } catch (error) {
+          logger.logWarning(`Failed to fetch preview for raster function ${info.name}`, error);
+          throw error;
+        }
+      })();
+
+      promises.set(info.name, promise);
+    });
+
+    return promises;
   }
 
   // #endregion METHODS
