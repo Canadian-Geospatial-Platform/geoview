@@ -328,6 +328,10 @@ export interface TypeSourceImageEsriInitialConfig extends TypeBaseSourceInitialC
    * .gif formats support transparency. Default = true.
    */
   transparent?: boolean;
+  /**
+   * The raster function to be applied to the image layer.
+   */
+  rasterFunction?: string;
 }
 
 /** Initial settings to apply to the GeoView layer at creation time. */
