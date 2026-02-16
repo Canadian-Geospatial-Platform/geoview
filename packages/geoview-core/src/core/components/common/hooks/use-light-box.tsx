@@ -4,7 +4,7 @@ import type { LightBoxSlides} from '@/core/components/lightbox/lightbox';
 import { LightboxImg } from '@/core/components/lightbox/lightbox';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
-import { TIMEOUT } from '@/core/utils/constant';
+import { TIMEOUT, LIGHTBOX_SELECTORS } from '@/core/utils/constant';
 
 // Constants outside component to prevent recreating every render
 const BASE64_IMAGE_PATTERN = /^data:image\/(png|jpeg|gif|webp);base64/;
@@ -48,7 +48,7 @@ const BaseLightBoxComponent = memo(function BaseLightBoxComponent({
 
     const img = new Image();
     img.onload = () => {
-      const container = document.querySelector('.yarl__container');
+      const container = document.querySelector(LIGHTBOX_SELECTORS.CONTAINER);
       if (container) {
         const containerRect = container.getBoundingClientRect();
         const availableWidth = containerRect.width - 40;
@@ -101,10 +101,12 @@ const BaseLightBoxComponent = memo(function BaseLightBoxComponent({
     if (!activeTrapGeoView) return;
 
     setTimeout(() => {
-      const element = document.querySelector(`.returnLightboxFocusItem-${aliasIndex}`) as HTMLElement;
+      const element = document.getElementById(aliasIndex);
       if (element) {
         element.focus();
         element.classList.add('keyboard-focused');
+      } else {
+        logger.logWarning(`LightBox focus restoration failed: element "${aliasIndex}" not found`);
       }
     }, TIMEOUT.focusDelayLightbox);
   }, [activeTrapGeoView, aliasIndex, onExit]);
@@ -158,7 +160,7 @@ export function useLightBox(): UseLightBoxReturnType {
       setSlides(createSlidesList(images, alias));
       setSlidesIndex(index ?? 0);
       setImgScale(scale);
-      setAliasIndex(alias.split('_')[0]);
+      setAliasIndex(alias);
     },
     [createSlidesList]
   );

@@ -61,6 +61,7 @@ export function LayersToolbar(): JSX.Element {
    * - Forces 'add' state when no layers exist
    * - Tracks display state changes
    * - Resets flags when transitioning away from 'add' state
+   * - Restores focus when user cancels
    */
   useEffect(() => {
     // Always show 'add' panel when there are no layers
@@ -71,6 +72,13 @@ export function LayersToolbar(): JSX.Element {
     // Track display state changes to handle transitions
     if (lastDisplayState.current !== displayState) {
       lastDisplayState.current = displayState;
+
+      // Restore focus to Add button when user cancels (before resetting the userClickedAdd flag)
+      if (displayState === 'view' && userClickedAdd.current) {
+        requestAnimationFrame(() => {
+          addButtonRef.current?.focus();
+        });
+      }
 
       // Reset the userClickedAdd flag when leaving 'add' state
       if (displayState !== 'add') {

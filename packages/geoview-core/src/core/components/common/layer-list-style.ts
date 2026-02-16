@@ -116,4 +116,27 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     right: '12px',
     top: '12px',
   },
+  orderButtonDisabled: {
+    opacity: 0.5,
+    cursor: 'not-allowed',
+    pointerEvents: 'none',
+  },
+  orderButtonEnabled: {
+    opacity: 1,
+    cursor: 'pointer',
+    pointerEvents: 'auto',
+  },
+  dividerVertical: {
+    marginLeft: '0.4rem',
+    height: '1.5rem',
+    backgroundColor: theme.palette.geoViewColor.bgColor.dark[300],
+  },
+  zoomButton: {
+    height: 40,
+    width: 40,
+  },
+  containerBox: {
+    width: '100%',
+    cursor: 'pointer',
+  },
 });

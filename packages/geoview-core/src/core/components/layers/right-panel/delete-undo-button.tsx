@@ -1,11 +1,10 @@
 import type { KeyboardEvent } from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, CircularProgressBase, DeleteOutlineIcon, IconButton, UndoIcon } from '@/ui';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useMapStoreActions, useMapSelectorLayerVisibility } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
-import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 interface DeleteUndoButtonProps {
   layerPath: string;
@@ -17,6 +16,7 @@ interface UndoButtonProps {
   progressValue: number;
   onUndo: () => void;
   handleKeyDown: (event: KeyboardEvent) => void;
+  iconRef: React.RefObject<HTMLButtonElement>;
 }
 
 function UndoButtonWithProgress(props: UndoButtonProps): JSX.Element {
@@ -25,7 +25,7 @@ function UndoButtonWithProgress(props: UndoButtonProps): JSX.Element {
 
   const { t } = useTranslation<string>();
 
-  const { progressValue, onUndo, handleKeyDown } = props;
+  const { progressValue, onUndo, handleKeyDown, iconRef } = props;
   return (
     <Box sx={{ position: 'relative', display: 'inline-flex' }} onClick={onUndo}>
       <CircularProgressBase variant="determinate" size={40} value={progressValue} />
@@ -41,7 +41,7 @@ function UndoButtonWithProgress(props: UndoButtonProps): JSX.Element {
           justifyContent: 'center',
         }}
       >
-        <IconButton aria-label={t('layers.undoLayer')} edge="end" size="small" onKeyDown={handleKeyDown}>
+        <IconButton iconRef={iconRef} aria-label={t('layers.undoLayer')} edge="end" size="small" onKeyDown={handleKeyDown}>
           <UndoIcon />
         </IconButton>
       </Box>
@@ -60,10 +60,14 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   const [progress, setProgress] = useState(10);
   const [inUndoState, setInUndoState] = useState(false);
 
+  // Refs for buttons to manage focus
+  const deleteButtonRef = useRef<HTMLButtonElement>(null);
+  const undoButtonRef = useRef<HTMLButtonElement>(null);
+  const wasKeyboardActivated = useRef<boolean>(false);
+
   // get store actions
   const { deleteLayer, setLayerDeleteInProgress, getLayerDeleteInProgress } = useLayerStoreActions();
   const { setOrToggleLayerVisibility, removeLayerHighlights } = useMapStoreActions();
-  const { disableFocusTrap } = useUIStoreActions();
   const isVisible = useMapSelectorLayerVisibility(layerPath);
 
   const handleDeleteClick = (): void => {
@@ -77,11 +81,13 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     setOrToggleLayerVisibility(layerPath);
     setInUndoState(false);
     setLayerDeleteInProgress('');
+    requestAnimationFrame(() => deleteButtonRef.current?.focus());
   };
 
   const handleDeleteKeyDown = (event: KeyboardEvent): void => {
     if (event.key === 'Enter') {
       event.preventDefault();
+      wasKeyboardActivated.current = true;
       handleDeleteClick();
     }
   };
@@ -109,7 +115,12 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
       setInUndoState(false);
 
       // set focus after deletion
-      disableFocusTrap(focusTargetIdAfterDelete || 'no-focus');
+      if (focusTargetIdAfterDelete) {
+        const targetId = focusTargetIdAfterDelete;
+        requestAnimationFrame(() => {
+          document.getElementById(targetId)?.focus();
+        });
+      }
     }
     return undefined;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -128,10 +139,20 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     return undefined;
   }, [inUndoState]);
 
+  useEffect(() => {
+    if (inUndoState && wasKeyboardActivated.current) {
+      requestAnimationFrame(() => {
+        undoButtonRef.current?.focus();
+        wasKeyboardActivated.current = false;
+      });
+    }
+  }, [inUndoState]);
+
   // Never hide the remove icon, so user can remove forever loading/processing layers.
   if (!inUndoState && layerRemovable && !getLayerDeleteInProgress()) {
     return (
       <IconButton
+        iconRef={deleteButtonRef}
         onClick={handleDeleteClick}
         className="buttonOutline"
         edge="end"
@@ -146,6 +167,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   if (!inUndoState) {
     return (
       <IconButton
+        iconRef={deleteButtonRef}
         aria-label={t('layers.deleteLayer')}
         onClick={handleDeleteClick}
         className="buttonOutline"
@@ -157,5 +179,12 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
       </IconButton>
     );
   }
-  return <UndoButtonWithProgress progressValue={progress} onUndo={handleUndoClick} handleKeyDown={handleUndoDeleteKeyDown} />;
+  return (
+    <UndoButtonWithProgress
+      iconRef={undoButtonRef}
+      progressValue={progress}
+      onUndo={handleUndoClick}
+      handleKeyDown={handleUndoDeleteKeyDown}
+    />
+  );
 }
