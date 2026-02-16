@@ -1067,7 +1067,7 @@ interface TypeLayerEntryConfig {
   layerStyle?: TypeLayerStyle;
   layerText?: TypeLayerTextConfig;
   layerFilter?: string;
-
+  
   // Scale constraints
   minScale?: number;
   maxScale?: number;
@@ -1604,6 +1604,7 @@ interface TypeSourceImageEsriInitialConfig {
   transparent?: boolean; // Default = true
   crossOrigin?: string;
   projection?: 3978 | 3857 | 4326;
+  rasterFunction?: string;
 }
 
 // Static Image Source
