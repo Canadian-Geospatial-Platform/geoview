@@ -46,6 +46,8 @@ export interface ILayerState {
     getLayerTimeDimension: (layerPath: string) => TimeDimension | undefined;
     getLayerRasterFunctionInfos: (layerPath: string) => TypeMetadataEsriRasterFunctionInfos[] | undefined;
     getLayerRasterFunction: (layerPath: string) => string | undefined;
+    getLayerRasterFunctionPreviews: (layerPath: string) => Map<string, Promise<string>>;
+    getLayerSettings: (layerPath: string) => string[];
     refreshLayer: (layerPath: string) => void;
     reloadLayer: (layerPath: string) => void;
     setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
@@ -203,6 +205,24 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        */
       getLayerRasterFunction: (layerPath: string): string | undefined => {
         return LegendEventProcessor.getLayerRasterFunction(get().mapId, layerPath);
+      },
+
+      /**
+       * Fetches raster function previews for a layer.
+       * @param {string} layerPath - The layer path.
+       * @returns {Map<string, Promise<string>>} Map of raster function names to preview URLs.
+       */
+      getLayerRasterFunctionPreviews: (layerPath: string): Map<string, Promise<string>> => {
+        return LegendEventProcessor.getLayerRasterFunctionPreviews(get().mapId, layerPath);
+      },
+
+      /**
+       * Gets the available settings for a layer.
+       * @param {string} layerPath - The layer path.
+       * @returns {string[]} Array of available setting types.
+       */
+      getLayerSettings: (layerPath: string): string[] => {
+        return LegendEventProcessor.getLayerSettings(get().mapId, layerPath);
       },
 
       /**
@@ -484,6 +504,11 @@ export const useLayerIconLayerSet = (layerPath: string): string[] => {
     return layer.icons.map((item) => item.iconImage).filter((d) => d !== null) as string[];
   }
   return [];
+};
+
+export const useLayerSelectorRasterFunctionInfos = (layerPath: string): TypeMetadataEsriRasterFunctionInfos[] | undefined => {
+  const actions = useStore(useGeoViewStore(), (state) => state.layerState.actions);
+  return actions.getLayerRasterFunctionInfos(layerPath);
 };
 
 // Generic hook that can select any key from the layer

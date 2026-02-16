@@ -219,6 +219,46 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Gets the raster function previews for the ESRI image layer
+   * @param {string} mapId - The map identifier.
+   * @param {string} layerPath - The layer path.
+   * @returns {Map<string, Promise<string>>} The raster function previews
+   */
+  static getLayerRasterFunctionPreviews(mapId: string, layerPath: string): Map<string, Promise<string>> {
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
+
+    if (geoviewLayer && 'getRasterFunctionPreviews' in geoviewLayer && typeof geoviewLayer.getRasterFunctionPreviews === 'function') {
+      return geoviewLayer.getRasterFunctionPreviews();
+    }
+
+    return new Map();
+  }
+
+  /**
+   * Gets the available settings for a layer
+   * @param {string} mapId - The map identifier
+   * @param {string} layerPath - The layer path
+   * @returns {string[]} Array of available setting types
+   */
+  static getLayerSettings(mapId: string, layerPath: string): string[] {
+    const settings: string[] = [];
+
+    const layer = LegendEventProcessor.getLegendLayerInfo(mapId, layerPath);
+    if (!layer) return settings;
+
+    // Check for ESRI Image with raster functions
+    if (layer.type === CONST_LAYER_TYPES.ESRI_IMAGE) {
+      const rasterFunctionInfos = this.getLayerRasterFunctionInfos(mapId, layerPath);
+      if (rasterFunctionInfos && rasterFunctionInfos.length > 0) {
+        settings.push('rasterFunction');
+      }
+    }
+
+    // Add other layer types with settings here
+    return settings;
+  }
+
+  /**
    * Sets the layer bounds for a layer path
    * @param {string} mapId - The map id
    * @param {string} layerPath - The layer path
