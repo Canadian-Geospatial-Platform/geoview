@@ -330,6 +330,10 @@ export interface TypeSourceImageEsriInitialConfig extends TypeBaseSourceInitialC
    * @deprecated Seems not used anymore?
    */
   transparent?: boolean;
+  /**
+   * The raster function to be applied to the image layer.
+   */
+  rasterFunction?: string;
 }
 
 /** Initial settings to apply to the GeoView layer at creation time. */
