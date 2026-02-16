@@ -50,7 +50,6 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const { setSelectedLayerPath } = useTimeSliderStoreActions()!;
   const { isLayerHiddenOnMap } = useMapStoreActions();
   const legendLayers = useLayerLegendLayers();
-  const displayLanguage = useAppDisplayLanguage();
   const layerDisplayDateFormats = useLayerDisplayDateFormats();
   const layerDisplayDateTimezones = useLayerDisplayDateTimezones();
   const layerTemporalModes = useLayerDateTemporalModes();
