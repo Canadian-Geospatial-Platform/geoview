@@ -13,7 +13,6 @@ import type { TypeEsriImageLayerConfig } from '@/geo/layer/geoview-layers/raster
 export interface EsriImageLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
   /** Source settings to apply to the GeoView layer source at creation time. */
   source?: TypeSourceImageEsriInitialConfig;
-  rasterFunction?: string; // Initial raster function for ESRI Image layers
   rasterFunctionInfos?: TypeMetadataEsriRasterFunctionInfos[];
 }
 
@@ -33,7 +32,7 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   constructor(layerConfig: EsriImageLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.ESRI_IMAGE, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
 
-    if (layerConfig.rasterFunction) this.#rasterFunction = layerConfig.rasterFunction;
+    if (layerConfig.source?.rasterFunction) this.#rasterFunction = layerConfig.source.rasterFunction;
   }
 
   // #region OVERRIDES
