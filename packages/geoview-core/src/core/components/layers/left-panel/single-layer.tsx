@@ -113,6 +113,9 @@ export function SingleLayer({
   // State to track if delete button should show for loading layers
   const [showDeleteOnLoading, setShowDeleteOnLoading] = useState(false);
 
+  // State to track if the layer item has focus within for accessibility purposes
+  const [hasFocusWithin, setHasFocusWithin] = useState(false);
+
   // Is visibility button disabled?
   const isLayerVisibleCapable = layerControls?.visibility;
 
@@ -208,48 +211,21 @@ export function SingleLayer({
   // #region HANDLERS
 
   /**
-   * Blur any focused button element that is not within this layer.
-   * This ensures hasFocusWithin state is properly cleared on other layers.
-   */
-  const blurOtherLayerButtons = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('SINGLE-LAYER - blurOtherLayerButtons');
-
-    const activeElement = document.activeElement as HTMLElement;
-    if (activeElement && activeElement.tagName === 'BUTTON' && !layerItemRef.current?.contains(activeElement)) {
-      activeElement.blur();
-    }
-  }, []);
-
-  /**
-   * Select the layer if not already selected and status is valid.
-   */
-  const selectLayerIfNeeded = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('SINGLE-LAYER - selectLayerIfNeeded');
-
-    if (!layerIsSelected && ['processed', 'loaded'].includes(layerStatus!)) {
-      setSelectedLayerPath(layerPath);
-      showLayerDetailsPanel?.(layerId || '');
-    }
-  }, [layerIsSelected, layerStatus, layerPath, layerId, setSelectedLayerPath, showLayerDetailsPanel]);
-
-  /**
    * Handle expand/shrink of layer groups.
    */
-  const handleExpandGroupClick = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('SINGLE-LAYER - handleExpandGroupClick');
+  const handleExpandGroupClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
+      // Log
+      logger.logTraceUseCallback('SINGLE-LAYER - handleExpandGroupClick');
 
-    // Blur focused buttons on other layers
-    blurOtherLayerButtons();
+      // Prevent triggering parent onClick
+      event.stopPropagation();
 
-    // Select the layer if not already selected
-    selectLayerIfNeeded();
-
-    // Set legend collapse value
-    toggleLegendCollapsed(layerPath);
-  }, [layerPath, selectLayerIfNeeded, toggleLegendCollapsed, blurOtherLayerButtons]);
+      // Set legend collapse value
+      toggleLegendCollapsed(layerPath);
+    },
+    [layerPath, toggleLegendCollapsed]
+  );
 
   const handleLayerClick = useCallback((): void => {
     // Log
@@ -267,39 +243,47 @@ export function SingleLayer({
       return;
     }
 
-    // Blur focused buttons on other layers
-    blurOtherLayerButtons();
-
     // Set selected layer path
     setSelectedLayerPath(layerPath);
     showLayerDetailsPanel?.(layerId || '');
-  }, [
-    layerPath,
-    layerId,
-    layerStatus,
-    setSelectedLayerPath,
-    showLayerDetailsPanel,
-    getLayerDeleteInProgress,
-    deleteLayer,
-    blurOtherLayerButtons,
-  ]);
+  }, [layerPath, layerId, layerStatus, setSelectedLayerPath, showLayerDetailsPanel, getLayerDeleteInProgress, deleteLayer]);
+
+  // Handlers for keyboard navigation of the sorting arrows and action buttons for accessibility
+  const handleFocusWithin = useCallback((): void => {
+    // Log
+    logger.logTraceUseCallback('SINGLE-LAYER - handleFocusWithin');
+
+    setHasFocusWithin(true);
+
+    // Scroll into view when any focusable element within receives focus (scrollListItemIntoView utility does not work well for this)
+    layerListItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+  }, []);
+
+  const handleBlurWithin = useCallback((event: React.FocusEvent<HTMLElement>): void => {
+    // Log
+    logger.logTraceUseCallback('SINGLE-LAYER - handleBlurWithin');
+
+    // Only blur if focus moved outside this layer item
+    if (!event.currentTarget.contains(event.relatedTarget as Node)) {
+      setHasFocusWithin(false);
+    }
+  }, []);
 
   const handleArrowClick = useCallback(
-    (direction: number) => {
+    (event: React.MouseEvent<HTMLButtonElement>, direction: number) => {
       // Log
       logger.logTraceUseCallback('SINGLE-LAYER - handleArrowClick');
 
-      // Select the layer if not already selected
-      selectLayerIfNeeded();
-
+      // Prevent triggering parent onClick
+      event.stopPropagation();
       reorderLayer(layerPath, direction);
 
-      // Scroll into view after DOM updates (scrollListItemIntoView utility does work well for this)
+      // Scroll into view after DOM updates (scrollListItemIntoView utility does not work well for this)
       requestAnimationFrame(() => {
         layerListItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
       });
     },
-    [layerPath, selectLayerIfNeeded, reorderLayer]
+    [layerPath, reorderLayer]
   );
 
   const handleArrowKeyDown = useCallback(
@@ -311,7 +295,7 @@ export function SingleLayer({
         reorderLayer(layerPath, direction);
         event.preventDefault();
 
-        // Scroll into view after DOM updates (scrollListItemIntoView utility does work well for this)
+        // Scroll into view after DOM updates (scrollListItemIntoView utility does not work well for this)
         requestAnimationFrame(() => {
           layerListItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
         });
@@ -341,43 +325,55 @@ export function SingleLayer({
     (event: React.MouseEvent<HTMLButtonElement>) => {
       // Determine direction from button id
       const direction = event.currentTarget.id.includes('up-order') ? -1 : 1;
-      handleArrowClick(direction);
+      handleArrowClick(event, direction);
     },
     [handleArrowClick]
   );
 
-  const handleToggleVisibility = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('SINGLE-LAYER - handleToggleVisibility');
+  const handleToggleVisibility = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
+      // Log
+      logger.logTraceUseCallback('SINGLE-LAYER - handleToggleVisibility');
 
-    // Select the layer if not already selected
-    selectLayerIfNeeded();
+      // Prevent triggering parent onClick
+      event.stopPropagation();
 
-    // Toggle visibility
-    setOrToggleLayerVisibility(layerPath);
-  }, [layerPath, selectLayerIfNeeded, setOrToggleLayerVisibility]);
+      // Toggle visibility
+      setOrToggleLayerVisibility(layerPath);
+    },
+    [layerPath, setOrToggleLayerVisibility]
+  );
 
-  const handleZoomToLayerVisibleScale = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('SINGLE-LAYER - handleZoomToLayerVisibleScale');
+  const handleZoomToLayerVisibleScale = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
+      // Log
+      logger.logTraceUseCallback('SINGLE-LAYER - handleZoomToLayerVisibleScale');
 
-    // Select the layer if not already selected
-    selectLayerIfNeeded();
+      // Prevent triggering parent onClick
+      event.stopPropagation();
 
-    // Zoom to visible scale
-    zoomToLayerVisibleScale(layerPath);
-  }, [layerPath, selectLayerIfNeeded, zoomToLayerVisibleScale]);
+      // Track that zoom button was clicked for focus restoration
+      zoomButtonClickedRef.current = true;
 
-  const handleReload = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('SINGLE-LAYER - handleReload');
+      // Zoom to visible scale
+      zoomToLayerVisibleScale(layerPath);
+    },
+    [layerPath, zoomToLayerVisibleScale]
+  );
 
-    // Select the layer if not already selected
-    selectLayerIfNeeded();
+  const handleReload = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
+      // Log
+      logger.logTraceUseCallback('SINGLE-LAYER - handleReload');
 
-    // Reload layer
-    reloadLayer(layerPath);
-  }, [layerPath, selectLayerIfNeeded, reloadLayer]);
+      // Prevent triggering parent onClick
+      event.stopPropagation();
+
+      // Reload layer
+      reloadLayer(layerPath);
+    },
+    [layerPath, reloadLayer]
+  );
 
   // #endregion HANDLERS
 
@@ -418,9 +414,7 @@ export function SingleLayer({
     // Log
     logger.logTraceUseMemo('SINGLE-LAYER - memoEditModeButtons', layerPath);
 
-    // Only show arrow buttons when this specific layer is selected
-    // Do not show when only a child is selected
-    if (layerIsSelected && displayState === 'view') {
+    if ((layerIsSelected || hasFocusWithin) && displayState === 'view') {
       return (
         <>
           <IconButton
@@ -483,6 +477,7 @@ export function SingleLayer({
     t,
     theme.palette.geoViewColor.bgColor.dark,
     containerType,
+    hasFocusWithin,
   ]);
 
   // Memoize the MoreLayerButtons component section
@@ -670,8 +665,16 @@ export function SingleLayer({
   const layerListItemButtonId = `${mapId}-${containerType}-${TABS.LAYERS}-${layerPath}`;
 
   return (
-    <ListItem ref={layerItemRef} className={memoContainerClass} key={layerName} disablePadding={true} data-layer-depth={depth}>
-      <Box onClick={handleLayerClick} sx={{ width: '100%', cursor: 'pointer' }}>
+    <ListItem
+      ref={layerListItemRef}
+      className={memoContainerClass}
+      key={layerName}
+      disablePadding={true}
+      data-layer-depth={depth}
+      onFocusCapture={handleFocusWithin}
+      onBlurCapture={handleBlurWithin}
+    >
+      <Box>
         <Tooltip
           title={t('layers.selectLayer', { layerName })}
           placement="top"

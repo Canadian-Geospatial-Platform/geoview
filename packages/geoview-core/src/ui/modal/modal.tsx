@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { Fragment, useEffect, useMemo } from 'react';
+import { Fragment, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
@@ -14,7 +14,6 @@ import { CloseIcon } from '@/ui/icons/index';
 import { getSxClasses } from '@/ui/modal/modal-style';
 import { useFadeIn } from '@/core/utils/useSpringAnimations';
 import { logger } from '@/core/utils/logger';
-import { TIMEOUT } from '@/core/utils/constant';
 
 /**
  * Properties for the Modal component extending Material-UI's DialogProps
@@ -205,22 +204,20 @@ function ModalUI(props: DialogPropsExtend): JSX.Element {
   const sxClasses = useMemo(() => getSxClasses(theme, width, height), [theme, width, height]);
   const fadeInAnimation = useFadeIn();
   const AnimatedDialog = animated(Dialog);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('MODAL - open with focus on close', open);
 
     if (open) {
-      const timer = setTimeout(() => {
-        const closeButton = document.querySelector('.buttonFilledOutline') as HTMLButtonElement;
-        if (closeButton) {
-          closeButton.focus();
+      // Focus close button if available and attached to DOM
+      requestAnimationFrame(() => {
+        if (closeButtonRef.current && document.contains(closeButtonRef.current)) {
+          closeButtonRef.current.focus();
         }
-      }, TIMEOUT.modalFocusClose);
-      return () => clearTimeout(timer);
+      });
     }
-
-    return undefined;
   }, [open]);
 
   /**
@@ -269,10 +266,11 @@ function ModalUI(props: DialogPropsExtend): JSX.Element {
             ) : null}
             <IconButton
               id={`${modalId}-close-button`}
-              aria-label={t('close')}
+              aria-label={t('general.close')}
               tooltipPlacement="right"
               onClick={modal.close}
               className="headerActionsContainer"
+              iconRef={closeButtonRef}
             >
               <CloseIcon />
             </IconButton>
@@ -334,10 +332,11 @@ function ModalUI(props: DialogPropsExtend): JSX.Element {
             {onClose && (
               <IconButton
                 id={`${modalId}-close-button`}
-                aria-label={t('close')}
+                aria-label={t('general.close')}
                 tooltipPlacement="right"
                 onClick={onClose}
                 className="buttonFilledOutline"
+                iconRef={closeButtonRef}
               >
                 <CloseIcon />
               </IconButton>
