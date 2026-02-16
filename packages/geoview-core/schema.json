@@ -1510,6 +1510,10 @@
           "type": "boolean",
           "default": true,
           "description": "If true, the layer will call the service using its native SRID so that OpenLayers take charge of the reprojection on the map."
+        },
+        "rasterFunction": {
+          "type": "string",
+          "description": "The raster function to be applied to the ESRI Image layer"
         }
       }
     },
@@ -1903,10 +1907,6 @@
         },
         "layerStyle": {
           "$ref": "#/definitions/TypeLayerStyleConfig"
-        },
-        "rasterFunction": {
-          "type": "string",
-          "description": "The raster function to be applied to the ESRI Image layer"
         },
         "not": {
           "listOfLayerEntryConfig": {
