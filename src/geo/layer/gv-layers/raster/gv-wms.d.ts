@@ -54,6 +54,7 @@ export declare class GVWMS extends AbstractGVRaster {
      * @param {Event} event - The event which is being triggered.
      */
     protected onImageLoadError(event: Event): void;
+    protected onImageLoadErrorDecipherError(event: Event): string;
     /**
      * Overrides the return of feature information at a given coordinate.
      * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.

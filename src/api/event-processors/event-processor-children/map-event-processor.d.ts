@@ -87,6 +87,15 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     static getInitialFilter(mapId: string, layerPath: string): string | undefined;
     static getPointMarkers(mapId: string): Record<string, TypePointMarker[]>;
     /**
+     * Gets geolocator search area
+     * @param {string} mapId - The mapId
+     * @returns {{ coords: Coordinate; bbox?: Extent } | undefined} The geolocator search area with coordinates and optional bounding box
+     */
+    static getGeolocatorSearchArea(mapId: string): {
+        coords: Coordinate;
+        bbox?: Extent;
+    } | undefined;
+    /**
      * Gets feature highlight color.
      * @param {string} mapId - The ID of the map
      * @returns {TypeHighlightColors} The highlight color
@@ -291,7 +300,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      * @returns Promise<void>
      */
     static zoomToExtent(mapId: string, extent: Extent, options?: FitOptions): Promise<void>;
-    static zoomToGeoLocatorLocation(mapId: string, coords: Coordinate, bbox?: Extent): Promise<void>;
+    static zoomToGeoLocatorLocation(mapId: string, searchItem: string, coords: Coordinate, bbox?: Extent): Promise<void>;
     /**
      * Return to initial view state of map using config.
      *

@@ -12,7 +12,8 @@ interface LayoutProps {
     onGuideIsOpen?: (isGuideOpen: boolean) => void;
     onRightPanelClosed?: () => void;
     onRightPanelVisibilityChanged?: (isVisible: boolean) => void;
-    containerType?: TypeContainerBox;
+    containerType: TypeContainerBox;
+    titleFullscreen: string;
     hideEnlargeBtn?: boolean;
     toggleMode?: boolean;
 }

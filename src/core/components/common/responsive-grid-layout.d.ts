@@ -11,7 +11,8 @@ interface ResponsiveGridLayoutProps {
     onRightPanelClosed?: () => void;
     onRightPanelVisibilityChanged?: (isVisible: boolean) => void;
     hideEnlargeBtn?: boolean;
-    containerType?: TypeContainerBox;
+    containerType: TypeContainerBox;
+    titleFullscreen: string;
     toggleMode?: boolean;
 }
 interface ResponsiveGridLayoutExposedMethods {

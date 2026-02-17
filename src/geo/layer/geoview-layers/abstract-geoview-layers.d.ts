@@ -32,6 +32,7 @@ export declare abstract class AbstractGeoViewLayer {
     static readonly DEFAULT_HIT_TOLERANCE: number;
     /** The default waiting time before showing a warning about the metadata taking a long time to get processed */
     static readonly DEFAULT_WAIT_PERIOD_METADATA_WARNING: number;
+    static readonly DEFAULT_WAIT_PERIOD_METADATA_WARNING_RECALL: number;
     /** The default hit tolerance */
     hitTolerance: number;
     /**

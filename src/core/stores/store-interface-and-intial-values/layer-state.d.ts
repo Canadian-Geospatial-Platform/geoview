@@ -14,7 +14,6 @@ export interface ILayerState {
     legendLayers: TypeLegendLayer[];
     displayState: TypeLayersViewDisplayState;
     layerDeleteInProgress: string;
-    selectedLayerSortingArrowId: string;
     layersAreLoading: boolean;
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
     actions: {
@@ -39,7 +38,6 @@ export interface ILayerState {
         toggleItemVisibility: (layerPath: string, item: TypeLegendItem) => void;
         zoomToLayerExtent: (layerPath: string) => Promise<void>;
         zoomToLayerVisibleScale: (layerPath: string) => void;
-        setSelectedLayerSortingArrowId: (layerId: string) => void;
     };
     setterActions: {
         setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
@@ -47,7 +45,6 @@ export interface ILayerState {
         setLayerDeleteInProgress: (newVal: string) => void;
         setLegendLayers: (legendLayers: TypeLegendLayer[]) => void;
         setSelectedLayerPath: (layerPath: string) => void;
-        setSelectedLayerSortingArrowId: (arrowId: string) => void;
         setLayersAreLoading: (areLoading: boolean) => void;
     };
 }
@@ -76,7 +73,6 @@ export declare const useLayerSelectedLayer: () => TypeLegendLayer;
 export declare const useLayerSelectedLayerPath: () => string | null | undefined;
 export declare const useLayerDisplayState: () => TypeLayersViewDisplayState;
 export declare const useLayerDeleteInProgress: () => string;
-export declare const useLayerSelectedLayerSortingArrowId: () => string;
 export declare const useLayerAreLayersLoading: () => boolean;
 export declare const useSelectedLayer: () => TypeLegendLayer | undefined;
 export declare const useLayerIconLayerSet: (layerPath: string) => string[];

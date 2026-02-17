@@ -167,6 +167,14 @@ export declare class MapViewer {
      */
     getI18nInstance(): i18n;
     /**
+     * Gets geolocator search area
+     * @returns {{ coords: Coordinate; bbox?: Extent } | undefined} The geolocator search area with coordinates and optional bounding box
+     */
+    getGeolocatorSearchArea(): {
+        coords: Coordinate;
+        bbox?: Extent;
+    } | undefined;
+    /**
      * set fullscreen / exit fullscreen
      *
      * @param status - Toggle fullscreen or exit fullscreen status

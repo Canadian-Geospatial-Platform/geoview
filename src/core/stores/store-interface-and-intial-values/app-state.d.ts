@@ -20,6 +20,7 @@ export interface IAppState {
     isFullscreenActive: boolean;
     notifications: Array<NotificationDetailsType>;
     showUnsymbolizedFeatures: boolean;
+    showLayerHighlightLayerBbox: boolean;
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
     actions: {
         addMessage: (type: SnackbarType, messageKey: string, param?: string[]) => void;

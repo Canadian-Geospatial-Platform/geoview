@@ -3,7 +3,7 @@ import type { TypeContainerBox } from '@/core/types/global-types';
 interface FocusTrapContainerProps {
     children: ReactNode;
     id: string;
-    containerType?: TypeContainerBox;
+    containerType: TypeContainerBox;
     open?: boolean;
 }
 /**

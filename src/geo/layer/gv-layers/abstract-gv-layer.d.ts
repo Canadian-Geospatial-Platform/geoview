@@ -14,7 +14,7 @@ import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vec
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { TypeLayerStyleConfig, TypeFeatureInfoEntry, codedValueType, rangeDomainType, TypeLocation, QueryType, TypeStyleGeometry, TypeOutfieldsType, TypeOutfields, TypeLayerStyleSettings } from '@/api/types/map-schema-types';
-import type { TypeLayerMetadataFields, TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
+import { type TypeLayerMetadataFields, type TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
 import type { TypeLegendItem } from '@/core/components/layers/types';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
@@ -106,6 +106,12 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @param {Event} event - The event which is being triggered.
      */
     protected onImageLoadError(event: Event): void;
+    /**
+     * Overridable method called to get a more specific error code for image load errors.
+     * @param {Event} event - The event which is being triggered.
+     * @returns {string} The error code to use for the error message to the user, default is 'layers.errorImageLoad'.
+     */
+    protected onImageLoadErrorDecipherError(event: Event): string;
     /**
      * Method called when the layer source changes to check for errors.
      * @param {Event} event - The event which is being triggered.
