@@ -162,7 +162,7 @@
             "timeDimension": {
                 "field": "Year",
                 "default": [
-                    "2013-01-01T05:00:00Z"
+                    "2013-01-01T00:00:00Z"
                 ],
                 "nearestValues": "discrete",
                 "displayDateFormat": {
