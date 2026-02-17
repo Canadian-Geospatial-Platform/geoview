@@ -32,7 +32,7 @@ export type TypeDisplayDateFormat = Record<TypeDisplayLanguage, string>;
 export type TypeDisplayDateDefaults = { dateFormat: TypeDisplayDateFormat; datetimeFormat: TypeDisplayDateFormat };
 
 /**
- * The possibly time zones the date to read is at.
+ * The possible time zones the date to read is at.
  * This can be any supported IANA time zone, e.g.: 'America/Toronto', 'Europe/Paris', 'UTC' or even 'local' to let the system determine the local TimeIANA on-the-fly.
  */
 export type TimeIANA = string | 'local';
@@ -905,7 +905,7 @@ export abstract class DateMgt {
 
   /**
    * Create a range of date object from OGC time dimension following ISO 8601
-   * @param {string} ogcTimeDimensionValues OGC time dimension values following
+   * @param {string} ogcTimeDimensionValues - OGC time dimension values following
    * @returns {RangeItems} array of date from the dimension
    * @throws {InvalidTimeDimensionError} When range couldn't be computed, or when duration is invalid, or non-positive or when an infinite loop is detected.
    * @throws {InvalidDateError} When input has invalid dates.

@@ -386,7 +386,7 @@ export class InvalidDateError extends Error {
 }
 
 /**
- * Custom error class for handling invalid time iana formats.
+ * Custom error class for handling invalid time IANA formats.
  * @extends {Error}
  */
 export class InvalidTimezoneError extends Error {
