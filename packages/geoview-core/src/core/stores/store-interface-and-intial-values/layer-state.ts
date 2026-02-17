@@ -478,14 +478,27 @@ export const useLayerDateTemporalModes = (): Record<string, TemporalMode> => {
   return useStableSelector(
     useGeoViewStore(),
     (state) => {
+      // The complete object that will be returned
       const modes: Record<string, TemporalMode> = {};
 
-      state.layerState.legendLayers.forEach((layer) => {
-        if (layer.layerPath) {
-          modes[layer.layerPath] = layer.dateTemporalMode ?? DateMgt.DEFAULT_TEMPORAL_MODE;
-        }
-      });
+      // Recursive function to collect the display date formats from all layers and their children
+      const collect = (layers: typeof state.layerState.legendLayers): void => {
+        layers.forEach((layer) => {
+          if (layer.layerPath) {
+            modes[layer.layerPath] = layer.dateTemporalMode ?? DateMgt.DEFAULT_TEMPORAL_MODE;
+          }
 
+          // If any children
+          if (layer.children?.length) {
+            collect(layer.children);
+          }
+        });
+      };
+
+      // Collect the display date formats starting from the top-level layers
+      collect(state.layerState.legendLayers);
+
+      // Return the date temporal modes
       return modes;
     },
     shallowObjectEqual
@@ -515,14 +528,30 @@ export const useLayerDisplayDateFormats = (): Record<string, TypeDisplayDateForm
   return useStableSelector(
     useGeoViewStore(),
     (state) => {
+      // The complete object that will be returned
       const modes: Record<string, TypeDisplayDateFormat> = {};
 
-      state.layerState.legendLayers.forEach((layer) => {
-        if (layer.layerPath) {
-          modes[layer.layerPath] = layer.displayDateFormat ?? AppEventProcessor.getDisplayDateFormatDefault(state.mapId).datetimeFormat;
-        }
-      });
+      // Get the default format
+      const defaultFormat = AppEventProcessor.getDisplayDateFormatDefault(state.mapId).datetimeFormat;
 
+      // Recursive function to collect the display date formats from all layers and their children
+      const collect = (layers: typeof state.layerState.legendLayers): void => {
+        layers.forEach((layer) => {
+          if (layer.layerPath) {
+            modes[layer.layerPath] = layer.displayDateFormat ?? defaultFormat;
+          }
+
+          // If any children
+          if (layer.children?.length) {
+            collect(layer.children);
+          }
+        });
+      };
+
+      // Collect the display date formats starting from the top-level layers
+      collect(state.layerState.legendLayers);
+
+      // Return the display date formats
       return modes;
     },
     shallowObjectEqual
