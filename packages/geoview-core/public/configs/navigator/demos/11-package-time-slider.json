@@ -12,7 +12,7 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerId": "ESRIImageCrop",
-        "geoviewLayerName": "Weekly best-quality NDVI",
+        "geoviewLayerName": "Weekly NDVI (issue with server?)",
         "geoviewLayerType": "esriImage",
         "metadataAccessPath": "https://agriculture.canada.ca/imagery-images/rest/services/agextent_mod_anomaly_best_quality_max_ndvi_weekly/ImageServer",
         "listOfLayerEntryConfig": [
@@ -35,7 +35,7 @@
       },
       {
         "geoviewLayerId": "historical-flood-dynamic",
-        "geoviewLayerName": "Hist. Flood Events - EsriDynamic",
+        "geoviewLayerName": "Hist. Flood - EsriDynamic",
         "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
         "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [
@@ -46,9 +46,25 @@
       },
       {
         "geoviewLayerId": "historical-flood-feature",
-        "geoviewLayerName": "Hist. Flood Events - EsriFeature",
+        "geoviewLayerName": "Hist. Flood - EsriFeature",
         "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/historical_flood_event_en/MapServer",
         "geoviewLayerType": "esriFeature",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "0",
+            "initialSettings": {
+              "states": {
+                "visible": false
+              }
+            }
+          }
+        ]
+      },
+      {
+        "geoviewLayerId": "historical-flood-wms",
+        "geoviewLayerName": "Hist. Flood - WMS (known issue, turn off time-slider toggle)",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/services/NRCan/historical_flood_event_en/MapServer/WMSServer",
+        "geoviewLayerType": "ogcWms",
         "listOfLayerEntryConfig": [
           {
             "layerId": "0",

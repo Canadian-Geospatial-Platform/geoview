@@ -1406,6 +1406,7 @@ export class LayerApi {
 
   /**
    * Sets the date display format (short) for a specific layer.
+   * Short means the date should be displayed in a more compact format.
    * This updates the layer-level configuration used to control how date values
    * are formatted when displayed (e.g., in legends, tooltips, or UI components).
    * The value is stored in the application state via the LegendEventProcessor.

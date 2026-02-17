@@ -847,11 +847,13 @@ export abstract class DateMgt {
     // Guess the display time information
     const guessedInfo = this.guessDisplayDateInformationFromTimeDimension(rangeItems.range, displayDateMode);
 
+    const defaultValues = singleHandle
+      ? [rangeItems.range[rangeItems.range.length - 1]]
+      : [rangeItems.range[0], rangeItems.range[rangeItems.range.length - 1]];
+
     const timeDimension: TimeDimension = {
       field: startTimeField,
-      default: singleHandle
-        ? [rangeItems.range[rangeItems.range.length - 1]]
-        : [rangeItems.range[0], rangeItems.range[rangeItems.range.length - 1]],
+      default: defaultValues,
       unitSymbol: '',
       rangeItems,
       nearestValues: rangeItems.type === 'relative' ? 'continuous' : 'discrete',
@@ -890,7 +892,7 @@ export abstract class DateMgt {
       unitSymbol: dimensionObject.unitSymbol || '',
       rangeItems,
       nearestValues: rangeItems.type === 'relative' ? 'continuous' : 'discrete',
-      singleHandle: true,
+      singleHandle: true, // TODO: WMS time dimensions enhancements to support dual handles? Would need to also update the TimeSliderEventProcessor.updateFilters function accordingly
       displayDateFormat: guessedInfo?.displayDateFormat,
       displayDateFormatShort: guessedInfo?.displayDateFormatShort,
       displayDateTimezone: guessedInfo?.displayDateTimezone,

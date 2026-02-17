@@ -293,7 +293,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Persists the display date format (short)for a specific layer in the application store.
+   * Persists the display date format (short) for a specific layer in the application store.
+   * Short means the date should be displayed in a more compact format.
    * This updates the legend layer state so that the selected display date format
    * is retained and can be reused by UI components (e.g. legends, tooltips)
    * without directly interacting with the map viewer.
