@@ -175,7 +175,7 @@ export abstract class DateMgt {
 
   /** Regex used to spot a time component inside a date format string */
   static readonly #REGEX_HAS_TIME_COMPONENTS_IN_FORMAT =
-    /(\[[^\]]*?])|(?:^|[^A-Za-z])(H{1,2}|h{1,2}|k{1,2}|m{1,2}|s{1,2}|S{1,3}|A|a|X|x)(?=[^A-Za-z]|$)/;
+    /(\[[^\]]*])|(?:^|[^A-Za-z])(H{1,2}|h{1,2}|k{1,2}|m{1,2}|s{1,2}|S{1,3}|A|a|X|x)(?=[^A-Za-z]|$)/;
 
   /** The default input formats to append to the specific input formats when trying to read a date in a non-ISO format */
   // TODO: Add more date format support (this is only used when a particular input format is specified, otherwise we default to ISO formats)
