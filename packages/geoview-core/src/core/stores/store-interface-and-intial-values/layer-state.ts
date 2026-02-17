@@ -478,15 +478,17 @@ export const useLayerDateTemporalModes = (): Record<string, TemporalMode> => {
   return useStableSelector(
     useGeoViewStore(),
     (state) => {
-      const modes: Record<string, TemporalMode> = {};
+      // Get all layers
+      const allLayers = LegendEventProcessor.findAllLayers(state.layerState.legendLayers);
 
-      state.layerState.legendLayers.forEach((layer) => {
+      // Return the object with the display date formats for all layers, using the default format when not defined at the layer level
+      return Object.values(allLayers).reduce<Record<string, TemporalMode>>((acc, layer) => {
         if (layer.layerPath) {
-          modes[layer.layerPath] = layer.dateTemporalMode ?? DateMgt.DEFAULT_TEMPORAL_MODE;
+          // eslint-disable-next-line no-param-reassign
+          acc[layer.layerPath] = layer.dateTemporalMode ?? DateMgt.DEFAULT_TEMPORAL_MODE;
         }
-      });
-
-      return modes;
+        return acc;
+      }, {});
     },
     shallowObjectEqual
   );
@@ -515,15 +517,20 @@ export const useLayerDisplayDateFormats = (): Record<string, TypeDisplayDateForm
   return useStableSelector(
     useGeoViewStore(),
     (state) => {
-      const modes: Record<string, TypeDisplayDateFormat> = {};
+      // Get the default format
+      const defaultFormat = AppEventProcessor.getDisplayDateFormatDefault(state.mapId).datetimeFormat;
 
-      state.layerState.legendLayers.forEach((layer) => {
+      // Get all layers
+      const allLayers = LegendEventProcessor.findAllLayers(state.layerState.legendLayers);
+
+      // Return the object with the display date formats for all layers, using the default format when not defined at the layer level
+      return Object.values(allLayers).reduce<Record<string, TypeDisplayDateFormat>>((acc, layer) => {
         if (layer.layerPath) {
-          modes[layer.layerPath] = layer.displayDateFormat ?? AppEventProcessor.getDisplayDateFormatDefault(state.mapId).datetimeFormat;
+          // eslint-disable-next-line no-param-reassign
+          acc[layer.layerPath] = layer.displayDateFormat ?? defaultFormat;
         }
-      });
-
-      return modes;
+        return acc;
+      }, {});
     },
     shallowObjectEqual
   );
@@ -579,15 +586,17 @@ export const useLayerDisplayDateTimezones = (): Record<string, TimeIANA> => {
   return useStableSelector(
     useGeoViewStore(),
     (state) => {
-      const modes: Record<string, TimeIANA> = {};
+      // Get all layers
+      const allLayers = LegendEventProcessor.findAllLayers(state.layerState.legendLayers);
 
-      state.layerState.legendLayers.forEach((layer) => {
+      // Return the object with the display date formats for all layers, using the default format when not defined at the layer level
+      return Object.values(allLayers).reduce<Record<string, TimeIANA>>((acc, layer) => {
         if (layer.layerPath) {
-          modes[layer.layerPath] = layer.displayDateTimezone ?? AppEventProcessor.getDisplayDateTimezone(state.mapId);
+          // eslint-disable-next-line no-param-reassign
+          acc[layer.layerPath] = layer.displayDateTimezone ?? AppEventProcessor.getDisplayDateTimezone(state.mapId);
         }
-      });
-
-      return modes;
+        return acc;
+      }, {});
     },
     shallowObjectEqual
   );

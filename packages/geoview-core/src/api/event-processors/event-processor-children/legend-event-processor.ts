@@ -717,6 +717,52 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Recursively traverses a hierarchy of legend layers and returns a flat lookup
+   * object indexed by `layerPath`.
+   * All layers that contain a defined `layerPath` will be included in the result,
+   * including nested children at any depth.
+   * If duplicate `layerPath` values exist (shouldn't happen by design), later occurrences will overwrite earlier ones.
+   * @param {TypeLegendLayer[]} layers - The top-level legend layers to traverse.
+   * @returns {Record<string, TypeLegendLayer>} A record keyed by `layerPath`, where each value is the corresponding `TypeLegendLayer`.
+   * @static
+   */
+  static findAllLayers(layers: TypeLegendLayer[]): Record<string, TypeLegendLayer> {
+    // The complete object that will be returned
+    const total: Record<string, TypeLegendLayer> = {};
+
+    // Collect the display date formats starting from the top-level layers
+    this.#findAllLayersRec(total, layers);
+
+    // Return the total
+    return total;
+  }
+
+  /**
+   * Internal recursive helper used by {@link findAllLayers} to flatten
+   * a tree of legend layers into a lookup object.
+   * This method mutates the provided `total` accumulator by adding entries
+   * for each layer that has a defined `layerPath`.
+   * @param {Record<string, TypeLegendLayer>} total - The accumulator object being populated with flattened layers.
+   * @param {TypeLegendLayer[]} layers - The current collection of layers to process.
+   * @returns {void}
+   * @private
+   * @static
+   */
+  static #findAllLayersRec(total: Record<string, TypeLegendLayer>, layers: TypeLegendLayer[]): void {
+    layers.forEach((layer) => {
+      if (layer.layerPath) {
+        // eslint-disable-next-line no-param-reassign
+        total[layer.layerPath] = layer;
+      }
+
+      // If any children
+      if (layer.children?.length) {
+        this.#findAllLayersRec(total, layer.children);
+      }
+    });
+  }
+
+  /**
    * Delete layer from legend layers.
    * @param {string} mapId - The ID of the map.
    * @param {string} layerPath - The layer path of the layer to change.

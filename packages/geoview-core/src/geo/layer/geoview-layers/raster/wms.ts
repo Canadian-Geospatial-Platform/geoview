@@ -253,7 +253,16 @@ export class WMS extends AbstractGeoViewRaster {
 
         // If a temporal dimension was found
         if (timeDimension) {
-          layerConfig.setTimeDimension(DateMgt.createDimensionFromOGC(timeDimension, displayDateMode));
+          try {
+            // Try to create the time dimension value
+            const layerTimeDimension = DateMgt.createDimensionFromOGC(timeDimension, displayDateMode);
+
+            // Set the time dimension
+            layerConfig.setTimeDimension(layerTimeDimension);
+          } catch (error: unknown) {
+            // Log and continue
+            logger.logError(error);
+          }
         }
       }
 
