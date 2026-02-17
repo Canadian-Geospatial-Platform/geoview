@@ -128,10 +128,10 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     setColumnsFiltersVisibility(newValue, layerPath);
   };
 
-  // TODO: ALEX - Uncouple dayjs from data-table
+  // Utility function to check date
   const isDayjs = (v: unknown): v is Dayjs => typeof v === 'object' && v !== null && 'isValid' in v;
 
-  // TODO: ALEX - Uncouple dayjs from data-table
+  // Utility function to check date range
   const isDateRange = useCallback((v: unknown): v is [Dayjs | null, Dayjs | null] => Array.isArray(v) && v.some(isDayjs), []);
 
   /**

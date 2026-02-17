@@ -941,6 +941,9 @@ export class GVWMS extends AbstractGVRaster {
       // Get the current data filter
       currentDataFilter = source.getParams()['FILTER'];
 
+      // Get the current datetime filter
+      currentDatetimeFilter = source.getParams()['TIME'];
+
       // If working with a WMS layer entry config, it's possible that it's filtered based on its style, which is no possible with Esri Image
       if (layerConfig instanceof OgcWmsLayerEntryConfig) {
         // Init to nothing
@@ -974,9 +977,6 @@ export class GVWMS extends AbstractGVRaster {
 
         // If there's a specific filter
         if (queryElements.length > 1) {
-          // Get the current datetime filter
-          currentDatetimeFilter = source.getParams()['TIME'];
-
           // Parse the filter value to use
           const datetimeFilter = GVLayerUtilities.parseDateTimeValuesEsriImageOrWMS(
             queryElements[1].trim(),
@@ -988,14 +988,8 @@ export class GVWMS extends AbstractGVRaster {
         }
       }
 
-      // Check whether the current data filter is different from the new one
-      const dataFilterChanged = sourceParams.FILTER !== currentDataFilter;
-
-      // Check whether the current datetime filter is different from the new one
-      const datetimeFilterChanged = sourceParams.TIME !== currentDatetimeFilter;
-
-      // Determine if we should apply or reset filter
-      const shouldUpdateFilter = dataFilterChanged || datetimeFilterChanged;
+      // Determine if we should update the filter
+      const shouldUpdateFilter = sourceParams.FILTER !== currentDataFilter || sourceParams.TIME !== currentDatetimeFilter;
 
       // If should update the filtering
       if (shouldUpdateFilter) {

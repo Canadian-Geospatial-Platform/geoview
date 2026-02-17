@@ -80,6 +80,9 @@ export abstract class AbstractGeoViewLayer {
   static readonly DEFAULT_WAIT_PERIOD_METADATA_WARNING: number = 10 * 1000; // 10 seconds
   static readonly DEFAULT_WAIT_PERIOD_METADATA_WARNING_RECALL: number = 20 * 1000; // 20 seconds
 
+  /** The default display date mode used when generating default configurations */
+  static readonly DEFAULT_DISPLAY_DATE_MODE_TO_GENERATE_CONFIGS: DisplayDateMode = 'long';
+
   /** The default hit tolerance */
   hitTolerance: number = AbstractGeoViewLayer.DEFAULT_HIT_TOLERANCE;
 
@@ -1327,7 +1330,7 @@ export abstract class AbstractGeoViewLayer {
       // Start the geoview-layers config process
       // Uses 'long' as displayDateMode by default just to generate a config
       layer
-        .createGeoViewLayers('long')
+        .createGeoViewLayers(this.DEFAULT_DISPLAY_DATE_MODE_TO_GENERATE_CONFIGS)
         .then((configs) => {
           // Resolve with the configurations
           resolve(configs);
