@@ -143,7 +143,6 @@
                 "en": "YYYY-MM-DD",
                 "fr": "YYYY-MM-DD"
               },
-              "displayDateTimezone": "America/Vancouver",
               "rangeItems": {
                 "type": "",
                 "range": ["2023-04-19T00:00:00+00:00", "2025-09-15T00:00:00+00:00"]
@@ -166,9 +165,10 @@
                     "2013-01-01T05:00:00Z"
                 ],
                 "nearestValues": "discrete",
-                "displayPattern": [
-                    "year"
-                ],
+                "displayDateFormat": {
+                  "en": "YYYY",
+                  "fr": "YYYY"
+                },
                 "rangeItems": {
                     "type": "",
                     "range": [

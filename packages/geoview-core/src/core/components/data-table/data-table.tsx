@@ -52,7 +52,6 @@ import { isImage, delay } from '@/core/utils/utilities';
 import { debounce } from '@/core/utils/debounce';
 import { logger } from '@/core/utils/logger';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
-import { VALID_DISPLAY_LANGUAGE } from '@/api/types/map-schema-types';
 import { useFilterRows, useToolbarActionMessage, useGlobalFilter } from './hooks';
 import { getSxClasses } from './data-table-style';
 import { useLightBox } from '@/core/components/common';
@@ -89,6 +88,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   const layerDateTemporalMode = useLayerDateTemporalMode(layerPath);
   const displayDateFormat = useLayerDisplayDateFormat(layerPath);
   const displayDateTimezone = useLayerDisplayDateTimezone(layerPath);
+  const displayDateTimezoneUniversal = displayDateTimezone === 'local' ? DateMgt.TIME_IANA_LOCAL : displayDateTimezone;
 
   // internal state
   const [density, setDensity] = useState<MRTDensityState>('compact');
@@ -284,15 +284,10 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
           Cell: ({ cell }) => getCellContentDate(cell.getValue<Dayjs>()),
           filterVariant: 'date',
           muiFilterDatePickerProps: {
-            timezone: displayDateTimezone,
-            format: 'YYYY-MM-DD', // TODO: ALEX - CHECK which format muiFilterDatePickerProps supports and see if we can use the same as the application
+            timezone: displayDateTimezoneUniversal,
+            format: displayDateFormat[language],
             // NOTE: reason for type cast as undefined as x-mui-datepicker prop type saying Date cant be assigned to undefined.
             minDate: DateMgt.createDayjs('1600-01-01') as unknown as undefined,
-            slotProps: {
-              textField: {
-                placeholder: language === VALID_DISPLAY_LANGUAGE[1] ? 'AAAA-MM-JJ' : 'YYYY-MM-DD',
-              },
-            },
           },
           columnFilterModeOptions: ['between', 'betweenInclusive'], // Number/OID/Date columns: equals, notEquals, between, betweenInclusive, lessThan, greaterThan, lessThanOrEqualTo, greaterThanOrEqualTo, empty, notEmpty
         }),
@@ -774,7 +769,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
         const operator = filterFn ?? 'contains';
         const strFilter = STRING_FILTER[operator];
 
-        return strFilter.replace('filterId', filterId).replace('value', value as string);
+        return strFilter?.replace('filterId', filterId).replace('value', value as string) ?? '';
       });
     },
     [useTable, isDateRange, isColumnFilterNumeric]

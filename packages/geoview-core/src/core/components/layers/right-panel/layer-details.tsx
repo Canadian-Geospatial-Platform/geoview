@@ -677,6 +677,11 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
                     <ListItemText primary={`${t('layers.layerDisplayDateTimezone')}${layerDisplayDateTimezone}`} />
                   </ListItem>
                 )}
+                {layerTimeDimension?.field && (
+                  <ListItem sx={sxClasses.layerDetailsListItem}>
+                    <ListItemText primary={`${t('layers.layerTimeDimensionField')}${layerTimeDimension.field}`} />
+                  </ListItem>
+                )}
                 {layerTimeDimension?.rangeItems?.range?.[0] && (
                   <ListItem sx={sxClasses.layerDetailsListItem}>
                     <ListItemText
@@ -706,7 +711,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
                     <ListItemText primary={`${t('layers.layerDisplayDateTimezone')}${timeSliderDimension.displayDateTimezone}`} />
                   </ListItem>
                 )}
-                {timeSliderDimension?.field && (
+                {timeSliderDimension?.field && timeSliderDimension?.field !== layerTimeDimension?.field && (
                   <ListItem sx={sxClasses.layerDetailsListItem}>
                     <ListItemText primary={`${t('layers.layerTimeDimensionField')}${timeSliderDimension.field}`} />
                   </ListItem>
