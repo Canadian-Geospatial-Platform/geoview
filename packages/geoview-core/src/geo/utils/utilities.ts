@@ -40,6 +40,21 @@ import type { TypeVectorLayerStyles } from './renderer/geoview-renderer';
 // available layer types
 export const layerTypes = CONST_LAYER_TYPES;
 
+interface EsriFeature {
+  attributes?: Record<string, unknown>;
+  geometry?: {
+    x?: number | string | undefined;
+    y?: number | string | undefined;
+    rings?: (number | string)[][][];
+    paths?: (number | string)[][][];
+    points?: (number | string)[][];
+  };
+}
+
+interface EsriFeatureCollection {
+  features?: EsriFeature[];
+}
+
 // #region FETCH METADATA
 
 export abstract class GeoUtilities {
@@ -960,6 +975,52 @@ export abstract class GeoUtilities {
    * @returns {import('ol/Feature').default[]} An array of parsed OpenLayers Feature instances.
    */
   static readFeaturesFromEsriJSON(features: unknown, options: ReadOptions | undefined): Feature<Geometry>[] {
+    // GV Strings in the geometry will throw errors in EsriJSON().readFeatures()
+    // GV So they are removed so the feature will show in the datatable but not the map
+    if (features && typeof features === 'object' && 'features' in features) {
+      (features as EsriFeatureCollection).features?.forEach((feature) => {
+        if (!feature.geometry) return;
+
+        // Handle point geometries - set to undefined if string coordinates
+        if (feature.geometry.x !== undefined || feature.geometry.y !== undefined) {
+          if (typeof feature.geometry.x === 'string' || typeof feature.geometry.y === 'string') {
+            // eslint-disable-next-line no-param-reassign
+            feature.geometry.x = undefined;
+            // eslint-disable-next-line no-param-reassign
+            feature.geometry.y = undefined;
+          }
+        }
+
+        // Handle rings (polygons) - set to empty array if first coordinate is string
+        if (
+          feature.geometry.rings &&
+          feature.geometry.rings.length > 0 &&
+          feature.geometry.rings[0].length > 0 &&
+          typeof feature.geometry.rings[0][0][0] === 'string'
+        ) {
+          // eslint-disable-next-line no-param-reassign
+          feature.geometry.rings = [];
+        }
+
+        // Handle paths (polylines) - set to empty array if first coordinate is string
+        if (
+          feature.geometry.paths &&
+          feature.geometry.paths.length > 0 &&
+          feature.geometry.paths[0].length > 0 &&
+          typeof feature.geometry.paths[0][0][0] === 'string'
+        ) {
+          // eslint-disable-next-line no-param-reassign
+          feature.geometry.paths = [];
+        }
+
+        // Handle points (multipoint) - set to empty array if first coordinate is string
+        if (feature.geometry.points && feature.geometry.points.length > 0 && typeof feature.geometry.points[0][0] === 'string') {
+          // eslint-disable-next-line no-param-reassign
+          feature.geometry.points = [];
+        }
+      });
+    }
+
     // Read the features
     return new EsriJSON().readFeatures(features, options);
   }
