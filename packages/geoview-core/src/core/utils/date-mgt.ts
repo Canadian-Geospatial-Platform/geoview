@@ -413,7 +413,7 @@ export abstract class DateMgt {
     const value = this.parseDateToDayjs(date, inputFormat, inputTimezone, temporalMode);
 
     // Check if valid
-    if (!value.isValid()) throw new InvalidDateError(date.toString());
+    if (!value.isValid()) throw new InvalidDateError(date?.toString());
 
     // Return
     return value;

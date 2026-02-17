@@ -730,7 +730,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     // The complete object that will be returned
     const total: Record<string, TypeLegendLayer> = {};
 
-    // Collect the display date formats starting from the top-level layers
+    // Collect the layers recursively
     this.#findAllLayersRec(total, layers);
 
     // Return the total
@@ -749,6 +749,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @static
    */
   static #findAllLayersRec(total: Record<string, TypeLegendLayer>, layers: TypeLegendLayer[]): void {
+    // For each layer at the current level
     layers.forEach((layer) => {
       if (layer.layerPath) {
         // eslint-disable-next-line no-param-reassign

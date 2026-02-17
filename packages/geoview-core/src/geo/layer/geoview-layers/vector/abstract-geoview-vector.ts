@@ -336,12 +336,17 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
     // Iterate over each feature to normalize its date fields
     features.forEach((feature) => {
       dateFields.forEach((field) => {
+        // Read the value
         const value = feature.get(field.name);
-        feature.set(
-          field.name,
-          DateMgt.convertToMilliseconds(value, layerConfig.getServiceDateFormat(), layerConfig.getServiceDateTimezone()),
-          true
-        );
+
+        // If the value is defined and not null
+        if (value && value !== null) {
+          feature.set(
+            field.name,
+            DateMgt.convertToMilliseconds(value, layerConfig.getServiceDateFormat(), layerConfig.getServiceDateTimezone()),
+            true
+          );
+        }
       });
     });
   }
