@@ -199,7 +199,12 @@
             .replace(/\s+=/g, '='); // Remove spaces before =
           if (staticUrl) {
             try {
-              const url = new URL(staticUrl);
+              const urlObj = new URL(staticUrl);
+              // Security: Only allow http and https protocols
+              if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
+                alert('Invalid URL protocol. Only HTTP and HTTPS are allowed.');
+                return;
+              }
               window.location.href = staticUrl;
             } catch (e) {
               alert('Invalid URL. Please check the URL format.');
@@ -230,8 +235,16 @@
             (text) => {
               // Only update if clipboard has NEW content (different from last known value)
               if (text && text !== lastClipboardText && text.includes(window.location.pathname)) {
-                lastClipboardText = text;
-                clipboardUrlInput.value = formatUrl(text);
+                try {
+                  // Validate URL before processing (security: ensures text is a valid URL)
+                  new URL(text);
+                  lastClipboardText = text;
+                  // Safe: .value on textarea doesn't interpret HTML, it sets plain text content
+                  clipboardUrlInput.value = formatUrl(text);
+                } catch (e) {
+                  // Invalid URL, ignore
+                  console.log('Clipboard contains invalid URL:', e);
+                }
               }
             },
             (err) => console.log('Could not read clipboard:', err)
@@ -258,7 +271,12 @@
             .replace(/\s+=/g, '='); // Remove spaces before =
           if (clipboardUrl) {
             try {
-              new URL(clipboardUrl); // Validate URL
+              const urlObj = new URL(clipboardUrl); // Validate URL
+              // Security: Only allow http and https protocols
+              if (urlObj.protocol !== 'http:' && urlObj.protocol !== 'https:') {
+                alert('Invalid URL protocol. Only HTTP and HTTPS are allowed.');
+                return;
+              }
               window.location.href = clipboardUrl;
             } catch (e) {
               alert('Invalid URL. Please check the URL format.');
