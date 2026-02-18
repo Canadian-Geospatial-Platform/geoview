@@ -200,6 +200,7 @@ export class GVEsriImage extends AbstractGVRaster {
   /**
    * Gets the list of rasterFunctionInfos that are available in the ImageServer
    * @returns {TypeMetadataEsriRasterFunctionInfo[]} The ImageServer's rasterFunctionInfos
+   * @protected
    */
   protected getMetadataRasterFunctionInfos(): TypeMetadataEsriRasterFunctionInfos[] | undefined {
     const config = this.getLayerConfig();
@@ -214,6 +215,7 @@ export class GVEsriImage extends AbstractGVRaster {
   /**
    * Updates the raster function for the layer
    * @param {string | undefined} rasterFunctionId - The raster function ID to apply
+   * @returns {void}
    */
   updateRasterFunction(rasterFunctionId: string | undefined): void {
     // Update the config
