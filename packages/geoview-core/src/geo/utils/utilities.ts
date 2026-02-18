@@ -44,6 +44,11 @@ interface EsriFeatureCollection {
   features?: EsriFeature[];
 }
 
+interface EsriJSONReadResult {
+  features: Feature<Geometry>[];
+  hadInvalidGeometries: boolean;
+}
+
 // #region FETCH METADATA
 
 export abstract class GeoUtilities {
@@ -786,57 +791,88 @@ export abstract class GeoUtilities {
    * Reads OpenLayers features from an Esri features object.
    * @param {unknown} features - The Features data to read.
    * @param {import('ol/format/Feature').ReadOptions} [options] - Optional read options such as projection or extent.
-   * @returns {import('ol/Feature').default[]} An array of parsed OpenLayers Feature instances.
+   * @returns {EsriJSONReadResult} An array of parsed OpenLayers Feature and whether there were any invalid geometries
    */
-  static readFeaturesFromEsriJSON(features: unknown, options: ReadOptions | undefined): Feature<Geometry>[] {
+  static readFeaturesFromEsriJSON(features: unknown, options: ReadOptions | undefined): EsriJSONReadResult {
     // GV Strings in the geometry will throw errors in EsriJSON().readFeatures()
-    // GV So they are removed so the feature will show in the datatable but not the map
-    if (features && typeof features === 'object' && 'features' in features) {
-      (features as EsriFeatureCollection).features?.forEach((feature) => {
-        if (!feature.geometry) return;
-
-        // Handle point geometries - set to undefined if string coordinates
-        if (feature.geometry.x !== undefined || feature.geometry.y !== undefined) {
-          if (typeof feature.geometry.x === 'string' || typeof feature.geometry.y === 'string') {
-            // eslint-disable-next-line no-param-reassign
-            feature.geometry.x = undefined;
-            // eslint-disable-next-line no-param-reassign
-            feature.geometry.y = undefined;
-          }
+    // GV Those features are removed so the rest of the features can be parsed
+    try {
+      // First try to process features right away and only clean the geometries if it fails
+      return {
+        features: new EsriJSON().readFeatures(features, options),
+        hadInvalidGeometries: false,
+      };
+    } catch (error) {
+      if (features && typeof features === 'object' && 'features' in features) {
+        try {
+          const cleanedFeatures = this.#cleanEsriGeometries(features);
+          return {
+            features: new EsriJSON().readFeatures(cleanedFeatures, options),
+            hadInvalidGeometries: true,
+          };
+        } catch (secondError) {
+          throw new Error(`Invalid geometries found in EsriJSON data that could not be cleaned: ${secondError}`);
         }
+      }
 
-        // Handle rings (polygons) - set to empty array if first coordinate is string
-        if (
-          feature.geometry.rings &&
-          feature.geometry.rings.length > 0 &&
-          feature.geometry.rings[0].length > 0 &&
-          typeof feature.geometry.rings[0][0][0] === 'string'
-        ) {
-          // eslint-disable-next-line no-param-reassign
-          feature.geometry.rings = [];
-        }
-
-        // Handle paths (polylines) - set to empty array if first coordinate is string
-        if (
-          feature.geometry.paths &&
-          feature.geometry.paths.length > 0 &&
-          feature.geometry.paths[0].length > 0 &&
-          typeof feature.geometry.paths[0][0][0] === 'string'
-        ) {
-          // eslint-disable-next-line no-param-reassign
-          feature.geometry.paths = [];
-        }
-
-        // Handle points (multipoint) - set to empty array if first coordinate is string
-        if (feature.geometry.points && feature.geometry.points.length > 0 && typeof feature.geometry.points[0][0] === 'string') {
-          // eslint-disable-next-line no-param-reassign
-          feature.geometry.points = [];
-        }
-      });
+      throw new Error(`Failed to parse EsriJSON data: ${error}`);
     }
+  }
 
-    // Read the features
-    return new EsriJSON().readFeatures(features, options);
+  /**
+   * Cleans invalid geometries in Esri feature collection by setting invalid coordinates to NaN or empty arrays.
+   * @param {unknown} features - The Features data to clean.
+   * @returns {EsriFeatureCollection} A cleaned copy of the features.
+   * @private
+   */
+  static #cleanEsriGeometries(features: unknown): EsriFeatureCollection {
+    const cleanedFeatures = JSON.parse(JSON.stringify(features)) as EsriFeatureCollection;
+
+    cleanedFeatures.features?.forEach((feature) => {
+      if (!feature.geometry) return;
+
+      // Handle point geometries - set to NaN if not a number
+      if ('x' in feature.geometry || 'y' in feature.geometry) {
+        if (typeof feature.geometry.x !== 'number') {
+          // eslint-disable-next-line no-param-reassign
+          feature.geometry.x = Number.NaN;
+        }
+        if (typeof feature.geometry.y !== 'number') {
+          // eslint-disable-next-line no-param-reassign
+          feature.geometry.y = Number.NaN;
+        }
+      }
+
+      // Handle rings (polygons) - set to empty array if first coordinate is not a number
+      if (
+        feature.geometry.rings &&
+        feature.geometry.rings.length > 0 &&
+        feature.geometry.rings[0].length > 0 &&
+        typeof feature.geometry.rings[0][0][0] !== 'number'
+      ) {
+        // eslint-disable-next-line no-param-reassign
+        feature.geometry.rings = [];
+      }
+
+      // Handle paths (polylines) - set to empty array if first coordinate is not a number
+      if (
+        feature.geometry.paths &&
+        feature.geometry.paths.length > 0 &&
+        feature.geometry.paths[0].length > 0 &&
+        typeof feature.geometry.paths[0][0][0] !== 'number'
+      ) {
+        // eslint-disable-next-line no-param-reassign
+        feature.geometry.paths = [];
+      }
+
+      // Handle points (multipoint) - set to empty array if first coordinate is not a number
+      if (feature.geometry.points && feature.geometry.points.length > 0 && typeof feature.geometry.points[0][0] !== 'number') {
+        // eslint-disable-next-line no-param-reassign
+        feature.geometry.points = [];
+      }
+    });
+
+    return cleanedFeatures;
   }
 
   /**
