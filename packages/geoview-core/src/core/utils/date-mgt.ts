@@ -173,9 +173,8 @@ export abstract class DateMgt {
   /** Regex used to spot a timezone inside a date input */
   static readonly #REGEX_HAS_TIMEZONE_IN_DATE = /([Zz]|[+-]\d{2}:\d{2})$/;
 
-  /** Regex used to spot a time component inside a date format string */
-  static readonly #REGEX_HAS_TIME_COMPONENTS_IN_FORMAT =
-    /(\[[^\]]*])|(?:^|[^A-Za-z])(H{1,2}|h{1,2}|k{1,2}|m{1,2}|s{1,2}|S{1,3}|A|a|X|x)(?=[^A-Za-z]|$)/;
+  /** Array of time tokens used for parsing and identifying time components in dates */
+  static readonly #TIME_TOKENS = ['H', 'HH', 'h', 'hh', 'k', 'kk', 'm', 'mm', 's', 'ss', 'S', 'SS', 'SSS', 'A', 'a', 'X', 'x'];
 
   /** The default input formats to append to the specific input formats when trying to read a date in a non-ISO format */
   // TODO: Add more date format support (this is only used when a particular input format is specified, otherwise we default to ISO formats)
@@ -616,10 +615,7 @@ export abstract class DateMgt {
   ): string {
     // If the reference format has time components
     let isoFormat = DateMgt.ISO_DISPLAY_DATE_FORMAT;
-    if (
-      this.#REGEX_HAS_TIME_COMPONENTS_IN_FORMAT.test(referenceFormat.en) ||
-      this.#REGEX_HAS_TIME_COMPONENTS_IN_FORMAT.test(referenceFormat.fr)
-    ) {
+    if (this.hasTimeComponents(referenceFormat.en) || this.hasTimeComponents(referenceFormat.fr)) {
       // We want an iso format with time components
       isoFormat = DateMgt.ISO_DISPLAY_DATETIME_FORMAT_MINUTES;
     }
@@ -661,6 +657,20 @@ export abstract class DateMgt {
   }
 
   /**
+   * Determines whether a date/time format string contains any supported
+   * time-related tokens.
+   * The method performs a simple substring check against a predefined
+   * list of time tokens (e.g. hours, minutes, seconds, meridiem, Unix time).
+   * If the format is `undefined`, the method safely returns `false`.
+   * @param {string | undefined} format - The date/time format string to evaluate. May be `undefined`.
+   * @returns `true` if the format contains at least one recognized time token;
+   * otherwise `false`.
+   */
+  static hasTimeComponents(format: string | undefined): boolean {
+    return this.#TIME_TOKENS.some((token) => format?.includes(token));
+  }
+
+  /**
    * Attempts to infer display date configuration from a service-provided
    * date format string.
    * The function inspects the format string to determine whether it contains
@@ -682,7 +692,7 @@ export abstract class DateMgt {
   static guessDisplayDateInformationFromServiceDateFormat(serviceDateFormat: string | undefined): GuessedTimeInformation | undefined {
     try {
       // If the serviceDateFormat has time components
-      if (serviceDateFormat && this.#REGEX_HAS_TIME_COMPONENTS_IN_FORMAT.test(serviceDateFormat)) {
+      if (serviceDateFormat && this.hasTimeComponents(serviceDateFormat)) {
         // We assume it's in local time and instant temporal mode
         return {
           serviceDateTemporalMode: 'instant',
