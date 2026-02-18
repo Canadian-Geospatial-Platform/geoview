@@ -429,7 +429,8 @@
       "vectorTileRemoved": "La tuile vectorielle '__param__' a dû être retirée en raison d'un conflit de projection.",
       "basemapLayerCreationError": "Erreur lors de la création de la couche de base __param__.",
       "kmlLayerWarning": "Les couches KML n'afficheront pas les symboles appropriés dans les panneaux et ne comporteront pas d'entrées dans le tableau de données.",
-      "layerCRSNotSupported": "La référence spatiale de la carte '__param__' n'est pas officiellement supportée par la couche '__param__'. GeoView va tout de même tenté d'afficher la couche, mais celle-ci risque d'être désalignée.."
+      "layerCRSNotSupported": "La référence spatiale de la carte '__param__' n'est pas officiellement supportée par la couche '__param__'. GeoView va tout de même tenté d'afficher la couche, mais celle-ci risque d'être désalignée..",
+      "invalidGeometry": "La couche '__param__' contient des entités dont la géométrie est invalide et qui ne s'afficheront pas sur la carte."
     }
   },
   "error": {
@@ -447,7 +448,8 @@
       "notAFeatureLayer": "L'identifiant de couche n'est pas une couche d'entités pour la couche '__param__'.",
       "notQueryableLayer": "La couche '__param__' n'est pas interrogeable.",
       "notAbleToQuery": "Impossible de téléchager les données pour '__param__'.",
-      "noWMSLegend": "Erreur lors de la récupération de la légende pour '__param__': '__param__'"
+      "noWMSLegend": "Erreur lors de la récupération de la légende pour '__param__': '__param__'",
+      "featureParsingError": "Impossible de lire les données d'entités pour la couche '__param__'."
     },
     "map": {
       "mapIdNotFound": "La carte avec l'identifiant '__param__' est introuvable.",
