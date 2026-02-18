@@ -438,7 +438,8 @@
       "vectorTileRemoved": "The vector tile __param__ had to be removed due to a projection conflict.",
       "basemapLayerCreationError": "Error creating __param__ basemap.",
       "kmlLayerWarning": "KML layers will not have proper symbols in the panels or have entries in the data table.",
-      "layerCRSNotSupported": "The spatial reference of the map '__param__' is not officially supported by the layer '__param__'. GeoView will still attempt to load the layer on the map, but it might be misaligned."
+      "layerCRSNotSupported": "The spatial reference of the map '__param__' is not officially supported by the layer '__param__'. GeoView will still attempt to load the layer on the map, but it might be misaligned.",
+      "invalidGeometry": "The '__param__' layer contains features with invalid geometries that will not show on the map."
     }
   },
   "error": {
@@ -456,7 +457,8 @@
       "notAFeatureLayer": "Layer id not a Feature Layer for layer '__param__'.",
       "notQueryableLayer": "Layer '__param__' is not queryable.",
       "notAbleToQuery": "Not able to download records for '__param__'",
-      "noWMSLegend": "Error fetching legend for '__param__': '__param__'"
+      "noWMSLegend": "Error fetching legend for '__param__': '__param__'",
+      "featureParsingError": "Unable to read feature data for layer '__param__'."
     },
     "map": {
       "mapIdNotFound": "Map with ID '__param__' not found.",

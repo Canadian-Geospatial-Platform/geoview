@@ -21,6 +21,7 @@ import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstrac
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { formatError } from '@/core/exceptions/core-exceptions';
+import { LayerFeatureParsingError } from '@/core/exceptions/layer-exceptions';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 
@@ -249,7 +250,25 @@ export class EsriFeature extends AbstractGeoViewVector {
     );
 
     // Convert each ESRI response chunk to features and flatten the result
-    return responseData.flatMap((json) => GeoUtilities.readFeaturesFromEsriJSON(json, readOptions));
+    let hadInvalidGeometries = false;
+    try {
+      const allFeatures = responseData.flatMap((json) => {
+        const result = GeoUtilities.readFeaturesFromEsriJSON(json, readOptions);
+        if (result.hadInvalidGeometries) {
+          hadInvalidGeometries = true;
+        }
+        return result.features;
+      });
+
+      // If we had to clean geometries, emit a warning message
+      if (hadInvalidGeometries) {
+        this.emitMessage('warning.layer.invalidGeometry', [layerConfig.getLayerNameCascade()], 'warning', true);
+      }
+
+      return allFeatures;
+    } catch {
+      throw new LayerFeatureParsingError(layerConfig.layerId, layerConfig.getLayerNameCascade());
+    }
   }
 
   /**

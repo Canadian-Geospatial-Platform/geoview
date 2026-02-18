@@ -8,6 +8,13 @@ import type { SxStyles } from '@/ui/style/types';
  * @returns {Object} the sx classes object
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
+  layerSettingsMenu: {
+    '& .MuiMenuItem-root': {
+      borderRadius: 1,
+      margin: '4px 8px',
+    },
+  },
+
   rasterFunctionMenu: {
     '& .MuiPaper-root': {
       padding: '8px',
