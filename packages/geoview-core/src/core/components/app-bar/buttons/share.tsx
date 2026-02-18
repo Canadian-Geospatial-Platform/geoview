@@ -28,13 +28,11 @@ import { isValidUUID } from '@/core/utils/utilities';
  * - Basemap options (basemapId, shaded, labeled) are updated
  * - Layers from URL parameters are appended to existing config layers (not replaced)
  *
- * @function getShareUrl
  * @param {number} zoom - Current zoom level of the map
  * @param {Coordinate} center - Current center coordinates of the map in the map's projection
  * @param {TypeValidMapProjectionCodes} projection - Current projection code (e.g., 3857, 3978)
  * @param {TypeBasemapOptions} basemap - Current basemap configuration (basemapId, shaded, labeled)
  * @param {string[]} layers - Array of layer paths; UUIDs are extracted from paths (e.g., "uuid/sublayer" -> "uuid")
- * @param {string[]} visibleLayers - Array of currently visible layer paths used to determine visibility state
  * @returns {string} URL query string with format: "?p=3857&z=4&c=-100.123456,40.654321&b=id:transport,s:on,l:off&keys=uuid1,uuid2"
  *                   Center coordinates are automatically reprojected to lon/lat (EPSG:4326) for sharing..
  *                   Returns empty string if an error occurs during generation.
