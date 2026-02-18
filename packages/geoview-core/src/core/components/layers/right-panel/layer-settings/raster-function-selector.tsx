@@ -15,7 +15,7 @@ interface RasterFunctionSelectorProps {
   layerDetails: TypeLegendLayer;
   anchorEl: HTMLElement | null;
   onClose: () => void;
-  onClickOutside: () => void;
+  onClickOutside: (event: {}, reason?: 'backdropClick' | 'escapeKeyDown') => void;
 }
 
 interface RasterFunctionMenuItemProps {
@@ -92,7 +92,7 @@ export function RasterFunctionSelector(props: RasterFunctionSelectorProps): JSX.
   const handleClose = (event: {}, reason: 'backdropClick' | 'escapeKeyDown'): void => {
     if (reason === 'backdropClick' && onClickOutside) {
       // Clicking outside should close both menus
-      onClickOutside();
+      onClickOutside(event, reason);
     } else if (reason === 'escapeKeyDown') {
       // Escape should only close submenu
       onClose();
@@ -100,8 +100,27 @@ export function RasterFunctionSelector(props: RasterFunctionSelectorProps): JSX.
   };
 
   const handleKeyDown = (event: React.KeyboardEvent): void => {
-    if (event.key === 'Escape') {
-      event.stopPropagation();
+    if (event.key === 'Tab') {
+      event.preventDefault();
+
+      // Get all menu items
+      const menuItems = event.currentTarget.querySelectorAll('[role="menuitem"]');
+      const currentIndex = Array.from(menuItems).findIndex((item) => item === document.activeElement);
+
+      let nextIndex;
+      if (currentIndex === -1) {
+        // No item focused, focus first item
+        nextIndex = 0;
+      } else if (event.shiftKey) {
+        // Shift+Tab: move up
+        nextIndex = currentIndex > 0 ? currentIndex - 1 : menuItems.length - 1;
+      } else {
+        // Tab: move down
+        nextIndex = currentIndex < menuItems.length - 1 ? currentIndex + 1 : 0;
+      }
+
+      (menuItems[nextIndex] as HTMLElement)?.focus();
+    } else if (event.key === 'Escape') {
       onClose();
     }
   };
@@ -116,6 +135,12 @@ export function RasterFunctionSelector(props: RasterFunctionSelectorProps): JSX.
       anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       transformOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       sx={sxClasses.rasterFunctionMenu}
+      slotProps={{
+        list: {
+          autoFocus: true,
+          autoFocusItem: true,
+        },
+      }}
     >
       {rasterFunctionInfos.map((info) => (
         <RasterFunctionMenuItem

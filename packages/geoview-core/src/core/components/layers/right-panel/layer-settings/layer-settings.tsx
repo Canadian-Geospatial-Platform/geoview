@@ -28,9 +28,35 @@ export function LayerSettings({ layerDetails }: LayerSettingsProps): JSX.Element
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = (): void => {
-    setAnchorEl(null);
-    setRasterFunctionAnchorEl(null); // Close submenu when main menu closes
+  const handleClose = (event: {}, reason?: 'backdropClick' | 'escapeKeyDown'): void => {
+    if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
+      setAnchorEl(null);
+      setRasterFunctionAnchorEl(null);
+    }
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent): void => {
+    if (event.key === 'Tab') {
+      event.preventDefault();
+
+      // Get all menu items
+      const menuItems = event.currentTarget.querySelectorAll('[role="menuitem"]');
+      const currentIndex = Array.from(menuItems).findIndex((item) => item === document.activeElement);
+
+      let nextIndex;
+      if (currentIndex === -1) {
+        // No item focused, focus first item
+        nextIndex = 0;
+      } else if (event.shiftKey) {
+        // Shift+Tab: move up
+        nextIndex = currentIndex > 0 ? currentIndex - 1 : menuItems.length - 1;
+      } else {
+        // Tab: move down
+        nextIndex = currentIndex < menuItems.length - 1 ? currentIndex + 1 : 0;
+      }
+
+      (menuItems[nextIndex] as HTMLElement)?.focus();
+    }
   };
 
   return (
@@ -43,9 +69,16 @@ export function LayerSettings({ layerDetails }: LayerSettingsProps): JSX.Element
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleClose}
+        onKeyDown={handleKeyDown}
         disableScrollLock
         anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
         transformOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        slotProps={{
+          list: {
+            autoFocus: true,
+            autoFocusItem: true,
+          },
+        }}
       >
         {availableSettings.includes('rasterFunction') && (
           <MenuItem
