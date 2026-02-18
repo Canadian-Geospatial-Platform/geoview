@@ -205,7 +205,8 @@
                 alert('Invalid URL protocol. Only HTTP and HTTPS are allowed.');
                 return;
               }
-              window.location.href = staticUrl;
+              // Use the validated URL object's href property
+              window.location.href = urlObj.href;
             } catch (e) {
               alert('Invalid URL. Please check the URL format.');
             }
@@ -256,7 +257,7 @@
 
         // Also check clipboard when window regains focus (faster response after clicking Share > Copy)
         window.addEventListener('focus', checkClipboard);
-        
+
         // Check clipboard when user clicks anywhere on the page (they're likely back after copying)
         document.addEventListener('click', checkClipboard);
 
@@ -277,7 +278,8 @@
                 alert('Invalid URL protocol. Only HTTP and HTTPS are allowed.');
                 return;
               }
-              window.location.href = clipboardUrl;
+              // Use the validated URL object's href property
+              window.location.href = urlObj.href;
             } catch (e) {
               alert('Invalid URL. Please check the URL format.');
             }
