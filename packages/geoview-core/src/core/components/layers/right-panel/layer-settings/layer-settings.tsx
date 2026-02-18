@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { RasterFunctionSelector } from './raster-function-selector';
+import { useTheme } from '@mui/material/styles';
+import { getSxClasses } from './layer-settings-style';
 import type { TypeLegendLayer } from '../../types';
 
 interface LayerSettingsProps {
@@ -12,7 +14,10 @@ interface LayerSettingsProps {
 }
 
 export function LayerSettings({ layerDetails }: LayerSettingsProps): JSX.Element | null {
+  const theme = useTheme();
+  const sxClasses = getSxClasses(theme);
   const { t } = useTranslation();
+
   const { getLayerSettings } = useLayerStoreActions();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [rasterFunctionAnchorEl, setRasterFunctionAnchorEl] = useState<null | HTMLElement>(null);
@@ -73,6 +78,7 @@ export function LayerSettings({ layerDetails }: LayerSettingsProps): JSX.Element
         disableScrollLock
         anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
         transformOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        sx={sxClasses.layerSettingsMenu}
         slotProps={{
           list: {
             autoFocus: true,
