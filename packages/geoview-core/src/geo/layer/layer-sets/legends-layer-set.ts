@@ -154,6 +154,22 @@ export class LegendsLayerSet extends AbstractLayerSet {
   }
 
   /**
+   * Queries the legend for the given layer path.
+   * @param {string} layerPath - The layer path to query the legend for
+   * @param {boolean} [forced=false] - Whether to force the query even if already queried
+   * @returns {void}
+   * @public
+   */
+  queryLegend(layerPath: string, forced: boolean = false): void {
+    // Get the layer config
+    const layerConfig = this.layerApi.getLayerEntryConfigIfExists(layerPath);
+    if (!layerConfig) return;
+
+    // Trigger the check/query process
+    this.#checkQueryLegend(layerConfig, forced);
+  }
+
+  /**
    * Checks if the layer config has reached the 'processed' status or greater and if so queries the legend.
    * @param {ConfigBaseClass} layerConfig - The layer config
    * @param {boolean} forced - Indicates if the legend query should be forced to happen (example when refreshing the legend)
