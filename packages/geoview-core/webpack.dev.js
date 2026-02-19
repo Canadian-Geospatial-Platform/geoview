@@ -9,12 +9,7 @@ const config = {
   mode: 'development',
   devtool: 'source-map',
   devServer: {
-    historyApiFallback: {
-      rewrites: [
-        // Rewrite /demo-open-maps/UUID to /demo-open-maps.html
-        { from: /^\/demo-open-maps\/[a-f0-9-,]+$/, to: '/demo-open-maps.html' },
-      ],
-    },
+    historyApiFallback: true,
     static: {
       directory: path.join(__dirname, 'public'),
       publicPath: '/',

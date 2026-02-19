@@ -26,11 +26,20 @@
     <div style="padding: 20px; background-color: #f5f5f5; margin: 20px 0; border-radius: 4px">
       <h3 style="margin-top: 0">How to Use This Template</h3>
       <p>
-        Replace the UUID in the URL path to dynamically load different layers from the GeoCore catalog. Simply modify the URL structure:
-        <code>/demo-open-maps/{UUID}</code>
+        Replace the UUID in the URL hash to dynamically load different layers from the GeoCore catalog. Simply modify the URL structure:
+        <code>/demo-open-maps.html#{UUID}</code>
       </p>
-      <p><strong>Example:</strong> <code>http://localhost:8080/demo-open-maps/6c343726-1e92-451a-876a-76e17d398a1c</code></p>
-      <p>You can also load multiple layers by separating UUIDs with commas: <code>/demo-open-maps/{UUID1},{UUID2}</code></p>
+      <p><strong>Example:</strong> <code>http://localhost:8080/demo-open-maps.html#6c343726-1e92-451a-876a-76e17d398a1c</code></p>
+      <p>You can also load multiple layers by separating UUIDs with commas: <code>/demo-open-maps.html#{UUID1},{UUID2}</code></p>
+    </div>
+
+    <div style="padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107; margin: 20px 0; border-radius: 4px">
+      <h4 style="margin-top: 0; color: #856404">⚠️ Technical Note: Hash-Based Routing</h4>
+      <p style="margin: 0; color: #856404; font-size: 0.95em">
+        This template uses hash-based routing (<code>#UUID</code>) for compatibility with static hosting services like GitHub Pages.
+        Path-based routing (e.g., <code>/demo-open-maps/UUID</code>) requires server-side URL rewrites and only works with the webpack dev
+        server, not on static file hosting. Hash-based routing works universally on both local development and production environments.
+      </p>
     </div>
 
     <h4 style="margin-left: 20px">Sample UUIDs to Test (click to copy UUID):</h4>
@@ -119,18 +128,30 @@
         }
       });
 
+      // Listen for hash changes to reload layers dynamically
+      window.addEventListener('hashchange', () => {
+        const newUuids = loadLayersFromHash();
+
+        if (newUuids) {
+          // Reload the page to clear old layers and load new ones
+          window.location.reload();
+        }
+      });
+
       // ********** IMPORTANT CUSTOM CODE FOR KEYS INJECTION - START **********
 
-      // Extract UUID(s) from URL path (e.g., /demo-open-maps/uuid1,uuid2)
-      const pathSegments = window.location.pathname.split('/');
-      const uuidSegment = pathSegments[pathSegments.length - 1];
+      // Function to load layers from UUID segment
+      function loadLayersFromHash() {
+        // Extract UUID(s) from URL hash (e.g., #uuid1,uuid2)
+        // Hash-based routing is used because GitHub Pages doesn't support server-side rewrites.
+        // Path-based routing (/demo-open-maps/uuid) only works with webpack dev server.
+        const uuidSegment = window.location.hash.substring(1); // Remove # symbol
 
-      // Validate UUID segment exists
-      if (!uuidSegment) {
-        alert(
-          'Please provide a valid UUID in the URL path:\nExample: /demo-open-maps/6c343726-1e92-451a-876a-76e17d398a1c'
-        );
-      } else {
+        // If no hash, return empty array (map will init without layers)
+        if (!uuidSegment) {
+          return [];
+        }
+
         // Split and validate each UUID using cgpv utilities
         const uuids = uuidSegment.split(',').map((uuid) => uuid.trim());
         const invalidUuids = [];
@@ -142,17 +163,28 @@
         }
 
         if (invalidUuids.length > 0) {
-          alert(`Invalid UUID(s) found:\n${invalidUuids.join('\n')}\n\nPlease provide valid UUID(s) in the URL path.`);
-        } else {
-          // All UUIDs are valid, proceed with map initialization
-          cgpv.onMapInit((mapViewer) => {
-            uuids.forEach((uuid) => {
+          alert(`Invalid UUID(s) found:\n${invalidUuids.join('\n')}\n\nPlease provide valid UUID(s) in the URL hash.`);
+          return false;
+        }
+
+        return uuids;
+      }
+
+      // Initial load
+      const initialUuids = loadLayersFromHash();
+
+      if (initialUuids !== false) {
+        // Proceed with map initialization
+        cgpv.onMapInit((mapViewer) => {
+          // Add layers only if UUIDs are provided
+          if (initialUuids.length > 0) {
+            initialUuids.forEach((uuid) => {
               cgpv.api.getMapViewer(mapViewer.mapId).layer.addGeoviewLayerByGeoCoreUUID(uuid);
             });
-          });
+          }
+        });
 
-          cgpv.init();
-        }
+        cgpv.init();
       }
 
       // ********** IMPORTANT CUSTOM CODE FOR KEYS INJECTION - END **********
