@@ -104,7 +104,6 @@ const config = {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
     chunkFilename: '[name].js',
-    publicPath: '/', // Added for the open-maps demo to work with the dev server, it is also useful for the production build to ensure assets are loaded correctly regardless of the hosting environment
   },
   resolve: {
     extensions: ['.mjs', '.ts', '.tsx', '.js', '.jsx'],
