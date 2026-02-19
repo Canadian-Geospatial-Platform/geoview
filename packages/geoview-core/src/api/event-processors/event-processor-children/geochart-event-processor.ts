@@ -138,6 +138,7 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The unique identifier of the GeoChart map.
    * @param {string} layerPath - The path of the layer to set as selected.
    * @returns {void}
+   * @static
    */
   static setSelectedGeochartLayerPath(mapId: string, layerPath: string): void {
     // Set the selected layer path

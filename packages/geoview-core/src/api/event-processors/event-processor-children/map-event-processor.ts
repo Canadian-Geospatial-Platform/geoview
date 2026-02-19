@@ -252,6 +252,18 @@ export class MapEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Gets the layer configuration of the specified layer path. This function redirects to the layer api.
+   * @param {string} mapId - The map id.
+   * @param {string} layerPath - The layer path.
+   * @returns {ConfigBaseClass | undefined} The layer configuration or undefined if not found.
+   * @static
+   */
+  static getLayerEntryConfigIfExists(mapId: string, layerPath: string): ConfigBaseClass | undefined {
+    // Redirect to the layer api
+    return this.getMapViewerLayerAPI(mapId).getLayerEntryConfigIfExists(layerPath);
+  }
+
+  /**
    * Retrieves the scale information from the DOM elements for the given map ID.
    * @param {string} mapId - The unique identifier of the map.
    * @returns {TypeScaleInfo} The scale information object
@@ -1818,17 +1830,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
 
     return undefined;
-  }
-
-  /**
-   * Gets the layer configuration of the specified layer path. This function redirects to the layer api.
-   * @param {string} mapId - The map id.
-   * @param {string} layerPath - The layer path.
-   * @returns {ConfigBaseClass | undefined} The layer configuration or undefined if not found.
-   */
-  static getLayerEntryConfigIfExists(mapId: string, layerPath: string): ConfigBaseClass | undefined {
-    // Redirect to the layer api
-    return this.getMapViewerLayerAPI(mapId).getLayerEntryConfigIfExists(layerPath);
   }
 
   /**

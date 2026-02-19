@@ -34,6 +34,17 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
     }
   }
 
+  // #region OVERRIDES
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeEsriFeatureLayerConfig} The strongly-typed layer configuration specific to this layer.
+   */
+  override getGeoviewLayerConfig(): TypeEsriFeatureLayerConfig {
+    return super.getGeoviewLayerConfig() as TypeEsriFeatureLayerConfig;
+  }
+
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
@@ -62,6 +73,8 @@ export class EsriFeatureLayerEntryConfig extends VectorLayerEntryConfig {
     // None
     return undefined;
   }
+
+  // #endregion OVERRIDES
 
   /**
    * Type guard that checks whether the given configuration (class instance or plain object)

@@ -42,6 +42,15 @@ export class ImageStatic extends AbstractGeoViewRaster {
   // #region OVERRIDES
 
   /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeImageStaticLayerConfig} The strongly-typed layer configuration specific to this layer.
+   */
+  override getGeoviewLayerConfig(): TypeImageStaticLayerConfig {
+    return super.getGeoviewLayerConfig() as TypeImageStaticLayerConfig;
+  }
+
+  /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    * @returns {Promise<T>} A promise with the metadata or undefined when no metadata for the particular layer type.

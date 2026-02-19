@@ -63,6 +63,15 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
+   * @returns {TypeWMSLayerConfig} The strongly-typed layer configuration specific to this layer.
+   */
+  override getGeoviewLayerConfig(): TypeWMSLayerConfig {
+    return super.getGeoviewLayerConfig() as TypeWMSLayerConfig;
+  }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
    * @returns {TypeSourceImageWmsInitialConfig} The strongly-typed source configuration specific to this layer entry config.
    */
   override getSource(): TypeSourceImageWmsInitialConfig {
@@ -146,7 +155,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * @returns {boolean} True when the vector information should be fetched from the WFS. True by default.
    */
   getShouldFetchVectorInformationFromWFS(): boolean {
-    return (this.getGeoviewLayerConfig() as TypeWMSLayerConfig).fetchVectorsOnWFS ?? true; // default: true
+    return this.getGeoviewLayerConfig().fetchVectorsOnWFS ?? true; // default: true
   }
 
   /**

@@ -66,6 +66,15 @@ export class WFS extends AbstractGeoViewVector {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
+   * @returns {TypeWFSLayerConfig} The strongly-typed layer configuration specific to this layer.
+   */
+  override getGeoviewLayerConfig(): TypeWFSLayerConfig {
+    return super.getGeoviewLayerConfig() as TypeWFSLayerConfig;
+  }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
    * @returns {TypeMetadataWFS | undefined} The strongly-typed layer configuration specific to this layer.
    */
   override getMetadata(): TypeMetadataWFS | undefined {

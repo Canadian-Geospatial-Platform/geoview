@@ -46,8 +46,6 @@ export interface TypeWMSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
   listOfLayerEntryConfig: OgcWmsLayerEntryConfig[];
 }
 
-const DEFAULT_WMS_LAYER_GROUP_FULL_SUB_LAYERS = true;
-
 /**
  * A class to add wms layer.
  *
@@ -55,6 +53,9 @@ const DEFAULT_WMS_LAYER_GROUP_FULL_SUB_LAYERS = true;
  * @class WMS
  */
 export class WMS extends AbstractGeoViewRaster {
+  /** Default setting for the WMS layer group processing (true will explode the group in many wms layers) */
+  static readonly DEFAULT_WMS_LAYER_GROUP_FULL_SUB_LAYERS = true;
+
   /**
    * Constructs a WMS Layer configuration processor.
    * @param {TypeWMSLayerConfig} layerConfig the layer configuration
@@ -66,6 +67,15 @@ export class WMS extends AbstractGeoViewRaster {
   }
 
   // #region OVERRIDES
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeWMSLayerConfig} The strongly-typed layer configuration specific to this layer.
+   */
+  override getGeoviewLayerConfig(): TypeWMSLayerConfig {
+    return super.getGeoviewLayerConfig() as TypeWMSLayerConfig;
+  }
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
@@ -153,7 +163,7 @@ export class WMS extends AbstractGeoViewRaster {
       undefined,
       this.getGeoviewLayerConfig().isTimeAware,
       entry,
-      true // We want all sub layers when we're initializing the layer entries (different than when we're processing)
+      this.getGeoviewLayerConfig().useFullWmsSublayers
     );
   }
 
@@ -867,7 +877,7 @@ export class WMS extends AbstractGeoViewRaster {
     geoviewLayerName: string,
     metadataAccessPath: string,
     isTimeAware?: boolean,
-    useFullWmsSublayers: boolean = DEFAULT_WMS_LAYER_GROUP_FULL_SUB_LAYERS
+    useFullWmsSublayers: boolean = this.DEFAULT_WMS_LAYER_GROUP_FULL_SUB_LAYERS
   ): Promise<TypeGeoviewLayerConfig> {
     // Create the Layer config
     const myLayer = new WMS({
@@ -902,7 +912,7 @@ export class WMS extends AbstractGeoViewRaster {
     serverType: TypeOfServer | undefined,
     isTimeAware: boolean | undefined,
     layerEntries: TypeLayerEntryShell[],
-    useFullWmsSublayers: boolean = DEFAULT_WMS_LAYER_GROUP_FULL_SUB_LAYERS,
+    useFullWmsSublayers: boolean = this.DEFAULT_WMS_LAYER_GROUP_FULL_SUB_LAYERS,
     customGeocoreLayerConfig: unknown = {}
   ): TypeWMSLayerConfig {
     const geoviewLayerConfig: TypeWMSLayerConfig = {
@@ -1062,7 +1072,8 @@ export class WMS extends AbstractGeoViewRaster {
     callbackGroupLayerCreated?: GroupLayerCreatedDelegate
   ): void {
     const fullSubLayers =
-      (layerConfig.getGeoviewLayerConfig() as TypeWMSLayerConfig).useFullWmsSublayers ?? DEFAULT_WMS_LAYER_GROUP_FULL_SUB_LAYERS;
+      (layerConfig.getGeoviewLayerConfig() as TypeWMSLayerConfig).useFullWmsSublayers ?? this.DEFAULT_WMS_LAYER_GROUP_FULL_SUB_LAYERS;
+
     // Loop on the sub layers
     const newListOfLayerEntryConfig: ConfigBaseClass[] = [];
     layer.forEach((subLayer) => {

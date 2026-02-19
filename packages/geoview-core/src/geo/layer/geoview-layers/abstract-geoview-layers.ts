@@ -264,8 +264,8 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Gets the Geoview layer id.
-   * @returns {string} The geoview layer id
+   * Gets the Geoview layer config.
+   * @returns {string} The geoview layer config
    */
   getGeoviewLayerConfig(): TypeGeoviewLayerConfig {
     return this.#geoviewLayerConfig;

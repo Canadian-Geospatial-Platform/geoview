@@ -455,15 +455,9 @@ export class LayerTester extends GVAbstractTester {
         test.addStep('Creating the GeoView Layer Configuration...');
 
         // Create the config
-        const gvConfig = WMS.createGeoviewLayerConfig(
-          gvLayerId,
-          gvLayerName,
-          layerUrl,
-          undefined,
-          false,
-          [{ id: GVAbstractTester.OWS_MUNDIALIS_LAYER_ID }],
-          false
-        );
+        const gvConfig = WMS.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, undefined, false, [
+          { id: GVAbstractTester.OWS_MUNDIALIS_LAYER_ID },
+        ]);
 
         // Redirect to helper to add the layer to the map and wait
         await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
@@ -779,6 +773,9 @@ export class LayerTester extends GVAbstractTester {
         const gvConfig = GeoJSON.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
           { id: GVAbstractTester.GEOJSON_POLYGONS },
         ]);
+
+        // Set the service date format, because Polygons date have weirdly formatted dates
+        gvConfig.serviceDateFormat = 'DD/MM/YYYYTHH:mm:ss';
 
         // Redirect to helper to add the layer to the map and wait
         await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
@@ -1300,7 +1297,7 @@ export class LayerTester extends GVAbstractTester {
 
     // Expected config
     const expectedResults = {
-      groupHighlight: undefined,
+      groupHighlight: false,
       groupRemove: false,
       childHighlight: true,
     };

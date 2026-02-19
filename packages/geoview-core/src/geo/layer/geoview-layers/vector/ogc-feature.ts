@@ -53,6 +53,15 @@ export class OgcFeature extends AbstractGeoViewVector {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
+   * @returns {TypeOgcFeatureLayerConfig} The strongly-typed layer configuration specific to this layer.
+   */
+  override getGeoviewLayerConfig(): TypeOgcFeatureLayerConfig {
+    return super.getGeoviewLayerConfig() as TypeOgcFeatureLayerConfig;
+  }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
    * @returns {TypeMetadataOGCFeature | undefined} The strongly-typed layer configuration specific to this layer.
    */
   override getMetadata(): TypeMetadataOGCFeature | undefined {

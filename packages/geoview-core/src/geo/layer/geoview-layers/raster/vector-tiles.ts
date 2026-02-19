@@ -45,7 +45,6 @@ export class VectorTiles extends AbstractGeoViewRaster {
   /**
    * Constructs a VectorTiles Layer configuration processor.
    * @param {TypeVectorTilesConfig} layerConfig - The layer configuration
-   * @param {ProjectionLike} fallbackProjection - The map projection when this layer is being created, for validation purposes.
    */
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(layerConfig: TypeVectorTilesConfig) {
@@ -53,6 +52,15 @@ export class VectorTiles extends AbstractGeoViewRaster {
   }
 
   // #region OVERRIDES
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeVectorTilesConfig} The strongly-typed layer configuration specific to this layer.
+   */
+  override getGeoviewLayerConfig(): TypeVectorTilesConfig {
+    return super.getGeoviewLayerConfig() as TypeVectorTilesConfig;
+  }
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).

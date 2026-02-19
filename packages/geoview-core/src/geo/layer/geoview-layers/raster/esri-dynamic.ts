@@ -51,6 +51,15 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
+   * @returns {TypeEsriDynamicLayerConfig} The strongly-typed layer configuration specific to this layer.
+   */
+  override getGeoviewLayerConfig(): TypeEsriDynamicLayerConfig {
+    return super.getGeoviewLayerConfig() as TypeEsriDynamicLayerConfig;
+  }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
    * @returns {TypeMetadataEsriDynamic | undefined} The strongly-typed layer configuration specific to this layer.
    */
   override getMetadata(): TypeMetadataEsriDynamic | undefined {

@@ -38,6 +38,15 @@ export class EsriImage extends AbstractGeoViewRaster {
   // #region OVERRIDES
 
   /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeEsriImageLayerConfig} The strongly-typed layer configuration specific to this layer.
+   */
+  override getGeoviewLayerConfig(): TypeEsriImageLayerConfig {
+    return super.getGeoviewLayerConfig() as TypeEsriImageLayerConfig;
+  }
+
+  /**
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
    */

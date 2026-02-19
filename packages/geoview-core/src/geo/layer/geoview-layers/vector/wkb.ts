@@ -49,6 +49,15 @@ export class WKB extends AbstractGeoViewVector {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
+   * @returns {TypeWkbLayerConfig} The strongly-typed layer configuration specific to this layer.
+   */
+  override getGeoviewLayerConfig(): TypeWkbLayerConfig {
+    return super.getGeoviewLayerConfig() as TypeWkbLayerConfig;
+  }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
    * @returns {TypeMetadataGeoJSON | undefined} The strongly-typed layer configuration specific to this layer.
    */
   override getMetadata(): TypeMetadataGeoJSON | undefined {

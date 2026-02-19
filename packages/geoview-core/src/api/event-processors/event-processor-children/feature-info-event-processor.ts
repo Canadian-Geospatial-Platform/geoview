@@ -113,6 +113,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * Shortcut to get the Feature Info state for a given map id
    * @param {string} mapId - The mapId
    * @returns {IFeatureInfoState} The Feature Info state
+   * @static
    */
   protected static getFeatureInfoState(mapId: string): IFeatureInfoState {
     // Return the feature info state
@@ -123,6 +124,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * Gets the selectedLayerPath value
    * @param {string} mapId - The map identifier
    * @returns {string} the selected layer path
+   * @static
    */
   static getSelectedLayerPath(mapId: string): string {
     return this.getFeatureInfoState(mapId).selectedLayerPath;
@@ -133,6 +135,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path to select
    * @returns {void}
+   * @static
    */
   static setSelectedLayerPath(mapId: string, layerPath: string): void {
     // The feature info state
@@ -151,6 +154,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map id.
    * @param {string} layerPath - The path of the layer to get.
    * @returns {TypeOrderedLayerInfo | undefined} The ordered layer info.
+   * @static
    */
   static findLayerDataFromLayerDataArray(
     mapId: string,
@@ -166,6 +170,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path to delete features from resultSet
    * @returns {void}
+   * @static
    */
   static resetResultSet(mapId: string, layerPath: string): void {
     const { resultSet } = MapEventProcessor.getMapViewerLayerAPI(mapId).featureInfoLayerSet;
@@ -186,6 +191,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path to delete
    * @returns {void}
+   * @static
    */
   static deleteFeatureInfo(mapId: string, layerPath: string): void {
     // The feature info state
@@ -217,6 +223,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {(layerArray: T[]) => void} onDeleteCallback - The callback executed when the array is updated
    * @returns {void}
    * @private
+   * @static
    */
   static #deleteFromArray<T extends TypeResultSetEntry>(
     layerArray: T[],
@@ -250,6 +257,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * Switch the open panel to details when a map click occurs, if it is not already geochart or details.
    * @param {string} mapId - The map identifier of the modified result set.
    * @returns {void}
+   * @static
    */
   static openDetailsPanelOnMapClick(mapId: string): void {
     // Show details panel as soon as there is a click on the map
@@ -272,6 +280,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map identifier of the modified result set.
    * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry being propagated.
    * @returns {void}
+   * @static
    */
   static propagateFeatureInfoToStore(mapId: string, resultSetEntry: TypeFeatureInfoResultSetEntry): void {
     // The feature info state
@@ -295,6 +304,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {TypeFeatureInfoResultSetEntry[]} layerDataArray - The layer data array to batch on
    * @returns {Promise<void>} Promise upon completion
    * @private
+   * @static
    */
   static #propagateFeatureInfoToStoreBatch(mapId: string, layerDataArray: TypeFeatureInfoResultSetEntry[]): Promise<void> {
     // The feature info state
@@ -345,6 +355,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map ID
    * @param {[number, number]} coordinates - The lng/lat coordinates
    * @returns {Promise<TypeCoordinateInfo>} Promise of coordinate information
+   * @static
    */
   static getCoordinateInfo(mapId: string, coordinates: TypeMapMouseInfo): void {
     // If the coordinate info is not enabled, clear any existing info

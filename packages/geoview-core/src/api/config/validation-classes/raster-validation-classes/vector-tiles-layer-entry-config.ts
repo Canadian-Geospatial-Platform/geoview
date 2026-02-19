@@ -44,6 +44,15 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
+   * @returns {TypeVectorTilesConfig} The strongly-typed layer configuration specific to this layer.
+   */
+  override getGeoviewLayerConfig(): TypeVectorTilesConfig {
+    return super.getGeoviewLayerConfig() as TypeVectorTilesConfig;
+  }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
    * @returns {TypeSourceTileInitialConfig} The strongly-typed source configuration specific to this layer entry config.
    */
   override getSource(): TypeSourceTileInitialConfig {

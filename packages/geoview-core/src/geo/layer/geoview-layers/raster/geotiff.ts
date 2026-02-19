@@ -43,6 +43,15 @@ export class GeoTIFF extends AbstractGeoViewRaster {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
+   * @returns {TypeGeoTIFFLayerConfig} The strongly-typed layer configuration specific to this layer.
+   */
+  override getGeoviewLayerConfig(): TypeGeoTIFFLayerConfig {
+    return super.getGeoviewLayerConfig() as TypeGeoTIFFLayerConfig;
+  }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
    * @returns {TypeMetadataGeoTIFF | undefined} The strongly-typed layer configuration specific to this layer.
    */
   override getMetadata(): TypeMetadataGeoTIFF | undefined {

@@ -84,8 +84,14 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
     // Test WMS OWSMundialis config
     const pWMSMundialis = this.#configTester.testWMSLayerWithOWSMundialis();
 
+    // Test WMS OWSMundialis config no full sub layers
+    const pWMSMundialisNoFullSubLayers = this.#configTester.testWMSLayerWithOWSMundialisNoFullSubLayers();
+
     // Test WMS DatacubeMSI config
     const pWMSDatacubeMSI = this.#configTester.testWMSLayerWithDatacubeMSI();
+
+    // Test WMS DatacubeMSI config
+    const pWMSDatacubeMSINoFullSubLayers = this.#configTester.testWMSLayerWithDatacubeMSINoFullSubLayers();
 
     // Test a true negative
     const pWMSBadUrl = this.#configTester.testWMSBadUrl();
@@ -156,7 +162,9 @@ export class GVTestSuiteConfig extends GVAbstractTestSuite {
       pEsriImage,
       pEsriImageBadUrl,
       pWMSMundialis,
+      pWMSMundialisNoFullSubLayers,
       pWMSDatacubeMSI,
+      pWMSDatacubeMSINoFullSubLayers,
       pWMSBadUrl,
       pWFSCurrentConditions,
       pWFSBadUrl,

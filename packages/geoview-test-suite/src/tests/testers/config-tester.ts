@@ -377,7 +377,7 @@ export class ConfigTester extends GVAbstractTester {
     const gvLayerId: string = 'gvLayerId';
     const gvLayerType: TypeGeoviewLayerType = 'ogcWms';
     const gvLayerName: string = 'OpenStreetMap WMS';
-    const fullSubLayers: boolean = false;
+    const fullSubLayers: boolean = true;
 
     // Expected config
     const expectedConfig = {
@@ -394,22 +394,82 @@ export class ConfigTester extends GVAbstractTester {
         test.addStep('Initializing config on url: ' + url);
 
         // Initialize the layer config
-        return WMS.initGeoviewLayerConfig(gvLayerId, gvLayerName, url, fullSubLayers);
+        return WMS.initGeoviewLayerConfig(gvLayerId, gvLayerName, url, false, fullSubLayers);
       },
       (test, result) => {
         // Perform assertions
         test.addStep('Verifying expected config...');
         Test.assertJsonObject(result, expectedConfig);
 
-        // Supposedly 11 layer entries
-        test.addStep('Verifying 11 layer entries in the config...');
-        Test.assertIsArrayLengthEqual(result.listOfLayerEntryConfig, 11);
+        // Supposedly 1 layer entry
+        test.addStep('Verifying 1 layer entry in the config root...');
+        Test.assertIsArrayLengthEqual(result.listOfLayerEntryConfig, 1);
 
         // Take the first layer entry
-        test.addStep('Verifying 1st layer entry config...');
         const layerEntry = result.listOfLayerEntryConfig[0];
-        Test.assertIsInstance(layerEntry, OgcWmsLayerEntryConfig);
-        Test.assertIsEqual(layerEntry.layerId, 'OSM-WMS');
+        test.addStep('Verifying 1st layer entry config to be a group...');
+        Test.assertIsInstance(layerEntry, GroupLayerEntryConfig);
+
+        // Supposedly 11 sub layer entries
+        test.addStep('Verifying 11 layer entries in the config sub root...');
+        Test.assertIsArrayLengthEqual(layerEntry.listOfLayerEntryConfig, 11);
+
+        // Take the first layer entry
+        test.addStep('Verifying 1st sub-layer entry config to be a WMS (as well as others)...');
+        const subLayerEntry1 = layerEntry.listOfLayerEntryConfig[0];
+        Test.assertIsInstance(subLayerEntry1, OgcWmsLayerEntryConfig);
+        Test.assertIsEqual(subLayerEntry1.layerId, 'OSM-WMS');
+      }
+    );
+  }
+
+  /**
+   * Tests an WMS Config using OWS Mundialis.
+   * @returns {Promise<Test<TypeGeoviewLayerConfig>>} A Promise that resolves with a Test containing the configuration.
+   */
+  testWMSLayerWithOWSMundialisNoFullSubLayers(): Promise<Test<TypeGeoviewLayerConfig>> {
+    // The url
+    const url = ConfigTester.OWS_MUNDIALIS;
+
+    // Dummy names
+    const gvLayerId: string = 'gvLayerId';
+    const gvLayerType: TypeGeoviewLayerType = 'ogcWms';
+    const gvLayerName: string = 'OpenStreetMap WMS';
+    const fullSubLayers: boolean = false;
+
+    // Expected config
+    const expectedConfig = {
+      geoviewLayerId: gvLayerId,
+      geoviewLayerType: gvLayerType,
+      geoviewLayerName: gvLayerName,
+    };
+
+    // Test the Esri Feature config
+    return this.test(
+      'Test a WMS with OWS Mundialis no full sub layers',
+      (test) => {
+        // Set step
+        test.addStep('Initializing config on url: ' + url);
+
+        // Initialize the layer config
+        return WMS.initGeoviewLayerConfig(gvLayerId, gvLayerName, url, false, fullSubLayers);
+      },
+      (test, result) => {
+        // Perform assertions
+        test.addStep('Verifying expected config...');
+        Test.assertJsonObject(result, expectedConfig);
+
+        // Supposedly 1 layer entry
+        test.addStep('Verifying 2 layer entry in the config root...');
+        Test.assertIsArrayLengthEqual(result.listOfLayerEntryConfig, 1);
+
+        // Take the first layer entry
+        const layerEntry = result.listOfLayerEntryConfig[0];
+        test.addStep('Verifying 1st layer entry config to a GroupLayerEntryConfig...');
+        Test.assertIsInstance(layerEntry, GroupLayerEntryConfig);
+
+        // Check nothing else loaded as entries
+        Test.assertIsArrayLengthEqual(layerEntry.listOfLayerEntryConfig, 0);
       }
     );
   }
@@ -419,6 +479,70 @@ export class ConfigTester extends GVAbstractTester {
    * @returns {Promise<Test<TypeGeoviewLayerConfig>>} A Promise that resolves with a Test containing the configuration.
    */
   testWMSLayerWithDatacubeMSI(): Promise<Test<TypeGeoviewLayerConfig>> {
+    // The url
+    const url = GVAbstractTester.DATACUBE_MSI;
+
+    // Dummy names
+    const gvLayerId: string = 'gvLayerId';
+    const gvLayerType: TypeGeoviewLayerType = 'ogcWms';
+    const gvLayerName: string = 'Layers / Couches';
+    const fullSubLayers: boolean = true;
+
+    // Expected config
+    const expectedConfig = {
+      geoviewLayerId: gvLayerId,
+      geoviewLayerType: gvLayerType,
+      geoviewLayerName: gvLayerName,
+    };
+
+    // Test the WMS
+    return this.test(
+      'Test a WMS with Datacube MSI',
+      (test) => {
+        // Set step
+        test.addStep('Initializing config on url: ' + url);
+
+        // Initialize the layer config
+        return WMS.initGeoviewLayerConfig(gvLayerId, gvLayerName, url, false, fullSubLayers);
+      },
+      (test, result) => {
+        // Perform assertions
+        test.addStep('Verifying expected config...');
+        Test.assertJsonObject(result, expectedConfig);
+
+        // Supposedly 2 layer entries
+        test.addStep('Verifying 1 layer entry in the config root...');
+        Test.assertIsArrayLengthEqual(result.listOfLayerEntryConfig, 1);
+
+        // Take the first layer entry
+        const layerEntry = result.listOfLayerEntryConfig[0];
+        test.addStep('Verifying 1st layer entry config to be a group...');
+        Test.assertIsInstance(layerEntry, GroupLayerEntryConfig);
+
+        // Supposedly 2 sub layer entries
+        test.addStep('Verifying 2 layer entries in the config sub root...');
+        Test.assertIsArrayLengthEqual(layerEntry.listOfLayerEntryConfig, 2);
+
+        // Take the first layer entry
+        test.addStep('Verifying 1st sub layer entry...');
+        const subLayerEntry1 = layerEntry.listOfLayerEntryConfig[0];
+        Test.assertIsInstance(subLayerEntry1, OgcWmsLayerEntryConfig);
+        Test.assertIsEqual(subLayerEntry1.layerId, GVAbstractTester.DATACUBE_MSI_LAYER_NAME_MSI);
+
+        // Take the second layer entry
+        test.addStep('Verifying 2nd layer entry...');
+        const subLayerEntry2 = layerEntry.listOfLayerEntryConfig[1];
+        Test.assertIsInstance(subLayerEntry2, OgcWmsLayerEntryConfig);
+        Test.assertIsEqual(subLayerEntry2.layerId, GVAbstractTester.DATACUBE_MSI_LAYER_NAME_MSI_OR_MORE);
+      }
+    );
+  }
+
+  /**
+   * Tests an WMS Config using Datacube MSI.
+   * @returns {Promise<Test<TypeGeoviewLayerConfig>>} A Promise that resolves with a Test containing the configuration.
+   */
+  testWMSLayerWithDatacubeMSINoFullSubLayers(): Promise<Test<TypeGeoviewLayerConfig>> {
     // The url
     const url = GVAbstractTester.DATACUBE_MSI;
 
@@ -443,7 +567,7 @@ export class ConfigTester extends GVAbstractTester {
         test.addStep('Initializing config on url: ' + url);
 
         // Initialize the layer config
-        return WMS.initGeoviewLayerConfig(gvLayerId, gvLayerName, url, fullSubLayers);
+        return WMS.initGeoviewLayerConfig(gvLayerId, gvLayerName, url, false, fullSubLayers);
       },
       (test, result) => {
         // Perform assertions
@@ -451,20 +575,16 @@ export class ConfigTester extends GVAbstractTester {
         Test.assertJsonObject(result, expectedConfig);
 
         // Supposedly 2 layer entries
-        test.addStep('Verifying 2 layer entries in the config...');
-        Test.assertIsArrayLengthEqual(result.listOfLayerEntryConfig, 2);
+        test.addStep('Verifying 1 layer entry in the config root...');
+        Test.assertIsArrayLengthEqual(result.listOfLayerEntryConfig, 1);
 
         // Take the first layer entry
-        test.addStep('Verifying 1st layer entry...');
-        const layerEntryFirst = result.listOfLayerEntryConfig[0];
-        Test.assertIsInstance(layerEntryFirst, OgcWmsLayerEntryConfig);
-        Test.assertIsEqual(layerEntryFirst.layerId, GVAbstractTester.DATACUBE_MSI_LAYER_NAME_MSI);
+        const layerEntry = result.listOfLayerEntryConfig[0];
+        test.addStep('Verifying 1st layer entry config to be a group...');
+        Test.assertIsInstance(layerEntry, GroupLayerEntryConfig);
 
-        // Take the second layer entry
-        test.addStep('Verifying 2nd layer entry...');
-        const layerEntrySecond = result.listOfLayerEntryConfig[1];
-        Test.assertIsInstance(layerEntrySecond, OgcWmsLayerEntryConfig);
-        Test.assertIsEqual(layerEntrySecond.layerId, GVAbstractTester.DATACUBE_MSI_LAYER_NAME_MSI_OR_MORE);
+        // Check nothing else loaded as entries
+        Test.assertIsArrayLengthEqual(layerEntry.listOfLayerEntryConfig, 0);
       }
     );
   }
@@ -490,7 +610,7 @@ export class ConfigTester extends GVAbstractTester {
       test.addStep('Creating the GeoView Layer Configuration...');
 
       // Try it and expect a fail
-      await WMS.initGeoviewLayerConfig('gvLayerId', 'gvLayerName', urlBad, false);
+      await WMS.initGeoviewLayerConfig('gvLayerId', 'gvLayerName', urlBad);
     });
   }
 

@@ -24,6 +24,17 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
     super(layerConfig, CONST_LAYER_TYPES.WFS);
   }
 
+  // #region OVERRIDES
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeWFSLayerConfig} The strongly-typed layer configuration specific to this layer.
+   */
+  override getGeoviewLayerConfig(): TypeWFSLayerConfig {
+    return super.getGeoviewLayerConfig() as TypeWFSLayerConfig;
+  }
+
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
@@ -41,6 +52,8 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
   override getLayerMetadata(): TypeOutfields[] | undefined {
     return super.getLayerMetadata() as TypeOutfields[] | undefined;
   }
+
+  // #endregion OVERRIDES
 
   /**
    * Retrieves the WFS `FeatureType` metadata entry corresponding to this layer.
@@ -160,7 +173,7 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
    * @returns {boolean} True when the styles should be fetched from the WMS. True by default.
    */
   getShouldFetchStylesFromWMS(): boolean {
-    return (this.getGeoviewLayerConfig() as TypeWFSLayerConfig).fetchStylesOnWMS ?? true; // default: true
+    return this.getGeoviewLayerConfig().fetchStylesOnWMS ?? true; // default: true
   }
 
   /**

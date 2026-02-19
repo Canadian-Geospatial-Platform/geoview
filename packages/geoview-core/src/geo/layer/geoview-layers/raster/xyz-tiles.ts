@@ -56,6 +56,15 @@ export class XYZTiles extends AbstractGeoViewRaster {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @override
+   * @returns {TypeXYZTilesConfig} The strongly-typed layer configuration specific to this layer.
+   */
+  override getGeoviewLayerConfig(): TypeXYZTilesConfig {
+    return super.getGeoviewLayerConfig() as TypeXYZTilesConfig;
+  }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
    * @returns {TypeMetadataXYZTiles | undefined} The strongly-typed layer configuration specific to this layer.
    */
   override getMetadata(): TypeMetadataXYZTiles | undefined {
