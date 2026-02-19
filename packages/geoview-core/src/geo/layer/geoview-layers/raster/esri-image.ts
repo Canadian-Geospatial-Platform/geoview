@@ -263,8 +263,8 @@ export class EsriImage extends AbstractGeoViewRaster {
         LAYERS: `show:${layerConfig.layerId}`,
         ...(source.transparent !== undefined && { transparent: source.transparent }),
         ...(source.format && { format: source.format }),
-        ...(layerConfig.getRasterFunction() && {
-          renderingRule: JSON.stringify({ rasterFunction: layerConfig.getRasterFunction() }),
+        ...(layerConfig.getInitialRasterFunction() && {
+          renderingRule: JSON.stringify({ rasterFunction: layerConfig.getInitialRasterFunction() }),
         }),
       },
       crossOrigin: source.crossOrigin ?? 'Anonymous',

@@ -250,6 +250,17 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Gets the active raster function for a layer.
+   * @param {string} mapId - The map identifier.
+   * @param {string} layerPath - The layer path.
+   * @returns {string | undefined} The active raster function identifier.
+   * @static
+   */
+  static getLayerRasterFunction(mapId: string, layerPath: string): string | undefined {
+    return LegendEventProcessor.getLegendLayerInfo(mapId, layerPath)?.rasterFunction;
+  }
+
+  /**
    * Sets the active raster function for a layer.
    * @param {string} mapId - The map identifier.
    * @param {string} layerPath - The layer path.
@@ -278,17 +289,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       // Set updated legend layers
       this.getLayerState(mapId).setterActions.setLegendLayers(layers);
     }
-  }
-
-  /**
-   * Gets the active raster function for a layer.
-   * @param {string} mapId - The map identifier.
-   * @param {string} layerPath - The layer path.
-   * @returns {string | undefined} The active raster function identifier.
-   * @static
-   */
-  static getLayerRasterFunction(mapId: string, layerPath: string): string | undefined {
-    return LegendEventProcessor.getLegendLayerInfo(mapId, layerPath)?.rasterFunction;
   }
 
   /**
@@ -818,8 +818,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           items,
           icons,
           rasterFunction:
-            'getRasterFunction' in layerConfig && typeof layerConfig.getRasterFunction === 'function'
-              ? layerConfig.getRasterFunction()
+            'getInitialRasterFunction' in layerConfig && typeof layerConfig.getInitialRasterFunction === 'function'
+              ? layerConfig.getInitialRasterFunction()
               : undefined,
         };
 
