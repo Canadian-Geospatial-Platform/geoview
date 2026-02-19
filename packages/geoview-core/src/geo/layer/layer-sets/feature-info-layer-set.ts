@@ -79,7 +79,8 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // Update the resultSet data
     const layerPath = layer.getLayerPath();
     this.resultSet[layerPath].queryStatus = 'processed';
-    this.resultSet[layerPath].features = [];
+    this.resultSet[layerPath].features = undefined;
+    this.resultSet[layerPath].featuresHaveGeometry = false;
   }
 
   /**
@@ -153,6 +154,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
       // Flag processing
       this.resultSet[layerPath].features = undefined;
+      this.resultSet[layerPath].featuresHaveGeometry = false;
       this.resultSet[layerPath].queryStatus = 'processing';
 
       // Propagate to store
@@ -187,18 +189,23 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
           // GV: When using 'at_lon_lat' query type, the results may be returned without their geometries when a promiseGeometries is defined.
           // GV: We have to wait for the promise (promiseResult.promiseGeometries) to resolve if we want to know when the geometries are actually part of the results.
-          // GV: The following commented code demonstrates this.
-          // Leaving this code commented as it's useful to debug
-          // if (promiseResult.promiseGeometries) {
-          //   promiseResult.promiseGeometries
-          //     .then((okReady) => {
-          //       logger.logDebug('Ok, geometries are ready now!', okReady);
-          //     })
-          //     .catch((error: unknown) => {
-          //       logger.logPromiseFailed('Geometry error', error);
-          //     });
-          //   logger.logDebug('Results gathered, possibly without their geometries yet, we will wait for them...');
-          // }
+
+          // If there's a promise of geometries
+          if (promiseResult.promiseGeometries) {
+            // There's a promise that the geometries are coming, wait for them
+            promiseResult.promiseGeometries
+              .then(() => {
+                // Ok, geometries have been loaded now
+                this.resultSet[layerPath].featuresHaveGeometry = true;
+
+                // Propagate to store
+                this.#propagateToStore(this.resultSet[layerPath]);
+              })
+              .catch((error: unknown) => {
+                // Log
+                logger.logPromiseFailed('Geometry error in promiseResult.promiseGeometries in queryLayers', error);
+              });
+          }
 
           // Get the layer config
           const layerConfig = layer.getLayerConfig();
@@ -219,6 +226,9 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
           // Keep the features retrieved
           this.resultSet[layerPath].features = arrayOfRecords;
 
+          // Indicate that the geometries have been loaded if there was no promises for them (default)
+          this.resultSet[layerPath].featuresHaveGeometry = !promiseResult.promiseGeometries;
+
           // Query was processed
           this.resultSet[layerPath].queryStatus = 'processed';
         })
@@ -230,6 +240,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
           } else {
             // Error in the query
             this.resultSet[layerPath].features = undefined;
+            this.resultSet[layerPath].featuresHaveGeometry = false;
             this.resultSet[layerPath].queryStatus = 'error';
 
             // Log
@@ -259,7 +270,8 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    */
   clearResults(layerPath: string): void {
     // Edit the result set
-    this.resultSet[layerPath].features = [];
+    this.resultSet[layerPath].features = undefined;
+    this.resultSet[layerPath].featuresHaveGeometry = false;
 
     // Propagate to store
     this.#propagateToStore(this.resultSet[layerPath]);

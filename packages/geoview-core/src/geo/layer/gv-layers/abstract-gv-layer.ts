@@ -1770,9 +1770,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
           ? AbstractGVLayer.getFeatureIconSource(feature, layerStyle, domainsLookup, aliasLookup, imageSourceDict)
           : undefined;
 
-        // Get the extent
-        const extent = feature.getGeometry()?.getExtent();
-
         // Get the TypeFeatureInfoEntry object
         const featureInfoEntry: TypeFeatureInfoEntry = {
           uid: getUid(feature),
@@ -1780,7 +1777,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
           geoviewLayerType: schemaTag,
           feature,
           geometry: feature.getGeometry(),
-          extent,
+          extent: feature.getGeometry()?.getExtent(),
           featureIcon: imageSource,
           fieldInfo: {},
           nameField: nameField || null,
