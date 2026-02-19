@@ -794,7 +794,7 @@ export abstract class GeoUtilities {
    * @returns {EsriJSONReadResult} An array of parsed OpenLayers Feature and whether there were any invalid geometries
    */
   static readFeaturesFromEsriJSON(features: unknown, options: ReadOptions | undefined): EsriJSONReadResult {
-    // GV Strings in the geometry will throw errors in EsriJSON().readFeatures()
+    // GV Anything other than numbers in the geometry will throw errors in EsriJSON().readFeatures()
     // GV Those features are removed so the rest of the features can be parsed
     try {
       // First try to process features right away and only clean the geometries if it fails

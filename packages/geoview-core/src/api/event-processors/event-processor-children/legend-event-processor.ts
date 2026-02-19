@@ -35,11 +35,22 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     return super.getState(mapId).layerState;
   }
 
+  /**
+   * Sets the selected layer in the layers tab
+   * @param mapId - The map id
+   * @param layerPath - The layer path
+   * @returns {void} @static
+   */
   static setSelectedLayersTabLayer(mapId: string, layerPath: string): void {
     // Save in store
     this.getLayerState(mapId).setterActions.setSelectedLayerPath(layerPath);
   }
 
+  /**
+   * Reorders the legend layers based on the ordered layer info
+   * @param mapId - The map id
+   * @returns {void} @static
+   */
   static reorderLegendLayers(mapId: string): void {
     // Sort the layers
     const sortedLayers = this.getLayerState(mapId).legendLayers.sort(
@@ -166,7 +177,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The unique identifier of the map instance.
    * @param {string} layerPath - The path to the layer.
    * @returns {TypeMetadataEsriRasterFunctionInfos[] | undefined} - The projection code of the layer, or `undefined` if not available.
-   *
+   * @static
    * @description
    * This method fetches the Geoview layer for the specified layer path and checks if it has a `getMetadataRasterFunctionInfos` method.
    * If the method exists, it retrieves the rasterFunctionInfos and returns the list of TypeMetadataEsriRasterFunctionInfo.
@@ -191,6 +202,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map identifier.
    * @param {string} layerPath - The layer path.
    * @param {string | undefined} rasterFunctionId - The raster function identifier to set.
+   * @static
    */
   static setLayerRasterFunction(mapId: string, layerPath: string, rasterFunctionId: string | undefined): void {
     MapEventProcessor.getMapViewerLayerAPI(mapId).setLayerRasterFunction(layerPath, rasterFunctionId);
@@ -201,6 +213,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map identifier.
    * @param {string} layerPath - The layer path.
    * @param {string | undefined} rasterFunctionId - The raster function identifier to set.
+   * @returns {void} @static
    */
   static setLayerRasterFunctionInStore(mapId: string, layerPath: string, rasterFunctionId: string | undefined): void {
     // Find the layer for the given layer path
@@ -220,6 +233,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map identifier.
    * @param {string} layerPath - The layer path.
    * @returns {string | undefined} The active raster function identifier.
+   * @static
    */
   static getLayerRasterFunction(mapId: string, layerPath: string): string | undefined {
     return LegendEventProcessor.getLegendLayerInfo(mapId, layerPath)?.rasterFunction;
@@ -230,6 +244,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map identifier.
    * @param {string} layerPath - The layer path.
    * @returns {Map<string, Promise<string>>} The raster function previews
+   * @static
    */
   static getLayerRasterFunctionPreviews(mapId: string, layerPath: string): Map<string, Promise<string>> {
     const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
@@ -246,6 +261,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map identifier
    * @param {string} layerPath - The layer path
    * @returns {string[]} Array of available setting types
+   * @static
    */
   static getLayerSettings(mapId: string, layerPath: string): string[] {
     const settings: string[] = [];
@@ -478,6 +494,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {number[]} objectIds - The IDs of features to get extents from.
    * @param {string} outfield - ID field to return for services that require a value in outfields.
    * @returns {Promise<Extent>} The extent of the feature, if available
+   * @static
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    * @throws {LayerWrongTypeError} When the layer was of wrong type.
    * @static
