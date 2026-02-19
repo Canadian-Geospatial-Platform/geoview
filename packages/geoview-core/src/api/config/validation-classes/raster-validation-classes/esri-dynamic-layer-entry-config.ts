@@ -39,7 +39,7 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeWMSLayerConfig} The strongly-typed layer configuration specific to this layer.
+   * @returns {TypeEsriDynamicLayerConfig} The strongly-typed layer configuration specific to this layer.
    * @override
    */
   override getGeoviewLayerConfig(): TypeEsriDynamicLayerConfig {

@@ -779,7 +779,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
           </Grid>
 
           <FeatureInfo
-            key={`${memoCurrentFeature.uid}-${memoCurrentFeature.geometry ? 'with-geo' : 'no-geo'}`}
+            key={`${memoCurrentFeature.uid}-${memoCurrentFeatureHasGeometry ? 'with-geo' : 'no-geo'}`}
             feature={memoCurrentFeature}
           />
         </Box>
