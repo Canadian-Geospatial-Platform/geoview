@@ -40,14 +40,14 @@ function RasterFunctionMenuItem({ info, isSelected, previewPromise, onSelect }: 
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('RASTER FUNCTION MENU ITEM - Menu item image preview', previewPromise);
+    logger.logTraceUseEffect(`RASTER FUNCTION MENU ITEM - image preview - ${info.name}`, previewPromise);
 
     if (!previewPromise) return;
     previewPromise
       .then(setPreviewSrc)
       .catch(() => setPreviewSrc(null))
       .finally(() => setLoading(false));
-  }, [previewPromise]);
+  }, [info.name, previewPromise]);
 
   const renderIcon = (): JSX.Element => {
     if (loading) {
