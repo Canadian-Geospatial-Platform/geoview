@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useTheme } from '@mui/material/styles';
 import { Menu, MenuItem, ListItemIcon, ListItemText, Box, CircularProgress } from '@mui/material';
 import { ImageNotSupported as ImageNotSupportedIcon } from '@mui/icons-material';
-import { useTheme } from '@mui/material/styles';
+import { getSxClasses } from './layer-settings-style';
 import {
   useLayerStoreActions,
   useLayerSelectorRasterFunctionInfos,
@@ -9,7 +10,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import type { TypeMetadataEsriRasterFunctionInfos } from '@/api/types/layer-schema-types';
-import { getSxClasses } from './layer-settings-style';
+import { logger } from '@/core/utils/logger';
 
 interface RasterFunctionSelectorProps {
   layerDetails: TypeLegendLayer;
@@ -26,12 +27,21 @@ interface RasterFunctionMenuItemProps {
 }
 
 function RasterFunctionMenuItem({ info, isSelected, previewPromise, onSelect }: RasterFunctionMenuItemProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/layers/right-panel/layer-settings/raster-function-selector > RasterFunctionMenuItem');
+
+  // Hooks
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+
+  // State
   const [previewSrc, setPreviewSrc] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('RASTER FUNCTION MENU ITEM - Menu item image preview', previewPromise);
+
     if (!previewPromise) return;
     previewPromise
       .then(setPreviewSrc)
@@ -70,20 +80,35 @@ function RasterFunctionMenuItem({ info, isSelected, previewPromise, onSelect }: 
 }
 
 export function RasterFunctionSelector(props: RasterFunctionSelectorProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/layers/right-panel/layer-settings/raster-function-selector > RasterFunctionSelector');
+
   const { layerDetails, anchorEl, onClose, onClickOutside } = props;
+
+  // Hooks
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
+
+  // Store actions
   const { setLayerRasterFunction, getLayerRasterFunctionPreviews } = useLayerStoreActions();
-  const rasterFunctionInfos = useLayerSelectorRasterFunctionInfos(layerDetails.layerPath) || [];
+
+  // Store hooks
+  const storeRasterFunctionInfos = useLayerSelectorRasterFunctionInfos(layerDetails.layerPath);
+  const rasterFunctionInfos = useMemo(() => storeRasterFunctionInfos || [], [storeRasterFunctionInfos]);
   const currentRasterFunction = useLayerSelectorRasterFunction(layerDetails.layerPath);
+
+  // State
   const [previewPromises, setPreviewPromises] = useState<Map<string, Promise<string>>>(new Map());
 
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('RASTER FUNCTION SELECTOR - Layer Raster Function Infos sync', rasterFunctionInfos);
+
     if (rasterFunctionInfos.length > 0) {
       const promises = getLayerRasterFunctionPreviews(layerDetails.layerPath);
       setPreviewPromises(promises);
     }
-  }, [layerDetails.layerPath, rasterFunctionInfos.length, getLayerRasterFunctionPreviews]);
+  }, [layerDetails.layerPath, rasterFunctionInfos, getLayerRasterFunctionPreviews]);
 
   const handleSelect = (rasterFunctionName: string): void => {
     setLayerRasterFunction(layerDetails.layerPath, rasterFunctionName);
