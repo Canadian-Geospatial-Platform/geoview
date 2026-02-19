@@ -104,6 +104,7 @@ const config = {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
     chunkFilename: '[name].js',
+    publicPath: '/', // Added for the open-maps demo to work with the dev server, it is also useful for the production build to ensure assets are loaded correctly regardless of the hosting environment
   },
   resolve: {
     extensions: ['.mjs', '.ts', '.tsx', '.js', '.jsx'],
@@ -236,7 +237,7 @@ const config = {
 
   performance: {
     maxEntrypointSize: 7 * 1024 * 1024, // 7 MiB
-    maxAssetSize: 40 * 1024 * 1024 // 40 MiB, because of big files, notably datasets/geojson/historical_flood_0.geojson (35.1 MiB)
+    maxAssetSize: 40 * 1024 * 1024, // 40 MiB, because of big files, notably datasets/geojson/historical_flood_0.geojson (35.1 MiB)
   },
 };
 

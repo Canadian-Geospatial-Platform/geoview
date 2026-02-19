@@ -168,13 +168,23 @@ export default function Share(): JSX.Element | null {
 
       <Dialog open={isModalOpen} onClose={handleCloseModal} aria-labelledby="share-dialog-title" maxWidth="sm" fullWidth>
         <DialogTitle id="share-dialog-title">{t('appbar.share')}</DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 2 }}>
+        <DialogContent dividers>
+          <Box sx={{ pt: 2, pb: 1 }}>
             <TextField
               fullWidth
               value={shareUrl}
-              InputProps={{
-                readOnly: true,
+              slotProps={{
+                input: {
+                  readOnly: true,
+                },
+                inputLabel: {
+                  sx: {
+                    color: 'primary.main',
+                    '&.Mui-focused': {
+                      color: 'primary.main',
+                    },
+                  },
+                },
               }}
               label={t('appbar.shareUrl')}
               variant="outlined"

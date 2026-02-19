@@ -4,60 +4,158 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Open Maps Demo - Canadian Geospatial Platform Viewer</title>
-    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="shortcut icon" href="/favicon.ico" />
     <meta name="msapplication-TileColor" content="#da532c" />
-    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="msapplication-config" content="/img/browserconfig.xml" />
     <meta name="theme-color" content="#ffffff" />
     <meta name="msapplication-TileColor" content="#da532c" />
     <meta name="theme-color" content="#ffffff" />
     <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="/css/style.css" />
   </head>
 
   <body>
     <div id="page-header"></div>
     <div>
       <div class="back-to-main">
-        <a href="./index.html?tab=specific-demos">← Back to Main</a>
+        <a href="/index.html?tab=specific-demos">← Back to Main</a>
       </div>
     </div>
 
-    <!-- IMPORTANT HTML CODE SECTION - START -->
-    <!-- This is the div for the map (same config EN and FR) -->
-    <div id="MapEN" class="geoview-map" data-lang="en" data-config-url="./configs/open-maps/open-maps-config.json"></div>
+    <div style="padding: 20px; background-color: #f5f5f5; margin: 20px 0; border-radius: 4px">
+      <h3 style="margin-top: 0">How to Use This Template</h3>
+      <p>
+        Replace the UUID in the URL path to dynamically load different layers from the GeoCore catalog. Simply modify the URL structure:
+        <code>/demo-open-maps/{UUID}</code>
+      </p>
+      <p><strong>Example:</strong> <code>http://localhost:8080/demo-open-maps/6c343726-1e92-451a-876a-76e17d398a1c</code></p>
+      <p>You can also load multiple layers by separating UUIDs with commas: <code>/demo-open-maps/{UUID1},{UUID2}</code></p>
+    </div>
 
-    <div style="border-bottom: 3px solid #515ba5; margin: 20px 0;"></div>
+    <h4 style="margin-left: 20px">Sample UUIDs to Test (click to copy UUID):</h4>
+    <ul class="demo-list" style="display: flex; flex-direction: column">
+      <li class="uuid-item" style="cursor: pointer; padding: 8px; border-radius: 4px; transition: background-color 0.2s">
+        1. 21b821cf-0f1c-40ee-8925-eab12d357668 - Airborne Radioactivity <strong>- Chart</strong>
+      </li>
+      <li class="uuid-item" style="cursor: pointer; padding: 8px; border-radius: 4px; transition: background-color 0.2s">
+        2. fe83a604-aa5a-4e46-903c-685f8b0cc33c - Historical Flood Events <strong>- Time Slider</strong>
+      </li>
+      <li class="uuid-item" style="cursor: pointer; padding: 8px; border-radius: 4px; transition: background-color 0.2s">
+        3. ed9b204b-590c-4b17-9703-f6e167acd6c6 - NAPL <strong>- Time Slider</strong>
+      </li>
+      <li class="uuid-item" style="cursor: pointer; padding: 8px; border-radius: 4px; transition: background-color 0.2s">
+        4. 0fe65119-e96e-4a57-8bfe-9d9245fba06b - DMS Hillshade
+      </li>
+    </ul>
 
-     <!-- This is the div for the map (same config EN and FR) -->
-    <div id="MapFR" class="geoview-map" data-lang="fr" data-config-url="./configs/open-maps/open-maps-config.json"></div>
-
-    <!-- Link to Geoview, to replace by release hosted version https://viewer-visualiseur.services.geo.ca/apps/GeoView/2.1.2/cgpv-main.js -->
-    <!-- <script src="https://canadian-geospatial-platform.github.io/geoview/public/cgpv-main.js"></script> -->
-    <!-- IMPORTANT HTML CODE SECTION - END -->
+    <style>
+      .uuid-item:hover {
+        background-color: #e3f2fd;
+      }
+      .uuid-item:active {
+        background-color: #bbdefb;
+      }
+    </style>
 
     <!-- JUST FOR DEMO -->
-    <script src="codedoc.js"></script>
+    <script>
+      // Add click handlers to copy UUID to clipboard
+      document.querySelectorAll('.uuid-item').forEach((item) => {
+        item.addEventListener('click', function () {
+          // Extract UUID from the text (format: "number. UUID - description")
+          const text = this.textContent.trim();
+          const uuidMatch = text.match(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/);
+
+          if (uuidMatch) {
+            const uuid = uuidMatch[0];
+            navigator.clipboard
+              .writeText(uuid)
+              .then(() => {
+                // Visual feedback
+                const originalBg = this.style.backgroundColor;
+                this.style.backgroundColor = '#4caf50';
+                setTimeout(() => {
+                  this.style.backgroundColor = originalBg;
+                }, 200);
+                console.log('UUID copied to clipboard:', uuid);
+              })
+              .catch((err) => {
+                console.error('Failed to copy UUID:', err);
+                alert('Failed to copy UUID to clipboard');
+              });
+          }
+        });
+      });
+    </script>
+
+    <div style="border-bottom: 3px solid #515ba5; margin: 20px 0"></div>
+
+    <!-- ********** IMPORTANT HTML CODE SECTION - START ********** -->
+
+    <!-- This is the div for the map (same config EN and FR) -->
+    <div id="MapEN" class="geoview-map" data-lang="en" data-config-url="/configs/open-maps/open-maps-config.json"></div>
+
+    <div style="border-bottom: 3px solid #515ba5; margin: 20px 0"></div>
+
+    <!-- This is the div for the map (same config EN and FR) -->
+    <div id="MapFR" class="geoview-map" data-lang="fr" data-config-url="/configs/open-maps/open-maps-config.json"></div>
+
+    <!-- Link to Geoview, to replace by release hosted version https://viewer-visualiseur.services.geo.ca/apps/GeoView/2.1.2/cgpv-main.js -->
+    <!-- Link to dev Geoview to use for testing <script src="https://canadian-geospatial-platform.github.io/geoview/public/cgpv-main.js"></script> -->
+
+    <!-- ********** IMPORTANT HTML CODE SECTION - END ********** -->
+
+    <!-- JUST FOR DEMO -->
+    <script src="/codedoc.js"></script>
     <script>
       // JUST FOR DEMO
       insertPageHeader();
 
-      // CUSTOM CODE FOR KEYS INJECTION - START
-
-      // Register handler when map has been initialized
-      cgpv.onMapInit((mapViewer) => {
-        // Turn keys into an array, pass them to the map
-        let keys = '6c343726-1e92-451a-876a-76e17d398a1c';
-        let keysArr = keys.split(',')
-        keysArr.forEach((uuid) => {
-          cgpv.api.getMapViewer(mapViewer.mapId).layer.addGeoviewLayerByGeoCoreUUID(uuid);
-        });
+      // Fix relative image paths after header is inserted
+      document.querySelectorAll('img').forEach((img) => {
+        if (img.src.includes('/demo-open-maps/img/')) {
+          img.src = img.src.replace('/demo-open-maps/img/', '/img/');
+        }
       });
 
-      // initialize cgpv
-      cgpv.init();
+      // ********** IMPORTANT CUSTOM CODE FOR KEYS INJECTION - START **********
 
-      // CUSTOM CODE FOR KEYS INJECTION - END
+      // Extract UUID(s) from URL path (e.g., /demo-open-maps/uuid1,uuid2)
+      const pathSegments = window.location.pathname.split('/');
+      const uuidSegment = pathSegments[pathSegments.length - 1];
+
+      // Validate UUID segment exists
+      if (!uuidSegment) {
+        alert(
+          'Please provide a valid UUID in the URL path:\nExample: /demo-open-maps/6c343726-1e92-451a-876a-76e17d398a1c'
+        );
+      } else {
+        // Split and validate each UUID using cgpv utilities
+        const uuids = uuidSegment.split(',').map((uuid) => uuid.trim());
+        const invalidUuids = [];
+
+        for (const uuid of uuids) {
+          if (!cgpv.api.utilities.core.isValidUUID(uuid)) {
+            invalidUuids.push(uuid);
+          }
+        }
+
+        if (invalidUuids.length > 0) {
+          alert(`Invalid UUID(s) found:\n${invalidUuids.join('\n')}\n\nPlease provide valid UUID(s) in the URL path.`);
+        } else {
+          // All UUIDs are valid, proceed with map initialization
+          cgpv.onMapInit((mapViewer) => {
+            uuids.forEach((uuid) => {
+              cgpv.api.getMapViewer(mapViewer.mapId).layer.addGeoviewLayerByGeoCoreUUID(uuid);
+            });
+          });
+
+          cgpv.init();
+        }
+      }
+
+      // ********** IMPORTANT CUSTOM CODE FOR KEYS INJECTION - END **********
     </script>
   </body>
 </html>
