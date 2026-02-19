@@ -50,8 +50,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {TypeEsriDynamicLayerConfig} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getGeoviewLayerConfig(): TypeEsriDynamicLayerConfig {
     return super.getGeoviewLayerConfig() as TypeEsriDynamicLayerConfig;
@@ -59,8 +59,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {TypeMetadataEsriDynamic | undefined} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getMetadata(): TypeMetadataEsriDynamic | undefined {
     return super.getMetadata() as TypeMetadataEsriDynamic | undefined;
@@ -69,6 +69,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   * @override
+   * @protected
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Fetch the metadata
@@ -107,6 +109,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
    * @returns {void}
    * @override
+   * @protected
    */
   protected override onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: ConfigBaseClass[]): void {
     // Redirect and hook when a layer entry must be registered
@@ -124,6 +127,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<EsriDynamicLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    * @override
+   * @protected
    */
   protected override onProcessLayerMetadata(
     layerConfig: EsriDynamicLayerEntryConfig,
@@ -139,6 +143,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer entry configuration.
    * @returns {GVEsriDynamic} The GV Layer
    * @override
+   * @protected
    */
   protected override onCreateGVLayer(layerConfig: EsriDynamicLayerEntryConfig): GVEsriDynamic {
     // Create the source

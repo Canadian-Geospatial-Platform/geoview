@@ -60,6 +60,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    * @param {AbstractBaseGVLayer} layer - The layer
    * @returns {boolean} True when the layer should be registered to this feature-info-layer-set.
    * @override
+   * @protected
    */
   protected override onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean {
     // Return if the layer is of queryable type and source is queryable
@@ -71,6 +72,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    * @param {AbstractBaseGVLayer} layer - The layer
    * @returns {void}
    * @override
+   * @protected
    */
   protected override onRegisterLayer(layer: AbstractBaseGVLayer): void {
     // Call parent
@@ -89,6 +91,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    * @param {PropagationType} type - The propagation type
    * @returns {void}
    * @override
+   * @protected
    */
   protected override onPropagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry, type: PropagationType): void {
     // Redirect - Add layer to the list after registration
@@ -103,6 +106,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    * @param {string} layerPath - The layer path to delete from the store
    * @returns {void}
    * @override
+   * @protected
    */
   protected override onDeleteFromStore(layerPath: string): void {
     // Remove it from feature info array (propagating to the store)

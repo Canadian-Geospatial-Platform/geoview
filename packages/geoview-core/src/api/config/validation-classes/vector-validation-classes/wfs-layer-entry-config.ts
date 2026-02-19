@@ -28,8 +28,8 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {TypeWFSLayerConfig} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getGeoviewLayerConfig(): TypeWFSLayerConfig {
     return super.getGeoviewLayerConfig() as TypeWFSLayerConfig;
@@ -37,8 +37,8 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {TypeMetadataWFS | undefined} The strongly-typed layer configuration specific to this layer entry config.
+   * @override
    */
   override getServiceMetadata(): TypeMetadataWFS | undefined {
     return super.getServiceMetadata() as TypeMetadataWFS | undefined;
@@ -46,8 +46,8 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {TypeOutfields[] | undefined} The strongly-typed layer metadata specific to this layer entry config.
+   * @override
    */
   override getLayerMetadata(): TypeOutfields[] | undefined {
     return super.getLayerMetadata() as TypeOutfields[] | undefined;

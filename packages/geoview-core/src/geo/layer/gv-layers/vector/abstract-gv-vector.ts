@@ -94,8 +94,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
-   * @override
    * @returns {VectorLayer<VectorSource>} The strongly-typed OpenLayers type.
+   * @override
    */
   override getOLLayer(): VectorLayer<VectorSource> {
     // Call parent and cast
@@ -104,8 +104,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
-   * @override
    * @returns {VectorSource} The VectorSource source instance associated with this layer.
+   * @override
    */
   override getOLSource(): VectorSource {
     // Get source from OL
@@ -114,8 +114,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {VectorLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getLayerConfig(): VectorLayerEntryConfig {
     // Call parent and cast
@@ -127,6 +127,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param {string} fieldName - The field name for which we want to get the type.
    * @returns {TypeOutfieldsType} The type of the field or 'string' when undefined.
    * @override
+   * @protected
    */
   protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
     // By default, look into the layer metadata for information on the field types
@@ -171,6 +172,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param {OLMap} map - The Map where to get Feature Info At Pixel from.
    * @param {Pixel} location - The pixel coordinate that will be used by the query.
    * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
+   * @protected
+   * @override
    */
   protected override getFeatureInfoAtPixel(map: OLMap, location: Pixel): Promise<TypeFeatureInfoResult> {
     // Get the layer source
@@ -211,6 +214,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
+   * @protected
+   * @override
    */
   protected override getFeatureInfoAtCoordinate(
     map: OLMap,
@@ -231,6 +236,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
+   * @protected
+   * @override
    */
   protected override getFeatureInfoAtLonLat(
     map: OLMap,
@@ -279,7 +286,6 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * @param {string?} outfield - ID field to return for services that require a value in outfields.
    * @returns {Promise<Extent>} The extent of the features, if available.
    * @override
-   * @deprecated Seems like this is not used anymore, not called anywhere and unsure how it'd work with adhoc vector layers without 'ids' (objectids) necessarily.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {

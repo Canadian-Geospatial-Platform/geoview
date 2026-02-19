@@ -71,12 +71,16 @@ export abstract class AbstractLayerSet {
    * A must-override method called to propagate the result set entry to the store
    * @param {TypeResultSetEntry} resultSetEntry - The result set entry to propagate
    * @param {PropagationType} type - The propagation type
+   * @returns {void}
+   * @protected
    */
   protected abstract onPropagateToStore(resultSetEntry: TypeResultSetEntry, type: PropagationType): void;
 
   /**
    * A must-override method called to delete a result set entry from the store
    * @param {string} layerPath - The layer path to delete from store
+   * @returns {void}
+   * @protected
    */
   protected abstract onDeleteFromStore(layerPath: string): void;
 
@@ -85,6 +89,7 @@ export abstract class AbstractLayerSet {
    * should happen for a specific geoview layer and layer path.
    * @param {ConfigBaseClass} layerConfig - The layer config
    * @returns {boolean} True if the layer config should be registered, false otherwise
+   * @protected
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected onRegisterLayerConfigCheck(layerConfig: ConfigBaseClass): boolean {
@@ -97,6 +102,8 @@ export abstract class AbstractLayerSet {
    * An overridable registration function for a layer-set that the registration process will use to
    * create a new entry in the layer set for a specific geoview layer and layer path.
    * @param {ConfigBaseClass} layerConfig - The layer config
+   * @returns {void}
+   * @protected
    */
   protected onRegisterLayerConfig(layerConfig: ConfigBaseClass): void {
     // Prep the resultSet (it's registered, but it doesn't mean it's in the store yet)
@@ -115,6 +122,7 @@ export abstract class AbstractLayerSet {
    * should happen for a specific geoview layer and layer path. By default, a layer-set always registers layers except when they are group layers.
    * @param {AbstractBaseGVLayer} layer - The layer
    * @returns {boolean} True if the layer should be registered, false otherwise
+   * @protected
    */
   // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
@@ -134,6 +142,8 @@ export abstract class AbstractLayerSet {
    * An overridable registration function for a layer-set that the registration process will use to
    * create a new entry in the layer set for a specific geoview layer and layer path.
    * @param {AbstractBaseGVLayer} layer - The layer config
+   * @returns {void}
+   * @protected
    */
   protected onRegisterLayer(layer: AbstractBaseGVLayer): void {
     // Get layer name
@@ -164,6 +174,8 @@ export abstract class AbstractLayerSet {
    * An overridable unregistration function for a layer-set that the registration process will use to
    * unregister a specific layer config.
    * @param {ConfigBaseClass | undefined} layerConfig - The layer config
+   * @returns {void}
+   * @protected
    */
   protected onUnregisterLayerConfig(layerConfig: ConfigBaseClass | undefined): void {
     // Unregister the layer status changed handler
@@ -174,6 +186,8 @@ export abstract class AbstractLayerSet {
    * An overridable unregistration function for a layer-set that the registration process will use to
    * unregister a specific geoview layer.
    * @param {AbstractBaseGVLayer | undefined} layer - The layer
+   * @returns {void}
+   * @protected
    */
   protected onUnregisterLayer(layer: AbstractBaseGVLayer | undefined): void {
     // Unregister the layer name changed handler
@@ -184,6 +198,8 @@ export abstract class AbstractLayerSet {
    * An overridable function for a layer-set to process a layer status changed event.
    * @param {ConfigBaseClass} layerConfig - The layer config
    * @param {TypeLayerStatus} layerStatus - The new layer status
+   * @returns {void}
+   * @protected
    */
   protected onProcessLayerStatusChanged(layerConfig: ConfigBaseClass, layerStatus: TypeLayerStatus): void {
     // Change the layer status!
@@ -199,6 +215,8 @@ export abstract class AbstractLayerSet {
    * An overridable function for a layer-set to process a layer name change.
    * @param {string} layerPath - The layer path being affected
    * @param {string} name - The new layer name
+   * @returns {void}
+   * @protected
    */
   protected onProcessNameChanged(layerPath: string, name: string): void {
     // Update name
@@ -208,6 +226,8 @@ export abstract class AbstractLayerSet {
   /**
    * An overridable layer set updated function for a layer-set to indicate the layer set has been updated.
    * @param {string} layerPath - The layer path
+   * @returns {void}
+   * @protected
    */
   protected onLayerSetUpdatedProcess(layerPath: string): void {
     // Emit layer set updated event to the outside

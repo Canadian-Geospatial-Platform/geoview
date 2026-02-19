@@ -25,8 +25,8 @@ export abstract class AbstractGVVectorTile extends AbstractGVLayer {
 
   /**
    * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
-   * @override
    * @returns {VectorTile} The VectorTile source instance associated with this layer.
+   * @override
    */
   override getOLSource(): VectorTile {
     // Get source from OL

@@ -33,8 +33,8 @@ export class GVWKB extends AbstractGVVector {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {WkbLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getLayerConfig(): WkbLayerEntryConfig {
     // Call parent and cast

@@ -443,7 +443,8 @@ export class LayerApi {
   }
 
   /**
-   * Returns the GeoView instance associated to the layer path.
+   * Returns the AbstractGVLayer instance associated to the layer path.
+   * This returns an actual AbstractGVLayer and throws a LayerWrongTypeError if the layerPath points to a GVGroupLayer object.
    * @param {string} layerPath - The layer path
    * @returns {AbstractBaseGVLayer} The new Geoview Layer
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
@@ -462,6 +463,7 @@ export class LayerApi {
 
   /**
    * Returns the GeoView Layer instance associated to the layer path.
+   * This returns an actual AbstractGVLayer (or undefined) and throws a LayerWrongTypeError if the layerPath points to a GVGroupLayer object.
    * @param {string} layerPath - The layer path
    * @returns {AbstractBaseGVLayer | undefined} The AbstractGVLayer or undefined when not found
    * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
@@ -1861,8 +1863,8 @@ export class LayerApi {
 
   /**
    * Handles when any layer status changes during any config processing
-   * @param layerConfig - The layer entry config having its layer status changed.
-   * @param event - The layer status changed event.
+   * @param {ConfigBaseClass} layerConfig - The layer entry config having its layer status changed.
+   * @param {ConfigLayerStatusChangedEvent} event - The layer status changed event.
    * @returns {void}
    */
   #handleLayerStatusChanged(layerConfig: ConfigBaseClass, event: ConfigLayerStatusChangedEvent): void {

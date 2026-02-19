@@ -40,12 +40,13 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
    * @param {GeoviewStoreType} store - The store associated with the GeoChart Event Processor
    * @returns {Array<() => void> | void} An array of the subscriptions callbacks which were created
    * @override
+   * @protected
    */
   // TODO: CHECK - Why void instead of undefined? Here and in all sibling classes
   protected override onInitialize(store: GeoviewStoreType): Array<() => void> | void {
     // Checks for updated layers in layer data array from the details state
     const layerDataArrayUpdate = store.subscribe(
-      (state) => state.detailsState.layerDataArray,
+      (state) => state.detailsState.layerDataArray as TypeGeochartResultSetEntry[],
       (cur: TypeGeochartResultSetEntry[]) => {
         // Log
         logger.logTraceCoreStoreSubscription('GEOCHART EVENT PROCESSOR - detailsState.layerDataArray', cur);

@@ -54,8 +54,8 @@ export class GVEsriImage extends AbstractGVRaster {
 
   /**
    * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
-   * @override
    * @returns {ImageLayer<ImageArcGISRest>} The strongly-typed OpenLayers type.
+   * @override
    */
   override getOLLayer(): ImageLayer<ImageArcGISRest> {
     // Call parent and cast
@@ -64,8 +64,8 @@ export class GVEsriImage extends AbstractGVRaster {
 
   /**
    * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
-   * @override
    * @returns {ImageArcGISRest} The ImageArcGISRest source instance associated with this layer.
+   * @override
    */
   override getOLSource(): ImageArcGISRest {
     // Get source from OL
@@ -74,8 +74,8 @@ export class GVEsriImage extends AbstractGVRaster {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {EsriImageLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getLayerConfig(): EsriImageLayerEntryConfig {
     // Call parent and cast
@@ -84,8 +84,8 @@ export class GVEsriImage extends AbstractGVRaster {
 
   /**
    * Overrides the fetching of the legend for an Esri image layer.
-   * @override
    * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
+   * @override
    */
   override async onFetchLegend(): Promise<TypeLegend | null> {
     const layerConfig = this.getLayerConfig();

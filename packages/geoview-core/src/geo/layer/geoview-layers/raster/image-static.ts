@@ -43,8 +43,8 @@ export class ImageStatic extends AbstractGeoViewRaster {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {TypeImageStaticLayerConfig} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getGeoviewLayerConfig(): TypeImageStaticLayerConfig {
     return super.getGeoviewLayerConfig() as TypeImageStaticLayerConfig;
@@ -55,6 +55,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
    * @returns {Promise<T>} A promise with the metadata or undefined when no metadata for the particular layer type.
    * @override
+   * @protected
    */
   protected override onFetchServiceMetadata<T>(): Promise<T> {
     // No metadata
@@ -65,6 +66,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
    * @override
+   * @protected
    */
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Redirect
@@ -87,6 +89,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<ImageStaticLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    * @override
+   * @protected
    */
   protected override onProcessLayerMetadata(
     layerConfig: ImageStaticLayerEntryConfig,
@@ -106,6 +109,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
    * @param {ImageStaticLayerEntryConfig} layerConfig - The layer entry configuration.
    * @returns {GVImageStatic} The GV Layer
    * @override
+   * @protected
    */
   protected override onCreateGVLayer(layerConfig: ImageStaticLayerEntryConfig): GVImageStatic {
     // Create the source

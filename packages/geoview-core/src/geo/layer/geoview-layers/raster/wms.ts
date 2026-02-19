@@ -70,8 +70,8 @@ export class WMS extends AbstractGeoViewRaster {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {TypeWMSLayerConfig} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getGeoviewLayerConfig(): TypeWMSLayerConfig {
     return super.getGeoviewLayerConfig() as TypeWMSLayerConfig;
@@ -79,8 +79,8 @@ export class WMS extends AbstractGeoViewRaster {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {TypeMetadataWMS | undefined} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getMetadata(): TypeMetadataWMS | undefined {
     return super.getMetadata() as TypeMetadataWMS | undefined;
@@ -99,6 +99,7 @@ export class WMS extends AbstractGeoViewRaster {
    * or `undefined` if metadata could not be retrieved or no capabilities were found.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    * @override
+   * @protected
    */
   protected override onFetchServiceMetadata<T = TypeMetadataWMS | undefined>(abortSignal?: AbortSignal): Promise<T> {
     // If metadata is in XML format (not WMS GetCapabilities)
@@ -135,6 +136,8 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+   * @override
+   * @protected
    */
   protected override async onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig> {
     // Get the metadata
@@ -172,6 +175,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {ConfigBaseClass} layerConfig - The layer entry config to validate.
    * @returns {void}
    * @override
+   * @protected
    */
   protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     const layerFound = this.getLayerCapabilities(layerConfig.layerId);
@@ -219,6 +223,8 @@ export class WMS extends AbstractGeoViewRaster {
    * @returns {Promise<OgcWmsLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    * @throws {InvalidTimeDimensionError} When range couldn't be computed, or when duration is invalid, or non-positive or when an infinite loop is detected.
    * @throws {InvalidDateError} When input has invalid dates.
+   * @override
+   * @protected
    */
   protected override async onProcessLayerMetadata(
     layerConfig: OgcWmsLayerEntryConfig,
@@ -295,6 +301,7 @@ export class WMS extends AbstractGeoViewRaster {
    * @param {OgcWmsLayerEntryConfig} layerConfig - The layer entry configuration.
    * @returns {GVWMS} The GV Layer
    * @override
+   * @protected
    */
   protected override onCreateGVLayer(layerConfig: OgcWmsLayerEntryConfig): GVWMS {
     // Create the source

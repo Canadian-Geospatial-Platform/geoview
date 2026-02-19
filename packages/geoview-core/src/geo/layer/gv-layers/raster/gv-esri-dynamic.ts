@@ -97,8 +97,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Overrides the fetching of the legend for an Esri Dynamic layer.
-   * @override
    * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
+   * @override
    */
   override async onFetchLegend(): Promise<TypeLegend | null> {
     // Get the config
@@ -217,7 +217,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {number[] | string[]} objectIds - The IDs of the features to calculate the extent from.
    * @param {OLProjection} outProjection - The output projection for the extent.
    * @param {string?} outfield - ID field to return for services that require a value in outfields.
-   * @override
    * @returns {Promise<Extent>} The extent of the features, if available.
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
@@ -227,6 +226,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @throws {ResponseTypeError} When the response from the service is not an object.
    * @throws {ResponseContentError} When the response actually contains an error within it.
    * @throws {NetworkError} When a network issue happened.
+   * @override
    */
   override async onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
     // Get url for service from layer entry config
@@ -248,8 +248,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
-   * @override
    * @returns {ImageLayer<ImageArcGISRest>} The strongly-typed OpenLayers type.
+   * @override
    */
   override getOLLayer(): ImageLayer<ImageArcGISRest> {
     // Call parent and cast
@@ -258,8 +258,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
-   * @override
    * @returns {ImageArcGISRest} The ImageArcGISRest source instance associated with this layer.
+   * @override
    */
   override getOLSource(): ImageArcGISRest {
     // Get source from OL
@@ -268,8 +268,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {EsriDynamicLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getLayerConfig(): EsriDynamicLayerEntryConfig {
     // Call parent and cast
@@ -278,8 +278,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Overrides the hit tolerance of the layer.
-   * @override
    * @returns {number} The hit tolerance for a GV Esri Dynamic layer
+   * @override
    */
   override getHitTolerance(): number {
     // Override the hit tolerance for a GVEsriDynamic layer
@@ -291,6 +291,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {string} fieldName - The field name for which we want to get the type.
    * @returns {TypeOutfieldsType} The type of the field.
    * @override
+   * @protected
    */
   protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect
@@ -302,6 +303,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {string} fieldName - The field name for which we want to get the domain.
    * @returns {null | codedValueType | rangeDomainType} The domain of the field.
    * @override
+   * @protected
    */
   protected override onGetFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
     // Redirect
@@ -314,8 +316,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {LayerFilters} layerFilters - The layer filters to apply when querying the features.
    * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
-   * @protected
    * @override
+   * @protected
    */
   protected override async getAllFeatureInfo(
     map: OLMap,
@@ -369,6 +371,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
    * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
+   * @override
+   * @protected
    */
   protected override getFeatureInfoAtCoordinate(
     map: OLMap,
@@ -391,6 +395,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   * @override
+   * @protected
    */
   protected override async getFeatureInfoAtLonLat(
     map: OLMap,
@@ -507,8 +513,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
       // GV: As a result, `featureInfoResult` is returned to the caller and the store is
       // GV: updated (via the layer-set calling this method) before geometries are effectively assigned to the records.
       // GV: The geometries are later added via mutation, which may lead to subtle or hard-to-trace issues over time.
-      // GV: Notably, it is the reason why there is a useEffect with a suspicious doUntil in details-panel (search id: f1d7bf71) which
-      // GV: checks every 500ms if a geometry 'appeared' on the records in order to activate the zoom to record button.
 
       // TODO: Performance - We may need to use chunk and process 50 geom at a time. When we query 500 features (points) we have CORS issue with
       // TO.DOCONT: the esri query (was working with identify). But identify was failing on huge geometry...
@@ -567,6 +571,7 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @param {LayerFilters} [filter] - The raw filter string input (defaults to an empty string if not provided).
    * @returns {void}
    * @override
+   * @protected
    */
   protected override onSetLayerFilters(filter?: LayerFilters): void {
     // Redirect

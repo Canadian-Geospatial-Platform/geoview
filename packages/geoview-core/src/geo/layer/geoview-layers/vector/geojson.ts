@@ -48,8 +48,8 @@ export class GeoJSON extends AbstractGeoViewVector {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {TypeGeoJSONLayerConfig} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getGeoviewLayerConfig(): TypeGeoJSONLayerConfig {
     return super.getGeoviewLayerConfig() as TypeGeoJSONLayerConfig;
@@ -57,8 +57,8 @@ export class GeoJSON extends AbstractGeoViewVector {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {TypeMetadataGeoJSON | undefined} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getMetadata(): TypeMetadataGeoJSON | undefined {
     return super.getMetadata() as TypeMetadataGeoJSON | undefined;
@@ -70,6 +70,8 @@ export class GeoJSON extends AbstractGeoViewVector {
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<T = TypeMetadataGeoJSON | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+   * @override
+   * @protected
    */
   protected override async onFetchServiceMetadata<T = TypeMetadataGeoJSON | undefined>(abortSignal?: AbortSignal): Promise<T> {
     try {
@@ -109,6 +111,8 @@ export class GeoJSON extends AbstractGeoViewVector {
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   * @override
+   * @protected
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Get the folder url
@@ -136,6 +140,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    * @param {ConfigBaseClass} layerConfig - The layer entry config to validate.
    * @returns {void}
    * @override
+   * @protected
    */
   protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     // Get the metadata
@@ -162,6 +167,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    * @override
+   * @protected
    */
   protected override onProcessLayerMetadata(
     layerConfig: VectorLayerEntryConfig,
@@ -227,8 +233,8 @@ export class GeoJSON extends AbstractGeoViewVector {
    * `featureProjection`.
    * @returns {Promise<Feature[]>}
    * A promise that resolves to an array of OpenLayers features.
-   * @protected
    * @override
+   * @protected
    */
   protected override async onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
@@ -268,6 +274,7 @@ export class GeoJSON extends AbstractGeoViewVector {
    * @param {GeoJSONLayerEntryConfig} layerConfig - The layer entry configuration.
    * @returns {GVGeoJSON} The GV Layer
    * @override
+   * @protected
    */
   protected override onCreateGVLayer(layerConfig: GeoJSONLayerEntryConfig): GVGeoJSON {
     // Create the source

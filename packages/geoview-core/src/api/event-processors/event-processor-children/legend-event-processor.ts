@@ -27,6 +27,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * Shortcut to get the Layer state for a given map id
    * @param {string} mapId - The mapId
    * @returns {ILayerState} The Layer state
+   * @static
+   * @protected
    */
   protected static getLayerState(mapId: string): ILayerState {
     // Return the layer state
@@ -55,6 +57,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The mapId
    * @param {'highlightedLayer' | 'selectedLayerPath' | 'displayState' | 'layerDeleteInProgress'} state - The state to get
    * @returns {string | boolean | null | undefined} The requested state
+   * @static
    */
   static getLayerPanelState(
     mapId: string,
@@ -68,6 +71,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The mapId
    * @param {string} layerPath - The path of the layer to get
    * @returns {TypeLegendLayer | undefined} The requested legend layer
+   * @static
    */
   static getLegendLayerInfo(mapId: string, layerPath: string): TypeLegendLayer | undefined {
     const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
@@ -78,6 +82,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * Gets the full legend layers list
    * @param {string} mapId - The mapId
    * @returns {TypeLegendLayer[]} The list of legend layers
+   * @static
    */
   static getLegendLayers(mapId: string): TypeLegendLayer[] {
     return LegendEventProcessor.getLayerState(mapId).legendLayers;
@@ -88,6 +93,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map id
    * @param {string} layerPath - The layer path
    * @returns {Extent | undefined} The extent of the layer at the given path
+   * @static
    */
   static getLayerBounds(mapId: string, layerPath: string): Extent | undefined {
     // Find the layer for the given layer path
@@ -108,6 +114,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - Identifier of the map instance containing the layer.
    * @param {string} layerPath - The unique hierarchical path of the layer whose
    *   bounds should be calculated and stored.
+   * @static
    */
   static calculateLayerBoundsAndSaveToStore(mapId: string, layerPath: string): void {
     // Calculate the bounds of the layer at the given layerPath
@@ -135,11 +142,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The unique identifier of the map instance.
    * @param {string} layerPath - The path to the layer.
    * @returns {string | undefined} - The projection code of the layer, or `undefined` if not available.
-   *
    * @description
    * This method fetches the Geoview layer for the specified layer path and checks if it has a `getMetadataProjection` method.
    * If the method exists, it retrieves the projection object and returns its code using the `getCode` method.
    * If the projection or its code is not available, the method returns `undefined`.
+   * @static
    */
   static getLayerServiceProjection(mapId: string, layerPath: string): string | undefined {
     // TODO: Check - Do we want it to throw instead of handling when undefined? (call getGeoviewLayer instead of getGeoviewLayerIfExists)
@@ -158,6 +165,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map id
    * @param {string} layerPath - The layer path
    * @param {Extent | undefined} bounds - The extent of the layer at the given path
+   * @static
    */
   static setLayerBounds(mapId: string, layerPath: string, bounds: Extent | undefined): void {
     // Find the layer for the given layer path
@@ -177,6 +185,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The ID of the map.
    * @param {string} layerPath - The layer path of the layer to change.
    * @param {boolean} queryable - The queryable state to set.
+   * @static
    */
   // TODO: REFACTOR EVENT PROCESSOR - The 'EventProcessor' classes could use some rethinking, especially when they end up calling the layer api to execute something like
   // TO.DOCONT: here and in multiple other places. This TODO considers also the next function here 'setLayerQueryableInStore' which saves the state to the store.
@@ -195,6 +204,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The ID of the map whose layer state should be updated.
    * @param {string} layerPath - The unique path/identifier of the layer to update.
    * @param {boolean} queryable - The new queryable state to set for the layer.
+   * @static
    */
   static setLayerQueryableInStore(mapId: string, layerPath: string, queryable: boolean): void {
     // Find the layer for the given layer path
@@ -214,6 +224,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The ID of the map.
    * @param {string} layerPath - The layer path of the layer to change.
    * @param {boolean} queryable - The queryable state to set.
+   * @static
    */
   static setLayerHoverable(mapId: string, layerPath: string, queryable: boolean): void {
     MapEventProcessor.getMapViewerLayerAPI(mapId).setLayerHoverable(layerPath, queryable);
@@ -227,6 +238,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The ID of the map whose layer state should be updated.
    * @param {string} layerPath - The unique path/identifier of the layer to update.
    * @param {boolean} hoverable - The new hoverable state to set for the layer.
+   * @static
    */
   static setLayerHoverableInStore(mapId: string, layerPath: string, hoverable: boolean): void {
     // Find the layer for the given layer path
@@ -247,6 +259,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath - The unique path identifying the layer.
    * @returns {TypeDisplayDateFormat | undefined} The configured display date format
    * for the layer, or `undefined` if the layer is not found or no format is set.
+   * @static
    */
   static getLayerDisplayDateFormat(mapId: string, layerPath: string): TypeDisplayDateFormat | undefined {
     // Find the layer for the given layer path
@@ -263,6 +276,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath - The unique path identifying the layer.
    * @param {TypeDisplayDateFormat} displayDateFormat - The date format to apply
    * when displaying date values for the layer.
+   * @static
    */
   static setLayerDisplayDateFormat(mapId: string, layerPath: string, displayDateFormat: TypeDisplayDateFormat): void {
     MapEventProcessor.getMapViewerLayerAPI(mapId).setLayerDisplayDateFormat(layerPath, displayDateFormat);
@@ -277,6 +291,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath - The unique path identifying the layer.
    * @param {TypeDisplayDateFormat} displayDateFormat - The date format to store
    * for displaying date values associated with the layer.
+   * @static
    */
   static setLayerDisplayDateFormatInStore(mapId: string, layerPath: string, displayDateFormat: TypeDisplayDateFormat): void {
     // Find the layer for the given layer path
@@ -301,6 +316,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath - The unique path identifying the layer.
    * @param {TypeDisplayDateFormat} displayDateFormat - The date format to store
    * for displaying date values associated with the layer.
+   * @static
    */
   static setLayerDisplayDateFormatShortInStore(mapId: string, layerPath: string, displayDateFormat: TypeDisplayDateFormat): void {
     // Find the layer for the given layer path
@@ -324,6 +340,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath - The unique path identifying the layer.
    * @param {TemporalMode} temporalMode - The date format to store
    * for displaying date values associated with the layer.
+   * @static
    */
   static setLayerDateTemporalInStore(mapId: string, layerPath: string, temporalMode: TemporalMode): void {
     // Find the layer for the given layer path
@@ -342,6 +359,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * Sets the layersAreLoading flag in the store
    * @param {string} mapId - The map id
    * @param {boolean} areLoading - Indicator if any layer is currently loading
+   * @static
    */
   static setLayersAreLoading(mapId: string, areLoading: boolean): void {
     // Update the store
@@ -357,6 +375,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @returns {Promise<Extent>} The extent of the feature, if available
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    * @throws {LayerWrongTypeError} When the layer was of wrong type.
+   * @static
    */
   static getExtentFromFeatures(mapId: string, layerPath: string, objectIds: number[], outfield?: string): Promise<Extent> {
     // Get the layer api
@@ -382,6 +401,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @remarks
    * This method does not return time-slider state or processed slider values.
    * For time-slider–related logic, see `TimeSliderEventProcessor.getInitialTimeSliderValues`.
+   * @static
    */
   static getLayerTimeDimension(mapId: string, layerPath: string): TimeDimension | undefined {
     // Get the layer api
@@ -404,6 +424,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * Gets the legend icon images for a given layer legend
    * @param {TypeLegend | null | undefined} layerLegend - The legend of the layer
    * @returns {TypeLegendLayerItem[] | undefined} The legend icon images details
+   * @static
    */
   static getLayerIconImage(layerLegend: TypeLegend | null | undefined): TypeLegendLayerItem[] | undefined {
     // TODO: Refactor - Move this function to a utility class instead of at the 'processor' level so it's safer to call from a layer framework level class
@@ -481,6 +502,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    *
    * @param {string} mapId - The map identifier.
    * @param {TypeLegendResultSetEntry} legendResultSetEntry - The legend result set that triggered the propagation.
+   * @static
    */
   static propagateLegendToStore(mapId: string, legendResultSetEntry: TypeLegendResultSetEntry): void {
     // TODO: REFACTOR - This whole function should be refactored to an initial propagation into the store and then only specific propagations in the store.
@@ -689,6 +711,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * Sets the highlighted layer state.
    * @param {string} mapId - The ID of the map
    * @param {string} layerPath - The layer path to set as the highlighted layer
+   * @static
    */
   static setHighlightLayer(mapId: string, layerPath: string): void {
     // Get highlighted layer to set active button state because there can only be one highlighted layer at a time.
@@ -703,6 +726,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {TypeLegendLayer[]} layers - The legend layers to search.
    * @param {string} layerPath - The path of the layer.
    * @returns {TypeLegendLayer | undefined}
+   * @static
    */
   static findLayerByPath(layers: TypeLegendLayer[], layerPath: string): TypeLegendLayer | undefined {
     let foundLayer: TypeLegendLayer | undefined;
@@ -774,6 +798,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * Delete layer from legend layers.
    * @param {string} mapId - The ID of the map.
    * @param {string} layerPath - The layer path of the layer to change.
+   * @static
    */
   static deleteLayerFromLegendLayers(mapId: string, layerPath: string): void {
     // Get legend layers to pass to recursive function
@@ -791,6 +816,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The ID of the map.
    * @param {TypeLegendLayer[]} legendLayers - The legend layers list to remove layer from.
    * @param {string} layerPath - The layer path of the layer to change.
+   * @static
    * @private
    */
   static #deleteLayersFromLegendLayersAndChildren(mapId: string, legendLayers: TypeLegendLayer[], layerPath: string): void {
@@ -812,6 +838,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * Delete layer.
    * @param {string} mapId - The ID of the map.
    * @param {string} layerPath - The layer path of the layer to change.
+   * @static
    */
   static deleteLayer(mapId: string, layerPath: string): void {
     // Delete layer through layer API
@@ -822,6 +849,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * Reload layer.
    * @param {string} mapId - The ID of the map.
    * @param {string} layerPath - The layer path of the layer to reload.
+   * @static
    */
   static reloadLayer(mapId: string, layerPath: string): void {
     // Delete layer through layer API
@@ -841,6 +869,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @returns {Promise<void>} A promise that resolves once the layer has been refreshed,
    * its states reset, and its items rendered if visible.
    * @throws {LayerNotFoundError} If the layer could not be found at the specified layer path.
+   * @static
    */
   static refreshLayer(mapId: string, layerPath: string): Promise<void> {
     // Get the layer through layer API
@@ -875,6 +904,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath - The path identifying the layer within the map.
    * @param {string} name - The name of the legend item to retrieve.
    * @returns {TypeLegendItem | undefined} The matching legend item if found; otherwise `undefined`.
+   * @static
    */
   static getItemVisibility(mapId: string, layerPath: string, name: string): TypeLegendItem | undefined {
     // Get the particular object holding the items array itself from the store
@@ -890,6 +920,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {TypeLegendItem} item - The item to change.
    * @param {boolean} visibility - The new visibility.
    * @param {string | undefined} classFilter - The new class filter.
+   * @static
    */
   static setItemVisibility(
     mapId: string,
@@ -933,6 +964,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * after the layer has completed its next render cycle.
    * @returns {Promise<void>} A promise that resolves once the visibility change
    * has been applied, and the layer has rendered if requested.
+   * @static
    */
   static toggleItemVisibility(mapId: string, layerPath: string, item: TypeLegendItem, waitForRender: boolean): Promise<void> {
     // Redirect to layer API
@@ -955,6 +987,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @returns {Promise<void>} A promise that resolves once all item visibilities have been updated and the layer has rendered if requested.
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    * @throws {LayerWrongTypeError} When the layer was of wrong type.
+   * @static
    */
   static async setAllItemsVisibility(mapId: string, layerPath: string, visibility: boolean, waitForRender: boolean): Promise<void> {
     // Set layer to visible
@@ -1008,6 +1041,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath - The layer path.
    * @param {number} opacity - The opacity to set.
    * @param {boolean} isChild - Is the layer a child layer.
+   * @static
    * @private
    */
   static #setOpacityInLayerAndChildren(
@@ -1036,6 +1070,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The ID of the map.
    * @param {string} layerPath - The layer path of the layer to change.
    * @param {number} opacity - The opacity to set.
+   * @static
    */
   static setOpacityInStore(mapId: string, layerPath: string, opacity: number): void {
     const curLayers = this.getLayerState(mapId).legendLayers;
@@ -1051,6 +1086,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} layerPath - The layer path of the layer to change.
    * @param {number} opacity - The opacity to set.
    * @param {boolean} updateLegendLayers - Whether to update the legend layers or not
+   * @static
    */
   static setLayerOpacity(mapId: string, layerPath: string, opacity: number, updateLegendLayers?: boolean): void {
     // Redirect
@@ -1061,6 +1097,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * Sorts legend layers children recursively in given legend layers list.
    * @param {string} mapId - The ID of the map.
    * @param {TypeLegendLayer[]} legendLayerList - The list to sort.
+   * @static
    */
   static sortLegendLayersChildren = (mapId: string, legendLayerList: TypeLegendLayer[]): void => {
     legendLayerList.forEach((legendLayer) => {

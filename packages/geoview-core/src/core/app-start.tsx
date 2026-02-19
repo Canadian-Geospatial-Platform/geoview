@@ -55,9 +55,10 @@ interface AppStartProps {
  * @property retryCount - The number of retry attempts made.
  */
 class ErrorBoundary extends Component<{ children: JSX.Element; language: TypeDisplayLanguage }, { hasError: boolean }> {
-  // TODO: CHECK - This is set to null and then never set to anything else, then the if below serves no purpose?
-  #retryTimeoutId: number | null = null;
-
+  /**
+   * Constructor
+   * @param {{ children: JSX.Element; language: TypeDisplayLanguage }} props - The props
+   */
   constructor(props: { children: JSX.Element; language: TypeDisplayLanguage }) {
     super(props);
     this.state = { hasError: false };
@@ -72,13 +73,6 @@ class ErrorBoundary extends Component<{ children: JSX.Element; language: TypeDis
     // Log both the error and component stack
     logger.logError('React error caught:', error);
     logger.logError('Component stack:', errorInfo.componentStack);
-  }
-
-  override componentWillUnmount(): void {
-    // Clear any pending retry timeout
-    if (this.#retryTimeoutId !== null) {
-      window.clearTimeout(this.#retryTimeoutId);
-    }
   }
 
   override render(): JSX.Element {

@@ -65,8 +65,8 @@ export class WFS extends AbstractGeoViewVector {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {TypeWFSLayerConfig} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getGeoviewLayerConfig(): TypeWFSLayerConfig {
     return super.getGeoviewLayerConfig() as TypeWFSLayerConfig;
@@ -74,8 +74,8 @@ export class WFS extends AbstractGeoViewVector {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {TypeMetadataWFS | undefined} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getMetadata(): TypeMetadataWFS | undefined {
     return super.getMetadata() as TypeMetadataWFS | undefined;
@@ -88,6 +88,8 @@ export class WFS extends AbstractGeoViewVector {
    * @returns {Promise<T = TypeMetadataWFS>} A promise with the metadata or undefined when no metadata for the particular layer type.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities).
+   * @override
+   * @protected
    */
   protected override async onFetchServiceMetadata<T = TypeMetadataWFS>(abortSignal?: AbortSignal): Promise<T> {
     let metadata;
@@ -116,6 +118,8 @@ export class WFS extends AbstractGeoViewVector {
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities).
+   * @override
+   * @protected
    */
   protected override async onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig> {
     // Fetch metadata
@@ -164,6 +168,7 @@ export class WFS extends AbstractGeoViewVector {
    * @param {ConfigBaseClass} layerConfig - The layer entry config to validate.
    * @returns {void}
    * @override
+   * @protected
    */
   protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     // Note that the code assumes wfs feature type list does not contains metadata layer group. If you need layer group,
@@ -211,6 +216,8 @@ export class WFS extends AbstractGeoViewVector {
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   * @override
+   * @protected
    */
   protected override async onProcessLayerMetadata(
     layerConfig: VectorLayerEntryConfig,
@@ -264,8 +271,8 @@ export class WFS extends AbstractGeoViewVector {
    * `featureProjection`.
    * @returns {Promise<Feature[]>}
    * A promise that resolves to an array of OpenLayers features.
-   * @protected
    * @override
+   * @protected
    */
   protected override async onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
@@ -344,6 +351,7 @@ export class WFS extends AbstractGeoViewVector {
    * @param {OgcWfsLayerEntryConfig} layerConfig - The layer entry configuration.
    * @returns {GVWFS} The GV Layer
    * @override
+   * @protected
    */
   protected override onCreateGVLayer(layerConfig: OgcWfsLayerEntryConfig): GVWFS {
     // Create the source

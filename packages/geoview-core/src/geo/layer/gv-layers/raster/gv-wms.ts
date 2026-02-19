@@ -143,6 +143,7 @@ export class GVWMS extends AbstractGVRaster {
    * @param {Event} event - The event which is being triggered.
    * @returns {void}
    * @override
+   * @protected
    */
   protected override onImageLoadError(event: Event): void {
     // The WMS image failed to load.. check if there's something we can do..
@@ -171,6 +172,7 @@ export class GVWMS extends AbstractGVRaster {
    * @param {Event} event - The image load error event triggered by the image source.
    * @returns {string} A translation key representing the detected error condition.
    * @override
+   * @protected
    */
   protected override onImageLoadErrorDecipherError(event: Event): string {
     // Checks for more specific errors
@@ -208,6 +210,7 @@ export class GVWMS extends AbstractGVRaster {
    * @param {AbortController?} [abortController] - The optional abort controller.
    * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
    * @override
+   * @protected
    */
   protected override getFeatureInfoAtCoordinate(
     map: OLMap,
@@ -231,6 +234,7 @@ export class GVWMS extends AbstractGVRaster {
    * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
    * @throws {LayerConfigWFSMissingError} If no WFS layer configuration is defined for this WMS layer.
    * @override
+   * @protected
    */
   protected override async getFeatureInfoAtLonLat(
     map: OLMap,
@@ -315,8 +319,8 @@ export class GVWMS extends AbstractGVRaster {
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
    * @throws {NetworkError} When a network issue happened.
-   * @protected
    * @override
+   * @protected
    */
   protected override getAllFeatureInfo(
     map: OLMap,
@@ -534,6 +538,7 @@ export class GVWMS extends AbstractGVRaster {
    * @param {LayerFilters} [filter] - An optional filter to be used in place of the getViewFilter value.
    * @returns {void}
    * @override
+   * @protected
    */
   protected override onSetLayerFilters(filter?: LayerFilters): void {
     // Process the layer filtering using the static method shared between EsriImage and WMS

@@ -38,8 +38,8 @@ export class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {TypeImageStaticLayerConfig} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getGeoviewLayerConfig(): TypeImageStaticLayerConfig {
     return super.getGeoviewLayerConfig() as TypeImageStaticLayerConfig;
@@ -47,8 +47,8 @@ export class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {TypeSourceImageStaticInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   * @override
    */
   override getSource(): TypeSourceImageStaticInitialConfig {
     return super.getSource();

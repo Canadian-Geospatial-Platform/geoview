@@ -48,8 +48,8 @@ export class WKB extends AbstractGeoViewVector {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {TypeWkbLayerConfig} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getGeoviewLayerConfig(): TypeWkbLayerConfig {
     return super.getGeoviewLayerConfig() as TypeWkbLayerConfig;
@@ -57,8 +57,8 @@ export class WKB extends AbstractGeoViewVector {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {TypeMetadataGeoJSON | undefined} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getMetadata(): TypeMetadataGeoJSON | undefined {
     return super.getMetadata() as TypeMetadataGeoJSON | undefined;
@@ -70,6 +70,8 @@ export class WKB extends AbstractGeoViewVector {
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<T = TypeMetadataGeoJSON | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+   * @override
+   * @protected
    */
   protected override async onFetchServiceMetadata<T = TypeMetadataGeoJSON | undefined>(abortSignal?: AbortSignal): Promise<T> {
     // If metadataAccessPath ends with .meta or .json
@@ -102,6 +104,8 @@ export class WKB extends AbstractGeoViewVector {
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+   * @override
+   * @protected
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Get the folder url
@@ -129,6 +133,7 @@ export class WKB extends AbstractGeoViewVector {
    * @param {ConfigBaseClass} layerConfig - The layer entry config to validate.
    * @returns {void}
    * @override
+   * @protected
    */
   protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     if (Array.isArray(this.getMetadata()?.listOfLayerEntryConfig)) {
@@ -152,6 +157,7 @@ export class WKB extends AbstractGeoViewVector {
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
    * @override
+   * @protected
    */
   protected override onProcessLayerMetadata(
     layerConfig: VectorLayerEntryConfig,
@@ -213,6 +219,7 @@ export class WKB extends AbstractGeoViewVector {
    * A promise that resolves to an array of OpenLayers features.
    * @protected
    * @override
+   * @protected
    */
   protected override async onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
@@ -255,6 +262,7 @@ export class WKB extends AbstractGeoViewVector {
    * @param {WkbLayerEntryConfig} layerConfig - The layer entry configuration.
    * @returns {GVWKB} The GV Layer
    * @override
+   * @protected
    */
   protected override onCreateGVLayer(layerConfig: WkbLayerEntryConfig): GVWKB {
     // Create the source

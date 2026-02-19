@@ -564,7 +564,7 @@ export function AddNewLayer(): JSX.Element {
 
       logger.logDebug('newGeoViewLayer to add', configObj[0]);
 
-      // Add the layer using the proper function
+      // TODO: REFACTOR - Add the layer using the proper function - use a state action
       const addedLayer: GeoViewLayerAddedResult = MapEventProcessor.addGeoviewLayer(
         mapId,
         configObj[0] as TypeGeoviewLayerConfig,

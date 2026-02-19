@@ -57,6 +57,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    * @param {AbstractBaseGVLayer} layer - The layer
    * @returns {boolean} True when the layer should be registered to this hover-feature-info-layer-set.
    * @override
+   * @protected
    */
   protected override onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean {
     // Return if the layer is of queryable type and source is queryable
@@ -68,6 +69,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    * @param {AbstractBaseGVLayer} layer - The layer
    * @returns {void}
    * @override
+   * @protected
    */
   protected override onRegisterLayer(layer: AbstractBaseGVLayer): void {
     // Call parent
@@ -85,6 +87,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    * @param {PropagationType} type - The propagation type
    * @returns {void}
    * @override
+   * @protected
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override onPropagateToStore(resultSetEntry: TypeHoverResultSetEntry, type: PropagationType): void {
@@ -96,6 +99,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    * @param {string} layerPath - The layer path to delete from the store
    * @returns {void}
    * @override
+   * @protected
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override onDeleteFromStore(layerPath: string): void {

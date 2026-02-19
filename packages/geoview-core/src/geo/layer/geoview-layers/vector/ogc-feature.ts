@@ -52,8 +52,8 @@ export class OgcFeature extends AbstractGeoViewVector {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {TypeOgcFeatureLayerConfig} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getGeoviewLayerConfig(): TypeOgcFeatureLayerConfig {
     return super.getGeoviewLayerConfig() as TypeOgcFeatureLayerConfig;
@@ -61,8 +61,8 @@ export class OgcFeature extends AbstractGeoViewVector {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {TypeMetadataOGCFeature | undefined} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getMetadata(): TypeMetadataOGCFeature | undefined {
     return super.getMetadata() as TypeMetadataOGCFeature | undefined;
@@ -74,6 +74,8 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<T = TypeMetadataOGCFeature>} A promise with the metadata or undefined when no metadata for the particular layer type.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+   * @override
+   * @protected
    */
   protected override async onFetchServiceMetadata<T = TypeMetadataOGCFeature>(abortSignal?: AbortSignal): Promise<T> {
     try {
@@ -93,6 +95,8 @@ export class OgcFeature extends AbstractGeoViewVector {
    * Overrides the way a geoview layer config initializes its layer entries.
    * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+   * @override
+   * @protected
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Get the folder url
@@ -133,6 +137,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @param {ConfigBaseClass} layerConfig - The layer entry config to validate.
    * @returns {void}
    * @override
+   * @protected
    */
   protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     // Note that the code assumes ogc-feature collections does not contains metadata layer group. If you need layer group,
@@ -181,6 +186,8 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @param {OLProjection?} [mapProjection] - The map projection.
    * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
    * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+   * @override
+   * @protected
    */
   protected override async onProcessLayerMetadata(
     layerConfig: VectorLayerEntryConfig,
@@ -218,8 +225,8 @@ export class OgcFeature extends AbstractGeoViewVector {
    * `featureProjection`.
    * @returns {Promise<Feature[]>}
    * A promise that resolves to an array of OpenLayers features.
-   * @protected
    * @override
+   * @protected
    */
   protected override async onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
@@ -244,6 +251,7 @@ export class OgcFeature extends AbstractGeoViewVector {
    * @param {OgcFeatureLayerEntryConfig} layerConfig - The layer entry configuration.
    * @returns {GVOGCFeature} The GV Layer
    * @override
+   * @protected
    */
   protected override onCreateGVLayer(layerConfig: OgcFeatureLayerEntryConfig): GVOGCFeature {
     // Create the source

@@ -62,8 +62,8 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {TypeWMSLayerConfig} The strongly-typed layer configuration specific to this layer.
+   * @override
    */
   override getGeoviewLayerConfig(): TypeWMSLayerConfig {
     return super.getGeoviewLayerConfig() as TypeWMSLayerConfig;
@@ -71,8 +71,8 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {TypeSourceImageWmsInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   * @override
    */
   override getSource(): TypeSourceImageWmsInitialConfig {
     return super.getSource();
@@ -80,8 +80,8 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {TypeMetadataWMS | undefined} The strongly-typed layer configuration specific to this layer entry config.
+   * @override
    */
   override getServiceMetadata(): TypeMetadataWMS | undefined {
     return super.getServiceMetadata() as TypeMetadataWMS | undefined;
@@ -89,8 +89,8 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
    * @returns {TypeMetadataWMSCapabilityLayer | undefined} The strongly-typed layer metadata specific to this layer entry config.
+   * @override
    */
   override getLayerMetadata(): TypeMetadataWMSCapabilityLayer | undefined {
     return super.getLayerMetadata() as TypeMetadataWMSCapabilityLayer | undefined;
