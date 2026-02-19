@@ -30,6 +30,10 @@ import type { TypeMetadataEsriRasterFunctionInfos } from '@/api/types/layer-sche
  * @class GVEsriImage
  */
 export class GVEsriImage extends AbstractGVRaster {
+  /** The currently active raster function id */
+  #rasterFunction?: string;
+
+  /** The cache of image previews for the different raster functions */
   #rasterFunctionPreviewCache = new Map<string, string>();
 
   /**
@@ -39,6 +43,9 @@ export class GVEsriImage extends AbstractGVRaster {
    */
   constructor(olSource: ImageArcGISRest, layerConfig: EsriImageLayerEntryConfig) {
     super(olSource, layerConfig);
+
+    // Initialize the active raster function from config's initial value
+    this.#rasterFunction = layerConfig.getInitialRasterFunction();
 
     // Create the image layer options.
     const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
@@ -94,7 +101,16 @@ export class GVEsriImage extends AbstractGVRaster {
     const layerConfig = this.getLayerConfig();
     try {
       if (!layerConfig) return null;
-      const legendJson = await Fetch.fetchEsriJson<TypeEsriImageLayerLegend>(`${layerConfig.getMetadataAccessPath()}/legend?f=json`);
+
+      // Build legend URL with optional raster function
+      let legendUrl = `${layerConfig.getMetadataAccessPath()}/legend?f=json`;
+      const rasterFunction = this.#rasterFunction;
+      if (rasterFunction) {
+        const renderingRule = encodeURIComponent(JSON.stringify({ rasterFunction }));
+        legendUrl += `&renderingRule=${renderingRule}`;
+      }
+
+      const legendJson = await Fetch.fetchEsriJson<TypeEsriImageLayerLegend>(legendUrl);
       let legendInfo;
       if (legendJson.layers && legendJson.layers.length === 1) {
         legendInfo = legendJson.layers[0].legend;
@@ -203,13 +219,15 @@ export class GVEsriImage extends AbstractGVRaster {
    * @protected
    */
   protected getMetadataRasterFunctionInfos(): TypeMetadataEsriRasterFunctionInfos[] | undefined {
-    const config = this.getLayerConfig();
-    const metadata = config?.getLayerMetadata();
+    return this.getLayerConfig().getRasterFunctionInfos();
+  }
 
-    if (metadata && metadata.rasterFunctionInfos) {
-      return metadata.rasterFunctionInfos;
-    }
-    return;
+  /**
+   * Gets the currently active raster function identifier.
+   * @returns {string | undefined} The raster function identifier
+   */
+  getRasterFunction(): string | undefined {
+    return this.#rasterFunction;
   }
 
   /**
@@ -219,7 +237,7 @@ export class GVEsriImage extends AbstractGVRaster {
    */
   updateRasterFunction(rasterFunctionId: string | undefined): void {
     // Update the config
-    this.getLayerConfig().setRasterFunction(rasterFunctionId);
+    this.#rasterFunction = rasterFunctionId;
 
     // Prepare the renderingRule / rasterFunction parameter
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

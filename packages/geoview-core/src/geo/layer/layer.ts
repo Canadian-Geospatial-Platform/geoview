@@ -1457,6 +1457,10 @@ export class LayerApi {
 
     // Update the store
     LegendEventProcessor.setLayerRasterFunctionInStore(this.getMapId(), layerPath, rasterFunctionId);
+
+    // Trigger legend re-query through the layer set system (forced refresh)
+    // This ensures the legend query happens through the normal flow without race conditions
+    this.legendsLayerSet.queryLegend(layerPath, true);
   }
 
   /**
