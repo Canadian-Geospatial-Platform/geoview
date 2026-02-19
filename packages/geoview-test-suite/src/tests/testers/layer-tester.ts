@@ -300,6 +300,47 @@ export class LayerTester extends GVAbstractTester {
     );
   }
 
+  /**
+   * Tests adding an Esri Feature service that contains some invalid geometries.
+   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   */
+  testAddEsriFeatureInvalidGeometry(): Promise<Test<AbstractGVLayer>> {
+    // Create a random geoview layer id
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.LOW_HEAD_HYDRO_DATABASE;
+    const layerPath = gvLayerId + '/' + GVAbstractTester.LOW_HEAD_HYDRO_DATABASE_YUKON_ID;
+    const gvLayerName = 'Yukon Low Head Hydro';
+
+    // Test
+    return this.test(
+      `Test Adding 'Yukon Low head' on map...`,
+      async (test) => {
+        // Creating the configuration
+        test.addStep('Creating the GeoView Layer Configuration...');
+
+        // Create the config
+        const gvConfig = EsriFeature.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
+          { id: GVAbstractTester.LOW_HEAD_HYDRO_DATABASE_YUKON_ID },
+        ]);
+
+        // Redirect to helper to add the layer to the map and wait
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+
+        // Find the layer and wait until its ready
+        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+      },
+      (test) => {
+        // Perform assertions
+        // Redirect to helper to check if the layer exists
+        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath, undefined, undefined);
+      },
+      (test) => {
+        // Redirect to helper to clean up and assert
+        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+      }
+    );
+  }
+
   // #endregion ESRI FEATURE
 
   // #region ESRI IMAGE

@@ -73,6 +73,9 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     const pLayerEsriFeatureBadUrl = this.#layerTester.testAddEsriFeatureBadUrl();
 
     // Test adding layer
+    const playerEsriFeatureInvalidGeometry = this.#layerTester.testAddEsriFeatureInvalidGeometry();
+
+    // Test adding layer
     const pLayerEsriImageElevation = this.#layerTester.testAddEsriImageWithElevation();
 
     // Test true negative
@@ -146,6 +149,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
       pLayerEsriDynamicBadUrl,
       pLayerEsriFeatureForestIndustry,
       pLayerEsriFeatureBadUrl,
+      playerEsriFeatureInvalidGeometry,
       pLayerEsriImageElevation,
       pLayerEsriImageBadUrl,
       // pLayerWMSOWSMundialis,

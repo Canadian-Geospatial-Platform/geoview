@@ -113,6 +113,11 @@ export abstract class GVAbstractTester extends AbstractTester {
     },
   ];
 
+  /** Low Head Hydro Database */
+  static readonly LOW_HEAD_HYDRO_DATABASE: string =
+    'https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Low_Head_Hydro_Database_en/MapServer';
+  static readonly LOW_HEAD_HYDRO_DATABASE_YUKON_ID: string = '1';
+
   /** EsriDynamic with Raster Layers */
   static readonly ESRI_DYNAMIC_LABOUR_FORCE_UUID: string = 'ac2096a6-7b4a-464e-9e08-eca7873dd88c';
   static readonly ESRI_DYNAMIC_LABOUR_FORCE_GROUP: string = '0';
