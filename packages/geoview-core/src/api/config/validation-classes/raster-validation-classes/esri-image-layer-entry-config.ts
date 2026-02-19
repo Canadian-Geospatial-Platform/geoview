@@ -20,10 +20,8 @@ export interface EsriImageLayerEntryConfigProps extends AbstractBaseLayerEntryCo
  * Type used to define a GeoView image layer to display on the map.
  */
 export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
-  /** The raster function to apply to the layer. */
-  #rasterFunction?: string;
-  /** The raster function infos with the listof available raster functions */
-  #rasterFunctionInfos?: TypeMetadataEsriRasterFunctionInfos[];
+  /** The initial raster function to apply to the layer. */
+  #initialRasterFunction?: string;
 
   /**
    * The class constructor.
@@ -33,7 +31,7 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   constructor(layerConfig: EsriImageLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.ESRI_IMAGE, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
 
-    if (layerConfig.source?.rasterFunction) this.#rasterFunction = layerConfig.source.rasterFunction;
+    if (layerConfig.source?.rasterFunction) this.#initialRasterFunction = layerConfig.source.rasterFunction;
   }
 
   // #region OVERRIDES
@@ -80,23 +78,20 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   // #region METHODS
 
   getRasterFunctionInfos(): TypeMetadataEsriRasterFunctionInfos[] | undefined {
-    return this.#rasterFunctionInfos;
+    const metadata = this.getLayerMetadata();
+
+    if (metadata && metadata.rasterFunctionInfos) {
+      return metadata.rasterFunctionInfos;
+    }
+    return;
   }
 
   /**
    * Gets the active raster function identifier
    * @returns {string | undefined} The raster function identifier
    */
-  getRasterFunction(): string | undefined {
-    return this.#rasterFunction;
-  }
-
-  /**
-   * Sets the active raster function identifier
-   * @param {string | undefined} rasterFunctionId - The raster function identifier to set
-   */
-  setRasterFunction(rasterFunctionId: string | undefined): void {
-    this.#rasterFunction = rasterFunctionId;
+  getInitialRasterFunction(): string | undefined {
+    return this.#initialRasterFunction;
   }
 
   // #endregion METHODS
