@@ -139,7 +139,6 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * @param {string} layerPath - The layer path to query the legend for
    * @param {boolean} [forced=false] - Whether to force the query even if already queried
    * @returns {void}
-   * @public
    */
   queryLegend(layerPath: string, forced: boolean = false): void {
     // Get the layer config
