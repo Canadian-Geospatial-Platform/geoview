@@ -10,7 +10,6 @@ import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-v
 import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
-import { type TypeDateFragments } from '@/core/utils/date-mgt';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 /**
@@ -198,12 +197,11 @@ export declare class GVWMS extends AbstractGVRaster {
      * optional style, and time-based fragments. It ensures the filter is only applied if it has changed or needs to be reset.
      * @param {OgcWmsLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig - The configuration object for the WMS or Esri Image layer.
      * @param {ImageWMS | ImageArcGISRest} source - The OpenLayers `ImageWMS` or `ImageArcGISRest` source instance to which the filter will be applied.
-     * @param {TypeDateFragments | undefined} externalDateFragments - Optional external date fragments used to assist in formatting time-based filters.
      * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
      * @throws {LayerInvalidLayerFilterError} If the filter expression fails to parse or cannot be applied.
      * @static
      */
-    static applyViewFilterOnSource(layerConfig: OgcWmsLayerEntryConfig | EsriImageLayerEntryConfig, source: ImageWMS | ImageArcGISRest, externalDateFragments: TypeDateFragments | undefined, filter: LayerFilters | undefined): void;
+    static applyViewFilterOnSource(layerConfig: OgcWmsLayerEntryConfig | EsriImageLayerEntryConfig, source: ImageWMS | ImageArcGISRest, filter: LayerFilters | undefined): void;
     /**
      * Registers an image load callback event handler.
      * @param {ImageLoadRescueDelegate} callback - The callback to be executed whenever the event is emitted

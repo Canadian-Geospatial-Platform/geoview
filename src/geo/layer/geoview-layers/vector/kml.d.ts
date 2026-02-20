@@ -9,6 +9,7 @@ import { KmlLayerEntryConfig } from '@/api/config/validation-classes/vector-vali
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { GVKML } from '@/geo/layer/gv-layers/vector/gv-kml';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
 export interface TypeKmlLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.KML;
     listOfLayerEntryConfig: KmlLayerEntryConfig[];
@@ -32,11 +33,12 @@ export declare class KML extends AbstractGeoViewVector {
     /**
      * Overrides the way the layer metadata is processed.
      * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration to process.
+     * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
      * @param {OLProjection?} [mapProjection] - The map projection.
      * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
      * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
      */
-    protected onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<VectorLayerEntryConfig>;
+    protected onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig, displayDateMode: DisplayDateMode, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<VectorLayerEntryConfig>;
     /**
      * Overrides the loading of the vector features for the layer by fetching KML data and converting it
      * into OpenLayers {@link Feature} feature instances.

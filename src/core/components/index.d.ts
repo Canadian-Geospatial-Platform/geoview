@@ -1,4 +1,3 @@
-export * from './app-bar/buttons/help';
 export * from './app-bar/buttons/version';
 export * from './app-bar/app-bar';
 export * from './app-bar/app-bar-api';

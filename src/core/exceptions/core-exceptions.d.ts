@@ -152,4 +152,40 @@ export declare class ResponseTypeError extends Error {
     readonly receivedContent: unknown;
     constructor(expectedType: string, receivedContent: unknown, message?: string);
 }
+/**
+ * Custom error class for handling invalid dates.
+ * @extends {Error}
+ */
+export declare class InvalidDateError extends Error {
+    /**
+     * Constructor to initialize the InvalidDateError with an optional message.
+     * The default message is "Response contained an error in its content." to indicate that the response body contained an error.
+     * @param {string} date - The invalid date
+     */
+    constructor(date: string);
+}
+/**
+ * Custom error class for handling invalid time IANA formats.
+ * @extends {Error}
+ */
+export declare class InvalidTimezoneError extends Error {
+    /**
+     * Constructor to initialize the InvalidTimezoneError with an optional message.
+     * The default message is "Response contained an error in its content." to indicate that the response body contained an error.
+     * @param {string} timezone - The invalid timezone
+     */
+    constructor(timezone: string);
+}
+/**
+ * Custom error class for handling invalid time dimensions.
+ * @extends {Error}
+ */
+export declare class InvalidTimeDimensionError extends Error {
+    /**
+     * Constructor to initialize the InvalidTimeDimensionError with an optional message.
+     * The default message is "Response contained an error in its content." to indicate that the response body contained an error.
+     * @param {string} dimension - The invalid date duration
+     */
+    constructor(dimension: string);
+}
 //# sourceMappingURL=core-exceptions.d.ts.map

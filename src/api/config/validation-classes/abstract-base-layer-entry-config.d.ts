@@ -2,7 +2,7 @@ import type { TypeLayerStyleConfig, TypeStyleGeometry, TypeLayerStyleSettings, T
 import type { ConfigClassOrType, TypeBaseSourceInitialConfig, TypeFeatureInfoLayerConfig, TypeGeoviewLayerType, TypeLayerEntryType, TypeValidSourceProjectionCodes } from '@/api/types/layer-schema-types';
 import type { ConfigBaseClassProps } from '@/api/config/validation-classes/config-base-class';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
-import type { TimeDimension } from '@/core/utils/date-mgt';
+import { type TemporalMode, type TimeDimension, type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 export interface AbstractBaseLayerEntryConfigProps extends ConfigBaseClassProps {
     /** Source settings to apply to the GeoView layer source at creation time. */
     source?: TypeBaseSourceInitialConfig;
@@ -95,6 +95,54 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
      * @deprecated This function should be deleted, because it can introduce issues when multiple geometry types are set on a layer style. See GeoJSON - Multi template to reproduce the issue.
      */
     getLayerStyleSettings(): TypeLayerStyleSettings | undefined;
+    /**
+     * Gets the service date format as specified by the config.
+     * @returns {string | undefined} The Date Format if specified.
+     */
+    getServiceDateFormatIdentify(): string | undefined;
+    /**
+     * Gets the service date format as specified by the config.
+     * @returns {string | undefined} The Date Format if specified.
+     */
+    getServiceDateFormat(): string | undefined;
+    /**
+     * Gets the service date timezone as specified by the config.
+     * @returns {TimeIANA | undefined} The date timezone if specified.
+     */
+    getServiceDateTimezone(): TimeIANA | undefined;
+    /**
+     * Gets the temporal mode for the date, indicating whether it should be treated as a 'calendar' date or an 'instant'.
+     * The method resolves the temporal mode in the following order:
+     * 1. Layer-specific configuration (`serviceDateTemporalMode`),
+     * 2. Time dimension configuration (`serviceDateTemporalMode`),
+     * 3. Inferred from the service date format if available.
+     * @returns {TemporalMode | undefined} The date temporal mode, or `undefined` if it cannot be determined.
+     */
+    getServiceDateTemporalMode(): TemporalMode | undefined;
+    /**
+     * Gets the display format for dates for this layer.
+     * The method checks the layer-specific configuration first, and if not set,
+     * falls back to the format defined in the layer's time dimension (if available).
+     *
+     * @returns {TypeDisplayDateFormat | undefined} The date display format, or `undefined` if none is configured.
+     */
+    getDisplayDateFormat(): TypeDisplayDateFormat | undefined;
+    /**
+     * Gets the short display format for dates for this layer.
+     * The method resolves the format in the following order:
+     * 1. Layer-specific configuration (`displayDateFormatShort`),
+     * 2. Time dimension configuration (`displayDateFormatShort`),
+     * 3. Default display format (`getDisplayDateFormat()`).
+     * @returns {TypeDisplayDateFormat | undefined} The short date display format, or `undefined` if none is configured.
+     */
+    getDisplayDateFormatShort(): TypeDisplayDateFormat | undefined;
+    /**
+     * Gets the timezone in which dates should be displayed for this layer.
+     * The method first checks the layer-specific configuration, and if not set,
+     * falls back to the timezone defined in the layer's time dimension (if available).
+     * @returns {TimeIANA | undefined} The display timezone, or `undefined` if none is configured.
+     */
+    getDisplayDateTimezone(): TimeIANA | undefined;
     /**
      * Gets the temporal dimension, if any, that is associated to the layer.
      * @returns {TimeDimension | undefined} The temporal dimension or undefined.

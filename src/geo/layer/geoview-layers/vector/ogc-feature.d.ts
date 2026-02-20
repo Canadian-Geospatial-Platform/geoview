@@ -3,6 +3,7 @@ import type { ReadOptions } from 'ol/format/Feature';
 import type { Options as SourceOptions } from 'ol/source/Vector';
 import type { Projection as OLProjection } from 'ol/proj';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
 import type { TypeGeoviewLayerConfig, TypeMetadataOGCFeature } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
@@ -54,11 +55,12 @@ export declare class OgcFeature extends AbstractGeoViewVector {
     /**
      * Overrides the way the layer metadata is processed.
      * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration to process.
+     * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
      * @param {OLProjection?} [mapProjection] - The map projection.
      * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
      * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
      */
-    protected onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<VectorLayerEntryConfig>;
+    protected onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig, displayDateMode: DisplayDateMode, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<VectorLayerEntryConfig>;
     /**
      * Overrides the loading of the vector features for the layer by fetching OGC Feature data and converting it
      * into OpenLayers {@link Feature} feature instances.

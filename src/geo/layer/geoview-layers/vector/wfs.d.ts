@@ -3,7 +3,7 @@ import type { ReadOptions } from 'ol/format/Feature';
 import type { Options as SourceOptions } from 'ol/source/Vector';
 import type { Projection as OLProjection } from 'ol/proj';
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import { type TypeOutfields, type TypeOutfieldsType } from '@/api/types/map-schema-types';
+import { type DisplayDateMode, type TypeOutfields, type TypeOutfieldsType } from '@/api/types/map-schema-types';
 import type { TypeGeoviewLayerConfig, TypeMetadataWFS, VectorStrategy } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
@@ -59,12 +59,13 @@ export declare class WFS extends AbstractGeoViewVector {
     /**
      * Overrides the way the layer metadata is processed.
      * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration to process.
+     * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
      * @param {OLProjection?} [mapProjection] - The map projection.
      * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
      * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
      * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
      */
-    protected onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<VectorLayerEntryConfig>;
+    protected onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig, displayDateMode: DisplayDateMode, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<VectorLayerEntryConfig>;
     /**
      * Overrides the loading of the vector features for the layer by fetching WFS data and converting it
      * into OpenLayers {@link Feature} feature instances.
@@ -177,7 +178,7 @@ export declare class WFS extends AbstractGeoViewVector {
     static fetchDescribeFeatureXML(url: string, abortSignal?: AbortSignal): Promise<TypeOutfields[]>;
     /**
      * Determines the simplified data type of a specified field from a WFS layer configuration.
-     * Extracts the field definition from the layer’s metadata, interprets its WFS type
+     * Extracts the field definition from the layer's metadata, interprets its WFS type
      * (e.g., `xsd:int`, `xsd:date`), and maps it to a normalized internal type
      * (`'string'`, `'number'`, or `'date'`).
      * @param {string} fieldName - The name of the field whose type should be retrieved.

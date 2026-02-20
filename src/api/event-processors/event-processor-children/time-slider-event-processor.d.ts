@@ -2,6 +2,7 @@ import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-pr
 import type { ITimeSliderState, TimeSliderLayerSet, TypeTimeSliderValues, TypeTimeSliderProps } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 export declare class TimeSliderEventProcessor extends AbstractEventProcessor {
     #private;
     /**
@@ -80,14 +81,6 @@ export declare class TimeSliderEventProcessor extends AbstractEventProcessor {
      */
     static getInitialTimeSliderValues(mapId: string, layerConfig: AbstractBaseLayerEntryConfig, timesliderConfig?: TypeTimeSliderProps): TypeTimeSliderValues | undefined;
     /**
-     * Guesses the estimated steps that should be used by the slider, depending on the value range
-     * @param {number} minValue - The minimum value
-     * @param {number} maxValue - The maximum value
-     * @returns The estimated stepping value based on the min and max values
-     * @static
-     */
-    static guessEstimatedStep(minValue: number, maxValue: number): number | undefined;
-    /**
      * Sets the selected layer path
      * @param {string} mapId - The map id of the state to act on
      * @param {string} layerPath - The layer path to use
@@ -105,16 +98,45 @@ export declare class TimeSliderEventProcessor extends AbstractEventProcessor {
      */
     static addOrUpdateSliderFilter(mapId: string, layerPath: string, filter: string): void;
     /**
-     * Filter the layer provided in the layerPath variable according to current states (filtering and values)
-     *
-     * @param {string} mapId - The id of the map
-     * @param {string} layerPath - The path of the layer to filter
-     * @param {string} field - The field to filter the layer by
-     * @param {boolean} filtering - Whether the layer should be filtered or returned to default
-     * @param {number[]} minAndMax - Minimum and maximum values of slider
-     * @param {number[]} values - Filter values to apply
-     * @returns {void}
-     * @throws {PluginStateUninitializedError} When the TimeSlider plugin is uninitialized.
+     * Updates the display date format for a specific layer in the time slider state.
+     * @param mapId - Identifier of the map viewer instance
+     * @param layerPath - Path identifying the target layer
+     * @param displayDateFormat - Date format configuration to store
+     */
+    static setDisplayDateFormat(mapId: string, layerPath: string, displayDateFormat: TypeDisplayDateFormat): void;
+    /**
+     * Updates the display date format for a specific layer in the time slider state.
+     * @param mapId - Identifier of the map viewer instance
+     * @param layerPath - Path identifying the target layer
+     * @param displayDateFormatShort - Date format configuration to store
+     */
+    static setDisplayDateFormatShort(mapId: string, layerPath: string, displayDateFormatShort: TypeDisplayDateFormat): void;
+    /**
+     * Updates the display time zone for date rendering of a specific layer
+     * in the time slider state.
+     * @param mapId - Identifier of the map viewer instance
+     * @param layerPath - Path identifying the target layer
+     * @param displayDateTimezone - IANA time zone identifier to store
+     */
+    static setDisplayDateTimezone(mapId: string, layerPath: string, displayDateTimezone: TimeIANA): void;
+    /**
+     * Applies or resets a time-based filter on the specified layer based on the
+     * current Time Slider state.
+     * The generated filter expression varies depending on the layer type
+     * (WMS, ESRI Image, or vector layers) and whether filtering is enabled.
+     * Date values are normalized and formatted before being injected into
+     * the filter expression.
+     * @param {string} mapId - The unique identifier of the map.
+     * @param {string} layerPath - The path of the layer to which the filter is applied.
+     * @param {string} field - The name of the date/time attribute used for filtering.
+     * @param {boolean} filtering - Whether filtering is enabled (`true`) or the layer
+     * should be reset to its default (unfiltered) state (`false`).
+     * @param {number[]} minAndMax - The minimum and maximum values representing the
+     * full temporal extent of the layer (typically epoch milliseconds).
+     * @param {number[]} values - The active filter values (typically epoch milliseconds)
+     * selected by the time slider.
+     * @throws {PluginStateUninitializedError} Thrown when the Time Slider plugin state
+     * has not been initialized for the specified map.
      * @static
      */
     static updateFilters(mapId: string, layerPath: string, field: string, filtering: boolean, minAndMax: number[], values: number[]): void;

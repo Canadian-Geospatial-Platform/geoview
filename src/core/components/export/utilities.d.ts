@@ -1,6 +1,7 @@
 import type { TypeNorthArrow, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import type { TypeTimeSliderValues } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import { type TemporalMode, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 export declare const EXPORT_CONSTANTS: {
     readonly DEFAULT_DPI: 96;
     readonly JPEG_QUALITY: 0.98;
@@ -76,24 +77,25 @@ export declare class ExportUtilities {
      * @param {ElementFactory} factory - Element factory for creating renderer-specific elements
      * @param {any} scaledStyles - The scaled styles object for sizing
      * @param {any} baseStyles - The base styles object for layout
+     * @param {Record<string, TypeDisplayDateFormat>} layerDateFormats - Date formats for layers
+     * @param {Record<string, TemporalMode>} layerDateTemporalModes - Temporal modes for layers
      * @param {number[]} [columnWidths] - Optional array of column widths in pixels for justified layout
      * @returns {JSX.Element} The rendered legend container with all columns
      */
     static renderLegendColumns(columns: FlattenedLegendItem[][], factory: ElementFactory, scaledStyles: any, // eslint-disable-line @typescript-eslint/no-explicit-any
     baseStyles: any, // eslint-disable-line @typescript-eslint/no-explicit-any
-    columnWidths?: number[]): JSX.Element;
+    layerDateFormats: Record<string, TypeDisplayDateFormat>, layerDateTemporalModes: Record<string, TemporalMode>, columnWidths?: number[]): JSX.Element;
     /**
      * Renders the footer section with disclaimer, attributions, and date.
      * Footer appears at the bottom of the export document in all formats.
      *
      * @param {string} disclaimer - The disclaimer text to display
      * @param {string[]} attributions - Array of attribution texts (one per map layer)
-     * @param {string} date - The export date string to display
      * @param {ElementFactory} factory - Element factory for creating renderer-specific elements
      * @param {any} scaledStyles - The scaled styles object with footer styling
      * @returns {JSX.Element} The rendered footer container
      */
-    static renderFooter(disclaimer: string, attributions: string[], date: string, factory: ElementFactory, scaledStyles: any): JSX.Element;
+    static renderFooter(disclaimer: string, attributions: string[], factory: ElementFactory, scaledStyles: any): JSX.Element;
     /**
      * Renders a scale bar with tick marks and label text.
      * The scale bar width is dynamically calculated to match the map extent.
@@ -151,9 +153,11 @@ export declare class ExportUtilities {
      * @param {string} mapId - The GeoView map ID
      * @param {string} exportTitle - The export title (affects height calculation)
      * @param {string} disclaimer - The disclaimer text (affects height calculation)
+     * @param {Record<string, TypeDisplayDateFormat>} layerDateFormats - Date formats for layers
+     * @param {Record<string, TemporalMode>} layerDateTemporalModes - Temporal modes for layers
      * @returns {Promise<TypeMapInfoResult>} Map image URL, scale info, north arrow, legend columns, canvas dimensions
      * @throws {Error} If canvas context is unavailable
      */
-    static getMapInfo(mapId: string, exportTitle: string, disclaimer: string): Promise<TypeMapInfoResult>;
+    static getMapInfo(mapId: string, exportTitle: string, disclaimer: string, layerDateFormats: Record<string, TypeDisplayDateFormat>, layerDateTemporalModes: Record<string, TemporalMode>): Promise<TypeMapInfoResult>;
 }
 //# sourceMappingURL=utilities.d.ts.map

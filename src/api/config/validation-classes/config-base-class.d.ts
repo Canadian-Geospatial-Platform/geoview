@@ -2,7 +2,7 @@ import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { Extent, TypeLayerStyleConfig } from '@/api/types/map-schema-types';
 import type { ConfigClassOrType, TypeBaseSourceInitialConfig, TypeGeoviewLayerConfig, TypeGeoviewLayerType, TypeLayerEntryType, TypeLayerInitialSettings, TypeLayerStatus, TypeTileGrid, TypeValidSourceProjectionCodes } from '@/api/types/layer-schema-types';
 import type { GroupLayerEntryConfig, GroupLayerEntryConfigProps } from './group-layer-entry-config';
-import type { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
+import type { TimeDimension } from '@/core/utils/date-mgt';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 export interface ConfigBaseClassProps {
     layerId: string;
@@ -158,33 +158,6 @@ export declare abstract class ConfigBaseClass {
      * @returns {boolean} True if this is a AbstractBaseLayerEntryConfig.
      */
     getEntryTypeIsRegular(): this is AbstractBaseLayerEntryConfig;
-    /**
-     * Gets the service date format as specified by the config.
-     * @returns {string | undefined} The Date Format
-     */
-    getServiceDateFormat(): string | undefined;
-    /**
-     * Gets the service date fragments order as specified by the config.
-     * @returns {TypeDateFragments} The Date Fragments
-     */
-    getServiceDateFragmentsOrder(): TypeDateFragments | undefined;
-    /**
-     * Gets the external date format as specified by the config.
-     * @returns {string | undefined} The Date Format
-     */
-    getExternalDateFormat(): string | undefined;
-    /**
-     * Gets the external fragments order if specified by the config, defaults to ISO_UTC.
-     * Date format object used to translate internal UTC ISO format to the external format.
-     * @returns {TypeDateFragments} The Date Fragments
-     */
-    getExternalFragmentsOrder(): TypeDateFragments | undefined;
-    /**
-     * Gets the external fragments order if specified by the config, defaults to ISO_UTC.
-     * Date format object used to translate internal UTC ISO format to the external format.
-     * @returns {TypeDateFragments} The Date Fragments
-     */
-    getExternalFragmentsOrderOrDefault(): TypeDateFragments;
     /**
      * Gets the layer min scale if any.
      * @returns {number | undefined} The layer min scale if any.

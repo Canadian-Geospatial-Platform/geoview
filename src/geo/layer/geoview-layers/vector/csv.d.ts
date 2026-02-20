@@ -9,6 +9,7 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { CsvLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { GVCSV } from '@/geo/layer/gv-layers/vector/gv-csv';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
 export interface TypeCSVLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.CSV;
     listOfLayerEntryConfig: CsvLayerEntryConfig[];
@@ -34,11 +35,12 @@ export declare class CSV extends AbstractGeoViewVector {
     /**
      * Overrides the way the layer metadata is processed.
      * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration to process.
+     * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
      * @param {OLProjection?} [mapProjection] - The map projection.
      * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
      * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
      */
-    protected onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<VectorLayerEntryConfig>;
+    protected onProcessLayerMetadata(layerConfig: VectorLayerEntryConfig, displayDateMode: DisplayDateMode, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<VectorLayerEntryConfig>;
     /**
      * Overrides the loading of the vector features for the layer by fetching CSV data and converting it
      * into OpenLayers {@link Feature} feature instances.

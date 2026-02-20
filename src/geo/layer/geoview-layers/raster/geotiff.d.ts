@@ -6,6 +6,7 @@ import type { TypeGeoviewLayerConfig, TypeMetadataGeoTIFF } from '@/api/types/la
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { GeoTIFFLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/geotiff-layer-entry-config';
 import { GVGeoTIFF } from '@/geo/layer/gv-layers/tile/gv-geotiff';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
 export interface TypeGeoTIFFLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.GEOTIFF;
     listOfLayerEntryConfig: GeoTIFFLayerEntryConfig[];
@@ -44,11 +45,12 @@ export declare class GeoTIFF extends AbstractGeoViewRaster {
     /**
      * Overrides the way the layer metadata is processed.
      * @param {GeoTIFFLayerEntryConfig} layerConfig - The layer entry configuration to process.
+     * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
      * @param {OLProjection?} [mapProjection] - The map projection.
      * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
      * @returns {Promise<GeoTIFFLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
      */
-    protected onProcessLayerMetadata(layerConfig: GeoTIFFLayerEntryConfig, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<GeoTIFFLayerEntryConfig>;
+    protected onProcessLayerMetadata(layerConfig: GeoTIFFLayerEntryConfig, displayDateMode: DisplayDateMode, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<GeoTIFFLayerEntryConfig>;
     /**
      * Overrides the creation of the GV Layer
      * @param {GeoTIFFLayerEntryConfig} layerConfig - The layer entry configuration.

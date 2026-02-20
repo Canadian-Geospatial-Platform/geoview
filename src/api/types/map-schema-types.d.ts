@@ -44,6 +44,13 @@ export type Extent = Array<number>;
 export type TypeDisplayLanguage = 'en' | 'fr';
 /** Constante mainly use for language validation. */
 export declare const VALID_DISPLAY_LANGUAGE: TypeDisplayLanguage[];
+/**
+ * iso mode:
+ *   Favors compact, machine-readable ISO 8601 date formats (e.g., "YYYY-MM-DDTHH:mm") for data exchange.
+ * long mode:
+ *   Favors more human-readable date formats (e.g., "MMM D, YYYY @ HH:mm") for display purposes.
+ */
+export type DisplayDateMode = 'iso' | 'long';
 /** Supported geoview themes. */
 export type TypeDisplayTheme = 'dark' | 'light' | 'geo.ca';
 /** Array of valid geoview themes. */
@@ -72,7 +79,7 @@ export type TypeFooterBarProps = {
     selectedTimeSliderLayerPath: string;
 };
 /** Supported app bar values. */
-export type TypeValidAppBarCoreProps = 'geolocator' | 'export' | 'aoi-panel' | 'about-panel' | 'custom-legend' | 'guide' | 'legend' | 'details' | 'data-table' | 'layers';
+export type TypeValidAppBarCoreProps = 'geolocator' | 'share' | 'export' | 'aoi-panel' | 'about-panel' | 'custom-legend' | 'guide' | 'legend' | 'details' | 'data-table' | 'layers';
 /** Configuration available on the application bar. Default = ['geolocator']. The about GeoView and notification are always there. */
 export type TypeAppBarProps = {
     tabs: {
@@ -158,6 +165,8 @@ export type TypeValidVersions = '1.0';
 export declare const ACCEPTED_SCHEMA_VERSIONS: TypeValidVersions[];
 /** Service endpoint urls. */
 export type TypeGlobalSettings = {
+    /** The display date pattern to use for the application */
+    displayDateMode?: DisplayDateMode;
     /** Whether or not sublayers can be removed from layer groups. Default = true */
     canRemoveSublayers?: boolean;
     /** Whether a certain layer type should be disabled */

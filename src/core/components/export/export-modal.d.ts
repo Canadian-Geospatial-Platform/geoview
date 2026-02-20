@@ -1,3 +1,4 @@
+import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 type FileFormat = 'pdf' | 'png' | 'jpeg';
 export interface FileExportProps {
     exportTitle: string;
@@ -5,6 +6,8 @@ export interface FileExportProps {
     dpi: number;
     jpegQuality?: number;
     format: FileFormat;
+    layerDateFormats: Record<string, TypeDisplayDateFormat>;
+    layerDateTemporalModes: Record<string, TemporalMode>;
 }
 /**
  * Export modal window component to export the viewer information in a PNG file

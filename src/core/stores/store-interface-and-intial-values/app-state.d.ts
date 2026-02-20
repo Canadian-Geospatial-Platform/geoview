@@ -1,13 +1,16 @@
-import type { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
+import type { DisplayDateMode, TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
 import type { TypeInitialGeoviewLayerType } from '@/api/types/layer-schema-types';
 import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import type { NotificationDetailsType } from '@/core/components/notifications/notifications';
 import type { TypeHTMLElement, TypeMapFeaturesConfig } from '@/core/types/global-types';
+import { type TimeIANA } from '@/core/utils/date-mgt';
 import type { SnackbarType } from '@/core/utils/notifications';
 type AppActions = IAppState['actions'];
 export interface IAppState {
     disabledLayerTypes: TypeInitialGeoviewLayerType[];
     displayLanguage: TypeDisplayLanguage;
+    displayDateMode: DisplayDateMode;
+    displayDateTimezone: TimeIANA;
     displayTheme: TypeDisplayTheme;
     guide: TypeGuideObject | undefined;
     geolocatorServiceURL: string | undefined;
@@ -27,6 +30,7 @@ export interface IAppState {
         addNotification: (notif: NotificationDetailsType) => void;
         setCrosshairActive: (active: boolean) => void;
         setDisplayLanguage: (lang: TypeDisplayLanguage) => Promise<void>;
+        setDisplayDateTimezone: (displayDateTimezone: TimeIANA) => void;
         setDisplayTheme: (theme: TypeDisplayTheme) => void;
         setFullScreenActive: (active: boolean, element?: TypeHTMLElement) => void;
         removeNotification: (key: string) => void;
@@ -36,6 +40,8 @@ export interface IAppState {
         setCircularProgress: (active: boolean) => void;
         setCrosshairActive: (active: boolean) => void;
         setDisplayLanguage: (lang: TypeDisplayLanguage) => void;
+        setDisplayDateMode: (displayDateMode: DisplayDateMode) => void;
+        setDisplayDateTimezone: (displayDateTimezone: TimeIANA) => void;
         setDisplayTheme: (theme: TypeDisplayTheme) => void;
         setFullScreenActive: (active: boolean) => void;
         setGuide: (guide: TypeGuideObject) => void;
@@ -60,6 +66,8 @@ export declare const useAppCircularProgressActive: () => boolean;
 export declare const useAppCrosshairsActive: () => boolean;
 export declare const useAppDisabledLayerTypes: () => TypeInitialGeoviewLayerType[];
 export declare const useAppDisplayLanguage: () => TypeDisplayLanguage;
+export declare const useAppDisplayDateMode: () => DisplayDateMode;
+export declare const useDisplayDateTimezone: () => TimeIANA;
 export declare const useAppDisplayTheme: () => TypeDisplayTheme;
 export declare const useAppFullscreenActive: () => boolean;
 export declare const useAppGeolocatorServiceURL: () => string | undefined;

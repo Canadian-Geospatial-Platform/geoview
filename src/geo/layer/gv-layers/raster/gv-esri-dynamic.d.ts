@@ -10,7 +10,6 @@ import type { TypeLayerMetadataEsriExtent } from '@/api/types/layer-schema-types
 import type { GeometryJson } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import type { TypeDateFragments } from '@/core/utils/date-mgt';
 import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 /**
  * Manages an Esri Dynamic layer.
@@ -152,12 +151,10 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
      * optional style, and time-based fragments. It ensures the filter is only applied if it has changed or needs to be reset.
      * @param {EsriDynamicLayerEntryConfig} layerConfig - The configuration object for the Esri Dynamic layer.
      * @param {ImageArcGISRest} source - The OpenLayers `ImageArcGISRest` source instance to which the filter will be applied.
-     * @param {TypeLayerStyleConfig | undefined} style - Optional style configuration that may influence filter expression generation.
-     * @param {TypeDateFragments | undefined} externalDateFragments - Optional external date fragments used to assist in formatting time-based filters.
      * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
      * @throws {LayerInvalidLayerFilterError} If the filter expression fails to parse or cannot be applied.
      */
-    static applyViewFilterOnSource(layerConfig: EsriDynamicLayerEntryConfig, source: ImageArcGISRest, externalDateFragments: TypeDateFragments | undefined, filter: LayerFilters | undefined): void;
+    static applyViewFilterOnSource(layerConfig: EsriDynamicLayerEntryConfig, source: ImageArcGISRest, filter: LayerFilters | undefined): void;
 }
 export type EsriQueryJsonResponse = {
     extent: TypeLayerMetadataEsriExtent;

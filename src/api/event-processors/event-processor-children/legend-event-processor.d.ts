@@ -1,5 +1,5 @@
 import type { Extent } from '@/api/types/map-schema-types';
-import type { TimeDimension } from '@/core/utils/date-mgt';
+import type { TemporalMode, TimeDimension, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import type { ILayerState, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
@@ -109,6 +109,59 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      */
     static setLayerHoverableInStore(mapId: string, layerPath: string, hoverable: boolean): void;
     /**
+     * Retrieves the display date format configured for a specific layer.
+     * @param {string} mapId - The unique identifier of the map.
+     * @param {string} layerPath - The unique path identifying the layer.
+     * @returns {TypeDisplayDateFormat | undefined} The configured display date format
+     * for the layer, or `undefined` if the layer is not found or no format is set.
+     */
+    static getLayerDisplayDateFormat(mapId: string, layerPath: string): TypeDisplayDateFormat | undefined;
+    /**
+     * Applies a display date format to a layer through the map viewer layer API.
+     * This method forwards the request to the map viewer, allowing the layer
+     * implementation to react to the new display date format (e.g. for rendering
+     * or querying purposes).
+     * @param {string} mapId - The unique identifier of the map.
+     * @param {string} layerPath - The unique path identifying the layer.
+     * @param {TypeDisplayDateFormat} displayDateFormat - The date format to apply
+     * when displaying date values for the layer.
+     */
+    static setLayerDisplayDateFormat(mapId: string, layerPath: string, displayDateFormat: TypeDisplayDateFormat): void;
+    /**
+     * Persists the display date format for a specific layer in the application store.
+     * This updates the legend layer state so that the selected display date format
+     * is retained and can be reused by UI components (e.g. legends, tooltips)
+     * without directly interacting with the map viewer.
+     * @param {string} mapId - The unique identifier of the map.
+     * @param {string} layerPath - The unique path identifying the layer.
+     * @param {TypeDisplayDateFormat} displayDateFormat - The date format to store
+     * for displaying date values associated with the layer.
+     */
+    static setLayerDisplayDateFormatInStore(mapId: string, layerPath: string, displayDateFormat: TypeDisplayDateFormat): void;
+    /**
+     * Persists the display date format (short) for a specific layer in the application store.
+     * Short means the date should be displayed in a more compact format.
+     * This updates the legend layer state so that the selected display date format
+     * is retained and can be reused by UI components (e.g. legends, tooltips)
+     * without directly interacting with the map viewer.
+     * @param {string} mapId - The unique identifier of the map.
+     * @param {string} layerPath - The unique path identifying the layer.
+     * @param {TypeDisplayDateFormat} displayDateFormat - The date format to store
+     * for displaying date values associated with the layer.
+     */
+    static setLayerDisplayDateFormatShortInStore(mapId: string, layerPath: string, displayDateFormat: TypeDisplayDateFormat): void;
+    /**
+     * Persists the date temporal mode for a specific layer in the application store.
+     * This updates the legend layer state so that the selected temporal mode
+     * is retained and can be reused by UI components (e.g. legends, tooltips)
+     * without directly interacting with the map viewer.
+     * @param {string} mapId - The unique identifier of the map.
+     * @param {string} layerPath - The unique path identifying the layer.
+     * @param {TemporalMode} temporalMode - The date format to store
+     * for displaying date values associated with the layer.
+     */
+    static setLayerDateTemporalInStore(mapId: string, layerPath: string, temporalMode: TemporalMode): void;
+    /**
      * Sets the layersAreLoading flag in the store
      * @param {string} mapId - The map id
      * @param {boolean} areLoading - Indicator if any layer is currently loading
@@ -134,6 +187,8 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      * This method fetches the Geoview layer for the specified layer path (if it exists) and checks if it has a `getTimeDimension` method.
      * If the method exists, it retrieves the temporal dimension information for the layer.
      * If the layer doesn't support temporal dimensions, the method returns `undefined`.
+     * @remarks This function returns the layer time dimension unrelated to the processing in the time-slider
+     * (see TimeSliderEventProcessor.getInitialTimeSliderValues).
      */
     static getLayerTimeDimension(mapId: string, layerPath: string): TimeDimension | undefined;
     /**
@@ -162,6 +217,17 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      * @returns {TypeLegendLayer | undefined}
      */
     static findLayerByPath(layers: TypeLegendLayer[], layerPath: string): TypeLegendLayer | undefined;
+    /**
+     * Recursively traverses a hierarchy of legend layers and returns a flat lookup
+     * object indexed by `layerPath`.
+     * All layers that contain a defined `layerPath` will be included in the result,
+     * including nested children at any depth.
+     * If duplicate `layerPath` values exist (shouldn't happen by design), later occurrences will overwrite earlier ones.
+     * @param {TypeLegendLayer[]} layers - The top-level legend layers to traverse.
+     * @returns {Record<string, TypeLegendLayer>} A record keyed by `layerPath`, where each value is the corresponding `TypeLegendLayer`.
+     * @static
+     */
+    static findAllLayers(layers: TypeLegendLayer[]): Record<string, TypeLegendLayer>;
     /**
      * Delete layer from legend layers.
      * @param {string} mapId - The ID of the map.

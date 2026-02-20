@@ -28,6 +28,7 @@ import type { TransformOptions } from '@/geo/interaction/transform/transform';
 import { Transform } from '@/geo/interaction/transform/transform';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
+import { type TimeIANA } from '@/core/utils/date-mgt';
 import type { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
@@ -92,7 +93,13 @@ export declare class MapViewer {
      * @param {string} pluginId - The plugin id
      * @returns {AbstractPlugin} The plugin
      */
-    getPlugin(pluginId: string): Promise<AbstractPlugin>;
+    getPlugin(pluginId: string): AbstractPlugin;
+    /**
+     * Asynchronously attempts to get a plugin by its id.
+     * @param {string} pluginId - The plugin id
+     * @returns {AbstractPlugin} The plugin
+     */
+    getPluginAsync(pluginId: string): Promise<AbstractPlugin>;
     /**
      * Retrieves the configuration object for a specific core plugin from the map's features configuration.
      *
@@ -191,10 +198,18 @@ export declare class MapViewer {
      * Set the display language of the map
      *
      * @param {TypeDisplayLanguage} displayLanguage - The language to use (en, fr)
-     * @param {boolean} resetLayer - Optional flag to ask viewer to reload layers with the new localize language
+     * @param {boolean} reloadLayers - Optional flag to ask viewer to reload layers with the new localize language
      * @returns {Promise<void>}
      */
     setLanguage(displayLanguage: TypeDisplayLanguage, reloadLayers?: boolean | false): Promise<void>;
+    /**
+     * Sets the timezone used to display date values for this map.
+     * This affects how parsed date instants are converted and presented in the UI,
+     * without modifying the underlying stored values.
+     * @param {TimeIANA} displayDateTimezone - The IANA timezone identifier to use for display.
+     * @throws {InvalidTimezoneError} If the time zone is not a valid or supported IANA identifier.
+     */
+    setDisplayDateTimezone(displayDateTimezone: TimeIANA): void;
     /**
      * Set the display projection of the map
      *

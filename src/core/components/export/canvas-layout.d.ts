@@ -1,3 +1,4 @@
+import { type TemporalMode, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { FileExportProps } from '@/core/components/export/export-modal';
 import type { FlattenedLegendItem } from '@/core/components/export/utilities';
 interface CanvasDocumentProps {
@@ -14,7 +15,8 @@ interface CanvasDocumentProps {
     northArrowRotation: number;
     disclaimer: string;
     attributions: string[];
-    date: string;
+    layerDateFormats: Record<string, TypeDisplayDateFormat>;
+    layerDateTemporalModes: Record<string, TemporalMode>;
     fittedColumns: FlattenedLegendItem[][];
     columnWidths?: number[];
     canvasWidth: number;
@@ -24,7 +26,7 @@ interface CanvasDocumentProps {
  * @param {CanvasDocumentProps} props - The Canvas Document properties
  * @returns {JSX.Element} The resulting html map
  */
-export declare function CanvasDocument({ mapDataUrl, exportTitle, scaleText, scaleLineWidth, northArrowSvg, northArrowRotation, fittedColumns, columnWidths, disclaimer, attributions, date, canvasWidth, }: CanvasDocumentProps): JSX.Element;
+export declare function CanvasDocument({ mapDataUrl, exportTitle, scaleText, scaleLineWidth, northArrowSvg, northArrowRotation, fittedColumns, columnWidths, disclaimer, attributions, layerDateFormats, layerDateTemporalModes, canvasWidth, }: CanvasDocumentProps): JSX.Element;
 /**
  * Creates the HTML map and converts to canvas and then image for the export
  * @param {string} mapId - The map ID

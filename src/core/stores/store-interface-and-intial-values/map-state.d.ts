@@ -166,6 +166,7 @@ export interface TypeOrderedLayerInfo {
 }
 export declare const useMapAttribution: () => string[];
 export declare const useMapBasemapOptions: () => TypeBasemapOptions;
+export declare const useMapCurrentBasemapOptions: () => TypeBasemapOptions;
 export declare const useMapCenterCoordinates: () => Coordinate;
 export declare const useMapClickMarker: () => TypeClickMarker | undefined;
 export declare const useMapClickCoordinates: () => TypeMapMouseInfo | undefined;
