@@ -1,27 +1,35 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useTheme } from '@mui/material/styles';
 import { IconButton, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material';
 import { Settings as SettingsIcon, Functions as FunctionsIcon } from '@mui/icons-material';
-import { useTranslation } from 'react-i18next';
 
-import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { RasterFunctionSelector } from './raster-function-selector';
-import { useTheme } from '@mui/material/styles';
 import { getSxClasses } from './layer-settings-style';
+import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+
+import { RasterFunctionSelector } from './raster-function-selector';
 import type { TypeLegendLayer } from '../../types';
+import { logger } from '@/core/utils/logger';
 
 interface LayerSettingsProps {
   layerDetails: TypeLegendLayer;
 }
 
 export function LayerSettings({ layerDetails }: LayerSettingsProps): JSX.Element | null {
+  // Log
+  logger.logTraceRender('components/layers/right-panel/layer-settings/layer-settings');
+
+  // Hooks
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
   const { t } = useTranslation();
 
+  // Hooks
   const { getLayerSettings } = useLayerStoreActions();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [rasterFunctionAnchorEl, setRasterFunctionAnchorEl] = useState<null | HTMLElement>(null);
 
+  // State
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const availableSettings = getLayerSettings(layerDetails.layerPath);
 
   // Don't render if no settings available

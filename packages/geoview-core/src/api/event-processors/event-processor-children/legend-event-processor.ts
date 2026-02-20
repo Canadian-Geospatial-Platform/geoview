@@ -52,7 +52,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * Sets the selected layer in the layers tab
    * @param mapId - The map id
    * @param layerPath - The layer path
-   * @returns {void} @static
+   * @returns {void}
+   * @static
    */
   static setSelectedLayersTabLayerInStore(mapId: string, layerPath: string): void {
     // Save in store
@@ -62,7 +63,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   /**
    * Reorders the legend layers based on the ordered layer info
    * @param mapId - The map id
-   * @returns {void} @static
+   * @returns {void}
+   * @static
    */
   static reorderLegendLayers(mapId: string): void {
     // Sort the layers
@@ -229,11 +231,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The unique identifier of the map instance.
    * @param {string} layerPath - The path to the layer.
    * @returns {TypeMetadataEsriRasterFunctionInfos[] | undefined} - The projection code of the layer, or `undefined` if not available.
-   * @static
    * @description
    * This method fetches the Geoview layer for the specified layer path and checks if it has a `getMetadataRasterFunctionInfos` method.
    * If the method exists, it retrieves the rasterFunctionInfos and returns the list of TypeMetadataEsriRasterFunctionInfo.
    * If the rasterFunctionInfos is not available, the method returns `undefined`.
+   * @static
    */
   static getLayerRasterFunctionInfos(mapId: string, layerPath: string): TypeMetadataEsriRasterFunctionInfos[] | undefined {
     const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
@@ -265,6 +267,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map identifier.
    * @param {string} layerPath - The layer path.
    * @param {string | undefined} rasterFunctionId - The raster function identifier to set.
+   * @returns {void}
    * @static
    */
   static setLayerRasterFunction(mapId: string, layerPath: string, rasterFunctionId: string | undefined): void {
@@ -276,7 +279,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {string} mapId - The map identifier.
    * @param {string} layerPath - The layer path.
    * @param {string | undefined} rasterFunctionId - The raster function identifier to set.
-   * @returns {void} @static
+   * @returns {void}
+   * @static
    */
   static setLayerRasterFunctionInStore(mapId: string, layerPath: string, rasterFunctionId: string | undefined): void {
     // Find the layer for the given layer path
@@ -625,7 +629,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @param {number[]} objectIds - The IDs of features to get extents from.
    * @param {string} outfield - ID field to return for services that require a value in outfields.
    * @returns {Promise<Extent>} The extent of the feature, if available
-   * @static
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    * @throws {LayerWrongTypeError} When the layer was of wrong type.
    * @static
@@ -817,6 +820,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           children: [] as TypeLegendLayer[],
           items,
           icons,
+          // TODO: Encapsulate rasterFunction and possibly other 'settings' into their own object
           rasterFunction:
             'getInitialRasterFunction' in layerConfig && typeof layerConfig.getInitialRasterFunction === 'function'
               ? layerConfig.getInitialRasterFunction()
