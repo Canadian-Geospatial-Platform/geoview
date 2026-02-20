@@ -981,9 +981,9 @@ export abstract class GeoUtilities {
    */
   static readFeaturesFromEsriJSON(features: unknown, options: ReadOptions | undefined): EsriJSONReadResult {
     // GV Anything other than numbers in the geometry will throw errors in EsriJSON().readFeatures()
-    // GV Those features are removed so the rest of the features can be parsed
     try {
       // First try to process features right away and only clean the geometries if it fails
+      // If the data was cleaned, a flag is raised so that a message can be emitted to the user
       return {
         features: new EsriJSON().readFeatures(features, options),
         hadInvalidGeometries: false,
@@ -1009,6 +1009,7 @@ export abstract class GeoUtilities {
    * Cleans invalid geometries in Esri feature collection by setting invalid coordinates to NaN or empty arrays.
    * @param {unknown} features - The Features data to clean.
    * @returns {EsriFeatureCollection} A cleaned copy of the features.
+   * @static
    * @private
    */
   static #cleanEsriGeometries(features: unknown): EsriFeatureCollection {
