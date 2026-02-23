@@ -183,6 +183,18 @@
       // Function to dynamically load cgpv-main.js from selected release
       function loadCgpvScript(scriptUrl) {
         return new Promise((resolve, reject) => {
+          // Validate scriptUrl to prevent code injection
+          const allowedPatterns = [
+            /^\.\/builds\/cgpv-main-[\d.]+\.js$/,  // Pattern: ./builds/cgpv-main-X.Y.Z.js
+            /^\.\/cgpv-main\.js$/                   // Pattern: ./cgpv-main.js
+          ];
+
+          const isValidUrl = allowedPatterns.some(pattern => pattern.test(scriptUrl));
+          if (!isValidUrl) {
+            reject(new Error(`Invalid script URL: ${scriptUrl}`));
+            return;
+          }
+
           // Remove previous cgpv script if exists
           if (currentScript) {
             currentScript.remove();
@@ -326,9 +338,7 @@
           // Set class and message
           validationMessage.classList.add('config-error');
           validationMessage.classList.remove('config-json-valid');
-          validationMessage.innerHTML = window.cgpv?.api?.utilities?.core?.escapeRegExp
-            ? cgpv.api.utilities.core.escapeRegExp(error.message)
-            : error.message;
+          validationMessage.innerHTML = error.message;
           applyConfigBtn.disabled = false; // Still allow apply even if validation fails
         }
       });
