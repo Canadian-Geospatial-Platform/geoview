@@ -16,16 +16,26 @@ const hash = JSON.stringify(childProcess.execSync('git rev-parse HEAD').toString
 console.log(`Build CGP Viewer: ${major}.${minor}.${patch} - ${date}`);
 
 // inject all sample files
-const multipleHtmlPluginsSamples = globSync('./public/templates/*.html').map((name) => {
-  const filename = path.basename(name);
-  return new HtmlWebpackPlugin({
-    template: `${name}`,
-    filename: filename,
-    title: 'Canadian Geospatial Platform Viewer',
-    inject: 'head',
-    scriptLoading: 'blocking',
-    chunks: ['cgpv-main'],
+const multipleHtmlPluginsSamples = globSync('./public/templates/*.html')
+  .filter((name) => !name.includes('release-navigator.html')) // Exclude release-navigator
+  .map((name) => {
+    const filename = path.basename(name);
+    return new HtmlWebpackPlugin({
+      template: `${name}`,
+      filename: filename,
+      title: 'Canadian Geospatial Platform Viewer',
+      inject: 'head',
+      scriptLoading: 'blocking',
+      chunks: ['cgpv-main'],
+    });
   });
+
+// Special handling for release-navigator.html (no script injection)
+const releaseNavigatorPlugin = new HtmlWebpackPlugin({
+  template: './public/templates/release-navigator.html',
+  filename: 'release-navigator.html',
+  title: 'Release Navigator - Canadian Geospatial Platform Viewer',
+  inject: false, // Don't inject any scripts
 });
 
 // inject all demos files
@@ -204,6 +214,9 @@ const config = {
         { from: './public/locales', to: 'locales', noErrorOnMissing: true },
         { from: './public/css', to: 'css' },
         { from: './public/js', to: 'js' },
+        { from: './public/builds', to: 'builds', noErrorOnMissing: true }, // Release builds
+        { from: './public/locales', to: 'builds/locales', noErrorOnMissing: true }, // Copy locales to builds folder for old versions
+        { from: './public/img', to: 'builds/img', noErrorOnMissing: true }, // Copy img to builds folder for old versions
         { from: './public/markers', to: 'markers' },
         { from: './public/datasets/geojson', to: 'datasets/geojson' },
         { from: './public/datasets/csv-files', to: 'datasets/csv-files' },
@@ -230,6 +243,7 @@ const config = {
       },
     }),
   ]
+    .concat(releaseNavigatorPlugin)
     .concat(multipleHtmlPluginsSamples)
     .concat(multipleHtmlPluginsDemos)
     .concat(multipleHtmlPluginsOutliers),

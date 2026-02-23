@@ -72,11 +72,10 @@ Open your browser then navigate to http://localhost:8080 to see the viewer in ac
 We are using [jsdoc](https://jsdoc.app/) notation for documenting the viewer library.
 
 Documentation blocks for jsdoc should start with /** and generally follow the javadoc format and markup style:
-```javascript
+```ts
 /**
  * Main function description.
- * @function functionName
- * @return {Object} random variable
+ * @return random variable
  */
 ```
 
@@ -84,17 +83,14 @@ Documentation blocks for jsdoc should start with /** and generally follow the ja
 Javascript allows functions to be defined in a variety of ways. In the context of a service or directive the function will automatically be linked as long as the @module tag is declared on the top level item.
 
 Function Sample
-```javascript
+```ts
         /**
          * Add RCS config layers to configuration after startup has finished
-         * @function rcsAddKeys
-         * @param {Array}  keys    list of keys marking which layers to retrieve
-         * @return {Promise} promise of full config nodes for newly added layers
+         *
+         * @param keys - Uptional list of keys marking which layers to retrieve
+         * @return Promise of full config nodes for newly added layers
          */
 ```
-* `@function`can be omitted for @class contexts, the parser is smart enough to figure that out, @function should be used everywhere else
-* for Promise, describe the type which it will resolve with
-* `@private` can be used to document functions which are not exposed by the service, directive or class being documented
 
 ## Commits
 Commit message format
