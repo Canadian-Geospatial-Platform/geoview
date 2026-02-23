@@ -64,8 +64,8 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
   const getLayerChildren = (treeLayerId: string): string[] => {
     const result: string[] = [];
 
-    function populateLayerChildren(origLayerId: string, parentViewId: string | null): void {
-      const viewLayerId = `${parentViewId ? `${parentViewId}/` : ''}${origLayerId}`;
+    function populateLayerChildren(origLayerId: string, parentViewId: string | undefined): void {
+      const viewLayerId = `${parentViewId ?? ''}${parentViewId ? '/' : ''}${origLayerId}`;
       result.push(viewLayerId);
       const layerDetails = UtilAddLayer.getLayerById(layerTree, origLayerId);
 
@@ -80,7 +80,7 @@ export function AddLayerTree(props: AddLayerTreeProps): JSX.Element | null {
 
     const layerTokens = treeLayerId.split('/');
     const origLayerId = layerTokens.pop();
-    let parentLayerId = null;
+    let parentLayerId;
     if (layerTokens.length > 0) {
       parentLayerId = layerTokens.join('/');
     }

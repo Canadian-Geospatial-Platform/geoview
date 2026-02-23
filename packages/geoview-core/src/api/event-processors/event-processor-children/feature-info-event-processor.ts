@@ -421,7 +421,6 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
             extent: undefined,
             geometry: undefined,
             featureKey: 0,
-            nameField: null,
             geoviewLayerType: 'CSV',
             supportZoomTo: true,
             layerPath: 'coordinate-info',

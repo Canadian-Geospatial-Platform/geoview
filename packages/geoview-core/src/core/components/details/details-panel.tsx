@@ -334,7 +334,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
       // Update the current feature index
       setCurrentFeatureIndex(newIndex);
     },
-    [memoSelectedLayerData, isFeatureInCheckedFeatures, removeHighlightedFeature, addHighlightedFeature]
+    [memoSelectedLayerData?.features, isFeatureInCheckedFeatures, removeHighlightedFeature, addHighlightedFeature]
   );
 
   /**
@@ -360,7 +360,6 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
 
     // Clear the unchecked highlights
     clearHighlightsUnchecked(prevLayerFeatures.current);
-    clearHighlightsUnchecked(memoSelectedLayerDataFeatures);
 
     // Re-highlight all checked features to ensure they persist through zoom
     checkedFeatures.forEach((checkedFeature) => {
@@ -368,12 +367,17 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
         addHighlightedFeature(checkedFeature);
       }
     });
+    // TODO: REFACTOR - The details-panel should be refactored to simplify the logic of the highlighted features, it's a bit confusing right now, too many useEffects
+    // TO.DOCONT: For example here, it's weird to have the 'memoSelectedLayerDataFeatures' in the dependency array here to make it work...
   }, [memoSelectedLayerDataFeatures, addHighlightedFeature, clearHighlightsUnchecked, checkedFeatures, hasValidGeometry]);
 
   /**
    * Use Effect for when the current feature has a geometry loaded
    */
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('DETAILS-PANEL - memoCurrentFeature changed', memoCurrentFeature);
+
     // If current feature
     if (memoCurrentFeature) {
       // If the geometry has been loaded
@@ -631,7 +635,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     }
 
     if (shouldClear) {
-      logger.logTraceUseEffect('DETAILS-PANEL - panel closed check !!!!e');
+      logger.logTraceUseEffect('DETAILS-PANEL - panel closed check !!!!');
 
       // Clear all highlights
       removeHighlightedFeature('all');

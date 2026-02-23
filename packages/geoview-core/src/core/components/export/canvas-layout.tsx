@@ -3,7 +3,7 @@ import * as html2canvas from '@html2canvas/html2canvas';
 
 import { type TemporalMode, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { FileExportProps } from '@/core/components/export/export-modal';
-import type { FlattenedLegendItem, ElementFactory } from '@/core/components/export/utilities';
+import type { FlattenedLegendItem, ElementFactory, NorthArrowSVG } from '@/core/components/export/utilities';
 import { ExportUtilities, EXPORT_CONSTANTS } from '@/core/components/export/utilities';
 import { CANVAS_STYLES, getScaledCanvasStyles } from '@/core/components/export/layout-styles';
 
@@ -12,12 +12,7 @@ interface CanvasDocumentProps {
   exportTitle: string;
   scaleText: string;
   scaleLineWidth: string;
-  northArrowSvg: Array<{
-    d: string | null;
-    fill: string | null;
-    stroke: string | null;
-    strokeWidth: string | null;
-  }> | null;
+  northArrowSvg?: NorthArrowSVG[];
   northArrowRotation: number;
   disclaimer: string;
   attributions: string[];

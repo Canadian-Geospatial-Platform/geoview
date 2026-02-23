@@ -1406,7 +1406,6 @@ export class GVWMS extends AbstractGVRaster {
       extent: [clickCoordinate[0], clickCoordinate[1], clickCoordinate[0], clickCoordinate[1]],
       featureIcon: document.createElement('canvas').toDataURL(),
       fieldInfo: {},
-      nameField: null,
       supportZoomTo: true,
       layerPath,
     };

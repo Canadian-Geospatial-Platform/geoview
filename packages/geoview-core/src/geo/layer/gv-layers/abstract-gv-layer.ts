@@ -1780,7 +1780,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
           extent: feature.getGeometry()?.getExtent(),
           featureIcon: imageSource,
           fieldInfo: {},
-          nameField: nameField || null,
+          nameField,
           supportZoomTo,
           layerPath,
         };
