@@ -7,6 +7,7 @@ import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validati
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
 export interface TypeEsriDynamicLayerConfig extends TypeGeoviewLayerConfig {
     geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_DYNAMIC;
     listOfLayerEntryConfig: (GroupLayerEntryConfig | EsriDynamicLayerEntryConfig)[];
@@ -45,11 +46,12 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
     /**
      * Overrides the way the layer metadata is processed.
      * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer entry configuration to process.
+     * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
      * @param {OLProjection?} [mapProjection] - The map projection.
      * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
      * @returns {Promise<EsriDynamicLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
      */
-    protected onProcessLayerMetadata(layerConfig: EsriDynamicLayerEntryConfig, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<EsriDynamicLayerEntryConfig>;
+    protected onProcessLayerMetadata(layerConfig: EsriDynamicLayerEntryConfig, displayDateMode: DisplayDateMode, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<EsriDynamicLayerEntryConfig>;
     /**
      * Overrides the creation of the GV Layer
      * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer entry configuration.

@@ -1,28 +1,65 @@
 import type { Coordinate } from 'ol/coordinate';
-import type { TypeDateFragments } from '@/core/utils/date-mgt';
+import type { TemporalMode, TimeIANA } from '@/core/utils/date-mgt';
 import type { TypeAliasLookup, TypeOutfields } from '@/api/types/map-schema-types';
 export declare class GVLayerUtilities {
     /**
-     * Parses a datetime filter for use in a Vector Geoviewlayer.
-     *
-     * @param {string} filter - The filter containing datetimes to parse
-     * @returns {TypeDateFragments | undefined} externalFragmentsOrder - The external fragments order of the layer
+     * Normalizes ISO 8601 datetime literals in a filter string for use with
+     * ESRI Dynamic (MapServer) layers.
+     * This function:
+     * - Detects SQL-style date literals containing ISO 8601 datetimes
+     *   (e.g. `date '2020-01-01T05:00:00Z'`)
+     * - Extracts and normalizes the ISO datetime value
+     * - Removes timezone information (`Z` or offsets)
+     * - Replaces the original literal with an ESRI- and database-friendly
+     *   `TIMESTAMP 'YYYY-MM-DD HH:mm:ss'` expression
+     * This is required because Dynamic services forward `layerDefs` directly
+     * to the underlying datastore, and `TIMESTAMP` is the most portable and
+     * reliable datetime literal across supported databases.
+     * Example:
+     * ```
+     * time_field >= date '2020-01-01T05:00:00Z'
+     * ```
+     * becomes:
+     * ```
+     * time_field >= TIMESTAMP '2020-01-01 05:00:00'
+     * ```
+     * @param {string} filter - The original filter string containing ISO datetime values.
+     * @param {TimeIANA} [timezone] - Optional IANA timezone used to normalize datetime values
+     *                                before stripping timezone information.
+     * @returns {string} A SQL filter string with normalized `TIMESTAMP` datetime literals
+     * suitable for ESRI Dynamic (MapServer) services.
      */
-    static parseDateTimeValuesVector(filter: string, externalFragmentsOrder: TypeDateFragments | undefined): string;
+    static parseDateTimeValuesEsriDynamic(filter: string, timezone?: TimeIANA, inputTemporalMode?: TemporalMode): string;
     /**
-     * Parses a datetime filter for use in an Esri Dynamic layer.
-     *
-     * @param {string} filter - The filter containing datetimes to parse
-     * @returns {TypeDateFragments | undefined} externalFragmentsOrder - The external fragments order of the layer
+     * Normalizes ISO 8601 datetime literals in a filter string for use with
+     * ESRI ImageServer and WMS layers.
+     * This function:
+     * - Detects SQL-style date literals containing ISO 8601 datetimes
+     *   (e.g. `date '2020-01-01T05:00:00Z'`)
+     * - Extracts and normalizes the ISO datetime value
+     * - Removes the surrounding SQL `date '...'` literal
+     * ImageServer and WMS services do not forward filters directly to a database
+     * and do not support SQL keywords such as `TIMESTAMP`.
+     * Example:
+     * ```
+     * acquisition_date >= date '2020-01-01T05:00:00Z'
+     * ```
+     * becomes:
+     * ```
+     * acquisition_date >= 2020-01-01T05:00:00Z
+     * ```
+     * @param {string} filter - The original filter string containing SQL-style date literals.
+     * @param {TimeIANA} [timezone] - Optional IANA timezone used to normalize datetime values
+     *                                before stripping timezone information.
+     * @returns {string} A filter string with normalized, timezone-less datetime values suitable
+     *   for ESRI ImageServer and WMS services.
      */
-    static parseDateTimeValuesEsriDynamic(filter: string, externalFragmentsOrder: TypeDateFragments | undefined): string;
+    static parseDateTimeValuesEsriImageOrWMS(filter: string, timezone?: TimeIANA, inputTemporalMode?: TemporalMode): string;
     /**
-     * Parses a datetime filter for use in an Esri Image or WMS layer.
-     *
-     * @param {string} filter - The filter containing datetimes to parse
-     * @returns {TypeDateFragments | undefined} externalFragmentsOrder - The external fragments order of the layer
+     * Create lookup dictionary of names to aliases
+     * @param {TypeOutfields[]} [outfields] - The outfields array from layer metadata
+     * @returns {TypeAliasLookup} The alias lookup dictionary
      */
-    static parseDateTimeValuesEsriImageOrWMS(filter: string, externalFragmentsOrder: TypeDateFragments | undefined): string;
     static createAliasLookup(outfields: TypeOutfields[] | undefined): TypeAliasLookup;
     /**
      * Rewrites SQL `LIKE` operations into case-insensitive equivalents for

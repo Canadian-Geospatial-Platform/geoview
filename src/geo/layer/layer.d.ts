@@ -3,6 +3,7 @@ import type { Extent } from 'ol/extent';
 import type { GeoJSONObject } from 'ol/format/GeoJSON';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { FeatureHighlight } from '@/geo/map/feature-highlight';
+import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { type TypeDisplayLanguage, type TypeOutfieldsType } from '@/api/types/map-schema-types';
@@ -312,6 +313,37 @@ export declare class LayerApi {
      * @throws {LayerWrongTypeError} When the layer was of wrong type
      */
     setLayerHoverable(layerPath: string, hoverable: boolean): void;
+    /**
+     * Sets the date display format for a specific layer.
+     * This updates the layer-level configuration used to control how date values
+     * are formatted when displayed (e.g., in legends, tooltips, or UI components).
+     * The value is stored in the application state via the LegendEventProcessor.
+     * @param {string} layerPath - The unique path identifying the layer.
+     * @param {TypeDisplayDateFormat} displayDateFormat - The date format to apply
+     * for displaying date values associated with this layer.
+     */
+    setLayerDisplayDateFormat(layerPath: string, displayDateFormat: TypeDisplayDateFormat | string): void;
+    /**
+     * Sets the date display format (short) for a specific layer.
+     * Short means the date should be displayed in a more compact format.
+     * This updates the layer-level configuration used to control how date values
+     * are formatted when displayed (e.g., in legends, tooltips, or UI components).
+     * The value is stored in the application state via the LegendEventProcessor.
+     * @param {string} layerPath - The unique path identifying the layer.
+     * @param {TypeDisplayDateFormat} displayDateFormat - The date format to apply
+     * for displaying date values associated with this layer.
+     */
+    setLayerDisplayDateFormatShort(layerPath: string, displayDateFormat: TypeDisplayDateFormat | string): void;
+    /**
+     * Sets the date temporal mode for the specific layer.
+     * This updates the layer-level configuration used to control how date values
+     * are interpreted.
+     * The value is stored in the application state via the LegendEventProcessor.
+     * @param {string} layerPath - The unique path identifying the layer.
+     * @param {TemporalMode} temporalMode - The date format to apply
+     * for displaying date values associated with this layer.
+     */
+    setLayerDateTemporalMode(layerPath: string, temporalMode: TemporalMode): void;
     /**
      * Changes a GeoJson Source of a GeoJSON layer at the given layer path.
      *

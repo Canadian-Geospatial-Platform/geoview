@@ -7,6 +7,7 @@ import type { TypeMetadataXYZTiles } from '@/api/config/validation-classes/raste
 import { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { GVXYZTiles } from '@/geo/layer/gv-layers/tile/gv-xyz-tiles';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
 export type TypeSourceImageXYZTilesInitialConfig = TypeSourceTileInitialConfig;
 export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.XYZ_TILES;
@@ -43,11 +44,12 @@ export declare class XYZTiles extends AbstractGeoViewRaster {
     /**
      * Overrides the way the layer metadata is processed.
      * @param {XYZTilesLayerEntryConfig} layerConfig - The layer entry configuration to process.
+     * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
      * @param {OLProjection?} [mapProjection] - The map projection.
      * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
      * @returns {Promise<XYZTilesLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
      */
-    protected onProcessLayerMetadata(layerConfig: XYZTilesLayerEntryConfig, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<XYZTilesLayerEntryConfig>;
+    protected onProcessLayerMetadata(layerConfig: XYZTilesLayerEntryConfig, displayDateMode: DisplayDateMode, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<XYZTilesLayerEntryConfig>;
     /**
      * Overrides the creation of the GV Layer
      * @param {XYZTilesLayerEntryConfig} layerConfig - The layer entry configuration.

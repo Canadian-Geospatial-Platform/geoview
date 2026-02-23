@@ -33,6 +33,7 @@ type SubscribeWithSelectorMiddleware = [['zustand/subscribeWithSelector', never]
 export type GeoviewStoreType = UseBoundStore<Mutate<StoreApi<IGeoviewState>, SubscribeWithSelectorMiddleware>>;
 export declare const useGeoViewMapId: () => string;
 export declare const useGeoViewConfig: () => TypeMapFeaturesConfig | undefined;
+export declare const useGeoViewSharedMode: () => boolean | undefined;
 /** To be able to compare objects for hooks */
 type EqualityFn<T> = (prev: T, next: T) => boolean;
 /**

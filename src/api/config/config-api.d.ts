@@ -19,12 +19,12 @@ export declare class ConfigApi {
     static guessLayerType(url: string): string | undefined;
     /**
      * Gets a map feature config from url parameters.
-     * @param {string} urlStringParams The url parameters.
-     *
-     * @returns {Promise<MapFeatureConfig>} A map feature configuration object generated from url parameters.
-     * @static @async
+     * @param {string} urlStringParams - The url parameters.
+     * @param {string[]} [existingUuids] - Optional array of existing layer UUIDs to check for duplicates.
+     * @returns {MapFeatureConfig} A map feature configuration object generated from url parameters.
+     * @static
      */
-    static getConfigFromUrl(urlStringParams: string): Promise<MapFeatureConfig>;
+    static getConfigFromUrl(urlStringParams: string, existingUuids?: string[]): MapFeatureConfig;
     /**
      * Gets the default values that are applied to the map feature configuration when the user doesn't provide a value for a field
      * that is covered by a default value.
@@ -43,7 +43,7 @@ export declare class ConfigApi {
      * errors are detected, the configuration will be corrected to the best of our ability to avoid crashing the viewer,
      * and all changes made will be logged in the console.
      *
-     * @param {string | MapFeatureConfig} mapConfig The map feature configuration to validate.
+     * @param {string | MapFeatureConfig} mapConfig - The map feature configuration to validate.
      * @returns {MapFeatureConfig} The validated map feature configuration.
      * @static
      */
@@ -53,12 +53,14 @@ export declare class ConfigApi {
      * @param {string} schemaPath - The JSON schema path used to retrieve the validator function.
      * @param {object} targetObject - The object to be validated against the schema.
      * @returns {boolean} Returns `true` if validation passes, `false` otherwise.
+     * @static
      */
     static validateSchema(schemaPath: string, targetObject: object): boolean;
     /**
      * Converts an ESRI renderer (in stringified JSON format) into a GeoView-compatible layer style configuration.
      * @param {string} rendererAsString - A stringified JSON representation of the ESRI renderer.
      * @returns {TypeLayerStyleConfig | undefined} The corresponding layer style configuration, or `undefined` if parsing or conversion fails.
+     * @static
      */
     static getStyleFromESRIRenderer(rendererAsString: string): TypeLayerStyleConfig | undefined;
     /**
@@ -70,12 +72,14 @@ export declare class ConfigApi {
      * @param {string} layers - A comma-separated list of WMS layer names to request styles for.
      * @returns {Promise<string>} A promise that resolves to the style definition
      * (typically an XML or SLD string) retrieved from the WMS service.
+     * @static
      */
     static fetchStyleFromWMS(wmsUrl: string, layers: string): Promise<string>;
     /**
      * Converts a WMS XML Styles renderer into a GeoView-compatible layer style configuration.
      * @param {string} xmlContent - An XML representation of the WMS renderer.
      * @returns {TypeLayerStyleConfig} The corresponding layer style configuration, or `undefined` if parsing or conversion fails.
+     * @static
      */
     static getStyleFromWMSRenderer(xmlContent: string): TypeLayerStyleConfig;
     /**
@@ -93,6 +97,7 @@ export declare class ConfigApi {
      * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
      * @returns {Promise<TypeGeoviewLayerConfig>} A Promise of a fully initialized `TypeGeoviewLayerConfig`.
      * @throws {NotSupportedError} If the provided layer type is not recognized or supported.
+     * @static
      */
     static createInitConfigFromType(layerType: TypeInitialGeoviewLayerType, geoviewLayerId: string, geoviewLayerName: string, layerURL: string, isTimeAware?: boolean, language?: TypeDisplayLanguage, mapId?: string, abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig>;
     /**
@@ -105,24 +110,28 @@ export declare class ConfigApi {
      * @param {boolean} isTimeAware - Indicates if the layer is time aware.
      * @returns {Promise<ConfigBaseClass[]>} A Promise of a list of ConfigBaseClass objects.
      * @throws {NotSupportedError} If the provided layer type is not recognized or supported.
+     * @static
      */
     static processLayerFromType(layerType: TypeInitialGeoviewLayerType, geoviewLayerId: string, geoviewLayerName: string, layerURL: string, layerIds: number[] | string[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
     /**
      * Utility function to serialize to string a TypeGeoviewLayerConfig object.
      * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The TypeGeoviewLayerConfig to serialize.
      * @returns {string} The serialized TypeGeoviewLayerConfig.
+     * @static
      */
     static serializeGeoviewLayerConfig(geoviewLayerConfig: TypeGeoviewLayerConfig): string;
     /**
      * Utility function to serialize an array of ConfigBaseClass objects.
      * @param {ConfigBaseClass[]} layerConfigs - The array of ConfigBaseClass objects to serialize.
      * @returns {string} The serialized array of ConfigBaseClass.
+     * @static
      */
     static serializeConfigClasses(layerConfigs: ConfigBaseClass[]): string;
     /**
      * Utility function to validate a UUID.
      * @param {string} uuid - The uuid to test.
      * @returns {boolean} True if the provided uuid is a valid uuid.
+     * @static
      */
     static isValidUUID(uuid: string): boolean;
 }

@@ -1,5 +1,7 @@
-import type { TypeFieldEntry } from '@/api/types/map-schema-types';
+import type { TypeDisplayLanguage, TypeFieldEntry } from '@/api/types/map-schema-types';
+import { type TemporalMode, type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 interface FeatureInfoTableProps {
+    layerPath: string;
     featureInfoList: TypeFieldEntry[];
 }
 interface FeatureItemProps {
@@ -12,6 +14,10 @@ interface FeatureItemProps {
 interface FeatureRowProps {
     featureInfoItem: TypeFieldEntry;
     onInitLightBox: (value: string, alias: string, index: number) => void;
+    language: TypeDisplayLanguage;
+    layerDateTemporalMode: TemporalMode;
+    displayDateFormat: TypeDisplayDateFormat;
+    displayDateTimezone: TimeIANA;
 }
 export declare const FeatureItem: import("react").NamedExoticComponent<FeatureItemProps>;
 export declare const FeatureRow: import("react").NamedExoticComponent<FeatureRowProps>;

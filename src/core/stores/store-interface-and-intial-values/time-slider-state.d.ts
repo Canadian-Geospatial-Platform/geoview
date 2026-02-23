@@ -1,6 +1,6 @@
 import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import type { DatePrecision, TimeDimension, TimePrecision } from '@/core/utils/date-mgt';
+import type { TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 type TimeSliderActions = ITimeSliderState['actions'];
 export interface ITimeSliderState {
     timeSliderLayers: TimeSliderLayerSet;
@@ -12,13 +12,15 @@ export interface ITimeSliderState {
         setTitle: (layerPath: string, title: string) => void;
         setDescription: (layerPath: string, description: string) => void;
         setDelay: (layerPath: string, delay: number) => void;
+        setDisplayDateFormat: (layerPath: string, displayDateFormat: TypeDisplayDateFormat) => void;
+        setDisplayDateFormatShort: (layerPath: string, displayDateFormatShort: TypeDisplayDateFormat) => void;
+        setDisplayDateTimezone: (layerPath: string, displayDateTimezone: TimeIANA) => void;
         setFiltering: (layerPath: string, filter: boolean) => void;
         setLocked: (layerPath: string, locked: boolean) => void;
         setReversed: (layerPath: string, locked: boolean) => void;
         setSelectedLayerPath: (layerPath: string) => void;
         setStep: (layerPath: string, step: number) => void;
         setValues: (layerPath: string, values: number[]) => void;
-        setDisplayPattern: (layerPath: string, value: [DatePrecision, TimePrecision]) => void;
     };
     setterActions: {
         addTimeSliderLayer: (newLayer: TimeSliderLayerSet) => void;
@@ -26,6 +28,9 @@ export interface ITimeSliderState {
         setTitle: (layerPath: string, title: string) => void;
         setDescription: (layerPath: string, description: string) => void;
         setDelay: (layerPath: string, delay: number) => void;
+        setDisplayDateFormat: (layerPath: string, displayDateFormat: TypeDisplayDateFormat) => void;
+        setDisplayDateFormatShort: (layerPath: string, displayDateFormatShort: TypeDisplayDateFormat) => void;
+        setDisplayDateTimezone: (layerPath: string, displayDateTimezone: TimeIANA) => void;
         setFiltering: (layerPath: string, filter: boolean) => void;
         setLocked: (layerPath: string, locked: boolean) => void;
         setReversed: (layerPath: string, locked: boolean) => void;
@@ -33,7 +38,6 @@ export interface ITimeSliderState {
         setSliderFilters: (newSliderFilters: Record<string, string>) => void;
         setStep: (layerPath: string, step: number) => void;
         setValues: (layerPath: string, values: number[]) => void;
-        setDisplayPattern: (layerPath: string, value: [DatePrecision, TimePrecision]) => void;
     };
 }
 /**
@@ -63,7 +67,10 @@ export interface TypeTimeSliderValues {
     singleHandle: boolean;
     title?: string;
     values: number[];
-    displayPattern: [DatePrecision, TimePrecision];
+    displayDateFormat?: TypeDisplayDateFormat;
+    displayDateFormatShort?: TypeDisplayDateFormat;
+    serviceDateTemporalMode?: TemporalMode;
+    displayDateTimezone?: TimeIANA;
 }
 export type TypeTimeSliderProps = {
     layerPaths: string[];
@@ -77,6 +84,7 @@ export type TypeTimeSliderProps = {
     timeDimension?: TimeDimension;
 };
 export declare const useTimeSliderLayers: () => TimeSliderLayerSet | undefined;
+export declare const useTimeSliderLayersSelector: (layerPath: string) => TypeTimeSliderValues | undefined;
 export declare const useTimeSliderSelectedLayerPath: () => string;
 export declare const useTimeSliderFilters: () => Record<string, string>;
 export declare const useTimeSliderFiltersSelector: (layerPath: string) => string | undefined;

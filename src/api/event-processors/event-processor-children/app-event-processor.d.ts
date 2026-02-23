@@ -1,8 +1,9 @@
-import type { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
+import type { DisplayDateMode, TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
 import type { IAppState } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import type { NotificationDetailsType } from '@/core/components';
 import type { TypeHTMLElement } from '@/core/types/global-types';
+import { type TimeIANA, type TypeDisplayDateDefaults } from '@/core/utils/date-mgt';
 import type { SnackbarType } from '@/core/utils/notifications';
 export declare class AppEventProcessor extends AbstractEventProcessor {
     /**
@@ -23,6 +24,24 @@ export declare class AppEventProcessor extends AbstractEventProcessor {
      * @returns {TypeDisplayLanguage} The display language.
      */
     static getDisplayLanguage(mapId: string): TypeDisplayLanguage;
+    /**
+     * Shortcut to get the display date mode for a given map id
+     * @param {string} mapId - The mapId
+     * @returns {DisplayDateMode} The display date mode.
+     */
+    static getDisplayDateMode(mapId: string): DisplayDateMode;
+    /**
+     * Shortcut to get the display date mode for a given map id
+     * @param {string} mapId - The mapId
+     * @returns {TypeDisplayDateDefaults} The display date mode.
+     */
+    static getDisplayDateFormatDefault(mapId: string): TypeDisplayDateDefaults;
+    /**
+     * Shortcut to get the display date timezone for a given map id
+     * @param {string} mapId - The mapId
+     * @returns {TimeIANA} The display date timezone.
+     */
+    static getDisplayDateTimezone(mapId: string): TimeIANA;
     /**
      * Shortcut to get the display theme for a given map id
      * @param {string} mapId - The mapId
@@ -60,6 +79,7 @@ export declare class AppEventProcessor extends AbstractEventProcessor {
     static removeAllNotifications(mapId: string): void;
     static setAppIsCrosshairActive(mapId: string, isActive: boolean): void;
     static setDisplayLanguage(mapId: string, lang: TypeDisplayLanguage): Promise<void>;
+    static setDisplayDateTimezone(mapId: string, displayDateTimezone: TimeIANA): void;
     static setDisplayTheme(mapId: string, theme: TypeDisplayTheme): void;
     static setFullscreen(mapId: string, active: boolean, element?: TypeHTMLElement): void;
     static setCircularProgress(mapId: string, active: boolean): void;

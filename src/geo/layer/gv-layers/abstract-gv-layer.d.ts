@@ -7,7 +7,7 @@ import type { Layer } from 'ol/layer';
 import type Source from 'ol/source/Source';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { Map as OLMap } from 'ol';
-import type { TimeDimension, TypeDateFragments } from '@/core/utils/date-mgt';
+import type { TemporalMode, TimeDimension, TimeIANA } from '@/core/utils/date-mgt';
 import type { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import type { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
@@ -369,21 +369,15 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      */
     waitStyleApplied(timeout?: number): Promise<TypeLayerStyleConfig>;
     /**
-     * Gets and formats the value of the field with the name passed in parameter. Vector GeoView layers convert dates to milliseconds
-     * since the base date. Vector feature dates must be in ISO format.
-     * @param {Feature} feature - The feature that hold the field values.
-     * @param {string} fieldName - The field name.
-     * @param {TypeOutfieldsType} fieldType - The field type.
-     * @returns {string | number | Date} The formatted value of the field.
-     */
-    protected getFieldValue(feature: Feature, fieldName: string, fieldType: TypeOutfieldsType): string | number | Date;
-    /**
      * Formats a list of features into an array of TypeFeatureInfoEntry, including icons, field values, domains, and metadata.
      * @param {Feature[]} features - Array of features to format.
      * @param {OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig} layerConfig - Configuration of the associated layer.
+     * @param {string | undefined} [serviceDateFormat] - The date format used by the service, if applicable.
+     * @param {string | undefined} [serviceDateIANA] - The IANA time zone identifier used by the service, if applicable.
+     * @param {TemporalMode | undefined} [serviceDateTemporalMode] - When `calendar`, treats the input as a calendar-date-only value (no timezones). When 'instant', treats the input as moment in time (timezones aware).
      * @returns {TypeFeatureInfoEntry[]} An array of TypeFeatureInfoEntry objects.
      */
-    protected formatFeatureInfoResult(features: Feature[], layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig): TypeFeatureInfoEntry[];
+    protected formatFeatureInfoResult(features: Feature[], layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig, serviceDateFormat: string | undefined, serviceDateIANA: string | undefined, serviceDateTemporalMode: TemporalMode | undefined): TypeFeatureInfoEntry[];
     /**
      * Emits a layer-specific message event with localization support
      * @protected
@@ -563,30 +557,34 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @param {boolean} supportZoomTo - Whether zoom-to functionality is supported for these features.
      * @param {TypeLayerMetadataFields[] | undefined} domainsLookup - Optional array of field metadata for domain lookups.
      * @param {Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>> | undefined} layerStyle - Optional mapping of geometry type to style settings for icons.
-     * @param {FilterNodeType[] | undefined} filterEquation - Optional array of filters applied to the layer.
+     * @param {string | string[] | undefined} [inputFormat] - The format(s) to prioritize for string inputs. Defaults to an ISO-like format.
+     * @param {TimeIANA | undefined} [inputTimezone] - The timezone IANA the dates are in.
+     * @param {TemporalMode | undefined} [inputTemporalMode] - When `calendar`, treats the input as a calendar-date-only value (no timezones). When 'instant', treats the input as moment in time (timezones aware).
      * @param {(fieldName: string) => TypeOutfieldsType} callbackGetFieldType - Callback that returns the field type for a given field name.
      * @param {(fieldName: string) => codedValueType | rangeDomainType | null} callbackGetFieldDomain - Callback that returns the coded value or range domain for a given field name.
-     * @param {(feature: Feature, fieldName: string, fieldType: TypeOutfieldsType) => string | number | Date} callbackGetFieldValue - Callback that returns the value of a field for a feature, in the correct type.
+     * @param {GetFieldValueDelegate} callbackGetFieldValue - Callback that returns the value of a field for a feature, in the correct type.
      * @returns {TypeFeatureInfoEntry[]} Array of feature info entries representing each feature with enriched metadata.
      * @description
      * Will not throw; errors are caught and logged. Returns an empty array if processing fails.
      */
-    static helperFormatFeatureInfoResult(features: Feature[], layerPath: string, schemaTag: TypeGeoviewLayerType, nameField: string | undefined, outFields: TypeOutfields[] | undefined, supportZoomTo: boolean, domainsLookup: TypeLayerMetadataFields[] | undefined, layerStyle: Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>> | undefined, callbackGetFieldType: (fieldName: string) => TypeOutfieldsType, callbackGetFieldDomain: (fieldName: string) => codedValueType | rangeDomainType | null, callbackGetFieldValue: (feature: Feature, fieldName: string, fieldType: TypeOutfieldsType) => string | number | Date): TypeFeatureInfoEntry[];
+    static helperFormatFeatureInfoResult(features: Feature[], layerPath: string, schemaTag: TypeGeoviewLayerType, nameField: string | undefined, outFields: TypeOutfields[] | undefined, supportZoomTo: boolean, domainsLookup: TypeLayerMetadataFields[] | undefined, layerStyle: Partial<Record<TypeStyleGeometry, TypeLayerStyleSettings>> | undefined, inputFormat: string | string[] | undefined, inputTimezone: TimeIANA | undefined, inputTemporalMode: TemporalMode | undefined, callbackGetFieldType: (fieldName: string) => TypeOutfieldsType, callbackGetFieldDomain: (fieldName: string) => codedValueType | rangeDomainType | null, callbackGetFieldValue: GetFieldValueDelegate): TypeFeatureInfoEntry[];
     /**
-     * Gets and formats the value of a field from a feature.
-     * For vector GeoView layers, dates are converted from milliseconds since the base date.
-     * Vector feature dates must be in ISO format if stored as strings.
-     * @param {Feature} feature - The OpenLayers feature that holds the field values.
+     * Retrieves and formats the value of a field from an OpenLayers feature.
+     * For fields of type `date`, the value is normalized and formatted using the
+     * date management utilities. Date values may be provided as epoch milliseconds
+     * or as date strings and are converted to a short ISO-like string.
+     * @param {Feature} feature - The OpenLayers feature containing the field values.
      * @param {string} fieldName - The name of the field to retrieve.
-     * @param {TypeOutfieldsType} fieldType - The type of the field ('string', 'number', 'date', etc.).
-     * @param {TypeDateFragments | undefined} serverDateFragmentsOrder - Optional order of date fragments as expected from the server.
-     *   If undefined, the server format will be deduced from the field value.
-     * @param {TypeDateFragments | undefined} externalFragmentsOrder - Optional order of date fragments for external display formatting.
-     * @returns {string | number | Date} The formatted field value.
-     *   Returns a string, number, or Date depending on the field type.
+     * @param {TypeOutfieldsType} fieldType - The type of the field (e.g. `'string'`, `'number'`, `'date'`).
+     * @param {string | string[] | undefined} [inputFormat] - The format(s) to prioritize for string inputs. Defaults to an ISO-like format.
+     * @param {TimeIANA | undefined} [inputTimezone] - The IANA timezone to assume when interpreting input date values.
+     * @param {TemporalMode | undefined} [inputTemporalMode] - When `calendar`, treats the input as a calendar-date-only value (no timezones). When 'instant', treats the input as moment in time (timezones aware).
+     * @returns {unknown} The formatted field value. For date fields, this is a
+     * formatted date string; for other field types, the raw field value is returned.
      */
-    static helperGetFieldValue(feature: Feature, fieldName: string, fieldType: TypeOutfieldsType, serverDateFragmentsOrder: TypeDateFragments | undefined, externalFragmentsOrder: TypeDateFragments | undefined): string | number | Date;
+    static helperGetFieldValue(feature: Feature, fieldName: string, fieldType: TypeOutfieldsType, inputFormat: string | string[] | undefined, inputTimezone: TimeIANA | undefined, inputTemporalMode: TemporalMode | undefined): unknown;
 }
+export type GetFieldValueDelegate = (feature: Feature, fieldName: string, fieldType: TypeOutfieldsType, inputFormat: string | string[] | undefined, inputTimezone: TimeIANA | undefined, inputTemporalMode: TemporalMode | undefined) => unknown;
 /**
  * Define an event for the delegate
  */

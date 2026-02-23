@@ -9,6 +9,7 @@ import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vec
 import type { TypeGeoviewLayerConfig, TypeMetadataEsriFeature } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
 export interface TypeEsriFeatureLayerConfig extends TypeGeoviewLayerConfig {
     geoviewLayerType: typeof CONST_LAYER_TYPES.ESRI_FEATURE;
     listOfLayerEntryConfig: EsriFeatureLayerEntryConfig[];
@@ -56,12 +57,13 @@ export declare class EsriFeature extends AbstractGeoViewVector {
     /**
      * Overrides the way the layer metadata is processed.
      * @param {EsriFeatureLayerEntryConfig} layerConfig - The layer entry configuration to process.
+     * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
      * @param {OLProjection?} [mapProjection] - The map projection.
      * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
      * @returns {Promise<EsriFeatureLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
      * @throws {LayerTooManyEsriFeatures} When the layer has too many Esri features.
      */
-    protected onProcessLayerMetadata(layerConfig: EsriFeatureLayerEntryConfig, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<EsriFeatureLayerEntryConfig>;
+    protected onProcessLayerMetadata(layerConfig: EsriFeatureLayerEntryConfig, displayDateMode: DisplayDateMode, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<EsriFeatureLayerEntryConfig>;
     /**
      * Overrides the loading of the vector features for the layer by fetching EsriFeature data and converting it
      * into OpenLayers {@link Feature} feature instances.

@@ -6,6 +6,7 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { GVVectorTiles } from '@/geo/layer/gv-layers/vector/gv-vector-tiles';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
 export interface TypeVectorTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOfLayerEntryConfig'> {
     geoviewLayerType: typeof CONST_LAYER_TYPES.VECTOR_TILES;
     listOfLayerEntryConfig: VectorTilesLayerEntryConfig[];
@@ -37,11 +38,12 @@ export declare class VectorTiles extends AbstractGeoViewRaster {
     /**
      * Overrides the way the layer metadata is processed.
      * @param {VectorTilesLayerEntryConfig} layerConfig - The layer entry configuration to process.
+     * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
      * @param {OLProjection?} [mapProjection] - The map projection.
      * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
      * @returns {Promise<VectorTilesLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
      */
-    protected onProcessLayerMetadata(layerConfig: VectorTilesLayerEntryConfig, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<VectorTilesLayerEntryConfig>;
+    protected onProcessLayerMetadata(layerConfig: VectorTilesLayerEntryConfig, displayDateMode: DisplayDateMode, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<VectorTilesLayerEntryConfig>;
     /**
      * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
      * @param {VectorTilesLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.

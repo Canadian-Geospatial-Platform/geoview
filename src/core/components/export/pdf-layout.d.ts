@@ -1,3 +1,4 @@
+import { type TemporalMode, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { FlattenedLegendItem } from '@/core/components/export/utilities';
 import type { FileExportProps } from '@/core/components/export/export-modal';
 interface ExportDocumentProps {
@@ -14,7 +15,8 @@ interface ExportDocumentProps {
     northArrowRotation: number;
     disclaimer: string;
     attributions: string[];
-    date: string;
+    layerDateFormats: Record<string, TypeDisplayDateFormat>;
+    layerDateTemporalModes: Record<string, TemporalMode>;
     fittedColumns: FlattenedLegendItem[][];
     columnWidths?: number[];
     canvasWidth: number;
@@ -25,7 +27,7 @@ interface ExportDocumentProps {
  * @param {ExportDocumentProps} props - The PDF Export Document properties
  * @returns {JSX.Element} The resulting html map
  */
-export declare function ExportDocument({ mapDataUrl, exportTitle, scaleText, scaleLineWidth, northArrowSvg, northArrowRotation, disclaimer, attributions, date, fittedColumns, columnWidths, canvasWidth, canvasHeight, }: ExportDocumentProps): JSX.Element;
+export declare function ExportDocument({ mapDataUrl, exportTitle, scaleText, scaleLineWidth, northArrowSvg, northArrowRotation, disclaimer, attributions, layerDateFormats, layerDateTemporalModes, fittedColumns, columnWidths, canvasWidth, canvasHeight, }: ExportDocumentProps): JSX.Element;
 /**
  * Creates the PDF map for the export
  * @param {string} mapId - The map ID

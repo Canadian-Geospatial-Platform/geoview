@@ -7,6 +7,7 @@ type BuildGeoViewLayerInput = {
     layerType: string;
     layerURL: string;
     layerTree: TypeGeoviewLayerConfig;
+    isGeoCore: boolean;
 };
 type LayerEntryConfigShell = {
     layerId: string;

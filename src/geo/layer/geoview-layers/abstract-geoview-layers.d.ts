@@ -1,9 +1,8 @@
 import type BaseLayer from 'ol/layer/Base';
 import type { Projection as OLProjection } from 'ol/proj';
-import type { TypeDateFragments } from '@/core/utils/date-mgt';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { EventDelegateBase } from '@/api/events/event-helper';
-import type { TypeStyleGeometry } from '@/api/types/map-schema-types';
+import type { DisplayDateMode, TypeStyleGeometry } from '@/api/types/map-schema-types';
 import type { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -33,6 +32,8 @@ export declare abstract class AbstractGeoViewLayer {
     /** The default waiting time before showing a warning about the metadata taking a long time to get processed */
     static readonly DEFAULT_WAIT_PERIOD_METADATA_WARNING: number;
     static readonly DEFAULT_WAIT_PERIOD_METADATA_WARNING_RECALL: number;
+    /** The default display date mode used when generating default configurations */
+    static readonly DEFAULT_DISPLAY_DATE_MODE_TO_GENERATE_CONFIGS: DisplayDateMode;
     /** The default hit tolerance */
     hitTolerance: number;
     /**
@@ -62,11 +63,12 @@ export declare abstract class AbstractGeoViewLayer {
     /**
      * Must override method to process a layer entry and return a Promise of an Open Layer Base Layer object.
      * @param {AbstractBaseLayerEntryConfig} layerConfig - Information needed to create the GeoView layer.
+     * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
      * @param {OLProjection?} [mapProjection] - The map projection.
      * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
      * @returns {Promise<AbstractBaseLayerEntryConfig>} The Promise that the config metadata has been processed.
      */
-    protected abstract onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<AbstractBaseLayerEntryConfig>;
+    protected abstract onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig, displayDateMode: DisplayDateMode, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<AbstractBaseLayerEntryConfig>;
     /**
      * Must override method to create a GV Layer from a layer configuration.
      * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
@@ -145,32 +147,6 @@ export declare abstract class AbstractGeoViewLayer {
      */
     getLayerEntryNameOrGeoviewLayerName(): string;
     /**
-     * Gets the current server date fragments order.
-     * The date fragments order describes how date components (e.g. day, month, year,
-     * time fragments) are arranged in server-provided date strings.
-     * @returns {TypeDateFragments | undefined} The server date fragments order,
-     * or `undefined` if it has not been initialized.
-     */
-    getServerDateFragmentsOrder(): TypeDateFragments | undefined;
-    /**
-     * Sets the server date fragments order.
-     * This value is typically derived from a service date format and cached
-     * for reuse when parsing or formatting server dates.
-     * @param {TypeDateFragments | undefined} serverDateFragmentsOrder -
-     * The date fragments order to store. Use `undefined` to reset the value.
-     */
-    setServerDateFragmentsOrder(serverDateFragmentsOrder: TypeDateFragments | undefined): void;
-    /**
-     * Initializes the server date fragments order from a service date format string.
-     * If the date fragments order has not already been set, this method derives it
-     * from the provided date format using {@link DateMgt.getDateFragmentsOrder}
-     * and stores it for later use.
-     * @param {string} [dateFormat='DD/MM/YYYY HH:MM:SSZ'] -
-     * The date format string provided by the service, used to determine
-     * the order of date fragments.
-     */
-    initServerDateFragmentsOrderFromServiceDateFormat(dateFormat?: string): void;
-    /**
      * Initializes the layer entries based on the GeoviewLayerConfig that was initially provided in the constructor.
      * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
      */
@@ -192,11 +168,12 @@ export declare abstract class AbstractGeoViewLayer {
      * is queryable, it will subscribe to the details-panel and every time the user clicks on the map, the panel will ask the layer
      * to return the descriptive information of all the features in a tolerance radius. This information will be used to populate
      * the details-panel.
+     * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
      * @param {OLProjection?} [mapProjection] - The map projection.
      * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
      * @returns {Promise<ConfigBaseClass[]>} A promise of the config base classes created.
      */
-    createGeoViewLayers(mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<ConfigBaseClass[]>;
+    createGeoViewLayers(displayDateMode: DisplayDateMode, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<ConfigBaseClass[]>;
     /**
      * Fetches the metadata by calling onFetchServiceMetadata.
      * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.

@@ -1,9 +1,9 @@
 import type { Extent } from 'ol/extent';
 import type { TypeLayersViewDisplayState, TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import type { TypeGetStore, TypeSetStore } from '@/core/stores/geoview-store';
+import { type TypeGetStore, type TypeSetStore } from '@/core/stores/geoview-store';
 import type { TypeFeatureInfoEntryPartial, TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
-import type { TimeDimension } from '@/core/utils/date-mgt';
+import { type TemporalMode, type TimeDimension, type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
 import type { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 type LayerActions = ILayerState['actions'];
@@ -76,6 +76,65 @@ export declare const useLayerDeleteInProgress: () => string;
 export declare const useLayerAreLayersLoading: () => boolean;
 export declare const useSelectedLayer: () => TypeLegendLayer | undefined;
 export declare const useLayerIconLayerSet: (layerPath: string) => string[];
+/**
+ * React hook that returns if the time dimension for a layer.
+ * @returns {TimeDimension | undefined} - The time dimension for the layer if any.
+ */
+export declare const useLayerTimeDimension: (layerPath: string) => TimeDimension | undefined;
+/**
+ * React hook that returns if the temporal modes for the layers.
+ * @returns {Record<string, TemporalMode>} - The temporal mode of the dates for the layer.
+ */
+export declare const useLayerDateTemporalModes: () => Record<string, TemporalMode>;
+/**
+ * React hook that returns if the temporal mode of the dates for the layer.
+ * @param {string} layerPath - Unique path identifying the layer in the legend state.
+ * @returns {TemporalMode} - The temporal mode of the dates for the layer. Default: DateMgt.DEFAULT_TEMPORAL_MODE.
+ */
+export declare const useLayerDateTemporalMode: (layerPath: string) => TemporalMode;
+/**
+ * React hook that returns if the display date formats for the layers.
+ * @returns {Record<string, TypeDisplayDateFormat>} - The display date format of the dates for the layer.
+ */
+export declare const useLayerDisplayDateFormats: () => Record<string, TypeDisplayDateFormat>;
+/**
+ * React hook that returns the display date format for a specific layer.
+ * The hook first attempts to resolve a layer-specific display date format
+ * using the provided layer path. If the layer does not define its own
+ * display date format (or cannot be found), the application-wide display
+ * date format for the current map is returned as a fallback.
+ * @param {string} layerPath - Unique path identifying the layer in the legend state.
+ * @returns {TypeDisplayDateFormat} - The display date format to use for the layer, falling back to the
+ * application's default display date format when none is defined.
+ */
+export declare const useLayerDisplayDateFormat: (layerPath: string) => TypeDisplayDateFormat;
+/**
+ * React hook that returns the display date format for a specific layer.
+ * The hook first attempts to resolve a layer-specific display date format
+ * using the provided layer path. If the layer does not define its own
+ * display date format (or cannot be found), the application-wide display
+ * date format for the current map is returned as a fallback.
+ * @param {string} layerPath - Unique path identifying the layer in the legend state.
+ * @returns {TypeDisplayDateFormat} - The display date format to use for the layer, falling back to the
+ * application's default display date format when none is defined.
+ */
+export declare const useLayerDisplayDateFormatShort: (layerPath: string) => TypeDisplayDateFormat;
+/**
+ * React hook that returns if the display date timezones for the layers.
+ * @returns {Record<string, TimeIANA>} - The display date timezone of the dates for the layer.
+ */
+export declare const useLayerDisplayDateTimezones: () => Record<string, TimeIANA>;
+/**
+ * React hook that returns the display date timezone for a specific layer.
+ * The hook first attempts to resolve a layer-specific display date timezone
+ * using the provided layer path. If the layer does not define its own
+ * display date timezone (or cannot be found), the application-wide display
+ * date timezone for the current map is returned as a fallback.
+ * @param {string} layerPath - Unique path identifying the layer in the legend state.
+ * @returns {TimeIANA} - The display date timezone to use for the layer, falling back to the
+ * application's default display date timezone when none is defined.
+ */
+export declare const useLayerDisplayDateTimezone: (layerPath: string) => TimeIANA;
 export declare const useLayerSelectorId: (layerPath: string) => string | undefined;
 export declare const useLayerSelectorName: (layerPath: string) => string | undefined;
 export declare const useLayerSelectorStatus: (layerPath: string) => import("@/api/types/layer-schema-types").TypeLayerStatus | undefined;
