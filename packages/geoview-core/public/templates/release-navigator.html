@@ -75,9 +75,7 @@
       <span id="validationMessage" class="sandbox-validation-msg">File not validated...</span>
     </div>
     <div class="editor">
-      <div class="line-numbers">
-        <span></span>
-      </div>
+      <div class="line-numbers"></div>
       <textarea id="mapConfig" name="configuration" rows="15" cols="150">
 {
   "map": {
@@ -108,8 +106,8 @@
   "theme": "geo.ca",
   "corePackages": [],
   "externalPackages": []
-}
-      </textarea>
+}</textarea
+      >
     </div>
 
     <script src="codedoc.js"></script>
@@ -120,14 +118,20 @@
       const switchLang = document.getElementById('switchLang');
       const switchProjectioneElem = document.getElementById('switchProjection');
       const mapConfigTextarea = document.getElementById('mapConfig');
-      const validateConfigBtn = document.getElementById('validateConfig');
       const applyConfigBtn = document.getElementById('applyConfig');
-      const validationMessage = document.getElementById('validationMessage');
       const urlParams = new URLSearchParams(window.location.search);
       const config = urlParams.get('config');
       const mapId = 'map1';
 
       let currentScript = null;
+
+      // Initialize config editor utilities (line numbers + validation)
+      const configUtils = initializeConfigEditor({
+        textareaSelector: '#mapConfig',
+        lineNumbersSelector: '.line-numbers',
+        validationMessageSelector: '#validationMessage',
+        reloadButtonSelector: '#applyConfig',
+      });
 
       //#region ------------------ SWITCHER SECTION START -----------------------------------------
       switchLang.addEventListener('change', (e) => {
@@ -247,9 +251,8 @@
       // Function to initialize/reinitialize the map with current config
       async function initializeMap() {
         try {
-          // Parse config from textarea (replace single quotes with double quotes like sandbox)
-          const regexExp = /(?<!\\)'/g;
-          const configJson = JSON.parse(mapConfigTextarea.value.replace(regexExp, '"'));
+          // Parse config from textarea using centralized parser
+          const configJson = parseConfigJSON(mapConfigTextarea.value);
 
           // Delete previous map if existing (compatible with different API versions)
           if (window.cgpv) {
@@ -305,68 +308,11 @@
         }
       });
 
-      // Validate config button handler
-      validateConfigBtn.addEventListener('click', async function (e) {
-        if (!window.cgpv || !configLoader.value) {
-          validationMessage.classList.add('config-error');
-          validationMessage.classList.remove('config-json-valid');
-          validationMessage.innerHTML = 'Please select a release version first.';
-          return;
-        }
-
-        try {
-          const regexExp = /(?<!\\)'/g;
-          // Replace single quotes with double quotes
-          const configJSON = JSON.parse(mapConfigTextarea.value.replace(regexExp, '"'));
-
-          // Check if validation API exists (newer versions only)
-          if (cgpv.api.config && cgpv.api.config.validateMapConfig) {
-            const validConfig = cgpv.api.config.validateMapConfig(configJSON, 'en');
-            // Set class and message
-            validationMessage.classList.add('config-json-valid');
-            validationMessage.classList.remove('config-error');
-            validationMessage.innerHTML = 'File seems valid, see console for details...';
-          } else {
-            // Fallback for older versions - just check JSON is valid
-            validationMessage.classList.add('config-json-valid');
-            validationMessage.classList.remove('config-error');
-            validationMessage.innerHTML = 'JSON syntax is valid (validation API not available in this version)...';
-          }
-          applyConfigBtn.disabled = false;
-        } catch (error) {
-          // Set class and message
-          validationMessage.classList.add('config-error');
-          validationMessage.classList.remove('config-json-valid');
-          validationMessage.textContent = error.message;
-          applyConfigBtn.disabled = false; // Still allow apply even if validation fails
-        }
-      });
-
       // If there's a config
       if (config) {
         configLoader.value = config;
         configLoader.dispatchEvent(new Event('change'));
       }
-
-      // Editor line numbers section===================================================================================================
-      const textarea = document.querySelector('#mapConfig');
-      const lineNumbers = document.querySelector('.line-numbers');
-
-      // Set default number of lines
-      const numberOfLines = textarea.value.split('\n').length;
-      lineNumbers.innerHTML = Array(numberOfLines).fill('<span></span>').join('');
-
-      // Update line numbers on keyup
-      textarea.addEventListener('keyup', (event) => {
-        const numberOfLines = event.target.value.split('\n').length;
-        lineNumbers.innerHTML = Array(numberOfLines).fill('<span></span>').join('');
-      });
-
-      // Reset validation message when config is modified
-      textarea.addEventListener('input', (event) => {
-        validationMessage.classList.remove('config-json-valid', 'config-error');
-        validationMessage.innerHTML = 'File not validated...';
-      });
       //#endregion ------------------ CONFIGURATION SECTION END -----------------------------------------
 
       // create snippets

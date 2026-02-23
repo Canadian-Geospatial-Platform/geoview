@@ -492,3 +492,150 @@ function insertPageHeader() {
     headerElement.innerHTML = headerHTML;
   }
 }
+
+//#region ------------------ CONFIG EDITOR UTILITIES -----------------------------------------
+/**
+ * Returns the regex pattern to match single quotes not preceded by backslash
+ * Used to convert single quotes to double quotes for JSON parsing
+ * @returns {RegExp} The regex pattern
+ */
+function getSingleQuoteRegex() {
+  return /(?<!\\)'/g;
+}
+
+/**
+ * Parse config text by replacing single quotes with double quotes
+ * @param {string} configText - The config text to parse
+ * @returns {object} The parsed JSON object
+ * @throws {Error} If JSON is invalid
+ */
+function parseConfigJSON(configText) {
+  const regexExp = getSingleQuoteRegex();
+  return JSON.parse(configText.replace(regexExp, '"'));
+}
+
+/**
+ * Initialize line numbers for a textarea editor
+ * Updates line numbers when user types or initially loads
+ * @param {string} textareaSelector - CSS selector for the textarea element
+ * @param {string} lineNumbersSelector - CSS selector for the line numbers container
+ */
+function initializeLineNumbers(textareaSelector = '#mapConfig', lineNumbersSelector = '.line-numbers') {
+  const textarea = document.querySelector(textareaSelector);
+  const lineNumbers = document.querySelector(lineNumbersSelector);
+
+  if (!textarea || !lineNumbers) {
+    console.warn('Textarea or line numbers container not found');
+    return;
+  }
+
+  // Set default number of lines
+  const numberOfLines = textarea.value.split('\n').length;
+  lineNumbers.innerHTML = Array(numberOfLines).fill('<span></span>').join('');
+
+  // Update line numbers on keyup
+  textarea.addEventListener('keyup', (event) => {
+    const numberOfLines = event.target.value.split('\n').length;
+    lineNumbers.innerHTML = Array(numberOfLines).fill('<span></span>').join('');
+  });
+}
+
+/**
+ * Setup validation functionality for config textarea
+ * Validates JSON syntax and optionally validates against GeoView schema
+ * @param {string} textareaSelector - CSS selector for the textarea element
+ * @param {string} validationMessageSelector - CSS selector for validation message element
+ * @param {string} reloadButtonSelector - CSS selector for reload button (optional)
+ * @param {function} onValidationChange - Callback when validation message changes (optional)
+ */
+function setupConfigValidation(
+  textareaSelector = '#mapConfig',
+  validationMessageSelector = '#validationMessage',
+  reloadButtonSelector = null,
+  onValidationChange = null
+) {
+  const textarea = document.querySelector(textareaSelector);
+  const validationMessage = document.querySelector(validationMessageSelector);
+  const validateBtn = document.getElementById('validateConfig');
+  const reloadBtn = reloadButtonSelector ? document.querySelector(reloadButtonSelector) : null;
+
+  if (!textarea || !validationMessage) {
+    console.warn('Textarea or validation message element not found');
+    return;
+  }
+
+  // Validate config button handler
+  if (validateBtn) {
+    validateBtn.addEventListener('click', async function (e) {
+      try {
+        const configJSON = parseConfigJSON(textarea.value);
+
+        // Check if validation API exists (newer versions only)
+        if (window.cgpv && cgpv.api.config && cgpv.api.config.validateMapConfig) {
+          const validConfig = cgpv.api.config.validateMapConfig(configJSON, 'en');
+          validationMessage.classList.add('config-json-valid');
+          validationMessage.classList.remove('config-error');
+          validationMessage.textContent = 'File seems valid, see console for details...';
+        } else {
+          // Fallback for older versions or when cgpv not loaded - just check JSON is valid
+          validationMessage.classList.add('config-json-valid');
+          validationMessage.classList.remove('config-error');
+          validationMessage.textContent = window.cgpv
+            ? 'JSON syntax is valid (validation API not available in this version)...'
+            : 'JSON syntax is valid (cgpv not loaded yet)...';
+        }
+
+        if (reloadBtn) reloadBtn.disabled = false;
+        if (onValidationChange) onValidationChange(true, null);
+      } catch (error) {
+        validationMessage.classList.add('config-error');
+        validationMessage.classList.remove('config-json-valid');
+        validationMessage.textContent = error.message;
+
+        if (reloadBtn) reloadBtn.disabled = false; // Still allow reload even if validation fails
+        if (onValidationChange) onValidationChange(false, error.message);
+      }
+    });
+  }
+
+  // Reset validation message when config is modified
+  textarea.addEventListener('input', (event) => {
+    validationMessage.classList.remove('config-json-valid', 'config-error');
+    validationMessage.textContent = 'File not validated...';
+    if (onValidationChange) onValidationChange(null, null);
+  });
+}
+
+/**
+ * Initialize all config editor utilities in one call
+ * Sets up line numbers, validation, and returns utility functions
+ * @param {object} options - Configuration options
+ * @param {string} options.textareaSelector - CSS selector for textarea
+ * @param {string} options.lineNumbersSelector - CSS selector for line numbers container
+ * @param {string} options.validationMessageSelector - CSS selector for validation message
+ * @param {string} options.reloadButtonSelector - CSS selector for reload button (optional)
+ * @param {function} options.onValidationChange - Callback for validation changes (optional)
+ * @returns {object} Object with utility functions (parseConfigJSON, getSingleQuoteRegex)
+ */
+function initializeConfigEditor(options = {}) {
+  const {
+    textareaSelector = '#mapConfig',
+    lineNumbersSelector = '.line-numbers',
+    validationMessageSelector = '#validationMessage',
+    reloadButtonSelector = null,
+    onValidationChange = null,
+  } = options;
+
+  // Initialize line numbers
+  initializeLineNumbers(textareaSelector, lineNumbersSelector);
+
+  // Setup validation
+  setupConfigValidation(textareaSelector, validationMessageSelector, reloadButtonSelector, onValidationChange);
+
+  // Return utility functions for parsing
+  return {
+    parseConfigJSON,
+    getSingleQuoteRegex,
+  };
+}
+//#endregion ------------------ CONFIG EDITOR UTILITIES END -----------------------------------------
