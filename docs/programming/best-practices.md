@@ -145,7 +145,72 @@ const scale = useMapScale();
 const [scaleMode, setScaleMode] = useState<number>(0);
 ```
 
-## 9- How we order functions in component
+## 9- How we format JSDOC
+
+Golden Rule of JSDoc in TypeScript Projects
+- Explain why
+- Explain behavior
+- Explain side effects
+- Explain non-obvious constraints
+
+It should NOT:
+- Repeat type information already in the signature
+- Replace TS visibility keywords
+- Duplicate what the compiler already guarantees
+
+```ts
+/**
+ * Fetches layer metadata from GeoCore.
+ *
+ * @param geoviewLayerId - UUID of the GeoView layer.
+ * @param signal - Optional abort signal for request cancellation.
+ * @returns Parsed layer metadata object.
+ */
+async function fetchMetadata(
+  geoviewLayerId: string,
+  signal?: AbortSignal
+): Promise<LayerMetadata> { }
+```
+
+Tags Worth Using
+- @param
+- @returns
+- @throws
+- @example
+- @deprecated
+- @see
+
+Tags Usually Overkill in TS
+- @private
+- @protected
+- @public
+- @readonly
+- @override
+- @static
+
+Advanced Best Practice
+✔ Short description = one sentence
+✔ Blank line
+✔ Behavior explanation
+✔ Describe Pr0mise resoled type
+✔ Then @param list
+✔ Then @returns
+✔ Then @throws (if applicable)
+
+```ts
+/**
+ * Updates layer visibility state.
+ *
+ * This method does not directly manipulate the map.
+ * It dispatches an event to the EventProcessor, which
+ * will trigger the appropriate GeoView API call.
+ *
+ * @param layerPath - Target layer path.
+ * @param visible - New visibility state.
+ */
+```
+
+## 10- How we order functions in component
 
 In components, functions should be ordered in the following way:
 
@@ -154,7 +219,7 @@ In components, functions should be ordered in the following way:
 - Hooks section where we have the useEffect, useCallback methods grouped together (as the other those are defined is actually important - best to group them)
 - Rendering methods used for rendering the JSX
 
-## 10- How we order functions in classes
+## 11- How we order functions in classes
 
 In classes, functions should be ordered in the following way:
 

@@ -175,21 +175,75 @@ Control via localStorage:
 
 ## Documentation Standards
 
-**JSDoc format** (per [CONTRIBUTING.md](../CONTRIBUTING.md)):
+**JSDoc Guidelines** (per [best-practices.md](../docs/programming/best-practices.md)):
+
+**Golden Rule of JSDoc in TypeScript Projects:**
+
+JSDoc should:
+- Explain **why** something works the way it does
+- Explain **behavior** and side effects
+- Explain **non-obvious constraints**
+
+JSDoc should NOT:
+- Repeat type information already in the signature
+- Replace TypeScript visibility keywords (`private`, `protected`, `public`)
+- Duplicate what the compiler already guarantees
+
+**Recommended Tags:**
+
+- `@param` - Parameter descriptions
+- `@returns` - Return value descriptions
+- `@throws` - Document thrown exceptions
+- `@example` - Usage examples
+- `@deprecated` - Mark deprecated APIs
+- `@see` - Reference related code
+
+**Tags to Avoid in TypeScript** (use TS keywords instead):
+
+- `@private`, `@protected`, `@public` - Use TS visibility modifiers
+- `@readonly` - Use TS `readonly` keyword
+- `@override` - Use TS `override` keyword
+- `@static` - Use TS `static` keyword
+
+**Format Structure:**
+
+1. Short description (one sentence)
+2. Blank line
+3. Detailed behavior explanation (if needed)
+4. Describe Promise resolved type (if applicable)
+5. `@param` list
+6. `@returns` (if applicable)
+7. `@throws` (if applicable)
+
+**Examples:**
 
 ```typescript
 /**
- * Main function description.
- * @function functionName
- * @param {Array} keys - List of keys
- * @return {Promise} Promise of config nodes
+ * Fetches layer metadata from GeoCore.
+ *
+ * @param geoviewLayerId - UUID of the GeoView layer.
+ * @param signal - Optional abort signal for request cancellation.
+ * @returns Parsed layer metadata object.
  */
+async function fetchMetadata(
+  geoviewLayerId: string,
+  signal?: AbortSignal,
+): Promise<LayerMetadata> {}
+
+/**
+ * Updates layer visibility state.
+ *
+ * This method does not directly manipulate the map.
+ * It dispatches an event to the EventProcessor, which
+ * will trigger the appropriate GeoView API call.
+ *
+ * @param layerPath - Target layer path.
+ * @param visible - New visibility state.
+ */
+function setLayerVisibility(layerPath: string, visible: boolean): void {}
 ```
 
-- Use `@function` outside class contexts
-- For Promises, describe resolved type
-- Use `@private` for non-exposed functions
-- Generate TypeDoc: `npm run doc` in geoview-core
+**TypeDoc Generation:** Run `npm run doc` in geoview-core to generate API documentation.
 
 ## Testing & Quality
 
