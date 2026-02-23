@@ -1079,6 +1079,8 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
   // #endregion PUBLIC METHODS
 
+  // #region PROTECTED METHODS
+
   /**
    * Formats a list of features into an array of TypeFeatureInfoEntry, including icons, field values, domains, and metadata.
    * @param {Feature[]} features - Array of features to format.
