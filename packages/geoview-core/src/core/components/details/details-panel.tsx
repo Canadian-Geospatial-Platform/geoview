@@ -419,6 +419,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   // #endregion
 
   // #region EVENT HANDLERS SECTION ***********************************************************************************
+
   /**
    * Handles click to remove all features in right panel.
    */
