@@ -189,9 +189,9 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
    * Memoize the feature name
    */
   const memoFeatureName = useMemo(() => {
-    return feature.nameField && feature.fieldInfo?.[feature.nameField]?.value
-      ? (feature.fieldInfo?.[feature.nameField]?.value as string)
-      : 'No name / Sans nom';
+    // Try to get the value at the fieldName
+    const value = feature.nameField && (feature.fieldInfo?.[feature.nameField]?.value as string);
+    return value ?? 'No name / Sans nom';
   }, [feature]);
 
   /**

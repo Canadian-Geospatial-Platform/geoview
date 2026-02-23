@@ -30,8 +30,7 @@ type LayerActions = ILayerState['actions'];
 export interface ILayerState {
   highlightedLayer: string;
   selectedLayer: TypeLegendLayer;
-  // TODO: CHECK - Do we need to differentiate between undefined and null? If so, write the reason in a GV comment. It'd clean many | null in the callers.
-  selectedLayerPath: string | undefined | null;
+  selectedLayerPath?: string;
   legendLayers: TypeLegendLayer[];
   displayState: TypeLayersViewDisplayState;
   layerDeleteInProgress: string;
@@ -59,7 +58,7 @@ export interface ILayerState {
     setLayerOpacity: (layerPath: string, opacity: number, updateLegendLayers?: boolean) => void;
     setLayerHoverable: (layerPath: string, enable: boolean) => void;
     setLayerQueryable: (layerPath: string, enable: boolean) => void;
-    setSelectedLayerPath: (layerPath: string) => void;
+    setSelectedLayerPath: (layerPath: string | undefined) => void;
     zoomToLayerExtent: (layerPath: string) => Promise<void>;
     zoomToLayerVisibleScale: (layerPath: string) => void;
   };
@@ -69,7 +68,7 @@ export interface ILayerState {
     setHighlightLayer: (layerPath: string) => void;
     setLayerDeleteInProgress: (newVal: string) => void;
     setLegendLayers: (legendLayers: TypeLegendLayer[]) => void;
-    setSelectedLayerPath: (layerPath: string) => void;
+    setSelectedLayerPath: (layerPath: string | undefined) => void;
     setLayersAreLoading: (areLoading: boolean) => void;
   };
 }
@@ -84,7 +83,6 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
   return {
     highlightedLayer: '',
     legendLayers: [] as TypeLegendLayer[],
-    selectedLayerPath: null,
     displayState: 'view',
     layerDeleteInProgress: '',
 
@@ -93,7 +91,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       set({
         layerState: {
           ...get().layerState,
-          selectedLayerPath: geoviewConfig.footerBar?.selectedLayersLayerPath || geoviewConfig.appBar?.selectedLayersLayerPath || null,
+          selectedLayerPath: geoviewConfig.footerBar?.selectedLayersLayerPath || geoviewConfig.appBar?.selectedLayersLayerPath,
         },
       });
     },
@@ -427,11 +425,11 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
       /**
        * Sets the selected layer path.
-       * @param {string} layerPath - The layer path to set as selected.
+       * @param {string | undefined} layerPath - The layer path to set as selected.
        */
-      setSelectedLayerPath: (layerPath: string | null): void => {
-        let theLayerPath: string | null = layerPath;
-        if (layerPath && layerPath.length === 0) theLayerPath = null;
+      setSelectedLayerPath: (layerPath: string | undefined): void => {
+        let theLayerPath: string | undefined = layerPath;
+        if (layerPath && layerPath.length === 0) theLayerPath = undefined;
         const curLayers = get().layerState.legendLayers;
         const layer = LegendEventProcessor.findLayerByPath(curLayers, layerPath!);
         set({

@@ -51,7 +51,14 @@ export type TypeMapStateForExportLayout = {
   mapRotation: number;
 };
 
-export interface FlattenedLegendItem {
+export type NorthArrowSVG = {
+  d: string | null; // null because this is SVG for HTML
+  fill: string | null; // null because this is SVG for HTML
+  stroke: string | null; // null because this is SVG for HTML
+  strokeWidth: string | null; // null because this is SVG for HTML
+};
+
+export type FlattenedLegendItem = {
   type: 'layer' | 'item' | 'child' | 'wms' | 'time';
   data: TypeLegendLayer;
   parentName?: string;
@@ -61,7 +68,7 @@ export interface FlattenedLegendItem {
   calculatedHeight?: number;
   calculatedWidth?: number;
   wmsImageSize?: { width: number; height: number }; // Actual measured WMS image dimensions
-}
+};
 
 /**
  * Element factory interface for creating renderer-specific elements
@@ -86,13 +93,7 @@ export type TypeMapInfoResult = {
   mapDataUrl: string;
   scaleText: string;
   scaleLineWidth: string;
-  // TODO: CHECK - Do we need to differentiate between undefined and null? If so, write the reason in a GV comment. It'd clean the code.
-  northArrowSvg: Array<{
-    d: string | null;
-    fill: string | null;
-    stroke: string | null;
-    strokeWidth: string | null;
-  }> | null;
+  northArrowSvg?: NorthArrowSVG[];
   northArrowRotation: number;
   attributions: string[];
   fittedColumns: FlattenedLegendItem[][];
@@ -537,19 +538,14 @@ export class ExportUtilities {
    * The rotation accounts for both map rotation and user-configured north arrow orientation.
    * Returns null if north arrow is disabled or SVG data is unavailable.
    *
-   * @param {Array} northArrowSvg - Array of SVG path data with stroke/fill properties
+   * @param {NorthArrowSVG[] | undefined} northArrowSvg - Array of SVG path data with stroke/fill properties
    * @param {number} northArrowRotation - The rotation angle in degrees (includes map rotation + config offset)
    * @param {ElementFactory} factory - Element factory for creating renderer-specific elements
    * @param {any} scaledStyles - The scaled styles object for sizing and rotation
    * @returns {JSX.Element | null} The rendered north arrow SVG or null if disabled
    */
   static renderNorthArrow(
-    northArrowSvg: Array<{
-      d: string | null;
-      fill: string | null;
-      stroke: string | null;
-      strokeWidth: string | null;
-    }> | null,
+    northArrowSvg: NorthArrowSVG[] | undefined,
     northArrowRotation: number,
     factory: ElementFactory,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -925,7 +921,7 @@ export class ExportUtilities {
     const rotationAngle = parseFloat(northArrowElement.degreeRotation) + currentRotation;
 
     // Generate north arrow SVG
-    let northArrowSvgPaths = null;
+    let northArrowSvgPaths;
     if (northArrow) {
       try {
         const iconString = renderToString(createElement(NorthArrowIcon, { width: 24, height: 24 }));
@@ -942,8 +938,8 @@ export class ExportUtilities {
           }));
         }
       } catch (error) {
+        // Log error and continue
         logger.logError(error);
-        northArrowSvgPaths = null;
       }
     }
 

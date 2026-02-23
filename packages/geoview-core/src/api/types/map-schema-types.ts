@@ -967,8 +967,7 @@ export type TypeFeatureInfoEntry = {
   extent: Extent | undefined;
   featureIcon?: string;
   fieldInfo: Partial<Record<string, TypeFieldEntry>>;
-  // TODO: CHECK - Do we need to differentiate between undefined and null? If so, write the reason in a GV comment. It'd clean many | null in the callers.
-  nameField: string | null;
+  nameField?: string;
   layerPath: string;
 };
 

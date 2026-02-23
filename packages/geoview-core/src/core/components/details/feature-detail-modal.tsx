@@ -47,8 +47,8 @@ export default function FeatureDetailModal(): JSX.Element {
     logger.logTraceUseMemo('DETAILS PANEL - Feature Detail Modal - featureInfoList');
 
     // Extract value of field info nameField for item symbol description
-    const nameFieldValueTmp = feature.fieldInfo[feature.nameField !== null ? feature.nameField : 0];
-    setNameFieldValue(nameFieldValueTmp !== undefined ? (nameFieldValueTmp.value as string) : '');
+    const key = feature.nameField;
+    setNameFieldValue(key && feature.fieldInfo?.[key]?.value ? (feature.fieldInfo[key].value as string) : '');
 
     const featureInfo = Object.keys(feature?.fieldInfo ?? {}).map((fieldName) => {
       return {

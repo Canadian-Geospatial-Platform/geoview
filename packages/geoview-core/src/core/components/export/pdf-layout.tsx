@@ -2,7 +2,7 @@ import { pdf } from '@react-pdf/renderer';
 
 import { Document, Page, Text, View, Image, Svg, Path } from '@react-pdf/renderer';
 import { type TemporalMode, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
-import type { FlattenedLegendItem, ElementFactory } from '@/core/components/export/utilities';
+import type { FlattenedLegendItem, ElementFactory, NorthArrowSVG } from '@/core/components/export/utilities';
 import { ExportUtilities } from '@/core/components/export/utilities';
 import type { FileExportProps } from '@/core/components/export/export-modal';
 import { PDF_STYLES, getScaledPDFStyles } from '@/core/components/export/layout-styles';
@@ -12,12 +12,7 @@ interface ExportDocumentProps {
   exportTitle: string;
   scaleText: string;
   scaleLineWidth: string;
-  northArrowSvg: Array<{
-    d: string | null;
-    fill: string | null;
-    stroke: string | null;
-    strokeWidth: string | null;
-  }> | null;
+  northArrowSvg?: NorthArrowSVG[];
   northArrowRotation: number;
   disclaimer: string;
   attributions: string[];
