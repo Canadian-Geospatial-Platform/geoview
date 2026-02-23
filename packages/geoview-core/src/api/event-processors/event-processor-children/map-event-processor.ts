@@ -1818,9 +1818,16 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @param {string} groupName - The name of the geometry group to clear
    */
   static deleteGeometriesFromGroup(mapId: string, groupName: string): void {
-    const viewer = this.getMapViewer(mapId);
-    if (viewer.layer.geometry.hasGeometryGroup(groupName)) {
-      viewer.layer.geometry.deleteGeometriesFromGroup(groupName);
+    // GV IMPORTANT: This method may be called during React cleanup effects after a map has been deleted.
+    // GV Wrap in try-catch to silently handle this expected race condition without throwing errors.
+    try {
+      const viewer = this.getMapViewer(mapId);
+      if (viewer.layer.geometry.hasGeometryGroup(groupName)) {
+        viewer.layer.geometry.deleteGeometriesFromGroup(groupName);
+      }
+    } catch {
+      // GV Silently handle MapViewerNotFoundError - map was already deleted during cleanup
+      logger.logDebug(`deleteGeometriesFromGroup: Map '${mapId}' not found (expected during cleanup)`);
     }
   }
 

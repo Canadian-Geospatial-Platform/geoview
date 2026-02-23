@@ -28,9 +28,7 @@
       </div>
     </div>
     <div class="editor">
-      <div class="line-numbers">
-        <span></span>
-      </div>
+      <div class="line-numbers"></div>
       <textarea id="configGeoview" name="configuration" rows="30" cols="150">
 {
   'map': {
@@ -126,8 +124,8 @@
     }
   ],
   'theme': 'geo.ca'
-}
-      </textarea>
+}</textarea
+      >
     </div>
 
     <div class="navigator-toolbar">
@@ -574,7 +572,7 @@
       }
     },
     "interaction": "dynamic",
-    ... other map settings ...  
+    ... other map settings ...
   }
 }
             </code></pre>
@@ -893,8 +891,9 @@
                 <li>Default: <code>false</code></li>
               </ul>
             </li>
-            <li> 
-              <code>showLayerHighlightLayerBbox</code> <em style="color: #6c757d">optional</em> - Show the bounding box of the highlighted layer
+            <li>
+              <code>showLayerHighlightLayerBbox</code> <em style="color: #6c757d">optional</em> - Show the bounding box of the highlighted
+              layer
               <ul>
                 <li>Type: <code>boolean</code></li>
                 <li>Default: <code>true</code></li>
@@ -1025,37 +1024,19 @@
         createCollapsible();
       });
 
-      const isValid = false;
-
-      // Validate Button============================================================================================================
-      const validateJSONButton = document.getElementById('validateConfig');
-
-      // add an event listener when a button is clicked
-      validateJSONButton.addEventListener('click', function (e) {
-        // get message element
-        const message = document.getElementById('validationMessage');
-
-        try {
-          // get config and test if JSON is valid
-          const configArea = document.getElementById('configGeoview');
-          const regexExp = /(?<!\\)'/g;
-          // Replace single quotes with double quotes
-          const configJSON = JSON.parse(configArea.value.replace(regexExp, '"'));
-
-          const validConfig = cgpv.api.config.validateMapConfig(configJSON, 'en');
-
-          // set class and message
-          message.classList.add('config-json-valid');
-          message.classList.remove('config-error');
-          message.innerHTML = 'File seems valid, see console for details...';
-          document.getElementById('createMap').disabled = 0;
-        } catch (error) {
-          // set class and message
-          message.classList.add('config-error');
-          message.classList.remove('config-json-valid');
-          message.innerHTML = cgpv.api.utilities.core.escapeRegExp(error.message);
-          document.getElementById('createMap').disabled = true;
-        }
+      // Initialize config editor utilities (line numbers + validation)
+      const configUtils = initializeConfigEditor({
+        textareaSelector: '#configGeoview',
+        lineNumbersSelector: '.line-numbers',
+        validationMessageSelector: '#validationMessage',
+        reloadButtonSelector: '#createMap',
+        onValidationChange: (isValid, errorMessage) => {
+          if (isValid === false) {
+            document.getElementById('createMap').disabled = true;
+          } else if (isValid === true) {
+            document.getElementById('createMap').disabled = false;
+          }
+        },
       });
 
       // Create Button============================================================================================================
@@ -1084,14 +1065,12 @@
 
         document.getElementById('mapSection').appendChild(newDiv);
 
-        // Regex expression to capture all single quotes (') except those preceded by a backslash (\)
-        const regexExp = /(?<!\\)'/g;
-
         // create map
         try {
           const configArea = document.getElementById('configGeoview');
-          // Replace single quotes with double quotes to make valid JSON
-          const mapViewer = await cgpv.api.createMapFromConfig('map1', configArea.value.replace(regexExp, '"'));
+          // Use centralized config parser
+          const configText = configArea.value.replace(getSingleQuoteRegex(), '"');
+          const mapViewer = await cgpv.api.createMapFromConfig('map1', configText);
           listenToLegendLayerSetChanges('sandboxMap-state', mapViewer);
         } catch (error) {
           console.error('Failed to create map from config', error);
@@ -1149,23 +1128,6 @@
       deleteMapButton.addEventListener('click', function (e) {
         // Delete the map
         cgpv.api.deleteMapViewer('map1', true);
-      });
-
-      // Editor script section===================================================================================================
-      const textarea = document.querySelector('textarea');
-      const lineNumbers = document.querySelector('.line-numbers');
-
-      // set default number of lines
-      const numberOfLines = textarea.value.split('\n').length;
-      lineNumbers.innerHTML = Array(numberOfLines).fill('<span></span>').join('');
-
-      textarea.addEventListener('keyup', (event) => {
-        const numberOfLines = event.target.value.split('\n').length;
-        lineNumbers.innerHTML = Array(numberOfLines).fill('<span></span>').join('');
-      });
-
-      textarea.addEventListener('input', (event) => {
-        document.getElementById('createMap').disabled = true;
       });
     </script>
   </body>
