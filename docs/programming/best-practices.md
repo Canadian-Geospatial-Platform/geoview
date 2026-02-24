@@ -191,9 +191,9 @@ Tags Usually Overkill in TS
 Advanced Best Practice
 ✔ Short description = one sentence
 ✔ Blank line
-✔ Behavior explanation
-✔ Describe Pr0mise resoled type
-✔ Then @param list
+✔ Behavior explanation (if applicable)
+✔ Blank line (if explanation)
+✔ Then @param list (parameter - description, Add Optional for optional parameter)
 ✔ Then @returns
 ✔ Then @throws (if applicable)
 

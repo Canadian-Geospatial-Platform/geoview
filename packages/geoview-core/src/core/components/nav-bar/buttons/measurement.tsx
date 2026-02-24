@@ -374,7 +374,14 @@ export default function Measurement(): JSX.Element {
     logger.logTraceUseEffect('MEASUREMENT, Clean up on mount');
 
     return () => {
-      clearMeasurements();
+      // GV IMPORTANT: This method may be called during React cleanup effects after a map has been deleted.
+      // GV Wrap in try-catch to silently handle this expected race condition without throwing errors.
+      try {
+        clearMeasurements();
+      } catch {
+        // GV Silently handle MapViewerNotFoundError - map was already deleted during cleanup
+        logger.logDebug(`deleteGeometriesFromGroup: Map not found (expected during cleanup)`);
+      }
     };
     // We use the empty array to avoid the rerender for clear measurement trigger on enable toggle
     // eslint-disable-next-line react-hooks/exhaustive-deps

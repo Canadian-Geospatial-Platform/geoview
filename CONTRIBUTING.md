@@ -71,10 +71,15 @@ Open your browser then navigate to http://localhost:8080 to see the viewer in ac
 ## Meta Documentation
 We are using [jsdoc](https://jsdoc.app/) notation for documenting the viewer library.
 
+For detailed JSDoc guidelines and best practices specific to this project, see [JSDoc Best Practices](docs/programming/best-practices.md#documentation-standards).
+
 Documentation blocks for jsdoc should start with /** and generally follow the javadoc format and markup style:
 ```ts
 /**
  * Main function description.
+ * 
+ * Function detailed explanations
+ * 
  * @return random variable
  */
 ```
@@ -87,7 +92,7 @@ Function Sample
         /**
          * Add RCS config layers to configuration after startup has finished
          *
-         * @param keys - Uptional list of keys marking which layers to retrieve
+         * @param keys - Optional list of keys marking which layers to retrieve
          * @return Promise of full config nodes for newly added layers
          */
 ```

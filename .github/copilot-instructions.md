@@ -210,8 +210,8 @@ JSDoc should NOT:
 1. Short description (one sentence)
 2. Blank line
 3. Detailed behavior explanation (if needed)
-4. Describe Promise resolved type (if applicable)
-5. `@param` list
+4. Blank line (if detailed explanation)
+5. `@param` list (parameter - description, Add Optional for optional parameter)
 6. `@returns` (if applicable)
 7. `@throws` (if applicable)
 
