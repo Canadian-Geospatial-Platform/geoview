@@ -44,6 +44,9 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
 
   const handleOnClick = useCallback(
     (aoiItem: AoiItem) => {
+      // Log
+      logger.logTraceUseCallback('AOI-PANEL - handleOnClick');
+
       // Project the extent from lonlatto map projection
       const extentInMapProjection = Projection.transformExtentFromProj(
         aoiItem.extent,
