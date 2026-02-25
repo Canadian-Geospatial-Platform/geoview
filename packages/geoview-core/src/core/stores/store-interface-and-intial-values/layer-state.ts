@@ -35,15 +35,14 @@ export interface ILayerState {
   selectedLayerPath?: string;
   legendLayers: TypeLegendLayer[];
   displayState: TypeLayersViewDisplayState;
-  layerDeleteInProgress: string;
   layersAreLoading: boolean;
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
-    deleteLayer: (layerPath: string) => void;
+    deleteLayer: (layerPath: string) => Promise<boolean>;
+    deleteLayerAbort: (layerPath: string) => void;
     getExtentFromFeatures: (layerPath: string, featureIds: number[], outfield?: string) => Promise<Extent>;
     queryLayerEsriDynamic: (layerPath: string, objectIDs: number[]) => Promise<TypeFeatureInfoEntryPartial[]>;
-    getLayerDeleteInProgress: () => string;
     getLayerServiceProjection: (layerPath: string) => string | undefined;
     getLayerRasterFunctionInfos: (layerPath: string) => TypeMetadataEsriRasterFunctionInfos[] | undefined;
     getLayerRasterFunction: (layerPath: string) => string | undefined;
@@ -58,7 +57,6 @@ export interface ILayerState {
     setAllItemsVisibilityAndWait: (layerPath: string, visibility: boolean) => Promise<void>;
     setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
     setHighlightLayer: (layerPath: string) => void;
-    setLayerDeleteInProgress: (newVal: string) => void;
     setLayerOpacity: (layerPath: string, opacity: number, updateLegendLayers?: boolean) => void;
     setLayerHoverable: (layerPath: string, enable: boolean) => void;
     setLayerQueryable: (layerPath: string, enable: boolean) => void;
@@ -75,28 +73,52 @@ export interface ILayerState {
   setterActions: {
     setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
     setHighlightLayer: (layerPath: string) => void;
-    setLayerDeleteInProgress: (newVal: string) => void;
     setLegendLayers: (legendLayers: TypeLegendLayer[]) => void;
     setSelectedLayerPath: (layerPath: string | undefined) => void;
     setLayersAreLoading: (areLoading: boolean) => void;
+    setLayerDeletionProgressPercentage: (layerPath: string, progression: number | undefined) => void;
   };
 }
 
 /**
  * Initializes a Layer State and provide functions which use the get/set Zustand mechanisms.
+ *
  * @param {TypeSetStore} set - The setter callback to be used by this state
  * @param {TypeGetStore} get - The getter callback to be used by this state
  * @returns The initialized Layer State
  */
 export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILayerState {
+  /**
+   * Helper function to update a layer property given its layer path.
+   */
+  const helperUpdateLayerByPath = (
+    layers: TypeLegendLayer[],
+    layerPath: string,
+    updater: (layer: TypeLegendLayer) => TypeLegendLayer
+  ): TypeLegendLayer[] => {
+    return layers.map((layer) => {
+      if (layer.layerPath === layerPath) {
+        return updater(layer);
+      }
+
+      if (layer.children?.length) {
+        return {
+          ...layer,
+          children: helperUpdateLayerByPath(layer.children, layerPath, updater),
+        };
+      }
+
+      return layer;
+    });
+  };
+
   return {
     highlightedLayer: '',
     legendLayers: [] as TypeLegendLayer[],
     displayState: 'view',
-    layerDeleteInProgress: '',
 
     // Initialize default
-    setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
+    setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig): void => {
       set({
         layerState: {
           ...get().layerState,
@@ -109,11 +131,18 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
     actions: {
       /**
        * Deletes a layer.
-       * @param {string} layerPath - The path of the layer to delete.
+       * @param layerPath - The path of the layer to delete.
        */
-      deleteLayer: (layerPath: string): void => {
-        LegendEventProcessor.deleteLayer(get().mapId, layerPath);
-        get().layerState.setterActions.setLayerDeleteInProgress('');
+      deleteLayer: (layerPath: string): Promise<boolean> => {
+        return LegendEventProcessor.deleteLayerStartTimer(get().mapId, layerPath);
+      },
+
+      /**
+       * Aborts the deletion of a layer
+       * @param layerPath - The path of the layer to abort its deletion.
+       */
+      deleteLayerAbort: (layerPath: string): void => {
+        LegendEventProcessor.deleteLayerAbort(get().mapId, layerPath);
       },
 
       /**
@@ -147,12 +176,6 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         // Perform the query
         return layer.getRecordsByOIDs(objectIDs, MapEventProcessor.getMapState(get().mapId).currentProjection);
       },
-
-      /**
-       * Get the LayerDeleteInProgress state.
-       */
-      // TODO: REFACTOR - HOOK - This should probably be a hook rather than an action
-      getLayerDeleteInProgress: () => get().layerState.layerDeleteInProgress,
 
       /**
        * Gets the service native projection of the layer.
@@ -307,15 +330,6 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       },
 
       /**
-       * Sets the layer delete in progress state.
-       * @param {string} newVal - The new value (the layerPath waiting to be deleted or '').
-       */
-      setLayerDeleteInProgress: (newVal: string): void => {
-        // Redirect to setter
-        get().layerState.setterActions.setLayerDeleteInProgress(newVal);
-      },
-
-      /**
        * Sets the opacity of the layer.
        * @param {string} layerPath - The layer path of the layer to change.
        * @param {number} opacity - The opacity to set.
@@ -448,19 +462,6 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       },
 
       /**
-       * Sets the layer delete in progress state.
-       * @param {string} newVal - The new value (the layerPath waiting to be deleted or '').
-       */
-      setLayerDeleteInProgress: (newVal: string): void => {
-        set({
-          layerState: {
-            ...get().layerState,
-            layerDeleteInProgress: newVal,
-          },
-        });
-      },
-
-      /**
        * Sets the legend layers state.
        * @param {TypeLegendLayer} legendLayers - The legend layers to set.
        */
@@ -493,12 +494,58 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         });
       },
 
+      /**
+       * Sets the layer as loading.
+       *
+       * @param {boolean} areLoading - Whether the layers are loading.
+       */
       setLayersAreLoading: (areLoading: boolean): void => {
         set({
           layerState: {
             ...get().layerState,
             layersAreLoading: areLoading,
           },
+        });
+      },
+
+      /**
+       * Updates the deletion progress of a specific layer in the store.
+       * This function immutably updates the `legendLayers` array in the
+       * `layerState` by setting or removing the `deletionProgressPercentage`
+       * property for the layer identified by `layerPath`.
+       *
+       * @param layerPath - The unique path or identifier of the layer to update.
+       * @param progression - The deletion progress percentage (0–100).
+       *   - If a number is provided, sets `deletionProgressPercentage` to that value.
+       *   - If `undefined`, removes the `deletionProgressPercentage` property from the layer.
+       * @remarks
+       * This function uses the helper `helperUpdateLayerByPath` to find the
+       * target layer and update it immutably, ensuring that the rest of the
+       * `legendLayers` array remains unchanged.
+       */
+      setLayerDeletionProgressPercentage: (layerPath: string, progression: number | undefined): void => {
+        set((state) => {
+          // Create updated legendLayers immutably
+          const updatedLegendLayers = helperUpdateLayerByPath(state.layerState.legendLayers, layerPath, (layer) => {
+            if (progression === undefined) {
+              // Remove deletionProgressPercentage immutably
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              const { deletionProgressPercentage, ...rest } = layer;
+              return rest;
+            }
+
+            return {
+              ...layer,
+              deletionProgressPercentage: progression,
+            };
+          });
+
+          return {
+            layerState: {
+              ...state.layerState,
+              legendLayers: updatedLegendLayers,
+            },
+          };
         });
       },
     },
@@ -535,7 +582,6 @@ export const useLayerSelectedLayer = (): TypeLegendLayer => useStore(useGeoViewS
 export const useLayerSelectedLayerPath = (): string | null | undefined =>
   useStore(useGeoViewStore(), (state) => state.layerState.selectedLayerPath);
 export const useLayerDisplayState = (): TypeLayersViewDisplayState => useStore(useGeoViewStore(), (state) => state.layerState.displayState);
-export const useLayerDeleteInProgress = (): string => useStore(useGeoViewStore(), (state) => state.layerState.layerDeleteInProgress);
 export const useLayerAreLayersLoading = (): boolean => useStore(useGeoViewStore(), (state) => state.layerState.layersAreLoading);
 
 // computed gets
@@ -788,6 +834,7 @@ export const useLayerStatuses = (): Record<string, TypeLayerStatus> => {
   });
 };
 
+export const useLayerSelectorDeletionProgressPercentage = createLayerSelectorHook('deletionProgressPercentage');
 export const useLayerSelectorFilter = createLayerSelectorHook('layerFilter');
 export const useLayerSelectorFilterClass = createLayerSelectorHook('layerFilterClass');
 export const useLayerSelectorSchemaTag = createLayerSelectorHook('schemaTag');

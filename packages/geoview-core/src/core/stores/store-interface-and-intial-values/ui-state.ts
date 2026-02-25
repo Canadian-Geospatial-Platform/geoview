@@ -69,6 +69,7 @@ export interface IUIState {
 
 /**
  * Initializes an UI State and provide functions which use the get/set Zustand mechanisms.
+ *
  * @param {TypeSetStore} set - The setter callback to be used by this state
  * @param {TypeGetStore} get - The getter callback to be used by this state
  * @returns {IUIState} - The initialized UI State

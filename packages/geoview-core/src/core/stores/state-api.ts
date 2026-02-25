@@ -32,12 +32,10 @@ export class StateApi {
 
   /**
    * Get a specific layer panel state.
-   * @param {'highlightedLayer' | 'selectedLayerPath' | 'displayState' | 'layerDeleteInProgress'} state - The state to get
+   * @param {'highlightedLayer' | 'selectedLayerPath' | 'displayState'} state - The state to get
    * @returns {string | boolean | null | undefined} The requested state
    */
-  getLayerPanelState(
-    state: 'highlightedLayer' | 'selectedLayerPath' | 'displayState' | 'layerDeleteInProgress'
-  ): string | boolean | null | undefined {
+  getLayerPanelState(state: 'highlightedLayer' | 'selectedLayerPath' | 'displayState'): string | boolean | null | undefined {
     return LegendEventProcessor.getLayerPanelState(this.mapId, state);
   }
 

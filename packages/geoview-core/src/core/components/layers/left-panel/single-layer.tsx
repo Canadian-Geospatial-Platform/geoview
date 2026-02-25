@@ -36,7 +36,7 @@ import {
   useMapSelectorLayerInVisibleRange,
   useMapSelectorLayerParentHidden,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { DeleteUndoButton } from '@/core/components/layers/right-panel/delete-undo-button';
+import { DeleteUndoButton } from '@/core/components/layers/delete-undo-button';
 import { LayersList } from './layers-list';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { logger } from '@/core/utils/logger';
@@ -84,7 +84,7 @@ export function SingleLayer({
   const reloadRequestedRef = useRef<boolean>(false);
 
   // Get store states
-  const { deleteLayer, reloadLayer, setSelectedLayerPath, zoomToLayerVisibleScale, getLayerDeleteInProgress } = useLayerStoreActions();
+  const { reloadLayer, setSelectedLayerPath, zoomToLayerVisibleScale } = useLayerStoreActions();
   const { setOrToggleLayerVisibility, toggleLegendCollapsed, reorderLayer } = useMapStoreActions();
   const mapId = useGeoViewMapId();
   const selectedLayerPath = useLayerSelectedLayerPath();
@@ -271,13 +271,6 @@ export function SingleLayer({
     // Log
     logger.logTraceUseCallback('SINGLE-LAYER - handleLayerClick');
 
-    // Check if there's a delete in progress on another layer
-    const layerDeleteInProgress = getLayerDeleteInProgress();
-    if (layerDeleteInProgress && layerDeleteInProgress !== layerPath) {
-      // Complete the delete for the other layer
-      deleteLayer(layerDeleteInProgress);
-    }
-
     // Only clickable if the layer status is processed or loaded
     if (!['processed', 'loaded'].includes(layerStatus!)) {
       return;
@@ -289,16 +282,7 @@ export function SingleLayer({
     // Set selected layer path
     setSelectedLayerPath(layerPath);
     showLayerDetailsPanel?.(layerId || '');
-  }, [
-    layerPath,
-    layerId,
-    layerStatus,
-    setSelectedLayerPath,
-    showLayerDetailsPanel,
-    getLayerDeleteInProgress,
-    deleteLayer,
-    blurOtherLayerButtons,
-  ]);
+  }, [layerPath, layerId, layerStatus, setSelectedLayerPath, showLayerDetailsPanel, blurOtherLayerButtons]);
 
   const handleArrowClick = useCallback(
     (direction: number) => {

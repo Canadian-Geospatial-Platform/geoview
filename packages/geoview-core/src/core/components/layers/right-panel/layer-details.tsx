@@ -72,7 +72,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { DeleteUndoButton } from '@/core/components/layers/right-panel/delete-undo-button';
+import { DeleteUndoButton } from '@/core/components/layers/delete-undo-button';
 import type { TypeContainerBox } from '@/core/types/global-types';
 
 // TODO: WCAG Issue #3108 - Fix layers.moreInfo button (button nested within a button)
