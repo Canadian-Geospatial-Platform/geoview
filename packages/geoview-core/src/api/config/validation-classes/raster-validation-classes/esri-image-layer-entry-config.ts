@@ -4,6 +4,7 @@ import type {
   TypeLayerMetadataEsri,
   TypeSourceImageEsriInitialConfig,
   TypeMetadataEsriRasterFunctionInfos,
+  TypeMosaicRule,
 } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
@@ -22,6 +23,13 @@ export interface EsriImageLayerEntryConfigProps extends AbstractBaseLayerEntryCo
 export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /** The initial raster function to apply to the layer. */
   #initialRasterFunction?: string;
+
+  // TODO: Add an option to set the initial mosaicRule in the config
+  /** The mosaic rule extracted from metadata for querying the correct raster item */
+  #mosaicRule?: TypeMosaicRule;
+
+  /** The initial time extent from metadata (start and end timestamps). */
+  #initialTimeExtent?: [number, number];
 
   /**
    * The class constructor.
@@ -62,6 +70,15 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     return super.getLayerMetadata() as TypeLayerMetadataEsri | undefined;
   }
 
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * @override
+   * @returns {TypeLayerMetadataEsri | undefined} The strongly-typed layer configuration specific to this layer entry config.
+   */
+  override getServiceMetadata(): TypeLayerMetadataEsri | undefined {
+    return super.getServiceMetadata() as TypeLayerMetadataEsri | undefined;
+  }
+
   // #endregion OVERRIDES
 
   // #region METHODS
@@ -81,6 +98,47 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    */
   getInitialRasterFunction(): string | undefined {
     return this.#initialRasterFunction;
+  }
+
+  /**
+   * Sets the initial raster function for this layer.
+   * Called during metadata processing to set default if not explicitly configured.
+   * @param {string} rasterFunction - The raster function name to set.
+   */
+  setInitialRasterFunction(rasterFunction: string): void {
+    this.#initialRasterFunction = rasterFunction;
+  }
+
+  /**
+   * Gets the mosaic rule for this layer.
+   * @returns {TypeMosaicRule | undefined} The mosaic rule or undefined.
+   */
+  getMosaicRule(): TypeMosaicRule | undefined {
+    return this.#mosaicRule;
+  }
+
+  /**
+   * Sets the mosaic rule for this layer.
+   * @param {TypeMosaicRule} mosaicRule - The mosaic rule to set.
+   */
+  setMosaicRule(mosaicRule: TypeMosaicRule): void {
+    this.#mosaicRule = mosaicRule;
+  }
+
+  /**
+   * Gets the initial time extent from metadata.
+   * @returns {[number, number] | undefined} The time extent as [startTime, endTime] in milliseconds or undefined.
+   */
+  getInitialTimeExtent(): [number, number] | undefined {
+    return this.#initialTimeExtent;
+  }
+
+  /**
+   * Sets the initial time extent from metadata.
+   * @param {[number, number]} timeExtent - The time extent as [startTime, endTime] in milliseconds.
+   */
+  setInitialTimeExtent(timeExtent: [number, number]): void {
+    this.#initialTimeExtent = timeExtent;
   }
 
   // #endregion METHODS

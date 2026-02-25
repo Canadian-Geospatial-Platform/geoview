@@ -953,6 +953,13 @@ export interface TypeLayerMetadataEsri {
   timeInfo: TimeDimensionESRI;
   geometryType: string;
   fields: TypeLayerMetadataFields[];
+
+  // Mosaic rules and sorting for ESRI Image Server
+  defaultMosaicMethod: string;
+  sortField: string;
+  sortAscending: boolean;
+  sortValue: string;
+  mosaicOperator: string;
 }
 
 export interface TypeLayerMetadataEsriDrawingInfo {
@@ -964,6 +971,52 @@ export interface TypeMetadataEsriRasterFunctionInfos {
   description: string;
   help: string;
 }
+
+/**
+ * Type definition for ESRI ImageServer mosaic rule parameters.
+ * Controls which raster items are selected from a mosaic dataset.
+ * @see https://developers.arcgis.com/rest/services-reference/enterprise/mosaic-rule.htm
+ */
+export type TypeMosaicRule = {
+  /** The mosaic method determines how the mosaic is created from the selected rasters. */
+  mosaicMethod:
+    | 'esriMosaicNone'
+    | 'esriMosaicCenter'
+    | 'esriMosaicNadir'
+    | 'esriMosaicViewpoint'
+    | 'esriMosaicAttribute'
+    | 'esriMosaicLockRaster'
+    | 'esriMosaicNorthwest'
+    | 'esriMosaicSeamline';
+
+  /** The mosaic operation defines how overlapping pixels are resolved. */
+  mosaicOperation?: 'MT_FIRST' | 'MT_LAST' | 'MT_MIN' | 'MT_MAX' | 'MT_MEAN' | 'MT_BLEND' | 'MT_SUM';
+
+  /** Field name used for attribute-based mosaic method. */
+  sortField?: string;
+
+  /** Value to match against sortField for item selection. */
+  sortValue?: string;
+
+  /** Sort order when using attribute-based mosaic. */
+  ascending?: boolean;
+
+  /** Object IDs of rasters to lock for display (used with esriMosaicLockRaster). */
+  lockRasterIds?: number[];
+
+  /** Viewpoint location for viewpoint-based mosaic method. */
+  viewpoint?: {
+    x: number;
+    y: number;
+    spatialReference?: { wkid: number };
+  };
+
+  /** WHERE clause to filter rasters in the mosaic. */
+  where?: string;
+
+  /** Multidimensional definition for filtering. */
+  multidimensionalDefinition?: unknown[];
+};
 
 export interface TypeLayerMetadataEsriExtent {
   spatialReference: TypeProjection;

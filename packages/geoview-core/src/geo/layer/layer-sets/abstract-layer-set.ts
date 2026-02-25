@@ -20,6 +20,7 @@ import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-v
 import type { LayerApi } from '@/geo/layer/layer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
+import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { AbstractBaseGVLayer, LayerNameChangedDelegate, LayerNameChangedEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
@@ -464,7 +465,7 @@ export abstract class AbstractLayerSet {
    * @returns True if the layer is of queryable type
    */
   protected static isQueryableType(layer: AbstractBaseGVLayer): boolean {
-    return layer instanceof AbstractGVVector || layer instanceof GVEsriDynamic || layer instanceof GVWMS;
+    return layer instanceof AbstractGVVector || layer instanceof GVEsriDynamic || layer instanceof GVWMS || layer instanceof GVEsriImage;
   }
 
   /**
