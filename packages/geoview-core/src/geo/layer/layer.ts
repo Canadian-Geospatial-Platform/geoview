@@ -137,6 +137,9 @@ import type { TypeTimeSliderProps } from '@/core/stores/store-interface-and-inti
  * @class LayerApi
  */
 export class LayerApi {
+  /** A zoom level buffer to guarantee that the calculations being done via the resolutions, inches per meter, dpi are more strict than not enough */
+  static readonly MIN_MAX_ZOOM_LEVEL_BUFFER = 0.21;
+
   /** Reference on the map viewer */
   mapViewer: MapViewer;
 
@@ -2298,20 +2301,28 @@ export class LayerApi {
     // in visible range. Inheritance has already been passed in the config and the group layer visibility will
     // be handled in the map-viewer's handleMapZoomEnd by checking the children visibility
     if ((layerConfig.getInitialSettings()?.maxZoom || layerConfig.getMaxScale()) && !(gvLayer instanceof GVGroupLayer)) {
-      let maxScaleZoomLevel = this.mapViewer.getMapZoomFromScale(layerConfig.getMaxScale());
-      maxScaleZoomLevel = maxScaleZoomLevel ? Math.ceil(maxScaleZoomLevel * 100) / 100 : undefined;
-      const maxZoom = Math.min(layerConfig.getInitialSettings()?.maxZoom ?? Infinity, maxScaleZoomLevel ?? Infinity);
+      // Calculate the map zoom for the corresponding max scale
+      let scaleZoomLevel = this.mapViewer.getMapZoomFromScale(layerConfig.getMaxScale()) ?? Infinity;
+
+      // Add a buffer, because the calculations are sometimes a bit off
+      scaleZoomLevel -= LayerApi.MIN_MAX_ZOOM_LEVEL_BUFFER;
+
+      const maxZoom = Math.min(layerConfig.getInitialSettings()?.maxZoom ?? Infinity, scaleZoomLevel);
       gvLayer.setMaxZoom(maxZoom);
     }
 
     if ((layerConfig.getInitialSettings()?.minZoom || layerConfig.getMinScale()) && !(gvLayer instanceof GVGroupLayer)) {
-      let minScaleZoomLevel = this.mapViewer.getMapZoomFromScale(layerConfig.getMinScale());
-      minScaleZoomLevel = minScaleZoomLevel ? Math.ceil(minScaleZoomLevel * 100) / 100 : undefined;
-      const minZoom = Math.max(layerConfig.getInitialSettings()?.minZoom ?? -Infinity, minScaleZoomLevel ?? -Infinity);
+      // Calculate the map zoom for the corresponding min scale
+      let scaleZoomLevel = this.mapViewer.getMapZoomFromScale(layerConfig.getMinScale()) ?? -Infinity;
+
+      // Add a buffer, because the calculations are sometimes a bit off
+      scaleZoomLevel += LayerApi.MIN_MAX_ZOOM_LEVEL_BUFFER;
+
+      const minZoom = Math.max(layerConfig.getInitialSettings()?.minZoom ?? -Infinity, scaleZoomLevel);
       gvLayer.setMinZoom(minZoom);
     }
 
-    const zoom = this.mapViewer.getView().getZoom() as number;
+    const zoom = this.mapViewer.getView().getZoom()!;
     const inVisibleRange = gvLayer.inVisibleRange(zoom);
     MapEventProcessor.setLayerInVisibleRange(this.getMapId(), gvLayer.getLayerPath(), inVisibleRange);
   }

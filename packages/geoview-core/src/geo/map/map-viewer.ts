@@ -92,8 +92,16 @@ export class MapViewer {
   /** Maximum delay to wait until the layers get processes/loaded/error state, should be high as other timeouts should expire before this.. */
   static readonly #MAX_DELAY_TO_WAIT_ON_MAP = 120 * 1000; // 2 minutes
 
-  // The default densification number when forming layer extents, to make ture to compensate for earth curvature
+  /** Default densification number when forming layer extents, to make ture to compensate for earth curvature */
   static DEFAULT_STOPS: number = 25;
+
+  /** Default DPI values */
+  static readonly DEFAULT_DPI_OPEN_LAYERS_LEGACY: number = 25.4 / 0.28; // <-- 90.71428571428571
+  static readonly DEFAULT_DPI_MODERN: number = 96; // <--- Modern web maps almost universally assume 96 DPI for screens
+  static DEFAULT_DPI: number = MapViewer.DEFAULT_DPI_MODERN;
+
+  /** Default inches per meter used by OpenLayers */
+  static readonly DEFAULT_INCHES_PER_METER = 39.3700787;
 
   // TODO: REFACTOR UI - If we do not put a high timeout, ui start but the function getMapCoordinateFromPixel
   // TD.CONT: AND scale component return null and fails. To patch, we add an higher time out for promise.
@@ -748,35 +756,41 @@ export class MapViewer {
     const mpu = projection.getMetersPerUnit();
     if (!mpu) return undefined;
 
-    const dpi = 25.4 / 0.28; // OpenLayers default DPI
-
     // Get resolution for zoom level
     const resolution = this.getView().getResolutionForZoom(zoom);
 
     // Calculate scale from resolution
     // Scale = Resolution * metersPerUnit * inchesPerMeter * DPI
-    return resolution * mpu * 39.37 * dpi;
+    return resolution * mpu * MapViewer.DEFAULT_INCHES_PER_METER * MapViewer.DEFAULT_DPI;
   }
 
   /**
-   * Converts a map scale to a zoom level.
-   * @param {number | undefined} targetScale - The desired scale (e.g. 50000 for 1:50,000)
-   * @param {number?} [dpiValue] - The optional DPI value to use for calculation
-   * @returns {number} The closest zoom level for the given scale
+   * Converts a map scale denominator (1:X) into the corresponding OpenLayers resolution.
+   * Resolution is computed using: resolution = scale / (metersPerUnit * inchesPerMeter * dpi)
+   * @param targetScale - The scale denominator (e.g., 50000000 for 1:50,000,000). Optional; returns undefined if not provided.
+   * @param dpiValue - Dots per inch to use for conversion. Defaults to `MapViewer.DEFAULT_DPI` (usually 96 or 90.714 depending on standard).
+   * @returns The map resolution in map units per pixel, or `undefined` if `targetScale` is not provided.
    */
-  getMapZoomFromScale(targetScale: number | undefined, dpiValue?: number): number | undefined {
+  getMapResolutionFromScale(targetScale: number | undefined, dpiValue: number = MapViewer.DEFAULT_DPI): number | undefined {
     if (!targetScale) return undefined;
     const projection = this.getView().getProjection();
-    const mpu = projection.getMetersPerUnit();
-    const dpi = dpiValue ?? 25.4 / 0.28; // OpenLayers' default DPI
-
-    // Calculate resolution from scale
-    if (!mpu) return undefined;
+    const mpu = projection.getMetersPerUnit()!;
 
     // Resolution = Scale / ( metersPerUnit * inchesPerMeter * DPI )
-    const targetResolution = targetScale / (mpu * 39.37 * dpi);
+    return targetScale / (mpu * MapViewer.DEFAULT_INCHES_PER_METER * dpiValue);
+  }
 
-    return this.getView().getZoomForResolution(targetResolution) || undefined;
+  /**
+   * Converts a map scale denominator (1:X) into the corresponding OpenLayers zoom level.
+   * Uses `getMapResolutionFromScale` internally and then computes the zoom for that resolution.
+   * @param targetScale - The scale denominator (e.g., 50000000 for 1:50,000,000). Optional; returns undefined if not provided.
+   * @param dpiValue - Dots per inch to use for conversion. Defaults to `MapViewer.DEFAULT_DPI`.
+   * @returns The OpenLayers zoom level corresponding to the scale, or `undefined` if `targetScale` is not provided.
+   */
+  getMapZoomFromScale(targetScale: number | undefined, dpiValue: number = MapViewer.DEFAULT_DPI): number | undefined {
+    const resolution = this.getMapResolutionFromScale(targetScale, dpiValue);
+    if (!resolution) return undefined;
+    return this.getView().getZoomForResolution(resolution);
   }
 
   /**

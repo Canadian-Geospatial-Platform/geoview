@@ -113,6 +113,26 @@ export class GeoViewError extends Error {
 }
 
 /**
+ * Error thrown when a configuration schema has a wrong path.
+ * @extends {GeoViewError}
+ */
+export class ConfigSchemaWrongPathError extends GeoViewError {
+  /**
+   * Creates an instance of ConfigSchemaWrongPathError.
+   * @param {string} schemaPath - The wrong schema path
+   */
+  constructor(schemaPath: string) {
+    super('validation.schema.wrongPath', [schemaPath]);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'ConfigSchemaWrongPathError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, ConfigSchemaWrongPathError.prototype);
+  }
+}
+
+/**
  * Error thrown when a map viewer with a specified ID is not found.
  * @extends {GeoViewError}
  */
@@ -530,5 +550,104 @@ export class LayerConfigNotFoundError extends GeoViewError {
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerConfigNotFoundError.prototype);
+  }
+}
+
+/**
+ * Error thrown when a Layer fails to load on the map.
+ */
+export class LayerFailedToLoadError extends GeoViewError {
+  /**
+   * Creates an instance of LayerFailedToLoadError.
+   * @param {string} layerName - The layer name of the layer that failed to load.
+   */
+  constructor(layerName: string) {
+    super('layers.errorNotLoaded', [layerName]);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'LayerFailedToLoadError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerFailedToLoadError.prototype);
+  }
+}
+
+/**
+ * Error thrown when a Layer Image fails to load on the map.
+ */
+export class LayerImageFailedToLoadError extends GeoViewError {
+  /**
+   * Creates an instance of LayerImageFailedToLoadError.
+   * @param {string} layerName - The layer name of the layer image that failed to load.
+   */
+  constructor(layerName: string) {
+    super('layers.errorImageLoad', [layerName]);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'LayerImageFailedToLoadError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerImageFailedToLoadError.prototype);
+  }
+}
+
+/**
+ * Error thrown when a Layer Image fails to load on the map due to its requested width being too big.
+ */
+export class LayerImageFailedToLoadWidthTooBigError extends GeoViewError {
+  /**
+   * Creates an instance of LayerImageFailedToLoadWidthTooBigError.
+   * @param layerName - The layer name of the layer image that failed to load.
+   * @param requestedHeight - The requested width for the image
+   * @param maxHeight - The maximum supported width for the generated image by the service
+   */
+  constructor(layerName: string, requestedWidth: number, maxWidth: number) {
+    super('layers.errorImageLoadSizeLimitExceededWidth', [layerName, requestedWidth, maxWidth]);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'LayerImageFailedToLoadWidthTooBigError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerImageFailedToLoadWidthTooBigError.prototype);
+  }
+}
+
+/**
+ * Error thrown when a Layer Image fails to load on the map due to its requested height being too big.
+ */
+export class LayerImageFailedToLoadHeightTooBigError extends GeoViewError {
+  /**
+   * Creates an instance of LayerImageFailedToLoadHeightTooBigError.
+   * @param layerName - The layer name of the layer image that failed to load.
+   * @param requestedHeight - The requested height for the image
+   * @param maxHeight - The maximum supported height for the generated image by the service
+   */
+  constructor(layerName: string, requestedHeight: number, maxHeight: number) {
+    super('layers.errorImageLoadSizeLimitExceededHeight', [layerName, requestedHeight, maxHeight]);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'LayerImageFailedToLoadHeightTooBigError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerImageFailedToLoadHeightTooBigError.prototype);
+  }
+}
+
+/**
+ * Error thrown when a Layer Image fails to load on the map due to no image returned.
+ */
+export class LayerImageFailedNoImageError extends GeoViewError {
+  /**
+   * Creates an instance of LayerImageFailedNoImageError.
+   * @param layerName - The layer name of the layer image that returned an empty image on load.
+   */
+  constructor(layerName: string) {
+    super('layers.errorImageLoadNoImageReturned', [layerName]);
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'LayerImageFailedNoImageError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerImageFailedNoImageError.prototype);
   }
 }

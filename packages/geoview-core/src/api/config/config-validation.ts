@@ -38,7 +38,7 @@ import type { GroupLayerEntryConfigProps } from '@/api/config/validation-classes
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 
 import { LayerMetadataAccessPathMandatoryError, LayerMissingGeoviewLayerIdError } from '@/core/exceptions/layer-exceptions';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { ConfigSchemaWrongPathError, GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { deepClone, deepMerge } from '@/core/utils/utilities';
 
@@ -95,7 +95,7 @@ export class ConfigValidation {
 
       if (!validate) {
         // Callback about the error
-        onErrorCallback('validation.schema.wrongPath', [schemaPath]);
+        onErrorCallback(new ConfigSchemaWrongPathError(schemaPath));
         return false;
       }
 
@@ -419,4 +419,4 @@ export class ConfigValidation {
   }
 }
 
-export type ErrorCallbackDelegate = (errorKey: string, params: string[]) => void;
+export type ErrorCallbackDelegate = (error: GeoViewError) => void;
