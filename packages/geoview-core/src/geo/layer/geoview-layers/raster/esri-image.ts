@@ -266,6 +266,11 @@ export class EsriImage extends AbstractGeoViewRaster {
     // Get the source
     const source = layerConfig.getSource();
 
+    // Get mosaic rule and time extent
+    const mosaicRule = layerConfig.getMosaicRule();
+    const timeExtent = layerConfig.getInitialTimeExtent();
+
+    //TODO Fix these depricated parameters?
     const sourceOptions: SourceOptions = {
       url: layerConfig.getDataAccessPath(),
       attributions: layerConfig.getAttributions(),
@@ -276,9 +281,23 @@ export class EsriImage extends AbstractGeoViewRaster {
         ...(layerConfig.getInitialRasterFunction() && {
           renderingRule: JSON.stringify({ rasterFunction: layerConfig.getInitialRasterFunction() }),
         }),
+        ...(mosaicRule && { mosaicRule: JSON.stringify(mosaicRule) }),
+        ...(timeExtent && { time: `${timeExtent[0]},${timeExtent[1]}` }),
       },
       crossOrigin: source.crossOrigin ?? 'Anonymous',
       projection: layerConfig.getProjectionWithEPSG(),
+      imageLoadFunction: (image, src) => {
+        // GV 'time' parameter is added above. OpenLayers adds a TIME parameter which we remove.
+        // GV If set as TIME, then OpenLayers TIME will overwrite ours
+        let finalSrc = src;
+
+        // Remove any TIME parameter that OpenLayers added
+        finalSrc = finalSrc.replace(/[&?]TIME=[^&]*/g, '');
+
+        // Get the actual HTMLImageElement from the ImageWrapper
+        const imageElement = image.getImage() as HTMLImageElement;
+        imageElement.src = finalSrc;
+      },
     };
 
     // Create the source
