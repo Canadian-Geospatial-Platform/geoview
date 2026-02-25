@@ -560,9 +560,10 @@ export class LayerFeatureParsingError extends LayerError {
    * Constructor to initialize the LayerFeatureParsingError with the layer ID.
    * @param {string} geoviewLayerId - The ID of the GeoView layer with parsing errors.
    * @param {string | undefined} layerName - The layer name.
+   * @param {Error} cause - The underlying error that caused this exception (e.g., network failure or timeout).
    */
-  constructor(geoviewLayerId: string, layerName: string | undefined) {
-    super(geoviewLayerId, 'error.layer.featureParsingError', [layerName || geoviewLayerId]);
+  constructor(geoviewLayerId: string, layerName: string | undefined, cause?: Error) {
+    super(geoviewLayerId, 'error.layer.featureParsingError', [layerName || geoviewLayerId], cause);
 
     // Ensure correct inheritance (important for transpilation targets)
     Object.setPrototypeOf(this, LayerFeatureParsingError.prototype);

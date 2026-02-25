@@ -33,12 +33,12 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * The class constructor.
-   * @param {EsriImageLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+   * @param layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: EsriImageLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.ESRI_IMAGE, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
 
-    if (layerConfig.source?.rasterFunction) this.#initialRasterFunction = layerConfig.source.rasterFunction;
+    this.#initialRasterFunction = EsriImageLayerEntryConfig.getClassOrTypeSourceInitialRasterFunction(layerConfig);
   }
 
   // #region OVERRIDES
@@ -46,7 +46,6 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    * @returns {TypeEsriImageLayerConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
    */
   override getGeoviewLayerConfig(): TypeEsriImageLayerConfig {
     return super.getGeoviewLayerConfig() as TypeEsriImageLayerConfig;
@@ -54,7 +53,7 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeSourceImageEsriInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+   * @returns The strongly-typed source configuration specific to this layer entry config.
    * @override
    */
   override getSource(): TypeSourceImageEsriInitialConfig {
@@ -72,8 +71,7 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
-   * @returns {TypeLayerMetadataEsri | undefined} The strongly-typed layer configuration specific to this layer entry config.
+   * @returns The strongly-typed layer configuration specific to this layer entry config.
    */
   override getServiceMetadata(): TypeLayerMetadataEsri | undefined {
     return super.getServiceMetadata() as TypeLayerMetadataEsri | undefined;
@@ -83,18 +81,17 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   // #region METHODS
 
+  /**
+   * Gets the raster function infos from the layer metadata.
+   * @returns The metadata raster function infos or undefined.
+   */
   getRasterFunctionInfos(): TypeMetadataEsriRasterFunctionInfos[] | undefined {
-    const metadata = this.getLayerMetadata();
-
-    if (metadata && metadata.rasterFunctionInfos) {
-      return metadata.rasterFunctionInfos;
-    }
-    return;
+    return this.getLayerMetadata()?.rasterFunctionInfos;
   }
 
   /**
    * Gets the active raster function identifier
-   * @returns {string | undefined} The raster function identifier
+   * @returns The raster function identifier
    */
   getInitialRasterFunction(): string | undefined {
     return this.#initialRasterFunction;
@@ -103,7 +100,7 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Sets the initial raster function for this layer.
    * Called during metadata processing to set default if not explicitly configured.
-   * @param {string} rasterFunction - The raster function name to set.
+   * @param rasterFunction - The raster function name to set.
    */
   setInitialRasterFunction(rasterFunction: string): void {
     this.#initialRasterFunction = rasterFunction;
@@ -111,7 +108,7 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Gets the mosaic rule for this layer.
-   * @returns {TypeMosaicRule | undefined} The mosaic rule or undefined.
+   * @returns The mosaic rule or undefined.
    */
   getMosaicRule(): TypeMosaicRule | undefined {
     return this.#mosaicRule;
@@ -119,7 +116,7 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Sets the mosaic rule for this layer.
-   * @param {TypeMosaicRule} mosaicRule - The mosaic rule to set.
+   * @param mosaicRule - The mosaic rule to set.
    */
   setMosaicRule(mosaicRule: TypeMosaicRule): void {
     this.#mosaicRule = mosaicRule;
@@ -127,7 +124,7 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Gets the initial time extent from metadata.
-   * @returns {[number, number] | undefined} The time extent as [startTime, endTime] in milliseconds or undefined.
+   * @returns The time extent as [startTime, endTime] in milliseconds or undefined.
    */
   getInitialTimeExtent(): [number, number] | undefined {
     return this.#initialTimeExtent;
@@ -135,7 +132,7 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Sets the initial time extent from metadata.
-   * @param {[number, number]} timeExtent - The time extent as [startTime, endTime] in milliseconds.
+   * @param timeExtent - The time extent as [startTime, endTime] in milliseconds.
    */
   setInitialTimeExtent(timeExtent: [number, number]): void {
     this.#initialTimeExtent = timeExtent;
@@ -149,13 +146,26 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * Type guard that checks whether the given configuration (class instance or plain object)
    * represents an Esri Image layer type.
    * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
-   * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
+   * @param layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
    * @returns `true` if the config is for an Esri Image layer; otherwise `false`.
    * @static
    */
   static isClassOrTypeEsriImage(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeEsriImageLayerConfig {
     // Redirect
     return this.isClassOrTypeSchemaTag(layerConfig, CONST_LAYER_TYPES.ESRI_IMAGE);
+  }
+
+  /**
+   * Helper function to support when a layerConfig is either a class instance or a regular json object.
+   * @param layerConfig - The layer config class instance or regular json object.
+   * @returns The raster function or undefined.
+   */
+  static getClassOrTypeSourceInitialRasterFunction(layerConfig: ConfigClassOrType | undefined): string | undefined {
+    if (layerConfig instanceof EsriImageLayerEntryConfig) {
+      return layerConfig.getInitialRasterFunction();
+    }
+    // Try to narrow the type and return, worst case it will be undefined
+    return (layerConfig as EsriImageLayerEntryConfigProps)?.source?.rasterFunction;
   }
 
   // #endregion STATIC METHODS

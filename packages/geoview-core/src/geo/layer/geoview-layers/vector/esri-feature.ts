@@ -244,8 +244,8 @@ export class EsriFeature extends AbstractGeoViewVector {
       }
 
       return allFeatures;
-    } catch {
-      throw new LayerFeatureParsingError(layerConfig.layerId, layerConfig.getLayerNameCascade());
+    } catch (error: unknown) {
+      throw new LayerFeatureParsingError(layerConfig.layerId, layerConfig.getLayerNameCascade(), formatError(error));
     }
   }
 

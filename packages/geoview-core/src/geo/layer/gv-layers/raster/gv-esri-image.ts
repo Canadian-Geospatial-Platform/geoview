@@ -562,9 +562,8 @@ export class GVEsriImage extends AbstractGVRaster {
   /**
    * Gets the list of rasterFunctionInfos that are available in the ImageServer
    * @returns {TypeMetadataEsriRasterFunctionInfo[]} The ImageServer's rasterFunctionInfos
-   * @protected
    */
-  protected getMetadataRasterFunctionInfos(): TypeMetadataEsriRasterFunctionInfos[] | undefined {
+  getMetadataRasterFunctionInfos(): TypeMetadataEsriRasterFunctionInfos[] | undefined {
     return this.getLayerConfig().getRasterFunctionInfos();
   }
 

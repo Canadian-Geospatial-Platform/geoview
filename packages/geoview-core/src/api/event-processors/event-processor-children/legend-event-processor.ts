@@ -10,6 +10,8 @@ import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-pr
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
+import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -174,37 +176,24 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Retrieves the layer's rasterFunctionInfos
+   * Retrieves the layer's rasterFunctionInfos and returns it
    *
-   * @param {string} mapId - The unique identifier of the map instance.
-   * @param {string} layerPath - The path to the layer.
-   * @returns {TypeMetadataEsriRasterFunctionInfos[] | undefined} - The projection code of the layer, or `undefined` if not available.
-   * @description
-   * This method fetches the Geoview layer for the specified layer path and checks if it has a `getMetadataRasterFunctionInfos` method.
-   * If the method exists, it retrieves the rasterFunctionInfos and returns the list of TypeMetadataEsriRasterFunctionInfo.
-   * If the rasterFunctionInfos is not available, the method returns `undefined`.
-   * @static
+   * @param mapId - The unique identifier of the map instance.
+   * @param layerPath - The path to the layer.
+   * @returns The raster function infos of the layer, or `undefined` if not available.
    */
   static getLayerRasterFunctionInfos(mapId: string, layerPath: string): TypeMetadataEsriRasterFunctionInfos[] | undefined {
     const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
+    if (!geoviewLayer || !(geoviewLayer instanceof GVEsriImage)) return;
 
-    if (
-      geoviewLayer &&
-      'getMetadataRasterFunctionInfos' in geoviewLayer &&
-      typeof geoviewLayer.getMetadataRasterFunctionInfos === 'function'
-    ) {
-      return geoviewLayer.getMetadataRasterFunctionInfos();
-    }
-
-    return undefined;
+    return geoviewLayer.getMetadataRasterFunctionInfos();
   }
 
   /**
    * Gets the active raster function for a layer.
-   * @param {string} mapId - The map identifier.
-   * @param {string} layerPath - The layer path.
-   * @returns {string | undefined} The active raster function identifier.
-   * @static
+   * @param mapId - The map identifier.
+   * @param layerPath - The layer path.
+   * @returns The active raster function identifier.
    */
   static getLayerRasterFunction(mapId: string, layerPath: string): string | undefined {
     return LegendEventProcessor.getLegendLayerInfo(mapId, layerPath)?.rasterFunction;
@@ -212,11 +201,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Sets the active raster function for a layer.
-   * @param {string} mapId - The map identifier.
-   * @param {string} layerPath - The layer path.
-   * @param {string | undefined} rasterFunctionId - The raster function identifier to set.
-   * @returns {void}
-   * @static
+   * @param mapId - The map identifier.
+   * @param layerPath - The layer path.
+   * @param rasterFunctionId - The raster function identifier to set.
    */
   static setLayerRasterFunction(mapId: string, layerPath: string, rasterFunctionId: string | undefined): void {
     MapEventProcessor.getMapViewerLayerAPI(mapId).setLayerRasterFunction(layerPath, rasterFunctionId);
@@ -224,11 +211,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Updates the active raster function for a layer in the store.
-   * @param {string} mapId - The map identifier.
-   * @param {string} layerPath - The layer path.
-   * @param {string | undefined} rasterFunctionId - The raster function identifier to set.
-   * @returns {void}
-   * @static
+   * @param mapId - The map identifier.
+   * @param layerPath - The layer path.
+   * @param rasterFunctionId - The raster function identifier to set.
    */
   static setLayerRasterFunctionInStore(mapId: string, layerPath: string, rasterFunctionId: string | undefined): void {
     // Find the layer for the given layer path
@@ -244,28 +229,23 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Gets the raster function previews for the ESRI image layer
-   * @param {string} mapId - The map identifier.
-   * @param {string} layerPath - The layer path.
-   * @returns {Map<string, Promise<string>>} The raster function previews
-   * @static
+   * Gets the raster function previews for the ESRI image layer.
+   * @param mapId - The map identifier.
+   * @param layerPath - The layer path.
+   * @returns The raster function previews.
    */
   static getLayerRasterFunctionPreviews(mapId: string, layerPath: string): Map<string, Promise<string>> {
     const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
+    if (!geoviewLayer || !(geoviewLayer instanceof GVEsriImage)) return new Map<string, Promise<string>>();
 
-    if (geoviewLayer && 'getRasterFunctionPreviews' in geoviewLayer && typeof geoviewLayer.getRasterFunctionPreviews === 'function') {
-      return geoviewLayer.getRasterFunctionPreviews();
-    }
-
-    return new Map();
+    return geoviewLayer.getRasterFunctionPreviews();
   }
 
   /**
-   * Gets the available settings for a layer
-   * @param {string} mapId - The map identifier
-   * @param {string} layerPath - The layer path
-   * @returns {string[]} Array of available setting types
-   * @static
+   * Gets the available settings for a layer.
+   * @param mapId - The map identifier.
+   * @param layerPath - The layer path.
+   * @returns Array of available setting types.
    */
   static getLayerSettings(mapId: string, layerPath: string): string[] {
     const settings: string[] = [];
@@ -273,12 +253,10 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const layer = LegendEventProcessor.getLegendLayerInfo(mapId, layerPath);
     if (!layer) return settings;
 
-    // Check for ESRI Image with raster functions
-    if (layer.type === CONST_LAYER_TYPES.ESRI_IMAGE) {
-      const rasterFunctionInfos = this.getLayerRasterFunctionInfos(mapId, layerPath);
-      if (rasterFunctionInfos && rasterFunctionInfos.length > 0) {
-        settings.push('rasterFunction');
-      }
+    // Check if raster function infos are present
+    const rasterFunctionInfos = this.getLayerRasterFunctionInfos(mapId, layerPath);
+    if (rasterFunctionInfos && rasterFunctionInfos.length > 0) {
+      settings.push('rasterFunction');
     }
 
     // Add other layer types with settings here
@@ -756,10 +734,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           icons: icons || [],
           url: layerConfig.getMetadataAccessPath(),
           // TODO: Encapsulate rasterFunction and possibly other 'settings' into their own object
-          rasterFunction:
-            'getInitialRasterFunction' in layerConfig && typeof layerConfig.getInitialRasterFunction === 'function'
-              ? layerConfig.getInitialRasterFunction()
-              : undefined,
+          rasterFunction: layerConfig instanceof EsriImageLayerEntryConfig ? layerConfig.getInitialRasterFunction() : undefined,
         };
 
         // If layer is regular (not group)
