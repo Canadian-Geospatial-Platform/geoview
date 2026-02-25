@@ -1,91 +1,93 @@
-import WebGLTile from 'ol/layer/WebGLTile';
-import type GeoTIFFSource from 'ol/source/GeoTIFF';
+import TileLayer from 'ol/layer/Tile';
+import type { Options as TileOptions } from 'ol/layer/BaseTile';
+import type WMTSSource from 'ol/source/WMTS';
 import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection } from 'ol/proj';
 
-import type { GeoTIFFLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/geotiff-layer-entry-config';
+import type {
+  OgcWmtsLayerEntryConfig,
+  TypeMetadataWMTSLayer,
+} from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
 import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
-import { type TypeLegend } from '@/index';
+import type { TypeLegend } from '@/index';
+import { Fetch } from '@/core/utils/fetch-helper';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
-import { Fetch } from '@/core/utils/fetch-helper';
 
 /**
- * Manages a GeoTIFF layer.
- * @exports
- * @class GVGeoTIFF
+ * Manages a WMTS layer.
+ *
+ * @class GVWMTS
  */
-export class GVGeoTIFF extends AbstractGVTile {
+export class GVWMTS extends AbstractGVTile {
   /**
-   * Constructs a GVGeoTIFF layer to manage an OpenLayer layer.
-   * @param {GeoTIFFSource} olSource - The OpenLayer source.
-   * @param {GeoTIFFLayerEntryConfig} layerConfig - The layer configuration.
+   * Constructs a GVWMTS layer to manage an OpenLayer layer.
+   * @param {WMTSSource} olSource - The OpenLayer source.
+   * @param {OgcWmtsLayerEntryConfig} layerConfig - The layer configuration.
    */
-  constructor(olSource: GeoTIFFSource, layerConfig: GeoTIFFLayerEntryConfig) {
-    // Call parent constructor with source
+  constructor(olSource: WMTSSource, layerConfig: OgcWmtsLayerEntryConfig) {
     super(olSource, layerConfig);
 
-    // Create WebGLTile layer
-    const olLayer = new WebGLTile({
-      source: olSource,
-      properties: { layerConfig },
-      className: `ol-layer-${layerConfig.layerId}`,
-    });
+    // Create the tile layer options.
+    const tileLayerOptions: TileOptions<WMTSSource> = { source: olSource };
 
-    // Set the OpenLayer layer
-    this.setOLLayer(olLayer);
+    // Init the layer options with initial settings
+    AbstractGVTile.initOptionsWithInitialSettings(tileLayerOptions, layerConfig);
+
+    // Create and set the OpenLayer layer
+    this.setOLLayer(new TileLayer(tileLayerOptions));
   }
 
   // #region OVERRIDES
 
   /**
    * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
-   * @override
-   * @returns {WebGLTile} The strongly-typed OpenLayers type.
+   *
+   * @returns The strongly-typed OpenLayers type.
    */
-  override getOLLayer(): WebGLTile {
+  override getOLLayer(): TileLayer<WMTSSource> {
     // Call parent and cast
-    return super.getOLLayer() as WebGLTile;
+    return super.getOLLayer() as TileLayer<WMTSSource>;
   }
 
   /**
    * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
-   * @override
-   * @returns {GeoTIFFSource} The GeoTIFF source instance associated with this layer.
+   *
+   * @returns The WMTS source instance associated with this layer.
    */
-  override getOLSource(): GeoTIFFSource {
+  override getOLSource(): WMTSSource {
     // Get source from OL
-    return super.getOLSource() as GeoTIFFSource;
+    return super.getOLSource() as WMTSSource;
   }
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
-   * @returns {GeoTIFFLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
-  override getLayerConfig(): GeoTIFFLayerEntryConfig {
+  override getLayerConfig(): OgcWmtsLayerEntryConfig {
     // Call parent and cast
-    return super.getLayerConfig() as GeoTIFFLayerEntryConfig;
+    return super.getLayerConfig() as OgcWmtsLayerEntryConfig;
   }
 
   /**
    * Overrides the way to get the bounds for this layer type.
-   * @param {OLProjection} projection - The projection to get the bounds into.
-   * @param {number} stops - The number of stops to use to generate the extent.
-   * @returns {Extent | undefined} The layer bounding box.
-   * @override
+   *
+   * @param projection - The projection to get the bounds into.
+   * @param stops - The number of stops to use to generate the extent.
+   * @returns The layer bounding box.
    */
   override onGetBounds(projection: OLProjection, stops: number): Extent | undefined {
-    // Get the source
-    const source = this.getOLSource();
+    // Get the layer
+    const layer = this.getOLLayer() as TileLayer<WMTSSource> | undefined;
 
     // Get the source projection
-    const sourceProjection = source?.getProjection() || undefined;
+    const sourceProjection = this.getOLSource()?.getProjection() || undefined;
 
     // Get the layer bounds
-    let sourceExtent = source?.getTileGrid()?.getExtent();
+    let sourceExtent = layer?.getSource()?.getTileGrid()?.getExtent();
 
     // If both found
     if (sourceExtent && sourceProjection) {
@@ -100,17 +102,21 @@ export class GVGeoTIFF extends AbstractGVTile {
 
   /**
    * Gets the legend image of a layer.
-   * @param {GeoTIFFLayerEntryConfig} layerConfig - The layer configuration.
-   * @returns {blob} A promise of an image blob
-   * @private
+   *
+   * @param layerConfig - The layer configuration.
+   * @returns A promise of an image blob
    */
-  static #getLegendImage(layerConfig: GeoTIFFLayerEntryConfig): Promise<string | ArrayBuffer | null> {
+  static #getLegendImage(layerConfig: OgcWmtsLayerEntryConfig): Promise<string | ArrayBuffer | null> {
     const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
-      const metadata = layerConfig.getServiceMetadata();
-      // If there is a thumbnail asset in the metadata, use it as legend
-      if (metadata?.assets?.thumbnail?.href) {
-        const legendUrl = metadata.assets.thumbnail.href;
+      const metadata = layerConfig.getLayerMetadata();
+      const layer = metadata?.Layer as TypeMetadataWMTSLayer | undefined;
+      const foundStyle = Array.isArray(layer?.Style)
+        ? layer.Style.find((style) => style['@attributes'].isDefault === 'true') || layer.Style[0]
+        : layer?.Style;
 
+      const legendUrl = foundStyle?.LegendURL?.['@attributes']?.['xlink:href'];
+
+      if (legendUrl) {
         // Fetch the blob
         Fetch.fetchBlob(legendUrl, { credentials: 'omit' })
           .then((blob) => {
@@ -131,9 +137,9 @@ export class GVGeoTIFF extends AbstractGVTile {
   }
 
   /**
-   * Overrides the fetching of the legend for a geotiff layer.
-   * @override
-   * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
+   * Overrides the fetching of the legend for a WMTS layer.
+   *
+   * @returns The legend of the layer or null.
    */
   override async onFetchLegend(): Promise<TypeLegend | null> {
     // Get the config
@@ -141,7 +147,7 @@ export class GVGeoTIFF extends AbstractGVTile {
 
     try {
       // Get legend image
-      const legendImage = await GVGeoTIFF.#getLegendImage(layerConfig);
+      const legendImage = await GVWMTS.#getLegendImage(layerConfig);
 
       // If legend image was read
       if (legendImage) {
@@ -174,7 +180,7 @@ export class GVGeoTIFF extends AbstractGVTile {
 
           // Return legend information
           return {
-            type: CONST_LAYER_TYPES.GEOTIFF,
+            type: CONST_LAYER_TYPES.WMTS,
             legend: drawingCanvas,
           };
         }
@@ -182,7 +188,7 @@ export class GVGeoTIFF extends AbstractGVTile {
 
       // No good
       return {
-        type: CONST_LAYER_TYPES.GEOTIFF,
+        type: CONST_LAYER_TYPES.WMTS,
         legend: null,
       };
     } catch (error: unknown) {

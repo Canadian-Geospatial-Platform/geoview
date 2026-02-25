@@ -853,6 +853,7 @@ export abstract class ConfigBaseClass {
       case CONST_LAYER_TYPES.WMS:
         return CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE;
       case CONST_LAYER_TYPES.XYZ_TILES:
+      case CONST_LAYER_TYPES.WMTS:
       case CONST_LAYER_TYPES.GEOTIFF:
       case CONST_LAYER_TYPES.VECTOR_TILES:
         return CONST_LAYER_ENTRY_TYPES.RASTER_TILE;
@@ -1190,6 +1191,7 @@ export type TypeLayerEntryShell = {
   layerId?: number | string;
   layerName?: string;
   tileGrid?: TypeTileGrid;
+  tileMatrixSet?: string;
   subLayers?: TypeLayerEntryShell[];
   source?: TypeLayerEntryShellSource;
   geoviewLayerConfig?: TypeGeoviewLayerConfig;
