@@ -30,7 +30,8 @@ type LayerTypesKey =
   | 'OGC_FEATURE'
   | 'WFS'
   | 'WKB'
-  | 'WMS';
+  | 'WMS'
+  | 'WMTS';
 
 /** Definition of the geoview layer types accepted by the viewer. */
 export type TypeGeoviewLayerType =
@@ -45,6 +46,7 @@ export type TypeGeoviewLayerType =
   | 'ogcFeature'
   | 'ogcWfs'
   | 'ogcWms'
+  | 'ogcWmts'
   | 'vectorTiles'
   | 'WKB'
   | 'xyzTiles';
@@ -70,6 +72,7 @@ export const CONST_LAYER_TYPES: Record<LayerTypesKey, TypeGeoviewLayerType> = {
   WFS: 'ogcWfs',
   WKB: 'WKB',
   WMS: 'ogcWms',
+  WMTS: 'ogcWmts',
 };
 
 /** Type used to configure the feature info for a layer. */
@@ -154,6 +157,7 @@ export const CONST_GEOVIEW_SCHEMA_BY_TYPE: Record<TypeGeoviewLayerType, string> 
   ogcFeature: 'TypeVectorLayerEntryConfig',
   ogcWfs: 'TypeVectorLayerEntryConfig',
   ogcWms: 'TypeOgcWmsLayerEntryConfig',
+  ogcWmts: 'TypeOgcWmtsLayerEntryConfig',
   WKB: 'TypeVectorLayerEntryConfig',
 };
 
@@ -410,6 +414,8 @@ export type TypeGeoviewLayerConfig = {
   displayDateTimezone?: TimeIANA;
   /** Flag to include layer in time able function like time slider */
   isTimeAware?: boolean;
+  /** Flag to indicate if the layer should be used as basemap. Only one layer can be used as basemap. */
+  useAsBasemap?: boolean;
 
   /**
    * Initial settings to apply to the GeoView layer at creation time.

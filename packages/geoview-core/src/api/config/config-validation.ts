@@ -30,6 +30,10 @@ import { ImageStaticLayerEntryConfig } from '@/api/config/validation-classes/ras
 import { KmlLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/kml-layer-entry-config';
 import { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/ogc-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import {
+  OgcWmtsLayerEntryConfig,
+  type OgcWmtsLayerEntryConfigProps,
+} from './validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
@@ -349,6 +353,9 @@ export class ConfigValidation {
       } else if (OgcWmsLayerEntryConfig.isClassOrTypeWMS(layerConfig)) {
         // eslint-disable-next-line no-param-reassign
         listOfLayerEntryConfig[i] = new OgcWmsLayerEntryConfig(layerConfigProps);
+      } else if (OgcWmtsLayerEntryConfig.isClassOrTypeWMTS(layerConfig)) {
+        // eslint-disable-next-line no-param-reassign
+        listOfLayerEntryConfig[i] = new OgcWmtsLayerEntryConfig(layerConfigProps as OgcWmtsLayerEntryConfigProps);
       } else if (GeoTIFFLayerEntryConfig.isClassOrTypeGeoTIFF(layerConfig)) {
         // eslint-disable-next-line no-param-reassign
         listOfLayerEntryConfig[i] = new GeoTIFFLayerEntryConfig(layerConfigProps);

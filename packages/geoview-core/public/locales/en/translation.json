@@ -147,6 +147,7 @@
     "serviceEsriDynamic": "ESRI Dynamic Service",
     "serviceEsriImage": "ESRI Image Service",
     "serviceOgcWMS": "OGC Web Map Service (WMS)",
+    "serviceOgcWMTS": "OGC Web Map Tile Service (WMTS)",
     "serviceOgcWFS": "OGC Web Feature Service (WFS)",
     "serviceOgcFeature": "OGC API Features",
     "serviceGeoCore": "GeoCore Identifier",

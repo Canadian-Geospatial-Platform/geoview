@@ -43,6 +43,7 @@ import {
 
 import { GeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
+import { WMTS } from '@/geo/layer/geoview-layers/raster/wmts';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
@@ -127,6 +128,7 @@ import { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vect
 import { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { OgcWmtsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
 import { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import type { TypeTimeSliderProps } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
@@ -756,19 +758,20 @@ export class LayerApi {
     this.#geoviewLayers[layerBeingAdded.getGeoviewLayerId()] = layerBeingAdded;
 
     // For each layer entry config in the geoview layer
-    layerBeingAdded.getAllLayerEntryConfigs().forEach((layerConfig) => {
-      // Log
-      logger.logTraceCore(`LAYERS - 1 - Registering layer entry config ${layerConfig.layerPath} on map ${this.getMapId()}`, layerConfig);
+    if (geoviewLayerConfig.useAsBasemap !== true)
+      layerBeingAdded.getAllLayerEntryConfigs().forEach((layerConfig) => {
+        // Log
+        logger.logTraceCore(`LAYERS - 1 - Registering layer entry config ${layerConfig.layerPath} on map ${this.getMapId()}`, layerConfig);
 
-      // Register it
-      this.registerLayerConfigInit(layerConfig);
+        // Register it
+        this.registerLayerConfigInit(layerConfig);
 
-      // Add filters to map initial filters, if they exist
-      this.#addInitialFilters(layerConfig);
-    });
+        // Add filters to map initial filters, if they exist
+        this.#addInitialFilters(layerConfig);
+      });
 
     // Register a callback when the layer entry config wants to register extra configs
-    layerBeingAdded.onLayerEntryRegisterInit(this.#handleLayerEntryRegisterInit.bind(this));
+    if (geoviewLayerConfig.useAsBasemap !== true) layerBeingAdded.onLayerEntryRegisterInit(this.#handleLayerEntryRegisterInit.bind(this));
 
     // Register a callback when layer wants to send a message
     layerBeingAdded.onLayerMessage(this.#handleLayerMessage.bind(this));
@@ -3030,6 +3033,9 @@ export class LayerApi {
     }
     if (OgcWmsLayerEntryConfig.isClassOrTypeWMS(geoviewLayerConfig)) {
       return new WMS(geoviewLayerConfig);
+    }
+    if (OgcWmtsLayerEntryConfig.isClassOrTypeWMTS(geoviewLayerConfig)) {
+      return new WMTS(geoviewLayerConfig);
     }
     if (XYZTilesLayerEntryConfig.isClassOrTypeXYZTiles(geoviewLayerConfig)) {
       return new XYZTiles(geoviewLayerConfig);
