@@ -3,6 +3,7 @@ import { UIEventProcessor } from '@/api/event-processors/event-processor-childre
 import type { QueryType, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
+import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
@@ -35,6 +36,9 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    * @returns {boolean} True when the layer should be registered to this all-feature-info-layer-set.
    */
   protected override onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean {
+    // Want to exclude ESRI Image layers. They have "features", but probably not useful
+    if (layer instanceof GVEsriImage) return false;
+
     // Return if the layer is of queryable type and source is queryable
     let isQueryable =
       super.onRegisterLayerCheck(layer) && AbstractLayerSet.isQueryableType(layer) && AbstractLayerSet.isSourceQueryable(layer);

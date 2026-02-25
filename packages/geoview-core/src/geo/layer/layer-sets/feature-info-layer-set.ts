@@ -16,6 +16,8 @@ import type {
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { logger } from '@/core/utils/logger';
+import { GVEsriDynamic } from '../gv-layers/raster/gv-esri-dynamic';
+import { GVEsriImage } from '../gv-layers/raster/gv-esri-image';
 
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
@@ -143,7 +145,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
       const layer = this.layerApi.getGeoviewLayer(layerPath);
 
       // If layer was found and of right type
-      if (layer instanceof AbstractGVLayer) {
+      if (layer instanceof AbstractGVLayer || layer instanceof GVEsriDynamic || layer instanceof GVEsriImage) {
         // If the layer is not queryable, skip it
         if (!layer.getQueryable()) return;
 
@@ -183,14 +185,18 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
             const layerConfig = layer.getLayerConfig();
 
             // If the response contain actual fields
-            if (AbstractLayerSet.recordsContainActualFields(layerConfig, arrayOfRecords)) {
+            if (!(layer instanceof GVEsriImage) && AbstractLayerSet.recordsContainActualFields(layerConfig, arrayOfRecords)) {
               // Align fields with layerConfig fields
               AbstractLayerSet.alignRecordsWithOutFields(layerConfig, arrayOfRecords);
             }
 
             // Filter out unsymbolized features if the showUnsymbolizedFeatures config is false
-            // GV: KML is excluded as it currently has no symbology.
-            if (!AppEventProcessor.getShowUnsymbolizedFeatures(this.getMapId()) && !(layer instanceof GVKML)) {
+            // GV: KML and ESRI Image is excluded as they currently have no symbology.
+            if (
+              !AppEventProcessor.getShowUnsymbolizedFeatures(this.getMapId()) &&
+              !(layer instanceof GVKML) &&
+              !(layer instanceof GVEsriImage)
+            ) {
               // eslint-disable-next-line no-param-reassign
               arrayOfRecords = arrayOfRecords.filter((record) => record.featureIcon);
             }

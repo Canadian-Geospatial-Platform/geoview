@@ -382,6 +382,8 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
         filter = `${field} = date '${DateMgt.formatDateISOShort(values[0])}'`;
       } else if (geoviewLayer instanceof GVEsriImage) {
         // ---- Esri Image ----
+        // Update the source TIME parameter for ESRI Image layers
+        this.#updateEsriImageTimeParameter(mapId, layerPath, values);
         // Esri Image layers expect the date to be an Epoch timestamp, not an ISO format
         if (values.length > 1) {
           filter = `time=${values[0]},${values[1]}`;
@@ -420,6 +422,12 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
           }
         }
       }
+    } else {
+      // If filtering is disabled, reset ESRI Image time parameter to initial extent
+      const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
+      if (geoviewLayer instanceof GVEsriImage) {
+        this.#updateEsriImageTimeParameter(mapId, layerPath, minAndMax);
+      }
     }
 
     // ---- Always applied ----
@@ -427,6 +435,41 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
     this.getTimeSliderState(mapId).setterActions.setValues(layerPath, values);
     this.addOrUpdateSliderFilter(mapId, layerPath, filter);
     MapEventProcessor.applyLayerFilters(mapId, layerPath);
+  }
+
+  /**
+   * Updates the TIME parameter on an ESRI Image layer source.
+   * This method directly modifies the OpenLayers source params to update the time range,
+   * which triggers a re-fetch of the image with the new temporal filter.
+   * @param {string} mapId - The map identifier.
+   * @param {string} layerPath - The layer path.
+   * @param {number[]} values - The time values in epoch milliseconds (start and optionally end).
+   * @private
+   * @static
+   */
+  static #updateEsriImageTimeParameter(mapId: string, layerPath: string, values: number[]): void {
+    // Get the layer
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayer(layerPath);
+
+    // Ensure it's an ESRI Image layer
+    if (!(geoviewLayer instanceof GVEsriImage)) return;
+
+    // Get the OpenLayers source
+    const olSource = geoviewLayer.getOLSource();
+
+    // Build the time parameter value
+    const timeParam = values.length > 1 ? `${values[0]},${values[1]}` : `${values[0]}`;
+
+    // Update the source params with new time value
+    // This will trigger OpenLayers to re-request the image with the updated TIME parameter
+    const currentParams = olSource.getParams();
+    olSource.updateParams({
+      ...currentParams,
+      time: timeParam,
+    });
+
+    // Force refresh
+    olSource.changed();
   }
 
   // #endregion

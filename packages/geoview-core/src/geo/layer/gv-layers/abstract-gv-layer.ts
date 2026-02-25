@@ -49,6 +49,7 @@ import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { GVVectorSource } from '@/geo/layer/source/vector-source';
 import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 import { delay, whenThisThen } from '@/core/utils/utilities';
+import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
@@ -1019,7 +1020,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    */
   protected formatFeatureInfoResult(
     features: Feature[],
-    layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig,
+    layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig | VectorLayerEntryConfig,
     serviceDateFormat: string | undefined,
     serviceDateIANA: string | undefined,
     serviceDateTemporalMode: TemporalMode | undefined
