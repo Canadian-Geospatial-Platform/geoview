@@ -117,7 +117,11 @@ export class WMS extends AbstractGeoViewRaster {
     }
 
     // Construct a proper WMS GetCapabilities URL
-    const url = this.getMetadataAccessPath();
+    let url = this.getMetadataAccessPath();
+    // Ensure HTTPS
+    if (url.toLowerCase().startsWith('http:')) {
+      url = `https${url.slice(4)}`;
+    }
 
     // Get the layer entries we need to query
     const layerConfigsToQuery = this.#getLayersToQuery();

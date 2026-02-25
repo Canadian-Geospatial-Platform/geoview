@@ -43,6 +43,7 @@ import {
 
 import { GeoJSON } from '@/geo/layer/geoview-layers/vector/geojson';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
+import { WMTS } from '@/geo/layer/geoview-layers/raster/wmts';
 import { EsriDynamic } from '@/geo/layer/geoview-layers/raster/esri-dynamic';
 import { EsriFeature } from '@/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from '@/geo/layer/geoview-layers/raster/esri-image';
@@ -127,6 +128,7 @@ import { OgcFeatureLayerEntryConfig } from '@/api/config/validation-classes/vect
 import { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wkb-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
+import { OgcWmtsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
 import { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import type { TypeTimeSliderProps } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
@@ -574,9 +576,11 @@ export class LayerApi {
         const geoviewLayerConfig = promise.value;
 
         try {
-          // Generate array of layer order information
-          const layerInfos = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
-          orderedLayerInfos.push(...layerInfos);
+          // Generate array of layer order information for non-basemap layers
+          if (geoviewLayerConfig.useAsBasemap !== true) {
+            const layerInfos = LayerApi.generateArrayOfLayerOrderInfo(geoviewLayerConfig);
+            orderedLayerInfos.push(...layerInfos);
+          }
 
           // Add it
           this.addGeoviewLayer(geoviewLayerConfig);
@@ -684,6 +688,11 @@ export class LayerApi {
         });
       }
 
+      if (geoviewLayerConfig.useAsBasemap === true) {
+        // If a basemap, remove the orderedLayerInfo placeholder as basemap are not part of the ordered layer info.
+        MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), geoviewLayerConfig.geoviewLayerId, true);
+      }
+
       // Add the geoview layer
       return this.addGeoviewLayer(geoviewLayerConfig);
     } catch (error: unknown) {
@@ -756,6 +765,7 @@ export class LayerApi {
     this.#geoviewLayers[layerBeingAdded.getGeoviewLayerId()] = layerBeingAdded;
 
     // For each layer entry config in the geoview layer
+
     layerBeingAdded.getAllLayerEntryConfigs().forEach((layerConfig) => {
       // Log
       logger.logTraceCore(`LAYERS - 1 - Registering layer entry config ${layerConfig.layerPath} on map ${this.getMapId()}`, layerConfig);
@@ -928,7 +938,7 @@ export class LayerApi {
     this.#layerEntryConfigs[layerConfig.layerPath] = layerConfig;
 
     // Register for ordered layer information
-    this.#registerForOrderedLayerInfo(layerConfig as TypeLayerEntryConfig);
+    if (layerConfig.getGeoviewLayerConfig().useAsBasemap !== true) this.#registerForOrderedLayerInfo(layerConfig as TypeLayerEntryConfig);
 
     // Tell the layer sets about it
     this.#allLayerSets.forEach((layerSet) => {
@@ -3030,6 +3040,9 @@ export class LayerApi {
     }
     if (OgcWmsLayerEntryConfig.isClassOrTypeWMS(geoviewLayerConfig)) {
       return new WMS(geoviewLayerConfig);
+    }
+    if (OgcWmtsLayerEntryConfig.isClassOrTypeWMTS(geoviewLayerConfig)) {
+      return new WMTS(geoviewLayerConfig);
     }
     if (XYZTilesLayerEntryConfig.isClassOrTypeXYZTiles(geoviewLayerConfig)) {
       return new XYZTiles(geoviewLayerConfig);
