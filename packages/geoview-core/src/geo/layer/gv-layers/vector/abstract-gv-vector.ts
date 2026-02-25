@@ -20,10 +20,11 @@ import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { GVVectorSource } from '@/geo/layer/source/vector-source';
 import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
-import { NoExtentError } from '@/core/exceptions/geoview-exceptions';
+import { GeoViewError, NoExtentError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer vector type layer.
@@ -104,12 +105,12 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
-   * @returns {VectorSource} The VectorSource source instance associated with this layer.
+   * @returns {GVVectorSource} The VectorSource source instance associated with this layer.
    * @override
    */
-  override getOLSource(): VectorSource {
+  override getOLSource(): GVVectorSource {
     // Get source from OL
-    return super.getOLSource() as VectorSource;
+    return super.getOLSource() as GVVectorSource;
   }
 
   /**
@@ -134,6 +135,27 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     const layerMetadata = this.getLayerConfig();
     const fieldDefinitions = layerMetadata?.getOutfields()?.find((fieldDefinition) => fieldDefinition.name === fieldName);
     return fieldDefinitions?.type || 'string';
+  }
+
+  /**
+   * Overridable method called to get a more specific error code for all errors.
+   * @param {Event} event - The event which is being triggered.
+   * @returns The message key and the optional parameters for the whole message to be displayed to the user, default is 'layers.errorImageLoad'.
+   */
+  protected override onErrorDecipherError(event: Event): GeoViewError {
+    // Try to get the error from the source
+    const layerSource = event.target;
+
+    // Check if the source is GVVectorSource (should be) and check if the error inside is a GeoViewError
+    if (layerSource instanceof GVVectorSource) {
+      const loaderError = layerSource.getLoaderError();
+      if (loaderError instanceof GeoViewError) {
+        return loaderError;
+      }
+    }
+
+    // Couldn't be deciphered, use parent's
+    return super.onErrorDecipherError(event);
   }
 
   /**

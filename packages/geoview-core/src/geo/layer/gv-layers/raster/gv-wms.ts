@@ -30,6 +30,7 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { WfsRenderer } from '@/geo/utils/renderer/wfs-renderer';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { NoExtentError } from '@/core/exceptions/geoview-exceptions';
 import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 
@@ -169,12 +170,12 @@ export class GVWMS extends AbstractGVRaster {
    * - An empty image response (zero width or height).
    * If none of the specific conditions are met, a generic image load error
    * message key is returned.
-   * @param {Event} event - The image load error event triggered by the image source.
-   * @returns {string} A translation key representing the detected error condition.
+   * @param event - The image load error event triggered by the image source.
+   * @returns A GeoView Error representing the error.
    * @override
    * @protected
    */
-  protected override onImageLoadErrorDecipherError(event: Event): string {
+  protected override onImageLoadErrorDecipherError(event: Event): GeoViewError {
     // Checks for more specific errors
     const maxWidth = this.getLayerConfig().getServiceMetadata()?.Service.MaxWidth;
     const maxHeight = this.getLayerConfig().getServiceMetadata()?.Service.MaxHeight;
@@ -185,21 +186,25 @@ export class GVWMS extends AbstractGVRaster {
       // Use the currentSrc to get the actual image URL with parameters
       const imageSrc = image instanceof HTMLImageElement ? image.currentSrc : undefined;
       if (imageSrc) {
-        // Get width and height from URL parameters
+        // Check against max width allowed
         const width = Number(imageSrc.split('WIDTH=')[1]?.split('&')[0]);
-        const height = Number(imageSrc.split('HEIGHT=')[1]?.split('&')[0]);
+        if (maxWidth && width > maxWidth) {
+          return new GeoViewError('layers.errorImageLoadSizeLimitExceededWidth', [this.getLayerName(), width, maxWidth]);
+        }
 
-        // Check against max allowed
-        if ((maxWidth && width > maxWidth) || (maxHeight && height > maxHeight)) {
-          return 'layers.errorImageLoadSizeLimitExceeded';
+        // Check against max height allowed
+        const height = Number(imageSrc.split('HEIGHT=')[1]?.split('&')[0]);
+        if (maxHeight && height > maxHeight) {
+          return new GeoViewError('layers.errorImageLoadSizeLimitExceededHeight', [this.getLayerName(), height, maxHeight]);
         }
       }
     } else if (image.height === 0 || image.width === 0) {
       // No image returned, update the error code
-      return 'layers.errorImageLoadNoImageReturned';
+      return new GeoViewError('layers.errorImageLoadNoImageReturned', [this.getLayerName()]);
     }
 
-    return 'layers.errorImageLoad';
+    // Couldn't be deciphered, use parent's
+    return super.onImageLoadErrorDecipherError(event);
   }
 
   /**

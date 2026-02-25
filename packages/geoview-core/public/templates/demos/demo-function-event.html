@@ -448,7 +448,7 @@
 
             // listen to individual layer loaded event
             payload.layer.onLayerError((sender, payload) => {
-              mapViewer.notifications.addNotificationSuccess('Layer: Airborne has fallen in error while rendering. Error ' + payload.error);
+              mapViewer.notifications.addNotificationSuccess('Layer: Airborne has fallen in error while rendering. Error ' + payload.error.message);
             });
           }
 
@@ -476,7 +476,7 @@
 
         // listen to layer error events
         mapViewer.layer.onLayerError((sender, payload) => {
-          mapViewer.notifications.addNotificationError('LayerApi: Error ' + payload.error);
+          mapViewer.notifications.addNotificationError('LayerApi: Error ' + payload.error.message);
         });
 
         // listen to layer loaded events
