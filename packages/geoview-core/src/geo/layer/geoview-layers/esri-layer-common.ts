@@ -231,7 +231,10 @@ export class EsriUtilities {
     if (layerConfig.getEntryTypeIsGroup() && !layerConfig.getIsMetadataLayerGroup()) return layerConfig;
 
     // The url
-    const queryUrl = layer.getMetadataAccessPath();
+    let queryUrl = layer.getMetadataAccessPath();
+    if (layerConfig instanceof EsriDynamicLayerEntryConfig || layerConfig instanceof EsriFeatureLayerEntryConfig) {
+      queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
+    }
 
     let responseJson;
     try {

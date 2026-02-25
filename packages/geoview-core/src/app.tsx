@@ -27,7 +27,8 @@ import { Config } from '@/api/config/config';
 import { useWhatChanged } from '@/core/utils/useWhatChanged';
 import { addGeoViewStore } from '@/core/stores/stores-managers';
 import { logger } from '@/core/utils/logger';
-import { generateId, getLocalizedMessage, removeCommentsFromJSON, watchHtmlElementRemoval } from '@/core/utils/utilities';
+import { generateId, removeCommentsFromJSON, watchHtmlElementRemoval } from '@/core/utils/utilities';
+import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { InitMapWrongCallError } from '@/core/exceptions/geoview-exceptions';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { MapViewer } from '@/geo/map/map-viewer';
@@ -202,19 +203,19 @@ async function renderMap(mapElement: HTMLElement): Promise<MapViewer> {
   // create a new config for this map element
   const lang = mapElement.hasAttribute('data-lang') ? (mapElement.getAttribute('data-lang')! as TypeDisplayLanguage) : 'en';
 
-  const configObj = Config.initializeMapConfig(mapId, configuration.map.listOfGeoviewLayerConfig, (errorKey: string, params: string[]) => {
+  const configObj = Config.initializeMapConfig(mapId, configuration.map.listOfGeoviewLayerConfig, (gvError: GeoViewError) => {
     // Wait for the map viewer to get loaded in the api
     api
       .getMapViewerAsync(mapId)
       .then(() => {
         // Get the message for the logger
-        const message = getLocalizedMessage(lang, errorKey, params);
+        const message = gvError.translateMessage(lang);
 
         // Log it
         logger.logError(`- Map ${mapId}: ${message}`);
 
         // Show the error using its key (which will get translated)
-        api.getMapViewer(mapId).notifications.showError(errorKey, params);
+        api.getMapViewer(mapId).notifications.showError(gvError.messageKey, gvError.messageParams);
       })
       .catch((error: unknown) => {
         // Log promise failed

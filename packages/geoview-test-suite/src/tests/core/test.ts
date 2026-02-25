@@ -394,7 +394,7 @@ export class Test<T = unknown> {
   }
 
   /**
-   * Asserts that a length of a given array is equal to the expected length.
+   * Asserts that a length of a given array is at least of minimum length.
    * @param {unknown[] | undefined} array - The array to check the length.
    * @param {number} expectedMinimumLength - The expected minimum length of the array.
    * @throws {AssertionArrayLengthMinimalError} If the values are not strictly equal.
