@@ -653,7 +653,7 @@ export class ConfigTester extends GVAbstractTester {
         Test.assertJsonObject(result, expectedConfig);
 
         // Supposedly 92 layer entries
-        test.addStep('Verifying 92 layer entries in the config...');
+        test.addStep('Verifying minimal count of layer entries in the config...');
         Test.assertIsArrayLengthMinimal(result.listOfLayerEntryConfig, 90);
 
         // Check at least one has the correct layerId
