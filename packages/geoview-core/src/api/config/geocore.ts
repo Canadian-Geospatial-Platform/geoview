@@ -8,7 +8,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { DEFAULT_MAP_FEATURE_CONFIG } from '@/api/types/map-schema-types';
 import type { GeoCoreLayerConfig, RCSLayerConfig, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
-import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**
  * Class used to add geoCore layer to the map
@@ -73,9 +73,9 @@ export class GeoCore {
       // Use the name from the first layer if none is provided in the config
       if (!tempLayerConfig.geoviewLayerName) tempLayerConfig.geoviewLayerName = response.layers[0].geoviewLayerName;
 
-      const newLayerConfig = Config.prevalidateGeoviewLayersConfig([tempLayerConfig], (errorKey: string, params: string[]) => {
+      const newLayerConfig = Config.prevalidateGeoviewLayersConfig([tempLayerConfig], (error: GeoViewError) => {
         // When an error happens, raise the exception, we handle it higher in this case
-        throw new GeoViewError(errorKey, params);
+        throw error;
       });
 
       // Return the created layer config from the merged config informations

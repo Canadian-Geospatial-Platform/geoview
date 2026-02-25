@@ -14,7 +14,6 @@ import { Fetch } from '@/core/utils/fetch-helper';
 import { parseXMLToJson } from '@/core/utils/utilities';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
-import { logger } from '@/core/utils/logger';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import type { TypeFeatureInfoEntry, TypeOutfieldsType, TypeFeatureInfoResult } from '@/api/types/map-schema-types';
@@ -30,8 +29,15 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { WfsRenderer } from '@/geo/utils/renderer/wfs-renderer';
-import { NoExtentError } from '@/core/exceptions/geoview-exceptions';
+import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import {
+  LayerImageFailedNoImageError,
+  LayerImageFailedToLoadHeightTooBigError,
+  LayerImageFailedToLoadWidthTooBigError,
+  NoExtentError,
+} from '@/core/exceptions/geoview-exceptions';
 import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
+import { logger } from '@/core/utils/logger';
 
 /**
  * Manages a WMS layer.
@@ -169,12 +175,12 @@ export class GVWMS extends AbstractGVRaster {
    * - An empty image response (zero width or height).
    * If none of the specific conditions are met, a generic image load error
    * message key is returned.
-   * @param {Event} event - The image load error event triggered by the image source.
-   * @returns {string} A translation key representing the detected error condition.
+   * @param event - The image load error event triggered by the image source.
+   * @returns A GeoView Error representing the error.
    * @override
    * @protected
    */
-  protected override onImageLoadErrorDecipherError(event: Event): string {
+  protected override onImageLoadErrorDecipherError(event: Event): GeoViewError {
     // Checks for more specific errors
     const maxWidth = this.getLayerConfig().getServiceMetadata()?.Service.MaxWidth;
     const maxHeight = this.getLayerConfig().getServiceMetadata()?.Service.MaxHeight;
@@ -185,21 +191,25 @@ export class GVWMS extends AbstractGVRaster {
       // Use the currentSrc to get the actual image URL with parameters
       const imageSrc = image instanceof HTMLImageElement ? image.currentSrc : undefined;
       if (imageSrc) {
-        // Get width and height from URL parameters
+        // Check against max width allowed
         const width = Number(imageSrc.split('WIDTH=')[1]?.split('&')[0]);
-        const height = Number(imageSrc.split('HEIGHT=')[1]?.split('&')[0]);
+        if (maxWidth && width > maxWidth) {
+          return new LayerImageFailedToLoadWidthTooBigError(this.getLayerName(), width, maxWidth);
+        }
 
-        // Check against max allowed
-        if ((maxWidth && width > maxWidth) || (maxHeight && height > maxHeight)) {
-          return 'layers.errorImageLoadSizeLimitExceeded';
+        // Check against max height allowed
+        const height = Number(imageSrc.split('HEIGHT=')[1]?.split('&')[0]);
+        if (maxHeight && height > maxHeight) {
+          return new LayerImageFailedToLoadHeightTooBigError(this.getLayerName(), height, maxHeight);
         }
       }
     } else if (image.height === 0 || image.width === 0) {
       // No image returned, update the error code
-      return 'layers.errorImageLoadNoImageReturned';
+      return new LayerImageFailedNoImageError(this.getLayerName());
     }
 
-    return 'layers.errorImageLoad';
+    // Couldn't be deciphered, use parent's
+    return super.onImageLoadErrorDecipherError(event);
   }
 
   /**

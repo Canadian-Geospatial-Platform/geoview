@@ -107,8 +107,8 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly FOREST_INDUSTRY_ICON_LIST: TypeLegendItem[] = [
     {
       geometryType: 'Point',
-      icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAeklEQVR4AZyPQQ5FQBBE5/87OBFW4iysWbPmLGKFEzkEr0hLRyyE1NPd1TVk/uHl8zlY8oMJZijgkv+iFhWbBGKoQQcpIfhgjhOBSX1mgw9uZrr6s94HR8wVTOoHG3yww2xgAV2mpfZwyAdlaKHLpAw6SDl1D57uw3sHAAD//6HK3mIAAAAGSURBVAMAWeIPFUBE16wAAAAASUVORK5CYII=',
-      name: 'Mills',
+      icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAYAAABy6+R8AAAAzklEQVR4AayQMc4BURSF7/zJbw32oKVQWwIbsASVaBQaUVmCDbAEtYLWHqyBYnzfk3ATU4iY3G9u7jnv3HmZv/ji+UGorttR1ys4wQHszu18odeXDERsMXuwgRnYnbcseAZfoYgJh66wgDNYdmd1fbXIoQHKDppKXb94OXRDcTPtrdT1i5FD/ygdaCp1/eLl0B5lCE2lrl+8HFqjtGAObqaF3VldXy39iKq6oIzgCGNYgt15FA8fKVLIUaOqphzoQh/szi70RCFfrwifvO4AAAD//7tcIlIAAAAGSURBVAMAw9syGzRTbcoAAAAASUVORK5CYII=',
+      name: 'Esri Feature Forest Industry',
       isVisible: true,
     },
   ];
