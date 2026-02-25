@@ -13,10 +13,6 @@ import type * as UI from '@/ui';
 import type { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import type { MapViewer } from '@/geo/map/map-viewer';
 
-export { getGeoViewStore } from '@/core/stores/stores-managers';
-
-export type { SelectChangeEvent } from '@mui/material';
-
 /**
  * Definition of the map feature configuration according to what can be specified in the map div and in the schema for the
  * type extension TypeMapFeaturesInstance.
