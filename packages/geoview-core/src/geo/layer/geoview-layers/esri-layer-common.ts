@@ -262,7 +262,7 @@ export class EsriUtilities {
     }
 
     // Check if we support that projection and if not add it on-the-fly
-    await Projection.addProjectionIfMissing(responseJson.spatialReference);
+    await Projection.addProjectionIfMissing(responseJson.spatialReference || responseJson.sourceSpatialReference);
 
     this.#commonProcessFeatureInfoConfig(layerConfig);
 

@@ -51,6 +51,7 @@ const DEFAULT_LAYER_NAMES: Record<TypeGeoviewLayerType, string> = {
   ogcFeature: 'OGC Feature Layer',
   ogcWfs: 'WFS Layer',
   ogcWms: 'WMS Layer',
+  ogcWmts: 'WMTS Layer',
   WKB: 'WKB Layer',
   vectorTiles: 'Vector Tiles',
   xyzTiles: 'XYZ Tiles',

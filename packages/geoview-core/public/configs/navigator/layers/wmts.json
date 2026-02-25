@@ -1,0 +1,91 @@
+{
+  "map": {
+    "interaction": "dynamic",
+    "viewSettings": {
+      "initialView": {
+        "zoomAndCenter": [4, [-100, 55]]
+      },
+      "projection": 3857
+    },
+    "basemapOptions": {
+      "basemapId": "nogeom",
+      "shaded": false,
+      "labeled": false
+    },
+    "listOfGeoviewLayerConfig": [
+      {
+        "geoviewLayerType": "ogcWmts",
+        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server2_serveur2/rest/services/BaseMaps/CBME_CBCE_HS_RO_3978/MapServer/WMTS/1.0.0/WMTSCapabilities.xml",
+        "geoviewLayerId": "basemap_wmts",
+        "geoviewLayerName": "Shaded Basemap - returning blank tiles",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "BaseMaps_CBME_CBCE_HS_RO_3978",
+            "tileMatrixSet": "default028mm"
+          }
+        ]
+      },
+      {
+        "geoviewLayerType": "ogcWmts",
+        "metadataAccessPath": "https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/1.0.0/WMTSCapabilities.xml",
+        "geoviewLayerId": "biomass",
+        "geoviewLayerName": "Biomass - reprojection issues",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "GEDI_ISS_L4B_Aboveground_Biomass_Density_Mean_201904-202303",
+            "tileMatrixSet": "1km"
+          }
+        ]
+      },
+      {
+        "geoviewLayerType": "ogcWmts",
+        "metadataAccessPath": "https://data.geopf.fr/wmts",
+        "geoviewLayerId": "geopf",
+        "useAsBasemap": true,
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2",
+            "tileMatrixSet": "PM_0_19"
+          }
+        ]
+      },
+      {
+        "geoviewLayerType": "ogcWmts",
+        "metadataAccessPath": "https://mrdata.usgs.gov/mapcache/wmts",
+        "geoviewLayerId": "sgmc2",
+        "geoviewLayerName": "sgmc2",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "sgmc2",
+            "tileMatrixSet": "GoogleMapsCompatible"
+          }
+        ]
+      },
+      {
+        "geoviewLayerType": "ogcWmts",
+        "metadataAccessPath": "https://data.geopf.fr/wmts",
+        "geoviewLayerId": "lidar",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "IGNF_LIDAR-HD_MNH_ELEVATION.ELEVATIONGRIDCOVERAGE.SHADOW",
+            "tileMatrixSet": "PM_0_18"
+          }
+        ]
+      }
+    ]
+  },
+  "components": ["overview-map", "north-arrow"],
+  "overviewMap": { "hideOnZoom": 7 },
+  "footerBar": {
+    "tabs": {
+      "core": ["layers", "data-table"]
+    }
+  },
+  "corePackages": [],
+  "theme": "geo.ca",
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "legend", "details", "export"]
+    }
+  }
+}

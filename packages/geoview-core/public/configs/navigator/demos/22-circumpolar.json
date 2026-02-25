@@ -8,14 +8,27 @@
       "projection": 3978
     },
     "basemapOptions": {
-      "basemapId": "transport",
-      "shaded": true,
+      "basemapId": "nogeom",
+      "shaded": false,
       "labeled": false
     },
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerType": "geoCore",
         "geoviewLayerId": "8b83fd58-5953-4b80-8009-94d44ff89844"
+      },
+      {
+        "geoviewLayerType": "ogcWmts",
+        "metadataAccessPath": "https://basemap.arctic-sdi.org/mapcache/wmts",
+        "geoviewLayerId": "arctic-sdi",
+        "geoviewLayerName": "arctic-sdi",
+        "useAsBasemap": true,
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "arctic_cascading",
+            "tileMatrixSet": "3573"
+          }
+        ]
       }
     ]
   },
