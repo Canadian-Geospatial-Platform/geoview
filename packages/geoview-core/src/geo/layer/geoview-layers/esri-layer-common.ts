@@ -18,7 +18,7 @@ import type {
   TypeFieldEntry,
   DisplayDateMode,
 } from '@/api/types/map-schema-types';
-import type { TypeLayerMetadataEsri } from '@/api/types/layer-schema-types';
+import type { TypeLayerMetadataEsri, TypeMosaicRule } from '@/api/types/layer-schema-types';
 import { Fetch } from '@/core/utils/fetch-helper';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
@@ -249,6 +249,13 @@ export class EsriUtilities {
     // Set the layer metadata
     layerConfig.setLayerMetadata(responseJson);
 
+    // For ESRI Image layers, extract and store mosaic rule from metadata
+    if (layerConfig instanceof EsriImageLayerEntryConfig) {
+      this.#processImageLayerInitialTime(layerConfig, responseJson);
+      this.#processImageLayerMosaicRule(layerConfig, responseJson);
+      this.#processImageLayerDefaultRasterFunction(layerConfig, responseJson);
+    }
+
     // The following line allow the type ascention of the type guard functions on the second line below
     if (layerConfig instanceof EsriDynamicLayerEntryConfig || layerConfig instanceof EsriFeatureLayerEntryConfig) {
       // Create the style from the Esri Renderer
@@ -265,7 +272,8 @@ export class EsriUtilities {
 
     this.#commonProcessInitialSettings(layerConfig);
 
-    this.#commonProcessTimeDimension(layerConfig, responseJson.timeInfo, displayDateMode, layerConfig instanceof EsriImageLayerEntryConfig);
+    // GV Changed from 'layerConfig instanceof EsriImageLayerEntryConfig' to false. Two handles seems to work better for ESRI Image Layer
+    this.#commonProcessTimeDimension(layerConfig, responseJson.timeInfo, displayDateMode, false);
 
     return layerConfig;
   }
@@ -286,7 +294,7 @@ export class EsriUtilities {
     if (!layerMetadata) throw new LayerServiceMetadataEmptyError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerNameCascade());
 
     // Read variables
-    const queryable = layerMetadata.capabilities.includes('Query');
+    const queryable = layerMetadata.capabilities.includes('Query') || layerMetadata.capabilities.includes('Catalog');
     const hasFields = !!layerMetadata.fields?.length;
     const isGroupLayer = layerMetadata.type === 'Group Layer';
     const isMetadataGroup = layerConfig.getIsMetadataLayerGroup();
@@ -403,9 +411,127 @@ export class EsriUtilities {
     displayDateMode: DisplayDateMode | undefined,
     singleHandle?: boolean
   ): void {
-    if (esriTimeDimension !== undefined && esriTimeDimension.timeExtent) {
-      layerConfig.setTimeDimension(DateMgt.createDimensionFromESRI(esriTimeDimension, displayDateMode, singleHandle));
+    if (!esriTimeDimension?.timeExtent) return;
+
+    // Create the time dimension
+    layerConfig.setTimeDimension(DateMgt.createDimensionFromESRI(esriTimeDimension, displayDateMode, singleHandle));
+  }
+
+  /**
+   * Processes ESRI Image Server metadata to set the default raster function if one wasn't configured.
+   * The first non-"None" raster function is used as the default.
+   * @param {EsriImageLayerEntryConfig} layerConfig - The ESRI Image layer configuration.
+   * @param {TypeLayerMetadataEsri} metadata - The service metadata response.
+   * @private
+   * @static
+   */
+  static #processImageLayerDefaultRasterFunction(layerConfig: EsriImageLayerEntryConfig, metadata: TypeLayerMetadataEsri): void {
+    // Skip if user already configured a raster function
+    if (layerConfig.getInitialRasterFunction()) return;
+
+    // Check if metadata has raster function infos
+    if (!metadata.rasterFunctionInfos || metadata.rasterFunctionInfos.length === 0) return;
+
+    // Find the first non-"None" raster function (first in list is the default)
+    const defaultRasterFunction = metadata.rasterFunctionInfos.find((rf) => rf.name && rf.name.toLowerCase() !== 'none');
+
+    if (defaultRasterFunction) {
+      // Set the default raster function using the setter
+      layerConfig.setInitialRasterFunction(defaultRasterFunction.name);
     }
+  }
+
+  /**
+   * Processes ESRI Image Server metadata to extract default mosaic rule parameters.
+   * Stores the mosaic rule in the layer config for use during source creation and querying.
+   * @param {EsriImageLayerEntryConfig} layerConfig - The ESRI Image layer configuration.
+   * @param {TypeLayerMetadataEsri} metadata - The service metadata response.
+   * @private
+   * @static
+   */
+  static #processImageLayerMosaicRule(layerConfig: EsriImageLayerEntryConfig, metadata: TypeLayerMetadataEsri): void {
+    // Check if metadata has default mosaic settings
+    if (!metadata.defaultMosaicMethod) return;
+
+    // Build mosaic rule from metadata defaults
+    const mosaicRule: TypeMosaicRule = {
+      mosaicMethod: EsriUtilities.convertMosaicMethod(metadata.defaultMosaicMethod),
+    };
+
+    // Add optional parameters if present
+    if (metadata.sortField) {
+      mosaicRule.sortField = metadata.sortField;
+      mosaicRule.ascending = metadata.sortAscending ?? true;
+    }
+
+    if (metadata.sortValue !== undefined) {
+      mosaicRule.sortValue = String(metadata.sortValue);
+    }
+
+    if (metadata.mosaicOperator) {
+      mosaicRule.mosaicOperation = EsriUtilities.convertMosaicOperator(metadata.mosaicOperator);
+    }
+
+    // Store in layer config via type extension
+    layerConfig.setMosaicRule(mosaicRule);
+  }
+
+  /**
+   * Processes ESRI Image Server metadata to set initial time parameter from timeExtent.
+   * Stores the time range in the layer config for use during source creation.
+   * @param {EsriImageLayerEntryConfig} layerConfig - The ESRI Image layer configuration.
+   * @param {TypeLayerMetadataEsri} metadata - The service metadata response.
+   * @private
+   * @static
+   */
+  static #processImageLayerInitialTime(layerConfig: EsriImageLayerEntryConfig, metadata: TypeLayerMetadataEsri): void {
+    // Check if metadata has time info with extent
+    if (!metadata.timeInfo?.timeExtent || metadata.timeInfo.timeExtent.length !== 2) return;
+
+    // Format as "startTime,endTime" string (ESRI REST API format)
+    const { timeExtent } = metadata.timeInfo;
+
+    // Store in layer config for source creation
+    layerConfig.setInitialTimeExtent(timeExtent as [number, number]);
+  }
+
+  /**
+   * Converts metadata mosaic method to ESRI REST API format.
+   * @param {string} method - The metadata mosaic method.
+   * @returns {TypeMosaicRule['mosaicMethod']} The ESRI API mosaic method string.
+   * @static
+   */
+  static convertMosaicMethod(method: string): TypeMosaicRule['mosaicMethod'] {
+    const methodMap: Record<string, TypeMosaicRule['mosaicMethod']> = {
+      ByAttribute: 'esriMosaicAttribute',
+      Center: 'esriMosaicCenter',
+      Nadir: 'esriMosaicNadir',
+      Viewpoint: 'esriMosaicViewpoint',
+      Seamline: 'esriMosaicSeamline',
+      None: 'esriMosaicNone',
+      LockRaster: 'esriMosaicLockRaster',
+      Northwest: 'esriMosaicNorthwest',
+    };
+    return methodMap[method] || 'esriMosaicNone';
+  }
+
+  /**
+   * Converts metadata mosaic operator to ESRI REST API format.
+   * @param {string} operator - The metadata mosaic operator.
+   * @returns {TypeMosaicRule['mosaicOperation']} The ESRI API mosaic operation string.
+   * @static
+   */
+  static convertMosaicOperator(operator: string): TypeMosaicRule['mosaicOperation'] {
+    const operatorMap: Record<string, TypeMosaicRule['mosaicOperation']> = {
+      First: 'MT_FIRST',
+      Last: 'MT_LAST',
+      Min: 'MT_MIN',
+      Max: 'MT_MAX',
+      Mean: 'MT_MEAN',
+      Blend: 'MT_BLEND',
+      Sum: 'MT_SUM',
+    };
+    return operatorMap[operator];
   }
 
   // #endregion LAYER PROCESSING METHODS
