@@ -1,27 +1,38 @@
 import type { ImageArcGISRest } from 'ol/source';
+import type { Geometry } from 'ol/geom';
 import type { Options as ImageOptions } from 'ol/layer/BaseImage';
+import type { Coordinate } from 'ol/coordinate';
 import { Image as ImageLayer } from 'ol/layer';
 import type { Extent } from 'ol/extent';
+import { Feature } from 'ol';
 import type { Projection as OLProjection } from 'ol/proj';
+import type { Map as OLMap } from 'ol';
 
+import { GeoUtilities } from '@/geo/utils/utilities';
+import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
+import { Fetch } from '@/core/utils/fetch-helper';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import type {
+  codedValueType,
+  rangeDomainType,
+  TypeFeatureInfoEntry,
+  TypeFieldEntry,
   TypeIconSymbolVectorConfig,
   TypeLayerStyleConfig,
   TypeLayerStyleConfigInfo,
   TypeLayerStyleSettings,
+  TypeOutfieldsType,
 } from '@/api/types/map-schema-types';
-import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-import { GeoUtilities } from '@/geo/utils/utilities';
+import { CONST_LAYER_TYPES, type TypeLayerMetadataEsri } from '@/api/types/layer-schema-types';
+import type { GeometryJson } from '@/geo/layer/gv-layers/utils';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { Projection } from '@/geo/utils/projection';
-import { Fetch } from '@/core/utils/fetch-helper';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 import type { TypeMetadataEsriRasterFunctionInfos } from '@/api/types/layer-schema-types';
+import { GeometryApi } from '@/geo/layer/geometry/geometry';
 
 /**
  * Manages an Esri Image layer.
@@ -212,6 +223,338 @@ export class GVEsriImage extends AbstractGVRaster {
     GVWMS.applyViewFilterOnSource(this.getLayerConfig(), this.getOLSource(), filter);
   }
 
+  /**
+   * Overrides the return of feature information at a given coordinate.
+   * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.
+   * @param {Coordinate} location - The coordinate that will be used by the query.
+   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+   * @param {AbortController?} [abortController] - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   */
+  protected override getFeatureInfoAtCoordinate(
+    map: OLMap,
+    location: Coordinate,
+    queryGeometry: boolean = true
+  ): Promise<TypeFeatureInfoEntry[]> {
+    // Transform coordinate from map projection to lntlat
+    const projCoordinate = Projection.transformToLonLat(location, map.getView().getProjection());
+
+    // Redirect to getFeatureInfoAtLonLat
+    return this.getFeatureInfoAtLonLat(map, projCoordinate, queryGeometry);
+  }
+
+  /**
+   * Overrides the return of feature information at the provided long lat coordinate.
+   * @param {OLMap} map - The Map where to get Feature Info At LonLat from.
+   * @param {Coordinate} lonlat - The coordinate that will be used by the query.
+   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
+   * @param {AbortController?} [abortController] - The optional abort controller.
+   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   */
+  protected override async getFeatureInfoAtLonLat(
+    map: OLMap,
+    lonlat: Coordinate,
+    queryGeometry: boolean = true
+  ): Promise<TypeFeatureInfoEntry[]> {
+    // Get the layer config
+    const layerConfig = this.getLayerConfig();
+
+    // Get map projection number
+    const mapView = map.getView();
+    const mapProjection = mapView.getProjection();
+    const mapProjNumber = parseInt(mapProjection.getCode()?.split(':')[1] || '', 10);
+
+    // Transform lonlat to map projection for the geometry parameter
+    const mapCoordinate = Projection.transformFromLonLat(lonlat, mapProjection);
+
+    // Build geometry parameter
+    const geometryParam = encodeURIComponent(
+      JSON.stringify({
+        spatialReference: { wkid: mapProjNumber },
+        x: mapCoordinate[0],
+        y: mapCoordinate[1],
+      })
+    );
+
+    // Build pixel size parameter (use map resolution)
+    const resolution = mapView.getResolution() || 1;
+    const pixelSizeParam = encodeURIComponent(
+      JSON.stringify({
+        spatialReference: { wkid: mapProjNumber },
+        x: resolution,
+        y: resolution,
+      })
+    );
+
+    // Build rendering rules parameter if raster function is active
+    let renderingRulesParam = '';
+    if (this.#rasterFunction) {
+      renderingRulesParam = `&renderingRules=${encodeURIComponent(JSON.stringify([{ rasterFunction: this.#rasterFunction }]))}`;
+    }
+
+    // Get source parameters for time and mosaic rule
+    const sourceParams = this.getOLSource().getParams();
+
+    // Build time parameter if available from source
+    const timeParam = sourceParams?.time ? `&time=${this.getOLSource().getParams().time}` : '';
+
+    // Build mosaic rule parameter if available from source (critical for processedValues)
+    let mosaicRuleParam = '';
+    if (sourceParams?.mosaicRule) {
+      mosaicRuleParam = `&mosaicRule=${encodeURIComponent(JSON.stringify(sourceParams.mosaicRule))}`;
+    }
+
+    // Construct the identify URL
+    const identifyUrl =
+      `${layerConfig.getMetadataAccessPath()}/identify?f=json` +
+      `&geometryType=esriGeometryPoint` +
+      `&geometry=${geometryParam}` +
+      `${mosaicRuleParam}` +
+      `${renderingRulesParam}` +
+      `&pixelSize=${pixelSizeParam}` +
+      `&returnGeometry=${queryGeometry}` +
+      `&returnCatalogItems=true` +
+      `&returnPixelValues=true` +
+      `&maxItemCount=1` +
+      `${timeParam}` +
+      `&processAsMultidimensional=false`;
+
+    // Fetch the identify response
+    const identifyJsonResponse = await Fetch.fetchEsriJson<EsriImageIdentifyJsonResponse>(identifyUrl);
+
+    // If no pixel value returned
+    if (identifyJsonResponse.value === undefined || identifyJsonResponse.value === null || identifyJsonResponse.value === 'NoData') {
+      return [];
+    }
+
+    // Build feature properties starting with pixel-specific fields
+    const properties: Record<string, unknown> = {
+      // Put pixel value first so it appears at top of details
+      PixelValue: identifyJsonResponse.value,
+      Name: identifyJsonResponse.name || 'Pixel',
+    };
+
+    // Determine the legend class index from processedValues
+    let classIndex: number | undefined;
+    if (identifyJsonResponse.processedValues?.[0] !== undefined && identifyJsonResponse.processedValues[0] !== 'NoData') {
+      classIndex = parseInt(String(identifyJsonResponse.processedValues[0]), 10);
+      properties.ProcessedValue = identifyJsonResponse.processedValues[0];
+    }
+
+    // Add catalog item attributes if available
+    if (identifyJsonResponse.catalogItems?.features?.[0]?.attributes) {
+      const catalogAttributes = identifyJsonResponse.catalogItems.features[0].attributes;
+      Object.assign(properties, catalogAttributes);
+    }
+
+    // Create geometry if available and requested
+    let geometry: Geometry | undefined;
+    if (queryGeometry && identifyJsonResponse.location) {
+      const locationGeom = identifyJsonResponse.location;
+      geometry = GeometryApi.createGeometryFromType('Point', [locationGeom.x, locationGeom.y]);
+    }
+
+    // Create a feature with the properties
+    const feature = new Feature({ ...properties, geometry });
+    feature.set('classIndex', classIndex);
+
+    // Format and return the result
+    const arrayOfFeatureInfoEntries = this.formatFeatureInfoResult([feature]);
+
+    return arrayOfFeatureInfoEntries;
+  }
+
+  /**
+   * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
+   * @param {string} fieldName - The field name for which we want to get the type.
+   * @returns {TypeOutfieldsType} The type of the field.
+   * @override
+   */
+  protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
+    // Handle special ESRI Image pixel fields
+    const lowerFieldName = fieldName.toLowerCase();
+
+    // Pixel-specific fields
+    if (lowerFieldName === 'pixelvalue' || lowerFieldName === 'processedvalue') {
+      return 'string';
+    }
+
+    if (lowerFieldName === 'name') {
+      return 'string';
+    }
+
+    // Check catalog item fields from metadata
+    const metadata = this.getLayerConfig().getServiceMetadata() as TypeLayerMetadataEsri;
+
+    if (metadata?.fields) {
+      const field = metadata.fields.find((f) => f.name.toLowerCase() === lowerFieldName);
+      if (field) {
+        // Map ESRI field types to our types
+        switch (field.type) {
+          case 'esriFieldTypeSmallInteger':
+          case 'esriFieldTypeInteger':
+          case 'esriFieldTypeOID':
+            return 'number';
+          case 'esriFieldTypeSingle':
+          case 'esriFieldTypeDouble':
+            return 'number';
+          case 'esriFieldTypeDate':
+            return 'date';
+          case 'esriFieldTypeString':
+          case 'esriFieldTypeGeometry':
+          default:
+            return 'string';
+        }
+      }
+    }
+
+    // Default to string for unknown fields
+    return 'string';
+  }
+
+  /**
+   * Overrides the return of the domain of the specified field.
+   * @param {string} fieldName - The field name for which we want to get the domain.
+   * @returns {null | codedValueType | rangeDomainType} The domain of the field.
+   * @override
+   */
+  protected override onGetFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
+    // Get metadata
+    const metadata = this.getLayerConfig().getServiceMetadata() as TypeLayerMetadataEsri;
+
+    // If no fields in metadata, return null
+    if (!metadata?.fields) return null;
+
+    // Find the field
+    const field = metadata.fields.find((f) => f.name.toLowerCase() === fieldName.toLowerCase());
+
+    // Return the domain if found
+    return field?.domain || null;
+  }
+
+  /**
+   * Overrides the formatting of feature info results to skip icon rendering for pixel-based queries.
+   * ESRI Image layers return pixel values, not symbolized features, so we skip the icon source step.
+   * @param {Feature[]} features - The array of features to format.
+   * @returns {TypeFeatureInfoEntry[]} The formatted feature info entries.
+   * @override
+   * @protected
+   */
+  protected override formatFeatureInfoResult(features: Feature[]): TypeFeatureInfoEntry[] {
+    // Get the legend from the layer
+    const legend = this.getLegend();
+    // Get class index from feature property set in getFeatureInfoAtLonLat
+    const classIndex = features[0]?.get('classIndex');
+
+    // Extract legend items from the style config
+    // For ESRI Image, the legend.styleConfig contains the Point symbols array
+    const styleConfig = legend?.styleConfig;
+    const legendSettings = styleConfig?.Point;
+    const legendItems = legendSettings?.info;
+
+    // Access the canvas array for RGB extraction (legend.legend is the raw ESRI legend data)
+    // Type guard: check if legend.legend is an object (not HTMLCanvasElement) before accessing Point
+    const legendCanvases =
+      legend?.legend && typeof legend.legend === 'object' && !(legend.legend instanceof HTMLCanvasElement)
+        ? legend.legend?.Point?.arrayOfCanvas
+        : undefined;
+
+    return features.map((feature, featureId) => {
+      // Build field info from feature properties
+      const properties = feature.getProperties();
+      const fieldInfo: Record<string, TypeFieldEntry> = {};
+
+      // Find the matching legend icon based on processedValue (0-indexed into the legend items array)
+      let featureIcon: string | undefined;
+      if (legendItems && Array.isArray(legendItems) && classIndex !== undefined && classIndex >= 0 && classIndex < legendItems.length) {
+        // Convert base64 src to data URI format if needed
+        const iconSettings = legendItems[classIndex]?.settings as TypeIconSymbolVectorConfig;
+        const iconSrc = iconSettings?.src;
+        featureIcon = iconSrc ? `data:image/png;base64,${iconSrc}` : undefined;
+
+        // Extract RGB values from the canvas if available
+        if (legendCanvases && Array.isArray(legendCanvases) && classIndex < legendCanvases.length) {
+          const canvas = legendCanvases[classIndex];
+          if (canvas instanceof HTMLCanvasElement) {
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              // Get pixel data from center of canvas (5,5) to avoid border
+              const imageData = ctx.getImageData(5, 5, 1, 1);
+              const r = imageData.data[0];
+              const g = imageData.data[1];
+              const b = imageData.data[2];
+              const a = imageData.data[3];
+
+              // Add RGB values FIRST to fieldInfo
+              fieldInfo.R = {
+                fieldKey: 0,
+                value: r,
+                dataType: 'number',
+                domain: null,
+                alias: 'R',
+              };
+              fieldInfo.G = {
+                fieldKey: 1,
+                value: g,
+                dataType: 'number',
+                domain: null,
+                alias: 'G',
+              };
+              fieldInfo.B = {
+                fieldKey: 2,
+                value: b,
+                dataType: 'number',
+                domain: null,
+                alias: 'B',
+              };
+              fieldInfo.A = {
+                fieldKey: 3,
+                value: a,
+                dataType: 'number',
+                domain: null,
+                alias: 'A',
+              };
+            }
+          }
+        }
+      }
+
+      // Process each property as a field
+      Object.keys(properties).forEach((fieldName, fieldId) => {
+        // Skip geometry property
+        if (fieldName === 'geometry') return;
+
+        const value = properties[fieldName];
+        const fieldType = this.getFieldType(fieldName);
+        const domain = this.onGetFieldDomain(fieldName);
+
+        fieldInfo[fieldName] = {
+          fieldKey: fieldId + 4, // +4 to account for R,G,B,A fields added first
+          value,
+          dataType: fieldType,
+          domain,
+          alias: fieldName,
+        };
+      });
+
+      const featureInfo: TypeFeatureInfoEntry = {
+        featureKey: featureId,
+        geoviewLayerType: CONST_LAYER_TYPES.ESRI_IMAGE,
+        layerPath: this.getLayerPath(),
+        featureIcon,
+        nameField: 'PixelValue',
+        extent: feature.getGeometry()?.getExtent(),
+        geometry: feature.getGeometry(),
+        fieldInfo,
+        feature,
+        uid: feature.getId()?.toString() || `${this.getLayerPath()}-${featureId}`, // Ensure uid exists
+        supportZoomTo: !!feature.getGeometry()?.getExtent(),
+      };
+      return featureInfo;
+    });
+  }
+
   // #endregion OVERRIDES
 
   // #region METHODS
@@ -337,4 +680,34 @@ export type TypeEsriImageLayerLegendLayerLegend = {
   height: number;
   width: number;
   values: string[];
+};
+
+export type EsriImageIdentifyJsonResponse = {
+  objectId: number;
+  name: string;
+  value: string | number;
+  location?: {
+    x: number;
+    y: number;
+    spatialReference: {
+      wkid: number;
+      latestWkid?: number;
+    };
+  };
+  properties?: {
+    Values: string[];
+  };
+  catalogItems?: {
+    objectIdFieldName: string;
+    geometryType: string;
+    spatialReference: {
+      wkid: number;
+      latestWkid?: number;
+    };
+    features: Array<{
+      attributes: Record<string, unknown>;
+      geometry?: GeometryJson;
+    }>;
+  };
+  processedValues?: string[];
 };

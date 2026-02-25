@@ -2,6 +2,7 @@ import { DataTableEventProcessor } from '@/api/event-processors/event-processor-
 import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
 import type { QueryType, TypeFeatureInfoResult } from '@/api/types/map-schema-types';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
+import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
@@ -35,6 +36,9 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    * @returns True when the layer should be registered to this all-feature-info-layer-set.
    */
   protected override onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean {
+    // Want to exclude ESRI Image layers. They have "features", but probably not useful
+    if (layer instanceof GVEsriImage) return false;
+
     // Return if the layer is of queryable type and source is queryable
     let isQueryable =
       super.onRegisterLayerCheck(layer) && AbstractLayerSet.isQueryableType(layer) && AbstractLayerSet.isSourceQueryable(layer);
