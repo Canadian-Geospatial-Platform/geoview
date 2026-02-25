@@ -164,7 +164,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         try {
           return LegendEventProcessor.getLayerRasterFunctionInfos(get().mapId, layerPath);
         } catch (error: unknown) {
-          logger.logError(`Error getting temporal dimension for layer ${layerPath}`, error);
+          logger.logError(`Error getting raster function information for layer ${layerPath}`, error);
         }
         return undefined;
       },
@@ -674,9 +674,15 @@ export const useLayerDisplayDateTimezone = (layerPath: string): TimeIANA => {
   });
 };
 
+/**
+ * React hook that returns the raster function infos for a specific layer.
+ * @param layerPath The layer path
+ * @returns The raster function infos for the layer or undefined
+ */
 export const useLayerSelectorRasterFunctionInfos = (layerPath: string): TypeMetadataEsriRasterFunctionInfos[] | undefined => {
-  const actions = useStore(useGeoViewStore(), (state) => state.layerState.actions);
-  return actions.getLayerRasterFunctionInfos(layerPath);
+  return useStore(useGeoViewStore(), (state) => {
+    return state.layerState.actions.getLayerRasterFunctionInfos(layerPath);
+  });
 };
 
 // Generic hook that can select any key from the layer

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { IconButton, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material';
-import { Settings as SettingsIcon, Functions as FunctionsIcon } from '@mui/icons-material';
+import { Menu, MenuItem, ListItemIcon, ListItemText, IconButton } from '@/ui';
+import { SettingsIcon, FunctionsIcon } from '@/ui';
 
 import { getSxClasses } from './layer-settings-style';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -74,7 +74,7 @@ export function LayerSettings({ layerDetails }: LayerSettingsProps): JSX.Element
 
   return (
     <>
-      <IconButton aria-label={t('layers.settings')!} className="buttonOutline" onClick={handleClick}>
+      <IconButton aria-label={t('layers.settings')} className="buttonOutline" onClick={handleClick} tooltipPlacement="right">
         <SettingsIcon />
       </IconButton>
 

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
-import { Menu, MenuItem, ListItemIcon, ListItemText, Box, CircularProgress } from '@mui/material';
-import { ImageNotSupported as ImageNotSupportedIcon } from '@mui/icons-material';
+import { Menu, MenuItem, ListItemIcon, ListItemText, Box, CircularProgress } from '@/ui';
+import { ImageNotSupportedIcon } from '@/ui';
 import { getSxClasses } from './layer-settings-style';
 import {
   useLayerStoreActions,
@@ -53,7 +53,7 @@ function RasterFunctionMenuItem({ info, isSelected, previewPromise, onSelect }: 
     if (loading) {
       return (
         <Box sx={sxClasses.previewImageContainer}>
-          <CircularProgress size={40} />
+          <CircularProgress size={40} isLoaded={!loading} />
         </Box>
       );
     }
