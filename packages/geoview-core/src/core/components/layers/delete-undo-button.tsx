@@ -1,9 +1,11 @@
-import type { KeyboardEvent } from 'react';
-import { useEffect, useState, useRef } from 'react';
+import type { KeyboardEvent, MouseEvent } from 'react';
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, CircularProgressBase, DeleteOutlineIcon, IconButton, UndoIcon } from '@/ui';
-import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useMapStoreActions, useMapSelectorLayerVisibility } from '@/core/stores/store-interface-and-intial-values/map-state';
+import {
+  useLayerSelectorDeletionProgressPercentage,
+  useLayerStoreActions,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
 
 interface DeleteUndoButtonProps {
@@ -14,7 +16,7 @@ interface DeleteUndoButtonProps {
 
 interface UndoButtonProps {
   progressValue: number;
-  onUndo: () => void;
+  onUndo: (event: MouseEvent) => void;
   handleKeyDown: (event: KeyboardEvent) => void;
   iconRef: React.RefObject<HTMLButtonElement>;
 }
@@ -57,99 +59,85 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
 
   const { t } = useTranslation<string>();
 
-  const [progress, setProgress] = useState(10);
-  const [inUndoState, setInUndoState] = useState(false);
-
   // Refs for buttons to manage focus
   const deleteButtonRef = useRef<HTMLButtonElement>(null);
   const undoButtonRef = useRef<HTMLButtonElement>(null);
-  const wasKeyboardActivated = useRef<boolean>(false);
 
   // get store actions
-  const { deleteLayer, setLayerDeleteInProgress, getLayerDeleteInProgress } = useLayerStoreActions();
-  const { setOrToggleLayerVisibility, removeLayerHighlights } = useMapStoreActions();
-  const isVisible = useMapSelectorLayerVisibility(layerPath);
+  const { deleteLayer, deleteLayerAbort } = useLayerStoreActions();
+  const layerDeletionProgressPercentage = useLayerSelectorDeletionProgressPercentage(layerPath);
 
-  const handleDeleteClick = (): void => {
-    if (isVisible) setOrToggleLayerVisibility(layerPath);
-    removeLayerHighlights(layerPath);
-    setInUndoState(true);
-    setLayerDeleteInProgress(layerPath);
+  /**
+   * Performs the delete operation on the layer.
+   * @param wasKeyboardActivated - Indicates if the delete was activated via the keyboard or not.
+   */
+  const performDelete = (wasKeyboardActivated: boolean): void => {
+    // If was keyboard activated on clicking
+    if (wasKeyboardActivated) {
+      requestAnimationFrame(() => {
+        // Focus on the undo button ref now
+        undoButtonRef.current?.focus();
+      });
+    }
+
+    // Delete the layer
+    deleteLayer(layerPath)
+      .then((deleted) => {
+        // If deleted, set focus elsewhere
+        if (deleted && focusTargetIdAfterDelete) {
+          const targetId = focusTargetIdAfterDelete;
+          requestAnimationFrame(() => {
+            document.getElementById(targetId)?.focus();
+          });
+        }
+      })
+      .catch((error: unknown) => {
+        // Log error
+        logger.logPromiseFailed('in deleteLayer in handleDeleteClick', error);
+      });
   };
 
-  const handleUndoClick = (): void => {
-    setOrToggleLayerVisibility(layerPath);
-    setInUndoState(false);
-    setLayerDeleteInProgress('');
-    requestAnimationFrame(() => deleteButtonRef.current?.focus());
+  /**
+   * Performs the undo operation on the layer.
+   * @param wasKeyboardActivated - Indicates if the delete was activated via the keyboard or not.
+   */
+  const performUndo = (wasKeyboardActivated: boolean): void => {
+    // Call the action
+    deleteLayerAbort(layerPath);
+
+    // If was keyboard activated on clicking
+    if (wasKeyboardActivated) {
+      // Focus on the delete button ref now
+      requestAnimationFrame(() => deleteButtonRef.current?.focus());
+    }
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleDeleteClick = (event: MouseEvent): void => {
+    performDelete(false);
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleUndoClick = (event: MouseEvent): void => {
+    performUndo(false);
   };
 
   const handleDeleteKeyDown = (event: KeyboardEvent): void => {
     if (event.key === 'Enter') {
       event.preventDefault();
-      wasKeyboardActivated.current = true;
-      handleDeleteClick();
+      performDelete(true);
     }
   };
 
   const handleUndoDeleteKeyDown = (event: KeyboardEvent): void => {
     if (event.key === 'Enter') {
-      handleUndoClick();
       event.preventDefault();
+      performUndo(true);
     }
   };
 
-  // Make sure there is no pending state on unmount. If not, it can stay in progress forever...
-  // If user switch panel when action is in progress
-  useEffect(() => {
-    return () => {
-      setInUndoState(false);
-      setLayerDeleteInProgress('');
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (progress === 100) {
-      deleteLayer(layerPath);
-      setInUndoState(false);
-
-      // set focus after deletion
-      if (focusTargetIdAfterDelete) {
-        const targetId = focusTargetIdAfterDelete;
-        requestAnimationFrame(() => {
-          document.getElementById(targetId)?.focus();
-        });
-      }
-    }
-    return undefined;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [progress]);
-
-  useEffect(() => {
-    if (inUndoState) {
-      const timer = setInterval(() => {
-        setProgress((prevProgress) => (prevProgress >= 100 ? 0 : prevProgress + 5));
-      }, 90);
-      return () => {
-        clearInterval(timer);
-      };
-    }
-    setProgress(0);
-    return undefined;
-  }, [inUndoState]);
-
-  useEffect(() => {
-    if (inUndoState && wasKeyboardActivated.current) {
-      requestAnimationFrame(() => {
-        undoButtonRef.current?.focus();
-        wasKeyboardActivated.current = false;
-      });
-    }
-  }, [inUndoState]);
-
   // Never hide the remove icon, so user can remove forever loading/processing layers.
-  if (!inUndoState && layerRemovable && !getLayerDeleteInProgress()) {
+  if (layerRemovable && layerDeletionProgressPercentage === undefined) {
     return (
       <IconButton
         iconRef={deleteButtonRef}
@@ -164,7 +152,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
       </IconButton>
     );
   }
-  if (!inUndoState) {
+  if (!layerRemovable) {
     return (
       <IconButton
         iconRef={deleteButtonRef}
@@ -182,7 +170,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   return (
     <UndoButtonWithProgress
       iconRef={undoButtonRef}
-      progressValue={progress}
+      progressValue={layerDeletionProgressPercentage ?? 0}
       onUndo={handleUndoClick}
       handleKeyDown={handleUndoDeleteKeyDown}
     />
