@@ -53,6 +53,7 @@ import { VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
 import { WKB } from '@/geo/layer/geoview-layers/vector/wkb';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
+import { WMTS } from '@/geo/layer/geoview-layers/raster/wmts';
 import { XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 
 import schema from '@/core/../../schema.json';
@@ -96,6 +97,8 @@ export class ConfigApi {
     if (isValidUUID(url)) return CONFIG_GEOCORE_TYPE;
 
     if (/WMS/i.test(url)) return CONST_LAYER_TYPES.WMS;
+
+    if (/WMTS/i.test(url)) return CONST_LAYER_TYPES.WMTS;
 
     if (/.CSV(?:$|\?)/i.test(url)) return CONST_LAYER_TYPES.CSV;
 
@@ -489,6 +492,8 @@ export class ConfigApi {
         return VectorTiles.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'ogcWms':
         return WMS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
+      case 'ogcWmts':
+        return WMTS.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'xyzTiles':
         return XYZTiles.initGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, isTimeAware);
       case 'CSV':
@@ -571,6 +576,8 @@ export class ConfigApi {
         return VectorTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
       case 'ogcWms':
         return WMS.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as number[], isTimeAware);
+      case 'ogcWmts':
+        return WMTS.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
       case 'xyzTiles':
         return XYZTiles.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
       case 'CSV':

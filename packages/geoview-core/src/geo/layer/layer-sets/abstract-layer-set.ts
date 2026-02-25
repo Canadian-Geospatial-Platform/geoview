@@ -87,25 +87,25 @@ export abstract class AbstractLayerSet {
   /**
    * An overridable registration condition function for a layer-set to check if the registration
    * should happen for a specific geoview layer and layer path.
-   * @param {ConfigBaseClass} layerConfig - The layer config
-   * @returns {boolean} True if the layer config should be registered, false otherwise
-   * @protected
+   *
+   * @param layerConfig - The layer config
+   * @returns True if the layer config should be registered, false otherwise
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected onRegisterLayerConfigCheck(layerConfig: ConfigBaseClass): boolean {
     // Override this function to perform registration condition logic in the inherited classes
     // By default, a layer-set doesn't register layer configs, it typically registers the layer objects but not the layer config
+    if (layerConfig.getGeoviewLayerConfig().useAsBasemap) return false;
     return this.#defaultRegisterLayerConfigCheck;
   }
 
   /**
    * An overridable registration function for a layer-set that the registration process will use to
    * create a new entry in the layer set for a specific geoview layer and layer path.
-   * @param {ConfigBaseClass} layerConfig - The layer config
-   * @returns {void}
-   * @protected
+   *
+   * @param layerConfig - The layer config
    */
   protected onRegisterLayerConfig(layerConfig: ConfigBaseClass): void {
+    if (layerConfig.getGeoviewLayerConfig().useAsBasemap) return;
     // Prep the resultSet (it's registered, but it doesn't mean it's in the store yet)
     this.resultSet[layerConfig.layerPath] = {
       layerPath: layerConfig.layerPath,

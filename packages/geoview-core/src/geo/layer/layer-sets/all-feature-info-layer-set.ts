@@ -30,12 +30,12 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
-   * @param {AbstractBaseGVLayer} layer - The layer
-   * @returns {boolean} True when the layer should be registered to this all-feature-info-layer-set.
-   * @override
-   * @protected
+   *
+   * @param layer - The layer
+   * @returns True when the layer should be registered to this all-feature-info-layer-set.
    */
   protected override onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean {
+    if (layer.getLayerConfig()?.getGeoviewLayerConfig().useAsBasemap) return false;
     // Return if the layer is of queryable type and source is queryable
     let isQueryable =
       super.onRegisterLayerCheck(layer) && AbstractLayerSet.isQueryableType(layer) && AbstractLayerSet.isSourceQueryable(layer);

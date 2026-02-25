@@ -258,7 +258,7 @@ export function AddNewLayer(): JSX.Element {
   // Hook
   const { t } = useTranslation<string>();
 
-  const { CSV, ESRI_DYNAMIC, ESRI_FEATURE, ESRI_IMAGE, GEOJSON, GEOTIFF, KML, WMS, WFS, OGC_FEATURE, XYZ_TILES, VECTOR_TILES } =
+  const { CSV, ESRI_DYNAMIC, ESRI_FEATURE, ESRI_IMAGE, GEOJSON, GEOTIFF, KML, WMS, WMTS, WFS, OGC_FEATURE, XYZ_TILES, VECTOR_TILES } =
     CONST_LAYER_TYPES;
 
   // States
@@ -464,6 +464,7 @@ export function AddNewLayer(): JSX.Element {
       promise = Promise.resolve(true);
     } else if (
       layerType === WMS ||
+      layerType === WMTS ||
       layerType === WFS ||
       layerType === OGC_FEATURE ||
       layerType === XYZ_TILES ||

@@ -740,9 +740,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
     return this.findMapLayerFromOrderedInfo(mapId, layerPath)?.legendCollapsed !== false;
   }
 
-  static getMapVisibilityFromOrderedLayerInfo(mapId: string, layerPath: string): boolean {
+  static getMapVisibilityFromOrderedLayerInfo(mapId: string, layerPath: string): boolean | undefined {
     // Get visibility of a layer
-    return this.findMapLayerFromOrderedInfo(mapId, layerPath)?.visible !== false;
+    return this.findMapLayerFromOrderedInfo(mapId, layerPath)?.visible;
   }
 
   /**
@@ -1014,7 +1014,23 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Set the visibility for all layers
     const layerApi = this.getMapViewerLayerAPI(mapId);
     layerApi.getGeoviewLayers().forEach((layer) => {
-      if (layer.getVisible() !== newVisibility) {
+      if (!layer.getLayerConfig().getGeoviewLayerConfig().useAsBasemap === true && layer.getVisible() !== newVisibility) {
+        layerApi.setOrToggleLayerVisibility(layer.getLayerPath(), newVisibility);
+      }
+    });
+  }
+
+  /**
+   * Sets the visibility of the Geoview basemap layer.
+   * @param {string} mapId - The identifier of the map whose basemap layer will be updated.
+   * @param {boolean} newVisibility - The visibility state to apply to the basemap layer (`true` to show, `false` to hide).
+   * @returns {void}
+   * @static
+   */
+  static setVisibilityOfGeoviewBasemapLayers(mapId: string, newVisibility: boolean): void {
+    const layerApi = this.getMapViewerLayerAPI(mapId);
+    layerApi.getGeoviewLayers().forEach((layer) => {
+      if (layer.getLayerConfig().getGeoviewLayerConfig().useAsBasemap === true && layer.getVisible() !== newVisibility) {
         layerApi.setOrToggleLayerVisibility(layer.getLayerPath(), newVisibility);
       }
     });
@@ -1787,6 +1803,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
             geoviewLayerName: overrideGeocoreServiceNames === false ? undefined : layerEntryConfig.getGeoviewLayerName(),
             geoviewLayerType: 'geoCore',
             initialSettings,
+            useAsBasemap: geoviewLayerConfig.useAsBasemap,
             listOfLayerEntryConfig,
           }
         : {
@@ -1803,6 +1820,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
             serviceDateTemporalMode: geoviewLayerConfig.serviceDateTemporalMode,
             displayDateFormat: geoviewLayerConfig.displayDateFormat,
             displayDateTimezone: geoviewLayerConfig.displayDateTimezone,
+            useAsBasemap: geoviewLayerConfig.useAsBasemap,
           };
 
     return newGeoviewLayerConfig;

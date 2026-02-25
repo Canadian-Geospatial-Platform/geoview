@@ -1,7 +1,11 @@
 import type { ReactNode } from 'react';
 import { createElement, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useMapBasemapOptions, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import {
+  useMapHasGeoviewBasemapLayer,
+  useMapBasemapOptions,
+  useMapStoreActions,
+} from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
 import type { TypeBasemapOptions } from '@/api/types/map-schema-types';
@@ -30,13 +34,16 @@ export default function BasemapSelect(): JSX.Element {
   const { t } = useTranslation<string>();
 
   // Get values from store
-  const { createBasemapFromOptions } = useMapStoreActions();
+  const { createBasemapFromOptions, setVisibilityOfGeoviewBasemapLayers } = useMapStoreActions();
   const configBasemapOptions = useMapBasemapOptions();
+  const hasGeoviewBasemapLayer = useMapHasGeoviewBasemapLayer();
 
-  // Check if the basemap from the config is one of our default basemaps
+  // Check if the basemap from the config is one of our default basemaps.
+  // If there is a custom basemap, we need to use it as the default regardless of basemap options.
   const noDefault =
     Object.keys(basemapChoiceOptions).includes(configBasemapOptions.basemapId) &&
-    JSON.stringify(configBasemapOptions) === JSON.stringify(basemapChoiceOptions[configBasemapOptions.basemapId]);
+    JSON.stringify(configBasemapOptions) === JSON.stringify(basemapChoiceOptions[configBasemapOptions.basemapId]) &&
+    !hasGeoviewBasemapLayer;
 
   const [selectedBasemap, setSelectedBasemap] = useState<string>(noDefault ? configBasemapOptions.basemapId : 'default');
 
@@ -49,6 +56,13 @@ export default function BasemapSelect(): JSX.Element {
       logger.logTraceUseCallback('BASEMAP-SELECT, handleChoice', basemapChoice);
 
       setSelectedBasemap(basemapChoice);
+
+      // If the Geoview basemap layer is present, toggle visibility based on selection. We hide it on nogeom.
+      if (hasGeoviewBasemapLayer) {
+        if (basemapChoice === 'default') setVisibilityOfGeoviewBasemapLayers(true);
+        else setVisibilityOfGeoviewBasemapLayers(false);
+      }
+
       createBasemapFromOptions(basemapChoice === 'default' ? configBasemapOptions : basemapChoiceOptions[basemapChoice]).catch(
         (error: unknown) => {
           // Log
@@ -62,7 +76,7 @@ export default function BasemapSelect(): JSX.Element {
         closeButton.focus();
       }
     },
-    [configBasemapOptions, createBasemapFromOptions]
+    [configBasemapOptions, createBasemapFromOptions, setVisibilityOfGeoviewBasemapLayers, hasGeoviewBasemapLayer]
   );
 
   /**

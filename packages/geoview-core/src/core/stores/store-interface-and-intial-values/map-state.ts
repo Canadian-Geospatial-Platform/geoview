@@ -52,6 +52,7 @@ export interface IMapState {
   featureHighlightColor: TypeHighlightColors;
   fixNorth: boolean;
   geolocatorSearchArea: { searchItem: string; coords: Coordinate; bbox?: Extent } | undefined;
+  hasGeoviewBasemapLayer: boolean;
   highlightedFeatures: TypeFeatureInfoEntry[];
   homeView: TypeMapViewSettings | undefined;
   hoverFeatureInfo: TypeHoverFeatureInfo | undefined | null;
@@ -107,6 +108,7 @@ export interface IMapState {
     setAllLayersCollapsed: (collapsed: boolean) => void;
     setOrToggleLayerVisibility: (layerPath: string, newValue?: boolean) => boolean;
     setAllLayersVisibility: (visibility: boolean) => void;
+    setVisibilityOfGeoviewBasemapLayers: (newVisibility: boolean) => void;
     setMapKeyboardPanInteractions: (panDelta: number) => void;
     setProjection: (projectionCode: TypeValidMapProjectionCodes) => void;
     setZoom: (zoom: number, duration?: number) => void;
@@ -186,6 +188,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     featureHighlightColor: DEFAULT_HIGHLIGHT_COLOR,
     geolocatorSearchArea: undefined,
     fixNorth: false,
+    hasGeoviewBasemapLayer: false,
     highlightedFeatures: [],
     homeView: undefined,
     hoverFeatureInfo: undefined,
@@ -234,6 +237,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
           currentBasemapOptions: geoviewConfig.map.basemapOptions,
           featureHighlightColor: geoviewConfig.map.highlightColor ?? DEFAULT_HIGHLIGHT_COLOR,
           geolocatorSearchArea: undefined,
+          hasGeoviewBasemapLayer: geoviewConfig.map.listOfGeoviewLayerConfig.some((layer) => layer.useAsBasemap),
           homeView: geoviewConfig.map.viewSettings.homeView ??
             geoviewConfig.map.viewSettings.initialView ?? { zoomAndCenter: [MAP_ZOOM_LEVEL[3857], MAP_CENTER[3857]] },
           initialView: geoviewConfig.map.viewSettings.initialView ?? { zoomAndCenter: [MAP_ZOOM_LEVEL[3857], MAP_CENTER[3857]] },
@@ -509,6 +513,15 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
       setAllLayersVisibility: (visibility: boolean): void => {
         // Redirect to processor.
         MapEventProcessor.setAllMapLayerVisibility(get().mapId, visibility);
+      },
+
+      /**
+       * Sets the visibility of the Geoview basemap layer.
+       * @param {boolean} visibility - The visibility.
+       */
+      setVisibilityOfGeoviewBasemapLayers: (visibility: boolean): void => {
+        // Redirect to processor.
+        MapEventProcessor.setVisibilityOfGeoviewBasemapLayers(get().mapId, visibility);
       },
 
       /**
@@ -1181,6 +1194,7 @@ export const useMapClickMarker = (): TypeClickMarker | undefined => useStore(use
 export const useMapClickCoordinates = (): TypeMapMouseInfo | undefined =>
   useStore(useGeoViewStore(), (state) => state.mapState.clickCoordinates);
 export const useMapExtent = (): Extent | undefined => useStore(useGeoViewStore(), (state) => state.mapState.mapExtent);
+export const useMapHasGeoviewBasemapLayer = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.hasGeoviewBasemapLayer);
 export const useMapFeatureHighlightColor = (): TypeHighlightColors =>
   useStore(useGeoViewStore(), (state) => state.mapState.featureHighlightColor);
 export const useMapFixNorth = (): boolean => useStore(useGeoViewStore(), (state) => state.mapState.fixNorth);

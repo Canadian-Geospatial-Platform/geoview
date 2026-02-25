@@ -369,6 +369,25 @@ export class LayerServiceMetadataUnableToFetchError extends LayerError {
 }
 
 /**
+ * Custom error class for errors that occur when metadata for a GeoView WMTS layer is missing necessary info.
+ * This is typically used in scenarios where user entered values don't exist in the metadata.
+ */
+export class LayerWMTSMetadataError extends LayerError {
+  /**
+   * Constructor to initialize the LayerWMTSMetadataError with the layer ID, and the underlying cause of the error.
+   * @param {string} geoviewLayerId - The ID of the GeoView layer related to the error.
+   * @param {string | undefined} layerName - The layer name.
+   * @param {string} missingElement - The element that is missing in the metadata.
+   */
+  constructor(geoviewLayerId: string, layerName: string | undefined, missingElement: string) {
+    super(geoviewLayerId, 'validation.layer.wmtsMetadataError', [layerName || geoviewLayerId, missingElement]);
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerWMTSMetadataError.prototype);
+  }
+}
+
+/**
  * Custom error class for scenarios where the metadata of a GeoView layer service is empty.
  * This error is typically thrown when a metadata request returns an empty response.
  * @extends {LayerError}

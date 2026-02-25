@@ -66,12 +66,11 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a hover-feature-info-layer-set wants to register a layer in its set.
-   * @param {AbstractBaseGVLayer} layer - The layer
-   * @returns {void}
-   * @override
-   * @protected
+   *
+   * @param layer - The layer
    */
   protected override onRegisterLayer(layer: AbstractBaseGVLayer): void {
+    if (layer.getLayerConfig()?.getGeoviewLayerConfig().useAsBasemap) return;
     // Call parent
     super.onRegisterLayer(layer);
 

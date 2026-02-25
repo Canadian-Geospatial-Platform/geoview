@@ -25,6 +25,7 @@ import type { TypeMetadataWMS, TypeMetadataWMSCapabilityLayer, TypeMetadataWMSRo
 import type { TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
 import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { NetworkError, NotSupportedError, ResponseEmptyError } from '@/core/exceptions/core-exceptions';
+import type { TypeMetadataWMTS } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
 
 // available layer types
 export const layerTypes = CONST_LAYER_TYPES;
@@ -323,6 +324,36 @@ export abstract class GeoUtilities {
 
     // Return it
     return metadataResult;
+  }
+
+  /**
+   * Fetch the json response from the XML response of a WMS getCapabilities request.
+   *
+   * @param url - The url the url of the WMS server.
+   * @param layers - The layers to query separate by.
+   * @param abortSignal - Optional abort signal to handle cancelling of the process.
+   * @returns A json promise containing the result of the query.
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
+   * @throws {ResponseError} When the response is not OK (non-2xx).
+   * @throws {ResponseEmptyError} When the JSON response is empty.
+   * @throws {NetworkError} When a network issue happened.
+   */
+  static async getWMTSServiceMetadata(url: string, layers?: string, abortSignal?: AbortSignal): Promise<TypeMetadataWMTS> {
+    // Make sure the URL has necessary information
+    const capUrl = this.ensureServiceRequestUrlGetCapabilities(url, 'WMTS', layers);
+
+    // Redirect
+    const metadataRaw = await this.getWMSServiceString(capUrl, undefined, abortSignal);
+
+    // Parse it
+    const metadataParsed = parseXMLToJson<TypeMetadataWMTS>(metadataRaw);
+
+    // If nothing
+    if (!metadataParsed) throw new ResponseEmptyError();
+
+    // Return it
+    return metadataParsed;
   }
 
   /**

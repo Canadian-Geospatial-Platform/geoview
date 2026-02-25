@@ -181,7 +181,20 @@
     "TypeValidAppBarCoreProps": {
       "description": "Valid values for the app bar tabs core array.",
       "additionalProperties": false,
-      "enum": ["about-panel", "geolocator", "export", "geochart", "details", "legend", "guide", "data-table", "layers", "share","aoi-panel", "custom-legend"]
+      "enum": [
+        "about-panel",
+        "geolocator",
+        "export",
+        "geochart",
+        "details",
+        "legend",
+        "guide",
+        "data-table",
+        "layers",
+        "share",
+        "aoi-panel",
+        "custom-legend"
+      ]
     },
     "TypeAppBarProps": {
       "type": "object",
@@ -1412,6 +1425,42 @@
         }
       }
     },
+    "TypeSourceImageWmtsInitialConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "dataAccessPath": {
+          "type": "string",
+          "description": "The path to reach the data to display. If not specified, metadatAccessPath will be assigned to it."
+        },
+        "crossOrigin": {
+          "type": "string",
+          "description": "The crossOrigin attribute for loaded images. Note that you must provide a crossOrigin value if you want to access pixel data with the Canvas renderer."
+        },
+        "projection": {
+          "type": "integer",
+          "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada."
+        },
+        "featureInfo": {
+          "$ref": "#/definitions/TypeFeatureInfoLayerConfig"
+        },
+        "wmtsStyle": {
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "Single style to apply"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Array of style to choose."
+            }
+          ]
+        }
+      }
+    },
     "TypeOfServer": {
       "enum": ["mapserver", "geoserver", "qgis"],
       "description": "The type of the remote WMS server. The default value is mapserver."
@@ -2060,6 +2109,52 @@
       },
       "required": ["schemaTag", "entryType", "layerId"]
     },
+    "TypeOgcWmtsLayerEntryConfig": {
+      "additionalProperties": false,
+      "type": "object",
+      "properties": {
+        "schemaTag": {
+          "enum": ["ogcWmts"]
+        },
+        "entryType": {
+          "enum": ["raster-tile"]
+        },
+        "initialSettings": {
+          "$ref": "#/definitions/TypeLayerInitialSettings",
+          "description": "Initial settings to apply to the layer entry at creation time. Initial settings are inherited from the parent in the configuration tree."
+        },
+        "isLayerGroup": {
+          "description": "Flag used to distinguish layer group nodes.",
+          "type": "boolean"
+        },
+        "layerPathEnding": {
+          "type": "string",
+          "description": "The ending element of the layer configuration path."
+        },
+        "layerId": {
+          "type": "string",
+          "description": "The id of the layer to display on the map."
+        },
+        "layerName": {
+          "type": "string",
+          "description": "The display name of the layer. If it is not present the viewer will make an attempt to scrape this information."
+        },
+        "source": {
+          "$ref": "#/definitions/TypeSourceTileInitialConfig"
+        },
+        "tileMatrixSet": {
+          "type": "string",
+          "description": "The identifier of the TileMatrixSet to use from the WMTS capabilities document."
+        },
+        "not": {
+          "listOfLayerEntryConfig": {
+            "$ref": "#/definitions/TypeListOfLayerEntryConfig",
+            "description": "The list of layer entry configurations to use from the GeoView layer group."
+          }
+        }
+      },
+      "required": ["schemaTag", "entryType", "layerId"]
+    },
     "TypeLayerEntryType": {
       "enum": ["vector", "vector-tile", "raster-tile", "raster-image", "geoCore", "shapefile"],
       "description": "Layer entry data type."
@@ -2122,6 +2217,9 @@
         },
         {
           "$ref": "#/definitions/TypeOgcWmsLayerEntryConfig"
+        },
+        {
+          "$ref": "#/definitions/TypeOgcWmtsLayerEntryConfig"
         },
         {
           "$ref": "#/definitions/TypeEsriDynamicLayerEntryConfig"
@@ -2194,6 +2292,22 @@
           },
           {
             "$ref": "#/definitions/TypeTileLayerEntryConfig"
+          }
+        ]
+      }
+    },
+    "TypeListOfWmtsLayerEntryConfig": {
+      "description": "This type is used recursively by the IsValidTypeListOfLayerEntryConfig method coded in config-validation.ts file. It completes the validation of the list of layer entry config.",
+      "type": "array",
+      "minItems": 1,
+      "additionalProperties": false,
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/definitions/TypeLayerGroupEntryConfig"
+          },
+          {
+            "$ref": "#/definitions/TypeOgcWmtsLayerEntryConfig"
           }
         ]
       }
@@ -2475,6 +2589,10 @@
           "type": "number",
           "description": "The maximum scale (furthest zoomed in scale) where the layer will still be seen."
         },
+        "useAsBasemap": {
+          "type": "boolean",
+          "description": "Flag to indicate if the layer should be used as basemap. Only one layer can be used as basemap."
+        },
         "listOfLayerEntryConfig": {
           "$ref": "#/definitions/TypeListOfLayerEntryConfig",
           "description": "The layer entries to use from the GeoView layer."
@@ -2573,6 +2691,7 @@
           "ogcFeature",
           "ogcWfs",
           "ogcWms",
+          "ogcWmts",
           "imageStatic",
           "vectorTiles",
           "WKB"
