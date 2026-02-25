@@ -13,6 +13,7 @@ import { OgcFeature } from '@/geo/layer/geoview-layers/vector/ogc-feature';
 import { VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { WFS } from '@/geo/layer/geoview-layers/vector/wfs';
 import { WMS } from '@/geo/layer/geoview-layers/raster/wms';
+import { WMTS } from '@/geo/layer/geoview-layers/raster/wmts';
 import { XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 
 import {
@@ -204,6 +205,9 @@ export class UUIDmapConfigReader {
           } else if (layerType === CONST_LAYER_TYPES.OGC_FEATURE) {
             // Redirect
             geoviewLayerConfig = OgcFeature.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
+          } else if (layerType === CONST_LAYER_TYPES.WMTS) {
+            // Redirect
+            geoviewLayerConfig = WMTS.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);
           } else if (layerType === CONST_LAYER_TYPES.GEOJSON) {
             // Redirect
             geoviewLayerConfig = GeoJSON.createGeoviewLayerConfig(idClean, layerName, layerUrl, layerIsTimeAware, layerEntries);

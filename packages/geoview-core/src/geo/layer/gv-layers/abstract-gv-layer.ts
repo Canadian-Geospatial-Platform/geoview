@@ -288,6 +288,8 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
     // If first time
     if (!this.loadedOnce) {
+      // If it's a basemap layer, put it at the bottom of the stack to avoid any issue with layers order on map.
+      if (this.getLayerConfig().getGeoviewLayerConfig().useAsBasemap === true) this.getOLLayer().setZIndex(-1);
       // Now that the layer is loaded, set its visibility correctly (had to be done in the loaded event, not before, per prior note in pre-refactor)
       this.setVisible(layerConfig.getInitialSettings()?.states?.visible ?? true); // default: true
 
