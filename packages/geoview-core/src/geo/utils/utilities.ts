@@ -978,6 +978,7 @@ export abstract class GeoUtilities {
    * @param {unknown} features - The Features data to read.
    * @param {import('ol/format/Feature').ReadOptions} [options] - Optional read options such as projection or extent.
    * @returns {EsriJSONReadResult} An array of parsed OpenLayers Feature and whether there were any invalid geometries
+   * @throws {Error} If the EsriJSON data is invalid and cannot be parsed, even after attempting to clean invalid geometries.
    */
   static readFeaturesFromEsriJSON(features: unknown, options: ReadOptions | undefined): EsriJSONReadResult {
     // GV Anything other than numbers in the geometry will throw errors in EsriJSON().readFeatures()
