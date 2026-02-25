@@ -11,7 +11,7 @@ import { type MRT_ColumnDef as MRTColumnDef } from 'material-react-table';
 import { IconButton, DownloadIcon, Menu, MenuItem } from '@/ui';
 import { logger } from '@/core/utils/logger';
 import type { ColumnsType } from './data-table-types';
-import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerSelectorName } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 interface ExportButtonProps {
   layerPath: string;
@@ -36,9 +36,9 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
   // Log
   logger.logTraceRender('components/data-table/export-button');
 
-  const { getLayer } = useLayerStoreActions();
-
   const { t } = useTranslation<string>();
+  const layerName = useLayerSelectorName(layerPath) ?? '';
+
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -73,7 +73,7 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
     const filteredColumns = columns.filter((col) => !COLUMNS_TO_REMOVE.includes(col.id as string));
 
     return (): Options => ({
-      filename: `table-${getLayer(layerPath)?.layerName.replaceAll(' ', '-')}`,
+      filename: `table-${layerName.replaceAll(' ', '-')}`,
       fieldSeparator: ',',
       quoteStrings: '"',
       decimalSeparator: '.',
@@ -82,7 +82,7 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
       useKeysAsHeaders: false,
       headers: filteredColumns.map((c) => c.id as string),
     });
-  }, [columns, getLayer, layerPath]);
+  }, [columns, layerName]);
 
   /**
    * Exports data table in csv format.

@@ -41,11 +41,8 @@ export interface ILayerState {
     deleteLayer: (layerPath: string) => void;
     getExtentFromFeatures: (layerPath: string, featureIds: number[], outfield?: string) => Promise<Extent>;
     queryLayerEsriDynamic: (layerPath: string, objectIDs: number[]) => Promise<TypeFeatureInfoEntryPartial[]>;
-    getLayer: (layerPath: string) => TypeLegendLayer | undefined;
-    getLayerBounds: (layerPath: string) => number[] | undefined;
     getLayerDeleteInProgress: () => string;
     getLayerServiceProjection: (layerPath: string) => string | undefined;
-    getLayerTimeDimension: (layerPath: string) => TimeDimension | undefined;
     refreshLayer: (layerPath: string) => Promise<void>;
     reloadLayer: (layerPath: string) => void;
     toggleItemVisibility: (layerPath: string, item: TypeLegendItem) => void;
@@ -140,28 +137,9 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       },
 
       /**
-       * Gets legend layer for given layer path.
-       * @param {string} layerPath - The layer path to get info for.
-       * @return {TypeLegendLayer | undefined}
-       */
-      getLayer: (layerPath: string): TypeLegendLayer | undefined => {
-        const curLayers = get().layerState.legendLayers;
-        return LegendEventProcessor.findLayerByPath(curLayers, layerPath);
-      },
-
-      /**
-       * Gets the layer bounds in the store which correspond to the layer path
-       * @param {string} layerPath - The layer path of the bounds to get
-       * @returns {Extent | undefined} The bounds or undefined
-       */
-      getLayerBounds: (layerPath: string): Extent | undefined => {
-        // Redirect to processor
-        return LegendEventProcessor.getLayerBounds(get().mapId, layerPath);
-      },
-
-      /**
        * Get the LayerDeleteInProgress state.
        */
+      // TODO: REFACTOR - HOOK - This should probably be a hook rather than an action
       getLayerDeleteInProgress: () => get().layerState.layerDeleteInProgress,
 
       /**
@@ -172,20 +150,6 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       getLayerServiceProjection: (layerPath: string): string | undefined => {
         // Redirect to processor
         return LegendEventProcessor.getLayerServiceProjection(get().mapId, layerPath);
-      },
-
-      /**
-       * Gets the layer time dimension initial configuration.
-       * @param {string} layerPath - The layer path
-       * @returns {TimeDimension | undefined} Time dimension information
-       */
-      getLayerTimeDimension: (layerPath: string): TimeDimension | undefined => {
-        try {
-          return LegendEventProcessor.getLayerTimeDimension(get().mapId, layerPath);
-        } catch (error: unknown) {
-          logger.logError(`Error getting temporal dimension for layer ${layerPath}`, error);
-        }
-        return undefined;
       },
 
       /**
@@ -466,7 +430,7 @@ export type TypeLegend = {
   entryType: TypeLayerEntryType;
   // Layers other than vector layers use the HTMLCanvasElement type for their legend.
   legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
-  styleConfig?: TypeLayerStyleConfig | null;
+  styleConfig?: TypeLayerStyleConfig;
 };
 
 export type TypeLegendResultSetEntry = TypeResultSetEntry & TypeLegendResultInfo;
@@ -703,6 +667,8 @@ export const useLayerSelectorChildren = createLayerSelectorHook('children');
 export const useLayerSelectorItems = createLayerSelectorHook('items');
 export const useLayerSelectorIcons = createLayerSelectorHook('icons');
 export const useLayerSelectorLegendQueryStatus = createLayerSelectorHook('legendQueryStatus');
+export const useLayerSelectorCanToggle = createLayerSelectorHook('canToggle');
+export const useLayerSelectorStyleConfig = createLayerSelectorHook('styleConfig');
 
 // Store Actions
 export const useLayerStoreActions = (): LayerActions => useStore(useGeoViewStore(), (state) => state.layerState.actions);

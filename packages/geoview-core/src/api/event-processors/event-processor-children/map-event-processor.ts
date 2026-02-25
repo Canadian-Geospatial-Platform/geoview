@@ -184,7 +184,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @static
    */
   protected static getMapStateProtected(mapId: string): IMapState {
-    // TODO: Refactor - Rename this function when we want to clarify the small confusion with getMapState function below
+    // TODO: REFACTOR - Rename this function when we want to clarify the small confusion with getMapState function below
     // Return the map state
     return this.getState(mapId).mapState;
   }

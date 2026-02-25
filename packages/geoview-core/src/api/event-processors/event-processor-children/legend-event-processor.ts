@@ -10,6 +10,7 @@ import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-pr
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -137,26 +138,33 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Retrieves the projection code for a specific layer.
-   *
-   * @param {string} mapId - The unique identifier of the map instance.
-   * @param {string} layerPath - The path to the layer.
-   * @returns {string | undefined} - The projection code of the layer, or `undefined` if not available.
+   * Retrieves the service (metadata) projection code for a specific raster layer.
+   * @param mapId - The unique identifier of the map instance.
+   * @param layerPath - The fully qualified path of the layer.
+   * @returns The projection code (e.g., "EPSG:4326") defined in the layer's service metadata,
+   *          or `undefined` if:
+   *          - the layer does not exist,
+   *          - the layer is not a raster layer,
+   *          * or the metadata projection is not available.
    * @description
-   * This method fetches the Geoview layer for the specified layer path and checks if it has a `getMetadataProjection` method.
-   * If the method exists, it retrieves the projection object and returns its code using the `getCode` method.
-   * If the projection or its code is not available, the method returns `undefined`.
+   * This method looks up the GeoView layer associated with the provided `layerPath`.
+   * If the layer exists and is an instance of `AbstractGVRaster`, it retrieves the
+   * projection defined in the service metadata via `getMetadataProjection()`.
+   * The projection code is then returned using `projection.getCode()`.
    * @static
    */
   static getLayerServiceProjection(mapId: string, layerPath: string): string | undefined {
-    // TODO: Check - Do we want it to throw instead of handling when undefined? (call getGeoviewLayer instead of getGeoviewLayerIfExists)
+    // Get the layer if it exists
     const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
 
-    if (geoviewLayer && 'getMetadataProjection' in geoviewLayer && typeof geoviewLayer.getMetadataProjection === 'function') {
+    // If of the right type
+    if (geoviewLayer instanceof AbstractGVRaster) {
+      // Get the projection and return its code
       const projection = geoviewLayer.getMetadataProjection();
-      return projection && typeof projection.getCode === 'function' ? projection.getCode() : undefined;
+      return projection?.getCode();
     }
 
+    // Layer not found or not a Raster layer or no metadtata projection
     return undefined;
   }
 

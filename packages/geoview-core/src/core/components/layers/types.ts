@@ -31,7 +31,7 @@ export interface TypeLegendLayer {
   legendQueryStatus: LegendQueryStatus;
   schemaTag: TypeGeoviewLayerType;
   entryType: TypeLayerEntryType;
-  styleConfig?: TypeLayerStyleConfig | null;
+  styleConfig?: TypeLayerStyleConfig;
   layerStatus?: TypeLayerStatus;
   layerFilter?: string;
   layerFilterClass?: string;
