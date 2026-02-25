@@ -17,6 +17,7 @@ import type {
   codedValueType,
   rangeDomainType,
   TypeFeatureInfoEntry,
+  TypeFeatureInfoResult,
   TypeFieldEntry,
   TypeIconSymbolVectorConfig,
   TypeLayerStyleConfig,
@@ -228,14 +229,13 @@ export class GVEsriImage extends AbstractGVRaster {
    * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.
    * @param {Coordinate} location - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-   * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
    */
   protected override getFeatureInfoAtCoordinate(
     map: OLMap,
     location: Coordinate,
     queryGeometry: boolean = true
-  ): Promise<TypeFeatureInfoEntry[]> {
+  ): Promise<TypeFeatureInfoResult> {
     // Transform coordinate from map projection to lntlat
     const projCoordinate = Projection.transformToLonLat(location, map.getView().getProjection());
 
@@ -248,15 +248,20 @@ export class GVEsriImage extends AbstractGVRaster {
    * @param {OLMap} map - The Map where to get Feature Info At LonLat from.
    * @param {Coordinate} lonlat - The coordinate that will be used by the query.
    * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-   * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
-   * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
    */
   protected override async getFeatureInfoAtLonLat(
     map: OLMap,
     lonlat: Coordinate,
     queryGeometry: boolean = true
-  ): Promise<TypeFeatureInfoEntry[]> {
+  ): Promise<TypeFeatureInfoResult> {
+    const featureInfoResult: TypeFeatureInfoResult = { results: [] };
+
+    // If invisible or not queryable, return empty result
+    if (!this.getVisible() || !this.getLayerConfig().getQueryableSourceDefaulted()) {
+      return featureInfoResult;
+    }
+
     // Get the layer config
     const layerConfig = this.getLayerConfig();
 
@@ -325,7 +330,7 @@ export class GVEsriImage extends AbstractGVRaster {
 
     // If no pixel value returned
     if (identifyJsonResponse.value === undefined || identifyJsonResponse.value === null || identifyJsonResponse.value === 'NoData') {
-      return [];
+      return featureInfoResult;
     }
 
     // Build feature properties starting with pixel-specific fields
@@ -360,9 +365,8 @@ export class GVEsriImage extends AbstractGVRaster {
     feature.set('classIndex', classIndex);
 
     // Format and return the result
-    const arrayOfFeatureInfoEntries = this.formatFeatureInfoResult([feature]);
-
-    return arrayOfFeatureInfoEntries;
+    featureInfoResult.results = this.formatFeatureInfoResult([feature]);
+    return featureInfoResult;
   }
 
   /**
