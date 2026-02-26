@@ -8,6 +8,7 @@ import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-sc
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { TypeGeoTIFFLayerConfig } from '@/geo/layer/geoview-layers/raster/geotiff';
+import type { RGBA } from '@/core/utils/utilities';
 
 export interface GeoTIFFLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
   /** Source settings to apply to the GeoView layer source at creation time. */
@@ -19,7 +20,7 @@ export interface GeoTIFFLayerEntryConfigProps extends AbstractBaseLayerEntryConf
  */
 export class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /** Embedded RGBA color palette extracted from the GeoTIFF file, if present. */
-  embeddedColorMap: [number, number, number, number][] | undefined;
+  embeddedColorMap: RGBA[] | undefined;
 
   /**
    * The class constructor.

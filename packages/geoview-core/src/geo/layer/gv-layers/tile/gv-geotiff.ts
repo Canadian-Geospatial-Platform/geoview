@@ -11,6 +11,7 @@ import { type TypeLegend } from '@/index';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 import { Fetch } from '@/core/utils/fetch-helper';
+import type { RGBA } from '@/core/utils/utilities';
 
 /**
  * Manages a GeoTIFF layer.
@@ -51,7 +52,7 @@ export class GVGeoTIFF extends AbstractGVTile {
    *
    * @param palette - Array of RGBA color tuples from the GeoTIFF color map.
    */
-  #applyColorMapStyle(palette: [number, number, number, number][]): void {
+  #applyColorMapStyle(palette: RGBA[]): void {
     // Make nodata index (0) fully transparent
     const adjustedPalette = [...palette];
     adjustedPalette[0] = [0, 0, 0, 0];

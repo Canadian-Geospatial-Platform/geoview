@@ -30,6 +30,11 @@ interface PingResult {
 }
 
 /**
+ * Represents RGBA color as [Red, Green, Blue, Alpha]
+ */
+export type RGBA = [r: number, g: number, b: number, a: number];
+
+/**
  * Generates an array of numbers from `start` (inclusive) to `end` (exclusive),
  * incrementing by `step`.
  * @param {number} start - The first number in the range.
@@ -528,9 +533,9 @@ export async function validateAndPingUrl(
  * Each color is normalized to 8-bit values.
  *
  * @param url - URL to the GeoTIFF file.
- * @returns Array of [R, G, B, A] color tuples, or undefined if no palette.
+ * @returns Array of RGBA color tuples, or undefined if no palette.
  */
-export async function extractGeotiffColorMap(url: string): Promise<[number, number, number, number][] | undefined> {
+export async function extractGeotiffColorMap(url: string): Promise<RGBA[] | undefined> {
   const tiff = await fromUrl(url);
   const image = await tiff.getImage();
 
@@ -542,7 +547,7 @@ export async function extractGeotiffColorMap(url: string): Promise<[number, numb
   }
 
   const size = colorMap.length / 3;
-  const palette: [number, number, number, number][] = [];
+  const palette: RGBA[] = [];
 
   for (let i = 0; i < size; i++) {
     // Use Math.floor(colorMap[i] / 256) instead of bitwise shift for clarity and to avoid unexpected behavior with large numbers
