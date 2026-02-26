@@ -14,7 +14,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { ConfigApi } from '@/api/config/config-api';
 import { logger } from '@/core/utils/logger';
-import { generateId, getLocalizedMessage, isValidUUID } from '@/core/utils/utilities';
+import { generateId, getLocalizedMessage, isValidUUID, validateAndPingUrl } from '@/core/utils/utilities';
 import { Config } from '@/api/config/config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import type { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -746,14 +746,35 @@ export function AddNewLayer(): JSX.Element {
 
   useEffect(() => {
     if (activeStep === 0) {
-      // TODO: create a utilities function to test valid URL before we enable the continue button
-      // TO.DOCONT: This function should try to ping the server for an answer...
-      // Check if url or geocore is provided
-      setStepButtonEnabled(layerURL.startsWith('https://') || isValidUUID(layerURL.trim()) || layerURL.startsWith('blob'));
+      // Validate URL for step 1
+      const validateUrl = async (): Promise<void> => {
+        // Allow blob URLs (local files) and GeoCore UUIDs without validation
+        if (layerURL.startsWith('blob') || isValidUUID(layerURL.trim())) {
+          setStepButtonEnabled(true);
+          return;
+        }
+
+        // Validate and ping HTTPS URLs
+        if (layerURL.startsWith('https://')) {
+          const check = await validateAndPingUrl(layerURL);
+          setStepButtonEnabled(check.isValid && check.isReachable);
+        } else {
+          setStepButtonEnabled(false);
+        }
+      };
+
+      validateUrl().catch((error: unknown) => {
+        logger.logError('URL validation failed', error);
+        setStepButtonEnabled(false);
+      });
+    }
+    if (activeStep === 1) {
+      // Disable button if no layer type selected
+      setStepButtonEnabled(layerType !== '');
     }
     if (activeStep === 2 && layerIdsToAdd.length > 0) setStepButtonEnabled(true);
     if (activeStep === 2 && !layerIdsToAdd.length) setStepButtonEnabled(false);
-  }, [layerURL, activeStep, layerIdsToAdd]);
+  }, [layerURL, activeStep, layerIdsToAdd, layerType]);
 
   useEffect(() => {
     if (activeStep === 1) {

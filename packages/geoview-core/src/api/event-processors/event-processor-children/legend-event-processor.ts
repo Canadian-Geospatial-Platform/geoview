@@ -573,7 +573,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             legendQueryStatus: legendResultSetEntry.legendQueryStatus,
             type: layerConfig.getEntryType() as TypeGeoviewLayerType, // TODO: Check - Bug - This typing is invalid, but we have to keep it for it to work for now...
             canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
-            opacity: layerConfig.getInitialSettings()?.states?.opacity ?? 1, // default: 1
+            opacity: layer?.getOLLayer()?.getOpacity() ?? layerConfig.getInitialSettings()?.states?.opacity ?? 1, // GV: This is call all the time, if set on OL use value, default to config or 1
             icons: [] as TypeLegendLayerItem[],
             items: [] as TypeLegendItem[],
             children: [] as TypeLegendLayer[],
@@ -622,7 +622,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           styleConfig: legendResultSetEntry.data?.styleConfig,
           type: legendResultSetEntry.data?.type || layerConfig.getSchemaTag(),
           canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
-          opacity: layerConfig.getInitialSettings()?.states?.opacity ?? 1, // default: 1
+          opacity: layer?.getOLLayer()?.getOpacity() ?? layerConfig.getInitialSettings()?.states?.opacity ?? 1, // GV: This is call all the time, if set on OL use value, default to config or 1
           hoverable: layerConfig.getInitialSettings()?.states?.hoverable, // default: true
           queryable: layerConfig.getInitialSettings()?.states?.queryable, // default: true
           items: [] as TypeLegendItem[],

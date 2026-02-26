@@ -22,7 +22,8 @@
             "zoom": false
           },
           "states": {
-            "visible": false
+            "visible": false,
+            "opacity": 0.5
           }
         },
         "listOfLayerEntryConfig": [

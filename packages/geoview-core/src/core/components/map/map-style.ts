@@ -17,6 +17,7 @@ export const getSxClasses = (): SxStyles => ({
       height: '100% !important',
       position: 'absolute',
       width: '100%',
+      backgroundColor: 'white !important', // Keep viewport background white to avoid black backgound in fullscreen
     },
 
     '& .ol-viewport:active': {

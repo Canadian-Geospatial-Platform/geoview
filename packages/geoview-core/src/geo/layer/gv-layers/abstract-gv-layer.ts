@@ -717,7 +717,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
   /**
    * Gets the temporal dimension that is associated to the layer.
-   * @returns {TimeDimension | undefined} The temporal dimension associated to the layer or undefined.
+   * @returns The temporal dimension associated to the layer or undefined.
    */
   getTimeDimension(): TimeDimension | undefined {
     return this.getLayerConfig().getTimeDimension();
@@ -725,7 +725,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
   /**
    * Gets the flag if layer use its time dimension, this can be use to exclude layers from time function like time slider
-   * @returns {boolean} The flag indicating if the layer should be included in time awareness functions such as the Time Slider. True by default.
+   * @returns The flag indicating if the layer should be included in time awareness functions such as the Time Slider. True by default.
    */
   getIsTimeAware(): boolean {
     return this.getLayerConfig().getGeoviewLayerConfig()?.isTimeAware ?? true;
@@ -733,8 +733,8 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
   /**
    * Gets the in visible range value
-   * @param {number | undefined} currentZoom - The map current zoom
-   * @returns {boolean} true if the layer is in visible range
+   * @param currentZoom - Optional. The map current zoom
+   * @returns True if the layer is in visible range
    */
   getInVisibleRange(currentZoom: number | undefined): boolean {
     if (!currentZoom) return false;
@@ -743,7 +743,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
   /**
    * Indicates if the layer is currently queryable.
-   * @returns {boolean} The currently queryable flag.
+   * @returns The currently queryable flag.
    */
   getQueryable(): boolean {
     return this.#queryable;
@@ -751,7 +751,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
   /**
    * Sets if the layer is currently queryable.
-   * @param {boolean} queryable - The queryable value.
+   * @param queryable - The queryable value.
    */
   setQueryable(queryable: boolean): void {
     // Get the layer config
@@ -767,7 +767,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
   /**
    * Indicates if the layer is currently hoverable.
-   * @returns {boolean} The currently hoverable flag.
+   * @returns The currently hoverable flag.
    */
   getHoverable(): boolean {
     return this.#hoverable;
@@ -775,7 +775,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
   /**
    * Sets if the layer is currently hoverable.
-   * @param {boolean} hoverable - The hoverable value.
+   * @param hoverable - The hoverable value.
    */
   setHoverable(hoverable: boolean): void {
     // Go for it
@@ -785,10 +785,10 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
   /**
    * Gets the extent of an array of features.
-   * @param {number[] | string[]} objectIds - The IDs of the features to calculate the extent from.
-   * @param {OLProjection} outProjection - The output projection for the extent.
-   * @param {string} outfield - ID field to return for services that require a value in outfields.
-   * @returns {Promise<Extent>} The extent of the features, if available
+   * @param objectIds - The IDs of the features to calculate the extent from.
+   * @param outProjection - The output projection for the extent.
+   * @param outfield - Optional. ID field to return for services that require a value in outfields.
+   * @returns The extent of the features, if available
    */
   getExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
     // Redirect
@@ -797,8 +797,8 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
   /**
    * Gets the field type for the given field name.
-   * @param {string} fieldName  - The field name
-   * @returns {TypeOutfieldsType} The field type.
+   * @param fieldName - The field name
+   * @returns The field type.
    */
   getFieldType(fieldName: string): TypeOutfieldsType {
     // Redirect
@@ -807,7 +807,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
   /**
    * Gets the layer filters associated to the layer.
-   * @returns {LayerFilters} The filter associated to the layer or undefined.
+   * @returns The filter associated to the layer or undefined.
    */
   getLayerFilters(): LayerFilters {
     // Return it
