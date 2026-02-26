@@ -264,7 +264,7 @@
                   "values": [],
                   "settings": {
                     "type": "simpleSymbol",
-                    "symbol": "star"
+                    "symbol": "square"
                   }
                 }
               ]
@@ -335,7 +335,7 @@
                       "values": [],
                       "settings": {
                         "type": "simpleSymbol",
-                        "symbol": "star"
+                        "symbol": "square"
                       }
                     }
                   ]
@@ -401,7 +401,7 @@
                       "values": [],
                       "settings": {
                         "type": "simpleSymbol",
-                        "symbol": "star"
+                        "symbol": "square"
                       }
                     }
                   ]
@@ -467,7 +467,7 @@
                       "values": [],
                       "settings": {
                         "type": "simpleSymbol",
-                        "symbol": "star"
+                        "symbol": "square"
                       }
                     }
                   ]
@@ -504,7 +504,7 @@
                 "label": "Point label",
                 "settings": {
                   "type": "simpleSymbol",
-                  "symbol": "star"
+                  "symbol": "square"
                 }
               }
             }
@@ -538,7 +538,7 @@
                 "label": "Point label",
                 "settings": {
                   "type": "simpleSymbol",
-                  "symbol": "star"
+                  "symbol": "square"
                 }
               }
             }
@@ -572,7 +572,7 @@
                 "label": "Point label",
                 "settings": {
                   "type": "simpleSymbol",
-                  "symbol": "star"
+                  "symbol": "square"
                 }
               }
             }
@@ -606,7 +606,7 @@
                 "label": "Point label",
                 "settings": {
                   "type": "simpleSymbol",
-                  "symbol": "star"
+                  "symbol": "square"
                 }
               }
             }

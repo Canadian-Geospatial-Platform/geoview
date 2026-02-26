@@ -13,7 +13,7 @@ import { GeoTIFFLayerEntryConfig } from '@/api/config/validation-classes/raster-
 import { GVGeoTIFF } from '@/geo/layer/gv-layers/tile/gv-geotiff';
 import { logger } from '@/core/utils/logger';
 import { Projection, type TypeProjection } from '@/geo/utils/projection';
-import { generateId } from '@/core/utils/utilities';
+import { generateId, extractGeotiffColorMap } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 
@@ -125,7 +125,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
    * @override
    * @protected
    */
-  protected override onProcessLayerMetadata(
+  protected override async onProcessLayerMetadata(
     layerConfig: GeoTIFFLayerEntryConfig,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     displayDateMode: DisplayDateMode,
@@ -149,6 +149,17 @@ export class GeoTIFF extends AbstractGeoViewRaster {
         // Update the data access path
         layerConfig.setDataAccessPath(metadata.assets[layerConfig.layerId].href);
       }
+    }
+
+    // Extract embedded color map from the GeoTIFF if present
+    try {
+      const colorMap = await extractGeotiffColorMap(layerConfig.getDataAccessPath());
+      if (colorMap) {
+        // eslint-disable-next-line no-param-reassign
+        layerConfig.embeddedColorMap = colorMap;
+      }
+    } catch (error) {
+      logger.logWarning(`Failed to extract color map for layer ${layerConfig.layerPath}`, error);
     }
 
     return Promise.resolve(layerConfig);
@@ -189,6 +200,8 @@ export class GeoTIFF extends AbstractGeoViewRaster {
   static createGeoTIFFSource(layerConfig: GeoTIFFLayerEntryConfig): GeoTIFFSource {
     const sourceOptions: SourceOptions = {
       sources: [{ url: layerConfig.getDataAccessPath(), overviews: layerConfig.getSource().overviews }],
+      // When an embedded color map exists, disable normalization so raw integer pixel values can index the palette
+      normalize: !layerConfig.embeddedColorMap,
     };
 
     return new GeoTIFFSource(sourceOptions);

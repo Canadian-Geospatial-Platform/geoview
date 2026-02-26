@@ -49,7 +49,7 @@ export function LayerOpacityControl(props: LayerOpacityControlProps): JSX.Elemen
     setOpacityMax(layerDetails.opacityFromParent || 1);
     // Add mark for parent opacity
     if (layerDetails.opacityFromParent && layerDetails.opacityFromParent !== 1) {
-      setMarks([{ value: layerDetails.opacityFromParent * 100, label: t('layers.opacityMax') }]);
+      setMarks([{ value: Math.round(layerDetails.opacityFromParent * 100), label: t('layers.opacityMax') }]);
     } else {
       setMarks([]);
     }
@@ -89,7 +89,7 @@ export function LayerOpacityControl(props: LayerOpacityControlProps): JSX.Elemen
         min={0}
         max={100}
         step={1}
-        value={localOpacity * 100}
+        value={Math.round(localOpacity * 100)}
         onChange={handleSliderChange}
         onChangeCommitted={(value: number | number[]) => handleSliderChange(value, 1, true)}
         marks={marks}

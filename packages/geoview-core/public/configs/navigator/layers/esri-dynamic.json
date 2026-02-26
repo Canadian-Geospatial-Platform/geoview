@@ -25,7 +25,8 @@
               },
               "states": {
                 "queryable": false,
-                "hoverable": false
+                "hoverable": false,
+                "opacity": 0.5
               }
             }
           }

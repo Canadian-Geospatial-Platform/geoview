@@ -36,6 +36,33 @@ export class GVGeoTIFF extends AbstractGVTile {
 
     // Set the OpenLayer layer
     this.setOLLayer(olLayer);
+
+    // If the layer config has an embedded color map, apply the palette style
+    if (layerConfig.embeddedColorMap) {
+      this.#applyColorMapStyle(layerConfig.embeddedColorMap);
+    }
+  }
+
+  /**
+   * Applies an embedded color palette as a WebGLTile style.
+   *
+   * Makes the nodata index (0) transparent so that pixels outside
+   * the data extent do not render as a solid color.
+   *
+   * @param palette - Array of RGBA color tuples from the GeoTIFF color map.
+   */
+  #applyColorMapStyle(palette: [number, number, number, number][]): void {
+    // Make nodata index (0) fully transparent
+    const adjustedPalette = [...palette];
+    adjustedPalette[0] = [0, 0, 0, 0];
+
+    // Convert RGBA tuples to CSS color strings as expected by the OpenLayers palette expression
+    const colorStrings = adjustedPalette.map(([r, g, b, a]) => `rgba(${r},${g},${b},${a / 255})`);
+
+    // Apply the palette style to the WebGLTile layer
+    this.getOLLayer().setStyle({
+      color: ['palette', ['band', 1], colorStrings],
+    });
   }
 
   // #region OVERRIDES

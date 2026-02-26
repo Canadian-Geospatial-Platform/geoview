@@ -18,6 +18,9 @@ export interface GeoTIFFLayerEntryConfigProps extends AbstractBaseLayerEntryConf
  * Type used to define a GeoTIFF layer to display on the map.
  */
 export class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfig {
+  /** Embedded RGBA color palette extracted from the GeoTIFF file, if present. */
+  embeddedColorMap: [number, number, number, number][] | undefined;
+
   /**
    * The class constructor.
    * @param {GeoTIFFLayerEntryConfigProps} layerConfig -  The layer configuration we want to instanciate.

@@ -1,6 +1,7 @@
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import sanitizeHtml from 'sanitize-html';
+import { fromUrl } from 'geotiff';
 
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
@@ -9,6 +10,7 @@ import type { TypeGuideObject } from '@/core/stores/store-interface-and-intial-v
 import { Fetch } from '@/core/utils/fetch-helper';
 import type { TypeHTMLElement } from '@/core/types/global-types';
 import { TIMEOUT } from '@/core/utils/constant';
+import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
 
 /** The observers to monitor element removals from the DOM tree */
 const observers: Record<string, MutationObserver> = {};
@@ -17,6 +19,14 @@ interface TypeDocument extends Document {
   webkitExitFullscreen: () => void;
   msExitFullscreen: () => void;
   mozCancelFullScreen: () => void;
+}
+
+interface PingResult {
+  isValid: boolean;
+  isReachable: boolean;
+  needsProxy: boolean;
+  status: number | null;
+  error?: string;
 }
 
 /**
@@ -390,6 +400,159 @@ export function generateId(length: 8 | 18 | 36 = 36): string {
 export function isValidUUID(uuid: string): boolean {
   const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   return regex.test(uuid);
+}
+
+/**
+ * Validates a URL's syntax and tests its reachability by attempting direct and proxied fetch requests.
+ *
+ * This function performs a two-stage validation:
+ * 1. **Direct fetch**: Attempts a HEAD request to the target URL. If successful (200 OK), returns immediately.
+ * 2. **Proxy fetch**: If direct fetch fails due to CORS/network errors, attempts a GET request through a proxy.
+ *    Also validates the response content to detect service errors (e.g., WMS ServiceExceptionReport).
+ *
+ * The function never throws errors - all failures are returned as part of the result object.
+ *
+ * @param targetUrl - The URL to validate and ping.
+ * @param proxyBase - Optional. The proxy server base URL. Defaults to CONFIG_PROXY_URL.
+ * @param timeoutMs - Optional. Request timeout in milliseconds. Defaults to 5000ms.
+ * @returns A result object containing validation and reachability status with properties:
+ *   isValid, isReachable, needsProxy, status, and optional error message.
+ */
+export async function validateAndPingUrl(
+  targetUrl: string,
+  proxyBase: string = CONFIG_PROXY_URL,
+  timeoutMs: number = 5000
+): Promise<PingResult> {
+  const result: PingResult = {
+    isValid: false,
+    isReachable: false,
+    needsProxy: false,
+    status: null,
+  };
+
+  const helperFetchWithTimeout = async (url: string, options: RequestInit): Promise<Response | null> => {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      // Split the url to remove paramters like GET capabilities
+      const response = await fetch(url.split('?')[0], { ...options, signal: controller.signal });
+      clearTimeout(id);
+      return response;
+    } catch {
+      clearTimeout(id);
+      return null;
+    }
+  };
+
+  // Syntax Validation
+  try {
+    new URL(targetUrl);
+    result.isValid = true;
+  } catch {
+    result.error = 'Invalid URL format';
+    return result;
+  }
+
+  // Attempt 1: Direct Fetch (Wrapped in its own try/catch to prevent function exit)
+  try {
+    const response = await helperFetchWithTimeout(targetUrl, { method: 'HEAD' });
+
+    // If no response (CORS/Network), null is returned by fetchWithTimeout, throwing here
+    if (!response) throw new Error('No response');
+
+    // If server says 400/500, we want to try the proxy instead of stopping
+    if (!response.ok) throw new Error(`Status ${response.status}`);
+
+    // If we get here, direct fetch worked!
+    result.isReachable = true;
+    result.status = response.status;
+    return result;
+  } catch (err) {
+    // This catch block acts as the "Bridge" to the proxy logic
+    logger.logWarning(`Direct fetch failed for ${targetUrl}: ${err}, trying proxy`);
+  }
+
+  // Attempt 2: Proxy Fetch
+  result.needsProxy = true;
+  try {
+    const proxiedUrl = `${proxyBase}?${encodeURIComponent(targetUrl)}`;
+    const proxyResponse = await helperFetchWithTimeout(proxiedUrl, { method: 'GET' });
+
+    if (!proxyResponse) {
+      result.isReachable = false;
+      result.error = 'Proxy unreachable';
+      return result;
+    }
+
+    result.status = proxyResponse.status;
+
+    if (!proxyResponse.ok) {
+      result.isReachable = false;
+      result.error = `Server returned ${proxyResponse.status}`;
+      return result;
+    }
+
+    // --- VALIDATE WMS CONTENT ---
+    const text = await proxyResponse.text();
+
+    // Specific check for proxy's "success-but-invalid" message
+    const isProxyInvalidError = text.includes('The response is not supported or invalid');
+
+    if (isProxyInvalidError) {
+      // The proxy reached the URL! Even if the content is "invalid",
+      // it proves the server is alive and responding.
+      result.isReachable = true;
+      result.status = proxyResponse.status;
+      result.needsProxy = true;
+
+      if (isProxyInvalidError) {
+        result.error = 'URL reachable, but proxy considers response invalid.';
+      }
+    } else {
+      // The proxy itself couldn't connect to the site at all
+      result.isReachable = false;
+      result.error = `Proxy Error: ${proxyResponse.status}`;
+    }
+  } catch (error) {
+    result.isReachable = false;
+    result.error = error instanceof Error && error.name === 'AbortError' ? 'Timeout' : 'Unreachable';
+  }
+
+  return result;
+}
+
+/**
+ * Extracts the embedded color palette from a GeoTIFF file at the given URL.
+ *
+ * Returns an array of RGBA color tuples, or `undefined` if no palette is present.
+ * Each color is normalized to 8-bit values.
+ *
+ * @param url - URL to the GeoTIFF file.
+ * @returns Array of [R, G, B, A] color tuples, or undefined if no palette.
+ */
+export async function extractGeotiffColorMap(url: string): Promise<[number, number, number, number][] | undefined> {
+  const tiff = await fromUrl(url);
+  const image = await tiff.getImage();
+
+  const fileDirectory = image.getFileDirectory();
+  const colorMap = fileDirectory.ColorMap as Uint16Array | undefined;
+
+  if (!colorMap) {
+    return undefined; // no embedded palette
+  }
+
+  const size = colorMap.length / 3;
+  const palette: [number, number, number, number][] = [];
+
+  for (let i = 0; i < size; i++) {
+    // Use Math.floor(colorMap[i] / 256) instead of bitwise shift for clarity and to avoid unexpected behavior with large numbers
+    const r = Math.floor(colorMap[i] / 256);
+    const g = Math.floor(colorMap[i + size] / 256);
+    const b = Math.floor(colorMap[i + size * 2] / 256);
+    palette.push([r, g, b, 255]);
+  }
+
+  return palette;
 }
 
 /**
