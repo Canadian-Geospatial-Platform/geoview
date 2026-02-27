@@ -1316,7 +1316,7 @@ export function handleEscapeKey(key: string, callbackId: string, isFocusTrapped?
     if (isFocusTrapped && callbackId) {
       setTimeout(() => {
         document.getElementById(callbackId ?? '')?.focus();
-      }, TIMEOUT.handleEsc);
+      }, TIMEOUT.dataPanelLoading);
     }
     cb?.();
   }

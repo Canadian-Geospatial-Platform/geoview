@@ -111,6 +111,7 @@ export class AppBarApi {
 
       const thePanelProps: TypePanelProps = {
         ...panelProps,
+        panelId: buttonPanelId,
         type: CONST_PANEL_TYPES.APPBAR,
       };
 

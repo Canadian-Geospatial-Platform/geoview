@@ -56,7 +56,7 @@ export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Elemen
   const transformListTitle = (title: string, searchTerm: string, province: string): JSX.Element => {
     const newTitle = getBoldListTitle(title, searchTerm);
     return (
-      <UseHtmlToReact extraOptions={{ component: 'span' }} itemOptions={{ component: 'span' }} htmlContent={`${newTitle} ${province}`} />
+      <UseHtmlToReact extraOptions={{ component: 'span' }} itemOptions={{ component: 'span' }} htmlContent={`${newTitle}${province}`} />
     );
   };
 
@@ -67,12 +67,12 @@ export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Elemen
         <Tooltip
           title={getTooltipTitle(geoListItem)}
           placement="right"
-          // sometime when we search by `bay`, response have name and lat same, thats why index is used to distinguish
+          // sometimes when we search by `bay`, response can have name and lat same, that's why index is used to distinguish
           key={`${geoListItem.name}-${geoListItem.lat}-${index.toString()}`}
           describeChild
         >
           <ListItem disablePadding>
-            <ListItemButton onClick={() => handleZoomToGeoLocator(geoListItem)}>
+            <ListItemButton onClick={() => handleZoomToGeoLocator(geoListItem)} aria-label={getTooltipTitle(geoListItem)}>
               <Grid container sx={{ width: '100%' }}>
                 <Grid size={{ xs: 12, sm: 8 }}>
                   <Typography component="div" sx={sxClassesList.listStyle}>

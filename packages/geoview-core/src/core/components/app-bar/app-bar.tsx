@@ -114,6 +114,20 @@ export function AppBar(props: AppBarProps): JSX.Element {
     } as Record<string, GroupPanelType>;
   }, [interaction]);
 
+  /**
+   * Constructs the AppBar element ID for buttons and panels.
+   *
+   * @param buttonId - The button identifier
+   * @param suffix - Optional suffix to append (e.g., '-panel-btn', '-panel')
+   * @returns The full element ID
+   */
+  const getButtonElementId = useCallback(
+    (buttonId: string, suffix?: string): string => {
+      return `${mapId}-${CONTAINER_TYPE.APP_BAR}-${buttonId}${suffix ?? ''}`;
+    },
+    [mapId]
+  );
+
   const closePanelById = useCallback(
     (buttonId: string) => {
       // Log
@@ -162,9 +176,16 @@ export function AppBar(props: AppBarProps): JSX.Element {
       // Log
       logger.logTraceUseCallback('APP-BAR - handleGeneralCloseClicked');
 
+      // Return focus to the AppBar button that opened this panel
+      if (isFocusTrapped) {
+        setTimeout(() => {
+          document.getElementById(getButtonElementId(buttonId, '-panel-btn'))?.focus();
+        }, TIMEOUT.dataPanelLoading);
+      }
+
       setActiveAppBarTab(buttonId, false, false);
     },
-    [setActiveAppBarTab]
+    [setActiveAppBarTab, isFocusTrapped, getButtonElementId]
   );
 
   const handleAddButtonPanel = useCallback(
@@ -347,8 +368,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
           return (
             <ListItem key={buttonPanel.button.id}>
               <IconButton
-                id={`${buttonPanel.button.id}-panel-btn-${mapId}`}
-                aria-controls={`appbar-panel-${buttonPanel.button.id}-${mapId}`}
+                id={getButtonElementId(buttonPanel.button.id!, '-panel-btn')}
+                aria-controls={getButtonElementId(buttonPanel.button.id!, '-panel')}
                 aria-label={t(buttonPanel.button['aria-label'])}
                 aria-expanded={tabId === buttonPanel.button.id && isOpen ? 'true' : 'false'}
                 tooltipPlacement="right"
@@ -386,6 +407,8 @@ export function AppBar(props: AppBarProps): JSX.Element {
             {appBarComponents.includes(DEFAULT_APPBAR_CORE.EXPORT) && interaction === 'dynamic' && (
               <ListItem>
                 <ExportButton
+                  id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-export-modal-btn`}
+                  ariaControls={`${mapId}-export-modal`}
                   ariaExpanded={activeModalId === DEFAULT_APPBAR_CORE.EXPORT}
                   className={` buttonFilled ${activeModalId === DEFAULT_APPBAR_CORE.EXPORT ? 'active' : ''}`}
                 />
@@ -417,22 +440,12 @@ export function AppBar(props: AppBarProps): JSX.Element {
               onOpen={buttonPanel.onOpen}
               onClose={hideClickMarker}
               onKeyDown={(event: KeyboardEvent) =>
-                handleEscapeKey(event.key, `${tabId}-panel-btn-${mapId}`, isFocusTrapped, () => {
-                  handleGeneralCloseClicked(buttonPanel.button?.id ?? '');
+                handleEscapeKey(event.key, getButtonElementId(buttonPanel.button?.id ?? '', '-panel-btn'), isFocusTrapped, () => {
+                  setActiveAppBarTab(buttonPanel.button?.id ?? '', false, false);
                 })
               }
               onGeneralClose={() => {
                 handleGeneralCloseClicked(buttonPanel.button?.id ?? '');
-
-                if (isFocusTrapped) {
-                  // use same timeout value as handleEscapeKey to align with panel close timing
-                  setTimeout(() => {
-                    const targetButton = document.getElementById(`${tabId}-panel-btn-${mapId}`) as HTMLButtonElement;
-                    if (targetButton) {
-                      targetButton.focus();
-                    }
-                  }, TIMEOUT.handleEsc);
-                }
               }}
             />
           );
