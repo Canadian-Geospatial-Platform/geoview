@@ -426,6 +426,25 @@ export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoV
           },
         },
       },
+      MuiInputBase: {
+        styleOverrides: {
+          root: {
+            '& .MuiInputBase-input::placeholder': {
+              color: geoViewColors.textColor.light[400], // Placeholder text color that meets WCAG contrast (min 4.5:1) requirements against a white background
+              opacity: 1,
+            },
+            // Hide browser's native search input controls globally: It's confusing to keyboard users as it isn't focusable
+            '& input[type="search"]::-webkit-search-cancel-button': {
+              WebkitAppearance: 'none',
+              appearance: 'none',
+            },
+            '& input[type="search"]::-webkit-search-decoration': {
+              WebkitAppearance: 'none',
+              appearance: 'none',
+            },
+          },
+        },
+      },
     },
     overrides: {
       button: {

@@ -101,7 +101,7 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
         ...(panelStyles?.panelContainer && { ...panelStyles.panelContainer }),
       }}
       ref={panelContainerRef}
-      id={`appbar-panel-${panel.panelId || ''}-${mapId}`}
+      id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-${panel.panelId || ''}-panel`}
       className={`appbar-panel appbar-panel-${panelId}`}
     >
       <FocusTrapContainer open={isFocusTrapped} id="app-bar-focus-trap" containerType={CONTAINER_TYPE.APP_BAR}>

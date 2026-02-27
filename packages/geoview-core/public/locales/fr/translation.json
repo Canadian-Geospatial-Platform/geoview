@@ -351,6 +351,7 @@
   },
   "geolocator": {
     "title": "Géolocalisation",
+    "filtersGroupTitle": "Filtres de géolocalisation",
     "panelTitle": "Panneau de géolocalisation",
     "searchFormLabel": "Recherche de géolocalisation",
     "searchInputLabel": "Entrer le(s) mot(s)-clé(s) (au moins trois caractères)",

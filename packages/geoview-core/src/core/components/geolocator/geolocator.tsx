@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { debounce } from '@/core/utils/debounce';
 import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { Box, ProgressBar } from '@/ui';
+import { Box, ProgressBar, Typography } from '@/ui';
 import { useUIActiveAppBarTab, useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { GeolocatorResult } from '@/core/components/geolocator/geolocator-result';
 import { getSxClasses } from '@/core/components/geolocator/geolocator-style';
@@ -96,12 +96,25 @@ export function Geolocator(): JSX.Element {
 
   // Focus search input when geolocator opens
   useEffect(() => {
-    logger.logTraceUseEffect('GEOLOCATOR - focus input', isOpen, tabId);
+    logger.logTraceUseEffect('GEOLOCATOR - focus input', isOpen, tabId, activeTrapGeoView);
 
     if (isOpen && tabId === DEFAULT_APPBAR_CORE.GEOLOCATOR && searchInputRef.current) {
-      searchInputRef.current?.focus();
+      // Set programmatic focus for screen readers
+      searchInputRef.current.focus();
+
+      // Add visual focus indicator only for keyboard users
+      // When setting focus programmatically, keyboard-focused class is not applied automatically as it is when tabbing
+      if (activeTrapGeoView) {
+        // Defer class addition
+        setTimeout(() => {
+          searchInputRef.current?.classList.add('keyboard-focused');
+        }, TIMEOUT.focusDelay);
+      }
+    } else if (!isOpen && searchInputRef.current) {
+      // Clean up keyboard focus class when panel closes
+      searchInputRef.current.classList.remove('keyboard-focused');
     }
-  }, [isOpen, tabId]);
+  }, [isOpen, tabId, activeTrapGeoView]);
 
   // Handle ESC key to close geolocator
   useEffect(() => {
@@ -126,11 +139,12 @@ export function Geolocator(): JSX.Element {
       ref={panelRef}
       component="section"
       role="dialog"
+      aria-modal="true"
       aria-label={t('geolocator.panelTitle')!}
       sx={sxClasses.root}
       visibility={tabId === DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen ? 'visible' : 'hidden'}
       className="appbar-panel-geolocator-search"
-      id={`appbar-panel-geolocator-${mapId}`}
+      id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-${DEFAULT_APPBAR_CORE.GEOLOCATOR}-panel`}
     >
       <FocusTrapContainer
         open={tabId === DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen && activeTrapGeoView}
@@ -138,6 +152,10 @@ export function Geolocator(): JSX.Element {
         containerType={CONTAINER_TYPE.APP_BAR}
       >
         <Box sx={sxClasses.geolocator}>
+          <Typography component="h2" sx={sxClasses.visuallyHidden}>
+            {t('geolocator.panelTitle')}
+          </Typography>
+
           <GeolocatorBar
             searchValue={searchValue}
             onChange={handleChange}

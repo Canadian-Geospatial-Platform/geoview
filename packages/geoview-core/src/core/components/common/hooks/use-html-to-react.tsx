@@ -31,8 +31,8 @@ export function UseHtmlToReact({ htmlContent, className, style, extraOptions, it
   // loop trought the array and set the elements
   const reactItems: Array<TrustedHTML> = [];
   for (let i = 0; i < items.length; i++) {
-    // eslint-disable-next-line react/no-danger
-    if (typeof items[i] === 'string') reactItems.push(<div dangerouslySetInnerHTML={{ __html: items[i] }} />);
+     
+    if (typeof items[i] === 'string') reactItems.push(<Box {...itemOptions} dangerouslySetInnerHTML={{ __html: items[i] }} />);
     else reactItems.push(items[i]);
   }
 

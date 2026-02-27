@@ -1,6 +1,7 @@
 import type { Dispatch, SetStateAction } from 'react';
 import type { TypeButtonPanel } from '@/ui/panel/panel-types';
 import type { ButtonPanelType } from './app-bar';
+import { CONTAINER_TYPE } from '@/core/utils/constant';
 
 export const helpOpenClosePanelByIdState = (
   buttonId: string,
@@ -46,11 +47,11 @@ export const helpClosePanelById = (
   // Close the panel
   helpOpenClosePanelByIdState(buttonId, setterCallback, false);
 
-  const buttonElementId = `${buttonId}-panel-btn-${mapId}`;
-  const buttonElement = document.getElementById(mapId)?.querySelector(`#${buttonElementId}`);
+  const buttonElementId = `${mapId}-${CONTAINER_TYPE.APP_BAR}-${buttonId}-panel-btn`;
+  const buttonElement = document.getElementById(buttonElementId);
   if (buttonElement) {
     // put back focus on calling button
-    (buttonElement as HTMLElement).focus();
+    buttonElement.focus();
   } else {
     // Nothing to put focus on, callback
     focusWhenNoElementCallback?.();
