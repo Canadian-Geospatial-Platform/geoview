@@ -537,7 +537,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
               </FormControl>
             </Box>
 
-            {singleHandle && !discreteValues && (
+            {!discreteValues && (
               <Box component="span" sx={{ paddingLeft: '10px' }}>
                 <FormControl sx={{ width: '100px' }}>
                   <InputLabel variant="standard">{getLocalizedMessage(displayLanguage, 'timeSlider.slider.stepValue')}</InputLabel>

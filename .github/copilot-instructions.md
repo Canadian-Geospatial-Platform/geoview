@@ -193,7 +193,7 @@ JSDoc should NOT:
 
 - `@param` - Parameter descriptions
 - `@returns` - Return value descriptions
-- `@throws` - Document thrown exceptions
+- `@throws` - Document thrown exceptions (@throws {TheErrorType} (description)  e.g. @throws {LayerNotGeoJsonError} When ...)
 - `@example` - Usage examples
 - `@deprecated` - Mark deprecated APIs
 - `@see` - Reference related code
