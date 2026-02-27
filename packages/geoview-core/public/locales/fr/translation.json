@@ -237,8 +237,31 @@
     "layerControls": "Commandes des couches",
     "selectLayerAndScrollTimeSlider": "Voir dans le panneau Curseur Temporel",
     "selectLayer": "Sélectionner {{layerName}}",
-    "settings": "Paramètres de couche",
-    "selectRasterFunction": "Sélectionnez la fonction raster"
+    "settings": {
+      "title": "Paramètres de couche",
+      "selectRasterFunction": "Changer la fonction raster",
+      "updateMosaicRule": "Ordre d'affichage des images",
+      "mosaicMethod": "Méthode de mosaïque",
+      "mosaicOperation": "Opération de mosaïque",
+      "ascending": "Ascendant",
+      "mosaicMethodNone": "Aucune",
+      "mosaicMethodCenter": "Centre",
+      "mosaicMethodNadir": "Nadir",
+      "mosaicMethodViewpoint": "Point de vue",
+      "mosaicMethodAttribute": "Attribut",
+      "mosaicMethodLockRaster": "Verrouiller le raster",
+      "mosaicMethodNorthwest": "Nord-ouest",
+      "mosaicMethodSeamline": "Ligne de raccord",
+      "mosaicOperationFirst": "Premier",
+      "mosaicOperationLast": "Dernier",
+      "mosaicOperationMin": "Minimum",
+      "mosaicOperationMax": "Maximum",
+      "mosaicOperationMean": "Moyenne",
+      "mosaicOperationBlend": "Mélange",
+      "mosaicOperationSum": "Somme",
+      "orderAscending": "Plus ancien au plus récent",
+      "orderDescending": "Plus récent au plus ancien"
+    }
   },
   "details": {
     "title": "Détails",

@@ -25,11 +25,8 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   #initialRasterFunction?: string;
 
   // TODO: Add an option to set the initial mosaicRule in the config
-  /** The mosaic rule extracted from metadata for querying the correct raster item */
-  #mosaicRule?: TypeMosaicRule;
-
-  /** The initial time extent from metadata (start and end timestamps). */
-  #initialTimeExtent?: [number, number];
+  /** The initial mosaic rule extracted from metadata for querying the correct raster item */
+  #initialMosaicRule?: TypeMosaicRule;
 
   /**
    * The class constructor.
@@ -107,35 +104,19 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   }
 
   /**
-   * Gets the mosaic rule for this layer.
-   * @returns The mosaic rule or undefined.
+   * Gets the initial mosaic rule for this layer.
+   * @returns The initial mosaic rule or undefined.
    */
-  getMosaicRule(): TypeMosaicRule | undefined {
-    return this.#mosaicRule;
+  getInitialMosaicRule(): TypeMosaicRule | undefined {
+    return this.#initialMosaicRule;
   }
 
   /**
-   * Sets the mosaic rule for this layer.
-   * @param mosaicRule - The mosaic rule to set.
+   * Sets the initial mosaic rule for this layer.
+   * @param mosaicRule - The initial mosaic rule to set.
    */
-  setMosaicRule(mosaicRule: TypeMosaicRule): void {
-    this.#mosaicRule = mosaicRule;
-  }
-
-  /**
-   * Gets the initial time extent from metadata.
-   * @returns The time extent as [startTime, endTime] in milliseconds or undefined.
-   */
-  getInitialTimeExtent(): [number, number] | undefined {
-    return this.#initialTimeExtent;
-  }
-
-  /**
-   * Sets the initial time extent from metadata.
-   * @param timeExtent - The time extent as [startTime, endTime] in milliseconds.
-   */
-  setInitialTimeExtent(timeExtent: [number, number]): void {
-    this.#initialTimeExtent = timeExtent;
+  setInitialMosaicRule(mosaicRule: TypeMosaicRule): void {
+    this.#initialMosaicRule = mosaicRule;
   }
 
   // #endregion METHODS
