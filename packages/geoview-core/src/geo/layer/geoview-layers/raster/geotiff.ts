@@ -155,8 +155,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
     try {
       const colorMap = await extractGeotiffColorMap(layerConfig.getDataAccessPath());
       if (colorMap) {
-        // eslint-disable-next-line no-param-reassign
-        layerConfig.embeddedColorMap = colorMap;
+        layerConfig.setEmbeddedColorMap(colorMap);
       }
     } catch (error) {
       logger.logWarning(`Failed to extract color map for layer ${layerConfig.layerPath}`, error);
@@ -198,7 +197,7 @@ export class GeoTIFF extends AbstractGeoViewRaster {
    * @static
    */
   static createGeoTIFFSource(layerConfig: GeoTIFFLayerEntryConfig): GeoTIFFSource {
-    const hasColorMap = !!layerConfig.embeddedColorMap;
+    const hasColorMap = layerConfig.hasEmbeddedColorMap();
     const sourceOptions: SourceOptions = {
       sources: [{ url: layerConfig.getDataAccessPath(), overviews: layerConfig.getSource().overviews }],
       // When an embedded color map exists, disable normalization so raw integer pixel values can index the palette

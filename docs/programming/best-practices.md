@@ -165,7 +165,7 @@ It should NOT:
  * @param geoviewLayerId - UUID of the GeoView layer.
  * @param signal - Optional abort signal for request cancellation.
  * @returns Parsed layer metadata object.
- * @throws {LayerNotGeoJsonError} An error to 
+ * @throws {LayerNotGeoJsonError} When an error to ...
  */
 async function fetchMetadata(
   geoviewLayerId: string,

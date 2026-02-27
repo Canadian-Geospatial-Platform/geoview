@@ -435,92 +435,52 @@ export async function validateAndPingUrl(
     status: null,
   };
 
-  const helperFetchWithTimeout = async (url: string, options: RequestInit): Promise<Response | null> => {
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeoutMs);
-    try {
-      // Split the url to remove paramters like GET capabilities
-      const response = await fetch(url.split('?')[0], { ...options, signal: controller.signal });
-      clearTimeout(id);
-      return response;
-    } catch {
-      clearTimeout(id);
-      return null;
-    }
-  };
+  // Remove params from url
+  const targetUrlWithoutParams = targetUrl.split('?')[0];
 
   // Syntax Validation
   try {
-    new URL(targetUrl);
+    new URL(targetUrlWithoutParams);
     result.isValid = true;
   } catch {
     result.error = 'Invalid URL format';
     return result;
   }
 
-  // Attempt 1: Direct Fetch (Wrapped in its own try/catch to prevent function exit)
   try {
-    const response = await helperFetchWithTimeout(targetUrl, { method: 'HEAD' });
+    // Direct fetch to check reachability and CORS
+    const response = await Fetch.fetchHeadWithTimeout(targetUrlWithoutParams, timeoutMs);
 
-    // If no response (CORS/Network), null is returned by fetchWithTimeout, throwing here
-    if (!response) throw new Error('No response');
-
-    // If server says 400/500, we want to try the proxy instead of stopping
-    if (!response.ok) throw new Error(`Status ${response.status}`);
-
-    // If we get here, direct fetch worked!
-    result.isReachable = true;
-    result.status = response.status;
-    return result;
-  } catch (err) {
-    // This catch block acts as the "Bridge" to the proxy logic
-    logger.logWarning(`Direct fetch failed for ${targetUrl}: ${err}, trying proxy`);
-  }
-
-  // Attempt 2: Proxy Fetch
-  result.needsProxy = true;
-  try {
-    const proxiedUrl = `${proxyBase}?${encodeURIComponent(targetUrl)}`;
-    const proxyResponse = await helperFetchWithTimeout(proxiedUrl, { method: 'GET' });
-
-    if (!proxyResponse) {
-      result.isReachable = false;
-      result.error = 'Proxy unreachable';
-      return result;
-    }
-
-    result.status = proxyResponse.status;
-
-    if (!proxyResponse.ok) {
-      result.isReachable = false;
-      result.error = `Server returned ${proxyResponse.status}`;
-      return result;
-    }
-
-    // --- VALIDATE WMS CONTENT ---
-    const text = await proxyResponse.text();
-
-    // Specific check for proxy's "success-but-invalid" message
-    const isProxyInvalidError = text.includes('The response is not supported or invalid');
-
-    if (isProxyInvalidError) {
-      // The proxy reached the URL! Even if the content is "invalid",
-      // it proves the server is alive and responding.
+    // If we got a response (even an error status), the server is reachable — no need for proxy
+    if (response) {
       result.isReachable = true;
-      result.status = proxyResponse.status;
-      result.needsProxy = true;
-
-      if (isProxyInvalidError) {
-        result.error = 'URL reachable, but proxy considers response invalid.';
-      }
+      result.status = response.status;
     } else {
-      // The proxy itself couldn't connect to the site at all
       result.isReachable = false;
-      result.error = `Proxy Error: ${proxyResponse.status}`;
+      result.error = 'No response from server';
     }
-  } catch (error) {
-    result.isReachable = false;
-    result.error = error instanceof Error && error.name === 'AbortError' ? 'Timeout' : 'Unreachable';
+    return result;
+  } catch {
+    // Direct fetch failed (CORS, network, etc.) — try through proxy
+    result.needsProxy = true;
+
+    try {
+      const proxiedUrl = `${proxyBase}?${encodeURIComponent(targetUrlWithoutParams)}`;
+      const text = await Fetch.fetchText(proxiedUrl, { method: 'GET' }, timeoutMs);
+
+      // The proxy may return a 200 but with an error message in the body (e.g. WMS ServiceExceptionReport)
+      if (text.includes('The response is not supported or invalid')) {
+        // The proxy reached the URL — the server is alive — but the response content is invalid
+        result.isReachable = true;
+        result.error = 'URL reachable, but proxy considers response invalid.';
+      } else {
+        result.isReachable = true;
+      }
+    } catch (proxyError) {
+      // Both direct and proxy failed
+      result.isReachable = false;
+      result.error = proxyError instanceof Error && proxyError.name === 'AbortError' ? 'Timeout' : 'Unreachable';
+    }
   }
 
   return result;
@@ -538,8 +498,10 @@ export async function validateAndPingUrl(
 export async function extractGeotiffColorMap(url: string): Promise<RGBA[] | undefined> {
   const tiff = await fromUrl(url);
   const image = await tiff.getImage();
-
   const fileDirectory = image.getFileDirectory();
+
+  // ColorMap is a flat Uint16Array of 3 × N entries laid out as [R0…R(N-1), G0…G(N-1), B0…B(N-1)].
+  // Values are 16-bit (0–65535) and must be scaled to 8-bit (0–255) by dividing by 256.
   const colorMap = fileDirectory.ColorMap as Uint16Array | undefined;
 
   if (!colorMap) {

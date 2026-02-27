@@ -755,8 +755,14 @@ export function AddNewLayer(): JSX.Element {
 
         // Validate and ping HTTPS URLs
         if (layerURL.startsWith('https://')) {
-          const check = await validateAndPingUrl(layerURL);
-          setStepButtonEnabled(check.isValid && check.isReachable);
+          setIsLoading(true);
+          try {
+            const check = await validateAndPingUrl(layerURL);
+            logger.logError(check);
+            setStepButtonEnabled(check.isValid && check.isReachable);
+          } finally {
+            setIsLoading(false);
+          }
         } else {
           setStepButtonEnabled(false);
         }
