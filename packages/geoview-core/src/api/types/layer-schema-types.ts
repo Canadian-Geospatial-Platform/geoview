@@ -989,18 +989,10 @@ export interface TypeMetadataEsriRasterFunctionInfos {
  */
 export type TypeMosaicRule = {
   /** The mosaic method determines how the mosaic is created from the selected rasters. */
-  mosaicMethod:
-    | 'esriMosaicNone'
-    | 'esriMosaicCenter'
-    | 'esriMosaicNadir'
-    | 'esriMosaicViewpoint'
-    | 'esriMosaicAttribute'
-    | 'esriMosaicLockRaster'
-    | 'esriMosaicNorthwest'
-    | 'esriMosaicSeamline';
+  mosaicMethod: TypeMosaicMethod;
 
   /** The mosaic operation defines how overlapping pixels are resolved. */
-  mosaicOperation?: 'MT_FIRST' | 'MT_LAST' | 'MT_MIN' | 'MT_MAX' | 'MT_MEAN' | 'MT_BLEND' | 'MT_SUM';
+  mosaicOperation?: TypeMosaicOperation;
 
   /** Field name used for attribute-based mosaic method. */
   sortField?: string;
@@ -1027,6 +1019,18 @@ export type TypeMosaicRule = {
   /** Multidimensional definition for filtering. */
   multidimensionalDefinition?: unknown[];
 };
+
+export type TypeMosaicMethod =
+  | 'esriMosaicNone'
+  | 'esriMosaicCenter'
+  | 'esriMosaicNadir'
+  | 'esriMosaicViewpoint'
+  | 'esriMosaicAttribute'
+  | 'esriMosaicLockRaster'
+  | 'esriMosaicNorthwest'
+  | 'esriMosaicSeamline';
+
+export type TypeMosaicOperation = 'MT_FIRST' | 'MT_LAST' | 'MT_MIN' | 'MT_MAX' | 'MT_MEAN' | 'MT_BLEND' | 'MT_SUM';
 
 export interface TypeLayerMetadataEsriExtent {
   spatialReference: TypeProjection;

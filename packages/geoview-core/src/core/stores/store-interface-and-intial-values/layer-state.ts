@@ -8,7 +8,14 @@ import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { type TypeGetStore, type TypeSetStore, useStableSelector } from '@/core/stores/geoview-store';
 import type { TypeFeatureInfoEntryPartial, TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
 import { DateMgt, type TemporalMode, type TimeDimension, type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
-import type { TypeGeoviewLayerType, TypeLayerStatus, TypeMetadataEsriRasterFunctionInfos } from '@/api/types/layer-schema-types';
+import type {
+  TypeGeoviewLayerType,
+  TypeLayerStatus,
+  TypeMetadataEsriRasterFunctionInfos,
+  TypeMosaicMethod,
+  TypeMosaicOperation,
+  TypeMosaicRule,
+} from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import type { TypeVectorLayerStyles } from '@/geo/utils/renderer/geoview-renderer';
@@ -55,6 +62,10 @@ export interface ILayerState {
     setLayerHoverable: (layerPath: string, enable: boolean) => void;
     setLayerQueryable: (layerPath: string, enable: boolean) => void;
     setLayerRasterFunction: (layerPath: string, rasterFunctionId: string) => void;
+    setLayerMosaicRule: (layerPath: string, mosaicRule: TypeMosaicRule | undefined) => void;
+    setLayerMosaicRuleAscending: (layerPath: string, value: boolean) => void;
+    setLayerMosaicRuleMethod: (layerPath: string, value: TypeMosaicMethod) => void;
+    setLayerMosaicRuleOperation: (layerPath: string, value: TypeMosaicOperation) => void;
     setSelectedLayerPath: (layerPath: string | undefined) => void;
     zoomToLayerExtent: (layerPath: string) => Promise<void>;
     zoomToLayerVisibleScale: (layerPath: string) => void;
@@ -337,6 +348,42 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        */
       setLayerRasterFunction: (layerPath: string, rasterFunctionId: string | undefined): void => {
         LegendEventProcessor.setLayerRasterFunction(get().mapId, layerPath, rasterFunctionId);
+      },
+
+      /**
+       * Sets the mosaic rule for a layer.
+       * @param layerPath - The layer path.
+       * @param mosaicRule The new mosaicRule object or undefined to clear the mosaic rule.
+       */
+      setLayerMosaicRule: (layerPath, mosaicRule): void => {
+        LegendEventProcessor.setLayerMosaicRule(get().mapId, layerPath, mosaicRule);
+      },
+
+      /**
+       * Sets the ascending property of the mosaic rule for a layer.
+       * @param layerPath - The layer path.
+       * @param value - The new value for the ascending property.
+       */
+      setLayerMosaicRuleAscending: (layerPath, value: boolean): void => {
+        LegendEventProcessor.setLayerMosaicRuleProperty(get().mapId, layerPath, { ascending: value });
+      },
+
+      /**
+       * Sets the mosaic method property of the mosaic rule for a layer.
+       * @param layerPath - The layer path.
+       * @param value - The new value for the mosaic method property.
+       */
+      setLayerMosaicRuleMethod: (layerPath: string, value: TypeMosaicMethod): void => {
+        LegendEventProcessor.setLayerMosaicRuleProperty(get().mapId, layerPath, { mosaicMethod: value });
+      },
+
+      /**
+       * Sets the mosaic operation property of the mosaic rule for a layer.
+       * @param layerPath - The layer path.
+       * @param value - The new value for the mosaic operation property.
+       */
+      setLayerMosaicRuleOperation: (layerPath: string, value: TypeMosaicOperation): void => {
+        LegendEventProcessor.setLayerMosaicRuleProperty(get().mapId, layerPath, { mosaicOperation: value });
       },
 
       /**
@@ -739,6 +786,7 @@ export const useLayerSelectorLegendQueryStatus = createLayerSelectorHook('legend
 export const useLayerSelectorCanToggle = createLayerSelectorHook('canToggle');
 export const useLayerSelectorStyleConfig = createLayerSelectorHook('styleConfig');
 export const useLayerSelectorRasterFunction = createLayerSelectorHook('rasterFunction');
+export const useLayerSelectorMosaicRule = createLayerSelectorHook('mosaicRule');
 
 // Store Actions
 export const useLayerStoreActions = (): LayerActions => useStore(useGeoViewStore(), (state) => state.layerState.actions);

@@ -25,6 +25,7 @@ export {
   ChevronRight as ChevronRightIcon,
   Circle as CircleIcon,
   Close as CloseIcon,
+  Collections as CollectionsIcon,
   Copyright as CopyrightIcon,
   CropOriginal as AoiIcon,
   Delete as DeleteIcon,

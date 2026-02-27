@@ -2,7 +2,12 @@ import type { Projection as OLProjection } from 'ol/proj';
 
 import type { Extent } from '@/api/types/map-schema-types';
 import type { TemporalMode, TimeDimension, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
-import type { TypeLayerControls, TypeLayerStatus, TypeMetadataEsriRasterFunctionInfos } from '@/api/types/layer-schema-types';
+import type {
+  TypeLayerControls,
+  TypeLayerStatus,
+  TypeMetadataEsriRasterFunctionInfos,
+  TypeMosaicRule,
+} from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import { MapViewer } from '@/geo/map/map-viewer';
@@ -272,6 +277,53 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Gets the active mosaic rule for a layer.
+   */
+  static getLayerMosaicRule(mapId: string, layerPath: string): TypeMosaicRule | undefined {
+    return LegendEventProcessor.getLegendLayerInfo(mapId, layerPath)?.mosaicRule;
+  }
+
+  /**
+   * Sets the active mosaic rule for a layer.
+   */
+  static setLayerMosaicRule(mapId: string, layerPath: string, mosaicRule: TypeMosaicRule | undefined): void {
+    MapEventProcessor.getMapViewerLayerAPI(mapId).setLayerMosaicRule(mapId, layerPath, mosaicRule);
+  }
+
+  /**
+   * Updates the mosaicRule for a layer by merging new properties.
+   * @param mapId - The map id.
+   * @param layerPath - The layer path.
+   * @param partialMosaicRule - An object with one or more mosaicRule properties to update.
+   */
+  static setLayerMosaicRuleProperty(mapId: string, layerPath: string, partialMosaicRule: Partial<TypeMosaicRule>): void {
+    const prevRule = LegendEventProcessor.getLayerMosaicRule(mapId, layerPath);
+    if (!prevRule) return;
+
+    // Merge the existing mosaic rule with the new properties, ensuring required properties are preserved
+    const mergedRule: TypeMosaicRule = {
+      ...prevRule,
+      ...partialMosaicRule,
+      mosaicMethod: partialMosaicRule.mosaicMethod ?? prevRule.mosaicMethod ?? 'esriMosaicNone',
+      mosaicOperation: partialMosaicRule.mosaicOperation ?? prevRule.mosaicOperation ?? 'MT_FIRST',
+    };
+
+    MapEventProcessor.getMapViewerLayerAPI(mapId).setLayerMosaicRule(mapId, layerPath, mergedRule);
+  }
+
+  /**
+   * Updates the active mosaic rule for a layer in the store.
+   */
+  static setLayerMosaicRuleInStore(mapId: string, layerPath: string, mosaicRule: TypeMosaicRule | undefined): void {
+    const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
+    const layer = this.findLayerByPath(layers, layerPath);
+    if (layer) {
+      layer.mosaicRule = mosaicRule;
+      this.getLayerState(mapId).setterActions.setLegendLayers(layers);
+    }
+  }
+
+  /**
    * Gets the raster function previews for the ESRI image layer.
    * @param mapId - The map identifier.
    * @param layerPath - The layer path.
@@ -300,6 +352,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const rasterFunctionInfos = this.getLayerRasterFunctionInfos(mapId, layerPath);
     if (rasterFunctionInfos && rasterFunctionInfos.length > 0) {
       settings.push('rasterFunction');
+    }
+
+    // Check if mosaicMode is present
+    const mosaicRule = this.getLayerMosaicRule(mapId, layerPath);
+    if (mosaicRule) {
+      settings.push('mosaicRule');
     }
 
     // Add other layer types with settings here
@@ -736,6 +794,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             items: [] as TypeLegendItem[],
             children: [] as TypeLegendLayer[],
             rasterFunction: undefined,
+            mosaicRule: undefined,
           };
 
           existingEntries.push(legendLayerEntry);
@@ -796,7 +855,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           items,
           icons,
           // TODO: Encapsulate rasterFunction and possibly other 'settings' into their own object
-          rasterFunction: layerConfig instanceof EsriImageLayerEntryConfig ? layerConfig.getInitialRasterFunction() : undefined,
+          rasterFunction: layer instanceof GVEsriImage ? layer.getRasterFunction() : undefined,
+          mosaicRule: layer instanceof GVEsriImage ? layer.getMosaicRule() : undefined,
         };
 
         // If layer is regular (not group)
