@@ -26,7 +26,7 @@
       },
       {
         "geoviewLayerId": "datacube-vegetation",
-        "geoviewLayerName": "Datacube Vegetation - Github Issue #3166",
+        "geoviewLayerName": "Datacube Vegetation",
         "metadataAccessPath": "https://datacube.services.geo.ca/stac/api/collections/vegetation/items/vegetation-2020",
         "geoviewLayerType": "GeoTIFF",
         "listOfLayerEntryConfig": [
