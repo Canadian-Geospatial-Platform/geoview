@@ -60,6 +60,9 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       fontSize: theme.palette.geoViewFontSize.default,
       marginTop: 0,
     },
+    '& .MuiInputLabel-formControl.Mui-focused': {
+      color: theme.palette.text.primary,
+    },
     '& .MuiSelect-select': {
       padding: '0px 12px 4px 0px !important',
     },
@@ -82,6 +85,17 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
         marginLeft: '-8px',
       },
     },
+  },
+  visuallyHidden: {
+    position: 'absolute',
+    width: '1px',
+    height: '1px',
+    padding: 0,
+    margin: '-1px',
+    overflow: 'hidden',
+    clip: 'rect(0, 0, 0, 0)',
+    whiteSpace: 'nowrap',
+    border: 0,
   },
 });
 
@@ -118,5 +132,11 @@ export const StyledInputField = styled(Input)(({ theme }) => ({
   '& .MuiInputBase-input': {
     transition: theme.transitions.create('width'),
     width: '100%',
+  },
+  '& input.keyboard-focused': {
+    // hide keyboard-focused default black outline (style.css)
+    // MUI adds a 2px border to the bottom of the input parent on focus.
+    // It has sufficient contrast to meet WCAG 2.1 requirements (see Success Criterion 1.4.11 and 2.4.7)
+    border: 'none !important',
   },
 })) as unknown as typeof Input;

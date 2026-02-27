@@ -94,14 +94,16 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
   return (
     <Box
       component="section"
-      role="dialog"
+      role={open ? 'dialog' : undefined}
+      aria-modal={open ? 'true' : undefined}
+      aria-hidden={!open}
       aria-label={`${t(panel.title)} panel`}
       sx={{
         ...sxClasses.panelContainer,
         ...(panelStyles?.panelContainer && { ...panelStyles.panelContainer }),
       }}
       ref={panelContainerRef}
-      id={`appbar-panel-${panel.panelId || ''}-${mapId}`}
+      id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-${panel.panelId || ''}-panel`}
       className={`appbar-panel appbar-panel-${panelId}`}
     >
       <FocusTrapContainer open={isFocusTrapped} id="app-bar-focus-trap" containerType={CONTAINER_TYPE.APP_BAR}>

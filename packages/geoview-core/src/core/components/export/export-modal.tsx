@@ -298,7 +298,7 @@ export default function ExportModal(): JSX.Element {
   return (
     <Dialog
       role="dialog"
-      id="export-modal"
+      id={`${mapId}-export-modal`}
       open={activeModalId === 'export'}
       onClose={handleCloseModal}
       slotProps={{

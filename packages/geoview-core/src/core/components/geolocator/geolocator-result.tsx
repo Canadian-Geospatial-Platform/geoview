@@ -11,6 +11,7 @@ import { getSxClasses } from '@/core/components/geolocator/geolocator-style';
 import { useMapSize } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 interface GeolocatorFiltersType {
   geoLocationData: GeoListItem[];
@@ -33,6 +34,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
   const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const mapId = useGeoViewMapId();
 
   // Store
   const shellContainer = useAppShellContainer();
@@ -107,17 +109,17 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
   return (
     <Paper component="div" elevation={4} square sx={{ width: 350 }}>
       {!error && (
-        <Box sx={sxClasses.filter} className="geolocator-filters" role="group">
+        <Box sx={sxClasses.filter} className="geolocator-filters" role="group" aria-label={t('geolocator.filtersGroupTitle')!}>
           <Box sx={{ flexGrow: 2, paddingRight: '8px', maxWidth: 150 }}>
             <Select
-              labelId="geolocationProvinceFilter"
+              labelId={`${mapId}-geolocator-province-filter-label`}
               formControlProps={{ variant: 'standard', size: 'small' }}
-              id="provinceGeolocatorFilters"
+              id={`${mapId}-geolocator-province-filter`}
               fullWidth
               value={province ?? ''}
               onChange={(event: SelectChangeEvent<unknown>) => setProvince(event.target.value as string)}
               label={t('geolocator.province')}
-              inputLabel={{ id: 'geolocationProvinceFilter' }}
+              inputLabel={{ id: `${mapId}-geolocator-province-filter-label` }}
               menuItems={memoProvinces}
               disabled={!geoLocationData.length}
               variant="standard"
@@ -126,14 +128,14 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
           </Box>
           <Box sx={{ flexGrow: 2, paddingRight: '8px', maxWidth: 150 }}>
             <Select
-              labelId="geolocationCategoryFilter"
-              id="typeGeolocatorFilters"
+              labelId={`${mapId}-geolocator-category-filter-label`}
+              id={`${mapId}-geolocator-category-filter`}
               formControlProps={{ variant: 'standard', size: 'small' }}
               value={category ?? ''}
               fullWidth
               onChange={(event: SelectChangeEvent<unknown>) => setCategory(event.target.value as string)}
               label={t('geolocator.category')}
-              inputLabel={{ id: 'geolocationCategoryFilter' }}
+              inputLabel={{ id: `${mapId}-geolocator-category-filter-label` }}
               menuItems={memoCategories}
               disabled={!geoLocationData.length}
               variant="standard"
@@ -157,23 +159,26 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
       )}
       <Box
         sx={{ maxHeight: mapSize[1] - 240, overflowY: 'auto' }}
-        id="geolocator-results-region"
+        className="geolocator-results-region"
         role="region"
         aria-label={t('geolocator.searchResults')!}
-        aria-live="polite"
-        aria-atomic="false"
-        aria-relevant="additions removals"
       >
         {error && (
-          <Typography component="p" sx={{ p: 10, fontSize: theme.palette.geoViewFontSize.md }}>
+          <Typography
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            component="p"
+            sx={{ p: 10, fontSize: theme.palette.geoViewFontSize.md }}
+          >
             {t('error.geolocator.noService')}
           </Typography>
         )}
         {!!memoFilteredData.length && (
           <>
             {/* An announcement for screen readers about the number of results found */}
-            <Box className="geolocatorResultsStatus" role="status" sx={sxClasses.geolocatorResultsStatus}>
-              <Typography component="p">
+            <Box className="geolocatorResultsStatus" sx={sxClasses.geolocatorResultsStatus}>
+              <Typography role="status" aria-live="polite" aria-atomic="true" component="p">
                 {t('geolocator.resultsFound', { count: memoFilteredData.length, searchTerm: searchValue })}
               </Typography>
               {activeFiltersDisplay}
@@ -182,8 +187,14 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
           </>
         )}
         {!memoFilteredData.length && searchValue.length >= 3 && (
-          <Box sx={{ p: 10 }} role="status">
-            <Typography component="p" sx={{ fontSize: theme.palette.geoViewFontSize.md }}>
+          <Box sx={{ p: 10 }}>
+            <Typography
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+              component="p"
+              sx={{ fontSize: theme.palette.geoViewFontSize.md }}
+            >
               {t('geolocator.noResult')} <b>{searchValue}</b>
             </Typography>
             {activeFiltersDisplay}
