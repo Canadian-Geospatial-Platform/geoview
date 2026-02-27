@@ -324,6 +324,40 @@ export abstract class Fetch {
   }
 
   /**
+   * Performs a HEAD request to check URL availability without downloading the body.
+   *
+   * Unlike other fetch methods, this never throws. Network errors, CORS failures,
+   * and timeouts are all caught and returned as null.
+   *
+   * @param url - The URL to send the HEAD request to.
+   * @param timeoutMs - Optional timeout in milliseconds before aborting the request.
+   * @returns The Response object on success, or null if any error occurred.
+   */
+  static async fetchHeadWithTimeout(url: string, timeoutMs?: number): Promise<Response | null> {
+    // If we want to use a timeout controller
+    let timeoutSignal: AbortSignal | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    if (timeoutMs) {
+      const timeoutController = Fetch.#createTimeoutAbortController(timeoutMs);
+      timeoutSignal = timeoutController.controller.signal;
+      ({ timeoutId } = timeoutController);
+    }
+
+    try {
+      // Query
+      const response = await fetch(url, { method: 'HEAD', signal: timeoutSignal });
+
+      // Return the response
+      return response;
+    } catch {
+      return null;
+    } finally {
+      // Clear the timeout, if any. We're done
+      clearTimeout(timeoutId);
+    }
+  }
+
+  /**
    * Performs a fetch request with timeout capability
    * @template T - The expected type of the JSON response
    * @param {string} url - The URL to fetch from

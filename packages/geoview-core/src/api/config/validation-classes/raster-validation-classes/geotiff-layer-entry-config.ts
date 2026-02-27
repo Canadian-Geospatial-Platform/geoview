@@ -20,7 +20,7 @@ export interface GeoTIFFLayerEntryConfigProps extends AbstractBaseLayerEntryConf
  */
 export class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /** Embedded RGBA color palette extracted from the GeoTIFF file, if present. */
-  embeddedColorMap: RGBA[] | undefined;
+  #embeddedColorMap: RGBA[] | undefined;
 
   /**
    * The class constructor.
@@ -66,6 +66,33 @@ export class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   }
 
   // #endregion OVERRIDES
+
+  /**
+   * Getter for the embedded color map.
+   *
+   * @returns {RGBA[] | undefined} The embedded RGBA color map, if present.
+   */
+  getEmbeddedColorMap(): RGBA[] | undefined {
+    return this.#embeddedColorMap;
+  }
+
+  /**
+   * Setter for the embedded color map.
+   *
+   * @param colorMap - The embedded RGBA color map to set.
+   */
+  setEmbeddedColorMap(colorMap: RGBA[] | undefined): void {
+    this.#embeddedColorMap = colorMap;
+  }
+
+  /**
+   * checks if an embedded color map is present in the layer config.
+   *
+   * @returns `true` if an embedded color map exists; otherwise `false`.
+   */
+  hasEmbeddedColorMap(): boolean {
+    return this.#embeddedColorMap !== undefined;
+  }
 
   // #region STATIC METHODS
 
