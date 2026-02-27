@@ -32,6 +32,7 @@ import type {
   TypeLayerStatus,
   GeoCoreLayerConfig,
   GeoPackageLayerConfig,
+  TypeMosaicRule,
 } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import {
@@ -1557,7 +1558,7 @@ export class LayerApi {
     if (!(layer instanceof GVEsriImage)) throw new LayerWrongTypeError(layerPath, layer.getLayerName());
 
     // Update the raster function
-    layer.updateRasterFunction(rasterFunctionId);
+    layer.setRasterFunction(rasterFunctionId);
 
     // Update the store
     LegendEventProcessor.setLayerRasterFunctionInStore(this.getMapId(), layerPath, rasterFunctionId);
@@ -1565,6 +1566,21 @@ export class LayerApi {
     // Trigger legend re-query through the layer set system (forced refresh)
     // This ensures the legend query happens through the normal flow without race conditions
     this.legendsLayerSet.queryLegend(layerPath, true);
+  }
+
+  /**
+   * Sets the mosaic rule for an ESRI Image layer.
+   * @param {string} mapId - The map id
+   * @param {string} layerPath - The layer path
+   * @param {TypeMosaicRule | undefined} mosaicRule - The mosaic rule to apply
+   * @returns {void}
+   */
+  setLayerMosaicRule(mapId: string, layerPath: string, mosaicRule: TypeMosaicRule | undefined): void {
+    const layer = this.getGeoviewLayer(layerPath);
+    if (layer instanceof GVEsriImage) {
+      layer.setMosaicRule(mosaicRule);
+      LegendEventProcessor.setLayerMosaicRuleInStore(mapId, layerPath, mosaicRule);
+    }
   }
 
   /**
