@@ -638,17 +638,6 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
         type: 'search',
         'aria-label': t('dataTable.searchInputLabel')!,
       },
-      sx: {
-        // Hide browser's native clear button. We're using a custom clear button in the UI.
-        'input[type="search"]::-webkit-search-cancel-button': {
-          WebkitAppearance: 'none',
-          appearance: 'none',
-        },
-        'input[type="search"]::-webkit-search-decoration': {
-          WebkitAppearance: 'none',
-          appearance: 'none',
-        },
-      },
     },
     // Improve table accessibility
     muiTableProps: {

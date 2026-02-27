@@ -103,6 +103,7 @@ export const TIMEOUT: Record<string, number> = {
   focusDelay: 0,
 
   dataPanelLoading: 100,
+  handleClose: 100,
   handleEsc: 100,
   interactionFocusText: 100,
   guideSearchVisibility: 100,

@@ -351,6 +351,7 @@
   },
   "geolocator": {
     "title": "Geolocator",
+    "filtersGroupTitle": "Geolocator filters",
     "panelTitle": "Geolocator panel",
     "searchFormLabel": "Geolocator search",
     "searchInputLabel": "Enter keyword(s) (minimum 3 characters)",

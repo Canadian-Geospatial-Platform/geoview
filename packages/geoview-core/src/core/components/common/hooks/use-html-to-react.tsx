@@ -24,26 +24,28 @@ export function UseHtmlToReact({ htmlContent, className, style, extraOptions, it
   // Log
   logger.logTraceRenderDetailed('core/containers/use-html-to-react');
 
-  // the html-react-parser can return 2 type in an array or not, make sure we have an array
-  const parsed = parse(htmlContent) as string | Array<string | TrustedHTML>;
-  const items = typeof parsed === 'string' || typeof parsed === 'object' ? [parsed] : parsed;
+  // The html-react-parser can return a single item or an array, ensure we have an array
+  const parsed = parse(htmlContent);
+  const items = Array.isArray(parsed) ? parsed : [parsed];
 
-  // loop trought the array and set the elements
-  const reactItems: Array<TrustedHTML> = [];
+  // Loop through the array and create the elements with keys assigned
+  const reactItems: ReactNode[] = [];
   for (let i = 0; i < items.length; i++) {
-    // eslint-disable-next-line react/no-danger
-    if (typeof items[i] === 'string') reactItems.push(<div dangerouslySetInnerHTML={{ __html: items[i] }} />);
-    else reactItems.push(items[i]);
+    // Plain text strings need dangerouslySetInnerHTML, JSX elements can be rendered directly
+    if (typeof items[i] === 'string') {
+      reactItems.push(<Box key={i} {...itemOptions} dangerouslySetInnerHTML={{ __html: items[i] }} />);
+    } else {
+      reactItems.push(
+        <Box key={i} {...itemOptions}>
+          {items[i] as ReactNode}
+        </Box>
+      );
+    }
   }
 
   return (
     <Box {...extraOptions} className={className} style={style}>
-      {reactItems.map((item: TrustedHTML, index) => (
-        // eslint-disable-next-line react/no-array-index-key
-        <Box key={index} {...itemOptions}>
-          {item as ReactNode}
-        </Box>
-      ))}
+      {reactItems}
     </Box>
   );
 }

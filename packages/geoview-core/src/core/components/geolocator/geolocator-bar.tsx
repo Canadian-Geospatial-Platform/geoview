@@ -1,6 +1,7 @@
 import type { ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { CloseIcon, AppBarUI, Box, IconButton, Toolbar } from '@/ui';
+import { CloseIcon, AppBarUI, Box, IconButton, Toolbar, InputAdornment } from '@/ui';
+import { SearchIcon } from '@/ui/icons';
 import { StyledInputField } from '@/core/components/geolocator/geolocator-style';
 import { logger } from '@/core/utils/logger';
 
@@ -38,9 +39,13 @@ export function GeolocatorBar({ searchValue, onChange, onSearch, onReset, isLoad
         >
           <StyledInputField
             type="search"
+            startAdornment={
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            }
             inputProps={{
               'aria-label': t('geolocator.searchInputLabel')!,
-              'aria-controls': 'geolocator-results-region',
             }}
             placeholder={t('geolocator.search')!}
             onChange={onChange}

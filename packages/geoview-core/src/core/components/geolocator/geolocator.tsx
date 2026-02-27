@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { debounce } from '@/core/utils/debounce';
 import { useTheme } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { Box, ProgressBar } from '@/ui';
+import { Box, ProgressBar, Typography } from '@/ui';
 import { useUIActiveAppBarTab, useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { GeolocatorResult } from '@/core/components/geolocator/geolocator-result';
 import { getSxClasses } from '@/core/components/geolocator/geolocator-style';
@@ -44,6 +44,9 @@ export function Geolocator(): JSX.Element {
   const { setActiveAppBarTab, disableFocusTrap } = useUIStoreActions();
   const { tabId, isOpen } = useUIActiveAppBarTab();
   const activeTrapGeoView = useUIActiveTrapGeoView();
+
+  // Derived values
+  const isPanelOpen = tabId === DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen;
 
   // Custom geolocator hook
   const { data, isLoading, searchValue, error, setSearchValue, getGeolocations, resetState } = useGeolocator();
@@ -122,22 +125,25 @@ export function Geolocator(): JSX.Element {
   }, [isOpen, tabId, handleReset, mapId]);
 
   return (
+    // Determine if the panel is actually open and visible
+
     <Box
       ref={panelRef}
       component="section"
-      role="dialog"
+      role={isPanelOpen ? 'dialog' : undefined}
+      aria-modal={isPanelOpen ? 'true' : undefined}
+      aria-hidden={!isPanelOpen}
       aria-label={t('geolocator.panelTitle')!}
       sx={sxClasses.root}
-      visibility={tabId === DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen ? 'visible' : 'hidden'}
-      className="appbar-panel-geolocator-search"
-      id={`appbar-panel-geolocator-${mapId}`}
+      visibility={isPanelOpen ? 'visible' : 'hidden'}
+      id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-${DEFAULT_APPBAR_CORE.GEOLOCATOR}-panel`}
     >
-      <FocusTrapContainer
-        open={tabId === DEFAULT_APPBAR_CORE.GEOLOCATOR && isOpen && activeTrapGeoView}
-        id="geolocator-focus-trap"
-        containerType={CONTAINER_TYPE.APP_BAR}
-      >
+      <FocusTrapContainer open={isPanelOpen && activeTrapGeoView} id="geolocator-focus-trap" containerType={CONTAINER_TYPE.APP_BAR}>
         <Box sx={sxClasses.geolocator}>
+          <Typography component="h2" sx={sxClasses.visuallyHidden}>
+            {t('geolocator.panelTitle')}
+          </Typography>
+
           <GeolocatorBar
             searchValue={searchValue}
             onChange={handleChange}
