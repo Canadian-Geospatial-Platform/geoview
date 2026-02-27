@@ -12,6 +12,7 @@ import { GeoUtilities } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
 import { Fetch } from '@/core/utils/fetch-helper';
+import { DateMgt } from '@/core/utils/date-mgt';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import type {
   codedValueType,
@@ -32,7 +33,7 @@ import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raste
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
-import type { TypeMetadataEsriRasterFunctionInfos } from '@/api/types/layer-schema-types';
+import type { TypeMetadataEsriRasterFunctionInfos, TypeMosaicRule } from '@/api/types/layer-schema-types';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 
 /**
@@ -48,6 +49,9 @@ export class GVEsriImage extends AbstractGVRaster {
   /** The cache of image previews for the different raster functions */
   #rasterFunctionPreviewCache = new Map<string, string>();
 
+  /** The currently active mosaic rule */
+  #mosaicRule?: TypeMosaicRule;
+
   /**
    * Constructs a GVEsriImage layer to manage an OpenLayer layer.
    * @param {ImageArcGISRest} olSource - The OpenLayer source.
@@ -58,6 +62,7 @@ export class GVEsriImage extends AbstractGVRaster {
 
     // Initialize the active raster function from config's initial value
     this.#rasterFunction = layerConfig.getInitialRasterFunction();
+    this.#mosaicRule = layerConfig.getInitialMosaicRule();
 
     // Create the image layer options.
     const imageLayerOptions: ImageOptions<ImageArcGISRest> = {
@@ -529,9 +534,13 @@ export class GVEsriImage extends AbstractGVRaster {
         // Skip geometry property
         if (fieldName === 'geometry') return;
 
-        const value = properties[fieldName];
+        let value = properties[fieldName];
         const fieldType = this.getFieldType(fieldName);
         const domain = this.onGetFieldDomain(fieldName);
+
+        if (fieldType === 'date') {
+          value = DateMgt.formatDate(value);
+        }
 
         fieldInfo[fieldName] = {
           fieldKey: fieldId + 4, // +4 to account for R,G,B,A fields added first
@@ -584,7 +593,7 @@ export class GVEsriImage extends AbstractGVRaster {
    * @param {string | undefined} rasterFunctionId - The raster function ID to apply
    * @returns {void}
    */
-  updateRasterFunction(rasterFunctionId: string | undefined): void {
+  setRasterFunction(rasterFunctionId: string | undefined): void {
     // Update the config
     this.#rasterFunction = rasterFunctionId;
 
@@ -655,6 +664,32 @@ export class GVEsriImage extends AbstractGVRaster {
     });
 
     return promises;
+  }
+
+  /**
+   * Gets the current mosaic rule for the layer.
+   * @returns The current mosaic rule.
+   */
+  getMosaicRule(): TypeMosaicRule | undefined {
+    return this.#mosaicRule;
+  }
+
+  /**
+   * Sets the entire mosaicRule object and updates the OL source.
+   * @param mosaicRule - The new mosaicRule object.
+   */
+  setMosaicRule(mosaicRule: TypeMosaicRule | undefined): void {
+    this.#mosaicRule = mosaicRule;
+
+    const olSource = this.getOLSource();
+    const params = { ...olSource.getParams() };
+    if (mosaicRule) {
+      params.mosaicRule = JSON.stringify(mosaicRule);
+    } else {
+      delete params.mosaicRule;
+    }
+    olSource.updateParams(params);
+    olSource.changed();
   }
 
   // #endregion METHODS

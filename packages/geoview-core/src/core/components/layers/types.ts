@@ -1,6 +1,6 @@
 import type { Extent } from 'ol/extent';
 import type { TypeLayerStyleConfig, TypeStyleGeometry } from '@/api/types/map-schema-types';
-import type { TypeGeoviewLayerType, TypeLayerControls, TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerType, TypeLayerControls, TypeLayerStatus, TypeMosaicRule } from '@/api/types/layer-schema-types';
 import type { LegendQueryStatus } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { TemporalMode, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 
@@ -50,6 +50,7 @@ export interface TypeLegendLayer {
   children: TypeLegendLayer[];
 
   rasterFunction?: string; // Active raster function for ESRI Image layers
+  mosaicRule?: TypeMosaicRule; // Active mosaic rule for ESRI Image layers
   opacity?: number;
   opacityFromParent?: number;
   zoom?: number;

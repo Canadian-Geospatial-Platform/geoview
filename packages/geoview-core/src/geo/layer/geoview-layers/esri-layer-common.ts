@@ -254,7 +254,6 @@ export class EsriUtilities {
 
     // For ESRI Image layers, extract and store mosaic rule from metadata
     if (layerConfig instanceof EsriImageLayerEntryConfig) {
-      this.#processImageLayerInitialTime(layerConfig, responseJson);
       this.#processImageLayerMosaicRule(layerConfig, responseJson);
       this.#processImageLayerDefaultRasterFunction(layerConfig, responseJson);
     }
@@ -476,26 +475,7 @@ export class EsriUtilities {
     }
 
     // Store in layer config via type extension
-    layerConfig.setMosaicRule(mosaicRule);
-  }
-
-  /**
-   * Processes ESRI Image Server metadata to set initial time parameter from timeExtent.
-   * Stores the time range in the layer config for use during source creation.
-   * @param {EsriImageLayerEntryConfig} layerConfig - The ESRI Image layer configuration.
-   * @param {TypeLayerMetadataEsri} metadata - The service metadata response.
-   * @private
-   * @static
-   */
-  static #processImageLayerInitialTime(layerConfig: EsriImageLayerEntryConfig, metadata: TypeLayerMetadataEsri): void {
-    // Check if metadata has time info with extent
-    if (!metadata.timeInfo?.timeExtent || metadata.timeInfo.timeExtent.length !== 2) return;
-
-    // Format as "startTime,endTime" string (ESRI REST API format)
-    const { timeExtent } = metadata.timeInfo;
-
-    // Store in layer config for source creation
-    layerConfig.setInitialTimeExtent(timeExtent as [number, number]);
+    layerConfig.setInitialMosaicRule(mosaicRule);
   }
 
   /**

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Menu, MenuItem, ListItemIcon, ListItemText, IconButton } from '@/ui';
-import { SettingsIcon, FunctionsIcon } from '@/ui';
+import { SettingsIcon, FunctionsIcon, CollectionsIcon } from '@/ui';
 
 import { getSxClasses } from './layer-settings-style';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -10,6 +10,7 @@ import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-v
 import { RasterFunctionSelector } from './raster-function-selector';
 import type { TypeLegendLayer } from '../../types';
 import { logger } from '@/core/utils/logger';
+import { MosaicRuleSelector } from './mosaic-rule-selector';
 
 interface LayerSettingsProps {
   layerDetails: TypeLegendLayer;
@@ -26,7 +27,8 @@ export function LayerSettings({ layerDetails }: LayerSettingsProps): JSX.Element
 
   // Hooks
   const { getLayerSettings } = useLayerStoreActions();
-  const [rasterFunctionAnchorEl, setRasterFunctionAnchorEl] = useState<null | HTMLElement>(null);
+  const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null);
+  const [openSettingsType, setOpenSettingsType] = useState<'rasterFunction' | 'mosaicRule' | null>(null);
 
   // State
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -44,7 +46,7 @@ export function LayerSettings({ layerDetails }: LayerSettingsProps): JSX.Element
   const handleClose = (event: {}, reason?: 'backdropClick' | 'escapeKeyDown'): void => {
     if (reason === 'backdropClick' || reason === 'escapeKeyDown') {
       setAnchorEl(null);
-      setRasterFunctionAnchorEl(null);
+      setSettingsAnchorEl(null);
     }
   };
 
@@ -74,7 +76,7 @@ export function LayerSettings({ layerDetails }: LayerSettingsProps): JSX.Element
 
   return (
     <>
-      <IconButton aria-label={t('layers.settings')} className="buttonOutline" onClick={handleClick} tooltipPlacement="right">
+      <IconButton aria-label={t('layers.settings.title')} className="buttonOutline" onClick={handleClick} tooltipPlacement="bottom">
         <SettingsIcon />
       </IconButton>
 
@@ -96,25 +98,58 @@ export function LayerSettings({ layerDetails }: LayerSettingsProps): JSX.Element
       >
         {availableSettings.includes('rasterFunction') && (
           <MenuItem
-            selected={Boolean(rasterFunctionAnchorEl)}
+            selected={Boolean(settingsAnchorEl)}
             onClick={(event) => {
-              setRasterFunctionAnchorEl(event.currentTarget);
+              setSettingsAnchorEl(event.currentTarget);
+              setOpenSettingsType('rasterFunction');
             }}
           >
             <ListItemIcon>
               <FunctionsIcon fontSize="small" />
             </ListItemIcon>
-            <ListItemText>{t('layers.selectRasterFunction')}</ListItemText>
+            <ListItemText>{t('layers.settings.selectRasterFunction')}</ListItemText>
+          </MenuItem>
+        )}
+
+        {availableSettings.includes('mosaicRule') && (
+          <MenuItem
+            selected={Boolean(settingsAnchorEl)}
+            onClick={(event) => {
+              setSettingsAnchorEl(event.currentTarget);
+              setOpenSettingsType('mosaicRule');
+            }}
+          >
+            <ListItemIcon>
+              <CollectionsIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>{t('layers.settings.updateMosaicRule')}</ListItemText>
           </MenuItem>
         )}
       </Menu>
 
-      <RasterFunctionSelector
-        layerDetails={layerDetails}
-        anchorEl={rasterFunctionAnchorEl}
-        onClose={() => setRasterFunctionAnchorEl(null)}
-        onClickOutside={handleClose} // Close both menus
-      />
+      {openSettingsType === 'rasterFunction' && (
+        <RasterFunctionSelector
+          layerDetails={layerDetails}
+          anchorEl={settingsAnchorEl}
+          onClose={() => {
+            setSettingsAnchorEl(null);
+            setOpenSettingsType(null);
+          }}
+          onClickOutside={handleClose}
+        />
+      )}
+
+      {openSettingsType === 'mosaicRule' && (
+        <MosaicRuleSelector
+          layerDetails={layerDetails}
+          anchorEl={settingsAnchorEl}
+          onClose={() => {
+            setSettingsAnchorEl(null);
+            setOpenSettingsType(null);
+          }}
+          onClickOutside={handleClose}
+        />
+      )}
     </>
   );
 }
