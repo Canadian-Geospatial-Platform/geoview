@@ -198,10 +198,13 @@ export class GeoTIFF extends AbstractGeoViewRaster {
    * @static
    */
   static createGeoTIFFSource(layerConfig: GeoTIFFLayerEntryConfig): GeoTIFFSource {
+    const hasColorMap = !!layerConfig.embeddedColorMap;
     const sourceOptions: SourceOptions = {
       sources: [{ url: layerConfig.getDataAccessPath(), overviews: layerConfig.getSource().overviews }],
       // When an embedded color map exists, disable normalization so raw integer pixel values can index the palette
-      normalize: !layerConfig.embeddedColorMap,
+      normalize: !hasColorMap,
+      // Use nearest-neighbor interpolation for palette data to avoid blending between class indices
+      interpolate: !hasColorMap,
     };
 
     return new GeoTIFFSource(sourceOptions);
