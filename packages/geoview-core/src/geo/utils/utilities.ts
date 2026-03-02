@@ -16,6 +16,7 @@ import GML3 from 'ol/format/GML3';
 
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { parseXMLToJson } from '@/core/utils/utilities';
+import { ensureServiceRequestUrl } from '@/core/utils/ogc-url-helper';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { Projection } from '@/geo/utils/projection';
 import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
@@ -60,29 +61,7 @@ export abstract class GeoUtilities {
    * @returns {string} The normalized and fully qualified service request URL.
    */
   static ensureServiceRequestUrl(url: string, service: string, request: string, version: string = '1.3.0'): string {
-    const parsedUrl = new URL(url, window.location.href); // fallback base if relative
-    const params = parsedUrl.searchParams;
-
-    // Normalize keys for comparison
-    const keysLower = Array.from(params.keys()).map((k) => k.toLowerCase());
-
-    // Fill the correct parameter
-    if (keysLower.includes('service')) {
-      params.delete('service');
-    }
-    params.set('SERVICE', service);
-
-    // Fill the correct parameter
-    if (keysLower.includes('request')) {
-      params.delete('request');
-    }
-    params.set('REQUEST', request);
-
-    // Add required parameters if missing
-    if (!keysLower.includes('version') && version && version.length > 0) params.set('VERSION', version);
-
-    // Return the parsed string
-    return parsedUrl.toString();
+    return ensureServiceRequestUrl(url, service, request, version);
   }
 
   /**

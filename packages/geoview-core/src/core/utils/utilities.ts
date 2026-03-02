@@ -6,9 +6,9 @@ import { fromUrl } from 'geotiff';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
 import i18n from '@/core/translation/i18n';
-import { GeoUtilities } from '@/geo/utils/utilities';
 import type { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { Fetch } from '@/core/utils/fetch-helper';
+import { ensureServiceRequestUrl } from '@/core/utils/ogc-url-helper';
 import type { TypeHTMLElement } from '@/core/types/global-types';
 import { TIMEOUT } from '@/core/utils/constant';
 import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
@@ -463,8 +463,8 @@ export async function validateAndPingUrl(
 
   // Build OGC GetCapabilities check URLs
   const ogcCheckUrls = [
-    GeoUtilities.ensureServiceRequestUrl(targetUrl, 'GetCapabilities', 'WMS', ''),
-    GeoUtilities.ensureServiceRequestUrl(targetUrl, 'GetCapabilities', 'WFS', ''),
+    ensureServiceRequestUrl(targetUrl, 'WMS', 'GetCapabilities', ''),
+    ensureServiceRequestUrl(targetUrl, 'WFS', 'GetCapabilities', ''),
   ];
 
   // HEAD request to see if the server responds

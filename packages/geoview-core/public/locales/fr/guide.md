@@ -276,6 +276,7 @@ Si l'icône de visibilité (œil) d'une couche est désactivée (grisée) <img s
 La **vue par défault** de l’onglet **Couches** se divise en deux sections. La section de gauche présente les couches affichées sur la carte. Si vous cliquez sur une couche, ses paramètres (options accessibles pour la couche) s’afficheront dans la section de droite.
 
 **Chargement des couches pour la première fois**
+
 - Toutes les couches enregistrées dans l'onglet **couches** deviendront **grises** lorsque Geoview tentera de récupérer les métadonnées.
 - Le statut de la couche passera à « en cours de traitement » lorsque les métadonnées auront été lues, et la case deviendra **verte**.
 - Lorsque la couche sera prête, la case deviendra **blanche**.
@@ -331,7 +332,7 @@ _N.B. : Les paramètres accessibles dépendent de plusieurs facteurs, comme le t
 | <img src="{{assetsURL}}/img/guide/layers/refresh_60.svg" alt="Une icône représentant la fonction « Réinitialiser la couche »" />   | Réinitialiser la couche               | Réinitialiser la couche dans sont état initial.                                                                                                                                                             |
 | <img src="{{assetsURL}}/img/guide/layers/highlight_60.svg" alt="Une icône représentant la fonction « Couche mise en évidence »" /> | Couche mise en évidence               | Place la couche au premier plan, diminue l'opacité des autres couches et affiche le périmètre de la couche.                                                                                                 |
 | <img src="{{assetsURL}}/img/guide/layers/zoom_60.svg" alt="Une icône représentant la fonction « Zoom sur la couche »" />           | Zoom sur la couche                    | Déplace la carte et fait un zoom pour que le périmètre de la couche soit visible.                                                                                                                           |
-| <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt="Une icône représentant la fonction Retirer" />                      | Retirer                             | Retirer cette couche de la carte.                  |
+| <img src="{{assetsURL}}/img/guide/layers/remove_25.svg" alt="Une icône représentant la fonction Retirer" />                        | Retirer                               | Retirer cette couche de la carte.                                                                                                                                                                           |
 | Curseur                                                                                                                            | Opacité                               | Curseur permettant d'augmenter ou de diminuer l'opacité de la couche.                                                                                                                                       |
 
 _N.B. : Lorsque la couche est cachée, les fonctions affectant la couche sur la carte sont désactivées._
@@ -366,7 +367,7 @@ Marche à suivre :
 
 - Pour ajouter un fichier, vous pouvez soit glisser le fichier dans l’assistant d’importation, soit cliquer sur le bouton **Choisir un fichier**, soit entrer l’URL du fichier.
 - Les types de fichiers acceptés sont les fichiers GeoJSON (.json ou .geojson), les fichiers GeoPackage (.gpkg), les fichiers CSV (.csv) contenant des valeurs de coordonnées, les fichiers shapefile (.shp) ou les fichiers ZIP (.zip) contenant un fichier shapefile.
-- Pour ajouter un service, entrez l’URL du service dans le champ de texte.
+- Pour ajouter un service, entrez l'URL du service dans le champ de texte. L'URL sera validée automatiquement afin de vérifier que le serveur est accessible. Le bouton **Continuer** ne sera activé qu'une fois l'URL validée avec succès.
 - Cliquez sur le bouton **Continuer** pour passer à la prochaine étape.
 - Vérifiez que le bon format de fichier ou de service est sélectionné dans le menu déroulant. S’il est erroné, vous recevrez un message d’erreur vous demandant de choisir un autre format.
 - Cliquez sur le bouton **Continuer** pour passer à la prochaine étape. Le format de fichier (p. ex. CSV) devrait s’afficher.
