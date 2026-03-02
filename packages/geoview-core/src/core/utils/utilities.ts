@@ -6,6 +6,7 @@ import { fromUrl } from 'geotiff';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
 import i18n from '@/core/translation/i18n';
+import { GeoUtilities } from '@/geo/utils/utilities';
 import type { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { Fetch } from '@/core/utils/fetch-helper';
 import type { TypeHTMLElement } from '@/core/types/global-types';
@@ -461,10 +462,9 @@ export async function validateAndPingUrl(
   }
 
   // Build OGC GetCapabilities check URLs
-  const separator = '?';
   const ogcCheckUrls = [
-    `${targetUrlWithoutParams}${separator}service=WMS&request=GetCapabilities`,
-    `${targetUrlWithoutParams}${separator}service=WFS&request=GetCapabilities`,
+    GeoUtilities.ensureServiceRequestUrl(targetUrl, 'GetCapabilities', 'WMS', ''),
+    GeoUtilities.ensureServiceRequestUrl(targetUrl, 'GetCapabilities', 'WFS', ''),
   ];
 
   // HEAD request to see if the server responds
@@ -490,6 +490,8 @@ export async function validateAndPingUrl(
       })
     );
 
+    // We fire both WMS and WFS GetCapabilities in parallel. If either one returns a valid
+    // capabilities response, the URL is considered reachable — we don't need both to succeed.
     for (const settled of directChecks) {
       if (settled.status === 'fulfilled' && isOgcCapabilitiesResponse(settled.value)) {
         result.isReachable = true;
@@ -526,6 +528,7 @@ export async function validateAndPingUrl(
       })
     );
 
+    // Same as above: if either WMS or WFS GetCapabilities succeeds through the proxy, it's reachable.
     for (const settled of proxyChecks) {
       if (settled.status === 'fulfilled' && isOgcCapabilitiesResponse(settled.value)) {
         result.isReachable = true;
