@@ -10,6 +10,12 @@ import {
 } from '@/core/exceptions/core-exceptions';
 import { logger } from '@/core/utils/logger';
 
+/** Result of a HEAD reachability check. */
+export interface HeadResult {
+  response: Response | null;
+  reason: 'ok' | 'cors' | 'network' | 'timeout';
+}
+
 export abstract class Fetch {
   /**
    * Fetches a url for a json response.
@@ -324,16 +330,19 @@ export abstract class Fetch {
   }
 
   /**
-   * Performs a HEAD request to check URL availability without downloading the body.
+   * Performs a HEAD request to check URL reachability without downloading the body.
    *
-   * Unlike other fetch methods, this never throws. Network errors, CORS failures,
-   * and timeouts are all caught and returned as null.
+   * Returns a structured result indicating what happened:
+   * - 'ok': Server responded (any HTTP status — it is alive).
+   * - 'cors': Server is alive but blocks cross-origin requests.
+   * - 'network': Server is truly unreachable (bad domain, DNS failure, etc.).
+   * - 'timeout': Request timed out before server could respond.
    *
    * @param url - The URL to send the HEAD request to.
    * @param timeoutMs - Optional timeout in milliseconds before aborting the request.
-   * @returns The Response object on success, or null if any error occurred.
+   * @returns A structured result with the response (if any) and a reason.
    */
-  static async fetchHeadWithTimeout(url: string, timeoutMs?: number): Promise<Response | null> {
+  static async fetchHeadWithTimeout(url: string, timeoutMs?: number): Promise<HeadResult> {
     // If we want to use a timeout controller
     let timeoutSignal: AbortSignal | undefined;
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
@@ -347,10 +356,30 @@ export abstract class Fetch {
       // Query
       const response = await fetch(url, { method: 'HEAD', signal: timeoutSignal });
 
-      // Return the response
-      return response;
-    } catch {
-      return null;
+      // Any HTTP response (even 404/500) means the server is alive
+      return { response, reason: 'ok' };
+    } catch (error: unknown) {
+      // AbortController fired — timeout
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return { response: null, reason: 'timeout' };
+      }
+
+      // TypeError covers both CORS and true network failures.
+      // Use a no-cors probe to distinguish: if the server responds (opaque), it is CORS.
+      if (error instanceof TypeError) {
+        try {
+          const probe = await fetch(url, { method: 'HEAD', mode: 'no-cors' });
+          if (probe.type === 'opaque') {
+            return { response: null, reason: 'cors' };
+          }
+          return { response: null, reason: 'network' };
+        } catch {
+          // no-cors probe also failed — server truly unreachable
+          return { response: null, reason: 'network' };
+        }
+      }
+
+      return { response: null, reason: 'network' };
     } finally {
       // Clear the timeout, if any. We're done
       clearTimeout(timeoutId);

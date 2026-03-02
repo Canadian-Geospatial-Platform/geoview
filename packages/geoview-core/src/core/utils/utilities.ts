@@ -408,20 +408,33 @@ export function isValidUUID(uuid: string): boolean {
 }
 
 /**
- * Validates a URL's syntax and tests its reachability by attempting direct and proxied fetch requests.
+ * Checks whether a text response contains a valid OGC capabilities root element.
  *
- * This function performs a two-stage validation:
- * 1. **Direct fetch**: Attempts a HEAD request to the target URL. If successful (200 OK), returns immediately.
- * 2. **Proxy fetch**: If direct fetch fails due to CORS/network errors, attempts a GET request through a proxy.
- *    Also validates the response content to detect service errors (e.g., WMS ServiceExceptionReport).
+ * @param text - The response text to check.
+ * @returns True if the text contains WMS or WFS capabilities markers.
+ */
+function isOgcCapabilitiesResponse(text: string): boolean {
+  const lower = text.toLowerCase();
+  return lower.includes('wms_capabilities') || lower.includes('wmt_ms_capabilities') || lower.includes('wfs_capabilities');
+}
+
+/**
+ * Validates a URL's syntax and tests whether the server is reachable.
  *
- * The function never throws errors - all failures are returned as part of the result object.
+ * Strategy:
+ * 1. **HEAD → 2xx/3xx** → reachable, no proxy needed.
+ * 2. **HEAD → 4xx/5xx** → server is alive but the bare path fails. Try OGC GetCapabilities
+ *    directly (CORS was fine since HEAD got a response). If valid → reachable. Otherwise → not reachable.
+ * 3. **HEAD → CORS** → server is alive but blocks cross-origin. Try OGC GetCapabilities
+ *    through the proxy. If valid → reachable + needsProxy. Otherwise → not reachable.
+ * 4. **HEAD → network/timeout** → server unreachable.
+ *
+ * The function never throws — all failures are returned as part of the result object.
  *
  * @param targetUrl - The URL to validate and ping.
  * @param proxyBase - Optional. The proxy server base URL. Defaults to CONFIG_PROXY_URL.
  * @param timeoutMs - Optional. Request timeout in milliseconds. Defaults to 5000ms.
- * @returns A result object containing validation and reachability status with properties:
- *   isValid, isReachable, needsProxy, status, and optional error message.
+ * @returns A result object with isValid, isReachable, needsProxy, status, and optional error.
  */
 export async function validateAndPingUrl(
   targetUrl: string,
@@ -435,10 +448,10 @@ export async function validateAndPingUrl(
     status: null,
   };
 
-  // Remove params from url
+  // Strip query params for the reachability check
   const targetUrlWithoutParams = targetUrl.split('?')[0];
 
-  // Syntax Validation
+  // Syntax validation
   try {
     new URL(targetUrlWithoutParams);
     result.isValid = true;
@@ -447,42 +460,87 @@ export async function validateAndPingUrl(
     return result;
   }
 
-  try {
-    // Direct fetch to check reachability and CORS
-    const response = await Fetch.fetchHeadWithTimeout(targetUrlWithoutParams, timeoutMs);
+  // Build OGC GetCapabilities check URLs
+  const separator = '?';
+  const ogcCheckUrls = [
+    `${targetUrlWithoutParams}${separator}service=WMS&request=GetCapabilities`,
+    `${targetUrlWithoutParams}${separator}service=WFS&request=GetCapabilities`,
+  ];
 
-    // If we got a response (even an error status), the server is reachable — no need for proxy
-    if (response) {
+  // HEAD request to see if the server responds
+  const { response, reason } = await Fetch.fetchHeadWithTimeout(targetUrlWithoutParams, timeoutMs);
+
+  if (reason === 'ok' && response) {
+    result.status = response.status;
+
+    // 2xx/3xx — the path exists and is reachable
+    if (response.status < 400) {
       result.isReachable = true;
-      result.status = response.status;
-    } else {
-      result.isReachable = false;
-      result.error = 'No response from server';
+      return result;
     }
-    return result;
-  } catch {
-    // Direct fetch failed (CORS, network, etc.) — try through proxy
-    result.needsProxy = true;
 
-    try {
-      const proxiedUrl = `${proxyBase}?${encodeURIComponent(targetUrlWithoutParams)}`;
-      const text = await Fetch.fetchText(proxiedUrl, { method: 'GET' }, timeoutMs);
+    // 4xx/5xx — server is alive but bare path fails.
+    // WMS/WFS services often return 4xx without query params. Since HEAD succeeded (no CORS issue),
+    // try GetCapabilities directly to see if it is a valid OGC service.
+    // Use raw fetch because WFS GetCapabilities may return non-2xx to the bare path but 200 with params.
+    const directChecks = await Promise.allSettled(
+      ogcCheckUrls.map(async (url) => {
+        const resp = await fetch(url);
+        return resp.text();
+      })
+    );
 
-      // The proxy may return a 200 but with an error message in the body (e.g. WMS ServiceExceptionReport)
-      if (text.includes('The response is not supported or invalid')) {
-        // The proxy reached the URL — the server is alive — but the response content is invalid
+    for (const settled of directChecks) {
+      if (settled.status === 'fulfilled' && isOgcCapabilitiesResponse(settled.value)) {
         result.isReachable = true;
-        result.error = 'URL reachable, but proxy considers response invalid.';
-      } else {
-        result.isReachable = true;
+        return result;
       }
-    } catch (proxyError) {
-      // Both direct and proxy failed
-      result.isReachable = false;
-      result.error = proxyError instanceof Error && proxyError.name === 'AbortError' ? 'Timeout' : 'Unreachable';
     }
+
+    // Not a valid OGC service either — the path is truly wrong
+    result.isReachable = false;
+    result.error = `Server returned status ${response.status} and no OGC service found at this URL`;
+    return result;
   }
 
+  if (reason === 'timeout') {
+    result.error = 'Request timed out';
+    return result;
+  }
+
+  if (reason === 'network') {
+    result.error = 'Server unreachable (DNS failure, server down, or network error)';
+    return result;
+  }
+
+  // CORS — server is alive but blocks cross-origin.
+  // Try OGC GetCapabilities through proxy (only WMS/WFS have CORS issues).
+  if (reason === 'cors') {
+    const proxyChecks = await Promise.allSettled(
+      ogcCheckUrls.map(async (checkUrl) => {
+        const proxiedUrl = `${proxyBase}?${checkUrl}`;
+        // Use raw fetch instead of Fetch.fetchText because the proxy may forward non-2xx
+        // responses that still contain valid capabilities XML in the body.
+        const resp = await fetch(proxiedUrl);
+        return resp.text();
+      })
+    );
+
+    for (const settled of proxyChecks) {
+      if (settled.status === 'fulfilled' && isOgcCapabilitiesResponse(settled.value)) {
+        result.isReachable = true;
+        result.needsProxy = true;
+        return result;
+      }
+    }
+
+    result.isReachable = false;
+    result.error = 'Server blocks cross-origin requests and no OGC service found';
+    return result;
+  }
+
+  // Unknown failure
+  result.error = 'Unexpected error during URL validation';
   return result;
 }
 

@@ -759,7 +759,7 @@ export function AddNewLayer(): JSX.Element {
           setIsLoading(true);
           try {
             const check = await validateAndPingUrl(layerURL);
-            logger.logError(check);
+            logger.logWarning('URL validation check', check);
             setStepButtonEnabled(check.isValid && check.isReachable);
           } finally {
             setIsLoading(false);
