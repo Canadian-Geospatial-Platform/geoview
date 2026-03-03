@@ -208,6 +208,10 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   // Generate unique table details button ID
   const tableDetailsButtonId = `table-details-${containerType}-${mapId}`;
 
+  // Round the bounds
+  const boundsRounded = bounds?.map((value) => Math.round(value));
+  const boundsRounded4326 = bounds4326?.map((value) => Math.round(value * 100) / 100);
+
   /**
    * Recursively checks if all children of a layer are visible.
    * @param {TypeLegendLayer} legendLayer - The legend layer to check
@@ -618,8 +622,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         <Collapse in={isInfoCollapse} sx={sxClasses.layerInfo}>
           <Box>{`${t('layers.layerType')}${localizedTypeName}`}</Box>
           {layerNativeProjection && <Box>{`${t('layers.layerServiceProjection')}${layerNativeProjection}`}</Box>}
-          <Box>{`${getLocalizedMessage(language, 'layers.layerBounds', [mapProjectionEPSG])}: ${bounds}`}</Box>
-          <Box>{`${t('layers.layerBounds4326')}: ${bounds4326}`}</Box>
+          <Box>{`${getLocalizedMessage(language, 'layers.layerBounds', [mapProjectionEPSG])}: ${boundsRounded?.join(', ')}`}</Box>
+          <Box>{`${t('layers.layerBounds4326')}: ${boundsRounded4326?.join(', ')}`}</Box>
           <Box>
             <Box>
               {t('layers.layerActiveFilters')}
