@@ -52,7 +52,6 @@ export class GVTestSuiteMapConfig extends GVAbstractTestSuite {
     // return Promise.all([pDevTest0]);
     // // GV END DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
 
-    // TODO: CHECK - For performance, check which of these tests can happen in parallel with other tests (remove some 'awaits' here and group some together)
     // Test data table pre-loaded in footer bar
     const pDataTableInFooterBar = this.#mapConfigTester.testDataTableSelectedTabFooterBar();
     await pDataTableInFooterBar;

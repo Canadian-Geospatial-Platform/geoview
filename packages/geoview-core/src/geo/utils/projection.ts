@@ -33,9 +33,9 @@ export abstract class Projection {
     LCC: 'EPSG:3978',
     3979: 'EPSG:3979',
     42101: 'EPSG:42101',
-    102100: 'EPSG:102100', // TODO: MINOR - The official name of this projection is ESRI:102100 (not EPSG:102100). However, for the purpose of simplification in GeoView code base, we name it with EPSG prefix.
-    102184: 'EPSG:102184', // TODO: MINOR - The official name of this projection is ESRI:102184 (not EPSG:102184). However, for the purpose of simplification in GeoView code base, we name it with EPSG prefix.
-    102190: 'EPSG:102190', // TODO: MINOR - The official name of this projection is ESRI:102190 (not EPSG:102190). However, for the purpose of simplification in GeoView code base, we name it with EPSG prefix.
+    102100: 'EPSG:102100', // GV The official name of this projection is ESRI:102100 (not EPSG:102100). However, for the purpose of simplification in GeoView code base, we name it with EPSG prefix.
+    102184: 'EPSG:102184', // GV The official name of this projection is ESRI:102184 (not EPSG:102184). However, for the purpose of simplification in GeoView code base, we name it with EPSG prefix.
+    102190: 'EPSG:102190', // GV The official name of this projection is ESRI:102190 (not EPSG:102190). However, for the purpose of simplification in GeoView code base, we name it with EPSG prefix.
     WM: 'EPSG:3857',
     3857: 'EPSG:3857',
     4269: 'EPSG:4269',

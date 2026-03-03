@@ -804,7 +804,8 @@ export interface TypeLineStringVectorConfig extends TypeBaseVectorGeometryConfig
   /** Line stroke symbology */
   stroke: TypeStrokeSymbolConfig;
   /** The additional graphic stroke symbology for special strokes */
-  graphicStrokes?: GraphicStrokeWithPlacement[]; // TODO: Remove this?
+  // TODO: CHECK - Maybe remove this. It is used in the generation of SVGs on-the-fly from GetStyles SLD, but not that useful afterall? TBD
+  graphicStrokes?: GraphicStrokeWithPlacement[];
   /** The text / label settings */
   text?: TypeLayerTextConfig;
 }
@@ -866,7 +867,8 @@ export interface TypePolygonVectorConfig extends TypeBaseVectorGeometryConfig {
   /** Kind of filling  for vector features. Default = solid.  */
   fillStyle: TypeFillStyle;
   /** The additional graphic fills symbology for special fills */
-  graphicFills?: GraphicFillWithPattern[]; // TODO: Remove this?
+  // TODO: CHECK - Maybe remove this. It is used in the generation of SVGs on-the-fly from GetStyles SLD, but not that useful afterall? TBD
+  graphicFills?: GraphicFillWithPattern[];
   /** The text / label settings */
   text?: TypeLayerTextConfig;
 }
@@ -976,8 +978,6 @@ export type TypeFeatureInfoEntry = {
  */
 export type TypeFeatureInfoEntryPartial = Pick<TypeFeatureInfoEntry, 'fieldInfo' | 'geometry'>;
 
-// TODO: Refactor - Check if this type is still used and replace it with something like TypeAllFeatureInfoResultSetEntry?
-// TO.DOCONT:  Still use in data-table-state and detail.tsx
 export type TypeLayerData = {
   // When property features is undefined, we are waiting for the query result.
   // when Array.isArray(features) is true, the features property contains the query result.

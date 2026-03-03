@@ -11,16 +11,57 @@ import { delay } from '@/core/utils/utilities';
 import type { TypeResultSetEntry } from '@/api/types/map-schema-types';
 import { GeoViewStoreOnMapNotFoundError } from '@/core/exceptions/geoview-exceptions';
 
-/**
- * Holds the buffer, on a map basis, for the propagation in batch in the layer data array store
- */
-export type BatchedPropagationLayerDataArrayByMap<T extends TypeResultSetEntry> = {
-  [mapId: string]: T[][];
-};
-
 export abstract class AbstractEventProcessor {
   // The subscription array used to destroy the subscriptions
-  #subscriptionArr: Array<() => void> = [];
+  #subscriptionArr: SubscriptionDelegate[] = [];
+
+  // #region OVERRIDES
+
+  /**
+   * Overridable method called when initializing an event processor.
+   * @param store - The store to initialize with
+   * @returns An array of the subscriptions callbacks which were created
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/class-methods-use-this
+  protected onInitialize(store: GeoviewStoreType): SubscriptionDelegate[] {
+    // ? Here, `store` is unused, but used in inherited classes, so the eslint-disable should be kept
+    // This method should be overriden to initialize and return a list of subscribtions so that they can be destroyed later
+    return [];
+  }
+
+  /**
+   * Overridable method called when destroying an event processor.
+   */
+  protected onDestroy(): void {
+    // destroying all subscriptions
+    this.#subscriptionArr.forEach((unsub) => unsub());
+  }
+
+  // #endregion
+
+  // #region PUBLIC METHODS
+
+  /**
+   * Initializes the processor
+   * @param {GeoviewStoreType} store the store to initialize the processor with
+   */
+  initialize(store: GeoviewStoreType): void {
+    // Call on initialize for the inherited classes to initialize and return their subscribtions
+    const subs = this.onInitialize(store);
+    if (subs) this.#subscriptionArr.push(...subs);
+  }
+
+  /**
+   * Destroys the processor
+   */
+  destroy(): void {
+    // Call onDestroy for the inherited classes to destroy themselves. Their subscriptions returned upon initializations will already be destroyed.
+    this.onDestroy();
+  }
+
+  // #endregion PUBLIC METHODS
+
+  // #region STATIC METHODS
 
   /**
    * Shortcut to get the store state for a given map id
@@ -54,38 +95,6 @@ export abstract class AbstractEventProcessor {
 
     // Not found
     throw new GeoViewStoreOnMapNotFoundError(mapId);
-  }
-
-  /**
-   * Initializes the processor
-   * @param {GeoviewStoreType} store the store to initialize the processor with
-   */
-  initialize(store: GeoviewStoreType): void {
-    // Call on initialize for the inherited classes to initialize and return their subscribtions
-    const subs = this.onInitialize(store);
-    if (subs) this.#subscriptionArr.push(...subs);
-  }
-
-  // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/class-methods-use-this
-  protected onInitialize(store: GeoviewStoreType): Array<() => void> | void {
-    // ? Here, `store` is unused, but used in inherited classes, so the eslint-disable should be kept
-    // This method should be overriden to initialize and return a list of subscribtions so that they can be destroyed later
-    return undefined;
-  }
-
-  /**
-   * Destroys the processor
-   * @param {GeoviewStoreType} store the store to initialize the processor with
-   */
-  destroy(): void {
-    // Call onDestroy for the inherited classes to destroy themselves. Their subscriptions returned upon initializations will already be destroyed.
-    this.onDestroy();
-  }
-
-  protected onDestroy(): void {
-    // destroying all subscriptions
-    this.#subscriptionArr.forEach((unsub) => unsub());
   }
 
   /**
@@ -180,4 +189,18 @@ export abstract class AbstractEventProcessor {
       batchPropagationObject[mapId] = [];
     }
   }
+
+  // #endregion STATIC METHODS
 }
+
+/**
+ * Holds the buffer, on a map basis, for the propagation in batch in the layer data array store
+ */
+export type BatchedPropagationLayerDataArrayByMap<T extends TypeResultSetEntry> = {
+  [mapId: string]: T[][];
+};
+
+/**
+ * Represents a subscription delegate
+ */
+export type SubscriptionDelegate = () => void;

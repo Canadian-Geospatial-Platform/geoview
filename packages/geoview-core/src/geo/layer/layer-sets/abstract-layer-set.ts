@@ -78,10 +78,10 @@ export abstract class AbstractLayerSet {
    * @param layerConfig - The layer config
    * @returns True if the layer config should be registered, false otherwise
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected onRegisterLayerConfigCheck(layerConfig: ConfigBaseClass): boolean {
     // Override this function to perform registration condition logic in the inherited classes
     // By default, a layer-set doesn't register layer configs, it typically registers the layer objects but not the layer config
-    if (layerConfig.getGeoviewLayerConfig().useAsBasemap) return false;
     return this.#defaultRegisterLayerConfigCheck;
   }
 
@@ -119,11 +119,12 @@ export abstract class AbstractLayerSet {
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean {
     // Override this function to perform registration condition logic in the inherited classes
-    // By default, a layer-set always registers layers except when they are group layers
+    // By default, a layer-set always registers layers except when they are group layers or basemap layers
     if (layer.getLayerConfig()?.getEntryTypeIsGroup()) {
       // Skip groups
       return false;
     }
+    if (layer.getLayerConfig().getGeoviewLayerConfig().useAsBasemap) return false;
 
     // Default
     return true;

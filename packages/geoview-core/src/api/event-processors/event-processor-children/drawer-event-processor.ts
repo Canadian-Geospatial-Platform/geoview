@@ -11,7 +11,7 @@ import { createBox } from 'ol/interaction/Draw';
 
 import { AppEventProcessor } from './app-event-processor';
 import { MapEventProcessor } from './map-event-processor';
-import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
+import { AbstractEventProcessor, type SubscriptionDelegate } from '@/api/event-processors/abstract-event-processor';
 import type { TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
 
 import { Projection } from '@/geo/utils/projection';
@@ -101,12 +101,10 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Initializes the event processor and sets up subscriptions
-   * @param {GeoviewStoreType} store - The store to initialize with
-   * @returns {Array<() => void>} Array of unsubscribe functions
-   * @override
-   * @protected
+   * @param store - The store to initialize with
+   * @returns An array of the subscriptions callbacks which were created
    */
-  protected override onInitialize(store: GeoviewStoreType): Array<() => void> {
+  protected override onInitialize(store: GeoviewStoreType): SubscriptionDelegate[] {
     const { mapId } = store.getState();
 
     // Set up keyboard handler

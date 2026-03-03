@@ -71,7 +71,8 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * @returns True when the layer should be registered to this legends-layer-set
    */
   protected override onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean {
-    // Always register layers for the legends-layer-set, because we want 'the box' in the UI to show the layer status progression
+    // Always register layers for the legends-layer-set, because we want 'the box' in the UI to show
+    // the layer status progression, unless it's a basemap layer.
     return layer.getLayerConfig().getGeoviewLayerConfig().useAsBasemap !== true;
   }
 

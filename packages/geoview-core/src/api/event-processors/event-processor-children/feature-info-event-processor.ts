@@ -2,7 +2,7 @@ import { logger } from '@/core/utils/logger';
 import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { Projection } from '@/geo/utils/projection';
 
-import type { BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
+import type { BatchedPropagationLayerDataArrayByMap, SubscriptionDelegate } from '@/api/event-processors/abstract-event-processor';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { UIEventProcessor } from './ui-event-processor';
 import type {
@@ -42,12 +42,12 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
 
   /**
    * Overrides initialization of the GeoChart Event Processor
-   * @param {GeoviewStoreType} store - The store associated with the GeoChart Event Processor
+   * @param store - The store associated with the GeoChart Event Processor
    * @returns An array of the subscriptions callbacks which were created
-   * @override
-   * @protected
    */
-  protected override onInitialize(store: GeoviewStoreType): Array<() => void> | void {
+  protected override onInitialize(store: GeoviewStoreType): SubscriptionDelegate[] {
+    const { mapId } = store.getState();
+
     // Checks for updated layers in layer data array and update the batched array consequently
     const layerDataArrayUpdateBatch = store.subscribe(
       (state) => state.detailsState.layerDataArray,
@@ -56,7 +56,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
         logger.logTraceCoreStoreSubscription('FEATURE-INFO EVENT PROCESSOR - layerDataArray', cur);
 
         // Also propagate in the batched array
-        FeatureInfoEventProcessor.#propagateFeatureInfoToStoreBatch(store.getState().mapId, cur).catch((error: unknown) => {
+        FeatureInfoEventProcessor.#propagateFeatureInfoToStoreBatch(mapId, cur).catch((error: unknown) => {
           // Log
           logger.logPromiseFailed(
             'propagateFeatureInfoToStoreBatch in layerDataArrayUpdateBatch subscribe in feature-info-event-processor',
@@ -65,8 +65,6 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
         });
       }
     );
-
-    const { mapId } = store.getState();
 
     const clickCoordinates = store.subscribe(
       (state) => state.mapState.clickCoordinates,

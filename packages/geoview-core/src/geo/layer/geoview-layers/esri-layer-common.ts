@@ -129,7 +129,6 @@ export class EsriUtilities {
           // eslint-disable-next-line no-param-reassign
           listOfLayerEntryConfig[i] = groupLayerConfig;
 
-          // TODO: Refactor: Do not do this on the fly here anymore with the new configs (quite unpredictable)...
           // Alert that we want to register new entry configs
           callbackWhenRegisteringConfig(groupLayerConfig);
 
@@ -152,7 +151,6 @@ export class EsriUtilities {
             // Append the sub layer entry to the list
             groupLayerConfig.listOfLayerEntryConfig.push(subLayerEntryConfig);
 
-            // TODO: Refactor: Do not do this on the fly here anymore with the new configs (quite unpredictable)...
             // Alert that we want to register new entry configs
             callbackWhenRegisteringConfig(subLayerEntryConfig);
           });

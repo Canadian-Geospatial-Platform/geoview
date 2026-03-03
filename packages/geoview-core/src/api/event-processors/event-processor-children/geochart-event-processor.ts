@@ -8,7 +8,7 @@ import type { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-read
 import { PluginStateUninitializedError } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
 
-import type { BatchedPropagationLayerDataArrayByMap } from '@/api/event-processors/abstract-event-processor';
+import type { BatchedPropagationLayerDataArrayByMap, SubscriptionDelegate } from '@/api/event-processors/abstract-event-processor';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { UIEventProcessor } from './ui-event-processor';
 
@@ -37,13 +37,10 @@ export class GeochartEventProcessor extends AbstractEventProcessor {
 
   /**
    * Overrides initialization of the GeoChart Event Processor
-   * @param {GeoviewStoreType} store - The store associated with the GeoChart Event Processor
-   * @returns {Array<() => void> | void} An array of the subscriptions callbacks which were created
-   * @override
-   * @protected
+   * @param store - The store associated with the GeoChart Event Processor
+   * @returns An array of the subscriptions callbacks which were created
    */
-  // TODO: CHECK - Why void instead of undefined? Here and in all sibling classes
-  protected override onInitialize(store: GeoviewStoreType): Array<() => void> | void {
+  protected override onInitialize(store: GeoviewStoreType): SubscriptionDelegate[] {
     // Checks for updated layers in layer data array from the details state
     const layerDataArrayUpdate = store.subscribe(
       (state) => state.detailsState.layerDataArray as TypeGeochartResultSetEntry[],

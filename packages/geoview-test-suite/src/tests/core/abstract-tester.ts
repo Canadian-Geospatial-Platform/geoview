@@ -200,7 +200,7 @@ export abstract class AbstractTester {
     test.setStatus('verifying');
     test.addStep('Verifying assertions...', 'major');
 
-    // TODO: Minor - Emit something?
+    // Emit something?
     // this.#emitTesting({ test });
   }
 
