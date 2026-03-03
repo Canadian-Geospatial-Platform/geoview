@@ -16,6 +16,15 @@ interface MosaicRuleSelectorProps {
   onClickOutside: (event: {}, reason?: 'backdropClick' | 'escapeKeyDown') => void;
 }
 
+/**
+ * An ArcGIS ImageServer mosaicRule defines how multiple raster datasets within a mosaic dataset
+ * are ordered, mosaicked, and displayed on-the-fly when viewed or queried.
+ * It specifies which rasters are included (e.g., by ID or attribute), their sorting order,
+ * and how overlapping pixels are resolved (e.g., via blending, maximum, or minimum values)
+ * @link https://developers.arcgis.com/javascript/latest/references/core/layers/support/MosaicRule
+ * @param props - The properties for the MosaicRuleSelector component.
+ * @returns A JSX element representing the MosaicRuleSelector component.
+ */
 export function MosaicRuleSelector(props: MosaicRuleSelectorProps): JSX.Element {
   const { layerDetails, anchorEl, onClose, onClickOutside } = props;
   const theme = useTheme();
@@ -23,7 +32,8 @@ export function MosaicRuleSelector(props: MosaicRuleSelectorProps): JSX.Element 
   const { t } = useTranslation();
 
   // Store actions
-  const { setLayerMosaicRuleAscending, setLayerMosaicRuleMethod, setLayerMosaicRuleOperation } = useLayerStoreActions();
+  const { getLayerAllowedMosaicMethods, setLayerMosaicRuleAscending, setLayerMosaicRuleMethod, setLayerMosaicRuleOperation } =
+    useLayerStoreActions();
 
   // Store hooks
   const mosaicRule = useLayerSelectorMosaicRule(layerDetails.layerPath);
@@ -68,17 +78,36 @@ export function MosaicRuleSelector(props: MosaicRuleSelectorProps): JSX.Element 
 
   // Menu items with translations - memoized to prevent recreation on every render
   const methodMenuItems = useMemo(
-    () => [
-      { key: 'esriMosaicNone', item: { value: 'esriMosaicNone', children: t('layers.settings.mosaicMethodNone') } },
-      { key: 'esriMosaicCenter', item: { value: 'esriMosaicCenter', children: t('layers.settings.mosaicMethodCenter') } },
-      { key: 'esriMosaicNadir', item: { value: 'esriMosaicNadir', children: t('layers.settings.mosaicMethodNadir') } },
-      { key: 'esriMosaicViewpoint', item: { value: 'esriMosaicViewpoint', children: t('layers.settings.mosaicMethodViewpoint') } },
-      { key: 'esriMosaicAttribute', item: { value: 'esriMosaicAttribute', children: t('layers.settings.mosaicMethodAttribute') } },
-      { key: 'esriMosaicLockRaster', item: { value: 'esriMosaicLockRaster', children: t('layers.settings.mosaicMethodLockRaster') } },
-      { key: 'esriMosaicNorthwest', item: { value: 'esriMosaicNorthwest', children: t('layers.settings.mosaicMethodNorthwest') } },
-      { key: 'esriMosaicSeamline', item: { value: 'esriMosaicSeamline', children: t('layers.settings.mosaicMethodSeamline') } },
-    ],
-    [t]
+    () =>
+      [
+        { key: 'esriMosaicNone', item: { value: 'esriMosaicNone', name: 'None', children: t('layers.settings.mosaicMethodNone') } },
+        { key: 'esriMosaicCenter', item: { value: 'esriMosaicCenter', name: 'Center', children: t('layers.settings.mosaicMethodCenter') } },
+        { key: 'esriMosaicNadir', item: { value: 'esriMosaicNadir', name: 'Nadir', children: t('layers.settings.mosaicMethodNadir') } },
+        {
+          key: 'esriMosaicViewpoint',
+          item: { value: 'esriMosaicViewpoint', name: 'Viewpoint', children: t('layers.settings.mosaicMethodViewpoint') },
+        },
+        {
+          key: 'esriMosaicAttribute',
+          item: { value: 'esriMosaicAttribute', name: 'ByAttribute', children: t('layers.settings.mosaicMethodAttribute') },
+        },
+        {
+          key: 'esriMosaicLockRaster',
+          item: { value: 'esriMosaicLockRaster', name: 'LockRaster', children: t('layers.settings.mosaicMethodLockRaster') },
+        },
+        {
+          key: 'esriMosaicNorthwest',
+          item: { value: 'esriMosaicNorthwest', name: 'NorthWest', children: t('layers.settings.mosaicMethodNorthwest') },
+        },
+        {
+          key: 'esriMosaicSeamline',
+          item: { value: 'esriMosaicSeamline', name: 'Seamline', children: t('layers.settings.mosaicMethodSeamline') },
+        },
+      ].filter((option) => {
+        const allowedMethods = getLayerAllowedMosaicMethods(layerDetails.layerPath);
+        return !allowedMethods || allowedMethods.includes(option.item.name as TypeMosaicMethod);
+      }),
+    [t, layerDetails.layerPath, getLayerAllowedMosaicMethods]
   );
 
   const operationMenuItems = useMemo(
