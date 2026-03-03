@@ -624,7 +624,7 @@
     },
     "TypeValidMapProjectionCodes": {
       "description": "Spatial Reference EPSG code supported (https://epsg.io/). We support Web Mercator and Lambert Conical Conform Canada.",
-      "enum": [3978, 3857],
+      "enum": [3978, 3857, 3573],
       "default": 3978
     },
     "TypeFeatureInfoLayerConfig": {

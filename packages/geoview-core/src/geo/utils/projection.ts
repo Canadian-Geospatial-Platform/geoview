@@ -30,6 +30,7 @@ export abstract class Projection {
    */
   static PROJECTION_NAMES: Record<string, string> = {
     3578: 'EPSG:3578',
+    3573: 'EPSG:3573',
     LCC: 'EPSG:3978',
     3979: 'EPSG:3979',
     42101: 'EPSG:42101',
@@ -826,7 +827,21 @@ function initBCAlbersProjection(): void {
   Projection.PROJECTIONS['3005'] = projection;
 }
 
+/**
+ * Initializes the EPSG:3573 - WGS 84 / North Pole LAEA Canada projection
+ */
+function init3573Projection(): void {
+  // EPSG:3573 - WGS 84 / North Pole LAEA Canada
+  proj4.defs('EPSG:3573', '+proj=laea +lat_0=90 +lon_0=-100 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs');
+  register(proj4);
+
+  const projection = Projection.getProjectionFromString(Projection.PROJECTION_NAMES[3573]);
+  // The extent must be set at registration time so the map View picks it up for zoom constraints.
+  projection.setExtent([-9000000, -9000000, 9000000, 9000000]);
+  Projection.PROJECTIONS['3573'] = projection;
+}
 // Initialize the supported projections
+init3573Projection();
 initCRS84Projection();
 init4326Projection();
 initWMProjection();

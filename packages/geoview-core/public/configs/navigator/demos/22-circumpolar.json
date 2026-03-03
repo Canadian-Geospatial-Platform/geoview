@@ -3,9 +3,9 @@
     "interaction": "dynamic",
     "viewSettings": {
       "initialView": {
-        "zoomAndCenter": [4, [-110, 82]]
+        "zoomAndCenter": [3, [-110, 80]]
       },
-      "projection": 3978
+      "projection": 3573
     },
     "basemapOptions": {
       "basemapId": "nogeom",
@@ -19,14 +19,19 @@
       },
       {
         "geoviewLayerType": "ogcWmts",
-        "metadataAccessPath": "https://basemap.arctic-sdi.org/mapcache/wmts",
         "geoviewLayerId": "arctic-sdi",
         "geoviewLayerName": "arctic-sdi",
         "useAsBasemap": true,
         "listOfLayerEntryConfig": [
           {
             "layerId": "arctic_cascading",
-            "tileMatrixSet": "3573"
+            "tileMatrixSet": "3573",
+            "source": {
+              "extent": [-4889334.802955, -4889334.802955, 4889334.802955, 4889334.802955],
+              "resolutionLevels": 11,
+              "projection": "EPSG:3573",
+              "dataAccessPath": "https://basemap.arctic-sdi.org/mapcache/wmts"
+            }
           }
         ]
       }
@@ -34,6 +39,7 @@
   },
   "components": ["overview-map", "north-arrow"],
   "overviewMap": { "hideOnZoom": 7 },
+  "navBar": ["zoom"],
   "footerBar": {
     "tabs": {
       "core": ["layers", "data-table"]

@@ -316,10 +316,16 @@ export class MapViewer {
 
     let extentProjected: Extent | undefined;
     if (mapViewSettings.maxExtent && projection) {
-      extentProjected = Projection.transformExtentFromProj(mapViewSettings.maxExtent, Projection.getProjectionLonLat(), projection);
+      // For polar projections, transforming a lon/lat bounding box clips the view too tightly.
+      // Use the projection's own extent directly instead.
+      if (mapViewSettings.projection === 3573) {
+        extentProjected = projection.getExtent() || undefined;
+      } else {
+        extentProjected = Projection.transformExtentFromProj(mapViewSettings.maxExtent, Projection.getProjectionLonLat(), projection);
 
-      // Special case for EPSG:3978 maxExtent top value to avoid cutting Canada north parts when north = 90
-      if (mapViewSettings.projection === 3978 && mapViewSettings.maxExtent[3] === 90) extentProjected[3] = 9000000;
+        // Special case for EPSG:3978 maxExtent top value to avoid cutting Canada north parts when north = 90
+        if (mapViewSettings.projection === 3978 && mapViewSettings.maxExtent[3] === 90) extentProjected[3] = 9000000;
+      }
     }
 
     const initialMap = new OLMap({
@@ -503,14 +509,18 @@ export class MapViewer {
     viewOptions.rotation = mapView.rotation ? mapView.rotation : currentView.getRotation();
 
     if (mapView.maxExtent) {
-      viewOptions.extent = Projection.transformExtentFromProj(
-        mapView.maxExtent,
-        Projection.getProjectionLonLat(),
-        Projection.getProjectionFromString(`EPSG:${mapView.projection}`)
-      );
+      const projObj = Projection.getProjectionFromString(`EPSG:${mapView.projection}`);
 
-      // Special case for EPSG:3978 maxExtent top value to avoid cutting Canada north parts when north = 90
-      if (Number(mapView.projection) === 3978 && mapView.maxExtent[3] === 90) viewOptions.extent[3] = 9000000;
+      // For polar projections, transforming a lon/lat bounding box clips the view too tightly.
+      // Use the projection's own extent directly instead.
+      if (Number(mapView.projection) === 3573) {
+        viewOptions.extent = projObj.getExtent() || undefined;
+      } else {
+        viewOptions.extent = Projection.transformExtentFromProj(mapView.maxExtent, Projection.getProjectionLonLat(), projObj);
+
+        // Special case for EPSG:3978 maxExtent top value to avoid cutting Canada north parts when north = 90
+        if (Number(mapView.projection) === 3978 && mapView.maxExtent[3] === 90) viewOptions.extent[3] = 9000000;
+      }
     }
 
     const newView = new View(viewOptions);
