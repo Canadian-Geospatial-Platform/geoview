@@ -321,10 +321,10 @@ export type TypeMapViewSettings = {
 };
 
 /** Type used to define valid map projection codes. */
-export type TypeValidMapProjectionCodes = 3978 | 3857;
+export type TypeValidMapProjectionCodes = 3978 | 3857 | 3573;
 
 /** Constant mainly used to test if a TypeValidMapProjectionCodes variable is a valid projection codes. */
-export const VALID_PROJECTION_CODES = [3978, 3857];
+export const VALID_PROJECTION_CODES = [3978, 3857, 3573];
 
 /**
  *  Definition of the basemap options type.
@@ -336,24 +336,28 @@ export const VALID_BASEMAP_ID: TypeBasemapId[] = ['transport', 'osm', 'simple', 
 export const BASEMAP_ID: Record<TypeValidMapProjectionCodes, TypeBasemapId[]> = {
   3857: VALID_BASEMAP_ID,
   3978: VALID_BASEMAP_ID,
+  3573: ['nogeom'] as TypeBasemapId[], // Only nogeom basemap is available for 3573 projection
 };
 
 // valid shaded basemap values for each projection
 export const BASEMAP_SHADED: Record<TypeValidMapProjectionCodes, boolean[]> = {
   3857: [true, false],
   3978: [true, false],
+  3573: [false], // Only nogeom basemap is available for 3573 projection
 };
 
 // valid labeled basemap values for each projection
 export const BASEMAP_LABEL: Record<TypeValidMapProjectionCodes, boolean[]> = {
   3857: [true, false],
   3978: [true, false],
+  3573: [false], // Only nogeom basemap is available for 3573 projection
 };
 
 // valid center levels from each projection
 export const VALID_MAP_CENTER: Record<TypeValidMapProjectionCodes, Record<string, number[]>> = {
   3857: { lat: [-90, 90], long: [-180, 180] },
   3978: { lat: [40, 90], long: [-140, -60] },
+  3573: { lat: [45, 90], long: [-180, 180] },
 };
 
 // Map view extents for each projection
@@ -361,22 +365,26 @@ export const MAP_EXTENTS: Record<TypeValidMapProjectionCodes, number[]> = {
   3857: [-180, 0, 80, 84],
   // TODO: tighten these up for initial view now that we have a separate MAX_EXTENTS_RESTRICTION
   3978: [-150, -10, -30, 90],
+  3573: [-180, 45, 180, 90],
 };
 
 // Extent restrictions for each projection
 export const MAX_EXTENTS_RESTRICTION: Record<TypeValidMapProjectionCodes, number[]> = {
   3857: [-180, -85.05112877980659, 180, 85.05112877980659],
   3978: [-150, -10, -30, 90],
+  3573: [-180, 45, 180, 90],
 };
 
 export const MAP_CENTER: Record<TypeValidMapProjectionCodes, [number, number]> = {
   3857: [-90, 65],
   3978: [-90, 60],
+  3573: [-90, 60],
 };
 
 export const MAP_ZOOM_LEVEL: Record<TypeValidMapProjectionCodes, number> = {
   3857: 3.5,
   3978: 4.5,
+  3573: 4.5,
 };
 
 /** Type used to define valid highlight colors. */

@@ -1,7 +1,7 @@
 import type { Options as SourceOptions } from 'ol/source/WMTS';
 import WMTSSource from 'ol/source/WMTS';
 import { get as getProjection } from 'ol/proj';
-import { getWidth } from 'ol/extent';
+import { getTopLeft, getWidth } from 'ol/extent';
 import type { Projection as OLProjection } from 'ol/proj';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
 
@@ -27,6 +27,10 @@ import type { DisplayDateMode } from '@/api/types/map-schema-types';
 export interface TypeSourceImageWMTSInitialConfig extends TypeSourceTileInitialConfig {
   // The style identifier to use for this WMTS layer, will use "default" if not specified.
   wmtsStyle?: string;
+  // The service extent to use when building the tile grid without metadata (e.g. [minX, minY, maxX, maxY]).
+  extent?: [number, number, number, number];
+  // The number of resolution levels (zoom levels) to generate when building the tile grid without metadata.
+  resolutionLevels?: number;
 }
 
 export interface TypeWmtsLayerConfig extends TypeGeoviewLayerConfig {
@@ -196,6 +200,9 @@ export class WMTS extends AbstractGeoViewRaster {
   ): Promise<OgcWmtsLayerEntryConfig> {
     // Get the metadata
     const metadata = this.getMetadata();
+
+    // If no metadata (e.g. no metadataAccessPath was provided), skip metadata processing entirely
+    if (!metadata) return layerConfig;
 
     // Find the TileMatrixSet and Layer in the metadata that corresponds to the layer entry config
     const metadataLayerFound: TypeMetadataWMTSLayer | undefined =
@@ -435,12 +442,29 @@ export class WMTS extends AbstractGeoViewRaster {
     const tileMatrixSet = metadata?.TileMatrixSet as TypeWMTSTileMatrixSet | undefined;
     const layer = metadata?.Layer as TypeMetadataWMTSLayer | undefined;
 
-    // If no metadata or missing TileMatrixSet or Layer info
-    if (!layer || !tileMatrixSet) {
-      throw new LayerWMTSMetadataError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerName(), `TileMatrixSet/Layer`);
+    // If metadata with TileMatrixSet and Layer info is available, create source from metadata
+    if (layer && tileMatrixSet) {
+      return WMTS.#createWMTSSourceFromMetadata(layerConfig, layer, tileMatrixSet);
     }
 
-    // Determine the style to use for the WMTS source. Priority is given to the style specified in the layer config's source configuration.
+    // Fallback: try to create the source from layerConfig attributes when no metadata is available
+    return WMTS.#createWMTSSourceFromConfig(layerConfig);
+  }
+
+  /**
+   * Creates a WMTS source from metadata (TileMatrixSet and Layer info from GetCapabilities).
+   *
+   * @param layerConfig - The layer entry configuration.
+   * @param layer - The WMTS layer metadata.
+   * @param tileMatrixSet - The WMTS TileMatrixSet metadata.
+   * @returns A fully configured WMTS source.
+   */
+  static #createWMTSSourceFromMetadata(
+    layerConfig: OgcWmtsLayerEntryConfig,
+    layer: TypeMetadataWMTSLayer,
+    tileMatrixSet: TypeWMTSTileMatrixSet
+  ): WMTSSource {
+    // Determine the style to use. Priority is given to the style specified in the layer config's source configuration.
     let style: string = layerConfig.getSource()?.wmtsStyle || '';
     if (!style) {
       const foundStyle = Array.isArray(layer.Style)
@@ -462,7 +486,7 @@ export class WMTS extends AbstractGeoViewRaster {
       ? Projection.transformExtentFromProj(bounds, getProjection('EPSG:4326')!, getProjection(`EPSG:${metadataProjectionCode}`)!)
       : undefined;
 
-    // Calculate the resolutions, matrixIds, tileSizes, origins,and sizes arrays needed to create the WMTS tile grid.
+    // Calculate the resolutions, matrixIds, tileSizes, origins, and sizes arrays needed to create the WMTS tile grid.
     const resolutions: number[] = [];
     const matrixIds: string[] = [];
     const tileSizes: [number, number][] = [];
@@ -470,21 +494,21 @@ export class WMTS extends AbstractGeoViewRaster {
     const origins: [number, number][] = [];
 
     for (let i = 0; i < tileMatrixSet.TileMatrix.length; i++) {
-      const timeMatrix = tileMatrixSet.TileMatrix[i];
+      const tileMatrix = tileMatrixSet.TileMatrix[i];
 
-      matrixIds[i] = timeMatrix['ows:Identifier'];
+      matrixIds[i] = tileMatrix['ows:Identifier'];
       resolutions[i] = maxResolution / Math.pow(2, i);
-      tileSizes[i] = [Number(timeMatrix.TileWidth), Number(timeMatrix.TileHeight)];
-      sizes[i] = [Number(timeMatrix.MatrixWidth), Number(timeMatrix.MatrixHeight)];
+      tileSizes[i] = [Number(tileMatrix.TileWidth), Number(tileMatrix.TileHeight)];
+      sizes[i] = [Number(tileMatrix.MatrixWidth), Number(tileMatrix.MatrixHeight)];
       origins[i] =
-        typeof timeMatrix.TopLeftCorner === 'string'
-          ? (timeMatrix.TopLeftCorner.split(' ').map(Number) as [number, number])
-          : timeMatrix.TopLeftCorner;
+        typeof tileMatrix.TopLeftCorner === 'string'
+          ? (tileMatrix.TopLeftCorner.split(' ').map(Number) as [number, number])
+          : tileMatrix.TopLeftCorner;
     }
 
     // Create the WMTS tile grid using the calculated parameters.
     const tileGrid = new WMTSTileGrid({
-      extent: extent,
+      extent,
       matrixIds,
       resolutions,
       tileSizes,
@@ -504,7 +528,61 @@ export class WMTS extends AbstractGeoViewRaster {
       tileGrid,
     };
 
-    // Return the fully configured WMTS instance
+    return new WMTSSource(sourceOptions);
+  }
+
+  /**
+   * Creates a WMTS source from layerConfig attributes when no metadata is available.
+   * Requires the source config to have dataAccessPath, extent, and a projection derivable
+   * from the tileMatrixSet identifier or source projection.
+   *
+   * @param layerConfig - The layer entry configuration.
+   * @returns A fully configured WMTS source.
+   * @throws {LayerWMTSMetadataError} When the layerConfig doesn't have enough info to create the source.
+   */
+  static #createWMTSSourceFromConfig(layerConfig: OgcWmtsLayerEntryConfig): WMTSSource {
+    const sourceConfig = layerConfig.getSource();
+
+    // Derive the projection code from the tileMatrixSet identifier or the source projection
+    const projectionCode = layerConfig.tileMatrixSet ? `EPSG:${layerConfig.tileMatrixSet}` : layerConfig.getProjectionWithEPSG();
+    const url = layerConfig.hasDataAccessPath() ? layerConfig.getDataAccessPath() : undefined;
+    const projection = projectionCode ? getProjection(projectionCode) : undefined;
+    const serviceExtent = sourceConfig?.extent;
+
+    // If we don't have enough info to create a source, throw
+    if (!url || !projection || !serviceExtent) {
+      throw new LayerWMTSMetadataError(
+        layerConfig.getGeoviewLayerId(),
+        layerConfig.getLayerName(),
+        `TileMatrixSet/Layer — no metadata and insufficient layerConfig (url: ${!!url}, projection: ${!!projection}, extent: ${!!serviceExtent})`
+      );
+    }
+
+    // Build tile grid from the provided extent and resolution levels
+    const numLevels = sourceConfig.resolutionLevels ?? 20;
+    const size = getWidth(serviceExtent) / 256;
+    const resolutions = new Array(numLevels);
+    const matrixIds = new Array(numLevels);
+    for (let z = 0; z < numLevels; ++z) {
+      resolutions[z] = size / Math.pow(2, z);
+      matrixIds[z] = z;
+    }
+
+    const sourceOptions: SourceOptions = {
+      url,
+      layer: layerConfig.layerId,
+      matrixSet: layerConfig.tileMatrixSet || projectionCode!.replace('EPSG:', ''),
+      format: 'image/png',
+      projection,
+      tileGrid: new WMTSTileGrid({
+        origin: getTopLeft(serviceExtent),
+        resolutions,
+        matrixIds,
+      }),
+      style: sourceConfig.wmtsStyle || 'default',
+      wrapX: true,
+    };
+
     return new WMTSSource(sourceOptions);
   }
 
