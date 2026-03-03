@@ -38,6 +38,10 @@
               {
                 "layerId": "points.json",
                 "layerName": "Points"
+              },
+              {
+                "layerId": "points_3.json",
+                "layerName": "Points 3"
               }
             ]
           }
