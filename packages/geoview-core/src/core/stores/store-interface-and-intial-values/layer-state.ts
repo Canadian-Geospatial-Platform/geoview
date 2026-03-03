@@ -48,6 +48,7 @@ export interface ILayerState {
     getLayerRasterFunctionInfos: (layerPath: string) => TypeMetadataEsriRasterFunctionInfos[] | undefined;
     getLayerRasterFunction: (layerPath: string) => string | undefined;
     getLayerRasterFunctionPreviews: (layerPath: string) => Map<string, Promise<string>>;
+    getLayerAllowedMosaicMethods: (layerPath: string) => TypeMosaicMethod[] | undefined;
     getLayerSettings: (layerPath: string) => string[];
     refreshLayer: (layerPath: string) => Promise<void>;
     reloadLayer: (layerPath: string) => void;
@@ -193,6 +194,10 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        */
       getLayerRasterFunctionPreviews: (layerPath: string): Map<string, Promise<string>> => {
         return LegendEventProcessor.getLayerRasterFunctionPreviews(get().mapId, layerPath);
+      },
+
+      getLayerAllowedMosaicMethods: (layerPath: string): TypeMosaicMethod[] | undefined => {
+        return LegendEventProcessor.getLayerAllowedMosaicMethods(get().mapId, layerPath);
       },
 
       /**
@@ -717,6 +722,17 @@ export const useLayerDisplayDateTimezone = (layerPath: string): TimeIANA => {
 export const useLayerSelectorRasterFunctionInfos = (layerPath: string): TypeMetadataEsriRasterFunctionInfos[] | undefined => {
   return useStore(useGeoViewStore(), (state) => {
     return state.layerState.actions.getLayerRasterFunctionInfos(layerPath);
+  });
+};
+
+/**
+ * React hook that returns the allowed mosaic methods for a specific layer.
+ * @param layerPath The layer path
+ * @returns The allowed mosaic methods for the layer or undefined
+ */
+export const useLayerSelectorAllowedMosaicMethods = (layerPath: string): TypeMosaicMethod[] | undefined => {
+  return useStore(useGeoViewStore(), (state) => {
+    return state.layerState.actions.getLayerAllowedMosaicMethods(layerPath);
   });
 };
 
