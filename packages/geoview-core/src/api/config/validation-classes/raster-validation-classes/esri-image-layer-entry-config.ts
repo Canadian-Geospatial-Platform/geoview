@@ -15,6 +15,7 @@ export interface EsriImageLayerEntryConfigProps extends AbstractBaseLayerEntryCo
   /** Source settings to apply to the GeoView layer source at creation time. */
   source?: TypeSourceImageEsriInitialConfig;
   rasterFunctionInfos?: TypeMetadataEsriRasterFunctionInfos[];
+  allowedMosaicMethods?: string;
 }
 
 /**
@@ -84,6 +85,14 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    */
   getRasterFunctionInfos(): TypeMetadataEsriRasterFunctionInfos[] | undefined {
     return this.getLayerMetadata()?.rasterFunctionInfos;
+  }
+
+  /**
+   * Gets the allowed mosaic methods from the layer metadata.
+   * @returns The allowed mosaic methods or undefined.
+   */
+  getAllowedMosaicMethods(): string | undefined {
+    return this.getLayerMetadata()?.allowedMosaicMethods;
   }
 
   /**

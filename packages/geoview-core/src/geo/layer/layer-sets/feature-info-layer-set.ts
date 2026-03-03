@@ -3,7 +3,7 @@ import { AppEventProcessor } from '@/api/event-processors/event-processor-childr
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
-import type { QueryType, TypeFeatureInfoResult, TypeResultSet } from '@/api/types/map-schema-types';
+import type { QueryType, TypeFeatureInfoEntry, TypeFeatureInfoResult, TypeResultSet } from '@/api/types/map-schema-types';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
@@ -16,6 +16,9 @@ import type {
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { logger } from '@/core/utils/logger';
 import { GVEsriImage } from '../gv-layers/raster/gv-esri-image';
+import { DateMgt, type DateLike } from '@/core/utils/date-mgt';
+import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
+import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
@@ -221,6 +224,10 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
             AbstractLayerSet.alignRecordsWithOutFields(layerConfig, arrayOfRecords);
           }
 
+          if (layer instanceof GVEsriImage) {
+            this.#formatEsriImageRecords(layer, arrayOfRecords);
+          }
+
           // Filter out unsymbolized features if the showUnsymbolizedFeatures config is false
           // GV: KML and ESRI Image is excluded as they currently have no symbology.
           if (
@@ -294,6 +301,73 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   #propagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry): void {
     // Propagate
     FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.getMapId(), resultSetEntry);
+  }
+
+  /**
+   * Formats date fields in feature info records using layer/time-slider configuration.
+   * Priority: time-slider config > layer config.
+   * @param {AbstractBaseGVLayer} layer - The layer being queried
+   * @param {TypeFeatureInfoEntry[]} records - The array of feature info records to format
+   * @private
+   */
+  #formatEsriImageRecords(layer: AbstractBaseGVLayer, records: TypeFeatureInfoEntry[]): void {
+    const mapId = this.getMapId();
+    const layerPath = layer.getLayerPath();
+
+    // Get display language and legend layer from state
+    const displayLanguage = AppEventProcessor.getDisplayLanguage(mapId);
+    const legendLayer = LegendEventProcessor.getLegendLayerInfo(mapId, layerPath);
+
+    // Get the display date format with proper fallback
+    let displayDateFormat = legendLayer?.displayDateFormat ?? DateMgt.ISO_DISPLAY_DATE_FORMAT;
+    let displayDateTimezone = legendLayer?.displayDateTimezone;
+    let serviceDateTemporalMode = legendLayer?.dateTemporalMode;
+
+    // Check if TimeSliderEventProcessor is initialized to get overrides
+    if (TimeSliderEventProcessor.isTimeSliderInitialized(mapId)) {
+      const timeSliderLayers = TimeSliderEventProcessor.getTimeSliderLayers(mapId);
+      const timeSliderLayerInfo = timeSliderLayers[layerPath];
+
+      // Override with time-slider values if they exist
+      if (timeSliderLayerInfo?.displayDateFormat) ({ displayDateFormat } = timeSliderLayerInfo);
+      if (timeSliderLayerInfo?.displayDateTimezone) ({ displayDateTimezone } = timeSliderLayerInfo);
+      if (timeSliderLayerInfo?.serviceDateTemporalMode) ({ serviceDateTemporalMode } = timeSliderLayerInfo);
+    }
+
+    // Process each record
+    records.forEach((record) => {
+      // Process each field in the record
+      Object.keys(record.fieldInfo).forEach((fieldName) => {
+        const field = record.fieldInfo[fieldName];
+        if (!field) return;
+
+        // Resolve domain values for catalog item fields (not for PixelValue, R/G/B/A, Name)
+        // These are the dynamic fields from the catalog items
+        const isSpecialField = ['PixelValue', 'ProcessedValue', 'Name', 'R', 'G', 'B', 'A'].includes(fieldName);
+        if (!isSpecialField && field.domain) {
+          // Resolve the domain value
+          let resolvedValue: string | number | undefined;
+          if (field.domain.type === 'codedValue' && field.value !== undefined) {
+            resolvedValue = field.domain.codedValues?.find((cv) => cv.code === field.value)?.name;
+          }
+
+          if (resolvedValue !== null) {
+            field.value = resolvedValue;
+          }
+        }
+
+        // If it's a date field, format it
+        if (field.dataType === 'date' && field.value) {
+          field.value = DateMgt.formatDate(
+            field.value as DateLike,
+            displayDateFormat[displayLanguage],
+            displayLanguage,
+            displayDateTimezone,
+            serviceDateTemporalMode
+          );
+        }
+      });
+    });
   }
 
   /**

@@ -4,6 +4,7 @@ import type {
   TypeGeoviewLayerType,
   TypeLayerControls,
   TypeMetadataEsriRasterFunctionInfos,
+  TypeMosaicMethod,
   TypeMosaicRule,
 } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
@@ -233,7 +234,24 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Gets the allowed mosaic methods for a layer.
+   * @param mapId - The map identifier.
+   * @param layerPath - The layer path.
+   * @returns The allowed mosaic methods or undefined.
+   */
+  static getLayerAllowedMosaicMethods(mapId: string, layerPath: string): TypeMosaicMethod[] | undefined {
+    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
+    if (!geoviewLayer || !(geoviewLayer instanceof GVEsriImage)) return undefined;
+
+    const allowedMosaicMethods = geoviewLayer.getLayerConfig().getAllowedMosaicMethods();
+    return (allowedMosaicMethods?.split(',') as TypeMosaicMethod[]) ?? undefined;
+  }
+
+  /**
    * Gets the active mosaic rule for a layer.
+   * @param mapId - The map identifier.
+   * @param layerPath - The layer path.
+   * @returns The active mosaic rule or undefined.
    */
   static getLayerMosaicRule(mapId: string, layerPath: string): TypeMosaicRule | undefined {
     return LegendEventProcessor.getLegendLayerInfo(mapId, layerPath)?.mosaicRule;
@@ -241,9 +259,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Sets the active mosaic rule for a layer.
+   * @param mapId - The map identifier.
+   * @param layerPath - The layer path.
+   * @param mosaicRule - The mosaic rule to set.
    */
   static setLayerMosaicRule(mapId: string, layerPath: string, mosaicRule: TypeMosaicRule | undefined): void {
-    MapEventProcessor.getMapViewerLayerAPI(mapId).setLayerMosaicRule(mapId, layerPath, mosaicRule);
+    MapEventProcessor.getMapViewerLayerAPI(mapId).setLayerMosaicRule(layerPath, mosaicRule);
   }
 
   /**
@@ -264,11 +285,14 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       mosaicOperation: partialMosaicRule.mosaicOperation ?? prevRule.mosaicOperation ?? 'MT_FIRST',
     };
 
-    MapEventProcessor.getMapViewerLayerAPI(mapId).setLayerMosaicRule(mapId, layerPath, mergedRule);
+    MapEventProcessor.getMapViewerLayerAPI(mapId).setLayerMosaicRule(layerPath, mergedRule);
   }
 
   /**
    * Updates the active mosaic rule for a layer in the store.
+   * @param mapId - The map identifier.
+   * @param layerPath - The layer path.
+   * @param mosaicRule - The mosaic rule to set.
    */
   static setLayerMosaicRuleInStore(mapId: string, layerPath: string, mosaicRule: TypeMosaicRule | undefined): void {
     const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;

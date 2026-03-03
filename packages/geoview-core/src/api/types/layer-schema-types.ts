@@ -956,6 +956,7 @@ export interface TypeLayerMetadataEsri {
 
   // Mosaic rules and sorting for ESRI Image Server
   defaultMosaicMethod: string;
+  allowedMosaicMethods: string;
   sortField: string;
   sortAscending: boolean;
   sortValue: string;
