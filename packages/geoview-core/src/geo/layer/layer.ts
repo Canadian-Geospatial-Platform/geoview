@@ -1563,23 +1563,26 @@ export class LayerApi {
     LegendEventProcessor.setLayerRasterFunctionInStore(this.getMapId(), layerPath, rasterFunctionId);
 
     // Trigger legend re-query through the layer set system (forced refresh)
-    // This ensures the legend query happens through the normal flow without race conditions
     this.legendsLayerSet.queryLegend(layerPath, true);
   }
 
   /**
    * Sets the mosaic rule for an ESRI Image layer.
-   * @param {string} mapId - The map id
    * @param {string} layerPath - The layer path
    * @param {TypeMosaicRule | undefined} mosaicRule - The mosaic rule to apply
-   * @returns {void}
    */
-  setLayerMosaicRule(mapId: string, layerPath: string, mosaicRule: TypeMosaicRule | undefined): void {
+  setLayerMosaicRule(layerPath: string, mosaicRule: TypeMosaicRule | undefined): void {
     const layer = this.getGeoviewLayer(layerPath);
-    if (layer instanceof GVEsriImage) {
-      layer.setMosaicRule(mosaicRule);
-      LegendEventProcessor.setLayerMosaicRuleInStore(mapId, layerPath, mosaicRule);
-    }
+    if (!(layer instanceof GVEsriImage)) return;
+
+    // Update the mosaic rule
+    layer.setMosaicRule(mosaicRule);
+
+    // Update the store
+    LegendEventProcessor.setLayerMosaicRuleInStore(this.getMapId(), layerPath, mosaicRule);
+
+    // Trigger legend re-query through the layer set system
+    this.legendsLayerSet.queryLegend(layerPath, true);
   }
 
   /**

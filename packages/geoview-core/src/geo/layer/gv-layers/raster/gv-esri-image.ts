@@ -12,7 +12,6 @@ import { GeoUtilities } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { logger } from '@/core/utils/logger';
 import { Fetch } from '@/core/utils/fetch-helper';
-import { DateMgt } from '@/core/utils/date-mgt';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import type {
   codedValueType,
@@ -125,6 +124,11 @@ export class GVEsriImage extends AbstractGVRaster {
       if (rasterFunction) {
         const renderingRule = encodeURIComponent(JSON.stringify({ rasterFunction }));
         legendUrl += `&renderingRule=${renderingRule}`;
+      }
+
+      const mosaicRule = this.#mosaicRule;
+      if (mosaicRule) {
+        legendUrl += `&mosaicRule=${encodeURIComponent(JSON.stringify(mosaicRule))}`;
       }
 
       const legendJson = await Fetch.fetchEsriJson<TypeEsriImageLayerLegend>(legendUrl);
@@ -296,22 +300,22 @@ export class GVEsriImage extends AbstractGVRaster {
       })
     );
 
+    // Get source parameters for time and mosaic rule
+    const sourceParams = this.getOLSource().getParams();
+
+    // Build time parameter if available from source
+    const timeParam = sourceParams?.TIME ? `&TIME=${this.getOLSource().getParams().TIME}` : '';
+
     // Build rendering rules parameter if raster function is active
     let renderingRulesParam = '';
     if (this.#rasterFunction) {
       renderingRulesParam = `&renderingRules=${encodeURIComponent(JSON.stringify([{ rasterFunction: this.#rasterFunction }]))}`;
     }
 
-    // Get source parameters for time and mosaic rule
-    const sourceParams = this.getOLSource().getParams();
-
-    // Build time parameter if available from source
-    const timeParam = sourceParams?.time ? `&time=${this.getOLSource().getParams().time}` : '';
-
     // Build mosaic rule parameter if available from source (critical for processedValues)
     let mosaicRuleParam = '';
     if (sourceParams?.mosaicRule) {
-      mosaicRuleParam = `&mosaicRule=${encodeURIComponent(JSON.stringify(sourceParams.mosaicRule))}`;
+      mosaicRuleParam = `&mosaicRule=${encodeURIComponent(JSON.stringify(this.#mosaicRule))}`;
     }
 
     // Construct the identify URL
@@ -319,8 +323,8 @@ export class GVEsriImage extends AbstractGVRaster {
       `${layerConfig.getMetadataAccessPath()}/identify?f=json` +
       `&geometryType=esriGeometryPoint` +
       `&geometry=${geometryParam}` +
-      `${mosaicRuleParam}` +
       `${renderingRulesParam}` +
+      `${mosaicRuleParam}` +
       `&pixelSize=${pixelSizeParam}` +
       `&returnGeometry=${queryGeometry}` +
       `&returnCatalogItems=true` +
@@ -450,7 +454,7 @@ export class GVEsriImage extends AbstractGVRaster {
    * @protected
    */
   protected override formatFeatureInfoResult(features: Feature[]): TypeFeatureInfoEntry[] {
-    // Get the legend from the layer
+    // Get the legend and config from the layer
     const legend = this.getLegend();
     // Get class index from feature property set in getFeatureInfoAtLonLat
     const classIndex = features[0]?.get('classIndex');
@@ -533,13 +537,9 @@ export class GVEsriImage extends AbstractGVRaster {
         // Skip geometry property
         if (fieldName === 'geometry') return;
 
-        let value = properties[fieldName];
+        const value = properties[fieldName];
         const fieldType = this.getFieldType(fieldName);
         const domain = this.onGetFieldDomain(fieldName);
-
-        if (fieldType === 'date') {
-          value = DateMgt.formatDate(value);
-        }
 
         fieldInfo[fieldName] = {
           fieldKey: fieldId + 4, // +4 to account for R,G,B,A fields added first
