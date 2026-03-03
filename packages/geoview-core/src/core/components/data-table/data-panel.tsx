@@ -315,8 +315,17 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
         <FilterAltIcon sx={{ color: theme.palette.geoViewColor.grey.main, verticalAlign: 'middle' }} />
       ),
     }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMapFilteredSelectedForLayer, orderedLayerData]);
+  }, [
+    containerType,
+    getFeaturesOfLayer,
+    getLayerTooltip,
+    isMapFilteredSelectedForLayer,
+    layerNames,
+    layerStatuses,
+    mapId,
+    orderedLayerData,
+    theme.palette.geoViewColor.grey.main,
+  ]);
 
   return (
     <Layout
