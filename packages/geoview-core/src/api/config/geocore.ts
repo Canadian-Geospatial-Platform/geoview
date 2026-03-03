@@ -21,9 +21,9 @@ export class GeoCore {
    * @param uuid - The UUID of the layer.
    * @param language - The language.
    * @param mapId - The optional map id.
-   * @param layerConfig - The optional layer configuration.
+   * @param layerConfig - Optional layer configuration.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns {Promise<GeoCoreLayerConfigResponse>} List of layer configurations to add to the map.
+   * @returns List of layer configurations to add to the map.
    */
   static async createLayerConfigFromUUID(
     uuid: string,

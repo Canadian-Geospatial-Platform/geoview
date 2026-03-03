@@ -117,6 +117,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Retrieves the service (metadata) projection code for a specific raster layer.
+   *
    * @param mapId - The unique identifier of the map instance.
    * @param layerPath - The fully qualified path of the layer.
    * @returns The projection code (e.g., "EPSG:4326") defined in the layer's service metadata,
@@ -142,13 +143,14 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       return projection?.getCode();
     }
 
-    // Layer not found or not a Raster layer or no metadtata projection
+    // Layer not found or not a Raster layer or no metadata projection
     return undefined;
   }
 
   /**
    * Triggers asynchronous bounds recalculation and propagation for a layer
    * and its parent hierarchy without awaiting completion.
+   *
    * @param mapId - The unique identifier of the map instance.
    * @param gvLayer - The layer from which bounds recalculation should begin.
    * @param allGroups - The collection of root-level group layers used to
@@ -173,6 +175,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Recalculates and stores bounds for a layer and all of its parent groups.
+   *
    * @param mapId - The unique identifier of the map instance.
    * @param gvLayer - The starting layer for which bounds should be computed.
    * @param allGroups - The collection of root-level group layers used to
@@ -210,7 +213,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Sets the layer bounds for a layer path
+   * Sets the layer bounds for a layer path.
+   *
    * @param {string} mapId - The map id
    * @param {string} layerPath - The layer path
    * @param {Extent | undefined} bounds - The extent of the layer at the given path
