@@ -194,12 +194,15 @@ export type TypeBaseSourceInitialConfig = {
    * The service endpoint of the layer. Added during creation of specific layer entry config.
    */
   dataAccessPath?: string;
+
   /**
    * Spatial Reference EPSG code supported (https://epsg.io/).
    */
   projection?: TypeValidSourceProjectionCodes;
+
   /** The crossOrigin attribute if needed to load the data. */
   crossOrigin?: string;
+
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
   featureInfo?: TypeFeatureInfoLayerConfig;
 };
@@ -225,10 +228,13 @@ export interface TypeBaseVectorSourceInitialConfig extends TypeBaseSourceInitial
   // TODO: REMOVE this property. The layerFilter isn't on the source object. When removing this, have to remove it from
   // TO.DOCONT: legacy configs like in 05-esri-feature-and-dynamic.json files.
   layerFilter?: string;
+
   /** Loading strategy to use (all or bbox). */
   strategy?: VectorStrategy;
+
   /** The projection code of the source. */
   dataProjection?: string; // TODO: refactor - from geo map schema types
+
   /** Settings to use when loading a GeoJSON layer using a POST instead of a GET */
   postSettings?: TypePostSettings; // TODO: refactor - from geo map schema types
 }
@@ -270,7 +276,8 @@ export type TypeTileGrid = {
 
 /** Type from which we derive the source properties for all the ESRI dynamic leaf nodes in the layer tree. */
 export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitialConfig {
-  /** Filter to apply on features of this layer. */
+  // TODO: REMOVE this property. The layerFilter isn't on the source object. When removing this, have to remove it from
+  // TO.DOCONT: legacy configs like in 05-esri-feature-and-dynamic.json files.
   layerFilter?: string;
 
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */

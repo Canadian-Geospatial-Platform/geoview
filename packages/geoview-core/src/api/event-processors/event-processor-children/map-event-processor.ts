@@ -1281,9 +1281,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
    * @returns Promise<void>
    * @static
    */
-  static zoomToInitialExtent(mapId: string): Promise<void> {
+  static async zoomToInitialExtent(mapId: string): Promise<void> {
     const currProjection = this.getMapStateProtected(mapId).currentProjection;
-    let extent: Extent = MAP_EXTENTS[currProjection];
+    let extent: Extent | undefined = MAP_EXTENTS[currProjection];
     const options: FitOptions = { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
     const homeView = this.getMapStateProtected(mapId).homeView || this.getMapStateProtected(mapId).initialView;
 
@@ -1313,10 +1313,10 @@ export class MapEventProcessor extends AbstractEventProcessor {
     }
 
     // If layer IDs are in the config, use them
-    if (homeView.layerIds) extent = this.getMapViewerLayerAPI(mapId).getExtentOfMultipleLayers(homeView.layerIds);
+    if (homeView.layerIds) extent = await this.getMapViewerLayerAPI(mapId).getExtentOfMultipleLayers(homeView.layerIds);
 
     // If extent is not valid, take the default one for the current projection
-    if (extent.length !== 4 || extent.includes(Infinity))
+    if (!extent || extent.length !== 4 || extent.includes(Infinity))
       extent = Projection.transformExtentFromProj(
         MAP_EXTENTS[currProjection],
         Projection.getProjectionLonLat(),
