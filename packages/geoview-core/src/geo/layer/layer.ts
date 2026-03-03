@@ -103,7 +103,7 @@ import { Projection } from '@/geo/utils/projection';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
-import type { MapViewer } from '@/geo/map/map-viewer';
+import { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { TypeLegendItem } from '@/core/components/layers/types';
@@ -1290,9 +1290,8 @@ export class LayerApi {
    * @param {string[]} layerIds - IDs or layerPaths of layers to get max extents from.
    * @returns {Extent} The overall extent.
    */
-  getExtentOfMultipleLayers(layerIds: string[] = this.getLayerEntryLayerPaths()): Extent {
-    let bounds: Extent = [];
-
+  async getExtentOfMultipleLayers(layerIds: string[] = this.getLayerEntryLayerPaths()): Promise<Extent | undefined> {
+    const layerBoundsPromises: Promise<Extent | undefined>[] = [];
     layerIds.forEach((layerId) => {
       // Get sublayerpaths and layerpaths from layer IDs.
       const subLayerPaths = this.getLayerEntryLayerPaths().filter(
@@ -1302,21 +1301,25 @@ export class LayerApi {
       if (subLayerPaths.length) {
         // Get max extents from all selected layers.
         subLayerPaths.forEach((layerPath) => {
-          // Get the bounds for the layer path
-          // TODO: CHECK - Instead of getting the layer bounds via the store, simply use the gvLayer.getBounds() method?
-          const layerBounds = LegendEventProcessor.getLayerBounds(this.getMapId(), layerPath);
-
-          // If layer bounds were found
-          if (layerBounds) {
-            // If bounds has not yet been defined, set to this layers bounds.
-            if (!bounds.length) bounds = layerBounds;
-            else bounds = GeoUtilities.getExtentUnion(bounds, layerBounds)!;
-          }
+          // Get the GV layer and get its bounds
+          const layerBoundsPromise = this.getGeoviewLayer(layerPath).getBounds(this.mapViewer.getProjection(), MapViewer.DEFAULT_STOPS);
+          layerBoundsPromises.push(layerBoundsPromise);
         });
       }
     });
 
-    return bounds;
+    // Once all promises resolve
+    const allBounds = await Promise.all(layerBoundsPromises);
+
+    // For each bounds found
+    let boundsUnion: Extent | undefined;
+    allBounds.forEach((bounds) => {
+      // Union the bounds with each other
+      boundsUnion = GeoUtilities.getExtentUnion(boundsUnion, bounds);
+    });
+
+    // Return the final bounds
+    return boundsUnion;
   }
 
   /**
@@ -1846,6 +1849,9 @@ export class LayerApi {
 
     // Register a hook when a layer is removed from the group layer
     groupLayer.offLayerRemoved(this.#boundedHandleLayerGroupLayerRemoved);
+
+    // Register a hook when a layer name is changed
+    groupLayer.offLayerNameChanged(this.#boundedHandleLayerNameChanged);
 
     // Unregister handler on layer opacity change
     groupLayer.offLayerOpacityChanged(this.#boundedHandleLayerOpacityChanged);

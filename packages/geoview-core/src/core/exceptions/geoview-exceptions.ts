@@ -560,7 +560,7 @@ export class LayerFailedToLoadError extends GeoViewError {
   /**
    * Creates an instance of LayerFailedToLoadError.
    * @param layerName - The layer name of the layer that failed to load.
-   * @param cause - The cause of the error, if any could be determined.
+   * @param cause - Optional, the inner cause of the error.
    */
   constructor(layerName: string, cause?: Error) {
     super('layers.errorNotLoaded', [layerName], { cause });
@@ -580,7 +580,7 @@ export class LayerImageFailedToLoadError extends GeoViewError {
   /**
    * Creates an instance of LayerImageFailedToLoadError.
    * @param layerName - The layer name of the layer image that failed to load.
-   * @param cause - The cause of the error, if any could be determined.
+   * @param cause - Optional, the inner cause of the error.
    */
   constructor(layerName: string, cause?: Error) {
     super('layers.errorImageLoad', [layerName], { cause });

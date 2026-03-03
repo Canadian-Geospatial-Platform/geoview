@@ -1916,7 +1916,7 @@ export class MapViewer {
    * - Else, no zoom to layer ids is done.
    * @private
    */
-  #zoomOnLayerIdsMaybe(): Promise<void> {
+  async #zoomOnLayerIdsMaybe(): Promise<void> {
     // If the layerIds property in initialView is defined
     if (this.mapFeaturesConfig.map.viewSettings.initialView?.layerIds) {
       // If the layerIds array is empty, use all layers
@@ -1924,10 +1924,10 @@ export class MapViewer {
         ? this.mapFeaturesConfig.map.viewSettings.initialView.layerIds
         : this.layer.getGeoviewLayerIds();
 
-      let layerExtents = this.layer.getExtentOfMultipleLayers(layerIdsToZoomTo);
+      let layerExtents = await this.layer.getExtentOfMultipleLayers(layerIdsToZoomTo);
 
       // If extents have infinity, use default instead
-      if (layerExtents.includes(Infinity))
+      if (!layerExtents || layerExtents.includes(Infinity))
         layerExtents = this.convertExtentLonLatToMapProj(MAP_EXTENTS[this.mapFeaturesConfig.map.viewSettings.projection]);
 
       // Zoom to calculated extent

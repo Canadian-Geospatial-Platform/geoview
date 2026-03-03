@@ -153,6 +153,12 @@ export class NetworkError extends Error {
   /** The network error code */
   readonly code: string;
 
+  /**
+   * Creates an instance of NetworkError.
+   * @param message - The message of the network error.
+   * @param message - The http code of the network error.
+   * @param cause - Optional, the inner cause of the error.
+   */
   constructor(message: string, code: string, cause?: Error) {
     super(message, { cause });
 

@@ -84,6 +84,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * @protected
    */
   protected override onRegisterLayerConfig(layerConfig: ConfigBaseClass): void {
+    // Call parent
+    super.onRegisterLayerConfig(layerConfig);
+
     // Register the layer status changed handler
     layerConfig.onLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
 

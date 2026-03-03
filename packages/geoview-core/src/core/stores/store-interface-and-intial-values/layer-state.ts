@@ -493,7 +493,7 @@ export const useLayerDateTemporalModes = (): Record<string, TemporalMode> => {
     // Get all layers
     const allLayers = LegendEventProcessor.findAllLayers(state.layerState.legendLayers);
 
-    // Return the object with the display date formats for all layers, using the default format when not defined at the layer level
+    // Return the object with the display date temporal modes for all layers, using the default format when not defined at the layer level
     return Object.values(allLayers).reduce<Record<string, TemporalMode>>((acc, layer) => {
       if (layer.layerPath) {
         // eslint-disable-next-line no-param-reassign
@@ -593,7 +593,7 @@ export const useLayerDisplayDateTimezones = (): Record<string, TimeIANA> => {
     // Get all layers
     const allLayers = LegendEventProcessor.findAllLayers(state.layerState.legendLayers);
 
-    // Return the object with the display date formats for all layers, using the default format when not defined at the layer level
+    // Return the object with the display date timezones for all layers, using the default format when not defined at the layer level
     return Object.values(allLayers).reduce<Record<string, TimeIANA>>((acc, layer) => {
       if (layer.layerPath) {
         // eslint-disable-next-line no-param-reassign
@@ -647,7 +647,7 @@ export const useLayerNames = (): Record<string, string> => {
     // Get all layers
     const allLayers = LegendEventProcessor.findAllLayers(state.layerState.legendLayers);
 
-    // Return the object with the display date formats for all layers, using the default format when not defined at the layer level
+    // Return the object with the layer names for all layers
     return Object.values(allLayers).reduce<Record<string, string>>((acc, layer) => {
       if (layer.layerPath) {
         // eslint-disable-next-line no-param-reassign
@@ -665,7 +665,7 @@ export const useLayerStatuses = (): Record<string, TypeLayerStatus> => {
     // Get all layers
     const allLayers = LegendEventProcessor.findAllLayers(state.layerState.legendLayers);
 
-    // Return the object with the display date formats for all layers, using the default format when not defined at the layer level
+    // Return the object with the layer statuses for all layers, using the default 'newInstance' when not defined at the layer level
     return Object.values(allLayers).reduce<Record<string, TypeLayerStatus>>((acc, layer) => {
       if (layer.layerPath) {
         // eslint-disable-next-line no-param-reassign
