@@ -136,8 +136,18 @@ export abstract class AbstractEventProcessor {
     // Log
     // logger.logDebug('Propagate in batch - buffering...', mapId, traceProcessorIndication, batchPropagationObject[mapId].length);
 
+    // Clone the layer data array to preserve snapshot of features at this moment, avoiding issues with non-cloneable properties
+    const clonedLayerDataArray = layerDataArray.map((layer) => {
+      if ('features' in layer)
+        return {
+          ...layer,
+          features: layer.features ? [...layer.features] : [],
+        };
+      return layer;
+    });
+
     // Pile up the array
-    batchPropagationObject[mapId].push(layerDataArray);
+    batchPropagationObject[mapId].push(clonedLayerDataArray);
 
     // If there's a layer path bypass set
     let layerDataBypass;
