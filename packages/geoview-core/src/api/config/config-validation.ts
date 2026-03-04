@@ -44,7 +44,7 @@ import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-lay
 import { LayerMetadataAccessPathMandatoryError, LayerMissingGeoviewLayerIdError } from '@/core/exceptions/layer-exceptions';
 import { ConfigSchemaWrongPathError, GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { NotSupportedError } from '@/core/exceptions/core-exceptions';
-import { deepClone, deepMerge } from '@/core/utils/utilities';
+import { deepMerge } from '@/core/utils/utilities';
 
 /**
  * A class to define the default values of a GeoView map configuration and validation methods for the map config attributes.
@@ -277,8 +277,8 @@ export class ConfigValidation {
       // Link the entry to its parent layer configuration if any
       ConfigBaseClass.setClassOrTypeParentLayerConfig(layerConfig, parentLayerConfig);
 
-      // layerConfig.initialSettings attributes that are not defined inherits parent layer settings that are defined.
-      const initialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(layerConfig);
+      // LayerConfig initialSettings attributes that are not defined inherits parent layer settings that are defined.
+      const initialSettings = ConfigBaseClass.getClassOrTypeInitialSettings(layerConfig) ?? {};
 
       // Get the parent initial settings from parentLayerConfig, or from geoviewLayerConfig if at root level
       const parentInitialSettings = parentLayerConfig
@@ -286,13 +286,13 @@ export class ConfigValidation {
         : geoviewLayerConfig.initialSettings;
 
       // If the minZoom is set, validate it with the parent
-      if (initialSettings?.minZoom !== undefined) {
+      if (initialSettings.minZoom !== undefined) {
         // Validate the minZoom value
         initialSettings.minZoom = Math.max(initialSettings.minZoom, parentInitialSettings?.minZoom || 0);
       }
 
       // If the maxZoom is set, validate it with the parent
-      if (initialSettings?.maxZoom !== undefined) {
+      if (initialSettings.maxZoom !== undefined) {
         // Validate the maxZoom value
         initialSettings.maxZoom = Math.min(initialSettings.maxZoom, parentInitialSettings?.maxZoom || 23);
       }
@@ -319,25 +319,23 @@ export class ConfigValidation {
 
       // If there's a parent initial settings
       if (parentInitialSettings) {
-        // Clone the parent properties
-        const parentInitialSettingsClone = deepClone(parentInitialSettings);
-        // Delete the visible property, because we don't want it to interfere with the layer initial settings when we merge
-        delete parentInitialSettingsClone.states?.visible;
-
         // Merge the rest of parent and child settings
-        ConfigBaseClass.setClassOrTypeInitialSettings(layerConfig, deepMerge(parentInitialSettingsClone, initialSettings));
+        const initSettingsMerged = deepMerge(parentInitialSettings, initialSettings);
+
+        // If the parent visible is set to false
+        if (parentInitialSettings.states?.visible === false) {
+          // Delete the visible property for the child, because we don't want it, having the parent invisible is enough
+          delete initSettingsMerged.states?.visible;
+        }
 
         // Cascade remove control: if parent is not removable, children cannot be removable
-        const mergedSettings = ConfigBaseClass.getClassOrTypeInitialSettings(layerConfig);
         if (parentInitialSettings.controls?.remove === false) {
-          if (!mergedSettings) {
-            ConfigBaseClass.setClassOrTypeInitialSettings(layerConfig, { controls: { remove: false } });
-          } else if (!mergedSettings.controls) {
-            mergedSettings.controls = { remove: false };
-          } else {
-            mergedSettings.controls.remove = false;
-          }
+          initialSettings.controls ??= {};
+          initialSettings.controls.remove = false;
         }
+
+        // Save it
+        ConfigBaseClass.setClassOrTypeInitialSettings(layerConfig, initSettingsMerged);
       }
 
       // Get the properties to be able to create the config object

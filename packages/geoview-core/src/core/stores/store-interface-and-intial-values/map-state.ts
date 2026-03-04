@@ -1213,7 +1213,7 @@ export const useMapPointerPosition = (): TypeMapMouseInfo | undefined =>
 export const useMapPointMarkers = (): Record<string, TypePointMarker[]> =>
   useStore(useGeoViewStore(), (state) => state.mapState.pointMarkers);
 export const useMapProjection = (): TypeValidMapProjectionCodes => useStore(useGeoViewStore(), (state) => state.mapState.currentProjection);
-export const useMapProjectionEPSG = (): string => useStore(useGeoViewStore(), (state) => `EPSG:'${state.mapState.currentProjection}`);
+export const useMapProjectionEPSG = (): string => useStore(useGeoViewStore(), (state) => `EPSG:${state.mapState.currentProjection}`);
 export const useMapRotation = (): number => useStore(useGeoViewStore(), (state) => state.mapState.rotation);
 export const useMapScale = (): TypeScaleInfo => useStore(useGeoViewStore(), (state) => state.mapState.scale);
 export const useMapSize = (): Size => useStore(useGeoViewStore(), (state) => state.mapState.size);

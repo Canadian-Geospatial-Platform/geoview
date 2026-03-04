@@ -1873,41 +1873,20 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
       const fieldEntry = outfields?.find((outfield) => outfield.name === fieldName || outfield.alias === fieldName);
 
-      if (fieldEntry) {
-        // Read the value using the callback
-        let value = callbackGetFieldValue(
-          feature,
-          fieldName,
-          fieldEntry.type as 'string' | 'number' | 'date',
-          inputFormat,
-          inputTimezone,
-          inputTemporalMode
-        );
+      // TODO: CHECK - What's the deal with the dictFieldTypes vs outfields and complexity here? Shouldn't outfields be basically same as dictFieldTypes? Simplify?
 
-        // If couldn't be read, try callbacking on the fieldEntry.name instead
-        if (!value) {
-          // TODO: CHECK - Is this really necessary? Seems deprecated? Remove this whole 'if (!value)'?
-          value = callbackGetFieldValue(
+      if (fieldEntry) {
+        // eslint-disable-next-line no-param-reassign
+        featureInfoEntry.fieldInfo[fieldEntry.name] = {
+          fieldKey: fieldKeyCounter++,
+          value: callbackGetFieldValue(
             feature,
             fieldEntry.name,
             fieldEntry.type as 'string' | 'number' | 'date',
             inputFormat,
             inputTimezone,
             inputTemporalMode
-          );
-
-          if (value) {
-            // logDebug for now until we find a case where this is actually needed or we'll delete this
-            logger.logDebug(
-              `Value not found using field name. You've found a case we thought was deprecated, check the code and adjust comments...`
-            );
-          }
-        }
-
-        // eslint-disable-next-line no-param-reassign
-        featureInfoEntry.fieldInfo[fieldEntry.name] = {
-          fieldKey: fieldKeyCounter++,
-          value,
+          ),
           dataType: fieldEntry.type,
           alias: fieldEntry.alias,
           domain: fieldDomain,
