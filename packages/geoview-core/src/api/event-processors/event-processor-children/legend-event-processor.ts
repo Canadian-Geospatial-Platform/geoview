@@ -29,7 +29,6 @@ import { Projection } from '@/geo/utils/projection';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
-import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { logger } from '@/core/utils/logger';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState

@@ -15,9 +15,6 @@ import type {
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { logger } from '@/core/utils/logger';
 import { GVEsriImage } from '../gv-layers/raster/gv-esri-image';
-import { DateMgt, type DateLike } from '@/core/utils/date-mgt';
-import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
-import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
@@ -215,14 +212,16 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
           // Get the layer config
           const layerConfig = layer.getLayerConfig();
 
+          // TODO Double check this logic. If it get's reworked, possibly include the "formatEsriImageRecords" logic in the "alignRecordsWithOutFields"
           // If the response contain actual fields
           if (!(layer instanceof GVEsriImage) && AbstractLayerSet.recordsContainActualFields(layerConfig, arrayOfRecords)) {
             // Align fields with layerConfig fields
             AbstractLayerSet.alignRecordsWithOutFields(layerConfig, arrayOfRecords);
           }
 
+          // ESRI Image layers have created fields and incorrect date field types, so we have to format them separately
           if (layer instanceof GVEsriImage) {
-            this.#formatEsriImageRecords(layer, arrayOfRecords);
+            FeatureInfoLayerSet.formatEsriImageRecords(arrayOfRecords);
           }
 
           // Filter out unsymbolized features if the showUnsymbolizedFeatures config is false
@@ -301,36 +300,10 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Formats date fields in feature info records using layer/time-slider configuration.
-   * Priority: time-slider config > layer config.
-   * @param {AbstractBaseGVLayer} layer - The layer being queried
+   * Makes ESRI Image layers date fields actually Date objects and resolve domain values
    * @param {TypeFeatureInfoEntry[]} records - The array of feature info records to format
-   * @private
    */
-  #formatEsriImageRecords(layer: AbstractBaseGVLayer, records: TypeFeatureInfoEntry[]): void {
-    const mapId = this.getMapId();
-    const layerPath = layer.getLayerPath();
-
-    // Get display language and legend layer from state
-    const displayLanguage = AppEventProcessor.getDisplayLanguage(mapId);
-    const legendLayer = LegendEventProcessor.getLegendLayerInfo(mapId, layerPath);
-
-    // Get the display date format with proper fallback
-    let displayDateFormat = legendLayer?.displayDateFormat ?? DateMgt.ISO_DISPLAY_DATE_FORMAT;
-    let displayDateTimezone = legendLayer?.displayDateTimezone;
-    let serviceDateTemporalMode = legendLayer?.dateTemporalMode;
-
-    // Check if TimeSliderEventProcessor is initialized to get overrides
-    if (TimeSliderEventProcessor.isTimeSliderInitialized(mapId)) {
-      const timeSliderLayers = TimeSliderEventProcessor.getTimeSliderLayers(mapId);
-      const timeSliderLayerInfo = timeSliderLayers[layerPath];
-
-      // Override with time-slider values if they exist
-      if (timeSliderLayerInfo?.displayDateFormat) ({ displayDateFormat } = timeSliderLayerInfo);
-      if (timeSliderLayerInfo?.displayDateTimezone) ({ displayDateTimezone } = timeSliderLayerInfo);
-      if (timeSliderLayerInfo?.serviceDateTemporalMode) ({ serviceDateTemporalMode } = timeSliderLayerInfo);
-    }
-
+  static formatEsriImageRecords(records: TypeFeatureInfoEntry[]): void {
     // Process each record
     records.forEach((record) => {
       // Process each field in the record
@@ -340,7 +313,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
         // Resolve domain values for catalog item fields (not for PixelValue, R/G/B/A, Name)
         // These are the dynamic fields from the catalog items
-        const isSpecialField = ['PixelValue', 'ProcessedValue', 'Name', 'R', 'G', 'B', 'A'].includes(fieldName);
+        const isSpecialField = ['PixelValue', 'R', 'G', 'B', 'A'].includes(fieldName);
         if (!isSpecialField && field.domain) {
           // Resolve the domain value
           let resolvedValue: string | number | undefined;
@@ -353,15 +326,13 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
           }
         }
 
-        // If it's a date field, format it
+        // If it's a date field, format it as a Date
         if (field.dataType === 'date' && field.value) {
-          field.value = DateMgt.formatDate(
-            field.value as DateLike,
-            displayDateFormat[displayLanguage],
-            displayLanguage,
-            displayDateTimezone,
-            serviceDateTemporalMode
-          );
+          if (typeof field.value === 'number') {
+            field.value = new Date(field.value);
+          } else if (typeof field.value === 'string') {
+            field.value = new Date(field.value);
+          }
         }
       });
     });
