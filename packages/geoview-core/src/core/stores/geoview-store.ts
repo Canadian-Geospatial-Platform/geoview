@@ -50,6 +50,7 @@ export interface IGeoviewState {
   uiState: IUIState;
 
   // packages state interface
+  // TODO: REFACTOR OPTIONAL STATES - Since those states are optional they should be typed with '| undefined' (lots of impacts)
   geochartState: IGeochartState;
   timeSliderState: ITimeSliderState;
   swiperState: ISwiperState;

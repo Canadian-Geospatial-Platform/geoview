@@ -132,10 +132,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     this.#queryable = layerConfig.getInitialSettings()?.states?.queryable ?? true;
     this.#hoverable = layerConfig.getInitialSettings()?.states?.hoverable ?? true;
 
-    // If there is a layer style in the config, set it in the layer
-    const style = layerConfig.getLayerStyle();
-    if (style) this.setStyle(style);
-
     // Create the layer filters object to empty. It'll be initialized properly later via 'initGVLayer' once the object is done being created.
     this.#layerFilters = new LayerFilters();
   }
@@ -210,7 +206,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   async onFetchLegend(): Promise<TypeLegend | null> {
     try {
       // Get the style
-      const style = this.getStyle() || this.getLayerConfig().getLayerStyle();
+      const style = this.getStyle();
 
       // Redirect
       return await AbstractGVLayer.createLegendFromStyle(this.getLayerConfig().getSchemaTag(), style);
@@ -581,7 +577,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @returns The layer style
    */
   getStyle(): TypeLayerStyleConfig | undefined {
-    return this.#layerStyle;
+    return this.#layerStyle ?? this.getLayerConfig().getLayerStyle();
   }
 
   /**
@@ -653,7 +649,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     // Redirect
     return GeoviewRenderer.getFilterFromStyle(
       this.getLayerConfig().getOutfields(),
-      this.getLayerConfig().getLayerStyle(), // TODO: Use this.getStyle() once we progress in the refactoring, right now leaving it as-is was..
+      this.getStyle(),
       this.getLayerConfig().getLayerStyleSettings()
     );
   }
@@ -1873,41 +1869,20 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
       const fieldEntry = outfields?.find((outfield) => outfield.name === fieldName || outfield.alias === fieldName);
 
-      if (fieldEntry) {
-        // Read the value using the callback
-        let value = callbackGetFieldValue(
-          feature,
-          fieldName,
-          fieldEntry.type as 'string' | 'number' | 'date',
-          inputFormat,
-          inputTimezone,
-          inputTemporalMode
-        );
+      // TODO: CHECK - What's the deal with the dictFieldTypes vs outfields and complexity here? Shouldn't outfields be basically same as dictFieldTypes? Simplify?
 
-        // If couldn't be read, try callbacking on the fieldEntry.name instead
-        if (!value) {
-          // TODO: CHECK - Is this really necessary? Seems deprecated? Remove this whole 'if (!value)'?
-          value = callbackGetFieldValue(
+      if (fieldEntry) {
+        // eslint-disable-next-line no-param-reassign
+        featureInfoEntry.fieldInfo[fieldEntry.name] = {
+          fieldKey: fieldKeyCounter++,
+          value: callbackGetFieldValue(
             feature,
             fieldEntry.name,
             fieldEntry.type as 'string' | 'number' | 'date',
             inputFormat,
             inputTimezone,
             inputTemporalMode
-          );
-
-          if (value) {
-            // logDebug for now until we find a case where this is actually needed or we'll delete this
-            logger.logDebug(
-              `Value not found using field name. You've found a case we thought was deprecated, check the code and adjust comments...`
-            );
-          }
-        }
-
-        // eslint-disable-next-line no-param-reassign
-        featureInfoEntry.fieldInfo[fieldEntry.name] = {
-          fieldKey: fieldKeyCounter++,
-          value,
+          ),
           dataType: fieldEntry.type,
           alias: fieldEntry.alias,
           domain: fieldDomain,

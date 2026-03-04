@@ -139,15 +139,23 @@ export type TypeGeochartResultSetEntry = TypeResultSetEntry & GeoChartResultInfo
 // **********************************************************
 // Geochart state selectors
 // **********************************************************
-export const useGeochartConfigs = (): GeoChartStoreByLayerPath | undefined =>
-  useStore(useGeoViewStore(), (state) => state.geochartState?.geochartChartsConfig);
-export const useGeochartLayerDataArray = (): TypeGeochartResultSetEntry[] | undefined =>
-  useStore(useGeoViewStore(), (state) => state.geochartState?.layerDataArray);
-export const useGeochartLayerDataArrayBatch = (): TypeGeochartResultSetEntry[] | undefined =>
-  useStore(useGeoViewStore(), (state) => state.geochartState?.layerDataArrayBatch);
-export const useGeochartSelectedLayerPath = (): string | undefined =>
-  useStore(useGeoViewStore(), (state) => state.geochartState?.selectedLayerPath);
+export const useGeochartConfigs = (): GeoChartStoreByLayerPath | undefined => {
+  // GV This hook is called from other components than the GeoChart so the '?' on the geochartState is mandatory
+  return useStore(useGeoViewStore(), (state) => state.geochartState?.geochartChartsConfig);
+};
+
+export const useGeochartLayerDataArray = (): TypeGeochartResultSetEntry[] =>
+  useStore(useGeoViewStore(), (state) => state.geochartState.layerDataArray);
+
+export const useGeochartLayerDataArrayBatch = (): TypeGeochartResultSetEntry[] | undefined => {
+  // GV This hook is called from other components than the GeoChart so the '?' on the geochartState is mandatory
+  return useStore(useGeoViewStore(), (state) => state.geochartState?.layerDataArrayBatch);
+};
+
+export const useGeochartSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.geochartState.selectedLayerPath);
 
 // Store Actions
-export const useGeochartStoreActions = (): GeochartActions | undefined =>
-  useStore(useGeoViewStore(), (state) => state.geochartState?.actions);
+export const useGeochartStoreActions = (): GeochartActions | undefined => {
+  // GV This hook is called from other components than the GeoChart so the '?' on the geochartState is mandatory
+  return useStore(useGeoViewStore(), (state) => state.geochartState?.actions);
+};

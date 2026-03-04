@@ -117,6 +117,7 @@ export const TIMEOUT: Record<string, number> = {
   modalFocusClose: 500,
   projectionSwitchRepeatQuery: 1000,
   notification: 1000,
+  northPoleVisibility: 1000,
 
   featureHighlight: 5000,
   geolocationReturn: 10000,

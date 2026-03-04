@@ -741,7 +741,7 @@ export class LayerApi {
    * @throws {LayerCreatedTwiceError} When there already is a layer on the map with the provided geoviewLayerId.
    */
   addGeoviewLayer(geoviewLayerConfig: TypeGeoviewLayerConfig, abortSignal?: AbortSignal): GeoViewLayerAddedResult {
-    // TODO: REFACTOR - This should be dealt with the config classes and this line commented out.
+    // TODO: REFACTOR listOfLayerEntryConfig types - This should be dealt with the config classes and this line commented out.
     // TO.DOCONT: Right now, this function is called when the configuration is first read and schema checked and everything and then again here when we're adding a geoviewLayerConfig.
     // TO.DOCONT: Commenting the function from here would remove an redundancy call and it seems to be working in our templates when the line is commented. However, commenting it would
     // TO.DOCONT: probably cause issues when this 'addGeoviewLayer' function is called by external?
@@ -2978,7 +2978,7 @@ export class LayerApi {
       }
     };
 
-    // TODO: REFACTOR - This function has issues with the expected types and what it's truly doing.
+    // TODO: REFACTOR listOfLayerEntryConfig types - This function has issues with the expected types and what it's truly doing.
     // TO.DOCONT: Sometimes, geoviewLayerConfig is a ConfigBaseClass instance and sometimes a regular json object
     // GV: The old code was doing `if (theGeoviewLayerConfig.geoviewLayerId)` which condition is only possible when `geoviewLayerId` is a property of the class instance.
     // GV: However, since that it's not a property anymore, that code was only being executed when the objet was a json object. For a while now...

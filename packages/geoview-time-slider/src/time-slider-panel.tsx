@@ -43,11 +43,8 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   // get values from store
   const displayLanguage = useAppDisplayLanguage();
   const visibleInRangeLayers = useMapAllVisibleandInRangeLayers();
-  // timeSliderLayers will always be present here, ! used to ignore possibility of it being undefined
   const timeSliderLayers = useTimeSliderLayers()!;
   const selectedLayerPath = useTimeSliderSelectedLayerPath();
-  // TODO: evaluate why sometimes undefined, threat all stores as possibly undefined for plugins OR manage this higher up use !
-  // TO.DOCONT: because return type is different then geochart store. We need to check existance of store easily for link component to work
   const { setSelectedLayerPath } = useTimeSliderStoreActions()!;
   const { isLayerHiddenOnMap } = useMapStoreActions();
   const layerNames = useLayerNames();

@@ -68,6 +68,7 @@ export class GeoCore {
       const tempLayerConfig = { ...layerConfig } as unknown as TypeGeoviewLayerConfig;
       tempLayerConfig.metadataAccessPath = response.layers[0].metadataAccessPath;
       tempLayerConfig.geoviewLayerType = response.layers[0].geoviewLayerType;
+      tempLayerConfig.listOfLayerEntryConfig ??= response.layers[0].listOfLayerEntryConfig ?? [];
       if (response.layers[0].isTimeAware === true || response.layers[0].isTimeAware === false)
         tempLayerConfig.isTimeAware = response.layers[0].isTimeAware;
       // Use the name from the first layer if none is provided in the config

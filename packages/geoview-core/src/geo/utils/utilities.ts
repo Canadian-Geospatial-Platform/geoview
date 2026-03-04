@@ -699,7 +699,6 @@ export abstract class GeoUtilities {
             iconDetailsEntry.iconImage = (styleRepresentation.defaultCanvas as HTMLCanvasElement).toDataURL();
             iconDetailsEntry.name = styleSettings.info[0].label;
 
-            // TODO Adding icons list, to be verified by backend devs
             const legendLayerListItem: TypeLegendItem = {
               geometryType,
               icon: iconDetailsEntry.iconImage,

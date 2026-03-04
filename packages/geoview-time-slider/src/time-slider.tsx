@@ -68,11 +68,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   const sliderDeltaRef = useRef<number>();
 
   // Get actions and states from store
-  // TODO: evaluate best option to set value by layer path.... through a getter?
-  const { setValues, setLocked, setReversed, setDelay, setStep, setFiltering } = useTimeSliderStoreActions()!; // TODO: This should be handle higher up...  timeSliderStoreActions will always have a value here, ! to ignore possibility of undefined
+  const { setValues, setLocked, setReversed, setDelay, setStep, setFiltering } = useTimeSliderStoreActions()!;
   const displayLanguage = useAppDisplayLanguage();
 
-  // TODO: check performance as we should technically have one selector by constant
   const {
     title,
     additionalLayerpaths,
@@ -91,7 +89,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     displayDateFormatShort: displayDateFormatShortFromStore,
     displayDateTimezone: displayDateTimezoneFromStore,
     serviceDateTemporalMode: serviceDateTemporalModeFromStore,
-  } = useTimeSliderLayers()![layerPath]; // timeSliderLayers will always have a value here, ! to ignore possibility of undefined
+  } = useTimeSliderLayers()![layerPath];
 
   // The display date format as specified by the layer
   const layerDisplayDateFormat = useLayerDisplayDateFormat(layerPath);

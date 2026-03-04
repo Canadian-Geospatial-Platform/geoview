@@ -362,11 +362,8 @@ export class GVWMS extends AbstractGVRaster {
    */
   override async onFetchLegend(): Promise<TypeLegend | null> {
     try {
-      // Get the config
-      const layerConfig = this.getLayerConfig();
-
       // Get the layer style from the config
-      const layerStyle = layerConfig.getLayerStyle();
+      const layerStyle = this.getStyle();
 
       // If any style, we want a vector-like style legend
       if (layerStyle) {

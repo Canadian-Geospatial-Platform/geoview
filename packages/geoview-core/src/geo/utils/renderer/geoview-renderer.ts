@@ -68,18 +68,19 @@ export type TypeStyleProcessorOptions = {
   visualVariables?: TypeLayerStyleVisualVariable[];
 };
 
-/** Default value of the legend canvas width when the settings do not provide one. */
-const LEGEND_CANVAS_WIDTH = 50;
-
-/** Default value of the legend canvas height when the settings do not provide one. */
-const LEGEND_CANVAS_HEIGHT = 50;
-
+// TODO: MINOR - Create a mechanism to have one counter by map if needed with a small class who reuse the getDefaultColor static function
 let colorCount = 0;
 
 export abstract class GeoviewRenderer {
   // The default filter when all should be included
-  static DEFAULT_FILTER_1EQUALS1: string = '(1=1)';
-  static DEFAULT_FILTER_1EQUALS0: string = '(1=0)';
+  static readonly DEFAULT_FILTER_1EQUALS1: string = '(1=1)';
+  static readonly DEFAULT_FILTER_1EQUALS0: string = '(1=0)';
+
+  /** Default value of the legend canvas width when the settings do not provide one. */
+  static readonly LEGEND_CANVAS_WIDTH = 50;
+
+  /** Default value of the legend canvas height when the settings do not provide one. */
+  static readonly LEGEND_CANVAS_HEIGHT = 50;
 
   /** Unary operators for the featureRespectsFilterEquation function */
   static readonly #UNARY_OPERATORS = new Set(['not', 'upper', 'lower']);
@@ -93,7 +94,6 @@ export abstract class GeoviewRenderer {
    * @returns {string} The current default color string.
    * @static
    */
-  // TODO: MINOR - Create a mechanism to have one counter by map if needed with a small class who reuse the static function
   static getDefaultColor(alpha: number, increment: boolean = false): string {
     // get color then increment if needed
     const color = asString(setAlphaColor(asArray(defaultColor[colorCount]), alpha));
@@ -230,8 +230,8 @@ export abstract class GeoviewRenderer {
       const image = await this.loadImage(iconStyle.getSrc()!);
       if (image) {
         const size = iconStyle.getSize();
-        const width = Array.isArray(size) ? size[0] : image.width || LEGEND_CANVAS_WIDTH;
-        const height = Array.isArray(size) ? size[1] : image.height || LEGEND_CANVAS_HEIGHT;
+        const width = Array.isArray(size) ? size[0] : image.width || this.LEGEND_CANVAS_WIDTH;
+        const height = Array.isArray(size) ? size[1] : image.height || this.LEGEND_CANVAS_HEIGHT;
         const drawingCanvas = document.createElement('canvas');
         drawingCanvas.width = width;
         drawingCanvas.height = height;
@@ -259,7 +259,7 @@ export abstract class GeoviewRenderer {
    */
   static createPointCanvas(pointStyle?: Style): HTMLCanvasElement {
     const size = pointStyle?.getImage()?.getSize();
-    const [width, height] = Array.isArray(size) ? size : [LEGEND_CANVAS_WIDTH, LEGEND_CANVAS_HEIGHT];
+    const [width, height] = Array.isArray(size) ? size : [this.LEGEND_CANVAS_WIDTH, this.LEGEND_CANVAS_HEIGHT];
     const drawingCanvas = document.createElement('canvas');
     drawingCanvas.width = width + 4;
     drawingCanvas.height = height + 4;
@@ -280,8 +280,8 @@ export abstract class GeoviewRenderer {
    */
   static createLineStringCanvas(lineStringStyle?: Style): HTMLCanvasElement {
     const drawingCanvas = document.createElement('canvas');
-    drawingCanvas.width = LEGEND_CANVAS_WIDTH;
-    drawingCanvas.height = LEGEND_CANVAS_HEIGHT;
+    drawingCanvas.width = this.LEGEND_CANVAS_WIDTH;
+    drawingCanvas.height = this.LEGEND_CANVAS_HEIGHT;
     const context = drawingCanvas.getContext('2d', { willReadFrequently: true })!;
     const gradient = context.createLinearGradient(0, drawingCanvas.height, drawingCanvas.width, 0);
     gradient.addColorStop(0, '#7f7f7f');
@@ -311,8 +311,8 @@ export abstract class GeoviewRenderer {
    */
   static createPolygonCanvas(polygonStyle?: Style): HTMLCanvasElement {
     const drawingCanvas = document.createElement('canvas');
-    drawingCanvas.width = LEGEND_CANVAS_WIDTH;
-    drawingCanvas.height = LEGEND_CANVAS_HEIGHT;
+    drawingCanvas.width = this.LEGEND_CANVAS_WIDTH;
+    drawingCanvas.height = this.LEGEND_CANVAS_HEIGHT;
     const context = drawingCanvas.getContext('2d', { willReadFrequently: true })!;
     const gradient = context.createLinearGradient(0, drawingCanvas.height, drawingCanvas.width, 0);
     gradient.addColorStop(0, '#7f7f7f');
@@ -1253,7 +1253,7 @@ export abstract class GeoviewRenderer {
 
     let style: Style | undefined;
     if (isFilledPolygonVectorConfig(settings)) {
-      const { fillStyle } = settings; // TODO: refactor - introduce by moving to config map schema type
+      const { fillStyle } = settings; // TODO: ? refactor - introduce by moving to config map schema type
       if (geometry !== undefined) {
         style = this.#processFillStyle[fillStyle](settings, geometry);
       } else {
@@ -1287,7 +1287,7 @@ export abstract class GeoviewRenderer {
   ): Promise<TypeVectorLayerStyles> {
     try {
       // UniqueValue or ClassBreak point style configuration ============================================================
-      const styleArray: (HTMLCanvasElement | null)[] = layerStyles.Point!.arrayOfCanvas!;
+      const styleArray: (HTMLCanvasElement | null)[] = layerStyles.Point!.arrayOfCanvas ?? [];
       const promiseOfCanvasCreated: Promise<HTMLCanvasElement | null>[] = [];
       for (let i = 0; i < arrayOfPointStyleConfig.length; i++) {
         if (isIconSymbolVectorConfig(arrayOfPointStyleConfig[i].settings))

@@ -69,8 +69,7 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
   }
 
   override onCreateContent(): JSX.Element {
-    // Get cgpv
-    // TODO: Create a geochart-appbar-panel equivalent to geochart-panel to hold the GeoChart itself and hook on the useGeochartConfigs store the same way geochart-panel does it
+    // TODO: GEOCHART IN APPBAR - Create a geochart-appbar-panel equivalent to geochart-panel to hold the GeoChart itself and hook on the useGeochartConfigs store the same way geochart-panel does it
     // return <GeoChartAppBarPanel mapId={this.mapViewer.mapId} schemaValidator={new SchemaValidator()} />;
     return <div>Not implemented</div>;
   }
@@ -81,7 +80,7 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   redrawChart(): void {
     // Emit a Chart Redraw event so the chart redraws
-    // TODO: Implement the equivalent that's in the index.tsx file
+    // TODO: GEOCHART IN APPBAR - Implement the equivalent that's in the index.tsx file
   }
 }
 

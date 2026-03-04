@@ -372,21 +372,25 @@ export type TypeTimeSliderProps = {
 // **********************************************************
 // Time-slider state selectors
 // **********************************************************
-export const useTimeSliderLayers = (): TimeSliderLayerSet | undefined =>
-  useStore(useGeoViewStore(), (state) => state.timeSliderState?.timeSliderLayers);
+export const useTimeSliderLayers = (): TimeSliderLayerSet | undefined => {
+  // GV This hook is called from other components than the TimeSlider so the '?' on the timeSliderState is mandatory
+  return useStore(useGeoViewStore(), (state) => state.timeSliderState?.timeSliderLayers);
+};
 
-export const useTimeSliderLayersSelector = (layerPath: string): TypeTimeSliderValues | undefined =>
-  useStore(useGeoViewStore(), (state) => state.timeSliderState?.timeSliderLayers[layerPath]);
+export const useTimeSliderLayersSelector = (layerPath: string): TypeTimeSliderValues | undefined => {
+  // GV This hook is called from other components than the TimeSlider so the '?' on the timeSliderState is mandatory
+  return useStore(useGeoViewStore(), (state) => state.timeSliderState?.timeSliderLayers[layerPath]);
+};
 
 export const useTimeSliderSelectedLayerPath = (): string => useStore(useGeoViewStore(), (state) => state.timeSliderState.selectedLayerPath);
 
-export const useTimeSliderFilters = (): Record<string, string> =>
-  useStore(useGeoViewStore(), (state) => state.timeSliderState?.sliderFilters);
-
 export const useTimeSliderFiltersSelector = (layerPath: string): string | undefined => {
+  // GV This hook is called from other components than the TimeSlider so the '?' on the timeSliderState is mandatory
   return useStore(useGeoViewStore(), (state) => state.timeSliderState?.sliderFilters[layerPath]);
 };
 
 // Store Actions
-export const useTimeSliderStoreActions = (): TimeSliderActions | undefined =>
-  useStore(useGeoViewStore(), (state) => state.timeSliderState?.actions);
+export const useTimeSliderStoreActions = (): TimeSliderActions | undefined => {
+  // GV This hook is called from other components than the TimeSlider so the '?' on the timeSliderState is mandatory
+  return useStore(useGeoViewStore(), (state) => state.timeSliderState?.actions);
+};
