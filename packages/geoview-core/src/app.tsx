@@ -199,7 +199,7 @@ async function renderMap(mapElement: HTMLElement): Promise<MapViewer> {
   // Read the map id
   const { mapId } = configuration;
 
-  // TODO: refactor - remove this config once we get layers from the new one
+  // TODO: ? refactor - remove this config once we get layers from the new one
   // create a new config for this map element
   const lang = mapElement.hasAttribute('data-lang') ? (mapElement.getAttribute('data-lang')! as TypeDisplayLanguage) : 'en';
 

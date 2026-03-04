@@ -64,7 +64,7 @@ import { debounce } from '@/core/utils/debounce';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { DateMgt, type TimeIANA } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
-import { NORTH_POLE_POSITION } from '@/core/utils/constant';
+import { NORTH_POLE_POSITION, TIMEOUT } from '@/core/utils/constant';
 import type { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
@@ -102,13 +102,6 @@ export class MapViewer {
 
   /** Default inches per meter used by OpenLayers */
   static readonly DEFAULT_INCHES_PER_METER = 39.3700787;
-
-  // TODO: REFACTOR UI - If we do not put a high timeout, ui start but the function getMapCoordinateFromPixel
-  // TD.CONT: AND scale component return null and fails. To patch, we add an higher time out for promise.
-  // TD.CONT: This solves for now the issue where the page start to load and user switch to another page and came back.
-  // Timeout value when map init to avoid when use the map is not ready, the UI will not start
-  // static INIT_TIMEOUT_PROMISE: number = 1000;
-  static INIT_TIMEOUT_NORTH_VISIBILITY: number = 1000;
 
   // map config properties
   mapFeaturesConfig: TypeMapFeaturesConfig;
@@ -1282,18 +1275,18 @@ export class MapViewer {
   // #region OTHERS
 
   /**
-   * Gets if north is visible. This is not a perfect solution and is more a work around
+   * Gets if north pole is visible. This is not a perfect solution and is more a work around
    *
    * @returns {Promise<boolean>} true if visible, false otherwise
    */
-  async getNorthVisibility(): Promise<boolean> {
+  async getNorthPoleVisibility(): Promise<boolean> {
     // Check the container value for top middle of the screen
     // Convert this value to a lat long coordinate
     const size = await this.getMapSize();
     const pointXY: [number, number] = [size[0] / 2, 1];
 
     // GV: Sometime, the getCoordinateFromPixel return null... use await
-    const pixel = await this.getCoordinateFromPixel(pointXY, MapViewer.INIT_TIMEOUT_NORTH_VISIBILITY);
+    const pixel = await this.getCoordinateFromPixel(pointXY, TIMEOUT.northPoleVisibility);
     const pt = Projection.transformToLonLat(pixel, this.getView().getProjection());
 
     // If user is pass north, long value will start to be positive (other side of the earth).
@@ -1766,7 +1759,7 @@ export class MapViewer {
           .then((data) => {
             if (data.geometry !== undefined) {
               // add the geometry
-              // TODO: use the geometry as GeoJSON and add properties to by queried by the details panel
+              // TODO: ? use the geometry as GeoJSON and add properties to by queried by the details panel
               this.layer.geometry.addPolygon(data.geometry.coordinates, undefined, generateId());
             }
           })
@@ -1890,8 +1883,8 @@ export class MapViewer {
     // Get the degree rotation
     const degreeRotation = this.getNorthArrowAngle();
 
-    // Get the north visibility
-    const isNorthVisible = await this.getNorthVisibility();
+    // Get the north pole visibility
+    const isNorthVisible = await this.getNorthPoleVisibility();
 
     // Get the map Extent
     const extent = this.getView().calculateExtent();
