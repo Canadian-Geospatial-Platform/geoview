@@ -192,7 +192,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
             type="text"
             size="small"
             id={uniqueButtonId}
-            onClick={() => initLightBox(cellValue, uniqueButtonId, 0)}
+            onClick={() => initLightBox(cellValue, '', uniqueButtonId, 0)} // WCAG - Using empty alt text for images as descriptive text is not available
             sx={{ height: '2.5rem', paddingLeft: '0.5rem', paddingRight: '0.5rem', textTransform: 'none' }}
           >
             {t('dataTable.images')}

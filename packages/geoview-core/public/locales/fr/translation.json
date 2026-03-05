@@ -17,17 +17,18 @@
     "openFullscreen": "Ouvrir en plein écran",
     "closeFullscreen": "Fermer le plein écran",
     "openGuide": "Ouvrir le guide",
-    "overview": "Aperçu",
     "guide": "Guide",
     "fullScreen": "Plein écran",
     "processing": "Traitement de __param__ element(s) sur __param__",
     "clickEnlarge": "Cliquer pour agrandir",
     "show": "Afficher",
     "hide": "Masquer",
+    "toggle": "Basculer",
     "none": "Aucun",
     "clearSearch": "Effacer la recherche",
     "enable": "Activer",
-    "disable": "Désactiver"
+    "disable": "Désactiver",
+    "panelLabel": "Panneau de {{title}}"
   },
   "mapnav": {
     "arianavbar": "Groupe de buttons vertical pour navigation sur la carte",
@@ -105,6 +106,7 @@
   },
   "legend": {
     "title": "Légende",
+    "titleFullScreen": "Légende - Aperçu (en lecture seule)",
     "removeLayer": "Retirer la couche",
     "zoomTo": "Zoom sur la couche",
     "addLayer": "Ajouter une couche",
@@ -119,7 +121,11 @@
     "legendInstructions": "Legend Instructions",
     "noLayersAdded": "Aucune couche ajoutée",
     "noLayersAddedDescription": "Ajoutez des couches à la carte en cliquant sur le bouton 'Couches' et en sélectionnant les couches que vous souhaitez afficher.",
-    "selectLayerAndScroll": "Voir dans le panneau Couches"
+    "selectLayerAndScroll": "Voir dans le panneau Couches",
+    "layerLoadingDescriptive": "Chargement de la couche {{layerName}}",
+    "layerLoadedDescriptive": "La couche {{layerName}} a été chargée avec succès",
+    "layerErrorDescriptive": "Erreur lors du chargement de la couche {{layerName}}",
+    "layerOutOfRangeScreenReader": "(visibilité limitée par l'échelle)"
   },
   "layers": {
     "title": "Couches",
@@ -397,7 +403,8 @@
     "province": "Province",
     "category": "Catégorie",
     "clearFilters": "Effacer les filtres",
-    "noFilter": "Aucun Filtre"
+    "noFilter": "Aucun Filtre",
+    "loadingResults": "Chargement des résultats de recherche"
   },
   "hovertooltip": {
     "alticon": "Symbol de l'élément sélectionné"

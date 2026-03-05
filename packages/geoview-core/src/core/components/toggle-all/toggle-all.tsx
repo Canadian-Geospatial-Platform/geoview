@@ -9,10 +9,14 @@ import {
   useMapStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useLayerDisplayState, useLayerAreLayersLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
+import type { TypeContainerBox } from '@/core/types/global-types';
+
 interface ToggleAllProps {
-  source?: 'layers' | 'legend';
+  source: 'layers' | 'legend';
+  containerType: TypeContainerBox;
 }
 
 const toggleAllStyle = {
@@ -24,13 +28,14 @@ const toggleAllStyle = {
   width: 'fit-content',
 };
 
-export function ToggleAll({ source = 'legend' }: ToggleAllProps): JSX.Element {
+export function ToggleAll({ source, containerType }: ToggleAllProps): JSX.Element {
   // Log
   logger.logTraceRender('components/toggle-all/toggle');
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const { t } = useTranslation<string>();
+  const mapId = useGeoViewMapId();
 
   const displayState = useLayerDisplayState();
   const allLayersVisible = useMapAllLayersVisibleToggle();
@@ -52,28 +57,30 @@ export function ToggleAll({ source = 'legend' }: ToggleAllProps): JSX.Element {
   // TO.DO There's an odd interaction going on where the map initially has no layers (!layersAreLoading) and then starts loading the layers (layersAreLoading)
   // TO.DO So need something more stable from the state
   return (
-    <Box id="toggle-all" sx={toggleAllStyle}>
+    <Box id={`${mapId}-${containerType}-${source}-toggle-all`} sx={toggleAllStyle}>
       {(source === 'legend' || displayState === 'view') && (
-        <Tooltip title={t('toggleAll.showTooltip')}>
+        <Tooltip title={t('toggleAll.showTooltip')} describeChild>
           <span>
             <Switch
               size={isSmallScreen ? 'small' : 'medium'}
               checked={allLayersVisible}
               onChange={handleVisibilityToggle}
-              label={t('toggleAll.show') || undefined}
+              label={t('toggleAll.show')}
               disabled={layersAreLoading}
+              disableRipple
             />
           </span>
         </Tooltip>
       )}
       {hasCollapsibleLayers && (source === 'legend' || displayState === 'view') && (
-        <Tooltip title={t('toggleAll.collapseTooltip')}>
+        <Tooltip title={t('toggleAll.collapseTooltip')} describeChild>
           <span>
             <Switch
               size={isSmallScreen ? 'small' : 'medium'}
               checked={allLayersCollapsed}
               onChange={handleCollapseToggle}
-              label={t('toggleAll.collapse') || undefined}
+              label={t('toggleAll.collapse')}
+              disableRipple
             />
           </span>
         </Tooltip>

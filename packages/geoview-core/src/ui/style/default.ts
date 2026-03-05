@@ -10,6 +10,26 @@ export const headingStyles = {
   fontWeight: 700,
 };
 
+/**
+ * Visually hidden style pattern for screen reader-only content.
+ *
+ * This CSS pattern hides content visually while keeping it accessible
+ * to screen readers, following WCAG best practices.
+ *
+ * @see https://www.w3.org/WAI/WCAG21/Techniques/css/C7
+ */
+export const visuallyHidden = {
+  position: 'absolute',
+  width: '1px',
+  height: '1px',
+  padding: 0,
+  margin: '-1px',
+  overflow: 'hidden',
+  clip: 'rect(0, 0, 0, 0)',
+  whiteSpace: 'nowrap',
+  border: 0,
+} as const;
+
 export const opacity = {
   hoverOpacity: 0.08,
   selectedOpacity: 0.16,
