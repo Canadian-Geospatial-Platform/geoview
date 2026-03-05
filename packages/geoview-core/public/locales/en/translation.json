@@ -20,14 +20,15 @@
     "guide": "Guide",
     "fullScreen": "Full screen",
     "processing": "Processing __param__ element(s) of __param__",
-    "overview": "Overview",
     "clickEnlarge": "Click to enlarge",
     "show": "Show",
     "hide": "Hide",
+    "toggle": "Toggle",
     "none": "No",
     "clearSearch": "Clear search",
     "enable": "Enable",
-    "disable": "Disable"
+    "disable": "Disable",
+    "panelLabel": "{{title}} panel"
   },
   "mapnav": {
     "arianavbar": "Vertical button group for map navigation",
@@ -105,6 +106,7 @@
   },
   "legend": {
     "title": "Legend",
+    "titleFullScreen": "Legend - Overview (read only)",
     "removeLayer": "Remove layer",
     "zoomTo": "Zoom to layer",
     "addLayer": "Add a layer",
@@ -119,7 +121,11 @@
     "legendInstructions": "Legend Instructions",
     "noLayersAdded": "No layers added to the map",
     "noLayersAddedDescription": "Add layers to the map by clicking on the 'Layers' button and adding the layers you want to display.",
-    "selectLayerAndScroll": "Show in Layers panel"
+    "selectLayerAndScroll": "Show in Layers panel",
+    "layerLoadingDescriptive": "Loading layer {{layerName}}",
+    "layerLoadedDescriptive": "Layer {{layerName}} loaded successfully",
+    "layerErrorDescriptive": "Error loading layer {{layerName}}",
+    "layerOutOfRangeScreenReader": "(visibility limited by scale)"
   },
   "layers": {
     "title": "Layers",
@@ -397,7 +403,8 @@
     "province": "Province",
     "category": "Category",
     "clearFilters": "Clear filters",
-    "noFilter": "No filter"
+    "noFilter": "No filter",
+    "loadingResults": "Loading search results"
   },
   "hovertooltip": {
     "alticon": "Selected feature icon"

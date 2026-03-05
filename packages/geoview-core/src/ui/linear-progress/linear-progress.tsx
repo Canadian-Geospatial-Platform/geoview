@@ -1,13 +1,18 @@
 import { LinearProgress as LinearProgressBar } from '@mui/material';
+
 import { logger } from '@/core/utils/logger';
 
 /**
- * Properties for the Progress Bar component extending Material-UI's LinearProgressProps
+ * Properties for the Progress Bar component.
+ *
+ * Extends Material-UI's LinearProgress functionality with
+ * additional accessibility support.
  */
 interface ProgressbarProps {
   className?: string;
   variant?: 'determinate' | 'indeterminate' | 'buffer' | 'query';
   value?: number; // Value between 0 and 100
+  'aria-label'?: string; // Optional - Screen reader label
 }
 
 /**

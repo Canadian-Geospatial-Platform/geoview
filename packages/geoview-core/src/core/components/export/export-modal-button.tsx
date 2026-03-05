@@ -12,10 +12,8 @@ import { useLayerAreLayersLoading } from '@/core/stores/store-interface-and-inti
  */
 interface ExportProps {
   id: string;
-  ariaControls: string;
   className?: string;
   sxDetails?: object;
-  ariaExpanded?: boolean;
 }
 
 /**
@@ -24,7 +22,7 @@ interface ExportProps {
  * @returns {JSX.Element} the export button
  */
 
-export default function ExportButton({ id, ariaControls, className = '', sxDetails, ariaExpanded = false }: ExportProps): JSX.Element {
+export default function ExportButton({ id, className = '', sxDetails }: ExportProps): JSX.Element {
   // Hooks
   const theme = useTheme();
   const { t } = useTranslation<string>();
@@ -36,10 +34,8 @@ export default function ExportButton({ id, ariaControls, className = '', sxDetai
   return (
     <IconButton
       id={id}
-      aria-controls={ariaControls}
       aria-label={t('appbar.export')}
-      aria-expanded={ariaExpanded}
-      tooltipPlacement="right"
+      aria-haspopup="dialog"
       onClick={() => enableFocusTrap({ activeElementId: 'export', callbackElementId: id })}
       sx={{ [theme.breakpoints.down('md')]: { display: 'none' }, ...sxDetails }}
       className={className}

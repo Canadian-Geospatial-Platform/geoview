@@ -21,6 +21,7 @@ import type { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import ExportButton from '@/core/components/export/export-modal-button';
 import {
   useUIActiveFocusItem,
+  useUIActiveTrapGeoView,
   useUIAppbarComponents,
   useUIActiveAppBarTab,
   useUIHiddenTabs,
@@ -38,7 +39,7 @@ import Version from './buttons/version';
 import Share from './buttons/share';
 import { getSxClasses } from './app-bar-style';
 import { enforceArrayOrder, helpClosePanelById, helpOpenPanelById } from './app-bar-helper';
-import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
+import { CONTAINER_TYPE, LIGHTBOX_SELECTORS, TIMEOUT } from '@/core/utils/constant';
 import type { TypeValidAppBarCoreProps } from '@/api/types/map-schema-types';
 import { DEFAULT_APPBAR_CORE, DEFAULT_APPBAR_TABS_ORDER } from '@/api/types/map-schema-types';
 import { camelCase, handleEscapeKey } from '@/core/utils/utilities';
@@ -85,6 +86,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const { tabId, isOpen, isFocusTrapped } = useUIActiveAppBarTab();
   const hiddenTabs = useUIHiddenTabs();
   const { hideClickMarker } = useMapStoreActions();
+  const activeTrapGeoView = useUIActiveTrapGeoView();
 
   const geoviewElement = useAppGeoviewHTMLElement().querySelector('[id^="mapTargetElement-"]') as HTMLElement;
 
@@ -363,15 +365,25 @@ export function AppBar(props: AppBarProps): JSX.Element {
       .map((panelName: string) => {
         // Get the button panel configuration for this panel name
         const buttonPanel = buttonPanels[panelName];
+
         // Only render if the button is explicitly set to visible
         if (buttonPanel?.button.visible !== undefined && buttonPanel?.button.visible) {
+          // WCAG - Compute ARIA attributes before rendering
+          const isPanelOpen: boolean = tabId === buttonPanel.button.id && isOpen;
+          const expandedState: 'true' | 'false' = isPanelOpen ? 'true' : 'false';
+          const ariaControls: string | undefined = activeTrapGeoView ? undefined : getButtonElementId(buttonPanel.button.id!, '-panel');
+          const ariaExpanded: 'true' | 'false' | undefined = activeTrapGeoView ? undefined : expandedState;
+
           return (
             <ListItem key={buttonPanel.button.id}>
               <IconButton
                 id={getButtonElementId(buttonPanel.button.id!, '-panel-btn')}
-                aria-controls={getButtonElementId(buttonPanel.button.id!, '-panel')}
                 aria-label={t(buttonPanel.button['aria-label'])}
-                aria-expanded={tabId === buttonPanel.button.id && isOpen ? 'true' : 'false'}
+                // In WCAG mode, panels are treated as dialogs because they are focus-trapped, so we set aria-haspopup to dialog to indicate that.
+                aria-haspopup={activeTrapGeoView ? 'dialog' : undefined}
+                // In default mode, panels are treated as regions, so we use aria-controls and aria-expanded to indicate the relationship and state.
+                aria-controls={ariaControls}
+                aria-expanded={ariaExpanded}
                 tooltipPlacement="right"
                 className={`buttonFilled ${tabId === buttonPanel.button.id && isOpen ? 'active' : ''}`}
                 size="small"
@@ -408,8 +420,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
               <ListItem>
                 <ExportButton
                   id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-export-modal-btn`}
-                  ariaControls={`${mapId}-export-modal`}
-                  ariaExpanded={activeModalId === DEFAULT_APPBAR_CORE.EXPORT}
                   className={` buttonFilled ${activeModalId === DEFAULT_APPBAR_CORE.EXPORT ? 'active' : ''}`}
                 />
               </ListItem>
@@ -439,11 +449,18 @@ export function AppBar(props: AppBarProps): JSX.Element {
               button={buttonPanel.button}
               onOpen={buttonPanel.onOpen}
               onClose={hideClickMarker}
-              onKeyDown={(event: KeyboardEvent) =>
+              onKeyDown={(event: KeyboardEvent) => {
+                // Early exit if lightbox is handling ESC
+                if (event.key === 'Escape') {
+                  const isLightboxOpen = document.querySelector(LIGHTBOX_SELECTORS.ROOT) !== null;
+                  if (isLightboxOpen) {
+                    return;
+                  }
+                }
                 handleEscapeKey(event.key, getButtonElementId(buttonPanel.button?.id ?? '', '-panel-btn'), isFocusTrapped, () => {
                   setActiveAppBarTab(buttonPanel.button?.id ?? '', false, false);
-                })
-              }
+                });
+              }}
               onGeneralClose={() => {
                 handleGeneralCloseClicked(buttonPanel.button?.id ?? '');
               }}

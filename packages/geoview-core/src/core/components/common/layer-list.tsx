@@ -130,7 +130,6 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
           selected={isSelected}
           // disable when layer features has null value.
           disabled={isDisabled || isLoading}
-          aria-disabled={isDisabled || isLoading}
         >
           {layer.layerPath === 'coordinate-info' ? (
             // Treat

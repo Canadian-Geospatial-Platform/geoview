@@ -43,6 +43,10 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
   const [province, setProvince] = useState<string>('');
   const [category, setCategory] = useState<string>('');
 
+  const hasActiveFilters = useMemo(() => {
+    return !!(province.length || category.length);
+  }, [province, category]);
+
   // Store
   // TODO: style - we should not base length on map size value, parent should adjust
   const mapSize = useMapSize();
@@ -51,6 +55,10 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
    * Clear all filters.
    */
   const handleClearFilters = (): void => {
+    // Prevent action when button is disabled
+    if (!hasActiveFilters) {
+      return;
+    }
     setProvince('');
     setCategory('');
   };
@@ -150,7 +158,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               className="buttonOutline"
               aria-label={t('geolocator.clearFilters')}
               onClick={handleClearFilters}
-              disabled={!geoLocationData.length}
+              aria-disabled={!hasActiveFilters}
             >
               <ClearFiltersIcon sx={{ fontSize: theme.palette.geoViewFontSize.md }} />
             </IconButton>

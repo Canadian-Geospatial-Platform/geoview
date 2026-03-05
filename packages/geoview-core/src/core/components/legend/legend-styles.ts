@@ -1,4 +1,5 @@
 import type { Theme } from '@mui/material/styles';
+import { visuallyHidden } from '@/ui/style/default';
 
 type SxClasses = Record<string, object>;
 
@@ -74,9 +75,6 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
         fontStyle: 'italic',
       },
     },
-    '& .outOfRangeButton': {
-      display: 'none',
-    },
   },
   legendListItemHeader: {
     width: '100%',
@@ -88,21 +86,15 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     marginLeft: '12px',
     fontSize: theme.palette.geoViewFontSize.md,
     fontWeight: '600',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
+    '& div': {
+      fontSize: 'inherit',
+      fontWeight: 'inherit',
+    },
     '>p': {
       margin: 0,
       color: theme.palette.geoViewColor.textColor.light[400],
       fontSize: theme.palette.geoViewFontSize.sm,
       lineHeight: 1.43,
-    },
-    '>div': {
-      whiteSpace: 'normal',
-      display: '-webkit-box',
-      WebkitLineClamp: '3',
-      WebkitBoxOrient: 'vertical',
-      overflow: 'hidden',
     },
     '& .MuiListItemText-secondary': {
       color: theme.palette.geoViewColor.textColor.light[400],
@@ -184,8 +176,7 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
   },
   toggleBar: {
     borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[100]}`,
-    paddingTop: '8px',
-    paddingLeft: '8px',
+    padding: '8px',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -218,4 +209,5 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
       borderLeft: 'none !important',
     },
   },
+  visuallyHidden,
 });

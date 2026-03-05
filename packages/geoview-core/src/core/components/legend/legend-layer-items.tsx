@@ -41,7 +41,7 @@ const LegendListItem = memo(
   }): JSX.Element => {
     const { t } = useTranslation<string>();
     const theme = useTheme();
-    const tooltipTitle = canToggle ? `${isVisible && layerVisible ? t('general.hide') : t('general.show')} ${name}` : '';
+    const tooltipTitle = canToggle ? `${t('layers.toggleVisibility')} - ${name}` : '';
     const getItemClassName = (): string | undefined => {
       return !isVisible || !layerVisible ? 'unchecked' : 'checked';
     };
@@ -75,6 +75,8 @@ const LegendListItem = memo(
             disableRipple
             sx={sxClasses.layerListItemButton}
             className={`layerListItemButton ${itemClassName || ''}`}
+            aria-pressed={isVisible && layerVisible}
+            aria-label={`${t('layers.toggleVisibility')} - ${name}`} // WCAG - Provide descriptive aria-label for accessibility
           >
             <ListItemIcon>
               <Box sx={{ display: 'flex', padding: '0 18px 0 18px', margin: '0 -18px 0 -18px' }}>
@@ -117,13 +119,13 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
    * Once generated, the same item will always receive the same ID across re-renders.
    *
    * @param item - The legend item to generate an ID for
-   * @returns A stable, unique ID in format: "legend-item-{randomId}-{mapId}"
+   * @returns A stable, unique ID in format: "{mapId}-legend-item-{randomId}"
    */
   const getItemId = (item: TypeLegendItem): string => {
     const itemKey = `${item.name}-${item.geometryType}-${item.icon}`;
 
     if (!itemIdMapRef.current.has(itemKey)) {
-      itemIdMapRef.current.set(itemKey, `legend-item-${generateId(18)}-${mapId}`);
+      itemIdMapRef.current.set(itemKey, `${mapId}-legend-item-${generateId(18)}`);
     }
     return itemIdMapRef.current.get(itemKey)!;
   };
