@@ -123,6 +123,22 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
     });
   }
 
+  /**
+   * Overrides the set opacity function to set the opacity to all the children as well.
+   *
+   * @param opacity - The desired opacity for the layer, typically between `0` (fully transparent)
+   * and `1` (fully opaque).
+   * @param emitOpacityChanged - Optional, whether to emit a layer opacity change event after
+   * updating the opacity. Defaults to true.
+   */
+  protected override onSetOpacity(opacity: number, emitOpacityChanged: boolean = true): void {
+    // Sure
+    super.onSetOpacity(opacity, emitOpacityChanged);
+
+    // Recursively set the opacity of the children layers as well
+    this.getLayers().forEach((child) => child.setOpacity(opacity, emitOpacityChanged));
+  }
+
   // #endregion OVERRIDES
 
   // #region METHODS
@@ -197,6 +213,9 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
     // Officially add it to the OL object
     this.getOLLayer().getLayers().push(layer.getOLLayer());
 
+    // Set its parent right away
+    layer.setParent(this);
+
     // Add the layer to our list
     this.#layers.push(layer);
 
@@ -217,6 +236,9 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
 
     // Officially remove it from the OL object
     this.getOLLayer().getLayers().remove(layer.getOLLayer());
+
+    // Clear its parent right away
+    layer.setParent(undefined);
 
     // Remove it from our list
     this.#layers.splice(idx, 1);

@@ -52,6 +52,6 @@ export interface TypeLegendLayer {
   children: TypeLegendLayer[];
 
   opacity?: number;
-  opacityFromParent?: number;
+  opacityMaxFromParent?: number;
   zoom?: number;
 }

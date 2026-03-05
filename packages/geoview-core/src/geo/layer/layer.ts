@@ -1112,7 +1112,7 @@ export class LayerApi {
           const layerBeingRemoved = this.#gvLayers[registeredLayerPath];
 
           // If the layer had a parent
-          const parent = layerBeingRemoved?.getParent(this.getGeoviewLayersGroups());
+          const parent = layerBeingRemoved?.getParent();
           if (parent) {
             // Make sure to remove the layer from the parent and that way when the bounds get recalculated the removed layer won't be included
             parent.removeLayer(layerBeingRemoved);
@@ -1955,7 +1955,7 @@ export class LayerApi {
     this.#registerLayerHandlers(gvLayer);
 
     // Calculate the bounds upon creation
-    LegendEventProcessor.setLayerBoundsForLayerAndParentsAndForgetInStore(this.getMapId(), gvLayer, this.getGeoviewLayersGroups());
+    LegendEventProcessor.setLayerBoundsForLayerAndParentsAndForgetInStore(this.getMapId(), gvLayer);
 
     // Emit about its creation so that one can attach events on it right away if necessary
     this.#emitLayerCreated({ layer: gvLayer });
@@ -2079,7 +2079,7 @@ export class LayerApi {
     // If a vector layer has been loaded
     if (layer instanceof AbstractGVVector) {
       // Calculate the bounds as those depend on the actual features in the layer
-      LegendEventProcessor.setLayerBoundsForLayerAndParentsAndForgetInStore(this.getMapId(), layer, this.getGeoviewLayersGroups());
+      LegendEventProcessor.setLayerBoundsForLayerAndParentsAndForgetInStore(this.getMapId(), layer);
     }
 
     // Emit about it
@@ -2112,6 +2112,7 @@ export class LayerApi {
    * @param event - The event containing the opacity change.
    */
   #handleLayerOpacityChanged(layer: AbstractBaseGVLayer, event: LayerOpacityChangedEvent): void {
+    // Update the store
     LegendEventProcessor.setOpacityInStore(this.getMapId(), layer.getLayerPath(), event.opacity);
   }
 
@@ -2253,7 +2254,15 @@ export class LayerApi {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   #handleLayerGroupLayerAdded(sender: GVGroupLayer, event: GVGroupLayerEvent): void {
     // Calculate the bounds on the group layer which had a layer added
-    LegendEventProcessor.setLayerBoundsForLayerAndParentsAndForgetInStore(this.getMapId(), sender, this.getGeoviewLayersGroups());
+    LegendEventProcessor.setLayerBoundsForLayerAndParentsAndForgetInStore(this.getMapId(), sender);
+
+    // Get the initial settings opacity of the group layer
+    const initialSettingsOpacity = sender.getLayerConfig().getInitialSettings()?.states?.opacity;
+
+    // If any
+    if (initialSettingsOpacity !== undefined) {
+      LegendEventProcessor.setOpacityInStore(this.getMapId(), sender.getLayerPath(), initialSettingsOpacity);
+    }
   }
 
   /**
@@ -2269,7 +2278,7 @@ export class LayerApi {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   #handleLayerGroupLayerRemoved(sender: GVGroupLayer, event: GVGroupLayerEvent): void {
     // Calculate the bounds on the group layer which had a layer removed
-    LegendEventProcessor.setLayerBoundsForLayerAndParentsAndForgetInStore(this.getMapId(), sender, this.getGeoviewLayersGroups());
+    LegendEventProcessor.setLayerBoundsForLayerAndParentsAndForgetInStore(this.getMapId(), sender);
   }
 
   /**
