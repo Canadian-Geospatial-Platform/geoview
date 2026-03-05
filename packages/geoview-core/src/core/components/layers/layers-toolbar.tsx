@@ -1,6 +1,9 @@
-import { useTranslation } from 'react-i18next';
-import { useTheme } from '@mui/material';
 import { useCallback, useEffect, useRef } from 'react';
+
+import { useTranslation } from 'react-i18next';
+
+import { useTheme } from '@mui/material';
+
 import { Box, AddCircleOutlineIcon, Button } from '@/ui';
 import { ToggleAll } from '@/core/components/toggle-all/toggle-all';
 import {
@@ -8,14 +11,21 @@ import {
   useLayerDisplayState,
   useLayerLegendLayers,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useGeoViewMapId } from '@/core/stores';
 import type { TypeLayersViewDisplayState } from './types';
 import { logger } from '@/core/utils/logger';
+import type { TypeContainerBox } from '@/core/types/global-types';
 
-export function LayersToolbar(): JSX.Element {
+interface TypeLayersToolbar {
+  containerType: TypeContainerBox;
+}
+
+export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/layers-toolbar');
 
   // Hooks
+  const mapId = useGeoViewMapId();
   const theme = useTheme();
   const { t } = useTranslation<string>();
   const addButtonRef = useRef<HTMLButtonElement>(null);
@@ -23,6 +33,7 @@ export function LayersToolbar(): JSX.Element {
 
   const layerToolbarStyle = {
     display: 'inline-flex',
+    gap: '4px',
     '&>button': { padding: '10px 15px' },
     '& .MuiButton-startIcon': { [theme.breakpoints.down('sm')]: { margin: 0, padding: '0 0.25rem' } },
     '& .MuiButtonGroup-root': { backgroundColor: theme.palette.geoViewColor.bgColor.light[300] },
@@ -103,7 +114,7 @@ export function LayersToolbar(): JSX.Element {
   }, [legendLayers.length]); // Only depend on legendLayers.length
 
   return (
-    <Box id="layers-toolbar" sx={layerToolbarStyle}>
+    <Box id={`${mapId}-${containerType}-layers-toolbar`} sx={layerToolbarStyle}>
       <Button
         ref={addButtonRef}
         makeResponsive
@@ -116,7 +127,7 @@ export function LayersToolbar(): JSX.Element {
       >
         {t('legend.addLayer')}
       </Button>
-      <ToggleAll source="layers" />
+      <ToggleAll source="layers" containerType={containerType} />
     </Box>
   );
 }

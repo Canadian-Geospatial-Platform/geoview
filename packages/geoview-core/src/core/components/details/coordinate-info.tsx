@@ -52,7 +52,7 @@ export function CoordinateInfoSwitch({ disabled }: CoordinateInfoSwitchProps): J
           size={isSmallScreen ? 'small' : 'medium'}
           checked={coordinateInfoEnabled}
           onChange={handleCoordinateInfoToggle}
-          label={t('details.showCoordinateInfo') || undefined}
+          label={t('details.showCoordinateInfo')}
           disabled={disabled}
         />
       </span>

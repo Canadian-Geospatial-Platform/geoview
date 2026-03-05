@@ -73,6 +73,7 @@ export function Geolocator(): JSX.Element {
     setActiveAppBarTab(DEFAULT_APPBAR_CORE.GEOLOCATOR, false, false);
     setTimeout(() => {
       disableFocusTrap(`${mapId}-${CONTAINER_TYPE.APP_BAR}-${DEFAULT_APPBAR_CORE.GEOLOCATOR}-panel-btn`);
+      disableFocusTrap(`${mapId}-${CONTAINER_TYPE.APP_BAR}-${DEFAULT_APPBAR_CORE.GEOLOCATOR}-panel-btn`);
     }, TIMEOUT.deferExecution);
   }, [setActiveAppBarTab, setSearchValue, disableFocusTrap, mapId]);
 
@@ -131,7 +132,7 @@ export function Geolocator(): JSX.Element {
       ref={panelRef}
       component="section"
       role={isPanelOpen ? 'dialog' : undefined}
-      aria-modal={isPanelOpen ? 'true' : undefined}
+      aria-modal={activeTrapGeoView || undefined}
       aria-hidden={!isPanelOpen}
       aria-label={t('geolocator.panelTitle')!}
       sx={sxClasses.root}

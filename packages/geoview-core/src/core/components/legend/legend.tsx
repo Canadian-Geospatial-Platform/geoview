@@ -1,5 +1,5 @@
 import { useTheme } from '@mui/material';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ToggleAll } from '@/core/components/toggle-all/toggle-all';
 import { Box, List, Typography } from '@/ui';
@@ -58,6 +58,7 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
   // State
   const [formattedLegendLayerList, setFormattedLegendLayersList] = useState<TypeLegendLayer[][]>([]);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const fullScreenBtnRef = useRef<HTMLButtonElement>(null);
 
   // Store
   const mapId = useGeoViewMapId();
@@ -171,7 +172,7 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
         }}
       >
         {layers.map((layer) => (
-          <LegendLayer layerPath={layer.layerPath} key={layer.layerPath} showControls={true} />
+          <LegendLayer layerPath={layer.layerPath} key={layer.layerPath} showControls={true} mapId={mapId} containerType={containerType} />
         ))}
       </List>
     ));
@@ -189,11 +190,12 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
         containerType={containerType}
         isOpen={isFullScreen}
         onClose={() => setIsFullScreen(false)}
+        buttonRef={fullScreenBtnRef}
       />
 
       <Box sx={sxClasses.toggleBar}>
-        <ToggleAll />
-        <LegendFullscreenButton containerType={containerType} onClick={() => setIsFullScreen(true)} />
+        <ToggleAll containerType={containerType} source="legend" />
+        <LegendFullscreenButton containerType={containerType} onClick={() => setIsFullScreen(true)} buttonRef={fullScreenBtnRef} />
       </Box>
       <Box
         sx={{ background: theme.palette.geoViewColor.bgColor.main, ...sxClassesMain.container }}

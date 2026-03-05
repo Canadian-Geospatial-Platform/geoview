@@ -14,6 +14,7 @@ import { useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-i
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import type { SxStyles } from '@/ui/style/types';
+import { visuallyHidden } from '@/ui/style/default';
 
 // eslint-disable-next-line no-underscore-dangle
 declare const __VERSION__: TypeAppVersion;
@@ -70,17 +71,7 @@ const getSxClasses = (theme: Theme): SxStyles => ({
       margin: '0 0 5px 0',
     },
   },
-  visuallyHidden: {
-    position: 'absolute',
-    width: '1px',
-    height: '1px',
-    padding: 0,
-    margin: '-1px',
-    overflow: 'hidden',
-    clip: 'rect(0, 0, 0, 0)',
-    whiteSpace: 'nowrap',
-    border: 0,
-  },
+  visuallyHidden,
 });
 
 export default function Version(): JSX.Element {
@@ -111,8 +102,8 @@ export default function Version(): JSX.Element {
 
       // Register focus trap with button as the return target
       enableFocusTrap({
-        activeElementId: `${mapId}-version`,
-        callbackElementId: `version-button-${mapId}`,
+        activeElementId: `${mapId}-${CONTAINER_TYPE.APP_BAR}-version-ft`,
+        callbackElementId: `${mapId}-${CONTAINER_TYPE.APP_BAR}-version-btn`,
       });
     },
     [mapId, enableFocusTrap]
@@ -131,9 +122,7 @@ export default function Version(): JSX.Element {
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
       <Box sx={{ padding: interaction === 'dynamic' ? 'none' : '5px' }}>
         <IconButton
-          id={`version-button-${mapId}`}
-          aria-controls={open ? `version-dialog-${mapId}` : undefined}
-          aria-expanded={open ? 'true' : 'false'}
+          id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-version-btn`}
           aria-haspopup="dialog"
           aria-label={t('appbar.version')}
           tooltipPlacement="right"
@@ -147,8 +136,8 @@ export default function Version(): JSX.Element {
 
         <Popper
           role="dialog"
-          id={`version-dialog-${mapId}`}
-          aria-labelledby="version-info-title"
+          id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-version-dialog`}
+          aria-labelledby={`${mapId}-${CONTAINER_TYPE.APP_BAR}-version-title`}
           aria-modal="true"
           open={open}
           anchorEl={anchorEl}
@@ -169,10 +158,14 @@ export default function Version(): JSX.Element {
           }}
           handleKeyDown={(key, callBackFn) => handleEscapeKey(key, '', false, callBackFn)}
         >
-          <FocusTrapContainer id={`${mapId}-version`} open={open && activeTrapGeoView} containerType={CONTAINER_TYPE.APP_BAR}>
+          <FocusTrapContainer
+            id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-version-ft`}
+            open={open && activeTrapGeoView}
+            containerType={CONTAINER_TYPE.APP_BAR}
+          >
             <Paper component="section" sx={sxClasses.versionInfoPanel}>
               <Box component="header" sx={sxClasses.versionHeading}>
-                <Typography sx={sxClasses.versionsInfoTitle} component="h2" id="version-info-title">
+                <Typography sx={sxClasses.versionsInfoTitle} component="h2" id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-version-title`}>
                   {t('appbar.version')}
                 </Typography>
                 <IconButton onClick={handleClickAway} size="small" aria-label={t('general.close')} tooltipPlacement="right">
