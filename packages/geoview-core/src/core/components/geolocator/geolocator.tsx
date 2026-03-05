@@ -1,8 +1,11 @@
 import type { ChangeEvent } from 'react';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { debounce } from '@/core/utils/debounce';
-import { useTheme } from '@mui/material';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
 import { useTranslation } from 'react-i18next';
+
+import { useTheme } from '@mui/material';
+
+import { debounce } from '@/core/utils/debounce';
 import { Box, ProgressBar, Typography } from '@/ui';
 import { useUIActiveAppBarTab, useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { GeolocatorResult } from '@/core/components/geolocator/geolocator-result';
@@ -50,6 +53,10 @@ export function Geolocator(): JSX.Element {
 
   // Custom geolocator hook
   const { data, isLoading, searchValue, error, setSearchValue, getGeolocations, resetState } = useGeolocator();
+
+  // WCAG - Track loading status changes for screen reader announcements
+  const prevLoadingRef = useRef<boolean>(false);
+  const [statusMessage, setStatusMessage] = useState<string>('');
 
   // Create debounced version of getGeolocations
   const debouncedRequest = useMemo(
@@ -124,6 +131,20 @@ export function Geolocator(): JSX.Element {
     };
   }, [isOpen, tabId, handleReset, mapId]);
 
+  // WCAG - Track loading status changes for screen reader announcements.
+  // Results are announced separately in the GeolocatorResult component, so we only announce loading status here.
+  useEffect(() => {
+    logger.logTraceUseEffect('GEOLOCATOR - status announcements', isLoading);
+
+    if (isLoading && !prevLoadingRef.current) {
+      setStatusMessage(t('geolocator.loadingResults') || '');
+      prevLoadingRef.current = true;
+    } else if (!isLoading && prevLoadingRef.current) {
+      setStatusMessage(''); // Clear when done loading
+      prevLoadingRef.current = false;
+    }
+  }, [isLoading, t]);
+
   return (
     // Determine if the panel is actually open and visible
 
@@ -131,7 +152,7 @@ export function Geolocator(): JSX.Element {
       ref={panelRef}
       component="section"
       role={isPanelOpen ? 'dialog' : undefined}
-      aria-modal={isPanelOpen ? 'true' : undefined}
+      aria-modal={isPanelOpen && activeTrapGeoView ? true : undefined}
       aria-hidden={!isPanelOpen}
       aria-label={t('geolocator.panelTitle')!}
       sx={sxClasses.root}
@@ -154,9 +175,14 @@ export function Geolocator(): JSX.Element {
           />
         </Box>
 
+        {/* WCAG - ARIA live region for screen reader announcements */}
+        <Box sx={sxClasses.visuallyHidden} role="status" aria-live="polite" aria-atomic="true">
+          {statusMessage}
+        </Box>
+
         {isLoading && (
           <Box sx={sxClasses.progressBar}>
-            <ProgressBar />
+            <ProgressBar aria-label={t('geolocator.loadingResults') || undefined} />
           </Box>
         )}
 

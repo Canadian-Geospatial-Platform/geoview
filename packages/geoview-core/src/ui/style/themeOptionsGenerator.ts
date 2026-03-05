@@ -33,6 +33,12 @@ const getButtonStyleOverrides = (geoViewColors: IGeoViewColors): any => ({
       color: `${geoViewColors.bgColor.dark[450]}`,
       backgroundColor: 'transparent',
     },
+    '&[aria-disabled="true"]': {
+      color: `${geoViewColors.bgColor.dark[450]}`,
+      backgroundColor: 'transparent',
+      cursor: 'not-allowed',
+      pointerEvents: 'none',
+    },
   },
   '&.buttonFilledOutline:not(:disabled)': {
     backgroundColor: `${geoViewColors.primary.main}`,

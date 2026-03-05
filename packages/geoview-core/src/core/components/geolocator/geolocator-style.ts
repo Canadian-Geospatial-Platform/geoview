@@ -1,6 +1,7 @@
 import type { Theme } from '@mui/material';
 import { Input, styled } from '@mui/material';
 import type { SxStyles } from '@/ui/style/types';
+import { visuallyHidden } from '@/ui/style/default';
 
 /**
  * Get custom sx classes for the geolocator
@@ -34,13 +35,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
   geolocatorResultsStatus: {
+    ...visuallyHidden,
     padding: 10,
-    position: 'absolute',
-    left: -10000,
-    top: 'auto',
-    width: 1,
-    height: 1,
-    overflow: 'hidden',
   },
   progressBar: {
     position: 'relative',
@@ -86,17 +82,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       },
     },
   },
-  visuallyHidden: {
-    position: 'absolute',
-    width: '1px',
-    height: '1px',
-    padding: 0,
-    margin: '-1px',
-    overflow: 'hidden',
-    clip: 'rect(0, 0, 0, 0)',
-    whiteSpace: 'nowrap',
-    border: 0,
-  },
+  visuallyHidden,
 });
 
 /**

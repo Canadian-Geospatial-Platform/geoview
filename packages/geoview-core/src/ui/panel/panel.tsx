@@ -1,5 +1,6 @@
 import type { KeyboardEvent } from 'react';
 import { useRef, useEffect, useMemo } from 'react';
+
 import { useTranslation } from 'react-i18next';
 
 // TODO: reuse our own custom ui
@@ -7,14 +8,15 @@ import Card from '@mui/material/Card';
 import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
 import { useTheme } from '@mui/material/styles';
-import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 
+import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { Box } from '@/ui/layout/index';
 import type { TypePanelProps } from '@/ui/panel/panel-types';
 import { CloseIcon } from '@/ui/icons/index';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { getSxClasses } from '@/ui/panel/panel-style';
+import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { FocusTrapContainer } from '@/core/components/common';
 import { delay } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
@@ -62,6 +64,9 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
   const sxClasses = useMemo(() => getSxClasses(theme, open, panelWidth), [theme, open, panelWidth]);
   const mapId = useGeoViewMapId();
 
+  // Store
+  const activeTrapGeoView = useUIActiveTrapGeoView();
+
   useEffect(() => {
     logger.logTraceUseEffect('UI.PANEL - open');
 
@@ -94,17 +99,17 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
   return (
     <Box
       component="section"
-      role={open ? 'dialog' : undefined}
-      aria-modal={open ? 'true' : undefined}
+      role={open && activeTrapGeoView ? 'dialog' : undefined}
+      aria-label={t('general.panelLabel', { title: t(panel.title) })!}
       aria-hidden={!open}
-      aria-label={`${t(panel.title)} panel`}
+      aria-modal={open && activeTrapGeoView ? true : undefined}
       sx={{
         ...sxClasses.panelContainer,
         ...(panelStyles?.panelContainer && { ...panelStyles.panelContainer }),
       }}
       ref={panelContainerRef}
-      id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-${panel.panelId || ''}-panel`}
-      className={`appbar-panel appbar-panel-${panelId}`}
+      id={`${mapId}-${CONTAINER_TYPE.APP_BAR}${panelId ? `-${panelId}` : ''}-panel`}
+      className={`appbar-panel${panelId ? ` appbar-panel-${panelId}` : ''}`}
     >
       <FocusTrapContainer open={isFocusTrapped} id="app-bar-focus-trap" containerType={CONTAINER_TYPE.APP_BAR}>
         <Card
@@ -124,13 +129,15 @@ function PanelUI(props: TypePanelAppProps): JSX.Element {
             sx={panelStyles?.panelCardHeader ? { ...panelStyles.panelCardHeader } : {}}
             ref={panelHeader}
             title={t(panel.title)}
-            titleTypographyProps={{
-              component: 'h2',
+            slotProps={{
+              title: {
+                component: 'h2',
+              },
             }}
             action={
               open ? (
                 <IconButton
-                  id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-${panel.panelId || ''}-panel-close-btn`}
+                  id={`${mapId}-${CONTAINER_TYPE.APP_BAR}${panelId ? `-${panelId}` : ''}-panel-close-btn`}
                   aria-label={t('general.close')}
                   tooltipPlacement="right"
                   size="small"

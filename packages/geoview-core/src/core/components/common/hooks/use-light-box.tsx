@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useState } from 'react';
 import { Box } from '@/ui';
-import type { LightBoxSlides} from '@/core/components/lightbox/lightbox';
+import type { LightBoxSlides } from '@/core/components/lightbox/lightbox';
 import { LightboxImg } from '@/core/components/lightbox/lightbox';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
@@ -16,12 +16,12 @@ interface BaseLightBoxProps {
   slides: LightBoxSlides[];
   slidesIndex: number;
   imgScale?: number;
-  aliasIndex: string;
+  returnFocusId: string;
   onExit: () => void;
   onSlideChange?: (index: number) => void;
 }
 interface UseLightBoxReturnType {
-  initLightBox: (images: string, alias: string, index?: number, scale?: number) => void;
+  initLightBox: (images: string, altText: string, returnFocusId: string, index?: number, scale?: number) => void;
   LightBoxComponent: () => JSX.Element;
 }
 
@@ -32,7 +32,7 @@ const BaseLightBoxComponent = memo(function BaseLightBoxComponent({
   slides,
   slidesIndex,
   imgScale,
-  aliasIndex,
+  returnFocusId,
   onExit,
   onSlideChange,
 }: BaseLightBoxProps) {
@@ -101,15 +101,15 @@ const BaseLightBoxComponent = memo(function BaseLightBoxComponent({
     if (!activeTrapGeoView) return;
 
     setTimeout(() => {
-      const element = document.getElementById(aliasIndex);
+      const element = document.getElementById(returnFocusId);
       if (element) {
         element.focus();
         element.classList.add('keyboard-focused');
       } else {
-        logger.logWarning(`LightBox focus restoration failed: element "${aliasIndex}" not found`);
+        logger.logWarning(`LightBox focus restoration failed: element "${returnFocusId}" not found`);
       }
     }, TIMEOUT.focusDelayLightbox);
-  }, [activeTrapGeoView, aliasIndex, onExit]);
+  }, [activeTrapGeoView, returnFocusId, onExit]);
 
   if (!isLightBoxOpen) return <Box />;
 
@@ -134,16 +134,16 @@ export function useLightBox(): UseLightBoxReturnType {
   const [slides, setSlides] = useState<LightBoxSlides[]>([]);
   const [slidesIndex, setSlidesIndex] = useState(0);
   const [imgScale, setImgScale] = useState<number | undefined>();
-  const [aliasIndex, setAliasIndex] = useState('0');
+  const [storedReturnFocusId, setStoredReturnFocusId] = useState('0');
 
   // Callbacks
-  const createSlidesList = useCallback((images: string, alias: string): LightBoxSlides[] => {
+  const createSlidesList = useCallback((images: string, altText: string): LightBoxSlides[] => {
     if (BASE64_IMAGE_PATTERN.test(images)) {
-      return [{ src: images, alt: alias, downloadUrl: '' }];
+      return [{ src: images, alt: altText, downloadUrl: '' }];
     }
     return images.split(';').map((item) => ({
       src: item,
-      alt: alias,
+      alt: altText,
       downloadUrl: item,
     }));
   }, []);
@@ -155,12 +155,12 @@ export function useLightBox(): UseLightBoxReturnType {
   }, []);
 
   const initLightBox = useCallback(
-    (images: string, alias: string, index?: number, scale?: number): void => {
+    (images: string, altText: string, returnFocusId: string, index?: number, scale?: number): void => {
       setIsLightBoxOpen(true);
-      setSlides(createSlidesList(images, alias));
+      setSlides(createSlidesList(images, altText));
       setSlidesIndex(index ?? 0);
       setImgScale(scale);
-      setAliasIndex(alias);
+      setStoredReturnFocusId(returnFocusId);
     },
     [createSlidesList]
   );
@@ -172,11 +172,11 @@ export function useLightBox(): UseLightBoxReturnType {
         slides={slides}
         slidesIndex={slidesIndex}
         imgScale={imgScale}
-        aliasIndex={aliasIndex}
+        returnFocusId={storedReturnFocusId}
         onExit={handleExit}
       />
     );
-  }, [isLightBoxOpen, slides, slidesIndex, imgScale, aliasIndex, handleExit]);
+  }, [isLightBoxOpen, slides, slidesIndex, imgScale, storedReturnFocusId, handleExit]);
 
   return {
     initLightBox,
