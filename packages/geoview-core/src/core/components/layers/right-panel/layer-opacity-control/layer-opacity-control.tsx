@@ -18,6 +18,8 @@ export function LayerOpacityControl(props: LayerOpacityControlProps): JSX.Elemen
   logger.logTraceRender('components/layers/right-panel/layer-opacity-control/layer-opacity-control');
 
   const { layerDetails } = props;
+  const layerOpacity = layerDetails.opacity ?? 1;
+  const layerParentOpacity = layerDetails.opacityMaxFromParent ?? 1;
 
   // Hook
   const { t } = useTranslation<string>();
@@ -30,39 +32,31 @@ export function LayerOpacityControl(props: LayerOpacityControlProps): JSX.Elemen
   const layerHidden = useMapSelectorIsLayerHiddenOnMap(layerDetails.layerPath);
 
   // State
-  const [localOpacity, setLocalOpacity] = useState(layerDetails.opacity || 1);
   const [marks, setMarks] = useState<Mark[]>([]);
-  const [opacityMax, setOpacityMax] = useState(layerDetails.opacityFromParent || 1);
+  const [localOpacity, setLocalOpacity] = useState(layerOpacity);
 
   // Sync local state with store when layerDetails.opacity changes
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('LAYER OPACITY CONTROL - opacity sync', layerDetails.opacity);
+    logger.logTraceUseEffect('LAYER OPACITY CONTROL - opacity sync', layerOpacity);
 
-    if (layerDetails.opacity) setLocalOpacity(layerDetails.opacity);
-  }, [layerDetails.opacity]);
+    // Update the local opacity if it exceeds the max
+    const newValue = Math.min(layerOpacity, layerParentOpacity);
+    setLocalOpacity(newValue);
+  }, [layerOpacity, layerParentOpacity]);
 
+  // Update markers if the parent has a specific opacity other than 1
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('LAYER OPACITY CONTROL - parent opacity', layerDetails.opacityFromParent);
+    logger.logTraceUseEffect('LAYER OPACITY CONTROL - parent opacity', layerParentOpacity);
 
-    setOpacityMax(layerDetails.opacityFromParent || 1);
     // Add mark for parent opacity
-    if (layerDetails.opacityFromParent && layerDetails.opacityFromParent !== 1) {
-      setMarks([{ value: Math.round(layerDetails.opacityFromParent * 100), label: t('layers.opacityMax') }]);
+    if (layerParentOpacity !== 1) {
+      setMarks([{ value: Math.round(layerParentOpacity * 100), label: t('layers.opacityMax') }]);
     } else {
       setMarks([]);
     }
-  }, [layerDetails.opacityFromParent, t]);
-
-  // Keeps the slider handle from exceeding the max opacity
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('LAYER OPACITY CONTROL - max opacity', localOpacity, opacityMax);
-
-    // Update the local opacity if it exceeds the max - if the check happens earlier, the handle will not always reset
-    if (localOpacity > opacityMax) setLocalOpacity(opacityMax);
-  }, [localOpacity, opacityMax]);
+  }, [layerParentOpacity, t]);
 
   /**
    * Updates the opacity of the layer on the map, optionally updating the store
@@ -73,13 +67,13 @@ export function LayerOpacityControl(props: LayerOpacityControlProps): JSX.Elemen
   const handleSliderChange = useCallback(
     (value: number | number[], activeThumb: number, updateStore: boolean = false): void => {
       const val = (Array.isArray(value) ? value[0] : value) / 100;
-      const newValue = val > opacityMax ? opacityMax : val;
+      const newValue = Math.min(val, layerParentOpacity);
 
       // Necessary to keep the handle from exceeding the max from parent
-      if (updateStore) setLocalOpacity(val);
-      if (newValue !== localOpacity) setLayerOpacity(layerDetails.layerPath, newValue, updateStore);
+      setLocalOpacity(newValue);
+      setLayerOpacity(layerDetails.layerPath, newValue, updateStore);
     },
-    [layerDetails.layerPath, localOpacity, opacityMax, setLayerOpacity]
+    [layerDetails.layerPath, layerParentOpacity, setLayerOpacity]
   );
 
   return (

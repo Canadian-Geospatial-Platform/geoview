@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { useState, useEffect, useLayoutEffect, useCallback, useRef, useMemo } from 'react';
+import { useLayoutEffect, useCallback, useRef, useMemo } from 'react';
 import type { SxProps, Theme } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
 import { Slider as MaterialSlider } from '@mui/material';
@@ -53,7 +53,7 @@ function SliderUI(props: SliderProps): JSX.Element {
 
   // Get constant from props
   const {
-    value: parentValue,
+    value,
     min,
     max,
     marks,
@@ -77,10 +77,6 @@ function SliderUI(props: SliderProps): JSX.Element {
 
   const containerId = generateId(18);
   const valueLabelDisplayOption = valueLabelDisplay === undefined ? 'on' : 'auto';
-
-  // State
-  const [value, setValue] = useState<number[] | number>(parentValue);
-  const [activeThumb, setActiveThumb] = useState<number>(-1);
 
   // TODO: Refactor - when refactor time slider, re work logic for marks and label to have all of them inside slider (geochart-time slider)
   // Limit visible marks to max 30
@@ -134,10 +130,8 @@ function SliderUI(props: SliderProps): JSX.Element {
   }, [value, orientation, className]);
 
   // handle constant change on the slider to set active thumb and instant values
-  const handleChange = (event: React.SyntheticEvent | Event, newValue: number | number[], newActiveThumb: number): void => {
+  const handleChange = (event: React.SyntheticEvent | Event, newValue: number | number[], activeThumb: number): void => {
     // Update the internal state
-    setActiveThumb(newActiveThumb);
-    setValue(newValue);
     event.preventDefault();
 
     // Callback
@@ -160,13 +154,6 @@ function SliderUI(props: SliderProps): JSX.Element {
       }
     }
   }, []);
-
-  useEffect(() => {
-    logger.logTraceUseEffect('UI.SLIDER - parent value', parentValue);
-
-    // Update it internally when the parent has updated the value
-    setValue(parentValue);
-  }, [parentValue]);
 
   // GV There is a bug with focus on slider element. When the arrow key is pressed, the event trigger value change
   // GV for the slider then the slider value is updated. This causes the slider to lose focus.

@@ -197,6 +197,9 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
     // Officially add it to the OL object
     this.getOLLayer().getLayers().push(layer.getOLLayer());
 
+    // Set its parent right away
+    layer.setParent(this);
+
     // Add the layer to our list
     this.#layers.push(layer);
 
@@ -217,6 +220,9 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
 
     // Officially remove it from the OL object
     this.getOLLayer().getLayers().remove(layer.getOLLayer());
+
+    // Clear its parent right away
+    layer.setParent(undefined);
 
     // Remove it from our list
     this.#layers.splice(idx, 1);

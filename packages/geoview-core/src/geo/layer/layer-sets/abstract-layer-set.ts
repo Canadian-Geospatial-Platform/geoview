@@ -285,7 +285,7 @@ export abstract class AbstractLayerSet {
     abortController?: AbortController
   ): Promise<TypeFeatureInfoResult> {
     // If the layer is invisible (or any of its parent(s) is invisible)
-    if (!geoviewLayer.getVisibleIncludingParents(this.layerApi.getGeoviewLayersGroups())) return Promise.resolve({ results: [] });
+    if (!geoviewLayer.getVisibleIncludingParents()) return Promise.resolve({ results: [] });
 
     // If is not in visible range
     if (!geoviewLayer.getInVisibleRange(this.layerApi.mapViewer.getView().getZoom())) return Promise.resolve({ results: [] });

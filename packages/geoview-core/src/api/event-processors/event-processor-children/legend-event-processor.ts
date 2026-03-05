@@ -21,7 +21,6 @@ import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-class
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { Projection } from '@/geo/utils/projection';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import type { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 import { logger } from '@/core/utils/logger';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
@@ -153,8 +152,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    *
    * @param mapId - The unique identifier of the map instance.
    * @param gvLayer - The layer from which bounds recalculation should begin.
-   * @param allGroups - The collection of root-level group layers used to
-   * resolve parent relationships.
    * @description
    * This method invokes {@link setLayerBoundsForLayerAndParentsInStore} using a
    * fire-and-forget pattern. The returned promise is intentionally not awaited,
@@ -164,9 +161,9 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * where bounds propagation should not delay execution. Callers requiring
    * completion guarantees should use the awaited version instead.
    */
-  static setLayerBoundsForLayerAndParentsAndForgetInStore(mapId: string, gvLayer: AbstractBaseGVLayer, allGroups: GVGroupLayer[]): void {
+  static setLayerBoundsForLayerAndParentsAndForgetInStore(mapId: string, gvLayer: AbstractBaseGVLayer): void {
     // Redirect and forget about it
-    const promise = this.setLayerBoundsForLayerAndParentsInStore(mapId, gvLayer, allGroups);
+    const promise = this.setLayerBoundsForLayerAndParentsInStore(mapId, gvLayer);
     promise.catch((error: unknown) => {
       // Log the error
       logger.logPromiseFailed('in LegendEventProcessor.setLayerBoundsForLayerAndParentsAndForget', error);
@@ -187,11 +184,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * iteratively walks up the layer hierarchy, recalculating and storing
    * bounds for each parent group layer.
    */
-  static async setLayerBoundsForLayerAndParentsInStore(
-    mapId: string,
-    gvLayer: AbstractBaseGVLayer,
-    allGroups: GVGroupLayer[]
-  ): Promise<void> {
+  static async setLayerBoundsForLayerAndParentsInStore(mapId: string, gvLayer: AbstractBaseGVLayer): Promise<void> {
     const mapViewer = MapEventProcessor.getMapViewer(mapId);
     const mapProjection = mapViewer.getProjection();
     const stops = MapViewer.DEFAULT_STOPS;
@@ -208,7 +201,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       this.setLayerBoundsInStore(mapId, current.getLayerPath(), bounds, mapProjection, stops);
 
       // Advance to parent
-      current = current.getParent(allGroups);
+      current = current.getParent();
     }
   }
 
@@ -633,11 +626,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
             schemaTag: schemaTag,
             entryType: 'group',
             canToggle: legendResultSetEntry.data?.type !== CONST_LAYER_TYPES.ESRI_IMAGE,
-            opacity: layer?.getOLLayer()?.getOpacity() ?? layerConfig.getInitialSettings()?.states?.opacity ?? 1, // GV: This is call all the time, if set on OL use value, default to config or 1
+            opacity: layerConfig.getInitialSettings()?.states?.opacity ?? 1, // GV: This is call all the time, if set on OL use value, default to config or 1
             icons: [] as TypeLegendLayerItem[],
             items: [] as TypeLegendItem[],
             children: [] as TypeLegendLayer[],
           };
+
           existingEntries.push(legendLayerEntry);
           entryIndex = existingEntries.length - 1;
         } else {
@@ -675,8 +669,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
         const legendLayerEntry: TypeLegendLayer = {
           url: layerConfig.getMetadataAccessPath(),
-          bounds: existingStoreEntry?.bounds,
-          bounds4326: existingStoreEntry?.bounds4326,
+          bounds: existingStoreEntry?.bounds, // Reassigning the value, because we try to not manage this property from within this function anymore
+          bounds4326: existingStoreEntry?.bounds4326, // Reassigning the value, because we try to not manage this property from within this function anymore
           controls,
           layerId: layerPathNodes[currentLevel - 1],
           layerPath: entryLayerPath,
@@ -688,7 +682,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           schemaTag: schemaTag,
           entryType: layerConfig.getEntryType(),
           canToggle: schemaTag !== CONST_LAYER_TYPES.ESRI_IMAGE,
-          opacity: layer?.getOLLayer()?.getOpacity() ?? layerConfig.getInitialSettings()?.states?.opacity ?? 1, // GV: This is call all the time, if set on OL use value, default to config or 1
+          opacity: existingStoreEntry?.opacity ?? 1, // Reassigning the value, because we try to not manage this property from within this function anymore
+          opacityMaxFromParent: existingStoreEntry?.opacityMaxFromParent ?? 1, // Reassigning the value, because we try to not manage this property from within this function anymore
           hoverable: layerConfig.getInitialSettings()?.states?.hoverable, // default: true
           queryable: layerConfig.getInitialSettings()?.states?.queryable, // default: true
           children: [] as TypeLegendLayer[],
@@ -1072,37 +1067,6 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Recursively updates the opacity in provided legend layers of a layer and its children.
-   * @param {string} mapId - The ID of the map.
-   * @param {TypeLegendLayer[]} curLayers - The current legend layers.
-   * @param {string} layerPath - The layer path.
-   * @param {number} opacity - The opacity to set.
-   * @param {boolean} isChild - Is the layer a child layer.
-   * @static
-   * @private
-   */
-  static #setOpacityInLayerAndChildren(
-    mapId: string,
-    curLayers: TypeLegendLayer[],
-    layerPath: string,
-    opacity: number,
-    isChild: boolean = false
-  ): void {
-    const layer = LegendEventProcessor.findLayerByPath(curLayers, layerPath);
-    if (layer) {
-      layer.opacity = opacity;
-      if (isChild) {
-        layer.opacityFromParent = opacity;
-      }
-      if (layer.children && layer.children.length > 0) {
-        layer.children.forEach((child) => {
-          this.#setOpacityInLayerAndChildren(mapId, curLayers, child.layerPath, opacity, true);
-        });
-      }
-    }
-  }
-
-  /**
    * Sets the opacity of the layer and its children in the store.
    * @param {string} mapId - The ID of the map.
    * @param {string} layerPath - The layer path of the layer to change.
@@ -1124,21 +1088,47 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Sets the opacity of the layer and its children in the store.
-   * @param {string} mapId - The ID of the map.
-   * @param {string} layerPath - The layer path of the layer to change.
-   * @param {number} opacity - The opacity to set.
-   * @static
+   *
+   * @param mapId - The ID of the map.
+   * @param layerPath - The layer path of the layer to change.
+   * @param opacity - The opacity to set.
    */
   static setOpacityInStore(mapId: string, layerPath: string, opacity: number): void {
-    const curLayers = this.getLayerState(mapId).legendLayers;
-    this.#setOpacityInLayerAndChildren(mapId, curLayers, layerPath, opacity);
+    const layers = this.getLayerState(mapId).legendLayers;
+    const layer = this.findLayerByPath(layers, layerPath);
+
+    if (layer) {
+      // Set the opacity
+      layer.opacity = opacity;
+      // Go recursive
+      this.#setOpacityInStoreRec(layer, opacity);
+    }
 
     // Set updated legend layers
-    this.getLayerState(mapId).setterActions.setLegendLayers(curLayers);
+    this.getLayerState(mapId).setterActions.setLegendLayers(layers);
+  }
+
+  /**
+   * Recursively sets the opacity and opacityMaxFromParent of all children of the given layer.
+   *
+   * @param layer - The layer on which to update the children opacity values.
+   * @param opacity - The opacity to set.
+   */
+  static #setOpacityInStoreRec(layer: TypeLegendLayer, opacity: number): void {
+    // Set the opacity along with all the children
+    layer.children?.forEach((child) => {
+      // eslint-disable-next-line no-param-reassign
+      child.opacity = opacity;
+      // eslint-disable-next-line no-param-reassign
+      child.opacityMaxFromParent = opacity;
+      // Go recursive
+      this.#setOpacityInStoreRec(child, opacity);
+    });
   }
 
   /**
    * Sets the opacity of a layer.
+   *
    * @param {string} mapId - The ID of the map.
    * @param {string} layerPath - The layer path of the layer to change.
    * @param {number} opacity - The opacity to set.
