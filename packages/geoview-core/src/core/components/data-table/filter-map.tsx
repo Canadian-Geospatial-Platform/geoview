@@ -37,7 +37,7 @@ function FilterMap({ layerPath, isGlobalFilterOn }: FilterMapProps): JSX.Element
       checked={!!datatableSettings[layerPath].mapFilteredRecord}
       sx={sxClasses.filterMap}
       disabled={isGlobalFilterOn}
-      label={t('dataTable.filterMap')!}
+      label={t('dataTable.filterMap')}
     />
   );
 }

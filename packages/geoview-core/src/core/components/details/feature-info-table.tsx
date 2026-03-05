@@ -35,12 +35,12 @@ interface FeatureItemProps {
   mapId: string;
   containerType: TypeContainerBox;
   featureInfoItem: TypeFieldEntry;
-  onInitLightBox: (value: string, elementId: string, index: number) => void;
+  onInitLightBox: (images: string, altText: string, returnFocusId: string, index?: number, scale?: number) => void;
 }
 
 interface FeatureRowProps {
   featureInfoItem: TypeFieldEntry;
-  onInitLightBox: (value: string, elementId: string, index: number) => void;
+  onInitLightBox: (images: string, altText: string, returnFocusId: string, index?: number, scale?: number) => void;
   language: TypeDisplayLanguage;
   layerDateTemporalMode: TemporalMode;
   displayDateFormat: TypeDisplayDateFormat;
@@ -101,10 +101,10 @@ export const FeatureItem = memo(function FeatureItem({
           src={item}
           tabIndex={0}
           title={t('general.clickEnlarge')!}
-          onClick={() => onInitLightBox(featureInfoItem.value as string, imageElementId, index)}
+          onClick={() => onInitLightBox(featureInfoItem.value as string, `${alias} ${index}`, imageElementId, index)}
           onKeyDown={(event: React.KeyboardEvent) => {
             if (event.key === 'Enter') {
-              onInitLightBox(featureInfoItem.value as string, imageElementId, index);
+              onInitLightBox(featureInfoItem.value as string, `${alias} ${index}`, imageElementId, index);
             }
           }}
         />
@@ -112,7 +112,7 @@ export const FeatureItem = memo(function FeatureItem({
           id={buttonElementId}
           type="text"
           sx={{ fontSize: theme.palette.geoViewFontSize.xs }}
-          onClick={() => onInitLightBox(featureInfoItem.value as string, buttonElementId, index)}
+          onClick={() => onInitLightBox(featureInfoItem.value as string, t('general.clickEnlarge'), buttonElementId, index)}
         >
           {t('general.clickEnlarge')!}
         </Button>

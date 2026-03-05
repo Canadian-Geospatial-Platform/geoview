@@ -1,6 +1,9 @@
 import { useRef, useCallback, useState } from 'react';
+
 import { useTranslation } from 'react-i18next';
+
 import { useTheme } from '@mui/material';
+
 import { Box } from '@/ui';
 import { useLayerDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LayersToolbar } from './layers-toolbar';
@@ -112,7 +115,7 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
   return (
     <ResponsiveGridLayout
       ref={responsiveLayoutRef}
-      leftTop={<LayersToolbar />}
+      leftTop={<LayersToolbar containerType={containerType} />}
       leftMain={leftPanel()}
       rightTop={layerTitle()}
       rightMain={rightPanel()}

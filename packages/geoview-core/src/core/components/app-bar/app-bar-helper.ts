@@ -1,7 +1,9 @@
 import type { Dispatch, SetStateAction } from 'react';
+
 import type { TypeButtonPanel } from '@/ui/panel/panel-types';
-import type { ButtonPanelType } from './app-bar';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
+
+import type { ButtonPanelType } from './app-bar';
 
 export const helpOpenClosePanelByIdState = (
   buttonId: string,

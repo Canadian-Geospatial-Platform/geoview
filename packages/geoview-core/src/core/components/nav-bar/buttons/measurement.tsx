@@ -397,14 +397,14 @@ export default function Measurement(): JSX.Element {
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         {/* On/Off Switch */}
         <Switch
-          label={!isMeasurementActive ? t('general.enable')! : t('general.disable')!}
+          label={!isMeasurementActive ? t('general.enable') : t('general.disable')}
           checked={isMeasurementActive}
           onChange={handleMeasurementToggle}
           size="small"
         />
         {/* Segment Labels Toggle */}
         <Switch
-          label={t('measurement.segmentLabels')!}
+          label={t('measurement.segmentLabels')}
           checked={showSegmentLabels}
           onChange={handleSegmentLabelsToggle}
           size="small"

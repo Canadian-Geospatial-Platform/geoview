@@ -22,6 +22,7 @@ import {
   useLayerSelectorControls,
   useLayerSelectorStatus,
   useLayerSelectorEntryType,
+  useLayerSelectorName,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
   useUIFooterBarComponents,
@@ -39,8 +40,7 @@ import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 
-// TODO: WCAG Issue #3108 - Check all icon buttons for aria-label clarity and translations
-// TODO: WCAG Issue #3108 - Check all icon buttons for "state related" aria values (i.e aria-checked, aria-disabled, etc.)
+// TODO: WCAG Issue #3332 - Consider disabling Zoom to Layer button when it's already zoomed to that layer's extent
 // TODO: WCAG - Consider showing Show in Time Slider button in WCAG mode (requires re-working WCAG UX)
 
 interface SecondaryControlsProps {
@@ -136,6 +136,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
   const parentHidden = useMapSelectorLayerParentHidden(layerPath);
   const highlightedLayer = useLayerHighlightedLayer();
   const isFocusTrap = useUIActiveTrapGeoView();
+  st layerName = useLayerSelectorName(layerPath) ?? layerPath;
 
   // Is visibility button disabled?
   const isLayerVisibleCapable = layerControls?.visibility ?? false;
@@ -148,6 +149,10 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
 
   // Is zoom to visible scale button visible?
   const isZoomToVisibleScaleCapable = !isInVisibleRange && layerEntryType !== 'group';
+  const isZoomToVisibleScaleButton = layerControls?.visibleScale ?? false;
+
+  // Is zoom to layer button disabled?
+  const isZoomToLayerDisabled = !isInVisibleRange || parentHidden || !isVisible || layerStatus === 'error';
 
   // Component helper
   const controls = useControlActions(layerPath);
@@ -163,7 +168,8 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
         {hasLayersTab && !isFocusTrap && (
           <Box sx={sxClasses.buttonDivider}>
             <IconButton
-              aria-label={t('legend.selectLayerAndScroll')}
+              tooltip={t('legend.selectLayerAndScroll')}
+              aria-label={`${t('legend.selectLayerAndScroll')} - ${layerName}`}
               className="buttonOutline"
               onClick={(event) => {
                 // Stop propagation to prevent AppBar's onScrollShellIntoView from firing
@@ -175,18 +181,29 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
             </IconButton>
           </Box>
         )}
-        <IconButton
-          edge="end"
-          aria-label={t('layers.zoomVisibleScale')}
-          className={`buttonOutline ${isZoomToVisibleScaleCapable ? '' : 'outOfRangeButton'}`}
-          onClick={controls.handleZoomToLayerVisibleScale}
-        >
-          <CenterFocusScaleIcon />
-        </IconButton>
+        {isZoomToVisibleScaleButton && (
+          <IconButton
+            edge="end"
+            tooltip={t('layers.zoomVisibleScale')}
+            aria-label={`${t('layers.zoomVisibleScale')} - ${layerName}`} // WCAG - Provide descriptive aria-label for icon button tooltips
+            aria-disabled={!isZoomToVisibleScaleCapable}
+            className={`buttonOutline`}
+            onClick={(event) => {
+              if (!isZoomToVisibleScaleCapable) {
+                return;
+              }
+              controls.handleZoomToLayerVisibleScale(event);
+            }}
+          >
+            <CenterFocusScaleIcon />
+          </IconButton>
+        )}
         {isLayerVisibleCapable && (
           <IconButton
             edge={isInVisibleRange ? false : 'end'}
-            aria-label={t('layers.toggleVisibility')}
+            tooltip={t('layers.toggleVisibility')}
+            aria-label={`${t('layers.toggleVisibility')} - ${layerName}`} // WCAG - Provide descriptive aria-label for icon button tooltips
+            aria-pressed={isVisible} // WCAG - used instead of disabled to allow button to retain focus after keyboard press
             className="buttonOutline"
             onClick={controls.handleToggleVisibility}
             disabled={!isInVisibleRange || parentHidden || layerStatus === 'error'}
@@ -196,7 +213,9 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
         )}
         {isLayerHighlightCapable && (
           <IconButton
-            aria-label={t('legend.highlightLayer')}
+            tooltip={t('legend.highlightLayer')}
+            aria-label={`${t('legend.highlightLayer')} - ${layerName}`} // WCAG - Provide descriptive aria-label for icon button tooltips
+            aria-pressed={highlightedLayer === layerPath}
             className="buttonOutline"
             onClick={controls.handleHighlightLayer}
             disabled={!isInVisibleRange || parentHidden || !isVisible || layerStatus === 'error'}
@@ -206,10 +225,16 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
         )}
         {isLayerZoomToExtentCapable && (
           <IconButton
-            aria-label={t('legend.zoomTo')}
+            tooltip={t('legend.zoomTo')}
+            aria-label={`${t('legend.zoomTo')} - ${layerName}`} // WCAG - Provide descriptive aria-label for icon button tooltips
+            aria-disabled={isZoomToLayerDisabled} // WCAG - used instead of disabled to allow button to retain focus after keyboard press
             className="buttonOutline"
-            onClick={controls.handleZoomTo}
-            disabled={!isInVisibleRange || parentHidden || !isVisible || layerStatus === 'error'}
+            onClick={(event) => {
+              if (isZoomToLayerDisabled) {
+                return;
+              }
+              controls.handleZoomTo(event);
+            }}
           >
             <ZoomInSearchIcon />
           </IconButton>
