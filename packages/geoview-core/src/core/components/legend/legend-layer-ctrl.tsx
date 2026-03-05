@@ -1,6 +1,8 @@
-import { useTheme } from '@mui/material';
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
+
 import { useTranslation } from 'react-i18next';
+
+import { useTheme } from '@mui/material';
 import {
   Box,
   IconButton,
@@ -22,6 +24,7 @@ import {
   useLayerSelectorControls,
   useLayerSelectorStatus,
   useLayerSelectorEntryType,
+  useLayerSelectorName,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
   useUIFooterBarComponents,
@@ -38,9 +41,12 @@ import type { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/t
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
+import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
-// TODO: WCAG Issue #3108 - Check all icon buttons for aria-label clarity and translations
-// TODO: WCAG Issue #3108 - Check all icon buttons for "state related" aria values (i.e aria-checked, aria-disabled, etc.)
+// TODO: WCAG Issue #3332 - Consider disabling Zoom to Layer button when it's already zoomed to that layer's extent
 // TODO: WCAG - Consider showing Show in Time Slider button in WCAG mode (requires re-working WCAG UX)
 
 interface SecondaryControlsProps {
@@ -54,9 +60,16 @@ type ControlActions = {
   handleZoomTo: (event: React.MouseEvent) => void;
 };
 
-// Custom hook for control actions
+/**
+ * Custom hook for control actions.
+ *
+ * Performance optimization: Only depends on layerPath for stable memoization.
+ * State values (visibility, parentHidden, etc.) are read imperatively from the store
+ * inside each handler when executed, preventing callback recreation on every state change.
+ */
 const useControlActions = (layerPath: string): ControlActions => {
   // Store
+  const mapId = useGeoViewMapId();
   const { setOrToggleLayerVisibility } = useMapStoreActions();
   const { setHighlightLayer, zoomToLayerExtent, zoomToLayerVisibleScale } = useLayerStoreActions();
 
@@ -64,24 +77,72 @@ const useControlActions = (layerPath: string): ControlActions => {
     () => ({
       handleZoomToLayerVisibleScale: (event: React.MouseEvent): void => {
         event.stopPropagation();
+        // Read current state values when handler executes
+        const store = getGeoViewStore(mapId);
+        const { layerState, mapState } = store.getState();
+        const layer = LegendEventProcessor.findLayerByPath(layerState.legendLayers, layerPath);
+        // Use orderedLayerInfo to check visibility range
+        const layerInfo = MapEventProcessor.findMapLayerFromOrderedInfo(mapId, layerPath, mapState.orderedLayerInfo);
+        const isInVisibleRange = layerInfo?.inVisibleRange || false;
+
+        const isZoomToVisibleScaleCapable = !isInVisibleRange && layer?.entryType !== 'group';
+        if (!isZoomToVisibleScaleCapable) {
+          return;
+        }
         zoomToLayerVisibleScale(layerPath);
       },
       handleToggleVisibility: (event: React.MouseEvent): boolean => {
         event.stopPropagation();
+        // Read current state values when handler executes
+        const store = getGeoViewStore(mapId);
+        const { layerState, mapState } = store.getState();
+        const layer = LegendEventProcessor.findLayerByPath(layerState.legendLayers, layerPath);
+        const layerInfo = MapEventProcessor.findMapLayerFromOrderedInfo(mapId, layerPath, mapState.orderedLayerInfo);
+        const isInVisibleRange = layerInfo?.inVisibleRange || false;
+        const parentHidden = MapEventProcessor.getMapLayerParentHidden(mapId, layerPath);
+
+        if (!isInVisibleRange || parentHidden || layer?.layerStatus === 'error') {
+          return false;
+        }
         return setOrToggleLayerVisibility(layerPath);
       },
       handleHighlightLayer: (event: React.MouseEvent): void => {
         event.stopPropagation();
+        // Read current state values when handler executes
+        const store = getGeoViewStore(mapId);
+        const { layerState, mapState } = store.getState();
+        const layer = LegendEventProcessor.findLayerByPath(layerState.legendLayers, layerPath);
+        const layerInfo = MapEventProcessor.findMapLayerFromOrderedInfo(mapId, layerPath, mapState.orderedLayerInfo);
+        const isInVisibleRange = layerInfo?.inVisibleRange || false;
+        const parentHidden = MapEventProcessor.getMapLayerParentHidden(mapId, layerPath);
+        const isVisible = layerInfo?.visible || false;
+
+        if (!isInVisibleRange || parentHidden || !isVisible || layer?.layerStatus === 'error') {
+          return;
+        }
         setHighlightLayer(layerPath);
       },
       handleZoomTo: (event: React.MouseEvent): void => {
         event.stopPropagation();
+        // Read current state values when handler executes
+        const store = getGeoViewStore(mapId);
+        const { layerState, mapState } = store.getState();
+        const layer = LegendEventProcessor.findLayerByPath(layerState.legendLayers, layerPath);
+        const layerInfo = MapEventProcessor.findMapLayerFromOrderedInfo(mapId, layerPath, mapState.orderedLayerInfo);
+        const isInVisibleRange = layerInfo?.inVisibleRange || false;
+        const parentHidden = MapEventProcessor.getMapLayerParentHidden(mapId, layerPath);
+        const isVisible = layerInfo?.visible || false;
+
+        const isZoomToLayerDisabled = !isInVisibleRange || parentHidden || !isVisible || layer?.layerStatus === 'error';
+        if (isZoomToLayerDisabled) {
+          return;
+        }
         zoomToLayerExtent(layerPath).catch((error: unknown) => {
           logger.logPromiseFailed('in zoomToLayerExtent in legend-layer.handleZoomTo', error);
         });
       },
     }),
-    [layerPath, setHighlightLayer, setOrToggleLayerVisibility, zoomToLayerExtent, zoomToLayerVisibleScale]
+    [layerPath, mapId, setHighlightLayer, setOrToggleLayerVisibility, zoomToLayerExtent, zoomToLayerVisibleScale]
   );
 };
 
@@ -119,6 +180,16 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
   // Use navigate hook
   const navigateToLayers = useNavigateToTab('layers', setSelectedLayerPath);
 
+  // Create stable handler for layer navigation
+  const handleNavigateToLayers = useCallback(
+    (event: React.MouseEvent) => {
+      // Stop propagation to prevent AppBar's onScrollShellIntoView from firing
+      event.stopPropagation();
+      navigateToLayers({ layerPath });
+    },
+    [navigateToLayers, layerPath]
+  );
+
   // Log
   logger.logTraceRender('components/legend/legend-layer-ctrl', layerPath);
 
@@ -136,6 +207,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
   const parentHidden = useMapSelectorLayerParentHidden(layerPath);
   const highlightedLayer = useLayerHighlightedLayer();
   const isFocusTrap = useUIActiveTrapGeoView();
+  const layerName = useLayerSelectorName(layerPath) ?? layerPath;
 
   // Is visibility button disabled?
   const isLayerVisibleCapable = layerControls?.visibility ?? false;
@@ -148,6 +220,10 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
 
   // Is zoom to visible scale button visible?
   const isZoomToVisibleScaleCapable = !isInVisibleRange && layerEntryType !== 'group';
+  const isZoomToVisibleScaleButton = layerControls?.visibleScale ?? false;
+
+  // Is zoom to layer button disabled?
+  const isZoomToLayerDisabled = !isInVisibleRange || parentHidden || !isVisible || layerStatus === 'error';
 
   // Component helper
   const controls = useControlActions(layerPath);
@@ -163,53 +239,59 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
         {hasLayersTab && !isFocusTrap && (
           <Box sx={sxClasses.buttonDivider}>
             <IconButton
-              aria-label={t('legend.selectLayerAndScroll')}
+              tooltip={t('legend.selectLayerAndScroll')}
+              aria-label={`${t('legend.selectLayerAndScroll')} - ${layerName}`}
               className="buttonOutline"
-              onClick={(event) => {
-                // Stop propagation to prevent AppBar's onScrollShellIntoView from firing
-                event.stopPropagation();
-                navigateToLayers({ layerPath });
-              }}
+              onClick={handleNavigateToLayers}
             >
               <LayersIcon />
             </IconButton>
           </Box>
         )}
-        <IconButton
-          edge="end"
-          aria-label={t('layers.zoomVisibleScale')}
-          className={`buttonOutline ${isZoomToVisibleScaleCapable ? '' : 'outOfRangeButton'}`}
-          onClick={controls.handleZoomToLayerVisibleScale}
-        >
-          <CenterFocusScaleIcon />
-        </IconButton>
+        {isZoomToVisibleScaleButton && (
+          <IconButton
+            edge="end"
+            tooltip={t('layers.zoomVisibleScale')}
+            aria-label={`${t('layers.zoomVisibleScale')} - ${layerName}`} // WCAG - // WCAG - Provide descriptive aria-label for screen readers
+            aria-disabled={!isZoomToVisibleScaleCapable}
+            className={`buttonOutline`}
+            onClick={controls.handleZoomToLayerVisibleScale}
+          >
+            <CenterFocusScaleIcon />
+          </IconButton>
+        )}
         {isLayerVisibleCapable && (
           <IconButton
             edge={isInVisibleRange ? false : 'end'}
-            aria-label={t('layers.toggleVisibility')}
+            tooltip={t('layers.toggleVisibility')}
+            aria-label={`${t('layers.toggleVisibility')} - ${layerName}`} // WCAG - Provide descriptive aria-label for screen readers
+            aria-pressed={isVisible} // WCAG - used instead of disabled to allow button to retain focus after keyboard press
+            aria-disabled={!isInVisibleRange || parentHidden || layerStatus === 'error'}
             className="buttonOutline"
             onClick={controls.handleToggleVisibility}
-            disabled={!isInVisibleRange || parentHidden || layerStatus === 'error'}
           >
             {isVisible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
           </IconButton>
         )}
         {isLayerHighlightCapable && (
           <IconButton
-            aria-label={t('legend.highlightLayer')}
+            tooltip={t('legend.highlightLayer')}
+            aria-label={`${t('legend.highlightLayer')} - ${layerName}`} // WCAG - Provide descriptive aria-label for icon button tooltips
+            aria-pressed={highlightedLayer === layerPath}
+            aria-disabled={!isInVisibleRange || parentHidden || !isVisible || layerStatus === 'error'}
             className="buttonOutline"
             onClick={controls.handleHighlightLayer}
-            disabled={!isInVisibleRange || parentHidden || !isVisible || layerStatus === 'error'}
           >
             {highlightedLayer === layerPath ? <HighlightIcon /> : <HighlightOutlinedIcon />}
           </IconButton>
         )}
         {isLayerZoomToExtentCapable && (
           <IconButton
-            aria-label={t('legend.zoomTo')}
+            tooltip={t('legend.zoomTo')}
+            aria-label={`${t('legend.zoomTo')} - ${layerName}`} // WCAG - Provide descriptive aria-label for icon button tooltips
+            aria-disabled={isZoomToLayerDisabled} // WCAG - used instead of disabled to allow button to retain focus after keyboard press
             className="buttonOutline"
             onClick={controls.handleZoomTo}
-            disabled={!isInVisibleRange || parentHidden || !isVisible || layerStatus === 'error'}
           >
             <ZoomInSearchIcon />
           </IconButton>

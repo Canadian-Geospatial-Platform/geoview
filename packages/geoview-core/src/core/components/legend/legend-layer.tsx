@@ -1,7 +1,11 @@
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useId, useMemo, useEffect, useRef, useState } from 'react';
+
 import { useTranslation } from 'react-i18next';
+
 import { useTheme } from '@mui/material';
-import { Box, ListItem, Tooltip, ListItemText, IconButton, KeyboardArrowDownIcon, KeyboardArrowUpIcon, ProgressBar } from '@/ui';
+
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { Box, ListItem, ListItemText, IconButton, KeyboardArrowDownIcon, KeyboardArrowUpIcon, ProgressBar } from '@/ui';
 import {
   useLayerSelectorChildren,
   useLayerSelectorItems,
@@ -21,13 +25,13 @@ import { CollapsibleContent } from './legend-layer-container';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
+import type { TypeContainerBox } from '@/core/types/global-types';
+import { Typography } from '@/ui/typography/typography';
 
-// TODO: WCAG Issue #3108 - Check all icon buttons for aria-label clarity and translations
-// TODO: WCAG Issue #3108 - Check all icon buttons for "state related" aria values (i.e aria-checked, aria-disabled, etc.)
-
-interface LegendLayerProps {
+export interface LegendLayerProps {
   layerPath: string;
   showControls: boolean;
+  containerType: TypeContainerBox;
 }
 
 interface LegendLayerHeaderProps {
@@ -36,61 +40,81 @@ interface LegendLayerHeaderProps {
   onExpandClick: (event: React.MouseEvent) => void;
   sxClasses: ReturnType<typeof getSxClasses>;
   showControls: boolean;
+  layerNameId: string;
+  collapseContainerId: string;
 }
 
-// Length at which the tooltip should be shown
-const CONST_NAME_LENGTH_TOOLTIP = 50;
-
 // Extracted Header Component
-const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick, sxClasses, showControls }: LegendLayerHeaderProps): JSX.Element => {
-  // Log
-  logger.logTraceUseMemo('components/legend/legend-layer - LegendLayerHeader', layerPath);
+const LegendLayerHeader = memo(
+  ({
+    layerPath,
+    tooltip,
+    onExpandClick,
+    sxClasses,
+    showControls,
+    layerNameId,
+    collapseContainerId,
+  }: LegendLayerHeaderProps): JSX.Element => {
+    // Log
+    logger.logTraceUseMemo('components/legend/legend-layer - LegendLayerHeader', layerPath);
 
-  // Hooks
-  const isCollapsed = useMapSelectorLayerLegendCollapsed(layerPath);
-  const layerHidden = useMapSelectorIsLayerHiddenOnMap(layerPath);
-  const layerName = useLayerSelectorName(layerPath);
-  const layerItems = useLayerSelectorItems(layerPath);
-  const layerChildren = useLayerSelectorChildren(layerPath);
-  const schemaTag = useLayerSelectorSchemaTag(layerPath);
-  const layerStatus = useLayerSelectorStatus(layerPath);
+    // Hooks
+    const isCollapsed = useMapSelectorLayerLegendCollapsed(layerPath);
+    const layerHidden = useMapSelectorIsLayerHiddenOnMap(layerPath);
+    const layerName = useLayerSelectorName(layerPath) ?? layerPath;
+    const layerItems = useLayerSelectorItems(layerPath);
+    const layerChildren = useLayerSelectorChildren(layerPath);
+    const schemaTag = useLayerSelectorSchemaTag(layerPath);
+    const layerStatus = useLayerSelectorStatus(layerPath);
 
-  // This is used to determine if the text should be wrapped in a tooltip
-  const shouldShowTooltip = !!layerName && layerName.length > CONST_NAME_LENGTH_TOOLTIP;
-
-  // Return the ui
-  return (
-    <Box
-      key={layerPath}
-      sx={sxClasses.legendListItemHeader}
-      className={`legendListItemHeader${layerHidden || layerStatus === 'error' ? ' outOfRange' : ''}`}
-    >
-      <LayerIcon layerPath={layerPath} />
-      <ListItemText
-        primary={
-          <Tooltip title={layerName} placement="top" disableHoverListener={!shouldShowTooltip}>
-            <Box>{layerName}</Box>
-          </Tooltip>
-        }
-        sx={sxClasses.legendTitle}
-        className="legendTitle"
-        disableTypography
-        secondary={showControls ? <SecondaryControls layerPath={layerPath} /> : undefined}
-      />
-      {showControls &&
-        ((layerChildren && layerChildren.length > 0) || (layerItems && layerItems.length > 1) || schemaTag === CONST_LAYER_TYPES.WMS) && (
-          <IconButton className="buttonOutline" onClick={onExpandClick} edge="end" size="small" aria-label={tooltip}>
-            {!isCollapsed ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
-        )}
-    </Box>
-  );
-});
+    // Return the ui
+    return (
+      <Box
+        key={layerPath}
+        sx={sxClasses.legendListItemHeader}
+        className={`legendListItemHeader${layerHidden || layerStatus === 'error' ? ' outOfRange' : ''}`}
+      >
+        <LayerIcon layerPath={layerPath} />
+        <ListItemText
+          primary={
+            <Typography component="div" id={layerNameId}>
+              {layerName}
+            </Typography>
+          }
+          sx={sxClasses.legendTitle}
+          className="legendTitle"
+          disableTypography
+          secondary={showControls ? <SecondaryControls layerPath={layerPath} /> : undefined}
+        />
+        {showControls &&
+          ((layerChildren && layerChildren.length > 0) || (layerItems && layerItems.length > 1) || schemaTag === CONST_LAYER_TYPES.WMS) && (
+            <IconButton
+              className="buttonOutline"
+              onClick={onExpandClick}
+              edge="end"
+              size="small"
+              tooltip={tooltip}
+              aria-label={`${tooltip} - ${layerName}`} // WCAG - Provide descriptive aria-label for icon button tooltips
+              aria-expanded={!isCollapsed} // WCAG - Indicate expanded/collapsed state with aria-expanded
+              aria-controls={!isCollapsed ? collapseContainerId : undefined} // WCAG - Link button to collapsible content using aria-controls and matching IDs
+            >
+              {!isCollapsed ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+            </IconButton>
+          )}
+      </Box>
+    );
+  }
+);
 
 LegendLayerHeader.displayName = 'LegendLayerHeader';
 
-// Main LegendLayer component
-export function LegendLayer({ layerPath, showControls }: LegendLayerProps): JSX.Element {
+/**
+ * Renders a layer entry in the legend with collapsible content.
+ *
+ * Triggers screen reader announcements when layer status changes between
+ * loading/loaded/error states via ARIA live regions.
+ */
+export function LegendLayer({ layerPath, showControls, containerType }: LegendLayerProps): JSX.Element {
   // Log
   logger.logTraceRender('components/legend/legend-layer', layerPath);
 
@@ -98,11 +122,20 @@ export function LegendLayer({ layerPath, showControls }: LegendLayerProps): JSX.
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
+  const mapId = useGeoViewMapId();
+  const id = useId(); // WCAG - Generate a stable unique ID
+  const layerNameId = `${mapId}-${containerType}-layer-name-${id}`; // WCAG - IDs to link the layer name to icon buttons related to it (aria-describedby)
+  const collapseContainerId = `${mapId}-${containerType}-collapse-${id}`; // WCAG - IDs to link collapse buttons to collapsible content related to it (aria-controls)
 
   // Stores
   const layerStatus = useLayerSelectorStatus(layerPath);
+  const layerName = useLayerSelectorName(layerPath) ?? layerPath;
   const { initLightBox, LightBoxComponent } = useLightBox();
   const { toggleLegendCollapsed } = useMapStoreActions();
+
+  // Internal state
+  const prevStatusRef = useRef<string | undefined>(undefined); // Ref to track previous status for status change detection
+  const [statusMessage, setStatusMessage] = useState<string>('');
 
   const handleExpandGroupClick = useCallback(
     (event: React.MouseEvent): void => {
@@ -115,6 +148,26 @@ export function LegendLayer({ layerPath, showControls }: LegendLayerProps): JSX.
     [layerPath, toggleLegendCollapsed]
   );
 
+  // WCAG - Track layer status changes for screen reader announcements
+  useEffect(() => {
+    if (layerStatus === 'loading' && prevStatusRef.current !== 'loading') {
+      // Announce when loading starts
+      setStatusMessage(t('legend.layerLoadingDescriptive', { layerName }) || '');
+      prevStatusRef.current = layerStatus;
+    } else if (layerStatus === 'loaded' && prevStatusRef.current === 'loading') {
+      // Announce when loading completes successfully
+      setStatusMessage(t('legend.layerLoadedDescriptive', { layerName }) || '');
+      prevStatusRef.current = layerStatus;
+    } else if (layerStatus === 'error' && prevStatusRef.current === 'loading') {
+      // Announce when loading fails
+      setStatusMessage(t('legend.layerErrorDescriptive', { layerName }) || '');
+      prevStatusRef.current = layerStatus;
+    } else {
+      // Update ref for any other status changes
+      prevStatusRef.current = layerStatus;
+    }
+  }, [layerStatus, layerName, t]);
+
   return (
     <ListItem className="legendListItem" sx={sxClasses.legendListItem} key={layerPath}>
       <LegendLayerHeader
@@ -123,17 +176,27 @@ export function LegendLayer({ layerPath, showControls }: LegendLayerProps): JSX.
         onExpandClick={handleExpandGroupClick}
         sxClasses={sxClasses}
         showControls={showControls}
+        layerNameId={layerNameId}
+        collapseContainerId={collapseContainerId}
       />
+      {/* WCAG - ARIA live region for screen reader announcements */}
+      <Box sx={sxClasses.visuallyHidden} role="status" aria-live="polite" aria-atomic="true">
+        {statusMessage}
+      </Box>
       {layerStatus === 'loading' && (
         <Box sx={sxClasses.loading}>
-          <ProgressBar />
+          <ProgressBar aria-label={t('legend.layerLoadingDescriptive', { layerName }) || undefined} />
         </Box>
       )}
+
       <CollapsibleContent
         layerPath={layerPath}
         initLightBox={initLightBox}
         LegendLayerComponent={LegendLayer}
         showControls={showControls}
+        containerType={containerType}
+        collapseContainerId={collapseContainerId}
+        layerNameId={layerNameId}
       />
       <LightBoxComponent />
     </ListItem>

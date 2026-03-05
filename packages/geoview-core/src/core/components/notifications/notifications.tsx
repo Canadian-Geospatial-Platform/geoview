@@ -29,7 +29,7 @@ import { useShake } from '@/core/utils/useSpringAnimations';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { SxStyles } from '@/ui/style/types';
-import { TIMEOUT } from '@/core/utils/constant';
+import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
 
 export type NotificationDetailsType = {
   key: string;
@@ -250,9 +250,7 @@ export default memo(function Notifications(): JSX.Element {
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>
       <Box sx={{ padding: interaction === 'dynamic' ? 'none' : '5px' }}>
         <IconButton
-          id={`notification-button-${mapId}`}
-          aria-controls={open ? `notification-dialog-${mapId}` : undefined}
-          aria-expanded={open ? 'true' : 'false'}
+          id={`${mapId}-${CONTAINER_TYPE.APP_BAR}-notifications-btn`}
           aria-label={t('appbar.notifications')}
           aria-haspopup="dialog"
           tooltipPlacement="right"

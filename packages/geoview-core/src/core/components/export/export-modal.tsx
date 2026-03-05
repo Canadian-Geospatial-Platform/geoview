@@ -297,8 +297,7 @@ export default function ExportModal(): JSX.Element {
 
   return (
     <Dialog
-      role="dialog"
-      id={`${mapId}-export-modal`}
+      id={`${mapId}-export-dialog`}
       open={activeModalId === 'export'}
       onClose={handleCloseModal}
       slotProps={{
@@ -315,7 +314,7 @@ export default function ExportModal(): JSX.Element {
         {/* Title input */}
         <Box sx={sxClasses.title}>
           <TextField
-            id="export-title-input"
+            id={`${mapId}-export-title-input`}
             inputRef={titleInputRef}
             label={t('exportModal.exportTitle')}
             variant="standard"
@@ -356,7 +355,7 @@ export default function ExportModal(): JSX.Element {
         </Button>
 
         {/* Format Selection Menu */}
-        <Menu id="format-selection" open={formatMenuOpen} onClose={handleFormatMenuClose} anchorEl={formatAnchorEl}>
+        <Menu id={`${mapId}-export-format-selection`} open={formatMenuOpen} onClose={handleFormatMenuClose} anchorEl={formatAnchorEl}>
           <MenuItem onClick={() => handleSelectFormat('pdf')}>PDF</MenuItem>
           <MenuItem onClick={() => handleSelectFormat('png')}>PNG</MenuItem>
           <MenuItem onClick={() => handleSelectFormat('jpeg')}>JPEG</MenuItem>
@@ -368,7 +367,7 @@ export default function ExportModal(): JSX.Element {
         {/* DPI Selection - Only show for PNG and JPEG */}
         {(exportFormat === 'png' || exportFormat === 'jpeg') && (
           <>
-            <Menu id="dpi-selection" open={dpiMenuOpen} onClose={handleMenuClose} anchorEl={dpiAnchorEl}>
+            <Menu id={`${mapId}-export-dpi-selection`} open={dpiMenuOpen} onClose={handleMenuClose} anchorEl={dpiAnchorEl}>
               <MenuItem onClick={() => handleSelectDpi(96)}>96 {t('exportModal.dpiBtn')}</MenuItem>
               <MenuItem onClick={() => handleSelectDpi(150)}>150 {t('exportModal.dpiBtn')}</MenuItem>
               <MenuItem onClick={() => handleSelectDpi(300)}>300 {t('exportModal.dpiBtn')}</MenuItem>
@@ -382,7 +381,12 @@ export default function ExportModal(): JSX.Element {
         {/* Quality Selection - Only show for JPEG */}
         {exportFormat === 'jpeg' && (
           <>
-            <Menu id="quality-selection" open={qualityMenuOpen} onClose={handleQualityMenuClose} anchorEl={qualityAnchorEl}>
+            <Menu
+              id={`${mapId}-export-quality-selection`}
+              open={qualityMenuOpen}
+              onClose={handleQualityMenuClose}
+              anchorEl={qualityAnchorEl}
+            >
               {QUALITY_OPTIONS.map((quality) => (
                 <MenuItem key={quality} onClick={() => handleSelectQuality(quality)}>
                   {quality}%

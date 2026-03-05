@@ -1,8 +1,8 @@
 import { useTheme } from '@mui/material';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Box, List, Typography, Button, FullscreenIcon } from '@/ui';
+import { Box, List, Typography, IconButton, FullscreenIcon } from '@/ui';
 import { logger } from '@/core/utils/logger';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
@@ -13,6 +13,7 @@ import { CONTAINER_TYPE } from '@/core/utils/constant';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 import { FullScreenDialog } from '@/core/components/common/full-screen-dialog';
+import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';
 
 /**
  * Properties for the LegendFullscreen component.
@@ -22,6 +23,7 @@ import { FullScreenDialog } from '@/core/components/common/full-screen-dialog';
  * @property {TypeContainerBox} containerType - The type of container where the legend is displayed.
  * @property {boolean} isOpen - Controls whether the fullscreen dialog is open.
  * @property {() => void} onClose - Callback function invoked when the fullscreen dialog is closed.
+ * @property {React.RefObject<HTMLButtonElement>} buttonRef - Reference to the fullscreen button for focus restoration.
  */
 interface LegendFullscreenProps {
   layersList: TypeLegendLayer[];
@@ -29,6 +31,7 @@ interface LegendFullscreenProps {
   containerType: TypeContainerBox;
   isOpen: boolean;
   onClose: () => void;
+  buttonRef: React.RefObject<HTMLButtonElement>;
 }
 
 /**
@@ -36,10 +39,12 @@ interface LegendFullscreenProps {
  * @interface FullscreenButtonProps
  * @property {TypeContainerBox} containerType - The type of container where the button is displayed.
  * @property {() => void} onClick - Callback function invoked when the button is clicked.
+ * @property {React.RefObject<HTMLButtonElement>} buttonRef - Reference to the button element for focus management.
  */
 interface FullscreenButtonProps {
   containerType: TypeContainerBox;
   onClick: () => void;
+  buttonRef: React.RefObject<HTMLButtonElement>;
 }
 
 // Constant style outside of render (styles)
@@ -72,7 +77,7 @@ const responsiveWidths = {
  * @param {() => void} props.onClick - Callback function invoked when the fullscreen button is clicked.
  * @returns {JSX.Element | null} The fullscreen button element, or null if not in the app bar.
  */
-export function LegendFullscreenButton({ containerType, onClick }: FullscreenButtonProps): JSX.Element | null {
+export function LegendFullscreenButton({ containerType, onClick, buttonRef }: FullscreenButtonProps): JSX.Element | null {
   logger.logTraceRender('components/legend/legend-fullscreen-button');
 
   // Hooks
@@ -82,16 +87,16 @@ export function LegendFullscreenButton({ containerType, onClick }: FullscreenBut
   if (containerType !== CONTAINER_TYPE.APP_BAR) return null;
 
   return (
-    <Button
-      type="icon"
+    <IconButton
+      iconRef={buttonRef}
       size="small"
       onClick={onClick}
-      tooltip={t('general.openFullscreen')!}
+      aria-label={t('general.openFullscreen')}
+      aria-haspopup="dialog"
       className="buttonOutline"
-      sx={{ borderRadius: '50%', minWidth: 'auto', margin: '0px 8px 8px 8px' }}
     >
       <FullscreenIcon />
-    </Button>
+    </IconButton>
   );
 }
 
@@ -107,16 +112,13 @@ export function LegendFullscreenButton({ containerType, onClick }: FullscreenBut
  * @param {() => void} props.onClose - Callback function invoked when the dialog is closed.
  * @returns {JSX.Element} The fullscreen legend dialog component.
  */
-export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onClose }: LegendFullscreenProps): JSX.Element {
+export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onClose, buttonRef }: LegendFullscreenProps): JSX.Element {
   logger.logTraceRender('components/legend/legend-fullscreen');
 
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
-
-  // Refs
-  const fullScreenBtnRef = useRef<HTMLButtonElement>(null);
 
   // State
   const [fullscreenLegendLayerList, setFullscreenLegendLayersList] = useState<TypeLegendLayer[][]>([]);
@@ -234,7 +236,7 @@ export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onC
 
     return (
       <Box sx={styles.noLayersContainer}>
-        <Typography variant="h3" gutterBottom sx={sxClasses.legendInstructionsTitle}>
+        <Typography component="div" gutterBottom sx={sxClasses.legendInstructionsTitle}>
           {t('legend.noLayersAdded')}
         </Typography>
         <Typography component="p" sx={sxClasses.legendInstructionsBody}>
@@ -265,7 +267,7 @@ export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onC
         }}
       >
         {layers.map((layer) => (
-          <LegendLayer layerPath={layer.layerPath} key={layer.layerPath} showControls={false} />
+          <LegendLayer layerPath={layer.layerPath} key={layer.layerPath} showControls={false} containerType={containerType} />
         ))}
       </List>
     ));
@@ -274,21 +276,22 @@ export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onC
 
   return (
     <FullScreenDialog
+      id={`${mapId}-${containerType}-${DEFAULT_APPBAR_CORE.LEGEND}-panel-fullscreen`}
       open={isOpen}
       onClose={onClose}
-      title={`${t('legend.title')} - ${t('general.overview')}`}
+      title={`${t('legend.titleFullScreen')}`}
       onExited={() => {
         // Use onExited callback to restore focus to the fullscreen button after the dialog exit animation completes
-        fullScreenBtnRef.current?.focus();
+        buttonRef.current?.focus();
       }}
     >
       <Box
         sx={sxClasses.fullscreenContainer}
-        id={`${mapId}-${containerType}-legendContainer-fullscreen`}
+        id={`${mapId}-${containerType}-${DEFAULT_APPBAR_CORE.LEGEND}-panel-fullscreen-container`}
         {...({
           // To set the content behind the dialog as inert to remove access to content
           // @ts-ignore - inert is a valid HTML attribute but not in React types yet
-          inert: '',
+          inert: 'true',
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any)}
       >
