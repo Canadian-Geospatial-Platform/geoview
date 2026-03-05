@@ -18,6 +18,9 @@ export abstract class AbstractBaseGVLayer {
   /** The OpenLayer layer // '!' is used here, because the children constructors are supposed to create the olLayer. */
   #olLayer!: BaseLayer;
 
+  /** The parent layer, when any */
+  #parentLayer?: GVGroupLayer;
+
   /** The layer configuration */
   #layerConfig: ConfigBaseClass;
 
@@ -61,6 +64,40 @@ export abstract class AbstractBaseGVLayer {
    * @param projection - Optional, the projection to refresh to.
    */
   protected abstract onRefresh(projection: OLProjection | undefined): void;
+
+  /**
+   * Overridable method to set the opacity of the layer.
+   *
+   * If the layer has a parent, the provided opacity is clamped so that it cannot be greater than
+   * the parent's opacity. The resulting opacity is applied to the underlying OpenLayers layer.
+   *
+   * If the layer is a {@link GVGroupLayer}, the computed opacity is recursively applied to all
+   * child layers to maintain consistency within the layer hierarchy.
+   *
+   * Optionally emits a layer opacity change event.
+   *
+   * @param opacity - The desired opacity for the layer, typically between `0` (fully transparent)
+   * and `1` (fully opaque).
+   * @param emitOpacityChanged - Optional, whether to emit a layer opacity changed event after
+   * updating the opacity. Defaults to true.
+   */
+  protected onSetOpacity(opacity: number, emitOpacityChanged: boolean = true): void {
+    // Get the parent of the layer
+    const parent = this.getParent();
+
+    // If the layer has a parent
+    let layerOpacityOkay = opacity;
+    if (parent) {
+      // Make sure the layer opacity doesn't go over the parent opacity
+      layerOpacityOkay = Math.min(parent.getOpacity(), opacity);
+    }
+
+    // Internally set the opacity on the actual OL object
+    this.getOLLayer().setOpacity(layerOpacityOkay);
+
+    // If emitting
+    if (emitOpacityChanged) this.#emitLayerOpacityChanged({ opacity });
+  }
 
   // #endregion OVERRIDES
 
@@ -203,6 +240,57 @@ export abstract class AbstractBaseGVLayer {
   }
 
   /**
+   * Returns the direct parent `GVGroupLayer` of this layer, if any.
+   *
+   * @returns The direct parent group layer, or `undefined` if this layer is not
+   *   contained within any group.
+   * @description
+   * This method searches through the provided root group layer collection to
+   * determine which group directly contains this layer. If the layer is nested
+   * within multiple groups, only the immediate parent group is returned.
+   */
+  getParent(): GVGroupLayer | undefined {
+    return this.#parentLayer;
+  }
+
+  /**
+   * Sets the parent layer
+   * @param parent - The parent layer for the current layer if any.
+   */
+  setParent(parent: GVGroupLayer | undefined): void {
+    this.#parentLayer = parent;
+  }
+
+  /**
+   * Returns the top-most (root) `GVGroupLayer` ancestor of this layer, if any.
+   *
+   * @returns The highest ancestor group layer in the hierarchy, or `undefined`
+   *   if this layer does not belong to any group.
+   * @description
+   * This method traverses upward through the parent chain starting from the
+   * immediate parent of this layer. It returns the last valid parent found.
+   * A protection mechanism prevents infinite loops in case of circular
+   * parent references.
+   */
+  getParentRoot(): GVGroupLayer | undefined {
+    // Keep track of the visited parents
+    const visited = new Set<GVGroupLayer>();
+
+    let parent = this.getParent();
+    let rootParent = parent;
+
+    // While a parent is found
+    while (parent && !visited.has(parent)) {
+      visited.add(parent);
+      rootParent = parent;
+      parent = parent.getParent();
+    }
+
+    // Return the root parent
+    return rootParent;
+  }
+
+  /**
    * Gets the opacity of the layer (between 0 and 1).
    * @returns {number} The opacity of the layer.
    */
@@ -211,13 +299,24 @@ export abstract class AbstractBaseGVLayer {
   }
 
   /**
-   * Sets the opacity of the layer (between 0 and 1).
-   * @param {number} layerOpacity The opacity of the layer.
-   * @param {boolean} emitOpacityChange - Whether to emit the event or not (false to avoid updating the legend layers)
+   * Sets the opacity of the layer while ensuring it does not exceed the opacity of its parent layer.
+   *
+   * If the layer has a parent, the provided opacity is clamped so that it cannot be greater than
+   * the parent's opacity. The resulting opacity is applied to the underlying OpenLayers layer.
+   *
+   * If the layer is a {@link GVGroupLayer}, the computed opacity is recursively applied to all
+   * child layers to maintain consistency within the layer hierarchy.
+   *
+   * Optionally emits a layer opacity change event.
+   *
+   * @param opacity - The desired opacity for the layer, typically between `0` (fully transparent)
+   * and `1` (fully opaque).
+   * @param emitOpacityChanged - Optional, whether to emit a layer opacity change event after
+   * updating the opacity. Defaults to true.
    */
-  setOpacity(layerOpacity: number, emitOpacityChange: boolean = true): void {
-    this.getOLLayer().setOpacity(layerOpacity);
-    if (emitOpacityChange) this.#emitLayerOpacityChanged({ opacity: layerOpacity });
+  setOpacity(opacity: number, emitOpacityChanged: boolean = true): void {
+    // Redirect
+    this.onSetOpacity(opacity, emitOpacityChanged);
   }
 
   /**
@@ -235,13 +334,10 @@ export abstract class AbstractBaseGVLayer {
    *   - every parent GVGroupLayer up the hierarchy is also visible.
    * This function walks upward through the group layer tree until it reaches
    * the root, returning `false` immediately if any parent is not visible.
-   * @param {GVGroupLayer[]} groupLayers - The top-level group layers from which
-   *   the layer hierarchy is searched. This must represent the root collection
-   *   of the layer tree.
    * @returns {boolean} `true` if this layer and all its parent groups are visible;
    *   otherwise `false`.
    */
-  getVisibleIncludingParents(groupLayers: GVGroupLayer[]): boolean {
+  getVisibleIncludingParents(): boolean {
     // If this layer itself is not visible, stop immediately.
     if (!this.getVisible()) return false;
 
@@ -251,17 +347,17 @@ export abstract class AbstractBaseGVLayer {
     // Loop until no parent reached
     while (true) {
       // Get the parent
-      const parent: GVGroupLayer | undefined = current?.getParent(groupLayers);
+      const parent: GVGroupLayer | undefined = current?.getParent();
 
       // If no parent
       if (!parent) {
-        // No parent: reached the top → all good
+        // No parent: reached the top, all good
         return true;
       }
 
       // Check the parent visibility
       if (!parent.getVisible()) {
-        // Parent is invisible → this layer must also be invisible
+        // Parent is invisible, this layer must also be invisible
         return false;
       }
 
@@ -321,52 +417,6 @@ export abstract class AbstractBaseGVLayer {
     const minZoom = this.getOLLayer().getMinZoom();
     const maxZoom = this.getOLLayer().getMaxZoom();
     return (!minZoom || zoom > minZoom) && (!maxZoom || zoom <= maxZoom);
-  }
-
-  /**
-   * Returns the direct parent `GVGroupLayer` of this layer, if any.
-   * @param groupLayers - The root-level group layers to search when locating
-   *   this layer’s immediate parent.
-   * @returns The direct parent group layer, or `undefined` if this layer is not
-   *   contained within any group.
-   * @description
-   * This method searches through the provided root group layer collection to
-   * determine which group directly contains this layer. If the layer is nested
-   * within multiple groups, only the immediate parent group is returned.
-   */
-  getParent(groupLayers: GVGroupLayer[]): GVGroupLayer | undefined {
-    // Redirect
-    return AbstractBaseGVLayer.#getParent(this, groupLayers);
-  }
-
-  /**
-   * Returns the top-most (root) `GVGroupLayer` ancestor of this layer, if any.
-   * @param groupLayers - The root-level group layers used to resolve the
-   *   parent hierarchy.
-   * @returns The highest ancestor group layer in the hierarchy, or `undefined`
-   *   if this layer does not belong to any group.
-   * @description
-   * This method traverses upward through the parent chain starting from the
-   * immediate parent of this layer. It returns the last valid parent found.
-   * A protection mechanism prevents infinite loops in case of circular
-   * parent references.
-   */
-  getParentRoot(groupLayers: GVGroupLayer[]): GVGroupLayer | undefined {
-    // Keep track of the visited parents
-    const visited = new Set<GVGroupLayer>();
-
-    let parent = this.getParent(groupLayers);
-    let rootParent = parent;
-
-    // While a parent is found
-    while (parent && !visited.has(parent)) {
-      visited.add(parent);
-      rootParent = parent;
-      parent = parent.getParent(groupLayers);
-    }
-
-    // Return the root parent
-    return rootParent;
   }
 
   // #endregion METHODS
@@ -477,7 +527,7 @@ export abstract class AbstractBaseGVLayer {
    * @private
    * @static
    */
-  static #getParent(layer: AbstractBaseGVLayer, groupLayers: AbstractBaseGVLayer[]): GVGroupLayer | undefined {
+  static getParent(layer: AbstractBaseGVLayer, groupLayers: AbstractBaseGVLayer[]): GVGroupLayer | undefined {
     // GV This function proceeds this way, because OpenLayers doesn't have a way to start from a leaf - have to start from the root.
     // For each group layers
     for (const group of groupLayers) {
@@ -492,7 +542,7 @@ export abstract class AbstractBaseGVLayer {
 
           // Look deeper recursively
           if (child instanceof GVGroupLayer) {
-            const parent = this.#getParent(layer, child.getLayers());
+            const parent = this.getParent(layer, child.getLayers());
             if (parent) return parent;
           }
         }
