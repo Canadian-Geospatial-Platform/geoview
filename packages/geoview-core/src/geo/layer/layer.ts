@@ -114,7 +114,7 @@ import { SwiperEventProcessor } from '@/api/event-processors/event-processor-chi
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
-import { GeoViewError, LayerConfigNotFoundError } from '@/core/exceptions/geoview-exceptions';
+import { GeoViewError, LayerConfigNotFoundError, LayerNoLastQueryToPerformError } from '@/core/exceptions/geoview-exceptions';
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
 import { ShapefileReader } from '@/api/config/reader/shapefile-reader';
 import { GeoPackageReader } from '@/api/config/reader/geopackage-reader';
@@ -134,6 +134,7 @@ import { OgcWmtsLayerEntryConfig } from '@/api/config/validation-classes/raster-
 import { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
 import type { TypeTimeSliderProps } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import type { TypeFeatureInfoResultSet } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
@@ -1712,11 +1713,34 @@ export class LayerApi {
   }
 
   /**
-   * Repeats the last feature info query if any.
-   * @returns {void}
+   * Repeats the last feature info query.
+   * This method waits for the layers to be loaded before performing the query.
+   *
+   * @throws {LayerNoLastQueryToPerformError} When there's no last query to perform.
    */
-  repeatLastQuery(): void {
-    FeatureInfoEventProcessor.repeatLastQuery(this.getMapId());
+  async repeatLastQuery(): Promise<TypeFeatureInfoResultSet> {
+    // Wait until the render completes
+    await this.mapViewer.waitForRender();
+
+    // Redirect
+    return FeatureInfoEventProcessor.repeatLastQuery(this.getMapId());
+  }
+
+  /**
+   * Repeats the last feature info query, if any.
+   * This method waits for the layers to be loaded before performing the query.
+   */
+  async repeatLastQueryIfAny(): Promise<TypeFeatureInfoResultSet | undefined> {
+    try {
+      // Redirect and leave the 'await' keyword here so the try/catch works as expected.
+      return await this.repeatLastQuery();
+    } catch (error: unknown) {
+      // If the error is LayerNoLastQueryToPerformError, no worries, skip
+      if (error instanceof LayerNoLastQueryToPerformError) return;
+
+      // Otherwise, keep throwing
+      throw error;
+    }
   }
 
   // #region PRIVATE FUNCTIONS

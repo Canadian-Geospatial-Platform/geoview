@@ -653,3 +653,21 @@ export class LayerImageFailedNoImageError extends GeoViewError {
     Object.setPrototypeOf(this, LayerImageFailedNoImageError.prototype);
   }
 }
+
+/**
+ * Error thrown when there's no last query to perform.
+ */
+export class LayerNoLastQueryToPerformError extends GeoViewError {
+  /**
+   * Creates an instance of LayerNoLastQueryToPerformError.
+   */
+  constructor() {
+    super('layers.errorNoLastQueryToPerform');
+
+    // Set a custom name for the error type to differentiate it from other error types
+    this.name = 'LayerNoLastQueryToPerformError';
+
+    // Ensure correct inheritance (important for transpilation targets)
+    Object.setPrototypeOf(this, LayerNoLastQueryToPerformError.prototype);
+  }
+}

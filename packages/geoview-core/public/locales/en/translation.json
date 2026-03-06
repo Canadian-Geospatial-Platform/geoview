@@ -175,6 +175,7 @@
     "errorImageLoadSizeLimitExceededWidth": "The image requested for layer '__param__' exceeds the maximum width allowed by the server (__param__px > __param__px).",
     "errorImageLoadSizeLimitExceededHeight": "The image requested for layer '__param__' exceeds the maximum height allowed by the server (__param__px > __param__px).",
     "errorImageLoadNoImageReturned": "No image was returned from the server for layer '__param__'.",
+    "errorNoLastQueryToPerform": "No last query to perform.",
     "errorProj": "Projection '__param__' invalid.",
     "errorResponseNoFeaturesProperty": "The response from the service didn't provide a 'features' property.",
     "errorNoPrimaryKeyField": "No primary key field found for layer '__param__'.",
