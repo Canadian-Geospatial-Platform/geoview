@@ -551,10 +551,10 @@ export class LegendEventProcessor extends AbstractEventProcessor {
    * @deprecated This function should be replaced, it's called too often and does too many things, see TODO.
    */
   static propagateLegendToStore(mapId: string, legendResultSetEntry: TypeLegendResultSetEntry): void {
-    // TODO: REFACTOR - This whole function should be refactored to an initial propagation into the store and then only specific propagations in the store.
+    // TODO: REFACTOR - propagateLegendToStore - This whole function should be refactored to an initial propagation into the store and then only specific propagations in the store.
     // TO.DOCONT: Right now things are sometimes recalculated, sometimes reset, sometimes unsure processing, for every single propagation in the store...
 
-    // TODO: REFACTOR - IMPORTANT, this function uses 'createNewLegendEntries' recursively which sends the children array (existingEntries[entryIndex].children)
+    // TODO: REFACTOR - propagateLegendToStore - IMPORTANT, this function uses 'createNewLegendEntries' recursively which sends the children array (existingEntries[entryIndex].children)
     // TO.DOCONT: in a loop and pushes objects into the array... However, when pushing objects into an array coming from a Zustand store (or react in general)
     // TO.DOCONT: the array remains the same object and a hook on the array
     // TO.DOCONT: (for example here the "useLayerSelectorChildren = createLayerSelectorHook('children')") will never trigger, because
@@ -582,7 +582,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       };
     };
 
-    // TODO: refactor - avoid nested function relying on outside parameter like layerPathNodes
+    // TODO: REFACTOR - propagateLegendToStore - Avoid nested function relying on outside parameter like layerPathNodes
     // TO.DOCONT: The layerId set by this array has the map identifier in front... remove
     const createNewLegendEntries = (currentLevel: number, existingEntries: TypeLegendLayer[]): void => {
       // If outside of range of layer paths, stop
@@ -633,7 +633,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           existingEntries.push(legendLayerEntry);
           entryIndex = existingEntries.length - 1;
         } else {
-          // TODO: Check - Is it missing group layer entry config properties in the store?
+          // TODO: CHECK - propagateLegendToStore - Is it missing group layer entry config properties in the store?
           // TO.DOCONT: At the time of writing this, it was just updating the layerStatus on the group layer entry.
           // TO.DOCONT: It seemed to me it should also at least update the name and the bounds (the bounds are tricky, as they get generated only when the children are loaded)
           // TO.DOCONT: Is there any other group layer entry attributes we would like to propagate in the legends store? I'd think so?

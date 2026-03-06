@@ -13,6 +13,7 @@ import type {
   TypeFeatureInfoResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
+import { LayerNoLastQueryToPerformError } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -112,25 +113,22 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Repeats the last query if there was one.
-   * @returns {void}
+   * @returns {Promise<TypeFeatureInfoResultSet>} A promise which will hold the result of the query.
+   * @throws {LayerNoLastQueryToPerformError} When there's no last query to perform.
    */
-  repeatLastQuery(): void {
-    // If we have a last query lon/lat
-    if (this.#lastQueryLonLat) {
-      // Re-query the layers
-      this.queryLayers(this.#lastQueryLonLat, false).catch((error: unknown) => {
-        // Log
-        logger.logPromiseFailed('queryLayers in repeatLastQuery in FeatureInfoLayerSet', error);
-      });
-    }
+  repeatLastQuery(): Promise<TypeFeatureInfoResultSet> {
+    // If no last query to perform
+    if (!this.#lastQueryLonLat) throw new LayerNoLastQueryToPerformError();
+
+    // Re-query the layers
+    return this.queryLayers(this.#lastQueryLonLat, false);
   }
 
   /**
    * Queries the features at the provided coordinate for all the registered layers.
    * @param {Coordinate} lonLatCoordinate - The longitude/latitude coordinate where to query the features
    * @param {boolean} fromClick - True if the query is from a user click, false otherwise.
-   * @returns {Promise<TypeFeatureInfoResultSet>} A promise which will hold the result of the query
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+   * @returns {Promise<TypeFeatureInfoResultSet>} A promise which will hold the result of the query.
    */
   async queryLayers(lonLatCoordinate: Coordinate, fromClick: boolean = true): Promise<TypeFeatureInfoResultSet> {
     // FIXME: Watch out for code reentrancy between queries!

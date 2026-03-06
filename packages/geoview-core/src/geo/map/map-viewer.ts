@@ -1124,12 +1124,11 @@ export class MapViewer {
 
   /**
    * Waits for the map layers loaded event to be emitted.
-   * @returns {Promise<MapViewer>} Promise resolved when the map layers loaded event is emitted
+   * @returns {Promise<number>} A promise that resolves with the number of layers that have reached the specified status.
    */
-  waitForLayersLoaded(): Promise<MapViewer> {
-    return new Promise((resolve) => {
-      this.onMapLayersLoaded(resolve);
-    });
+  waitForLayersLoaded(): Promise<number> {
+    // Redirect
+    return this.waitAllLayersStatus('loaded');
   }
 
   /**

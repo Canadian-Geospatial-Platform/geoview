@@ -12,7 +12,11 @@ import type {
   TypeAltitudeResponse,
   TypeNtsResponse,
 } from '@/api/types/map-schema-types';
-import type { IFeatureInfoState, TypeFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import type {
+  IFeatureInfoState,
+  TypeFeatureInfoResultSet,
+  TypeFeatureInfoResultSetEntry,
+} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import type { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { MapEventProcessor } from './map-event-processor';
 import { doUntil } from '@/core/utils/utilities';
@@ -245,11 +249,10 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
   /**
    * Repeats the last feature info query if any.
    * @param {string} mapId - The map identifier
-   * @returns {void}
-   * @static
+   * @throws {LayerNoLastQueryToPerformError} When there's no last query to perform.
    */
-  static repeatLastQuery(mapId: string): void {
-    MapEventProcessor.getMapViewerLayerAPI(mapId).featureInfoLayerSet.repeatLastQuery();
+  static repeatLastQuery(mapId: string): Promise<TypeFeatureInfoResultSet> {
+    return MapEventProcessor.getMapViewerLayerAPI(mapId).featureInfoLayerSet.repeatLastQuery();
   }
 
   /**
@@ -309,7 +312,7 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
     // The feature info state
     const featureInfoState = this.getFeatureInfoState(mapId);
 
-    // TODO: Fix 'details propagation' when some layers have been loaded in the UI, but their queries fail (very specific case that happened during a weekend)
+    // TODO: CHECK - 'details propagation' when some layers have been loaded in the UI, but their queries fail (very specific case that happened during a weekend)
     // TO.DOCONT: Putting the TODO here, but not sure where the fix should be.
     // TO.DOCONT: When layers have spotty query happening (but are loaded with their legends fine in the ui) the Details panel has trouble maitaining the
     // TO.DOCONT: currently selected layer, selected, in the ui when clicking on various features on the map.

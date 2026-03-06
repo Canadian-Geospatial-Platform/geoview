@@ -48,7 +48,7 @@ import type { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { Projection } from '@/geo/utils/projection';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
-import { DEFAULT_OL_FITOPTIONS, NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_PADDING, TIMEOUT } from '@/core/utils/constant';
+import { DEFAULT_OL_FITOPTIONS, NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
 import { delay, isValidUUID, whenThisThen } from '@/core/utils/utilities';
 import type { TimeDimension } from '@/core/utils/date-mgt';
@@ -620,8 +620,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       MapEventProcessor.setOverviewMapVisibility(mapId, true);
 
       // Repeat last query for layer features after a delay to allow projection change to propagate
-      // TODO: Optimize this with event listener instead of timeout - need to find/create an event that signals reprojection is done
-      setTimeout(() => this.getMapViewer(mapId).layer.repeatLastQuery(), TIMEOUT.projectionSwitchRepeatQuery);
+      this.getMapViewer(mapId).layer.repeatLastQueryIfAny();
     } finally {
       // Remove circular progress as refresh is done
       AppEventProcessor.setCircularProgress(mapId, false);
