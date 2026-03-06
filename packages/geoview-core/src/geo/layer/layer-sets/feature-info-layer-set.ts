@@ -113,7 +113,8 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Repeats the last query if there was one.
-   * @returns {Promise<TypeFeatureInfoResultSet>} A promise which will hold the result of the query.
+   *
+   * @returns A promise which will hold the result of the query.
    * @throws {LayerNoLastQueryToPerformError} When there's no last query to perform.
    */
   repeatLastQuery(): Promise<TypeFeatureInfoResultSet> {

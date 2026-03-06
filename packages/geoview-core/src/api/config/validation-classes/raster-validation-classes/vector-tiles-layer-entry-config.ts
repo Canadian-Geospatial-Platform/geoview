@@ -24,7 +24,8 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
 
   /**
    * The class constructor.
-   * @param {VectorTilesLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+   *
+   * @param layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: VectorTilesLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.VECTOR_TILES, CONST_LAYER_ENTRY_TYPES.RASTER_TILE);
@@ -43,8 +44,8 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeVectorTilesConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getGeoviewLayerConfig(): TypeVectorTilesConfig {
     return super.getGeoviewLayerConfig() as TypeVectorTilesConfig;
@@ -52,8 +53,8 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeSourceTileInitialConfig} The strongly-typed source configuration specific to this layer entry config.
-   * @override
+   *
+   * @returns The strongly-typed source configuration specific to this layer entry config.
    */
   override getSource(): TypeSourceTileInitialConfig {
     return super.getSource();
@@ -61,8 +62,8 @@ export class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeMetadataVectorTiles | undefined} The strongly-typed layer configuration specific to this layer entry config.
-   * @override
+   *
+   * @returns The strongly-typed service configuration specific to this layer entry config.
    */
   override getServiceMetadata(): TypeMetadataVectorTiles | undefined {
     return super.getServiceMetadata() as TypeMetadataVectorTiles | undefined;

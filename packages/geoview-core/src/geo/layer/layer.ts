@@ -1716,6 +1716,7 @@ export class LayerApi {
    * Repeats the last feature info query.
    * This method waits for the layers to be loaded before performing the query.
    *
+   * @returns A promise which will hold the result of the query.
    * @throws {LayerNoLastQueryToPerformError} When there's no last query to perform.
    */
   async repeatLastQuery(): Promise<TypeFeatureInfoResultSet> {
@@ -1729,6 +1730,8 @@ export class LayerApi {
   /**
    * Repeats the last feature info query, if any.
    * This method waits for the layers to be loaded before performing the query.
+   *
+   * @returns A promise which will hold the result of the query or undefined when no query to repeat.
    */
   async repeatLastQueryIfAny(): Promise<TypeFeatureInfoResultSet | undefined> {
     try {

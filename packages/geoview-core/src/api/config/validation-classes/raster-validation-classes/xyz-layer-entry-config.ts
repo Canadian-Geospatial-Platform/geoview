@@ -22,7 +22,8 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
 
   /**
    * The class constructor.
-   * @param {XYZTilesLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+   *
+   * @param layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: XYZTilesLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.XYZ_TILES, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
@@ -40,8 +41,8 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeXYZTilesConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getGeoviewLayerConfig(): TypeXYZTilesConfig {
     return super.getGeoviewLayerConfig() as TypeXYZTilesConfig;
@@ -49,8 +50,8 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeSourceImageXYZTilesInitialConfig} The strongly-typed source configuration specific to this layer entry config.
-   * @override
+   *
+   * @returns The strongly-typed source configuration specific to this layer entry config.
    */
   override getSource(): TypeSourceImageXYZTilesInitialConfig {
     return super.getSource();

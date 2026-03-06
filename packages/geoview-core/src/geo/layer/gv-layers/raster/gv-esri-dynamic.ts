@@ -58,8 +58,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Constructs a GVEsriDynamic layer to manage an OpenLayer layer.
-   * @param {ImageArcGISRest} olSource - The OpenLayer source.
-   * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer configuration.
+   *
+   * @param olSource - The OpenLayer source.
+   * @param layerConfig - The layer configuration.
    */
   constructor(olSource: ImageArcGISRest, layerConfig: EsriDynamicLayerEntryConfig) {
     super(olSource, layerConfig);
@@ -94,6 +95,36 @@ export class GVEsriDynamic extends AbstractGVRaster {
   }
 
   // #region OVERRIDES
+
+  /**
+   * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
+   *
+   * @returns The strongly-typed OpenLayers type.
+   */
+  override getOLLayer(): ImageLayer<ImageArcGISRest> {
+    // Call parent and cast
+    return super.getOLLayer() as ImageLayer<ImageArcGISRest>;
+  }
+
+  /**
+   * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
+   *
+   * @returns The ImageArcGISRest source instance associated with this layer.
+   */
+  override getOLSource(): ImageArcGISRest {
+    // Get source from OL
+    return super.getOLSource() as ImageArcGISRest;
+  }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
+   */
+  override getLayerConfig(): EsriDynamicLayerEntryConfig {
+    // Call parent and cast
+    return super.getLayerConfig() as EsriDynamicLayerEntryConfig;
+  }
 
   /**
    * Overrides the fetching of the legend for an Esri Dynamic layer.
@@ -243,36 +274,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
     // Validate and return the extent
     return GeoUtilities.validateExtent([extent.xmin, extent.ymin, extent.xmax, extent.ymax], outProjection.getCode());
-  }
-
-  /**
-   * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
-   * @returns {ImageLayer<ImageArcGISRest>} The strongly-typed OpenLayers type.
-   * @override
-   */
-  override getOLLayer(): ImageLayer<ImageArcGISRest> {
-    // Call parent and cast
-    return super.getOLLayer() as ImageLayer<ImageArcGISRest>;
-  }
-
-  /**
-   * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
-   * @returns {ImageArcGISRest} The ImageArcGISRest source instance associated with this layer.
-   * @override
-   */
-  override getOLSource(): ImageArcGISRest {
-    // Get source from OL
-    return super.getOLSource() as ImageArcGISRest;
-  }
-
-  /**
-   * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {EsriDynamicLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
-   */
-  override getLayerConfig(): EsriDynamicLayerEntryConfig {
-    // Call parent and cast
-    return super.getLayerConfig() as EsriDynamicLayerEntryConfig;
   }
 
   /**

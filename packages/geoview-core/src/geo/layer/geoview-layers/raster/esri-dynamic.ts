@@ -38,7 +38,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
   /**
    * Constructs an EsriDynamic Layer configuration processor.
-   * @param {TypeEsriDynamicLayerConfig} layerConfig The layer configuration.
+   *
+   * @param layerConfig - The layer configuration.
    */
   // The constructor is not useless, it narrows down the accepted parameter type.
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
@@ -50,8 +51,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeEsriDynamicLayerConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getGeoviewLayerConfig(): TypeEsriDynamicLayerConfig {
     return super.getGeoviewLayerConfig() as TypeEsriDynamicLayerConfig;
@@ -59,8 +60,8 @@ export class EsriDynamic extends AbstractGeoViewRaster {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeMetadataEsriDynamic | undefined} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getMetadata(): TypeMetadataEsriDynamic | undefined {
     return super.getMetadata() as TypeMetadataEsriDynamic | undefined;
@@ -375,7 +376,7 @@ export class EsriDynamic extends AbstractGeoViewRaster {
    * @returns {TypeLayerEntryShell[]} A nested array representing the hierarchical layer structure with `subLayers` assigned to parents.
    * @static
    */
-  static buildLayerEntriesTree(entries: { layerId: number; subLayerIds: number[] }[]): TypeLayerEntryShell[] {
+  static buildLayerEntriesTree(entries: { layerId: number; subLayerIds: number[] | null }[]): TypeLayerEntryShell[] {
     // Create a lookup map of all entries by layerId
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const entryMap: Record<number, any> = {};

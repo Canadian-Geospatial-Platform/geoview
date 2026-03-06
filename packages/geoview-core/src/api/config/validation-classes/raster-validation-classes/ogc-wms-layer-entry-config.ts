@@ -36,7 +36,8 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * The class constructor.
-   * @param {OgcWmsLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+   *
+   * @param layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: OgcWmsLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.WMS, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
@@ -62,8 +63,8 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeWMSLayerConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getGeoviewLayerConfig(): TypeWMSLayerConfig {
     return super.getGeoviewLayerConfig() as TypeWMSLayerConfig;
@@ -71,8 +72,8 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeSourceImageWmsInitialConfig} The strongly-typed source configuration specific to this layer entry config.
-   * @override
+   *
+   * @returns The strongly-typed source configuration specific to this layer entry config.
    */
   override getSource(): TypeSourceImageWmsInitialConfig {
     return super.getSource();
@@ -80,8 +81,8 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeMetadataWMS | undefined} The strongly-typed layer configuration specific to this layer entry config.
-   * @override
+   *
+   * @returns The strongly-typed service metadata specific to this layer entry config.
    */
   override getServiceMetadata(): TypeMetadataWMS | undefined {
     return super.getServiceMetadata() as TypeMetadataWMS | undefined;
@@ -89,8 +90,8 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeMetadataWMSCapabilityLayer | undefined} The strongly-typed layer metadata specific to this layer entry config.
-   * @override
+   *
+   * @returns The strongly-typed layer metadata specific to this layer entry config.
    */
   override getLayerMetadata(): TypeMetadataWMSCapabilityLayer | undefined {
     return super.getLayerMetadata() as TypeMetadataWMSCapabilityLayer | undefined;
@@ -101,7 +102,8 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * If attributions are not yet cached, this method attempts
    * to read them from the layer's metadata (via the `Attribution.Title` property)
    * and sets them accordingly. Once set, the attributions are cached in the layer.
-   * @returns {string[] | undefined} The list of layer attributions, or `undefined` if none are available.
+   *
+   * @returns The list of layer attributions, or `undefined` if none are available.
    */
   override getAttributions(): string[] | undefined {
     // If no attributions defined

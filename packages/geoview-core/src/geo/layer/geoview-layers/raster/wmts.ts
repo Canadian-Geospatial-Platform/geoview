@@ -46,6 +46,7 @@ export interface TypeWmtsLayerConfig extends TypeGeoviewLayerConfig {
 export class WMTS extends AbstractGeoViewRaster {
   /**
    * Constructs a WMTS Layer configuration processor.
+   *
    * @param layerConfig - The layer configuration
    */
   // The constructor is not useless, it narrows down the accepted parameter type.
@@ -68,7 +69,7 @@ export class WMTS extends AbstractGeoViewRaster {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns The strongly-typed layer configuration specific to this layer.
+   * @returns The strongly-typed metadata specific to this layer.
    */
   override getMetadata(): TypeMetadataWMTS | undefined {
     return super.getMetadata() as TypeMetadataWMTS | undefined;
@@ -176,8 +177,8 @@ export class WMTS extends AbstractGeoViewRaster {
       ? metadata?.Capabilities?.Contents?.Layer.find((layer) => layer['ows:Identifier'] === layerConfig.layerId)
       : metadata?.Capabilities?.Contents?.Layer;
 
-    // If no name and layer has a title
-    if (!layerConfig.getLayerName() && layerMetadata?.['ows:Title']) layerConfig.setLayerName(layerMetadata['ows:Title']);
+    // Initialize the layer name by filling the blanks with the name from the metadata
+    layerConfig.initLayerNameFromMetadata(layerMetadata?.['ows:Title']);
   }
 
   /**

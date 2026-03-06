@@ -24,7 +24,8 @@ export class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * The class constructor.
-   * @param {GeoTIFFLayerEntryConfigProps} layerConfig -  The layer configuration we want to instanciate.
+   *
+   * @param layerConfig -  The layer configuration we want to instanciate.
    */
   constructor(layerConfig: GeoTIFFLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.GEOTIFF, CONST_LAYER_ENTRY_TYPES.RASTER_TILE);
@@ -40,8 +41,8 @@ export class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeGeoTIFFLayerConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getGeoviewLayerConfig(): TypeGeoTIFFLayerConfig {
     return super.getGeoviewLayerConfig() as TypeGeoTIFFLayerConfig;
@@ -49,8 +50,8 @@ export class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeSourceGeoTIFFInitialConfig} The strongly-typed source configuration specific to this layer entry config.
-   * @override
+   *
+   * @returns The strongly-typed source configuration specific to this layer entry config.
    */
   override getSource(): TypeSourceGeoTIFFInitialConfig {
     return super.getSource();
@@ -58,8 +59,8 @@ export class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeMetadataGeoTIFF | undefined} The strongly-typed layer configuration specific to this layer entry config.
-   * @override
+   *
+   * @returns The strongly-typed service metadata specific to this layer entry config.
    */
   override getServiceMetadata(): TypeMetadataGeoTIFF | undefined {
     return super.getServiceMetadata() as TypeMetadataGeoTIFF | undefined;

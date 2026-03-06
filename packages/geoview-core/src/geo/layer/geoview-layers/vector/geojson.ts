@@ -36,7 +36,7 @@ export interface TypeGeoJSONLayerConfig extends Omit<TypeGeoviewLayerConfig, 'li
 export class GeoJSON extends AbstractGeoViewVector {
   /**
    * Constructs a GeoJSON Layer configuration processor.
-   * @param {TypeGeoJSONLayerConfig} layerConfig the layer configuration
+   * @param layerConfig - The layer configuration
    */
   // The constructor is not useless, it narrows down the accepted parameter type.
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
@@ -48,8 +48,8 @@ export class GeoJSON extends AbstractGeoViewVector {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeGeoJSONLayerConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getGeoviewLayerConfig(): TypeGeoJSONLayerConfig {
     return super.getGeoviewLayerConfig() as TypeGeoJSONLayerConfig;
@@ -57,8 +57,8 @@ export class GeoJSON extends AbstractGeoViewVector {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeMetadataGeoJSON | undefined} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed metadata specific to this layer.
    */
   override getMetadata(): TypeMetadataGeoJSON | undefined {
     return super.getMetadata() as TypeMetadataGeoJSON | undefined;
@@ -191,8 +191,8 @@ export class GeoJSON extends AbstractGeoViewVector {
 
       // If the layer metadata was found
       if (layerMetadataFound) {
-        // Set the layer name
-        layerConfig.setLayerName(layerConfig.getLayerName() || layerMetadataFound.layerName || layerConfig.getLayerNameCascade());
+        // Initialize the layer name by filling the blanks with the name from the metadata
+        layerConfig.initLayerNameFromMetadata(layerMetadataFound.layerName);
 
         // Initialize the source by filling the blanks with the information from the metadata
         layerConfig.initSourceFromMetadata(layerMetadataFound.source);

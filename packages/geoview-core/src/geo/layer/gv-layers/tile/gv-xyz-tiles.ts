@@ -18,8 +18,9 @@ import { Projection } from '@/geo/utils/projection';
 export class GVXYZTiles extends AbstractGVTile {
   /**
    * Constructs a GVXYZTiles layer to manage an OpenLayer layer.
-   * @param {XYZ} olSource - The OpenLayer source.
-   * @param {XYZTilesLayerEntryConfig} layerConfig - The layer configuration.
+   *
+   * @param olSource - The OpenLayer source.
+   * @param layerConfig - The layer configuration.
    */
   constructor(olSource: XYZ, layerConfig: XYZTilesLayerEntryConfig) {
     super(olSource, layerConfig);
@@ -38,8 +39,8 @@ export class GVXYZTiles extends AbstractGVTile {
 
   /**
    * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
-   * @override
-   * @returns {TileLayer<XYZ>} The strongly-typed OpenLayers type.
+   *
+   * @returns The strongly-typed OpenLayers type.
    */
   override getOLLayer(): TileLayer<XYZ> {
     // Call parent and cast
@@ -48,8 +49,8 @@ export class GVXYZTiles extends AbstractGVTile {
 
   /**
    * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
-   * @override
-   * @returns {XYZ} The XYZ source instance associated with this layer.
+   *
+   * @returns The XYZ source instance associated with this layer.
    */
   override getOLSource(): XYZ {
     // Get source from OL
@@ -58,8 +59,8 @@ export class GVXYZTiles extends AbstractGVTile {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
-   * @returns {XYZTilesLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getLayerConfig(): XYZTilesLayerEntryConfig {
     // Call parent and cast

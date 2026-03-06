@@ -9,7 +9,8 @@ export interface OgcFeatureLayerEntryConfigProps extends VectorLayerEntryConfigP
 export class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
   /**
    * The class constructor.
-   * @param {OgcFeatureLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+   *
+   * @param layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: OgcFeatureLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.OGC_FEATURE);
@@ -19,8 +20,8 @@ export class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeOgcFeatureLayerConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getGeoviewLayerConfig(): TypeOgcFeatureLayerConfig {
     return super.getGeoviewLayerConfig() as TypeOgcFeatureLayerConfig;
@@ -28,9 +29,10 @@ export class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeLayerMetadataOGC | undefined} The strongly-typed layer metadata specific to this layer entry config.
-   * @override
+   *
+   * @returns The strongly-typed layer metadata specific to this layer entry config.
    */
+  // TODO: REFACTOR - Fix this override once cleanup is ready. Search id: 7887777f
   override getLayerMetadata(): TypeLayerMetadataOGC | undefined {
     return super.getLayerMetadata() as TypeLayerMetadataOGC | undefined;
   }
