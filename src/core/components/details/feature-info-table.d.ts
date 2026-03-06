@@ -1,23 +1,29 @@
 import type { TypeDisplayLanguage, TypeFieldEntry } from '@/api/types/map-schema-types';
+import type { TypeContainerBox } from '@/core/types/global-types';
 import { type TemporalMode, type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 interface FeatureInfoTableProps {
     layerPath: string;
     featureInfoList: TypeFieldEntry[];
+    containerType: TypeContainerBox;
 }
 interface FeatureItemProps {
     item: string;
     alias: string;
     index: number;
+    uniqueItemId: string;
+    mapId: string;
+    containerType: TypeContainerBox;
     featureInfoItem: TypeFieldEntry;
-    onInitLightBox: (value: string, alias: string, index: number) => void;
+    onInitLightBox: (value: string, elementId: string, index: number) => void;
 }
 interface FeatureRowProps {
     featureInfoItem: TypeFieldEntry;
-    onInitLightBox: (value: string, alias: string, index: number) => void;
+    onInitLightBox: (value: string, elementId: string, index: number) => void;
     language: TypeDisplayLanguage;
     layerDateTemporalMode: TemporalMode;
     displayDateFormat: TypeDisplayDateFormat;
     displayDateTimezone: TimeIANA;
+    containerType: TypeContainerBox;
 }
 export declare const FeatureItem: import("react").NamedExoticComponent<FeatureItemProps>;
 export declare const FeatureRow: import("react").NamedExoticComponent<FeatureRowProps>;

@@ -9,22 +9,22 @@ import type { GeoCoreLayerConfig, RCSLayerConfig, TypeGeoviewLayerConfig } from 
 export declare class GeoCore {
     /**
      * Gets GeoView layer configurations list from the UUIDs of the list of layer entry configurations.
-     * @param {string} uuid - The UUID of the layer.
-     * @param {TypeDisplayLanguage} language - The language.
-     * @param {string} mapId - The optional map id.
-     * @param {GeoCoreLayerConfig?} layerConfig - The optional layer configuration.
-     * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
-     * @returns {Promise<GeoCoreLayerConfigResponse>} List of layer configurations to add to the map.
+     * @param uuid - The UUID of the layer.
+     * @param language - The language.
+     * @param mapId - The optional map id.
+     * @param layerConfig - Optional layer configuration.
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
+     * @returns List of layer configurations to add to the map.
      */
     static createLayerConfigFromUUID(uuid: string, language: TypeDisplayLanguage, mapId?: string, layerConfig?: GeoCoreLayerConfig, abortSignal?: AbortSignal): Promise<GeoCoreLayerConfigResponse>;
     /**
      * Gets GeoView layer configurations list from the RCS UUIDs of the list of layer entry configurations.
-     * @param {string} uuid - The UUID of the layer.
-     * @param {TypeDisplayLanguage} language - The language.
-     * @param {string} mapId - The optional map id.
-     * @param {RCSLayerConfig?} layerConfig - The optional layer configuration.
-     * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of fetch.
-     * @returns {Promise<TypeGeoviewLayerConfig>} List of layer configurations to add to the map.
+     * @param uuid - The UUID of the layer.
+     * @param language - The language.
+     * @param mapId - The optional map id.
+     * @param layerConfig - Optional layer configuration.
+     * @param abortSignal - Optional {@link AbortSignal} used to handle cancelling of fetch.
+     * @returns List of layer configurations to add to the map.
      */
     static createLayerConfigFromRCSUUID(uuid: string, language: TypeDisplayLanguage, mapId: string, layerConfig?: RCSLayerConfig, abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig>;
 }

@@ -40,15 +40,16 @@ export interface IFeatureInfoState {
 export declare function initFeatureInfoState(set: TypeSetStore, get: TypeGetStore): IFeatureInfoState;
 export type TypeFeatureInfoSetEntry = {
     queryStatus: TypeQueryStatus;
-    features: TypeFeatureInfoEntry[] | undefined;
+    features?: TypeFeatureInfoEntry[];
+    featuresHaveGeometry: boolean;
 };
 export type TypeFeatureInfoResultSetEntry = TypeResultSetEntry & TypeFeatureInfoSetEntry;
 export type TypeFeatureInfoResultSet = TypeResultSet<TypeFeatureInfoResultSetEntry>;
 export type TypeHoverFeatureInfo = {
     geoviewLayerType: TypeGeoviewLayerType;
-    featureIcon: string | undefined;
-    fieldInfo: TypeFieldEntry | undefined;
-    nameField: string | null;
+    featureIcon?: string;
+    fieldInfo?: TypeFieldEntry;
+    nameField?: string;
 } | undefined | null;
 export type TypeHoverSetEntry = {
     queryStatus: TypeQueryStatus;

@@ -19,7 +19,13 @@ export type TypeMapStateForExportLayout = {
     mapScale: TypeScaleInfo;
     mapRotation: number;
 };
-export interface FlattenedLegendItem {
+export type NorthArrowSVG = {
+    d: string | null;
+    fill: string | null;
+    stroke: string | null;
+    strokeWidth: string | null;
+};
+export type FlattenedLegendItem = {
     type: 'layer' | 'item' | 'child' | 'wms' | 'time';
     data: TypeLegendLayer;
     parentName?: string;
@@ -32,7 +38,7 @@ export interface FlattenedLegendItem {
         width: number;
         height: number;
     };
-}
+};
 /**
  * Element factory interface for creating renderer-specific elements
  * Allows us to abstract between Canvas (HTML) and PDF rendering
@@ -49,12 +55,7 @@ export type TypeMapInfoResult = {
     mapDataUrl: string;
     scaleText: string;
     scaleLineWidth: string;
-    northArrowSvg: Array<{
-        d: string | null;
-        fill: string | null;
-        stroke: string | null;
-        strokeWidth: string | null;
-    }> | null;
+    northArrowSvg?: NorthArrowSVG[];
     northArrowRotation: number;
     attributions: string[];
     fittedColumns: FlattenedLegendItem[][];
@@ -115,18 +116,13 @@ export declare class ExportUtilities {
      * The rotation accounts for both map rotation and user-configured north arrow orientation.
      * Returns null if north arrow is disabled or SVG data is unavailable.
      *
-     * @param {Array} northArrowSvg - Array of SVG path data with stroke/fill properties
+     * @param {NorthArrowSVG[] | undefined} northArrowSvg - Array of SVG path data with stroke/fill properties
      * @param {number} northArrowRotation - The rotation angle in degrees (includes map rotation + config offset)
      * @param {ElementFactory} factory - Element factory for creating renderer-specific elements
      * @param {any} scaledStyles - The scaled styles object for sizing and rotation
      * @returns {JSX.Element | null} The rendered north arrow SVG or null if disabled
      */
-    static renderNorthArrow(northArrowSvg: Array<{
-        d: string | null;
-        fill: string | null;
-        stroke: string | null;
-        strokeWidth: string | null;
-    }> | null, northArrowRotation: number, factory: ElementFactory, scaledStyles: any): JSX.Element | null;
+    static renderNorthArrow(northArrowSvg: NorthArrowSVG[] | undefined, northArrowRotation: number, factory: ElementFactory, scaledStyles: any): JSX.Element | null;
     /**
      * Main export processing function - gathers map data, processes legend, and optimizes layout.
      *

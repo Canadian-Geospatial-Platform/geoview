@@ -21,45 +21,47 @@ export declare class GVEsriImage extends AbstractGVRaster {
     constructor(olSource: ImageArcGISRest, layerConfig: EsriImageLayerEntryConfig);
     /**
      * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
-     * @override
      * @returns {ImageLayer<ImageArcGISRest>} The strongly-typed OpenLayers type.
+     * @override
      */
     getOLLayer(): ImageLayer<ImageArcGISRest>;
     /**
      * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
-     * @override
      * @returns {ImageArcGISRest} The ImageArcGISRest source instance associated with this layer.
+     * @override
      */
     getOLSource(): ImageArcGISRest;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @override
      * @returns {EsriImageLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
+     * @override
      */
     getLayerConfig(): EsriImageLayerEntryConfig;
     /**
      * Overrides the fetching of the legend for an Esri image layer.
-     * @override
      * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
+     * @override
      */
     onFetchLegend(): Promise<TypeLegend | null>;
     /**
      * Overrides when the style should be set by the fetched legend.
      * @param {TypeLegend} legend - The legend type
+     * @returns {void}
      * @override
      */
     onSetStyleAccordingToLegend(legend: TypeLegend): void;
     /**
      * Overrides the way to get the bounds for this layer type.
-     * @param {OLProjection} projection - The projection to get the bounds into.
-     * @param {number} stops - The number of stops to use to generate the extent.
-     * @override
-     * @returns {Extent | undefined} The layer bounding box.
+     * @param projection - The projection to get the bounds into.
+     * @param stops - The number of stops to use to generate the extent.
+     * @returns A promise of layer bounding box.
      */
-    onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
+    onGetBounds(projection: OLProjection, stops: number): Promise<Extent | undefined>;
     /**
      * Overrides the way a WMS layer applies a view filter. It does so by updating the source TIME parameters.
      * @param {LayerFilters} [filter] - An optional filter to be used in place of the getViewFilter value.
+     * @returns {void}
+     * @override
      */
     protected onSetLayerFilters(filter?: LayerFilters): void;
 }

@@ -40,7 +40,7 @@ export interface CardMediaPropsExtend extends CardMediaProps {
  *   key={generateId()}
  *   sx={{ ...sxClasses.featureInfoItemValue, cursor: 'pointer' }}
  *   alt={`${alias} ${index}`}
- *   className={`returnLightboxFocusItem-${index}`}
+ *   id={imageElementId}
  *   src={item}
  *   tabIndex={0}
  *   onClick={() => onInitLightBox(featureInfoItem.value as string, featureInfoItem.alias, index)}

@@ -2,7 +2,7 @@ import type BaseLayer from 'ol/layer/Base';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { EventDelegateBase } from '@/api/events/event-helper';
-import type { DisplayDateMode, TypeStyleGeometry } from '@/api/types/map-schema-types';
+import type { DisplayDateMode } from '@/api/types/map-schema-types';
 import type { TypeGeoviewLayerConfig, TypeLayerEntryConfig, TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -50,14 +50,14 @@ export declare abstract class AbstractGeoViewLayer {
     constructor(geoviewLayerConfig: TypeGeoviewLayerConfig);
     /**
      * Must override method to read the service metadata from the metadataAccessPath.
-     * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
      * @returns {Promise<T>} A promise resolved once the metadata has been fetched.
      * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
      */
     protected abstract onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T>;
     /**
      * Must override method to initialize a layer entry based on a GeoView layer config.
-     * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+     * @returns A promise resolved once the layer entries have been initialized.
      */
     protected abstract onInitLayerEntries(): Promise<TypeGeoviewLayerConfig>;
     /**
@@ -65,7 +65,7 @@ export declare abstract class AbstractGeoViewLayer {
      * @param {AbstractBaseLayerEntryConfig} layerConfig - Information needed to create the GeoView layer.
      * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
      * @param {OLProjection?} [mapProjection] - The map projection.
-     * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
      * @returns {Promise<AbstractBaseLayerEntryConfig>} The Promise that the config metadata has been processed.
      */
     protected abstract onProcessLayerMetadata(layerConfig: AbstractBaseLayerEntryConfig, displayDateMode: DisplayDateMode, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<AbstractBaseLayerEntryConfig>;
@@ -106,8 +106,8 @@ export declare abstract class AbstractGeoViewLayer {
      */
     getClassName(): string;
     /**
-     * Gets the Geoview layer id.
-     * @returns {string} The geoview layer id
+     * Gets the Geoview layer config.
+     * @returns {string} The geoview layer config
      */
     getGeoviewLayerConfig(): TypeGeoviewLayerConfig;
     /**
@@ -148,7 +148,7 @@ export declare abstract class AbstractGeoViewLayer {
     getLayerEntryNameOrGeoviewLayerName(): string;
     /**
      * Initializes the layer entries based on the GeoviewLayerConfig that was initially provided in the constructor.
-     * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+     * @returns A promise resolved once the layer entries have been initialized.
      */
     initGeoViewLayerEntries(): Promise<TypeGeoviewLayerConfig>;
     /**
@@ -170,13 +170,13 @@ export declare abstract class AbstractGeoViewLayer {
      * the details-panel.
      * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
      * @param {OLProjection?} [mapProjection] - The map projection.
-     * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
      * @returns {Promise<ConfigBaseClass[]>} A promise of the config base classes created.
      */
     createGeoViewLayers(displayDateMode: DisplayDateMode, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<ConfigBaseClass[]>;
     /**
      * Fetches the metadata by calling onFetchServiceMetadata.
-     * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
      * @returns {Promise<T>} Returns a Promise of a metadata
      * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
      * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities) (WMS/WFS layers).
@@ -206,7 +206,6 @@ export declare abstract class AbstractGeoViewLayer {
     initGVLayer(layer: AbstractGVLayer): void;
     /**
      * Emits a layer-specific message event with localization support
-     * @protected
      * @param {string} messageKey - The key used to lookup the localized message OR message
      * @param {string[] | undefined} messageParams - Array of parameters to be interpolated into the localized message
      * @param {SnackbarType} messageType - The message type
@@ -221,6 +220,7 @@ export declare abstract class AbstractGeoViewLayer {
      * );
      *
      * @fires LayerMessageEvent
+     * @protected
      */
     protected emitMessage(messageKey: string, messageParams?: string[] | undefined, messageType?: SnackbarType, notification?: boolean): void;
     /**
@@ -310,8 +310,8 @@ export declare abstract class AbstractGeoViewLayer {
      * Processes a Layer Config by calling 'createGeoViewLayers' on the provided layer.
      * @param {AbstractGeoViewLayer} layer - The layer to use to process the configuration
      * @returns {Promise<ConfigBaseClass>} The promise of a generated ConfigBaseClass.
-     * @protected
      * @static
+     * @protected
      */
     protected static processConfig(layer: AbstractGeoViewLayer): Promise<ConfigBaseClass[]>;
 }
@@ -403,50 +403,5 @@ export type LayerMessageEvent = {
     messageType: SnackbarType;
     notification: boolean;
 };
-export interface TypeImageStaticLegend extends Omit<TypeLegend, 'styleConfig'> {
-    legend: HTMLCanvasElement | null;
-}
-export interface TypeVectorLegend extends TypeLegend {
-    legend: TypeVectorLayerStyles;
-}
-export interface TypeGeoTIFFLegend extends Omit<TypeLegend, 'styleConfig'> {
-    legend: HTMLCanvasElement | null;
-}
-export type TypeStyleRepresentation = {
-    /** The defaultCanvas property is used by Simple styles and default styles when defined in unique value and class
-     * break styles.
-     */
-    defaultCanvas?: HTMLCanvasElement | null;
-    /** The arrayOfCanvas property is used by unique value and class break styles. */
-    arrayOfCanvas?: (HTMLCanvasElement | null)[];
-};
-export type TypeVectorLayerStyles = Partial<Record<TypeStyleGeometry, TypeStyleRepresentation>>;
-/**
- * type guard function that redefines a TypeLegend as a TypeVectorLegend
- * if the type attribute of the verifyIfLegend parameter is valid. The type ascention
- * applies only to the true block of the if clause.
- *
- * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export declare const isVectorLegend: (verifyIfLegend: TypeLegend) => verifyIfLegend is TypeVectorLegend;
-/**
- * type guard function that redefines a TypeLegend as a TypeImageStaticLegend
- * if the type attribute of the verifyIfLegend parameter is valid. The type ascention
- * applies only to the true block of the if clause.
- *
- * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export declare const isImageStaticLegend: (verifyIfLegend: TypeLegend) => verifyIfLegend is TypeImageStaticLegend;
-/**
- * type guard function that redefines a TypeLegend as a TypeGeoTIFFLegend
- * if the type attribute of the verifyIfLegend parameter is valid. The type ascention
- * applies only to the true block of the if clause.
- *
- * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
- * @returns {boolean} returns true if the payload is valid
- */
-export declare const isGeoTIFFLegend: (verifyIfLegend: TypeLegend) => verifyIfLegend is TypeGeoTIFFLegend;
 export {};
 //# sourceMappingURL=abstract-geoview-layers.d.ts.map

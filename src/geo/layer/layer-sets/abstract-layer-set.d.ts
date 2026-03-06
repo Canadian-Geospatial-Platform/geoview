@@ -1,6 +1,5 @@
 import type { EventDelegateBase } from '@/api/events/event-helper';
-import type { QueryType, TypeFeatureInfoEntry, TypeLocation, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
-import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { QueryType, TypeFeatureInfoEntry, TypeFeatureInfoResult, TypeLocation, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { LayerApi } from '@/geo/layer/layer';
@@ -24,25 +23,70 @@ export declare abstract class AbstractLayerSet {
      */
     constructor(layerApi: LayerApi);
     /**
-     * A quick getter to help identify which layerset class the current instance is coming from.
-     */
-    getClassName(): string;
-    /**
      * A must-override method called to propagate the result set entry to the store
      * @param {TypeResultSetEntry} resultSetEntry - The result set entry to propagate
      * @param {PropagationType} type - The propagation type
+     * @returns {void}
+     * @protected
      */
     protected abstract onPropagateToStore(resultSetEntry: TypeResultSetEntry, type: PropagationType): void;
     /**
      * A must-override method called to delete a result set entry from the store
      * @param {string} layerPath - The layer path to delete from store
+     * @returns {void}
+     * @protected
      */
     protected abstract onDeleteFromStore(layerPath: string): void;
     /**
-     * Gets the MapId for the layer set
-     * @returns
+     * An overridable registration condition function for a layer-set to check if the registration
+     * should happen for a specific geoview layer and layer path.
+     *
+     * @param layerConfig - The layer config
+     * @returns True if the layer config should be registered, false otherwise
      */
-    protected getMapId(): string;
+    protected onRegisterLayerConfigCheck(layerConfig: ConfigBaseClass): boolean;
+    /**
+     * An overridable registration function for a layer-set that the registration process will use to
+     * create a new entry in the layer set for a specific geoview layer and layer path.
+     *
+     * @param layerConfig - The layer config
+     */
+    protected onRegisterLayerConfig(layerConfig: ConfigBaseClass): void;
+    /**
+     * An overridable unregistration function for a layer-set that the registration process will use to
+     * unregister a specific layer config.
+     * @param {ConfigBaseClass | undefined} layerConfig - The layer config
+     * @returns {void}
+     * @protected
+     */
+    protected onUnregisterLayerConfig(layerConfig: ConfigBaseClass | undefined): void;
+    /**
+     * An overridable registration condition function for a layer-set to check if the registration
+     * should happen for a specific geoview layer and layer path. By default, a layer-set always registers layers except when they are group layers.
+     * @param {AbstractBaseGVLayer} layer - The layer
+     * @returns {boolean} True if the layer should be registered, false otherwise
+     * @protected
+     */
+    protected onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean;
+    /**
+     * An overridable registration function for a layer-set that the registration process will use to
+     * create a new entry in the layer set for a specific geoview layer and layer path.
+     * @param {AbstractBaseGVLayer} layer - The layer config
+     * @returns {void}
+     * @protected
+     */
+    protected onRegisterLayer(layer: AbstractBaseGVLayer): void;
+    /**
+     * An overridable layer set updated function for a layer-set to indicate the layer set has been updated.
+     * @param {string} layerPath - The layer path
+     * @returns {void}
+     * @protected
+     */
+    protected onLayerSetUpdatedProcess(layerPath: string): void;
+    /**
+     * A quick getter to help identify which layerset class the current instance is coming from.
+     */
+    getClassName(): string;
     /**
      * Gets the registered layer paths based on the registered layers
      * @returns {string[]} An array of layer paths
@@ -54,82 +98,31 @@ export declare abstract class AbstractLayerSet {
      */
     registerLayerConfig(layerConfig: ConfigBaseClass): void;
     /**
-     * An overridable registration condition function for a layer-set to check if the registration
-     * should happen for a specific geoview layer and layer path.
-     * @param {ConfigBaseClass} layerConfig - The layer config
-     * @returns {boolean} True if the layer config should be registered, false otherwise
-     */
-    protected onRegisterLayerConfigCheck(layerConfig: ConfigBaseClass): boolean;
-    /**
-     * An overridable registration function for a layer-set that the registration process will use to
-     * create a new entry in the layer set for a specific geoview layer and layer path.
-     * @param {ConfigBaseClass} layerConfig - The layer config
-     */
-    protected onRegisterLayerConfig(layerConfig: ConfigBaseClass): void;
-    /**
      * Registers the layer in the layer-set.
      * If the layer is already registered, the function returns immediately.
      * @param {AbstractBaseGVLayer} layer - The layer to register
      */
     registerLayer(layer: AbstractBaseGVLayer): Promise<void>;
     /**
-     * An overridable registration condition function for a layer-set to check if the registration
-     * should happen for a specific geoview layer and layer path. By default, a layer-set always registers layers except when they are group layers.
-     * @param {AbstractBaseGVLayer} layer - The layer
-     * @returns {boolean} True if the layer should be registered, false otherwise
-     */
-    protected onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean;
-    /**
-     * An overridable registration function for a layer-set that the registration process will use to
-     * create a new entry in the layer set for a specific geoview layer and layer path.
-     * @param {AbstractBaseGVLayer} layer - The layer config
-     */
-    protected onRegisterLayer(layer: AbstractBaseGVLayer): void;
-    /**
      * Unregisters the layer config and layer from the layer-set.
      * @param {string} layerPath - The layer path
      */
     unregister(layerPath: string): void;
     /**
-     * An overridable unregistration function for a layer-set that the registration process will use to
-     * unregister a specific layer config.
-     * @param {ConfigBaseClass | undefined} layerConfig - The layer config
+     * Gets the MapId for the layer set
+     * @returns
      */
-    protected onUnregisterLayerConfig(layerConfig: ConfigBaseClass | undefined): void;
-    /**
-     * An overridable unregistration function for a layer-set that the registration process will use to
-     * unregister a specific geoview layer.
-     * @param {AbstractBaseGVLayer | undefined} layer - The layer
-     */
-    protected onUnregisterLayer(layer: AbstractBaseGVLayer | undefined): void;
-    /**
-     * An overridable function for a layer-set to process a layer status changed event.
-     * @param {ConfigBaseClass} layerConfig - The layer config
-     * @param {TypeLayerStatus} layerStatus - The new layer status
-     */
-    protected onProcessLayerStatusChanged(layerConfig: ConfigBaseClass, layerStatus: TypeLayerStatus): void;
-    /**
-     * An overridable function for a layer-set to process a layer name change.
-     * @param {string} layerPath - The layer path being affected
-     * @param {string} name - The new layer name
-     */
-    protected onProcessNameChanged(layerPath: string, name: string): void;
-    /**
-     * An overridable layer set updated function for a layer-set to indicate the layer set has been updated.
-     * @param {string} layerPath - The layer path
-     */
-    protected onLayerSetUpdatedProcess(layerPath: string): void;
+    protected getMapId(): string;
     /**
      * Processes layer data to query features on it, if the layer path can be queried.
-     * @param {OLMap} map - The Map to query layer features from.
      * @param {AbstractGVLayer} geoviewLayer - The geoview layer
      * @param {QueryType} queryType - The query type
      * @param {TypeLocation} location - The location for the query
      * @param {boolean} queryGeometry - The query geometry boolean
      * @param {AbortController?} [abortController] - The optional abort controller.
-     * @returns {Promise<TypeFeatureInfoEntry[]>} A promise resolving to the query results
+     * @returns {Promise<TypeFeatureInfoResult>} A promise resolving to the query results
      */
-    protected static queryLayerFeatures(layerApi: LayerApi, geoviewLayer: AbstractGVLayer, queryType: QueryType, location: TypeLocation, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
+    protected queryLayerFeatures(geoviewLayer: AbstractGVLayer, queryType: QueryType, location: TypeLocation, queryGeometry?: boolean, abortController?: AbortController): Promise<TypeFeatureInfoResult>;
     /**
      * Checks if the layer is of queryable type based on its class definition
      * @param {AbstractBaseGVLayer} layer - The layer
@@ -147,13 +140,13 @@ export declare abstract class AbstractLayerSet {
      * This will update fields in and delete unwanted fields from the arrayOfRecords
      * @param {AbstractBaseLayerEntryConfig} layerEntryConfig - The layer entry config object.
      * @param {TypeFeatureInfoEntry[]} arrayOfRecords - Features to delete fields from.
-     * @protected
      * @static
+     * @protected
      */
     protected static alignRecordsWithOutFields(layerEntryConfig: AbstractBaseLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): void;
     /**
      * Determines whether the retrieved feature info records contain real attribute fields
-     * (i.e., key–value properties) or whether they were returned in a fallback
+     * (i.e., key-value properties) or whether they were returned in a fallback
      * HTML/plain-text form, which commonly occurs with WMS `GetFeatureInfo` responses.
      * This is used primarily to detect when a WMS service cannot return structured
      * feature attributes and instead provides the feature data as a single HTML or
@@ -171,8 +164,8 @@ export declare abstract class AbstractLayerSet {
      * @returns {boolean}
      *   `true` if the feature info records contain real attribute fields;
      *   `false` if they consist only of fallback HTML or plain-text content.
-     * @protected
      * @static
+     * @protected
      */
     protected static recordsContainActualFields(layerConfig: AbstractBaseLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): boolean;
     /**

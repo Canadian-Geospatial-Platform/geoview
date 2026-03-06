@@ -1,3 +1,8 @@
+/** Result of a HEAD reachability check. */
+export interface HeadResult {
+    response: Response | null;
+    reason: 'ok' | 'cors' | 'network' | 'timeout';
+}
 export declare abstract class Fetch {
     #private;
     /**
@@ -109,6 +114,20 @@ export declare abstract class Fetch {
      * @throws {NetworkError} When a network issue happened.
      */
     static fetchXMLToJson<T = Record<string, unknown>>(url: string, init?: RequestInit, timeoutMs?: number): Promise<T>;
+    /**
+     * Performs a HEAD request to check URL reachability without downloading the body.
+     *
+     * Returns a structured result indicating what happened:
+     * - 'ok': Server responded (any HTTP status — it is alive).
+     * - 'cors': Server is alive but blocks cross-origin requests.
+     * - 'network': Server is truly unreachable (bad domain, DNS failure, etc.).
+     * - 'timeout': Request timed out before server could respond.
+     *
+     * @param url - The URL to send the HEAD request to.
+     * @param timeoutMs - Optional timeout in milliseconds before aborting the request.
+     * @returns A structured result with the response (if any) and a reason.
+     */
+    static fetchHeadWithTimeout(url: string, timeoutMs?: number): Promise<HeadResult>;
     /**
      * Performs a fetch request with timeout capability
      * @template T - The expected type of the JSON response

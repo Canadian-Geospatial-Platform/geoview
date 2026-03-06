@@ -1,6 +1,7 @@
 import type { GeoviewStoreType } from '@/core/stores';
 import type { GeoChartStoreByLayerPath, IGeochartState, TypeGeochartResultSetEntry } from '@/core/stores/store-interface-and-intial-values/geochart-state';
 import type { GeoViewGeoChartConfig } from '@/api/config/reader/uuid-config-reader';
+import type { SubscriptionDelegate } from '@/api/event-processors/abstract-event-processor';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 /**
  * Event processor focusing on interacting with the geochart state in the store.
@@ -10,10 +11,10 @@ export declare class GeochartEventProcessor extends AbstractEventProcessor {
     static TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH: number;
     /**
      * Overrides initialization of the GeoChart Event Processor
-     * @param {GeoviewStoreType} store The store associated with the GeoChart Event Processor
+     * @param store - The store associated with the GeoChart Event Processor
      * @returns An array of the subscriptions callbacks which were created
      */
-    protected onInitialize(store: GeoviewStoreType): Array<() => void> | void;
+    protected onInitialize(store: GeoviewStoreType): SubscriptionDelegate[];
     /**
      * Checks if the Geochart plugin is iniitialized for the given map.
      * @param {string} mapId - The map id
@@ -41,6 +42,8 @@ export declare class GeochartEventProcessor extends AbstractEventProcessor {
      * Sets the selected layer path for a specific GeoChart map instance in the Zustand store.
      * @param {string} mapId - The unique identifier of the GeoChart map.
      * @param {string} layerPath - The path of the layer to set as selected.
+     * @returns {void}
+     * @static
      */
     static setSelectedGeochartLayerPath(mapId: string, layerPath: string): void;
     /**
@@ -50,6 +53,7 @@ export declare class GeochartEventProcessor extends AbstractEventProcessor {
      *
      * @param {string} mapId - The map id
      * @param {GeoViewGeoChartConfig[]} charts The array of JSON configuration for GeoChart
+     * @returns {void}
      * @throws {PluginStateUninitializedError} When the Geochart plugin is uninitialized.
      * @static
      */
@@ -59,6 +63,7 @@ export declare class GeochartEventProcessor extends AbstractEventProcessor {
      * @param {string} mapId - The map ID
      * @param {string} layerPath - The layer path
      * @param {GeoViewGeoChartConfig} chartConfig - The Geochart Configuration
+     * @returns {void}
      * @throws {PluginStateUninitializedError} When the Geochart plugin is uninitialized.
      * @static
      */
@@ -67,6 +72,7 @@ export declare class GeochartEventProcessor extends AbstractEventProcessor {
      * Removes a GeoChart Configuration at the specified map id and layer path
      * @param {string} mapId - The map ID
      * @param {string} layerPath - The layer path
+     * @returns {void}
      * @throws {PluginStateUninitializedError} When the Geochart plugin is uninitialized.
      * @static
      */

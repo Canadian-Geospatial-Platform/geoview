@@ -26,7 +26,7 @@ export interface IAppState {
     showLayerHighlightLayerBbox: boolean;
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
     actions: {
-        addMessage: (type: SnackbarType, messageKey: string, param?: string[]) => void;
+        addMessage: (type: SnackbarType, messageKey: string, messageParams?: unknown[], notification?: boolean) => void;
         addNotification: (notif: NotificationDetailsType) => void;
         setCrosshairActive: (active: boolean) => void;
         setDisplayLanguage: (lang: TypeDisplayLanguage) => Promise<void>;

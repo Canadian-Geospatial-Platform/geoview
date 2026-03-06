@@ -2,6 +2,17 @@ import type { Root } from 'react-dom/client';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import type { TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
 import type { TypeHTMLElement } from '@/core/types/global-types';
+interface PingResult {
+    isValid: boolean;
+    isReachable: boolean;
+    needsProxy: boolean;
+    status: number | null;
+    error?: string;
+}
+/**
+ * Represents RGBA color as [Red, Green, Blue, Alpha]
+ */
+export type RGBA = [r: number, g: number, b: number, a: number];
 /**
  * Generates an array of numbers from `start` (inclusive) to `end` (exclusive),
  * incrementing by `step`.
@@ -147,6 +158,35 @@ export declare function generateId(length?: 8 | 18 | 36): string;
  * @returns {boolean} Returns true if the UUID respect the format.
  */
 export declare function isValidUUID(uuid: string): boolean;
+/**
+ * Validates a URL's syntax and tests whether the server is reachable.
+ *
+ * Strategy:
+ * 1. **HEAD → 2xx/3xx** → reachable, no proxy needed.
+ * 2. **HEAD → 4xx/5xx** → server is alive but the bare path fails. Try OGC GetCapabilities
+ *    directly (CORS was fine since HEAD got a response). If valid → reachable. Otherwise → not reachable.
+ * 3. **HEAD → CORS** → server is alive but blocks cross-origin. Try OGC GetCapabilities
+ *    through the proxy. If valid → reachable + needsProxy. Otherwise → not reachable.
+ * 4. **HEAD → network/timeout** → server unreachable.
+ *
+ * The function never throws — all failures are returned as part of the result object.
+ *
+ * @param targetUrl - The URL to validate and ping.
+ * @param proxyBase - Optional. The proxy server base URL. Defaults to CONFIG_PROXY_URL.
+ * @param timeoutMs - Optional. Request timeout in milliseconds. Defaults to 5000ms.
+ * @returns A result object with isValid, isReachable, needsProxy, status, and optional error.
+ */
+export declare function validateAndPingUrl(targetUrl: string, proxyBase?: string, timeoutMs?: number): Promise<PingResult>;
+/**
+ * Extracts the embedded color palette from a GeoTIFF file at the given URL.
+ *
+ * Returns an array of RGBA color tuples, or `undefined` if no palette is present.
+ * Each color is normalized to 8-bit values.
+ *
+ * @param url - URL to the GeoTIFF file.
+ * @returns Array of RGBA color tuples, or undefined if no palette.
+ */
+export declare function extractGeotiffColorMap(url: string): Promise<RGBA[] | undefined>;
 /**
  * Set alpha for a color
  * @param {number[]} colorArray - The array of color numbers
@@ -411,4 +451,5 @@ export declare function formatArea(area: number, displayLanguage: string): strin
  * @returns {string} The normalized access path.
  */
 export declare function normalizeDatacubeAccessPath(path: string): string;
+export {};
 //# sourceMappingURL=utilities.d.ts.map

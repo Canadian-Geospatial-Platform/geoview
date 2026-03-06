@@ -11,9 +11,13 @@ import { Polygon } from 'ol/geom';
 import type { Coordinate } from 'ol/coordinate';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import type { TypeOutfields, TypeStyleGeometry, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
-import type { TypeMetadataWMS, TypeStylesWMS } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerType, TypeMetadataWMS, TypeStylesWMS } from '@/api/types/layer-schema-types';
 import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
-export declare const layerTypes: Record<"CSV" | "ESRI_DYNAMIC" | "ESRI_FEATURE" | "ESRI_IMAGE" | "IMAGE_STATIC" | "GEOJSON" | "GEOTIFF" | "KML" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WFS" | "WKB" | "WMS", import("@/api/types/layer-schema-types").TypeGeoviewLayerType>;
+import type { TypeMetadataWMTS } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
+import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { TypeLegendItem, TypeLegendLayerItem } from '@/core/components/layers/types';
+import type { TypeVectorLayerStyles } from './renderer/geoview-renderer';
+export declare const layerTypes: Record<"CSV" | "KML" | "WKB" | "ESRI_DYNAMIC" | "ESRI_FEATURE" | "ESRI_IMAGE" | "IMAGE_STATIC" | "GEOJSON" | "GEOTIFF" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WFS" | "WMS" | "WMTS", TypeGeoviewLayerType>;
 export declare abstract class GeoUtilities {
     #private;
     /**
@@ -80,6 +84,18 @@ export declare abstract class GeoUtilities {
      */
     static ensureServiceRequestUrlGetFeature(url: string, layerId: string, version: string, outputFormat: string | undefined, outfields: TypeOutfields[] | undefined, xmlFilter: string | undefined, outputProjectionCode: string | undefined): string;
     /**
+     * Removes specified query parameters from a URL, preserving all others.
+     * This method normalizes a URL by stripping out any query parameters whose
+     * keys match the ones provided in `removeParams`. It works even if the URL
+     * contains multiple `?` or `&` characters (e.g., proxy-wrapped URLs).
+     * @param {string} url - The URL to normalize.
+     * @param {string[]} removeParams - Array of parameter names (case-insensitive)
+     *   to remove from the URL.
+     * @returns {string} - The normalized URL with the specified parameters removed.
+     * @static
+     */
+    static ensureURLForOpenLayersSource(url: string, removeParams: string[]): string;
+    /**
      * Fetch the json response from the ESRI map server to get REST endpoint metadata.
      * @param {string} url - The url of the ESRI map server.
      * @returns {Promise<unknown>} A json promise containing the result of the query.
@@ -90,7 +106,7 @@ export declare abstract class GeoUtilities {
      * @param {string} url - The url the url of the WMS server.
      * @param {CallbackNewMetadataDelegate?} [callbackNewMetadataUrl] - Callback executed when a proxy had to be used to fetch the metadata.
      * The parameter sent in the callback is the proxy prefix with the '?' at the end.
-     * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
      * @returns {Promise<TypeMetadataWMS>} A json promise containing the result of the query.
      * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
      * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
@@ -105,7 +121,7 @@ export declare abstract class GeoUtilities {
      * @param {string} layers - The layers to query separate by.
      * @param {CallbackNewMetadataDelegate?} [callbackNewMetadataUrl] - Callback executed when a proxy had to be used to fetch the metadata.
      * The parameter sent in the callback is the proxy prefix with the '?' at the end.
-     * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
      * @returns {Promise<TypeMetadataWMS>} A json promise containing the result of the query.
      * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
      * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
@@ -116,11 +132,25 @@ export declare abstract class GeoUtilities {
     static getWMSServiceMetadata(url: string, layers?: string, callbackNewMetadataUrl?: CallbackNewMetadataDelegate, abortSignal?: AbortSignal): Promise<TypeMetadataWMS>;
     /**
      * Fetch the json response from the XML response of a WMS getCapabilities request.
+     *
+     * @param url - The url the url of the WMS server.
+     * @param layers - The layers to query separate by.
+     * @param abortSignal - Optional abort signal to handle cancelling of the process.
+     * @returns A json promise containing the result of the query.
+     * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
+     * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
+     * @throws {ResponseError} When the response is not OK (non-2xx).
+     * @throws {ResponseEmptyError} When the JSON response is empty.
+     * @throws {NetworkError} When a network issue happened.
+     */
+    static getWMTSServiceMetadata(url: string, layers?: string, abortSignal?: AbortSignal): Promise<TypeMetadataWMTS>;
+    /**
+     * Fetch the json response from the XML response of a WMS getCapabilities request.
      * @param {string} url - The url the url of the WMS server.
      * @param {string} layers - The layers to query separate by.
      * @param {CallbackNewMetadataDelegate?} [callbackNewMetadataUrl] - Callback executed when a proxy had to be used to fetch the metadata.
      * The parameter sent in the callback is the proxy prefix with the '?' at the end.
-     * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
      * @returns {Promise<TypeStylesWMS>} A json promise containing the result of the query.
      * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
      * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
@@ -152,6 +182,63 @@ export declare abstract class GeoUtilities {
      * @returns {string} A new URL string with the updated BBOX parameter
      */
     static replaceCRSandBBOXParam(url: string, newCRS: string, newBBOX: number[]): string;
+    /**
+     * Generates legend layer icon metadata from a layer legend definition.
+     * This method extracts icon imagery and legend item details from the provided
+     * `layerLegend`, handling both vector and non-vector legends.
+     * Behavior:
+     * - **Vector legends**:
+     *   - Iterates through each geometry type in the legend definition.
+     *   - Generates icon images from HTML canvas elements using `toDataURL()`.
+     *   - Supports both `simple` and categorized style configurations.
+     *   - Builds an `iconList` of {@link TypeLegendItem} entries per geometry type.
+     *   - Assigns:
+     *     - `iconImage` as the primary icon (first legend item)
+     *     - `iconImageStacked` as the secondary icon when multiple entries exist
+     * - **Non-vector legends**:
+     *   - Attempts to extract a canvas image directly from `layerLegend.legend`.
+     *   - Falls back to `'no data'` if no canvas is available.
+     * Notes:
+     * - Duplicate legend labels within categorized styles are filtered out.
+     * - Visibility defaults to `true` unless explicitly set to `false`.
+     * - Returns `undefined` if `layerLegend` is `null` or `undefined`.
+     * @param schemaTag - The layer schema type used to determine
+     * whether the legend should be interpreted as vector-based.
+     * @param layerLegend - The legend configuration
+     * object associated with the layer.
+     * @returns An array of legend layer item metadata containing icon images and legend entries,
+     * or `undefined` if no legend is provided.
+     */
+    static getLayerIconImage(schemaTag: TypeGeoviewLayerType, layerLegend: TypeLegend | null | undefined): TypeLegendLayerItem[] | undefined;
+    /**
+     * Extracts and normalizes legend items from a collection of legend layer icons.
+     * This method:
+     * - Flattens all `iconList` entries from the provided legend layer items.
+     * - Handles special layer types (`imageStatic` and `GeoTIFF`) by dynamically
+     *   creating a legend item using the `iconImage` property.
+     * For `imageStatic` and `GeoTIFF` schema tags, if at least one icon is present,
+     * an additional legend item is created with:
+     * - `geometryType` set to `'Point'`
+     * - `name` set to `'image'`
+     * - `icon` set from `icons[0].iconImage`
+     * - `isVisible` set to `true`
+     * @param schemaTag - The layer schema type used to determine
+     * special handling logic (e.g., `'imageStatic'`, `'GeoTIFF'`).
+     * @param icons - The list of legend layer items containing
+     * optional `iconList` collections and optional `iconImage` values.
+     * @returns A flattened array of legend items derived from the
+     * provided icons, including any dynamically generated items for special layer types.
+     */
+    static getLayerItemsFromIcons(schemaTag: TypeGeoviewLayerType, icons: TypeLegendLayerItem[]): TypeLegendItem[];
+    /**
+     * type guard function that redefines a TypeLegend as a TypeVectorLegend
+     * if the type attribute of the verifyIfLegend parameter is valid. The type ascention
+     * applies only to the true block of the if clause.
+     *
+     * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
+     * @returns {boolean} returns true if the payload is valid
+     */
+    static isVectorLegend(verifyIfLegend: TypeLegend, schemaTag: TypeGeoviewLayerType): verifyIfLegend is TypeVectorLegend;
     /**
      * Returns the WKT representation of a given geometry.
      * @param {string} geometry - The geometry
@@ -389,4 +476,7 @@ export declare abstract class GeoUtilities {
 }
 /** The type for the function callback for getWMSServiceMetadata() */
 export type CallbackNewMetadataDelegate = (proxyUsed: string) => void;
+export interface TypeVectorLegend extends TypeLegend {
+    legend: TypeVectorLayerStyles;
+}
 //# sourceMappingURL=utilities.d.ts.map

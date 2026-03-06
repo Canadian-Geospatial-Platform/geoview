@@ -13,14 +13,20 @@ export declare class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
     constructor(layerConfig: OgcWfsLayerEntryConfigProps);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @returns {TypeWFSLayerConfig} The strongly-typed layer configuration specific to this layer.
      * @override
+     */
+    getGeoviewLayerConfig(): TypeWFSLayerConfig;
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
      * @returns {TypeMetadataWFS | undefined} The strongly-typed layer configuration specific to this layer entry config.
+     * @override
      */
     getServiceMetadata(): TypeMetadataWFS | undefined;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @override
      * @returns {TypeOutfields[] | undefined} The strongly-typed layer metadata specific to this layer entry config.
+     * @override
      */
     getLayerMetadata(): TypeOutfields[] | undefined;
     /**

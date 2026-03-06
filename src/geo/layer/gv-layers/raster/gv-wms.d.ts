@@ -8,9 +8,10 @@ import { type EventDelegateBase } from '@/api/events/event-helper';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
-import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoResult } from '@/api/types/map-schema-types';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
+import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 /**
  * Manages a WMS layer.
@@ -51,47 +52,68 @@ export declare class GVWMS extends AbstractGVRaster {
     /**
      * Overrides when the layer image is in error and couldn't be loaded correctly.
      * @param {Event} event - The event which is being triggered.
+     * @returns {void}
+     * @override
+     * @protected
      */
-    protected onImageLoadError(event: Event): void;
-    protected onImageLoadErrorDecipherError(event: Event): string;
+    protected onImageLoadError(error: GeoViewError): void;
+    /**
+     * Deciphers an image load error event and returns a corresponding
+     * localized error message key.
+     * This override inspects the failed image request to detect more specific
+     * failure scenarios before falling back to a generic error message.
+     * The method currently checks for:
+     * - Image size exceeding the service-defined `MaxWidth` or `MaxHeight`
+     *   constraints (if available in service metadata).
+     * - An empty image response (zero width or height).
+     * If none of the specific conditions are met, a generic image load error
+     * message key is returned.
+     * @param event - The image load error event triggered by the image source.
+     * @returns A GeoView Error representing the error.
+     * @override
+     * @protected
+     */
+    protected onImageLoadErrorDecipherError(event: Event): GeoViewError;
     /**
      * Overrides the return of feature information at a given coordinate.
      * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.
      * @param {Coordinate} location - The coordinate that will be used by the query.
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
      * @param {AbortController?} [abortController] - The optional abort controller.
-     * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+     * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
      * @override
+     * @protected
      */
-    protected getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
+    protected getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
     /**
      * Overrides the return of feature information at the provided long lat coordinate.
      * @param {OLMap} map - The Map where to get Feature Info At LonLat from.
      * @param {Coordinate} lonlat - The coordinate that will be used by the query.
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
      * @param {AbortController?} [abortController] - The optional abort controller.
-     * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+     * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
      * @throws {LayerConfigWFSMissingError} If no WFS layer configuration is defined for this WMS layer.
      * @override
+     * @protected
      */
-    protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
+    protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
     /**
      * Overrides the get all feature information for all the features stored in the layer.
      * This function performs a WFS 'GetFeature' query operation using the WFS layer configuration embedded in the WMS layer configuration.
      * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
      * @param {LayerFilters} layerFilters - The layer filters to apply when querying the features.
      * @param {AbortController?} [abortController] - The optional abort controller.
-     * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+     * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
      * @throws {LayerConfigWFSMissingError} If no WFS layer configuration is defined for this WMS layer.
      * @throws {ResponseError} When the response is not OK (non-2xx).
      * @throws {ResponseEmptyError} When the JSON response is empty.
      * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
      * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
      * @throws {NetworkError} When a network issue happened.
-     * @protected
      * @override
+     * @protected
      */
-    protected getAllFeatureInfo(map: OLMap, layerFilters: LayerFilters, abortController?: AbortController): Promise<TypeFeatureInfoEntry[]>;
+    protected getAllFeatureInfo(map: OLMap, layerFilters: LayerFilters, abortController?: AbortController): Promise<TypeFeatureInfoResult>;
     /**
      * Overrides the fetching of the legend for a WMS layer.
      * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
@@ -100,12 +122,11 @@ export declare class GVWMS extends AbstractGVRaster {
     onFetchLegend(): Promise<TypeLegend | null>;
     /**
      * Overrides the way to get the bounds for this layer type.
-     * @param {OLProjection} projection - The projection to get the bounds into.
-     * @param {number} stops - The number of stops to use to generate the extent.
-     * @returns {Extent | undefined} The layer bounding box.
-     * @override
+     * @param projection - The projection to get the bounds into.
+     * @param stops - The number of stops to use to generate the extent.
+     * @returns A promise of layer bounding box.
      */
-    onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
+    onGetBounds(projection: OLProjection, stops: number): Promise<Extent | undefined>;
     /**
      * Sends a query to get feature and calculates an extent from them.
      * @param {number[] | string[]} objectIds - The IDs of the features to calculate the extent from.
@@ -126,6 +147,9 @@ export declare class GVWMS extends AbstractGVRaster {
     /**
      * Overrides the way a WMS layer applies a view filter. It does so by updating the source FILTER and TIME parameters.
      * @param {LayerFilters} [filter] - An optional filter to be used in place of the getViewFilter value.
+     * @returns {void}
+     * @override
+     * @protected
      */
     protected onSetLayerFilters(filter?: LayerFilters): void;
     /**
@@ -180,9 +204,7 @@ export declare class GVWMS extends AbstractGVRaster {
      * @param {OgcWfsLayerEntryConfig} wfsLayerConfig - The WFS layer configuration used for schema tags, outfields, metadata, and
      *   date formatting.
      * @param {AbortController} [abortController] - Optional `AbortController` used to cancel the fetch request.
-     * @returns {Promise<TypeFeatureInfoEntry[]>}
-     *   A promise resolving to an array of GeoView Feature Info entries representing
-     *   the parsed and formatted features from the WFS response.
+     * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
      * @throws {ResponseError} When the response is not OK (non-2xx).
      * @throws {ResponseEmptyError} When the JSON response is empty.
      * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
@@ -190,7 +212,7 @@ export declare class GVWMS extends AbstractGVRaster {
      * @throws {NetworkError} When a network issue happened.
      * @static
      */
-    static fetchAndParseFeaturesFromWFSUrl(urlWithOutputJson: string, wmsLayerConfig: OgcWmsLayerEntryConfig, wfsLayerConfig: OgcWfsLayerEntryConfig, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
+    static fetchAndParseFeaturesFromWFSUrl(urlWithOutputJson: string, wmsLayerConfig: OgcWmsLayerEntryConfig, wfsLayerConfig: OgcWfsLayerEntryConfig, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
     /**
      * Applies a view filter to a WMS or an Esri Image layer's source by updating the source parameters.
      * This function is responsible for generating the appropriate filter expression based on the layer configuration,
@@ -221,7 +243,7 @@ export type CRSOverride = {
  * Define an event for the delegate
  */
 export type ImageLoadRescueEvent = {
-    imageLoadErrorEvent: unknown;
+    imageLoadErrorEvent: Error;
 };
 /**
  * Define a delegate for the event handler function signature

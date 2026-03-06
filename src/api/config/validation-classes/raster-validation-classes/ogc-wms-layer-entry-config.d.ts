@@ -20,20 +20,26 @@ export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig
     constructor(layerConfig: OgcWmsLayerEntryConfigProps);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @returns {TypeWMSLayerConfig} The strongly-typed layer configuration specific to this layer.
      * @override
+     */
+    getGeoviewLayerConfig(): TypeWMSLayerConfig;
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
      * @returns {TypeSourceImageWmsInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+     * @override
      */
     getSource(): TypeSourceImageWmsInitialConfig;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @override
      * @returns {TypeMetadataWMS | undefined} The strongly-typed layer configuration specific to this layer entry config.
+     * @override
      */
     getServiceMetadata(): TypeMetadataWMS | undefined;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @override
      * @returns {TypeMetadataWMSCapabilityLayer | undefined} The strongly-typed layer metadata specific to this layer entry config.
+     * @override
      */
     getLayerMetadata(): TypeMetadataWMSCapabilityLayer | undefined;
     /**

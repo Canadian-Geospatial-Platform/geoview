@@ -17,14 +17,20 @@ export declare class VectorTilesLayerEntryConfig extends TileLayerEntryConfig {
     constructor(layerConfig: VectorTilesLayerEntryConfigProps);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @returns {TypeVectorTilesConfig} The strongly-typed layer configuration specific to this layer.
      * @override
+     */
+    getGeoviewLayerConfig(): TypeVectorTilesConfig;
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
      * @returns {TypeSourceTileInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+     * @override
      */
     getSource(): TypeSourceTileInitialConfig;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @override
      * @returns {TypeMetadataVectorTiles | undefined} The strongly-typed layer configuration specific to this layer entry config.
+     * @override
      */
     getServiceMetadata(): TypeMetadataVectorTiles | undefined;
     /**

@@ -1,8 +1,8 @@
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 interface JSONExportButtonProps {
+    layerPath: string;
     rows: unknown[];
     features: TypeFeatureInfoEntry[];
-    layerPath: string;
 }
 /**
  * Custom  GeoJson export button which will help to download data table data in geojson format.

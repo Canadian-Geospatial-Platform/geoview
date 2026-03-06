@@ -1,17 +1,12 @@
 import { type TemporalMode, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { FileExportProps } from '@/core/components/export/export-modal';
-import type { FlattenedLegendItem } from '@/core/components/export/utilities';
+import type { FlattenedLegendItem, NorthArrowSVG } from '@/core/components/export/utilities';
 interface CanvasDocumentProps {
     mapDataUrl: string;
     exportTitle: string;
     scaleText: string;
     scaleLineWidth: string;
-    northArrowSvg: Array<{
-        d: string | null;
-        fill: string | null;
-        stroke: string | null;
-        strokeWidth: string | null;
-    }> | null;
+    northArrowSvg?: NorthArrowSVG[];
     northArrowRotation: number;
     disclaimer: string;
     attributions: string[];

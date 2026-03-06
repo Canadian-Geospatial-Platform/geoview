@@ -2,8 +2,7 @@ import type { Coordinate } from 'ol/coordinate';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { QueryType, TypeResultSet } from '@/api/types/map-schema-types';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
-import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
+import { AbstractLayerSet, type PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import type { LayerApi } from '@/geo/layer/layer';
 import type { TypeFeatureInfoResultSet, TypeFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 /**
@@ -27,22 +26,33 @@ export declare class FeatureInfoLayerSet extends AbstractLayerSet {
      * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
      * @param {AbstractBaseGVLayer} layer - The layer
      * @returns {boolean} True when the layer should be registered to this feature-info-layer-set.
+     * @override
+     * @protected
      */
     protected onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean;
     /**
      * Overrides the behavior to apply when a feature-info-layer-set wants to register a layer in its set.
      * @param {AbstractBaseGVLayer} layer - The layer
+     * @returns {void}
+     * @override
+     * @protected
      */
     protected onRegisterLayer(layer: AbstractBaseGVLayer): void;
     /**
      * Overrides the behavior to apply when propagating to the store
      * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate
      * @param {PropagationType} type - The propagation type
+     * @returns {void}
+     * @override
+     * @protected
      */
     protected onPropagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry, type: PropagationType): void;
     /**
      * Overrides the behavior to apply when deleting from the store
      * @param {string} layerPath - The layer path to delete from the store
+     * @returns {void}
+     * @override
+     * @protected
      */
     protected onDeleteFromStore(layerPath: string): void;
     /**

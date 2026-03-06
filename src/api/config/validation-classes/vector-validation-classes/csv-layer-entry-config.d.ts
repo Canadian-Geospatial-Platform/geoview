@@ -14,8 +14,14 @@ export declare class CsvLayerEntryConfig extends VectorLayerEntryConfig {
     constructor(layerConfig: CsvLayerEntryConfigProps);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @returns {TypeCSVLayerConfig} The strongly-typed layer configuration specific to this layer.
      * @override
+     */
+    getGeoviewLayerConfig(): TypeCSVLayerConfig;
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
      * @returns {TypeSourceCSVInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+     * @override
      */
     getSource(): TypeSourceCSVInitialConfig;
     /**

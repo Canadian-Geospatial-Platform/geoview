@@ -6,7 +6,6 @@ import type Feature from 'ol/Feature';
 import type { TypeLayerStyleConfigType, TypePolygonVectorConfig, TypeIconSymbolVectorConfig, TypeLineStyle, TypeLineStringVectorConfig, TypeSimpleSymbolVectorConfig, TypeKindOfVectorSettings, TypeStyleGeometry, TypeLayerStyleSettings, TypeLayerStyleConfig, TypeLayerStyleConfigInfo, TypeLayerStyleValueCondition, TypeLayerTextConfig, TypeLayerStyleVisualVariable, TypeAliasLookup, TypeValidMapProjectionCodes, TypeOutfields } from '@/api/types/map-schema-types';
 import type { TypeLayerMetadataFields } from '@/api/types/layer-schema-types';
 import type { FillPatternLine, FillPatternSettings, FilterNodeType } from './geoview-renderer-types';
-import type { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 type TypeStyleProcessor = (styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions) => Style | undefined;
 /**
  * Options object for processing styles with optional parameters
@@ -680,5 +679,14 @@ export declare abstract class GeoviewRenderer {
      */
     static getFilterFromStyle(outFields: TypeOutfields[] | undefined, style: TypeLayerStyleConfig | undefined, styleSettings: TypeLayerStyleSettings | undefined): string | undefined;
 }
+export type TypeStyleRepresentation = {
+    /** The defaultCanvas property is used by Simple styles and default styles when defined in unique value and class
+     * break styles.
+     */
+    defaultCanvas?: HTMLCanvasElement | null;
+    /** The arrayOfCanvas property is used by unique value and class break styles. */
+    arrayOfCanvas?: (HTMLCanvasElement | null)[];
+};
+export type TypeVectorLayerStyles = Partial<Record<TypeStyleGeometry, TypeStyleRepresentation>>;
 export {};
 //# sourceMappingURL=geoview-renderer.d.ts.map

@@ -3,14 +3,27 @@ import type { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-inter
 import type { TypeFeatureInfoResultSetEntry, TypeHoverResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import type { TypeGeochartResultSetEntry } from '@/core/stores/store-interface-and-intial-values/geochart-state';
 import type { TypeResultSetEntry } from '@/api/types/map-schema-types';
-/**
- * Holds the buffer, on a map basis, for the propagation in batch in the layer data array store
- */
-export type BatchedPropagationLayerDataArrayByMap<T extends TypeResultSetEntry> = {
-    [mapId: string]: T[][];
-};
 export declare abstract class AbstractEventProcessor {
     #private;
+    /**
+     * Overridable method called when initializing an event processor.
+     * @param store - The store to initialize with
+     * @returns An array of the subscriptions callbacks which were created
+     */
+    protected onInitialize(store: GeoviewStoreType): SubscriptionDelegate[];
+    /**
+     * Overridable method called when destroying an event processor.
+     */
+    protected onDestroy(): void;
+    /**
+     * Initializes the processor
+     * @param {GeoviewStoreType} store the store to initialize the processor with
+     */
+    initialize(store: GeoviewStoreType): void;
+    /**
+     * Destroys the processor
+     */
+    destroy(): void;
     /**
      * Shortcut to get the store state for a given map id
      *
@@ -25,18 +38,6 @@ export declare abstract class AbstractEventProcessor {
      * @returns {IGeoviewState} the store state
      */
     protected static getStateAsync(mapId: string): Promise<IGeoviewState>;
-    /**
-     * Initializes the processor
-     * @param {GeoviewStoreType} store the store to initialize the processor with
-     */
-    initialize(store: GeoviewStoreType): void;
-    protected onInitialize(store: GeoviewStoreType): Array<() => void> | void;
-    /**
-     * Destroys the processor
-     * @param {GeoviewStoreType} store the store to initialize the processor with
-     */
-    destroy(): void;
-    protected onDestroy(): void;
     /**
      * Helper method to propagate in the layerDataArray in a batched manner.
      * The propagation can be bypassed using 'layerPathBypass' parameter which tells the process to
@@ -56,4 +57,14 @@ export declare abstract class AbstractEventProcessor {
      */
     protected static helperPropagateArrayStoreBatch<T extends TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry | TypeGeochartResultSetEntry>(mapId: string, layerDataArray: T[], batchPropagationObject: BatchedPropagationLayerDataArrayByMap<T>, timeDelayBetweenPropagations: number, onSetLayerDataArray: (layerDataArray: T[]) => void, traceProcessorIndication?: string, layerPathBypass?: string, onResetBypass?: (layerPath: string) => void): Promise<void>;
 }
+/**
+ * Holds the buffer, on a map basis, for the propagation in batch in the layer data array store
+ */
+export type BatchedPropagationLayerDataArrayByMap<T extends TypeResultSetEntry> = {
+    [mapId: string]: T[][];
+};
+/**
+ * Represents a subscription delegate
+ */
+export type SubscriptionDelegate = () => void;
 //# sourceMappingURL=abstract-event-processor.d.ts.map

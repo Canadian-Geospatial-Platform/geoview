@@ -4,13 +4,13 @@ import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { type TypeGetStore, type TypeSetStore } from '@/core/stores/geoview-store';
 import type { TypeFeatureInfoEntryPartial, TypeLayerStyleConfig, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
 import { type TemporalMode, type TimeDimension, type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
-import type { TypeGeoviewLayerType } from '@/api/types/layer-schema-types';
-import type { TypeVectorLayerStyles } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
+import type { TypeGeoviewLayerType, TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { TypeVectorLayerStyles } from '@/geo/utils/renderer/geoview-renderer';
 type LayerActions = ILayerState['actions'];
 export interface ILayerState {
     highlightedLayer: string;
     selectedLayer: TypeLegendLayer;
-    selectedLayerPath: string | undefined | null;
+    selectedLayerPath?: string;
     legendLayers: TypeLegendLayer[];
     displayState: TypeLayersViewDisplayState;
     layerDeleteInProgress: string;
@@ -20,22 +20,21 @@ export interface ILayerState {
         deleteLayer: (layerPath: string) => void;
         getExtentFromFeatures: (layerPath: string, featureIds: number[], outfield?: string) => Promise<Extent>;
         queryLayerEsriDynamic: (layerPath: string, objectIDs: number[]) => Promise<TypeFeatureInfoEntryPartial[]>;
-        getLayer: (layerPath: string) => TypeLegendLayer | undefined;
-        getLayerBounds: (layerPath: string) => number[] | undefined;
         getLayerDeleteInProgress: () => string;
         getLayerServiceProjection: (layerPath: string) => string | undefined;
-        getLayerTimeDimension: (layerPath: string) => TimeDimension | undefined;
-        refreshLayer: (layerPath: string) => void;
+        refreshLayer: (layerPath: string) => Promise<void>;
         reloadLayer: (layerPath: string) => void;
+        toggleItemVisibility: (layerPath: string, item: TypeLegendItem) => void;
+        toggleItemVisibilityAndWait: (layerPath: string, item: TypeLegendItem) => Promise<void>;
         setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
+        setAllItemsVisibilityAndWait: (layerPath: string, visibility: boolean) => Promise<void>;
         setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
         setHighlightLayer: (layerPath: string) => void;
         setLayerDeleteInProgress: (newVal: string) => void;
         setLayerOpacity: (layerPath: string, opacity: number, updateLegendLayers?: boolean) => void;
         setLayerHoverable: (layerPath: string, enable: boolean) => void;
         setLayerQueryable: (layerPath: string, enable: boolean) => void;
-        setSelectedLayerPath: (layerPath: string) => void;
-        toggleItemVisibility: (layerPath: string, item: TypeLegendItem) => void;
+        setSelectedLayerPath: (layerPath: string | undefined) => void;
         zoomToLayerExtent: (layerPath: string) => Promise<void>;
         zoomToLayerVisibleScale: (layerPath: string) => void;
     };
@@ -44,7 +43,7 @@ export interface ILayerState {
         setHighlightLayer: (layerPath: string) => void;
         setLayerDeleteInProgress: (newVal: string) => void;
         setLegendLayers: (legendLayers: TypeLegendLayer[]) => void;
-        setSelectedLayerPath: (layerPath: string) => void;
+        setSelectedLayerPath: (layerPath: string | undefined) => void;
         setLayersAreLoading: (areLoading: boolean) => void;
     };
 }
@@ -56,14 +55,15 @@ export interface ILayerState {
  */
 export declare function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILayerState;
 export type TypeLegendResultInfo = {
+    layerStatus: TypeLayerStatus;
     legendQueryStatus: LegendQueryStatus;
-    data: TypeLegend | undefined | null;
+    data: TypeLegend | undefined;
 };
 export type LegendQueryStatus = 'init' | 'querying' | 'queried' | 'error';
 export type TypeLegend = {
     type: TypeGeoviewLayerType;
     legend: TypeVectorLayerStyles | HTMLCanvasElement | null;
-    styleConfig?: TypeLayerStyleConfig | null;
+    styleConfig?: TypeLayerStyleConfig;
 };
 export type TypeLegendResultSetEntry = TypeResultSetEntry & TypeLegendResultInfo;
 export type TypeLegendResultSet = TypeResultSet<TypeLegendResultSetEntry>;
@@ -137,15 +137,22 @@ export declare const useLayerDisplayDateTimezones: () => Record<string, TimeIANA
 export declare const useLayerDisplayDateTimezone: (layerPath: string) => TimeIANA;
 export declare const useLayerSelectorId: (layerPath: string) => string | undefined;
 export declare const useLayerSelectorName: (layerPath: string) => string | undefined;
-export declare const useLayerSelectorStatus: (layerPath: string) => import("@/api/types/layer-schema-types").TypeLayerStatus | undefined;
+export declare const useLayerNames: () => Record<string, string>;
+export declare const useLayerSelectorStatus: (layerPath: string) => TypeLayerStatus | undefined;
+export declare const useLayerStatuses: () => Record<string, TypeLayerStatus>;
 export declare const useLayerSelectorFilter: (layerPath: string) => string | undefined;
 export declare const useLayerSelectorFilterClass: (layerPath: string) => string | undefined;
-export declare const useLayerSelectorType: (layerPath: string) => TypeGeoviewLayerType | undefined;
+export declare const useLayerSelectorSchemaTag: (layerPath: string) => TypeGeoviewLayerType | undefined;
+export declare const useLayerSelectorEntryType: (layerPath: string) => import("@/api/types/layer-schema-types").TypeLayerEntryType | undefined;
+export declare const useLayerSelectorBounds: (layerPath: string) => Extent | undefined;
+export declare const useLayerSelectorBounds4326: (layerPath: string) => Extent | undefined;
 export declare const useLayerSelectorControls: (layerPath: string) => import("@/api/types/layer-schema-types").TypeLayerControls | undefined;
 export declare const useLayerSelectorChildren: (layerPath: string) => TypeLegendLayer[] | undefined;
 export declare const useLayerSelectorItems: (layerPath: string) => TypeLegendItem[] | undefined;
 export declare const useLayerSelectorIcons: (layerPath: string) => import("@/core/components/layers/types").TypeLegendLayerItem[] | undefined;
 export declare const useLayerSelectorLegendQueryStatus: (layerPath: string) => LegendQueryStatus | undefined;
+export declare const useLayerSelectorCanToggle: (layerPath: string) => boolean | undefined;
+export declare const useLayerSelectorStyleConfig: (layerPath: string) => Partial<Record<"Point" | "MultiPoint" | "LineString" | "MultiLineString" | "Polygon" | "MultiPolygon", import("@/api/types/map-schema-types").TypeLayerStyleSettings>> | undefined;
 export declare const useLayerStoreActions: () => LayerActions;
 export {};
 //# sourceMappingURL=layer-state.d.ts.map

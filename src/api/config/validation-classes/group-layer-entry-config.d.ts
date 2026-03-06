@@ -33,6 +33,8 @@ export declare class GroupLayerEntryConfig extends ConfigBaseClass {
      * `metadata` to each entry in `listOfLayerEntryConfig`. It ensures that
      * all nested or child layer entries also receive the updated metadata.
      * @param {unknown} metadata - The new service metadata to be used.
+     * @returns {void}
+     * @override
      */
     protected onSetServiceMetadata(metadata: unknown): void;
     /**
@@ -41,17 +43,21 @@ export declare class GroupLayerEntryConfig extends ConfigBaseClass {
      * `dataAccessPath` to each entry in `listOfLayerEntryConfig`. It ensures that
      * all nested or child layer entries also receive the updated data access path.
      * @param {string} dataAccessPath - The new path to be used for accessing data.
+     * @returns {void}
+     * @override
      */
     protected onSetDataAccessPath(dataAccessPath: string): void;
     /**
      * Overrides the creation of the layer props and return a deep clone of the layer entry configuration properties.
      * This method calls the parent method and then copies the listOfLayerEntryConfig over.
      * @returns {GroupLayerEntryConfigProps} A deep-cloned copy of the layer entry properties.
+     * @override
      */
     protected onCloneLayerProps(): GroupLayerEntryConfigProps;
     /**
      * Overrides the toJson of the mother class
      * @returns {T} The Json representation of the instance.
+     * @override
      * @protected
      */
     protected onToJson<T>(): T;

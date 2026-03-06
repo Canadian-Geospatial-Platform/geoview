@@ -22,26 +22,34 @@ export declare class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryC
     constructor(layerConfig: EsriDynamicLayerEntryConfigProps);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @returns {TypeEsriDynamicLayerConfig} The strongly-typed layer configuration specific to this layer.
      * @override
+     */
+    getGeoviewLayerConfig(): TypeEsriDynamicLayerConfig;
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
      * @returns {TypeSourceEsriDynamicInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+     * @override
      */
     getSource(): TypeSourceEsriDynamicInitialConfig;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @override
      * @returns {TypeMetadataEsriDynamic | undefined} The strongly-typed layer configuration specific to this layer entry config.
+     * @override
      */
     getServiceMetadata(): TypeMetadataEsriDynamic | undefined;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @override
      * @returns {TypeLayerMetadataEsri | undefined} The strongly-typed layer metadata specific to this layer entry config.
+     * @override
      */
     getLayerMetadata(): TypeLayerMetadataEsri | undefined;
     /**
      * Overrides the get geometry type to interpret the esri type name.
      * @returns {TypeStyleGeometry | undefined} The geometry type, if it could be determined.
      * @throws {NotSupportedError} When the geometry type is not supported.
+     * @override
+     * @protected
      */
     protected onGetGeometryType(): TypeStyleGeometry | undefined;
     /**
