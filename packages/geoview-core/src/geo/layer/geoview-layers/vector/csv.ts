@@ -31,7 +31,8 @@ export interface TypeCSVLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
 export class CSV extends AbstractGeoViewVector {
   /**
    * Constructs a CSV Layer configuration processor.
-   * @param {TypeCSVLayerConfig} layerConfig the layer configuration
+   *
+   * @param layerConfig - The layer configuration
    */
   // The constructor is not useless, it narrows down the accepted parameter type.
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
@@ -43,8 +44,8 @@ export class CSV extends AbstractGeoViewVector {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeCSVLayerConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getGeoviewLayerConfig(): TypeCSVLayerConfig {
     return super.getGeoviewLayerConfig() as TypeCSVLayerConfig;

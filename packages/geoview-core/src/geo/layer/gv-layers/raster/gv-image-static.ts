@@ -23,8 +23,9 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 export class GVImageStatic extends AbstractGVRaster {
   /**
    * Constructs a GVImageStatic layer to manage an OpenLayer layer.
-   * @param {Static} olSource - The OpenLayer source.
-   * @param {ImageStaticLayerEntryConfig} layerConfig - The layer configuration.
+   *
+   * @param olSource - The OpenLayer source.
+   * @param layerConfig - The layer configuration.
    */
   constructor(olSource: Static, layerConfig: ImageStaticLayerEntryConfig) {
     super(olSource, layerConfig);
@@ -43,8 +44,8 @@ export class GVImageStatic extends AbstractGVRaster {
 
   /**
    * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
-   * @returns {ImageLayer<Static>} The strongly-typed OpenLayers type.
-   * @override
+   *
+   * @returns The strongly-typed OpenLayers type.
    */
   override getOLLayer(): ImageLayer<Static> {
     // Call parent and cast
@@ -53,8 +54,8 @@ export class GVImageStatic extends AbstractGVRaster {
 
   /**
    * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
-   * @returns {Static} The Static source instance associated with this layer.
-   * @override
+   *
+   * @returns The Static source instance associated with this layer.
    */
   override getOLSource(): Static {
     // Get source from OL
@@ -63,8 +64,8 @@ export class GVImageStatic extends AbstractGVRaster {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {ImageStaticLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getLayerConfig(): ImageStaticLayerEntryConfig {
     // Call parent and cast

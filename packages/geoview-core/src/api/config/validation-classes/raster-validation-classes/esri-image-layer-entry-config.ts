@@ -1,7 +1,7 @@
 import type {
   ConfigClassOrType,
   TypeGeoviewLayerConfig,
-  TypeLayerMetadataEsri,
+  TypeMetadataEsriImage,
   TypeSourceImageEsriInitialConfig,
 } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
@@ -20,7 +20,8 @@ export interface EsriImageLayerEntryConfigProps extends AbstractBaseLayerEntryCo
 export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * The class constructor.
-   * @param {EsriImageLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+   *
+   * @param layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: EsriImageLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.ESRI_IMAGE, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
@@ -30,8 +31,8 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeEsriImageLayerConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getGeoviewLayerConfig(): TypeEsriImageLayerConfig {
     return super.getGeoviewLayerConfig() as TypeEsriImageLayerConfig;
@@ -39,8 +40,8 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeSourceImageEsriInitialConfig} The strongly-typed source configuration specific to this layer entry config.
-   * @override
+   *
+   * @returns The strongly-typed source configuration specific to this layer entry config.
    */
   override getSource(): TypeSourceImageEsriInitialConfig {
     return super.getSource();
@@ -48,11 +49,21 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeLayerMetadataEsri | undefined} The strongly-typed layer metadata specific to this layer entry config.
-   * @override
+   *
+   * @returns The strongly-typed service metadata specific to this layer entry config.
    */
-  override getLayerMetadata(): TypeLayerMetadataEsri | undefined {
-    return super.getLayerMetadata() as TypeLayerMetadataEsri | undefined;
+  override getServiceMetadata(): TypeMetadataEsriImage | undefined {
+    return super.getServiceMetadata() as TypeMetadataEsriImage | undefined;
+  }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   * Note, in the case of an EsriImage, the layer metadata is the same as the service metadata.
+   *
+   * @returns The strongly-typed layer metadata specific to this layer entry config.
+   */
+  override getLayerMetadata(): TypeMetadataEsriImage | undefined {
+    return super.getLayerMetadata() as TypeMetadataEsriImage | undefined;
   }
 
   // #endregion OVERRIDES

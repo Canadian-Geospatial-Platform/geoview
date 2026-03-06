@@ -113,7 +113,8 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Repeats the last query if there was one.
-   * @returns {Promise<TypeFeatureInfoResultSet>} A promise which will hold the result of the query.
+   *
+   * @returns A promise which will hold the result of the query.
    * @throws {LayerNoLastQueryToPerformError} When there's no last query to perform.
    */
   repeatLastQuery(): Promise<TypeFeatureInfoResultSet> {
@@ -126,9 +127,10 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Queries the features at the provided coordinate for all the registered layers.
-   * @param {Coordinate} lonLatCoordinate - The longitude/latitude coordinate where to query the features
-   * @param {boolean} fromClick - True if the query is from a user click, false otherwise.
-   * @returns {Promise<TypeFeatureInfoResultSet>} A promise which will hold the result of the query.
+   *
+   * @param lonLatCoordinate - The longitude/latitude coordinate where to query the features
+   * @param fromClick - True if the query is from a user click, false otherwise.
+   * @returns A promise which will hold the result of the query.
    */
   async queryLayers(lonLatCoordinate: Coordinate, fromClick: boolean = true): Promise<TypeFeatureInfoResultSet> {
     // FIXME: Watch out for code reentrancy between queries!

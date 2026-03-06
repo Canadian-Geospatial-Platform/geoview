@@ -93,8 +93,11 @@ export type GuessedTimeInformation = {
  */
 export type TimeDimensionESRI = {
   startTimeField: string;
-  timeExtent: number[];
+  endTimeField?: string;
+  trackIdField?: string;
+  timeExtent?: [number, number];
   timeInterval: number;
+  hasLiveData?: boolean;
   timeIntervalUnits: 'esriTimeUnitsHours' | 'esriTimeUnitsDays' | 'esriTimeUnitsWeeks' | 'esriTimeUnitsMonths' | 'esriTimeUnitsYears';
 };
 
@@ -851,7 +854,7 @@ export abstract class DateMgt {
     };
 
     // Read the dates in the service and change them to UTC if they're not already
-    const dimensionValues = `${this.formatDateISOShort(timeExtent[0])}/${this.formatDateISOShort(timeExtent[1])}${calcDuration()}`;
+    const dimensionValues = `${this.formatDateISOShort(timeExtent![0])}/${this.formatDateISOShort(timeExtent![1])}${calcDuration()}`;
     const rangeItems = this.createRangeOGC(dimensionValues);
 
     // Guess the display time information

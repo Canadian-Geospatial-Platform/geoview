@@ -240,13 +240,9 @@ export class UUIDmapConfigReader {
           // Add it
           listOfGeoviewLayerConfig.push(geoviewLayerConfig);
 
-          // If there's only the one layer AND customGeocoreLayerConfig.layerName is not provided, replace the layer name with the name from GeoCore
-          if (
-            listOfGeoviewLayerConfig[i].listOfLayerEntryConfig.length === 1 &&
-            !listOfGeoviewLayerConfig[i].listOfLayerEntryConfig[0].listOfLayerEntryConfig &&
-            customGeocoreLayerConfig?.layerName === undefined
-          ) {
-            listOfGeoviewLayerConfig[i].listOfLayerEntryConfig[0].setLayerName(layerName);
+          // If there's only the one layer AND customGeocoreLayerConfig.layerName is provided, replace the layer name with the name from config
+          if (listOfGeoviewLayerConfig[i].listOfLayerEntryConfig.length === 1 && customGeocoreLayerConfig?.layerName) {
+            listOfGeoviewLayerConfig[i].listOfLayerEntryConfig[0].setLayerName(customGeocoreLayerConfig.layerName);
           }
         }
       }

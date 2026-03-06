@@ -86,9 +86,10 @@ export abstract class ConfigBaseClass {
 
   /**
    * The class constructor.
-   * @param {ConfigClassOrType} layerConfig - The layer configuration we want to instanciate.
+   *
+   * @param layerConfig - The layer configuration we want to instanciate.
    */
-  // TODO: Refactor - There is an oddity inside LayerApi.addGeoviewLayer to the effect that it's calling validateListOfGeoviewLayerConfig even if it was already called in config-validation.
+  // TODO: REFACTOR - Major TypeLayerEntryConfig - There is an oddity inside LayerApi.addGeoviewLayer to the effect that it's calling validateListOfGeoviewLayerConfig even if it was already called in config-validation.
   // TO.DOCONT: Until this is fixed, this constructor supports sending a ConfigBaseClass in its typing, for now (ConfigClassOrType = ConfigBaseClassProps | ConfigBaseClass)... though it should only be a ConfigBaseClassProps eventually.
   protected constructor(layerConfig: ConfigClassOrType, schemaTag: TypeGeoviewLayerType, entryType: TypeLayerEntryType) {
     // Transfer the properties from the object to the class (without using Object.assign anymore)
@@ -105,9 +106,8 @@ export abstract class ConfigBaseClass {
    * Subclasses should override this method to implement the logic needed
    * to update the service metadata on the current layer entry, including
    * any recursive behavior for child entries or associated sources.
-   * @param {unknown} metadata - The service metadata to set.
-   * @abstract
-   * @protected
+   *
+   * @param metadata - The service metadata to set.
    */
   protected abstract onSetServiceMetadata(metadata: unknown): void;
 
@@ -116,15 +116,15 @@ export abstract class ConfigBaseClass {
    * Subclasses should override this method to implement the logic needed
    * to update the data access path on the current layer entry, including
    * any recursive behavior for child entries or associated sources.
-   * @param {string} dataAccessPath - The data access path to set.
-   * @abstract
-   * @protected
+   *
+   * @param dataAccessPath - The data access path to set.
    */
   protected abstract onSetDataAccessPath(dataAccessPath: string): void;
 
   /**
    * The layerPath getter method for the ConfigBaseClass class and its descendant classes.
-   * @returns {string} The layer path
+   *
+   * @returns The layer path
    */
   get layerPath(): string {
     return ConfigBaseClass.#evaluateLayerPath(this);
@@ -132,7 +132,8 @@ export abstract class ConfigBaseClass {
 
   /**
    * The layerId getter method for the ConfigBaseClass class and its descendant classes.
-   * @retuns {TypeLayerStatus} The layer status
+   *
+   * @retuns The layer status
    */
   get layerStatus(): TypeLayerStatus {
     return this.#layerStatus;
@@ -143,6 +144,8 @@ export abstract class ConfigBaseClass {
    * fallbacks on the geoviewLayerName from the GeoViewLayerConfig or
    * fallbacks on the geoviewLayerId from the GeoViewLayerConfig or
    * fallsback on the layerPath.
+   *
+   * @returns The layer name based on the priority.
    */
   getLayerNameCascade(): string {
     return this.#layerName || this.getGeoviewLayerName() || this.getGeoviewLayerId() || this.layerPath;
@@ -150,6 +153,8 @@ export abstract class ConfigBaseClass {
 
   /**
    * Gets the layer name of the entry layer if any.
+   *
+   * @returns The layer name.
    */
   getLayerName(): string | undefined {
     return this.#layerName;
@@ -157,6 +162,7 @@ export abstract class ConfigBaseClass {
 
   /**
    * Sets the layer name of the entry layer.
+   *
    * @param {string} layerName - The layer name.
    */
   setLayerName(layerName: string): void {
@@ -167,8 +173,25 @@ export abstract class ConfigBaseClass {
   }
 
   /**
+   * Sets the layer name from the metadata layer name, except if the layer entry already had a layer name.
+   *
+   * @param layerName - The layer name if any.
+   */
+  initLayerNameFromMetadata(layerName: string | undefined): void {
+    // If there already is a layer name from the entry props or we're initializing nothing
+    if (this.layerEntryProps.layerName || !layerName) return; // Skip, config has priority
+
+    // If we have no parent layer config and there's already a GeoView layer name
+    if (!this.layerEntryProps.parentLayerConfig && this.layerEntryProps.geoviewLayerConfig.geoviewLayerName) return; // Skip, config has priority
+
+    // Set it
+    this.setLayerName(layerName);
+  }
+
+  /**
    * Gets the schema tag for the layer entry config.
-   * @returns {TypeGeoviewLayerType} The layer entry type (or undefined, e.g. groups).
+   *
+   * @returns The layer entry type (or undefined, e.g. groups).
    */
   getSchemaTag(): TypeGeoviewLayerType {
     return this.#schemaTag;

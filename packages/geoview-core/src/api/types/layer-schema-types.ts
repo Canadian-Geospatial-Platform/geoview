@@ -321,13 +321,11 @@ export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceInitialCo
 
 export interface TypeSourceImageEsriInitialConfig extends TypeBaseSourceInitialConfig {
   /** The format used by the image layer.
-   * @deprecated Seems not used anymore?
    */
   format?: TypeEsriFormatParameter;
   /**
    * If true, the image will be exported with the background color of the map set as its transparent color. Only the .png and
    * .gif formats support transparency. Default = true.
-   * @deprecated Seems not used anymore?
    */
   transparent?: boolean;
 }
@@ -917,12 +915,6 @@ export interface TypeMetadataFeatureInfoLayerAttribute {
   value: unknown;
 }
 
-export interface TypeMetadataEsriFeature {
-  layers: TypeMetadataEsriDynamicLayer[];
-  id: string;
-  name: string;
-}
-
 export interface TypeMetadataGeoTIFF {
   id: string;
   bbox: number[];
@@ -945,27 +937,6 @@ export interface TypeMetadataGeoTIFFAsset {
   type: string;
 }
 
-/**
- * Represents layer metadata as read from an Esri layer service.
- */
-export interface TypeLayerMetadataEsri {
-  type: string;
-  capabilities: string;
-  geometryField: TypeLayerMetadataEsriField;
-  displayField: string;
-  defaultVisibility: boolean;
-  minScale: number;
-  maxScale: number;
-  maxRecordCount: number;
-  spatialReference: TypeProjection;
-  sourceSpatialReference: TypeProjection;
-  extent: TypeLayerMetadataEsriExtent;
-  drawingInfo: TypeLayerMetadataEsriDrawingInfo;
-  timeInfo: TimeDimensionESRI;
-  geometryType: string;
-  fields: TypeLayerMetadataFields[];
-}
-
 export interface TypeLayerMetadataEsriDrawingInfo {
   renderer: EsriBaseRenderer;
 }
@@ -982,17 +953,210 @@ export interface TypeLayerMetadataEsriField {
   name: unknown;
 }
 
-export interface TypeMetadataEsriDynamic {
-  layers: TypeMetadataEsriDynamicLayer[];
-  supportsDynamicLayers: boolean;
-  fields?: TypeLayerMetadataFields[];
+export interface TypeEsriSpatialReference {
+  wkid: number;
+  latestWkid?: number;
+  wkt?: string;
 }
 
+/**
+ * Payload response for a url call to {server_url}/MapServer?f=json
+ */
+export interface TypeMetadataEsriDynamic {
+  currentVersion: number;
+  serviceDescription: string;
+  mapName: string;
+
+  capabilities: string;
+
+  supportsDynamicLayers: boolean;
+
+  layers: TypeMetadataEsriLayerSummary[];
+  tables?: TypeMetadataEsriLayerSummary[];
+
+  spatialReference: TypeEsriSpatialReference;
+  fullExtent: TypeLayerMetadataEsriExtent;
+  initialExtent: TypeLayerMetadataEsriExtent;
+}
+
+/**
+ * Payload response for a url call to {server_url}/MapServer/{layerId}?f=json
+ */
 export interface TypeMetadataEsriDynamicLayer {
   id: number;
   name: string;
   type: string;
-  subLayerIds: number[];
+
+  capabilities: string;
+
+  description?: string;
+
+  geometryType: string;
+  displayField: string;
+  geometryField?: TypeLayerMetadataEsriField;
+
+  minScale: number;
+  maxScale: number;
+
+  defaultVisibility: boolean;
+
+  extent: TypeLayerMetadataEsriExtent;
+
+  spatialReference?: TypeEsriSpatialReference;
+  sourceSpatialReference?: TypeEsriSpatialReference;
+
+  maxRecordCount: number;
+
+  fields: TypeLayerMetadataFields[];
+
+  drawingInfo?: TypeLayerMetadataEsriDrawingInfo;
+
+  timeInfo?: TimeDimensionESRI;
+}
+
+/**
+ * Payload response for a url call to {server_url}/FeatureServer?f=json
+ */
+export interface TypeMetadataEsriFeature {
+  currentVersion: number;
+  serviceDescription: string;
+
+  capabilities: string;
+
+  layers: TypeMetadataEsriLayerSummary[];
+  tables: TypeMetadataEsriLayerSummary[];
+
+  maxRecordCount?: number;
+
+  spatialReference?: TypeEsriSpatialReference;
+
+  fullExtent?: TypeLayerMetadataEsriExtent;
+  initialExtent?: TypeLayerMetadataEsriExtent;
+}
+
+/**
+ * Payload response for a url call to {server_url}/FeatureServer/{layerId}?f=json
+ */
+export interface TypeMetadataEsriFeatureLayer {
+  id: number;
+  name: string;
+  type: 'Feature Layer';
+
+  description?: string;
+
+  displayField: string;
+  objectIdField: string;
+  globalIdField?: string;
+  geometryField?: TypeLayerMetadataEsriField;
+
+  geometryType: string;
+
+  spatialReference?: TypeEsriSpatialReference;
+  sourceSpatialReference?: TypeEsriSpatialReference;
+  extent?: TypeLayerMetadataEsriExtent;
+
+  minScale: number;
+  maxScale: number;
+
+  defaultVisibility?: boolean;
+
+  maxRecordCount: number;
+
+  supportsStatistics?: boolean;
+  supportsAdvancedQueries?: boolean;
+  supportsRollbackOnFailureParameter?: boolean;
+
+  capabilities: string;
+
+  fields: TypeLayerMetadataFields[];
+
+  types?: unknown[];
+
+  templates?: unknown;
+
+  drawingInfo?: TypeLayerMetadataEsriDrawingInfo;
+
+  editingInfo?: unknown;
+
+  timeInfo?: TimeDimensionESRI;
+}
+
+/**
+ * Payload response for a url call to {server_url}/ImageServer?f=json
+ */
+export interface TypeMetadataEsriImage {
+  currentVersion: number;
+
+  name: string;
+  serviceDescription?: string;
+  description?: string;
+
+  capabilities: string;
+
+  pixelType: string;
+  bandCount: number;
+
+  minPixelSizeX?: number;
+  minPixelSizeY?: number;
+  maxPixelSizeX?: number;
+  maxPixelSizeY?: number;
+
+  maxImageHeight?: number;
+  maxImageWidth?: number;
+
+  maxRecordCount?: number;
+
+  spatialReference: TypeEsriSpatialReference;
+  sourceSpatialReference?: TypeEsriSpatialReference;
+
+  extent: TypeLayerMetadataEsriExtent;
+  initialExtent?: TypeLayerMetadataEsriExtent;
+  fullExtent?: TypeLayerMetadataEsriExtent;
+
+  fields?: TypeLayerMetadataFields[];
+
+  timeInfo?: TimeDimensionESRI;
+
+  mosaicDatasetInfo?: TypeMetadataEsriMosaicDatasetInfo;
+
+  allowedMosaicMethods?: string[];
+  defaultMosaicMethod?: string;
+
+  allowedCompressionMethods?: string[];
+
+  rasterFunctionInfos?: TypeMetadataEsriRasterFunctionInfo[];
+
+  defaultResamplingMethod?: string;
+}
+
+export interface TypeMetadataEsriMosaicDatasetInfo {
+  objectIdField: string;
+  globalIdField?: string;
+
+  timeField?: string;
+
+  maxRecordCount?: number;
+
+  supportsTime?: boolean;
+  supportsZ?: boolean;
+  supportsM?: boolean;
+}
+
+export interface TypeMetadataEsriRasterFunctionInfo {
+  name: string;
+  description?: string;
+  help?: string;
+}
+
+export interface TypeMetadataEsriLayerSummary {
+  id: number;
+  name: string;
+  parentLayerId: number;
+  defaultVisibility: boolean;
+  subLayerIds: number[] | null; // Esri's response always includes this property and sets it to null when none
+  minScale: number;
+  maxScale: number;
+  type?: string; // Older ArcGIS servers may not provide a 'type' property (true?)
 }
 
 export interface TypeLayerMetadataVector {

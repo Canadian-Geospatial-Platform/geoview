@@ -7,7 +7,7 @@ import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
-import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type {
   TypeFeatureInfoEntryPartial,
   TypeStyleGeometry,
@@ -18,7 +18,14 @@ import type {
   TypeFieldEntry,
   DisplayDateMode,
 } from '@/api/types/map-schema-types';
-import type { TypeLayerMetadataEsri } from '@/api/types/layer-schema-types';
+import type {
+  TypeMetadataEsriDynamic,
+  TypeMetadataEsriDynamicLayer,
+  TypeMetadataEsriFeature,
+  TypeMetadataEsriFeatureLayer,
+  TypeMetadataEsriLayerSummary,
+  TypeMetadataEsriImage,
+} from '@/api/types/layer-schema-types';
 import { Fetch } from '@/core/utils/fetch-helper';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
@@ -46,127 +53,251 @@ export class EsriUtilities {
   // #region LAYER PROCESSING METHODS
 
   /**
-   * This method validates recursively the configuration of the layer entries to ensure that it is a feature layer identified
-   * with a numeric layerId and creates a group entry when a layer is a group.
-   * @param {EsriDynamic | EsriFeature} layer The ESRI layer instance pointer.
-   * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
-   * @param {RegisterLayerEntryConfigDelegate} callbackWhenRegisteringConfig - Called when a config needs to be registered.
-   * @static
+   * This method validates recursively the configuration of the layer entries to ensure that
+   * it is a feature layer identified with a numeric layerId and creates a group entry
+   * when a layer is a group.
+   *
+   * @param layer - The ESRI layer instance pointer.
+   * @param listOfLayerEntryConfig - The list of layer entries configuration to validate.
+   * @param callbackWhenRegisteringConfig - Called when a config needs to be registered.
+   * @remarks
+   * - This method performs **indirect recursion** by eventually delegating child validation to
+   *   {@link validateListOfLayerEntryConfig} in a sub function called here.
    */
   static commonValidateListOfLayerEntryConfig(
     layer: EsriDynamic | EsriFeature,
     listOfLayerEntryConfig: ConfigBaseClass[],
     callbackWhenRegisteringConfig: RegisterLayerEntryConfigDelegate
   ): void {
-    // TODO: REFACTOR - Send this function to ChatGPT for a complete rewrite..
+    // Get the metadata
+    const metadata = layer.getMetadata();
 
-    // For each layer entry config
-    listOfLayerEntryConfig.forEach((layerConfig, i) => {
+    // Return if no metadata. There should always be some here, because the check happened already in validateListOfLayerEntryConfig.
+    if (!metadata) return;
+
+    // Loop on the layer entry configs
+    listOfLayerEntryConfig.forEach((layerConfig, index) => {
+      // Skip configs already marked as error
       if (layerConfig.layerStatus === 'error') return;
 
-      // If is a group layer
-      if (layerConfig.getEntryTypeIsGroup()) {
-        // Use the layer name from the metadata if it exists and there is no existing name.
-        if (!layerConfig.getLayerName()) {
-          layerConfig.setLayerName(
-            layer.getMetadata()!.layers[Number(layerConfig.layerId)]?.name
-              ? layer.getMetadata()!.layers[Number(layerConfig.layerId)].name
-              : ''
-          );
-        }
-
-        // Indirect recursion
-        layer.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig);
-
-        if (!layerConfig.listOfLayerEntryConfig.length) {
-          // Add a layer load error
-          layer.addLayerLoadError(new LayerEntryConfigEmptyLayerGroupError(layerConfig), layerConfig);
-        }
+      // Handle group layer validation
+      if (layerConfig instanceof GroupLayerEntryConfig) {
+        this.#validateGroupLayer(layer, layerConfig, metadata);
         return;
       }
 
-      // If a regular layer (not a group)
-      if (layerConfig.getEntryTypeIsRegular()) {
-        // Set the layer status to processing
-        layerConfig.setLayerStatusProcessing();
-
-        // Validate and update the extent initial settings
-        layerConfig.initInitialSettingsExtentAndBoundsFromConfig();
-
-        let esriIndex = Number(layerConfig.layerId);
-
-        // Validate the layer id is a number (and a non-decimal one)
-        if (!Number.isInteger(esriIndex)) {
-          // Add a layer load error
-          layer.addLayerLoadError(
-            new LayerEntryConfigLayerIdEsriMustBeNumberError(
-              layerConfig.getGeoviewLayerId(),
-              layerConfig.layerId,
-              layerConfig.getLayerName()
-            ),
-            layerConfig
-          );
-          return;
-        }
-
-        esriIndex = layer.getMetadata()?.layers ? layer.getMetadata()!.layers.findIndex((layerInfo) => layerInfo.id === esriIndex) : -1;
-
-        if (esriIndex === -1) {
-          // Add a layer load error
-          layer.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
-          return;
-        }
-
-        // Get the metadata
-        const metadata = layer.getMetadata();
-
-        if (metadata?.layers[esriIndex]?.subLayerIds?.length) {
-          // Create the group layer entry config instance reusing the props
-          const groupLayerConfigProps = layerConfig.toGroupLayerConfigProps(layerConfig.getLayerName() || metadata.layers[esriIndex].name);
-          const groupLayerConfig = new GroupLayerEntryConfig(groupLayerConfigProps);
-
-          // Replace the old version of the layer with the new layer group
-          // eslint-disable-next-line no-param-reassign
-          listOfLayerEntryConfig[i] = groupLayerConfig;
-
-          // Alert that we want to register new entry configs
-          callbackWhenRegisteringConfig(groupLayerConfig);
-
-          metadata.layers[esriIndex].subLayerIds.forEach((layerId) => {
-            // Clone the layer props and tweak them
-            const subLayerProps = {
-              ...layerConfig.cloneLayerProps(),
-              layerId: `${layerId}`,
-              layerName: metadata.layers.filter((item) => item.id === layerId)[0].name,
-              parentLayerConfig: groupLayerConfig,
-            };
-
-            let subLayerEntryConfig;
-            if (layerConfig instanceof EsriDynamicLayerEntryConfig) {
-              subLayerEntryConfig = new EsriDynamicLayerEntryConfig(subLayerProps);
-            } else {
-              subLayerEntryConfig = new EsriFeatureLayerEntryConfig(subLayerProps);
-            }
-
-            // Append the sub layer entry to the list
-            groupLayerConfig.listOfLayerEntryConfig.push(subLayerEntryConfig);
-
-            // Alert that we want to register new entry configs
-            callbackWhenRegisteringConfig(subLayerEntryConfig);
-          });
-
-          // Indirect recursion
-          layer.validateListOfLayerEntryConfig(groupLayerConfig.listOfLayerEntryConfig);
-          return;
-        }
-
-        // Check for warnings if any needs to be logged
-        this.#checkForWarningOnTheLayerMetadata(layer, layerConfig, esriIndex);
-
-        // If no layer name
-        if (!layerConfig.getLayerName()) layerConfig.setLayerName(metadata?.layers[esriIndex].name || 'No name / Sans nom');
+      // Handle regular layer validation
+      if (layerConfig instanceof AbstractBaseLayerEntryConfig) {
+        this.#validateRegularLayer(layer, layerConfig, index, listOfLayerEntryConfig, metadata, callbackWhenRegisteringConfig);
       }
     });
+  }
+
+  /**
+   * Validates a group layer entry configuration and recursively validates its children.
+   * This method performs three main tasks:
+   * 1. Initializes the group layer name using metadata when the name is missing.
+   * 2. Recursively validates all child layer entry configurations.
+   * 3. Ensures the group contains at least one valid child layer; otherwise an error is registered.
+   *
+   * @param layer - The parent GeoView layer instance responsible for validating layer
+   * entry configurations and registering potential load errors.
+   * @param layerConfig - The group layer entry configuration being validated.
+   * @param metadata - The ESRI service metadata associated with the layer. This metadata
+   * may be used to resolve missing layer names. If undefined, no metadata-based initialization
+   * will occur.
+   * @remarks
+   * - This method performs **indirect recursion** by delegating child validation to
+   *   {@link validateListOfLayerEntryConfig}.
+   * - If the group ends up with no valid child layers after validation, a
+   *   {@link LayerEntryConfigEmptyLayerGroupError} is attached on the layer.
+   */
+  static #validateGroupLayer(
+    layer: EsriDynamic | EsriFeature,
+    layerConfig: GroupLayerEntryConfig,
+    metadata: TypeMetadataEsriDynamic | TypeMetadataEsriFeature
+  ): void {
+    // Initialize the layer name by filling the blanks with the name from the metadata
+    // TODO: CHECK - LAYER NAME - Why here we send '' and not in any other layer types?
+    layerConfig.initLayerNameFromMetadata(metadata.layers?.[Number(layerConfig.layerId)]?.name ?? '');
+
+    // Recursively validate children
+    layer.validateListOfLayerEntryConfig(layerConfig.listOfLayerEntryConfig);
+
+    // Error if group ended up empty
+    if (!layerConfig.listOfLayerEntryConfig.length) {
+      layer.addLayerLoadError(new LayerEntryConfigEmptyLayerGroupError(layerConfig), layerConfig);
+    }
+  }
+
+  /**
+   * Validates a regular (non-group) layer entry configuration against the service metadata.
+   * This method performs the validation workflow for a single layer entry:
+   * 1. Marks the layer entry configuration as processing.
+   * 2. Initializes extent and bounds settings defined in the configuration.
+   * 3. Validates that the configured `layerId` is a valid integer.
+   * 4. Resolves the corresponding layer in the ESRI service metadata.
+   * 5. Expands the configuration into a group layer if the metadata indicates the
+   *    presence of sublayers.
+   * 6. Finalizes validation using metadata (warnings, default name assignment, etc.).
+   * If validation fails (e.g., invalid `layerId` or layer not found in metadata),
+   * a corresponding layer load error is registered on the parent layer.
+   *
+   * @param layer - The GeoView layer instance responsible for validating
+   * configurations and registering potential layer load errors.
+   * @param layerConfig - The layer entry configuration to
+   * validate. This represents a regular layer (not a group layer).
+   * @param index - The index of the layer entry configuration within
+   * `listOfLayerEntryConfig`. This is used when the configuration must be
+   * replaced (e.g., when expanding a regular layer into a group layer due to
+   * sublayers in the metadata).
+   * @param listOfLayerEntryConfig - The list containing the layer entry configuration
+   * being validated. This list may be modified if the current configuration is expanded
+   * into a group layer.
+   * @param metadata - The ESRI service metadata used to validate the layer identifier
+   * and inspect properties such as sublayers.
+   * @param callbackWhenRegisteringConfig - Callback invoked whenever new layer entry
+   * configurations are dynamically created and need to be registered.
+   * @remarks
+   * - If the metadata indicates that the layer contains `subLayerIds`, the layer
+   *   configuration is expanded into a group layer via {@link #expandSubLayers}.
+   * - When no sublayers exist, the validation is finalized through
+   *   {@link #finalizeRegularLayer}.
+   * - Errors encountered during validation are reported using `layer.addLayerLoadError`.
+   */
+  static #validateRegularLayer(
+    layer: EsriDynamic | EsriFeature,
+    layerConfig: AbstractBaseLayerEntryConfig,
+    index: number,
+    listOfLayerEntryConfig: ConfigBaseClass[],
+    metadata: TypeMetadataEsriDynamic | TypeMetadataEsriFeature,
+    callbackWhenRegisteringConfig: RegisterLayerEntryConfigDelegate
+  ): void {
+    // Mark layer as processing
+    layerConfig.setLayerStatusProcessing();
+
+    // Initialize extent settings
+    layerConfig.initInitialSettingsExtentAndBoundsFromConfig();
+
+    let esriIndex = Number(layerConfig.layerId);
+
+    // Validate id is integer
+    if (!Number.isInteger(esriIndex)) {
+      layer.addLayerLoadError(
+        new LayerEntryConfigLayerIdEsriMustBeNumberError(layerConfig.getGeoviewLayerId(), layerConfig.layerId, layerConfig.getLayerName()),
+        layerConfig
+      );
+      return;
+    }
+
+    // Find layer in metadata
+    esriIndex = metadata.layers ? metadata.layers.findIndex((l) => l.id === esriIndex) : -1;
+
+    if (esriIndex === -1) {
+      layer.addLayerLoadError(new LayerEntryConfigLayerIdNotFoundError(layerConfig), layerConfig);
+      return;
+    }
+
+    // Get the metadata of the layer
+    const metadataLayer = metadata.layers[esriIndex];
+
+    // Expand sublayers if necessary
+    if (metadataLayer?.subLayerIds?.length) {
+      this.#expandSubLayers(layer, layerConfig, index, listOfLayerEntryConfig, metadata, metadataLayer, callbackWhenRegisteringConfig);
+      return;
+    }
+
+    // Check metadata warnings
+    this.#checkForWarningOnTheLayerMetadata(layer, layerConfig, metadata, metadataLayer);
+
+    // Initialize the layer name by filling the blanks with the name from the metadata
+    // TODO: CHECK - LAYER NAME - Why here we send 'No name / Sans nom' and not in any other layer types?
+    layerConfig.initLayerNameFromMetadata(metadataLayer?.name || 'No name / Sans nom');
+  }
+
+  /**
+   * Expands a regular layer entry configuration into a group layer configuration
+   * when the corresponding metadata layer contains sublayers.
+   * This method transforms the provided `layerConfig` into a {@link GroupLayerEntryConfig}
+   * and dynamically generates child layer entry configurations for each sublayer defined
+   * in the ESRI service metadata. The original layer entry configuration in the
+   * `listOfLayerEntryConfig` array is replaced with the newly created group configuration.
+   * The expansion process performs the following steps:
+   * 1. Creates a new {@link GroupLayerEntryConfig} using properties derived from the
+   *    original layer configuration.
+   * 2. Replaces the original configuration in the list with the new group configuration.
+   * 3. Registers the new group configuration through the provided callback.
+   * 4. Iterates through each `subLayerId` from the metadata and creates a corresponding
+   *    layer entry configuration (either {@link EsriDynamicLayerEntryConfig} or
+   *    {@link EsriFeatureLayerEntryConfig} depending on the original type).
+   * 5. Adds each generated configuration to the group's `listOfLayerEntryConfig` and
+   *    registers it through the callback.
+   * 6. Recursively validates the newly generated sublayer configurations.
+   *
+   * @param layer - The parent GeoView layer instance responsible
+   * for validating the newly created sublayer configurations and registering potential errors.
+   * @param layerConfig - The original layer entry configuration that will
+   * be expanded into a group layer due to the presence of sublayers in the metadata.
+   * @param index - The index of the original configuration within `listOfLayerEntryConfig`.
+   * This index is used to replace the original configuration with the newly created group configuration.
+   * @param listOfLayerEntryConfig - The list containing the layer entry configuration being expanded.
+   * This array is modified in-place to replace the original configuration with the generated group layer.
+   * @param metadata - The full ESRI service metadata used to resolve sublayer names and other properties.
+   * @param metadataLayer - The metadata layer corresponding to the configuration being
+   * expanded. This metadata provides the list of `subLayerIds` used to generate child configurations.
+   * @param callbackWhenRegisteringConfig - Callback invoked
+   * whenever a new layer entry configuration is created and needs to be registered by the calling system.
+   * @remarks
+   * - The type of generated sublayer configuration is determined by the type of the
+   *   original `layerConfig`.
+   * - This method performs **indirect recursion** by invoking
+   *   {@link validateListOfLayerEntryConfig} on the generated sublayer configurations.
+   * - The original layer entry configuration is **replaced** by a group configuration
+   *   within the parent list.
+   */
+  static #expandSubLayers(
+    layer: EsriDynamic | EsriFeature,
+    layerConfig: ConfigBaseClass,
+    index: number,
+    listOfLayerEntryConfig: ConfigBaseClass[],
+    metadata: TypeMetadataEsriDynamic | TypeMetadataEsriFeature,
+    metadataLayer: TypeMetadataEsriLayerSummary,
+    callbackWhenRegisteringConfig: RegisterLayerEntryConfigDelegate
+  ): void {
+    // Create group config
+    const groupProps = layerConfig.toGroupLayerConfigProps(layerConfig.getLayerName() || metadataLayer.name);
+
+    const groupLayerConfig = new GroupLayerEntryConfig(groupProps);
+
+    // Replace the original config with the group
+    // eslint-disable-next-line no-param-reassign
+    listOfLayerEntryConfig[index] = groupLayerConfig;
+
+    callbackWhenRegisteringConfig(groupLayerConfig);
+
+    // Create configs for each sublayer
+    metadataLayer.subLayerIds?.forEach((layerId: number) => {
+      const subMeta = metadata.layers.find((item) => item.id === layerId);
+
+      const subLayerProps = {
+        ...layerConfig.cloneLayerProps(),
+        layerId: `${layerId}`,
+        layerName: subMeta?.name,
+        parentLayerConfig: groupLayerConfig,
+      };
+
+      const subLayerEntryConfig =
+        layerConfig instanceof EsriDynamicLayerEntryConfig
+          ? new EsriDynamicLayerEntryConfig(subLayerProps)
+          : new EsriFeatureLayerEntryConfig(subLayerProps);
+
+      groupLayerConfig.listOfLayerEntryConfig.push(subLayerEntryConfig);
+
+      callbackWhenRegisteringConfig(subLayerEntryConfig);
+    });
+
+    // Recursively validate generated layers
+    layer.validateListOfLayerEntryConfig(groupLayerConfig.listOfLayerEntryConfig);
   }
 
   /**
@@ -177,35 +308,32 @@ export class EsriUtilities {
    *    are *not* supported (`supportsDynamicLayers === false`).
    * 2. **EsriFeature layers** — Logs a warning if the metadata for the child layer does not identify itself
    *    as a `"Feature Layer"`, which may suggest a misconfiguration or unexpected server response.
-   * @param {EsriDynamic | EsriFeature} layer
-   *   The ESRI layer instance being evaluated.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig
-   *   The configuration object associated with the layer entry. Used to report contextual information
-   *   (layer path, user-friendly name, etc.) in warnings.
-   * @param {number} esriIndexForFeature
-   *   For feature layers, the index pointing to the corresponding entry inside the server metadata's
-   *   `layers[]` array. Ignored for dynamic layers.
-   * @static
+   *
+   * @param layer - The ESRI layer instance being evaluated.
+   * @param layerConfig - The configuration object associated with the layer entry. Used to
+   * report contextual information (layer path, user-friendly name, etc.) in warnings.
+   * @param metadata - The full ESRI service metadata used to resolve sublayer names and other properties.
+   * @param metadataLayer - The metadata layer corresponding to the configuration being
+   * expanded. This metadata provides the list of `subLayerIds` used to generate child configurations.
    */
   static #checkForWarningOnTheLayerMetadata(
     layer: EsriDynamic | EsriFeature,
     layerConfig: AbstractBaseLayerEntryConfig,
-    esriIndexForFeature: number
+    metadata: TypeMetadataEsriDynamic | TypeMetadataEsriFeature,
+    metadataLayer: TypeMetadataEsriLayerSummary
   ): void {
     // If the layer is an EsriDynamic
     if (layer instanceof EsriDynamic) {
-      if (layer.getMetadata()?.supportsDynamicLayers === false) {
+      if ((metadata as TypeMetadataEsriDynamic)?.supportsDynamicLayers === false) {
         // Log a warning, but continue
         GeoViewError.logWarning(new LayerNotSupportingDynamicLayersError(layerConfig.layerPath, layerConfig.getLayerNameCascade()));
       }
-    } else if (layer instanceof EsriFeature) {
-      // If the metadata for the particular layer doesn't indicate 'Feature Layer' as the type
-      // GV: Older ArcGIS servers do not have a 'type' attribute for layers in the layers list and it can only be retrieved from the layer's metadata endpoint
-      if (
-        Object.prototype.hasOwnProperty.call(layer.getMetadata()!.layers[esriIndexForFeature], 'type') &&
-        layer.getMetadata()!.layers[esriIndexForFeature].type !== 'Feature Layer'
-      ) {
-        // Log warning
+    }
+
+    // If the layer is an EsriFeature
+    if (layer instanceof EsriFeature) {
+      // Older ArcGIS servers may not provide a 'type' property
+      if (metadataLayer && metadataLayer.type !== 'Feature Layer') {
         GeoViewError.logWarning(new LayerNotFeatureLayerError(layerConfig.layerPath, layerConfig.getLayerNameCascade()));
       }
     }
@@ -228,44 +356,61 @@ export class EsriUtilities {
     // User-defined groups do not have metadata provided by the service endpoint.
     if (layerConfig.getEntryTypeIsGroup() && !layerConfig.getIsMetadataLayerGroup()) return layerConfig;
 
-    // The url
-    let queryUrl = layer.getMetadataAccessPath();
+    // If the layer is EsriDynamic or EsriFeature (basically not EsriImage)
+    let layerMetadata: TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeatureLayer | TypeMetadataEsriImage;
     if (layerConfig instanceof EsriDynamicLayerEntryConfig || layerConfig instanceof EsriFeatureLayerEntryConfig) {
-      queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
-    }
+      // The url
+      const baseUrl = layer.getMetadataAccessPath().replace(/\/$/, '');
+      const queryUrl = `${baseUrl}/${layerConfig.layerId}`;
 
-    let responseJson;
-    try {
-      // Fetch the layer metadata
-      responseJson = await Fetch.fetchJson<TypeLayerMetadataEsri>(`${queryUrl}?f=json`, { signal: abortSignal });
-    } catch (error: unknown) {
-      // Rethrow
-      throw new LayerServiceMetadataUnableToFetchError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerName(), formatError(error));
+      try {
+        // Fetch the layer metadata
+        layerMetadata = await Fetch.fetchJson<TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeatureLayer | TypeMetadataEsriImage>(
+          `${queryUrl}?f=json`,
+          {
+            signal: abortSignal,
+          }
+        );
+      } catch (error: unknown) {
+        // Rethrow
+        throw new LayerServiceMetadataUnableToFetchError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerName(), formatError(error));
+      }
+    } else {
+      // The layer metadata was alredy queried (same as the service metadata), use that
+      layerMetadata = layerConfig.getServiceMetadata()!;
     }
 
     // Validate the metadata response
-    AbstractGeoViewRaster.throwIfMetatadaHasError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerName(), responseJson);
+    AbstractGeoViewRaster.throwIfMetatadaHasError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerName(), layerMetadata);
 
     // Set the layer metadata
-    layerConfig.setLayerMetadata(responseJson);
+    layerConfig.setLayerMetadata(layerMetadata);
 
     // The following line allow the type ascention of the type guard functions on the second line below
     if (layerConfig instanceof EsriDynamicLayerEntryConfig || layerConfig instanceof EsriFeatureLayerEntryConfig) {
+      // Cast the metadata according to the config type (basically excluding the EsriImage)
+      const layerMetadataCasted = layerMetadata as TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeatureLayer;
+
       // Create the style from the Esri Renderer
-      const styleFromRenderer = EsriRenderer.createStylesFromEsriRenderer(responseJson.drawingInfo?.renderer);
+      const styleFromRenderer = EsriRenderer.createStylesFromEsriRenderer(layerMetadataCasted.drawingInfo?.renderer);
 
       // Initialize the layer style by filling the blanks with the information from the metadata
       layerConfig.initLayerStyleFromMetadata(styleFromRenderer);
     }
 
     // Check if we support that projection and if not add it on-the-fly
-    await Projection.addProjectionIfMissing(responseJson.spatialReference || responseJson.sourceSpatialReference);
+    await Projection.addProjectionIfMissing(layerMetadata.spatialReference || layerMetadata.sourceSpatialReference);
 
-    this.#commonProcessFeatureInfoConfig(layerConfig);
+    this.#commonProcessFeatureInfoConfig(layerConfig, layerMetadata);
 
-    this.#commonProcessInitialSettings(layerConfig);
+    this.#commonProcessInitialSettings(layerConfig, layerMetadata);
 
-    this.#commonProcessTimeDimension(layerConfig, responseJson.timeInfo, displayDateMode, layerConfig instanceof EsriImageLayerEntryConfig);
+    this.#commonProcessTimeDimension(
+      layerConfig,
+      layerMetadata.timeInfo,
+      displayDateMode,
+      layerConfig instanceof EsriImageLayerEntryConfig
+    );
 
     return layerConfig;
   }
@@ -277,10 +422,11 @@ export class EsriUtilities {
    * @static
    */
   static #commonProcessFeatureInfoConfig(
-    layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
+    layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig,
+    layerMetadata: TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeatureLayer | TypeMetadataEsriImage
   ): void {
-    // Get the layer metadata
-    const layerMetadata = layerConfig.getLayerMetadata();
+    // Cast to the TypeMetadataEsriDynamicLayer to perform some specific payload operations here
+    const layerMetadataEsriDynamicLayer = layerMetadata as TypeMetadataEsriDynamicLayer;
 
     // If no metadata, throw metadata empty error (maybe change to just return if this is too strict? Trying the more strict approach first..)
     if (!layerMetadata) throw new LayerServiceMetadataEmptyError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerNameCascade());
@@ -288,7 +434,7 @@ export class EsriUtilities {
     // Read variables
     const queryable = layerMetadata.capabilities.includes('Query');
     const hasFields = !!layerMetadata.fields?.length;
-    const isGroupLayer = layerMetadata.type === 'Group Layer';
+    const isGroupLayer = layerMetadataEsriDynamicLayer.type === 'Group Layer';
     const isMetadataGroup = layerConfig.getIsMetadataLayerGroup();
 
     // Initialize the queryable source
@@ -296,7 +442,7 @@ export class EsriUtilities {
 
     // Initialize the outfields
     // dynamic group layer doesn't have fields definition
-    if (layerMetadata.type !== 'Group Layer' && layerMetadata.fields) {
+    if (layerMetadata.fields && !isGroupLayer) {
       // Get the outfields
       let outfields = layerConfig.getOutfields();
 
@@ -308,12 +454,12 @@ export class EsriUtilities {
         // Loop
         layerMetadata.fields.forEach((fieldEntry) => {
           // If the field is the geometry field
-          if (layerMetadata.geometryField && fieldEntry?.name === layerMetadata.geometryField?.name) {
+          if (layerMetadataEsriDynamicLayer.geometryField && fieldEntry?.name === layerMetadataEsriDynamicLayer.geometryField?.name) {
             // Keep the geometry field for future use
             layerConfig.setGeometryField({
               name: fieldEntry.name,
               alias: fieldEntry.alias || fieldEntry.name,
-              type: layerMetadata.geometryType as TypeOutfieldsType, // Force the typing, because the type doesn't include all geometry type values
+              type: layerMetadataEsriDynamicLayer.geometryType as TypeOutfieldsType, // Force the typing, because the type doesn't include all geometry type values
             });
 
             // Skip that geometry field
@@ -339,7 +485,7 @@ export class EsriUtilities {
       layerConfig.initOutfieldsAliases();
 
       // Initialize the name field
-      layerConfig.initNameField(layerMetadata.displayField ?? outfields?.[0]?.name);
+      layerConfig.initNameField(layerMetadataEsriDynamicLayer.displayField ?? outfields?.[0]?.name);
     }
   }
 
@@ -350,17 +496,18 @@ export class EsriUtilities {
    * @private
    */
   static #commonProcessInitialSettings(
-    layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
+    layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig,
+    layerMetadata: TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeatureLayer | TypeMetadataEsriImage
   ): void {
-    // Get the layer metadata
-    const layerMetadata = layerConfig.getLayerMetadata();
+    // Cast to the TypeMetadataEsriDynamicLayer to perform some specific payload operations here
+    const layerMetadataEsriDynamicLayer = layerMetadata as TypeMetadataEsriDynamicLayer;
 
     // Validate and update the visible initial settings
-    layerConfig.initInitialSettingsStatesVisibleFromMetadata(layerMetadata?.defaultVisibility);
+    layerConfig.initInitialSettingsStatesVisibleFromMetadata(layerMetadataEsriDynamicLayer?.defaultVisibility);
 
     // Update Min / Max Scales with value if service doesn't allow the configured value for proper UI functionality
-    layerConfig.initMinScaleFromMetadata(layerMetadata?.minScale);
-    layerConfig.initMaxScaleFromMetadata(layerMetadata?.maxScale);
+    layerConfig.initMinScaleFromMetadata(layerMetadataEsriDynamicLayer?.minScale);
+    layerConfig.initMaxScaleFromMetadata(layerMetadataEsriDynamicLayer?.maxScale);
 
     // Set the max record count for querying
     if ('maxRecordCount' in layerConfig) {
@@ -395,15 +542,13 @@ export class EsriUtilities {
    * @throws {InvalidDateError} When input has invalid dates.
    * @static
    */
-  // TODO: Issue #2139 - There is a bug with the temporal dimension returned by service URL:
-  // TO.DOCONT:  https://maps-cartes.services.geo.ca/server_serveur/rest/services/NRCan/Temporal_Test_Bed_fr/MapServer/0
   static #commonProcessTimeDimension(
     layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig,
-    esriTimeDimension: TimeDimensionESRI,
+    esriTimeDimension: TimeDimensionESRI | undefined,
     displayDateMode: DisplayDateMode | undefined,
     singleHandle?: boolean
   ): void {
-    if (esriTimeDimension !== undefined && esriTimeDimension.timeExtent) {
+    if (esriTimeDimension && esriTimeDimension.timeExtent) {
       layerConfig.setTimeDimension(DateMgt.createDimensionFromESRI(esriTimeDimension, displayDateMode, singleHandle));
     }
   }

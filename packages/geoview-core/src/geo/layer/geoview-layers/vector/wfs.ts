@@ -53,7 +53,8 @@ export interface TypeWFSLayerConfig extends Omit<TypeGeoviewLayerConfig, 'geovie
 export class WFS extends AbstractGeoViewVector {
   /**
    * Constructs a WFS Layer configuration processor.
-   * @param {TypeWFSLayerConfig} layerConfig the layer configuration
+   *
+   * @param layerConfig - The layer configuration
    */
   // The constructor is not useless, it narrows down the accepted parameter type.
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
@@ -65,8 +66,8 @@ export class WFS extends AbstractGeoViewVector {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeWFSLayerConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getGeoviewLayerConfig(): TypeWFSLayerConfig {
     return super.getGeoviewLayerConfig() as TypeWFSLayerConfig;
@@ -74,8 +75,8 @@ export class WFS extends AbstractGeoViewVector {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeMetadataWFS | undefined} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed metadata specific to this layer.
    */
   override getMetadata(): TypeMetadataWFS | undefined {
     return super.getMetadata() as TypeMetadataWFS | undefined;
@@ -180,13 +181,12 @@ export class WFS extends AbstractGeoViewVector {
       const layerConfigCasted = layerConfig as OgcWfsLayerEntryConfig;
       const featureType = layerConfigCasted.getFeatureType();
 
-      // If no name
-      if (!layerConfig.getLayerName()) {
-        let foundTitle = featureType.Title as string;
-        if (typeof featureType.Title === 'object' && '#text' in featureType.Title) foundTitle = featureType.Title['#text'];
-        // If found title, use that
-        if (foundTitle) layerConfig.setLayerName(foundTitle);
-      }
+      // Check the title from the metadata
+      let foundTitle = featureType.Title as string;
+      if (typeof featureType.Title === 'object' && '#text' in featureType.Title) foundTitle = featureType.Title['#text'];
+
+      // Initialize the layer name by filling the blanks with the name from the metadata
+      layerConfig.initLayerNameFromMetadata(foundTitle);
 
       // If no bounds defined in the initial settings and an extent is defined in the metadata
       let bounds = layerConfig.getInitialSettingsBounds();

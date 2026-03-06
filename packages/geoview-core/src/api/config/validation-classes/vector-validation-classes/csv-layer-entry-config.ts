@@ -14,7 +14,8 @@ export interface CsvLayerEntryConfigProps extends VectorLayerEntryConfigProps {
 export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
   /**
    * The class constructor.
-   * @param {CsvLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+   *
+   * @param layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: CsvLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.CSV);
@@ -43,8 +44,8 @@ export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeCSVLayerConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getGeoviewLayerConfig(): TypeCSVLayerConfig {
     return super.getGeoviewLayerConfig() as TypeCSVLayerConfig;
@@ -52,8 +53,8 @@ export class CsvLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeSourceCSVInitialConfig} The strongly-typed source configuration specific to this layer entry config.
-   * @override
+   *
+   * @returns The strongly-typed source configuration specific to this layer entry config.
    */
   override getSource(): TypeSourceCSVInitialConfig {
     return super.getSource();

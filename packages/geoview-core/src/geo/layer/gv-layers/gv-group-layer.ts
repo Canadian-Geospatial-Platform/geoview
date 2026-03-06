@@ -29,8 +29,9 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
 
   /**
    * Constructs a Group layer to manage an OpenLayer Group Layer.
-   * @param {LayerGroup} olLayerGroup - The OpenLayer group layer.
-   * @param {GroupLayerEntryConfig} layerConfig - The layer configuration.
+   *
+   * @param layerGroupOptions - The OpenLayer group layer.
+   * @param layerConfig - The layer configuration.
    */
   constructor(layerGroupOptions: LayerGroupOptions, layerConfig: GroupLayerEntryConfig) {
     super(layerConfig);
@@ -51,8 +52,8 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
-   * @returns {GroupLayerEntryConfig} The strongly-typed layer configuration specific to this group layer.
+   *
+   * @returns The strongly-typed layer configuration specific to this group layer.
    */
   override getLayerConfig(): GroupLayerEntryConfig {
     return super.getLayerConfig() as GroupLayerEntryConfig;
@@ -60,8 +61,8 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
 
   /**
    * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
-   * @override
-   * @returns {LayerGroup} The strongly-typed OpenLayers type.
+   *
+   * @returns The OpenLayers generic type for groups.
    */
   override getOLLayer(): LayerGroup {
     // Call parent and cast

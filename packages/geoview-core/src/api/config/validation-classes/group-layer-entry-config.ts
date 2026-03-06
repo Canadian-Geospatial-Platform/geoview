@@ -12,23 +12,96 @@ export interface GroupLayerEntryConfigProps extends ConfigBaseClassProps {
  */
 export class GroupLayerEntryConfig extends ConfigBaseClass {
   /** The list of layer entry configurations to use from the GeoView layer group. */
-  // TODO: Refactor - Config - TypeLayerEntryConfig - Try to type this as ConfigBaseClass[] instead of TypeLayerEntryConfig[]
+  // TODO: REFACTOR - Major TypeLayerEntryConfig - Try to type this as ConfigBaseClass[] instead of TypeLayerEntryConfig[]
   listOfLayerEntryConfig: TypeLayerEntryConfig[];
 
   /**
    * The class constructor.
-   * @param {GroupLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+   *
+   * @param layerConfig - The layer configuration we want to instanciate.
    */
-  // TO: Until this is fixed, this constructor supports sending a GroupLayerEntryConfig in its typing, for now (GroupLayerEntryConfigProps | GroupLayerEntryConfig)... though it should only be a GroupLayerEntryConfigProps eventually
   constructor(layerConfig: GroupLayerEntryConfigProps) {
     super(layerConfig, layerConfig.geoviewLayerConfig.geoviewLayerType, CONST_LAYER_ENTRY_TYPES.GROUP);
     this.listOfLayerEntryConfig = layerConfig.listOfLayerEntryConfig || [];
   }
 
+  // #region OVERRIDES
+
+  /**
+   * Overrides the setting of the service metadata to do it for all layer entries in the configuration.
+   * This method overrides a base implementation to recursively apply the provided
+   * `metadata` to each entry in `listOfLayerEntryConfig`. It ensures that
+   * all nested or child layer entries also receive the updated metadata.
+   *
+   * @param metadata - The new service metadata to be used.
+   */
+  protected override onSetServiceMetadata(metadata: unknown): void {
+    // Recursively change the service metadata for each layer entries
+    this.listOfLayerEntryConfig.forEach((layerEntry) => {
+      // Go recursive
+      layerEntry.setServiceMetadata(metadata);
+    });
+  }
+
+  /**
+   * Overrides the setting of the data access path to do it for all layer entries in the configuration.
+   * This method overrides a base implementation to recursively apply the provided
+   * `dataAccessPath` to each entry in `listOfLayerEntryConfig`. It ensures that
+   * all nested or child layer entries also receive the updated data access path.
+   *
+   * @param dataAccessPath - The new path to be used for accessing data.
+   */
+  protected override onSetDataAccessPath(dataAccessPath: string): void {
+    // Recursively change the data access path for each layer entries
+    this.listOfLayerEntryConfig.forEach((layerEntry) => {
+      // Go recursive
+      layerEntry.setDataAccessPath(dataAccessPath);
+    });
+  }
+
+  /**
+   * Overrides the creation of the layer props and return a deep clone of the layer entry configuration properties.
+   * This method calls the parent method and then copies the listOfLayerEntryConfig over.
+   * The listOfLayerEntryConfig isn't deeply cloned.
+   *
+   * @returns A deep-cloned copy of the layer entry properties.
+   */
+  protected override onCloneLayerProps(): GroupLayerEntryConfigProps {
+    // Sure
+    const clonedCopy = super.onCloneLayerProps() as GroupLayerEntryConfigProps;
+
+    // Also copy the list of layer entry configs
+    clonedCopy.listOfLayerEntryConfig = this.listOfLayerEntryConfig;
+
+    // Return the cloned copy
+    return clonedCopy;
+  }
+
+  /**
+   * Overrides the toJson of the mother class.
+   *
+   * @returns The Json representation of the instance.
+   */
+  protected override onToJson<T>(): T {
+    // Call parent
+    const serialized = super.onToJson<T>() as TypeGeoviewLayerConfig;
+
+    // Copy values
+    serialized.listOfLayerEntryConfig = this.listOfLayerEntryConfig.map((layerEntryConfig) => layerEntryConfig.toJson());
+
+    // Return it
+    return serialized as T;
+  }
+
+  // #endregion OVERRIDES
+
+  // #region PUBLIC METHDOS
+
   /**
    * Returns the `layerPath` values of all immediate child layers in `listOfLayerEntryConfig`.
    * This method does **not** recurse into nested sublayers.
-   * @returns {string[]} An array of `layerPath` strings for direct sublayers.
+   *
+   * @returns An array of `layerPath` strings for direct sublayers.
    */
   getLayerPaths(): string[] {
     return this.listOfLayerEntryConfig.map((geoviewLayerEntryConfig) => geoviewLayerEntryConfig.layerPath);
@@ -37,7 +110,8 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
   /**
    * Recursively returns the `layerPath` values of all layers and sublayers starting from this layer.
    * This includes the `layerPath` of the current layer, its direct children, and all nested descendants.
-   * @returns {string[]} An array of `layerPath` strings for all descendant layers (including nested groups).
+   *
+   * @returns An array of `layerPath` strings for all descendant layers (including nested groups).
    */
   getLayerPathsAll(): string[] {
     function getChildPaths(listOfLayerEntryConfig: TypeLayerEntryConfig[]): string[] {
@@ -55,71 +129,5 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
     return getChildPaths([this]);
   }
 
-  /**
-   * Updates the service metadata for all layer entries in the configuration.
-   * This method overrides a base implementation to recursively apply the provided
-   * `metadata` to each entry in `listOfLayerEntryConfig`. It ensures that
-   * all nested or child layer entries also receive the updated metadata.
-   * @param {unknown} metadata - The new service metadata to be used.
-   * @returns {void}
-   * @override
-   */
-  protected override onSetServiceMetadata(metadata: unknown): void {
-    // Recursively change the service metadata for each layer entries
-    this.listOfLayerEntryConfig.forEach((layerEntry) => {
-      // Go recursive
-      layerEntry.setServiceMetadata(metadata);
-    });
-  }
-
-  /**
-   * Updates the data access path for all layer entries in the configuration.
-   * This method overrides a base implementation to recursively apply the provided
-   * `dataAccessPath` to each entry in `listOfLayerEntryConfig`. It ensures that
-   * all nested or child layer entries also receive the updated data access path.
-   * @param {string} dataAccessPath - The new path to be used for accessing data.
-   * @returns {void}
-   * @override
-   */
-  protected override onSetDataAccessPath(dataAccessPath: string): void {
-    // Recursively change the data access path for each layer entries
-    this.listOfLayerEntryConfig.forEach((layerEntry) => {
-      // Go recursive
-      layerEntry.setDataAccessPath(dataAccessPath);
-    });
-  }
-
-  /**
-   * Overrides the creation of the layer props and return a deep clone of the layer entry configuration properties.
-   * This method calls the parent method and then copies the listOfLayerEntryConfig over.
-   * @returns {GroupLayerEntryConfigProps} A deep-cloned copy of the layer entry properties.
-   * @override
-   */
-  protected override onCloneLayerProps(): GroupLayerEntryConfigProps {
-    // Sure
-    const clonedCopy = super.onCloneLayerProps() as GroupLayerEntryConfigProps;
-
-    // Also copy the list of layer entry configs
-    clonedCopy.listOfLayerEntryConfig = this.listOfLayerEntryConfig;
-
-    // Return the cloned copy
-    return clonedCopy;
-  }
-
-  /**
-   * Overrides the toJson of the mother class
-   * @returns {T} The Json representation of the instance.
-   * @override
-   * @protected
-   */
-  protected override onToJson<T>(): T {
-    // Call parent
-    const serialized = super.onToJson<T>() as TypeGeoviewLayerConfig;
-
-    // Copy values
-    serialized.listOfLayerEntryConfig = this.listOfLayerEntryConfig.map((layerEntryConfig) => layerEntryConfig.toJson());
-
-    // Return it
-    return serialized as T;
-  }
+  // #endregion PUBLIC METHDOS
 }

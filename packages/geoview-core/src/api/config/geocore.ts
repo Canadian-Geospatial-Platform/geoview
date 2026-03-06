@@ -71,24 +71,31 @@ export class GeoCore {
       tempLayerConfig.listOfLayerEntryConfig ??= response.layers[0].listOfLayerEntryConfig ?? [];
       if (response.layers[0].isTimeAware === true || response.layers[0].isTimeAware === false)
         tempLayerConfig.isTimeAware = response.layers[0].isTimeAware;
+
       // Use the name from the first layer if none is provided in the config
-      if (!tempLayerConfig.geoviewLayerName) tempLayerConfig.geoviewLayerName = response.layers[0].geoviewLayerName;
+      tempLayerConfig.geoviewLayerName ??= response.layers[0].geoviewLayerName;
 
       const newLayerConfig = Config.prevalidateGeoviewLayersConfig([tempLayerConfig], (error: GeoViewError) => {
         // When an error happens, raise the exception, we handle it higher in this case
         throw error;
       });
-
       // Return the created layer config from the merged config informations
       return { config: newLayerConfig[0] as TypeGeoviewLayerConfig, geocharts };
     }
 
-    // In case of simplified geocoreConfig being provided, just update geoviewLayerName and the first layer
+    // If the config already has a name
     if (layerConfig?.geoviewLayerName) {
+      // Use the name from the config
       response.layers[0].geoviewLayerName = layerConfig.geoviewLayerName;
-      if (response.layers[0].listOfLayerEntryConfig.length === 1)
-        response.layers[0].listOfLayerEntryConfig[0].setLayerName(layerConfig.geoviewLayerName);
     }
+
+    // TODO: CLEANUP - Remove commented code 2026-03-06 - trying to reduce the clutter with the layer name processing
+    // // In case of simplified geocoreConfig being provided, just update geoviewLayerName and the first layer
+    // if (layerConfig?.geoviewLayerName) {
+    //   response.layers[0].geoviewLayerName = layerConfig.geoviewLayerName;
+    //   if (response.layers[0].listOfLayerEntryConfig.length === 1)
+    //     response.layers[0].listOfLayerEntryConfig[0].setLayerName(layerConfig.geoviewLayerName);
+    // }
 
     // Make sure if it's a duplicate, the response has the duplicates safe ID
     if (uuid.includes(':') && uuid.split(':')[0] === response.layers[0].geoviewLayerId) {
@@ -124,14 +131,15 @@ export class GeoCore {
     // Validate the generated Geoview Layer Config
     ConfigValidation.validateListOfGeoviewLayerConfig(response.layers);
 
-    // In case of simplified geocoreConfig being provided, just update geoviewLayerName and the first layer
-    // TODO refactor: this is a terrible patch to get it to work the way OSDP wants, should be changed after refactor
-    // GV: Always the ifrst one because there is only one layer by layers array...
-    if (layerConfig?.geoviewLayerName) {
-      response.layers[0].geoviewLayerName = layerConfig.geoviewLayerName;
-      if (response.layers[0].listOfLayerEntryConfig.length === 1)
-        response.layers[0].listOfLayerEntryConfig[0].setLayerName(layerConfig.geoviewLayerName);
-    }
+    // TODO: CLEANUP - Remove commented code 2026-03-06 - trying to reduce the clutter with the layer name processing
+    // // In case of simplified geocoreConfig being provided, just update geoviewLayerName and the first layer
+    // // TODO refactor: this is a terrible patch to get it to work the way OSDP wants, should be changed after refactor
+    // // GV: Always the ifrst one because there is only one layer by layers array...
+    // if (layerConfig?.geoviewLayerName) {
+    //   response.layers[0].geoviewLayerName = layerConfig.geoviewLayerName;
+    //   if (response.layers[0].listOfLayerEntryConfig.length === 1)
+    //     response.layers[0].listOfLayerEntryConfig[0].setLayerName(layerConfig.geoviewLayerName);
+    // }
 
     // Always only first one
     return response.layers[0];

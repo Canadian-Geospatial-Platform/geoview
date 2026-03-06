@@ -7,7 +7,12 @@ import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validati
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import type { TypeGeoviewLayerConfig, TypeMetadataEsriFeature } from '@/api/types/layer-schema-types';
+import type {
+  TypeGeoviewLayerConfig,
+  TypeMetadataEsriDynamic,
+  TypeMetadataEsriDynamicLayer,
+  TypeMetadataEsriFeature,
+} from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
@@ -33,7 +38,8 @@ export interface TypeEsriFeatureLayerConfig extends TypeGeoviewLayerConfig {
 export class EsriFeature extends AbstractGeoViewVector {
   /**
    * Constructs an EsriFeature Layer configuration processor.
-   * @param {TypeEsriFeatureLayerConfig} layerConfig The layer configuration.
+   *
+   * @param layerConfig - The layer configuration.
    */
   // The constructor is not useless, it narrows down the accepted parameter type.
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
@@ -45,8 +51,8 @@ export class EsriFeature extends AbstractGeoViewVector {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeEsriFeatureLayerConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getGeoviewLayerConfig(): TypeEsriFeatureLayerConfig {
     return super.getGeoviewLayerConfig() as TypeEsriFeatureLayerConfig;
@@ -54,23 +60,32 @@ export class EsriFeature extends AbstractGeoViewVector {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeMetadataEsriFeature | undefined} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @remarks Sometimes, the layer processing uses metadata coming from MapServer/?f=json (TypeMetadataEsriDynamic) and sometimes
+   * from FeatureServer/?f=json (TypeMetadataEsriFeature) which is the reason for the double types.
+   *
+   * @returns The strongly-typed layer metadata specific to this layer.
    */
-  override getMetadata(): TypeMetadataEsriFeature | undefined {
-    return super.getMetadata() as TypeMetadataEsriFeature | undefined;
+  override getMetadata(): TypeMetadataEsriDynamic | TypeMetadataEsriFeature | undefined {
+    return super.getMetadata() as TypeMetadataEsriDynamic | TypeMetadataEsriFeature | undefined;
   }
 
   /**
    * Overrides the way the metadata is fetched.
    * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
+   *
+   * @remarks This function returns TypeMetadataEsriDynamic | TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeature because sometimes the url is
+   * MapServer/?f=json, sometimes MapServer/{layerId}?f=json and sometimes FeatureServer/?f=json which all return different payloads.
+   *
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns {Promise<T = TypeMetadataEsriFeature | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
+   * @returns A promise with the metadata or undefined when no metadata for the particular layer type.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    * @override
    * @protected
    */
-  protected override async onFetchServiceMetadata<T = TypeMetadataEsriFeature | undefined>(abortSignal?: AbortSignal): Promise<T> {
+  protected override async onFetchServiceMetadata<
+    T = TypeMetadataEsriDynamic | TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeature | undefined,
+  >(abortSignal?: AbortSignal): Promise<T> {
     let responseJson;
     try {
       // Query
@@ -100,8 +115,8 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @protected
    */
   protected override async onInitLayerEntries(abortSignal?: AbortSignal): Promise<TypeGeoviewLayerConfig> {
-    // Fetch metadata
-    const metadata = await this.onFetchServiceMetadata(abortSignal);
+    // Fetch metadata, in this init context we fetch either via /MapServer/{layerId} or /FeatureServer url endpoints
+    const metadata = await this.onFetchServiceMetadata<TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeature>(abortSignal);
 
     // If metadata was fetched successfully
     const entries = [];
@@ -112,21 +127,28 @@ export class EsriFeature extends AbstractGeoViewVector {
       let idx = this.getMetadataAccessPath().toLowerCase().lastIndexOf(sep);
 
       if (idx > 0) {
+        // Cast the right payload
+        const metadataMapServer = metadata as TypeMetadataEsriDynamicLayer;
+
         // The layer id is in the metadata at root
         finalUrl = this.getMetadataAccessPath().substring(0, idx + sep.length);
+
         entries.push({
-          id: Number(metadata.id),
-          index: Number(metadata.id),
-          layerId: Number(metadata.id),
-          layerName: metadata.name,
+          id: metadataMapServer.id,
+          index: metadataMapServer.id,
+          layerId: metadataMapServer.id,
+          layerName: metadataMapServer.name,
         });
       } else {
         // If FeatureServer url, the metadata is in the first layer
         sep = '/featureserver';
         idx = this.getMetadataAccessPath().toLowerCase().lastIndexOf(sep);
         if (idx > 0) {
+          // Cast the right payload
+          const metadataFeatureServer = metadata as TypeMetadataEsriFeature;
+
           // The layer metadata is in the first layer of the metadata
-          const layer = metadata.layers[0];
+          const layer = metadataFeatureServer.layers[0];
           entries.push({
             id: layer.id,
             index: layer.id,

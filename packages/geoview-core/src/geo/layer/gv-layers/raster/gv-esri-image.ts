@@ -31,8 +31,9 @@ import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 export class GVEsriImage extends AbstractGVRaster {
   /**
    * Constructs a GVEsriImage layer to manage an OpenLayer layer.
-   * @param {ImageArcGISRest} olSource - The OpenLayer source.
-   * @param {EsriImageLayerEntryConfig} layerConfig - The layer configuration.
+   *
+   * @param olSource - The OpenLayer source.
+   * @param layerConfig - The layer configuration.
    */
   constructor(olSource: ImageArcGISRest, layerConfig: EsriImageLayerEntryConfig) {
     super(olSource, layerConfig);
@@ -54,8 +55,8 @@ export class GVEsriImage extends AbstractGVRaster {
 
   /**
    * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
-   * @returns {ImageLayer<ImageArcGISRest>} The strongly-typed OpenLayers type.
-   * @override
+   *
+   * @returns The strongly-typed OpenLayers type.
    */
   override getOLLayer(): ImageLayer<ImageArcGISRest> {
     // Call parent and cast
@@ -64,8 +65,8 @@ export class GVEsriImage extends AbstractGVRaster {
 
   /**
    * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
-   * @returns {ImageArcGISRest} The ImageArcGISRest source instance associated with this layer.
-   * @override
+   *
+   * @returns The ImageArcGISRest source instance associated with this layer.
    */
   override getOLSource(): ImageArcGISRest {
     // Get source from OL
@@ -74,8 +75,8 @@ export class GVEsriImage extends AbstractGVRaster {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {EsriImageLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getLayerConfig(): EsriImageLayerEntryConfig {
     // Call parent and cast
