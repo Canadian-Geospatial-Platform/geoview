@@ -321,13 +321,11 @@ export interface TypeSourceImageWmsInitialConfig extends TypeBaseSourceInitialCo
 
 export interface TypeSourceImageEsriInitialConfig extends TypeBaseSourceInitialConfig {
   /** The format used by the image layer.
-   * @deprecated Seems not used anymore?
    */
   format?: TypeEsriFormatParameter;
   /**
    * If true, the image will be exported with the background color of the map set as its transparent color. Only the .png and
    * .gif formats support transparency. Default = true.
-   * @deprecated Seems not used anymore?
    */
   transparent?: boolean;
 }

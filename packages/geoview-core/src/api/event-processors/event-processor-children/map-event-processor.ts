@@ -620,7 +620,12 @@ export class MapEventProcessor extends AbstractEventProcessor {
       MapEventProcessor.setOverviewMapVisibility(mapId, true);
 
       // Repeat last query for layer features after a delay to allow projection change to propagate
-      this.getMapViewer(mapId).layer.repeatLastQueryIfAny();
+      this.getMapViewer(mapId)
+        .layer.repeatLastQueryIfAny()
+        .catch((error: unknown) => {
+          // Log
+          logger.logPromiseFailed('in repeatLastQueryIfAny in MapEventProcessor.setProjection', error);
+        });
     } finally {
       // Remove circular progress as refresh is done
       AppEventProcessor.setCircularProgress(mapId, false);

@@ -180,13 +180,12 @@ export class WFS extends AbstractGeoViewVector {
       const layerConfigCasted = layerConfig as OgcWfsLayerEntryConfig;
       const featureType = layerConfigCasted.getFeatureType();
 
-      // If no name
-      if (!layerConfig.getLayerName()) {
-        let foundTitle = featureType.Title as string;
-        if (typeof featureType.Title === 'object' && '#text' in featureType.Title) foundTitle = featureType.Title['#text'];
-        // If found title, use that
-        if (foundTitle) layerConfig.setLayerName(foundTitle);
-      }
+      // Check the title from the metadata
+      let foundTitle = featureType.Title as string;
+      if (typeof featureType.Title === 'object' && '#text' in featureType.Title) foundTitle = featureType.Title['#text'];
+
+      // Initialize the layer name by filling the blanks with the name from the metadata
+      layerConfig.initLayerNameFromMetadata(foundTitle);
 
       // If no bounds defined in the initial settings and an extent is defined in the metadata
       let bounds = layerConfig.getInitialSettingsBounds();

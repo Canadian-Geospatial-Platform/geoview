@@ -157,6 +157,7 @@ export abstract class ConfigBaseClass {
 
   /**
    * Sets the layer name of the entry layer.
+   *
    * @param {string} layerName - The layer name.
    */
   setLayerName(layerName: string): void {
@@ -164,6 +165,22 @@ export abstract class ConfigBaseClass {
     if (typeof layerName === 'string') {
       this.#layerName = layerName;
     } // else skip
+  }
+
+  /**
+   * Sets the layer name from the metadata layer name, except if the layer entry already had a layer name.
+   *
+   * @param layerName - The layer name if any.
+   */
+  initLayerNameFromMetadata(layerName: string | undefined): void {
+    // If there already is a layer name from the entry props or we're initializing nothing
+    if (this.layerEntryProps.layerName || !layerName) return; // Skip, config has priority
+
+    // If we have no parent layer config and there's already a GeoView layer name
+    if (!this.layerEntryProps.parentLayerConfig && this.layerEntryProps.geoviewLayerConfig.geoviewLayerName) return; // Skip, config has priority
+
+    // Set it
+    this.setLayerName(layerName);
   }
 
   /**

@@ -154,8 +154,8 @@ export class OgcFeature extends AbstractGeoViewVector {
         return;
       }
 
-      // If found description, replace the name
-      if (foundCollection.description) layerConfig.setLayerName(foundCollection.description);
+      // Initialize the layer name by filling the blanks with the name from the metadata
+      layerConfig.initLayerNameFromMetadata(foundCollection.description);
 
       // If no bounds defined in the initial settings and an extent is defined in the metadata
       let bounds = layerConfig.getInitialSettingsBounds();
