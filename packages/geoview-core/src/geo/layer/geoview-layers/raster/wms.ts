@@ -210,8 +210,8 @@ export class WMS extends AbstractGeoViewRaster {
       return;
     }
 
-    // If no name and layer has a title
-    if (!layerConfig.getLayerName() && layerFound.Title) layerConfig.setLayerName(layerFound.Title);
+    // Initialize the layer name by filling the blanks with the name from the metadata
+    layerConfig.initLayerNameFromMetadata(layerFound.Title);
   }
 
   /**

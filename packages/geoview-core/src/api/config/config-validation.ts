@@ -270,6 +270,7 @@ export class ConfigValidation {
     listOfLayerEntryConfig: ConfigClassOrType[],
     parentLayerConfig?: GroupLayerEntryConfig
   ): void {
+    // For each layer entry config
     listOfLayerEntryConfig.forEach((layerConfig, i: number) => {
       // Link the entry to its GeoView layer config.
       ConfigBaseClass.setClassOrTypeGeoviewLayerConfig(layerConfig, geoviewLayerConfig);

@@ -191,8 +191,8 @@ export class GeoJSON extends AbstractGeoViewVector {
 
       // If the layer metadata was found
       if (layerMetadataFound) {
-        // Set the layer name
-        layerConfig.setLayerName(layerConfig.getLayerName() || layerMetadataFound.layerName || layerConfig.getLayerNameCascade());
+        // Initialize the layer name by filling the blanks with the name from the metadata
+        layerConfig.initLayerNameFromMetadata(layerMetadataFound.layerName);
 
         // Initialize the source by filling the blanks with the information from the metadata
         layerConfig.initSourceFromMetadata(layerMetadataFound.source);

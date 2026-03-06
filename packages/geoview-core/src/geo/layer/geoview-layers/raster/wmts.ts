@@ -172,8 +172,8 @@ export class WMTS extends AbstractGeoViewRaster {
       ? metadata?.Capabilities?.Contents?.Layer.find((layer) => layer['ows:Identifier'] === layerConfig.layerId)
       : metadata?.Capabilities?.Contents?.Layer;
 
-    // If no name and layer has a title
-    if (!layerConfig.getLayerName() && layerMetadata?.['ows:Title']) layerConfig.setLayerName(layerMetadata['ows:Title']);
+    // Initialize the layer name by filling the blanks with the name from the metadata
+    layerConfig.initLayerNameFromMetadata(layerMetadata?.['ows:Title']);
   }
 
   /**

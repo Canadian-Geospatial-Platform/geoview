@@ -70,6 +70,7 @@ export class EsriFeature extends AbstractGeoViewVector {
    * @override
    * @protected
    */
+  // TODO: CHECK IMPORTANT - Here, we are fetching sometimes from FeatureServer/?f=json and sometimes from MapServer/?f=json we should probably return 2 different types as 'T'!
   protected override async onFetchServiceMetadata<T = TypeMetadataEsriFeature | undefined>(abortSignal?: AbortSignal): Promise<T> {
     let responseJson;
     try {
