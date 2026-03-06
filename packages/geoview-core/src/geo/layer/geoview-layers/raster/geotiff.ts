@@ -30,7 +30,8 @@ export interface TypeGeoTIFFLayerConfig extends Omit<TypeGeoviewLayerConfig, 'li
 export class GeoTIFF extends AbstractGeoViewRaster {
   /**
    * Constructs a GeoTIFF Layer configuration processor.
-   * @param {TypeGeoTIFFLayerConfig} layerConfig the layer configuration
+   *
+   * @param layerConfig - The layer configuration
    */
   // The constructor is not useless, it narrows down the accepted parameter type.
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
@@ -42,8 +43,8 @@ export class GeoTIFF extends AbstractGeoViewRaster {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeGeoTIFFLayerConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getGeoviewLayerConfig(): TypeGeoTIFFLayerConfig {
     return super.getGeoviewLayerConfig() as TypeGeoTIFFLayerConfig;
@@ -51,8 +52,8 @@ export class GeoTIFF extends AbstractGeoViewRaster {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeMetadataGeoTIFF | undefined} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed metadata specific to this layer.
    */
   override getMetadata(): TypeMetadataGeoTIFF | undefined {
     return super.getMetadata() as TypeMetadataGeoTIFF | undefined;

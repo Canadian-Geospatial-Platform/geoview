@@ -15,7 +15,8 @@ export interface ImageStaticLayerEntryConfigProps extends AbstractBaseLayerEntry
 export class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * The class constructor.
-   * @param {ImageStaticLayerEntryConfigProps} layerConfig -  The layer configuration we want to instanciate.
+   *
+   * @param layerConfig -  The layer configuration we want to instanciate.
    */
   constructor(layerConfig: ImageStaticLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.IMAGE_STATIC, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
@@ -38,8 +39,8 @@ export class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeImageStaticLayerConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getGeoviewLayerConfig(): TypeImageStaticLayerConfig {
     return super.getGeoviewLayerConfig() as TypeImageStaticLayerConfig;
@@ -47,8 +48,8 @@ export class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeSourceImageStaticInitialConfig} The strongly-typed source configuration specific to this layer entry config.
-   * @override
+   *
+   * @returns The strongly-typed source configuration specific to this layer entry config.
    */
   override getSource(): TypeSourceImageStaticInitialConfig {
     return super.getSource();

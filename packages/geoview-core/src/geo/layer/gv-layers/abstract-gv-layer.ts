@@ -32,12 +32,7 @@ import type {
   TypeLayerStyleSettings,
   TypeFeatureInfoResult,
 } from '@/api/types/map-schema-types';
-import {
-  type TypeLayerMetadataFields,
-  type TypeLayerMetadataEsri,
-  type TypeLayerMetadataVector,
-  type TypeGeoviewLayerType,
-} from '@/api/types/layer-schema-types';
+import { type TypeLayerMetadataFields, type TypeGeoviewLayerType, type TypeMetadataEsriDynamicLayer } from '@/api/types/layer-schema-types';
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { LayerFailedToLoadError, LayerImageFailedToLoadError } from '@/core/exceptions/geoview-exceptions';
 import type { TypeLegendItem } from '@/core/components/layers/types';
@@ -121,8 +116,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
   /**
    * Constructs a GeoView layer to manage an OpenLayer layer.
-   * @param {Source} olSource - The OpenLayer Source.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration.
+   *
+   * @param olSource - The OpenLayer Source.
+   * @param layerConfig - The layer configuration.
    */
   protected constructor(olSource: Source, layerConfig: AbstractBaseLayerEntryConfig) {
     super(layerConfig);
@@ -140,8 +136,8 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
   /**
    * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
-   * @override
-   * @returns {Layer} The strongly-typed OpenLayers type.
+   *
+   * @returns The OpenLayers generic type.
    */
   override getOLLayer(): Layer {
     // Call parent and cast
@@ -150,8 +146,8 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
-   * @returns {AbstractBaseLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getLayerConfig(): AbstractBaseLayerEntryConfig {
     return super.getLayerConfig() as AbstractBaseLayerEntryConfig;
@@ -1038,6 +1034,15 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     serviceDateIANA: string | undefined,
     serviceDateTemporalMode: TemporalMode | undefined
   ): TypeFeatureInfoEntry[] {
+    // Get the layer metadata
+    const layerMetadata = layerConfig.getLayerMetadata();
+
+    // Cast to the EsriDynamic version to check for domains lookup
+    const layerMetadataEsriDynamicLayer = layerMetadata as TypeMetadataEsriDynamicLayer;
+
+    // Get the fields from metadata if any
+    const domainsLookup = layerMetadataEsriDynamicLayer?.fields;
+
     // Redirect
     return AbstractGVLayer.helperFormatFeatureInfoResult(
       features,
@@ -1046,7 +1051,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       layerConfig.getNameField(),
       layerConfig.getOutfields(),
       true,
-      (layerConfig.getLayerMetadata() as TypeLayerMetadataEsri | TypeLayerMetadataVector)?.fields,
+      domainsLookup,
       this.getStyle(),
       serviceDateFormat,
       serviceDateIANA,

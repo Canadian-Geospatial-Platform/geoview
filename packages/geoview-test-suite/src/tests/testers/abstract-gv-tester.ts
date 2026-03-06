@@ -393,7 +393,7 @@ export abstract class GVAbstractTester extends AbstractTester {
   static readonly PYGEOAPI_B6RYUVAKK5_LAKES_ICON_LIST: Partial<TypeLegendItem>[] = [
     {
       geometryType: 'Polygon',
-      name: 'lakes of the world, public domain',
+      name: 'lakes',
       isVisible: true,
     },
   ];

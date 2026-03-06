@@ -12,7 +12,8 @@ export interface WkbLayerEntryConfigProps extends VectorLayerEntryConfigProps {
 export class WkbLayerEntryConfig extends VectorLayerEntryConfig {
   /**
    * The class constructor.
-   * @param {WkbLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+   *
+   * @param layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: WkbLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.WKB);
@@ -22,8 +23,8 @@ export class WkbLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeWkbLayerConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getGeoviewLayerConfig(): TypeWkbLayerConfig {
     return super.getGeoviewLayerConfig() as TypeWkbLayerConfig;
@@ -31,8 +32,8 @@ export class WkbLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeSourceWkbVectorInitialConfig} The strongly-typed source configuration specific to this layer entry config.
-   * @override
+   *
+   * @returns The strongly-typed source configuration specific to this layer entry config.
    */
   override getSource(): TypeSourceWkbVectorInitialConfig {
     return super.getSource();

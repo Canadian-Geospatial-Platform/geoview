@@ -248,7 +248,9 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
 
   /**
    * Repeats the last feature info query if any.
-   * @param {string} mapId - The map identifier
+   *
+   * @param mapId - The map identifier
+   * @returns A promise which will hold the result of the query.
    * @throws {LayerNoLastQueryToPerformError} When there's no last query to perform.
    */
   static repeatLastQuery(mapId: string): Promise<TypeFeatureInfoResultSet> {

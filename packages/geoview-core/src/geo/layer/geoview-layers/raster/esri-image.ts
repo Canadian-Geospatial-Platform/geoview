@@ -5,7 +5,7 @@ import type { Options as SourceOptions } from 'ol/source/ImageArcGISRest';
 import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import type { TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig, TypeMetadataEsriImage } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
@@ -27,7 +27,8 @@ export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
 export class EsriImage extends AbstractGeoViewRaster {
   /**
    * Constructs an EsriImage Layer configuration processor.
-   * @param {TypeEsriImageLayerConfig} layerConfig The layer configuration.
+   *
+   * @param layerConfig - The layer configuration.
    */
   // The constructor is not useless, it narrows down the accepted parameter type.
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
@@ -39,11 +40,20 @@ export class EsriImage extends AbstractGeoViewRaster {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeEsriImageLayerConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getGeoviewLayerConfig(): TypeEsriImageLayerConfig {
     return super.getGeoviewLayerConfig() as TypeEsriImageLayerConfig;
+  }
+
+  /**
+   * Overrides the parent class's getter to provide a more specific return type (covariant return).
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
+   */
+  override getMetadata(): TypeMetadataEsriImage | undefined {
+    return super.getMetadata() as TypeMetadataEsriImage | undefined;
   }
 
   /**

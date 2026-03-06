@@ -40,7 +40,8 @@ export interface TypeOgcFeatureLayerConfig extends Omit<TypeGeoviewLayerConfig, 
 export class OgcFeature extends AbstractGeoViewVector {
   /**
    * Constructs a OgcFeature Layer configuration processor.
-   * @param {TypeOgcFeatureLayerConfig} layerConfig the layer configuration
+   *
+   * @param layerConfig - The layer configuration
    */
   // The constructor is not useless, it narrows down the accepted parameter type.
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
@@ -52,8 +53,8 @@ export class OgcFeature extends AbstractGeoViewVector {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeOgcFeatureLayerConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getGeoviewLayerConfig(): TypeOgcFeatureLayerConfig {
     return super.getGeoviewLayerConfig() as TypeOgcFeatureLayerConfig;
@@ -61,8 +62,8 @@ export class OgcFeature extends AbstractGeoViewVector {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeMetadataOGCFeature | undefined} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed metadata specific to this layer.
    */
   override getMetadata(): TypeMetadataOGCFeature | undefined {
     return super.getMetadata() as TypeMetadataOGCFeature | undefined;
@@ -154,8 +155,8 @@ export class OgcFeature extends AbstractGeoViewVector {
         return;
       }
 
-      // If found description, replace the name
-      if (foundCollection.description) layerConfig.setLayerName(foundCollection.description);
+      // Initialize the layer name by filling the blanks with the name from the metadata
+      layerConfig.initLayerNameFromMetadata(foundCollection.description);
 
       // If no bounds defined in the initial settings and an extent is defined in the metadata
       let bounds = layerConfig.getInitialSettingsBounds();
