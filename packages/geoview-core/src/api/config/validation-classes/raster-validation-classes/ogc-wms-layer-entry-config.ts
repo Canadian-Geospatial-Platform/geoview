@@ -36,7 +36,8 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * The class constructor.
-   * @param {OgcWmsLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+   *
+   * @param layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: OgcWmsLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.WMS, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);

@@ -356,11 +356,12 @@ export class EsriUtilities {
     // User-defined groups do not have metadata provided by the service endpoint.
     if (layerConfig.getEntryTypeIsGroup() && !layerConfig.getIsMetadataLayerGroup()) return layerConfig;
 
+    // If the layer is EsriDynamic or EsriFeature (basically not EsriImage)
     let layerMetadata: TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeatureLayer | TypeMetadataEsriImage;
     if (layerConfig instanceof EsriDynamicLayerEntryConfig || layerConfig instanceof EsriFeatureLayerEntryConfig) {
       // The url
-      let queryUrl = layer.getMetadataAccessPath();
-      queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
+      const baseUrl = layer.getMetadataAccessPath().replace(/\/$/, '');
+      const queryUrl = `${baseUrl}/${layerConfig.layerId}`;
 
       try {
         // Fetch the layer metadata
@@ -375,7 +376,7 @@ export class EsriUtilities {
         throw new LayerServiceMetadataUnableToFetchError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerName(), formatError(error));
       }
     } else {
-      // Was alredy queried that metadata in the case of EsriImages, use that
+      // The layer metadata was alredy queried (same as the service metadata), use that
       layerMetadata = layerConfig.getServiceMetadata()!;
     }
 
