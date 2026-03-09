@@ -316,16 +316,7 @@ export class MapViewer {
 
     let extentProjected: Extent | undefined;
     if (mapViewSettings.maxExtent && projection) {
-      // For polar projections, transforming a lon/lat bounding box clips the view too tightly.
-      // Use the projection's own extent directly instead.
-      if (mapViewSettings.projection === 3573) {
-        extentProjected = projection.getExtent() || undefined;
-      } else {
-        extentProjected = Projection.transformExtentFromProj(mapViewSettings.maxExtent, Projection.getProjectionLonLat(), projection);
-
-        // Special case for EPSG:3978 maxExtent top value to avoid cutting Canada north parts when north = 90
-        if (mapViewSettings.projection === 3978 && mapViewSettings.maxExtent[3] === 90) extentProjected[3] = 9000000;
-      }
+      extentProjected = MapViewer.#computeViewExtent(mapViewSettings.projection, mapViewSettings.maxExtent, projection);
     }
 
     const initialMap = new OLMap({
@@ -510,17 +501,7 @@ export class MapViewer {
 
     if (mapView.maxExtent) {
       const projObj = Projection.getProjectionFromString(`EPSG:${mapView.projection}`);
-
-      // For polar projections, transforming a lon/lat bounding box clips the view too tightly.
-      // Use the projection's own extent directly instead.
-      if (Number(mapView.projection) === 3573) {
-        viewOptions.extent = projObj.getExtent() || undefined;
-      } else {
-        viewOptions.extent = Projection.transformExtentFromProj(mapView.maxExtent, Projection.getProjectionLonLat(), projObj);
-
-        // Special case for EPSG:3978 maxExtent top value to avoid cutting Canada north parts when north = 90
-        if (Number(mapView.projection) === 3978 && mapView.maxExtent[3] === 90) viewOptions.extent[3] = 9000000;
-      }
+      viewOptions.extent = MapViewer.#computeViewExtent(Number(mapView.projection), mapView.maxExtent, projObj);
     }
 
     const newView = new View(viewOptions);
@@ -1555,6 +1536,35 @@ export class MapViewer {
    * @returns {Promise<void>} Promise when done processing the map move
    * @private
    */
+  /**
+   * Computes the view extent for a given projection, handling projection-specific edge cases.
+   *
+   * For polar projections (e.g. EPSG:3573), transforming a lon/lat bounding box clips
+   * the view too tightly, so the projection's own extent is used directly instead.
+   *
+   * @param projectionCode - The numeric projection code (e.g. 3978, 3857, 3573).
+   * @param maxExtent - The max extent in lon/lat.
+   * @param projection - The OpenLayers projection object.
+   * @returns The computed view extent, or undefined if none could be determined.
+   */
+  static #computeViewExtent(projectionCode: number, maxExtent: Extent, projection: OLProjection): Extent | undefined {
+    switch (projectionCode) {
+      case 3573:
+        // Polar projection: use the projection's own extent directly
+        return projection.getExtent() || undefined;
+
+      case 3978: {
+        const extent = Projection.transformExtentFromProj(maxExtent, Projection.getProjectionLonLat(), projection);
+        // Avoid cutting Canada's north parts when north boundary = 90
+        if (maxExtent[3] === 90) extent[3] = 9000000;
+        return extent;
+      }
+
+      default:
+        return Projection.transformExtentFromProj(maxExtent, Projection.getProjectionLonLat(), projection);
+    }
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async #handleMapMoveEnd(event: MapEvent): Promise<void> {
     try {
