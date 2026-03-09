@@ -60,7 +60,6 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const playIntervalRef = useRef<number>();
 
   // References for play button
@@ -68,7 +67,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   const sliderDeltaRef = useRef<number>();
 
   // Get actions and states from store
-  const { setValues, setLocked, setReversed, setDelay, setStep, setFiltering } = useTimeSliderStoreActions()!;
+  const { setValues: setStoreValues, setLocked, setReversed, setDelay, setStep, setFiltering } = useTimeSliderStoreActions()!;
   const displayLanguage = useAppDisplayLanguage();
 
   const {
@@ -81,7 +80,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     minAndMax,
     filtering,
     singleHandle,
-    values,
+    values: storeValues,
     delay,
     locked,
     reversed,
@@ -151,6 +150,10 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     });
   }
 
+  // States
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [values, setValues] = useState<number[]>(storeValues);
+
   /**
    * Moves the slider handles based on the specified direction.
    * @param direction - The direction to move the slider ('back' or 'forward').
@@ -168,7 +171,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
         if (currentIndex === -1) {
           // Value not found - snap to nearest
           const nearest = timeStampRange.reduce((prev, curr) => (Math.abs(curr - values[0]) < Math.abs(prev - values[0]) ? curr : prev));
-          setValues(layerPath, [nearest]);
+          setStoreValues(layerPath, [nearest]);
           return;
         }
 
@@ -180,7 +183,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
           newIndex = timeStampRange.length - 1; // Wrap to end
         }
 
-        setValues(layerPath, [timeStampRange[newIndex]]);
+        setStoreValues(layerPath, [timeStampRange[newIndex]]);
         return;
       }
 
@@ -196,7 +199,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
           newPosition = minAndMax[1];
         }
 
-        setValues(layerPath, [newPosition]);
+        setStoreValues(layerPath, [newPosition]);
         return;
       }
 
@@ -206,7 +209,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       // If handles are at the extremes, reset the delta
       if (rightHandle - leftHandle === minAndMax[1] - minAndMax[0]) {
         sliderDeltaRef.current = (minAndMax[1] - minAndMax[0]) / 10;
-        setValues(
+        setStoreValues(
           layerPath,
           isForward ? [leftHandle, leftHandle + sliderDeltaRef.current] : [rightHandle - sliderDeltaRef.current, rightHandle]
         );
@@ -252,9 +255,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
         if (leftHandle < sliderValueRef.current! && rightHandle > sliderValueRef.current!) leftHandle = sliderValueRef.current as number;
       }
 
-      setValues(layerPath, [leftHandle, rightHandle]);
+      setStoreValues(layerPath, [leftHandle, rightHandle]);
     },
-    [discreteValues, layerPath, locked, minAndMax, reversed, setValues, singleHandle, step, timeStampRange, values]
+    [discreteValues, layerPath, locked, minAndMax, reversed, values, setStoreValues, singleHandle, step, timeStampRange]
   );
 
   const moveBack = useCallback((): void => {
@@ -264,32 +267,6 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   const moveForward = useCallback((): void => {
     moveSlider('forward');
   }, [moveSlider]);
-
-  // #region USE EFFECT
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('TIME-SLIDER - values filtering', values, filtering);
-
-    // If slider cycle is active, pause before advancing to next increment
-    if (isPlaying) {
-      if (reversed) playIntervalRef.current = window.setTimeout(moveBack, delay);
-      else playIntervalRef.current = window.setTimeout(moveForward, delay);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [values, filtering, reversed, locked]);
-
-  // When slider cycle is activated, advance to first increment without delay
-  useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('TIME-SLIDER - isPlaying', isPlaying);
-
-    if (isPlaying) {
-      if (reversed) moveBack();
-      else moveForward();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isPlaying]);
-  // #endregion
 
   // #region HANDLE FUNCTIONS
   const handleBack = useCallback((): void => {
@@ -347,24 +324,84 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     [layerPath, setFiltering]
   );
 
+  /**
+   * Handles when the slider changes in the UI.
+   * Adjusts the local state so the Slider thumb updates.
+   */
   const handleSliderChange = useCallback(
-    (newValues: number | number[]): void => {
+    (newValues: number | number[]) => {
       // Log
       logger.logTraceUseCallback('TIME-SLIDER - handleSliderChange', layerPath);
 
       clearTimeout(playIntervalRef.current);
       setIsPlaying(false);
       sliderDeltaRef.current = undefined;
+
+      // Update the local values
+      if (Array.isArray(newValues)) setValues(newValues);
+      else setValues([newValues]);
+    },
+    [layerPath]
+  );
+
+  /**
+   * Handles when the slider thumb has committed to a value in the slider.
+   * Adjusts the main time slider store with the values.
+   */
+  const handleSliderChangeCommitted = useCallback(
+    (newValues: number | number[]): void => {
+      // Log
+      logger.logTraceUseCallback('TIME-SLIDER - handleSliderChangeCommitted', layerPath);
+
       if (discreteValues && singleHandle) {
         const value = Array.isArray(newValues) ? newValues[0] : newValues;
         const nearest = timeStampRange.reduce((prev, curr) => (Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev));
-        setValues(layerPath, [nearest]);
+        setStoreValues(layerPath, [nearest]);
       } else {
-        setValues(layerPath, newValues as number[]);
+        setStoreValues(layerPath, newValues as number[]);
       }
     },
-    [discreteValues, layerPath, setValues, singleHandle, timeStampRange]
+    [discreteValues, layerPath, setStoreValues, singleHandle, timeStampRange]
   );
+
+  // #region USE EFFECT
+
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('TIME-SLIDER - values filtering', values, filtering);
+
+    // If slider cycle is active, pause before advancing to next increment
+    if (isPlaying) {
+      if (reversed) playIntervalRef.current = window.setTimeout(moveBack, delay);
+      else playIntervalRef.current = window.setTimeout(moveForward, delay);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values, filtering, reversed, locked]);
+
+  // When slider cycle is activated, advance to first increment without delay
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('TIME-SLIDER - isPlaying', isPlaying);
+
+    if (isPlaying) {
+      if (reversed) moveBack();
+      else moveForward();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPlaying]);
+
+  /**
+   * Keeps the local state values in sync with the store values.
+   */
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('TIME-SLIDER - storeValues', storeValues);
+
+    // Sync local state
+    setValues(storeValues);
+  }, [storeValues]);
+
+  // #endregion
 
   /**
    * Create labels for values on slider
@@ -436,14 +473,14 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
         <Grid size={{ xs: 12 }}>
           <Box sx={{ textAlign: 'center', paddingTop: '20px' }}>
             <Slider
-              key={values[1] ? values[1] + values[0] : values[0]}
               style={{ width: '80%', color: 'primary' }}
               min={minAndMax[0]}
               max={minAndMax[1]}
               value={values}
               marks={sliderMarks}
               step={discreteValues ? null : step || (minAndMax[1] - minAndMax[0]) / 20}
-              onChangeCommitted={handleSliderChange}
+              onChange={handleSliderChange}
+              onChangeCommitted={handleSliderChangeCommitted}
               onValueLabelFormat={handleLabelFormat}
             />
           </Box>
