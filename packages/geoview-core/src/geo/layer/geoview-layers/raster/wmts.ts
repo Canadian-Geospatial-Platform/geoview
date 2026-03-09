@@ -435,20 +435,29 @@ export class WMTS extends AbstractGeoViewRaster {
    *
    * @param layerConfig - The configuration for the WMTS layer.
    * @returns A fully configured WMTS source.
-   * @throws {LayerWMTSMetadataError} When the tileMatrixSet and layer information are missing, likely because onProcessMetadata wasn't called.
+   * @throws {LayerWMTSMetadataError} When we don't have enough info to create a source, throw an error.
    */
   static createWMTSSource(layerConfig: OgcWmtsLayerEntryConfig): WMTSSource {
     const metadata = layerConfig.getLayerMetadata();
     const tileMatrixSet = metadata?.TileMatrixSet as TypeWMTSTileMatrixSet | undefined;
     const layer = metadata?.Layer as TypeMetadataWMTSLayer | undefined;
 
+    // If layerConfig has values, prioritize config over metadata
+    if (
+      layerConfig.hasDataAccessPath() &&
+      layerConfig.getSource().extent &&
+      (layerConfig.tileMatrixSet || layerConfig.getProjectionWithEPSG())
+    ) {
+      return WMTS.#createWMTSSourceFromConfig(layerConfig);
+    }
+
     // If metadata with TileMatrixSet and Layer info is available, create source from metadata
     if (layer && tileMatrixSet) {
       return WMTS.#createWMTSSourceFromMetadata(layerConfig, layer, tileMatrixSet);
     }
 
-    // Fallback: try to create the source from layerConfig attributes when no metadata is available
-    return WMTS.#createWMTSSourceFromConfig(layerConfig);
+    // If we don't have enough info to create a source, throw
+    throw new LayerWMTSMetadataError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerName(), 'items');
   }
 
   /**
@@ -533,6 +542,7 @@ export class WMTS extends AbstractGeoViewRaster {
 
   /**
    * Creates a WMTS source from layerConfig attributes when no metadata is available.
+   *
    * Requires the source config to have dataAccessPath, extent, and a projection derivable
    * from the tileMatrixSet identifier or source projection.
    *
@@ -551,11 +561,8 @@ export class WMTS extends AbstractGeoViewRaster {
 
     // If we don't have enough info to create a source, throw
     if (!url || !projection || !serviceExtent) {
-      throw new LayerWMTSMetadataError(
-        layerConfig.getGeoviewLayerId(),
-        layerConfig.getLayerName(),
-        `TileMatrixSet/Layer — no metadata and insufficient layerConfig (url: ${!!url}, projection: ${!!projection}, extent: ${!!serviceExtent})`
-      );
+      const missing = [!url && 'url', !projection && 'projection', !serviceExtent && 'extent'].filter(Boolean).join(', ');
+      throw new LayerWMTSMetadataError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerName(), missing);
     }
 
     // Build tile grid from the provided extent and resolution levels
