@@ -680,7 +680,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           schemaTag: schemaTag,
           entryType: layerConfig.getEntryType(),
           canToggle: schemaTag !== CONST_LAYER_TYPES.ESRI_IMAGE,
-          opacity: existingStoreEntry?.opacity ?? 1, // Reassigning the value, because we try to not manage this property from within this function anymore
+          opacity: existingStoreEntry?.opacity ?? layerConfig.getInitialSettings()?.states?.opacity ?? 1, // Reassigning the value, because we try to not manage this property from within this function anymore
           opacityMaxFromParent: existingStoreEntry?.opacityMaxFromParent ?? 1, // Reassigning the value, because we try to not manage this property from within this function anymore
           hoverable: layerConfig.getInitialSettings()?.states?.hoverable, // default: true
           queryable: layerConfig.getInitialSettings()?.states?.queryable, // default: true
