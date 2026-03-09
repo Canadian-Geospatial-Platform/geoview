@@ -22,6 +22,7 @@
         "geoviewLayerId": "arctic-sdi",
         "geoviewLayerName": "arctic-sdi",
         "useAsBasemap": true,
+        "metadataUrl": "https://basemap.arctic-sdi.org/mapcache/wmts?SERVICE=WMTS&REQUEST=GetCapabilities",
         "listOfLayerEntryConfig": [
           {
             "layerId": "arctic_cascading",
