@@ -69,8 +69,9 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Constructs a GVWMS layer to manage an OpenLayer layer.
-   * @param {ImageWMS} olSource - The OpenLayer source.
-   * @param {OgcWmsLayerEntryConfig} layerConfig - The layer configuration.
+   *
+   * @param olSource - The OpenLayer source.
+   * @param layerConfig - The layer configuration.
    */
   constructor(olSource: ImageWMS, layerConfig: OgcWmsLayerEntryConfig) {
     super(olSource, layerConfig);
@@ -116,8 +117,8 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
-   * @returns {ImageLayer<ImageWMS>} The strongly-typed OpenLayers type.
-   * @override
+   *
+   * @returns The strongly-typed OpenLayers type.
    */
   override getOLLayer(): ImageLayer<ImageWMS> {
     // Call parent and cast
@@ -126,8 +127,8 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
-   * @returns {ImageWMS} The ImageWMS source instance associated with this layer.
-   * @override
+   *
+   * @returns The ImageWMS source instance associated with this layer.
    */
   override getOLSource(): ImageWMS {
     // Get source from OL
@@ -136,8 +137,8 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {OgcWmsLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getLayerConfig(): OgcWmsLayerEntryConfig {
     // Call parent and cast
@@ -146,10 +147,8 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Overrides when the layer image is in error and couldn't be loaded correctly.
-   * @param {Event} event - The event which is being triggered.
-   * @returns {void}
-   * @override
-   * @protected
+   *
+   * @param error - The error which has been triggered.
    */
   protected override onImageLoadError(error: GeoViewError): void {
     // The WMS image failed to load.. check if there's something we can do..
@@ -175,10 +174,9 @@ export class GVWMS extends AbstractGVRaster {
    * - An empty image response (zero width or height).
    * If none of the specific conditions are met, a generic image load error
    * message key is returned.
+   *
    * @param event - The image load error event triggered by the image source.
    * @returns A GeoView Error representing the error.
-   * @override
-   * @protected
    */
   protected override onImageLoadErrorDecipherError(event: Event): GeoViewError {
     // Checks for more specific errors

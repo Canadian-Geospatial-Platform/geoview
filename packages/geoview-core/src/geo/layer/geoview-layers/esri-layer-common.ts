@@ -19,10 +19,12 @@ import type {
   DisplayDateMode,
 } from '@/api/types/map-schema-types';
 import type {
-  TypeLayerMetadataEsri,
   TypeMetadataEsriDynamic,
   TypeMetadataEsriDynamicLayer,
   TypeMetadataEsriFeature,
+  TypeMetadataEsriFeatureLayer,
+  TypeMetadataEsriLayerSummary,
+  TypeMetadataEsriImage,
 } from '@/api/types/layer-schema-types';
 import { Fetch } from '@/core/utils/fetch-helper';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
@@ -259,7 +261,7 @@ export class EsriUtilities {
     index: number,
     listOfLayerEntryConfig: ConfigBaseClass[],
     metadata: TypeMetadataEsriDynamic | TypeMetadataEsriFeature,
-    metadataLayer: TypeMetadataEsriDynamicLayer,
+    metadataLayer: TypeMetadataEsriLayerSummary,
     callbackWhenRegisteringConfig: RegisterLayerEntryConfigDelegate
   ): void {
     // Create group config
@@ -274,7 +276,7 @@ export class EsriUtilities {
     callbackWhenRegisteringConfig(groupLayerConfig);
 
     // Create configs for each sublayer
-    metadataLayer.subLayerIds.forEach((layerId: number) => {
+    metadataLayer.subLayerIds?.forEach((layerId: number) => {
       const subMeta = metadata.layers.find((item) => item.id === layerId);
 
       const subLayerProps = {
@@ -318,7 +320,7 @@ export class EsriUtilities {
     layer: EsriDynamic | EsriFeature,
     layerConfig: AbstractBaseLayerEntryConfig,
     metadata: TypeMetadataEsriDynamic | TypeMetadataEsriFeature,
-    metadataLayer: TypeMetadataEsriDynamicLayer
+    metadataLayer: TypeMetadataEsriLayerSummary
   ): void {
     // If the layer is an EsriDynamic
     if (layer instanceof EsriDynamic) {
@@ -331,7 +333,7 @@ export class EsriUtilities {
     // If the layer is an EsriFeature
     if (layer instanceof EsriFeature) {
       // Older ArcGIS servers may not provide a 'type' property
-      if (metadataLayer && 'type' in metadataLayer && metadataLayer.type !== 'Feature Layer') {
+      if (metadataLayer && metadataLayer.type !== 'Feature Layer') {
         GeoViewError.logWarning(new LayerNotFeatureLayerError(layerConfig.layerPath, layerConfig.getLayerNameCascade()));
       }
     }
@@ -354,44 +356,60 @@ export class EsriUtilities {
     // User-defined groups do not have metadata provided by the service endpoint.
     if (layerConfig.getEntryTypeIsGroup() && !layerConfig.getIsMetadataLayerGroup()) return layerConfig;
 
-    // The url
-    let queryUrl = layer.getMetadataAccessPath();
+    let layerMetadata: TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeatureLayer | TypeMetadataEsriImage;
     if (layerConfig instanceof EsriDynamicLayerEntryConfig || layerConfig instanceof EsriFeatureLayerEntryConfig) {
+      // The url
+      let queryUrl = layer.getMetadataAccessPath();
       queryUrl = queryUrl.endsWith('/') ? `${queryUrl}${layerConfig.layerId}` : `${queryUrl}/${layerConfig.layerId}`;
-    }
 
-    let responseJson;
-    try {
-      // Fetch the layer metadata
-      responseJson = await Fetch.fetchJson<TypeLayerMetadataEsri>(`${queryUrl}?f=json`, { signal: abortSignal });
-    } catch (error: unknown) {
-      // Rethrow
-      throw new LayerServiceMetadataUnableToFetchError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerName(), formatError(error));
+      try {
+        // Fetch the layer metadata
+        layerMetadata = await Fetch.fetchJson<TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeatureLayer | TypeMetadataEsriImage>(
+          `${queryUrl}?f=json`,
+          {
+            signal: abortSignal,
+          }
+        );
+      } catch (error: unknown) {
+        // Rethrow
+        throw new LayerServiceMetadataUnableToFetchError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerName(), formatError(error));
+      }
+    } else {
+      // Was alredy queried that metadata in the case of EsriImages, use that
+      layerMetadata = layerConfig.getServiceMetadata()!;
     }
 
     // Validate the metadata response
-    AbstractGeoViewRaster.throwIfMetatadaHasError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerName(), responseJson);
+    AbstractGeoViewRaster.throwIfMetatadaHasError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerName(), layerMetadata);
 
     // Set the layer metadata
-    layerConfig.setLayerMetadata(responseJson);
+    layerConfig.setLayerMetadata(layerMetadata);
 
     // The following line allow the type ascention of the type guard functions on the second line below
     if (layerConfig instanceof EsriDynamicLayerEntryConfig || layerConfig instanceof EsriFeatureLayerEntryConfig) {
+      // Cast the metadata according to the config type (basically excluding the EsriImage)
+      const layerMetadataCasted = layerMetadata as TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeatureLayer;
+
       // Create the style from the Esri Renderer
-      const styleFromRenderer = EsriRenderer.createStylesFromEsriRenderer(responseJson.drawingInfo?.renderer);
+      const styleFromRenderer = EsriRenderer.createStylesFromEsriRenderer(layerMetadataCasted.drawingInfo?.renderer);
 
       // Initialize the layer style by filling the blanks with the information from the metadata
       layerConfig.initLayerStyleFromMetadata(styleFromRenderer);
     }
 
     // Check if we support that projection and if not add it on-the-fly
-    await Projection.addProjectionIfMissing(responseJson.spatialReference || responseJson.sourceSpatialReference);
+    await Projection.addProjectionIfMissing(layerMetadata.spatialReference || layerMetadata.sourceSpatialReference);
 
-    this.#commonProcessFeatureInfoConfig(layerConfig);
+    this.#commonProcessFeatureInfoConfig(layerConfig, layerMetadata);
 
-    this.#commonProcessInitialSettings(layerConfig);
+    this.#commonProcessInitialSettings(layerConfig, layerMetadata);
 
-    this.#commonProcessTimeDimension(layerConfig, responseJson.timeInfo, displayDateMode, layerConfig instanceof EsriImageLayerEntryConfig);
+    this.#commonProcessTimeDimension(
+      layerConfig,
+      layerMetadata.timeInfo,
+      displayDateMode,
+      layerConfig instanceof EsriImageLayerEntryConfig
+    );
 
     return layerConfig;
   }
@@ -403,10 +421,11 @@ export class EsriUtilities {
    * @static
    */
   static #commonProcessFeatureInfoConfig(
-    layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
+    layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig,
+    layerMetadata: TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeatureLayer | TypeMetadataEsriImage
   ): void {
-    // Get the layer metadata
-    const layerMetadata = layerConfig.getLayerMetadata();
+    // Cast to the TypeMetadataEsriDynamicLayer to perform some specific payload operations here
+    const layerMetadataEsriDynamicLayer = layerMetadata as TypeMetadataEsriDynamicLayer;
 
     // If no metadata, throw metadata empty error (maybe change to just return if this is too strict? Trying the more strict approach first..)
     if (!layerMetadata) throw new LayerServiceMetadataEmptyError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerNameCascade());
@@ -414,7 +433,7 @@ export class EsriUtilities {
     // Read variables
     const queryable = layerMetadata.capabilities.includes('Query');
     const hasFields = !!layerMetadata.fields?.length;
-    const isGroupLayer = layerMetadata.type === 'Group Layer';
+    const isGroupLayer = layerMetadataEsriDynamicLayer.type === 'Group Layer';
     const isMetadataGroup = layerConfig.getIsMetadataLayerGroup();
 
     // Initialize the queryable source
@@ -422,7 +441,7 @@ export class EsriUtilities {
 
     // Initialize the outfields
     // dynamic group layer doesn't have fields definition
-    if (layerMetadata.type !== 'Group Layer' && layerMetadata.fields) {
+    if (layerMetadata.fields && layerMetadataEsriDynamicLayer.type !== 'Group Layer') {
       // Get the outfields
       let outfields = layerConfig.getOutfields();
 
@@ -432,14 +451,14 @@ export class EsriUtilities {
         outfields = [];
 
         // Loop
-        layerMetadata.fields.forEach((fieldEntry) => {
+        layerMetadataEsriDynamicLayer.fields.forEach((fieldEntry) => {
           // If the field is the geometry field
-          if (layerMetadata.geometryField && fieldEntry?.name === layerMetadata.geometryField?.name) {
+          if (layerMetadataEsriDynamicLayer.geometryField && fieldEntry?.name === layerMetadataEsriDynamicLayer.geometryField?.name) {
             // Keep the geometry field for future use
             layerConfig.setGeometryField({
               name: fieldEntry.name,
               alias: fieldEntry.alias || fieldEntry.name,
-              type: layerMetadata.geometryType as TypeOutfieldsType, // Force the typing, because the type doesn't include all geometry type values
+              type: layerMetadataEsriDynamicLayer.geometryType as TypeOutfieldsType, // Force the typing, because the type doesn't include all geometry type values
             });
 
             // Skip that geometry field
@@ -465,7 +484,7 @@ export class EsriUtilities {
       layerConfig.initOutfieldsAliases();
 
       // Initialize the name field
-      layerConfig.initNameField(layerMetadata.displayField ?? outfields?.[0]?.name);
+      layerConfig.initNameField(layerMetadataEsriDynamicLayer.displayField ?? outfields?.[0]?.name);
     }
   }
 
@@ -476,17 +495,18 @@ export class EsriUtilities {
    * @private
    */
   static #commonProcessInitialSettings(
-    layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig
+    layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig,
+    layerMetadata: TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeatureLayer | TypeMetadataEsriImage
   ): void {
-    // Get the layer metadata
-    const layerMetadata = layerConfig.getLayerMetadata();
+    // Cast to the TypeMetadataEsriDynamicLayer to perform some specific payload operations here
+    const layerMetadataEsriDynamicLayer = layerMetadata as TypeMetadataEsriDynamicLayer;
 
     // Validate and update the visible initial settings
-    layerConfig.initInitialSettingsStatesVisibleFromMetadata(layerMetadata?.defaultVisibility);
+    layerConfig.initInitialSettingsStatesVisibleFromMetadata(layerMetadataEsriDynamicLayer?.defaultVisibility);
 
     // Update Min / Max Scales with value if service doesn't allow the configured value for proper UI functionality
-    layerConfig.initMinScaleFromMetadata(layerMetadata?.minScale);
-    layerConfig.initMaxScaleFromMetadata(layerMetadata?.maxScale);
+    layerConfig.initMinScaleFromMetadata(layerMetadataEsriDynamicLayer?.minScale);
+    layerConfig.initMaxScaleFromMetadata(layerMetadataEsriDynamicLayer?.maxScale);
 
     // Set the max record count for querying
     if ('maxRecordCount' in layerConfig) {
@@ -523,11 +543,11 @@ export class EsriUtilities {
    */
   static #commonProcessTimeDimension(
     layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig,
-    esriTimeDimension: TimeDimensionESRI,
+    esriTimeDimension: TimeDimensionESRI | undefined,
     displayDateMode: DisplayDateMode | undefined,
     singleHandle?: boolean
   ): void {
-    if (esriTimeDimension !== undefined && esriTimeDimension.timeExtent) {
+    if (esriTimeDimension && esriTimeDimension.timeExtent) {
       layerConfig.setTimeDimension(DateMgt.createDimensionFromESRI(esriTimeDimension, displayDateMode, singleHandle));
     }
   }

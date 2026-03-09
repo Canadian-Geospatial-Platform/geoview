@@ -1,8 +1,8 @@
 import type {
   ConfigClassOrType,
   TypeGeoviewLayerConfig,
-  TypeLayerMetadataEsri,
   TypeMetadataEsriDynamic,
+  TypeMetadataEsriDynamicLayer,
   TypeSourceEsriDynamicInitialConfig,
 } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
@@ -28,7 +28,8 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * The class constructor.
-   * @param {EsriDynamicLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+   *
+   * @param layerConfig - The layer configuration we want to instanciate.
    */
   constructor(layerConfig: EsriDynamicLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.ESRI_DYNAMIC, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
@@ -39,8 +40,8 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeEsriDynamicLayerConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getGeoviewLayerConfig(): TypeEsriDynamicLayerConfig {
     return super.getGeoviewLayerConfig() as TypeEsriDynamicLayerConfig;
@@ -48,8 +49,8 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeSourceEsriDynamicInitialConfig} The strongly-typed source configuration specific to this layer entry config.
-   * @override
+   *
+   * @returns The strongly-typed source configuration specific to this layer entry config.
    */
   override getSource(): TypeSourceEsriDynamicInitialConfig {
     return super.getSource();
@@ -57,8 +58,8 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeMetadataEsriDynamic | undefined} The strongly-typed layer configuration specific to this layer entry config.
-   * @override
+   *
+   * @returns The strongly-typed service metadata specific to this layer entry config.
    */
   override getServiceMetadata(): TypeMetadataEsriDynamic | undefined {
     return super.getServiceMetadata() as TypeMetadataEsriDynamic | undefined;
@@ -66,19 +67,18 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeLayerMetadataEsri | undefined} The strongly-typed layer metadata specific to this layer entry config.
-   * @override
+   *
+   * @returns The strongly-typed layer metadata specific to this layer entry config.
    */
-  override getLayerMetadata(): TypeLayerMetadataEsri | undefined {
-    return super.getLayerMetadata() as TypeLayerMetadataEsri | undefined;
+  override getLayerMetadata(): TypeMetadataEsriDynamicLayer | undefined {
+    return super.getLayerMetadata() as TypeMetadataEsriDynamicLayer | undefined;
   }
 
   /**
    * Overrides the get geometry type to interpret the esri type name.
-   * @returns {TypeStyleGeometry | undefined} The geometry type, if it could be determined.
+   *
+   * @returns The geometry type, if it could be determined.
    * @throws {NotSupportedError} When the geometry type is not supported.
-   * @override
-   * @protected
    */
   protected override onGetGeometryType(): TypeStyleGeometry | undefined {
     // Get the geometry field

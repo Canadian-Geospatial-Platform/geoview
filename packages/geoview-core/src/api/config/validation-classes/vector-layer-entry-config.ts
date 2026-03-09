@@ -36,6 +36,15 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
     return super.getSource();
   }
 
+  // /**
+  //  * Helper function to get the layer metadata casted as TypeLayerMetadataVector.
+  //  * @returns {TypeLayerMetadataVector | undefined} The casted layer metadata in the right type.
+  //  */
+  // TODO: REFACTOR - Add this function once cleanup is ready. Search id: 7887777f
+  // override getLayerMetadata(): TypeLayerMetadataVector | undefined {
+  //   return super.getLayerMetadata() as TypeLayerMetadataVector | undefined;
+  // }
+
   // #endregion OVERRIDES
 
   // #region STATIC METHODS
@@ -45,7 +54,7 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
    * @returns {TypeLayerMetadataVector | undefined} The casted layer metadata in the right type.
    */
   getLayerMetadataCasted(): TypeLayerMetadataVector | undefined {
-    // TODO: Refactor - Remove this function in favor of a generic to be used by the class signature itself:
+    // TODO: REFACTOR - Remove this function in favor of a generic to be used by the class signature itself. Search id: 7887777f :
     // TO.DOCONT: `class AbstractBaseLayerEntryConfig<TLayerMetadata = unknown>`
     // TO.DOCONT: `class VectorLayerEntryConfig<TLayerMetadata = TypeLayerMetadataVector> extends AbstractBaseLayerEntryConfig<TypeLayerMetadataVector>`
     // TO.DOCONT: `class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig<TypeLayerMetadataWfs[]>`

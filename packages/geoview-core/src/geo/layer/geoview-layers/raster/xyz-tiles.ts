@@ -43,7 +43,8 @@ export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
 export class XYZTiles extends AbstractGeoViewRaster {
   /**
    * Constructs a XYZTiles Layer configuration processor.
-   * @param {TypeXYZTilesConfig} layerConfig the layer configuration
+   *
+   * @param layerConfig - The layer configuration
    */
   // The constructor is not useless, it narrows down the accepted parameter type.
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
@@ -55,8 +56,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeXYZTilesConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getGeoviewLayerConfig(): TypeXYZTilesConfig {
     return super.getGeoviewLayerConfig() as TypeXYZTilesConfig;
@@ -64,8 +65,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {TypeMetadataXYZTiles | undefined} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed metadata specific to this layer.
    */
   override getMetadata(): TypeMetadataXYZTiles | undefined {
     return super.getMetadata() as TypeMetadataXYZTiles | undefined;

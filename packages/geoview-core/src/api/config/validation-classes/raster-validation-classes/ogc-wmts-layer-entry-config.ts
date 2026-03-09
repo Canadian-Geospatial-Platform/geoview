@@ -13,6 +13,7 @@ export interface OgcWmtsLayerEntryConfigProps extends AbstractBaseLayerEntryConf
 
 export class OgcWmtsLayerEntryConfig extends TileLayerEntryConfig {
   tileMatrixSet?: string;
+
   /**
    * The class constructor.
    *
@@ -25,6 +26,7 @@ export class OgcWmtsLayerEntryConfig extends TileLayerEntryConfig {
     // The parent constructor will set it to the metadataAccessPath, and we only want it if provided by the config.
     if (!layerConfig.source?.dataAccessPath) this.setDataAccessPath('');
   }
+
   // #region OVERRIDES
 
   /**
@@ -48,8 +50,7 @@ export class OgcWmtsLayerEntryConfig extends TileLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns {TypeMetadataWMTS | undefined} The strongly-typed layer configuration specific to this layer entry config.
-   * @override
+   * @returns The strongly-typed service metadata specific to this layer entry config.
    */
   override getServiceMetadata(): TypeMetadataWMTS | undefined {
     return super.getServiceMetadata() as TypeMetadataWMTS | undefined;
@@ -58,7 +59,7 @@ export class OgcWmtsLayerEntryConfig extends TileLayerEntryConfig {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns The strongly-typed layer configuration specific to this layer entry config.
+   * @returns The strongly-typed layer metadata specific to this layer entry config.
    */
   override getLayerMetadata(): TypeMetadataWMTSContents | undefined {
     return super.getLayerMetadata() as TypeMetadataWMTSContents | undefined;

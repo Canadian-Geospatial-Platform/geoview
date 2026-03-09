@@ -48,8 +48,8 @@ export class GVGeoTIFF extends AbstractGVTile {
 
   /**
    * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
-   * @override
-   * @returns {WebGLTile} The strongly-typed OpenLayers type.
+   *
+   * @returns The strongly-typed OpenLayers type.
    */
   override getOLLayer(): WebGLTile {
     // Call parent and cast
@@ -58,8 +58,8 @@ export class GVGeoTIFF extends AbstractGVTile {
 
   /**
    * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
-   * @override
-   * @returns {GeoTIFFSource} The GeoTIFF source instance associated with this layer.
+   *
+   * @returns The GeoTIFF source instance associated with this layer.
    */
   override getOLSource(): GeoTIFFSource {
     // Get source from OL
@@ -68,8 +68,8 @@ export class GVGeoTIFF extends AbstractGVTile {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @override
-   * @returns {GeoTIFFLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getLayerConfig(): GeoTIFFLayerEntryConfig {
     // Call parent and cast

@@ -42,6 +42,7 @@ export interface TypeWmtsLayerConfig extends TypeGeoviewLayerConfig {
 export class WMTS extends AbstractGeoViewRaster {
   /**
    * Constructs a WMTS Layer configuration processor.
+   *
    * @param layerConfig - The layer configuration
    */
   // The constructor is not useless, it narrows down the accepted parameter type.
@@ -64,7 +65,7 @@ export class WMTS extends AbstractGeoViewRaster {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns The strongly-typed layer configuration specific to this layer.
+   * @returns The strongly-typed metadata specific to this layer.
    */
   override getMetadata(): TypeMetadataWMTS | undefined {
     return super.getMetadata() as TypeMetadataWMTS | undefined;
