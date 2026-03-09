@@ -46,4 +46,13 @@ export declare const CONTAINER_TYPE: {
     readonly FOOTER_BAR: "footerBar";
 };
 export declare const TIMEOUT: Record<string, number>;
+/**
+ * Lightbox DOM selectors for yet-another-react-lightbox components.
+ * ROOT: Use for state detection (checking if lightbox is open)
+ * CONTAINER: Use for dimension calculations only
+ */
+export declare const LIGHTBOX_SELECTORS: {
+    readonly ROOT: ".yarl__root";
+    readonly CONTAINER: ".yarl__container";
+};
 //# sourceMappingURL=constant.d.ts.map

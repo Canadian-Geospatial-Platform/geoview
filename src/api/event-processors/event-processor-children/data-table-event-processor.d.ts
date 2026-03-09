@@ -1,6 +1,6 @@
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import type { IDataTableState, IDataTableSettings, TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import type { TypeFeatureInfoEntry, TypeLayerData } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoEntry, TypeFeatureInfoResult, TypeLayerData } from '@/api/types/map-schema-types';
 export declare class DataTableEventProcessor extends AbstractEventProcessor {
     #private;
     /**
@@ -48,9 +48,9 @@ export declare class DataTableEventProcessor extends AbstractEventProcessor {
      * Shortcut to get the DataTable state for a given map id and layer path
      * @param {string} mapId - Id of the map.
      * @param {string} layerPath - Layer path to query the features.
-     * @returns {Promise<TypeFeatureInfoEntry[] | void>}
+     * @returns {Promise<TypeFeatureInfoResult>}
      */
-    static triggerGetAllFeatureInfo(mapId: string, layerPath: string): Promise<TypeFeatureInfoEntry[] | void>;
+    static triggerGetAllFeatureInfo(mapId: string, layerPath: string): Promise<TypeFeatureInfoResult>;
     /**
      * Shortcut to reset the DataTable features given map id and layer path
      * @param {string} mapId - Id of the map.

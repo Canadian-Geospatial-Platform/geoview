@@ -7,7 +7,7 @@ export interface LayerListEntry {
     layerPath: string;
     layerStatus: TypeLayerStatus;
     queryStatus: TypeQueryStatus;
-    layerFeatures?: ReactNode;
+    layerFeatures?: string;
     mapFilteredIcon?: ReactNode;
     tooltip?: JSX.Element | string;
     numOffeatures?: number;

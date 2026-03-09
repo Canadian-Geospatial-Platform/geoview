@@ -15,7 +15,7 @@ export declare class LayerGeoCoreUUIDNotFoundError extends LayerGeoCoreError {
     /**
      * Constructs a new UUID-not-found error for a given map and list of UUIDs.
      * @param {string[]} uuids - The list of UUIDs that could not be found.
-     * @param {Error} cause - The original error that caused this one, if any.
+     * @param {Error} cause - The original error that caused this one.
      */
     constructor(uuids: string[], cause: Error);
 }

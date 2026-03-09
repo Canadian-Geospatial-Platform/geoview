@@ -1,7 +1,7 @@
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import type { ITimeSliderState, TimeSliderLayerSet, TypeTimeSliderValues, TypeTimeSliderProps } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 export declare class TimeSliderEventProcessor extends AbstractEventProcessor {
     #private;
@@ -76,7 +76,7 @@ export declare class TimeSliderEventProcessor extends AbstractEventProcessor {
      * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer path of the layer to add to the state
      * @returns {TimeSliderLayer | undefined}
      * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-     * @throws {LayerWrongTypeError} When the specified layer is of wrong type.
+     * @throws {LayerWrongTypeError} When the layer was of wrong type.
      * @static
      */
     static getInitialTimeSliderValues(mapId: string, layerConfig: AbstractBaseLayerEntryConfig, timesliderConfig?: TypeTimeSliderProps): TypeTimeSliderValues | undefined;
@@ -135,6 +135,8 @@ export declare class TimeSliderEventProcessor extends AbstractEventProcessor {
      * full temporal extent of the layer (typically epoch milliseconds).
      * @param {number[]} values - The active filter values (typically epoch milliseconds)
      * selected by the time slider.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+     * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
      * @throws {PluginStateUninitializedError} Thrown when the Time Slider plugin state
      * has not been initialized for the specified map.
      * @static

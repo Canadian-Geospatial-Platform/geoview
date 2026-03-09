@@ -1,4 +1,4 @@
-import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
+import { AbstractEventProcessor, type SubscriptionDelegate } from '@/api/event-processors/abstract-event-processor';
 import type { IDrawerState, StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
 import type { GeoviewStoreType } from '@/core/stores/geoview-store';
 export declare const DRAW_GROUP_KEY = "draw-group";
@@ -9,10 +9,10 @@ export declare class DrawerEventProcessor extends AbstractEventProcessor {
     #private;
     /**
      * Initializes the event processor and sets up subscriptions
-     * @param {GeoviewStoreType} store - The store to initialize with
-     * @returns {Array<() => void>} Array of unsubscribe functions
+     * @param store - The store to initialize with
+     * @returns An array of the subscriptions callbacks which were created
      */
-    onInitialize(store: GeoviewStoreType): Array<() => void>;
+    protected onInitialize(store: GeoviewStoreType): SubscriptionDelegate[];
     /**
      * Shortcut to get the Drawer state for a given map id
      * @param {string} mapId - The mapId

@@ -11,6 +11,12 @@ export declare class KmlLayerEntryConfig extends VectorLayerEntryConfig {
      */
     constructor(layerConfig: KmlLayerEntryConfigProps);
     /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @returns {TypeKmlLayerConfig} The strongly-typed layer configuration specific to this layer.
+     * @override
+     */
+    getGeoviewLayerConfig(): TypeKmlLayerConfig;
+    /**
      * Type guard that checks whether the given configuration (class instance or plain object)
      * represents a KML Feature layer type.
      * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).

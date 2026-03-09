@@ -1,4 +1,4 @@
-import type { QueryType, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
+import type { QueryType, TypeFeatureInfoResult } from '@/api/types/map-schema-types';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
@@ -17,34 +17,44 @@ export declare class AllFeatureInfoLayerSet extends AbstractLayerSet {
     resultSet: TypeAllFeatureInfoResultSet;
     /**
      * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
-     * @param {AbstractBaseGVLayer} layer - The layer
-     * @returns {boolean} True when the layer should be registered to this all-feature-info-layer-set.
+     *
+     * @param layer - The layer
+     * @returns True when the layer should be registered to this all-feature-info-layer-set.
      */
     protected onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean;
     /**
      * Overrides the behavior to apply when an all-feature-info-layer-set wants to register a layer in its set.
      * @param {AbstractBaseGVLayer} layer - The layer
+     * @returns {void}
+     * @override
+     * @protected
      */
     protected onRegisterLayer(layer: AbstractBaseGVLayer): void;
     /**
      * Overrides the behavior to apply when propagating to the store
      * @param {TypeAllFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate
      * @param {PropagationType} type - The propagation type
+     * @returns {void}
+     * @override
+     * @protected
      */
     protected onPropagateToStore(resultSetEntry: TypeAllFeatureInfoResultSetEntry, type: PropagationType): void;
     /**
      * Overrides the behavior to apply when deleting from the store
      * @param {string} layerPath - The layer path to delete from the store
+     * @returns {void}
+     * @override
+     * @protected
      */
     protected onDeleteFromStore(layerPath: string): void;
     /**
      * Helper function used to launch the query on a layer to get all of its feature information.
      * @param {string} layerPath - The layerPath that will be queried
      * @param {QueryType} queryType - The query type, default: AllFeatureInfoLayerSet.QUERY_TYPE.
-     * @returns {Promise<TypeFeatureInfoEntry[] | void>} A promise which will hold the result of the query
+     * @returns {Promise<TypeFeatureInfoResult>} A promise which will hold the result of the query
      * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
      */
-    queryLayer(layerPath: string, queryType?: QueryType): Promise<TypeFeatureInfoEntry[] | void>;
+    queryLayer(layerPath: string, queryType?: QueryType): Promise<TypeFeatureInfoResult>;
     /**
      * Clears all stored features for a specific layer in the Feature Info result set.
      * If the given `layerPath` exists in the internal `resultSet`, this method:

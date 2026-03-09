@@ -21,18 +21,25 @@ export declare class VectorTiles extends AbstractGeoViewRaster {
     /**
      * Constructs a VectorTiles Layer configuration processor.
      * @param {TypeVectorTilesConfig} layerConfig - The layer configuration
-     * @param {ProjectionLike} fallbackProjection - The map projection when this layer is being created, for validation purposes.
      */
     constructor(layerConfig: TypeVectorTilesConfig);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @returns {TypeVectorTilesConfig} The strongly-typed layer configuration specific to this layer.
      * @override
+     */
+    getGeoviewLayerConfig(): TypeVectorTilesConfig;
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
      * @returns {TypeMetadataVectorTiles | undefined} The strongly-typed layer configuration specific to this layer.
+     * @override
      */
     getMetadata(): TypeMetadataVectorTiles | undefined;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
-     * @returns {Promise<TypeGeoviewLayerConfig>} A promise resolved once the layer entries have been initialized.
+     * @returns A promise resolved once the layer entries have been initialized.
+     * @override
+     * @protected
      */
     protected onInitLayerEntries(): Promise<TypeGeoviewLayerConfig>;
     /**
@@ -40,20 +47,26 @@ export declare class VectorTiles extends AbstractGeoViewRaster {
      * @param {VectorTilesLayerEntryConfig} layerConfig - The layer entry configuration to process.
      * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
      * @param {OLProjection?} [mapProjection] - The map projection.
-     * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
      * @returns {Promise<VectorTilesLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
+     * @override
+     * @protected
      */
     protected onProcessLayerMetadata(layerConfig: VectorTilesLayerEntryConfig, displayDateMode: DisplayDateMode, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<VectorTilesLayerEntryConfig>;
     /**
      * Overrides the way the layer entry is processed to generate an Open Layer Base Layer object.
      * @param {VectorTilesLayerEntryConfig} layerConfig - The layer entry config needed to create the Open Layer object.
      * @returns {Promise<VectorTileLayer<VectorTileSource>>} The GeoView raster layer that has been created.
+     * @override
+     * @protected
      */
     protected onProcessOneLayerEntry(layerConfig: VectorTilesLayerEntryConfig): Promise<GVVectorTiles>;
     /**
      * Overrides the creation of the GV Layer
      * @param {VectorTilesLayerEntryConfig} layerConfig - The layer entry configuration.
      * @returns {GVVectorTiles} The GV Layer
+     * @override
+     * @protected
      */
     protected onCreateGVLayer(layerConfig: VectorTilesLayerEntryConfig): GVVectorTiles;
     /**
@@ -61,11 +74,11 @@ export declare class VectorTiles extends AbstractGeoViewRaster {
      * This method creates a basic TypeGeoviewLayerConfig using the provided
      * ID, name, and metadata access path URL. It then initializes the layer entries by calling
      * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
-     * @param {string} geoviewLayerId - A unique identifier for the layer.
-     * @param {string} geoviewLayerName - The display name of the layer.
-     * @param {string} metadataAccessPath - The full service URL to the layer endpoint.
-     * @param {boolean?} [isTimeAware] - Indicates whether the layer supports time-based filtering.
-     * @returns {Promise<TypeGeoviewLayerConfig>} A promise that resolves to an initialized GeoView layer configuration with layer entries.
+     * @param geoviewLayerId - A unique identifier for the layer.
+     * @param geoviewLayerName - The display name of the layer.
+     * @param metadataAccessPath - The full service URL to the layer endpoint.
+     * @param isTimeAware - Indicates whether the layer supports time-based filtering.
+     * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries.
      * @static
      */
     static initGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware?: boolean): Promise<TypeGeoviewLayerConfig>;
@@ -73,12 +86,12 @@ export declare class VectorTiles extends AbstractGeoViewRaster {
      * Creates a configuration object for a XYZTiles layer.
      * This function constructs a `TypeVectorTilesConfig` object that describes an XYZTiles layer
      * and its associated entry configurations based on the provided parameters.
-     * @param {string} geoviewLayerId - A unique identifier for the GeoView layer.
-     * @param {string} geoviewLayerName - The display name of the GeoView layer.
-     * @param {string} metadataAccessPath - The URL or path to access metadata.
-     * @param {boolean | undefined} isTimeAware - Indicates whether the layer supports time-based filtering.
-     * @param {TypeLayerEntryShell[]} layerEntries - An array of layer entries objects to be included in the configuration.
-     * @returns {TypeVectorTilesConfig} The constructed configuration object for the XYZTiles layer.
+     * @param geoviewLayerId - A unique identifier for the GeoView layer.
+     * @param geoviewLayerName - The display name of the GeoView layer.
+     * @param metadataAccessPath - The URL or path to access metadata.
+     * @param isTimeAware - Indicates whether the layer supports time-based filtering.
+     * @param layerEntries - An array of layer entries objects to be included in the configuration.
+     * @returns The constructed configuration object for the XYZTiles layer.
      * @static
      */
     static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[]): TypeVectorTilesConfig;

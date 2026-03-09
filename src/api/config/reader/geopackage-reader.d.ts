@@ -20,9 +20,9 @@ export declare class GeoPackageReader {
     #private;
     /**
      * Generates a WKB layer config from a GeoPackage.
-     * @param {GeoPackageLayerConfig} layerConfig - the config to convert
-     * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
-     * @returns {Promise<TypeWkbLayerConfig>} A WKB layer config
+     * @param layerConfig - The config to convert
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
+     * @returns A Promise of a WKB layer config
      */
     static createLayerConfigFromGeoPackage(layerConfig: GeoPackageLayerConfig, abortSignal?: AbortSignal): Promise<TypeWkbLayerConfig>;
 }

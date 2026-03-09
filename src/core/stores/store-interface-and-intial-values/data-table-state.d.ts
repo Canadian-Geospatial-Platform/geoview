@@ -1,5 +1,5 @@
 import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
-import type { TypeFeatureInfoEntry, TypeLayerData, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoEntry, TypeFeatureInfoResult, TypeLayerData, TypeResultSet, TypeResultSetEntry } from '@/api/types/map-schema-types';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 type DataTableActions = IDataTableState['actions'];
 export interface IDataTableState {
@@ -23,7 +23,7 @@ export interface IDataTableState {
         setSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
         setSelectedLayerPath: (layerPath: string) => void;
         setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
-        triggerGetAllFeatureInfo: (layerPath: string) => Promise<TypeFeatureInfoEntry[] | void>;
+        triggerGetAllFeatureInfo: (layerPath: string) => Promise<TypeFeatureInfoResult>;
     };
     setterActions: {
         setActiveLayersData: (layers: TypeLayerData[]) => void;

@@ -28,12 +28,16 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
     /**
      * Sets the service metadata for the layer.
      * @param {unknown} metadata - The service metadata to set
+     * @returns {void}
+     * @override
      */
     onSetServiceMetadata(metadata: unknown): void;
     /**
      * Sets the data access path for the source object.
      * This method is called when the data access path is being set.
      * @param {string} dataAccessPath - The path string used to access data.
+     * @returns {void}
+     * @override
      */
     protected onSetDataAccessPath(dataAccessPath: string): void;
     /**
@@ -45,7 +49,8 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
     protected onGetGeometryType(): TypeStyleGeometry | undefined;
     /**
      * Overrides the toJson of the mother class
-     * @returns {unknown} The Json representation of the instance.
+     * @returns {T} The Json representation of the instance.
+     * @override
      * @protected
      */
     protected onToJson<T>(): T;

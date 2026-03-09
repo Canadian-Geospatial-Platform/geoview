@@ -42,7 +42,7 @@ export declare class StateApi {
      */
     getPluginState(pluginId: 'geochart' | 'swiper' | 'time-slider', state: string): string | TypeGeochartResultSetEntry[] | GeoChartStoreByLayerPath | TimeSliderLayerSet | string[] | undefined;
     /**
-     * Get the collapsed state of layer's legend.
+     * Set the collapsed state of layer's legend.
      * @param {string} layerPath - Path of the layer to get state for.
      * @param {boolean} collapsed - The new state
      * @returns {boolean} If the legend is collapsed.

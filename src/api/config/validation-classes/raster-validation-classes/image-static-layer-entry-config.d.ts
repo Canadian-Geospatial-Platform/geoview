@@ -17,8 +17,14 @@ export declare class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryC
     constructor(layerConfig: ImageStaticLayerEntryConfigProps);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @returns {TypeImageStaticLayerConfig} The strongly-typed layer configuration specific to this layer.
      * @override
+     */
+    getGeoviewLayerConfig(): TypeImageStaticLayerConfig;
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
      * @returns {TypeSourceImageStaticInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+     * @override
      */
     getSource(): TypeSourceImageStaticInitialConfig;
     /**

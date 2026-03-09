@@ -26,22 +26,31 @@ export declare class HoverFeatureInfoLayerSet extends AbstractLayerSet {
      * Overrides the behavior to apply when a hover-feature-info-layer-set wants to check for condition to register a layer in its set.
      * @param {AbstractBaseGVLayer} layer - The layer
      * @returns {boolean} True when the layer should be registered to this hover-feature-info-layer-set.
+     * @override
+     * @protected
      */
     protected onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean;
     /**
      * Overrides the behavior to apply when a hover-feature-info-layer-set wants to register a layer in its set.
-     * @param {AbstractBaseGVLayer} layer - The layer
+     *
+     * @param layer - The layer
      */
     protected onRegisterLayer(layer: AbstractBaseGVLayer): void;
     /**
      * Overrides the behavior to apply when propagating to the store
      * @param {TypeHoverResultSetEntry} resultSetEntry - The result set entry to propagate to the store
      * @param {PropagationType} type - The propagation type
+     * @returns {void}
+     * @override
+     * @protected
      */
     protected onPropagateToStore(resultSetEntry: TypeHoverResultSetEntry, type: PropagationType): void;
     /**
      * Overrides the behavior to apply when deleting from the store
      * @param {string} layerPath - The layer path to delete from the store
+     * @returns {void}
+     * @override
+     * @protected
      */
     protected onDeleteFromStore(layerPath: string): void;
     /**
@@ -50,6 +59,7 @@ export declare class HoverFeatureInfoLayerSet extends AbstractLayerSet {
      * @param {QueryType} queryType - The query type, default: HoverFeatureInfoLayerSet.QUERY_TYPE.
      * @returns {Promise<TypeHoverResultSet>} The hover result set results.
      * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+     * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
      * @async
      */
     queryLayers(coordinate: Coordinate, queryType?: QueryType): Promise<TypeHoverResultSet>;

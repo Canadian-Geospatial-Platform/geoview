@@ -19,13 +19,14 @@ export declare class GVGeoJSON extends AbstractGVVector {
     constructor(olSource: VectorSource, layerConfig: GeoJSONLayerEntryConfig);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @override
      * @returns {GeoJSONLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
+     * @override
      */
     getLayerConfig(): GeoJSONLayerEntryConfig;
     /**
      * Overrides the refresh to reload the Geojson object in the layer source once the refresh completes.
      * @param {OLProjection | undefined} projection - Optional, the projection to refresh to.
+     * @returns {void}
      * @override
      */
     onRefresh(projection: OLProjection | undefined): void;

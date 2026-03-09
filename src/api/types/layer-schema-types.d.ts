@@ -8,9 +8,9 @@ import type { TypeProjection } from '@/geo/utils/projection';
 import type { TemporalMode, TimeDimensionESRI, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { EsriBaseRenderer } from '@/geo/utils/renderer/esri-renderer';
 /** Definition of the keys used to create the constants of the GeoView layer */
-type LayerTypesKey = 'CSV' | 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'ESRI_IMAGE' | 'IMAGE_STATIC' | 'GEOJSON' | 'GEOTIFF' | 'KML' | 'XYZ_TILES' | 'VECTOR_TILES' | 'OGC_FEATURE' | 'WFS' | 'WKB' | 'WMS';
+type LayerTypesKey = 'CSV' | 'ESRI_DYNAMIC' | 'ESRI_FEATURE' | 'ESRI_IMAGE' | 'IMAGE_STATIC' | 'GEOJSON' | 'GEOTIFF' | 'KML' | 'XYZ_TILES' | 'VECTOR_TILES' | 'OGC_FEATURE' | 'WFS' | 'WKB' | 'WMS' | 'WMTS';
 /** Definition of the geoview layer types accepted by the viewer. */
-export type TypeGeoviewLayerType = 'CSV' | 'esriDynamic' | 'esriFeature' | 'esriImage' | 'GeoJSON' | 'GeoTIFF' | 'imageStatic' | 'KML' | 'ogcFeature' | 'ogcWfs' | 'ogcWms' | 'vectorTiles' | 'WKB' | 'xyzTiles';
+export type TypeGeoviewLayerType = 'CSV' | 'esriDynamic' | 'esriFeature' | 'esriImage' | 'GeoJSON' | 'GeoTIFF' | 'imageStatic' | 'KML' | 'ogcFeature' | 'ogcWfs' | 'ogcWms' | 'ogcWmts' | 'vectorTiles' | 'WKB' | 'xyzTiles';
 /** Definition of the geoview layer types accepted by the viewer. */
 export type TypeInitialGeoviewLayerType = TypeGeoviewLayerType | 'geoCore' | 'GeoPackage' | 'shapefile' | 'rcs';
 /**
@@ -90,14 +90,8 @@ export interface TypeSourceGeoTIFFInitialConfig extends TypeBaseSourceInitialCon
 export type TypeOfServer = 'mapserver' | 'geoserver' | 'qgis';
 /** Base type from which we derive the source properties for all the vector leaf nodes in the layer tree. */
 export interface TypeBaseVectorSourceInitialConfig extends TypeBaseSourceInitialConfig {
-    /** Path used to access the data. */
-    dataAccessPath?: string;
-    /** Maximum number of records to fetch (default: 0). */
-    maxRecordCount?: number;
     /** Filter to apply on features of this layer. */
     layerFilter?: string;
-    /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
-    featureInfo?: TypeFeatureInfoLayerConfig;
     /** Loading strategy to use (all or bbox). */
     strategy?: VectorStrategy;
     /** The projection code of the source. */
@@ -138,20 +132,14 @@ export type TypeTileGrid = {
 };
 /** Type from which we derive the source properties for all the ESRI dynamic leaf nodes in the layer tree. */
 export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitialConfig {
-    /** Maximum number of records to fetch (default: 0). */
-    maxRecordCount?: number;
-    /** Filter to apply on features of this layer. */
     layerFilter?: string;
     /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
     featureInfo?: TypeFeatureInfoLayerConfig;
-    /** The format used by the image layer.
-     * @deprecated Seems not used anymore?
-     */
+    /** The format used by the image layer. */
     format?: TypeEsriFormatParameter;
     /**
      * If true, the image will be exported with the background color of the map set as its transparent color. Only the .png
      * and .gif formats support transparency.
-     * @deprecated Seems not used anymore?
      */
     transparent?: boolean;
     /**
@@ -262,6 +250,8 @@ export type TypeGeoviewLayerConfig = {
     displayDateTimezone?: TimeIANA;
     /** Flag to include layer in time able function like time slider */
     isTimeAware?: boolean;
+    /** Flag to indicate if the layer should be used as basemap. Only one layer can be used as basemap. */
+    useAsBasemap?: boolean;
     /**
      * Initial settings to apply to the GeoView layer at creation time.
      * This attribute is allowed only if listOfLayerEntryConfig.length > 1.
@@ -286,6 +276,8 @@ export type GeoCoreLayerConfig = {
     initialSettings?: TypeLayerInitialSettings;
     /** The layer entries to use from the GeoCore layer. */
     listOfLayerEntryConfig?: TypeLayerEntryConfig[];
+    /** Should the layer be used as basemap. */
+    useAsBasemap?: boolean;
 };
 export type RCSLayerConfig = {
     /** Type of GeoView layer. */
@@ -300,6 +292,8 @@ export type RCSLayerConfig = {
     initialSettings?: TypeLayerInitialSettings;
     /** The layer entries to use from the GeoCore layer. */
     listOfLayerEntryConfig?: TypeLayerEntryConfig[];
+    /** Should the layer be used as basemap. */
+    useAsBasemap?: boolean;
 };
 export type GeoPackageLayerConfig = {
     /** Type of GeoView layer. */
@@ -314,6 +308,8 @@ export type GeoPackageLayerConfig = {
     initialSettings?: TypeLayerInitialSettings;
     /** The layer entries to use from the GeoPackage. */
     listOfLayerEntryConfig?: TypeLayerEntryConfig[];
+    /** Should the layer be used as basemap. */
+    useAsBasemap?: boolean;
 };
 export type ShapefileLayerConfig = {
     /** Type of GeoView layer. */
@@ -328,6 +324,8 @@ export type ShapefileLayerConfig = {
     initialSettings?: TypeLayerInitialSettings;
     /** The layer entries to use from the shapefile. */
     listOfLayerEntryConfig?: TypeLayerEntryConfig[];
+    /** Should the layer be used as basemap. */
+    useAsBasemap?: boolean;
 };
 /**
  * Type guard that checks if a given map layer configuration entry is of type GeoCore.

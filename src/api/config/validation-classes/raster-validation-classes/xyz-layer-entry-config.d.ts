@@ -22,8 +22,14 @@ export declare class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
     constructor(layerConfig: XYZTilesLayerEntryConfigProps);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     * @returns {TypeXYZTilesConfig} The strongly-typed layer configuration specific to this layer.
      * @override
+     */
+    getGeoviewLayerConfig(): TypeXYZTilesConfig;
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
      * @returns {TypeSourceImageXYZTilesInitialConfig} The strongly-typed source configuration specific to this layer entry config.
+     * @override
      */
     getSource(): TypeSourceImageXYZTilesInitialConfig;
     /**

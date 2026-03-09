@@ -8,9 +8,9 @@ import type { TypeGeoJSONLayerConfig } from '@/geo/layer/geoview-layers/vector/g
 export declare class ShapefileReader {
     /**
      * Generates GeoJson layer config from a shapefile.
-     * @param {TypeShapefileLayerConfig} layerConfig - The config to convert.
-     * @param {AbortSignal?} [abortSignal] - Abort signal to handle cancelling of the process.
-     * @returns {Promise<TypeGeoJSONLayerConfig>} A geojson layer config
+     * @param layerConfig - The config to convert.
+     * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
+     * @returns A Promise of a Geojson layer config
      */
     static convertShapefileConfigToGeoJson(layerConfig: ShapefileLayerConfig, abortSignal?: AbortSignal): Promise<TypeGeoJSONLayerConfig>;
 }

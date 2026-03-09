@@ -39,6 +39,17 @@ export declare class GeoViewError extends Error {
     static logWarning(error: unknown, language?: TypeDisplayLanguage): void;
 }
 /**
+ * Error thrown when a configuration schema has a wrong path.
+ * @extends {GeoViewError}
+ */
+export declare class ConfigSchemaWrongPathError extends GeoViewError {
+    /**
+     * Creates an instance of ConfigSchemaWrongPathError.
+     * @param {string} schemaPath - The wrong schema path
+     */
+    constructor(schemaPath: string);
+}
+/**
  * Error thrown when a map viewer with a specified ID is not found.
  * @extends {GeoViewError}
  */
@@ -268,5 +279,61 @@ export declare class LayerConfigNotFoundError extends GeoViewError {
      * @param {string} layerPath - The layer path where the layer config couldn't be found.
      */
     constructor(layerPath: string);
+}
+/**
+ * Error thrown when a Layer fails to load on the map.
+ */
+export declare class LayerFailedToLoadError extends GeoViewError {
+    /**
+     * Creates an instance of LayerFailedToLoadError.
+     * @param layerName - The layer name of the layer that failed to load.
+     * @param cause - Optional, the inner cause of the error.
+     */
+    constructor(layerName: string, cause?: Error);
+}
+/**
+ * Error thrown when a Layer Image fails to load on the map.
+ */
+export declare class LayerImageFailedToLoadError extends GeoViewError {
+    /**
+     * Creates an instance of LayerImageFailedToLoadError.
+     * @param layerName - The layer name of the layer image that failed to load.
+     * @param cause - Optional, the inner cause of the error.
+     */
+    constructor(layerName: string, cause?: Error);
+}
+/**
+ * Error thrown when a Layer Image fails to load on the map due to its requested width being too big.
+ */
+export declare class LayerImageFailedToLoadWidthTooBigError extends GeoViewError {
+    /**
+     * Creates an instance of LayerImageFailedToLoadWidthTooBigError.
+     * @param layerName - The layer name of the layer image that failed to load.
+     * @param requestedHeight - The requested width for the image
+     * @param maxHeight - The maximum supported width for the generated image by the service
+     */
+    constructor(layerName: string, requestedWidth: number, maxWidth: number);
+}
+/**
+ * Error thrown when a Layer Image fails to load on the map due to its requested height being too big.
+ */
+export declare class LayerImageFailedToLoadHeightTooBigError extends GeoViewError {
+    /**
+     * Creates an instance of LayerImageFailedToLoadHeightTooBigError.
+     * @param layerName - The layer name of the layer image that failed to load.
+     * @param requestedHeight - The requested height for the image
+     * @param maxHeight - The maximum supported height for the generated image by the service
+     */
+    constructor(layerName: string, requestedHeight: number, maxHeight: number);
+}
+/**
+ * Error thrown when a Layer Image fails to load on the map due to no image returned.
+ */
+export declare class LayerImageFailedNoImageError extends GeoViewError {
+    /**
+     * Creates an instance of LayerImageFailedNoImageError.
+     * @param layerName - The layer name of the layer image that returned an empty image on load.
+     */
+    constructor(layerName: string);
 }
 //# sourceMappingURL=geoview-exceptions.d.ts.map

@@ -3,7 +3,7 @@ import type { Pixel } from 'ol/pixel';
 import type { Geometry } from 'ol/geom';
 import type Feature from 'ol/Feature';
 import type { MapFeatureConfig } from '@/api/config/map-feature-config';
-import type { MapConfigLayerEntry, TypeGeoviewLayerType, TypeLayerStatus } from './layer-schema-types';
+import type { MapConfigLayerEntry, TypeGeoviewLayerType } from './layer-schema-types';
 /**
  *  Definition of the map feature instance according to what is specified in the schema.
  */
@@ -668,11 +668,13 @@ export type QueryType = 'at_pixel' | 'at_coordinate' | 'at_lon_lat' | 'using_a_b
 export type TypeLocation = null | Pixel | Coordinate | Coordinate[] | string;
 export type TypeResultSetEntry = {
     layerPath: string;
-    layerName: string;
-    layerStatus: TypeLayerStatus;
 };
 export type TypeResultSet<T extends TypeResultSetEntry = TypeResultSetEntry> = {
     [layerPath: string]: T;
+};
+export type TypeFeatureInfoResult = {
+    results: TypeFeatureInfoEntry[];
+    promiseGeometries?: Promise<boolean>;
 };
 export type TypeFeatureInfoEntry = {
     featureKey: number;
@@ -684,7 +686,7 @@ export type TypeFeatureInfoEntry = {
     extent: Extent | undefined;
     featureIcon?: string;
     fieldInfo: Partial<Record<string, TypeFieldEntry>>;
-    nameField: string | null;
+    nameField?: string;
     layerPath: string;
 };
 /**

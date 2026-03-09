@@ -1,4 +1,5 @@
 import type { MapConfigLayerEntry } from '@/api/types/layer-schema-types';
+import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 /**
  * A class to define the default values of a GeoView map configuration and validation methods for the map config attributes.
  * @exports
@@ -21,5 +22,5 @@ export declare class ConfigValidation {
      */
     static validateListOfGeoviewLayerConfig(listOfMapConfigLayerEntry?: MapConfigLayerEntry[]): void;
 }
-export type ErrorCallbackDelegate = (errorKey: string, params: string[]) => void;
+export type ErrorCallbackDelegate = (error: GeoViewError) => void;
 //# sourceMappingURL=config-validation.d.ts.map

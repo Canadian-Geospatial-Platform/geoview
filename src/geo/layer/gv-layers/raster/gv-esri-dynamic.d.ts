@@ -5,7 +5,7 @@ import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { Map as OLMap } from 'ol';
 import type { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
-import type { TypeFeatureInfoEntry, rangeDomainType, codedValueType, TypeOutfieldsType, TypeFeatureInfoEntryPartial } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoResult, rangeDomainType, codedValueType, TypeOutfieldsType, TypeFeatureInfoEntryPartial } from '@/api/types/map-schema-types';
 import type { TypeLayerMetadataEsriExtent } from '@/api/types/layer-schema-types';
 import type { GeometryJson } from '@/geo/layer/gv-layers/utils';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
@@ -28,30 +28,29 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
     constructor(olSource: ImageArcGISRest, layerConfig: EsriDynamicLayerEntryConfig);
     /**
      * Overrides the fetching of the legend for an Esri Dynamic layer.
-     * @override
      * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
+     * @override
      */
     onFetchLegend(): Promise<TypeLegend | null>;
     /**
      * Overrides when the style should be set by the fetched legend.
      * @param {TypeLegend} legend - The legend type
+     * @returns {void}
      * @override
      */
     onSetStyleAccordingToLegend(legend: TypeLegend): void;
     /**
      * Overrides the way to get the bounds for this layer type.
-     * @param {OLProjection} projection - The projection to get the bounds into.
-     * @param {number} stops - The number of stops to use to generate the extent.
-     * @override
-     * @returns {Extent | undefined} The layer bounding box.
+     * @param projection - The projection to get the bounds into.
+     * @param stops - The number of stops to use to generate the extent.
+     * @returns A promise of layer bounding box.
      */
-    onGetBounds(projection: OLProjection, stops: number): Extent | undefined;
+    onGetBounds(projection: OLProjection, stops: number): Promise<Extent | undefined>;
     /**
      * Sends a query to get ESRI Dynamic feature geometries and calculates an extent from them.
      * @param {number[] | string[]} objectIds - The IDs of the features to calculate the extent from.
      * @param {OLProjection} outProjection - The output projection for the extent.
      * @param {string?} outfield - ID field to return for services that require a value in outfields.
-     * @override
      * @returns {Promise<Extent>} The extent of the features, if available.
      * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
      * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
@@ -61,42 +60,47 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
      * @throws {ResponseTypeError} When the response from the service is not an object.
      * @throws {ResponseContentError} When the response actually contains an error within it.
      * @throws {NetworkError} When a network issue happened.
+     * @override
      */
     onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
     /**
      * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
-     * @override
      * @returns {ImageLayer<ImageArcGISRest>} The strongly-typed OpenLayers type.
+     * @override
      */
     getOLLayer(): ImageLayer<ImageArcGISRest>;
     /**
      * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
-     * @override
      * @returns {ImageArcGISRest} The ImageArcGISRest source instance associated with this layer.
+     * @override
      */
     getOLSource(): ImageArcGISRest;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @override
      * @returns {EsriDynamicLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
+     * @override
      */
     getLayerConfig(): EsriDynamicLayerEntryConfig;
     /**
      * Overrides the hit tolerance of the layer.
-     * @override
      * @returns {number} The hit tolerance for a GV Esri Dynamic layer
+     * @override
      */
     getHitTolerance(): number;
     /**
      * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
      * @param {string} fieldName - The field name for which we want to get the type.
      * @returns {TypeOutfieldsType} The type of the field.
+     * @override
+     * @protected
      */
     protected onGetFieldType(fieldName: string): TypeOutfieldsType;
     /**
      * Overrides the return of the domain of the specified field.
      * @param {string} fieldName - The field name for which we want to get the domain.
      * @returns {null | codedValueType | rangeDomainType} The domain of the field.
+     * @override
+     * @protected
      */
     protected onGetFieldDomain(fieldName: string): null | codedValueType | rangeDomainType;
     /**
@@ -104,33 +108,40 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
      * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
      * @param {LayerFilters} layerFilters - The layer filters to apply when querying the features.
      * @param {AbortController?} [abortController] - The optional abort controller.
-     * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
-     * @protected
+     * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
      * @override
+     * @protected
      */
-    protected getAllFeatureInfo(map: OLMap, layerFilters: LayerFilters, abortController?: AbortController): Promise<TypeFeatureInfoEntry[]>;
+    protected getAllFeatureInfo(map: OLMap, layerFilters: LayerFilters, abortController?: AbortController): Promise<TypeFeatureInfoResult>;
     /**
      * Overrides the return of feature information at a given coordinate.
      * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.
      * @param {Coordinate} location - The coordinate that will be used by the query.
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
      * @param {AbortController?} [abortController] - The optional abort controller.
-     * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+     * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
+     * @override
+     * @protected
      */
-    protected getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
+    protected getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
     /**
      * Overrides the return of feature information at the provided long lat coordinate.
      * @param {OLMap} map - The Map where to get Feature Info At LonLat from.
      * @param {Coordinate} lonlat - The coordinate that will be used by the query.
      * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
      * @param {AbortController?} [abortController] - The optional abort controller.
-     * @returns {Promise<TypeFeatureInfoEntry[]>} A promise of an array of TypeFeatureInfoEntry[].
+     * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
      * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
+     * @override
+     * @protected
      */
-    protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoEntry[]>;
+    protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
     /**
      * Overrides the way an EsriDynamic layer applies a view filter. It does so by updating the source layerDefs parameter.
      * @param {LayerFilters} [filter] - The raw filter string input (defaults to an empty string if not provided).
+     * @returns {void}
+     * @override
+     * @protected
      */
     protected onSetLayerFilters(filter?: LayerFilters): void;
     /**
