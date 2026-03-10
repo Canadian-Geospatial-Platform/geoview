@@ -62,6 +62,24 @@ import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 
+/** The possible filters for numeric columns */
+const NUMERIC_FIELD_FILTERS = [
+  'equals',
+  'notEquals',
+  'between',
+  'betweenInclusive',
+  'lessThan',
+  'greaterThan',
+  'lessThanOrEqualTo',
+  'greaterThanOrEqualTo',
+];
+
+/** The possible filters for date columns */
+const DATE_FIELD_FILTERS = NUMERIC_FIELD_FILTERS;
+
+/** The possible filters for string columns */
+const STRING_FIELD_FILTERS = ['contains', 'startsWith', 'endsWith'];
+
 /**
  * Build Data table from map.
  * @param {DataTableProps} data map data which will be used to build data table.
@@ -245,6 +263,36 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   );
 
   /**
+   * The filter options config for the column based on the data type.
+   *
+   * @param dataType - The data type to use to infer the filter options config.
+   * @returns The filter options config.
+   */
+  const getFilterConfig = useCallback((dataType: string): Partial<MRTColumnDef<ColumnsType>> => {
+    // Depending on the data type
+    if (dataType === 'date') {
+      return {
+        filterFn: 'between',
+        columnFilterModeOptions: DATE_FIELD_FILTERS,
+        filterVariant: 'date',
+        sortingFn: 'datetime',
+      };
+    }
+
+    if (dataType === 'number' || dataType === 'oid') {
+      return {
+        filterFn: 'between',
+        columnFilterModeOptions: NUMERIC_FIELD_FILTERS,
+      };
+    }
+
+    return {
+      filterFn: 'contains',
+      columnFilterModeOptions: STRING_FIELD_FILTERS,
+    };
+  }, []);
+
+  /**
    * Build material react data table column header.
    *
    * @param {object} data.fieldAliases object values transformed into required key value property of material react data table
@@ -259,6 +307,9 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     const entries = Object.entries({ ICON: iconColumn, ZOOM: zoomColumn, DETAILS: detailColumn, ...data.fieldInfos });
     const columnList = [] as MRTColumnDef<ColumnsType>[];
     entries.forEach(([key, value]) => {
+      // Get the filter config
+      const filterConfig = getFilterConfig(value.dataType);
+
       columnList.push({
         id: key,
         accessorFn: (row) => {
@@ -273,28 +324,26 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
         },
         header: value.alias,
         visibleInShowHideMenu: value.id === 'icon' || value.id === 'zoom' || value.id === 'details' ? false : true,
-        filterFn: 'contains',
-        columnFilterModeOptions: ['contains', 'startsWith', 'endsWith'], // String columns: contains, startsWith, endsWith, empty, notEmpty
-        ...((value.dataType === 'number' || value.dataType === 'oid') && {
-          filterFn: 'between',
-          columnFilterModeOptions: ['between', 'betweenInclusive'],
-        }),
+
         Header: ({ column }) => getTableHeader(column.columnDef.header),
         Cell: ({ cell }) => getCellValueWithTooltip(cell.getValue() as string | number | JSX.Element, cell.id),
+
+        // Spread in the filter config
+        ...filterConfig,
+
+        // Spread in more properties if dataType is date
         ...(value.dataType === 'date' && {
           accessorFn: (row) => DateMgt.createDayjs(row[key].value as string),
-          sortingFn: 'datetime',
-          filterFn: 'between',
           Cell: ({ cell }) => getCellContentDate(cell.getValue<Dayjs>()),
-          filterVariant: 'date',
           muiFilterDatePickerProps: {
             timezone: displayDateTimezoneUniversal,
             format: displayDateFormat[language],
             // NOTE: reason for type cast as undefined as x-mui-datepicker prop type saying Date cant be assigned to undefined.
             minDate: DateMgt.createDayjs('1600-01-01') as unknown as undefined,
           },
-          columnFilterModeOptions: ['between', 'betweenInclusive'], // Number/OID/Date columns: equals, notEquals, between, betweenInclusive, lessThan, greaterThan, lessThanOrEqualTo, greaterThanOrEqualTo, empty, notEmpty
         }),
+
+        // Spread in the extra config for the special columns (icon/zoom/details)
         ...([t('dataTable.icon'), t('dataTable.zoom'), t('dataTable.details')].includes(value.alias)
           ? (() => {
               return {
@@ -320,7 +369,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     return columnList;
     // TODO: CLEANUP REACT - Uncomment all disable react-hooks/exhaustive-deps from this file and fix all dependencies!
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [density, getCellContentDate, displayDateTimezone]);
+  }, [density, getFilterConfig, getCellContentDate, displayDateTimezone]);
 
   /**
    * Initialize default filter modes for columns using first available option
