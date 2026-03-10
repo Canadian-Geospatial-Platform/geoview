@@ -47,13 +47,6 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   // Get the theme
   const theme = useTheme();
 
-  // Tweak the default colors based on the theme
-  const defaultColors: GeoChartDefaultColors = {
-    backgroundColor: theme.palette.background.default,
-    borderColor: theme.palette.primary.main,
-    color: theme.palette.primary.main,
-  };
-
   // #region USE STATE SECTION ****************************************************************************************
 
   // Use State
@@ -112,6 +105,20 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   );
 
   /**
+   * Memoizes the theme colors.
+   */
+  const memoDefaultColors: GeoChartDefaultColors = useMemo(() => {
+    // Log
+    logger.logTraceUseMemo('GEOVIEW-GEOCHART - memoDefaultColors', theme);
+
+    return {
+      backgroundColor: theme.palette.background.default,
+      borderColor: theme.palette.geoViewColor.grey.light[100],
+      color: theme.palette.geoViewColor.textColor.main,
+    };
+  }, [theme]);
+
+  /**
    * Memoizes the fetching of the correct config based on the provided layers array (TypeArrayOfLayerData).
    */
   const memoAllInfo = useMemo(() => {
@@ -160,10 +167,10 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
     <GeoChartComponent
       chart="line"
       schemaValidator={schemaValidator}
-      sx={{ ...sx, ...{ backgroundColor: defaultColors.backgroundColor } }}
+      sx={{ ...sx, ...{ backgroundColor: memoDefaultColors.backgroundColor } }}
       inputs={inputs}
       language={displayLanguage}
-      defaultColors={defaultColors}
+      defaultColors={memoDefaultColors}
       action={action}
       onError={handleError}
     />
