@@ -140,6 +140,7 @@
             "geochart": {
               "xAxis": {
                 "type": "time",
+                "grid": { "drawOnChartArea": false },
                 "property": "CollectionStart_DebutPrelevement",
                 "label": "Collected date",
                 "timeFormat": {
@@ -149,6 +150,7 @@
               },
               "yAxis": {
                 "type": "linear",
+                "grid": { "drawOnChartArea": false },
                 "property": "Activity_Activite_mBqm3",
                 "label": "Activity (mBqm3)",
                 "tooltipSuffix": "mBqm3"
