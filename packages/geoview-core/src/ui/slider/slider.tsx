@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { useLayoutEffect, useCallback, useRef, useMemo } from 'react';
+import { useLayoutEffect, useCallback, useRef, useMemo, useState } from 'react';
 import type { SxProps, Theme } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
 import { Slider as MaterialSlider } from '@mui/material';
@@ -17,7 +17,8 @@ type SliderProps = {
   // Important props: min, max, value
   min: number;
   max: number;
-  value: Array<number> | number;
+  value?: number[] | number;
+  defaultValue?: number[] | number;
 
   // custom slider classes and styles
   className?: string;
@@ -54,6 +55,7 @@ function SliderUI(props: SliderProps): JSX.Element {
   // Get constant from props
   const {
     value,
+    defaultValue,
     min,
     max,
     marks,
@@ -68,6 +70,12 @@ function SliderUI(props: SliderProps): JSX.Element {
     ...properties
   } = props;
 
+  // Determine if the component is controlled or not to determine if we need an internal state or not.
+  // This is the best-practice according to react and is also how MUI does it internally.
+  const isControlled = value !== undefined;
+  const [internalValue, setInternalValue] = useState(defaultValue);
+  const sliderValue = isControlled ? value : internalValue;
+
   // Hooks
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
@@ -76,6 +84,7 @@ function SliderUI(props: SliderProps): JSX.Element {
   const sliderRef = useRef<HTMLDivElement>(null);
 
   const containerId = generateId(18);
+
   const valueLabelDisplayOption = valueLabelDisplay === undefined ? 'on' : 'auto';
 
   // TODO: Refactor - when refactor time slider, re work logic for marks and label to have all of them inside slider (geochart-time slider)
@@ -122,16 +131,20 @@ function SliderUI(props: SliderProps): JSX.Element {
 
   // Memoize the className calculation
   const finalClassName = useMemo(() => {
-    const shouldSpreadLabel = Array.isArray(value) && value.length >= 2 && (!orientation || orientation === 'horizontal');
+    const shouldSpreadLabel = Array.isArray(sliderValue) && sliderValue.length >= 2 && (!orientation || orientation === 'horizontal');
 
     if (!shouldSpreadLabel) return className;
 
     return className ? `${className} MuiSlider-labelSpread` : 'MuiSlider-labelSpread';
-  }, [value, orientation, className]);
+  }, [sliderValue, orientation, className]);
 
   // handle constant change on the slider to set active thumb and instant values
   const handleChange = (event: React.SyntheticEvent | Event, newValue: number | number[], activeThumb: number): void => {
-    // Update the internal state
+    // Update the internal state if not controlled, meaning 'value' isn't provided by the parent component
+    if (!isControlled) {
+      setInternalValue(newValue);
+    }
+
     event.preventDefault();
 
     // Callback
@@ -293,10 +306,10 @@ function SliderUI(props: SliderProps): JSX.Element {
 
   // Add this new effect to handle slider value changes
   useLayoutEffect(() => {
-    logger.logTraceUseEffect('UI.SLIDER - remove overlap on value change');
+    logger.logTraceUseEffect('UI.SLIDER - remove overlap on value change', sliderValue);
 
     removeLabelOverlap();
-  }, [value, removeLabelOverlap]);
+  }, [sliderValue, removeLabelOverlap]);
 
   return (
     <MaterialSlider
@@ -306,7 +319,7 @@ function SliderUI(props: SliderProps): JSX.Element {
       className={finalClassName}
       ref={sliderRef}
       orientation={orientation}
-      value={value}
+      value={sliderValue}
       min={min}
       max={max}
       marks={processedMarks}

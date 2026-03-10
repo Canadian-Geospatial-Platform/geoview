@@ -142,7 +142,7 @@
               id: 'UI1-slider-flood',
               min: 1696,
               max: 2023,
-              value: [1696, 2023],
+              defaultValue: [1696, 2023],
               marks: [
                 { value: 1696, label: '1696' },
                 { value: 1700, label: '1700' },
@@ -152,7 +152,7 @@
                 { value: 2023, label: '2023' },
               ],
               track: 'normal',
-              onChange: (dates) => {
+              onChangeCommitted: (dates) => {
                 mapViewer.layer
                   .getGeoviewLayer('historical-flood/0')
                   .setLayerFiltersDate(dates[0] + '-01-01', dates[1] + '-12-31');
@@ -170,13 +170,15 @@
           // get the slider position 2 dom element
           const sliderPosition2 = document.getElementsByClassName('slider-position2');
 
+          const defaultValue = 8;
+
           // Props for slider 1
           const propsSlider1 = {
             mapId: 'map1',
             id: 'UI1-slider1',
             min: 0,
             max: 18,
-            value: 8,
+            defaultValue: defaultValue,
             marks: [
               { value: 0, label: 'Min Level 0' },
               { value: 4, label: 'Level 4' },
@@ -197,14 +199,17 @@
           // set min max
           function setSliderMinMax() {
             // Update the react component from external call
-            root1 = createAndUpdateSliderComponent('UI1-slider1', { ...propsSlider1, min: 4, max: 12 }, root1);
+            root1 = createAndUpdateSliderComponent('UI1-slider1', { ...propsSlider1, min: 4, max: 12, defaultValue: defaultValue }, root1);
+            mapViewer.getView().animate({ zoom: defaultValue });
           }
           document.getElementById('sliderminmax').addEventListener('click', setSliderMinMax);
 
           // set values
           function setSliderValues() {
             // Update the react component from external call
-            root1 = createAndUpdateSliderComponent('UI1-slider1', { ...propsSlider1, min: 0, max: 20, value: 12 }, root1); // Math.floor(Math.random() * 2) + 4 <-- Helpful to test funky react stuff
+            const zoomLevel = 12;
+            root1 = createAndUpdateSliderComponent('UI1-slider1', { ...propsSlider1, min: 0, max: 20, defaultValue: zoomLevel }, root1); // Math.floor(Math.random() * 2) + 4 <-- Helpful to test funky react stuff
+            mapViewer.getView().animate({ zoom: zoomLevel });
           }
           document.getElementById('slidervalues').addEventListener('click', setSliderValues);
 
@@ -213,7 +218,7 @@
             id: 'UI1-slider2',
             min: 0,
             max: 18,
-            value: [5, 10],
+            defaultValue: [5, 10],
             marks: [
               { value: 0, label: 'Min Level 0' },
               { value: 2 },
