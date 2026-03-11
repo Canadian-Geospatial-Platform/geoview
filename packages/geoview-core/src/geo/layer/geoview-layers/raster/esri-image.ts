@@ -216,7 +216,7 @@ export class EsriImage extends AbstractGeoViewRaster {
       return new EsriImageLayerEntryConfig({
         geoviewLayerConfig: geoviewLayerConfig,
         layerId: `${layerEntry.index || layerEntry.id}`,
-        layerName: layerEntry.layerName,
+        ...(layerEntry.layerName && { layerName: `${layerEntry.layerName}` }),
       });
     });
 

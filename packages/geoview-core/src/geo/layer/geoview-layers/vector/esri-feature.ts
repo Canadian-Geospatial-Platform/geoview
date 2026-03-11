@@ -345,7 +345,7 @@ export class EsriFeature extends AbstractGeoViewVector {
       const layerEntryConfig = new EsriFeatureLayerEntryConfig({
         geoviewLayerConfig,
         layerId: `${layerEntry.index || layerEntry.id}`,
-        layerName: layerEntry.layerName,
+        ...(layerEntry.layerName && { layerName: `${layerEntry.layerName}` }),
       });
       return layerEntryConfig;
     });

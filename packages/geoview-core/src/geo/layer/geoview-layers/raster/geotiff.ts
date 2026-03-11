@@ -294,10 +294,8 @@ export class GeoTIFF extends AbstractGeoViewRaster {
       geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
         const layerEntryConfig = new GeoTIFFLayerEntryConfig({
           geoviewLayerConfig,
-          schemaTag: CONST_LAYER_TYPES.GEOTIFF,
-          entryType: CONST_LAYER_ENTRY_TYPES.RASTER_TILE,
           layerId: `${layerEntry.id}`,
-          layerName: `${layerEntry.layerName || layerEntry.id}`,
+          ...(layerEntry.layerName && { layerName: `${layerEntry.layerName}` }),
         });
         return layerEntryConfig;
       });

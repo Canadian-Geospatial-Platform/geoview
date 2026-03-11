@@ -980,9 +980,9 @@ export class WMS extends AbstractGeoViewRaster {
     if (isGroup) {
       // Create the group layer config object
       const groupLayer = new GroupLayerEntryConfig({
-        layerId: layerEntry.id,
-        layerName: layerEntry.layerName,
         geoviewLayerConfig,
+        layerId: layerEntry.id,
+        ...(layerEntry.layerName && { layerName: `${layerEntry.layerName}` }),
         listOfLayerEntryConfig: [], // will be populated below
       } as GroupLayerEntryConfigProps);
 
@@ -997,7 +997,7 @@ export class WMS extends AbstractGeoViewRaster {
     const layerEntryConfig: OgcWmsLayerEntryConfigProps = {
       geoviewLayerConfig,
       layerId: `${layerEntry.id}`,
-      layerName: layerEntry.layerName || `${layerEntry.id}`,
+      ...(layerEntry.layerName && { layerName: `${layerEntry.layerName}` }),
       source: {
         serverType,
       },

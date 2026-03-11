@@ -262,6 +262,7 @@ export class VectorTiles extends AbstractGeoViewRaster {
       const layerEntryConfig = new VectorTilesLayerEntryConfig({
         geoviewLayerConfig,
         layerId: `${layerEntry.id}`,
+        ...(layerEntry.layerName && { layerName: `${layerEntry.layerName}` }),
       });
       return layerEntryConfig;
     });

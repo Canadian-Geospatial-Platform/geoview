@@ -380,8 +380,8 @@ export class WMTS extends AbstractGeoViewRaster {
       const layerEntryConfig = new OgcWmtsLayerEntryConfig({
         geoviewLayerConfig,
         layerId: `${layerEntry.id}`,
-        tileMatrixSet: `${layerEntry.tileMatrixSet}`,
-        layerName: `${layerEntry.layerName || layerEntry.id}`,
+        ...(layerEntry.layerName && { layerName: `${layerEntry.layerName}` }),
+        tileMatrixSet: layerEntry.tileMatrixSet,
       });
       return layerEntryConfig;
     });
