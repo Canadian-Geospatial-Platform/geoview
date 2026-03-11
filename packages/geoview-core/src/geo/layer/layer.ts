@@ -1,6 +1,7 @@
 import type BaseLayer from 'ol/layer/Base';
 import type { Extent } from 'ol/extent';
 import type { GeoJSONObject } from 'ol/format/GeoJSON';
+import type { FitOptions } from 'ol/View';
 
 import { GeoCore } from '@/api/config/geocore';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
@@ -1321,6 +1322,18 @@ export class LayerApi {
 
     // Return the final bounds
     return boundsUnion;
+  }
+
+  /**
+   * Zoom to extents of a layer.
+   *
+   * @param layerPath - The path of the layer to zoom to.
+   * @param fitOptions - Optional fit options for zooming.
+   * @throws {NoBoundsError} When the layer doesn't have bounds.
+   */
+  zoomToLayerExtent(layerPath: string, fitOptions?: FitOptions): Promise<void> {
+    // Redirect to the map viewer function
+    return MapEventProcessor.zoomToLayerExtent(this.getMapId(), layerPath, fitOptions);
   }
 
   /**

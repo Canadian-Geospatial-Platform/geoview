@@ -366,6 +366,8 @@ export type TypeLayerControls = {
   visibility?: boolean;
   /** Is zoom available for layer. Default = true */
   zoom?: boolean;
+  /** Is visible scale control available for layer. Default = false */
+  visibleScale?: boolean;
 };
 
 /** Initial settings for layer states. */

@@ -563,8 +563,11 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const { layerPath } = legendResultSetEntry;
     const layerPathNodes = layerPath.split('/');
 
-    const setLayerControls = (layerConfig: ConfigBaseClass, isChild: boolean = false): TypeLayerControls => {
+    const setLayerControls = (layerConfig: ConfigBaseClass, isChild: boolean = false, layer?: AbstractBaseGVLayer): TypeLayerControls => {
       const removeDefault = isChild ? MapEventProcessor.getGeoViewMapConfig(mapId)?.globalSettings?.canRemoveSublayers !== false : true;
+
+      // Check if the layer has a minZoom or maxZoom defined, so we know if it needs the visible scale button.
+      const visibleScale: boolean = Number.isFinite(layer?.getMinZoom()) || Number.isFinite(layer?.getMaxZoom());
 
       // Get the initial settings
       const initialSettings = layerConfig.getInitialSettings();
@@ -579,6 +582,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
         table: initialSettings?.controls?.table ?? true, // default: true
         visibility: initialSettings?.controls?.visibility ?? true, // default: true
         zoom: initialSettings?.controls?.zoom ?? true, // default: true
+        visibleScale, // default: false
       };
     };
 
@@ -660,7 +664,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           items = GeoUtilities.getLayerItemsFromIcons(legendResultSetEntry.data.type, icons);
         }
 
-        const controls: TypeLayerControls = setLayerControls(layerConfig, currentLevel > 2);
+        const controls: TypeLayerControls = setLayerControls(layerConfig, currentLevel > 2, layer);
 
         // Get the schema tag
         const schemaTag = legendResultSetEntry.data?.type ?? layerConfig.getSchemaTag();

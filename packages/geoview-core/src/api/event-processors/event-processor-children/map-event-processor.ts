@@ -69,7 +69,7 @@ import { getAppCrosshairsActive } from '@/core/stores/store-interface-and-intial
 import type { TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 
-import { InvalidExtentError, PluginError } from '@/core/exceptions/geoview-exceptions';
+import { InvalidExtentError, NoBoundsError, PluginError } from '@/core/exceptions/geoview-exceptions';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
@@ -1392,6 +1392,29 @@ export class MapEventProcessor extends AbstractEventProcessor {
         // Log error
         logger.logPromiseFailed('in getBounds in MapEventProcessor.zoomToLayerVisibleScale', error);
       });
+  }
+
+  /**
+   * Zoom to extents of a layer.
+   *
+   * @param mapId - ID of map to zoom on
+   * @param layerPath - The path of the layer to zoom to.
+   * @throws {NoBoundsError} When the layer doesn't have bounds.
+   */
+  static zoomToLayerExtent(mapId: string, layerPath: string, fitOptions?: FitOptions): Promise<void> {
+    // Define some zoom options
+    const options: FitOptions = fitOptions ?? { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
+
+    // Get the layer bounds
+    const bounds = LegendEventProcessor.getLayerBounds(mapId, layerPath);
+
+    // If found
+    if (bounds) {
+      return MapEventProcessor.zoomToExtent(mapId, bounds, options);
+    }
+
+    // Failed
+    throw new NoBoundsError(layerPath);
   }
 
   /**

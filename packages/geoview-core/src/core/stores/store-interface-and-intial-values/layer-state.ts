@@ -1,6 +1,5 @@
 import { useStore } from 'zustand';
 
-import type { FitOptions } from 'ol/View';
 import type { Extent } from 'ol/extent';
 
 import { useGeoViewStore } from '@/core/stores/stores-managers';
@@ -11,14 +10,12 @@ import type { TypeFeatureInfoEntryPartial, TypeLayerStyleConfig, TypeResultSet, 
 import { DateMgt, type TemporalMode, type TimeDimension, type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type { TypeGeoviewLayerType, TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-import { OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import type { TypeVectorLayerStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { LayerNotEsriDynamicError } from '@/core/exceptions/layer-exceptions';
-import { NoBoundsError } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
 
 // #region INTERFACES & TYPES
@@ -303,22 +300,13 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
 
       /**
        * Zoom to extents of a layer.
-       * @param {string} layerPath - The path of the layer to zoom to.
+       *
+       * @param layerPath - The path of the layer to zoom to.
+       * @throws {NoBoundsError} When the layer doesn't have bounds.
        */
       zoomToLayerExtent: (layerPath: string): Promise<void> => {
-        // Define some zoom options
-        const options: FitOptions = { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
-
-        // Get the layer bounds
-        const bounds = LegendEventProcessor.getLayerBounds(get().mapId, layerPath);
-
-        // If found
-        if (bounds) {
-          return MapEventProcessor.zoomToExtent(get().mapId, bounds, options);
-        }
-
-        // Failed
-        throw new NoBoundsError(layerPath);
+        // Redirect
+        return MapEventProcessor.zoomToLayerExtent(get().mapId, layerPath);
       },
 
       zoomToLayerVisibleScale: (layerPath: string): void => {
