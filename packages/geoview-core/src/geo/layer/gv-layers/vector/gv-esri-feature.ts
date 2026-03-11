@@ -1,8 +1,6 @@
 import type VectorSource from 'ol/source/Vector';
 
 import type { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
-import type { codedValueType, rangeDomainType, TypeOutfieldsType } from '@/api/types/map-schema-types';
-import { EsriUtilities } from '@/geo/layer/geoview-layers/esri-layer-common';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 
 /**
@@ -34,30 +32,6 @@ export class GVEsriFeature extends AbstractGVVector {
   override getLayerConfig(): EsriFeatureLayerEntryConfig {
     // Call parent and cast
     return super.getLayerConfig() as EsriFeatureLayerEntryConfig;
-  }
-
-  /**
-   * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
-   * @param {string} fieldName - The field name for which we want to get the type.
-   * @returns {TypeOutfieldsType} The type of the field.
-   * @override
-   * @protected
-   */
-  protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
-    // Redirect
-    return EsriUtilities.esriGetFieldType(this.getLayerConfig(), fieldName);
-  }
-
-  /**
-   * Overrides the return of the domain of the specified field.
-   * @param {string} fieldName - The field name for which we want to get the domain.
-   * @returns {null | codedValueType | rangeDomainType} The domain of the field.
-   * @override
-   * @protected
-   */
-  protected override onGetFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
-    // Redirect
-    return EsriUtilities.esriGetFieldDomain(this.getLayerConfig(), fieldName);
   }
 
   // #endregion OVERRIDES

@@ -34,18 +34,6 @@ export class GVWFS extends AbstractGVVector {
     return super.getLayerConfig() as OgcWfsLayerEntryConfig;
   }
 
-  /**
-   * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
-   * @param {string} fieldName - The field name for which we want to get the type.
-   * @returns {TypeOutfieldsType} The type of the field.
-   * @override
-   * @protected
-   */
-  protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
-    // Redirect
-    return GVWFS.getFieldType(this.getLayerConfig().getLayerMetadata(), fieldName);
-  }
-
   // #endregion OVERRIDES
 
   // #region STATIC

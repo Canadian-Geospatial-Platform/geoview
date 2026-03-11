@@ -15,7 +15,7 @@ import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import { logger } from '@/core/utils/logger';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import type { TypeFeatureInfoResult, TypeOutfieldsType } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoResult } from '@/api/types/map-schema-types';
 import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { GVLayerUtilities } from '@/geo/layer/gv-layers/utils';
@@ -122,20 +122,6 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   override getLayerConfig(): VectorLayerEntryConfig {
     // Call parent and cast
     return super.getLayerConfig() as VectorLayerEntryConfig;
-  }
-
-  /**
-   * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
-   * @param {string} fieldName - The field name for which we want to get the type.
-   * @returns {TypeOutfieldsType} The type of the field or 'string' when undefined.
-   * @override
-   * @protected
-   */
-  protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
-    // By default, look into the layer metadata for information on the field types
-    const layerMetadata = this.getLayerConfig();
-    const fieldDefinitions = layerMetadata?.getOutfields()?.find((fieldDefinition) => fieldDefinition.name === fieldName);
-    return fieldDefinitions?.type || 'string';
   }
 
   /**

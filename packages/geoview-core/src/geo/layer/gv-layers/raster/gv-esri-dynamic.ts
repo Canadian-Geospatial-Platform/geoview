@@ -17,11 +17,8 @@ import type { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classe
 import type {
   TypeLayerStyleSettings,
   TypeFeatureInfoResult,
-  rangeDomainType,
-  codedValueType,
   TypeLayerStyleConfig,
   TypeLayerStyleConfigInfo,
-  TypeOutfieldsType,
   TypeValidMapProjectionCodes,
   TypeIconSymbolVectorConfig,
   TypeFeatureInfoEntryPartial,
@@ -284,30 +281,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
   override getHitTolerance(): number {
     // Override the hit tolerance for a GVEsriDynamic layer
     return GVEsriDynamic.DEFAULT_HIT_TOLERANCE;
-  }
-
-  /**
-   * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
-   * @param {string} fieldName - The field name for which we want to get the type.
-   * @returns {TypeOutfieldsType} The type of the field.
-   * @override
-   * @protected
-   */
-  protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
-    // Redirect
-    return EsriUtilities.esriGetFieldType(this.getLayerConfig(), fieldName);
-  }
-
-  /**
-   * Overrides the return of the domain of the specified field.
-   * @param {string} fieldName - The field name for which we want to get the domain.
-   * @returns {null | codedValueType | rangeDomainType} The domain of the field.
-   * @override
-   * @protected
-   */
-  protected override onGetFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
-    // Redirect
-    return EsriUtilities.esriGetFieldDomain(this.getLayerConfig(), fieldName);
   }
 
   /**
