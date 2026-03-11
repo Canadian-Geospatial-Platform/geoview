@@ -64,10 +64,10 @@ import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 
 /** The possible filters for numeric columns */
 const NUMERIC_FIELD_FILTERS = [
+  'between', // The first one listed here is the default
+  'betweenInclusive',
   'equals',
   'notEquals',
-  'between',
-  'betweenInclusive',
   'lessThan',
   'greaterThan',
   'lessThanOrEqualTo',
