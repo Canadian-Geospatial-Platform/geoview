@@ -1209,12 +1209,16 @@ export interface TypeMetadataEsriImage {
 
   mosaicDatasetInfo?: TypeMetadataEsriMosaicDatasetInfo;
 
-  allowedMosaicMethods?: string[];
+  allowedMosaicMethods?: string;
   defaultMosaicMethod?: string;
+  sortField?: string;
+  sortValue?: string;
+  sortAscending?: boolean;
+  mosaicOperator?: string;
 
   allowedCompressionMethods?: string[];
 
-  rasterFunctionInfos?: TypeMetadataEsriRasterFunctionInfo[];
+  rasterFunctionInfos?: TypeMetadataEsriRasterFunctionInfos[];
 
   defaultResamplingMethod?: string;
 }

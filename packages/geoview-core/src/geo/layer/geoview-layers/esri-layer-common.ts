@@ -389,8 +389,8 @@ export class EsriUtilities {
 
     // For ESRI Image layers, extract and store mosaic rule from metadata
     if (layerConfig instanceof EsriImageLayerEntryConfig) {
-      this.#processImageLayerMosaicRule(layerConfig, responseJson);
-      this.#processImageLayerDefaultRasterFunction(layerConfig, responseJson);
+      this.#processImageLayerMosaicRule(layerConfig, layerMetadata as TypeMetadataEsriImage);
+      this.#processImageLayerDefaultRasterFunction(layerConfig, layerMetadata as TypeMetadataEsriImage);
     }
 
     // The following line allow the type ascention of the type guard functions on the second line below
@@ -561,12 +561,12 @@ export class EsriUtilities {
   /**
    * Processes ESRI Image Server metadata to set the default raster function if one wasn't configured.
    * The first non-"None" raster function is used as the default.
-   * @param {EsriImageLayerEntryConfig} layerConfig - The ESRI Image layer configuration.
-   * @param {TypeLayerMetadataEsri} metadata - The service metadata response.
+   * @param layerConfig - The ESRI Image layer configuration.
+   * @param metadata - The service metadata response.
    * @private
    * @static
    */
-  static #processImageLayerDefaultRasterFunction(layerConfig: EsriImageLayerEntryConfig, metadata: TypeLayerMetadataEsri): void {
+  static #processImageLayerDefaultRasterFunction(layerConfig: EsriImageLayerEntryConfig, metadata: TypeMetadataEsriImage): void {
     // Skip if user already configured a raster function
     if (layerConfig.getInitialRasterFunction()) return;
 
@@ -585,12 +585,12 @@ export class EsriUtilities {
   /**
    * Processes ESRI Image Server metadata to extract default mosaic rule parameters.
    * Stores the mosaic rule in the layer config for use during source creation and querying.
-   * @param {EsriImageLayerEntryConfig} layerConfig - The ESRI Image layer configuration.
-   * @param {TypeLayerMetadataEsri} metadata - The service metadata response.
+   * @param layerConfig - The ESRI Image layer configuration.
+   * @param metadata - The service metadata response.
    * @private
    * @static
    */
-  static #processImageLayerMosaicRule(layerConfig: EsriImageLayerEntryConfig, metadata: TypeLayerMetadataEsri): void {
+  static #processImageLayerMosaicRule(layerConfig: EsriImageLayerEntryConfig, metadata: TypeMetadataEsriImage): void {
     // Check if metadata has default mosaic settings
     if (!metadata.defaultMosaicMethod) return;
 

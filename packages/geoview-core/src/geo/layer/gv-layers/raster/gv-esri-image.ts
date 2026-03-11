@@ -25,14 +25,14 @@ import type {
   TypeLayerStyleSettings,
   TypeOutfieldsType,
 } from '@/api/types/map-schema-types';
-import { CONST_LAYER_TYPES, type TypeLayerMetadataEsri } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { GeometryJson } from '@/geo/layer/gv-layers/utils';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
-import type { TypeMetadataEsriRasterFunctionInfos, TypeMosaicRule } from '@/api/types/layer-schema-types';
+import type { TypeMetadataEsriImage, TypeMetadataEsriRasterFunctionInfos, TypeMosaicRule } from '@/api/types/layer-schema-types';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import type { TemporalMode } from '@/index';
 
@@ -405,7 +405,7 @@ export class GVEsriImage extends AbstractGVRaster {
     }
 
     // Check catalog item fields from metadata
-    const metadata = this.getLayerConfig().getServiceMetadata() as TypeLayerMetadataEsri;
+    const metadata = this.getLayerConfig().getServiceMetadata() as TypeMetadataEsriImage;
 
     if (metadata?.fields) {
       const field = metadata.fields.find((f) => f.name.toLowerCase() === lowerFieldName);
@@ -441,7 +441,7 @@ export class GVEsriImage extends AbstractGVRaster {
    */
   protected override onGetFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
     // Get metadata
-    const metadata = this.getLayerConfig().getServiceMetadata() as TypeLayerMetadataEsri;
+    const metadata = this.getLayerConfig().getServiceMetadata() as TypeMetadataEsriImage;
 
     // If no fields in metadata, return null
     if (!metadata?.fields) return null;
