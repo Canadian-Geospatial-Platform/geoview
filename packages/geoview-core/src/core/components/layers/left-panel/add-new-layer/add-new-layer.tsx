@@ -761,18 +761,35 @@ export function AddNewLayer(): JSX.Element {
           try {
             const check = await validateAndPingUrl(layerURL);
             logger.logWarning('URL validation check', check);
-            setStepButtonEnabled(check.isValid && check.isReachable);
+            const isOk = check.isValid && check.isReachable;
+            setStepButtonEnabled(isOk);
+            if (!isOk && check.error) {
+              addMessage('error', 'layers.errorUrlUnreachable', [], false);
+            } else if (!isOk && !check.isValid) {
+              addMessage('error', 'layers.errorUrlInvalid', [], false);
+            }
           } finally {
             setIsLoading(false);
           }
         } else {
           setStepButtonEnabled(false);
+          if (layerURL.trim() !== '') {
+            // Input isn't a blob, valid UUID, or HTTPS URL — determine what the user likely intended
+            const trimmedUrl = layerURL.trim();
+            if (!isValidUUID(trimmedUrl) && !trimmedUrl.includes('.') && !trimmedUrl.includes('/')) {
+              // No dots or slashes means it's not a URL — likely a malformed UUID
+              addMessage('error', 'layers.errorUrlInvalidUUID', [], false);
+            } else {
+              addMessage('error', 'layers.errorUrlHttps', [], false);
+            }
+          }
         }
       };
 
       validateUrl().catch((error: unknown) => {
         logger.logError('URL validation failed', error);
         setStepButtonEnabled(false);
+        addMessage('error', 'layers.errorUrlUnreachable', [], false);
       });
     }
     if (activeStep === 1) {
@@ -781,7 +798,7 @@ export function AddNewLayer(): JSX.Element {
     }
     if (activeStep === 2 && layerIdsToAdd.length > 0) setStepButtonEnabled(true);
     if (activeStep === 2 && !layerIdsToAdd.length) setStepButtonEnabled(false);
-  }, [layerURL, activeStep, layerIdsToAdd, layerType]);
+  }, [layerURL, activeStep, layerIdsToAdd, layerType, addMessage]);
 
   useEffect(() => {
     if (activeStep === 1) {

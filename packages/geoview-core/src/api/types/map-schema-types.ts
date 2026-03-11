@@ -106,7 +106,6 @@ export type TypeFooterBarProps = {
 /** Supported app bar values. */
 export type TypeValidAppBarCoreProps =
   | 'geolocator'
-  | 'share'
   | 'export'
   | 'aoi-panel'
   | 'about-panel'

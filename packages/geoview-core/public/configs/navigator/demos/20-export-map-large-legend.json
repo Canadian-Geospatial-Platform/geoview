@@ -212,6 +212,11 @@
       "core": ["geolocator", "export", "guide", "details", "legend", "data-table", "layers"]
     }
   },
+  "footerBar": {
+    "tabs": {
+      "core": []
+    }
+  },
   "navBar": ["zoom", "fullscreen", "home", "location"],
   "components": ["north-arrow", "overview-map"],
   "corePackages": [],

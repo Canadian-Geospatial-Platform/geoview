@@ -15,15 +15,15 @@
   "overviewMap": {
     "hideOnZoom": 7
   },
-  "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select"],
+  "navBar": ["zoom", "rotation"],
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "legend", "details", "export"]
+      "core": ["geolocator"]
     }
   },
   "footerBar": {
     "tabs": {
-      "core": ["layers", "data-table"]
+      "core": []
     }
   },
   "corePackages": [],

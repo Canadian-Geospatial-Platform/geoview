@@ -432,6 +432,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       northArrowElement: mapState.northArrowElement,
       mapScale: mapState.scale,
       mapRotation: mapState.rotation,
+      currentProjection: mapState.currentProjection,
     };
   }
 
