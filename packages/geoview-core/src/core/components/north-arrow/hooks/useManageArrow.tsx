@@ -70,18 +70,18 @@ export const useManageArrow = (): ArrowReturn => {
       return { calculatedRotation: { angle: 0 }, calculatedOffset: 0 };
     }
 
-    // Early return if zoom level is smaller the 5 and map center is near central meridian (keep rotation to 0)
-    const mapCenterLongitude: number = Projection.transformCoordinates(mapCenterCoord, 'EPSG:3978', 'EPSG:4326')![0] as number;
-    if (mapZoom < 5 && Math.abs(CENTRAL_MERIDIAN - mapCenterLongitude) < 10) {
-      return { calculatedRotation: { angle: 0 }, calculatedOffset: offsetX };
-    }
-
-    // Handle Web Mercator Projection - simpler case first
+    // Handle Web Mercator Projection first - north is always up, only map rotation matters
     if (isWebMercator) {
       return {
         calculatedRotation: { angle: mapRotation * (180 / Math.PI) },
         calculatedOffset: offsetX,
       };
+    }
+
+    // Early return if zoom level is smaller than 5 and map center is near central meridian (keep rotation to 0)
+    const mapCenterLongitude: number = Projection.transformCoordinates(mapCenterCoord, 'EPSG:3978', 'EPSG:4326')![0] as number;
+    if (mapZoom < 5 && Math.abs(CENTRAL_MERIDIAN - mapCenterLongitude) < 10) {
+      return { calculatedRotation: { angle: 0 }, calculatedOffset: offsetX };
     }
 
     // Early return if north is visible

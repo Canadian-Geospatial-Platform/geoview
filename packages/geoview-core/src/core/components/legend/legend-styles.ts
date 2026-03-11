@@ -213,5 +213,9 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
     display: 'flex',
     flexDirection: 'row',
     flexWrap: 'wrap',
+    width: '100%',
+    '& .layerListItemButton': {
+      borderLeft: 'none !important',
+    },
   },
 });

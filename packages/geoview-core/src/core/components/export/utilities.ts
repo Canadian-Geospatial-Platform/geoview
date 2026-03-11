@@ -49,6 +49,7 @@ export type TypeMapStateForExportLayout = {
   northArrowElement: TypeNorthArrow;
   mapScale: TypeScaleInfo;
   mapRotation: number;
+  currentProjection: number;
 };
 
 export type NorthArrowSVG = {
@@ -835,7 +836,7 @@ export class ExportUtilities {
     // Get all needed data from store state
     const mapElement = AppEventProcessor.getGeoviewHTMLElement(mapId);
     const mapState = MapEventProcessor.getMapStateForExportLayout(mapId);
-    const { northArrow, northArrowElement, attribution, mapRotation, mapScale } = mapState;
+    const { northArrow, northArrowElement, attribution, mapRotation, mapScale, currentProjection } = mapState;
 
     // Get browser map dimensions from viewport element (not canvas, which changes size when rotated)
     const viewport = mapElement.getElementsByClassName('ol-viewport')[0] as HTMLElement;
@@ -858,6 +859,13 @@ export class ExportUtilities {
     const resultContext = resultCanvas.getContext('2d');
 
     if (!resultContext) throw new Error('Canvas context not available');
+
+    // Fill canvas with white background before drawing map layers.
+    // Canvas defaults to transparent, which becomes black when exported as JPEG (no alpha channel).
+    // This must be done here on the 2D context, not via CSS styles, because toDataURL() only captures
+    // painted pixel data and ignores any DOM/CSS background behind the canvas element.
+    resultContext.fillStyle = 'white';
+    resultContext.fillRect(0, 0, mapImageWidth, mapImageHeight);
 
     // GV IMPORTANT: Apply rotation transform to match browser display
     // GV.Cont Viewport dimensions stay constant (e.g., 800x400), rotation is applied via canvas transform
@@ -918,7 +926,11 @@ export class ExportUtilities {
 
     // Get rotation angle for north arrow
     const currentRotation = (mapRotation * 180) / Math.PI;
-    const rotationAngle = parseFloat(northArrowElement.degreeRotation) + currentRotation;
+    // For Web Mercator (3857), north is always up so only the map rotation matters.
+    // Add 180 to match the degreeRotation convention (180 = pointing north) used by renderNorthArrow which subtracts 180.
+    // For LCC (3978) and other projections, the bearing from the North Pole (degreeRotation) must be added.
+    const rotationAngle =
+      currentProjection === 3857 ? 180 + currentRotation : parseFloat(northArrowElement.degreeRotation) + currentRotation;
 
     // Generate north arrow SVG
     let northArrowSvgPaths;

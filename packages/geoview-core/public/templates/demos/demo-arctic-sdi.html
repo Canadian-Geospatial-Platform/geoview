@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Arctic SDI Demo - Canadian Geospatial Platform Viewer</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="msapplication-config" content="./img/browserconfig.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="msapplication-TileColor" content="#da532c" />
+    <meta name="theme-color" content="#ffffff" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto|Montserrat:200,300,400,900|Merriweather" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <div id="page-header"></div>
+    <div>
+      <div class="back-to-main">
+        <a href="./index.html?tab=specific-demos">← Back to Main</a>
+      </div>
+
+      <div class="demo-section">
+        <h4>Arctic SDI Demo</h4>
+        <p>Demonstration of Arctic Spatial Data Infrastructure (Arctic SDI) in GeoView</p>
+      </div>
+      <div class="demo-section">
+        <h4>Arctic SDI Demo</h4>
+        <p>Demonstration of Arctic Spatial Data Infrastructure (Arctic SDI) in GeoView</p>
+        <ul class="demo-list">
+          <li><a href="#HLYR1">1. Wetlands</a></li>
+          <li><a href="#HLYR2">2. Sea Ice Extent (1979-2016)</a></li>
+        </ul>
+      </div>
+    </div>
+    </div>
+
+    <div class="demo-section">
+      <h4 id="HLYR1">1. Wetlands</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div
+      id="map1"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'initialView': {
+              'zoomAndCenter': [3, [-110, 80]]
+            },
+            'projection': 3573
+          },
+          'basemapOptions': {
+            'basemapId': 'nogeom',
+            'shaded': false,
+            'labeled': false
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerType': 'geoCore',
+              'geoviewLayerId': '8b83fd58-5953-4b80-8009-94d44ff89844'
+            },
+            {
+              'geoviewLayerType': 'ogcWmts',
+              'geoviewLayerId': 'arctic-sdi-bm1',
+              'geoviewLayerName': 'arctic-sdi',
+              'useAsBasemap': true,
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'arctic_cascading',
+                  'tileMatrixSet': '3573',
+                  'source': {
+                    'extent': [-4889334.802955, -4889334.802955, 4889334.802955, 4889334.802955],
+                    'resolutionLevels': 11,
+                    'projection': 'EPSG:3573',
+                    'dataAccessPath': 'https://basemap.arctic-sdi.org/mapcache/wmts'
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['overview-map', 'north-arrow'],
+        'overviewMap': { 'hideOnZoom': 7 },
+        'navBar': ['zoom'],
+        'footerBar': {
+          'tabs': {
+            'core': ['layers', 'data-table']
+          }
+        },
+        'corePackages': [],
+        'theme': 'geo.ca',
+        'appBar': {
+          'tabs': {
+            'core': ['geolocator', 'legend', 'details', 'export']
+          }
+        }
+      }"
+    ></div>
+
+    <div class="demo-section">
+      <h4 id="HLYR2">2. Sea Ice Extent (1979-2016)</h4>
+      <a class="ref-link" href="#top">Top</a>
+    </div>
+    <div
+      id="map2"
+      class="geoview-map"
+      data-lang="en"
+      data-config="{
+        'map': {
+          'interaction': 'dynamic',
+          'viewSettings': {
+            'initialView': {
+              'zoomAndCenter': [3, [-110, 80]]
+            },
+            'projection': 3573
+          },
+          'basemapOptions': {
+            'basemapId': 'nogeom',
+            'shaded': false,
+            'labeled': false
+          },
+          'listOfGeoviewLayerConfig': [
+            {
+              'geoviewLayerId': 'seaice-1979',
+              'metadataAccessPath': 'https://geo.abds.is/geoserver/ows',
+              'geoviewLayerType': 'ogcWms',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'sambr:C2f4_average_sea-ice_extant_sept_1979',
+                  'layerName': 'Average September sea ice extent 1979'
+                }
+              ]
+            },
+            {
+              'geoviewLayerId': 'seaice-2016',
+              'metadataAccessPath': 'https://geo.abds.is/geoserver/ows',
+              'geoviewLayerType': 'ogcWms',
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'sambr:C2f4_average_sea-ice_extent_sept_2016',
+                  'layerName': 'Average September sea ice extent 2016'
+                }
+              ]
+            },
+            {
+              'geoviewLayerType': 'ogcWmts',
+              'geoviewLayerId': 'arctic-sdi-bm2',
+              'geoviewLayerName': 'arctic-sdi',
+              'useAsBasemap': true,
+              'listOfLayerEntryConfig': [
+                {
+                  'layerId': 'arctic_cascading',
+                  'tileMatrixSet': '3573',
+                  'source': {
+                    'extent': [-4889334.802955, -4889334.802955, 4889334.802955, 4889334.802955],
+                    'resolutionLevels': 11,
+                    'projection': 'EPSG:3573',
+                    'dataAccessPath': 'https://basemap.arctic-sdi.org/mapcache/wmts'
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        'components': ['overview-map', 'north-arrow'],
+        'overviewMap': { 'hideOnZoom': 7 },
+        'navBar': ['zoom'],
+        'footerBar': {
+          'tabs': {
+            'core': ['layers', 'data-table']
+          }
+        },
+        'corePackages': ['swiper'],
+        'theme': 'geo.ca',
+        'appBar': {
+          'tabs': {
+            'core': ['geolocator', 'custom-legend', 'details', 'export'],
+            'selectedTab': 'custom-legend'
+          }
+        },
+        'corePackagesConfig': [
+          {
+            'swiper': {
+              'orientation': 'vertical',
+              'keyboardOffset': 10,
+              'layers': ['seaice-1979/sambr:C2f4_average_sea-ice_extant_sept_1979']
+            }
+          },
+          {
+            'custom-legend': {
+              'isOpen': true,
+              'title': 'Average Pan-Arctic Sea Ice Extent (1979 to 2016)',
+              'legendList': [
+                {
+                  'type': 'header',
+                  'text': 'Instructions',
+                  'description': {
+                    'text': 'Move the vertical slider left to right to compare sea ice extent between 1979 and 2016.'
+                  },
+                  'fontSize': 14
+                },
+                {
+                  'type': 'header',
+                  'text': 'Sources',
+                  'description': {
+                    'text': 'Sea ice extent: Arctic Council Conservation of Arctic Flora and Fauna (CAFF) Working Group (https://www.caff.is/) AND Arctic SDI topographic basemap: Arctic SDI (https://arctic-sdi.org/)'
+                  },
+                  'fontSize': 14
+                },
+                {
+                  'type': 'layer',
+                  'layerPath': 'seaice-1979/sambr:C2f4_average_sea-ice_extant_sept_1979'
+                },
+                {
+                  'type': 'layer',
+                  'layerPath': 'seaice-2016/sambr:C2f4_average_sea-ice_extent_sept_2016'
+                }
+              ],
+              'version': '1.0'
+            }
+          }
+        ]
+      }"
+    ></div>
+
+    <script src="codedoc.js"></script>
+    <script>
+      insertPageHeader();
+
+      // initialize cgpv
+      cgpv.init();
+    </script>
+  </body>
+</html>

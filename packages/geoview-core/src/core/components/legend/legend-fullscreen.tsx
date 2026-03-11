@@ -276,7 +276,7 @@ export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onC
     <FullScreenDialog
       open={isOpen}
       onClose={onClose}
-      title={t('legend.title')}
+      title={`${t('legend.title')} - ${t('general.overview')}`}
       onExited={() => {
         // Use onExited callback to restore focus to the fullscreen button after the dialog exit animation completes
         fullScreenBtnRef.current?.focus();

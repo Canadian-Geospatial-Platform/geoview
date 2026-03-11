@@ -77,11 +77,12 @@ const LegendLayerHeader = memo(({ layerPath, tooltip, onExpandClick, sxClasses, 
         disableTypography
         secondary={showControls ? <SecondaryControls layerPath={layerPath} /> : undefined}
       />
-      {((layerChildren && layerChildren.length > 0) || (layerItems && layerItems.length > 1) || schemaTag === CONST_LAYER_TYPES.WMS) && (
-        <IconButton className="buttonOutline" onClick={onExpandClick} edge="end" size="small" aria-label={tooltip}>
-          {!isCollapsed ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-        </IconButton>
-      )}
+      {showControls &&
+        ((layerChildren && layerChildren.length > 0) || (layerItems && layerItems.length > 1) || schemaTag === CONST_LAYER_TYPES.WMS) && (
+          <IconButton className="buttonOutline" onClick={onExpandClick} edge="end" size="small" aria-label={tooltip}>
+            {!isCollapsed ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </IconButton>
+        )}
     </Box>
   );
 });

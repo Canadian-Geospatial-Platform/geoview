@@ -1463,13 +1463,12 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Gets the legend image of a layer.
-   * @param {OgcWmsLayerEntryConfig} layerConfig - The layer configuration.
-   * @param {string | undefined} chosenStyle - Style to get the legend image for.
-   * @returns {blob} A promise of an image blob
-   * @private
-   * @static
+   *
+   * @param layerConfig - The layer configuration.
+   * @param chosenStyle - Style to get the legend image for.
+   * @returns A promise of an image blob
    */
-  static #getLegendImage(layerConfig: OgcWmsLayerEntryConfig, chosenStyle?: string): Promise<string | ArrayBuffer | null> {
+  static async #getLegendImage(layerConfig: OgcWmsLayerEntryConfig, chosenStyle?: string): Promise<string | ArrayBuffer | null> {
     // Get the legend URL from the layer metadata
     let queryUrl = layerConfig.getLegendUrl(chosenStyle);
 
@@ -1495,8 +1494,8 @@ export class GVWMS extends AbstractGVRaster {
     }
 
     try {
-      // Fetch the image
-      return Fetch.fetchBlobImage(queryUrl);
+      // Fetch the image (must await so CORS/network errors are caught below)
+      return await Fetch.fetchBlobImage(queryUrl);
     } catch (error) {
       // Retry with proxy if it's a network error (e.g., CORS)
       if (error instanceof NetworkError) {
