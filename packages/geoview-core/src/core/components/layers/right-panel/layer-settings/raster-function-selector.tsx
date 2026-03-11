@@ -59,8 +59,10 @@ function RasterFunctionMenuItem({ info, isSelected, previewPromise, onSelect }: 
             sx={{
               position: 'relative',
               backgroundColor: 'transparent',
-              width: 'auto !important',
-              height: 'auto !important',
+            }}
+            sxCircular={{
+              width: '40px !important',
+              height: '40px !important',
             }}
           />
         </Box>
