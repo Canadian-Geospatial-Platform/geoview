@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
-import { CircularProgress } from '@mui/material';
-import { Menu, MenuItem, ListItemIcon, ListItemText, Box } from '@/ui';
+import { Menu, MenuItem, ListItemIcon, ListItemText, Box, CircularProgress } from '@/ui';
 import { ImageNotSupportedIcon } from '@/ui';
 import { getSxClasses } from './layer-settings-style';
 import {
@@ -54,8 +53,16 @@ function RasterFunctionMenuItem({ info, isSelected, previewPromise, onSelect }: 
     if (loading) {
       return (
         <Box sx={sxClasses.previewImageContainer}>
-          {/* Use MUI CircularProgress because UI CircularProgress styles are conflicting */}
-          <CircularProgress size={40} />
+          <CircularProgress
+            isLoaded={false}
+            size={24}
+            sx={{
+              position: 'relative',
+              backgroundColor: 'transparent',
+              width: 'auto !important',
+              height: 'auto !important',
+            }}
+          />
         </Box>
       );
     }
