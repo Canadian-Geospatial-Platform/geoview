@@ -26,7 +26,6 @@ import { Projection } from '@/geo/utils/projection';
 import { LayerInvalidFeatureInfoFormatWMSError, LayerInvalidLayerFilterError } from '@/core/exceptions/layer-exceptions';
 import { formatError, NetworkError, ResponseContentError } from '@/core/exceptions/core-exceptions';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import { GVWFS } from '@/geo/layer/gv-layers/vector/gv-wfs';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { WfsRenderer } from '@/geo/utils/renderer/wfs-renderer';
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
@@ -661,13 +660,11 @@ export class GVWMS extends AbstractGVRaster {
       wmsLayerConfig.getNameField(),
       wmsLayerConfig.getOutfields(),
       wmsLayerConfig.hasOutfieldsPK(),
-      undefined, // TODO: Support domains?
+      undefined,
       wmsLayerConfig.getLayerStyle(), // The styles as read from the WMS layer config (not WFS in case it was overridden in the WMS)
       wmsLayerConfig.getServiceDateFormat(),
       wmsLayerConfig.getServiceDateTimezone(),
       wmsLayerConfig.getServiceDateTemporalMode(),
-      (fieldName) => GVWFS.getFieldType(wfsLayerConfig.getLayerMetadata(), fieldName),
-      () => null,
       AbstractGVLayer.helperGetFieldValue
     );
 

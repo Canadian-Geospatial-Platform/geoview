@@ -22,8 +22,6 @@ import EventHelper from '@/api/events/event-helper';
 import type {
   TypeLayerStyleConfig,
   TypeFeatureInfoEntry,
-  codedValueType,
-  rangeDomainType,
   TypeLocation,
   QueryType,
   TypeStyleGeometry,
@@ -468,29 +466,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   }
 
   /**
-   * Overridable function to return the domain of the specified field or null if the field has no domain.
-   * @param {string} fieldName - The field name for which we want to get the domain.
-   * @returns {null | codedValueType | rangeDomainType} The domain of the field.
-   */
-  // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
-  protected onGetFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
-    // Log - REMOVED as it is trigger for every row of data table, just enable for debuggin purpose
-    // logger.logWarning(`getFieldDomain is not implemented for ${fieldName} on layer path ${this.getLayerPath()}`);
-    return null;
-  }
-
-  /**
-   * Overridable function to return the type of the specified field from the metadata. If the type can not be found, return 'string'.
-   * @param {string} fieldName - The field name for which we want to get the type.
-   * @returns {TypeOutfieldsType} The type of the field.
-   */
-  protected onGetFieldType(fieldName: string): TypeOutfieldsType {
-    // Log
-    logger.logWarning(`getFieldType is not implemented for ${fieldName} on layer path ${this.getLayerPath()}`);
-    return 'string';
-  }
-
-  /**
    * Overridable function set the style according to the fetched legend information
    * @param {TypeLegend} legend - The fetched legend information
    */
@@ -729,16 +704,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   getExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
     // Redirect
     return this.onGetExtentFromFeatures(objectIds, outProjection, outfield);
-  }
-
-  /**
-   * Gets the field type for the given field name.
-   * @param fieldName - The field name
-   * @returns The field type.
-   */
-  getFieldType(fieldName: string): TypeOutfieldsType {
-    // Redirect
-    return this.onGetFieldType(fieldName);
   }
 
   /**
@@ -1057,8 +1022,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       serviceDateFormat,
       serviceDateIANA,
       serviceDateTemporalMode,
-      this.getFieldType.bind(this),
-      this.onGetFieldDomain.bind(this),
       AbstractGVLayer.helperGetFieldValue
     );
   }
@@ -1733,8 +1696,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param {string | string[] | undefined} [inputFormat] - The format(s) to prioritize for string inputs. Defaults to an ISO-like format.
    * @param {TimeIANA | undefined} [inputTimezone] - The timezone IANA the dates are in.
    * @param {TemporalMode | undefined} [inputTemporalMode] - When `calendar`, treats the input as a calendar-date-only value (no timezones). When 'instant', treats the input as moment in time (timezones aware).
-   * @param {(fieldName: string) => TypeOutfieldsType} callbackGetFieldType - Callback that returns the field type for a given field name.
-   * @param {(fieldName: string) => codedValueType | rangeDomainType | null} callbackGetFieldDomain - Callback that returns the coded value or range domain for a given field name.
    * @param {GetFieldValueDelegate} callbackGetFieldValue - Callback that returns the value of a field for a feature, in the correct type.
    * @returns {TypeFeatureInfoEntry[]} Array of feature info entries representing each feature with enriched metadata.
    * @description
@@ -1752,16 +1713,12 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     inputFormat: string | string[] | undefined,
     inputTimezone: TimeIANA | undefined,
     inputTemporalMode: TemporalMode | undefined,
-    callbackGetFieldType: (fieldName: string) => TypeOutfieldsType,
-    callbackGetFieldDomain: (fieldName: string) => codedValueType | rangeDomainType | null,
     callbackGetFieldValue: GetFieldValueDelegate
   ): TypeFeatureInfoEntry[] {
     try {
       if (!features.length) return [];
 
       const aliasLookup = GVLayerUtilities.createAliasLookup(outFields);
-      const dictFieldDomains: Record<string, codedValueType | rangeDomainType | null> = {};
-      const dictFieldTypes: Record<string, TypeOutfieldsType> = {};
 
       let featureKeyCounter = 0;
       let fieldKeyCounter = 0;
@@ -1795,15 +1752,11 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
         fieldKeyCounter = this.#helperFeatureFields(
           feature,
           outFields,
-          dictFieldDomains,
-          dictFieldTypes,
           featureInfoEntry,
           fieldKeyCounter,
           inputFormat,
           inputTimezone,
           inputTemporalMode,
-          callbackGetFieldType,
-          callbackGetFieldDomain,
           callbackGetFieldValue
         );
         queryResult.push(featureInfoEntry);
@@ -1831,23 +1784,17 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * @param {string | string[] | undefined} [inputFormat] - The format(s) to prioritize for string inputs. Defaults to an ISO-like format.
    * @param {TimeIANA | undefined} inputTimezone - The timezone IANA the dates are in.
    * @param {TemporalMode | undefined} [inputTemporalMode] - When `calendar`, treats the input as a calendar-date-only value (no timezones). When 'instant', treats the input as moment in time (timezones aware).
-   * @param {(fieldName: string) => TypeOutfieldsType} callbackGetFieldType - Callback function that returns the type of a given field.
-   * @param {(fieldName: string) => codedValueType | rangeDomainType | null} callbackGetFieldDomain - Callback function that returns the domain metadata for a given field.
    * @param {GetFieldValueDelegate} callbackGetFieldValue - Callback function that returns the value of a given field for the feature, typed according to the field type.
    * @returns {number} The next field key counter value after processing, to be used for further fields or subsequent features.
    */
   static #helperFeatureFields(
     feature: Feature,
     outfields: TypeOutfields[] | undefined,
-    dictFieldDomains: Record<string, codedValueType | rangeDomainType | null>,
-    dictFieldTypes: Record<string, TypeOutfieldsType>,
     featureInfoEntry: TypeFeatureInfoEntry,
     fieldKeyCounterStart: number,
     inputFormat: string | string[] | undefined,
     inputTimezone: TimeIANA | undefined,
     inputTemporalMode: TemporalMode | undefined,
-    callbackGetFieldType: (fieldName: string) => TypeOutfieldsType,
-    callbackGetFieldDomain: (fieldName: string) => codedValueType | rangeDomainType | null,
     callbackGetFieldValue: GetFieldValueDelegate
   ): number {
     const featureFields = feature.getKeys();
@@ -1861,46 +1808,22 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       // eslint-disable-next-line no-continue
       if (fieldValue && typeof fieldValue === 'object' && !Array.isArray(fieldValue)) continue;
 
-      if (!(fieldName in dictFieldDomains)) {
-        // eslint-disable-next-line no-param-reassign
-        dictFieldDomains[fieldName] = callbackGetFieldDomain(fieldName);
-      }
-      const fieldDomain = dictFieldDomains[fieldName];
-
-      if (!(fieldName in dictFieldTypes)) {
-        // eslint-disable-next-line no-param-reassign
-        dictFieldTypes[fieldName] = callbackGetFieldType(fieldName);
-      }
-      const fieldType = dictFieldTypes[fieldName];
-
+      // Find the field entry corresponding to the feature field
       const fieldEntry = outfields?.find((outfield) => outfield.name === fieldName || outfield.alias === fieldName);
 
-      // TODO: CHECK - What's the deal with the dictFieldTypes vs outfields and complexity here? Shouldn't outfields be basically same as dictFieldTypes? Simplify?
-
+      // If the field entry was found
       if (fieldEntry) {
+        // TODO: CHECK - Performance - Do we really need to attach all this on every feature info entries!?
+        // TO.DOCONT: It seems like a lot of duplication of information to carry for each individual entry
+
+        // Attach the fieldInfo property on the feature info entry
         // eslint-disable-next-line no-param-reassign
         featureInfoEntry.fieldInfo[fieldEntry.name] = {
           fieldKey: fieldKeyCounter++,
-          value: callbackGetFieldValue(
-            feature,
-            fieldEntry.name,
-            fieldEntry.type as 'string' | 'number' | 'date',
-            inputFormat,
-            inputTimezone,
-            inputTemporalMode
-          ),
+          value: callbackGetFieldValue(feature, fieldEntry.name, fieldEntry.type, inputFormat, inputTimezone, inputTemporalMode),
           dataType: fieldEntry.type,
           alias: fieldEntry.alias,
-          domain: fieldDomain,
-        };
-      } else if (!outfields) {
-        // eslint-disable-next-line no-param-reassign
-        featureInfoEntry.fieldInfo[fieldName] = {
-          fieldKey: fieldKeyCounter++,
-          value: callbackGetFieldValue(feature, fieldName, fieldType, inputFormat, inputTimezone, inputTemporalMode),
-          dataType: fieldType,
-          alias: fieldName,
-          domain: fieldDomain,
+          domain: fieldEntry.domain ?? null,
         };
       }
     }
