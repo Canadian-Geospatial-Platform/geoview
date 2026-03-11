@@ -15,6 +15,7 @@ export interface CircularProgressPropsExtend extends CircularProgressProps {
   isLoaded: boolean;
   style?: CSSProperties;
   sx?: SxProps<Theme>;
+  sxCircular?: SxProps<Theme>;
 }
 
 /**
@@ -62,17 +63,19 @@ function CircularProgressUI(props: CircularProgressPropsExtend): JSX.Element {
   logger.logTraceRenderDetailed('ui/circular-progress/circular-progress');
 
   // Get constant from props
-  const { style = {}, isLoaded, sx = {}, ...rest } = props;
+  const { style = {}, isLoaded, sx = {}, sxCircular = {}, ...rest } = props;
 
   // Hook
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   const sxMerged = { ...sxClasses.loading, ...sx };
+  const sxCircularMerged = { ...sxClasses.progress, ...sxCircular };
+
   return (
     <Fade in={!isLoaded} timeout={{ enter: 0, exit: theme.transitions.duration.splash }} mountOnEnter unmountOnExit>
       <Box sx={sxMerged} style={{ ...style }}>
-        <MaterialCircularProgress sx={sxClasses.progress} {...rest} />
+        <MaterialCircularProgress sx={sxCircularMerged} {...rest} />
       </Box>
     </Fade>
   );
