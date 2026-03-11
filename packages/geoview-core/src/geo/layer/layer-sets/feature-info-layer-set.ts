@@ -3,7 +3,7 @@ import { AppEventProcessor } from '@/api/event-processors/event-processor-childr
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
-import type { QueryType, TypeFeatureInfoEntry, TypeFeatureInfoResult, TypeResultSet } from '@/api/types/map-schema-types';
+import type { QueryType, TypeFeatureInfoResult, TypeResultSet } from '@/api/types/map-schema-types';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractLayerSet, type PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { GVKML } from '@/geo/layer/gv-layers/vector/gv-kml';
@@ -219,11 +219,6 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
             AbstractLayerSet.alignRecordsWithOutFields(layerConfig, arrayOfRecords);
           }
 
-          // ESRI Image layers have created fields and incorrect date field types, so we have to format them separately
-          if (layer instanceof GVEsriImage) {
-            FeatureInfoLayerSet.formatEsriImageRecords(arrayOfRecords);
-          }
-
           // Filter out unsymbolized features if the showUnsymbolizedFeatures config is false
           // GV: KML and ESRI Image is excluded as they currently have no symbology.
           if (
@@ -297,45 +292,6 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   #propagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry): void {
     // Propagate
     FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.getMapId(), resultSetEntry);
-  }
-
-  /**
-   * Makes ESRI Image layers date fields actually Date objects and resolve domain values
-   * @param {TypeFeatureInfoEntry[]} records - The array of feature info records to format
-   */
-  static formatEsriImageRecords(records: TypeFeatureInfoEntry[]): void {
-    // Process each record
-    records.forEach((record) => {
-      // Process each field in the record
-      Object.keys(record.fieldInfo).forEach((fieldName) => {
-        const field = record.fieldInfo[fieldName];
-        if (!field) return;
-
-        // Resolve domain values for catalog item fields (not for PixelValue, R/G/B/A, Name)
-        // These are the dynamic fields from the catalog items
-        const isSpecialField = ['PixelValue', 'R', 'G', 'B', 'A'].includes(fieldName);
-        if (!isSpecialField && field.domain) {
-          // Resolve the domain value
-          let resolvedValue: string | number | undefined;
-          if (field.domain.type === 'codedValue' && field.value !== undefined) {
-            resolvedValue = field.domain.codedValues?.find((cv) => cv.code === field.value)?.name;
-          }
-
-          if (resolvedValue !== null) {
-            field.value = resolvedValue;
-          }
-        }
-
-        // If it's a date field, format it as a Date
-        if (field.dataType === 'date' && field.value) {
-          if (typeof field.value === 'number') {
-            field.value = new Date(field.value);
-          } else if (typeof field.value === 'string') {
-            field.value = new Date(field.value);
-          }
-        }
-      });
-    });
   }
 
   /**
