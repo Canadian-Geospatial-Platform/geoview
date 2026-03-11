@@ -721,7 +721,7 @@ export class WFS extends AbstractGeoViewVector {
       const props = {
         geoviewLayerConfig,
         layerId: `${layerEntry.id}`,
-        layerName: layerEntry.layerName || geoviewLayerName || `${layerEntry.id}`,
+        ...(layerEntry.layerName && { layerName: `${layerEntry.layerName}` }),
         source: {
           strategy,
         },

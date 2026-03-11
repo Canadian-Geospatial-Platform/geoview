@@ -46,7 +46,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     super(olSource, layerConfig);
 
     // Get the style label in case we need it later
-    const label = layerConfig.getLayerName() || layerConfig.layerId;
+    const label = layerConfig.getLayerNameCascade();
 
     // Create the vector layer options.
     const layerOptions: VectorLayerOptions<VectorSource<Feature<Geometry>>> = {

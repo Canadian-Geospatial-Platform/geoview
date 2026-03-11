@@ -186,6 +186,7 @@ export class ImageStatic extends AbstractGeoViewRaster {
       const layerEntryConfig = new ImageStaticLayerEntryConfig({
         geoviewLayerConfig,
         layerId: `${layerEntry.id}`,
+        ...(layerEntry.layerName && { layerName: `${layerEntry.layerName}` }),
         source: {
           extent: layerEntry.source.extent,
           projection: layerEntry.source.projection,

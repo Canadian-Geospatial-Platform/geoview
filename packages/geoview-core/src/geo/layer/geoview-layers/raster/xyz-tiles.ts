@@ -271,7 +271,7 @@ export class XYZTiles extends AbstractGeoViewRaster {
       const layerEntryConfig = new XYZTilesLayerEntryConfig({
         geoviewLayerConfig,
         layerId: `${layerEntry.id}`,
-        layerName: `${layerEntry.layerName || layerEntry.id}`,
+        ...(layerEntry.layerName && { layerName: `${layerEntry.layerName}` }),
       });
       return layerEntryConfig;
     });

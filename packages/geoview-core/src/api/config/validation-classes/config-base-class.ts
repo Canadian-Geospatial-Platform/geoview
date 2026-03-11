@@ -1011,7 +1011,7 @@ export abstract class ConfigBaseClass {
       return layerConfig.getLayerName();
     }
 
-    return (layerConfig as ConfigBaseClassProps)?.layerName || (layerConfig as TypeGeoviewLayerConfig).geoviewLayerName;
+    return (layerConfig as ConfigBaseClassProps)?.layerName;
   }
 
   /**

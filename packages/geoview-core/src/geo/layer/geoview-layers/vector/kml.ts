@@ -5,7 +5,7 @@ import type { Projection as OLProjection } from 'ol/proj';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import type { TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
-import { CONST_LAYER_ENTRY_TYPES, CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { KmlLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/kml-layer-entry-config';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { GVKML } from '@/geo/layer/gv-layers/vector/gv-kml';
@@ -203,10 +203,8 @@ export class KML extends AbstractGeoViewVector {
     geoviewLayerConfig.listOfLayerEntryConfig = layerEntries.map((layerEntry) => {
       const layerEntryConfig = new KmlLayerEntryConfig({
         geoviewLayerConfig,
-        schemaTag: CONST_LAYER_TYPES.KML,
-        entryType: CONST_LAYER_ENTRY_TYPES.VECTOR,
         layerId: `${layerEntry.id}`,
-        layerName: `${layerEntry.layerName || (layerEntries.length === 1 ? geoviewLayerName : layerEntry.id)}`,
+        ...(layerEntry.layerName && { layerName: `${layerEntry.layerName}` }),
         source: {
           dataAccessPath: layerEntry.source?.dataAccessPath,
         },

@@ -388,7 +388,7 @@ export class OgcFeature extends AbstractGeoViewVector {
       const layerEntryConfig = new OgcFeatureLayerEntryConfig({
         geoviewLayerConfig,
         layerId: `${layerEntry.id}`,
-        layerName: layerEntry.layerName || `${layerEntry.id}`,
+        ...(layerEntry.layerName && { layerName: `${layerEntry.layerName}` }),
       });
       return layerEntryConfig;
     });
