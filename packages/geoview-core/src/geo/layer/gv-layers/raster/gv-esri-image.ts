@@ -34,6 +34,7 @@ import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 import type { TypeMetadataEsriRasterFunctionInfos, TypeMosaicRule } from '@/api/types/layer-schema-types';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
+import type { TemporalMode } from '@/index';
 
 /**
  * Manages an Esri Image layer.
@@ -345,7 +346,7 @@ export class GVEsriImage extends AbstractGVRaster {
     const properties: Record<string, unknown> = {
       // Put pixel value first so it appears at top of details
       PixelValue: identifyJsonResponse.value,
-      Name: identifyJsonResponse.name || 'Pixel',
+      PixelName: identifyJsonResponse.name || 'Pixel',
     };
 
     // Determine the legend class index from processedValues
@@ -373,7 +374,13 @@ export class GVEsriImage extends AbstractGVRaster {
     feature.set('classIndex', classIndex);
 
     // Format and return the result
-    featureInfoResult.results = this.formatFeatureInfoResult([feature]);
+    featureInfoResult.results = this.formatFeatureInfoResult(
+      [feature],
+      layerConfig,
+      layerConfig.getServiceDateFormat(),
+      layerConfig.getServiceDateTimezone(),
+      layerConfig.getServiceDateTemporalMode()
+    );
     return featureInfoResult;
   }
 
@@ -453,117 +460,143 @@ export class GVEsriImage extends AbstractGVRaster {
    * @override
    * @protected
    */
-  protected override formatFeatureInfoResult(features: Feature[]): TypeFeatureInfoEntry[] {
-    // Get the legend and config from the layer
-    const legend = this.getLegend();
-    // Get class index from feature property set in getFeatureInfoAtLonLat
-    const classIndex = features[0]?.get('classIndex');
+  protected override formatFeatureInfoResult(
+    features: Feature[],
+    layerConfig: EsriImageLayerEntryConfig,
+    serviceDateFormat: string | undefined,
+    serviceDateIANA: string | undefined,
+    serviceDateTemporalMode: TemporalMode | undefined
+  ): TypeFeatureInfoEntry[] {
+    // Extract ESRI Image-specific properties BEFORE parent processing
+    const esriImageData = features.map((feature) => ({
+      pixelValue: feature.get('PixelValue'),
+      pixelName: feature.get('PixelName'),
+      processedValue: feature.get('ProcessedValue'),
+      classIndex: feature.get('classIndex'),
+    }));
 
-    // Extract legend items from the style config
-    // For ESRI Image, the legend.styleConfig contains the Point symbols array
+    // Call parent to get base formatting
+    const baseResults = super.formatFeatureInfoResult(features, layerConfig, serviceDateFormat, serviceDateIANA, serviceDateTemporalMode);
+
+    // Get legend data for RGBA extraction and icon assignment
+    const legend = this.getLegend();
     const styleConfig = legend?.styleConfig;
     const legendSettings = styleConfig?.Point;
     const legendItems = legendSettings?.info;
 
-    // Access the canvas array for RGB extraction (legend.legend is the raw ESRI legend data)
-    // Type guard: check if legend.legend is an object (not HTMLCanvasElement) before accessing Point
+    // Access canvas array for RGBA extraction
     const legendCanvases =
       legend?.legend && typeof legend.legend === 'object' && !(legend.legend instanceof HTMLCanvasElement)
         ? legend.legend?.Point?.arrayOfCanvas
         : undefined;
 
-    return features.map((feature, featureId) => {
-      // Build field info from feature properties
-      const properties = feature.getProperties();
-      const fieldInfo: Record<string, TypeFieldEntry> = {};
+    // Enhance each result with ESRI Image-specific data
+    return baseResults.map((result, index) => {
+      const imageData = esriImageData[index];
+      const { classIndex } = imageData;
 
-      // Find the matching legend icon based on processedValue (0-indexed into the legend items array)
-      let featureIcon: string | undefined;
+      // Add feature icon if we have a matching legend item
       if (legendItems && Array.isArray(legendItems) && classIndex !== undefined && classIndex >= 0 && classIndex < legendItems.length) {
-        // Convert base64 src to data URI format if needed
         const iconSettings = legendItems[classIndex]?.settings as TypeIconSymbolVectorConfig;
         const iconSrc = iconSettings?.src;
-        featureIcon = iconSrc ? `data:image/png;base64,${iconSrc}` : undefined;
+        // eslint-disable-next-line no-param-reassign
+        result.featureIcon = iconSrc ? `data:image/png;base64,${iconSrc}` : undefined;
+      }
 
-        // Extract RGB values from the canvas if available
-        if (legendCanvases && Array.isArray(legendCanvases) && classIndex < legendCanvases.length) {
-          const canvas = legendCanvases[classIndex];
-          if (canvas instanceof HTMLCanvasElement) {
-            const ctx = canvas.getContext('2d');
-            if (ctx) {
-              // Get pixel data from center of canvas (5,5) to avoid border
-              const imageData = ctx.getImageData(5, 5, 1, 1);
-              const r = imageData.data[0];
-              const g = imageData.data[1];
-              const b = imageData.data[2];
-              const a = imageData.data[3];
+      // Build new fieldInfo with ESRI Image fields first
+      const newFieldInfo: Record<string, TypeFieldEntry> = {};
+      let fieldKey = 0;
 
-              // Add RGB values FIRST to fieldInfo
-              fieldInfo.R = {
-                fieldKey: 0,
-                value: r,
-                dataType: 'number',
-                domain: null,
-                alias: 'R',
-              };
-              fieldInfo.G = {
-                fieldKey: 1,
-                value: g,
-                dataType: 'number',
-                domain: null,
-                alias: 'G',
-              };
-              fieldInfo.B = {
-                fieldKey: 2,
-                value: b,
-                dataType: 'number',
-                domain: null,
-                alias: 'B',
-              };
-              fieldInfo.A = {
-                fieldKey: 3,
-                value: a,
-                dataType: 'number',
-                domain: null,
-                alias: 'A',
-              };
-            }
+      // Add RGBA values if available
+      if (legendCanvases && Array.isArray(legendCanvases) && classIndex !== undefined && classIndex < legendCanvases.length) {
+        const canvas = legendCanvases[classIndex];
+        if (canvas instanceof HTMLCanvasElement) {
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            const imageDataPixel = ctx.getImageData(5, 5, 1, 1);
+            const r = imageDataPixel.data[0];
+            const g = imageDataPixel.data[1];
+            const b = imageDataPixel.data[2];
+            const a = imageDataPixel.data[3];
+
+            newFieldInfo.R = {
+              fieldKey: fieldKey++,
+              value: r,
+              dataType: 'number',
+              domain: null,
+              alias: 'R',
+            };
+            newFieldInfo.G = {
+              fieldKey: fieldKey++,
+              value: g,
+              dataType: 'number',
+              domain: null,
+              alias: 'G',
+            };
+            newFieldInfo.B = {
+              fieldKey: fieldKey++,
+              value: b,
+              dataType: 'number',
+              domain: null,
+              alias: 'B',
+            };
+            newFieldInfo.A = {
+              fieldKey: fieldKey++,
+              value: a,
+              dataType: 'number',
+              domain: null,
+              alias: 'A',
+            };
           }
         }
       }
 
-      // Process each property as a field
-      Object.keys(properties).forEach((fieldName, fieldId) => {
-        // Skip geometry property
-        if (fieldName === 'geometry') return;
+      // Add pixel-specific fields
+      if (imageData.pixelValue !== undefined && imageData.pixelValue) {
+        newFieldInfo.PixelValue = {
+          fieldKey: fieldKey++,
+          value: imageData.pixelValue,
+          dataType: 'string',
+          domain: null,
+          alias: 'Pixel Value',
+        };
+      }
 
-        const value = properties[fieldName];
-        const fieldType = this.getFieldType(fieldName);
-        const domain = this.onGetFieldDomain(fieldName);
+      if (imageData.pixelName !== undefined && imageData.pixelName) {
+        newFieldInfo.PixelName = {
+          fieldKey: fieldKey++,
+          value: imageData.pixelName,
+          dataType: 'string',
+          domain: null,
+          alias: 'Pixel Name',
+        };
+      }
 
-        fieldInfo[fieldName] = {
-          fieldKey: fieldId + 4, // +4 to account for R,G,B,A fields added first
-          value,
-          dataType: fieldType,
-          domain,
-          alias: fieldName,
+      if (imageData.processedValue !== undefined && imageData.processedValue) {
+        newFieldInfo.ProcessedValue = {
+          fieldKey: fieldKey++,
+          value: imageData.processedValue,
+          dataType: 'string',
+          domain: null,
+          alias: 'Processed Value',
+        };
+      }
+
+      // Add existing fields from parent with updated keys
+      Object.entries(result.fieldInfo).forEach(([fieldName, fieldEntry]) => {
+        if (!fieldEntry) return;
+        newFieldInfo[fieldName] = {
+          ...fieldEntry,
+          fieldKey: fieldKey++,
         };
       });
 
-      const featureInfo: TypeFeatureInfoEntry = {
-        featureKey: featureId,
-        geoviewLayerType: CONST_LAYER_TYPES.ESRI_IMAGE,
-        layerPath: this.getLayerPath(),
-        featureIcon,
-        nameField: 'PixelValue',
-        extent: feature.getGeometry()?.getExtent(),
-        geometry: feature.getGeometry(),
-        fieldInfo,
-        feature,
-        uid: feature.getId()?.toString() || `${this.getLayerPath()}-${featureId}`, // Ensure uid exists
-        supportZoomTo: !!feature.getGeometry()?.getExtent(),
-      };
-      return featureInfo;
+      // eslint-disable-next-line no-param-reassign
+      result.fieldInfo = newFieldInfo;
+      // eslint-disable-next-line no-param-reassign
+      result.nameField = 'PixelValue';
+
+      return result;
     });
   }
 

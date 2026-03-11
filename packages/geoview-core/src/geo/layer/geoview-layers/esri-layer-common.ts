@@ -271,8 +271,7 @@ export class EsriUtilities {
 
     this.#commonProcessInitialSettings(layerConfig);
 
-    // GV Changed from 'layerConfig instanceof EsriImageLayerEntryConfig' to false. Two handles seems to work better for ESRI Image Layer
-    this.#commonProcessTimeDimension(layerConfig, responseJson.timeInfo, displayDateMode, false);
+    this.#commonProcessTimeDimension(layerConfig, responseJson.timeInfo, displayDateMode);
 
     return layerConfig;
   }
@@ -412,6 +411,8 @@ export class EsriUtilities {
   ): void {
     if (!esriTimeDimension?.timeExtent) return;
 
+    // TODO: Review the purpose of the singleHandle variable. It now always defaults to false and is used to set the defaultValues of the timeslider,
+    // TO.DOCONT: but the default values could be / should be overwritten by the config. Also, the defaultValues seem like the actual way to make the timeslider a single handle?
     // Create the time dimension
     layerConfig.setTimeDimension(DateMgt.createDimensionFromESRI(esriTimeDimension, displayDateMode, singleHandle));
   }
