@@ -79,14 +79,6 @@ export class EsriImageLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     return super.getLayerMetadata() as TypeMetadataEsriImage | undefined;
   }
 
-  /**
-   * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns The strongly-typed layer configuration specific to this layer entry config.
-   */
-  override getServiceMetadata(): TypeLayerMetadataEsri | undefined {
-    return super.getServiceMetadata() as TypeLayerMetadataEsri | undefined;
-  }
-
   // #endregion OVERRIDES
 
   // #region METHODS
