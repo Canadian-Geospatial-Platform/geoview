@@ -39,7 +39,7 @@ export interface ILayerState {
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
-    deleteLayer: (layerPath: string) => Promise<boolean>;
+    deleteLayer: (layerPath: string, undoWindowDuration: number) => Promise<boolean>;
     deleteLayerAbort: (layerPath: string) => void;
     getExtentFromFeatures: (layerPath: string, featureIds: number[], outfield?: string) => Promise<Extent>;
     queryLayerEsriDynamic: (layerPath: string, objectIDs: number[]) => Promise<TypeFeatureInfoEntryPartial[]>;
@@ -76,7 +76,7 @@ export interface ILayerState {
     setLegendLayers: (legendLayers: TypeLegendLayer[]) => void;
     setSelectedLayerPath: (layerPath: string | undefined) => void;
     setLayersAreLoading: (areLoading: boolean) => void;
-    setLayerDeletionProgressPercentage: (layerPath: string, progression: number | undefined) => void;
+    setLayerDeletionStartTime: (layerPath: string, startTime: number | undefined) => void;
   };
 }
 
@@ -132,9 +132,10 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       /**
        * Deletes a layer.
        * @param layerPath - The path of the layer to delete.
+       * @param undoWindowDuration - The duration to wait before finalizing the deletion, to allow for an undo by the user.
        */
-      deleteLayer: (layerPath: string): Promise<boolean> => {
-        return LegendEventProcessor.deleteLayerStartTimer(get().mapId, layerPath);
+      deleteLayer: (layerPath: string, undoWindowDuration: number): Promise<boolean> => {
+        return LegendEventProcessor.deleteLayerStartTimer(get().mapId, layerPath, undoWindowDuration);
       },
 
       /**
@@ -523,20 +524,20 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        * target layer and update it immutably, ensuring that the rest of the
        * `legendLayers` array remains unchanged.
        */
-      setLayerDeletionProgressPercentage: (layerPath: string, progression: number | undefined): void => {
+      setLayerDeletionStartTime: (layerPath: string, startTime: number | undefined): void => {
         set((state) => {
           // Create updated legendLayers immutably
           const updatedLegendLayers = helperUpdateLayerByPath(state.layerState.legendLayers, layerPath, (layer) => {
-            if (progression === undefined) {
-              // Remove deletionProgressPercentage immutably
+            if (startTime === undefined) {
+              // Remove deletionStartTime immutably
               // eslint-disable-next-line @typescript-eslint/no-unused-vars
-              const { deletionProgressPercentage, ...rest } = layer;
+              const { deletionStartTime, ...rest } = layer;
               return rest;
             }
 
             return {
               ...layer,
-              deletionProgressPercentage: progression,
+              deletionStartTime: startTime,
             };
           });
 
@@ -834,7 +835,7 @@ export const useLayerStatuses = (): Record<string, TypeLayerStatus> => {
   });
 };
 
-export const useLayerSelectorDeletionProgressPercentage = createLayerSelectorHook('deletionProgressPercentage');
+export const useLayerSelectorDeletionStartTime = createLayerSelectorHook('deletionStartTime');
 export const useLayerSelectorFilter = createLayerSelectorHook('layerFilter');
 export const useLayerSelectorFilterClass = createLayerSelectorHook('layerFilterClass');
 export const useLayerSelectorSchemaTag = createLayerSelectorHook('schemaTag');

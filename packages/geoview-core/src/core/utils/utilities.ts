@@ -1004,15 +1004,68 @@ export function stringify(str: unknown): unknown | string {
 // #region TIMING HELPERS
 
 /**
+ * Creates a delayed job which includes a promise that resolves after a specified timeout, with the ability to cancel or reject it manually.
+ *
+ * @param timeout - The number of milliseconds to wait before resolving the promise.
+ * @returns An object representing the delayed job, containing:
+ *   - `promise`: A Promise that resolves after the timeout (or immediately if canceled).
+ *   - `cancel()`: Cancels the timeout and immediately resolves the promise.
+ *   - `reject(reason)`: Cancels the timeout and rejects the promise with the given reason.
+ *   - `timeoutId`: The ID of the underlying setTimeout, useful for advanced control.
+ */
+export function doTimeout(timeout: number): DelayJob {
+  // Create a promise of the delay
+  let timeoutId: ReturnType<typeof setTimeout>;
+  let resolveFn: (value: DelayResult) => void;
+  let rejectFn: (reason?: unknown) => void;
+
+  let finished = false; // To prevent multiple resolutions/rejections
+  const promise = new Promise<DelayResult>((resolve, reject) => {
+    // Keep a reference to the resolve function
+    resolveFn = (result) => {
+      if (finished) return;
+      finished = true;
+      resolve(result);
+    };
+
+    // Keep a reference to the reject function
+    rejectFn = (reason) => {
+      if (finished) return;
+      finished = true;
+      reject(reason);
+    };
+
+    // Wait
+    timeoutId = setTimeout(() => resolveFn('timeout'), timeout);
+  });
+
+  // Return the promise and the timeoutId in case we want to abort it
+  return {
+    promise,
+    cancel: () => {
+      clearTimeout(timeoutId);
+      resolveFn('cancelled');
+    },
+    reject: (reason: unknown) => {
+      clearTimeout(timeoutId);
+      rejectFn(reason);
+    },
+    timeoutId: timeoutId!,
+  };
+}
+
+/**
  * Delay helper function.
  *
  * @param timeout - The number of milliseconds to wait for.
  * @returns A Promise which resolves when the delay timeout expires.
  */
 export function delay(timeout: number): Promise<void> {
-  return new Promise((resolve) => {
-    // Wait
-    setTimeout(resolve, timeout);
+  // Redirect
+  return doTimeout(timeout).promise.then((result) => {
+    if (result !== 'timeout') {
+      throw new Error('Delay was cancelled unexpectedly');
+    }
   });
 }
 
@@ -1033,59 +1086,57 @@ export function delay(timeout: number): Promise<void> {
  * is automatically cleared. If omitted, the interval runs until the callback stops it.
  * @param startImmediately - If `true`, the callback is invoked once immediately
  * before the interval is scheduled. Defaults to `false`.
- * @returns The interval timer ID returned by `setInterval`. This can be used with
- * `clearInterval` to manually stop the loop.
+ * @returns The job object containing the cancel function and interval ID.
  */
-
-export function doUntil<T>(
-  callback: (elapsed: number) => T,
-  intervalMs: number,
-  timeout?: number,
-  startImmediately = false
-): ReturnType<typeof setInterval> {
+export function doUntil<T>(callback: (elapsed: number) => T, intervalMs: number, timeout?: number, startImmediately = false): DoUntilJob {
   // Keep track of the start time
   const start = Date.now();
-  let done = false;
+
+  let stopped = false;
   let interval: ReturnType<typeof setInterval> | undefined = undefined;
 
-  // Helper to compute elapsed and call the callback
-  const tick = (): boolean => {
-    // If done, skip (protect against race conditions)
-    if (done) return true;
+  const cancel = (): void => {
+    if (stopped) return;
+    stopped = true;
+    clearInterval(interval);
+  };
 
-    // Check how long it's been running
+  const tick = (): boolean => {
+    if (stopped) return true;
+
     const elapsed = Date.now() - start;
 
-    // Stop if timeout reached
-    if (timeout !== undefined && elapsed >= timeout) {
-      done = true;
-      clearInterval(interval);
+    if (timeout && elapsed >= timeout) {
+      cancel();
       return true;
     }
 
-    // Callback
     const shouldStop = callback(elapsed);
 
-    // If clearing the interval
+    // Abort might have happened during callback
+    if (stopped) return true;
+
     if (shouldStop) {
-      done = true;
-      clearInterval(interval);
+      cancel();
       return true;
     }
 
     return false;
   };
 
-  // Start immediately if requested
-  if (startImmediately) {
-    tick();
+  if (startImmediately) tick();
+
+  // If stopped immediately, don't even interval it
+  if (!stopped) {
+    interval = setInterval(tick, intervalMs);
   }
 
-  // Create the interval using our tick callback
-  interval = setInterval(tick, intervalMs);
-
-  // Return the interval
-  return interval;
+  // Return the cancel function and interval ID for potential manual cleanup
+  return {
+    start,
+    cancel,
+    interval,
+  };
 }
 
 /**
@@ -1100,16 +1151,16 @@ export function doUntil<T>(
  * @param intervalMs - The interval duration in milliseconds.
  * @returns The interval timer, which can be cleared manually if needed.
  */
-export function doUntilPromise<T>(callback: () => T, promise: Promise<unknown>, intervalMs: number): ReturnType<typeof setInterval> {
+export function doUntilPromise<T>(callback: () => T, promise: Promise<unknown>, intervalMs: number): DoUntilJob {
   // Start a recurrent timer
-  const interval = doUntil(callback, intervalMs);
+  const job = doUntil(callback, intervalMs);
 
   // Disble eslint here, it should be caught by the creator of the promise
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
-  promise.finally(() => clearInterval(interval));
+  promise.finally(() => job.cancel());
 
   // Return the interval timer
-  return interval;
+  return job;
 }
 
 /**
@@ -1515,3 +1566,33 @@ export function normalizeDatacubeAccessPath(path: string): string {
   //TODO: extract to list of exceptions / normalizations?
   return path.toLowerCase().includes('datacube') ? path.replace('wrapper/ramp/ogc', 'wrapper/ogc').replace('/ows/', '/wrapper/ogc/') : path;
 }
+
+/** Job returned by the doWhen function */
+export type DelayJob = {
+  /** The promise representing the delay job */
+  promise: Promise<DelayResult>;
+
+  /** Cancels the delay job, resolving correctly */
+  cancel: () => void;
+
+  /** Rejects the delay job, throwing an error */
+  reject: (reason?: unknown) => void;
+
+  /** The ID of the timeout */
+  timeoutId: ReturnType<typeof setTimeout>;
+};
+
+/** Job result indicating if the delay timedout, good, or the job got cancelled */
+export type DelayResult = 'timeout' | 'cancelled';
+
+/** Job returned by the doUntil function */
+export type DoUntilJob = {
+  /** The start time of the job */
+  start: number;
+
+  /** Cancels the job */
+  cancel: () => void;
+
+  /** The ID of the interval */
+  interval?: ReturnType<typeof setInterval>;
+};

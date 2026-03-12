@@ -1,18 +1,10 @@
 import type { KeyboardEvent, MouseEvent } from 'react';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, CircularProgressBase, DeleteOutlineIcon, IconButton, UndoIcon } from '@/ui';
-import {
-  useLayerSelectorDeletionProgressPercentage,
-  useLayerStoreActions,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { logger } from '@/core/utils/logger';
 
-interface DeleteUndoButtonProps {
-  layerPath: string;
-  layerRemovable: boolean;
-  focusTargetIdAfterDelete?: string;
-}
+import { Box, CircularProgressBase, DeleteOutlineIcon, IconButton, UndoIcon } from '@/ui';
+import { useLayerSelectorDeletionStartTime, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { logger } from '@/core/utils/logger';
 
 interface UndoButtonProps {
   progressValue: number;
@@ -28,9 +20,19 @@ function UndoButtonWithProgress(props: UndoButtonProps): JSX.Element {
   const { t } = useTranslation<string>();
 
   const { progressValue, onUndo, handleKeyDown, iconRef } = props;
+
   return (
     <Box sx={{ position: 'relative', display: 'inline-flex' }} onClick={onUndo}>
-      <CircularProgressBase variant="determinate" size={40} value={progressValue} />
+      <CircularProgressBase
+        variant="determinate"
+        size={40}
+        value={progressValue}
+        sx={{
+          '& .MuiCircularProgress-circle': {
+            transition: 'none', // completely disable transitions so it doesn't jump from 0 to current progress on mount
+          },
+        }}
+      />
       <Box
         style={{
           top: 0,
@@ -51,9 +53,18 @@ function UndoButtonWithProgress(props: UndoButtonProps): JSX.Element {
   );
 }
 
+interface DeleteUndoButtonProps {
+  layerPath: string;
+  layerRemovable: boolean;
+  focusTargetIdAfterDelete?: string;
+}
+
 export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/delete-undo-button/DeleteUndoButton');
+
+  /** The undo window duration the user can abort the delete operation */
+  const UNDO_WINDOW_DURATION = 2500;
 
   const { layerPath, layerRemovable, focusTargetIdAfterDelete } = props;
 
@@ -65,7 +76,10 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
 
   // get store actions
   const { deleteLayer, deleteLayerAbort } = useLayerStoreActions();
-  const layerDeletionProgressPercentage = useLayerSelectorDeletionProgressPercentage(layerPath);
+  const layerDeletionStartTime = useLayerSelectorDeletionStartTime(layerPath);
+
+  // state
+  const [progress, setProgress] = useState(0);
 
   /**
    * Performs the delete operation on the layer.
@@ -82,7 +96,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     }
 
     // Delete the layer
-    deleteLayer(layerPath)
+    deleteLayer(layerPath, UNDO_WINDOW_DURATION)
       .then((deleted) => {
         // If deleted, set focus elsewhere
         if (deleted && focusTargetIdAfterDelete) {
@@ -138,8 +152,32 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     }
   };
 
+  useEffect(() => {
+    if (!layerDeletionStartTime) return undefined;
+
+    // Use requestAnimationFrame to update the progress percentage instead of relying on a value
+    // constantly being updated coming from the store, for performance.
+    // RAF syncs with the browser repaint cycle for smoother animation and auto-pauses when the tab is hidden.
+    // For the RAF to work, the transition on the MuiCircularProgress-circle component must be set to none,
+    // otherwise it will cause the progress circle to only update on weird force renders.
+    let frameId: number;
+    const animate = (): void => {
+      const elapsed = Date.now() - layerDeletionStartTime;
+      const pct = Math.min((elapsed / UNDO_WINDOW_DURATION) * 100, 100);
+      setProgress(pct);
+      if (pct < 100) {
+        frameId = requestAnimationFrame(animate);
+      }
+    };
+    frameId = requestAnimationFrame(animate);
+
+    return () => {
+      cancelAnimationFrame(frameId);
+    };
+  }, [layerDeletionStartTime]);
+
   // Never hide the remove icon, so user can remove forever loading/processing layers.
-  if (layerRemovable && layerDeletionProgressPercentage === undefined) {
+  if (layerRemovable && !layerDeletionStartTime) {
     return (
       <IconButton
         iconRef={deleteButtonRef}
@@ -172,7 +210,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   return (
     <UndoButtonWithProgress
       iconRef={undoButtonRef}
-      progressValue={layerDeletionProgressPercentage ?? 0}
+      progressValue={progress}
       onUndo={handleUndoClick}
       handleKeyDown={handleUndoDeleteKeyDown}
     />
