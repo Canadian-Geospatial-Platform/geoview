@@ -32,29 +32,24 @@ export class API {
   // LayerApi static class
   layer = LayerApi;
 
-  // list of available maps
-  #maps: Record<string, MapViewer> = {};
-
   // load plugins API
-  plugin: typeof Plugin;
+  plugin = Plugin;
 
   // utilities object
-  utilities;
+  utilities = {
+    core: Utilities,
+    geo: GeoUtilities,
+    projection: Projection,
+    date: DateMgt,
+  };
+
+  // list of available maps
+  #maps: Record<string, MapViewer> = {};
 
   /**
    * Initiate the event and projection objects
    */
   constructor() {
-    // TODO: Check - Maybe move plugin inside utilities?
-    this.plugin = Plugin;
-
-    this.utilities = {
-      core: Utilities,
-      geo: GeoUtilities,
-      projection: Projection,
-      date: DateMgt,
-    };
-
     // apply focus to element when keyboard navigation is use
     API.#manageKeyboardFocus();
   }

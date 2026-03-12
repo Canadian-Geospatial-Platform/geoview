@@ -562,7 +562,7 @@ export class ConfigApi {
       case 'GeoTIFF':
         return GeoTIFF.processGeoviewLayerConfig(geoviewLayerId, geoviewLayerName, layerURL, layerIds as string[], isTimeAware);
       case 'imageStatic':
-        // TODO: CHECK - Config init - Check if there's a way to better determine the source extent to send, defaults to napl-ring-of-fire's extent
+        // TODO: MINOR - Config init - Check if there's a way to better determine the source extent to send, defaults to napl-ring-of-fire's extent
         return ImageStatic.processGeoviewLayerConfig(
           geoviewLayerId,
           geoviewLayerName,

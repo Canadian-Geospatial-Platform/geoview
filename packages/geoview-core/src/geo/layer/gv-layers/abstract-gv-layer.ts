@@ -734,7 +734,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     }
 
     // Emit event
-    // TODO: LayerApi could listen to that event in case we need to update the store.
     this.emitLayerFilterApplied({
       filter: layerFilters,
     });
@@ -1813,9 +1812,6 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
       // If the field entry was found
       if (fieldEntry) {
-        // TODO: CHECK - Performance - Do we really need to attach all this on every feature info entries!?
-        // TO.DOCONT: It seems like a lot of duplication of information to carry for each individual entry
-
         // Attach the fieldInfo property on the feature info entry
         // eslint-disable-next-line no-param-reassign
         featureInfoEntry.fieldInfo[fieldEntry.name] = {

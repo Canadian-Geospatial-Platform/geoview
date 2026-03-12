@@ -135,6 +135,7 @@
         // adding a geojson layer requires a type of geojson and url
         const addResult = cgpv.api.getMapViewer('map1').layer.addGeoviewLayer(
           {
+            geoviewLayerId: cgpv.api.utilities.core.generateId(8),
             geoviewLayerType: `${geoviewLayerType}`,
             metadataAccessPath: `${metadataAccessPath}`,
             listOfLayerEntryConfig: [
