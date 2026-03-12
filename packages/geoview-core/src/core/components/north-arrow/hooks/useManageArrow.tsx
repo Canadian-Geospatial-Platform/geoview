@@ -8,10 +8,10 @@ import {
   useMapProjectionEPSG,
   useMapRotation,
   useMapSize,
-  useMapStoreActions,
   useMapZoom,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
+import { useMapController } from '@/core/controllers/map-controller';
 
 /** Return type for the useManageArrow hook. */
 interface ArrowReturn {
@@ -43,7 +43,7 @@ export const useManageArrow = (): ArrowReturn => {
   const mapRotation = useMapRotation();
   const mapCenterCoord = useMapCenterCoordinates();
   const mapSize = useMapSize();
-  const { getPixelFromCoordinate, setRotation } = useMapStoreActions();
+  const mapController = useMapController();
 
   /**
    * Whether the map projection is Lambert Conformal Conic.
@@ -116,18 +116,18 @@ export const useManageArrow = (): ArrowReturn => {
         const deviationFromCenter = mapCenterLongitude - CENTRAL_MERIDIAN;
 
         if (Math.abs(deviationFromCenter) <= 3) {
-          setRotation(0);
+          mapController.rotate(0);
           equalCountRef.current = 0;
         } else if (diff > 0.01) {
           // Only set rotation if we haven't already set it for this value
           if (rotationValue !== prevRotationRef.current) {
-            setRotation(rotationValue);
+            mapController.rotate(rotationValue);
             prevRotationRef.current = rotationValue;
             equalCountRef.current = 1; // Set to 1 to indicate we've used this value
           }
           // If values are the same but we haven't set rotation yet
           else if (equalCountRef.current === 0) {
-            setRotation(rotationValue);
+            mapController.rotate(rotationValue);
             equalCountRef.current = 1;
           }
           // Otherwise, do nothing (skip setting rotation)
@@ -139,11 +139,11 @@ export const useManageArrow = (): ArrowReturn => {
 
       // Calculate offset
       let newOffset = offsetX;
-      const northPolePosition = getPixelFromCoordinate(NORTH_POLE_POSITION);
+      const northPolePosition = mapController.getPixelFromCoordinate(NORTH_POLE_POSITION);
 
       if (!fixNorth && northPolePosition !== null) {
         const screenNorthPoint = northPolePosition;
-        const mapCenter = getPixelFromCoordinate(mapCenterCoord);
+        const mapCenter = mapController.getPixelFromCoordinate(mapCenterCoord);
 
         // Calculate distance from north pole using triangle
         const deltaX = screenNorthPoint[0] - mapCenter[0];
@@ -172,18 +172,7 @@ export const useManageArrow = (): ArrowReturn => {
 
     // Should never goes here but failover to default values
     return { memoCalculatedRotation: { angle: 0 }, memoCalculatedOffset: 0 };
-  }, [
-    northArrowElement,
-    memoIsLCCProjection,
-    memoIsWebMercator,
-    fixNorth,
-    mapRotation,
-    mapZoom,
-    mapSize,
-    getPixelFromCoordinate,
-    mapCenterCoord,
-    setRotation,
-  ]);
+  }, [mapSize, northArrowElement, memoIsLCCProjection, memoIsWebMercator, mapCenterCoord, mapZoom, mapRotation, fixNorth, mapController]);
 
   /**
    * Updates local state with the calculated rotation and offset values.

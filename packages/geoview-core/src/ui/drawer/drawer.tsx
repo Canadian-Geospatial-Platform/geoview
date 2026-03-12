@@ -6,7 +6,7 @@ import type { DrawerProps } from '@mui/material';
 import { Drawer as MaterialDrawer, Box } from '@mui/material';
 
 import { IconButton } from '@/ui/icon-button/icon-button';
-import { ChevronLeftIcon, ChevronRightIcon } from '@/ui/icons/index';
+import { ChevronLeftIcon, ChevronRightIcon } from '@/ui/icons';
 import { getSxClasses } from '@/ui/drawer/drawer-style';
 import { logger } from '@/core/utils/logger';
 

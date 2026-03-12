@@ -3,9 +3,10 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Box, CircularProgressBase, DeleteOutlineIcon, IconButton, UndoIcon } from '@/ui';
-import { useLayerSelectorDeletionStartTime, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerSelectorDeletionStartTime } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
 import { TIMEOUT } from '@/core/utils/constant';
+import { useLayerController } from '@/core/controllers/layer-controller';
 
 interface UndoButtonProps {
   progressValue: number;
@@ -72,9 +73,9 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   const deleteButtonRef = useRef<HTMLButtonElement>(null);
   const undoButtonRef = useRef<HTMLButtonElement>(null);
 
-  // get store actions
-  const { deleteLayer, deleteLayerAbort } = useLayerStoreActions();
+  // Store hooks
   const layerDeletionStartTime = useLayerSelectorDeletionStartTime(layerPath);
+  const layerController = useLayerController();
 
   // state
   const [progress, setProgress] = useState(0);
@@ -94,7 +95,8 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     }
 
     // Delete the layer
-    deleteLayer(layerPath, TIMEOUT.deleteLayerUndoWindow)
+    layerController
+      .deleteLayerStartTimer(layerPath, TIMEOUT.deleteLayerUndoWindow)
       .then((deleted) => {
         // If deleted, set focus elsewhere
         if (deleted && focusTargetIdAfterDelete) {
@@ -117,7 +119,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
    */
   const performUndo = (wasKeyboardActivated: boolean): void => {
     // Call the action
-    deleteLayerAbort(layerPath);
+    layerController.deleteLayerAbort(layerPath);
 
     // If was keyboard activated on clicking
     if (wasKeyboardActivated) {

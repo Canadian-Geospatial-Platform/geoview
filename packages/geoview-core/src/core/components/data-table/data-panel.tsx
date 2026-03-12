@@ -3,20 +3,21 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Box, FilterAltIcon } from '@/ui';
 import DataTable from './data-table';
+
+import { useUIController } from '@/core/controllers/ui-controller';
 import {
   useDataTableSelectedLayerPath,
   useDataTableAllFeaturesDataArray,
   useDataTableLayerSettings,
-  useDataTableStoreActions,
+  setStoreSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useMapStoreActions, useMapAllVisibleandInRangeLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapAllVisibleandInRangeLayers, getStoreMapIsLayerHiddenOnMap } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useLayerNames, useLayerStatuses } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
   useUIActiveAppBarTab,
   useUIActiveFooterBarTab,
   useUIAppbarComponents,
-  useUIStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import type { LayerListEntry } from '@/core/components/common';
@@ -28,6 +29,7 @@ import type { MappedLayerDataType } from './data-table-types';
 import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import DataSkeleton from './data-skeleton';
+import { useLayerSetController } from '@/core/controllers/layer-set-controller';
 
 /** Properties for the Datapanel component. */
 interface DataPanelType {
@@ -52,18 +54,16 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   const isFirstLoad = useRef<Record<string, boolean>>({});
 
   const mapId = useGeoViewMapId();
+  const uiController = useUIController();
+  const layerSetController = useLayerSetController();
   const layerData = useDataTableAllFeaturesDataArray();
   const selectedLayerPath = useDataTableSelectedLayerPath();
   const datatableSettings = useDataTableLayerSettings();
-  const { setSelectedLayerPath } = useDataTableStoreActions();
-  const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
-  const { isLayerHiddenOnMap } = useMapStoreActions();
   const visibleInRangeLayers = useMapAllVisibleandInRangeLayers();
   const activeFooterBarTab = useUIActiveFooterBarTab();
   const activeAppBarTab = useUIActiveAppBarTab();
   const appBarComponents = useUIAppbarComponents();
   const showUnsymbolizedFeatures = useAppShowUnsymbolizedFeatures();
-  const { disableFocusTrap } = useUIStoreActions();
   const layerNames = useLayerNames();
   const layerStatuses = useLayerStatuses();
 
@@ -76,18 +76,19 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   const memoOrderedLayerData = useMemo(() => {
     return visibleInRangeLayers
       .map((layerPath) => mappedLayerData.filter((data) => data.layerPath === layerPath)[0])
-      .filter((layer) => layer !== undefined && !isLayerHiddenOnMap(layer.layerPath));
-  }, [mappedLayerData, visibleInRangeLayers, isLayerHiddenOnMap]);
+      .filter((layer) => layer !== undefined && !getStoreMapIsLayerHiddenOnMap(mapId, layer.layerPath));
+    // TODO: CHECK - Above, we're using a state selector, where we should probably use a state hook. We do this here and elsewhere with the same selector.
+  }, [mappedLayerData, visibleInRangeLayers, mapId]);
 
   /**
    * Handles layer selection change from the layer list.
    */
   const handleLayerChange = useCallback(
     (_layer: LayerListEntry): void => {
-      setSelectedLayerPath(_layer.layerPath); // This will trigger the useEffect below to call tiggerGetAllFeatureInfo()
+      setStoreSelectedLayerPath(mapId, _layer.layerPath); // This will trigger the useEffect below to call tiggerGetAllFeatureInfo()
       setIsLoading(true);
     },
-    [setSelectedLayerPath]
+    [mapId]
   );
 
   /**
@@ -158,11 +159,11 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
     if (selectedLayerPath) {
       // Build the full layer list item ID that matches the DOM
       const layerListItemId = `${mapId}-${containerType}-${TABS.DATA_TABLE}-${selectedLayerPath}`;
-      disableFocusTrap(layerListItemId);
+      uiController.disableFocusTrap(layerListItemId);
     } else {
-      disableFocusTrap('no-focus');
+      uiController.disableFocusTrap('no-focus');
     }
-  }, [mapId, selectedLayerPath, disableFocusTrap, containerType]);
+  }, [mapId, selectedLayerPath, uiController, containerType]);
 
   /**
    * Checks if the selected layer is disabled due to null features.
@@ -207,10 +208,10 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
     // NOTE: Reason for not using component unmount, because we are not mounting and unmounting components
     // when we switch tabs.
     if (activeFooterBarTab.tabId !== TABS.DATA_TABLE && containerType !== CONTAINER_TYPE.APP_BAR) {
-      setSelectedLayerPath('');
+      setStoreSelectedLayerPath(mapId, '');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeFooterBarTab]);
+  }, [mapId, activeFooterBarTab]);
 
   /**
    * Resets the selected layer path when the app bar data table tab is closed.
@@ -223,9 +224,9 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
       (activeAppBarTab.tabId !== DEFAULT_APPBAR_CORE.DATA_TABLE || !activeAppBarTab.isOpen) &&
       appBarComponents.includes(DEFAULT_APPBAR_CORE.DATA_TABLE)
     ) {
-      setSelectedLayerPath('');
+      setStoreSelectedLayerPath(mapId, '');
     }
-  }, [activeAppBarTab, setSelectedLayerPath, appBarComponents]);
+  }, [mapId, activeAppBarTab, appBarComponents]);
 
   /**
    * Triggers feature info query on first load of the selected layer.
@@ -245,7 +246,8 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
       if (foundLayer) {
         isFirstLoad.current[selectedLayerPath] = true;
         setIsLoading(true);
-        triggerGetAllFeatureInfo(selectedLayerPath)
+        layerSetController
+          .triggerGetAllFeatureInfo(selectedLayerPath)
           .catch((error: unknown) => {
             // Log error
             logger.logError(`Data panel has failed to get all feature info, error: ${error}`);
@@ -255,7 +257,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
           });
       }
     }
-  }, [memoOrderedLayerData, selectedLayerPath, triggerGetAllFeatureInfo]);
+  }, [memoOrderedLayerData, selectedLayerPath, layerSetController]);
 
   /**
    * Checks if any layer query status is processing.

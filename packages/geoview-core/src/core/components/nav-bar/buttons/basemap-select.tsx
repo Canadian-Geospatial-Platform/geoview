@@ -1,11 +1,7 @@
 import type { ReactNode } from 'react';
 import { createElement, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  useMapHasGeoviewBasemapLayer,
-  useMapBasemapOptions,
-  useMapStoreActions,
-} from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapHasGeoviewBasemapLayer, useMapBasemapOptions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
 import type { TypeBasemapOptions } from '@/api/types/map-schema-types';
@@ -15,6 +11,7 @@ import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { List, ListItem } from '@/ui/list';
 import { BlockIcon, PublicIcon, SatelliteIcon, SignpostIcon } from '@/ui/icons';
+import { useMapController } from '@/core/controllers/map-controller';
 
 /** Mapping of basemap choice identifiers to their options. */
 const basemapChoiceOptions: Record<string, TypeBasemapOptions> = {
@@ -36,9 +33,9 @@ export default function BasemapSelect(): JSX.Element {
   const { t } = useTranslation<string>();
 
   // Get values from store
-  const { createBasemapFromOptions, setVisibilityOfGeoviewBasemapLayers } = useMapStoreActions();
   const configBasemapOptions = useMapBasemapOptions();
   const hasGeoviewBasemapLayer = useMapHasGeoviewBasemapLayer();
+  const mapController = useMapController();
 
   // Check if the basemap from the config is one of our default basemaps.
   // If there is a custom basemap, we need to use it as the default regardless of basemap options.
@@ -60,16 +57,16 @@ export default function BasemapSelect(): JSX.Element {
 
       // If the Geoview basemap layer is present, toggle visibility based on selection. We hide it on nogeom.
       if (hasGeoviewBasemapLayer) {
-        if (basemapChoice === 'default') setVisibilityOfGeoviewBasemapLayers(true);
-        else setVisibilityOfGeoviewBasemapLayers(false);
+        if (basemapChoice === 'default') mapController.setVisibilityOfGeoviewBasemapLayers(true);
+        else mapController.setVisibilityOfGeoviewBasemapLayers(false);
       }
 
-      createBasemapFromOptions(basemapChoice === 'default' ? configBasemapOptions : basemapChoiceOptions[basemapChoice]).catch(
-        (error: unknown) => {
+      mapController
+        .setBasemap(basemapChoice === 'default' ? configBasemapOptions : basemapChoiceOptions[basemapChoice])
+        .catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('setBaseMap in basemaps.ts', error);
-        }
-      );
+        });
 
       // Focus the close button after selection
       const closeButton = document.querySelector('.MuiDialogTitle-root button') as HTMLButtonElement;
@@ -77,7 +74,7 @@ export default function BasemapSelect(): JSX.Element {
         closeButton.focus();
       }
     },
-    [configBasemapOptions, createBasemapFromOptions, setVisibilityOfGeoviewBasemapLayers, hasGeoviewBasemapLayer]
+    [configBasemapOptions, hasGeoviewBasemapLayer, mapController]
   );
 
   /**

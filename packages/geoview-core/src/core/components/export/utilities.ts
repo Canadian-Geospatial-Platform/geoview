@@ -2,17 +2,18 @@ import { createElement } from 'react';
 import { Buffer } from 'buffer';
 import { renderToString } from 'react-dom/server';
 
-import type { TypeNorthArrow, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import type { TypeNorthArrow, TypeScaleInfo, TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
-import type { TypeTimeSliderValues, TimeSliderLayerSet } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
-
-// TODO As a utility file, the EventProcessors probably shouldn't be here, but it removes a lot of duplication
-// TO.DO from the pdf-layout and canvas-layout files. Possibly a rename or a better solution could be found.
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
-import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
+import {
+  type TypeTimeSliderValues,
+  type TimeSliderLayerSet,
+  getStoreTimeSliderLayers,
+  isStoreTimeSliderInitialized,
+} from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import { getStoreMapOrderedLayerInfo, getStoreMapStateForExportLayout } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { getStoreGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { getStoreLayerStateLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 import { logger } from '@/core/utils/logger';
 import { getLocalizedMessage } from '@/core/utils/utilities';
@@ -818,7 +819,7 @@ export class ExportUtilities {
    * @param mapId - The GeoView map ID (used to resolve display language for fallback message).
    * @returns A JPEG data URL of the canvas, or a fallback image with an explanatory message.
    */
-  static #safeToDataURL(canvas: HTMLCanvasElement, mapId: string): string {
+  static #safeToDataURL(canvas: HTMLCanvasElement, displayLanguage: TypeDisplayLanguage): string {
     try {
       return canvas.toDataURL('image/jpeg', EXPORT_CONSTANTS.JPEG_QUALITY);
     } catch (error) {
@@ -838,7 +839,6 @@ export class ExportUtilities {
       ctx.strokeRect(1, 1, fallback.width - 2, fallback.height - 2);
 
       // Draw localized message centered on the canvas
-      const displayLanguage = AppEventProcessor.getDisplayLanguage(mapId);
       const message = getLocalizedMessage(displayLanguage, 'exportModal.canvasTaintedMessage');
       const fontSize = Math.max(14, Math.round(fallback.width / 40));
       ctx.fillStyle = '#666';
@@ -905,14 +905,15 @@ export class ExportUtilities {
    */
   static async getMapInfo(
     mapId: string,
+    displayLanguage: TypeDisplayLanguage,
     exportTitle: string,
     disclaimer: string,
     layerDateFormats: Record<string, TypeDisplayDateFormat>,
     layerDateTemporalModes: Record<string, TemporalMode>
   ): Promise<TypeMapInfoResult> {
     // Get all needed data from store state
-    const mapElement = AppEventProcessor.getGeoviewHTMLElement(mapId);
-    const mapState = MapEventProcessor.getMapStateForExportLayout(mapId);
+    const mapElement = getStoreGeoviewHTMLElement(mapId);
+    const mapState = getStoreMapStateForExportLayout(mapId);
     const { northArrow, northArrowElement, attribution, mapRotation, mapScale, currentProjection } = mapState;
 
     // Get browser map dimensions from viewport element (not canvas, which changes size when rotated)
@@ -992,13 +993,13 @@ export class ExportUtilities {
     const scaleLineWidth = `${pdfScaleWidth}px`;
 
     // Get all other state data
-    const legendLayers = LegendEventProcessor.getLegendLayers(mapId).filter(
+    const legendLayers = getStoreLayerStateLegendLayers(mapId).filter(
       (layer) => layer.layerStatus === 'loaded' && (layer.items.length === 0 || layer.items.some((item) => item.isVisible))
     );
-    const orderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(mapId);
+    const orderedLayerInfo = getStoreMapOrderedLayerInfo(mapId);
     let timeSliderLayers = undefined;
-    if (TimeSliderEventProcessor.isTimeSliderInitialized(mapId)) {
-      timeSliderLayers = TimeSliderEventProcessor.getTimeSliderLayers(mapId);
+    if (isStoreTimeSliderInitialized(mapId)) {
+      timeSliderLayers = getStoreTimeSliderLayers(mapId);
     }
 
     // Get rotation angle for north arrow
@@ -1470,7 +1471,7 @@ export class ExportUtilities {
     const columnWidths = localColumnWidths;
 
     // Measure canvas height by rendering temporary CanvasDocument (reused by PDF/PNG exports)
-    const mapDataUrl = this.#safeToDataURL(resultCanvas, mapId);
+    const mapDataUrl = this.#safeToDataURL(resultCanvas, displayLanguage);
     const tempHtml = renderToString(
       createElement(CanvasDocument, {
         mapDataUrl,

@@ -3,11 +3,12 @@ import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 
 import { useDataTableSelectedFeature } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { useUIActiveFocusItem, useUIStoreActions, useUIActiveAppBarTab } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIActiveFocusItem, useUIActiveAppBarTab } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
 
 import { Modal, List, Box, Typography, BrowserNotSupportedIcon } from '@/ui';
 
+import { useUIController } from '@/core/controllers/ui-controller';
 import { getSxClasses } from './details-style';
 import { FeatureInfoTable } from './feature-info-table';
 import type { TypeFieldEntry } from '@/api/types/map-schema-types';
@@ -29,7 +30,7 @@ export default function FeatureDetailModal(): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   // get store function
-  const { disableFocusTrap } = useUIStoreActions();
+  const uiController = useUIController();
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const feature = useDataTableSelectedFeature()!;
   const [nameFieldValue, setNameFieldValue] = useState('');
@@ -74,7 +75,7 @@ export default function FeatureDetailModal(): JSX.Element {
         // The LightBox will handle its own close and focus restoration
         const lightboxOpen = document.querySelector(LIGHTBOX_SELECTORS.ROOT);
         if (!lightboxOpen) {
-          disableFocusTrap();
+          uiController.disableFocusTrap();
         }
       }}
       title={t('details.featureDetailModalTitle')}

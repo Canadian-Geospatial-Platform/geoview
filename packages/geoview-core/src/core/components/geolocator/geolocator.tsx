@@ -7,7 +7,9 @@ import { useTheme } from '@mui/material';
 
 import { debounce } from '@/core/utils/debounce';
 import { Box, ProgressBar, Typography } from '@/ui';
-import { useUIActiveAppBarTab, useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+
+import { useUIController } from '@/core/controllers/ui-controller';
+import { useUIActiveAppBarTab, useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { GeolocatorResult } from '@/core/components/geolocator/geolocator-result';
 import { getSxClasses } from '@/core/components/geolocator/geolocator-style';
 import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';
@@ -60,7 +62,7 @@ export function Geolocator(): JSX.Element {
   const mapId = useGeoViewMapId();
 
   // Store
-  const { setActiveAppBarTab, disableFocusTrap } = useUIStoreActions();
+  const uiController = useUIController();
   const { tabId, isOpen } = useUIActiveAppBarTab();
   const activeTrapGeoView = useUIActiveTrapGeoView();
 
@@ -99,11 +101,11 @@ export function Geolocator(): JSX.Element {
    */
   const handleReset = useCallback((): void => {
     setSearchValue('');
-    setActiveAppBarTab(DEFAULT_APPBAR_CORE.GEOLOCATOR, false, false);
+    uiController.setActiveAppBarTab(DEFAULT_APPBAR_CORE.GEOLOCATOR, false, false);
     setTimeout(() => {
-      disableFocusTrap(`${mapId}-${CONTAINER_TYPE.APP_BAR}-${DEFAULT_APPBAR_CORE.GEOLOCATOR}-panel-btn`);
+      uiController.disableFocusTrap(`${mapId}-${CONTAINER_TYPE.APP_BAR}-${DEFAULT_APPBAR_CORE.GEOLOCATOR}-panel-btn`);
     }, TIMEOUT.deferExecution);
-  }, [setActiveAppBarTab, setSearchValue, disableFocusTrap, mapId]);
+  }, [setSearchValue, uiController, mapId]);
 
   /**
    * Handles search input value changes.

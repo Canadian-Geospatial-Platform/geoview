@@ -6,10 +6,12 @@ import { Box, Fade, Typography } from '@/ui';
 import { getSxClasses } from './crosshair-style';
 import { CrosshairIcon } from './crosshair-icon';
 import { useAppCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { getMapPointerPosition, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { getStoreMapPointerPosition } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useUIController } from '@/core/controllers/ui-controller';
+import { useMapController } from '@/core/controllers/map-controller';
 
 /** Properties for the Crosshair component. */
 type CrosshairProps = {
@@ -38,9 +40,9 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
   //  Store
   const isCrosshairsActive = useAppCrosshairsActive();
   const mapId = useGeoViewMapId();
-  const { setClickCoordinates, setMapKeyboardPanInteractions } = useMapStoreActions();
+  const uiController = useUIController();
+  const mapController = useMapController();
 
-  // Callbacks
   /**
    * Simulates a map mouse click to trigger the details panel.
    */
@@ -51,12 +53,12 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
       }
 
       // Use store getter, we do not subcribe to modification
-      const currentPointerPosition = getMapPointerPosition(mapId);
+      const currentPointerPosition = getStoreMapPointerPosition(mapId);
       if (currentPointerPosition) {
-        setClickCoordinates(currentPointerPosition);
+        mapController.setClickCoordinates(currentPointerPosition);
       }
     },
-    [isCrosshairsActive, setClickCoordinates, mapId]
+    [isCrosshairsActive, mapId, mapController]
   );
 
   /**
@@ -71,11 +73,10 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
       if ((myEvent.key === 'ArrowDown' && myEvent.shiftKey) || (myEvent.key === 'ArrowUp' && myEvent.shiftKey)) {
         panDelta.current = myEvent.key === 'ArrowDown' ? Math.max(10, panDelta.current - 10) : panDelta.current + 10;
 
-        setMapKeyboardPanInteractions(panDelta.current);
+        uiController.setMapKeyboardPanInteractions(panDelta.current);
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isCrosshairsActive]
+    [isCrosshairsActive, uiController]
   );
 
   // Use custom hook for event listeners

@@ -7,10 +7,11 @@ import { Box, CircularProgress, Collapse, Typography } from '@/ui';
 import { ImageNotSupportedIcon, PaletteIcon, ExpandMoreIcon, ExpandLessIcon } from '@/ui';
 
 import { getSxClasses } from './layer-settings-style';
-import { useLayerStoreActions, useLayerSelectorWmsStyle } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerSelectorWmsStyle, useLayerSelectorWmsStyles } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import type { TypeMetadataWMSCapabilityLayerStyle } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
+import { useLayerController } from '@/core/controllers/layer-controller';
 
 interface WmsStyleItemProps {
   style: TypeMetadataWMSCapabilityLayerStyle;
@@ -138,26 +139,21 @@ export function WmsStylePanel({ layerDetails }: WmsStylePanelProps): JSX.Element
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  // Store actions
-  const { setLayerWmsStyle, getLayerWmsAvailableStyles } = useLayerStoreActions();
-
   // Store hooks
   const currentWmsStyle = useLayerSelectorWmsStyle(layerDetails.layerPath);
+  const storeWmsStyles = useLayerSelectorWmsStyles(layerDetails.layerPath);
+  const memoWmsStyleArray = useMemo(() => storeWmsStyles || [], [storeWmsStyles]);
+  const layerController = useLayerController();
 
   // State
   const [expanded, setExpanded] = useState(false);
 
-  // Get the full style metadata
-  const memoWmsStyleArray = useMemo(
-    () => getLayerWmsAvailableStyles(layerDetails.layerPath) || [],
-    [getLayerWmsAvailableStyles, layerDetails.layerPath]
-  );
-
   const handleSelect = useCallback(
     (wmsStyleName: string): void => {
-      setLayerWmsStyle(layerDetails.layerPath, wmsStyleName);
+      // TODO: REFACTOR - This setting of styles should be done through a controller, because it affects the domain directly.
+      layerController.setLayerWmsStyle(layerDetails.layerPath, wmsStyleName);
     },
-    [layerDetails.layerPath, setLayerWmsStyle]
+    [layerDetails.layerPath, layerController]
   );
 
   const handleToggle = useCallback((): void => {

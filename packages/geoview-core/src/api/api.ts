@@ -1,6 +1,5 @@
 import { ConfigApi } from '@/api/config/config-api';
 
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { Plugin } from '@/api/plugin/plugin';
 
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -17,7 +16,7 @@ import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { removeGeoviewStore } from '@/core/stores/stores-managers';
 import { InitDivNotExistError, MapViewerAlreadyExistsError, MapViewerNotFoundError } from '@/core/exceptions/geoview-exceptions';
 import type { TypeMapFeaturesInstance } from '@/api/types/map-schema-types';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { getStoreMapConfigState } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 /** Class used to handle api calls (events, functions etc...). */
 export class API {
@@ -46,7 +45,7 @@ export class API {
    */
   constructor() {
     // apply focus to element when keyboard navigation is use
-    API.#manageKeyboardFocus();
+    API.#manageKeyboardFocus(this);
   }
 
   /**
@@ -208,7 +207,7 @@ export class API {
    */
   async reload(mapId: string, mapConfig?: TypeMapFeaturesConfig | TypeMapFeaturesInstance): Promise<MapViewer> {
     // If no config is provided, get the original from the store
-    const config = mapConfig || MapEventProcessor.getGeoViewMapConfig(mapId);
+    const config = mapConfig || getStoreMapConfigState(mapId);
 
     // Get the map viewer
     const mapViewer = this.getMapViewer(mapId);
@@ -250,7 +249,7 @@ export class API {
    *
    * Code from: https://github.com/MaxMaeder/keyboardFocus.js
    */
-  static #manageKeyboardFocus(): void {
+  static #manageKeyboardFocus(apiInstance: API): void {
     // Remove the 'keyboard-focused' class from any elements that have it
     function removeFocusedClass(): void {
       const previouslyFocusedElement = document.getElementsByClassName('keyboard-focused')[0];
@@ -279,7 +278,10 @@ export class API {
 
           // Only log if map is in focus, if not... too much logging
           if (mapFocus) logger.logInfo(`Map ${mapId} focus and crosshair is enabled`, [mapFocus]);
-          AppEventProcessor.setAppIsCrosshairActive(mapId, mapFocus);
+
+          // Get the associated MapViewer
+          const mapViewer = apiInstance.getMapViewer(mapId);
+          mapViewer.controllers.uiController.setCrosshairActive(mapFocus);
         }
       }
     });

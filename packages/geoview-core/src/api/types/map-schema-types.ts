@@ -411,6 +411,29 @@ export type TypePointMarker = {
   projectionCode?: number;
 };
 
+/**
+ *  Definition of map state to attach to the map object for reference.
+ */
+export type TypeMapState = {
+  currentProjection: number;
+  currentZoom: number;
+  mapCenterCoordinates: Coordinate;
+  mapExtent: Extent;
+  rotation: number;
+  singleClickedPosition: TypeMapMouseInfo;
+  pointerPosition: TypeMapMouseInfo;
+};
+
+/**
+ * Type used to define the map mouse information
+ * */
+export type TypeMapMouseInfo = {
+  lonlat: Coordinate;
+  pixel: Coordinate;
+  projected: Coordinate;
+  dragging: boolean;
+};
+
 // #endregion MAP FEATURES
 
 // #region GEOVIEW LAYERS

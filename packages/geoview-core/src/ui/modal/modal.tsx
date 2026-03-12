@@ -10,7 +10,7 @@ import { animated } from '@react-spring/web';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 
 import { IconButton } from '@/ui/icon-button/icon-button';
-import { CloseIcon } from '@/ui/icons/index';
+import { CloseIcon } from '@/ui/icons';
 import { getSxClasses } from '@/ui/modal/modal-style';
 import { useFadeIn } from '@/core/utils/useSpringAnimations';
 import { logger } from '@/core/utils/logger';

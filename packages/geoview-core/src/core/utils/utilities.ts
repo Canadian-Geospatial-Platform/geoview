@@ -1442,79 +1442,69 @@ function getSectionHeading(content: string): string {
 /**
  * Create guide object from .md file.
  *
- * @param mapId - ID of map
  * @param language - Language to use for guide
  * @param assetsURL - The base URL for assets
  * @returns A promise that resolves with the guide object, or undefined on error
  */
-export async function createGuideObject(
-  mapId: string,
-  language: TypeDisplayLanguage,
-  assetsURL: string
-): Promise<TypeGuideObject | undefined> {
-  try {
-    // Fetch the guide content
-    const content = await Fetch.fetchText(`${assetsURL}/locales/${language}/guide.md`);
+export async function createGuideObject(language: TypeDisplayLanguage, assetsURL: string): Promise<TypeGuideObject> {
+  // Fetch the guide content
+  const content = await Fetch.fetchText(`${assetsURL}/locales/${language}/guide.md`);
 
-    // Split by first level sections (Split with =1!<key>=) AND set URL for images from the assetURL
-    const sections = content.replaceAll('{{assetsURL}}', assetsURL).split(/=(?=1!)(.*?)=/);
+  // Split by first level sections (Split with =1!<key>=) AND set URL for images from the assetURL
+  const sections = content.replaceAll('{{assetsURL}}', assetsURL).split(/=(?=1!)(.*?)=/);
 
-    if (!sections[0].trim()) {
-      sections.shift();
-    }
-
-    const guideObject: TypeGuideObject = {};
-    for (let i = 0; i < sections.length; i += 2) {
-      // Remove "1!" and whitespace from the key
-      const key = sections[i].trim().substring(2);
-      const fullSectionContent = sections[i + 1].trim();
-      const heading = getSectionHeading(fullSectionContent);
-
-      // Split by second level sections (Split with =2!<key>=)
-      const subSections = fullSectionContent.split(/=(?=2!)(.*?)=/);
-
-      // Content for top level is the first subsection
-      const sectionContent = subSections[0];
-      const children: TypeGuideObject = {};
-
-      // Get level two sections
-      if (subSections.length > 1) {
-        for (let j = 1; j < subSections.length; j += 2) {
-          // Remove "2!" and whitespace from the key
-          const childKey = subSections[j].trim().substring(2);
-          const fullChildContent = subSections[j + 1].trim();
-          const childHeading = getSectionHeading(fullChildContent);
-          const subSubSections = fullChildContent.split(/=(?=3!)(.*?)=/);
-
-          // Content for child level is the first subsection
-          const childContent = subSubSections[0];
-          const grandChildren: TypeGuideObject = {};
-
-          // Get level three sections
-          for (let k = 1; k < subSubSections.length; k += 2) {
-            // Remove "3!" and whitespace from the key
-            const grandChildKey = subSubSections[k].trim().substring(2);
-
-            // Highest possible level, so all that remains is content
-            const grandChildContent = subSubSections[k + 1].trim();
-            const grandChildHeading = getSectionHeading(grandChildContent);
-            grandChildren[grandChildKey] = { heading: grandChildHeading, content: grandChildContent };
-          }
-
-          children[childKey] = {
-            heading: childHeading,
-            content: childContent,
-            children: grandChildren,
-          };
-        }
-      }
-      guideObject[key] = { heading, content: sectionContent, children };
-    }
-    return guideObject;
-  } catch (error: unknown) {
-    logger.logError(mapId, error, 'createGuideObject');
-    return undefined;
+  if (!sections[0].trim()) {
+    sections.shift();
   }
+
+  const guideObject: TypeGuideObject = {};
+  for (let i = 0; i < sections.length; i += 2) {
+    // Remove "1!" and whitespace from the key
+    const key = sections[i].trim().substring(2);
+    const fullSectionContent = sections[i + 1].trim();
+    const heading = getSectionHeading(fullSectionContent);
+
+    // Split by second level sections (Split with =2!<key>=)
+    const subSections = fullSectionContent.split(/=(?=2!)(.*?)=/);
+
+    // Content for top level is the first subsection
+    const sectionContent = subSections[0];
+    const children: TypeGuideObject = {};
+
+    // Get level two sections
+    if (subSections.length > 1) {
+      for (let j = 1; j < subSections.length; j += 2) {
+        // Remove "2!" and whitespace from the key
+        const childKey = subSections[j].trim().substring(2);
+        const fullChildContent = subSections[j + 1].trim();
+        const childHeading = getSectionHeading(fullChildContent);
+        const subSubSections = fullChildContent.split(/=(?=3!)(.*?)=/);
+
+        // Content for child level is the first subsection
+        const childContent = subSubSections[0];
+        const grandChildren: TypeGuideObject = {};
+
+        // Get level three sections
+        for (let k = 1; k < subSubSections.length; k += 2) {
+          // Remove "3!" and whitespace from the key
+          const grandChildKey = subSubSections[k].trim().substring(2);
+
+          // Highest possible level, so all that remains is content
+          const grandChildContent = subSubSections[k + 1].trim();
+          const grandChildHeading = getSectionHeading(grandChildContent);
+          grandChildren[grandChildKey] = { heading: grandChildHeading, content: grandChildContent };
+        }
+
+        children[childKey] = {
+          heading: childHeading,
+          content: childContent,
+          children: grandChildren,
+        };
+      }
+    }
+    guideObject[key] = { heading, content: sectionContent, children };
+  }
+  return guideObject;
 }
 
 /**

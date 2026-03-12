@@ -17,11 +17,10 @@ import type { TypeButtonPanel } from '@/ui/panel/panel-types';
 import { getSxClasses } from './nav-bar-style';
 import type { NavBarApi, NavBarCreatedEvent, NavBarRemovedEvent } from '@/core/components';
 import type { TypeValidNavBarProps } from '@/api/types/map-schema-types';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { useUINavbarComponents } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from './nav-bar-panel-button';
+import { usePluginController } from '@/core/controllers/plugin-controller';
 
 /** The properties for the nav-bar component. */
 type NavBarProps = {
@@ -71,13 +70,13 @@ export function NavBar(props: NavBarProps): JSX.Element {
   const { api: navBarApi } = props;
 
   // Hooks
-  const mapId = useGeoViewMapId();
   const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
   // Store
   const navBarComponents = useUINavbarComponents();
+  const pluginController = usePluginController();
 
   // Ref
   const navBarRef = useRef<HTMLDivElement>(null);
@@ -177,7 +176,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
       // Check if the plugin is in navBarComponents but not in corePackages
       if (navBarComponents.includes(pluginName)) {
         // Load and add the plugin
-        MapEventProcessor.loadAndAddPlugin(mapId, pluginName).catch((error: unknown) => {
+        pluginController.loadAndAddPlugin(pluginName).catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('loadAndAddPlugin(time-slider) in processPlugin in nav-bar', error);
         });
@@ -186,7 +185,7 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
     // Process drawer plugin if it's in the navBar
     processPlugin('drawer');
-  }, [navBarComponents, mapId]);
+  }, [navBarComponents, pluginController]);
 
   /**
    * Registers NavBar API event listeners on mount and cleans up on unmount.

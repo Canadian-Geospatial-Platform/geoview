@@ -3,9 +3,14 @@ import { useEffect, useRef, memo } from 'react';
 import type { Coordinate } from 'ol/coordinate';
 import { Box, ClickMapMarker } from '@/ui';
 
-import { useMapClickMarker, useMapClickCoordinates, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import {
+  useMapClickMarker,
+  useMapClickCoordinates,
+  setStoreMapOverlayClickMarkerRef,
+} from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useMapController } from '@/core/controllers/map-controller';
 
 /** Represents a click marker placed on the map at the user's click location. */
 export type TypeClickMarker = {
@@ -22,13 +27,14 @@ export const ClickMarker = memo(function ClickMarker(): JSX.Element {
   logger.logTraceRender('components/click-marker/click-marker');
 
   // State
+  const mapId = useGeoViewMapId();
   const clickMarkerRef = useRef<HTMLDivElement>(null);
-  const clickMarkerId = `${useGeoViewMapId()}-clickmarker`;
+  const clickMarkerId = `${mapId}-clickmarker`;
 
   // Store
   const clickMarker = useMapClickMarker();
   const clickCoordinates = useMapClickCoordinates();
-  const { setOverlayClickMarkerRef, showClickMarker } = useMapStoreActions();
+  const mapController = useMapController();
 
   /**
    * Registers the click marker overlay ref on mount.
@@ -37,8 +43,9 @@ export const ClickMarker = memo(function ClickMarker(): JSX.Element {
     // Log
     logger.logTraceUseEffect('CLICK-MARKER - setOverlayClickMarkerRef');
 
-    setOverlayClickMarkerRef(clickMarkerRef.current as HTMLElement);
-  }, [setOverlayClickMarkerRef]);
+    // Update the store
+    setStoreMapOverlayClickMarkerRef(mapId, clickMarkerRef.current as HTMLElement);
+  }, [mapId]);
 
   /**
    * Shows the click marker when click coordinates change.
@@ -48,9 +55,9 @@ export const ClickMarker = memo(function ClickMarker(): JSX.Element {
     logger.logTraceUseEffect('CLICK-MARKER - clickCoordinates');
 
     if (clickCoordinates) {
-      showClickMarker({ lonlat: clickCoordinates.lonlat });
+      mapController.clickMarkerIconShow({ lonlat: clickCoordinates.lonlat });
     }
-  }, [clickCoordinates, showClickMarker]);
+  }, [clickCoordinates, mapController]);
 
   return (
     <Box

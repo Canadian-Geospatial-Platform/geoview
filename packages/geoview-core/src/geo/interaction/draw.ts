@@ -10,6 +10,7 @@ import { GeoUtilities } from '@/geo/utils/utilities';
 
 import type { InteractionOptions } from './interaction';
 import { Interaction } from './interaction';
+import type { GeometryApi } from '@/geo/layer/geometry/geometry';
 
 /**
  * Supported options for drawing interactions
@@ -46,16 +47,16 @@ export class Draw extends Interaction {
    *
    * @param options - Object to configure the initialization of the Draw interaction
    */
-  constructor(options: DrawOptions) {
+  constructor(options: DrawOptions, geometryApi: GeometryApi) {
     super(options);
 
     // Get the vector source for the geometry group or create one when not existing
-    const geomGroup = this.mapViewer.layer.geometry?.createGeometryGroup(options.geometryGroupKey);
+    const geomGroup = geometryApi.createGeometryGroup(options.geometryGroupKey);
 
     // The OpenLayers Draw options
     // TODO: Enhancements - Add support for more drawing options
     const olOptions: OLDrawOptions = {
-      source: geomGroup?.vectorSource,
+      source: geomGroup.vectorSource,
       type: (options.type as OLGeomType) || 'Polygon',
       style: GeoUtilities.convertTypeFeatureStyleToOpenLayersStyle(options.style) as FlatStyle,
       freehand: options.freehand,

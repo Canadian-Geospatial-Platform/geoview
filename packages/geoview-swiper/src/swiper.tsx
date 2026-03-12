@@ -6,6 +6,7 @@ import type BaseLayer from 'ol/layer/Base';
 import type { EventTypes } from 'ol/Observable';
 import type BaseEvent from 'ol/events/Event';
 
+import type { SwipeOrientation } from 'geoview-core/core/stores/store-interface-and-intial-values/swiper-state';
 import { useSwiperLayerPaths, useSwiperOrientation } from 'geoview-core/core/stores/store-interface-and-intial-values/swiper-state';
 import { logger } from 'geoview-core/core/utils/logger';
 import { getLocalizedMessage, delay } from 'geoview-core/core/utils/utilities';
@@ -28,7 +29,7 @@ type SwiperProps = {
 /** Configuration properties for the Swiper plugin. */
 export type ConfigProps = {
   layers: string[];
-  orientation: string;
+  orientation: SwipeOrientation;
 };
 
 /** Maximum wait time in milliseconds for layers to be ready. */
@@ -223,7 +224,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
     async (layerPath: string) => {
       try {
         // Get the layer at the layer path
-        const olLayer = await viewer.layer.getOLLayerAsync(layerPath, CONST_LAYERS_WAIT, CONST_LAYERS_RETRY);
+        const olLayer = await viewer.controllers.layerController.getOLLayerAsync(layerPath, CONST_LAYERS_WAIT, CONST_LAYERS_RETRY);
 
         // Set the OL layers
         setOlLayers((prevArray) => [...prevArray, olLayer]);
@@ -236,7 +237,12 @@ export function Swiper(props: SwiperProps): JSX.Element {
         olLayer.changed();
       } catch (error: unknown) {
         // Log
-        logger.logError('SWIPER - Failed to attach layer events', viewer.layer?.getGeoviewLayerIds(), layerPath, error);
+        logger.logError(
+          'SWIPER - Failed to attach layer events',
+          viewer.controllers.layerController.getGeoviewLayerIds(),
+          layerPath,
+          error
+        );
       }
     },
     [viewer, prerender]
@@ -273,7 +279,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
       associatedLayerPaths.forEach((layerPath: string) => {
         try {
           // Get the layer at the layer path
-          const olLayer = viewer.layer.getOLLayerIfExists(layerPath);
+          const olLayer = viewer.controllers.layerController.getGeoviewLayerIfExists(layerPath)?.getOLLayer();
           if (olLayer) {
             // Unwire the events on the layer
             olLayer.un(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
