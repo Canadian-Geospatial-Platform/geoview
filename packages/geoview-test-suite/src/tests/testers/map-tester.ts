@@ -2,20 +2,21 @@ import { TestError } from '../core/exceptions';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import { delay } from 'geoview-core/core/utils/utilities';
-import type { TypeMapState } from 'geoview-core/geo/map/map-viewer';
 import type { TypeMapFeaturesConfig } from 'geoview-core/core/types/global-types';
 import { MapEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/map-event-processor';
-import type { Extent, TypeBasemapId, TypeValidMapProjectionCodes } from 'geoview-core/api/types/map-schema-types';
-import { AppEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/app-event-processor';
-import { UIEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/ui-event-processor';
+import type { Extent, TypeBasemapId, TypeMapState, TypeValidMapProjectionCodes } from 'geoview-core/api/types/map-schema-types';
 import type { Coordinate } from 'ol/coordinate';
-import { FeatureInfoEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/feature-info-event-processor';
-import type {
-  TypeFeatureInfoResultSetEntry,
-  TypeHoverFeatureInfo,
+import {
+  getStoreDetailsFeatures,
+  getStoreDetailsSelectedLayerPath,
+  setStoreDetailsSelectedLayerPath,
+  type TypeFeatureInfoResultSetEntry,
+  type TypeHoverFeatureInfo,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/feature-info-state';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { Projection } from 'geoview-core/geo/utils/projection';
+import { getStoreActiveAppBarTab, getStoreActiveFooterBarTab } from 'geoview-core/core/stores/store-interface-and-intial-values/ui-state';
+import { getStoreDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 
 /**
  * Main Map testing class.
@@ -327,7 +328,7 @@ export class MapTester extends GVAbstractTester {
         test.addStep(`Selecting footer bar tab '${targetTab}'...`);
 
         // Select the tab
-        this.getMapViewer().footerBarApi.selectTab(targetTab);
+        this.getMapViewer().controllers.uiController.setActiveFooterBarTab(targetTab);
 
         // Wait for tab selection to complete
         await delay(500);
@@ -336,7 +337,7 @@ export class MapTester extends GVAbstractTester {
       },
       (test, result) => {
         test.addStep('Verifying tab is selected...');
-        const { tabId } = UIEventProcessor.getActiveFooterBarTab(this.getMapId());
+        const { tabId } = getStoreActiveFooterBarTab(this.getMapId());
         Test.assertIsEqual(tabId, result);
       }
     );
@@ -356,7 +357,7 @@ export class MapTester extends GVAbstractTester {
         test.addStep(`Selecting app bar tab '${targetTab}'...`);
 
         // Select the tab
-        this.getMapViewer().appBarApi.selectTab(targetTab);
+        this.getMapViewer().controllers.uiController.setActiveAppBarTab(targetTab, true, true);
 
         // Wait for tab selection to complete
         await delay(500);
@@ -365,7 +366,7 @@ export class MapTester extends GVAbstractTester {
       },
       (test, result) => {
         test.addStep('Verifying tab is selected...');
-        const activeTab = UIEventProcessor.getActiveAppBarTab(this.getMapId());
+        const activeTab = getStoreActiveAppBarTab(this.getMapId());
         Test.assertIsEqual(activeTab?.tabId, result);
       }
     );
@@ -424,14 +425,17 @@ export class MapTester extends GVAbstractTester {
       async (test) => {
         test.addStep(`Changing language to '${targetLanguage}'...`);
 
-        if (AppEventProcessor.getDisplayLanguage(this.getMapId()) === 'fr') {
+        // If either the domain or the store language is set to 'fr'.
+        // We typically only need to check the domain, but in this test we can check both too as we'll be asserting the result in the store later.
+        if (this.getMapViewer().getDisplayLanguage() === 'fr' || getStoreDisplayLanguage(this.getMapId()) === 'fr') {
           throw new TestError(`False precondition, language is already set to '${targetLanguage}'`);
         }
 
         // Set language
         await this.getMapViewer().setLanguage(targetLanguage);
 
-        return AppEventProcessor.getDisplayLanguage(this.getMapId());
+        // Return the display language as read from the store
+        return getStoreDisplayLanguage(this.getMapId());
       },
       (test, result) => {
         test.addStep('Verifying language changed...');
@@ -769,7 +773,7 @@ export class MapTester extends GVAbstractTester {
 
         // Check which layer is selected after first click
         test.addStep('Checking selected layer after first click...');
-        const originalLayerPath = FeatureInfoEventProcessor.getSelectedLayerPath(this.getMapId());
+        const originalLayerPath = getStoreDetailsSelectedLayerPath(this.getMapId());
         test.addStep(`First selected layer: ${originalLayerPath}`);
 
         // The alternate layer
@@ -777,7 +781,7 @@ export class MapTester extends GVAbstractTester {
 
         // Manually select the alternate layer
         test.addStep(`Manually selecting the other layer '${altLayerPathh}'...`);
-        FeatureInfoEventProcessor.setSelectedLayerPath(this.getMapId(), altLayerPathh);
+        setStoreDetailsSelectedLayerPath(this.getMapId(), altLayerPathh);
 
         // Simulate a map click at second location
         test.addStep(`Performing second map click at [${clickCoordinates2.join(', ')}]...`);
@@ -788,12 +792,12 @@ export class MapTester extends GVAbstractTester {
 
         // Check which layer is still selected after second click
         test.addStep('Checking selected layer after second click...');
-        const alternateLayerPath = FeatureInfoEventProcessor.getSelectedLayerPath(this.getMapId());
+        const alternateLayerPath = getStoreDetailsSelectedLayerPath(this.getMapId());
         test.addStep(`Second selected layer: ${alternateLayerPath}`);
 
-        // Get feature count   for second layer
-        const secondLayerData = FeatureInfoEventProcessor.findLayerDataFromLayerDataArray(this.getMapId(), alternateLayerPath);
-        const secondFeatureCount = secondLayerData?.features?.length || 0;
+        // Get feature count for second layer
+        const secondLayerDataFeatures = getStoreDetailsFeatures(this.getMapId(), alternateLayerPath);
+        const secondFeatureCount = secondLayerDataFeatures?.length || 0;
         test.addStep(`Second layer feature count: ${secondFeatureCount}`);
 
         return {

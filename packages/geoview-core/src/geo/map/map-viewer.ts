@@ -25,6 +25,8 @@ import type {
   TypeDisplayTheme,
   TypeMapViewSettings,
   TypeStyleGeometry,
+  TypeMapMouseInfo,
+  TypeMapState,
 } from '@/api/types/map-schema-types';
 import {
   MAP_CENTER,
@@ -42,6 +44,7 @@ import { LayerApi } from '@/geo/layer/layer';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { Projection } from '@/geo/utils/projection';
 
+import { ControllerRegistry } from '@/core/controllers/controller-registry';
 import { Plugin } from '@/api/plugin/plugin';
 import { AppBarApi } from '@/core/components/app-bar/app-bar-api';
 import { NavBarApi } from '@/core/components/nav-bar/nav-bar-api';
@@ -59,25 +62,26 @@ import { Transform } from '@/geo/interaction/transform/transform';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
-import { delay, exitFullscreen, generateId, getLocalizedMessage, requestFullscreen, whenThisThen } from '@/core/utils/utilities';
+import { delay, generateId, getLocalizedMessage, whenThisThen } from '@/core/utils/utilities';
 import { debounce } from '@/core/utils/debounce';
-import { GeoUtilities } from '@/geo/utils/utilities';
-import { DateMgt, type TimeIANA } from '@/core/utils/date-mgt';
+import { type TimeIANA } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { NORTH_POLE_POSITION, TIMEOUT } from '@/core/utils/constant';
 import type { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
-import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
 import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
-import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { getStoreDisplayTheme } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { setStoreLayerSelectedLayersTabLayer, type TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { GeoUtilities } from '@/geo/utils/utilities';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 import { Fetch } from '@/core/utils/fetch-helper';
 import type { PluginsContainer } from '@/api/plugin/plugin-types';
 import type { AbstractPlugin } from '@/api/plugin/abstract-plugin';
+import { UIDomain } from '@/core/domains/ui-domain';
+import { LayerDomain } from '@/core/domains/layer-domain';
 
 /**
  * Class used to manage created maps.
@@ -140,11 +144,18 @@ export class MapViewer {
   /** Modals creation */
   modal: ModalApi;
 
+  /** The UI domain */
+  #uiDomain: UIDomain;
+
+  /** The Layer domain */
+  #layerDomain: LayerDomain;
+
+  /** The controller registry owning all framework-level controllers */
+  controllers: ControllerRegistry;
+
+  // max number of icons cached
   /** Max number of icons cached */
   iconImageCacheSize: number;
-
-  /** The i18n instance */
-  #i18nInstance: i18n;
 
   /** Indicates if the map has been initialized */
   #mapInit = false;
@@ -260,15 +271,21 @@ export class MapViewer {
     this.mapId = mapFeaturesConfig.mapId;
     this.mapFeaturesConfig = mapFeaturesConfig;
 
-    this.#i18nInstance = i18instance;
-
     this.iconImageCacheSize = 1;
+
+    // Initialize the ui domain
+    this.#uiDomain = new UIDomain(i18instance, mapFeaturesConfig.displayLanguage ?? 'en');
+    this.#layerDomain = new LayerDomain();
+
+    // Initialize the controller registry
+    this.controllers = new ControllerRegistry(this, this.#uiDomain, this.#layerDomain);
+    this.controllers.hookControllers();
 
     this.appBarApi = new AppBarApi(this.mapId);
     this.navBarApi = new NavBarApi(this.mapId);
     this.footerBarApi = new FooterBarApi(this.mapId);
     this.stateApi = new StateApi(this.mapId);
-    this.notifications = new Notifications(this.mapId);
+    this.notifications = new Notifications(this.controllers.uiController);
 
     this.modal = new ModalApi();
 
@@ -276,7 +293,7 @@ export class MapViewer {
     this.basemap = new BasemapApi(this, MapEventProcessor.getBasemapOptions(this.mapId));
 
     // Initialize layer api
-    this.layer = new LayerApi(this);
+    this.layer = new LayerApi(this, this.controllers, this.#layerDomain);
 
     // Register handler when basemap has error
     this.basemap.onBasemapError((sender, event) => {
@@ -447,7 +464,7 @@ export class MapViewer {
    * @returns The display language
    */
   getDisplayLanguage(): TypeDisplayLanguage {
-    return AppEventProcessor.getDisplayLanguage(this.mapId);
+    return this.#uiDomain.getLanguage();
   }
 
   /**
@@ -456,7 +473,7 @@ export class MapViewer {
    * @returns The display theme
    */
   getDisplayTheme(): TypeDisplayTheme {
-    return AppEventProcessor.getDisplayTheme(this.mapId);
+    return getStoreDisplayTheme(this.mapId);
   }
 
   /**
@@ -565,12 +582,19 @@ export class MapViewer {
   }
 
   /**
-   * Gets the map projection.
-   *
+   * Gets the map projection
    * @returns The map projection
    */
   getProjection(): OLProjection {
     return this.getView().getProjection();
+  }
+
+  /**
+   * Gets the map projection number
+   * @returns The map projection number
+   */
+  getProjectionNumber(): number | undefined {
+    return Projection.readEPSGNumber(this.getProjection());
   }
 
   /**
@@ -588,7 +612,7 @@ export class MapViewer {
    * @returns The i18n instance
    */
   getI18nInstance(): i18n {
-    return this.#i18nInstance;
+    return this.#uiDomain.geti18n();
   }
 
   /**
@@ -607,32 +631,8 @@ export class MapViewer {
    * @param element - The element to toggle fullscreen on
    */
   setFullscreen(status: boolean, element: TypeHTMLElement | undefined): void {
-    // If entering fullscreen
-    if (status && element) {
-      // Request full screen on the element
-      requestFullscreen(element);
-    }
-
-    // exit fullscreen
-    if (!status) {
-      // Store the extent before any size changes occur
-      const currentExtent = this.getView().calculateExtent();
-
-      // Store the extent and other relevant information
-      const handleSizeChange = (): void => {
-        this.zoomToExtent(currentExtent, { padding: [0, 0, 0, 0] })
-          .then(() => {
-            this.map.renderSync(); // Force render
-          })
-          .catch((error: unknown) => {
-            logger.logError('Error during zoom after fullscreen exit:', error);
-          });
-      };
-
-      // Add the listener before exiting fullscreen
-      this.map.once('change:size', handleSizeChange);
-      exitFullscreen();
-    }
+    // Redirect to controller
+    this.controllers.uiController.setFullScreen(status, element);
   }
 
   /**
@@ -660,22 +660,24 @@ export class MapViewer {
    */
   async setLanguage(displayLanguage: TypeDisplayLanguage, reloadLayers?: boolean | false): Promise<void> {
     // If the language hasn't changed don't do anything
-    if (AppEventProcessor.getDisplayLanguage(this.mapId) === displayLanguage) return;
-    if (VALID_DISPLAY_LANGUAGE.includes(displayLanguage)) {
-      await AppEventProcessor.setDisplayLanguage(this.mapId, displayLanguage);
+    if (this.#uiDomain.getLanguage() === displayLanguage) return;
 
-      // if flag is true, reload just the GeoCore layers instead of reloading the whole map with current state
-      if (reloadLayers) {
-        this.layer.reloadGeocoreLayers();
-      }
-
-      // Emit language changed event
-      this.#emitMapLanguageChanged({ language: displayLanguage });
+    if (!VALID_DISPLAY_LANGUAGE.includes(displayLanguage)) {
+      // Unsupported
+      this.notifications.addNotificationError(getLocalizedMessage(displayLanguage, 'validation.changeDisplayLanguage'));
       return;
     }
 
-    // Unsupported
-    this.notifications.addNotificationError(getLocalizedMessage(displayLanguage, 'validation.changeDisplayLanguage'));
+    // Proceed
+    await this.controllers.uiController.setDisplayLanguage(displayLanguage);
+
+    // if flag is true, reload just the GeoCore layers instead of reloading the whole map with current state
+    if (reloadLayers) {
+      this.layer.reloadGeocoreLayers();
+    }
+
+    // Emit language changed event
+    this.#emitMapLanguageChanged({ language: displayLanguage });
   }
 
   /**
@@ -688,11 +690,8 @@ export class MapViewer {
    * @throws {InvalidTimezoneError} When the time zone is not a valid or supported IANA identifier
    */
   setDisplayDateTimezone(displayDateTimezone: TimeIANA): void {
-    // Validate the timezone
-    DateMgt.validateTimezone(displayDateTimezone);
-
     // Redirect to processor
-    AppEventProcessor.setDisplayDateTimezone(this.mapId, displayDateTimezone);
+    this.controllers.uiController.setDisplayDateTimezone(displayDateTimezone);
   }
 
   /**
@@ -735,7 +734,7 @@ export class MapViewer {
    */
   setTheme(displayTheme: TypeDisplayTheme): void {
     if (VALID_DISPLAY_THEME.includes(displayTheme)) {
-      AppEventProcessor.setDisplayTheme(this.mapId, displayTheme);
+      this.controllers.uiController.setDisplayTheme(displayTheme);
     } else this.notifications.addNotificationError(getLocalizedMessage(this.getDisplayLanguage(), 'validation.changeDisplayTheme'));
   }
 
@@ -908,19 +907,6 @@ export class MapViewer {
   }
 
   /**
-   * Add a localization ressource bundle for a supported language (fr, en).
-   *
-   * Then the new key added can be access from the utilities function getLocalizesMessage
-   * to reuse in ui from outside the core viewer.
-   *
-   * @param language - The language to add the resource for (en, fr)
-   * @param translations - The translation object to add
-   */
-  addLocalizeRessourceBundle(language: TypeDisplayLanguage, translations: Record<string, unknown>): void {
-    this.#i18nInstance.addResourceBundle(language, 'translation', translations, true, false);
-  }
-
-  /**
    * Emits a map single click event.
    *
    * NOTE: This Does not update the store, only emit the click.
@@ -975,7 +961,7 @@ export class MapViewer {
       resolveQuery();
 
       // Wait for UI batch propagation
-      delay(FeatureInfoEventProcessor.TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH)
+      delay(TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH)
         .then(() => {
           // Now resolve the promise about the completion of the query and batched through the UI
           resolveQueryBatched();
@@ -1023,6 +1009,9 @@ export class MapViewer {
   async delete(): Promise<void> {
     // Remove the dom element (remove rendered map and overview map)
     if (this.overviewRoot) this.overviewRoot.unmount();
+
+    // Unhook the controllers
+    this.controllers.unhookControllers();
 
     try {
       // Remove all layers
@@ -1855,7 +1844,7 @@ export class MapViewer {
     logger.logMarkerStart(`readyMap-${this.mapId}`);
 
     // Load the guide
-    AppEventProcessor.setGuide(this.mapId).catch((error: unknown) => {
+    this.controllers.uiController.createGuide().catch((error: unknown) => {
       // Log
       logger.logPromiseFailed('in AppEventProcessor.setGuide in #readyMap', error);
     });
@@ -1898,7 +1887,7 @@ export class MapViewer {
     // If there's a layer path that should be selected in footerBar or appBar configs, select it
     const selectedLayerPath =
       this.mapFeaturesConfig.footerBar?.selectedLayersLayerPath || this.mapFeaturesConfig.appBar?.selectedLayersLayerPath;
-    if (selectedLayerPath) LegendEventProcessor.setSelectedLayersTabLayerInStore(this.mapId, selectedLayerPath);
+    if (selectedLayerPath) setStoreLayerSelectedLayersTabLayer(this.mapId, selectedLayerPath);
 
     // Await for all layers to be 'loaded'
     await this.#checkMapLayersLoaded();
@@ -2501,29 +2490,6 @@ export class MapViewer {
 
   // #endregion
 }
-
-/**
- *  Definition of map state to attach to the map object for reference.
- */
-export type TypeMapState = {
-  currentProjection: number;
-  currentZoom: number;
-  mapCenterCoordinates: Coordinate;
-  mapExtent: Extent;
-  rotation: number;
-  singleClickedPosition: TypeMapMouseInfo;
-  pointerPosition: TypeMapMouseInfo;
-};
-
-/**
- * Type used to define the map mouse information
- * */
-export type TypeMapMouseInfo = {
-  lonlat: Coordinate;
-  pixel: Coordinate;
-  projected: Coordinate;
-  dragging: boolean;
-};
 
 /**
  * Type used when fetching geometry json

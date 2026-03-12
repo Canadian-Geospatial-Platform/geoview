@@ -12,12 +12,16 @@ import {
   Typography,
   ZoomInSearchIcon,
 } from '@/ui';
-import { useDetailsCheckedFeatures, useDetailsStoreActions } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import {
+  addStoreDetailsCheckedFeature,
+  removeStoreDetailsCheckedFeature,
+  useDetailsCheckedFeatures,
+} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
+  setStoreGeochartSelectedLayerPath,
   useGeochartConfigs,
   useGeochartLayerDataArrayBatch,
-  useGeochartStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/geochart-state';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 import { logger } from '@/core/utils/logger';
@@ -27,6 +31,7 @@ import type { TypeContainerBox } from '@/core/types/global-types';
 import { FeatureInfoTable } from './feature-info-table';
 import { getSxClasses } from './details-style';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 interface FeatureInfoProps {
   feature: TypeFeatureInfoEntry;
@@ -172,18 +177,14 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
   const [checked, setChecked] = useState<boolean>(false);
 
   // Store
+  const mapId = useGeoViewMapId();
   const checkedFeatures = useDetailsCheckedFeatures();
-  const { addCheckedFeature, removeCheckedFeature } = useDetailsStoreActions();
   const { zoomToExtent, highlightBBox, addHighlightedFeature } = useMapStoreActions();
   const geochartLayerDataArrayBatch = useGeochartLayerDataArrayBatch();
-  const { setSelectedLayerPath } = useGeochartStoreActions() ?? {};
   const geochartConfigs = useGeochartConfigs();
 
   // Use navigate hook for geochart (only if geochart state exists)
-  const navigateToGeochart = useNavigateToTab(
-    'geochart',
-    setSelectedLayerPath ? (layerPath: string) => setSelectedLayerPath(layerPath) : undefined
-  );
+  const navigateToGeochart = useNavigateToTab('geochart', setStoreGeochartSelectedLayerPath);
 
   /**
    * Memoize the feature name
@@ -238,13 +239,13 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
       // If feature is checked
       if (checkedState) {
         // Add
-        addCheckedFeature(feature);
+        addStoreDetailsCheckedFeature(mapId, feature);
       } else {
         // Remove
-        removeCheckedFeature(feature);
+        removeStoreDetailsCheckedFeature(mapId, feature);
       }
     },
-    [feature, addCheckedFeature, removeCheckedFeature]
+    [mapId, feature]
   );
 
   /**

@@ -1,12 +1,10 @@
 import type { GeoChartConfig, ChartType, GeoChartDefaultColors, SchemaValidator, GeoChartAction } from 'geochart';
 import { GeoChart as GeoChartComponent } from 'geochart';
-import {
-  useAppDisplayLanguageById,
-  useAppStoreActions,
-  useDisplayDateTimezone,
-} from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+
+import { useAppDisplayLanguageById, useDisplayDateTimezone } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { useLayerDisplayDateFormatShort } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
+import { useUIController } from 'geoview-core/core/controllers/ui-controller';
 import { MapEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/map-event-processor';
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
@@ -59,7 +57,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   const displayLanguage = useAppDisplayLanguageById(mapId);
   const displayDateFormatShort = useLayerDisplayDateFormatShort(layerPath);
   const displayDateTimezone = useDisplayDateTimezone();
-  const { addNotification } = useAppStoreActions();
+  const uiController = useUIController();
 
   // Provide the callback to redraw this component to the parent component
   provideCallbackRedraw?.(() => {
@@ -101,9 +99,9 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
       logger.logTraceUseCallback('GEOVIEW-GEOCHART - handleError', mapId, errorMessage);
 
       // Show error
-      addNotification({ key: 'geochart', message: errorMessage, notificationType: 'error', count: 0 });
+      uiController.addNotification({ key: 'geochart', message: errorMessage, notificationType: 'error', count: 0 });
     },
-    [addNotification, mapId]
+    [uiController, mapId]
   );
 
   /**

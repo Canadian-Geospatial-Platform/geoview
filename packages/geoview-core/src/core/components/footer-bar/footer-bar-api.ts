@@ -1,5 +1,4 @@
 import type { TypeTabs } from '@/ui/tabs/tabs';
-import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
 
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
@@ -129,22 +128,6 @@ export class FooterBarApi {
       // trigger an event that a tab has been removed
       this.#emitFooterTabRemoved({ tabid: id });
     }
-  }
-
-  /**
-   * Shows a tab by id.
-   * @param {string} id - The id of the tab to be shown
-   */
-  showTabButton(id: string): void {
-    UIEventProcessor.showTabButton(this.mapId, id);
-  }
-
-  /**
-   * Selects a tab by id, if the id is not a tab, the footer bar will close
-   * @param {string} id - The id of the tab to be selected
-   */
-  selectTab(id: string): void {
-    UIEventProcessor.setActiveFooterBarTab(this.mapId, id);
   }
 }
 

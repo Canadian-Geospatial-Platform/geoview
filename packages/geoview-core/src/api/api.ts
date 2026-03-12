@@ -1,6 +1,5 @@
 import { ConfigApi } from '@/api/config/config-api';
 
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { Plugin } from '@/api/plugin/plugin';
 
 import { DateMgt } from '@/core/utils/date-mgt';
@@ -46,7 +45,7 @@ export class API {
    */
   constructor() {
     // apply focus to element when keyboard navigation is use
-    API.#manageKeyboardFocus();
+    API.#manageKeyboardFocus(this);
   }
 
   /**
@@ -250,7 +249,7 @@ export class API {
    *
    * Code from: https://github.com/MaxMaeder/keyboardFocus.js
    */
-  static #manageKeyboardFocus(): void {
+  static #manageKeyboardFocus(apiInstance: API): void {
     // Remove the 'keyboard-focused' class from any elements that have it
     function removeFocusedClass(): void {
       const previouslyFocusedElement = document.getElementsByClassName('keyboard-focused')[0];
@@ -279,7 +278,10 @@ export class API {
 
           // Only log if map is in focus, if not... too much logging
           if (mapFocus) logger.logInfo(`Map ${mapId} focus and crosshair is enabled`, [mapFocus]);
-          AppEventProcessor.setAppIsCrosshairActive(mapId, mapFocus);
+
+          // Get the associated MapViewer
+          const mapViewer = apiInstance.getMapViewer(mapId);
+          mapViewer.controllers.uiController.setCrosshairActive(mapFocus);
         }
       }
     });

@@ -32,6 +32,7 @@ import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 import { InitMapWrongCallError } from '@/core/exceptions/geoview-exceptions';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { MapViewer } from '@/geo/map/map-viewer';
+import { AbstractEventProcessor } from './api/event-processors/abstract-event-processor';
 
 // The next export allow to import the exernal-types from 'geoview-core' from outside of the geoview-core package.
 export * from './core/types/external-types';
@@ -240,6 +241,9 @@ async function renderMap(mapElement: HTMLElement): Promise<MapViewer> {
   // create a new map viewer instance and add it to the api
   const mapViewer = new MapViewer(configuration, i18n);
   api.setMapViewer(mapId, mapViewer);
+
+  // Initialize the event processors with the map viewer
+  AbstractEventProcessor.initializeMapViewer(mapId, mapViewer);
 
   // Create a promise to be resolved when the MapViewer is initialized via the AppStart component
   reactRoots[mapId].render(<AppStart mapViewer={mapViewer} i18nLang={i18n} />);

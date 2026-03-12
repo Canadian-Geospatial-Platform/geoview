@@ -18,7 +18,6 @@ import {
 } from '@/ui';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import {
-  useLayerStoreActions,
   useLayerDisplayState,
   useLayerSelectedLayerPath,
   useLayerSelectorName,
@@ -28,6 +27,7 @@ import {
   useLayerSelectorControls,
   useLayerSelectorChildren,
   useLayerSelectorItems,
+  setStoreLayerSelectedLayersTabLayer,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
   useMapStoreActions,
@@ -40,7 +40,6 @@ import { DeleteUndoButton } from '@/core/components/layers/delete-undo-button';
 import { LayersList } from './layers-list';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { logger } from '@/core/utils/logger';
-import { useDataTableStoreActions } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { ArrowDownwardIcon, ArrowUpIcon, CenterFocusScaleIcon, LoopIcon } from '@/ui/icons';
 import { Divider } from '@/ui/divider/divider';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
@@ -49,6 +48,8 @@ import { scrollListItemIntoView } from '@/core/utils/utilities';
 import { TIMEOUT, TABS } from '@/core/utils/constant';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 interface SingleLayerProps {
   layerPath: string;
@@ -84,15 +85,12 @@ export function SingleLayer({
   const reloadRequestedRef = useRef<boolean>(false);
 
   // Get store states
-  const { reloadLayer, setSelectedLayerPath, zoomToLayerVisibleScale } = useLayerStoreActions();
   const { setOrToggleLayerVisibility, toggleLegendCollapsed, reorderLayer } = useMapStoreActions();
   const mapId = useGeoViewMapId();
   const selectedLayerPath = useLayerSelectedLayerPath();
   const displayState = useLayerDisplayState();
   const layerIsSelected = layerPath === selectedLayerPath && displayState === 'view';
   const isKeyboardNavigationMode = useUIActiveTrapGeoView();
-
-  useDataTableStoreActions();
 
   const isVisible = useMapSelectorLayerVisibility(layerPath);
   const inVisibleRange = useMapSelectorLayerInVisibleRange(layerPath);
@@ -219,13 +217,13 @@ export function SingleLayer({
       logger.logTraceUseCallback('SINGLE-LAYER - selectLayerIfNeeded');
 
       if (!layerIsSelected && ['processed', 'loaded'].includes(layerStatus!)) {
-        setSelectedLayerPath(layerPath);
+        setStoreLayerSelectedLayersTabLayer(mapId, layerPath);
         if (openPanel) {
           showLayerDetailsPanel?.(layerId || '');
         }
       }
     },
-    [layerIsSelected, layerStatus, layerPath, layerId, setSelectedLayerPath, showLayerDetailsPanel]
+    [mapId, layerIsSelected, layerStatus, layerPath, layerId, showLayerDetailsPanel]
   );
 
   /**
@@ -280,9 +278,9 @@ export function SingleLayer({
     blurOtherLayerButtons();
 
     // Set selected layer path
-    setSelectedLayerPath(layerPath);
+    setStoreLayerSelectedLayersTabLayer(mapId, layerPath);
     showLayerDetailsPanel?.(layerId || '');
-  }, [layerPath, layerId, layerStatus, setSelectedLayerPath, showLayerDetailsPanel, blurOtherLayerButtons]);
+  }, [mapId, layerPath, layerId, layerStatus, showLayerDetailsPanel, blurOtherLayerButtons]);
 
   const handleArrowClick = useCallback(
     (direction: number) => {
@@ -408,8 +406,8 @@ export function SingleLayer({
     selectLayerIfNeeded();
 
     // Zoom to visible scale
-    zoomToLayerVisibleScale(layerPath);
-  }, [layerPath, selectLayerIfNeeded, zoomToLayerVisibleScale]);
+    MapEventProcessor.zoomToLayerVisibleScale(mapId, layerPath);
+  }, [layerPath, mapId, selectLayerIfNeeded]);
 
   const handleZoomToLayerVisibleScaleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>): void => {
@@ -421,7 +419,7 @@ export function SingleLayer({
         selectLayerIfNeeded(false);
 
         // Zoom to visible scale
-        zoomToLayerVisibleScale(layerPath);
+        MapEventProcessor.zoomToLayerVisibleScale(mapId, layerPath);
 
         // Allow the zoom to visible scale action to work
         event.preventDefault();
@@ -432,7 +430,7 @@ export function SingleLayer({
         });
       }
     },
-    [layerPath, zoomToLayerVisibleScale, selectLayerIfNeeded, layerListItemButtonId]
+    [layerPath, mapId, selectLayerIfNeeded, layerListItemButtonId]
   );
 
   const handleReload = useCallback((): void => {
@@ -443,8 +441,8 @@ export function SingleLayer({
     selectLayerIfNeeded();
 
     // Reload layer
-    reloadLayer(layerPath);
-  }, [layerPath, selectLayerIfNeeded, reloadLayer]);
+    LegendEventProcessor.reloadLayer(mapId, layerPath);
+  }, [mapId, layerPath, selectLayerIfNeeded]);
 
   const handleReloadKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>): void => {
@@ -459,13 +457,13 @@ export function SingleLayer({
         reloadRequestedRef.current = true;
 
         // Reload layer
-        reloadLayer(layerPath);
+        LegendEventProcessor.reloadLayer(mapId, layerPath);
 
         // Allow the reload action to work
         event.preventDefault();
       }
     },
-    [layerPath, reloadLayer, selectLayerIfNeeded]
+    [mapId, layerPath, selectLayerIfNeeded]
   );
 
   // Handlers for keyboard navigation of the sorting arrows and action buttons for accessibility

@@ -1,12 +1,12 @@
 import { useCallback, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { List } from '@/ui';
-import { useMapOrderedLayers } from '@/core/stores';
 import { logger } from '@/core/utils/logger';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import { SingleLayer } from './single-layer';
 import { getSxClasses } from './left-panel-styles';
 import type { TypeContainerBox } from '@/core/types/global-types';
+import { useMapOrderedLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 interface LayerListProps {
   depth: number;

@@ -10,6 +10,11 @@ import { TimeSliderPanel } from './time-slider-panel';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-time-slider-panel.json';
 import type { ConfigProps } from './time-slider-types';
+import {
+  setStoreTimeSliderDisplayDateFormat,
+  setStoreTimeSliderDisplayDateFormatShort,
+  setStoreTimeSliderDisplayDateTimezone,
+} from 'geoview-core/core/stores/store-interface-and-intial-values/time-slider-state';
 
 /** Properties for the slider filter configuration. */
 export interface SliderFilterProps {
@@ -194,8 +199,8 @@ class TimeSliderPlugin extends FooterPlugin {
     let displayDateFormatToSet: TypeDisplayDateFormat = displayDateFormat as TypeDisplayDateFormat;
     if (typeof displayDateFormat === 'string') displayDateFormatToSet = { en: displayDateFormat, fr: displayDateFormat };
 
-    // Redirect to processor
-    TimeSliderEventProcessor.setDisplayDateFormat(this.mapViewer.mapId, layerPath, displayDateFormatToSet);
+    // Save in the store
+    setStoreTimeSliderDisplayDateFormat(this.mapViewer.mapId, layerPath, displayDateFormatToSet);
   }
 
   /**
@@ -209,8 +214,8 @@ class TimeSliderPlugin extends FooterPlugin {
     let displayDateFormatToSet: TypeDisplayDateFormat = displayDateFormat as TypeDisplayDateFormat;
     if (typeof displayDateFormat === 'string') displayDateFormatToSet = { en: displayDateFormat, fr: displayDateFormat };
 
-    // Redirect to processor
-    TimeSliderEventProcessor.setDisplayDateFormatShort(this.mapViewer.mapId, layerPath, displayDateFormatToSet);
+    // Save in the store
+    setStoreTimeSliderDisplayDateFormatShort(this.mapViewer.mapId, layerPath, displayDateFormatToSet);
   }
 
   /**
@@ -224,8 +229,8 @@ class TimeSliderPlugin extends FooterPlugin {
     // Validate the timezone before sending it in the store in order to protect the ui
     DateMgt.validateTimezone(displayDateTimezone);
 
-    // Redirect to processor
-    TimeSliderEventProcessor.setDisplayDateTimezone(this.mapViewer.mapId, layerPath, displayDateTimezone);
+    // Save in the store
+    setStoreTimeSliderDisplayDateTimezone(this.mapViewer.mapId, layerPath, displayDateTimezone);
   }
 
   /**

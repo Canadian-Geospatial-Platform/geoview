@@ -21,7 +21,7 @@ import { Fetch } from '@/core/utils/fetch-helper';
 import { Projection } from '@/geo/utils/projection';
 import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES, validVectorLayerLegendTypes } from '@/api/types/layer-schema-types';
-import type { TypeOutfields, TypeStyleGeometry, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
+import type { TypeMapMouseInfo, TypeOutfields, TypeStyleGeometry, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
 import type {
   TypeGeoviewLayerType,
   TypeMetadataWMS,
@@ -30,7 +30,6 @@ import type {
   TypeStylesWMS,
 } from '@/api/types/layer-schema-types';
 import type { TypeBasemapLayer } from '@/geo/layer/basemap/basemap-types';
-import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { NetworkError, NotSupportedError, ResponseEmptyError } from '@/core/exceptions/core-exceptions';
 import type { TypeMetadataWMTS } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
