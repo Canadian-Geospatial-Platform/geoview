@@ -1,11 +1,12 @@
-import type { TypeWindow } from 'geoview-core';
+import { type TypeWindow } from 'geoview-core';
 import { getSxClasses } from 'geoview-core/core/components/nav-bar/nav-bar-style';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
-import { useDrawerActions, useDrawerIsEditing } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
+import { useDrawerIsEditing } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 
 import { IconButton, EditIcon, EditOffIcon } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
+import { useDrawerController } from 'geoview-core/core/controllers/drawer-controller';
 
 /**
  * Creates an edit button to toggle editing capabilities.
@@ -25,15 +26,13 @@ export default function Edit(): JSX.Element {
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const displayLanguage = useAppDisplayLanguage();
   const isEditing = useDrawerIsEditing();
-
-  // Store actions
-  const { toggleEditing } = useDrawerActions();
+  const drawerController = useDrawerController();
 
   /**
    * Handles a click on the edit button
    */
   const handleToggleEditing = (): void => {
-    toggleEditing();
+    drawerController.toggleEditing();
   };
 
   return (

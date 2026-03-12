@@ -15,7 +15,6 @@ import EventHelper from '@/api/events/event-helper';
 import { setAlphaColor, getScriptAndAssetURL, generateId } from '@/core/utils/utilities';
 import type { TypeStyleGeometry } from '@/api/types/map-schema-types';
 import { Projection } from '@/geo/utils/projection';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 
 import type { TypeFeatureCircleStyle, TypeFeatureStyle, TypeIconStyle } from '@/geo/layer/geometry/geometry-types';
@@ -35,8 +34,8 @@ interface FeatureCollection {
  * Class used to manage vector geometries (Polyline, Polygon, Circle, Marker...).
  */
 export class GeometryApi {
-  /** The map id */
-  #mapId: string;
+  /** Reference on the map viewer */
+  #mapViewer: MapViewer;
 
   /** The geometry groups */
   #geometryGroups: FeatureCollection[] = [];
@@ -50,9 +49,6 @@ export class GeometryApi {
   /** The index of the active geometry group used to add new geometries in the map */
   #activeGeometryGroupIndex = 0;
 
-  /** Reference to the map viewer */
-  #mapViewer: MapViewer;
-
   /** Callback delegates for the geometry added event */
   #onGeometryAddedHandlers: GeometryAddedDelegate[] = [];
 
@@ -63,7 +59,6 @@ export class GeometryApi {
    */
   constructor(mapViewer: MapViewer) {
     this.#mapViewer = mapViewer;
-    this.#mapId = mapViewer.mapId;
   }
 
   /**
@@ -123,7 +118,7 @@ export class GeometryApi {
     const polyline = new Feature({
       geometry: new LineString(points, polylineOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        Projection.PROJECTIONS[MapEventProcessor.getMapState(this.#mapId).currentProjection]
+        this.#mapViewer.getProjection()
       ),
     });
 
@@ -196,7 +191,7 @@ export class GeometryApi {
     const polygon = new Feature({
       geometry: new Polygon(points, polygonOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        Projection.PROJECTIONS[MapEventProcessor.getMapState(this.#mapId).currentProjection]
+        this.#mapViewer.getProjection()
       ),
     });
 
@@ -267,11 +262,7 @@ export class GeometryApi {
 
     const projectionConv = Projection.getProjectionFromString(`EPSG:${options?.projection || 4326}`);
 
-    const projectedCoordinates = Projection.transform(
-      coordinate,
-      projectionConv,
-      Projection.PROJECTIONS[MapEventProcessor.getMapState(this.#mapId).currentProjection]
-    );
+    const projectedCoordinates = Projection.transform(coordinate, projectionConv, this.#mapViewer.getProjection());
 
     // get radius, if not defined, set default
     const radius = circleOptions.style !== undefined ? circleOptions.style.radius || 1 : 1;
@@ -360,7 +351,7 @@ export class GeometryApi {
     const marker = new Feature({
       geometry: new Point(coordinate, markerOptions.geometryLayout).transform(
         `EPSG:${options?.projection || 4326}`,
-        Projection.PROJECTIONS[MapEventProcessor.getMapState(this.#mapId).currentProjection]
+        this.#mapViewer.getProjection()
       ),
     });
 
@@ -738,8 +729,7 @@ export class GeometryApi {
     }
 
     if (coords && projection) {
-      const mapProjection = Projection.PROJECTIONS[MapEventProcessor.getMapState(this.#mapId).currentProjection];
-      const mapProjectionCode = mapProjection.getCode();
+      const mapProjectionCode = this.#mapViewer.getProjection().getCode();
       const transformProjection = `EPSG:${projection}`;
       coords = Projection.transformCoordinates(coords, mapProjectionCode, transformProjection);
     }
@@ -761,7 +751,7 @@ export class GeometryApi {
   ): void {
     const feature = this.getGeometry(featureId);
     const featureGeometry = feature.getGeometry();
-    const mapProjection = Projection.PROJECTIONS[MapEventProcessor.getMapState(this.#mapId).currentProjection].getCode();
+    const mapProjection = this.#mapViewer.getProjection().getCode();
     const coordsProjection = `EPSG:${projection || 4326}`;
     const projectedCoordinates = Projection.transformCoordinates(coordinates, coordsProjection, mapProjection);
 

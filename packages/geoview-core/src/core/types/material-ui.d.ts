@@ -3,8 +3,19 @@ import type { IGeoViewColors, IGeoViewFontSizes, IGeoViewSpacingAndSizing } from
 
 /** MUI theme augmentation. See https://material-ui.com/guides/typescript/ */
 
-/** Shape configuration for the MUI theme. */
-type Shape = {
+/**
+ * Custom shape overrides for the MUI theme.
+ *
+ * This type MUST be exported so that TypeScript emits this file to the
+ * declaration output (`lib/`). Without at least one export, `.d.ts` files
+ * containing only ambient `declare module` blocks are silently excluded
+ * from the build output, which prevents plugin packages from seeing the
+ * MUI augmentations (e.g. `geoViewColor` on `Palette`) during `rush build`.
+ *
+ * The re-export in `external-types.ts` (`export * from './material-ui.d'`)
+ * then pulls this file into the module graph for all consumers.
+ */
+export type Shape = {
   borderRadius: number | string;
   left: string;
   center: string;

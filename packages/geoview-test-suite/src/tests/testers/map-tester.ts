@@ -1,21 +1,26 @@
+import type { Coordinate } from 'ol/coordinate';
+
 import { TestError } from '../core/exceptions';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import { delay } from 'geoview-core/core/utils/utilities';
-import type { TypeMapState } from 'geoview-core/geo/map/map-viewer';
-import type { TypeMapFeaturesConfig } from 'geoview-core/core/types/global-types';
-import { MapEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/map-event-processor';
-import type { Extent, TypeBasemapId, TypeValidMapProjectionCodes } from 'geoview-core/api/types/map-schema-types';
-import { AppEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/app-event-processor';
-import { UIEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/ui-event-processor';
-import type { Coordinate } from 'ol/coordinate';
-import { FeatureInfoEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/feature-info-event-processor';
-import type {
-  TypeFeatureInfoResultSetEntry,
-  TypeHoverFeatureInfo,
+import type { Extent, TypeBasemapId, TypeMapState, TypeValidMapProjectionCodes } from 'geoview-core/api/types/map-schema-types';
+import {
+  getStoreDetailsFeatures,
+  getStoreDetailsSelectedLayerPath,
+  setStoreDetailsSelectedLayerPath,
+  type TypeFeatureInfoResultSetEntry,
+  type TypeHoverFeatureInfo,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/feature-info-state';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { Projection } from 'geoview-core/geo/utils/projection';
+import { getStoreActiveAppBarTab, getStoreActiveFooterBarTab } from 'geoview-core/core/stores/store-interface-and-intial-values/ui-state';
+import { getStoreDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import {
+  getStoreMapConfigViewSettingsProjection,
+  getStoreMapHoverFeatureInfo,
+  getStoreMapStateJson,
+} from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 
 /**
  * Main Map testing class.
@@ -38,7 +43,7 @@ export class MapTester extends GVAbstractTester {
    */
   testInitialMapState(): Promise<Test<TypeMapState>> {
     // Get the projection
-    const { projection } = this.#getMapConfigFromStore().map.viewSettings;
+    const projection = getStoreMapConfigViewSettingsProjection(this.getMapId());
 
     // The expected map state configuration including the current projection
     const expectedConfig: Record<string, unknown> = {
@@ -50,7 +55,7 @@ export class MapTester extends GVAbstractTester {
       'Test projection',
       () => {
         // Return the map state
-        return MapEventProcessor.getMapState(this.getMapId());
+        return getStoreMapStateJson(this.getMapId());
       },
       (test, result) => {
         // Perform assertions
@@ -69,7 +74,7 @@ export class MapTester extends GVAbstractTester {
    */
   testMapZoom(zoomEnd: number, zoomDuration: number): Promise<Test<number>> {
     // Get the current zoom
-    const { currentZoom } = MapEventProcessor.getMapState(this.getMapId());
+    const { currentZoom } = getStoreMapStateJson(this.getMapId());
 
     // Test the projection
     return this.test(
@@ -80,7 +85,7 @@ export class MapTester extends GVAbstractTester {
 
         // Perform a zoom
         test.addStep('Performing zoom...');
-        await MapEventProcessor.zoomMap(this.getMapId(), zoomEnd, zoomDuration);
+        await this.getMapViewer().controllers.mapController.zoomMap(zoomEnd, zoomDuration);
 
         // Return the result
         return zoomEnd;
@@ -88,12 +93,12 @@ export class MapTester extends GVAbstractTester {
       (test, result) => {
         // Perform assertions
         test.addStep('Verifying expected zoom in the store...');
-        Test.assertIsEqual(MapEventProcessor.getMapState(this.getMapId()).currentZoom, result);
+        Test.assertIsEqual(getStoreMapStateJson(this.getMapId()).currentZoom, result);
       },
       async (test) => {
         // Unzooms to original position
         test.addStep('Unzooms to the original zoom...');
-        await MapEventProcessor.zoomMap(this.getMapId(), currentZoom, zoomDuration);
+        await this.getMapViewer().controllers.mapController.zoomMap(currentZoom, zoomDuration);
       }
     );
   }
@@ -119,10 +124,10 @@ export class MapTester extends GVAbstractTester {
     zoomLevel: number
   ): Promise<Test<Extent>> {
     // Zoom to initial extent
-    await MapEventProcessor.zoomToInitialExtent(this.getMapId());
+    await this.getMapViewer().controllers.mapController.zoomToInitialExtent();
 
     // Get the current init extent
-    const { mapExtent, currentProjection } = MapEventProcessor.getMapState(this.getMapId());
+    const { mapExtent, currentProjection } = getStoreMapStateJson(this.getMapId());
 
     // Test the projection/initial extent
     return this.test(
@@ -134,28 +139,28 @@ export class MapTester extends GVAbstractTester {
 
         // Perform a projection switch
         test.addStep(`Performing projection switch to ${secondProjection}...`);
-        await MapEventProcessor.setProjection(this.getMapId(), secondProjection);
+        await this.getMapViewer().controllers.mapController.setProjection(secondProjection);
 
         // Update the step
         test.addStep(`Performing zoom to level ${zoomLevel}...`);
 
         // Perform a zoom
-        await MapEventProcessor.zoomMap(this.getMapId(), zoomLevel, 1000);
+        await this.getMapViewer().controllers.mapController.zoomMap(zoomLevel, 1000);
 
         // Update the step
         test.addStep('Performing projection switch to original...');
 
         // Perform a projection switch
-        await MapEventProcessor.setProjection(this.getMapId(), initialProjection);
+        await this.getMapViewer().controllers.mapController.setProjection(initialProjection);
 
         // Update the step
         test.addStep('Performing zomm to inital extent...');
 
         // Zoom to initial extent
-        await MapEventProcessor.zoomToInitialExtent(this.getMapId());
+        await this.getMapViewer().controllers.mapController.zoomToInitialExtent();
 
         // Return the result
-        return MapEventProcessor.getMapState(this.getMapId()).mapExtent;
+        return getStoreMapStateJson(this.getMapId()).mapExtent;
       },
       (test, result) => {
         // Perform assertions
@@ -186,7 +191,7 @@ export class MapTester extends GVAbstractTester {
       (test) => {
         // Add a circle to a new geometry group
         test.addStep('Adding circle to test group...');
-        this.getMapViewer().layer.geometry.addCircle(
+        this.getGeometryApi().addCircle(
           circleCoords,
           {
             projection: 4326,
@@ -204,16 +209,16 @@ export class MapTester extends GVAbstractTester {
 
         // Get the initial z-index
         test.addStep('Getting initial z-index...');
-        const initialZIndex = this.getMapViewer().layer.geometry.getGeometryGroupZIndex(testGroupId);
+        const initialZIndex = this.getGeometryApi().getGeometryGroupZIndex(testGroupId);
 
         // Set z-index to 0
         test.addStep(`Initial z-index: ${initialZIndex}`);
         test.addStep('Setting z-index to 0...');
-        this.getMapViewer().layer.geometry.setGeometryGroupZIndex(testGroupId, 0);
+        this.getGeometryApi().setGeometryGroupZIndex(testGroupId, 0);
 
         // Get the z-index again
         test.addStep('Getting final z-index...');
-        const finalZIndex = this.getMapViewer().layer.geometry.getGeometryGroupZIndex(testGroupId);
+        const finalZIndex = this.getGeometryApi().getGeometryGroupZIndex(testGroupId);
 
         // Return both values
         test.addStep(`Final z-index: ${finalZIndex}`);
@@ -230,21 +235,9 @@ export class MapTester extends GVAbstractTester {
       (test) => {
         // Cleanup: remove the test group
         test.addStep('Cleaning up test geometry group...');
-        this.getMapViewer().layer.geometry.deleteGeometryGroup(testGroupId);
+        this.getGeometryApi().deleteGeometryGroup(testGroupId);
       }
     );
-  }
-
-  /**
-   * Gets the map config from the store.
-   *
-   * @returns The map config as read from the store
-   */
-  #getMapConfigFromStore(): TypeMapFeaturesConfig {
-    // Redirect
-    const mapConfig = MapEventProcessor.getGeoViewMapConfig(this.getMapId());
-    if (!mapConfig) throw new TestError(`Map config for map id ${this.getMapId()} couldn't be read from store`);
-    return mapConfig;
   }
 
   /**
@@ -266,7 +259,7 @@ export class MapTester extends GVAbstractTester {
 
         // Transform extent and handle potential undefined return
         return Projection.transformExtentFromProj(
-          MapEventProcessor.getMapState(this.getMapId()).mapExtent,
+          getStoreMapStateJson(this.getMapId()).mapExtent,
           this.getMapViewer().getProjection(),
           Projection.getProjectionLonLat()
         );
@@ -300,7 +293,7 @@ export class MapTester extends GVAbstractTester {
         // Transform coordinates
         return Promise.resolve(
           Projection.transformCoordinates(
-            MapEventProcessor.getMapState(this.getMapId()).mapCenterCoordinates,
+            getStoreMapStateJson(this.getMapId()).mapCenterCoordinates,
             this.getMapViewer().getProjection().getCode(),
             'EPSG:4326'
           ) as Coordinate
@@ -327,7 +320,7 @@ export class MapTester extends GVAbstractTester {
         test.addStep(`Selecting footer bar tab '${targetTab}'...`);
 
         // Select the tab
-        this.getMapViewer().footerBarApi.selectTab(targetTab);
+        this.getControllersRegistry().uiController.setActiveFooterBarTab(targetTab);
 
         // Wait for tab selection to complete
         await delay(500);
@@ -336,7 +329,7 @@ export class MapTester extends GVAbstractTester {
       },
       (test, result) => {
         test.addStep('Verifying tab is selected...');
-        const { tabId } = UIEventProcessor.getActiveFooterBarTab(this.getMapId());
+        const { tabId } = getStoreActiveFooterBarTab(this.getMapId());
         Test.assertIsEqual(tabId, result);
       }
     );
@@ -356,7 +349,7 @@ export class MapTester extends GVAbstractTester {
         test.addStep(`Selecting app bar tab '${targetTab}'...`);
 
         // Select the tab
-        this.getMapViewer().appBarApi.selectTab(targetTab);
+        this.getControllersRegistry().uiController.setActiveAppBarTab(targetTab, true, true);
 
         // Wait for tab selection to complete
         await delay(500);
@@ -365,7 +358,7 @@ export class MapTester extends GVAbstractTester {
       },
       (test, result) => {
         test.addStep('Verifying tab is selected...');
-        const activeTab = UIEventProcessor.getActiveAppBarTab(this.getMapId());
+        const activeTab = getStoreActiveAppBarTab(this.getMapId());
         Test.assertIsEqual(activeTab?.tabId, result);
       }
     );
@@ -424,14 +417,17 @@ export class MapTester extends GVAbstractTester {
       async (test) => {
         test.addStep(`Changing language to '${targetLanguage}'...`);
 
-        if (AppEventProcessor.getDisplayLanguage(this.getMapId()) === 'fr') {
+        // If either the domain or the store language is set to 'fr'.
+        // We typically only need to check the domain, but in this test we can check both too as we'll be asserting the result in the store later.
+        if (this.getMapViewer().getDisplayLanguage() === 'fr' || getStoreDisplayLanguage(this.getMapId()) === 'fr') {
           throw new TestError(`False precondition, language is already set to '${targetLanguage}'`);
         }
 
         // Set language
         await this.getMapViewer().setLanguage(targetLanguage);
 
-        return AppEventProcessor.getDisplayLanguage(this.getMapId());
+        // Return the display language as read from the store
+        return getStoreDisplayLanguage(this.getMapId());
       },
       (test, result) => {
         test.addStep('Verifying language changed...');
@@ -508,12 +504,12 @@ export class MapTester extends GVAbstractTester {
       'Test north arrow rotation in LCC projection for British Columbia',
       async (test) => {
         // Get current projection
-        const { currentProjection } = MapEventProcessor.getMapState(this.getMapId());
+        const { currentProjection } = getStoreMapStateJson(this.getMapId());
 
         // Switch to LCC projection if not already there
         if (currentProjection !== 3978) {
           test.addStep('Switching to LCC projection (3978)...');
-          await MapEventProcessor.setProjection(this.getMapId(), 3978);
+          await this.getMapViewer().controllers.mapController.setProjection(3978);
         }
 
         test.addStep('Zooming to British Columbia extent...');
@@ -572,7 +568,7 @@ export class MapTester extends GVAbstractTester {
       'Test non-queryable layer not in details after map click',
       async (test) => {
         // Get the layer
-        const layer = this.getLayerApi().getGeoviewLayerRegular(layerPath);
+        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
 
         // The layer should be initially queryable
         if (!layer.getQueryable()) throw new TestError(`False precondition, the layer ${layerPath} wasn't initially queryable.`);
@@ -582,7 +578,7 @@ export class MapTester extends GVAbstractTester {
 
         // Perform a map click using the feature info layer set
         test.addStep(`Perform query operation at given coordinates...`);
-        const results1 = await this.getLayerApi().featureInfoLayerSet.queryLayers(lonlat);
+        const results1 = await this.getControllersRegistry().layerSetController.queryAtLonLat(lonlat);
 
         // Check if there is feature selected from the layer
         test.addStep(`Checking for features from layer '${layerPath}'...`);
@@ -597,7 +593,7 @@ export class MapTester extends GVAbstractTester {
 
         // Perform a map click using the feature info layer set
         test.addStep(`Perform query operation at given coordinates...`);
-        const results2 = await this.getLayerApi().featureInfoLayerSet.queryLayers(lonlat);
+        const results2 = await this.getControllersRegistry().layerSetController.queryAtLonLat(lonlat);
 
         // Check if there is feature selected from the layer
         test.addStep(`Checking for features from layer '${layerPath}'...`);
@@ -612,7 +608,7 @@ export class MapTester extends GVAbstractTester {
 
         // Perform a map click using the feature info layer set
         test.addStep(`Perform query operation at given coordinates...`);
-        const results3 = await this.getLayerApi().featureInfoLayerSet.queryLayers(lonlat);
+        const results3 = await this.getControllersRegistry().layerSetController.queryAtLonLat(lonlat);
 
         // Check if there is feature selected from the layer
         test.addStep(`Checking for features from layer '${layerPath}'...`);
@@ -664,7 +660,7 @@ export class MapTester extends GVAbstractTester {
       'Test layer hoverable state in hoverFeatureInfoLayerSet',
       async (test) => {
         // Get the layer
-        const layer = this.getLayerApi().getGeoviewLayerRegular(layerPath);
+        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
 
         // The layer should be initially hoverable
         if (!layer.getHoverable()) throw new TestError(`False precondition, the layer ${layerPath} wasn't initially hoverable.`);
@@ -674,11 +670,11 @@ export class MapTester extends GVAbstractTester {
 
         // Perform a hover query using the hover feature info layer set
         test.addStep(`Perform query operation at given coordinates...`);
-        await this.getLayerApi().hoverFeatureInfoLayerSet.queryLayers(lonlat, 'at_lon_lat');
+        await this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.queryLayers(lonlat, 'at_lon_lat');
 
         // Check if there is feature selected from the layer
         test.addStep(`Checking for features from layer '${layerPath}'...`);
-        const layerDataOnTemp = MapEventProcessor.getMapHoverFeatureInfo(this.getMapId());
+        const layerDataOnTemp = getStoreMapHoverFeatureInfo(this.getMapId());
 
         // Store a deep copy of the data before clearing to preserve it
         const layerDataOn = layerDataOnTemp ? { ...layerDataOnTemp } : undefined;
@@ -689,11 +685,11 @@ export class MapTester extends GVAbstractTester {
 
         // Perform a hover query using the feature info layer set
         test.addStep(`Perform query operation at given coordinates...`);
-        await this.getLayerApi().hoverFeatureInfoLayerSet.queryLayers(lonlat, 'at_lon_lat');
+        await this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.queryLayers(lonlat, 'at_lon_lat');
 
         // Check if there is feature selected from the layer
         test.addStep(`Checking for features from layer '${layerPath}'...`);
-        const layerDataOffTemp = MapEventProcessor.getMapHoverFeatureInfo(this.getMapId());
+        const layerDataOffTemp = getStoreMapHoverFeatureInfo(this.getMapId());
 
         // Store a deep copy of the data before clearing to preserve it
         const layerDataOff = layerDataOffTemp ? { ...layerDataOffTemp } : undefined;
@@ -704,11 +700,11 @@ export class MapTester extends GVAbstractTester {
 
         // Perform a hover query using the feature info layer set
         test.addStep(`Perform query operation at given coordinates...`);
-        await this.getLayerApi().hoverFeatureInfoLayerSet.queryLayers(lonlat, 'at_lon_lat');
+        await this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.queryLayers(lonlat, 'at_lon_lat');
 
         // Check if there is feature selected from the layer
         test.addStep(`Checking for features from layer '${layerPath}'...`);
-        const layerDataOn2Temp = MapEventProcessor.getMapHoverFeatureInfo(this.getMapId());
+        const layerDataOn2Temp = getStoreMapHoverFeatureInfo(this.getMapId());
 
         // Store a deep copy of the data before clearing to preserve it
         const layerDataOn2 = layerDataOn2Temp ? { ...layerDataOn2Temp } : undefined;
@@ -769,7 +765,7 @@ export class MapTester extends GVAbstractTester {
 
         // Check which layer is selected after first click
         test.addStep('Checking selected layer after first click...');
-        const originalLayerPath = FeatureInfoEventProcessor.getSelectedLayerPath(this.getMapId());
+        const originalLayerPath = getStoreDetailsSelectedLayerPath(this.getMapId());
         test.addStep(`First selected layer: ${originalLayerPath}`);
 
         // The alternate layer
@@ -777,7 +773,7 @@ export class MapTester extends GVAbstractTester {
 
         // Manually select the alternate layer
         test.addStep(`Manually selecting the other layer '${altLayerPathh}'...`);
-        FeatureInfoEventProcessor.setSelectedLayerPath(this.getMapId(), altLayerPathh);
+        setStoreDetailsSelectedLayerPath(this.getMapId(), altLayerPathh);
 
         // Simulate a map click at second location
         test.addStep(`Performing second map click at [${clickCoordinates2.join(', ')}]...`);
@@ -788,12 +784,12 @@ export class MapTester extends GVAbstractTester {
 
         // Check which layer is still selected after second click
         test.addStep('Checking selected layer after second click...');
-        const alternateLayerPath = FeatureInfoEventProcessor.getSelectedLayerPath(this.getMapId());
+        const alternateLayerPath = getStoreDetailsSelectedLayerPath(this.getMapId());
         test.addStep(`Second selected layer: ${alternateLayerPath}`);
 
-        // Get feature count   for second layer
-        const secondLayerData = FeatureInfoEventProcessor.findLayerDataFromLayerDataArray(this.getMapId(), alternateLayerPath);
-        const secondFeatureCount = secondLayerData?.features?.length || 0;
+        // Get feature count for second layer
+        const secondLayerDataFeatures = getStoreDetailsFeatures(this.getMapId(), alternateLayerPath);
+        const secondFeatureCount = secondLayerDataFeatures?.length || 0;
         test.addStep(`Second layer feature count: ${secondFeatureCount}`);
 
         return {

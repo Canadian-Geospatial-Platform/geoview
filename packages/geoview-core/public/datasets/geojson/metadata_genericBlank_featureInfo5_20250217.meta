@@ -6,7 +6,7 @@
       "layerId": "blank.json",
       "layerName": "Programs",
       "source": {
-        "dataAccessPath": "./datasets/blank.json",
+        "dataAccessPath": "./datasets/geojson/blank.json",
         "format": "GeoJSON",
         "featureInfo": {
           "queryable": true,

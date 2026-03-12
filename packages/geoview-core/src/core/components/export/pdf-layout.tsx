@@ -146,8 +146,8 @@ export function ExportDocument({
  * @returns A promise that resolves with a string URL for the document
  */
 export async function createPDFMapUrl(mapId: string, params: FileExportProps): Promise<string> {
-  const { exportTitle, disclaimer, layerDateFormats, layerDateTemporalModes } = params;
-  const mapInfo = await ExportUtilities.getMapInfo(mapId, exportTitle, disclaimer, layerDateFormats, layerDateTemporalModes);
+  const { exportTitle, disclaimer, layerDateFormats, layerDateTemporalModes, language } = params;
+  const mapInfo = await ExportUtilities.getMapInfo(mapId, language, exportTitle, disclaimer, layerDateFormats, layerDateTemporalModes);
 
   // Use pre-calculated canvas height from getMapInfo (measured during preview)
   const blob = await pdf(

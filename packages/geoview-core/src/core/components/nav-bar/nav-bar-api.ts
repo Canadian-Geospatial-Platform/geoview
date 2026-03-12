@@ -9,9 +9,6 @@ import { generateId } from '@/core/utils/utilities';
  * Class to manage buttons on the nav-bar.
  */
 export class NavBarApi {
-  /** The map identifier. */
-  mapId: string;
-
   /** Groups of button panels created on the nav-bar. */
   buttons: Record<string, Record<string, TypeButtonPanel>> = {};
 
@@ -26,12 +23,8 @@ export class NavBarApi {
 
   /**
    * Instantiates a NavBarApi class.
-   *
-   * @param mapId - The map id this NavBarApi belongs to
    */
-  constructor(mapId: string) {
-    this.mapId = mapId;
-
+  constructor() {
     this.#createDefaultButtonPanels();
   }
 

@@ -2,11 +2,20 @@ import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-t
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import { UIEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/ui-event-processor';
-import { DataTableEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/data-table-event-processor';
-import { LegendEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/legend-event-processor';
 import { delay } from 'geoview-core/core/utils/utilities';
-import { MapEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/map-event-processor';
+import {
+  getStoreActiveAppBarTab,
+  getStoreActiveFooterBarTab,
+  getStoreAppBarComponents,
+  getStoreFooterBarComponents,
+  getStoreNavBarComponents,
+} from 'geoview-core/core/stores/store-interface-and-intial-values/ui-state';
+import {
+  getStoreDataTableAllFeaturesArray,
+  getStoreDataTableSelectedLayerPath,
+} from 'geoview-core/core/stores/store-interface-and-intial-values/data-table-state';
+import { getStoreLayerStateLayerBounds } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
+import { getStoreMapPointMarkers } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 
 /**
  * Main Map Config testing class.
@@ -48,17 +57,17 @@ export class MapConfigTester extends GVAbstractTester {
       (test) => {
         // Verify the footer bar tab is selected
         test.addStep('Verifying data-table tab is selected in footer bar...');
-        const { tabId } = UIEventProcessor.getActiveFooterBarTab(mapId);
+        const { tabId } = getStoreActiveFooterBarTab(mapId);
         Test.assertIsEqual(tabId, 'data-table');
 
         // Verify the selected layer path in data table store
         test.addStep('Verifying selectedLayerPath in data table store...');
-        const selectedLayerPath = DataTableEventProcessor.getSingleDataTableState(mapId, 'selectedLayerPath');
+        const selectedLayerPath = getStoreDataTableSelectedLayerPath(mapId);
         Test.assertIsEqual(selectedLayerPath, 'geojsonLYR5/polygons.json');
 
         // Verify that layer data exists (table was created)
         test.addStep('Verifying data table is defined...');
-        const allFeaturesData = DataTableEventProcessor.getSingleDataTableState(mapId, 'allFeaturesDataArray');
+        const allFeaturesData = getStoreDataTableAllFeaturesArray(mapId);
         Test.assertIsDefined('allFeaturesDataArray', allFeaturesData);
 
         // Verify if there is an array of data tables with content
@@ -104,17 +113,17 @@ export class MapConfigTester extends GVAbstractTester {
       (test) => {
         // Verify that data-table is not in footer tabs
         test.addStep('Verifying data-table is selected in app bar...');
-        const activeTab = UIEventProcessor.getActiveAppBarTab(mapId);
+        const activeTab = getStoreActiveAppBarTab(mapId);
         Test.assertIsEqual(activeTab.tabId, 'data-table');
 
         // Verify the selected layer path in data table store
         test.addStep('Verifying selectedLayerPath in data table store...');
-        const selectedLayerPath = DataTableEventProcessor.getSingleDataTableState(mapId, 'selectedLayerPath');
+        const selectedLayerPath = getStoreDataTableSelectedLayerPath(mapId);
         Test.assertIsEqual(selectedLayerPath, 'geojsonLYR5/polygons.json');
 
         // Verify that layer data exists (table was created)
         test.addStep('Verifying data table is defined...');
-        const allFeaturesData = DataTableEventProcessor.getSingleDataTableState(mapId, 'allFeaturesDataArray');
+        const allFeaturesData = getStoreDataTableAllFeaturesArray(mapId);
         Test.assertIsDefined('allFeaturesDataArray', allFeaturesData);
 
         // Verify if there is an array of data tables with content
@@ -157,7 +166,7 @@ export class MapConfigTester extends GVAbstractTester {
       (test) => {
         // Verify that footer bar exists with default tabs
         test.addStep('Verifying footer bar has default tabs...');
-        const footerBarTabs = UIEventProcessor.getFooterBarComponents(mapId);
+        const footerBarTabs = getStoreFooterBarComponents(mapId);
         Test.assertIsDefined('footerBarTabs', footerBarTabs);
 
         // Verify default tabs are present (layers, data-table)
@@ -166,7 +175,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Verify that app bar exists with default tabs
         test.addStep('Verifying app bar has default tabs...');
-        const appBarTabs = UIEventProcessor.getAppBarComponents(mapId);
+        const appBarTabs = getStoreAppBarComponents(mapId);
         Test.assertIsDefined('appBarTabs', appBarTabs);
 
         // Verify default tabs are present (geolocator, legend, details, export)
@@ -200,12 +209,12 @@ export class MapConfigTester extends GVAbstractTester {
       (test) => {
         // Verify that footer bar has no tabs
         test.addStep('Verifying footer bar has no tabs...');
-        const footerBarTabs = UIEventProcessor.getFooterBarComponents(mapId);
+        const footerBarTabs = getStoreFooterBarComponents(mapId);
         Test.assertIsArrayLengthEqual(footerBarTabs, 0);
 
         // Verify that app bar has no tabs
         test.addStep('Verifying app bar has no tabs...');
-        const appBarTabs = UIEventProcessor.getAppBarComponents(mapId);
+        const appBarTabs = getStoreAppBarComponents(mapId);
         Test.assertIsArrayLengthEqual(appBarTabs, 0);
       }
     );
@@ -231,7 +240,7 @@ export class MapConfigTester extends GVAbstractTester {
       (test) => {
         // Verify that navBar exists with default controls
         test.addStep('Verifying navBar has default controls...');
-        const navBarComponents = UIEventProcessor.getNavBarComponents(mapId);
+        const navBarComponents = getStoreNavBarComponents(mapId);
         Test.assertIsDefined('navBarComponents', navBarComponents);
 
         // Verify default controls are present
@@ -261,7 +270,7 @@ export class MapConfigTester extends GVAbstractTester {
       (test) => {
         // Verify that navBar exists
         test.addStep('Verifying navBar exists...');
-        const navBarComponents = UIEventProcessor.getNavBarComponents(mapId);
+        const navBarComponents = getStoreNavBarComponents(mapId);
         Test.assertIsDefined('navBarComponents', navBarComponents);
 
         // Verify no buttons are present
@@ -297,9 +306,9 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Get the layer bounds
         test.addStep('Getting layer bound extent...');
-        const geoviewLayer = newMapViewer.layer.getGeoviewLayerRegular('geojsonLYR5/polygons.json');
+        const geoviewLayer = newMapViewer.controllers.layerController.getGeoviewLayerRegular('geojsonLYR5/polygons.json');
         Test.assertIsDefined('geoviewLayer', geoviewLayer);
-        const layerExtent = LegendEventProcessor.getLayerBounds(this.getMapId(), 'geojsonLYR5/polygons.json');
+        const layerExtent = getStoreLayerStateLayerBounds(this.getMapId(), 'geojsonLYR5/polygons.json');
         Test.assertIsArray(layerExtent);
 
         await delay(2000);
@@ -360,7 +369,7 @@ export class MapConfigTester extends GVAbstractTester {
       (test) => {
         // Verify that overlay pointsMMarkers objects exist
         test.addStep('Verifying pointMarkers objects are defined...');
-        const pointsMMarkers = MapEventProcessor.getPointMarkers(mapId);
+        const pointsMMarkers = getStoreMapPointMarkers(mapId);
         Test.assertIsDefined('pointMarkers', pointsMMarkers);
 
         // Verify cities group exists
@@ -407,31 +416,31 @@ export class MapConfigTester extends GVAbstractTester {
         const mapViewer = await this.#helperCreateMapConfig(test, mapId, [['map.viewSettings', viewSettingsConfig]]);
         return mapViewer;
       },
-      async (test, mapViewer) => {
+      async (test, newMapViewer) => {
         // Get the map view
-        const view = mapViewer.getView();
+        const view = newMapViewer.getView();
 
         // Test zooming to minimum allowed zoom (6)
         test.addStep('Testing zoom to minimum allowed level (6)...');
-        await mapViewer.setMapZoomLevel(6);
+        await newMapViewer.setMapZoomLevel(6);
         const zoomAt6 = view.getZoom();
         Test.assertIsEqual(zoomAt6, 6);
 
         // Test zooming below minimum (4) - should be constrained to minZoom
         test.addStep('Testing zoom below minimum level (4) - should be constrained...');
-        await mapViewer.setMapZoomLevel(4);
+        await newMapViewer.setMapZoomLevel(4);
         const zoomAt4 = view.getZoom();
         Test.assertIsEqual(zoomAt4, 6); // Should be constrained to minZoom
 
         // Test zooming to maximum allowed zoom (8)
         test.addStep('Testing zoom to maximum allowed level (8)...');
-        await mapViewer.setMapZoomLevel(8);
+        await newMapViewer.setMapZoomLevel(8);
         const zoomAt8 = view.getZoom();
         Test.assertIsEqual(zoomAt8, 8);
 
         // Test zooming above maximum (10) - should be constrained to maxZoom
         test.addStep('Testing zoom above maximum level (10) - should be constrained...');
-        await mapViewer.setMapZoomLevel(10);
+        await newMapViewer.setMapZoomLevel(10);
         const zoomAt10 = view.getZoom();
         Test.assertIsEqual(zoomAt10, 8); // Should be constrained to maxZoom
       }
@@ -504,8 +513,14 @@ export class MapConfigTester extends GVAbstractTester {
     await this.getApi().deleteMapViewer(mapId, false);
 
     // Wait for layer to load and data table to initialize
-    test.addStep('Waiting for layer to load and data table to initialize...');
+    test.addStep('Creating the map from config...');
     const mapViewer = await this.getApi().createMapFromConfig(mapId, JSON.stringify(baseConfig), 500);
+
+    // Replace the map viewer in the tester with the new one created from config
+    this.setMapViewer(mapViewer);
+
+    // Wait for layer to load and data table to initialize
+    test.addStep('Waiting for layers to get loaded...');
     await mapViewer.waitForLayersLoaded();
 
     test.addStep('Layers loaded');

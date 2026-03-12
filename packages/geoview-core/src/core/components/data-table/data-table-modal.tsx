@@ -6,18 +6,20 @@ import { MRT_Localization_FR as MRTLocalizationFR } from 'material-react-table/l
 import { MRT_Localization_EN as MRTLocalizationEN } from 'material-react-table/locales/en';
 
 import { Modal, MRTTable as Table, type MRT_ColumnDef as MRTColumnDef, Box, CircularProgress, Button } from '@/ui';
+import { useUIController } from '@/core/controllers/ui-controller';
 import {
   useUIActiveFocusItem,
-  useUIStoreActions,
   useUIFooterBarComponents,
   useUIAppbarComponents,
   useUIActiveTrapGeoView,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useLayerNames, useLayerSelectedLayerPath } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useDataTableStoreActions } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { getSxClasses } from './data-table-style';
 import { logger } from '@/core/utils/logger';
-import { useDataTableAllFeaturesDataArray } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import {
+  setStoreSelectedLayerPath,
+  useDataTableAllFeaturesDataArray,
+} from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useFeatureFieldInfos } from './hooks';
 import type { TypeFieldEntry } from '@/api/types/map-schema-types';
 import { useAppDisplayLanguage, useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -41,7 +43,7 @@ export default function DataTableModal(): JSX.Element {
   const [isLoading, setIsLoading] = useState(true);
 
   // get store function
-  const { disableFocusTrap } = useUIStoreActions();
+  const uiController = useUIController();
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const selectedLayerPath = useLayerSelectedLayerPath();
   const layersData = useDataTableAllFeaturesDataArray();
@@ -49,7 +51,6 @@ export default function DataTableModal(): JSX.Element {
   const shellContainer = useAppShellContainer();
   const footerBarComponents = useUIFooterBarComponents();
   const appBarComponents = useUIAppbarComponents();
-  const { setSelectedLayerPath: setDataTableSelectedLayerPath } = useDataTableStoreActions();
   const isFocusTrap = useUIActiveTrapGeoView();
   const layerNames = useLayerNames();
 
@@ -61,7 +62,7 @@ export default function DataTableModal(): JSX.Element {
   const hasDataTableTab = hasFooterDataTableTab || hasAppBarDataTableTab;
 
   // Use navigate hook with scrollToFooter disabled since modal closes
-  const navigateToDataTable = useNavigateToTab('data-table', setDataTableSelectedLayerPath);
+  const navigateToDataTable = useNavigateToTab('data-table', setStoreSelectedLayerPath);
 
   // Create columns for data table.
   const mappedLayerData = useFeatureFieldInfos(layersData);
@@ -180,16 +181,16 @@ export default function DataTableModal(): JSX.Element {
    */
   const handleNavigateToDataTable = useCallback((): void => {
     // Close modal first
-    disableFocusTrap();
+    uiController.disableFocusTrap();
     // Navigate to data-table tab with selected layer
     navigateToDataTable({ layerPath: selectedLayerPath! });
-  }, [disableFocusTrap, navigateToDataTable, selectedLayerPath]);
+  }, [uiController, navigateToDataTable, selectedLayerPath]);
 
   return (
     <Modal
       modalId="layerDataTable"
       open={activeModalId === 'layerDataTable'}
-      onClose={() => disableFocusTrap()}
+      onClose={() => uiController.disableFocusTrap()}
       title={`${t('legend.tableDetails')} ${layerNames[selectedLayerPath!] || ''}`}
       container={shellContainer}
       width="90vw"

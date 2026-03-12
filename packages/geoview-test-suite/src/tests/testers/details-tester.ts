@@ -1,13 +1,14 @@
 import type { Coordinate } from 'ol/coordinate';
+
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import { delay } from 'geoview-core/core/utils/utilities';
-import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
-import { FeatureInfoEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/feature-info-event-processor';
-import { UIEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/ui-event-processor';
-import { LegendEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/legend-event-processor';
 import { logger } from 'geoview-core/core/utils/logger';
+import { getStoreActiveFooterBarTab } from 'geoview-core/core/stores/store-interface-and-intial-values/ui-state';
+import { setStoreDetailsSelectedLayerPath } from 'geoview-core/core/stores/store-interface-and-intial-values/feature-info-state';
+import { getStoreLayerItemVisibility } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
+import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 
 /**
  * Main Map testing class.
@@ -36,65 +37,71 @@ export class DetailsTester extends GVAbstractTester {
       `Test Details on layer ${layerPath}...`,
       async (test) => {
         // Get the layer
-        const layer = this.getLayerApi().getGeoviewLayerRegular(layerPath);
-        await layer.waitLoadedOnce();
+        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
 
         // Query the lonlat coordinate
-        const resultsOntarioResults = await DetailsTester.helperStepQueryLayerAtCoordinate(test, this.getMapViewer(), layerPath, lonlat1);
+        const resultsOntarioResults = await this.helperStepQueryLayerAtCoordinate(test, layer, lonlat1);
 
         // Check that the details panel was selected for the layer
-        await DetailsTester.helperStepCheckDetailsPanel(test, this.getMapViewer(), layerPath);
+        await DetailsTester.helperStepCheckDetailsPanel(test, this.getMapId(), layerPath);
 
         // Make the layer invisible
         layer.setVisible(false);
 
         // Query the lonlat coordinate
-        const resultsOntarioNoResults = await DetailsTester.helperStepQueryLayerAtCoordinate(test, this.getMapViewer(), layerPath, lonlat1);
+        const resultsOntarioNoResults = await this.helperStepQueryLayerAtCoordinate(test, layer, lonlat1);
 
         // Make the layer visible
         layer.setVisible(true);
 
         // Query in Alberta where there should be no results
-        const resultsAlbertaNoResults1 = await DetailsTester.helperStepQueryLayerAtCoordinate(
-          test,
-          this.getMapViewer(),
-          layerPath,
-          lonlat2
-        );
+        const resultsAlbertaNoResults1 = await this.helperStepQueryLayerAtCoordinate(test, layer, lonlat2);
 
         // Make the Alberta polygon visible
-        let item = LegendEventProcessor.getItemVisibility(this.getMapId(), layerPath, 'Alberta')!;
-        await LegendEventProcessor.toggleItemVisibility(this.getMapId(), layerPath, item, true);
+        let item = getStoreLayerItemVisibility(this.getMapId(), layerPath, 'Alberta')!;
+        await this.getControllersRegistry().layerController.toggleItemVisibility(layerPath, item, true);
 
         // Query where there now should be some results
-        const resultsAlbertaResults = await DetailsTester.helperStepQueryLayerAtCoordinate(test, this.getMapViewer(), layerPath, lonlat2);
+        const resultsAlbertaResults = await this.helperStepQueryLayerAtCoordinate(test, layer, lonlat2);
 
         // Make the Alberta polygon back to invisible
-        item = LegendEventProcessor.getItemVisibility(this.getMapId(), layerPath, 'Alberta')!;
-        await LegendEventProcessor.toggleItemVisibility(this.getMapId(), layerPath, item, true);
+        item = getStoreLayerItemVisibility(this.getMapId(), layerPath, 'Alberta')!;
+        await this.getControllersRegistry().layerController.toggleItemVisibility(layerPath, item, true);
 
-        // Query where there now should no results
-        const resultsAlbertaNoResults2 = await DetailsTester.helperStepQueryLayerAtCoordinate(
-          test,
-          this.getMapViewer(),
-          layerPath,
-          lonlat2
-        );
+        // Query where there now should be no results
+        const resultsAlbertaNoResults2 = await this.helperStepQueryLayerAtCoordinate(test, layer, lonlat2);
 
         // Return the results of the queries
-        return {
-          resultsOntarioResults,
-          resultsOntarioNoResults,
-          resultsAlbertaNoResults1,
-          resultsAlbertaResults,
-          resultsAlbertaNoResults2,
-        };
+        return [resultsOntarioResults, resultsOntarioNoResults, resultsAlbertaNoResults1, resultsAlbertaResults, resultsAlbertaNoResults2];
       },
       (test, results) => {
         // Perform assertions
+        const [resultsOntarioResults, resultsOntarioNoResults, resultsAlbertaNoResults1, resultsAlbertaResults, resultsAlbertaNoResults2] =
+          results as unknown[][];
+
+        // Check that there was 1 result for the Ontario
+        test.addStep('Verifying there is 1 feature info result for the Ontario query...');
+        Test.assertIsArrayLengthEqual(resultsOntarioResults, 1);
+
+        // Check that there was 0 result for the Ontario
+        test.addStep('Verifying there is 0 feature info result for the Ontario query...');
+        Test.assertIsArrayLengthEqual(resultsOntarioNoResults, 0);
+
+        // Check that there was 0 result for the Alberta
+        test.addStep('Verifying there is 0 feature info result for the Alberta query...');
+        Test.assertIsArrayLengthEqual(resultsAlbertaNoResults1, 0);
+
+        // Check that there was 1 result for the Alberta
+        test.addStep('Verifying there is 1 feature info result for the Alberta query...');
+        Test.assertIsArrayLengthEqual(resultsAlbertaResults, 1);
+
+        // Check that there was 0 result for the Alberta
+        test.addStep('Verifying there is 0 feature info result for the Alberta query...');
+        Test.assertIsArrayLengthEqual(resultsAlbertaNoResults2, 0);
+
         // Check that details is the active footer bar
         test.addStep("Verifying 'details' is the selected footer tab...");
-        Test.assertIsEqual(UIEventProcessor.getActiveFooterBarTab(this.getMapId()).tabId, 'details');
+        Test.assertIsEqual(getStoreActiveFooterBarTab(this.getMapId()).tabId, 'details');
 
         logger.logDebug(results);
       }
@@ -211,21 +218,19 @@ export class DetailsTester extends GVAbstractTester {
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
    * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
    */
-  static async helperStepQueryLayerAtCoordinate<T>(
+  async helperStepQueryLayerAtCoordinate<T>(
     test: Test<T>,
-    mapViewer: MapViewer,
-    layerPath: string,
+    layer: AbstractGVLayer,
     lonlat: Coordinate
   ): Promise<TypeFeatureInfoEntry[] | undefined> {
     // Get the layer and make sure it's in loaded status
-    const layer = mapViewer.layer.getGeoviewLayerRegular(layerPath);
     await layer.waitLoadedOnce();
 
     // Update the step
     test.addStep(`Perform query operation at given coordinates...`);
 
     // Perform a map click using the feature info layer set
-    return (await mapViewer.layer.featureInfoLayerSet.queryLayers(lonlat))[layerPath].features;
+    return (await this.getControllersRegistry().layerSetController.queryAtLonLat(lonlat))[layer.getLayerPath()].features;
   }
 
   /**
@@ -233,11 +238,11 @@ export class DetailsTester extends GVAbstractTester {
    *
    * @template T - The type parameter for the test instance
    * @param test - The test instance used to log each step
-   * @param mapViewer - The map viewer containing the layer and UI context
+   * @param mapId - The ID of the map containing the layer and UI context
    * @param layerPath - The unique path or ID of the layer to check
    * @returns A promise that resolves when the check is complete
    */
-  static async helperStepCheckDetailsPanel<T>(test: Test<T>, mapViewer: MapViewer, layerPath: string): Promise<void> {
+  static async helperStepCheckDetailsPanel<T>(test: Test<T>, mapId: string, layerPath: string): Promise<void> {
     // Update the step
     test.addStep(`Waiting on UI to refresh...`);
 
@@ -248,6 +253,6 @@ export class DetailsTester extends GVAbstractTester {
     test.addStep(`Selecting the details for the added layer...`);
 
     // Select the right layer path
-    FeatureInfoEventProcessor.setSelectedLayerPath(mapViewer.mapId, layerPath);
+    setStoreDetailsSelectedLayerPath(mapId, layerPath);
   }
 }
