@@ -114,3 +114,12 @@ type AbstractClassType<T> = abstract new (...args: any[]) => T;
  * @template T - The type of the instance the constructor produces
  */
 export type ClassType<T> = RegularClassType<T> | AbstractClassType<T>;
+
+/**
+ * Re-export from `material-ui.d.ts` to ensure its `declare module` augmentations
+ * (e.g. `geoViewColor` on MUI `Palette`) are included in the compilation of any
+ * package that imports from this file. Without this, plugin packages that import
+ * `TypeWindow` but never directly reference `material-ui.d.ts` would not see
+ * the augmented MUI types during `tsc --build`.
+ */
+export type { Shape as GeoViewMUIShape } from './material-ui.d';

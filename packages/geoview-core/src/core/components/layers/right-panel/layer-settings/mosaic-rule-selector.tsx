@@ -6,11 +6,15 @@ import { Box, Checkbox, Collapse, FormControl, Select, Typography } from '@/ui';
 import { CollectionsIcon, ExpandMoreIcon, ExpandLessIcon } from '@/ui';
 
 import { getSxClasses } from './layer-settings-style';
-import { useLayerStoreActions, useLayerSelectorMosaicRule } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  useLayerSelectorMosaicRule,
+  useLayerSelectorAllowedMosaicMethods,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 import type { TypeLegendLayer } from '../../types';
 import type { TypeMosaicMethod, TypeMosaicOperation } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
+import { useLayerController } from '@/core/controllers/layer-controller';
 
 // Maps mosaic method keys to their filter name and translation key
 const METHOD_ENTRIES: Record<string, { name: string; labelKey: string }> = {
@@ -63,12 +67,10 @@ export function MosaicRulePanel({ layerDetails }: MosaicRulePanelProps): JSX.Ele
   const sxClasses = getSxClasses(theme);
   const { t } = useTranslation();
 
-  // Store actions
-  const { getLayerAllowedMosaicMethods, setLayerMosaicRuleAscending, setLayerMosaicRuleMethod, setLayerMosaicRuleOperation } =
-    useLayerStoreActions();
-
   // Store hooks
   const mosaicRule = useLayerSelectorMosaicRule(layerDetails.layerPath);
+  const allowedMosaicMethods = useLayerSelectorAllowedMosaicMethods(layerDetails.layerPath);
+  const layerController = useLayerController();
 
   // State
   const [expanded, setExpanded] = useState(false);
@@ -88,23 +90,23 @@ export function MosaicRulePanel({ layerDetails }: MosaicRulePanelProps): JSX.Ele
   // Handlers with stable references
   const handleChangeMethod = useCallback(
     (event: React.ChangeEvent<HTMLInputElement> | (Event & { target: { value: unknown; name: string } })): void => {
-      setLayerMosaicRuleMethod(layerDetails.layerPath, event.target.value as TypeMosaicMethod);
+      layerController.setLayerMosaicRuleMethod(layerDetails.layerPath, event.target.value as TypeMosaicMethod);
     },
-    [layerDetails.layerPath, setLayerMosaicRuleMethod]
+    [layerDetails.layerPath, layerController]
   );
 
   const handleChangeOperation = useCallback(
     (event: React.ChangeEvent<HTMLInputElement> | (Event & { target: { value: unknown; name: string } })): void => {
-      setLayerMosaicRuleOperation(layerDetails.layerPath, event.target.value as TypeMosaicOperation);
+      layerController.setLayerMosaicRuleOperation(layerDetails.layerPath, event.target.value as TypeMosaicOperation);
     },
-    [layerDetails.layerPath, setLayerMosaicRuleOperation]
+    [layerDetails.layerPath, layerController]
   );
 
   const handleChangeAscending = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {
-      setLayerMosaicRuleAscending(layerDetails.layerPath, event.target.checked);
+      layerController.setLayerMosaicRuleAscending(layerDetails.layerPath, event.target.checked);
     },
-    [layerDetails.layerPath, setLayerMosaicRuleAscending]
+    [layerDetails.layerPath, layerController]
   );
 
   // Menu items derived from the module-level entry maps
@@ -113,10 +115,9 @@ export function MosaicRulePanel({ layerDetails }: MosaicRulePanelProps): JSX.Ele
       Object.entries(METHOD_ENTRIES)
         .map(([key, { name, labelKey }]) => ({ key, item: { value: key, name, children: t(labelKey) } }))
         .filter((option) => {
-          const allowedMethods = getLayerAllowedMosaicMethods(layerDetails.layerPath);
-          return !allowedMethods || allowedMethods.includes(option.item.name as TypeMosaicMethod);
+          return !allowedMosaicMethods || allowedMosaicMethods.includes(option.item.name as TypeMosaicMethod);
         }),
-    [t, layerDetails.layerPath, getLayerAllowedMosaicMethods]
+    [t, allowedMosaicMethods]
   );
 
   const memoOperationMenuItems = useMemo(

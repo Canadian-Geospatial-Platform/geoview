@@ -1,10 +1,7 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from 'geoview-core/core/utils/logger';
-import {
-  useMapStoreActions,
-  useMapSelectorLayerArrayVisibility,
-} from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
+import { useMapSelectorLayerArrayVisibility } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 
 import type { TypeGroupLayer, TypeLegendItem } from '../custom-legend-types';
@@ -12,6 +9,7 @@ import { isGroupLayer, generateLegendItemId, isLegendLayer } from '../custom-leg
 import type { getSxClasses } from '../custom-legend-style';
 import { LegendItem } from './legend-item';
 import { DescriptionText } from './description-text';
+import { useMapController } from 'geoview-core/core/controllers/map-controller';
 
 /** Props for the GroupItem component. */
 interface GroupItemProps {
@@ -69,7 +67,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
   } = ui.elements;
 
   const displayLanguage = useAppDisplayLanguage();
-  const { setOrToggleLayerVisibility } = useMapStoreActions();
+  const mapController = useMapController();
 
   const [collapsed, setCollapsed] = useState<boolean>(isGroupLayer(item) ? (item.collapsed ?? false) : false);
 
@@ -96,7 +94,7 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
 
     // Toggle all child layers
     layerPaths.forEach((layerPath) => {
-      setOrToggleLayerVisibility(layerPath, newVisibility);
+      mapController.setOrToggleMapLayerVisibility(layerPath, newVisibility);
     });
   };
 

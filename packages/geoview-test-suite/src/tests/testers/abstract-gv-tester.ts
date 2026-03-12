@@ -1,11 +1,14 @@
 import type { Coordinate } from 'ol/coordinate';
 
+import { AbstractTester } from '../core/abstract-tester';
 import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
 import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
-import type { LayerApi } from 'geoview-core/geo/layer/layer';
-import { AbstractTester } from '../core/abstract-tester';
+import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
+import { Test } from '../core/test';
+import { getStoreLayerStateLegendLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
+import type { GeometryApi } from 'geoview-core/geo/layer/geometry/geometry';
 
 /**
  * Main GeoView Abstract Tester class.
@@ -16,6 +19,7 @@ export abstract class GVAbstractTester extends AbstractTester {
 
   /** Some long lat coordinates for map investigations */
   static readonly QUEBEC_LONLAT: Coordinate = [-71.356054449131, 46.78077550041052];
+  static readonly OTTAWA_LONLAT: Coordinate = [-75.8, 45.24];
   static readonly ONTARIO_CENTER_LONLAT: Coordinate = [-87, 51];
   static readonly ALBERTA_CENTER_LONLAT: Coordinate = [-112, 51];
 
@@ -489,12 +493,12 @@ export abstract class GVAbstractTester extends AbstractTester {
   }
 
   /**
-   * Gets the LayerApi.
+   * Sets the MapViewer.
    *
-   * @returns The LayerApi
+   * @param mapViewer - The MapViewer to set
    */
-  getLayerApi(): LayerApi {
-    return this.getMapViewer().layer;
+  setMapViewer(mapViewer: MapViewer): void {
+    this.#mapViewer = mapViewer;
   }
 
   /**
@@ -504,5 +508,49 @@ export abstract class GVAbstractTester extends AbstractTester {
    */
   getMapId(): string {
     return this.getMapViewer().mapId;
+  }
+
+  /**
+   * Gets the geometry API from the map viewer.
+   * @returns The geometry API instance
+   */
+  getGeometryApi(): GeometryApi {
+    return this.getMapViewer().geometry;
+  }
+
+  /**
+   * Gets the controller registry when the tester class needs to do something with controllers.
+   *
+   * @returns The controller registry
+   */
+  getControllersRegistry(): ControllerRegistry {
+    return this.getMapViewer().controllers;
+  }
+
+  /**
+   * Removes a layer from the map using its path and asserts that it no longer exists in the legend store.
+   *
+   * Each step is logged to the provided test instance for traceability.
+   *
+   * @param test - The test instance used to record each step of the removal process
+   * @param mapViewer - The map viewer instance from which the layer is removed
+   * @param layerPath - The unique path or ID of the layer to be removed
+   */
+  helperFinalizeStepRemoveLayerAndAssert<T>(test: Test<T>, layerPath: string): void {
+    // Check that the layer is indeed there
+    test.addStep(`Checking the layer path ${layerPath} exists on the map...`);
+    Test.assertArrayIncludes(this.getControllersRegistry().layerController.getGeoviewLayerPaths(), layerPath);
+
+    // Remove the added layer
+    test.addStep(`Removing the layer ${layerPath} from the map...`);
+    this.getControllersRegistry().layerCreatorController.removeLayerUsingPath(layerPath);
+
+    // Check the removal worked
+    test.addStep(`Check that the layer is indeed removed...`);
+    const legendLayers = getStoreLayerStateLegendLayers(this.getMapId());
+    Test.assertArrayExcludes(
+      legendLayers.map((legendLayer) => legendLayer.layerPath),
+      layerPath
+    );
   }
 }

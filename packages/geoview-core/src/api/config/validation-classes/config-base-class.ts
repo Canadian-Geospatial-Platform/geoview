@@ -91,7 +91,7 @@ export abstract class ConfigBaseClass {
    * @param schemaTag - The GeoView layer type schema tag
    * @param entryType - The layer entry type
    */
-  // TODO: REFACTOR - Major TypeLayerEntryConfig - There is an oddity inside LayerApi.addGeoviewLayer to the effect that it's calling validateListOfGeoviewLayerConfig even if it was already called in config-validation.
+  // TODO: REFACTOR - Major TypeLayerEntryConfig - There is an oddity inside LayerCreatorController.addGeoviewLayer to the effect that it's calling validateListOfGeoviewLayerConfig even if it was already called in config-validation.
   // TO.DOCONT: Until this is fixed, this constructor supports sending a ConfigBaseClass in its typing, for now (ConfigClassOrType = ConfigBaseClassProps | ConfigBaseClass)... though it should only be a ConfigBaseClassProps eventually.
   protected constructor(layerConfig: ConfigClassOrType, schemaTag: TypeGeoviewLayerType, entryType: TypeLayerEntryType) {
     // Transfer the properties from the object to the class (without using Object.assign anymore)
@@ -1260,9 +1260,9 @@ export abstract class ConfigBaseClass {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onLayerStatusChanged(callback: LayerStatusChangedDelegate): void {
+  onLayerStatusChanged(callback: LayerStatusChangedDelegate): LayerStatusChangedDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onLayerStatusChangedHandlers, callback);
+    return EventHelper.onEvent(this.#onLayerStatusChangedHandlers, callback);
   }
 
   /**
@@ -1270,7 +1270,7 @@ export abstract class ConfigBaseClass {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerStatusChanged(callback: LayerStatusChangedDelegate): void {
+  offLayerStatusChanged(callback: LayerStatusChangedDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerStatusChangedHandlers, callback);
   }

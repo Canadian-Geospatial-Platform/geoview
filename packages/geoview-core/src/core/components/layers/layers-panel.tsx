@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material';
 
 import { Box } from '@/ui';
+
+import { useUIController } from '@/core/controllers/ui-controller';
 import { useLayerDisplayState, useSelectedLayer } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { LayersToolbar } from './layers-toolbar';
 import { LayerDetails } from './right-panel/layer-details';
@@ -14,9 +16,8 @@ import type { ResponsiveGridLayoutExposedMethods } from '@/core/components/commo
 import { ResponsiveGridLayout } from '@/core/components/common/responsive-grid-layout';
 import { Typography } from '@/ui/typography/typography';
 import type { TypeContainerBox } from '@/core/types/global-types';
-import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { TABS } from '@/core/utils/constant';
-import { useGeoViewMapId } from '@/core/stores';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 interface TypeLayersPanel {
   containerType: TypeContainerBox;
@@ -33,7 +34,7 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
   const displayState = useLayerDisplayState();
   const [isLayoutEnlarged, setIsLayoutEnlarged] = useState<boolean>(false);
 
-  const { disableFocusTrap } = useUIStoreActions();
+  const uiController = useUIController();
 
   const responsiveLayoutRef = useRef<ResponsiveGridLayoutExposedMethods>(null);
   const mapId = useGeoViewMapId();
@@ -101,11 +102,11 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
     // If we have a selected layer, tell disableFocusTrap to focus it
     if (selectedLayer?.layerPath) {
       const layerListItemId = `${mapId}-${containerType}-${TABS.LAYERS}-${selectedLayer.layerPath}`;
-      disableFocusTrap(layerListItemId);
+      uiController.disableFocusTrap(layerListItemId);
     } else {
-      disableFocusTrap('no-focus');
+      uiController.disableFocusTrap('no-focus');
     }
-  }, [mapId, selectedLayer, disableFocusTrap, containerType]);
+  }, [mapId, selectedLayer, uiController, containerType]);
 
   return (
     <ResponsiveGridLayout

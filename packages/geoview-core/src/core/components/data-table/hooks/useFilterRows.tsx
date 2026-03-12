@@ -1,7 +1,8 @@
 import type { Dispatch, SetStateAction } from 'react';
 import { useEffect, useState } from 'react';
 import type { TypeColumnFiltersState } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { useDataTableStoreActions, useDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useDataTableLayerSettings, setStoreColumnFiltersEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 /** Properties for the useFilterRows hook. */
@@ -19,9 +20,8 @@ export function useFilterRows({ layerPath }: UseFilterRowsProps): {
   columnFilters: TypeColumnFiltersState;
   setColumnFilters: Dispatch<SetStateAction<TypeColumnFiltersState>>;
 } {
+  const mapId = useGeoViewMapId();
   const datatableSettings = useDataTableLayerSettings();
-
-  const { setColumnFiltersEntry } = useDataTableStoreActions();
 
   const [columnFilters, setColumnFilters] = useState<TypeColumnFiltersState>(datatableSettings[layerPath].columnFiltersRecord || []);
 
@@ -32,9 +32,8 @@ export function useFilterRows({ layerPath }: UseFilterRowsProps): {
     // Log
     logger.logTraceUseEffect('USEFILTERROWS - columnFilters', columnFilters);
 
-    setColumnFiltersEntry(columnFilters, layerPath);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [columnFilters]);
+    setStoreColumnFiltersEntry(mapId, columnFilters, layerPath);
+  }, [mapId, columnFilters, layerPath]);
 
   return { columnFilters, setColumnFilters };
 }

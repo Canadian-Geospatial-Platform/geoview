@@ -3,8 +3,8 @@ import { useTheme } from '@mui/material/styles';
 
 import { IconButton, HomeIcon } from '@/ui';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
-import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
+import { useMapController } from '@/core/controllers/map-controller';
 
 /**
  * Creates a home button to return the user to the map center.
@@ -21,13 +21,13 @@ export default function Home(): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   // Store actions
-  const { zoomToInitialExtent } = useMapStoreActions();
+  const mapController = useMapController();
 
   /**
    * Handles when the user clicks the home button.
    */
   const handleZoom = (): void => {
-    zoomToInitialExtent().catch((error: unknown) => {
+    mapController.zoomToInitialExtent().catch((error: unknown) => {
       // Log
       logger.logPromiseFailed('Failed to zoomToInitialExtent in home.handleZoom', error);
     });

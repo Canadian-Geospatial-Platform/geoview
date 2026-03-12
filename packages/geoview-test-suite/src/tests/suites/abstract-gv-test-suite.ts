@@ -1,6 +1,7 @@
+import { AbstractTestSuite } from '../core/abstract-test-suite';
 import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
-import { AbstractTestSuite } from '../core/abstract-test-suite';
+import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 
 /**
  * Main GeoView Abstract Suite class.
@@ -42,6 +43,15 @@ export abstract class GVAbstractTestSuite extends AbstractTestSuite {
    */
   getMapViewer(): MapViewer {
     return this.#mapViewer;
+  }
+
+  /**
+   * Gets the controllers registry.
+   *
+   * @returns The controllers registry
+   */
+  getControllersRegistry(): ControllerRegistry {
+    return this.getMapViewer().controllers;
   }
 
   /**

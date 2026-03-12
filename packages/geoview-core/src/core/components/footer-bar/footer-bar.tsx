@@ -4,6 +4,11 @@ import { useTheme } from '@mui/material/styles';
 
 import type { TypeTabs } from '@/ui';
 import { Box, Tabs } from '@/ui';
+// default tabs icon and class
+import { LegendIcon, InfoIcon, LayersIcon, StorageIcon, QuestionMarkIcon } from '@/ui/icons';
+
+import { useUIController } from '@/core/controllers/ui-controller';
+import { usePluginController } from '@/core/controllers/plugin-controller';
 import { getSxClasses } from './footer-bar-style';
 import { ResizeFooterPanel } from '@/core/components/footer-bar/hooks/resize-footer-panel';
 import { useAppFullscreenActive, useAppHeight, useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -11,27 +16,22 @@ import { useDetailsLayerDataArrayBatch } from '@/core/stores/store-interface-and
 import {
   useUIActiveFooterBarTab,
   useUIFooterPanelResizeValue,
-  useUIStoreActions,
   useUIActiveTrapGeoView,
   useUIHiddenTabs,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { FooterBarApi, FooterTabCreatedEvent, FooterTabRemovedEvent } from '@/core/components';
 import { DEFAULT_FOOTER_TABS_ORDER } from '@/api/types/map-schema-types';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
-
-// default tabs icon and class
-import { LegendIcon, InfoIcon, LayersIcon, StorageIcon, QuestionMarkIcon } from '@/ui/icons';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { Legend } from '@/core/components/legend/legend';
 import { LayersPanel } from '@/core/components/layers/layers-panel';
 import { DetailsPanel } from '@/core/components/details/details-panel';
 import { Datapanel } from '@/core/components/data-table/data-panel';
+import { camelCase, delay, scrollIfNotVisible } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 import { Guide } from '@/core/components/guide/guide';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { FooterPlugin } from '@/api/plugin/footer-plugin';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
-import { camelCase, delay, scrollIfNotVisible } from '@/core/utils/utilities';
 
 /** Tab definition with icon, content, and optional label. */
 interface Tab {
@@ -77,10 +77,11 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const activeFooterBarTab = useUIActiveFooterBarTab();
   const activeTrapGeoView = useUIActiveTrapGeoView();
   const shellContainer = useAppShellContainer();
-  const { setActiveFooterBarTab, enableFocusTrap, disableFocusTrap, setFooterBarIsOpen } = useUIStoreActions();
+  const uiController = useUIController();
   const backupAppHeight: number = useAppHeight();
   const appHeight = document.getElementById(mapId)?.getAttribute('data-footer-height') ?? `${backupAppHeight}px`;
   const hiddenTabs: string[] = useUIHiddenTabs();
+  const pluginController = usePluginController();
 
   // get store config for footer bar tabs to add (similar logic as in app-bar)
   const footerBarTabsConfig = useGeoViewConfig()?.footerBar;
@@ -220,10 +221,10 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
    * Updates the active footer tab based on footer tabs created from configuration.
    */
   useEffect(() => {
-    if (!activeFooterBarTab.tabId && activeFooterBarTab.isOpen) setActiveFooterBarTab(memoFooterBarTabs?.[0]?.id ?? '');
+    if (!activeFooterBarTab.tabId && activeFooterBarTab.isOpen) uiController.setActiveFooterBarTab(memoFooterBarTabs?.[0]?.id ?? '');
     // No need to update when selected tab changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [memoFooterBarTabs, setActiveFooterBarTab]);
+  }, [memoFooterBarTabs, uiController]);
 
   /**
    * Whenever the array layer data batch changes if we're on 'details' tab and it's collapsed, make sure we uncollapse it
@@ -238,10 +239,10 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     // If we're on the details panel and the footer is collapsed
     if (activeFooterBarTab.tabId === 'details' && !activeFooterBarTab.isOpen) {
       // Uncollapse it
-      setFooterBarIsOpen(true);
+      uiController.setFooterBarIsOpen(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [arrayOfLayerDataBatch, activeFooterBarTab, setFooterBarIsOpen]);
+  }, [arrayOfLayerDataBatch, activeFooterBarTab, uiController]);
   // Don't add isCollapsed in the dependency array, because it'll retrigger the useEffect
 
   /**
@@ -261,22 +262,22 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       }
       tabsContainerRef.current = tabsContainer;
     }
-  }, [activeFooterBarTab.isOpen, setActiveFooterBarTab]);
+  }, [activeFooterBarTab.isOpen, uiController]);
 
   /**
    * Handles the collapse/expand toggle.
    */
   const handleToggleCollapse = (): void => {
-    if (activeFooterBarTab.isOpen) setActiveFooterBarTab(undefined);
-    setFooterBarIsOpen(!activeFooterBarTab.isOpen);
+    if (activeFooterBarTab.isOpen) uiController.setActiveFooterBarTab(undefined);
+    uiController.setFooterBarIsOpen(!activeFooterBarTab.isOpen);
   };
 
   /**
    * Handles when the selected tab changes.
    */
   const handleSelectedTabChanged = (tab: TypeTabs): void => {
-    setActiveFooterBarTab(tab.id);
-    setFooterBarIsOpen(true);
+    uiController.setActiveFooterBarTab(tab.id);
+    uiController.setFooterBarIsOpen(true);
   };
 
   /**
@@ -310,7 +311,8 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     // If clicked on a tab with a plugin
     if (activeFooterBarTab.tabId) {
       // Get the plugin if it exists
-      MapEventProcessor.getMapViewerPluginIfExists(mapId, activeFooterBarTab.tabId)
+      pluginController
+        .getMapViewerPluginIfExists(activeFooterBarTab.tabId)
         .then((plugin) => {
           // If the Plugin is a FooterPlugin
           if (plugin instanceof FooterPlugin) {
@@ -323,7 +325,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
           logger.logPromiseFailed('getMapViewerPlugin in useEffect in footer-bar', error);
         });
     }
-  }, [mapId, activeFooterBarTab]);
+  }, [pluginController, activeFooterBarTab]);
 
   /**
    * Registers and unregisters tab create/remove event handlers on mount.
@@ -365,7 +367,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     // Packages tab
     if (footerBarTabsConfig && footerBarTabsConfig.tabs.core.includes('time-slider')) {
       // Load and add the plugin
-      MapEventProcessor.loadAndAddPlugin(mapId, 'time-slider').catch((error: unknown) => {
+      pluginController.loadAndAddPlugin('time-slider').catch((error: unknown) => {
         // Log
         logger.logPromiseFailed('loadAndAddPlugin(time-slider) in useEffect in FooterBar', error);
       });
@@ -373,12 +375,12 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
 
     if (footerBarTabsConfig && footerBarTabsConfig.tabs.core.includes('geochart')) {
       // Load and add the plugin
-      MapEventProcessor.loadAndAddPlugin(mapId, 'geochart').catch((error: unknown) => {
+      pluginController.loadAndAddPlugin('geochart').catch((error: unknown) => {
         // Log
         logger.logPromiseFailed('loadAndAddPlugin(geochart) in useEffect in FooterBar', error);
       });
     }
-  }, [footerBarTabsConfig, mapId]);
+  }, [footerBarTabsConfig, pluginController]);
 
   /**
    * Scrolls the footer into view on mouse click.
@@ -423,8 +425,8 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         isCollapsed={!activeFooterBarTab.isOpen}
         onToggleCollapse={handleToggleCollapse}
         onSelectedTabChanged={handleSelectedTabChanged}
-        onOpenKeyboard={enableFocusTrap}
-        onCloseKeyboard={disableFocusTrap}
+        onOpenKeyboard={(e) => uiController.enableFocusTrap(e)}
+        onCloseKeyboard={() => uiController.disableFocusTrap()}
         selectedTab={memoFooterBarTabs.findIndex((t) => t.id === activeFooterBarTab.tabId)}
         tabProps={{ disableRipple: true }}
         tabs={memoFooterBarTabs}

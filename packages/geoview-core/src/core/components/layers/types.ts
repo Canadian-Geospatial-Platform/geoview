@@ -5,10 +5,13 @@ import type {
   TypeLayerControls,
   TypeLayerEntryType,
   TypeLayerStatus,
+  TypeMetadataEsriRasterFunctionInfos,
+  TypeMetadataWMSCapabilityLayerStyle,
+  TypeMosaicMethod,
   TypeMosaicRule,
 } from '@/api/types/layer-schema-types';
 import type { LegendQueryStatus } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import type { TemporalMode, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import type { TemporalMode, TimeDimension, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 
 export type TypeLayersViewDisplayState = 'add' | 'view';
 
@@ -62,8 +65,12 @@ export interface TypeLegendLayer {
   children: TypeLegendLayer[];
 
   rasterFunction?: string; // Active raster function for ESRI Image layers
+  rasterFunctionInfos?: TypeMetadataEsriRasterFunctionInfos[]; // Available raster functions metadata from ESRI Image service
+  allowedMosaicMethods?: TypeMosaicMethod[]; // Allowed mosaic methods from ESRI Image service metadata
   mosaicRule?: TypeMosaicRule; // Active mosaic rule for ESRI Image layers
+  timeDimension?: TimeDimension; // Temporal dimension metadata for time-aware layers
   wmsStyle?: string; // Active style for WMS layers
+  wmsStyles?: TypeMetadataWMSCapabilityLayerStyle[]; // Available WMS styles metadata from WMS capabilities
   opacity?: number;
   opacityMaxFromParent?: number;
   zoom?: number;

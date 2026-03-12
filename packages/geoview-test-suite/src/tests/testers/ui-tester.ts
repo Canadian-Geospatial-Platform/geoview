@@ -1,8 +1,7 @@
-import { delay } from 'geoview-core/index';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import { UIEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/ui-event-processor';
-import { AppEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/app-event-processor';
+import { delay } from 'geoview-core/core/utils/utilities';
+import { getStoreGeoviewHTMLElement } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 
 /**
  * Main UI testing class.
@@ -30,14 +29,14 @@ export class UITester extends GVAbstractTester {
       async (test) => {
         // Step 1: Select the details tab in footer bar
         test.addStep('Selecting details panel...');
-        UIEventProcessor.setActiveFooterBarTab(mapId, 'details');
+        this.getControllersRegistry().uiController.setActiveFooterBarTab('details');
 
         // Wait a bit for the UI to update
         await delay(500);
 
         // Get the GeoView HTML element
         test.addStep('Getting GeoView HTML element...');
-        const geoviewElement = AppEventProcessor.getGeoviewHTMLElement(mapId);
+        const geoviewElement = getStoreGeoviewHTMLElement(mapId);
 
         // Find the guide-container div
         test.addStep('Finding guide-container div...');

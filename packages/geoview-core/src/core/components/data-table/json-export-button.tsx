@@ -4,19 +4,16 @@ import type { Geometry } from 'ol/geom';
 import { Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon } from 'ol/geom';
 import { MenuItem } from '@/ui';
 
-import { logger } from '@/core/utils/logger';
 import { JsonExportWorker } from '@/core/workers/json-export-worker';
 import type { SerializedGeometry, TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
-import {
-  useLayerSelectorName,
-  useLayerSelectorSchemaTag,
-  useLayerStoreActions,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useLayerSelectorName, useLayerSelectorSchemaTag } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useMapProjectionEPSG } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { TIMEOUT } from '@/core/utils/constant';
+import { useUIController } from '@/core/controllers/ui-controller';
+import { logger } from '@/core/utils/logger';
+import { useLayerController } from '@/core/controllers/layer-controller';
 
 /** Properties for the JSONExportButton component. */
 interface JSONExportButtonProps {
@@ -38,11 +35,11 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
   const { t } = useTranslation<string>();
 
   // get store action and map projection
-  const { queryLayerEsriDynamic } = useLayerStoreActions();
-  const { addMessage } = useAppStoreActions();
+  const uiController = useUIController();
   const mapProjectionEPSG = useMapProjectionEPSG();
   const layerName = useLayerSelectorName(layerPath) ?? '';
   const schemaTag = useLayerSelectorSchemaTag(layerPath);
+  const layerController = useLayerController();
 
   // Keep exporting state
   const [isExporting, setIsExporting] = useState(false);
@@ -100,7 +97,8 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
           });
 
           // Query
-          queryLayerEsriDynamic(layerPath, objectids)
+          layerController
+            .queryLayerEsriDynamic(layerPath, objectids)
             .then((results) => {
               // For each result
               results.forEach((result) => {
@@ -126,7 +124,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
         return Promise.resolve(chunk); // Return the original chunk if there's an error
       }
     },
-    [layerPath, queryLayerEsriDynamic]
+    [layerPath, layerController]
   );
 
   /**
@@ -230,26 +228,26 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
       const chunks = [];
       let i = 0;
 
-      addMessage('info', 'dataTable.downloadAsGeoJSONMessage', [`${t('general.started')}...`]);
+      uiController.addMessage('info', 'dataTable.downloadAsGeoJSONMessage', [`${t('general.started')}...`]);
       for await (const chunk of jsonGenerator) {
         chunks.push(chunk);
         i++;
 
         // Update progress here
         const count = i * 100 < rows.length ? i * 100 : rows.length;
-        addMessage('info', 'general.processing', [String(count), String(rows.length)]);
+        uiController.addMessage('info', 'general.processing', [String(count), String(rows.length)]);
       }
 
       const fullJson = chunks.join('');
       const blob = new Blob([fullJson], { type: 'application/json' });
       exportBlob(blob, `table-${layerName.replaceAll(' ', '-')}.json`);
     } catch (error: unknown) {
-      addMessage('error', 'dataTable.downloadAsGeoJSONMessage', [t('general.failed')]);
+      uiController.addMessage('error', 'dataTable.downloadAsGeoJSONMessage', [t('general.failed')]);
       logger.logError('Download GeoJSON failed:', error);
     } finally {
       setIsExporting(false);
     }
-  }, [addMessage, exportBlob, getJson, layerName, schemaTag, rows.length, t]);
+  }, [uiController, exportBlob, getJson, layerName, schemaTag, rows.length, t]);
 
   return (
     // eslint-disable-next-line @typescript-eslint/no-misused-promises

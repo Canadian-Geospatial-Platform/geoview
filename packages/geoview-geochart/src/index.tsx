@@ -3,12 +3,13 @@ import { FooterPlugin } from 'geoview-core/api/plugin/footer-plugin';
 import type { TypeTabs } from 'geoview-core/ui/tabs/tabs';
 import { ChartIcon } from 'geoview-core/ui/icons';
 
-import { GeochartEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/geochart-event-processor';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-geochart.json';
 import { GeoChartPanel } from './geochart-panel';
 import type { PluginGeoChartConfig } from './geochart-types';
 import { convertGeoViewGeoChartConfigToCore } from './geochart-types';
+import { initStoreGeochartCharts } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
+import { logger } from 'geoview-core/core/utils/logger';
 
 /**
  * The Chart Plugin which will be automatically instanciated during GeoView's initialization.
@@ -85,7 +86,16 @@ class GeoChartFooterPlugin extends FooterPlugin {
     // Initialize the store with geochart provided configuration if there is one
     if (this.getConfig().charts) {
       const configs = this.getConfig().charts.map((config) => convertGeoViewGeoChartConfigToCore(config));
-      GeochartEventProcessor.setGeochartCharts(this.mapViewer.mapId, configs);
+      // Init the charts to the store
+      initStoreGeochartCharts(this.mapViewer.mapId, configs);
+
+      // If there is charts, tab should be shown
+      if (configs.length) {
+        this.mapViewer.controllers.uiController.showTabButton('geochart');
+      }
+
+      // Log
+      logger.logInfo('Added GeoChart configs');
     }
 
     // Wire a handler using a custom hook on the window resize event

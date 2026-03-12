@@ -194,13 +194,13 @@ function addRectangle(map, groupKey) {
 
 function listenToLegendLayerSetChanges(elementId, mapViewer) {
   mapViewer.layer.legendsLayerSet.onLayerSetUpdated((sender, payload) => {
+
     const { resultSet } = payload;
     const outputHeader = '<table class="state"><tr class="state"><th class="state">Name</th><th class="state">Status</th></tr>';
     const displayField = document.getElementById(elementId);
     const output = Object.keys(resultSet).reduce((outputValue, layerPath) => {
-      const layerName = resultSet[layerPath]?.layerName || '';
       const { layerStatus } = resultSet[layerPath];
-      return `${outputValue}<tr class="state"><td class="state">${layerName}</td><td class="state">${layerStatus}</td></tr>`;
+      return `${outputValue}<tr class="state"><td class="state">${layerPath}</td><td class="state">${layerStatus}</td></tr>`;
     }, outputHeader);
     displayField.innerHTML = output && output !== outputHeader ? `${output}</table>` : '';
   });
