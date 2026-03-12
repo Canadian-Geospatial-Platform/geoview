@@ -233,7 +233,8 @@ export abstract class AbstractBaseGVLayer {
   /**
    * Sets the extent of the layer. Use undefined if it will be visible regardless of extent. The layer extent is an array of
    * numbers representing an extent: [minx, miny, maxx, maxy].
-   * @param {Extent} layerExtent The extent to assign to the layer.
+   *
+   * @param layerExtent - The extent to assign to the layer.
    */
   setExtent(layerExtent: Extent): void {
     this.getOLLayer().setExtent(layerExtent);
@@ -244,8 +245,7 @@ export abstract class AbstractBaseGVLayer {
    *
    * @returns The direct parent group layer, or `undefined` if this layer is not
    *   contained within any group.
-   * @description
-   * This method searches through the provided root group layer collection to
+   * @description This method searches through the provided root group layer collection to
    * determine which group directly contains this layer. If the layer is nested
    * within multiple groups, only the immediate parent group is returned.
    */
@@ -262,32 +262,50 @@ export abstract class AbstractBaseGVLayer {
   }
 
   /**
-   * Returns the top-most (root) `GVGroupLayer` ancestor of this layer, if any.
+   * Retrieves all parent group layers of this layer in hierarchical order.
    *
-   * @returns The highest ancestor group layer in the hierarchy, or `undefined`
-   *   if this layer does not belong to any group.
-   * @description
-   * This method traverses upward through the parent chain starting from the
-   * immediate parent of this layer. It returns the last valid parent found.
-   * A protection mechanism prevents infinite loops in case of circular
-   * parent references.
+   * The returned array starts with the immediate parent and continues up
+   * the hierarchy until the root group layer is reached or a group has already been visited
+   * (not supposed to happen).
+   *
+   * @returns An array of parent {@link GVGroupLayer} instances, ordered from
+   * the immediate parent to the top-most ancestor. Returns an empty array
+   * if the layer has no parent.
+   * @description This method traverses upward through the parent chain starting
+   * from the immediate parent of this layer. A protection mechanism prevents infinite
+   * loops in case of circular parent references.
    */
-  getParentRoot(): GVGroupLayer | undefined {
+  getParents(): GVGroupLayer[] {
     // Keep track of the visited parents
     const visited = new Set<GVGroupLayer>();
 
+    // The list of parents that will be returned
+    const parents: GVGroupLayer[] = [];
+
+    // Get the immediate parent
     let parent = this.getParent();
-    let rootParent = parent;
 
     // While a parent is found
     while (parent && !visited.has(parent)) {
       visited.add(parent);
-      rootParent = parent;
+      parents.push(parent);
       parent = parent.getParent();
     }
 
-    // Return the root parent
-    return rootParent;
+    // Return the parents of this layer
+    return parents;
+  }
+
+  /**
+   * Returns the top-most (root) `GVGroupLayer` ancestor of this layer, if any.
+   *
+   * @returns The highest ancestor group layer in the hierarchy, or `undefined`
+   *   if this layer does not belong to any group.
+   */
+  getParentRoot(): GVGroupLayer | undefined {
+    // Get the parents of this layer
+    const parents = this.getParents();
+    return parents.length ? parents[parents.length - 1] : undefined;
   }
 
   /**

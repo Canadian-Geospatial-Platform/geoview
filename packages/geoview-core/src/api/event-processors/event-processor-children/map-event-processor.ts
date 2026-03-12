@@ -906,6 +906,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
       return '';
     }
 
+    // If the layer path is set to nothing, done
+    if (!layerPath) return '';
+
     // Redirect to layer to highlight
     MapEventProcessor.getMapViewerLayerAPI(mapId).highlightLayer(layerPath);
 
