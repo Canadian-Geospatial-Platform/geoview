@@ -15,17 +15,17 @@
   "overviewMap": {
     "hideOnZoom": 7
   },
-  "navBar": ["zoom", "fullscreen", "home", "location", "basemap-select"],
+  "navBar": ["zoom", "location", "basemap-select"],
   "appBar": {
     "tabs": {
-      "core": ["geolocator", "legend", "details", "export"]
+      "core": ["geolocator"]
     }
   },
   "footerBar": {
     "tabs": {
-      "core": ["layers", "data-table"]
+      "core": []
     }
   },
-  "corePackages": [],
+  "corePackages": [""],
   "theme": "geo.ca"
 }
