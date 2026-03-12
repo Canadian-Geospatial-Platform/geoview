@@ -12,6 +12,10 @@
     "listOfGeoviewLayerConfig": [
       {
         "geoviewLayerType": "geoCore",
+        "geoviewLayerId": "4e615eae-b90c-420b-adee-2ca35896caf6"
+      },
+      {
+        "geoviewLayerType": "geoCore",
         "geoviewLayerId": "f129611d-7ca1-418b-8390-ebac5adf958e"
       },
       {
