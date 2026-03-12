@@ -75,6 +75,15 @@
       "italic": false
     },
     {
+      "tag": "to.docont",
+      "color": "#FF8C00",
+      "strikethrough": false,
+      "underline": false,
+      "backgroundColor": "transparent",
+      "bold": false,
+      "italic": false
+    },
+    {
       "tag": "*",
       "color": "#98C379",
       "strikethrough": false,
@@ -91,6 +100,24 @@
       "backgroundColor": "transparent",
       "bold": false,
       "italic": false
-    }
+    },
+    {
+      "tag": "#region",
+      "color": "#EDDE3B",
+      "strikethrough": false,
+      "underline": false,
+      "backgroundColor": "transparent",
+      "bold": true,
+      "italic": false
+    },
+    {
+      "tag": "#endregion",
+      "color": "#EDDE3B",
+      "strikethrough": false,
+      "underline": false,
+      "backgroundColor": "transparent",
+      "bold": true,
+      "italic": false
+    },
   ]
 }

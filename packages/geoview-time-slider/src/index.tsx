@@ -4,12 +4,16 @@ import { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-la
 import { TimeSliderIcon } from 'geoview-core/ui';
 import { DateMgt, type TimeIANA, type TypeDisplayDateFormat } from 'geoview-core/core/utils/date-mgt';
 import { FooterPlugin } from 'geoview-core/api/plugin/footer-plugin';
-import { TimeSliderEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/time-slider-event-processor';
 
 import { TimeSliderPanel } from './time-slider-panel';
 import schema from '../schema.json';
 import defaultConfig from '../default-config-time-slider-panel.json';
 import type { ConfigProps } from './time-slider-types';
+import {
+  setStoreTimeSliderDisplayDateFormat,
+  setStoreTimeSliderDisplayDateFormatShort,
+  setStoreTimeSliderDisplayDateTimezone,
+} from 'geoview-core/core/stores/store-interface-and-intial-values/time-slider-state';
 
 /** Properties for the slider filter configuration. */
 export interface SliderFilterProps {
@@ -164,12 +168,12 @@ class TimeSliderPlugin extends FooterPlugin {
    */
   initTimeSliderPlugin(): void {
     // Now the layerTimeDimension should be good on the layers
-    const orderedLayerPaths = this.mapViewer.layer.getLayerEntryLayerPaths();
+    const orderedLayerPaths = this.mapViewer.controllers.layerController.getLayerEntryLayerPaths();
     const initialTimeSliderLayerPaths = this.#filterTimeSliderLayers(orderedLayerPaths);
     if (initialTimeSliderLayerPaths) {
       initialTimeSliderLayerPaths.forEach((layerPath) => {
         // Get the layer
-        const layer = this.mapViewer.layer.getGeoviewLayerIfExists(layerPath);
+        const layer = this.mapViewer.controllers.layerController.getGeoviewLayerIfExists(layerPath);
 
         // If the layer was found and of right type
         if (layer instanceof AbstractGVLayer) {
@@ -177,7 +181,7 @@ class TimeSliderPlugin extends FooterPlugin {
           const timesliderConfig = this.getConfig().sliders.find((slider) => slider.layerPaths.includes(layerPath));
 
           // Check and add time slider layer when needed
-          TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.mapViewer.mapId, layer, timesliderConfig);
+          this.mapViewer.controllers.timeSliderController?.checkInitTimeSliderLayerAndApplyFilters(layer, timesliderConfig);
         }
       });
     }
@@ -194,8 +198,8 @@ class TimeSliderPlugin extends FooterPlugin {
     let displayDateFormatToSet: TypeDisplayDateFormat = displayDateFormat as TypeDisplayDateFormat;
     if (typeof displayDateFormat === 'string') displayDateFormatToSet = { en: displayDateFormat, fr: displayDateFormat };
 
-    // Redirect to processor
-    TimeSliderEventProcessor.setDisplayDateFormat(this.mapViewer.mapId, layerPath, displayDateFormatToSet);
+    // Save to the store
+    setStoreTimeSliderDisplayDateFormat(this.mapViewer.mapId, layerPath, displayDateFormatToSet);
   }
 
   /**
@@ -209,8 +213,8 @@ class TimeSliderPlugin extends FooterPlugin {
     let displayDateFormatToSet: TypeDisplayDateFormat = displayDateFormat as TypeDisplayDateFormat;
     if (typeof displayDateFormat === 'string') displayDateFormatToSet = { en: displayDateFormat, fr: displayDateFormat };
 
-    // Redirect to processor
-    TimeSliderEventProcessor.setDisplayDateFormatShort(this.mapViewer.mapId, layerPath, displayDateFormatToSet);
+    // Save to the store
+    setStoreTimeSliderDisplayDateFormatShort(this.mapViewer.mapId, layerPath, displayDateFormatToSet);
   }
 
   /**
@@ -224,8 +228,8 @@ class TimeSliderPlugin extends FooterPlugin {
     // Validate the timezone before sending it in the store in order to protect the ui
     DateMgt.validateTimezone(displayDateTimezone);
 
-    // Redirect to processor
-    TimeSliderEventProcessor.setDisplayDateTimezone(this.mapViewer.mapId, layerPath, displayDateTimezone);
+    // Save to the store
+    setStoreTimeSliderDisplayDateTimezone(this.mapViewer.mapId, layerPath, displayDateTimezone);
   }
 
   /**
@@ -238,7 +242,7 @@ class TimeSliderPlugin extends FooterPlugin {
     // Return the layer paths for the layers that have a time dimension
     return layerPaths.filter((layerPath) => {
       // Get the layer
-      const layer = this.mapViewer.layer.getGeoviewLayerIfExists(layerPath);
+      const layer = this.mapViewer.controllers.layerController.getGeoviewLayerIfExists(layerPath);
 
       // If of the right type
       if (layer instanceof AbstractGVLayer) {

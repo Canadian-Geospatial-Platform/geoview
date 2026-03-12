@@ -9,13 +9,13 @@ import CardHeader from '@mui/material/CardHeader';
 import CardContent from '@mui/material/CardContent';
 import { useTheme } from '@mui/material/styles';
 
-import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
-import { Box } from '@/ui/layout/index';
+import { Box } from '@/ui/layout';
 import type { TypePanelProps } from '@/ui/panel/panel-types';
-import { CloseIcon } from '@/ui/icons/index';
+import { CloseIcon } from '@/ui/icons';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { getSxClasses } from '@/ui/panel/panel-style';
+import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { FocusTrapContainer } from '@/core/components/common';
 import { delay } from '@/core/utils/utilities';

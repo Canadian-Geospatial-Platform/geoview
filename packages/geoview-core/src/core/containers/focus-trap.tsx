@@ -1,18 +1,17 @@
 import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
-
 import { useTranslation } from 'react-i18next';
-
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
-
 import { Modal, Button } from '@/ui';
+
+import { useUIController } from '@/core/controllers/ui-controller';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
-import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 import { getFocusTrapSxClasses } from './containers-style';
 import { ARROW_KEY_CODES } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
-import { useAppGeoviewHTMLElement, useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 
 /** Interface for the focus trap properties. */
 interface FocusTrapProps {
@@ -54,8 +53,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   // Store
   // tracks if the last action was done through a keyboard (map navigation) or mouse (mouse movement)
-  const { setCrosshairActive } = useAppStoreActions();
-  const { setActiveTrapGeoView } = useUIStoreActions();
+  const uiController = useUIController();
   const activeTrapGeoView = useUIActiveTrapGeoView();
 
   // Get container and fullscreen state
@@ -172,7 +170,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     // - If we used useCallback, each function would need to depend on the other
     handlers.current = {
       exit: () => {
-        setActiveTrapGeoView(false);
+        uiController.setActiveTrapGeoView(false);
         geoviewElement.classList.remove('map-focus-trap');
 
         if (handlers.current?.handleKeyDown && shellElementRef.current) {
@@ -182,7 +180,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
         // The setTimeout is used to ensure the DOM has been updated and the element is ready to receive focus
         setTimeout(() => document.getElementById(`toplink-${focusTrapId}`)?.focus(), FOCUS_DELAY);
-        setCrosshairActive(false);
+        uiController.setCrosshairActive(false);
       },
       handleKeyDown: (evt: KeyboardEvent) => {
         if (!ARROW_KEY_CODES.includes(evt.code)) {
@@ -194,7 +192,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
         }
       },
     };
-  }, [focusTrapId, geoviewElement, handleScrolling, mapElementStore, setActiveTrapGeoView, setCrosshairActive]);
+  }, [focusTrapId, geoviewElement, handleScrolling, mapElementStore, uiController]);
 
   /**
    * Exits the focus trap by delegating to the handlers ref.
@@ -217,7 +215,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     if (shellElementRef.current) {
       const mapHTMLElement = shellElementRef.current;
 
-      setActiveTrapGeoView(true);
+      uiController.setActiveTrapGeoView(true);
       mapHTMLElement.classList.add('map-focus-trap');
       mapHTMLElement.addEventListener('keydown', handleExit);
 
@@ -225,7 +223,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       // Focus on the skip to main content link to skip app bar
       setTimeout(() => document.getElementById(`main-map-${mapId}`)?.focus({ preventScroll: true }), FOCUS_DELAY);
     }
-  }, [handleExit, mapId, setActiveTrapGeoView]);
+  }, [handleExit, mapId, uiController]);
 
   /**
    * Handles when the user clicks the enable focus trap button.

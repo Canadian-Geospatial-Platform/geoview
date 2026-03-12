@@ -12,8 +12,9 @@ import type { LayerListEntry } from '@/core/components/common';
  * @param memoLayersList - The list of layers available for selection
  */
 export function checkSelectedLayerPathList(
-  callbackSetLayerDataArrayBatch: (layerPath: string) => void,
-  callbackSetSelectedLayerPath: (layerPath: string) => void,
+  mapId: string,
+  callbackSetStoreLayerDataArrayBatch: (mapId: string, layerPath: string) => void,
+  callbackSetStoreSelectedLayerPath: (mapId: string, layerPath: string) => void,
   memoLayerSelectedItem: LayerListEntry | undefined,
   memoLayersList: LayerListEntry[]
 ): void {
@@ -25,7 +26,7 @@ export function checkSelectedLayerPathList(
   if (memoLayerSelectedItem?.numOffeatures) {
     // All good, keep selection
     // Reset the bypass for next time
-    callbackSetLayerDataArrayBatch(memoLayerSelectedItem.layerPath);
+    callbackSetStoreLayerDataArrayBatch(mapId, memoLayerSelectedItem.layerPath);
   } else {
     // Find the first layer with features
     const anotherLayerEntry = memoLayersList.find((layer) => {
@@ -35,11 +36,11 @@ export function checkSelectedLayerPathList(
     // If found
     if (anotherLayerEntry) {
       // Select that one
-      callbackSetSelectedLayerPath(anotherLayerEntry.layerPath);
+      callbackSetStoreSelectedLayerPath(mapId, anotherLayerEntry.layerPath);
     } else {
       // TODO: Investigate infinite loop in AppBar for statement. (Not sure if still relevant to check or how to check it?)
       // None found, select none
-      callbackSetSelectedLayerPath('');
+      callbackSetStoreSelectedLayerPath(mapId, '');
     }
   }
 }

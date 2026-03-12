@@ -1,11 +1,10 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import type { Extent } from 'geoview-core/api/types/map-schema-types';
 import { Projection } from 'geoview-core/geo/utils/projection';
-import { useMapProjectionEPSG, useMapStoreActions } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
-import { useGeoViewMapId } from 'geoview-core/core/stores/geoview-store';
-import { MapEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/map-event-processor';
+import { useMapProjectionEPSG } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from 'geoview-core/core/utils/logger';
 import { getSxClasses } from './area-of-interest-style';
+import { useMapController } from 'geoview-core/core/controllers/map-controller';
 
 /** Props for the AoiPanel component. */
 interface AoiPanelProps {
@@ -52,9 +51,8 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
   const theme = ui.useTheme();
   const sxClasses = getSxClasses(theme);
 
-  const mapId = useGeoViewMapId();
   const mapProjectionEPSG = useMapProjectionEPSG();
-  const { highlightBBox } = useMapStoreActions();
+  const mapController = useMapController();
 
   /**
    * Handles when the user clicks on an AOI card
@@ -69,17 +67,18 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
       );
 
       // Zoom to extent and highlight
-      MapEventProcessor.zoomToExtent(mapId, extentInMapProjection, { maxZoom: 14 })
+      mapController
+        .zoomToExtent(extentInMapProjection, { maxZoom: 14 })
         .then(() => {
           // Highlight
-          highlightBBox(extentInMapProjection, false);
+          mapController.highlightBBox(extentInMapProjection, false);
         })
         .catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('in zoomToLonLatExtentOrCoordinate', error);
         });
     },
-    [mapId, mapProjectionEPSG, highlightBBox]
+    [mapProjectionEPSG, mapController]
   );
 
   return (

@@ -21,7 +21,7 @@ import {
   List,
 } from '@/ui';
 import { getSxClasses } from './notifications-style';
-import { useAppNotifications, useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppNotifications } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import { useMapInteraction } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -30,6 +30,7 @@ import { handleEscapeKey } from '@/core/utils/utilities';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { SxStyles } from '@/ui/style/types';
 import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
+import { useUIController } from '@/core/controllers/ui-controller';
 
 /** Details for a single notification entry. */
 export type NotificationDetailsType = {
@@ -201,7 +202,7 @@ export default memo(function Notifications(): JSX.Element {
   const notifications = useAppNotifications();
   const interaction = useMapInteraction();
   const activeTrapGeoView = useUIActiveTrapGeoView();
-  const { removeNotification, removeAllNotifications } = useAppStoreActions();
+  const uiController = useUIController();
 
   // Get container
   const mapId = useGeoViewMapId();
@@ -234,11 +235,21 @@ export default memo(function Notifications(): JSX.Element {
    */
   const handleRemoveNotification = useCallback(
     (key: string): void => {
-      removeNotification(key);
+      uiController.removeNotification(key);
     },
-    [removeNotification]
+    [uiController]
   );
 
+  /**
+   * Handles when the user removes all notifications.
+   *
+   * @param key - The notification key to remove
+   */
+  const handleRemoveAllNotifications = useCallback(() => {
+    uiController.removeAllNotifications();
+  }, [uiController]);
+
+  // Effects
   /**
    * Resets the notification count when the popover opens.
    */
@@ -349,7 +360,7 @@ export default memo(function Notifications(): JSX.Element {
           <Paper component="section" sx={sxClasses.notificationPanel}>
             <NotificationHeader
               onClose={handleClickAway}
-              onRemoveAll={removeAllNotifications}
+              onRemoveAll={handleRemoveAllNotifications}
               hasNotifications={notifications.length > 0}
               t={t}
               sxClasses={sxClasses}

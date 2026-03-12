@@ -3,11 +3,10 @@ import type { Options as LayerGroupOptions } from 'ol/layer/Group';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { Extent } from 'ol/extent';
 
-import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import { LayerNotFoundError } from '@/core/exceptions/layer-exceptions';
-import { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import { AbstractBaseGVLayer, type LayerDelegate, type LayerEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GeoUtilities } from '@/geo/utils/utilities';
 
@@ -337,19 +336,3 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
 
   // #endregion EVENTS
 }
-
-// #region EVENT TYPES
-
-/**
- * Define an event for the delegate
- */
-export type LayerEvent = {
-  layer: AbstractBaseGVLayer;
-};
-
-/**
- * Define a delegate for the event handler function signature
- */
-export type LayerDelegate = EventDelegateBase<GVGroupLayer, LayerEvent, void>;
-
-// #endregion EVENT TYPES

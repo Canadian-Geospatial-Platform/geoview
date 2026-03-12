@@ -1260,9 +1260,9 @@ export abstract class ConfigBaseClass {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onLayerStatusChanged(callback: LayerStatusChangedDelegate): void {
+  onLayerStatusChanged(callback: LayerStatusChangedDelegate): LayerStatusChangedDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onLayerStatusChangedHandlers, callback);
+    return EventHelper.onEvent(this.#onLayerStatusChangedHandlers, callback);
   }
 
   /**
@@ -1270,7 +1270,7 @@ export abstract class ConfigBaseClass {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerStatusChanged(callback: LayerStatusChangedDelegate): void {
+  offLayerStatusChanged(callback: LayerStatusChangedDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerStatusChangedHandlers, callback);
   }

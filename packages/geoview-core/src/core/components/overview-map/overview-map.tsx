@@ -8,13 +8,12 @@ import { ThemeProvider } from '@mui/material/styles';
 
 import { cgpvTheme } from '@/ui/style/theme';
 import { OverviewMapToggle } from './overview-map-toggle';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useMapOverviewMapHideZoom, useMapZoom } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from '@/core/utils/logger';
 import { Box } from '@/ui/layout';
 import { TIMEOUT } from '@/core/utils/constant';
+import { useMapController } from '@/core/controllers/map-controller';
 
 /** The properties for the overview map component. */
 export type OverviewMapProps = {
@@ -33,11 +32,11 @@ export function OverviewMap(props: OverviewMapProps): JSX.Element {
   logger.logTraceRender('components/overview-map/overview-map');
 
   // Store
-  const mapId = useGeoViewMapId();
   const zoomLevel = useMapZoom();
   const hideOnZoom = useMapOverviewMapHideZoom();
   const displayLanguage = useAppDisplayLanguage();
   const { i18n } = props;
+  const mapController = useMapController();
 
   // State
   const [visibility, setVisibility] = useState<boolean>(!(zoomLevel > hideOnZoom));
@@ -55,9 +54,9 @@ export function OverviewMap(props: OverviewMapProps): JSX.Element {
     const shouldBeVisibile = zoomLevel > hideOnZoom;
     if (shouldBeVisibile !== visibility) {
       setVisibility(shouldBeVisibile);
-      MapEventProcessor.setOverviewMapVisibility(mapId, shouldBeVisibile);
+      mapController.setOverviewMapVisibility(shouldBeVisibile);
     }
-  }, [mapId, hideOnZoom, zoomLevel, visibility, isInitialized]);
+  }, [mapController, hideOnZoom, zoomLevel, visibility, isInitialized]);
 
   /**
    * Initializes the overview map control and renders the toggle button on mount.
@@ -67,7 +66,7 @@ export function OverviewMap(props: OverviewMapProps): JSX.Element {
 
     let root: Root | null = null;
     const toggleButton = document.createElement('div');
-    const overviewMapControl = MapEventProcessor.getOverviewMapControl(mapId, toggleButton);
+    const overviewMapControl = mapController.initOverviewMapControl(toggleButton);
 
     // Use setTimeout to defer root creation to next tick
     const timeoutId = setTimeout(() => {
@@ -80,7 +79,7 @@ export function OverviewMap(props: OverviewMapProps): JSX.Element {
         </I18nextProvider>
       );
       // Store the root reference for cleanup
-      MapEventProcessor.setMapOverviewMapRoot(mapId, root);
+      mapController.setMapOverviewMapRoot(root);
 
       // Set initialized to true after everything is set up
       setIsInitialized(true);
@@ -98,7 +97,7 @@ export function OverviewMap(props: OverviewMapProps): JSX.Element {
       }, TIMEOUT.deferExecution);
       setIsInitialized(false);
     };
-  }, [mapId, displayLanguage, i18n]);
+  }, [mapController, displayLanguage, i18n]);
 
   return <Box />;
 }

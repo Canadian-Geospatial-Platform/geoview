@@ -5,7 +5,7 @@ import { useTheme } from '@mui/material/styles';
 import { Box, BrowserNotSupportedIcon } from '@/ui';
 
 import {
-  getMapPointerPosition,
+  getStoreMapPointerPosition,
   useMapHoverFeatureInfo,
   useMapIsMouseInsideMap,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -80,7 +80,7 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
    */
   const memoPosition = useMemo(() => {
     // Use store getter, we do not subcribe to modification and use it only when needed
-    const pointerPosition = getMapPointerPosition(mapId);
+    const pointerPosition = getStoreMapPointerPosition(mapId);
 
     // Early return in memo
     // Check for all required conditions upfront

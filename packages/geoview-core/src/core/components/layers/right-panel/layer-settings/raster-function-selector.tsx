@@ -8,13 +8,13 @@ import { ImageNotSupportedIcon, FunctionsIcon, ExpandMoreIcon, ExpandLessIcon } 
 
 import { getSxClasses } from './layer-settings-style';
 import {
-  useLayerStoreActions,
   useLayerSelectorRasterFunctionInfos,
   useLayerSelectorRasterFunction,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import type { TypeMetadataEsriRasterFunctionInfos } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
+import { useLayerController } from '@/core/controllers/layer-controller';
 
 interface RasterFunctionItemProps {
   info: TypeMetadataEsriRasterFunctionInfos;
@@ -145,13 +145,11 @@ export function RasterFunctionPanel({ layerDetails }: RasterFunctionPanelProps):
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  // Store actions
-  const { setLayerRasterFunction, getLayerRasterFunctionPreviews } = useLayerStoreActions();
-
   // Store hooks
   const storeRasterFunctionInfos = useLayerSelectorRasterFunctionInfos(layerDetails.layerPath);
   const memoRasterFunctionInfos = useMemo(() => storeRasterFunctionInfos || [], [storeRasterFunctionInfos]);
   const currentRasterFunction = useLayerSelectorRasterFunction(layerDetails.layerPath);
+  const layerController = useLayerController();
 
   // State
   const [previewPromises, setPreviewPromises] = useState<Map<string, Promise<string>>>(new Map());
@@ -162,16 +160,17 @@ export function RasterFunctionPanel({ layerDetails }: RasterFunctionPanelProps):
     logger.logTraceUseEffect('RASTER FUNCTION PANEL - Layer Raster Function Infos sync', memoRasterFunctionInfos);
 
     if (memoRasterFunctionInfos.length > 0) {
-      const promises = getLayerRasterFunctionPreviews(layerDetails.layerPath);
+      // TODO: CHECK - Verify if that's the intent here? - Use a hook?
+      const promises = layerController.getLayerRasterFunctionPreviews(layerDetails.layerPath);
       setPreviewPromises(promises);
     }
-  }, [layerDetails.layerPath, memoRasterFunctionInfos, getLayerRasterFunctionPreviews]);
+  }, [layerDetails.layerPath, memoRasterFunctionInfos, layerController]);
 
   const handleSelect = useCallback(
     (rasterFunctionName: string): void => {
-      setLayerRasterFunction(layerDetails.layerPath, rasterFunctionName);
+      layerController.setLayerRasterFunction(layerDetails.layerPath, rasterFunctionName);
     },
-    [layerDetails.layerPath, setLayerRasterFunction]
+    [layerDetails.layerPath, layerController]
   );
 
   const handleToggle = useCallback((): void => {

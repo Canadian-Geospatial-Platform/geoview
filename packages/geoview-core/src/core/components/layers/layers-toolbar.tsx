@@ -7,14 +7,14 @@ import { useTheme } from '@mui/material';
 import { Box, AddCircleOutlineIcon, Button } from '@/ui';
 import { ToggleAll } from '@/core/components/toggle-all/toggle-all';
 import {
-  useLayerStoreActions,
   useLayerDisplayState,
   useLayerLegendLayers,
+  setStoreLayerDisplayState,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useGeoViewMapId } from '@/core/stores';
 import type { TypeLayersViewDisplayState } from './types';
 import { logger } from '@/core/utils/logger';
 import type { TypeContainerBox } from '@/core/types/global-types';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 interface TypeLayersToolbar {
   containerType: TypeContainerBox;
@@ -25,7 +25,6 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
   logger.logTraceRender('components/layers/layers-toolbar');
 
   // Hooks
-  const mapId = useGeoViewMapId();
   const theme = useTheme();
   const { t } = useTranslation<string>();
   const addButtonRef = useRef<HTMLButtonElement>(null);
@@ -40,9 +39,9 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
   };
 
   // Store
+  const mapId = useGeoViewMapId();
   const displayState = useLayerDisplayState();
   const legendLayers = useLayerLegendLayers();
-  const { setDisplayState } = useLayerStoreActions();
 
   // State
   const lastDisplayState = useRef<TypeLayersViewDisplayState | null>(null);
@@ -60,9 +59,9 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
         userClickedAdd.current = false;
       }
 
-      setDisplayState(displayStateParam);
+      setStoreLayerDisplayState(mapId, displayStateParam);
     },
-    [setDisplayState]
+    [mapId]
   );
 
   /**
@@ -75,7 +74,7 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
   useEffect(() => {
     // Always show 'add' panel when there are no layers
     if (legendLayers.length === 0 && displayState !== 'add') {
-      setDisplayState('add');
+      setStoreLayerDisplayState(mapId, 'add');
     }
 
     // Track display state changes to handle transitions
@@ -94,7 +93,7 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
         userClickedAdd.current = false;
       }
     }
-  }, [displayState, legendLayers.length, setDisplayState]);
+  }, [displayState, legendLayers.length, mapId]);
 
   /**
    * Secondary effect specifically for auto-switching to view mode.
@@ -106,10 +105,10 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
    */
   useEffect(() => {
     if (legendLayers.length > 0 && displayState === 'add' && !userClickedAdd.current) {
-      setDisplayState('view');
+      setStoreLayerDisplayState(mapId, 'view');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [legendLayers.length]); // Only depend on legendLayers.length
+  }, [legendLayers.length, mapId]); // Only depend on legendLayers.length and mapId
 
   return (
     <Box id={`${mapId}-${containerType}-layers-toolbar`} sx={layerToolbarStyle}>

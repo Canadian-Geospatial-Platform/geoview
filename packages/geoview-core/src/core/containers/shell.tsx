@@ -13,13 +13,13 @@ import { MapInfo } from '@/core/components/map-info/map-info';
 import type { TypeModalProps, ModalApi, ModalEvent } from '@/ui';
 import { Box, CircularProgress, Link, Modal, Snackbar, Button } from '@/ui';
 import { getShellSxClasses } from './containers-style';
+import { useUIController } from '@/core/controllers/ui-controller';
 import { useMapInteraction, useMapLoaded } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
   useAppCircularProgressActive,
   useAppFullscreenActive,
   useAppGeoviewHTMLElement,
   useAppHeight,
-  useAppStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/app-state';
 import {
   useUIActiveFocusItem,
@@ -88,13 +88,13 @@ export function Shell(props: ShellProps): JSX.Element {
   const interaction = useMapInteraction();
   const geoviewConfig = useGeoViewConfig();
   const focusItem = useUIActiveFocusItem();
+  const uiController = useUIController();
   const isMapFullScreen = useAppFullscreenActive();
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
   const { isOpen } = useUIActiveFooterBarTab();
   const geoviewElement = useAppGeoviewHTMLElement();
   const appHeight = useAppHeight();
   const footerTabContainer = geoviewElement.querySelector(`[id^="${mapId}-tabsContainer"]`) as HTMLElement;
-  const { setCrosshairActive } = useAppStoreActions();
 
   // SxClasses
   const sxClasses = useMemo(() => getShellSxClasses(theme, appHeight), [theme, appHeight]);
@@ -260,9 +260,9 @@ export function Shell(props: ShellProps): JSX.Element {
    */
   const handleSkipToMainContent = useCallback((): void => {
     // Focus the map and set crosshair
-    setCrosshairActive(true);
+    uiController.setCrosshairActive(true);
     document.getElementById(`mapTargetElement-${mapId}`)?.focus();
-  }, [mapId, setCrosshairActive]);
+  }, [mapId, uiController]);
 
   // #endregion HANDLERS
 

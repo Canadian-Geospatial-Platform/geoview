@@ -4,9 +4,9 @@ import { List, ListItem, ListItemButton, Grid, Tooltip, Typography } from '@/ui'
 import type { GeoListItem } from '@/core/components/geolocator/geolocator';
 import { getSxClassesList } from '@/core/components/geolocator/geolocator-style';
 import { getBoldListTitle, getTooltipTitle } from '@/core/components/geolocator/utilities';
-import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { logger } from '@/core/utils/logger';
+import { useMapController } from '@/core/controllers/map-controller';
 
 /** Props for the GeoList component. */
 type GeoListProps = {
@@ -30,22 +30,24 @@ export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Elemen
   const sxClassesList = useMemo(() => getSxClassesList(theme), [theme]);
 
   // Store
-  const { zoomToGeoLocatorLocation } = useMapStoreActions();
+  const mapController = useMapController();
 
   /**
    * Handles zooming to a geolocation result.
    */
   const handleZoomToGeoLocator = useCallback(
     (geoListItem: GeoListItem): void => {
-      zoomToGeoLocatorLocation(
-        `${geoListItem.name}, ${geoListItem.province}, ${geoListItem.category}`,
-        [geoListItem.lng, geoListItem.lat],
-        geoListItem.bbox
-      ).catch((error: unknown) => {
-        logger.logPromiseFailed('Failed to zoomToGeoLocatorLocation in GeoList', error);
-      });
+      mapController
+        .zoomToGeoLocatorLocation(
+          `${geoListItem.name}, ${geoListItem.province}, ${geoListItem.category}`,
+          [geoListItem.lng, geoListItem.lat],
+          geoListItem.bbox
+        )
+        .catch((error: unknown) => {
+          logger.logPromiseFailed('Failed to zoomToGeoLocatorLocation in GeoList', error);
+        });
     },
-    [zoomToGeoLocatorLocation]
+    [mapController]
   );
 
   /**

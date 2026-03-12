@@ -3,16 +3,17 @@ import { useTheme, useMediaQuery } from '@mui/material';
 import { useCallback } from 'react';
 import { Box, Switch, Tooltip } from '@/ui';
 import {
+  setStoreMapAllMapLayerCollapsed,
   useMapAllLayersCollapsedToggle,
   useMapAllLayersVisibleToggle,
   useMapHasCollapsibleLayersToggle,
-  useMapStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useLayerDisplayState, useLayerAreLayersLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 import type { TypeContainerBox } from '@/core/types/global-types';
+import { useMapController } from '@/core/controllers/map-controller';
 
 /** The properties for the toggle all component. */
 interface ToggleAllProps {
@@ -52,21 +53,21 @@ export function ToggleAll({ source, containerType }: ToggleAllProps): JSX.Elemen
   const allLayersCollapsed = useMapAllLayersCollapsedToggle();
   const layersAreLoading = useLayerAreLayersLoading();
   const hasCollapsibleLayers = useMapHasCollapsibleLayersToggle();
-  const { setAllLayersVisibility, setAllLayersCollapsed } = useMapStoreActions();
+  const mapController = useMapController();
 
   /**
    * Handles when the user toggles the visibility switch.
    */
   const handleVisibilityToggle = useCallback((): void => {
-    setAllLayersVisibility(!allLayersVisible);
-  }, [allLayersVisible, setAllLayersVisibility]);
+    mapController.setAllMapLayerVisibility(!allLayersVisible);
+  }, [allLayersVisible, mapController]);
 
   /**
    * Handles when the user toggles the collapse switch.
    */
   const handleCollapseToggle = useCallback((): void => {
-    setAllLayersCollapsed(!allLayersCollapsed);
-  }, [allLayersCollapsed, setAllLayersCollapsed]);
+    setStoreMapAllMapLayerCollapsed(mapId, !allLayersCollapsed);
+  }, [allLayersCollapsed, mapId]);
 
   // TODO Hide this component until all layers have loaded the first time.
   // TO.DO May require something external as a useRef for the first time the !layerAreLoading didn't work
