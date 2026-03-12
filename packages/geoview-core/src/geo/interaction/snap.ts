@@ -5,6 +5,7 @@ import type Feature from 'ol/Feature';
 
 import type { InteractionOptions } from './interaction';
 import { Interaction } from './interaction';
+import type { GeometryApi } from '@/geo/layer/geometry/geometry';
 
 /**
  * Supported options for snapping interactions
@@ -26,7 +27,7 @@ export class Snap extends Interaction {
    *
    * @param options - Object to configure the initialization of the Snap interaction
    */
-  constructor(options: SnapOptions) {
+  constructor(options: SnapOptions, geometryApi: GeometryApi) {
     super(options);
 
     // The OpenLayers Snap options
@@ -38,8 +39,8 @@ export class Snap extends Interaction {
       olOptions.features = options.features;
     } else if (options.geometryGroupKey) {
       // If a geometry group key is set, get the vector source for the geometry group
-      const geomGroup = this.mapViewer.layer.geometry?.createGeometryGroup(options.geometryGroupKey);
-      olOptions.source = geomGroup?.vectorSource;
+      const geomGroup = geometryApi.createGeometryGroup(options.geometryGroupKey);
+      olOptions.source = geomGroup.vectorSource;
     }
 
     // Instantiate the OpenLayers Snap interaction

@@ -38,7 +38,7 @@ import { LayerFailedToLoadError, LayerImageFailedToLoadError } from '@/core/exce
 import type { TypeLegendItem } from '@/core/components/layers/types';
 import { GeoviewRenderer, type TypeStyleProcessorOptions } from '@/geo/utils/renderer/geoview-renderer';
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import { AbstractBaseGVLayer, type LayerBaseDelegate, type LayerBaseEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { SnackbarType } from '@/core/utils/notifications';
 import { formatError, NotImplementedError, NotSupportedError } from '@/core/exceptions/core-exceptions';
 import { LayerNotQueryableError, LayerStatusErrorError } from '@/core/exceptions/layer-exceptions';
@@ -95,13 +95,13 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
   #onLayerFilterAppliedHandlers: LayerFilterAppliedDelegate[] = [];
 
   /** Callback delegates for the layer first loaded event */
-  #onLayerFirstLoadedHandlers: LayerDelegate[] = [];
+  #onLayerFirstLoadedHandlers: LayerBaseDelegate[] = [];
 
   /** Callback delegates for the layer loading event */
-  #onLayerLoadingHandlers: LayerDelegate[] = [];
+  #onLayerLoadingHandlers: LayerBaseDelegate[] = [];
 
   /** Callback delegates for the layer loaded event */
-  #onLayerLoadedHandlers: LayerDelegate[] = [];
+  #onLayerLoadedHandlers: LayerBaseDelegate[] = [];
 
   /** Callback delegates for the layer error event */
   #onLayerErrorHandlers: LayerErrorDelegate[] = [];
@@ -114,6 +114,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
 
   /** Callback delegates for the layer hoverable changed event */
   #onLayerHoverableChangedHandlers: LayerHoverableChangedDelegate[] = [];
+
+  /** Callback delegates for the layer item visibility changed event */
+  #onLayerItemVisibilityChangedHandlers: LayerItemVisibilityChangedDelegate[] = [];
 
   /**
    * Constructs a GeoView layer to manage an OpenLayer layer.
@@ -606,12 +609,12 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    * render, and optionally waits for the next render cycle to complete.
    *
    * @param item - The legend/style item whose visibility will be updated
-   * @param visibility - Whether the style item should be visible
+   * @param visible - Whether the style item should be visible
    * @param waitForRender - When `true`, waits for the next layer render to complete before resolving
    * @returns A promise that resolves after the visibility has been
    * updated and, if requested, the layer has finished rendering
    */
-  async setStyleItemVisibility(item: TypeLegendItem, visibility: boolean, waitForRender: boolean): Promise<void> {
+  async setStyleItemVisibility(item: TypeLegendItem, visible: boolean, waitForRender: boolean): Promise<void> {
     // Get the style config
     const geometryStyleConfig = this.getStyle()![item.geometryType];
 
@@ -619,7 +622,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     const styleInfos = geometryStyleConfig?.info.filter((styleInfo) => styleInfo.label === item.name);
     styleInfos?.forEach((styleInfo) => {
       // eslint-disable-next-line no-param-reassign
-      styleInfo.visible = visibility;
+      styleInfo.visible = visible;
     });
 
     // Force a re-render of the layer source (this is required if there are classes)
@@ -630,6 +633,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
       // Wait for the render to complete
       await this.waitForRender();
     }
+
+    // Emit about it
+    this.#emitLayerItemVisibilityChanged({ item, visible });
   }
 
   /**
@@ -1277,7 +1283,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    */
   #emitLegendQuerying(): void {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLegendQueryingHandlers, undefined);
+    EventHelper.emitEvent(this, this.#onLegendQueryingHandlers, {});
   }
 
   /**
@@ -1285,9 +1291,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onLegendQuerying(callback: LegendQueryingDelegate): void {
+  onLegendQuerying(callback: LegendQueryingDelegate): LegendQueryingDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onLegendQueryingHandlers, callback);
+    return EventHelper.onEvent(this.#onLegendQueryingHandlers, callback);
   }
 
   /**
@@ -1295,7 +1301,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offLegendQuerying(callback: LegendQueryingDelegate): void {
+  offLegendQuerying(callback: LegendQueryingDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLegendQueryingHandlers, callback);
   }
@@ -1315,9 +1321,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onLegendQueried(callback: LegendQueriedDelegate): void {
+  onLegendQueried(callback: LegendQueriedDelegate): LegendQueriedDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onLegendQueriedHandlers, callback);
+    return EventHelper.onEvent(this.#onLegendQueriedHandlers, callback);
   }
 
   /**
@@ -1325,7 +1331,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offLegendQueried(callback: LegendQueriedDelegate): void {
+  offLegendQueried(callback: LegendQueriedDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLegendQueriedHandlers, callback);
   }
@@ -1345,9 +1351,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onLayerFilterApplied(callback: LayerFilterAppliedDelegate): void {
+  onLayerFilterApplied(callback: LayerFilterAppliedDelegate): LayerFilterAppliedDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onLayerFilterAppliedHandlers, callback);
+    return EventHelper.onEvent(this.#onLayerFilterAppliedHandlers, callback);
   }
 
   /**
@@ -1355,7 +1361,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerFilterApplied(callback: LayerFilterAppliedDelegate): void {
+  offLayerFilterApplied(callback: LayerFilterAppliedDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerFilterAppliedHandlers, callback);
   }
@@ -1375,9 +1381,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onLayerStyleChanged(callback: StyleChangedDelegate): void {
+  onLayerStyleChanged(callback: StyleChangedDelegate): StyleChangedDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onLayerStyleChangedHandlers, callback);
+    return EventHelper.onEvent(this.#onLayerStyleChangedHandlers, callback);
   }
 
   /**
@@ -1385,7 +1391,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerStyleChanged(callback: StyleChangedDelegate): void {
+  offLayerStyleChanged(callback: StyleChangedDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerStyleChangedHandlers, callback);
   }
@@ -1395,7 +1401,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    */
   #emitLayerFirstLoaded(): void {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLayerFirstLoadedHandlers, undefined);
+    EventHelper.emitEvent(this, this.#onLayerFirstLoadedHandlers, {});
   }
 
   /**
@@ -1403,9 +1409,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onLayerFirstLoaded(callback: LayerDelegate): void {
+  onLayerFirstLoaded(callback: LayerBaseDelegate): LayerBaseDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onLayerFirstLoadedHandlers, callback);
+    return EventHelper.onEvent(this.#onLayerFirstLoadedHandlers, callback);
   }
 
   /**
@@ -1413,7 +1419,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerFirstLoaded(callback: LayerDelegate): void {
+  offLayerFirstLoaded(callback: LayerBaseDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerFirstLoadedHandlers, callback);
   }
@@ -1423,7 +1429,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    */
   #emitLayerLoading(): void {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLayerLoadingHandlers, undefined);
+    EventHelper.emitEvent(this, this.#onLayerLoadingHandlers, {});
   }
 
   /**
@@ -1431,9 +1437,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onLayerLoading(callback: LayerDelegate): void {
+  onLayerLoading(callback: LayerBaseDelegate): LayerBaseDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onLayerLoadingHandlers, callback);
+    return EventHelper.onEvent(this.#onLayerLoadingHandlers, callback);
   }
 
   /**
@@ -1441,7 +1447,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerLoading(callback: LayerDelegate): void {
+  offLayerLoading(callback: LayerBaseDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerLoadingHandlers, callback);
   }
@@ -1451,7 +1457,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    */
   #emitLayerLoaded(): void {
     // Emit the event for all handlers
-    EventHelper.emitEvent(this, this.#onLayerLoadedHandlers, undefined);
+    EventHelper.emitEvent(this, this.#onLayerLoadedHandlers, {});
   }
 
   /**
@@ -1459,9 +1465,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onLayerLoaded(callback: LayerDelegate): void {
+  onLayerLoaded(callback: LayerBaseDelegate): LayerBaseDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onLayerLoadedHandlers, callback);
+    return EventHelper.onEvent(this.#onLayerLoadedHandlers, callback);
   }
 
   /**
@@ -1469,7 +1475,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerLoaded(callback: LayerDelegate): void {
+  offLayerLoaded(callback: LayerBaseDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerLoadedHandlers, callback);
   }
@@ -1489,9 +1495,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onLayerError(callback: LayerErrorDelegate): void {
+  onLayerError(callback: LayerErrorDelegate): LayerErrorDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onLayerErrorHandlers, callback);
+    return EventHelper.onEvent(this.#onLayerErrorHandlers, callback);
   }
 
   /**
@@ -1499,7 +1505,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerError(callback: LayerErrorDelegate): void {
+  offLayerError(callback: LayerErrorDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerErrorHandlers, callback);
   }
@@ -1519,9 +1525,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onLayerMessage(callback: LayerMessageDelegate): void {
+  onLayerMessage(callback: LayerMessageDelegate): LayerMessageDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onLayerMessageHandlers, callback);
+    return EventHelper.onEvent(this.#onLayerMessageHandlers, callback);
   }
 
   /**
@@ -1529,7 +1535,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerMessage(callback: LayerMessageDelegate): void {
+  offLayerMessage(callback: LayerMessageDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerMessageHandlers, callback);
   }
@@ -1549,9 +1555,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onLayerQueryableChanged(callback: LayerQueryableChangedDelegate): void {
+  onLayerQueryableChanged(callback: LayerQueryableChangedDelegate): LayerQueryableChangedDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onLayerQueryableChangedHandlers, callback);
+    return EventHelper.onEvent(this.#onLayerQueryableChangedHandlers, callback);
   }
 
   /**
@@ -1559,7 +1565,7 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerQueryableChanged(callback: LayerQueryableChangedDelegate): void {
+  offLayerQueryableChanged(callback: LayerQueryableChangedDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerQueryableChangedHandlers, callback);
   }
@@ -1579,9 +1585,9 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onLayerHoverableChanged(callback: LayerHoverableChangedDelegate): void {
+  onLayerHoverableChanged(callback: LayerHoverableChangedDelegate): LayerHoverableChangedDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onLayerHoverableChangedHandlers, callback);
+    return EventHelper.onEvent(this.#onLayerHoverableChangedHandlers, callback);
   }
 
   /**
@@ -1589,9 +1595,39 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerHoverableChanged(callback: LayerHoverableChangedDelegate): void {
+  offLayerHoverableChanged(callback: LayerHoverableChangedDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerHoverableChangedHandlers, callback);
+  }
+
+  /**
+   * Emits layer item visibility toggled event.
+   *
+   * @param event - The event to emit
+   */
+  #emitLayerItemVisibilityChanged(event: LayerItemVisibilityChangedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerItemVisibilityChangedHandlers, event);
+  }
+
+  /**
+   * Registers a layer item visibility toggled event handler.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerItemVisibilityChanged(callback: LayerItemVisibilityChangedDelegate): LayerItemVisibilityChangedDelegate {
+    // Register the event handler
+    return EventHelper.onEvent(this.#onLayerItemVisibilityChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer item visibility changed event handler.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerItemVisibilityChanged(callback: LayerItemVisibilityChangedDelegate | undefined): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerItemVisibilityChangedHandlers, callback);
   }
 
   // #endregion EVENTS
@@ -1973,10 +2009,10 @@ export type GetFieldValueDelegate = (
 /**
  * Define an event for the delegate
  */
-export type StyleChangedEvent = {
+export interface StyleChangedEvent extends LayerBaseEvent {
   // The style
   style: TypeLayerStyleConfig;
-};
+}
 
 /**
  * Define a delegate for the event handler function signature
@@ -1986,7 +2022,7 @@ export type StyleChangedDelegate = EventDelegateBase<AbstractGVLayer, StyleChang
 /**
  * Define an event for the delegate
  */
-export type LegendQueryingEvent = unknown;
+export interface LegendQueryingEvent extends LayerBaseEvent {}
 
 /**
  * Define a delegate for the event handler function signature
@@ -1996,9 +2032,9 @@ export type LegendQueryingDelegate = EventDelegateBase<AbstractGVLayer, LegendQu
 /**
  * Define an event for the delegate
  */
-export type LegendQueriedEvent = {
+export interface LegendQueriedEvent extends LayerBaseEvent {
   legend: TypeLegend;
-};
+}
 
 /**
  * Define a delegate for the event handler function signature
@@ -2008,10 +2044,10 @@ export type LegendQueriedDelegate = EventDelegateBase<AbstractGVLayer, LegendQue
 /**
  * Define an event for the delegate
  */
-export type LayerFilterAppliedEvent = {
+export interface LayerFilterAppliedEvent extends LayerBaseEvent {
   // The filter
   filter: LayerFilters;
-};
+}
 
 /**
  * Define a delegate for the event handler function signature
@@ -2019,17 +2055,12 @@ export type LayerFilterAppliedEvent = {
 export type LayerFilterAppliedDelegate = EventDelegateBase<AbstractGVLayer, LayerFilterAppliedEvent, void>;
 
 /**
- * Define a delegate for the event handler function signature
- */
-export type LayerDelegate = EventDelegateBase<AbstractGVLayer, undefined, void>;
-
-/**
  * Define an event for the delegate
  */
-export type LayerErrorEvent = {
+export interface LayerErrorEvent extends LayerBaseEvent {
   // The error
   error: GeoViewError;
-};
+}
 
 /**
  * Define a delegate for the event handler function signature
@@ -2039,13 +2070,13 @@ export type LayerErrorDelegate = EventDelegateBase<AbstractGVLayer, LayerErrorEv
 /**
  * Define an event for the delegate
  */
-export type LayerMessageEvent = {
+export interface LayerMessageEvent extends LayerBaseEvent {
   // The loaded layer
   messageKey: string;
   messageParams: unknown[] | undefined;
   messageType: SnackbarType;
   notification: boolean;
-};
+}
 
 /**
  * Define a delegate for the event handler function signature
@@ -2055,27 +2086,43 @@ export type LayerMessageDelegate = EventDelegateBase<AbstractGVLayer, LayerMessa
 /**
  * Define an event for the delegate
  */
-export type LayerQueryableChangedEvent = {
+export interface LayerQueryableChangedEvent extends LayerBaseEvent {
   // The flag
   queryable: boolean;
-};
+}
 
 /**
  * Define a delegate for the event handler function signature
  */
-export type LayerQueryableChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, LayerQueryableChangedEvent, void>;
+export type LayerQueryableChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerQueryableChangedEvent, void>;
 
 /**
  * Define an event for the delegate
  */
-export type LayerHoverableChangedEvent = {
+export interface LayerHoverableChangedEvent extends LayerBaseEvent {
   // The flag
   hoverable: boolean;
-};
+}
 
 /**
  * Define a delegate for the event handler function signature
  */
-export type LayerHoverableChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, LayerHoverableChangedEvent, void>;
+export type LayerHoverableChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerHoverableChangedEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export interface LayerItemVisibilityChangedEvent extends LayerBaseEvent {
+  /** The item being toggled */
+  item: TypeLegendItem;
+
+  /** The new visibility */
+  visible: boolean;
+}
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type LayerItemVisibilityChangedDelegate = EventDelegateBase<AbstractGVLayer, LayerItemVisibilityChangedEvent, void>;
 
 // #endregion EVENT TYPES

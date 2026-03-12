@@ -2,10 +2,12 @@ import { useTranslation } from 'react-i18next';
 import type { MouseEvent } from 'react';
 import { useState, useMemo, memo, useCallback } from 'react';
 import Slider from '@mui/material/Slider';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { Box, HeightIcon, IconButton, Popover } from '@/ui';
+
+import { useUIController } from '@/core/controllers/ui-controller';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { getSxClasses } from './resize-footer-panel-style';
-import { useUIFooterPanelResizeValue, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIFooterPanelResizeValue } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
 
 /** Slider input styles for vertical orientation. */
@@ -47,7 +49,7 @@ export const ResizeFooterPanel = memo(function ResizeFooterPanel(): JSX.Element 
 
   // Store
   const footerPanelResizeValue = useUIFooterPanelResizeValue();
-  const { setFooterPanelResizeValue } = useUIStoreActions();
+  const uiController = useUIController();
 
   // States
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -81,10 +83,10 @@ export const ResizeFooterPanel = memo(function ResizeFooterPanel(): JSX.Element 
    */
   const handleOnSliderChange = useCallback(
     (event: Event, value: number | number[]): void => {
-      setFooterPanelResizeValue(value as number);
+      uiController.setFooterPanelResizeValue(value as number);
       handleClose();
     },
-    [handleClose, setFooterPanelResizeValue]
+    [handleClose, uiController]
   );
 
   // #endregion Handlers

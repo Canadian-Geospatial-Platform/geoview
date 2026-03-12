@@ -1,11 +1,12 @@
-import type { TypeWindow } from 'geoview-core';
+import { type TypeWindow } from 'geoview-core';
 import { getSxClasses } from 'geoview-core/core/components/nav-bar/nav-bar-style';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
-import { useDrawerActions, useDrawerIsDrawing } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
+import { useDrawerIsDrawing } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 
 import { IconButton, DrawIcon } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
+import { useDrawerController } from 'geoview-core/core/controllers/drawer-controller';
 
 /**
  * Creates a draw button to toggle drawing capabilities.
@@ -25,15 +26,13 @@ export default function Draw(): JSX.Element {
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const displayLanguage = useAppDisplayLanguage();
   const isDrawing = useDrawerIsDrawing();
-
-  // Store actions
-  const { toggleDrawing } = useDrawerActions();
+  const drawerController = useDrawerController();
 
   /**
    * Handles a click on the draw button
    */
   const handleDraw = (): void => {
-    toggleDrawing();
+    drawerController.toggleDrawing();
   };
 
   return (

@@ -1,8 +1,8 @@
 import ReactDOMServer from 'react-dom/server';
-import type { TypeWindow } from 'geoview-core';
+import { useGeoViewMapId, type TypeWindow } from 'geoview-core';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import {
-  useDrawerActions,
+  setStoreDrawerIconSrc,
   useDrawerActiveGeom,
   useDrawerIsDrawing,
   useDrawerStyle,
@@ -10,6 +10,7 @@ import {
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 
 import { logger } from 'geoview-core/core/utils/logger';
+import { useDrawerController } from 'geoview-core/core/controllers/drawer-controller';
 
 /** Props for the GeometryPickerPanel component. */
 export interface GeometryPickerPanelProps {
@@ -35,7 +36,8 @@ export function PointIcon(props: PointIconProps): JSX.Element {
   const { useEffect } = cgpv.reactUtilities.react;
   const { IconComponent } = props;
 
-  const { setIconSrc } = useDrawerActions();
+  const mapId = useGeoViewMapId();
+
   const { fillColor, strokeColor, strokeWidth } = useDrawerStyle();
 
   useEffect(() => {
@@ -74,11 +76,11 @@ export function PointIcon(props: PointIconProps): JSX.Element {
     const dataUrl = `data:image/svg+xml;base64,${btoa(svgStr)}`;
 
     // Store the URL
-    setIconSrc(dataUrl);
+    setStoreDrawerIconSrc(mapId, dataUrl);
 
     // Clean up when component unmounts
     return () => URL.revokeObjectURL(dataUrl);
-  }, [IconComponent, fillColor, setIconSrc, strokeColor, strokeWidth]);
+  }, [IconComponent, fillColor, mapId, strokeColor, strokeWidth]);
 
   return <IconComponent sx={{ fill: fillColor, stroke: strokeColor, strokeWidth }} />;
 }
@@ -136,9 +138,9 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
 
   // Get store values
   const displayLanguage = useAppDisplayLanguage();
+  const drawerController = useDrawerController();
 
   // Store actions
-  const { setActiveGeom, toggleDrawing } = useDrawerActions();
   const style = useDrawerStyle();
   const activeGeom = useDrawerActiveGeom();
   const isDrawing = useDrawerIsDrawing();
@@ -182,72 +184,72 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
    */
   const safeStartDrawing = useCallback((): void => {
     if (!isDrawing) {
-      toggleDrawing();
+      drawerController.toggleDrawing();
     }
-  }, [isDrawing, toggleDrawing]);
+  }, [isDrawing, drawerController]);
 
   /**
    * Sets the current geometry type to Point
    */
   const handleGeometrySelectPoint = useCallback((): void => {
-    setActiveGeom('Point');
+    drawerController.setActiveGeom('Point');
     safeStartDrawing();
     closePanel?.();
-  }, [closePanel, safeStartDrawing, setActiveGeom]);
+  }, [drawerController, closePanel, safeStartDrawing]);
 
   /**
    * Sets the current geometry type to Text
    */
   const handleGeometrySelectText = useCallback((): void => {
-    setActiveGeom('Text');
+    drawerController.setActiveGeom('Text');
     safeStartDrawing();
     closePanel?.();
-  }, [closePanel, safeStartDrawing, setActiveGeom]);
+  }, [drawerController, closePanel, safeStartDrawing]);
 
   /**
    * Sets the current geometry type to LineString
    */
   const handleGeometrySelectLineString = useCallback((): void => {
-    setActiveGeom('LineString');
+    drawerController.setActiveGeom('LineString');
     safeStartDrawing();
     closePanel?.();
-  }, [closePanel, safeStartDrawing, setActiveGeom]);
+  }, [drawerController, closePanel, safeStartDrawing]);
 
   /**
    * Sets the current geometry type to Polygon
    */
   const handleGeometrySelectPolygon = useCallback((): void => {
-    setActiveGeom('Polygon');
+    drawerController.setActiveGeom('Polygon');
     safeStartDrawing();
     closePanel?.();
-  }, [closePanel, safeStartDrawing, setActiveGeom]);
+  }, [drawerController, closePanel, safeStartDrawing]);
 
   /**
    * Sets the current geometry type to Rectangle
    */
   const handleGeometrySelectRectangle = useCallback((): void => {
-    setActiveGeom('Rectangle');
+    drawerController.setActiveGeom('Rectangle');
     safeStartDrawing();
     closePanel?.();
-  }, [closePanel, safeStartDrawing, setActiveGeom]);
+  }, [drawerController, closePanel, safeStartDrawing]);
 
   /**
    * Sets the current geometry type to Circle
    */
   const handleGeometrySelectCircle = useCallback((): void => {
-    setActiveGeom('Circle');
+    drawerController.setActiveGeom('Circle');
     safeStartDrawing();
     closePanel?.();
-  }, [closePanel, safeStartDrawing, setActiveGeom]);
+  }, [drawerController, closePanel, safeStartDrawing]);
 
   /**
    * Sets the current geometry type to Star
    */
   const handleGeometrySelectStar = useCallback((): void => {
-    setActiveGeom('Star');
+    drawerController.setActiveGeom('Star');
     safeStartDrawing();
     closePanel?.();
-  }, [closePanel, safeStartDrawing, setActiveGeom]);
+  }, [drawerController, closePanel, safeStartDrawing]);
 
   // #endregion
 

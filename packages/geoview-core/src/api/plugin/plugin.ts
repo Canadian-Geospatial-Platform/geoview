@@ -1,4 +1,3 @@
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { whenThisThen, getScriptAndAssetURL } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
@@ -48,14 +47,28 @@ export abstract class Plugin {
   }
 
   /**
-   * Deletes a specific plugin loaded in a map.
+   * Adds a specific plugin in a map.
+   *
+   * @param pluginId - The id of the plugin to add
+   * @param constructor - The constructor of the plugin
+   * @param mapId - The map id to add the plugin to
+   * @param props - Optional properties to pass to the plugin
+   */
+  static addPlugin(pluginId: string, constructor: typeof AbstractPlugin, mapId: string, props?: unknown): Promise<AbstractPlugin> {
+    // TODO: REFACTOR IMPORTANT - Rethink how the plugin api finds the MapViewer
+    return window.cgpv.api.getMapViewer(mapId).controllers.pluginController.addPlugin(pluginId, constructor, mapId, props);
+  }
+
+  /**
+   * Deletes a specific plugin from a map.
    *
    * @param pluginId - The id of the plugin to delete
    * @param mapId - The map id to remove the plugin from
    */
   static async removePlugin(pluginId: string, mapId: string): Promise<void> {
+    // TODO: REFACTOR IMPORTANT - Rethink how the plugin api finds the MapViewer
     // Get the plugin and remove it
-    const plugins = await MapEventProcessor.getMapViewerPlugins(mapId);
+    const plugins = await window.cgpv.api.getMapViewer(mapId).controllers.pluginController.getMapViewerPlugins();
     plugins[pluginId]?.remove?.();
     delete plugins[pluginId];
   }
@@ -66,7 +79,8 @@ export abstract class Plugin {
    * @param mapId - The map id to remove the plugin from (if not provided then plugin will be removed from all maps)
    */
   static async removePlugins(mapId: string): Promise<void> {
-    const recordOfPlugins = await MapEventProcessor.getMapViewerPlugins(mapId);
+    // TODO: REFACTOR IMPORTANT - Rethink how the plugin api finds the MapViewer
+    const recordOfPlugins = await window.cgpv.api.getMapViewer(mapId).controllers.pluginController.getMapViewerPlugins();
 
     if (recordOfPlugins) {
       // remove all plugins by map

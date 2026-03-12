@@ -481,21 +481,22 @@
 
         // listen to layer loaded events
         mapViewer.layer.onLayerAllLoaded((sender, payload) => {
-          mapViewer.notifications.addNotificationSuccess('LayerApi: All layers loaded/error');
+          mapViewer.notifications.addNotificationSuccess('LayerApi: All layers loaded');
         });
 
         // listen to layer item visibility changed event (any layers)
         mapViewer.layer.onLayerVisibilityToggled((sender, payload) => {
           mapViewer.notifications.addNotificationSuccess(
-            'LayerApi: ' + `layer ${payload.layerPath} visibility set to ${payload.visibility} - global`
+            'LayerApi: ' + `layer ${payload.layer.getLayerPath()} visibility set to ${payload.visible} - global`
           );
         });
 
         // listen to layer item visibility changed event (any layers)
         mapViewer.layer.onLayerItemVisibilityToggled((sender, payload) => {
           mapViewer.notifications.addNotificationSuccess(
-            'LayerApi: ' + `${payload.itemName} on layer ${payload.layerPath} visibility set to ${payload.visibility} - global`
+            'LayerApi: ' + `${payload.item.name} on layer ${payload.layer.getLayerPath()} visibility set to ${payload.visible} - global`
           );
+          console.log('LayerApi: ' + `${payload.item.name} on layer ${payload.layer.getLayerPath()} visibility set to ${payload.visible} - global`);
         });
 
         // Register a handler when all layers are loaded, once, upon first load
@@ -509,7 +510,7 @@
           // To be sure to catch all events, register a hook on mapViewer.layer.onLayerCreated like the example above in this template page.
 
           // listen to layer visibility changed event (individual geoview layer)
-          mapViewer.layer.getGeoviewLayer(LYR_PATH_UNIQUE).onVisibleChanged((sender, payload) => {
+          mapViewer.layer.getGeoviewLayer(LYR_PATH_UNIQUE).onLayerVisibleChanged((sender, payload) => {
             mapViewer.notifications.addNotificationSuccess(`Layer: ${sender.getLayerPath()} visibility set to ${payload.visible} - individual`);
           });
 
@@ -521,13 +522,6 @@
           // listen to layer filter applied event
           mapViewer.layer.getGeoviewLayer(LYR_PATH_UNIQUE).onLayerFilterApplied((sender, payload) => {
             mapViewer.notifications.addNotificationSuccess(`Layer: ${sender.getLayerPath()} filter changed to ${payload.filter.getAllFilters()}`);
-          });
-
-          // listen to layer visibility changed event (individual geoview layer)
-          mapViewer.layer.getGeoviewLayer(LYR_PATH_GEOCORE).onVisibleChanged((sender, payload) => {
-            mapViewer.notifications.addNotificationSuccess(
-              `Layer: layer ${sender.getLayerPath()} visibility set to ${payload.visible} - individual`
-            );
           });
 
           // Add more registrations of listeners when the layers have been loaded here...

@@ -70,6 +70,9 @@ export class GVGeoJSON extends AbstractGVVector {
    * @returns A promise that resolves once the source has been updated with the new features.
    */
   async setGeojsonSource(geojson: GeoJSONObject | string, projection: OLProjection): Promise<void> {
+    // Set the loading event manually, because we're not going through the 'loader' callback when features are added manually.
+    this.onLoading();
+
     // Convert string to geoJSON if necessary
     const geojsonObject = typeof geojson === 'string' ? JSON.parse(geojson) : geojson;
 

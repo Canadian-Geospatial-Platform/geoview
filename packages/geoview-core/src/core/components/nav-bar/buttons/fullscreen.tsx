@@ -4,9 +4,10 @@ import { useTheme } from '@mui/material/styles';
 import { IconButton, FullscreenIcon, FullscreenExitIcon } from '@/ui';
 import type { TypeHTMLElement } from '@/core/types/global-types';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
-import { useAppStoreActions, useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppFullscreenActive } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
+import { useUIController } from '@/core/controllers/ui-controller';
 
 /**
  * Creates a toggle button to toggle between fullscreen.
@@ -25,7 +26,7 @@ export default function Fullscreen(): JSX.Element {
 
   // get the values from store
   const isFullScreen = useAppFullscreenActive();
-  const { setFullScreenActive } = useAppStoreActions();
+  const uiController = useUIController();
 
   /**
    * Toggles between fullscreen and window mode.
@@ -33,7 +34,7 @@ export default function Fullscreen(): JSX.Element {
   function setFullscreen(): void {
     const element = document.getElementById(`shell-${mapId}`);
     if (element) {
-      setFullScreenActive(!isFullScreen, element as TypeHTMLElement);
+      uiController.setFullScreen(!isFullScreen, element as TypeHTMLElement);
 
       // TODO: deprecated, do we still need this? January 30th 2026
       // setFooterBarIsOpen(false);
@@ -52,7 +53,7 @@ export default function Fullscreen(): JSX.Element {
      */
     function handleExit(): void {
       if (!document.fullscreenElement) {
-        setFullScreenActive(false);
+        uiController.setFullScreen(false);
       }
     }
     document.addEventListener('fullscreenchange', handleExit);

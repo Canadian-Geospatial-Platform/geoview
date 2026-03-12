@@ -1,8 +1,6 @@
 import { Fragment, memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import type { TypeLegendLayer, TypeLegendItem } from '@/core/components/layers/types';
-import { getSxClasses } from './layer-details-style';
 import { delay } from '@/core/utils/utilities';
 import {
   Box,
@@ -27,17 +25,20 @@ import {
   ZoomInSearchIcon,
 } from '@/ui';
 import { ArrowBackIcon } from '@/ui/icons';
+
+import { useUIController } from '@/core/controllers/ui-controller';
+import type { TypeLegendLayer, TypeLegendItem } from '@/core/components/layers/types';
+import { getSxClasses } from './layer-details-style';
 import {
+  getStoreLayerStyleSettings,
   useLayerHighlightedLayer,
   useLayerSelectorBounds,
   useLayerSelectorHasText,
-  useLayerStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useUIStoreActions, useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import {
   useDataTableAllFeaturesDataArray,
   useDataTableLayerSettings,
-  useDataTableStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { LayerOpacityControl } from './layer-opacity-control/layer-opacity-control';
@@ -51,14 +52,19 @@ import {
   useMapVisibleLayers,
   useMapSelectorIsLayerHiddenOnMap,
   useMapSelectorLayerVisibility,
-  useMapStoreActions,
   useMapSelectorLayerParentHidden,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useTimeSliderLayers, useTimeSliderStoreActions } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import {
+  useTimeSliderLayers,
+  setStoreTimeSliderSelectedLayerPath,
+} from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { DeleteUndoButton } from '@/core/components/layers/delete-undo-button';
 import type { TypeContainerBox } from '@/core/types/global-types';
+import { useLayerController } from '@/core/controllers/layer-controller';
+import { useLayerSetController } from '@/core/controllers/layer-set-controller';
+import { useMapController } from '@/core/controllers/map-controller';
 
 // TODO: WCAG Issue #3108 - Fix layers.moreInfo button (button nested within a button)
 // TODO: WCAG Issue #3108 - Check all disabled buttons. They may need special treatment. Need to find instance in UI first)
@@ -86,7 +92,7 @@ const Sublayer = memo(({ layer }: SubLayerProps): JSX.Element => {
   const layerHidden = useMapSelectorIsLayerHiddenOnMap(layer.layerPath);
   const parentHidden = useMapSelectorLayerParentHidden(layer.layerPath);
   const layerVisible = useMapSelectorLayerVisibility(layer.layerPath);
-  const { setOrToggleLayerVisibility } = useMapStoreActions();
+  const mapController = useMapController();
 
   // Return the ui
   return (
@@ -94,7 +100,7 @@ const Sublayer = memo(({ layer }: SubLayerProps): JSX.Element => {
       <IconButton
         color="primary"
         role="checkbox"
-        onClick={() => setOrToggleLayerVisibility(layer.layerPath)}
+        onClick={() => mapController.setOrToggleMapLayerVisibility(layer.layerPath)}
         disabled={parentHidden}
         aria-checked={layerVisible === true}
         aria-label={layerVisible ? t('layers.hideLayer', { name: layer.layerName }) : t('layers.showLayer', { name: layer.layerName })}
@@ -138,13 +144,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   // get store actions
   const highlightedLayer = useLayerHighlightedLayer();
-  const { setAllItemsVisibility, toggleItemVisibility, setHighlightLayer, refreshLayer, zoomToLayerExtent, getLayerSettings } =
-    useLayerStoreActions();
-  const availableSettings = getLayerSettings(layerDetails.layerPath);
   const hasText = useLayerSelectorHasText(layerDetails.layerPath);
-  const { setOrToggleLayerVisibility } = useMapStoreActions();
-  const { enableFocusTrap } = useUIStoreActions();
-  const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
+  const uiController = useUIController();
   const visibleLayers = useMapVisibleLayers();
   const datatableSettings = useDataTableLayerSettings();
   const layersData = useDataTableAllFeaturesDataArray();
@@ -153,14 +154,16 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const parentHidden = useMapSelectorLayerParentHidden(layerDetails.layerPath);
   const layerHidden = useMapSelectorIsLayerHiddenOnMap(layerDetails.layerPath);
   const timeSliderLayers = useTimeSliderLayers();
-  const timeSliderActions = useTimeSliderStoreActions();
   const isFocusTrap = useUIActiveTrapGeoView();
+  const layerController = useLayerController();
+  const layerSetController = useLayerSetController();
+  const mapController = useMapController();
+
+  // TODO: CHECK - This should likely go through a Zustand hook instead of a state getter
+  const availableSettings = getStoreLayerStyleSettings(mapId, layerDetails.layerPath);
 
   // Use navigate hook for time slider (only if time slider state exists)
-  const navigateToTimeSlider = useNavigateToTab(
-    'time-slider',
-    timeSliderActions ? (layerPath: string) => timeSliderActions.setSelectedLayerPath(layerPath) : undefined
-  );
+  const navigateToTimeSlider = useNavigateToTab('time-slider', setStoreTimeSliderSelectedLayerPath);
 
   // Is highlight button disabled?
   const isLayerHighlightCapable = layerDetails.controls?.highlight;
@@ -203,14 +206,14 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   }, [allSublayersVisible, layerDetails, layerDetails.children, legendLayersChildrenVisible, visibleLayers]);
 
   const handleRefreshLayer = (): void => {
-    refreshLayer(layerDetails.layerPath).catch((error: unknown) => {
+    layerController.resetLayer(layerDetails.layerPath).catch((error: unknown) => {
       // Log
-      logger.logPromiseFailed('in refreshLayer in layer-details.handleRefreshLayer', error);
+      logger.logPromiseFailed('in layerController.resetLayer in layer-details.handleRefreshLayer', error);
     });
   };
 
   const handleZoomTo = (): void => {
-    zoomToLayerExtent(layerDetails.layerPath).catch((error: unknown) => {
+    mapController.zoomToLayerExtent(layerDetails.layerPath).catch((error: unknown) => {
       // Log
       logger.logPromiseFailed('in zoomToLayerExtent in layer-details.handleZoomTo', error);
     });
@@ -222,16 +225,16 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       !layersData.filter((layers) => layers.layerPath === layerDetails.layerPath && !!layers?.features?.length).length ||
       layerDetails.layerStatus === LAYER_STATUS.ERROR
     ) {
-      triggerGetAllFeatureInfo(layerDetails.layerPath).catch((error: unknown) => {
+      layerSetController.triggerGetAllFeatureInfo(layerDetails.layerPath).catch((error: unknown) => {
         // Log
         logger.logPromiseFailed('Failed to triggerGetAllFeatureInfo in single-layer.handleLayerClick', error);
       });
     }
-    enableFocusTrap({ activeElementId: 'layerDataTable', callbackElementId: tableDetailsButtonId });
+    uiController.enableFocusTrap({ activeElementId: 'layerDataTable', callbackElementId: tableDetailsButtonId });
   };
 
   const handleHighlightLayer = (): void => {
-    setHighlightLayer(layerDetails.layerPath);
+    layerController.setHighlightLayer(layerDetails.layerPath);
   };
 
   /**
@@ -297,12 +300,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     (legendLayer: TypeLegendLayer, newVisibility: boolean): void => {
       legendLayer.children.forEach((child) => {
         if (newVisibility) {
-          if (!visibleLayers.includes(child.layerPath)) setOrToggleLayerVisibility(child.layerPath, true);
-        } else if (visibleLayers.includes(child.layerPath)) setOrToggleLayerVisibility(child.layerPath, false);
+          if (!visibleLayers.includes(child.layerPath)) mapController.setOrToggleMapLayerVisibility(child.layerPath, true);
+        } else if (visibleLayers.includes(child.layerPath)) mapController.setOrToggleMapLayerVisibility(child.layerPath, false);
         if (child.children.length) setVisibilityForAllSublayers(child, newVisibility);
       });
     },
-    [setOrToggleLayerVisibility, visibleLayers]
+    [mapController, visibleLayers]
   );
 
   /**
@@ -344,7 +347,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         aria-label={item.isVisible ? t('layers.hideClass', { name: item.name }) : t('layers.showClass', { name: item.name })}
         aria-checked={item.isVisible === true}
         tooltipPlacement="left"
-        onClick={() => toggleItemVisibility(layerDetails.layerPath, item)}
+        onClick={() => layerController.toggleItemVisibilityAndForget(layerDetails.layerPath, item)}
         disabled={layerHidden}
       >
         {item.isVisible === true ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
@@ -368,7 +371,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         aria-label={allItemsChecked() ? t('layers.hideAllLayers') : t('layers.showAllLayers')}
         aria-checked={allItemsChecked() === true}
         tooltipPlacement="left"
-        onClick={() => setAllItemsVisibility(layerDetails.layerPath, !allItemsChecked())}
+        onClick={() => layerController.setAllItemsVisibilityAndForget(layerDetails.layerPath, !allItemsChecked())}
         disabled={layerHidden}
       >
         {allItemsChecked() ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}

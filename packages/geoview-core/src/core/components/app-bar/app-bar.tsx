@@ -16,6 +16,8 @@ import {
   LayersOutlinedIcon,
 } from '@/ui';
 
+import { useUIController } from '@/core/controllers/ui-controller';
+import { usePluginController } from '@/core/controllers/plugin-controller';
 import { Geolocator } from '@/core/components/geolocator/geolocator';
 import type { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import ExportButton from '@/core/components/export/export-modal-button';
@@ -25,9 +27,8 @@ import {
   useUIAppbarComponents,
   useUIActiveAppBarTab,
   useUIHiddenTabs,
-  useUIStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useMapInteraction, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapInteraction, setStoreMapClickMarkerIconHide } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
@@ -44,7 +45,6 @@ import type { TypeValidAppBarCoreProps } from '@/api/types/map-schema-types';
 import { DEFAULT_APPBAR_CORE, DEFAULT_APPBAR_TABS_ORDER } from '@/api/types/map-schema-types';
 import { camelCase, handleEscapeKey } from '@/core/utils/utilities';
 import { IconButton } from '@/ui/icon-button/icon-button';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 /** Mapping of panel id to its icon and content. */
 interface GroupPanelType {
@@ -87,12 +87,12 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const appBarComponents = useUIAppbarComponents();
   const { tabId, isOpen, isFocusTrapped } = useUIActiveAppBarTab();
   const hiddenTabs = useUIHiddenTabs();
-  const { hideClickMarker } = useMapStoreActions();
   const activeTrapGeoView = useUIActiveTrapGeoView();
+  const pluginController = usePluginController();
 
   const geoviewElement = useAppGeoviewHTMLElement().querySelector('[id^="mapTargetElement-"]') as HTMLElement;
 
-  const { setActiveAppBarTab } = useUIStoreActions();
+  const uiController = useUIController();
 
   // get store config for app bar to add (similar logic as in footer-bar)
   const appBarConfig = useGeoViewConfig()?.appBar;
@@ -180,9 +180,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
     (buttonId: string): void => {
       // Get the button panel
       const buttonPanel = buttonPanels[buttonId];
-      setActiveAppBarTab(buttonId, !buttonPanel.panel?.status, !buttonPanel.panel?.status);
+      uiController.setActiveAppBarTab(buttonId, !buttonPanel.panel?.status, !buttonPanel.panel?.status);
     },
-    [buttonPanels, setActiveAppBarTab]
+    [buttonPanels, uiController]
   );
 
   /**
@@ -199,9 +199,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
         }, TIMEOUT.dataPanelLoading);
       }
 
-      setActiveAppBarTab(buttonId, false, false);
+      uiController.setActiveAppBarTab(buttonId, false, false);
     },
-    [setActiveAppBarTab, isFocusTrapped, getButtonElementId]
+    [uiController, isFocusTrapped, getButtonElementId]
   );
 
   /**
@@ -267,6 +267,14 @@ export function AppBar(props: AppBarProps): JSX.Element {
   }, []);
 
   /**
+   * Handles when the panel closes
+   */
+  const handlePanelClose = useCallback(() => {
+    // Save to the store
+    setStoreMapClickMarkerIconHide(mapId);
+  }, [mapId]);
+
+  /**
    * Registers and unregisters AppBar created/removed event handlers.
    */
   useEffect(() => {
@@ -321,13 +329,13 @@ export function AppBar(props: AppBarProps): JSX.Element {
         }
 
         // Load and add the plugin
-        MapEventProcessor.loadAndAddPlugin(mapId, pluginName).catch((error: unknown) => {
+        pluginController.loadAndAddPlugin(pluginName).catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('loadAndAddPlugin(time-slider) in processPlugin in app-bar', error);
         });
       });
     }
-  }, [appBarConfig, mapId]);
+  }, [appBarConfig, pluginController]);
 
   /**
    * Creates AppBar button panels from configuration tabs.
@@ -482,7 +490,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
               panel={buttonPanel.panel}
               button={buttonPanel.button}
               onOpen={buttonPanel.onOpen}
-              onClose={hideClickMarker}
+              onClose={handlePanelClose}
               onKeyDown={(event: KeyboardEvent) => {
                 // Early exit if lightbox is handling ESC
                 if (event.key === 'Escape') {
@@ -492,7 +500,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                   }
                 }
                 handleEscapeKey(event.key, getButtonElementId(buttonPanel.button?.id ?? '', '-panel-btn'), isFocusTrapped, () => {
-                  setActiveAppBarTab(buttonPanel.button?.id ?? '', false, false);
+                  uiController.setActiveAppBarTab(buttonPanel.button?.id ?? '', false, false);
                 });
               }}
               onGeneralClose={() => {

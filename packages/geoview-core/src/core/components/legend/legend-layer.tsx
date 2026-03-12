@@ -14,9 +14,9 @@ import {
   useLayerSelectorSchemaTag,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
-  useMapStoreActions,
   useMapSelectorLayerLegendCollapsed,
   useMapSelectorIsLayerHiddenOnMap,
+  setStoreMapToggleLegendCollapsed,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useLightBox } from '@/core/components/common';
 import { LayerIcon } from '@/core/components/common/layer-icon';
@@ -131,7 +131,6 @@ export function LegendLayer({ layerPath, showControls, containerType }: LegendLa
   const layerStatus = useLayerSelectorStatus(layerPath);
   const layerName = useLayerSelectorName(layerPath) ?? layerPath;
   const { initLightBox, LightBoxComponent } = useLightBox();
-  const { toggleLegendCollapsed } = useMapStoreActions();
 
   // Internal state
   const prevStatusRef = useRef<string | undefined>(undefined); // Ref to track previous status for status change detection
@@ -140,9 +139,11 @@ export function LegendLayer({ layerPath, showControls, containerType }: LegendLa
   const handleExpandGroupClick = useCallback(
     (event: React.MouseEvent): void => {
       event.stopPropagation();
-      toggleLegendCollapsed(layerPath); // store value
+
+      // Save to the store
+      setStoreMapToggleLegendCollapsed(mapId, layerPath);
     },
-    [layerPath, toggleLegendCollapsed]
+    [layerPath, mapId]
   );
 
   // WCAG - Track layer status changes for screen reader announcements
