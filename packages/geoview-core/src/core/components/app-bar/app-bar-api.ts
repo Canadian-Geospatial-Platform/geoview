@@ -5,9 +5,8 @@ import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { generateId } from '@/core/utils/utilities';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
-import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
+import { getStoreActiveAppBarTab, type ActiveAppBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
-import type { ActiveAppBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 /**
  * Class to manage buttons on the app-bar
@@ -157,7 +156,7 @@ export class AppBarApi {
    * @return {ActiveAppBarTabType} The active app bar tab info.
    */
   getActiveAppBarTab(): ActiveAppBarTabType {
-    return UIEventProcessor.getActiveAppBarTab(this.mapId);
+    return getStoreActiveAppBarTab(this.mapId);
   }
 
   /**
@@ -176,16 +175,6 @@ export class AppBarApi {
       // Log
       logger.logError(`Failed to get app bar panel button ${buttonPanelId}`, error);
     }
-  }
-
-  /**
-   * Selects a tab by id
-   *
-   * @param {string} tabId - The id of the tab to be selected
-   * @param {boolean} open - Open (true) or closed (false) panel: default = true
-   */
-  selectTab(tabId: string, open: boolean = true, isFocusTrapped: boolean = true): void {
-    UIEventProcessor.setActiveAppBarTab(this.mapId, tabId, open, isFocusTrapped);
   }
 }
 

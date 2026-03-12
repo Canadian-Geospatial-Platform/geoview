@@ -75,6 +75,15 @@
       "italic": false
     },
     {
+      "tag": "to.docont",
+      "color": "#FF8C00",
+      "strikethrough": false,
+      "underline": false,
+      "backgroundColor": "transparent",
+      "bold": false,
+      "italic": false
+    },
+    {
       "tag": "*",
       "color": "#98C379",
       "strikethrough": false,

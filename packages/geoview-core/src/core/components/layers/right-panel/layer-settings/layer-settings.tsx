@@ -5,11 +5,7 @@ import { useTheme } from '@mui/material/styles';
 import { Box, Divider, Typography } from '@/ui';
 import { Switch } from '@/ui/switch/switch';
 
-import {
-  useLayerSelectorHasText,
-  useLayerSelectorTextVisibility,
-  useLayerStoreActions,
-} from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerSelectorHasText, useLayerSelectorTextVisibility } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 import { getSxClasses } from '../layer-details-style';
 import { RasterFunctionPanel } from './raster-function-selector';
@@ -17,6 +13,8 @@ import { MosaicRulePanel } from './mosaic-rule-selector';
 import { WmsStylePanel } from './wms-style-selector';
 import type { TypeLegendLayer } from '../../types';
 import { logger } from '@/core/utils/logger';
+import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 interface LayerSettingsPanelProps {
   layerDetails: TypeLegendLayer;
@@ -41,8 +39,8 @@ export function LayerSettingsPanel({ layerDetails }: LayerSettingsPanelProps): J
   const sxClasses = getSxClasses(theme);
 
   // Store
-  const { getLayerSettings, setLayerHoverable, setLayerQueryable, setLayerTextVisibility } = useLayerStoreActions();
-  const availableSettings = getLayerSettings(layerDetails.layerPath);
+  const mapId = useGeoViewMapId();
+  const availableSettings = LegendEventProcessor.getLayerSettings(mapId, layerDetails.layerPath);
   const hasText = useLayerSelectorHasText(layerDetails.layerPath);
   const textVisible = useLayerSelectorTextVisibility(layerDetails.layerPath);
 
@@ -52,16 +50,16 @@ export function LayerSettingsPanel({ layerDetails }: LayerSettingsPanelProps): J
 
   // Stable handlers for hover/query toggles
   const handleToggleHoverable = useCallback((): void => {
-    setLayerHoverable(layerDetails.layerPath, !layerDetails.hoverable!);
-  }, [layerDetails.layerPath, layerDetails.hoverable, setLayerHoverable]);
+    LegendEventProcessor.setLayerHoverable(mapId, layerDetails.layerPath, !layerDetails.hoverable!);
+  }, [layerDetails.layerPath, layerDetails.hoverable, mapId]);
 
   const handleToggleQueryable = useCallback((): void => {
-    setLayerQueryable(layerDetails.layerPath, !layerDetails.queryable!);
-  }, [layerDetails.layerPath, layerDetails.queryable, setLayerQueryable]);
+    LegendEventProcessor.setLayerQueryable(mapId, layerDetails.layerPath, !layerDetails.queryable!);
+  }, [layerDetails.layerPath, layerDetails.queryable, mapId]);
 
   const handleToggleText = useCallback((): void => {
-    setLayerTextVisibility(layerDetails.layerPath, !textVisible);
-  }, [layerDetails.layerPath, textVisible, setLayerTextVisibility]);
+    LegendEventProcessor.setLayerTextVisibility(mapId, layerDetails.layerPath, !textVisible);
+  }, [layerDetails.layerPath, textVisible, mapId]);
 
   function renderToggleTextButton(): JSX.Element {
     return (

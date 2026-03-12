@@ -5,8 +5,9 @@ import type { Mark } from '@mui/base';
 import { getSxClasses } from './layer-opacity-control-styles';
 import { Box, Slider, Typography } from '@/ui';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
-import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { useMapSelectorIsLayerHiddenOnMap } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 interface LayerOpacityControlProps {
@@ -25,10 +26,7 @@ export function LayerOpacityControl(props: LayerOpacityControlProps): JSX.Elemen
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
-
-  // Store actions
-  const { setLayerOpacity } = useLayerStoreActions();
-
+  const mapId = useGeoViewMapId();
   const layerHidden = useMapSelectorIsLayerHiddenOnMap(layerDetails.layerPath);
 
   // State
@@ -71,9 +69,9 @@ export function LayerOpacityControl(props: LayerOpacityControlProps): JSX.Elemen
 
       // Necessary to keep the handle from exceeding the max from parent
       setLocalOpacity(newValue);
-      setLayerOpacity(layerDetails.layerPath, newValue, updateStore);
+      LegendEventProcessor.setLayerOpacity(mapId, layerDetails.layerPath, newValue, updateStore);
     },
-    [layerDetails.layerPath, layerParentOpacity, setLayerOpacity]
+    [layerDetails.layerPath, layerParentOpacity, mapId]
   );
 
   return (

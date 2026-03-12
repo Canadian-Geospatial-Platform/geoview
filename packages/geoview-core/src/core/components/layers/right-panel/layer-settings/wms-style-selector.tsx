@@ -7,10 +7,12 @@ import { Box, CircularProgress, Collapse, Typography } from '@/ui';
 import { ImageNotSupportedIcon, PaletteIcon, ExpandMoreIcon, ExpandLessIcon } from '@/ui';
 
 import { getSxClasses } from './layer-settings-style';
-import { useLayerStoreActions, useLayerSelectorWmsStyle } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerSelectorWmsStyle } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import type { TypeMetadataWMSCapabilityLayerStyle } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
+import { useGeoViewMapId } from '@/app';
+import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 
 interface WmsStyleItemProps {
   style: TypeMetadataWMSCapabilityLayerStyle;
@@ -138,10 +140,8 @@ export function WmsStylePanel({ layerDetails }: WmsStylePanelProps): JSX.Element
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  // Store actions
-  const { setLayerWmsStyle, getLayerWmsAvailableStyles } = useLayerStoreActions();
-
   // Store hooks
+  const mapId = useGeoViewMapId();
   const currentWmsStyle = useLayerSelectorWmsStyle(layerDetails.layerPath);
 
   // State
@@ -149,15 +149,17 @@ export function WmsStylePanel({ layerDetails }: WmsStylePanelProps): JSX.Element
 
   // Get the full style metadata
   const memoWmsStyleArray = useMemo(
-    () => getLayerWmsAvailableStyles(layerDetails.layerPath) || [],
-    [getLayerWmsAvailableStyles, layerDetails.layerPath]
+    // TODO: REFACTOR - This getting of styles should be done in the store in case it changes. Here a
+    // TO.DOCONT: change in the wms styles (getStylesMetadata) of a layer config from the domain will not trigger a react update.
+    () => LegendEventProcessor.getLayerWmsStyles(mapId, layerDetails.layerPath) || [],
+    [mapId, layerDetails.layerPath]
   );
 
   const handleSelect = useCallback(
     (wmsStyleName: string): void => {
-      setLayerWmsStyle(layerDetails.layerPath, wmsStyleName);
+      LegendEventProcessor.setLayerWmsStyle(mapId, layerDetails.layerPath, wmsStyleName);
     },
-    [layerDetails.layerPath, setLayerWmsStyle]
+    [layerDetails.layerPath, mapId]
   );
 
   const handleToggle = useCallback((): void => {

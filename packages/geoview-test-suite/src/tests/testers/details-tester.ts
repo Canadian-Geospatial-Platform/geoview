@@ -4,10 +4,11 @@ import { GVAbstractTester } from './abstract-gv-tester';
 import { delay } from 'geoview-core/core/utils/utilities';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
-import { FeatureInfoEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/feature-info-event-processor';
-import { UIEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/ui-event-processor';
 import { LegendEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/legend-event-processor';
 import { logger } from 'geoview-core/core/utils/logger';
+import { getStoreActiveFooterBarTab } from 'geoview-core/core/stores/store-interface-and-intial-values/ui-state';
+import { setStoreDetailsSelectedLayerPath } from 'geoview-core/core/stores/store-interface-and-intial-values/feature-info-state';
+import { getStoreLayerItemVisibility } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 
 /**
  * Main Map testing class.
@@ -63,14 +64,14 @@ export class DetailsTester extends GVAbstractTester {
         );
 
         // Make the Alberta polygon visible
-        let item = LegendEventProcessor.getItemVisibility(this.getMapId(), layerPath, 'Alberta')!;
+        let item = getStoreLayerItemVisibility(this.getMapId(), layerPath, 'Alberta')!;
         await LegendEventProcessor.toggleItemVisibility(this.getMapId(), layerPath, item, true);
 
         // Query where there now should be some results
         const resultsAlbertaResults = await DetailsTester.helperStepQueryLayerAtCoordinate(test, this.getMapViewer(), layerPath, lonlat2);
 
         // Make the Alberta polygon back to invisible
-        item = LegendEventProcessor.getItemVisibility(this.getMapId(), layerPath, 'Alberta')!;
+        item = getStoreLayerItemVisibility(this.getMapId(), layerPath, 'Alberta')!;
         await LegendEventProcessor.toggleItemVisibility(this.getMapId(), layerPath, item, true);
 
         // Query where there now should no results
@@ -94,7 +95,7 @@ export class DetailsTester extends GVAbstractTester {
         // Perform assertions
         // Check that details is the active footer bar
         test.addStep("Verifying 'details' is the selected footer tab...");
-        Test.assertIsEqual(UIEventProcessor.getActiveFooterBarTab(this.getMapId()).tabId, 'details');
+        Test.assertIsEqual(getStoreActiveFooterBarTab(this.getMapId()).tabId, 'details');
 
         logger.logDebug(results);
       }
@@ -248,6 +249,6 @@ export class DetailsTester extends GVAbstractTester {
     test.addStep(`Selecting the details for the added layer...`);
 
     // Select the right layer path
-    FeatureInfoEventProcessor.setSelectedLayerPath(mapViewer.mapId, layerPath);
+    setStoreDetailsSelectedLayerPath(mapViewer.mapId, layerPath);
   }
 }

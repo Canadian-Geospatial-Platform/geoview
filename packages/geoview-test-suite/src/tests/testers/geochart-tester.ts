@@ -5,8 +5,12 @@ import { LayerTester } from './layer-tester';
 import { delay } from 'geoview-core/core/utils/utilities';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
-import { GeochartEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/geochart-event-processor';
-import { UIEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/ui-event-processor';
+import { getStoreActiveFooterBarTab } from 'geoview-core/core/stores/store-interface-and-intial-values/ui-state';
+import {
+  getStoreGeochartChartsConfig,
+  getStoreGeochartSelectedLayerPath,
+  setStoreGeochartSelectedLayerPath,
+} from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
 
 /**
  * Main Map testing class.
@@ -40,11 +44,11 @@ export class GeochartTester extends GVAbstractTester {
         // Perform assertions
         // Check that geochart is the active footer bar
         test.addStep("Verifying 'geochart' is the selected footer tab...");
-        Test.assertIsEqual(UIEventProcessor.getActiveFooterBarTab(this.getMapId()).tabId, 'geochart');
+        Test.assertIsEqual(getStoreActiveFooterBarTab(this.getMapId()).tabId, 'geochart');
 
         // Check that layer path is selected
         test.addStep('Verifying ' + layerPath + ' is the selected layer for the geochart...');
-        Test.assertIsEqual(GeochartEventProcessor.getSingleGeochartState(this.getMapId(), 'selectedLayerPath'), layerPath);
+        Test.assertIsEqual(getStoreGeochartSelectedLayerPath(this.getMapId()), layerPath);
       }
     );
   }
@@ -60,7 +64,7 @@ export class GeochartTester extends GVAbstractTester {
       GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID,
       GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX,
       GVAbstractTester.AIRBORNE_RADIOACTIVITY_GROUP,
-      GVAbstractTester.QUEBEC_LONLAT,
+      GVAbstractTester.OTTAWA_LONLAT,
       {
         [GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX]: {
           layers: [
@@ -129,16 +133,16 @@ export class GeochartTester extends GVAbstractTester {
       (test) => {
         // Perform assertions
         test.addStep('Verifying expected geochart config...');
-        const geochartsConfig = GeochartEventProcessor.getSingleGeochartState(this.getMapId(), 'geochartChartsConfig');
+        const geochartsConfig = getStoreGeochartChartsConfig(this.getMapId());
         Test.assertJsonObject(geochartsConfig, expectedGeochartChartsConfig);
 
         // Check that geochart is the active footer bar
         test.addStep("Verifying 'geochart' is the selected footer tab...");
-        Test.assertIsEqual(UIEventProcessor.getActiveFooterBarTab(this.getMapId()).tabId, 'geochart');
+        Test.assertIsEqual(getStoreActiveFooterBarTab(this.getMapId()).tabId, 'geochart');
 
         // Check that layer path is selected
         test.addStep('Verifying ' + layerPathAdd + ' is the selected layer for the geochart...');
-        Test.assertIsEqual(GeochartEventProcessor.getSingleGeochartState(this.getMapId(), 'selectedLayerPath'), layerPathAdd);
+        Test.assertIsEqual(getStoreGeochartSelectedLayerPath(this.getMapId()), layerPathAdd);
       },
       (test) => {
         // Redirect to LayerTest to help test the removal of the layer
@@ -188,7 +192,7 @@ export class GeochartTester extends GVAbstractTester {
     test.addStep(`Setting active footerbar tab to geochart...`);
 
     // Set the footer tab to Geochart
-    UIEventProcessor.setActiveFooterBarTab(mapViewer.mapId, 'geochart');
+    mapViewer.controllers.uiController.setActiveFooterBarTab('geochart');
 
     // Update the step
     test.addStep(`Waiting on UI to refresh...`);
@@ -200,7 +204,7 @@ export class GeochartTester extends GVAbstractTester {
     test.addStep(`Selecting the geochart for the added layer...`);
 
     // Select the right layer path
-    GeochartEventProcessor.setSelectedGeochartLayerPath(mapViewer.mapId, layerPath);
+    setStoreGeochartSelectedLayerPath(mapViewer.mapId, layerPath);
 
     // Wait purposely on the UI, this waiting period isn't necessary for the test, but it's good to see it happen in real-time
     await delay(1000);

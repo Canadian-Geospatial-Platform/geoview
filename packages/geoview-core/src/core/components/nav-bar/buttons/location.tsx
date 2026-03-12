@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { IconButton, EmojiPeopleIcon } from '@/ui';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useUIController } from '@/core/controllers/ui-controller';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -21,7 +21,7 @@ export default function Location(): JSX.Element {
 
   // get store actions
   const { zoomToMyLocation } = useMapStoreActions();
-  const { addNotification } = useAppStoreActions();
+  const uiController = useUIController();
 
   const successCallback = (position: GeolocationPosition): void => {
     // Zoom to my location
@@ -32,7 +32,7 @@ export default function Location(): JSX.Element {
   };
 
   const errorCallback = (err: GeolocationPositionError): void => {
-    addNotification({
+    uiController.addNotification({
       key: 'location',
       message: `ERROR(${err.code}): ${err.message}`,
       notificationType: 'warning',

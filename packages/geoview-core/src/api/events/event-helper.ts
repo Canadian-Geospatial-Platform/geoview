@@ -19,9 +19,10 @@ export default class EventHelper {
    * @param {EventDelegateBase<T, U, Z>[]} handlersList - The list of handlers to be called with the event
    * @param {EventDelegateBase<T, U, Z>} callback - The callback to be executed whenever the event is raised
    */
-  static onEvent<T, U, Z>(handlersList: EventDelegateBase<T, U, Z>[], callback: EventDelegateBase<T, U, Z>): void {
+  static onEvent<T, U, Z>(handlersList: EventDelegateBase<T, U, Z>[], callback: EventDelegateBase<T, U, Z>): EventDelegateBase<T, U, Z> {
     // Push a new callback handler to the list of handlers
     handlersList.push(callback);
+    return callback;
   }
 
   /**

@@ -14,9 +14,10 @@ import { useLayerNames, useLayerStatuses } from 'geoview-core/core/stores/store-
 import type { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
 import {
   useGeochartConfigs,
-  useGeochartStoreActions,
   useGeochartLayerDataArrayBatch,
   useGeochartSelectedLayerPath,
+  setStoreGeochartLayerDataArrayBatchLayerPathBypass,
+  setStoreGeochartSelectedLayerPath,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
@@ -53,7 +54,6 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const visibleInRangeLayers = useMapAllVisibleandInRangeLayers();
   const storeArrayOfLayerData = useGeochartLayerDataArrayBatch();
   const selectedLayerPath = useGeochartSelectedLayerPath();
-  const { setSelectedLayerPath, setLayerDataArrayBatchLayerPathBypass } = useGeochartStoreActions()!;
   const { isLayerHiddenOnMap } = useMapStoreActions();
   const displayLanguage = useAppDisplayLanguage();
   const mapClickCoordinates = useMapClickCoordinates();
@@ -144,9 +144,9 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
       logger.logTraceUseCallback('GEOCHART-PANEL - handleLayerChange', layer);
 
       // Set the selected layer path in the store which will in turn trigger the store listeners on this component
-      setSelectedLayerPath?.(layer.layerPath);
+      setStoreGeochartSelectedLayerPath?.(mapId, layer.layerPath);
     },
-    [setSelectedLayerPath]
+    [mapId]
   );
 
   // #endregion
@@ -221,9 +221,9 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
     // Set the layer data array batch bypass to the currently selected layer
     if (selectedLayerPath) {
-      setLayerDataArrayBatchLayerPathBypass?.(selectedLayerPath);
+      setStoreGeochartLayerDataArrayBatchLayerPathBypass?.(mapId, selectedLayerPath);
     }
-  }, [selectedLayerPath, setLayerDataArrayBatchLayerPathBypass]);
+  }, [mapId, selectedLayerPath]);
 
   /**
    * Effect used to persist or alter the current layer selection based on the layers list changes.
@@ -234,11 +234,17 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     logger.logTraceUseEffect('GEOCHART-PANEL - check selection', memoLayerSelectedItem, selectedLayerPath);
 
     // If selected layer path is not empty launch the checker to try to maintain the selection on the correct selected layer
-    if (selectedLayerPath && setLayerDataArrayBatchLayerPathBypass && setSelectedLayerPath) {
+    if (selectedLayerPath) {
       // Redirect to the keep selected layer path logic
-      checkSelectedLayerPathList(setLayerDataArrayBatchLayerPathBypass, setSelectedLayerPath, memoLayerSelectedItem, memoLayersList);
+      checkSelectedLayerPathList(
+        mapId,
+        setStoreGeochartLayerDataArrayBatchLayerPathBypass,
+        setStoreGeochartSelectedLayerPath,
+        memoLayerSelectedItem,
+        memoLayersList
+      );
     }
-  }, [memoLayerSelectedItem, memoLayersList, selectedLayerPath, setLayerDataArrayBatchLayerPathBypass, setSelectedLayerPath]);
+  }, [mapId, memoLayerSelectedItem, memoLayersList, selectedLayerPath]);
 
   /**
    * Selects a layer after a map click happened on the map.
@@ -248,13 +254,12 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     logger.logTraceUseEffect('DETAILS-PANEL- mapClickCoordinates', mapClickCoordinates);
 
     // If nothing was previously selected at all
-    if (mapClickCoordinates && memoLayersList?.length && !selectedLayerPath?.length && setSelectedLayerPath) {
+    if (mapClickCoordinates && memoLayersList?.length && !selectedLayerPath?.length) {
       const selectedLayer = memoLayersList.find((layer) => !!layer.numOffeatures);
       // Select the first layer that has features
-      setSelectedLayerPath(selectedLayer?.layerPath ?? '');
+      setStoreGeochartSelectedLayerPath(mapId, selectedLayer?.layerPath ?? '');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapClickCoordinates, memoLayersList, setSelectedLayerPath]);
+  }, [mapId, mapClickCoordinates, memoLayersList, selectedLayerPath?.length]);
 
   // #endregion HOOKS
 

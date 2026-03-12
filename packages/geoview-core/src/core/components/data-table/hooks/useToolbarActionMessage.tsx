@@ -1,9 +1,13 @@
 import { useEffect } from 'react';
 import { type MRT_TableInstance as MRTTableInstance, type MRT_ColumnFiltersState as MRTColumnFiltersState } from 'material-react-table';
 import { useTranslation } from 'react-i18next';
-import { useDataTableStoreActions } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import {
+  setStoreRowsFilteredEntry,
+  setStoreToolbarRowSelectedMessageEntry,
+} from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
 import type { MappedLayerDataType, ColumnsType } from '@/core/components/data-table/data-table-types';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 interface UseSelectedRowMessageProps {
   data: MappedLayerDataType;
@@ -32,7 +36,7 @@ export function useToolbarActionMessage({
   const { t } = useTranslation();
 
   // Get store values
-  const { setToolbarRowSelectedMessageEntry, setRowsFilteredEntry } = useDataTableStoreActions();
+  const mapId = useGeoViewMapId();
 
   // Set feature count message
   useEffect(() => {
@@ -65,10 +69,9 @@ export function useToolbarActionMessage({
         length = 0;
       }
 
-      setRowsFilteredEntry(length, layerPath);
+      setStoreRowsFilteredEntry(mapId, length, layerPath);
     }
 
-    setToolbarRowSelectedMessageEntry(message, layerPath);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [columnFilters, data.features, globalFilter, showUnsymbolizedFeatures]);
+    setStoreToolbarRowSelectedMessageEntry(mapId, message, layerPath);
+  }, [mapId, columnFilters, data.features, globalFilter, showUnsymbolizedFeatures, tableInstance, layerPath, t]);
 }

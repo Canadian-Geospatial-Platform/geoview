@@ -16,6 +16,7 @@ export abstract class GVAbstractTester extends AbstractTester {
 
   /** Some long lat coordinates for map investigations */
   static readonly QUEBEC_LONLAT: Coordinate = [-71.356054449131, 46.78077550041052];
+  static readonly OTTAWA_LONLAT: Coordinate = [-75.8, 45.24];
   static readonly ONTARIO_CENTER_LONLAT: Coordinate = [-87, 51];
   static readonly ALBERTA_CENTER_LONLAT: Coordinate = [-112, 51];
 

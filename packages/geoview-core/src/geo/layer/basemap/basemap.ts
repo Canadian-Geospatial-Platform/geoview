@@ -22,7 +22,6 @@ import type {
 } from '@/geo/layer/basemap/basemap-types';
 import { Projection } from '@/geo/utils/projection';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { logger } from '@/core/utils/logger';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
@@ -326,7 +325,7 @@ export class BasemapApi {
       if (basemapLayer.styleUrl) {
         const tileSize = [tileInfo.rows, tileInfo.cols];
         source = new VectorTile({
-          attributions: getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId), 'mapctrl.attribution.defaultnrcan'),
+          attributions: getLocalizedMessage(this.mapViewer.getDisplayLanguage(), 'mapctrl.attribution.defaultnrcan'),
           projection: Projection.PROJECTIONS[urlProj],
           url: basemapLayer.url,
           format: new MVT(),
@@ -339,7 +338,7 @@ export class BasemapApi {
         });
       } else {
         source = new XYZ({
-          attributions: getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId), 'mapctrl.attribution.defaultnrcan'),
+          attributions: getLocalizedMessage(this.mapViewer.getDisplayLanguage(), 'mapctrl.attribution.defaultnrcan'),
           projection: Projection.PROJECTIONS[urlProj],
           url: basemapLayer.url,
           crossOrigin: 'Anonymous',
@@ -421,7 +420,7 @@ export class BasemapApi {
     const projectionCode = projection === undefined ? MapEventProcessor.getMapState(this.mapViewer.mapId).currentProjection : projection;
 
     // Check if language is provided for the basemap creation
-    const languageCode = language === undefined ? AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId) : language;
+    const languageCode = language === undefined ? this.mapViewer.getDisplayLanguage() : language;
 
     // Check if basemap options are provided for the basemap creation
     const coreBasemapOptions = basemapOptions === undefined ? this.basemapOptions : basemapOptions;
@@ -568,13 +567,10 @@ export class BasemapApi {
         basemapOptions: coreBasemapOptions,
         attribution:
           coreBasemapOptions.basemapId === 'osm'
-            ? [
-                '© OpenStreetMap',
-                getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId), 'mapctrl.attribution.defaultnrcan'),
-              ]
+            ? ['© OpenStreetMap', getLocalizedMessage(this.mapViewer.getDisplayLanguage(), 'mapctrl.attribution.defaultnrcan')]
             : [
                 basemapLayers.find((layer) => coreBasemapOptions.basemapId === layer.basemapId)?.copyright || '',
-                getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapViewer.mapId), 'mapctrl.attribution.defaultnrcan'),
+                getLocalizedMessage(this.mapViewer.getDisplayLanguage(), 'mapctrl.attribution.defaultnrcan'),
               ],
         zoomLevels: {
           min: minZoom,

@@ -1,209 +1,114 @@
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import type {
-  ITimeSliderState,
-  TimeSliderLayerSet,
-  TypeTimeSliderValues,
-  TypeTimeSliderProps,
+import {
+  type TypeTimeSliderValues,
+  type TypeTimeSliderProps,
+  isStoreTimeSliderInitialized,
+  addStoreTimeSliderLayer,
+  addOrUpdateStoreTimeSliderFilter,
+  setStoreTimeSliderFiltering,
+  setStoreTimeSliderValues,
+  getStoreTimeSliderLayer,
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import { DateMgt, type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
-import { PluginStateUninitializedError } from '@/core/exceptions/geoview-exceptions';
+import { DateMgt, type TimeDimension } from '@/core/utils/date-mgt';
 
-// GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
-
-export class TimeSliderEventProcessor extends AbstractEventProcessor {
-  // **********************************************************
-  // Static functions for Typescript files to access store actions
-  // **********************************************************
-  // GV Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
-  // GV Some action does state modifications AND map actions.
-  // GV ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
-
-  // #region
-
-  /**
-   * Checks if the Time Slider plugin is iniitialized for the given map.
-   * @param {string} mapId - The map id
-   * @returns {boolean} True when the Time lider plugin is initialized.
-   * @static
-   */
-  static isTimeSliderInitialized(mapId: string): boolean {
-    try {
-      // Get its state, this will throw PluginStateUninitializedError if uninitialized
-      this.getTimeSliderState(mapId);
-      return true;
-    } catch {
-      // Uninitialized
-      return false;
-    }
-  }
-
-  /**
-   * Shortcut to get the TimeSlider state for a given map id
-   * @param {string} mapId - The mapId
-   * @returns {ITimeSliderState} The Time Slider state.
-   * @throws {PluginStateUninitializedError} When the Time Slider plugin is uninitialized.
-   * @static
-   */
-  protected static getTimeSliderState(mapId: string): ITimeSliderState {
-    // Get the time slider state
-    const { timeSliderState } = super.getState(mapId);
-
-    // If not found
-    if (!timeSliderState) throw new PluginStateUninitializedError('TimeSlider', mapId);
-
-    // Return it
-    return timeSliderState;
-  }
-
-  /**
-   * Gets time slider layers.
-   * @param {string} mapId - The map id of the state to act on
-   * @returns {TimeSliderLayerSet} The time slider layer set or undefined
-   * @throws {PluginStateUninitializedError} When the Time Slider plugin is uninitialized.
-   * @static
-   */
-  static getTimeSliderLayers(mapId: string): TimeSliderLayerSet {
-    return this.getTimeSliderState(mapId).timeSliderLayers;
-  }
-
-  /**
-   * Gets time slider selected layer path.
-   * @param {string} mapId - The map id of the state to act on
-   * @returns {string} The selected time slider layer path
-   * @throws {PluginStateUninitializedError} When the Time Slider plugin is uninitialized.
-   * @static
-   */
-  static getTimeSliderSelectedLayer(mapId: string): string {
-    return this.getTimeSliderState(mapId).selectedLayerPath;
-  }
-
-  /**
-   * Gets filter(s) for all layers.
-   * @param {string} mapId - The map id of the state to act on
-   * @returns {string} The time slider filter(s) for the layer
-   * @throws {PluginStateUninitializedError} When the Time Slider plugin is uninitialized.
-   * @static
-   */
-  static getTimeSliderFilters(mapId: string): Record<string, string> {
-    return this.getTimeSliderState(mapId).sliderFilters;
-  }
-
-  /**
-   * Gets filter(s) for a specific layer path.
-   * @param {string} mapId - The map id of the state to act on
-   * @param {string} layerPath - The path of the layer
-   * @returns {string} The time slider filter(s) for the layer
-   * @throws {PluginStateUninitializedError} When the Time Slider plugin is uninitialized.
-   * @static
-   */
-  static getTimeSliderFilter(mapId: string, layerPath: string): string {
-    return this.getTimeSliderFilters(mapId)[layerPath];
-  }
+/**
+ * Event processor for time-slider related operations.
+ *
+ * Provides static methods that orchestrate store updates, filter generation,
+ * and layer API calls for temporal filtering and time slider configuration.
+ */
+export abstract class TimeSliderEventProcessor extends AbstractEventProcessor {
+  // #region STATIC METHODS
 
   /**
    * Checks if the layer has time slider values. If there are, adds the time slider layer and applies filters.
-   * @param {string} mapId - The map id of the state to act on
-   * @param {AbstractGVLayer} layer - The layer to add to the state
-   * @param {TypeTimeSliderProps?} timesliderConfig - Optional time slider configuration
-   * @static
+   *
+   * @param mapId - The map id of the state to act on
+   * @param layer - The layer to add to the state
+   * @param timesliderConfig - Optional time slider configuration
    */
   static checkInitTimeSliderLayerAndApplyFilters(mapId: string, layer: AbstractGVLayer, timesliderConfig?: TypeTimeSliderProps): void {
     // If there is no Time Slider, ignore
-    if (!this.isTimeSliderInitialized(mapId)) return;
+    if (!isStoreTimeSliderInitialized(mapId)) return;
 
     // Get the temporal dimension, if any
-    const tempDimension = layer.getTimeDimension();
+    const layerTimeDimension = layer.getTimeDimension();
 
     // If no temporal dimension or invalid
-    if (!tempDimension || !tempDimension.isValid) return; // Skip
+    if (!layerTimeDimension || !layerTimeDimension.isValid) return; // Skip
 
     // Get the time slider values
-    const timeSliderValues = this.getInitialTimeSliderValues(mapId, layer.getLayerConfig(), timesliderConfig);
+    const timeSliderValues = this.#getInitialTimeSliderValues(layer.getLayerConfig(), layerTimeDimension, timesliderConfig);
 
     // If any
     if (timeSliderValues) {
-      // Add the time slider in store
-      this.#addTimeSliderLayerAndApplyFilters(mapId, layer.getLayerPath(), timeSliderValues);
+      // Add it to the store
+      addStoreTimeSliderLayer(mapId, layer.getLayerPath(), timeSliderValues);
+
+      // Update the filters on the layer in question and potential additional ones
+      this.#updateAndApplyTimeFiltersForAll(mapId, layer, timeSliderValues, timeSliderValues.filtering, timeSliderValues.values);
+
+      // Make sure tab is visible
+      this.getUIController(mapId).showTabButton('time-slider');
     }
   }
 
   /**
-   * Adds a time slider layer to the state
-   * @param {string} mapId - The map id of the state to act on
-   * @param {string} layerPath - The layer path of the layer to add to the state
-   * @param {TypeTimeSliderValues} timeSliderValues - The time slider values to add and apply filters
-   * @throws {PluginStateUninitializedError} When the Time Slider plugin is uninitialized.
-   * @static
-   */
-  static #addTimeSliderLayerAndApplyFilters(mapId: string, layerPath: string, timeSliderValues: TypeTimeSliderValues): void {
-    // Get the timeslider state which is only initialized if the TimeSlider Plugin exists.
-    const timeSliderState = this.getTimeSliderState(mapId);
-
-    // Create set part (because that's how it works for now)
-    const timeSliderLayer = { [layerPath]: timeSliderValues };
-
-    // Add it
-    timeSliderState.setterActions.addTimeSliderLayer(timeSliderLayer);
-
-    const { field, filtering, minAndMax, values } = timeSliderLayer[layerPath];
-
-    // Update the filters
-    this.updateFilters(mapId, layerPath, field, filtering, minAndMax, values);
-
-    // Make sure tab is visible
-    UIEventProcessor.showTabButton(mapId, 'time-slider');
-  }
-
-  /**
-   * Removes a time slider layer from the state
-   * @param {string} mapId - The map id of the state to act on
-   * @param {string} layerPath - The layer path of the layer to remove from the state
-   * @throws {PluginStateUninitializedError} When the TimeSlider plugin is uninitialized.
-   * @static
-   */
-  static removeTimeSliderLayer(mapId: string, layerPath: string): void {
-    // Get the timeslider state which is only initialized if the TimeSlider Plugin exists.
-    const timeSliderState = this.getTimeSliderState(mapId);
-
-    // Redirect
-    timeSliderState.setterActions.removeTimeSliderLayer(layerPath);
-
-    // If there are no more layers with time dimension
-    if (!Object.keys(timeSliderState.timeSliderLayers).length) {
-      // Hide tab
-      UIEventProcessor.hideTabButton(mapId, 'time-slider');
-    }
-  }
-
-  /**
-   * Get initial values for a layer's time slider states
+   * Updates the time slider values for a layer path and re-applies the temporal filters.
    *
-   * @param {string} mapId - The id of the map
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer path of the layer to add to the state
-   * @returns {TimeSliderLayer | undefined}
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} When the layer was of wrong type.
-   * @static
+   * @param mapId - The map identifier
+   * @param layerPath - The layer path
+   * @param values - The new slider values (timestamps in milliseconds)
    */
-  static getInitialTimeSliderValues(
-    mapId: string,
+  static updateTimeSliderValues(mapId: string, layerPath: string, values: number[]): void {
+    // Get the store values
+    const timeSliderValues = getStoreTimeSliderLayer(mapId, layerPath)!;
+
+    // Get the corresponding layer
+    const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerRegular(layerPath);
+
+    // Update the filters on the layer in question and potential additional ones
+    this.#updateAndApplyTimeFiltersForAll(mapId, layer, timeSliderValues, timeSliderValues.filtering, values);
+  }
+
+  /**
+   * Updates the filtering state for a layer path and re-applies the temporal filters.
+   *
+   * @param mapId - The map identifier
+   * @param layerPath - The layer path
+   * @param filtering - Whether temporal filtering is active
+   */
+  static updateTimeSliderFiltering(mapId: string, layerPath: string, filtering: boolean): void {
+    // Get the store values
+    const timeSliderValues = getStoreTimeSliderLayer(mapId, layerPath)!;
+
+    // Get the corresponding layer
+    const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerRegular(layerPath);
+
+    // Update the filters on the layer in question and potential additional ones
+    this.#updateAndApplyTimeFiltersForAll(mapId, layer, timeSliderValues, filtering, timeSliderValues.values);
+  }
+
+  /**
+   * Computes the initial time slider values from the layer configuration and temporal dimension metadata.
+   *
+   * @param layerConfig - The layer entry configuration
+   * @param layerTimeDimensionInfo - The temporal dimension information of the layer
+   * @param timesliderConfig - Optional time slider configuration from the plugin
+   * @returns The computed time slider values, or undefined if no valid temporal dimension is available
+   */
+  static #getInitialTimeSliderValues(
     layerConfig: AbstractBaseLayerEntryConfig,
+    layerTimeDimensionInfo: TimeDimension,
     timesliderConfig?: TypeTimeSliderProps
   ): TypeTimeSliderValues | undefined {
     // Get the layer using the map event processor, If no temporal dimension OR layerPath, return undefined
     if (!layerConfig.layerPath) return undefined;
-
-    // Cast the layer
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerRegular(layerConfig.layerPath);
-
-    // Get the temporal dimension information from metadata
-    const timeDimensionInfo = geoviewLayer.getTimeDimension();
 
     // Get temporal dimension info from plugin config
     const configTimeDimension = timesliderConfig?.timeDimension;
@@ -213,23 +118,22 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       timesliderConfig && timesliderConfig.layerPaths.length > 1 ? timesliderConfig.layerPaths.indexOf(layerConfig.layerPath) : undefined;
 
     // If no temporal dimension information
-    if ((!timeDimensionInfo || !timeDimensionInfo.rangeItems) && (!configTimeDimension || !configTimeDimension.rangeItems))
-      return undefined;
+    if (!layerTimeDimensionInfo.rangeItems && (!configTimeDimension || !configTimeDimension.rangeItems)) return undefined;
 
     // Set defaults values from temporal dimension
-    const { range } = timesliderConfig?.timeDimension?.rangeItems || timeDimensionInfo!.rangeItems;
+    const { range } = timesliderConfig?.timeDimension?.rangeItems || layerTimeDimensionInfo.rangeItems;
 
-    const defaultDates = configTimeDimension?.default || timeDimensionInfo!.default;
+    const defaultDates = configTimeDimension?.default || layerTimeDimensionInfo.default;
 
     const minAndMax: number[] = [DateMgt.convertToMilliseconds(range[0]), DateMgt.convertToMilliseconds(range[range.length - 1])];
-    const singleHandle = configTimeDimension?.singleHandle ?? timeDimensionInfo?.singleHandle ?? false;
-    const nearestValues = configTimeDimension?.nearestValues ?? timeDimensionInfo?.nearestValues;
+    const singleHandle = configTimeDimension?.singleHandle ?? layerTimeDimensionInfo?.singleHandle ?? false;
+    const nearestValues = configTimeDimension?.nearestValues ?? layerTimeDimensionInfo?.nearestValues;
 
     // Check if the time slider info is associated with another time slider
     const isMainLayerPath = timesliderConfig ? timesliderConfig.layerPaths[0] === layerConfig.layerPath : true;
 
     // Only use the field from the config if this is the main layer of the slider
-    let field = isMainLayerPath && configTimeDimension?.field ? configTimeDimension?.field : timeDimensionInfo!.field;
+    let field = isMainLayerPath && configTimeDimension?.field ? configTimeDimension?.field : layerTimeDimensionInfo.field;
 
     // Use fields from config if they are provided
     if (timesliderConfig?.fields && index) field = timesliderConfig.fields[index];
@@ -280,94 +184,95 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Sets the selected layer path
-   * @param {string} mapId - The map id of the state to act on
-   * @param {string} layerPath - The layer path to use
-   * @throws {PluginStateUninitializedError} When the TimeSlider plugin is uninitialized.
-   * @static
+   * Updates and applies temporal filters for the given layer and all its additional linked layers.
+   *
+   * @param mapId - The map identifier
+   * @param layer - The main GeoView layer
+   * @param timeSliderValues - The time slider values for this layer
+   * @param filtering - Whether temporal filtering is active
+   * @param values - The current slider values (timestamps in milliseconds)
    */
-  static setSelectedLayerPath(mapId: string, layerPath: string): void {
-    // Redirect
-    this.getTimeSliderState(mapId).setterActions.setSelectedLayerPath(layerPath);
+  static #updateAndApplyTimeFiltersForAll(
+    mapId: string,
+    layer: AbstractGVLayer,
+    timeSliderValues: TypeTimeSliderValues,
+    filtering: boolean,
+    values: number[]
+  ): void {
+    // Update the filters on the layer in question
+    this.#updateAndApplyTimeFiltersForOne(mapId, layer, timeSliderValues, timeSliderValues.field, filtering, values);
+
+    // Many layer paths of layers to adjust
+    // For each layer paths extra, apply the same filter
+    timeSliderValues.additionalLayerpaths?.forEach((additionalLayerPath) => {
+      // Get the time slider layer state if exists
+      const additionalTimeSliderValues = getStoreTimeSliderLayer(mapId, additionalLayerPath);
+
+      // If not exist, skip
+      if (!additionalTimeSliderValues) return;
+
+      // Get the corresponding additional layer
+      const additionalLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerRegular(additionalLayerPath);
+
+      // Update the filters on the additional layer
+      this.#updateAndApplyTimeFiltersForOne(mapId, additionalLayer, timeSliderValues, additionalTimeSliderValues.field, filtering, values);
+    });
   }
 
   /**
-   * Sets the filter for the layer path
-   * @param {string} mapId - The map id of the state to act on
-   * @param {string} layerPath - The layer path to use
-   * @param {string} filter - The filter
-   * @throws {PluginStateUninitializedError} When the TimeSlider plugin is uninitialized.
-   * @static
+   * Updates and applies the temporal filter for a single layer.
+   *
+   * Generates the filter string, stores the filter and values in the store,
+   * and applies the filters on the map.
+   *
+   * @param mapId - The map identifier
+   * @param layer - The GeoView layer to apply the filter on
+   * @param timeSliderValues - The time slider values for this layer
+   * @param field - The temporal field name to filter on
+   * @param filtering - Whether temporal filtering is active
+   * @param values - The current slider values (timestamps in milliseconds)
    */
-  static addOrUpdateSliderFilter(mapId: string, layerPath: string, filter: string): void {
-    const curSliderFilters = this.getTimeSliderFilters(mapId);
-    this.getTimeSliderState(mapId).setterActions.setSliderFilters({ ...curSliderFilters, [layerPath]: filter });
+  static #updateAndApplyTimeFiltersForOne(
+    mapId: string,
+    layer: AbstractGVLayer,
+    timeSliderValues: TypeTimeSliderValues,
+    field: string,
+    filtering: boolean,
+    values: number[]
+  ): void {
+    // Generate the filter string
+    const filter = this.#generateFilterString(layer, timeSliderValues, field, filtering, values);
+
+    // ---- Always applied ----
+    addOrUpdateStoreTimeSliderFilter(mapId, layer.getLayerPath(), filter);
+    setStoreTimeSliderFiltering(mapId, layer.getLayerPath(), filtering);
+    setStoreTimeSliderValues(mapId, layer.getLayerPath(), values);
+
+    // Apply filters on the map
+    MapEventProcessor.applyLayerFilters(mapId, layer.getLayerPath());
   }
 
   /**
-   * Updates the display date format for a specific layer in the time slider state.
-   * @param mapId - Identifier of the map viewer instance
-   * @param layerPath - Path identifying the target layer
-   * @param displayDateFormat - Date format configuration to store
+   * Generates the filter expression string for temporal filtering on a layer.
+   *
+   * Handles different layer types (WMS, Esri Image, Dynamic/Vector) with their
+   * respective date formatting conventions, and supports single-handle, range,
+   * discrete, and absolute slider modes.
+   *
+   * @param layer - The GeoView layer
+   * @param timeSliderValues - The time slider configuration values
+   * @param field - The temporal field name
+   * @param filtering - Whether filtering is active (returns empty string when false)
+   * @param values - The current slider values (timestamps in milliseconds)
+   * @returns The filter expression string, or an empty string when filtering is inactive
    */
-  static setDisplayDateFormat(mapId: string, layerPath: string, displayDateFormat: TypeDisplayDateFormat): void {
-    this.getTimeSliderState(mapId).setterActions.setDisplayDateFormat(layerPath, displayDateFormat);
-  }
-
-  /**
-   * Updates the display date format for a specific layer in the time slider state.
-   * @param mapId - Identifier of the map viewer instance
-   * @param layerPath - Path identifying the target layer
-   * @param displayDateFormatShort - Date format configuration to store
-   */
-  static setDisplayDateFormatShort(mapId: string, layerPath: string, displayDateFormatShort: TypeDisplayDateFormat): void {
-    this.getTimeSliderState(mapId).setterActions.setDisplayDateFormatShort(layerPath, displayDateFormatShort);
-  }
-
-  /**
-   * Updates the display time zone for date rendering of a specific layer
-   * in the time slider state.
-   * @param mapId - Identifier of the map viewer instance
-   * @param layerPath - Path identifying the target layer
-   * @param displayDateTimezone - IANA time zone identifier to store
-   */
-  static setDisplayDateTimezone(mapId: string, layerPath: string, displayDateTimezone: TimeIANA): void {
-    this.getTimeSliderState(mapId).setterActions.setDisplayDateTimezone(layerPath, displayDateTimezone);
-  }
-
-  // #endregion
-
-  // **********************************************************
-  // Static functions for Store Map State to action on API
-  // **********************************************************
-  // GV NEVER add a store action who does set state AND map action at a same time.
-  // GV Review the action in store state to make sure
-
-  // #region
-
-  /**
-   * Applies or resets a time-based filter on the specified layer based on the
-   * current Time Slider state.
-   * The generated filter expression varies depending on the layer type
-   * (WMS, ESRI Image, or vector layers) and whether filtering is enabled.
-   * Date values are normalized and formatted before being injected into
-   * the filter expression.
-   * @param {string} mapId - The unique identifier of the map.
-   * @param {string} layerPath - The path of the layer to which the filter is applied.
-   * @param {string} field - The name of the date/time attribute used for filtering.
-   * @param {boolean} filtering - Whether filtering is enabled (`true`) or the layer
-   * should be reset to its default (unfiltered) state (`false`).
-   * @param {number[]} minAndMax - The minimum and maximum values representing the
-   * full temporal extent of the layer (typically epoch milliseconds).
-   * @param {number[]} values - The active filter values (typically epoch milliseconds)
-   * selected by the time slider.
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
-   * @throws {PluginStateUninitializedError} Thrown when the Time Slider plugin state
-   * has not been initialized for the specified map.
-   * @static
-   */
-  static updateFilters(mapId: string, layerPath: string, field: string, filtering: boolean, minAndMax: number[], values: number[]): void {
+  static #generateFilterString(
+    layer: AbstractGVLayer,
+    timeSliderValues: TypeTimeSliderValues,
+    field: string,
+    filtering: boolean,
+    values: number[]
+  ): string {
     let filter = '';
 
     /** Helper function to format dates Esri way */
@@ -375,13 +280,10 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
 
     // If filtering
     if (filtering) {
-      // Get the layer
-      const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerRegular(layerPath);
-
       // ---- GVWMS ----
-      if (geoviewLayer instanceof GVWMS) {
+      if (layer instanceof GVWMS) {
         filter = `${field} = ${helperEsriDate(values[0])}`;
-      } else if (geoviewLayer instanceof GVEsriImage) {
+      } else if (layer instanceof GVEsriImage) {
         // ---- Esri Image ----
         // Esri Image layers expect the date to be an Epoch timestamp, not an ISO format
         if (values.length > 1) {
@@ -392,8 +294,6 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       } else {
         // ---- Other layers (Dynamic / Vector) ----
         // Esri Dynamic and Vector layers expect the date to be in ISO format
-        const timeSliderValues = this.getTimeSliderLayers(mapId)[layerPath];
-
         const startDate = helperEsriDate(values[0]);
 
         // If range mode
@@ -417,7 +317,7 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
           }
         } else {
           // Absolute mode (single handle)
-          const step = timeSliderValues.step ?? DateMgt.guessEstimatedStep(minAndMax[0], minAndMax[1]);
+          const step = timeSliderValues.step ?? DateMgt.guessEstimatedStep(timeSliderValues.minAndMax[0], timeSliderValues.minAndMax[1]);
 
           if (step) {
             const endDate = helperEsriDate(values[0] + step);
@@ -429,12 +329,9 @@ export class TimeSliderEventProcessor extends AbstractEventProcessor {
       }
     }
 
-    // ---- Always applied ----
-    this.getTimeSliderState(mapId).setterActions.setFiltering(layerPath, filtering);
-    this.getTimeSliderState(mapId).setterActions.setValues(layerPath, values);
-    this.addOrUpdateSliderFilter(mapId, layerPath, filter);
-    MapEventProcessor.applyLayerFilters(mapId, layerPath);
+    // Return the filter
+    return filter;
   }
 
-  // #endregion
+  // #endregion STATIC METHODS
 }

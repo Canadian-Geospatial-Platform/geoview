@@ -6,7 +6,7 @@ import type { TypeTimeSliderValues } from 'geoview-core/core/stores/store-interf
 import {
   useTimeSliderLayers,
   useTimeSliderSelectedLayerPath,
-  useTimeSliderStoreActions,
+  setStoreTimeSliderSelectedLayerPath,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { useMapStoreActions, useMapAllVisibleandInRangeLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
@@ -50,7 +50,6 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const visibleInRangeLayers = useMapAllVisibleandInRangeLayers();
   const timeSliderLayers = useTimeSliderLayers()!;
   const selectedLayerPath = useTimeSliderSelectedLayerPath();
-  const { setSelectedLayerPath } = useTimeSliderStoreActions()!;
   const { isLayerHiddenOnMap } = useMapStoreActions();
   const layerNames = useLayerNames();
   const layerStatuses = useLayerStatuses();
@@ -71,9 +70,9 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       logger.logTraceUseCallback('TIME-SLIDER-PANEL - handleLayerList');
 
       // Set the layer path
-      setSelectedLayerPath?.(layer.layerPath);
+      setStoreTimeSliderSelectedLayerPath?.(mapId, layer.layerPath);
     },
-    [setSelectedLayerPath]
+    [mapId]
   );
 
   /**
@@ -204,9 +203,9 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
 
     if (selectedLayerPath && !memoLayersList.some((layer) => layer.layerPath === selectedLayerPath)) {
       // Selected layer is no longer in the visible layers list, unselect it
-      setSelectedLayerPath?.('');
+      setStoreTimeSliderSelectedLayerPath?.(mapId, '');
     }
-  }, [selectedLayerPath, memoLayersList, setSelectedLayerPath]);
+  }, [mapId, selectedLayerPath, memoLayersList]);
 
   /**
    * Renders the right panel content based on selected Layer path of time slider.

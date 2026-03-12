@@ -7,13 +7,13 @@ import {
   useLayerSelectorCanToggle,
   useLayerSelectorControls,
   useLayerSelectorStyleConfig,
-  useLayerStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 import { generateId } from '@/core/utils/utilities';
 import { useMapSelectorIsLayerHiddenOnMap } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 
 interface ItemsListProps {
   items: TypeLegendItem[];
@@ -106,7 +106,6 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
   const lastToggledRef = useRef<string | null>(null);
   const itemIdMapRef = useRef<Map<string, string>>(new Map());
 
-  const { toggleItemVisibility } = useLayerStoreActions();
   const layerControls = useLayerSelectorControls(layerPath);
   const layerHidden = useMapSelectorIsLayerHiddenOnMap(layerPath);
   const canToggle = useLayerSelectorCanToggle(layerPath);
@@ -138,9 +137,9 @@ export const ItemsList = memo(function ItemsList({ items, layerPath }: ItemsList
   const handleToggleItemVisibility = useCallback(
     (item: TypeLegendItem, itemId: string): void => {
       lastToggledRef.current = itemId;
-      toggleItemVisibility(layerPath, item);
+      LegendEventProcessor.toggleItemVisibilityAndForget(mapId, layerPath, item);
     },
-    [layerPath, toggleItemVisibility]
+    [layerPath, mapId]
   );
 
   // Keep focus on layers when they are toggled using keyboard

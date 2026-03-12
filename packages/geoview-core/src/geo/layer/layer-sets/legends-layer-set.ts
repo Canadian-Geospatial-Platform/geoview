@@ -8,10 +8,12 @@ import { logger } from '@/core/utils/logger';
 import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
-import type {
-  TypeLegend,
-  TypeLegendResultSet,
-  TypeLegendResultSetEntry,
+import {
+  deleteStoreLayerFromLegendLayers,
+  setStoreLegendQueryStatus,
+  type TypeLegend,
+  type TypeLegendResultSet,
+  type TypeLegendResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { StyleChangedDelegate, StyleChangedEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -159,7 +161,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
    */
   protected override onDeleteFromStore(layerPath: string): void {
     // Delete from store
-    LegendEventProcessor.deleteLayerFromLegendLayers(this.getMapId(), layerPath);
+    deleteStoreLayerFromLegendLayers(this.getMapId(), layerPath);
   }
 
   /**
@@ -254,7 +256,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
    */
   #propagateToStoreLegendQueryStatus(layerPath: string, resultSetEntry: TypeLegendResultSetEntry): void {
     // Propagate
-    LegendEventProcessor.setLegendQueryStatusInStore(this.getMapId(), layerPath, resultSetEntry.legendQueryStatus, resultSetEntry.data);
+    setStoreLegendQueryStatus(this.getMapId(), layerPath, resultSetEntry.legendQueryStatus, resultSetEntry.data);
   }
 
   /**

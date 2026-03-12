@@ -1,16 +1,20 @@
 import { Box } from 'geoview-core/ui';
+import { useGeoViewMapId } from 'geoview-core/core/stores/geoview-store';
 import {
+  setStoreTimeSliderDelay,
+  setStoreTimeSliderLocked,
+  setStoreTimeSliderReversed,
+  setStoreTimeSliderStep,
   useTimeSliderLayers,
-  useTimeSliderStoreActions,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/time-slider-state';
 import {
   useLayerDateTemporalMode,
   useLayerDisplayDateFormat,
   useLayerDisplayDateFormatShort,
   useLayerDisplayDateTimezone,
-  useLayerLegendLayers,
+  useLayerNames,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
-import { LegendEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/legend-event-processor';
+import { TimeSliderEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/time-slider-event-processor';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from 'geoview-core/core/utils/logger';
@@ -67,8 +71,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   const sliderValueRef = useRef<number>();
   const sliderDeltaRef = useRef<number>();
 
-  // Get actions and states from store
-  const { setValues: setStoreValues, setLocked, setReversed, setDelay, setStep, setFiltering } = useTimeSliderStoreActions()!;
+  const mapId = useGeoViewMapId();
   const displayLanguage = useAppDisplayLanguage();
 
   const {
@@ -108,11 +111,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   const serviceDateTemporalMode = serviceDateTemporalModeFromStore ?? layerTemporalMode;
 
   // Get name from legend layers
-  const legendLayers = useLayerLegendLayers();
-  const name = LegendEventProcessor.findLayerByPath(legendLayers, layerPath)?.layerName;
-  const additionalNames = additionalLayerpaths?.map(
-    (additionalLayerPath) => LegendEventProcessor.findLayerByPath(legendLayers, additionalLayerPath)?.layerName
-  );
+  const names = useLayerNames();
+  const name = names[layerPath];
+  const additionalNames = additionalLayerpaths?.map((additionalLayerPath) => names[additionalLayerPath]);
   const combinedNames = additionalNames ? `${name}, ${additionalNames.join(', ')}` : name;
   const displayTitle = title ? title : combinedNames;
 
@@ -173,7 +174,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
         if (currentIndex === -1) {
           // Value not found - snap to nearest
           const nearest = timeStampRange.reduce((prev, curr) => (Math.abs(curr - values[0]) < Math.abs(prev - values[0]) ? curr : prev));
-          setStoreValues(layerPath, [nearest]);
+          TimeSliderEventProcessor.updateTimeSliderValues(mapId, layerPath, [nearest]);
           return;
         }
 
@@ -185,7 +186,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
           newIndex = timeStampRange.length - 1; // Wrap to end
         }
 
-        setStoreValues(layerPath, [timeStampRange[newIndex]]);
+        TimeSliderEventProcessor.updateTimeSliderValues(mapId, layerPath, [timeStampRange[newIndex]]);
         return;
       }
 
@@ -201,7 +202,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
           newPosition = minAndMax[1];
         }
 
-        setStoreValues(layerPath, [newPosition]);
+        TimeSliderEventProcessor.updateTimeSliderValues(mapId, layerPath, [newPosition]);
         return;
       }
 
@@ -211,7 +212,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       // If handles are at the extremes, reset the delta
       if (rightHandle - leftHandle === minAndMax[1] - minAndMax[0]) {
         sliderDeltaRef.current = (minAndMax[1] - minAndMax[0]) / 10;
-        setStoreValues(
+        TimeSliderEventProcessor.updateTimeSliderValues(
+          mapId,
           layerPath,
           isForward ? [leftHandle, leftHandle + sliderDeltaRef.current] : [rightHandle - sliderDeltaRef.current, rightHandle]
         );
@@ -257,9 +259,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
         if (leftHandle < sliderValueRef.current! && rightHandle > sliderValueRef.current!) leftHandle = sliderValueRef.current as number;
       }
 
-      setStoreValues(layerPath, [leftHandle, rightHandle]);
+      TimeSliderEventProcessor.updateTimeSliderValues(mapId, layerPath, [leftHandle, rightHandle]);
     },
-    [discreteValues, layerPath, locked, minAndMax, reversed, values, setStoreValues, singleHandle, step, timeStampRange]
+    [mapId, discreteValues, layerPath, locked, minAndMax, reversed, values, singleHandle, step, timeStampRange]
   );
 
   const moveBack = useCallback((): void => {
@@ -293,8 +295,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
    */
   const handleLock = useCallback((): void => {
     clearTimeout(playIntervalRef.current);
-    setLocked(layerPath, !locked);
-  }, [layerPath, locked, setLocked]);
+    setStoreTimeSliderLocked(mapId, layerPath, !locked);
+  }, [mapId, layerPath, locked]);
 
   /**
    * Handles when the user clicks the play/pause button.
@@ -310,21 +312,21 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
    */
   const handleReverse = useCallback((): void => {
     clearTimeout(playIntervalRef.current);
-    setReversed(layerPath, !reversed);
+    setStoreTimeSliderReversed(mapId, layerPath, !reversed);
     if (isPlaying) {
       if (reversed) moveBack();
       else moveForward();
     }
-  }, [isPlaying, layerPath, moveBack, moveForward, reversed, setReversed]);
+  }, [isPlaying, mapId, layerPath, moveBack, moveForward, reversed]);
 
   /**
    * Handles when the user changes the time delay.
    */
   const handleTimeChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>): void => {
-      setDelay(layerPath, Number(event.target.value));
+      setStoreTimeSliderDelay(mapId, layerPath, Number(event.target.value));
     },
-    [layerPath, setDelay]
+    [mapId, layerPath]
   );
 
   /**
@@ -332,9 +334,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
    */
   const handleStepChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>): void => {
-      setStep(layerPath, Number(event.target.value));
+      setStoreTimeSliderStep(mapId, layerPath, Number(event.target.value));
     },
-    [layerPath, setStep]
+    [mapId, layerPath]
   );
 
   /**
@@ -342,13 +344,13 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
    */
   const handleCheckbox = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>, newValue: boolean): void => {
-      setFiltering(layerPath, newValue);
+      TimeSliderEventProcessor.updateTimeSliderFiltering(mapId, layerPath, newValue);
       if (!newValue) {
         clearInterval(playIntervalRef.current);
         setIsPlaying(false);
       }
     },
-    [layerPath, setFiltering]
+    [mapId, layerPath]
   );
 
   /**
@@ -385,12 +387,12 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       if (discreteValues && singleHandle) {
         const value = Array.isArray(newValues) ? newValues[0] : newValues;
         const nearest = timeStampRange.reduce((prev, curr) => (Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev));
-        setStoreValues(layerPath, [nearest]);
+        TimeSliderEventProcessor.updateTimeSliderValues(mapId, layerPath, [nearest]);
       } else {
-        setStoreValues(layerPath, newValues as number[]);
+        TimeSliderEventProcessor.updateTimeSliderValues(mapId, layerPath, newValues as number[]);
       }
     },
-    [discreteValues, layerPath, setStoreValues, singleHandle, timeStampRange]
+    [mapId, discreteValues, layerPath, singleHandle, timeStampRange]
   );
 
   // #region USE EFFECT

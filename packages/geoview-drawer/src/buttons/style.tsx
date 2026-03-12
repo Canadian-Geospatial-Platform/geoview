@@ -1,11 +1,10 @@
-import type { TypeWindow } from 'geoview-core';
+import { useGeoViewMapId, type TypeWindow } from 'geoview-core';
 import { MuiColorInput } from 'mui-color-input';
 import type { ChangeEvent } from 'react';
 import { useState } from 'react';
 import {
   useDrawerStyle,
   useDrawerActiveGeom,
-  useDrawerActions,
   useDrawerSelectedDrawingType,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
@@ -13,6 +12,7 @@ import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 import { logger } from 'geoview-core/core/utils/logger';
 
 import { FONT_OPTIONS, DEFAULT_FONT, loadGoogleFont } from '../utils/fonts';
+import { DrawerEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/drawer-event-processor';
 
 // Styles
 const sxClasses = {
@@ -63,6 +63,7 @@ export function StylePanel(): JSX.Element {
   const { Box, List, ListItem, Typography, TextField, IconButton, FormatBoldIcon, FormatItalicIcon } = ui.elements;
 
   // Get store values
+  const mapId = useGeoViewMapId();
   const style = useDrawerStyle();
   const activeGeom = useDrawerActiveGeom();
   const selectedDrawingType = useDrawerSelectedDrawingType();
@@ -78,22 +79,6 @@ export function StylePanel(): JSX.Element {
   const [localTextColor, setLocalTextColor] = useState(style.textColor || '#000000');
   const [localTextHaloColor, setLocalTextHaloColor] = useState(style.textHaloColor || 'rgba(255,255,255,0.8)');
 
-  // Store actions
-  const {
-    setFillColor,
-    setStrokeColor,
-    setStrokeWidth,
-    setIconSize,
-    setTextValue,
-    setTextSize,
-    setTextHaloColor,
-    setTextHaloWidth,
-    setTextColor,
-    setTextBold,
-    setTextItalic,
-    setTextFont,
-  } = useDrawerActions();
-
   // #region Handlers
 
   /**
@@ -101,9 +86,9 @@ export function StylePanel(): JSX.Element {
    */
   const handleTextChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
-      setTextValue(event.target.value);
+      DrawerEventProcessor.setTextValue(mapId, event.target.value);
     },
-    [setTextValue]
+    [mapId]
   );
 
   /**
@@ -119,9 +104,9 @@ export function StylePanel(): JSX.Element {
         loadGoogleFont(fontOption.name);
       }
 
-      setTextFont(selectedFont);
+      DrawerEventProcessor.setTextFont(mapId, selectedFont);
     },
-    [setTextFont]
+    [mapId]
   );
 
   /**
@@ -130,9 +115,9 @@ export function StylePanel(): JSX.Element {
   const handleTextSizeChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>): void => {
       const size = parseInt(event.target.value, 10);
-      if (!Number.isNaN(size)) setTextSize(size);
+      if (!Number.isNaN(size)) DrawerEventProcessor.setTextSize(mapId, size);
     },
-    [setTextSize]
+    [mapId]
   );
 
   /**
@@ -141,9 +126,9 @@ export function StylePanel(): JSX.Element {
   const handleTextHaloWidthChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>): void => {
       const size = parseInt(event.target.value, 10);
-      if (!Number.isNaN(size)) setTextHaloWidth(size);
+      if (!Number.isNaN(size)) DrawerEventProcessor.setTextHaloWidth(mapId, size);
     },
-    [setTextHaloWidth]
+    [mapId]
   );
 
   /**
@@ -157,8 +142,8 @@ export function StylePanel(): JSX.Element {
    * Handles when the fill color picker closes
    */
   const handleFillColorClose = useCallback((): void => {
-    setFillColor(localFillColor);
-  }, [setFillColor, localFillColor]);
+    DrawerEventProcessor.setFillColor(mapId, localFillColor);
+  }, [mapId, localFillColor]);
 
   /**
    * Handles when the user changes the stroke color
@@ -171,8 +156,8 @@ export function StylePanel(): JSX.Element {
    * Handles when the stroke color picker closes
    */
   const handleStrokeColorClose = useCallback((): void => {
-    setStrokeColor(localStrokeColor);
-  }, [setStrokeColor, localStrokeColor]);
+    DrawerEventProcessor.setStrokeColor(mapId, localStrokeColor);
+  }, [mapId, localStrokeColor]);
 
   /**
    * Handles when the user changes the icon size
@@ -180,9 +165,9 @@ export function StylePanel(): JSX.Element {
   const handleIconSizeChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>): void => {
       const size = parseInt(event.target.value, 10);
-      if (!Number.isNaN(size)) setIconSize(size);
+      if (!Number.isNaN(size)) DrawerEventProcessor.setDrawerIconSize(mapId, size);
     },
-    [setIconSize]
+    [mapId]
   );
 
   /**
@@ -196,8 +181,8 @@ export function StylePanel(): JSX.Element {
    * Handles when the text color picker closes
    */
   const handleTextColorClose = useCallback((): void => {
-    setTextColor(localTextColor);
-  }, [setTextColor, localTextColor]);
+    DrawerEventProcessor.setTextColor(mapId, localTextColor);
+  }, [mapId, localTextColor]);
 
   /**
    * Handles when the user changes the text halo color
@@ -210,8 +195,8 @@ export function StylePanel(): JSX.Element {
    * Handles when the text halo color picker closes
    */
   const handleTextHaloColorClose = useCallback((): void => {
-    setTextHaloColor(localTextHaloColor);
-  }, [setTextHaloColor, localTextHaloColor]);
+    DrawerEventProcessor.setTextHaloColor(mapId, localTextHaloColor);
+  }, [mapId, localTextHaloColor]);
 
   /**
    * Handles when the user changes the stroke width
@@ -220,24 +205,24 @@ export function StylePanel(): JSX.Element {
     (event: ChangeEvent<HTMLInputElement>): void => {
       const width = parseFloat(event.target.value);
       if (Number.isNaN(width)) return;
-      setStrokeWidth(width);
+      DrawerEventProcessor.setStrokeWidth(mapId, width);
     },
-    [setStrokeWidth]
+    [mapId]
   );
 
   /**
    * Handles when the user toggles bold formatting
    */
   const handleToggleBold = useCallback((): void => {
-    setTextBold(!style.textBold);
-  }, [setTextBold, style.textBold]);
+    DrawerEventProcessor.setTextBold(mapId, !style.textBold);
+  }, [mapId, style.textBold]);
 
   /**
    * Handles when the user toggles italic formatting
    */
   const handleToggleItalic = useCallback((): void => {
-    setTextItalic(!style.textItalic);
-  }, [setTextItalic, style.textItalic]);
+    DrawerEventProcessor.setTextItalic(mapId, !style.textItalic);
+  }, [mapId, style.textItalic]);
 
   // #endregion
 

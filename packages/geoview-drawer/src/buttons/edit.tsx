@@ -1,11 +1,12 @@
-import type { TypeWindow } from 'geoview-core';
+import { useGeoViewMapId, type TypeWindow } from 'geoview-core';
 import { getSxClasses } from 'geoview-core/core/components/nav-bar/nav-bar-style';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
-import { useDrawerActions, useDrawerIsEditing } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
+import { useDrawerIsEditing } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 
 import { IconButton, EditIcon, EditOffIcon } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
+import { DrawerEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/drawer-event-processor';
 
 /**
  * Creates an edit button to toggle editing capabilities.
@@ -21,19 +22,17 @@ export default function Edit(): JSX.Element {
   const { useMemo } = cgpv.reactUtilities.react;
 
   // Get store values
+  const mapId = useGeoViewMapId();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const displayLanguage = useAppDisplayLanguage();
   const isEditing = useDrawerIsEditing();
 
-  // Store actions
-  const { toggleEditing } = useDrawerActions();
-
   /**
    * Handles a click on the edit button
    */
   const handleToggleEditing = (): void => {
-    toggleEditing();
+    DrawerEventProcessor.toggleEditing(mapId);
   };
 
   return (

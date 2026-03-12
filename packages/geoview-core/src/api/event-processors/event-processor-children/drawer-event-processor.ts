@@ -9,66 +9,62 @@ import type { StyleLike } from 'ol/style/Style';
 import type { DrawEvent, GeometryFunction, SketchCoordType } from 'ol/interaction/Draw';
 import { createBox } from 'ol/interaction/Draw';
 
-import { AppEventProcessor } from './app-event-processor';
 import { MapEventProcessor } from './map-event-processor';
-import { AbstractEventProcessor, type SubscriptionDelegate } from '@/api/event-processors/abstract-event-processor';
-import type { TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
+import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
+import type { TypeDisplayLanguage, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
 
 import { Projection } from '@/geo/utils/projection';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import type { Draw } from '@/geo/interaction/draw';
 import type { Transform } from '@/geo/interaction/transform';
 import type { TransformDeleteFeatureEvent, TransformEvent, TransformSelectionEvent } from '@/geo/interaction/transform/transform-events';
-import type { IDrawerState, StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
-import { DEFAULT_TEXT_VALUES } from '@/core/stores/store-interface-and-intial-values/drawer-state';
+import type { StyleProps } from '@/core/stores/store-interface-and-intial-values/drawer-state';
+import {
+  getStoreActiveGeom,
+  getStoreDrawInstance,
+  getStoreHideMeasurements,
+  getStoreIconSrc,
+  getStoreIsDrawing,
+  getStoreIsEditing,
+  getStoreIsSnapping,
+  getStoreSelectedDrawing,
+  getStoreSnapInstance,
+  getStoreStyle,
+  getStoreTransformInstance,
+  isStoreDrawerInitialized,
+  removeStoreDrawInstance,
+  removeStoreSnapInstance,
+  removeStoreTransformInstance,
+  setStoreActiveGeom,
+  setStoreDrawerIconSize,
+  setStoreDrawInstance,
+  setStoreFillColor,
+  setStoreHideMeasurements,
+  setStoreRedoDisabled,
+  setStoreSelectedDrawing,
+  setStoreSnapInstance,
+  setStoreStrokeColor,
+  setStoreStrokeWidth,
+  setStoreTextBold,
+  setStoreTextColor,
+  setStoreTextFont,
+  setStoreTextHaloColor,
+  setStoreTextHaloWidth,
+  setStoreTextItalic,
+  setStoreTextRotation,
+  setStoreTextSize,
+  setStoreTextValue,
+  setStoreTransformInstance,
+  setStoreUndoDisabled,
+  updateStoreStateStyle,
+} from '@/core/stores/store-interface-and-intial-values/drawer-state';
 import { generateId, formatLength, formatArea } from '@/core/utils/utilities';
-import type { GeoviewStoreType } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
-
-// GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
-
-export const DRAW_GROUP_KEY = 'draw-group';
-
-interface DrawerHistoryAction {
-  type: 'add' | 'delete' | 'modify' | 'clear' | 'select';
-  features: Feature[];
-  originalGeometries?: Geometry[];
-  modifiedGeometries?: Geometry[];
-  originalStyles?: (StyleLike | undefined)[];
-  modifiedStyles?: (StyleLike | undefined)[];
-}
-
-interface TypeGeoJSONStyleProps {
-  strokeColor?: string;
-  strokeWidth?: number;
-  fillColor?: string;
-  iconSrc?: string;
-  iconSize?: number;
-  text?: string;
-  textSize?: number;
-  textFont?: string;
-  textColor?: string;
-  textHaloColor?: string;
-  textHaloWidth?: number;
-  textBold?: boolean;
-  textItalic?: boolean;
-  textRotation?: number;
-}
-
-const DEFAULT_ICON_SOURCE =
-  'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBkPSJNMTIgMkM4LjEzIDIgNSA1LjEzIDUgOWMwIDUuMjUgNyAxMyA3IDEzczctNy43NSA3LTEzYzAtMy44Ny0zLjEzLTctNy03bTAgOS41Yy0xLjM4IDAtMi41LTEuMTItMi41LTIuNXMxLjEyLTIuNSAyLjUtMi41IDIuNSAxLjEyIDIuNSAyLjUtMS4xMiAyLjUtMi41IDIuNSIgZmlsbD0icmdiYSgyNTIsIDI0MSwgMCwgMC4zKSIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjwvc3ZnPg==';
 
 /**
  * Event processor focusing on interacting with the drawer state in the store.
  */
-export class DrawerEventProcessor extends AbstractEventProcessor {
-  // **********************************************************
-  // Static functions for Typescript files to access store actions
-  // **********************************************************
-  // GV Typescript MUST always use the defined store actions below to modify store - NEVER use setState!
-  // GV Some action does state modifications AND map actions.
-  // GV ALWAYS use map event processor when an action modify store and IS NOT trap by map state event handler
-
+export abstract class DrawerEventProcessor extends AbstractEventProcessor {
   /** History stack for undo/redo functionality */
   static #drawerHistory: Map<string, DrawerHistoryAction[]> = new Map();
 
@@ -91,75 +87,241 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   /** Maximum history size */
   static #maxHistorySize = 50;
 
-  /** Keyboard event handlers for each map */
-  static #keyboardHandlers: Map<string, (event: KeyboardEvent) => void> = new Map();
-
   /** Keep track of the temporary transform instances for new text drawings */
   static #tempTransformInstances = new Map<string, Transform>();
 
-  // #region OVERRIDES
+  /** The geometry group key used for all drawer features */
+  static readonly DRAW_GROUP_KEY = 'draw-group';
 
-  /**
-   * Initializes the event processor and sets up subscriptions
-   * @param store - The store to initialize with
-   * @returns An array of the subscriptions callbacks which were created
-   */
-  protected override onInitialize(store: GeoviewStoreType): SubscriptionDelegate[] {
-    const { mapId } = store.getState();
-
-    // Set up keyboard handler
-    DrawerEventProcessor.#setupKeyboardHandler(mapId);
-
-    // Subscribe to language changes
-    const languageUnsubscribe = store.subscribe(
-      (state) => state.appState.displayLanguage,
-      () => {
-        // Update all measurement tooltips when language changes
-        DrawerEventProcessor.#updateMeasurementTooltips(mapId);
-
-        // Update Default Text when language changes
-        DrawerEventProcessor.#updateDefaultText(mapId);
-      }
-    );
-
-    // Subscribe to projection changes
-    const projectionUnsubscribe = store.subscribe(
-      (state) => state.mapState.currentProjection,
-      (currentProjection, previousProjection) => {
-        DrawerEventProcessor.#handleMapReprojection(mapId, currentProjection, previousProjection);
-      }
-    );
-
-    // Return the unsubscribe function to be added to the subscription array
-    return [languageUnsubscribe, projectionUnsubscribe];
-  }
-
-  // #endregion OVERRIDES
+  /** The default icon source as a base64-encoded SVG data URI */
+  static readonly DEFAULT_ICON_SOURCE =
+    'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBkPSJNMTIgMkM4LjEzIDIgNSA1LjEzIDUgOWMwIDUuMjUgNyAxMyA3IDEzczctNy43NSA3LTEzYzAtMy44Ny0zLjEzLTctNy03bTAgOS41Yy0xLjM4IDAtMi41LTEuMTItMi41LTIuNXMxLjEyLTIuNSAyLjUtMi41IDIuNSAxLjEyIDIuNSAyLjUtMS4xMiAyLjUtMi41IDIuNSIgZmlsbD0icmdiYSgyNTIsIDI0MSwgMCwgMC4zKSIgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjwvc3ZnPg==';
 
   // #region STATIC METHODS
 
   /**
-   * Shortcut to get the Drawer state for a given map id
-   * @param {string} mapId - The mapId
-   * @returns {IDrawerState | undefined} The Drawer state. Forcing the return to also be 'undefined', because
-   *                                       there will be no drawerState if the Drawer plugin isn't active.
-   *                                       This helps the developers making sure the existence is checked.
+   * Sets the active geometry type and refreshes the interaction instances.
+   *
+   * @param mapId - The map ID
+   * @param geomType - The geometry type to set as active
    */
-  protected static getDrawerState(mapId: string): IDrawerState | undefined {
-    // Return the drawer state when it exists
-    return super.getState(mapId).drawerState;
+  static setActiveGeom(mapId: string, geomType: string): void {
+    // Save to store
+    setStoreActiveGeom(mapId, geomType);
+
+    // Refresh
+    this.refreshInteractionInstances(mapId);
   }
 
   /**
-   * Function for handling map projection changes to reproject the drawings
-   * @param {string} mapId - The map ID
-   * @param {TypeValidMapProjectionCodes} currentProjection - The current projection code
-   * @param {TypeValidMapProjectionCodes} previousProjection - The previous projection code
+   * Refreshes the draw instance and updates the style of any transforming feature.
+   *
+   * @param mapId - The map ID
    */
-  static #handleMapReprojection(
+  static updateFeatureStyle(mapId: string): void {
+    // Refresh the draw instance with the new style
+    if (getStoreDrawInstance(mapId) !== undefined) {
+      this.startDrawing(mapId);
+    }
+
+    this.updateTransformingFeatureStyle(mapId, getStoreStyle(mapId));
+  }
+
+  /**
+   * Sets the fill color in the store and updates the feature style.
+   *
+   * @param mapId - The map ID
+   * @param fillColor - The fill color value
+   */
+  static setFillColor(mapId: string, fillColor: string): void {
+    // Save to store
+    setStoreFillColor(mapId, fillColor);
+
+    // Update the feature style at large
+    this.updateFeatureStyle(mapId);
+  }
+
+  /**
+   * Sets the stroke color in the store and updates the feature style.
+   *
+   * @param mapId - The map ID
+   * @param strokeColor - The stroke color value
+   */
+  static setStrokeColor(mapId: string, strokeColor: string): void {
+    // Save to store
+    setStoreStrokeColor(mapId, strokeColor);
+
+    // Update the feature style at large
+    this.updateFeatureStyle(mapId);
+  }
+
+  /**
+   * Sets the stroke width in the store and updates the feature style.
+   *
+   * @param mapId - The map ID
+   * @param strokeWidth - The stroke width value
+   */
+  static setStrokeWidth(mapId: string, strokeWidth: number): void {
+    // Save to store
+    setStoreStrokeWidth(mapId, strokeWidth);
+
+    // Update the feature style at large
+    this.updateFeatureStyle(mapId);
+  }
+
+  /**
+   * Sets the icon size in the store and updates the feature style.
+   *
+   * @param mapId - The map ID
+   * @param iconSize - The icon size value
+   */
+  static setDrawerIconSize(mapId: string, iconSize: number): void {
+    // Save to store
+    setStoreDrawerIconSize(mapId, iconSize);
+
+    // Update the feature style at large
+    this.updateFeatureStyle(mapId);
+  }
+
+  /**
+   * Sets the text value in the store and updates the feature style.
+   *
+   * @param mapId - The map ID
+   * @param text - The text content
+   */
+  static setTextValue(mapId: string, text: string): void {
+    // Save to store
+    setStoreTextValue(mapId, text);
+
+    // Update the feature style at large
+    this.updateFeatureStyle(mapId);
+  }
+
+  /**
+   * Sets the text size in the store and updates the feature style.
+   *
+   * @param mapId - The map ID
+   * @param size - The text size in pixels
+   */
+  static setTextSize(mapId: string, size: number): void {
+    // Save to store
+    setStoreTextSize(mapId, size);
+
+    // Update the feature style at large
+    this.updateFeatureStyle(mapId);
+  }
+
+  /**
+   * Sets the text font in the store and updates the feature style.
+   *
+   * @param mapId - The map ID
+   * @param font - The font family name
+   */
+  static setTextFont(mapId: string, font: string): void {
+    // Save to store
+    setStoreTextFont(mapId, font);
+
+    // Update the feature style at large
+    this.updateFeatureStyle(mapId);
+  }
+
+  /**
+   * Sets the text color in the store and updates the feature style.
+   *
+   * @param mapId - The map ID
+   * @param color - The text color value
+   */
+  static setTextColor(mapId: string, color: string): void {
+    // Save to store
+    setStoreTextColor(mapId, color);
+
+    // Update the feature style at large
+    this.updateFeatureStyle(mapId);
+  }
+
+  /**
+   * Sets the text halo color in the store and updates the feature style.
+   *
+   * @param mapId - The map ID
+   * @param color - The halo color value
+   */
+  static setTextHaloColor(mapId: string, color: string): void {
+    // Save to store
+    setStoreTextHaloColor(mapId, color);
+
+    // Update the feature style at large
+    this.updateFeatureStyle(mapId);
+  }
+
+  /**
+   * Sets the text halo width in the store and updates the feature style.
+   *
+   * @param mapId - The map ID
+   * @param width - The halo width value
+   */
+  static setTextHaloWidth(mapId: string, width: number): void {
+    // Save to store
+    setStoreTextHaloWidth(mapId, width);
+
+    // Update the feature style at large
+    this.updateFeatureStyle(mapId);
+  }
+
+  /**
+   * Sets the text bold state in the store and updates the feature style.
+   *
+   * @param mapId - The map ID
+   * @param bold - Whether the text should be bold
+   */
+  static setTextBold(mapId: string, bold: boolean): void {
+    // Save to store
+    setStoreTextBold(mapId, bold);
+
+    // Update the feature style at large
+    this.updateFeatureStyle(mapId);
+  }
+
+  /**
+   * Sets the text italic state in the store and updates the feature style.
+   *
+   * @param mapId - The map ID
+   * @param italic - Whether the text should be italic
+   */
+  static setTextItalic(mapId: string, italic: boolean): void {
+    // Save to store
+    setStoreTextItalic(mapId, italic);
+
+    // Update the feature style at large
+    this.updateFeatureStyle(mapId);
+  }
+
+  /**
+   * Sets the text rotation in the store and updates the feature style.
+   *
+   * @param mapId - The map ID
+   * @param rotation - The rotation angle
+   */
+  static setTextRotation(mapId: string, rotation: number): void {
+    // Save to store
+    setStoreTextRotation(mapId, rotation);
+
+    // Update the feature style at large
+    this.updateFeatureStyle(mapId);
+  }
+
+  /**
+   * Handles map projection changes to reproject the drawings.
+   *
+   * @param mapId - The map ID
+   * @param currentProjection - The current projection code
+   * @param previousProjection - The previous projection code
+   * @param displayLanguage - The current display language for updating measurement tooltips after reprojection
+   */
+  static handleMapReprojection(
     mapId: string,
     currentProjection: TypeValidMapProjectionCodes,
-    previousProjection: TypeValidMapProjectionCodes
+    previousProjection: TypeValidMapProjectionCodes,
+    displayLanguage: TypeDisplayLanguage
   ): void {
     if (previousProjection) {
       const features = this.#getDrawingFeatures(mapId);
@@ -168,27 +330,28 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         if (!geometry) return;
 
         geometry.transform(Projection.PROJECTIONS[previousProjection], Projection.PROJECTIONS[currentProjection]);
-        DrawerEventProcessor.#updateMeasurementTooltips(mapId);
+        this.updateMeasurementTooltips(mapId, displayLanguage);
       });
     }
   }
 
   /**
-   * Gets all drawing features for a map
-   * @param {string} mapId - The map ID
-   * @returns {Feature[]} Array of features
-   * @throws {InvaliGeometryGroupIdError} If the provided geometry group id does not exist.
+   * Gets all drawing features for a map.
+   *
+   * @param mapId - The map ID
+   * @returns Array of features
+   * @throws {InvaliGeometryGroupIdError} When the provided geometry group id does not exist
    */
   static #getDrawingFeatures(mapId: string): Feature[] {
     // Check if state exist and if draw instance is enable, solve error when switch lang and no draw instance
-    const state = this.getDrawerState(mapId);
-    if (!state || state.drawInstance === undefined) return [];
+    if (!isStoreDrawerInitialized(mapId)) return [];
+    if (!getStoreDrawInstance(mapId)) return [];
 
     // Get the map viewer instance
-    const viewer = MapEventProcessor.getMapViewer(mapId);
+    const viewer = this.getMapViewer(mapId);
 
     // Get features from drawing group
-    const geometryGroup = viewer.layer.geometry.getGeometryGroup(DRAW_GROUP_KEY);
+    const geometryGroup = viewer.layer.geometry.getGeometryGroup(this.DRAW_GROUP_KEY);
     const features = geometryGroup?.vectorSource.getFeatures();
     if (!features) {
       return [];
@@ -197,10 +360,11 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Gets a feature by it's id
-   * @param {string} mapId - The map ID
-   * @param {string} featureId - Feature ID we are looking for
-   * @returns {Feature | undefined} The found feature
+   * Gets a feature by its ID.
+   *
+   * @param mapId - The map ID
+   * @param featureId - Feature ID to search for
+   * @returns The found feature, or undefined if not found
    */
   static #getFeatureById(mapId: string, featureId: string): Feature | undefined {
     const allDrawingFeatures = this.#getDrawingFeatures(mapId);
@@ -211,11 +375,12 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Updates all measurement tooltips for a map with the current language
-   * @param {string} mapId - The map ID
+   * Updates all measurement tooltips for a map with the current language.
+   *
+   * @param mapId - The map ID
+   * @param displayLanguage - The display language
    */
-  static #updateMeasurementTooltips(mapId: string): void {
-    const displayLanguage = AppEventProcessor.getDisplayLanguage(mapId);
+  static updateMeasurementTooltips(mapId: string, displayLanguage: TypeDisplayLanguage): void {
     const features = this.#getDrawingFeatures(mapId);
 
     features.forEach((feature) => {
@@ -231,26 +396,15 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Sets the text value to the default text value of the current language
-   * @param {string} mapId - The map ID
-   */
-  static #updateDefaultText(mapId: string): void {
-    const state = this.getDrawerState(mapId);
-    if (!state) return;
-
-    const displayLanguage = AppEventProcessor.getDisplayLanguage(mapId);
-    state.setterActions.setTextValue(DEFAULT_TEXT_VALUES[displayLanguage]);
-  }
-
-  /**
-   * Calculates measurements for a geometry feature
-   * @param {Geometry} geom - The geometry to measure
-   * @param {string} displayLanguage - The display language
-   * @returns {Object} Object containing the formatted output text and tooltip coordinates
+   * Calculates measurements for a geometry feature.
+   *
+   * @param geom - The geometry to measure
+   * @param displayLanguage - The display language
+   * @returns Object containing the formatted output text and tooltip coordinates
    */
   static #getFeatureMeasurements(
     geom: Geometry,
-    displayLanguage: string
+    displayLanguage: TypeDisplayLanguage
   ): { output: string | undefined; tooltipCoord: number[] | undefined } {
     let output: string | undefined;
     let tooltipCoord: number[] | undefined;
@@ -284,15 +438,16 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Creates or updates a measurement tooltip for a feature
-   * @param {Feature<Geometry>} feature - The feature to create a tooltip for
-   * @param {boolean} hideMeasurements - Whether to hide the measurement tooltip
-   * @param {string} mapId - The map ID
-   * @returns {Overlay | undefined} The created or updated overlay, or undefined if creation failed
+   * Creates or updates a measurement tooltip for a feature.
+   *
+   * @param feature - The feature to create a tooltip for
+   * @param hideMeasurements - Whether to hide the measurement tooltip
+   * @param mapId - The map ID
+   * @returns The created or updated overlay, or undefined if creation failed
    */
   static #createMeasureTooltip(feature: Feature<Geometry>, hideMeasurements: boolean, mapId: string): Overlay | undefined {
     // Get current display language
-    const displayLanguage = AppEventProcessor.getDisplayLanguage(mapId);
+    const displayLanguage = this.getMapViewer(mapId).getDisplayLanguage();
 
     // Get the measureTooltip for the feature if one alrady exists
     let measureTooltip = (feature.get('measureTooltip') as Overlay) || undefined;
@@ -331,10 +486,11 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Utility to convert SVG path to coordinates
-   * @param {string} pathData - SVG path string
-   * @param {number[]} center - Center coordinates
-   * @returns {number[][]} Array of coordinates
+   * Converts an SVG path string to an array of coordinates.
+   *
+   * @param pathData - SVG path string
+   * @param center - Center coordinates
+   * @returns Array of coordinates
    */
   static #svgPathToCoordinates = (pathData: string, center: number[]): number[][] => {
     const commands = pathData.match(/[MmLlHhVvCcSsQqTtAaZz][^MmLlHhVvCcSsQqTtAaZz]*/g) || [];
@@ -387,11 +543,12 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   };
 
   /**
-   * Utility to convert SVG path to coordinates with auto-centering
-   * @param {string} svgPath - SVG path string
-   * @param {SketchCoordType} coordinates - Circle coordinate (center and out edge)
-   * @param {SimpleGeometry} geometry - The intermediate geometry for display while expanding
-   * @returns {Polygon} The result polygon
+   * Converts an SVG path string to a polygon geometry with auto-centering.
+   *
+   * @param svgPath - SVG path string
+   * @param coordinates - Circle coordinate (center and outer edge)
+   * @param geometry - Optional intermediate geometry for display while expanding
+   * @returns The resulting polygon
    */
   static #svgPathToGeometry = (svgPath: string, coordinates: SketchCoordType, geometry?: SimpleGeometry): Polygon => {
     const center = coordinates[0] as number[];
@@ -456,12 +613,13 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   };
 
   /**
-   * Sets up a feature with ID, geometry group, and type-specific properties
-   * @param {Feature} feature - The feature to set up
-   * @param {string} geomType - The geometry type
-   * @param {StyleProps} style - The style properties
-   * @param {string} iconSrc - The icon source for point features
-   * @param {string} featureId - Optional feature ID (generates one if not provided)
+   * Sets up a feature with ID, geometry group, and type-specific properties.
+   *
+   * @param feature - The feature to set up
+   * @param geomType - The geometry type
+   * @param style - The style properties
+   * @param iconSrc - Optional icon source for point features
+   * @param featureId - Optional feature ID (generates one if not provided)
    */
   static #setFeatureProperties(feature: Feature, geomType: string, style: StyleProps, iconSrc?: string, featureId?: string): void {
     // Set up basic feature properties
@@ -469,7 +627,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       const id = featureId || generateId();
       feature.setId(id);
       feature.set('featureId', id);
-      feature.set('geometryGroup', DRAW_GROUP_KEY);
+      feature.set('geometryGroup', this.DRAW_GROUP_KEY);
     }
 
     // Set type-specific properties
@@ -490,10 +648,11 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Extracts style properties from a feature
-   * @param {Feature} feature - The feature to extract properties from
-   * @param {StyleProps} currentStyle - The current style properties to update
-   * @returns {StyleProps} The extracted style properties
+   * Extracts style properties from a feature.
+   *
+   * @param feature - The feature to extract properties from
+   * @param currentStyle - The current style properties to update
+   * @returns The extracted style properties
    */
   static #getFeatureProperties(feature: Feature, currentStyle: StyleProps): StyleProps {
     const style: StyleProps = currentStyle;
@@ -531,8 +690,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Cleans up the temporary text transform interaction
-   * @param {string} mapId - The map ID
+   * Cleans up the temporary text transform interaction.
+   *
+   * @param mapId - The map ID
    */
   static #cleanupTempTransform(mapId: string): void {
     const tempTransform = this.#tempTransformInstances.get(mapId);
@@ -548,40 +708,40 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   // #region Drawing Actions
 
   /**
-   * Starts a drawing operation with the specified geometry type
-   * @param {string} mapId - The map ID
-   * @param {string} geomType - The geometry type to draw (optional, uses current state if not provided)
-   * @param {StyleProps} styleInput - Optional style properties to use
+   * Starts a drawing operation with the specified geometry type.
+   *
+   * @param mapId - The map ID
+   * @param geomType - Optional geometry type to draw (uses current state if not provided)
+   * @param styleInput - Optional style properties to use
    */
   static startDrawing(mapId: string, geomType?: string, styleInput?: StyleProps): void {
     // Quickly clean up the temp transform if present
     this.#cleanupTempTransform(mapId);
 
-    const state = this.getDrawerState(mapId);
-    if (!state) return;
+    if (!isStoreDrawerInitialized(mapId)) return;
 
     // Get the map viewer instance and stop map pointer events if not already stopped
-    const viewer = MapEventProcessor.getMapViewer(mapId);
-    if (!state.actions.getIsEditing()) {
+    const viewer = this.getMapViewer(mapId);
+    if (!getStoreIsEditing(mapId)) {
       viewer.unregisterMapPointerHandlers(viewer.map);
     }
 
     // If editing already, stop it
     // GV Moved the stop editing up so the rotation is set properly for any active text drawing
-    if (state.actions.getIsEditing()) {
+    if (getStoreIsEditing(mapId)) {
       this.stopEditing(mapId);
     }
 
     // Get current state values if not provided
-    const currentGeomType = geomType || state.actions.getActiveGeom();
-    const currentStyle = styleInput || state.actions.getStyle();
+    const currentGeomType = geomType || getStoreActiveGeom(mapId);
+    const currentStyle = styleInput || getStoreStyle(mapId);
 
     // Make new text horizontal, regardless of what the state rotation was
     // GV If a style input is added for the rotation, then this can be removed
     currentStyle.textRotation = 0;
 
     // If drawing already, stop and restart as it's likely a style change
-    if (this.getDrawerState(mapId)?.drawInstance) {
+    if (getStoreDrawInstance(mapId)) {
       this.stopDrawing(mapId);
     }
 
@@ -598,40 +758,40 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     // Initialize drawing interaction
     let draw: Draw;
     if (currentGeomType === 'Text') {
-      draw = viewer.initDrawInteractions(DRAW_GROUP_KEY, 'Point', currentStyle);
+      draw = viewer.initDrawInteractions(this.DRAW_GROUP_KEY, 'Point', currentStyle);
     } else if (currentGeomType in customGeometries) {
-      draw = viewer.initDrawInteractions(DRAW_GROUP_KEY, 'Circle', currentStyle, customGeometries[currentGeomType]);
+      draw = viewer.initDrawInteractions(this.DRAW_GROUP_KEY, 'Circle', currentStyle, customGeometries[currentGeomType]);
     } else {
-      draw = viewer.initDrawInteractions(DRAW_GROUP_KEY, currentGeomType, currentStyle);
+      draw = viewer.initDrawInteractions(this.DRAW_GROUP_KEY, currentGeomType, currentStyle);
     }
 
     // Set up draw end event handler
     draw.onDrawEnd(this.#handleDrawEnd(mapId));
 
     // Update state
-    state.actions.setDrawInstance(draw);
+    setStoreDrawInstance(mapId, draw);
     if (geomType) {
-      state.actions.setActiveGeom(geomType);
+      this.setActiveGeom(mapId, geomType);
     }
 
-    if (state.actions.getIsSnapping()) {
+    if (getStoreIsSnapping(mapId)) {
       this.refreshSnappingInstance(mapId);
     }
   }
 
   /**
-   * The handler for Draw End events
-   * @param {string} mapId - The map ID
+   * Creates a handler for draw end events.
+   *
+   * @param mapId - The map ID
    */
   static #handleDrawEnd(mapId: string) {
     return (_sender: unknown, event: DrawEvent): void => {
-      const state = this.getDrawerState(mapId);
-      if (!state) return;
+      if (!isStoreDrawerInitialized(mapId)) return;
 
-      const currentGeomType = state.actions.getActiveGeom();
-      const currentStyle = state.actions.getStyle();
+      const currentGeomType = getStoreActiveGeom(mapId);
+      const currentStyle = getStoreStyle(mapId);
 
-      const viewer = MapEventProcessor.getMapViewer(mapId);
+      const viewer = this.getMapViewer(mapId);
       const { feature } = event;
 
       const geom = feature.getGeometry();
@@ -644,7 +804,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         // For points, use a circle style
         featureStyle = new Style({
           image: new OLIcon({
-            src: state.actions.getIconSrc(),
+            src: getStoreIconSrc(mapId),
             anchor: [0.5, 1], // 50% of X = Middle, 100% Y = Bottom
             anchorXUnits: 'fraction',
             anchorYUnits: 'fraction',
@@ -684,12 +844,12 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       feature.setStyle(featureStyle);
 
       // Set the feature properties for proper download / upload
-      this.#setFeatureProperties(feature, currentGeomType, currentStyle, state.actions.getIconSrc());
+      this.#setFeatureProperties(feature, currentGeomType, currentStyle, getStoreIconSrc(mapId));
 
       // Add overlays to non-point features
       if (!(geom instanceof Point)) {
         // GV hideMeasurements has to be here, otherwise the value can be stale, unlike style and geomType which restart the interaction
-        const hideMeasurements = state.actions.getHideMeasurements();
+        const hideMeasurements = getStoreHideMeasurements(mapId);
         const newOverlay = this.#createMeasureTooltip(feature, hideMeasurements, mapId);
         if (newOverlay) {
           viewer.map.addOverlay(newOverlay);
@@ -697,7 +857,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       }
 
       viewer.layer.geometry.geometries.push(feature);
-      viewer.layer.geometry.addToGeometryGroup(feature, DRAW_GROUP_KEY);
+      viewer.layer.geometry.addToGeometryGroup(feature, this.DRAW_GROUP_KEY);
 
       this.#saveToHistory(mapId, {
         type: 'add',
@@ -706,12 +866,12 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
       // For text features, create a temporary transform for immediate editing
       if (currentGeomType === 'Text') {
-        const drawInstance = state.actions.getDrawInstance();
+        const drawInstance = getStoreDrawInstance(mapId);
         drawInstance?.stopInteraction();
 
         const featureCollection = new Collection([feature]); // Only select this specific feature
         const tempTransform = viewer.initTransformInteractions({
-          geometryGroupKey: DRAW_GROUP_KEY,
+          geometryGroupKey: this.DRAW_GROUP_KEY,
           features: featureCollection,
         });
 
@@ -759,37 +919,37 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Stops the current drawing operation
-   * @param {string} mapId - The map ID
+   * Stops the current drawing operation.
+   *
+   * @param mapId - The map ID
    */
   static stopDrawing(mapId: string): void {
     // Cleanup temp transforms
     this.#cleanupTempTransform(mapId);
 
-    const state = this.getDrawerState(mapId);
-    if (!state) return;
+    if (!isStoreDrawerInitialized(mapId)) return;
 
     // Restart Map Pointer handlers that place the details icon when clicking on the map
-    if (!state.actions.getIsEditing()) {
-      const viewer = MapEventProcessor.getMapViewer(mapId);
+    if (!getStoreIsEditing(mapId)) {
+      const viewer = this.getMapViewer(mapId);
       viewer.registerMapPointerHandlers(viewer.map);
     }
 
-    state.actions.getDrawInstance()?.stopInteraction();
+    getStoreDrawInstance(mapId)?.stopInteraction();
 
     // Update state
-    state.actions.removeDrawInstance();
+    removeStoreDrawInstance(mapId);
   }
 
   /**
-   * Toggles the drawing state
-   * @param {string} mapId - The map ID
+   * Toggles the drawing state.
+   *
+   * @param mapId - The map ID
    */
   static toggleDrawing(mapId: string): void {
-    const state = this.getDrawerState(mapId);
-    if (!state) return;
+    if (!isStoreDrawerInitialized(mapId)) return;
 
-    if (state.actions.getIsDrawing()) {
+    if (getStoreIsDrawing(mapId)) {
       this.stopDrawing(mapId);
     } else {
       this.startDrawing(mapId);
@@ -799,33 +959,33 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Initiates editing interactions
-   * @param {string} mapId - The map ID
+   * Initiates editing interactions.
+   *
+   * @param mapId - The map ID
    */
   static startEditing(mapId: string): void {
     // Quickly clean up the temp transform if present
     this.#cleanupTempTransform(mapId);
 
-    const state = this.getDrawerState(mapId);
-    if (!state) return;
+    if (!isStoreDrawerInitialized(mapId)) return;
 
     // Get the map viewer instance and stop map pointer events
-    const viewer = MapEventProcessor.getMapViewer(mapId);
-    if (!state.actions.getIsDrawing()) {
+    const viewer = this.getMapViewer(mapId);
+    if (!getStoreIsDrawing(mapId)) {
       viewer.unregisterMapPointerHandlers(viewer.map);
     }
 
-    const oldTransformInstance = state.actions.getTransformInstance();
+    const oldTransformInstance = getStoreTransformInstance(mapId);
 
     // If editing already, stop and restart as it's likely a style change
     if (oldTransformInstance) {
       oldTransformInstance.stopInteraction();
-      state.actions.removeTransformInstance();
+      removeStoreTransformInstance(mapId);
     }
 
     // Only start editing if the drawing group exists
-    if (viewer.layer.geometry.hasGeometryGroup(DRAW_GROUP_KEY)) {
-      const transformInstance = viewer.initTransformInteractions({ geometryGroupKey: DRAW_GROUP_KEY, hitTolerance: 5 });
+    if (viewer.layer.geometry.hasGeometryGroup(this.DRAW_GROUP_KEY)) {
+      const transformInstance = viewer.initTransformInteractions({ geometryGroupKey: this.DRAW_GROUP_KEY, hitTolerance: 5 });
 
       // Handle Transform Events (A feature was edited, the feature is still being edited)
       transformInstance.onTransformEnd(this.#handleTransformEnd(mapId));
@@ -836,27 +996,29 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       // Handle Selection Events (new selection, removed selection, or both)
       transformInstance.onSelectionChange(this.#handleTransformSelectionChange(mapId));
 
-      state.actions.setTransformInstance(transformInstance);
+      setStoreTransformInstance(mapId, transformInstance);
     } else {
       this.startDrawing(mapId);
       return;
     }
 
     // If we have an active drawing instance, stop it
-    const drawInstance = state.actions.getDrawInstance();
+    const drawInstance = getStoreDrawInstance(mapId);
     if (drawInstance) {
       this.stopDrawing(mapId);
     }
 
-    if (state.actions.getIsSnapping()) {
+    if (getStoreIsSnapping(mapId)) {
       this.refreshSnappingInstance(mapId);
     }
   }
 
   /**
-   * Handler for Transform End events
-   * The current transform action has ended and the new geometry and style are applied to the feature
-   * @param {string} mapId - The map ID
+   * Creates a handler for transform end events.
+   *
+   * The current transform action has ended and the new geometry and style are applied to the feature.
+   *
+   * @param mapId - The map ID
    */
   static #handleTransformEnd(mapId: string) {
     return (_sender: unknown, event: TransformEvent): void => {
@@ -872,13 +1034,13 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         const isItalic = feature.get('textItalic') as boolean;
         const rotation = feature.get('textRotation') as number;
 
-        const state = this.getDrawerState(mapId);
-        if (!state) return;
-        state.actions.setTextValue(textValue);
-        state.actions.setTextSize(finalSize);
-        state.actions.setTextBold(isBold);
-        state.actions.setTextItalic(isItalic);
-        state.actions.setTextRotation(rotation);
+        if (!isStoreDrawerInitialized(mapId)) return;
+
+        this.setTextValue(mapId, textValue);
+        this.setTextSize(mapId, finalSize);
+        this.setTextBold(mapId, isBold);
+        this.setTextItalic(mapId, isItalic);
+        this.setTextRotation(mapId, rotation);
       }
 
       const geom = feature.getGeometry();
@@ -894,8 +1056,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Handler of transform delete feature events
-   * @param {string} mapId - The map ID
+   * Creates a handler for transform delete feature events.
+   *
+   * @param mapId - The map ID
    */
   static #handleTransformDeleteFeature(mapId: string) {
     return (_sender: unknown, event: TransformDeleteFeatureEvent) => {
@@ -912,19 +1075,24 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         this.deleteSingleDrawing(mapId, featureId as string);
       }
 
-      this.getDrawerState(mapId)?.actions.setSelectedDrawing(undefined);
+      setStoreSelectedDrawing(mapId, undefined);
       this.#updateUndoRedoState(mapId);
     };
   }
 
   /**
-   * The handler for transform selection change events
-   * @param {string} mapId - The map Id
+   * Creates a handler for transform selection change events.
+   *
+   * @param mapId - The map ID
    */
   static #handleTransformSelectionChange(mapId: string) {
     return (_sender: unknown, event: TransformSelectionEvent) => {
       // GV Get hideMeasurements here so the value is not stale
-      const hideMeasurements = this.getDrawerState(mapId)?.hideMeasurements;
+      let hideMeasurements = false;
+      if (isStoreDrawerInitialized(mapId)) {
+        hideMeasurements = getStoreHideMeasurements(mapId);
+      }
+
       const { previousFeature, newFeature, createSelectAction } = event;
 
       // If we had a previous feature selected, check if it was modified
@@ -996,14 +1164,14 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         if (newTooltip) {
           newTooltip.getElement().hidden = true;
         }
-        const state = this.getDrawerState(mapId);
-        if (!state) return;
 
-        const featureProperties = this.#getFeatureProperties(newFeature, state.actions.getStyle());
-        state.actions.updateStateStyle(featureProperties);
+        if (!isStoreDrawerInitialized(mapId)) return;
+
+        const featureProperties = this.#getFeatureProperties(newFeature, getStoreStyle(mapId));
+        updateStoreStateStyle(mapId, featureProperties);
       }
 
-      this.getDrawerState(mapId)?.actions.setSelectedDrawing(newFeature);
+      setStoreSelectedDrawing(mapId, newFeature);
 
       // Update the undo redo state
       this.#updateUndoRedoState(mapId);
@@ -1011,34 +1179,34 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Stops the editing interaction for all groups
-   * @param {string} mapId - The map ID
+   * Stops the editing interaction for all groups.
+   *
+   * @param mapId - The map ID
    */
   static stopEditing(mapId: string): void {
-    const state = this.getDrawerState(mapId);
-    if (!state) return;
+    if (!isStoreDrawerInitialized(mapId)) return;
 
-    if (!state.actions.getIsDrawing()) {
-      const viewer = MapEventProcessor.getMapViewer(mapId);
+    if (!getStoreIsDrawing(mapId)) {
+      const viewer = this.getMapViewer(mapId);
       viewer.registerMapPointerHandlers(viewer.map);
     }
 
-    const transformInstance = state.actions.getTransformInstance();
+    const transformInstance = getStoreTransformInstance(mapId);
 
     if (!transformInstance) return;
     transformInstance.stopInteraction();
-    state.actions.removeTransformInstance();
+    removeStoreTransformInstance(mapId);
   }
 
   /**
-   * Function to toggle editing state
-   * @param {string} mapId - The map ID
+   * Toggles the editing state.
+   *
+   * @param mapId - The map ID
    */
   static toggleEditing(mapId: string): void {
-    const state = this.getDrawerState(mapId);
-    if (!state) return;
+    if (!isStoreDrawerInitialized(mapId)) return;
 
-    const isEditing = state.actions.getIsEditing();
+    const isEditing = getStoreIsEditing(mapId);
     if (isEditing) {
       this.stopEditing(mapId);
     } else {
@@ -1049,43 +1217,43 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Starts snapping interactions
-   * @param {string} mapId - The map ID
+   * Starts snapping interactions.
+   *
+   * @param mapId - The map ID
    */
   static startSnapping(mapId: string): void {
-    const state = this.getDrawerState(mapId);
-    if (!state) return;
+    if (!isStoreDrawerInitialized(mapId)) return;
 
-    const viewer = MapEventProcessor.getMapViewer(mapId);
-    const snapInstance = viewer.initSnapInteractions(DRAW_GROUP_KEY);
+    const viewer = this.getMapViewer(mapId);
+    const snapInstance = viewer.initSnapInteractions(this.DRAW_GROUP_KEY);
     snapInstance.startInteraction();
 
-    state.actions.setSnapInstance(snapInstance);
+    setStoreSnapInstance(mapId, snapInstance);
   }
 
   /**
-   * Stops snapping interactions
-   * @param {string} mapId - The map ID
+   * Stops snapping interactions.
+   *
+   * @param mapId - The map ID
    */
   static stopSnapping(mapId: string): void {
-    const state = this.getDrawerState(mapId);
-    if (!state) return;
+    if (!isStoreDrawerInitialized(mapId)) return;
 
-    const snapInstance = state.actions.getSnapInstance();
+    const snapInstance = getStoreSnapInstance(mapId);
     snapInstance?.stopInteraction();
 
-    state.actions.removeSnapInstance();
+    removeStoreSnapInstance(mapId);
   }
 
   /**
-   * Toggles snapping state
-   * @param {string} mapId - The map ID
+   * Toggles the snapping state.
+   *
+   * @param mapId - The map ID
    */
   static toggleSnapping(mapId: string): void {
-    const state = this.getDrawerState(mapId);
-    if (!state) return;
+    if (!isStoreDrawerInitialized(mapId)) return;
 
-    const isSnapping = state.actions.getIsSnapping();
+    const isSnapping = getStoreIsSnapping(mapId);
     if (isSnapping) {
       this.stopSnapping(mapId);
     } else {
@@ -1094,15 +1262,15 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Updates the style of any currently transforming features
-   * @param {string} mapId - The map ID
-   * @param {StyleProps} newStyle - The new style to apply
+   * Updates the style of any currently transforming features.
+   *
+   * @param mapId - The map ID
+   * @param newStyle - The new style to apply
    */
   static updateTransformingFeatureStyle(mapId: string, newStyle: StyleProps): void {
-    const state = this.getDrawerState(mapId);
-    if (!state) return;
+    if (!isStoreDrawerInitialized(mapId)) return;
 
-    const transformInstance = state.actions.getTransformInstance();
+    const transformInstance = getStoreTransformInstance(mapId);
     if (!transformInstance) return;
 
     const selectedFeature = transformInstance.getSelectedFeature();
@@ -1128,7 +1296,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
         geomType = 'Point';
         featureStyle = new Style({
           image: new OLIcon({
-            src: state.actions.getIconSrc(),
+            src: getStoreIconSrc(mapId),
             anchor: [0.5, 1],
             anchorXUnits: 'fraction',
             anchorYUnits: 'fraction',
@@ -1160,21 +1328,22 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       }
 
       // Set the new feature properties and style
-      this.#setFeatureProperties(selectedFeature, geomType, newStyle, state.actions.getIconSrc());
+      this.#setFeatureProperties(selectedFeature, geomType, newStyle, getStoreIconSrc(mapId));
       selectedFeature.setStyle(featureStyle);
     }
   }
 
   /**
-   * Delete a single drawing feature from the map
-   * @param {string} mapId - The map ID
-   * @param {string} featureId - The ID of the feature to be deleted
+   * Deletes a single drawing feature from the map.
+   *
+   * @param mapId - The map ID
+   * @param featureId - The ID of the feature to be deleted
    */
   static deleteSingleDrawing(mapId: string, featureId: string): void {
     const feature = this.#getFeatureById(mapId, featureId);
     if (!feature) return;
 
-    const viewer = MapEventProcessor.getMapViewer(mapId);
+    const viewer = this.getMapViewer(mapId);
 
     const measureTooltip = feature.get('measureTooltip');
     measureTooltip?.getElement()?.remove();
@@ -1184,15 +1353,15 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Clears all drawings from the map
-   * @param {string} mapId - The map ID
+   * Clears all drawings from the map.
+   *
+   * @param mapId - The map ID
    */
   static clearDrawings(mapId: string, saveHistory: boolean = true): void {
-    const state = this.getDrawerState(mapId);
-    if (!state) return;
+    if (!isStoreDrawerInitialized(mapId)) return;
 
     // Get the map viewer instance
-    const viewer = MapEventProcessor.getMapViewer(mapId);
+    const viewer = this.getMapViewer(mapId);
 
     // Get all geometries for each type
     const features = this.#getDrawingFeatures(mapId);
@@ -1212,54 +1381,58 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     });
 
     // Delete all geometries from the group
-    viewer.layer.geometry.deleteGeometriesFromGroup(DRAW_GROUP_KEY);
+    viewer.layer.geometry.deleteGeometriesFromGroup(this.DRAW_GROUP_KEY);
 
-    if (state.actions.getIsEditing()) {
+    if (getStoreIsEditing(mapId)) {
       this.stopEditing(mapId);
     }
   }
 
   /**
-   * Refreshes the interaction instances
-   * @param {string} mapId - The map ID
+   * Refreshes the interaction instances.
+   *
+   * @param mapId - The map ID
    */
   static refreshInteractionInstances(mapId: string): void {
-    const state = this.getDrawerState(mapId);
-    if (!state) return;
+    if (!isStoreDrawerInitialized(mapId)) return;
 
     // If drawing, restart drawing to set the style
-    if (state.actions.getIsDrawing()) {
+    if (getStoreIsDrawing(mapId)) {
       this.startDrawing(mapId);
     }
 
     // If editing, restart editing
     // Do this after the start drawing so the group is created if missing
-    if (state.actions.getIsEditing()) {
+    if (getStoreIsEditing(mapId)) {
       this.stopEditing(mapId);
       this.startEditing(mapId);
     }
   }
 
+  /**
+   * Refreshes the snapping instance by stopping and restarting it.
+   *
+   * @param mapId - The map ID
+   */
   static refreshSnappingInstance(mapId: string): void {
-    const state = this.getDrawerState(mapId);
-    if (!state) return;
+    if (!isStoreDrawerInitialized(mapId)) return;
 
-    if (state.actions.getIsSnapping()) {
+    if (getStoreIsSnapping(mapId)) {
       this.stopSnapping(mapId);
       this.startSnapping(mapId);
     }
   }
 
   /**
-   * Toggles the measurement overlays on the map
-   * @param {string} mapId - The map ID
+   * Toggles the measurement overlays on the map.
+   *
+   * @param mapId - The map ID
    */
   static toggleHideMeasurements(mapId: string): void {
-    const state = this.getDrawerState(mapId);
-    if (!state) return;
+    if (!isStoreDrawerInitialized(mapId)) return;
 
-    const hideMeasurements = state.actions.getHideMeasurements();
-    const selectedDrawingId = state.actions.getSelectedDrawing()?.getId();
+    const hideMeasurements = getStoreHideMeasurements(mapId);
+    const selectedDrawingId = getStoreSelectedDrawing(mapId)?.getId();
 
     // Get all overlays, ignoring currently selected features
     const features = this.#getDrawingFeatures(mapId);
@@ -1273,7 +1446,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       const elem = overlay.getElement();
       if (elem) elem.hidden = !hideMeasurements;
     });
-    state.actions.setHideMeasurements(!hideMeasurements);
+    setStoreHideMeasurements(mapId, !hideMeasurements);
   }
 
   // #endregion
@@ -1281,8 +1454,9 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   // #region Download / Upload
 
   /**
-   * Downloads drawings as GeoJSON with embedded styles
-   * @param {string} mapId - The map ID
+   * Downloads drawings as GeoJSON with embedded styles.
+   *
+   * @param mapId - The map ID
    */
   static downloadDrawings(mapId: string): void {
     const features = this.#getDrawingFeatures(mapId);
@@ -1363,19 +1537,19 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Uploads and loads drawings from GeoJSON file
-   * @param {string} mapId - The map ID
-   * @param {File} file - The GeoJSON file
+   * Uploads and loads drawings from a GeoJSON file.
+   *
+   * @param mapId - The map ID
+   * @param file - The GeoJSON file
    */
   static uploadDrawings(mapId: string, file: File): void {
-    const state = this.getDrawerState(mapId);
-    if (!state) return;
+    if (!isStoreDrawerInitialized(mapId)) return;
 
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
         const geojson = JSON.parse(e.target?.result as string);
-        const viewer = MapEventProcessor.getMapViewer(mapId);
+        const viewer = this.getMapViewer(mapId);
 
         // Get current map projection
         const mapProjection = Projection.PROJECTIONS[MapEventProcessor.getMapState(mapId).currentProjection];
@@ -1389,7 +1563,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
           // Apply style from properties
           const styleProps = (geoFeature.properties.style as unknown as TypeGeoJSONStyleProps) || undefined;
-          const iconSrc = styleProps?.iconSrc || DEFAULT_ICON_SOURCE;
+          const iconSrc = styleProps?.iconSrc || this.DEFAULT_ICON_SOURCE;
           let featureStyle;
           if (olGeometry instanceof Point) {
             if (styleProps?.text !== undefined) {
@@ -1444,7 +1618,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
           // Add overlays to non-point features
           if (!(olGeometry instanceof Point)) {
             // GV hideMeasurements has to be here, otherwise the value can be stale, unlike style and geomType which restart the interaction
-            const hideMeasurements = state.actions.getHideMeasurements();
+            const hideMeasurements = getStoreHideMeasurements(mapId);
             const newOverlay = this.#createMeasureTooltip(feature, hideMeasurements, mapId);
             if (newOverlay) {
               viewer.map.addOverlay(newOverlay);
@@ -1453,7 +1627,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
           // Add to map
           viewer.layer.geometry.geometries.push(feature);
-          viewer.layer.geometry.addToGeometryGroup(feature, DRAW_GROUP_KEY);
+          viewer.layer.geometry.addToGeometryGroup(feature, this.DRAW_GROUP_KEY);
 
           newFeatures.push(feature);
         });
@@ -1478,9 +1652,10 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Saves an action to the drawer history.
-   * @param {string} mapId - The map ID
-   * @param {DrawerHistoryAction} action - The action to save
-   * @param {boolean} insertAtCurrentIndex - Whether to create the action as the next action / as a redo
+   *
+   * @param mapId - The map ID
+   * @param action - The action to save
+   * @param insertAtCurrentIndex - Whether to create the action as the next action / as a redo
    */
   static #saveToHistory(mapId: string, action: DrawerHistoryAction, insertAtCurrentIndex: boolean = false): void {
     if (!this.#drawerHistory.has(mapId)) {
@@ -1517,46 +1692,16 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Sets up keyboard event handling for undo/redo.
-   * @param {string} mapId - The map ID
-   */
-  static #setupKeyboardHandler(mapId: string): void {
-    if (this.#keyboardHandlers.has(mapId)) return;
-
-    const handler = (event: KeyboardEvent): void => {
-      if (event.ctrlKey || event.metaKey) {
-        switch (event.key.toLowerCase()) {
-          case 'z':
-            if (event.shiftKey) {
-              if (this.redo(mapId)) event.preventDefault();
-            } else if (this.undo(mapId)) {
-              event.preventDefault();
-            }
-            break;
-          case 'y':
-            if (this.redo(mapId)) event.preventDefault();
-            break;
-          default:
-            break;
-        }
-      }
-    };
-
-    this.#keyboardHandlers.set(mapId, handler);
-    document.addEventListener('keydown', handler);
-  }
-
-  /**
    * Undoes the last drawer action.
-   * @param {string} mapId - The map ID
-   * @returns {boolean} If the action was successful
+   *
+   * @param mapId - The map ID
+   * @returns Whether the action was successful
    */
   static undo(mapId: string): boolean {
-    const state = this.getDrawerState(mapId);
-    if (!state) return false;
+    if (!isStoreDrawerInitialized(mapId)) return false;
 
     // If editing, undo the transform instance and not the drawer-event-processor
-    const transformInstance = state.actions.getTransformInstance();
+    const transformInstance = getStoreTransformInstance(mapId);
     if (transformInstance && transformInstance.getSelectedFeature()) {
       if (transformInstance.canUndo()) {
         return transformInstance.undo(() => {
@@ -1571,7 +1716,7 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     if (!history || currentIndex === undefined || currentIndex < 0) return false;
 
     const action = history[currentIndex];
-    const viewer = MapEventProcessor.getMapViewer(mapId);
+    const viewer = this.getMapViewer(mapId);
     if (!viewer) return false;
 
     // Reverse the action
@@ -1603,15 +1748,15 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
 
   /**
    * Redoes the next drawer action.
-   * @param {string} mapId - The map ID
-   * @returns {boolean} If the action was successful
+   *
+   * @param mapId - The map ID
+   * @returns Whether the action was successful
    */
   static redo(mapId: string): boolean {
-    const state = this.getDrawerState(mapId);
-    if (!state) return false;
+    if (!isStoreDrawerInitialized(mapId)) return false;
 
     // If editing, redo the transform instance and not the drawer-event-processor
-    const transformInstance = state.actions.getTransformInstance();
+    const transformInstance = getStoreTransformInstance(mapId);
     if (transformInstance && transformInstance.getSelectedFeature()) {
       if (transformInstance.canRedo()) {
         return transformInstance.redo(() => {
@@ -1669,23 +1814,23 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Re-add new features
-   * @param {string} mapId - The map ID
-   * @param {DrawerHistoryAction} action - The action that will be re-performed
+   * Re-adds features from a history action.
+   *
+   * @param mapId - The map ID
+   * @param action - The action that will be re-performed
    */
   static #addFeaturesAction(mapId: string, action: DrawerHistoryAction): void {
-    const viewer = MapEventProcessor.getMapViewer(mapId);
+    const viewer = this.getMapViewer(mapId);
     if (!viewer) return;
 
     // Re-add the features
     action.features.forEach((feature) => {
       feature.setId(feature.get('featureId'));
       viewer.layer.geometry.geometries.push(feature);
-      viewer.layer.geometry.addToGeometryGroup(feature, DRAW_GROUP_KEY);
+      viewer.layer.geometry.addToGeometryGroup(feature, this.DRAW_GROUP_KEY);
 
       // Add to transform instance if editing is active
-      const state = this.getDrawerState(mapId);
-      const transformInstance = state?.actions.getTransformInstance();
+      const transformInstance = getStoreTransformInstance(mapId);
       if (transformInstance) {
         transformInstance.addFeature(feature);
       }
@@ -1700,13 +1845,14 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Re-delete deleted features
-   * @param {string} mapId - The map ID
-   * @param {DrawerHistoryAction} action - The action that will be re-performed
-   * @throws {InvaliGeometryGroupIdError} If the provided geometry group id does not exist.
+   * Re-deletes features from a history action.
+   *
+   * @param mapId - The map ID
+   * @param action - The action that will be re-performed
+   * @throws {InvaliGeometryGroupIdError} When the provided geometry group id does not exist
    */
   static #deleteFeaturesAction(mapId: string, action: DrawerHistoryAction): void {
-    const viewer = MapEventProcessor.getMapViewer(mapId);
+    const viewer = this.getMapViewer(mapId);
 
     action.features.forEach((feature) => {
       const featureId = feature.get('featureId');
@@ -1716,14 +1862,14 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
       // GV deleteGeometryFromGroup function in core > geo > layer > geometry > geometry.ts
       // Remove from geometries array
       const geometryIndex = viewer.layer.geometry.geometries.findIndex((f) => {
-        return f.get('featureId') === featureId && f.get('geometryGroup') === DRAW_GROUP_KEY;
+        return f.get('featureId') === featureId && f.get('geometryGroup') === this.DRAW_GROUP_KEY;
       });
       if (geometryIndex !== -1) {
         viewer.layer.geometry.geometries.splice(geometryIndex, 1);
       }
 
       // Remove from vector source directly
-      const geometryGroup = viewer.layer.geometry.getGeometryGroup(DRAW_GROUP_KEY);
+      const geometryGroup = viewer.layer.geometry.getGeometryGroup(this.DRAW_GROUP_KEY);
       const vectorSource = geometryGroup.vectorLayer.getSource();
       const layerFeatures = vectorSource?.getFeatures() || [];
 
@@ -1741,12 +1887,13 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Function that redoes a modify action
-   * @param {string} mapId - The map ID
-   * @param {DrawerHistoryAction} action - The action to be redone
+   * Redoes a modify action by restoring modified geometries and styles.
+   *
+   * @param mapId - The map ID
+   * @param action - The action to be redone
    */
   static #redoModifyAction(mapId: string, action: DrawerHistoryAction): void {
-    const viewer = MapEventProcessor.getMapViewer(mapId);
+    const viewer = this.getMapViewer(mapId);
     if (!viewer) return;
 
     action.features.forEach((feature, index) => {
@@ -1773,12 +1920,13 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Function that undoes a modify action
-   * @param {string} mapId - The map ID
-   * @param {DrawerHistoryAction} action - The action to be undone
+   * Undoes a modify action by restoring original geometries and styles.
+   *
+   * @param mapId - The map ID
+   * @param action - The action to be undone
    */
   static #undoModifyAction(mapId: string, action: DrawerHistoryAction): void {
-    const viewer = MapEventProcessor.getMapViewer(mapId);
+    const viewer = this.getMapViewer(mapId);
     if (!viewer) return;
 
     action.features.forEach((feature, index) => {
@@ -1805,37 +1953,38 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Re-performs a select action. Note: deselect happens inside the transform-base undo
-   * @param {string} mapId - The map ID
-   * @param {DrawerHistoryAction} action - The select action to be applied
+   * Re-performs a select action.
+   *
+   * Deselect happens inside the transform-base undo.
+   *
+   * @param mapId - The map ID
+   * @param action - The select action to be applied
    */
   static #selectFeaturesAction(mapId: string, action: DrawerHistoryAction): void {
-    const state = this.getDrawerState(mapId);
-    if (!state) return;
+    if (!isStoreDrawerInitialized(mapId)) return;
 
-    const transformInstance = state.actions.getTransformInstance();
+    const transformInstance = getStoreTransformInstance(mapId);
     if (transformInstance) {
       transformInstance.selectFeature(action.features[0], false);
     }
   }
 
   /**
-   * Refreshes the undo / redo states depending on if we are currently editing
-   * a feature since there is undo / redo functionality for both
-   * drawer-event-processor and transform-base
+   * Refreshes the undo/redo states depending on whether a feature is currently being edited,
+   * since there is undo/redo functionality for both drawer-event-processor and transform-base.
+   *
    * @param mapId - The map ID
    */
   static #updateUndoRedoState(mapId: string): void {
-    const state = this.getDrawerState(mapId);
-    if (!state) return;
+    if (!isStoreDrawerInitialized(mapId)) return;
 
-    const transformInstance = state.actions.getTransformInstance();
-    if (transformInstance && state.selectedDrawing) {
+    const transformInstance = getStoreTransformInstance(mapId);
+    if (transformInstance && getStoreSelectedDrawing(mapId)) {
       const undoDisabled = !transformInstance.canUndo();
       const redoDisabled = !transformInstance.canRedo();
 
-      state.actions.setUndoDisabled(undoDisabled);
-      state.actions.setRedoDisabled(redoDisabled);
+      setStoreUndoDisabled(mapId, undoDisabled);
+      setStoreRedoDisabled(mapId, redoDisabled);
       return;
     }
 
@@ -1848,22 +1997,16 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
     // Can't redo if no history or at the end
     const redoDisabled = history.length === 0 || currentIndex >= history.length - 1;
 
-    state.actions.setUndoDisabled(undoDisabled);
-    state.actions.setRedoDisabled(redoDisabled);
+    setStoreUndoDisabled(mapId, undoDisabled);
+    setStoreRedoDisabled(mapId, redoDisabled);
   }
 
   /**
-   * Clean up resources for a map
-   * @param {string} mapId - The map ID
+   * Cleans up resources for a map.
+   *
+   * @param mapId - The map ID
    */
   static cleanup(mapId: string): void {
-    // Remove keyboard handler
-    const handler = this.#keyboardHandlers.get(mapId);
-    if (handler) {
-      document.removeEventListener('keydown', handler);
-      this.#keyboardHandlers.delete(mapId);
-    }
-
     // Clear history
     this.#drawerHistory.delete(mapId);
     this.#historyIndex.delete(mapId);
@@ -1874,20 +2017,88 @@ export class DrawerEventProcessor extends AbstractEventProcessor {
   }
 
   // #endregion
-
-  // **********************************************************
-  // Static functions for Store Map State to action on API
-  // **********************************************************
-  // GV NEVER add a store action who does set state AND map action at a same time.
-  // GV Review the action in store state to make sure
 }
 
+/** Represents a GeoJSON feature with geometry and style properties */
 type GeoJsonFeature = {
+  /** The GeoJSON geometry object */
   geometry: unknown;
+
+  /** The feature properties including ID and style */
   properties: GeoJsonFeatureProps;
 };
 
+/** Properties attached to a GeoJSON feature */
 type GeoJsonFeatureProps = {
+  /** The feature identifier */
   id: string;
+
+  /** The style properties for the feature */
   style: TypeGeoJSONStyleProps;
 };
+
+/** Represents a single action in the drawer undo/redo history */
+interface DrawerHistoryAction {
+  /** The type of action that was performed */
+  type: 'add' | 'delete' | 'modify' | 'clear' | 'select';
+
+  /** The features involved in the action */
+  features: Feature[];
+
+  /** Optional original geometries before modification */
+  originalGeometries?: Geometry[];
+
+  /** Optional modified geometries after modification */
+  modifiedGeometries?: Geometry[];
+
+  /** Optional original styles before modification */
+  originalStyles?: (StyleLike | undefined)[];
+
+  /** Optional modified styles after modification */
+  modifiedStyles?: (StyleLike | undefined)[];
+}
+
+/** Style properties for GeoJSON feature serialization/deserialization */
+interface TypeGeoJSONStyleProps {
+  /** The stroke color */
+  strokeColor?: string;
+
+  /** The stroke width */
+  strokeWidth?: number;
+
+  /** The fill color */
+  fillColor?: string;
+
+  /** The icon source URL or data URI */
+  iconSrc?: string;
+
+  /** The icon size in pixels */
+  iconSize?: number;
+
+  /** The text content */
+  text?: string;
+
+  /** The text size in pixels */
+  textSize?: number;
+
+  /** The text font family */
+  textFont?: string;
+
+  /** The text color */
+  textColor?: string;
+
+  /** The text halo color */
+  textHaloColor?: string;
+
+  /** The text halo width */
+  textHaloWidth?: number;
+
+  /** Whether the text is bold */
+  textBold?: boolean;
+
+  /** Whether the text is italic */
+  textItalic?: boolean;
+
+  /** The text rotation angle */
+  textRotation?: number;
+}

@@ -7,8 +7,9 @@ import { List, ListItem, Box, Typography, Switch, Tooltip } from '@/ui';
 import {
   useDetailsLayerDataArray,
   useDetailsCoordinateInfoEnabled,
-  useDetailsStoreActions,
+  toggleStoreDetailsCoordinateInfoEnabled,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
@@ -32,18 +33,18 @@ export function CoordinateInfoSwitch({ disabled }: CoordinateInfoSwitchProps): J
 
   const { t } = useTranslation();
   const theme = useTheme();
+  const mapId = useGeoViewMapId();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
 
   const coordinateInfoEnabled = useDetailsCoordinateInfoEnabled();
-  const { toggleCoordinateInfoEnabled } = useDetailsStoreActions();
 
   const handleCoordinateInfoToggle = useCallback(() => {
     // Log
     logger.logTraceUseCallback('DETAILS-PANEL - handleCoordinateInfoToggle');
 
     // Toggle the state
-    toggleCoordinateInfoEnabled();
-  }, [toggleCoordinateInfoEnabled]);
+    toggleStoreDetailsCoordinateInfoEnabled(mapId);
+  }, [mapId]);
 
   return (
     <Tooltip title={t('details.toggleCoordinateInfo')}>

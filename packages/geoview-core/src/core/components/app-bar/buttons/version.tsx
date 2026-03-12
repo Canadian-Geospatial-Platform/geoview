@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { Theme } from '@mui/material';
 import { Typography, Box, Link, SvgIcon, ClickAwayListener, List, Paper, useTheme } from '@mui/material';
 
+import { useUIController } from '@/core/controllers/ui-controller';
 import { GITHUB_REPO, GEO_URL_TEXT, CONTAINER_TYPE } from '@/core/utils/constant';
 import { GeoCaIcon, IconButton, Popper, CloseIcon } from '@/ui';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
@@ -10,7 +11,7 @@ import { useMapInteraction } from '@/core/stores/store-interface-and-intial-valu
 import { GitHubIcon } from '@/ui/icons';
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { FocusTrapContainer } from '@/core/components/common/focus-trap-container';
-import { useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import type { SxStyles } from '@/ui/style/types';
@@ -83,7 +84,7 @@ export default function Version(): JSX.Element {
   // Store
   const interaction = useMapInteraction();
   const activeTrapGeoView = useUIActiveTrapGeoView();
-  const { enableFocusTrap, disableFocusTrap } = useUIStoreActions();
+  const uiController = useUIController();
 
   // Get container
   const mapId = useGeoViewMapId();
@@ -101,12 +102,12 @@ export default function Version(): JSX.Element {
       setOpen((prev) => !prev);
 
       // Register focus trap with button as the return target
-      enableFocusTrap({
+      uiController.enableFocusTrap({
         activeElementId: `${mapId}-${CONTAINER_TYPE.APP_BAR}-version-ft`,
         callbackElementId: `${mapId}-${CONTAINER_TYPE.APP_BAR}-version-btn`,
       });
     },
-    [mapId, enableFocusTrap]
+    [mapId, uiController]
   );
 
   const handleClickAway = useCallback(() => {
@@ -114,9 +115,9 @@ export default function Version(): JSX.Element {
     if (open) {
       setOpen(false);
       // Restore focus to the button that opened the panel
-      disableFocusTrap();
+      uiController.disableFocusTrap();
     }
-  }, [open, disableFocusTrap]);
+  }, [open, uiController]);
 
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>

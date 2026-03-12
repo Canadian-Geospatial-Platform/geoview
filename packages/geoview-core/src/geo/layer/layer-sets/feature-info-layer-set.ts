@@ -1,5 +1,4 @@
 import type { Coordinate } from 'ol/coordinate';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
@@ -7,15 +6,18 @@ import type { QueryType, TypeFeatureInfoResult, TypeResultSet } from '@/api/type
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractLayerSet, type PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { GVKML } from '@/geo/layer/gv-layers/vector/gv-kml';
+import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import type { LayerApi } from '@/geo/layer/layer';
-import type {
-  TypeFeatureInfoResultSet,
-  TypeFeatureInfoResultSetEntry,
+import {
+  deleteStoreDetailsFeatureInfo,
+  propagateStoreFeatureInfoDetails,
+  type TypeFeatureInfoResultSet,
+  type TypeFeatureInfoResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { getStoreShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { LayerNoLastQueryToPerformError } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
-import { GVEsriImage } from '../gv-layers/raster/gv-esri-image';
 
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
@@ -102,7 +104,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    */
   protected override onDeleteFromStore(layerPath: string): void {
     // Remove it from feature info array (propagating to the store)
-    FeatureInfoEventProcessor.deleteFeatureInfo(this.getMapId(), layerPath);
+    deleteStoreDetailsFeatureInfo(this.getMapId(), layerPath);
   }
 
   /**
@@ -214,11 +216,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
           // Filter out unsymbolized features if the showUnsymbolizedFeatures config is false
           // GV: KML and ESRI Image is excluded as they currently have no symbology.
-          if (
-            !AppEventProcessor.getShowUnsymbolizedFeatures(this.getMapId()) &&
-            !(layer instanceof GVKML) &&
-            !(layer instanceof GVEsriImage)
-          ) {
+          if (!getStoreShowUnsymbolizedFeatures(this.getMapId()) && !(layer instanceof GVKML) && !(layer instanceof GVEsriImage)) {
             // eslint-disable-next-line no-param-reassign
             promiseResult.results = arrayOfRecords.filter((record) => record.featureIcon);
           }
@@ -285,7 +283,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    */
   #propagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry): void {
     // Propagate
-    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.getMapId(), resultSetEntry);
+    propagateStoreFeatureInfoDetails(this.getMapId(), resultSetEntry);
   }
 
   /**
