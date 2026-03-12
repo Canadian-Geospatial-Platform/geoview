@@ -31,7 +31,7 @@
         "geoviewLayerType": "ogcWmts",
         "geoviewLayerId": "arctic-sdi",
         "geoviewLayerName": "arctic-sdi",
-        "useAsBasemap": true,
+        "useAsBasemap": false,
         "listOfLayerEntryConfig": [
           {
             "layerId": "arctic_cascading",

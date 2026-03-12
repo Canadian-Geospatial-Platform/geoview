@@ -1,238 +1,154 @@
-# GeoView
+# GeoView – Viewer / Visualisateur
 
-The Canadian Geospatial Platform intends to deploy new infrastructure, tools and web integration of GeoCore, a new geospatial metadata lake library capable of supporting multiple metadata standards. In recognition of these desired capabilities, it needs a lightweight viewer to incorporate in their infrastructure. The need is to have flexible viewer to display geospatial data from GeoCore metadata lake on a map with customizable functionalities.
+**La version française suit.**
 
-[Demo](https://canadian-geospatial-platform.github.io/geoview/public/index.html)
+Natural Resources Canada / Ressources naturelles Canada  
+Part of **GEO.ca**
 
-![BigPicture](https://user-images.githubusercontent.com/3472990/233729101-89cc4196-915d-4d6e-a353-4fb70cbb566e.PNG)
+---
 
+## Overview
 
-## Creating and Managing Map Configurations
+The Canadian Geospatial Platform intends to deploy new infrastructure, tools and web integration of GeoCore, a new geospatial metadata lake library capable of supporting multiple metadata standards. In recognition of these desired capabilities, it needs a lightweight viewer to incorporate in their infrastructure. The need is to have a flexible viewer to display geospatial data from the GeoCore metadata lake on a map with customizable functionalities.
 
-To assist you in creating or customizing map configurations, we provide a dedicated [Map Configuration Repository on GitHub]:(https://github.com/Canadian-Geospatial-Platform/geoview-demo). This repository contains a collection of sample configurations, documentation, API functions to help you get started quickly.
+GeoView is built with **React**, **TypeScript**, and **OpenLayers**, and is structured as a **Rush monorepo**. It can be embedded into any web page with a single script tag and configured declaratively via HTML attributes or programmatically through a rich JavaScript/TypeScript API.
 
-## Solution
+### Key Capabilities
 
-GeoView mapping capabilities are based on [OpenLayers](https://openlayers.org/) open source viewer. The overall project uses the latest [React](https://reactjs.org/) framework version 17+. With this in mind, here is the list of the main dependencies
+**Extensive Layer Support**
 
-- [i18next](https://www.i18next.com/) to do localization in English and French
+GeoView supports a wide range of geospatial data sources out of the box:
 
-- [material-ui](https://mui.com/) to do the layout
+- **Raster**: OGC WMS, ESRI Dynamic, ESRI Image, static images, XYZ tiles, WMTS
+- **Vector**: OGC API Features, WFS, ESRI Feature Service, GeoJSON, CSV, KML, WKB, GeoPackage, Shapefile
+- **Vector Tiles**: Mapbox Vector Tiles (MVT)
 
-## Project Structure
+Layers can be organized in hierarchies, filtered, styled, and controlled individually through a consistent API.
 
-This project is now a monorepo and contains the following packages under the `packages` folder:
+**Multiple Map Projections**
 
-- [geoview-core](packages/geoview-core) - the core is responsible for managing APIs, layers, user interface and rendering the maps. The core will also expose API access to be used in internal, external packages and apps that uses the viewer.
+Maps can be rendered in Lambert Conformal Conic (EPSG:3978), Web Mercator (EPSG:3857), and North Pole LAEA Canada (EPSG:3573) projections.
 
-- [geoview-details-panel](packages/geoview-details-panel) - a package that displays a panel with details when a location / feature is clicked on the map.
+**Plugin Architecture**
 
-- [geoview-layers-panel](packages/geoview-layers-panel) - a package that displays a panel with a list of loaded layers and their legend.
+A plugin system allows functionality to be extended without modifying the core. Official plugins include:
 
-- [geoview-swiper](packages/geoview-swiper) - a package that enable a swiper control to tooggle visibility of layers from one side to the other side of the swiper bar.
+- **Time Slider** – temporal navigation and animation for time-enabled layers
+- **Swiper** – side-by-side layer comparison
+- **GeoChart** – charting of geospatial attribute data
+- **Drawer** – collapsible side panel for custom content
+- **AOI Panel** – area-of-interest selection
+- **Custom Legend** – user-defined legend rendering
+- **About Panel** – configurable about/information panel
 
-## Development
+**Map Interaction & UI**
 
-Our developers use [Visual Studio Code](https://code.visualstudio.com/) with a few extentions to help linting and formatting
+- Interactive legend with visibility and opacity controls
+- Feature details panel (click/hover queries)
+- North arrow, scale bar, and overview map
+- Map rotation support
+- Basemap switching
+- Full-screen mode and responsive layout
+- Export to PNG and PDF with legend, scale bar, and attribution
+- Customizable theming (light, dark, and custom color palettes)
 
-- Prettier - Code formatter
+**Developer Experience**
 
-- ESLint
+- Declarative (HTML `data-config`) and programmatic (`createMapFromConfig`) map creation
+- Shareable map state via URL parameters
+- Zustand-based state management with a clear three-layer architecture (UI → Event Processors → Store)
+- Comprehensive event system for map, layer, and interaction events
+- Bilingual support (English and French)
+- WCAG 2.1 accessibility compliance
+- TypeDoc-generated API documentation
 
-- Better Comments
+## Related Resources
 
-- We are using [React Dev Tools](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi)
+- **GitHub Repository**: Canadian-Geospatial-Platform/geoview
+- **GEO.ca**: [geo.ca](https://app.geo.ca)
+- **Developement**: [Code](README-DEV.md)
 
-### Documentation for GeoView
+---
 
-- [click here](https://canadian-geospatial-platform.github.io/geoview/public/docs/) to view generated typedoc for the GeoView core.
-- [click here](./docs/README.md) to view best practicies and how to develop with GeoView.
+## Support & Contributions
 
-### Contributing to the project
+- Report bugs or request features via **GitHub Issues**
+- Contributions are welcome following Government of Canada open-source guidelines
 
-see our [contributing guide](CONTRIBUTING.md)
+**Contact**:  
+`geo@nrcan-rncan.gc.ca`
 
-## Building the project
+---
 
-### First clone this repo
+## License & Attribution
 
-```
-$ git clone https://github.com/Canadian-Geospatial-Platform/geoview.git
-```
+© His Majesty the King in Right of Canada, as represented by the Minister of Natural Resources.
 
-### Go to the directory of the cloned repo
+This project is released under the applicable Government of Canada open-source license.
 
-```
-$ cd geoview
-```
+---
 
-### Install rush globally
+# GeoView – Visualisateur / Viewer
 
-```
-$ npm install -g @microsoft/rush
-```
+Ressources naturelles Canada / Natural Resources Canada  
+Fait partie de **GEO.ca**
 
-- Note: you can also use the included `shell.nix` to setup your dev environment if you are on Mac/Linux/WSL.
+---
 
-### Install dependencies
+## Aperçu
 
-It's always recommended to run the below command if you pull any changes.
+La Plateforme géospatiale canadienne vise à déployer une nouvelle infrastructure, de nouveaux outils et une intégration web de GeoCore, une nouvelle bibliothèque de lac de métadonnées géospatiales capable de prendre en charge plusieurs normes de métadonnées. Pour répondre à ces besoins, il faut un visualiseur léger à intégrer dans cette infrastructure. L'objectif est d'avoir un visualiseur flexible pour afficher des données géospatiales provenant du lac de métadonnées GeoCore sur une carte avec des fonctionnalités personnalisables.
 
-```
-$ rush update
-```
+GeoView est construit avec **React**, **TypeScript** et **OpenLayers**, et est structuré en **monorepo Rush**. Il peut être intégré dans n'importe quelle page web à l'aide d'une seule balise script et configuré de manière déclarative via des attributs HTML ou par programmation via une API JavaScript/TypeScript.
 
-If you need to re-download the modules you can run
+### Capacités principales
 
-```
-$ rush update --full
-```
+**Prise en charge étendue des couches**
 
-### Build the project:
+GeoView prend en charge un large éventail de sources de données géospatiales :
 
-```
-$ rush build
-```
+- **Matricielles** : OGC WMS, ESRI Dynamic, ESRI Image, images statiques, tuiles XYZ, WMTS
+- **Vectorielles** : OGC API Features, WFS, ESRI Feature Service, GeoJSON, CSV, KML, WKB, GeoPackage, Shapefile
+- **Tuiles vectorielles** : Mapbox Vector Tiles (MVT)
 
-Output build files will be placed under
+**Projections cartographiques multiples**
 
-```
-packages/geoview-core/dist
-```
+Les cartes peuvent être rendues en projection conique conforme de Lambert (EPSG:3978), Web Mercator (EPSG:3857) et LAEA pôle Nord Canada (EPSG:3573).
 
-### Run/Serve the project
+**Architecture de plugiciels**
 
-```
-$ rush serve
-```
+Un système de plugiciels permet d'étendre les fonctionnalités sans modifier le cœur de l'application. Les plugiciels officiels comprennent : le curseur temporel, le comparateur par balayage (swiper), GeoChart, le tiroir, le panneau de zone d'intérêt, la légende personnalisée et le panneau À propos.
 
-GeoView will be serve from http://localhost:8080/
+**Interaction et interface utilisateur**
 
-## Deploy to gh-pages
+- Légende interactive avec contrôles de visibilité et d'opacité
+- Panneau de détails des entités
+- Flèche du nord, barre d'échelle et carte de survol
+- Exportation en PNG et PDF avec légende, barre d'échelle et attribution
+- Thématisation personnalisable (palettes claires, sombres et personnalisées)
+- Support bilingue (anglais et français)
+- Conformité à l'accessibilité WCAG 2.1
 
-### Build the project:
+## Ressources connexes
 
-```
-$ rush build
-```
+- **Dépôt GitHub** : Canadian-Geospatial-Platform/geoview
+- **GEO.ca** : [geo.ca](https://app.geo.ca)
+- **Documentation** : [Code](README-DEV.md) **En anglais seulement**
 
-### Push the dist folder to your gh-pages
+---
 
-```
-$ rush host
-```
+## Soutien et contributions
 
-The project will now serve inside your GitHub gh-pages at
+- Signalez des bogues ou proposez des fonctionnalités via les **issues GitHub**
+- Les contributions sont les bienvenues conformément aux lignes directrices open source du gouvernement du Canada
 
-```
-https://[GITHUB-USERNAME].github.io/geoview/index.html
-```
-
-_Make sure GitHub pages are active inside your origin repository_
-
-## Usage
-
-We'll go through the simplest way to use the Canadian Geospatial Platform Viewer.
-
-### Using the viewer on your own project
-
-For the moment, the developement bundle of the viewer is hosted under:
-
-```
-https://canadian-geospatial-platform.github.io/geoview/public/cgpv-main.js
-```
-
-_As the viewer is still in development, this bundle will always contain the latest commits. We really recommand to use one of our release on your web server_
-
-To use the viewer on your own project, you need to include the above script in a script tag in your **HTML** file
-
-```html
-<!DOCTYPE html>
-<html>
-  <body>
-    ...
-  </body>
-  <script src="https://canadian-geospatial-platform.github.io/geoview/public/cgpv-main.js"></script>
-</html>
-```
-
-After including the viewer in your page, the viewer will allow you to load maps and draw them on your page.
-
-There are multiple ways to load maps. Below we will show a basic usage of loading a map, if you want to see how you can load the map in all supported ways then [click here](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/docs/app/loading-maps.md).
-
-#### Loading a map using a config passed in as inline to the map div element
-
-The viewer allows you to load multiple maps on the page, you need to provide a **different id** for each map. Maps are added in the body tag of the **HTML** document. _You can also load maps inside any **JS** framework such as React, Angular, VueJS._
-
-For the viewer to recognize that you are trying to render a map on the page, you need to have a **div element** with **class** "geoview-map".
-
-It's **recommended** to pass in an **id attribute**, if an id is not passed then the viewer will auto generate an id for you. If you want to use APIs that control this map then you will need to view all created maps on the page and figure out the id of the created map.
-
-_Tip: to view all maps on the page you can console out the maps using this function: console.log(cgpv.api.getMapViewerIds())_
-
-Below is an example of a simple map, with an id **mapOne**. This map will be using LCC projection (EPSG:3978) and will have a zoom of 4, a center of 60 latitude and -100 longtitude. The interaction of the map will be dynamic (meaning that you can move around and zoom in/out). It will use the transport, shaded with labels as the basemap. It will display an esri dynamic layer with multiple sub layers. The language of the map will be English.
-
-```html
-<div
-  id="mapOne"
-  class="geoview-map"
-  style="height: 100vh;"
-  data-lang="en"
-  data-config="{
-      'map': {
-        'interaction': 'dynamic',
-        'viewSettings': {
-          'projection': 3978
-        },
-        'basemapOptions': {
-          'basemapId': 'transport',
-          'shaded': true,
-          'labeled': true
-        },
-        'listOfGeoviewLayerConfig': [
-          {
-            'geoviewLayerId': 'esriDynamicLYR2',
-            'geoviewLayerName': 'Energy',
-            'metadataAccessPath': 'https://maps-cartes.ec.gc.ca/arcgis/rest/services/CESI/MapServer',
-            'geoviewLayerType': 'esriDynamic',
-            'listOfLayerEntryConfig': [{ 'layerId': '0' }, { 'layerId': '6' }]
-          }
-        ]
-      },
-      'theme': 'geo.ca',
-      'components': ['north-arrow', 'overview-map'],
-      'corePackages': []
-    }"
-></div>
-```
-
-Once you add the above to the body of the html file. You must **call** the **init function** to allow the viewer to render the map.
-
-```html
-<script>
-  // init functions, takes one parameter as a function callback. Any code inside the callback will run once map has finished rendering.
-  cgpv.init(function () {});
-</script>
-```
-
-Full example:
-
-```html
-<!DOCTYPE html>
-<html>
-  <body>
-    <div
-      id="mapOne"
-      class="geoview-map"
-      style="height: 100vh;"
-      data-lang="en"
-      data-config="{... insert your configuration ...}"
-    ></div>
-    <script src="https://canadian-geospatial-platform.github.io/geoview/public/cgpv-main.js"></script>
-    <script>
-      // init functions, takes one parameter as a function callback. Any code inside the callback will run once map has finished rendering.
-      cgpv.init(function () {});
-    </script>
-  </body>
-</html>
-```
+**Contact**:  
+`geo@nrcan-rncan.gc.ca`
+
+---
+
+## Licence et attribution
+
+© Sa Majesté le Roi du chef du Canada, représenté par le ministre des Ressources naturelles.
+
+Ce projet est publié sous la licence open source applicable du gouvernement du Canada.

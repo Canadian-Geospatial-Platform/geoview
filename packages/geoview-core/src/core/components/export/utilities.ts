@@ -15,6 +15,7 @@ import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 
 import { logger } from '@/core/utils/logger';
+import { getLocalizedMessage } from '@/core/utils/utilities';
 import { DateMgt, type TemporalMode, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { NorthArrowIcon } from '@/core/components/north-arrow/north-arrow-icon';
 
@@ -796,6 +797,71 @@ export class ExportUtilities {
   }
 
   /**
+   * Safely converts a canvas to a data URL, handling tainted canvas errors from cross-origin tiles
+   * (e.g. Arctic SDI WMTS) that don't serve CORS headers.
+   *
+   * When the canvas is tainted, falls back to a white canvas with a localized message
+   * explaining why the map image is not available.
+   *
+   * @param canvas - The canvas element to convert.
+   * @param mapId - The GeoView map ID (used to resolve display language for fallback message).
+   * @returns A JPEG data URL of the canvas, or a fallback image with an explanatory message.
+   */
+  static #safeToDataURL(canvas: HTMLCanvasElement, mapId: string): string {
+    try {
+      return canvas.toDataURL('image/jpeg', EXPORT_CONSTANTS.JPEG_QUALITY);
+    } catch (error) {
+      logger.logWarning('Canvas is tainted by cross-origin tiles. Map image will be blank in the export.', error);
+
+      // Create a fallback canvas with a message explaining why the map is not visible
+      const fallback = document.createElement('canvas');
+      fallback.width = canvas.width;
+      fallback.height = canvas.height;
+      const ctx = fallback.getContext('2d')!;
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, fallback.width, fallback.height);
+
+      // Draw border
+      ctx.strokeStyle = '#ccc';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(1, 1, fallback.width - 2, fallback.height - 2);
+
+      // Draw localized message centered on the canvas
+      const displayLanguage = AppEventProcessor.getDisplayLanguage(mapId);
+      const message = getLocalizedMessage(displayLanguage, 'exportModal.canvasTaintedMessage');
+      const fontSize = Math.max(14, Math.round(fallback.width / 40));
+      ctx.fillStyle = '#666';
+      ctx.font = `${fontSize}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      // Word-wrap the message to fit within 80% of the canvas width
+      const maxTextWidth = fallback.width * 0.8;
+      const words = message.split(' ');
+      const lines: string[] = [];
+      let currentLine = words[0];
+      for (let w = 1; w < words.length; w++) {
+        const testLine = `${currentLine} ${words[w]}`;
+        if (ctx.measureText(testLine).width > maxTextWidth) {
+          lines.push(currentLine);
+          currentLine = words[w];
+        } else {
+          currentLine = testLine;
+        }
+      }
+      lines.push(currentLine);
+
+      const lineHeight = fontSize * 1.4;
+      const startY = fallback.height / 2 - ((lines.length - 1) * lineHeight) / 2;
+      lines.forEach((line, idx) => {
+        ctx.fillText(line, fallback.width / 2, startY + idx * lineHeight);
+      });
+
+      return fallback.toDataURL('image/jpeg', EXPORT_CONSTANTS.JPEG_QUALITY);
+    }
+  }
+
+  /**
    * Main export processing function - gathers map data, processes legend, and optimizes layout.
    *
    * Workflow (AUTO mode only):
@@ -933,8 +999,9 @@ export class ExportUtilities {
       currentProjection === 3857 ? 180 + currentRotation : parseFloat(northArrowElement.degreeRotation) + currentRotation;
 
     // Generate north arrow SVG
+    // Hide north arrow for polar projections (e.g. EPSG:3573) where north direction is ambiguous
     let northArrowSvgPaths;
-    if (northArrow) {
+    if (northArrow && currentProjection !== 3573) {
       try {
         const iconString = renderToString(createElement(NorthArrowIcon, { width: 24, height: 24 }));
         const parser = new DOMParser();
@@ -1392,9 +1459,10 @@ export class ExportUtilities {
     const columnWidths = localColumnWidths;
 
     // Measure canvas height by rendering temporary CanvasDocument (reused by PDF/PNG exports)
+    const mapDataUrl = this.#safeToDataURL(resultCanvas, mapId);
     const tempHtml = renderToString(
       createElement(CanvasDocument, {
-        mapDataUrl: resultCanvas.toDataURL('image/jpeg', EXPORT_CONSTANTS.JPEG_QUALITY),
+        mapDataUrl,
         scaleText: `${mapScale.labelGraphicMetric} (approx)`,
         scaleLineWidth,
         northArrowSvg: northArrowSvgPaths,
@@ -1417,7 +1485,7 @@ export class ExportUtilities {
     document.body.removeChild(tempElement);
 
     return {
-      mapDataUrl: resultCanvas.toDataURL('image/jpeg', EXPORT_CONSTANTS.JPEG_QUALITY),
+      mapDataUrl,
       scaleText: `${mapScale.labelGraphicMetric} (approx)`,
       scaleLineWidth,
       northArrowSvg: northArrowSvgPaths,
