@@ -12,6 +12,7 @@ import { GeoUtilities } from '@/geo/utils/utilities';
 
 import type { InteractionOptions } from './interaction';
 import { Interaction } from './interaction';
+import type { GeometryApi } from '@/geo/layer/geometry/geometry';
 
 /**
  * Supported options for modify interactions
@@ -48,7 +49,7 @@ export class Modify extends Interaction {
    *
    * @param options - Object to configure the initialization of the Modify interaction
    */
-  constructor(options: ModifyOptions) {
+  constructor(options: ModifyOptions, geometryApi: GeometryApi) {
     super(options);
 
     // The OpenLayers Modify options
@@ -64,8 +65,8 @@ export class Modify extends Interaction {
     } else if (options.geometryGroupKey) {
       // If a geometry group key is set
       // Get the vector source for the geometry group or create one when not existing
-      const geomGroup = this.mapViewer.layer.geometry?.createGeometryGroup(options.geometryGroupKey);
-      olOptions.source = geomGroup?.vectorSource;
+      const geomGroup = geometryApi.createGeometryGroup(options.geometryGroupKey);
+      olOptions.source = geomGroup.vectorSource;
     }
 
     // The insertVertexCondition condition takes a function that allows for customizing

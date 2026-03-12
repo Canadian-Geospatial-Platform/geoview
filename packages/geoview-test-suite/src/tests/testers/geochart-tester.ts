@@ -1,12 +1,14 @@
 import type { Coordinate } from 'ol/coordinate';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import { LayerTester } from './layer-tester';
 import { delay } from 'geoview-core/core/utils/utilities';
-import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
-import { GeochartEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/geochart-event-processor';
-import { UIEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/ui-event-processor';
+import { getStoreActiveFooterBarTab } from 'geoview-core/core/stores/store-interface-and-intial-values/ui-state';
+import {
+  getStoreGeochartChartsConfig,
+  getStoreGeochartSelectedLayerPath,
+  setStoreGeochartSelectedLayerPath,
+} from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
 
 /**
  * Main Map testing class.
@@ -34,17 +36,17 @@ export class GeochartTester extends GVAbstractTester {
       `Test Geochart on layer ${layerPath}...`,
       (test) => {
         // Continue the test and return the layer
-        return GeochartTester.helperStepLayerWithGeochart(test, this.getMapViewer(), layerPath, lonlat);
+        return this.helperStepLayerWithGeochart(test, layerPath, lonlat);
       },
       (test) => {
         // Perform assertions
         // Check that geochart is the active footer bar
         test.addStep("Verifying 'geochart' is the selected footer tab...");
-        Test.assertIsEqual(UIEventProcessor.getActiveFooterBarTab(this.getMapId()).tabId, 'geochart');
+        Test.assertIsEqual(getStoreActiveFooterBarTab(this.getMapId()).tabId, 'geochart');
 
         // Check that layer path is selected
         test.addStep('Verifying ' + layerPath + ' is the selected layer for the geochart...');
-        Test.assertIsEqual(GeochartEventProcessor.getSingleGeochartState(this.getMapId(), 'selectedLayerPath'), layerPath);
+        Test.assertIsEqual(getStoreGeochartSelectedLayerPath(this.getMapId()), layerPath);
       }
     );
   }
@@ -60,7 +62,7 @@ export class GeochartTester extends GVAbstractTester {
       GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID,
       GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX,
       GVAbstractTester.AIRBORNE_RADIOACTIVITY_GROUP,
-      GVAbstractTester.QUEBEC_LONLAT,
+      GVAbstractTester.OTTAWA_LONLAT,
       {
         [GVAbstractTester.AIRBORNE_RADIOACTIVITY_UUID_WITH_SUFFIX]: {
           layers: [
@@ -115,7 +117,7 @@ export class GeochartTester extends GVAbstractTester {
         test.addStep(`Adding the layer on the map for ${uuid}`);
 
         // Add the geoview layer by geocore uuid
-        const result = await this.getMapViewer().layer.addGeoviewLayerByGeoCoreUUID(uuid);
+        const result = await this.getControllersRegistry().layerCreatorController.addGeoviewLayerByGeoCoreUUID(uuid);
 
         // Update the step
         test.addStep(`Adding the layer on the map...`);
@@ -124,25 +126,25 @@ export class GeochartTester extends GVAbstractTester {
         await result?.promiseLayer;
 
         // Continue the test and return the layer
-        return GeochartTester.helperStepLayerWithGeochart(test, this.getMapViewer(), layerPathAdd, lonlat);
+        return this.helperStepLayerWithGeochart(test, layerPathAdd, lonlat);
       },
       (test) => {
         // Perform assertions
         test.addStep('Verifying expected geochart config...');
-        const geochartsConfig = GeochartEventProcessor.getSingleGeochartState(this.getMapId(), 'geochartChartsConfig');
+        const geochartsConfig = getStoreGeochartChartsConfig(this.getMapId());
         Test.assertJsonObject(geochartsConfig, expectedGeochartChartsConfig);
 
         // Check that geochart is the active footer bar
         test.addStep("Verifying 'geochart' is the selected footer tab...");
-        Test.assertIsEqual(UIEventProcessor.getActiveFooterBarTab(this.getMapId()).tabId, 'geochart');
+        Test.assertIsEqual(getStoreActiveFooterBarTab(this.getMapId()).tabId, 'geochart');
 
         // Check that layer path is selected
         test.addStep('Verifying ' + layerPathAdd + ' is the selected layer for the geochart...');
-        Test.assertIsEqual(GeochartEventProcessor.getSingleGeochartState(this.getMapId(), 'selectedLayerPath'), layerPathAdd);
+        Test.assertIsEqual(getStoreGeochartSelectedLayerPath(this.getMapId()), layerPathAdd);
       },
       (test) => {
         // Redirect to LayerTest to help test the removal of the layer
-        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPathRemove);
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPathRemove);
       }
     );
   }
@@ -160,17 +162,12 @@ export class GeochartTester extends GVAbstractTester {
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
    * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
    */
-  static async helperStepLayerWithGeochart<T>(
-    test: Test<T>,
-    mapViewer: MapViewer,
-    layerPath: string,
-    lonlat: Coordinate
-  ): Promise<AbstractGVLayer> {
+  async helperStepLayerWithGeochart<T>(test: Test<T>, layerPath: string, lonlat: Coordinate): Promise<AbstractGVLayer> {
     // Update the step
     test.addStep(`Getting the layer with the geochart ${layerPath}...`);
 
     // Get the layer
-    const layer = mapViewer.layer.getGeoviewLayerRegular(layerPath);
+    const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
 
     // Update the step
     test.addStep(`Waiting for its layer 'loaded' status...`);
@@ -182,13 +179,13 @@ export class GeochartTester extends GVAbstractTester {
     test.addStep(`Perform query operation at given coordinates...`);
 
     // Perform a map click using the feature info layer set
-    await mapViewer.layer.featureInfoLayerSet.queryLayers(lonlat);
+    await this.getControllersRegistry().layerSetController.queryAtLonLat(lonlat);
 
     // Update the step
     test.addStep(`Setting active footerbar tab to geochart...`);
 
     // Set the footer tab to Geochart
-    UIEventProcessor.setActiveFooterBarTab(mapViewer.mapId, 'geochart');
+    this.getControllersRegistry().uiController.setActiveFooterBarTab('geochart');
 
     // Update the step
     test.addStep(`Waiting on UI to refresh...`);
@@ -200,7 +197,7 @@ export class GeochartTester extends GVAbstractTester {
     test.addStep(`Selecting the geochart for the added layer...`);
 
     // Select the right layer path
-    GeochartEventProcessor.setSelectedGeochartLayerPath(mapViewer.mapId, layerPath);
+    setStoreGeochartSelectedLayerPath(this.getMapId(), layerPath);
 
     // Wait purposely on the UI, this waiting period isn't necessary for the test, but it's good to see it happen in real-time
     await delay(1000);

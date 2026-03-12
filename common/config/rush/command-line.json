@@ -23,7 +23,7 @@
       "commandKind": "bulk",
       "name": "build",
       "summary": "Build the packages and move them to the dist directory",
-      "enableParallelism": false,
+      "enableParallelism": true,
       "ignoreMissingScript": true,
       "allowWarningsInSuccessfulBuild": true
     }

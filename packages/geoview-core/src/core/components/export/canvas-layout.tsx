@@ -137,10 +137,10 @@ export function CanvasDocument({
  * @returns A promise that resolves with a data URL for the exported image
  */
 export async function createCanvasMapUrls(mapId: string, props: FileExportProps): Promise<string> {
-  const { exportTitle, disclaimer, dpi, jpegQuality, format, layerDateFormats, layerDateTemporalModes } = props;
+  const { exportTitle, disclaimer, dpi, jpegQuality, format, layerDateFormats, layerDateTemporalModes, language } = props;
 
   // Get map info with title/disclaimer for accurate height calculation
-  const mapInfo = await ExportUtilities.getMapInfo(mapId, exportTitle, disclaimer, layerDateFormats, layerDateTemporalModes);
+  const mapInfo = await ExportUtilities.getMapInfo(mapId, language, exportTitle, disclaimer, layerDateFormats, layerDateTemporalModes);
   // Create main page HTML
   const mainPageHtml = renderToString(
     <CanvasDocument

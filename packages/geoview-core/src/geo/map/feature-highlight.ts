@@ -13,7 +13,7 @@ import { type TypeHighlightColors, type TypeFeatureInfoEntry, DEFAULT_HIGHLIGHT_
 import { logger } from '@/core/utils/logger';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { PointMarkers } from './point-markers';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { getStoreMapFeatureHighlightColor } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { TIMEOUT } from '@/core/utils/constant';
 
 /**
@@ -68,8 +68,8 @@ export class FeatureHighlight {
     // Initialize the Feature Highlight (adding the map option sets zIndex to infinity because it is undefined)
     this.overlayLayer = new VectorLayer({ source: this.highlightSource, map: this.mapViewer.map });
     this.pointMarkers = new PointMarkers(this.mapViewer, this);
-    if (MapEventProcessor.getFeatureHighlightColor(this.mapViewer.mapId) !== DEFAULT_HIGHLIGHT_COLOR)
-      this.changeHighlightColor(MapEventProcessor.getFeatureHighlightColor(this.mapViewer.mapId));
+    if (getStoreMapFeatureHighlightColor(this.mapViewer.mapId) !== DEFAULT_HIGHLIGHT_COLOR)
+      this.changeHighlightColor(getStoreMapFeatureHighlightColor(this.mapViewer.mapId));
   }
 
   /**

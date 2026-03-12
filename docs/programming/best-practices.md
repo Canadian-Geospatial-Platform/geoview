@@ -202,10 +202,6 @@ Advanced Best Practice
 /**
  * Updates layer visibility state.
  *
- * This method does not directly manipulate the map.
- * It dispatches an event to the EventProcessor, which
- * will trigger the appropriate GeoView API call.
- *
  * @param layerPath - Target layer path.
  * @param visible - New visibility state.
  */

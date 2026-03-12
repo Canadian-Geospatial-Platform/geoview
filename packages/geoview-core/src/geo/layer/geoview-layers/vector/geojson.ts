@@ -230,13 +230,16 @@ export class GeoJSON extends AbstractGeoViewVector {
     // Cast it to a GeoJson layer type
     const layerConfigGeoJSON = layerConfig as GeoJSONLayerEntryConfig;
 
+    // Read input config geojson
+    const { geojson } = layerConfigGeoJSON.getSource();
+
     // If GeoJson is present
     let responseData;
-    if (layerConfigGeoJSON.getSource().geojson) {
+    if (geojson) {
       // As-is
-      responseData = layerConfigGeoJSON.getSource().geojson;
+      responseData = geojson;
     } else {
-      // Query
+      // Have to fetch it
       responseData = await AbstractGeoViewVector.fetchJson(layerConfig.getDataAccessPath(false), layerConfig.getSource().postSettings);
     }
 

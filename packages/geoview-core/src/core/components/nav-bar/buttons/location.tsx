@@ -1,10 +1,11 @@
-import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '@mui/material/styles';
+
 import { IconButton, EmojiPeopleIcon } from '@/ui';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
-import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useUIController } from '@/core/controllers/ui-controller';
 import { logger } from '@/core/utils/logger';
+import { useMapController } from '@/core/controllers/map-controller';
 
 /**
  * Creates a location button to zoom to user location.
@@ -20,8 +21,8 @@ export default function Location(): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   // get store actions
-  const { zoomToMyLocation } = useMapStoreActions();
-  const { addNotification } = useAppStoreActions();
+  const uiController = useUIController();
+  const mapController = useMapController();
 
   /**
    * Handles successful geolocation by zooming to the user position.
@@ -30,7 +31,7 @@ export default function Location(): JSX.Element {
    */
   const successCallback = (position: GeolocationPosition): void => {
     // Zoom to my location
-    zoomToMyLocation(position).catch((error: unknown) => {
+    mapController.zoomToMyLocation(position).catch((error: unknown) => {
       // Log
       logger.logPromiseFailed('Failed to zoomToMyLocation in location.successCallback', error);
     });
@@ -42,7 +43,7 @@ export default function Location(): JSX.Element {
    * @param err - The geolocation position error
    */
   const errorCallback = (err: GeolocationPositionError): void => {
-    addNotification({
+    uiController.addNotification({
       key: 'location',
       message: `ERROR(${err.code}): ${err.message}`,
       notificationType: 'warning',

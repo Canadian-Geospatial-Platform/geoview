@@ -26,18 +26,24 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, LoadingButton, Skeleton, TextField, Menu, MenuItem } from '@/ui';
-import { useUIActiveFocusItem, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
+import { useUIActiveFocusItem } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { useAppGeoviewHTMLElement, useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
+import {
+  useAppDisplayLanguage,
+  useAppGeoviewHTMLElement,
+  useAppShellContainer,
+} from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useLayerDateTemporalModes, useLayerDisplayDateFormats } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { exportFile } from '@/core/utils/utilities';
-import { logger } from '@/core/utils/logger';
 
+import { useUIController } from '@/core/controllers/ui-controller';
 import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { createPDFMapUrl } from '@/core/components/export/pdf-layout';
 import { createCanvasMapUrls } from '@/core/components/export/canvas-layout';
 import { getSxClasses } from '@/core/components/export/export-modal-style';
 import { TIMEOUT } from '@/core/utils/constant';
+import { logger } from '@/core/utils/logger';
 
 /** Supported export file formats. */
 type FileFormat = 'pdf' | 'png' | 'jpeg';
@@ -47,6 +53,8 @@ const QUALITY_OPTIONS = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
 
 /** Properties for file export configuration. */
 export interface FileExportProps {
+  /** The language */
+  language: TypeDisplayLanguage;
   /** The export title text. */
   exportTitle: string;
   /** The disclaimer text. */
@@ -80,9 +88,10 @@ export default function ExportModal(): JSX.Element {
   // Store
   const mapId = useGeoViewMapId();
   const mapElement = useAppGeoviewHTMLElement();
-  const { disableFocusTrap } = useUIStoreActions();
+  const uiController = useUIController();
   const activeModalId = useUIActiveFocusItem().activeElementId;
   const shellContainer = useAppShellContainer();
+  const language = useAppDisplayLanguage();
   const layerDateFormats = useLayerDisplayDateFormats();
   const layerDateTemporalModes = useLayerDateTemporalModes();
 
@@ -125,6 +134,7 @@ export default function ExportModal(): JSX.Element {
         format: 'jpeg',
         layerDateFormats,
         layerDateTemporalModes,
+        language,
       });
       setPngPreviewUrls([pngUrl]);
       URL.revokeObjectURL(pngUrl);
@@ -134,7 +144,7 @@ export default function ExportModal(): JSX.Element {
       setIsMapLoading(false);
       setIsLegendLoading(false);
     }
-  }, [t, mapId, layerDateFormats, layerDateTemporalModes]);
+  }, [t, mapId, layerDateFormats, layerDateTemporalModes, language]);
 
   /**
    * Exports the file in the selected format and resolution.
@@ -165,6 +175,7 @@ export default function ExportModal(): JSX.Element {
           format: exportFormat,
           layerDateFormats,
           layerDateTemporalModes,
+          language,
         });
         exportFile(pdfUrl, filename, exportFormat);
         URL.revokeObjectURL(pdfUrl);
@@ -177,6 +188,7 @@ export default function ExportModal(): JSX.Element {
           format: exportFormat,
           layerDateFormats,
           layerDateTemporalModes,
+          language,
         });
         exportFile(imageUrl, filename, exportFormat);
         URL.revokeObjectURL(imageUrl);
@@ -185,10 +197,10 @@ export default function ExportModal(): JSX.Element {
       logger.logError(`Error exporting ${exportFormat.toUpperCase()}`, error);
     } finally {
       setIsMapExporting(false);
-      disableFocusTrap();
+      uiController.disableFocusTrap();
     }
   }, [
-    disableFocusTrap,
+    uiController,
     exportFormat,
     exportMapResolution,
     exportTitle,
@@ -196,6 +208,7 @@ export default function ExportModal(): JSX.Element {
     jpegQuality,
     layerDateFormats,
     layerDateTemporalModes,
+    language,
     mapId,
     t,
   ]);
@@ -235,14 +248,14 @@ export default function ExportModal(): JSX.Element {
     // has time to release before we attempt to restore focus via disableFocusTrap
     // (which uses the callbackElementId to re-focus the export button in the app bar).
     setTimeout(() => {
-      disableFocusTrap();
+      uiController.disableFocusTrap();
     }, TIMEOUT.deferExecution);
 
     // Clear preview content so skeleton shows on next open
     setPngPreviewUrls([]);
     setIsMapLoading(false);
     setIsLegendLoading(false);
-  }, [disableFocusTrap]);
+  }, [uiController]);
 
   /**
    * Handles triggering the export process.

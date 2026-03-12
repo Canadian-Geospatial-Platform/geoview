@@ -3,8 +3,7 @@ import type { QueryType, TypeFeatureInfoResult } from '@/api/types/map-schema-ty
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
-import type { LayerApi } from '@/geo/layer/layer';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { getStoreMapOrderedLayerInfo, setStoreMapHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import type {
   TypeHoverFeatureInfo,
   TypeHoverResultSet,
@@ -14,7 +13,7 @@ import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { logger } from '@/core/utils/logger';
 
 /**
- * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
+ * A Layer-set working with the LayerSetController at handling a result set of registered layers and synchronizing
  * events happening on them (in this case when the user hovers on the map) with a store
  * for UI updates.
  */
@@ -27,30 +26,6 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
 
   /** The abort controllers per layer path */
   #abortControllers: { [layerPath: string]: AbortController } = {};
-
-  /**
-   * The class constructor that instantiates a set of layers.
-   *
-   * @param layerApi - The layer Api to work with
-   */
-  constructor(layerApi: LayerApi) {
-    super(layerApi);
-
-    // Register a handler when the map pointer moves
-    layerApi.mapViewer.onMapPointerMove(() => {
-      // This will execute immediately on every pointer move to clear the HoverFeatureInfo
-      this.#propagateToStore(null);
-    });
-
-    // Register a handler when the map pointer stops
-    layerApi.mapViewer.onMapPointerStop((mapViewer, payload) => {
-      // Query
-      this.queryLayers(payload.pixel).catch((error: unknown) => {
-        // Log
-        logger.logPromiseFailed('queryLayers in onMapPointerStop in HoverFeatureInfoLayerSet', error);
-      });
-    });
-  }
 
   /**
    * Overrides the behavior to apply when a hover-feature-info-layer-set wants to check for condition to register a layer in its set.
@@ -120,7 +95,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
     // Loop on each layer path in the resultSet were there is a layer to query
     layersToQuery.forEach((layerPath) => {
       // Get the layer associated with the layer path
-      const layer = this.layerApi.getGeoviewLayerRegular(layerPath);
+      const layer = this.layerDomain.getGeoviewLayerRegular(layerPath);
 
       // If the layer is not hoverable, skip it
       if (!layer.getHoverable()) return;
@@ -226,13 +201,21 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   }
 
   /**
+   * Clears the results immediately for all.
+   */
+  clearResultsAll(): void {
+    // This will execute immediately on every pointer move to clear the HoverFeatureInfo
+    this.#propagateToStore(null);
+  }
+
+  /**
    * Propagates the resultSetEntry to the store.
    *
    * @param hoverFeatureInfo - The hover info to propagate to the store
    */
   #propagateToStore(hoverFeatureInfo: TypeHoverFeatureInfo | undefined): void {
-    // Propagate
-    MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), hoverFeatureInfo);
+    // Save to the store
+    setStoreMapHoverFeatureInfo(this.getMapId(), hoverFeatureInfo);
   }
 
   /**
@@ -242,7 +225,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    */
   #getOrderedLayerPaths(): string[] {
     // Get the map layer order
-    const mapLayerOrder = this.layerApi.mapViewer.getMapLayerOrderInfo().filter((layer) => layer.inVisibleRange);
+    const mapLayerOrder = getStoreMapOrderedLayerInfo(this.getMapId()).filter((layer) => layer.inVisibleRange);
     const resultSetLayers = new Set(Object.keys(this.resultSet));
 
     // Filter and order the layers that are in our resultSet

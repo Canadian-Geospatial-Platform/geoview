@@ -2,7 +2,7 @@ import type { Root } from 'react-dom/client';
 
 import type { i18n } from 'i18next';
 
-import type { MapBrowserEvent, MapEvent } from 'ol';
+import { Overlay, type MapBrowserEvent, type MapEvent } from 'ol';
 import { ObjectEvent } from 'ol/Object';
 import OLMap from 'ol/Map';
 import type { FitOptions, ViewOptions } from 'ol/View';
@@ -14,6 +14,7 @@ import type { Condition } from 'ol/events/condition';
 import { shared as iconImageCache } from 'ol/style/IconImageCache';
 import type { Size } from 'ol/size';
 import type { GeometryFunction } from 'ol/interaction/Draw';
+import ScaleLine from 'ol/control/ScaleLine';
 
 import queryString from 'query-string';
 import type {
@@ -25,6 +26,8 @@ import type {
   TypeDisplayTheme,
   TypeMapViewSettings,
   TypeStyleGeometry,
+  TypeMapMouseInfo,
+  TypeMapState,
 } from '@/api/types/map-schema-types';
 import {
   MAP_CENTER,
@@ -42,6 +45,7 @@ import { LayerApi } from '@/geo/layer/layer';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { Projection } from '@/geo/utils/projection';
 
+import { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import { Plugin } from '@/api/plugin/plugin';
 import { AppBarApi } from '@/core/components/app-bar/app-bar-api';
 import { NavBarApi } from '@/core/components/nav-bar/nav-bar-api';
@@ -59,25 +63,49 @@ import { Transform } from '@/geo/interaction/transform/transform';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import { ModalApi } from '@/ui';
-import { delay, exitFullscreen, generateId, getLocalizedMessage, requestFullscreen, whenThisThen } from '@/core/utils/utilities';
+import { delay, generateId, getLocalizedMessage, whenThisThen } from '@/core/utils/utilities';
 import { debounce } from '@/core/utils/debounce';
-import { GeoUtilities } from '@/geo/utils/utilities';
-import { DateMgt, type TimeIANA } from '@/core/utils/date-mgt';
+import { type TimeIANA } from '@/core/utils/date-mgt';
 import { logger } from '@/core/utils/logger';
 import { NORTH_POLE_POSITION, TIMEOUT } from '@/core/utils/constant';
 import type { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global-types';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
-import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
-import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
-import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  getStoreMapBasemapOptions,
+  getStoreMapGeolocatorSearchArea,
+  getStoreMapOrderedLayerInfo,
+  setStoreMapLoaded,
+  setStoreMapClickMarkerIconHide,
+  setStoreMapZoom,
+  setStoreMapHomeButtonView,
+  type TypeOrderedLayerInfo,
+  getStoreMapStateJson,
+  setStoreMapDisplayed,
+  setStoreMapPointerPosition,
+  setStoreMapIsMouseInsideMap,
+  setStoreMapRotation,
+  setStoreMapScale,
+  setStoreMapMoveEnd,
+  type TypeScaleInfo,
+  setStoreMapOverlayNorthMarker,
+  setStoreMapOverlayClickMarker,
+  getStoreMapCurrentProjectionEPSG,
+  getStoreMapInteraction,
+  setStoreMapInteraction,
+} from '@/core/stores/store-interface-and-intial-values/map-state';
+import { getStoreDisplayTheme } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { setStoreLayerSelectedLayersTabLayer, type TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { GeoUtilities } from '@/geo/utils/utilities';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 import { Fetch } from '@/core/utils/fetch-helper';
 import type { PluginsContainer } from '@/api/plugin/plugin-types';
 import type { AbstractPlugin } from '@/api/plugin/abstract-plugin';
+import { UIDomain } from '@/core/domains/ui-domain';
+import { LayerDomain } from '@/core/domains/layer-domain';
+import { GeometryApi } from '@/geo/layer/geometry/geometry';
+import { FeatureHighlight } from './feature-highlight';
 
 /**
  * Class used to manage created maps.
@@ -134,23 +162,39 @@ export class MapViewer {
   /** Used to manage states */
   stateApi: StateApi;
 
-  /** Used to access basemap functions */
-  basemap: BasemapApi;
-
   /** Used to attach the notification class */
   notifications: Notifications;
+
+  /** Used to access geometry API to create and manage geometries */
+  geometry: GeometryApi;
+
+  /** Used to access basemap API functions */
+  basemap: BasemapApi;
 
   /** Used to access layers functions */
   layer: LayerApi;
 
+  /** Used to access feature highlight API functions */
+  featureHighlight: FeatureHighlight;
+
   /** Modals creation */
   modal: ModalApi;
 
+  /** The UI domain */
+  #uiDomain: UIDomain;
+
+  /** The Layer domain */
+  #layerDomain: LayerDomain;
+
+  // TODO: REFACTOR IMPORTANT - Ideally, the MapViewer class would be a proper 'Domain' class unaware of 'controllers'.
+  // TO.DOCONT: We should review everywhere in this file where 'this.controllers.' is used - as those are backwards domain (MapViewer) calling a controller.
+  // TO.DOCONT: However, we can only do this once we have another 'Application class' which holds the ControllersRegistry instead of the MapViewer itself.
+  /** The controller registry owning all framework-level controllers */
+  controllers: ControllerRegistry;
+
+  // max number of icons cached
   /** Max number of icons cached */
   iconImageCacheSize: number;
-
-  /** The i18n instance */
-  #i18nInstance: i18n;
 
   /** Indicates if the map has been initialized */
   #mapInit = false;
@@ -266,23 +310,35 @@ export class MapViewer {
     this.mapId = mapFeaturesConfig.mapId;
     this.mapFeaturesConfig = mapFeaturesConfig;
 
-    this.#i18nInstance = i18instance;
-
     this.iconImageCacheSize = 1;
 
-    this.appBarApi = new AppBarApi(this.mapId);
-    this.navBarApi = new NavBarApi(this.mapId);
-    this.footerBarApi = new FooterBarApi(this.mapId);
-    this.stateApi = new StateApi(this.mapId);
-    this.notifications = new Notifications(this.mapId);
+    // Initialize the ui domain
+    this.#uiDomain = new UIDomain(i18instance, mapFeaturesConfig.displayLanguage ?? 'en');
+    this.#layerDomain = new LayerDomain();
+
+    // The geometry api
+    this.geometry = new GeometryApi(this);
+
+    // The feature highligh api
+    this.featureHighlight = new FeatureHighlight(this);
+
+    // Initialize the controller registry
+    this.controllers = new ControllerRegistry(this, this.#uiDomain, this.#layerDomain, this.geometry, this.featureHighlight);
+    this.controllers.hookControllers();
+
+    this.appBarApi = new AppBarApi(this.controllers.uiController);
+    this.navBarApi = new NavBarApi();
+    this.footerBarApi = new FooterBarApi(this.controllers.uiController);
+    this.stateApi = new StateApi(this.controllers.mapController);
+    this.notifications = new Notifications(this.controllers.uiController);
 
     this.modal = new ModalApi();
 
     // create basemap and pass in the map id to be able to access the map instance
-    this.basemap = new BasemapApi(this, MapEventProcessor.getBasemapOptions(this.mapId));
+    this.basemap = new BasemapApi(this, getStoreMapBasemapOptions(this.mapId));
 
     // Initialize layer api
-    this.layer = new LayerApi(this);
+    this.layer = new LayerApi(this.controllers, this.#layerDomain, this.geometry, this.featureHighlight);
 
     // Register handler when basemap has error
     this.basemap.onBasemapError((sender, event) => {
@@ -374,13 +430,13 @@ export class MapViewer {
     this.#checkMapReadyStartTime = Date.now();
 
     // Load the Map itself and the UI controls
-    await MapEventProcessor.initMapControls(this.mapId);
+    await this.initMapControls();
 
     // Load the core packages plugins
     await this.#loadCorePackages();
 
     // Reset the basemap - not awaited as we proceed with empty basemap while it loads
-    MapEventProcessor.resetBasemap(this.mapId).catch((error: unknown) => logger.logError('Basemap creation failed', error));
+    this.controllers.mapController.resetBasemap().catch((error: unknown) => logger.logError('Basemap creation failed', error));
 
     // Emit map init
     this.#mapInit = true;
@@ -390,17 +446,95 @@ export class MapViewer {
     this.#loadGeometries();
 
     // Prepare the FeatureHighlight now that the map is available
-    this.layer.featureHighlight.init();
+    this.featureHighlight.init();
 
     // Load the list of geoview layers in the config to add all layers on the map.
     // After this call, all first level layers have been registered.
-    await this.layer.loadListOfGeoviewLayer(this.mapFeaturesConfig.map.listOfGeoviewLayerConfig);
+    await this.controllers.layerCreatorController.loadListOfGeoviewLayer(this.mapFeaturesConfig.map.listOfGeoviewLayerConfig);
 
     // Here, all base-level "this.mapFeaturesConfig.map.listOfGeoviewLayerConfig" have been registered (layerStatus === 'registered').
     // However, careful, the layers are still processing and some sub-layer-entries can get registered on-the-fly (notably: EsriDynamic, WMS).
 
     // Ready the map
     return this.#readyMap();
+  }
+
+  /**
+   * Initializes the map controls
+   */
+  async initMapControls(): Promise<void> {
+    // Log
+    logger.logTraceCore('MAP VIEWER - initMapControls', this.mapId);
+
+    // use api to access map because this function will set map element in store
+    const { map } = this;
+    const { mapId } = this;
+
+    // Add map controls (scale)
+    const scaleBarMetric = new ScaleLine({
+      units: 'metric',
+      target: document.getElementById(`${mapId}-scaleControlBarMetric`) as HTMLElement,
+      bar: true,
+      text: true,
+    });
+
+    const scaleBarImperial = new ScaleLine({
+      units: 'imperial',
+      target: document.getElementById(`${mapId}-scaleControlBarImperial`) as HTMLElement,
+      bar: true,
+      text: true,
+    });
+
+    map.addControl(scaleBarMetric);
+    map.addControl(scaleBarImperial);
+
+    // Get the projection
+    const mapProjection = Projection.getProjectionFromString(getStoreMapCurrentProjectionEPSG(this.mapId));
+
+    // add map overlays
+    // create overlay for north pole icon
+    const northPoleId = `${mapId}-northpole`;
+    const projectionPosition = Projection.transformFromLonLat([NORTH_POLE_POSITION[1], NORTH_POLE_POSITION[0]], mapProjection);
+
+    const northPoleMarker = new Overlay({
+      id: northPoleId,
+      position: projectionPosition,
+      positioning: 'center-center',
+      element: document.getElementById(northPoleId) as HTMLElement,
+      stopEvent: false,
+    });
+    map.addOverlay(northPoleMarker);
+
+    // create overlay for click marker icon
+    const clickMarkerId = `${mapId}-clickmarker`;
+    const clickMarkerOverlay = new Overlay({
+      id: clickMarkerId,
+      position: [-1, -1],
+      positioning: 'center-center',
+      offset: [-18, -30],
+      element: document.getElementById(clickMarkerId) as HTMLElement,
+      stopEvent: false,
+    });
+    map.addOverlay(clickMarkerOverlay);
+
+    // Save to the store
+    setStoreMapOverlayNorthMarker(mapId, northPoleMarker);
+    setStoreMapOverlayClickMarker(mapId, clickMarkerOverlay);
+
+    // Get the size
+    const size = await this.getMapSize();
+
+    // Set map size
+    this.controllers.mapController.setMapSize(size);
+
+    // Get the scale information
+    const scale = MapViewer.getScaleInfoFromDomElement(mapId);
+
+    // Save to the store
+    setStoreMapScale(mapId, scale);
+
+    // Save to the store
+    setStoreMapInteraction(mapId, getStoreMapInteraction(mapId));
   }
 
   // #region MAP STATES
@@ -453,7 +587,7 @@ export class MapViewer {
    * @returns The display language
    */
   getDisplayLanguage(): TypeDisplayLanguage {
-    return AppEventProcessor.getDisplayLanguage(this.mapId);
+    return this.#uiDomain.getLanguage();
   }
 
   /**
@@ -462,7 +596,7 @@ export class MapViewer {
    * @returns The display theme
    */
   getDisplayTheme(): TypeDisplayTheme {
-    return AppEventProcessor.getDisplayTheme(this.mapId);
+    return getStoreDisplayTheme(this.mapId);
   }
 
   /**
@@ -472,8 +606,8 @@ export class MapViewer {
    */
   getMapState(): TypeMapState {
     // map state initialize with store data coming from configuration file/object.
-    // updated values will be added by store subscription in map-event-processor
-    return MapEventProcessor.getMapState(this.mapId);
+    // updated values will be added by store subscription in controllers
+    return getStoreMapStateJson(this.mapId);
   }
 
   /**
@@ -571,12 +705,19 @@ export class MapViewer {
   }
 
   /**
-   * Gets the map projection.
-   *
+   * Gets the map projection
    * @returns The map projection
    */
   getProjection(): OLProjection {
     return this.getView().getProjection();
+  }
+
+  /**
+   * Gets the map projection number
+   * @returns The map projection number
+   */
+  getProjectionNumber(): number | undefined {
+    return Projection.readEPSGNumber(this.getProjection());
   }
 
   /**
@@ -585,7 +726,7 @@ export class MapViewer {
    * @returns The ordered layer info
    */
   getMapLayerOrderInfo(): TypeOrderedLayerInfo[] {
-    return MapEventProcessor.getMapOrderedLayerInfo(this.mapId);
+    return getStoreMapOrderedLayerInfo(this.mapId);
   }
 
   /**
@@ -594,7 +735,7 @@ export class MapViewer {
    * @returns The i18n instance
    */
   getI18nInstance(): i18n {
-    return this.#i18nInstance;
+    return this.#uiDomain.geti18n();
   }
 
   /**
@@ -603,7 +744,7 @@ export class MapViewer {
    * @returns The geolocator search area with coordinates and optional bounding box, or undefined if not set
    */
   getGeolocatorSearchArea(): { coords: Coordinate; bbox?: Extent } | undefined {
-    return MapEventProcessor.getGeolocatorSearchArea(this.mapId);
+    return getStoreMapGeolocatorSearchArea(this.mapId);
   }
 
   /**
@@ -613,32 +754,8 @@ export class MapViewer {
    * @param element - The element to toggle fullscreen on
    */
   setFullscreen(status: boolean, element: TypeHTMLElement | undefined): void {
-    // If entering fullscreen
-    if (status && element) {
-      // Request full screen on the element
-      requestFullscreen(element);
-    }
-
-    // exit fullscreen
-    if (!status) {
-      // Store the extent before any size changes occur
-      const currentExtent = this.getView().calculateExtent();
-
-      // Store the extent and other relevant information
-      const handleSizeChange = (): void => {
-        this.zoomToExtent(currentExtent, { padding: [0, 0, 0, 0] })
-          .then(() => {
-            this.map.renderSync(); // Force render
-          })
-          .catch((error: unknown) => {
-            logger.logError('Error during zoom after fullscreen exit:', error);
-          });
-      };
-
-      // Add the listener before exiting fullscreen
-      this.map.once('change:size', handleSizeChange);
-      exitFullscreen();
-    }
+    // Redirect to controller
+    this.controllers.uiController.setFullScreen(status, element);
   }
 
   /**
@@ -647,7 +764,11 @@ export class MapViewer {
    * @param interaction - Map interaction
    */
   setInteraction(interaction: TypeInteraction): void {
-    MapEventProcessor.setInteraction(this.mapId, interaction);
+    // Set active the map interactions if necessary
+    this.map.getInteractions().forEach((x) => x.setActive(interaction === 'dynamic'));
+
+    // Save to the store
+    setStoreMapInteraction(this.mapId, interaction);
 
     // Register or unregister pointer handlers
     if (interaction === 'static') {
@@ -666,22 +787,24 @@ export class MapViewer {
    */
   async setLanguage(displayLanguage: TypeDisplayLanguage, reloadLayers?: boolean | false): Promise<void> {
     // If the language hasn't changed don't do anything
-    if (AppEventProcessor.getDisplayLanguage(this.mapId) === displayLanguage) return;
-    if (VALID_DISPLAY_LANGUAGE.includes(displayLanguage)) {
-      await AppEventProcessor.setDisplayLanguage(this.mapId, displayLanguage);
+    if (this.#uiDomain.getLanguage() === displayLanguage) return;
 
-      // if flag is true, reload just the GeoCore layers instead of reloading the whole map with current state
-      if (reloadLayers) {
-        this.layer.reloadGeocoreLayers();
-      }
-
-      // Emit language changed event
-      this.#emitMapLanguageChanged({ language: displayLanguage });
+    if (!VALID_DISPLAY_LANGUAGE.includes(displayLanguage)) {
+      // Unsupported
+      this.notifications.addNotificationError(getLocalizedMessage(displayLanguage, 'validation.changeDisplayLanguage'));
       return;
     }
 
-    // Unsupported
-    this.notifications.addNotificationError(getLocalizedMessage(displayLanguage, 'validation.changeDisplayLanguage'));
+    // Proceed
+    await this.controllers.uiController.setDisplayLanguage(displayLanguage);
+
+    // if flag is true, reload just the GeoCore layers instead of reloading the whole map with current state
+    if (reloadLayers) {
+      this.controllers.layerCreatorController.reloadGeocoreLayers();
+    }
+
+    // Emit language changed event
+    this.#emitMapLanguageChanged({ language: displayLanguage });
   }
 
   /**
@@ -694,11 +817,8 @@ export class MapViewer {
    * @throws {InvalidTimezoneError} When the time zone is not a valid or supported IANA identifier
    */
   setDisplayDateTimezone(displayDateTimezone: TimeIANA): void {
-    // Validate the timezone
-    DateMgt.validateTimezone(displayDateTimezone);
-
-    // Redirect to processor
-    AppEventProcessor.setDisplayDateTimezone(this.mapId, displayDateTimezone);
+    // Redirect to controller
+    this.controllers.uiController.setDisplayDateTimezone(displayDateTimezone);
   }
 
   /**
@@ -710,7 +830,7 @@ export class MapViewer {
   setProjection(projectionCode: TypeValidMapProjectionCodes): Promise<void> {
     if (VALID_PROJECTION_CODES.includes(Number(projectionCode))) {
       // Propagate to the store
-      const promise = MapEventProcessor.setProjection(this.mapId, projectionCode);
+      const promise = this.controllers.mapController.setProjection(projectionCode);
 
       // Emit to outside
       this.#emitMapProjectionChanged({ projection: Projection.PROJECTIONS[projectionCode] });
@@ -741,7 +861,7 @@ export class MapViewer {
    */
   setTheme(displayTheme: TypeDisplayTheme): void {
     if (VALID_DISPLAY_THEME.includes(displayTheme)) {
-      AppEventProcessor.setDisplayTheme(this.mapId, displayTheme);
+      this.controllers.uiController.setDisplayTheme(displayTheme);
     } else this.notifications.addNotificationError(getLocalizedMessage(this.getDisplayLanguage(), 'validation.changeDisplayTheme'));
   }
 
@@ -863,7 +983,7 @@ export class MapViewer {
    * @returns A promise that resolves when the zoom operation completes
    */
   setExtent(extent: Extent): Promise<void> {
-    return MapEventProcessor.zoomToExtent(this.mapId, extent);
+    return this.controllers.mapController.zoomToExtent(extent);
   }
 
   /**
@@ -921,19 +1041,6 @@ export class MapViewer {
   }
 
   /**
-   * Add a localization ressource bundle for a supported language (fr, en).
-   *
-   * Then the new key added can be access from the utilities function getLocalizesMessage
-   * to reuse in ui from outside the core viewer.
-   *
-   * @param language - The language to add the resource for (en, fr)
-   * @param translations - The translation object to add
-   */
-  addLocalizeRessourceBundle(language: TypeDisplayLanguage, translations: Record<string, unknown>): void {
-    this.#i18nInstance.addResourceBundle(language, 'translation', translations, true, false);
-  }
-
-  /**
    * Emits a map single click event.
    *
    * NOTE: This Does not update the store, only emit the click.
@@ -965,7 +1072,7 @@ export class MapViewer {
     };
 
     // Update store... this will not emit the event because only when WCAG mode is enable
-    MapEventProcessor.setClickCoordinates(this.mapId, clickCoordinates);
+    this.controllers.mapController.setClickCoordinates(clickCoordinates);
 
     // The resolve of the query
     let resolveQuery: () => void;
@@ -982,13 +1089,13 @@ export class MapViewer {
     // Register one-time listener for query completion
     const handleQueryEnded = (): void => {
       // Unregister the listener immediately
-      this.layer.featureInfoLayerSet.offQueryEnded(handleQueryEnded);
+      this.controllers.layerSetController.featureInfoLayerSet.offQueryEnded(handleQueryEnded);
 
       // Resolve the promise about the completion of the query
       resolveQuery();
 
       // Wait for UI batch propagation
-      delay(FeatureInfoEventProcessor.TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH)
+      delay(TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH)
         .then(() => {
           // Now resolve the promise about the completion of the query and batched through the UI
           resolveQueryBatched();
@@ -999,7 +1106,7 @@ export class MapViewer {
     };
 
     // Register the handler before clicking
-    this.layer.featureInfoLayerSet.onQueryEnded(handleQueryEnded);
+    this.controllers.layerSetController.featureInfoLayerSet.onQueryEnded(handleQueryEnded);
 
     // Emit the event is done here, not from the processor to avoid circular references
     this.#emitMapSingleClick(clickCoordinates);
@@ -1012,8 +1119,8 @@ export class MapViewer {
    * Hide a click marker from the map
    */
   clickMarkerIconHide(): void {
-    // Redirect to the processor
-    MapEventProcessor.clickMarkerIconHide(this.mapId);
+    // Save to the store
+    setStoreMapClickMarkerIconHide(this.mapId);
   }
 
   /**
@@ -1023,7 +1130,7 @@ export class MapViewer {
    */
   clickMarkerIconShow(marker: TypeClickMarker): void {
     // Redirect to the processor
-    MapEventProcessor.clickMarkerIconShow(this.mapId, marker);
+    this.controllers.mapController.clickMarkerIconShow(marker);
   }
 
   /**
@@ -1037,16 +1144,19 @@ export class MapViewer {
     // Remove the dom element (remove rendered map and overview map)
     if (this.overviewRoot) this.overviewRoot.unmount();
 
+    // Unload all plugins
+    await Plugin.removePlugins(this.mapId);
+
+    // Unhook the controllers
+    this.controllers.unhookControllers();
+
     try {
       // Remove all layers
-      this.layer.removeAllGeoviewLayers();
+      this.controllers.layerCreatorController.removeAllGeoviewLayers();
     } catch (error: unknown) {
       // Failed to remove layers, eat the exception and continue to remove the map
       logger.logError('Failed to remove layers', error);
     }
-
-    // Unload all plugins
-    await Plugin.removePlugins(this.mapId);
 
     // Remove all controls
     this.map.getControls().clear();
@@ -1066,12 +1176,8 @@ export class MapViewer {
    * @returns A promise that resolves when the zoom operation completes
    */
   zoomToExtent(extent: Extent, options?: FitOptions): Promise<void> {
-    // TODO: DISCUSSION - Where is the line between a function using MapEventProcessor in MapViewer vs in MapState action?
-    // TO.DOCONT: This function (and there are many others in this class) redirects to the MapEventProcessor, should it be in MapState with the others or do we keep some in MapViewer and some in MapState?
-    // TO.DOCONT: If we keep some here, we should maybe add a fourth call-stack possibility in the MapEventProcessor paradigm documentation which goes like so:
-    // - 4th paradigm: MapViewer ---calls---> MapEventProcessor ---calls---> MapViewer ---calls/emits events---> MapState.setterActions.
     // Redirect to the processor
-    return MapEventProcessor.zoomToExtent(this.mapId, extent, options);
+    return this.controllers.mapController.zoomToExtent(extent, options);
   }
 
   /**
@@ -1080,8 +1186,8 @@ export class MapViewer {
    * @returns A promise that resolves when the zoom operation completes
    */
   zoomToInitialExtent(): Promise<void> {
-    // Redirect to processor
-    return MapEventProcessor.zoomToInitialExtent(this.mapId);
+    // Redirect to the processor
+    return this.controllers.mapController.zoomToInitialExtent();
   }
 
   /**
@@ -1090,8 +1196,8 @@ export class MapViewer {
    * @param view - The new view settings
    */
   setHomeButtonView(view: TypeMapViewSettings): void {
-    // Redirect to the processor
-    MapEventProcessor.setHomeButtonView(this.mapId, view);
+    // Save to the store
+    setStoreMapHomeButtonView(this.mapId, view);
   }
 
   /**
@@ -1104,7 +1210,7 @@ export class MapViewer {
   zoomToLonLatExtentOrCoordinate(extent: Extent | Coordinate, options?: FitOptions): Promise<void> {
     const fullExtent = extent.length === 2 ? [extent[0], extent[1], extent[0], extent[1]] : extent;
     const projectedExtent = Projection.transformExtentFromProj(fullExtent, Projection.getProjectionLonLat(), this.getProjection());
-    return MapEventProcessor.zoomToExtent(this.mapId, projectedExtent, options);
+    return this.controllers.mapController.zoomToExtent(projectedExtent, options);
   }
 
   /**
@@ -1116,14 +1222,14 @@ export class MapViewer {
     // GV This will need to be revised if functionality to add additional icons to a layer is added
     let styleCount = this.iconImageCacheSize;
     if (legend.styleConfig)
-      Object.keys(legend.styleConfig).forEach((geometry) => {
+      Object.keys(legend.styleConfig).forEach((geom) => {
         if (
           legend.styleConfig &&
-          (legend.styleConfig[geometry as TypeStyleGeometry]?.type === 'uniqueValue' ||
-            legend.styleConfig[geometry as TypeStyleGeometry]?.type === 'classBreaks')
+          (legend.styleConfig[geom as TypeStyleGeometry]?.type === 'uniqueValue' ||
+            legend.styleConfig[geom as TypeStyleGeometry]?.type === 'classBreaks')
         ) {
-          if (legend.styleConfig[geometry as TypeStyleGeometry]!.info?.length)
-            styleCount += legend.styleConfig[geometry as TypeStyleGeometry]!.info.length;
+          if (legend.styleConfig[geom as TypeStyleGeometry]!.info?.length)
+            styleCount += legend.styleConfig[geom as TypeStyleGeometry]!.info.length;
         }
       });
     // Set the openlayers icon image cache
@@ -1149,7 +1255,7 @@ export class MapViewer {
     await whenThisThen(
       () => {
         // Check if all layers have met the status
-        const [allGood, layersCountInside] = this.layer.checkLayerStatus(layerStatus, (layerConfig) => {
+        const [allGood, layersCountInside] = this.controllers.layerController.checkLayerStatus(layerStatus, (layerConfig) => {
           // Log
           logger.logTraceDetailed(
             `checkMapReady - waiting on layer to be '${layerStatus}'...`,
@@ -1271,13 +1377,16 @@ export class MapViewer {
    */
   initDrawInteractions(geomGroupKey: string, type: string, style: TypeFeatureStyle, geometryFunction?: GeometryFunction): Draw {
     // Create the Draw component
-    const draw = new Draw({
-      mapViewer: this,
-      geometryGroupKey: geomGroupKey,
-      type,
-      style,
-      geometryFunction,
-    });
+    const draw = new Draw(
+      {
+        mapViewer: this,
+        geometryGroupKey: geomGroupKey,
+        type,
+        style,
+        geometryFunction,
+      },
+      this.geometry
+    );
     draw.startInteraction();
     return draw;
   }
@@ -1298,13 +1407,16 @@ export class MapViewer {
     pixelTolerance?: number
   ): Modify {
     // Create the modify component
-    const modify = new Modify({
-      mapViewer: this,
-      geometryGroupKey: geomGroupKey,
-      style,
-      insertVertexCondition,
-      pixelTolerance,
-    });
+    const modify = new Modify(
+      {
+        mapViewer: this,
+        geometryGroupKey: geomGroupKey,
+        style,
+        insertVertexCondition,
+        pixelTolerance,
+      },
+      this.geometry
+    );
     modify.startInteraction();
     return modify;
   }
@@ -1317,10 +1429,13 @@ export class MapViewer {
    */
   initSnapInteractions(geomGroupKey: string): Snap {
     // Create snapping capabilities
-    const snap = new Snap({
-      mapViewer: this,
-      geometryGroupKey: geomGroupKey,
-    });
+    const snap = new Snap(
+      {
+        mapViewer: this,
+        geometryGroupKey: geomGroupKey,
+      },
+      this.geometry
+    );
     snap.startInteraction();
     return snap;
   }
@@ -1333,10 +1448,13 @@ export class MapViewer {
    */
   initTransformInteractions(options?: Partial<TransformOptions>): Transform {
     // Create transform capabilities
-    const transform = new Transform({
-      mapViewer: this,
-      ...options,
-    });
+    const transform = new Transform(
+      {
+        mapViewer: this,
+        ...options,
+      },
+      this.geometry
+    );
     transform.startInteraction();
     return transform;
   }
@@ -1344,6 +1462,29 @@ export class MapViewer {
   // #endregion
 
   // #region OTHERS
+
+  /**
+   * Retrieves the scale information from the DOM elements for the given map ID.
+   *
+   * @param {string} mapId - The unique identifier of the map.
+   * @returns {TypeScaleInfo} The scale information object
+   */
+  static getScaleInfoFromDomElement(mapId: string): TypeScaleInfo {
+    // Get metric values
+    const scaleControlBarMetric = document.getElementById(`${mapId}-scaleControlBarMetric`);
+    const lineWidthMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner') as HTMLElement)?.style.width;
+    const labelGraphicMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner')?.lastChild as HTMLElement)?.innerHTML;
+
+    // Get metric values
+    const scaleControlBarImperial = document.getElementById(`${mapId}-scaleControlBarImperial`);
+    const lineWidthImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner') as HTMLElement)?.style.width;
+    const labelGraphicImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner')?.lastChild as HTMLElement)?.innerHTML;
+
+    // get resolution value (same for metric and imperial)
+    const labelNumeric = (scaleControlBarMetric?.querySelector('.ol-scale-text') as HTMLElement)?.innerHTML;
+
+    return { lineWidthMetric, labelGraphicMetric, lineWidthImperial, labelGraphicImperial, labelNumeric };
+  }
 
   /**
    * Gets if north pole is visible. This is not a perfect solution and is more a work around.
@@ -1521,7 +1662,7 @@ export class MapViewer {
    * @returns Map config with current map state, or undefined if unavailable
    */
   createMapConfigFromMapState(overrideGeocoreServiceNames: boolean | 'hybrid' = true): TypeMapFeaturesInstance | undefined {
-    return MapEventProcessor.createMapConfigFromMapState(this.mapId, overrideGeocoreServiceNames);
+    return this.controllers.mapController.createMapConfigFromMapState(overrideGeocoreServiceNames);
   }
 
   /**
@@ -1537,9 +1678,7 @@ export class MapViewer {
     mapConfig?: TypeMapFeaturesConfig,
     removeUnlisted: boolean = false
   ): TypeMapFeaturesInstance | undefined {
-    const mapConfigToUse = mapConfig || this.createMapConfigFromMapState();
-    if (mapConfigToUse) return MapEventProcessor.replaceMapConfigLayerNames(namePairs, mapConfigToUse, removeUnlisted);
-    return undefined;
+    return this.controllers.mapController.replaceMapConfigLayerNames(namePairs, mapConfig, removeUnlisted);
   }
 
   /**
@@ -1555,11 +1694,15 @@ export class MapViewer {
     const mapHTMLElement = map.getTargetElement();
     mapHTMLElement.addEventListener('mouseenter', () => {
       mapHTMLElement.focus({ preventScroll: true });
-      MapEventProcessor.setIsMouseInsideMap(this.mapId, true);
+
+      // Save to the store
+      setStoreMapIsMouseInsideMap(this.mapId, true);
     });
     mapHTMLElement.addEventListener('mouseleave', () => {
       mapHTMLElement.blur();
-      MapEventProcessor.setIsMouseInsideMap(this.mapId, false);
+
+      // Save to the store
+      setStoreMapIsMouseInsideMap(this.mapId, false);
     });
 
     // Now that the map dom is loaded, register a handle when size is changing
@@ -1670,8 +1813,8 @@ export class MapViewer {
       // Get the pointer position information based on the map event
       const pointerPosition: TypeMapMouseInfo = GeoUtilities.getPointerPositionFromMapEvent(event, projCode);
 
-      // Save in the store
-      MapEventProcessor.setMapPointerPosition(this.mapId, pointerPosition);
+      // Save to the store
+      setStoreMapPointerPosition(this.mapId, pointerPosition);
 
       // Emit to the outside
       this.#emitMapPointerMove(pointerPosition);
@@ -1715,8 +1858,8 @@ export class MapViewer {
       // Get the pointer position information based on the map event
       const pointerPosition: TypeMapMouseInfo = GeoUtilities.getPointerPositionFromMapEvent(event, projCode);
 
-      // Save in the store
-      MapEventProcessor.setClickCoordinates(this.mapId, pointerPosition);
+      // Save to the store
+      this.controllers.mapController.setClickCoordinates(pointerPosition);
 
       // Emit to the outside
       this.#emitMapSingleClick(pointerPosition);
@@ -1738,11 +1881,11 @@ export class MapViewer {
       const zoom = this.getView().getZoom();
       if (!zoom) return;
 
-      // Save in the store
-      MapEventProcessor.setZoom(this.mapId, zoom);
+      // Save to the store
+      setStoreMapZoom(this.mapId, zoom);
 
       // Get all layers
-      const allLayers = this.layer.getGeoviewLayers();
+      const allLayers = this.controllers.layerController.getGeoviewLayers();
 
       // Get the inVisibleRange property based on the layer's minZoom and maxZoom values
       allLayers.forEach((layer) => {
@@ -1762,8 +1905,8 @@ export class MapViewer {
           inVisibleRange = childLayers.some((childLayer) => childLayer.inVisibleRange(zoom));
         }
 
-        // Save in the store
-        MapEventProcessor.setLayerInVisibleRange(this.mapId, layerPath, inVisibleRange);
+        // Save to the store
+        this.controllers.mapController.setLayerInVisibleRange(layerPath, inVisibleRange);
       });
 
       // Emit to the outside
@@ -1785,8 +1928,8 @@ export class MapViewer {
       // Get the map rotation
       const rotation = this.getView().getRotation();
 
-      // Save in the store
-      MapEventProcessor.setRotation(this.mapId, rotation);
+      // Save to the store
+      setStoreMapRotation(this.mapId, rotation);
 
       // Emit to the outside
       this.#emitMapRotation({ rotation });
@@ -1806,14 +1949,14 @@ export class MapViewer {
   async #handleMapChangeSize(event: ObjectEvent): Promise<void> {
     try {
       // Get the scale information
-      const scale = MapEventProcessor.getScaleInfoFromDomElement(this.mapId);
+      const scale = MapViewer.getScaleInfoFromDomElement(this.mapId);
 
       // Get the size
       const size = await this.getMapSize();
 
-      // Save in the store
-      MapEventProcessor.setMapSize(this.mapId, size);
-      MapEventProcessor.setMapScale(this.mapId, scale);
+      // Save to the store
+      this.controllers.mapController.setMapSize(size);
+      setStoreMapScale(this.mapId, scale);
 
       // Emit to the outside
       this.#emitMapChangeSize({ size });
@@ -1828,7 +1971,7 @@ export class MapViewer {
    */
   #loadGeometries(): void {
     // Create the geometry group
-    this.layer.geometry.createGeometryGroup(this.layer.geometry.defaultGeometryGroupId);
+    this.geometry.createGeometryGroup(this.geometry.defaultGeometryGroupId);
 
     // see if a data geometry endpoint is configured and geoms param is provided then get the param value(s)
     const servEndpoint = this.map.getTargetElement()?.closest('.geoview-map')?.getAttribute('data-geometry-endpoint') || '';
@@ -1844,7 +1987,7 @@ export class MapViewer {
             if (data.geometry !== undefined) {
               // add the geometry
               // TODO: ? use the geometry as GeoJSON and add properties to by queried by the details panel
-              this.layer.geometry.addPolygon(data.geometry.coordinates, undefined, generateId());
+              this.geometry.addPolygon(data.geometry.coordinates, undefined, generateId());
             }
           })
           .catch((error: unknown) => {
@@ -1868,9 +2011,9 @@ export class MapViewer {
     logger.logMarkerStart(`readyMap-${this.mapId}`);
 
     // Load the guide
-    AppEventProcessor.setGuide(this.mapId).catch((error: unknown) => {
+    this.controllers.uiController.createGuide().catch((error: unknown) => {
       // Log
-      logger.logPromiseFailed('in AppEventProcessor.setGuide in #readyMap', error);
+      logger.logPromiseFailed('in uiController.createGuide in MapViewer.#readyMap', error);
     });
 
     // Check how load in milliseconds has it been processing thus far
@@ -1879,12 +2022,12 @@ export class MapViewer {
     // Wait at least the minimum delay before officializing the map as loaded for the UI
     await delay(MapViewer.#MIN_DELAY_LOADING - elapsedMilliseconds); // Negative value will simply resolve immediately
 
-    // Save in the store that the map is loaded
+    // Save to the store that the map is loaded
     // GV This removes the spinning circle overlay and starts showing the map correctly in the html dom
-    MapEventProcessor.setMapLoaded(this.mapId, true);
+    setStoreMapLoaded(this.mapId, true);
 
-    // Save in the store that the map is properly being displayed now
-    MapEventProcessor.setMapDisplayed(this.mapId);
+    // Save to the store that the map is properly being displayed now
+    setStoreMapDisplayed(this.mapId);
 
     // Update the map controls based on the original map state (equivalent of initMapControls, just later in the process)
     await this.#updateMapControls();
@@ -1911,7 +2054,7 @@ export class MapViewer {
     // If there's a layer path that should be selected in footerBar or appBar configs, select it
     const selectedLayerPath =
       this.mapFeaturesConfig.footerBar?.selectedLayersLayerPath || this.mapFeaturesConfig.appBar?.selectedLayersLayerPath;
-    if (selectedLayerPath) LegendEventProcessor.setSelectedLayersTabLayerInStore(this.mapId, selectedLayerPath);
+    if (selectedLayerPath) setStoreLayerSelectedLayersTabLayer(this.mapId, selectedLayerPath);
 
     // Await for all layers to be 'loaded'
     await this.#checkMapLayersLoaded();
@@ -1938,7 +2081,7 @@ export class MapViewer {
     const promises: Promise<void>[] = [];
     this.mapFeaturesConfig?.corePackages?.forEach((corePackage: string): void => {
       // Load and add the plugin compiling the promise in a list
-      const promise = MapEventProcessor.loadAndAddPlugin(this.mapId, corePackage);
+      const promise = this.controllers.pluginController.loadAndAddPlugin(corePackage);
 
       // Compile
       promises.push(promise);
@@ -1978,10 +2121,10 @@ export class MapViewer {
     const extent = this.getView().calculateExtent();
 
     // Get the scale information
-    const scale = MapEventProcessor.getScaleInfoFromDomElement(this.mapId);
+    const scale = MapViewer.getScaleInfoFromDomElement(this.mapId);
 
-    // Save in the store
-    MapEventProcessor.setMapMoveEnd(this.mapId, centerCoordinates, pointerPosition, degreeRotation, isNorthVisible, extent, scale);
+    // Save to the store
+    setStoreMapMoveEnd(this.mapId, centerCoordinates, pointerPosition, degreeRotation, isNorthVisible, extent, scale);
   }
 
   /**
@@ -2025,9 +2168,9 @@ export class MapViewer {
       // If the layerIds array is empty, use all layers
       const layerIdsToZoomTo = this.mapFeaturesConfig.map.viewSettings.initialView.layerIds.length
         ? this.mapFeaturesConfig.map.viewSettings.initialView.layerIds
-        : this.layer.getGeoviewLayerIds();
+        : this.controllers.layerController.getGeoviewLayerIds();
 
-      let layerExtents = await this.layer.getExtentOfMultipleLayers(layerIdsToZoomTo);
+      let layerExtents = await this.controllers.layerController.getExtentOfMultipleLayers(layerIdsToZoomTo);
 
       // If extents have infinity, use default instead
       if (!layerExtents || layerExtents.includes(Infinity))
@@ -2239,9 +2382,9 @@ export class MapViewer {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onMapPointerMove(callback: MapPointerMoveDelegate): void {
+  onMapPointerMove(callback: MapPointerMoveDelegate): MapPointerMoveDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onMapPointerMoveHandlers, callback);
+    return EventHelper.onEvent(this.#onMapPointerMoveHandlers, callback);
   }
 
   /**
@@ -2249,7 +2392,7 @@ export class MapViewer {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offMapPointerMove(callback: MapPointerMoveDelegate): void {
+  offMapPointerMove(callback: MapPointerMoveDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onMapPointerMoveHandlers, callback);
   }
@@ -2269,9 +2412,9 @@ export class MapViewer {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onMapPointerStop(callback: MapPointerMoveDelegate): void {
+  onMapPointerStop(callback: MapPointerMoveDelegate): MapPointerMoveDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onMapPointerStopHandlers, callback);
+    return EventHelper.onEvent(this.#onMapPointerStopHandlers, callback);
   }
 
   /**
@@ -2279,7 +2422,7 @@ export class MapViewer {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offMapPointerStop(callback: MapPointerMoveDelegate): void {
+  offMapPointerStop(callback: MapPointerMoveDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onMapPointerStopHandlers, callback);
   }
@@ -2299,9 +2442,9 @@ export class MapViewer {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onMapSingleClick(callback: MapSingleClickDelegate): void {
+  onMapSingleClick(callback: MapSingleClickDelegate): MapSingleClickDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onMapSingleClickHandlers, callback);
+    return EventHelper.onEvent(this.#onMapSingleClickHandlers, callback);
   }
 
   /**
@@ -2309,7 +2452,7 @@ export class MapViewer {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offMapSingleClick(callback: MapSingleClickDelegate): void {
+  offMapSingleClick(callback: MapSingleClickDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onMapSingleClickHandlers, callback);
   }
@@ -2514,29 +2657,6 @@ export class MapViewer {
 
   // #endregion
 }
-
-/**
- *  Definition of map state to attach to the map object for reference.
- */
-export type TypeMapState = {
-  currentProjection: number;
-  currentZoom: number;
-  mapCenterCoordinates: Coordinate;
-  mapExtent: Extent;
-  rotation: number;
-  singleClickedPosition: TypeMapMouseInfo;
-  pointerPosition: TypeMapMouseInfo;
-};
-
-/**
- * Type used to define the map mouse information
- * */
-export type TypeMapMouseInfo = {
-  lonlat: Coordinate;
-  pixel: Coordinate;
-  projected: Coordinate;
-  dragging: boolean;
-};
 
 /**
  * Type used when fetching geometry json

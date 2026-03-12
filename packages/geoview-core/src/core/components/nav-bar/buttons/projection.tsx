@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { createElement, useCallback } from 'react';
-import { useMapProjection, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapProjection } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
 import type { TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
@@ -10,6 +10,7 @@ import { IconButton } from '@/ui/icon-button/icon-button';
 import { List, ListItem } from '@/ui/list';
 import { ProjectionIcon, PublicIcon } from '@/ui/icons';
 import { useTranslation } from 'react-i18next';
+import { useMapController } from '@/core/controllers/map-controller';
 
 /** Mapping of projection codes to their display names. */
 const projectionChoiceOptions: {
@@ -35,7 +36,7 @@ export default function Projection(): JSX.Element {
 
   // Store
   const projection = useMapProjection();
-  const { setProjection } = useMapStoreActions();
+  const mapController = useMapController();
 
   /**
    * Handles map projection choice.
@@ -44,9 +45,9 @@ export default function Projection(): JSX.Element {
    */
   const handleChoice = useCallback(
     (projectionCode: TypeValidMapProjectionCodes): void => {
-      setProjection(projectionCode);
+      mapController.setProjectionAndForget(projectionCode);
     },
-    [setProjection]
+    [mapController]
   );
 
   /**

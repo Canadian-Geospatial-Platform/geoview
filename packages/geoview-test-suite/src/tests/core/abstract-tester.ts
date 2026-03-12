@@ -233,6 +233,7 @@ export abstract class AbstractTester {
   protected onPerformingTestSuccess<T>(test: Test<T>, result: T): void {
     // Update the step - clearing it
     test.setStatus('success');
+    test.addStep('Completed assertions.');
 
     // Emit
     this.#emitSuccess({ test, result });

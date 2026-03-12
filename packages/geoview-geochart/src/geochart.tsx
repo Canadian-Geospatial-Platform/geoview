@@ -1,13 +1,11 @@
 import type { GeoChartConfig, ChartType, GeoChartDefaultColors, SchemaValidator, GeoChartAction } from 'geochart';
 import { GeoChart as GeoChartComponent } from 'geochart';
-import {
-  useAppDisplayLanguageById,
-  useAppStoreActions,
-  useDisplayDateTimezone,
-} from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+
+import { useAppDisplayLanguageById, useDisplayDateTimezone } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { useLayerDisplayDateFormatShort } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
-import { MapEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/map-event-processor';
+import { useUIController } from 'geoview-core/core/controllers/ui-controller';
+import { useLayerController } from 'geoview-core/core/controllers/layer-controller';
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import type { TypeFeatureInfoEntry } from 'geoview-core/api/types/map-schema-types';
 import { logger } from 'geoview-core/core/utils/logger';
@@ -59,7 +57,8 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   const displayLanguage = useAppDisplayLanguageById(mapId);
   const displayDateFormatShort = useLayerDisplayDateFormatShort(layerPath);
   const displayDateTimezone = useDisplayDateTimezone();
-  const { addNotification } = useAppStoreActions();
+  const uiController = useUIController();
+  const layerController = useLayerController();
 
   // Provide the callback to redraw this component to the parent component
   provideCallbackRedraw?.(() => {
@@ -98,9 +97,9 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   const handleError = useCallback<(error: string, exception: unknown | undefined) => void>(
     (errorMessage: string): void => {
       // Show error
-      addNotification({ key: 'geochart', message: errorMessage, notificationType: 'error', count: 0 });
+      uiController.addNotification({ key: 'geochart', message: errorMessage, notificationType: 'error', count: 0 });
     },
-    [addNotification]
+    [uiController]
   );
 
   /**
@@ -128,8 +127,8 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
       ConfigBaseClass | undefined,
       TypeFeatureInfoEntry[] | undefined,
     ] = GeoChartParsing.findLayerDataAndConfigFromQueryResults(config, layers, (lyrPath: string) => {
-      // Searches the layer entry config based on the layer path using the MapEventProcessor
-      return MapEventProcessor.getLayerEntryConfigIfExists(mapId, lyrPath);
+      // Searches the layer entry config based on the layer path using the LayerController
+      return layerController.getLayerEntryConfigIfExists(lyrPath);
     });
 
     // If found a chart for the layer
@@ -148,7 +147,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
 
     // Return all info
     return { foundConfigChart, foundConfigChartLyr, foundLayerEntry, foundData, chartConfig };
-  }, [config, mapId, layers, displayLanguage, displayDateFormatShort, displayDateTimezone]);
+  }, [config, layers, layerController, displayDateFormatShort, displayLanguage, displayDateTimezone]);
 
   // #endregion HOOKS SECTION
 

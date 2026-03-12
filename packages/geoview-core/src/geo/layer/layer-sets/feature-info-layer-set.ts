@@ -1,24 +1,24 @@
 import type { Coordinate } from 'ol/coordinate';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import type { QueryType, TypeFeatureInfoResult, TypeResultSet } from '@/api/types/map-schema-types';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { AbstractLayerSet, type PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { GVKML } from '@/geo/layer/gv-layers/vector/gv-kml';
-import type { LayerApi } from '@/geo/layer/layer';
-import type {
-  TypeFeatureInfoResultSet,
-  TypeFeatureInfoResultSetEntry,
+import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
+import {
+  deleteStoreDetailsFeatureInfo,
+  propagateStoreFeatureInfoDetails,
+  type TypeFeatureInfoResultSet,
+  type TypeFeatureInfoResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { getStoreShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { LayerNoLastQueryToPerformError } from '@/core/exceptions/geoview-exceptions';
 import { logger } from '@/core/utils/logger';
-import { GVEsriImage } from '../gv-layers/raster/gv-esri-image';
 
 /**
- * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
+ * A Layer-set working with the LayerSetController at handling a result set of registered layers and synchronizing
  * events happening on them (in this case when the user click a location on the map) with a store
  * for UI updates.
  */
@@ -37,24 +37,6 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /** The abort controllers per layer path */
   #abortControllers: { [layerPath: string]: AbortController } = {};
-
-  /**
-   * The class constructor that instantiates a set of layers.
-   *
-   * @param layerApi - The layer Api to work with
-   */
-  constructor(layerApi: LayerApi) {
-    super(layerApi);
-
-    // Register a handler on the map click
-    this.layerApi.mapViewer.onMapSingleClick((mapViewer, payload) => {
-      // Query all layers which can be queried
-      this.queryLayers(payload.lonlat).catch((error: unknown) => {
-        // Log
-        logger.logPromiseFailed('queryLayers in onMapSingleClick in FeatureInfoLayerSet', error);
-      });
-    });
-  }
 
   /**
    * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
@@ -102,7 +84,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    */
   protected override onDeleteFromStore(layerPath: string): void {
     // Remove it from feature info array (propagating to the store)
-    FeatureInfoEventProcessor.deleteFeatureInfo(this.getMapId(), layerPath);
+    deleteStoreDetailsFeatureInfo(this.getMapId(), layerPath);
   }
 
   /**
@@ -116,17 +98,17 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     if (!this.#lastQueryLonLat) throw new LayerNoLastQueryToPerformError();
 
     // Re-query the layers
-    return this.queryLayers(this.#lastQueryLonLat, false);
+    return this.queryLayers(this.#lastQueryLonLat);
   }
 
   /**
    * Queries the features at the provided coordinate for all the registered layers.
    *
    * @param lonLatCoordinate - The longitude/latitude coordinate where to query the features
-   * @param fromClick - Optional whether the query is from a user click
+   * @param callbackWhenFirstQueryStarted - Optional callback to be executed when the first query has started progressing.
    * @returns A promise that resolves with the result of the query
    */
-  async queryLayers(lonLatCoordinate: Coordinate, fromClick: boolean = true): Promise<TypeFeatureInfoResultSet> {
+  async queryLayers(lonLatCoordinate: Coordinate, callbackWhenFirstQueryStarted?: () => void): Promise<TypeFeatureInfoResultSet> {
     // FIXME: Watch out for code reentrancy between queries!
     // FIX.MECONT: The AbortController helps a lot, but there could be some minor timing issues left
     // FIX.MECONT: with the mutating this.resultSet.
@@ -142,7 +124,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
     // Loop on each layer path in the resultSet
     Object.keys(this.resultSet).forEach((layerPath) => {
       // Get the layer config and layer associated with the layer path
-      const layer = this.layerApi.getGeoviewLayerRegular(layerPath);
+      const layer = this.layerDomain.getGeoviewLayerRegular(layerPath);
 
       // If the layer is not queryable, skip it
       if (!layer.getQueryable()) return;
@@ -214,11 +196,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
           // Filter out unsymbolized features if the showUnsymbolizedFeatures config is false
           // GV: KML and ESRI Image is excluded as they currently have no symbology.
-          if (
-            !AppEventProcessor.getShowUnsymbolizedFeatures(this.getMapId()) &&
-            !(layer instanceof GVKML) &&
-            !(layer instanceof GVEsriImage)
-          ) {
+          if (!getStoreShowUnsymbolizedFeatures(this.getMapId()) && !(layer instanceof GVKML) && !(layer instanceof GVEsriImage)) {
             // eslint-disable-next-line no-param-reassign
             promiseResult.results = arrayOfRecords.filter((record) => record.featureIcon);
           }
@@ -250,7 +228,9 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
         .finally(() => {
           // Propagate to store
           this.#propagateToStore(this.resultSet[layerPath]);
-          if (fromClick) FeatureInfoEventProcessor.openDetailsPanelOnMapClick(this.getMapId());
+
+          // Callback about it
+          callbackWhenFirstQueryStarted?.();
         });
     });
 
@@ -285,7 +265,7 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    */
   #propagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry): void {
     // Propagate
-    FeatureInfoEventProcessor.propagateFeatureInfoToStore(this.getMapId(), resultSetEntry);
+    propagateStoreFeatureInfoDetails(this.getMapId(), resultSetEntry);
   }
 
   /**

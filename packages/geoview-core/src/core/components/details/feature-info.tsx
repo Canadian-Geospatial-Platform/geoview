@@ -12,12 +12,15 @@ import {
   Typography,
   ZoomInSearchIcon,
 } from '@/ui';
-import { useDetailsCheckedFeatures, useDetailsStoreActions } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
+  addStoreDetailsCheckedFeature,
+  removeStoreDetailsCheckedFeature,
+  useDetailsCheckedFeatures,
+} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import {
+  setStoreGeochartSelectedLayerPath,
   useGeochartConfigs,
   useGeochartLayerDataArrayBatch,
-  useGeochartStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/geochart-state';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 import { logger } from '@/core/utils/logger';
@@ -27,6 +30,8 @@ import type { TypeContainerBox } from '@/core/types/global-types';
 import { FeatureInfoTable } from './feature-info-table';
 import { getSxClasses } from './details-style';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useMapController } from '@/core/controllers/map-controller';
 
 /** Properties for the FeatureInfo component. */
 interface FeatureInfoProps {
@@ -206,18 +211,14 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
   const [checked, setChecked] = useState<boolean>(false);
 
   // Store
+  const mapId = useGeoViewMapId();
   const checkedFeatures = useDetailsCheckedFeatures();
-  const { addCheckedFeature, removeCheckedFeature } = useDetailsStoreActions();
-  const { zoomToExtent, highlightBBox, addHighlightedFeature } = useMapStoreActions();
   const geochartLayerDataArrayBatch = useGeochartLayerDataArrayBatch();
-  const { setSelectedLayerPath } = useGeochartStoreActions() ?? {};
   const geochartConfigs = useGeochartConfigs();
+  const mapController = useMapController();
 
   // Use navigate hook for geochart (only if geochart state exists)
-  const navigateToGeochart = useNavigateToTab(
-    'geochart',
-    setSelectedLayerPath ? (layerPath: string) => setSelectedLayerPath(layerPath) : undefined
-  );
+  const navigateToGeochart = useNavigateToTab('geochart', setStoreGeochartSelectedLayerPath);
 
   /**
    * Memoizes the feature name.
@@ -272,13 +273,13 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
       // If feature is checked
       if (checkedState) {
         // Add
-        addCheckedFeature(feature);
+        addStoreDetailsCheckedFeature(mapId, feature);
       } else {
         // Remove
-        removeCheckedFeature(feature);
+        removeStoreDetailsCheckedFeature(mapId, feature);
       }
     },
-    [feature, addCheckedFeature, removeCheckedFeature]
+    [mapId, feature]
   );
 
   /**
@@ -294,20 +295,21 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
       const zoomExtent = isPoint ? GeoUtilities.bufferExtent(feature.extent, EXTENT_BUFFER) : feature.extent;
 
       // Zoom to extent and highlight the feature
-      zoomToExtent(zoomExtent, { padding: ZOOM_PADDING, maxZoom: ZOOM_MAX_LEVEL })
+      mapController
+        .zoomToExtent(zoomExtent, { padding: ZOOM_PADDING, maxZoom: ZOOM_MAX_LEVEL })
         .then(() => {
           // Highlight the bounding box
           if (feature.extent && !isPoint) {
-            highlightBBox(feature.extent, false);
+            mapController.highlightBBox(feature.extent, false);
           }
           // Add the current feature to highlights
-          addHighlightedFeature(feature);
+          mapController.addHighlightedFeature(feature);
         })
         .catch((error: unknown) => {
           logger.logPromiseFailed('zoomToExtent in handleZoomIn in FeatureInfoNew', error);
         });
     },
-    [feature, zoomToExtent, highlightBBox, addHighlightedFeature]
+    [feature, mapController]
   );
 
   /**

@@ -22,9 +22,10 @@ export default class EventHelper {
    * @param handlersList - The list of handlers to be called with the event
    * @param callback - The callback to be executed whenever the event is raised
    */
-  static onEvent<T, U, Z>(handlersList: EventDelegateBase<T, U, Z>[], callback: EventDelegateBase<T, U, Z>): void {
+  static onEvent<T, U, Z>(handlersList: EventDelegateBase<T, U, Z>[], callback: EventDelegateBase<T, U, Z>): EventDelegateBase<T, U, Z> {
     // Push a new callback handler to the list of handlers
     handlersList.push(callback);
+    return callback;
   }
 
   /**
@@ -33,7 +34,10 @@ export default class EventHelper {
    * @param handlersList - The list of handlers on which to check to remove the handler
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  static offEvent<T, U, Z>(handlersList: EventDelegateBase<T, U, Z>[], callback: EventDelegateBase<T, U, Z>): void {
+  static offEvent<T, U, Z>(handlersList: EventDelegateBase<T, U, Z>[], callback: EventDelegateBase<T, U, Z> | undefined): void {
+    // If no callback provided, do nothing
+    if (!callback) return;
+
     // Find the callback and remove it
     const index = handlersList.indexOf(callback);
     if (index !== -1) {

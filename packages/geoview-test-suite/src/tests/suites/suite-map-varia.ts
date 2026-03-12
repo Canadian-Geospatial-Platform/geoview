@@ -2,7 +2,6 @@ import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { MapTester } from '../testers/map-tester';
 import { GVAbstractTestSuite } from './abstract-gv-test-suite';
-import { MapEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/map-event-processor';
 
 /**
  * The GeoView Test Suite.
@@ -107,7 +106,7 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
     await pNorthArrowRotationLCC;
 
     // Make sure the map is reset in its initial extent after the zooms
-    await MapEventProcessor.zoomToInitialExtent(this.getMapId());
+    await this.getControllersRegistry().mapController.zoomToInitialExtent();
 
     // #endregion PROMISES SYNCH ZOOMING
 
@@ -142,7 +141,7 @@ export class GVTestSuiteMapVaria extends GVAbstractTestSuite {
     const pSetLanguage = this.#mapTester.testSetLanguage();
 
     // Make sure the map is in its initial extent
-    await MapEventProcessor.zoomToInitialExtent(this.getMapId());
+    await this.getControllersRegistry().mapController.zoomToInitialExtent();
 
     // Test non-queryable layer not in details
     const pNonQueryableLayerNotInDetails = this.#mapTester.testNonQueryableLayerNotInDetails('geojsonLYR5/polygons.json', [-88, 52]);

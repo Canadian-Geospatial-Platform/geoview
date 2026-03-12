@@ -9,16 +9,17 @@ import type {
   TypeResultSetEntry,
 } from '@/api/types/map-schema-types';
 import { generateId, whenThisThen } from '@/core/utils/utilities';
+import type { LayerDomain } from '@/core/domains/layer-domain';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
-import type { LayerApi } from '@/geo/layer/layer';
 import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { MapViewer } from '@/geo/map/map-viewer';
 import { logger } from '@/core/utils/logger';
 
 /**
@@ -27,8 +28,13 @@ import { logger } from '@/core/utils/logger';
  * Layers are added/removed to the layer-set via the registerOrUnregisterLayer function.
  */
 export abstract class AbstractLayerSet {
-  /** The LayerApi to work with */
-  protected layerApi: LayerApi;
+  /** The LayerDomain to work with */
+  // TODO: REFACTOR IMPORTANT - We can get rid of the layerDomain dependency here if we
+  // TO.DOCONT: always pass the GVLayer or LayerEntry in parameters when necessary instead of the layerPath string.
+  protected layerDomain: LayerDomain;
+
+  /** The MapViewer to work with */
+  protected mapViewer: MapViewer;
 
   /** An object containing the result sets indexed using the layer path */
   resultSet: TypeResultSet = {};
@@ -47,10 +53,12 @@ export abstract class AbstractLayerSet {
   /**
    * Constructs a new LayerSet instance.
    *
-   * @param layerApi - The LayerApi instance to work with
+   * @param mapViewer - The MapViewer instance to work with
+   * @param layerDomain - The LayerDomain instance to work with
    */
-  constructor(layerApi: LayerApi) {
-    this.layerApi = layerApi;
+  constructor(mapViewer: MapViewer, layerDomain: LayerDomain) {
+    this.mapViewer = mapViewer;
+    this.layerDomain = layerDomain;
   }
 
   // #region OVERRIDES
@@ -242,7 +250,7 @@ export abstract class AbstractLayerSet {
    */
   unregister(layerPath: string): void {
     // Call the unregistration function for the layer-set. This method is different for each child.
-    this.onUnregisterLayerConfig(this.layerApi.getLayerEntryConfigIfExists(layerPath));
+    this.onUnregisterLayerConfig(this.layerDomain.getLayerEntryConfigIfExists(layerPath));
 
     // Delete from the store
     this.onDeleteFromStore(layerPath);
@@ -267,7 +275,7 @@ export abstract class AbstractLayerSet {
    * @returns The map id
    */
   protected getMapId(): string {
-    return this.layerApi.getMapId();
+    return this.mapViewer.mapId;
   }
 
   /**
@@ -291,10 +299,10 @@ export abstract class AbstractLayerSet {
     if (!geoviewLayer.getVisibleIncludingParents()) return Promise.resolve({ results: [] });
 
     // If is not in visible range
-    if (!geoviewLayer.getInVisibleRange(this.layerApi.mapViewer.getView().getZoom())) return Promise.resolve({ results: [] });
+    if (!geoviewLayer.getInVisibleRange(this.mapViewer.getView().getZoom())) return Promise.resolve({ results: [] });
 
     // Get Feature Info
-    return geoviewLayer.getFeatureInfo(this.layerApi.mapViewer.map, queryType, location, queryGeometry, abortController);
+    return geoviewLayer.getFeatureInfo(this.mapViewer.map, queryType, location, queryGeometry, abortController);
   }
 
   // #endregion PROTECTED METHODS
@@ -320,7 +328,7 @@ export abstract class AbstractLayerSet {
           // The layer has become loaded
 
           // Get the layer (not just the config) if it exists yet
-          const layer = this.layerApi.getGeoviewLayerIfExists(layerConfig.layerPath);
+          const layer = this.layerDomain.getGeoviewLayerIfExists(layerConfig.layerPath);
 
           // If the layer could be found
           if (layer) {

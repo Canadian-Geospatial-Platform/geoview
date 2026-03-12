@@ -5,16 +5,16 @@ import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { generateId } from '@/core/utils/utilities';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
-import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
+import { type ActiveAppBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import type { UIController } from '@/core/controllers/ui-controller';
 import { logger } from '@/core/utils/logger';
-import type { ActiveAppBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 /**
  * Class to manage buttons on the app-bar.
  */
 export class AppBarApi {
-  /** The map id this AppBarApi belongs to. */
-  mapId: string;
+  /** The UI controller */
+  #uiController: UIController;
 
   /** Button panels registered on the app-bar, keyed by panel id. */
   buttons: Record<string, TypeButtonPanel> = {};
@@ -28,10 +28,11 @@ export class AppBarApi {
   /**
    * Instantiates an AppBarApi class.
    *
-   * @param mapId - The map id this AppBarApi belongs to
+   * @param uiController - The UI controller this app bar api belongs to
    */
-  constructor(mapId: string) {
-    this.mapId = mapId;
+  constructor(uiController: UIController) {
+    // Keep the controller, for actions.
+    this.#uiController = uiController;
   }
 
   /**
@@ -155,12 +156,13 @@ export class AppBarApi {
   }
 
   /**
-   * Gets the currently active app-bar tab.
+   * Gets the active app bar tab.
    *
-   * @returns The active app bar tab info
+   * @return {ActiveAppBarTabType} The active app bar tab info.
+   * @deprecated Legacy support. Should use uiController.getActiveAppBarTab directly instead.
    */
   getActiveAppBarTab(): ActiveAppBarTabType {
-    return UIEventProcessor.getActiveAppBarTab(this.mapId);
+    return this.#uiController.getActiveAppBarTab();
   }
 
   /**
@@ -187,9 +189,11 @@ export class AppBarApi {
    * @param tabId - The id of the tab to be selected
    * @param open - Optional open (true) or closed (false) panel (default: true)
    * @param isFocusTrapped - Optional whether focus should be trapped (default: true)
+   * @deprecated Legacy support. Should use uiController.setActiveAppBarTab directly instead.
    */
   selectTab(tabId: string, open: boolean = true, isFocusTrapped: boolean = true): void {
-    UIEventProcessor.setActiveAppBarTab(this.mapId, tabId, open, isFocusTrapped);
+    // Redirect to ui controller
+    this.#uiController.setActiveAppBarTab(tabId, open, isFocusTrapped);
   }
 }
 

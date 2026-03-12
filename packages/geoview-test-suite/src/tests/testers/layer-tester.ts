@@ -1,6 +1,5 @@
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { LayerStatusErrorError } from 'geoview-core/core/exceptions/layer-exceptions';
 import { LayerNoCapabilitiesError, LayerServiceMetadataUnableToFetchError } from 'geoview-core/core/exceptions/layer-exceptions';
 import type { TypeGeoviewLayerConfig } from 'geoview-core/api/types/layer-schema-types';
@@ -8,7 +7,6 @@ import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-
 import { EsriDynamic } from 'geoview-core/geo/layer/geoview-layers/raster/esri-dynamic';
 import { generateId } from 'geoview-core/core/utils/utilities';
 import { AbstractBaseLayerEntryConfig } from 'geoview-core/api/config/validation-classes/abstract-base-layer-entry-config';
-import { LegendEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/legend-event-processor';
 import { EsriFeature } from 'geoview-core/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from 'geoview-core/geo/layer/geoview-layers/raster/esri-image';
 import { WMS } from 'geoview-core/geo/layer/geoview-layers/raster/wms';
@@ -19,9 +17,10 @@ import { CSV } from 'geoview-core/geo/layer/geoview-layers/vector/csv';
 import { OgcFeature } from 'geoview-core/geo/layer/geoview-layers/vector/ogc-feature';
 import { WKB } from 'geoview-core/geo/layer/geoview-layers/vector/wkb';
 import { KML } from 'geoview-core/geo/layer/geoview-layers/vector/kml';
-import type { GeoViewLayerAddedResult } from 'geoview-core/geo/layer/layer';
+import type { GeoViewLayerAddedResult } from 'geoview-core/core/controllers/layer-creator-controller';
 import type { TypeMapFeaturesInstance } from 'geoview-core/api/types/map-schema-types';
 import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
+import { getStoreLayerStateLegendLayerByPath } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 
 /**
  * Main Layer testing class.
@@ -63,25 +62,19 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath);
       },
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.helperStepAssertLayerExists(
-          test,
-          this.getMapViewer(),
-          layerPath,
-          undefined,
-          GVAbstractTester.HISTORICAL_FLOOD_ICON_LIST
-        );
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath, undefined, GVAbstractTester.HISTORICAL_FLOOD_ICON_LIST);
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -109,57 +102,57 @@ export class LayerTester extends GVAbstractTester {
         test.addStep('Creating the GeoView Layer Configuration...');
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMapFromUUID(test, this.getMapViewer(), gvLayerId);
+        await this.helperStepAddLayerOnMapFromUUID(test, gvLayerId);
 
         // Find the layer and wait until its ready
-        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathPetroleum);
-        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathMinerals);
-        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathForestry);
-        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathFisheries);
-        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathAgriculture);
-        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathCanecumene);
+        await this.helperStepCheckLayerAtLayerPath(test, layerPathPetroleum);
+        await this.helperStepCheckLayerAtLayerPath(test, layerPathMinerals);
+        await this.helperStepCheckLayerAtLayerPath(test, layerPathForestry);
+        await this.helperStepCheckLayerAtLayerPath(test, layerPathFisheries);
+        await this.helperStepCheckLayerAtLayerPath(test, layerPathAgriculture);
+        return this.helperStepCheckLayerAtLayerPath(test, layerPathCanecumene);
       },
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
         LayerTester.helperStepAssertLayerExists(
           test,
-          this.getMapViewer(),
+          this.getMapId(),
           layerPathPetroleum,
           undefined,
           GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_PETROLEUM_ICON_LIST
         );
         LayerTester.helperStepAssertLayerExists(
           test,
-          this.getMapViewer(),
+          this.getMapId(),
           layerPathMinerals,
           undefined,
           GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_MINERALS_ICON_LIST
         );
         LayerTester.helperStepAssertLayerExists(
           test,
-          this.getMapViewer(),
+          this.getMapId(),
           layerPathForestry,
           undefined,
           GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_FORESTRY_ICON_LIST
         );
         LayerTester.helperStepAssertLayerExists(
           test,
-          this.getMapViewer(),
+          this.getMapId(),
           layerPathFisheries,
           undefined,
           GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_FISHERIES_ICON_LIST
         );
         LayerTester.helperStepAssertLayerExists(
           test,
-          this.getMapViewer(),
+          this.getMapId(),
           layerPathAgriculture,
           undefined,
           GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_AGRICULTURE_ICON_LIST
         );
         LayerTester.helperStepAssertLayerExists(
           test,
-          this.getMapViewer(),
+          this.getMapId(),
           layerPathCanecumene,
           undefined,
           GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_CANECUMENE_ICON_LIST
@@ -167,7 +160,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPathGroup);
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPathGroup);
       }
     );
   }
@@ -202,12 +195,12 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
       },
       undefined,
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerConfigAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerConfigAndAssert(test, layerPath);
       }
     );
   }
@@ -241,25 +234,19 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath);
       },
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.helperStepAssertLayerExists(
-          test,
-          this.getMapViewer(),
-          layerPath,
-          undefined,
-          GVAbstractTester.FOREST_INDUSTRY_ICON_LIST
-        );
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath, undefined, GVAbstractTester.FOREST_INDUSTRY_ICON_LIST);
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -294,12 +281,12 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
       },
       undefined,
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerConfigAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerConfigAndAssert(test, layerPath);
       }
     );
   }
@@ -329,19 +316,19 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath);
       },
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath, undefined, undefined);
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath, undefined, undefined);
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -373,19 +360,19 @@ export class LayerTester extends GVAbstractTester {
         const gvConfig = EsriImage.createGeoviewLayerConfigSimple(gvLayerId, gvLayerName, layerUrl, false);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath);
       },
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath);
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath);
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -424,21 +411,21 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathCities);
-        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPathRoads);
+        await this.helperStepCheckLayerAtLayerPath(test, layerPathCities);
+        return this.helperStepCheckLayerAtLayerPath(test, layerPathRoads);
       },
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPathCities);
-        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPathRoads);
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPathCities);
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPathRoads);
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPathGroup);
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPathGroup);
       }
     );
   }
@@ -471,12 +458,12 @@ export class LayerTester extends GVAbstractTester {
         const gvConfig = EsriImage.createGeoviewLayerConfigSimple(gvLayerId, gvLayerName, layerUrl, false);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
       },
       undefined,
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerConfigAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerConfigAndAssert(test, layerPath);
       }
     );
   }
@@ -510,19 +497,19 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath, undefined, false);
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath, undefined, false);
       },
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath, GVAbstractTester.OWS_MUNDIALIS_ICON_IMAGE);
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath, GVAbstractTester.OWS_MUNDIALIS_ICON_IMAGE);
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -558,19 +545,19 @@ export class LayerTester extends GVAbstractTester {
         );
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath, undefined, false);
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath, undefined, false);
       },
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath, GVAbstractTester.DATACUBE_MSI_ICON_IMAGE);
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath, GVAbstractTester.DATACUBE_MSI_ICON_IMAGE);
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -606,24 +593,19 @@ export class LayerTester extends GVAbstractTester {
         );
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath, undefined, false);
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath, undefined, false);
       },
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.helperStepAssertLayerExists(
-          test,
-          this.getMapViewer(),
-          layerPath,
-          GVAbstractTester.DATACUBE_RING_FIRE_HALIFAX_ICON_IMAGE
-        );
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath, GVAbstractTester.DATACUBE_RING_FIRE_HALIFAX_ICON_IMAGE);
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -667,12 +649,12 @@ export class LayerTester extends GVAbstractTester {
         );
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
       },
       undefined,
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerConfigAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerConfigAndAssert(test, layerPath);
       }
     );
   }
@@ -706,19 +688,19 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath);
       },
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath, undefined, GVAbstractTester.GEOMET_ICON_LIST);
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath, undefined, GVAbstractTester.GEOMET_ICON_LIST);
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -753,12 +735,12 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
       },
       undefined,
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerConfigAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerConfigAndAssert(test, layerPath);
       }
     );
   }
@@ -792,12 +774,12 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
       },
       undefined,
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerConfigAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerConfigAndAssert(test, layerPath);
       }
     );
   }
@@ -834,25 +816,19 @@ export class LayerTester extends GVAbstractTester {
         gvConfig.serviceDateFormat = 'DD/MM/YYYYTHH:mm:ss';
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath);
       },
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.helperStepAssertLayerExists(
-          test,
-          this.getMapViewer(),
-          layerPath,
-          undefined,
-          GVAbstractTester.GEOJSON_POLYGONS_ICON_LIST
-        );
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath, undefined, GVAbstractTester.GEOJSON_POLYGONS_ICON_LIST);
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -889,15 +865,15 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+        await this.helperStepCheckLayerAtLayerPath(test, layerPath);
       },
       undefined,
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerConfigAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerConfigAndAssert(test, layerPath);
       }
     );
   }
@@ -931,19 +907,19 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready, wait longer than default timeout, because TIFF
-        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath, 60000, false);
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath, 60000, false);
       },
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        return LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath);
+        return LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath);
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -980,15 +956,15 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+        await this.helperStepCheckLayerAtLayerPath(test, layerPath);
       },
       undefined,
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerConfigAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerConfigAndAssert(test, layerPath);
       }
     );
   }
@@ -1022,19 +998,19 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath);
       },
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath, undefined, GVAbstractTester.CSV_STATION_ICON_LIST);
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath, undefined, GVAbstractTester.CSV_STATION_ICON_LIST);
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1071,15 +1047,15 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+        await this.helperStepCheckLayerAtLayerPath(test, layerPath);
       },
       undefined,
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerConfigAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerConfigAndAssert(test, layerPath);
       }
     );
   }
@@ -1113,17 +1089,17 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath);
       },
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
         LayerTester.helperStepAssertLayerExists(
           test,
-          this.getMapViewer(),
+          this.getMapId(),
           layerPath,
           undefined,
           GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES_ICON_LIST
@@ -1131,7 +1107,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1166,12 +1142,12 @@ export class LayerTester extends GVAbstractTester {
         ]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
       },
       undefined,
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerConfigAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerConfigAndAssert(test, layerPath);
       }
     );
   }
@@ -1203,19 +1179,19 @@ export class LayerTester extends GVAbstractTester {
         const gvConfig = WKB.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: GVAbstractTester.WKB_SOUTH_AFRICA }]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath, undefined, false);
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath, undefined, false);
       },
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath);
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath);
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1250,15 +1226,15 @@ export class LayerTester extends GVAbstractTester {
         const gvConfig = WKB.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: GVAbstractTester.WKB_SOUTH_AFRICA }]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+        await this.helperStepCheckLayerAtLayerPath(test, layerPath);
       },
       undefined,
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerConfigAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerConfigAndAssert(test, layerPath);
       }
     );
   }
@@ -1290,19 +1266,19 @@ export class LayerTester extends GVAbstractTester {
         const gvConfig = KML.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: GVAbstractTester.KML_TORNADO_FILE }]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath, undefined, false);
+        return this.helperStepCheckLayerAtLayerPath(test, layerPath, undefined, false);
       },
       (test) => {
         // Perform assertions
         // Redirect to helper to check if the layer exists
-        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath);
+        LayerTester.helperStepAssertLayerExists(test, this.getMapId(), layerPath);
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPath);
       }
     );
   }
@@ -1337,15 +1313,15 @@ export class LayerTester extends GVAbstractTester {
         const gvConfig = KML.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [{ id: GVAbstractTester.KML_TORNADO_FILE }]);
 
         // Redirect to helper to add the layer to the map and wait
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await this.helperStepAddLayerOnMap(test, gvConfig);
 
         // Find the layer and wait until its ready
-        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+        await this.helperStepCheckLayerAtLayerPath(test, layerPath);
       },
       undefined,
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerConfigAndAssert(test, this.getMapViewer(), layerPath);
+        this.helperFinalizeStepRemoveLayerConfigAndAssert(test, layerPath);
       }
     );
   }
@@ -1375,7 +1351,7 @@ export class LayerTester extends GVAbstractTester {
       'Test initial settings cascade',
       async (test) => {
         // Add the layer to the map and get the AbstractGeoViewLayer
-        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), config as unknown as TypeGeoviewLayerConfig);
+        await this.helperStepAddLayerOnMap(test, config as unknown as TypeGeoviewLayerConfig);
 
         // Return created map config
         return this.getMapViewer().createMapConfigFromMapState();
@@ -1405,7 +1381,7 @@ export class LayerTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to helper to clean up and assert
-        LayerTester.helperFinalizeStepRemoveLayerConfigAndAssert(test, this.getMapViewer(), 'geojsonLYR1/point-feature-group');
+        this.helperFinalizeStepRemoveLayerConfigAndAssert(test, 'geojsonLYR1/point-feature-group');
       }
     );
   }
@@ -1424,16 +1400,12 @@ export class LayerTester extends GVAbstractTester {
    * @param gvConfig - The configuration object defining the GeoView layer to be added
    * @returns A promise that resolves to the fully loaded GeoView layer instance
    */
-  static async helperStepAddLayerOnMap<T>(
-    test: Test<T>,
-    mapViewer: MapViewer,
-    gvConfig: TypeGeoviewLayerConfig
-  ): Promise<GeoViewLayerAddedResult> {
+  async helperStepAddLayerOnMap<T>(test: Test<T>, gvConfig: TypeGeoviewLayerConfig): Promise<GeoViewLayerAddedResult> {
     // Adding the layer on the map
     test.addStep('Adding the layer on the map...');
 
     // Add the geoview layer by geocore uuid
-    const result = mapViewer.layer.addGeoviewLayer(gvConfig);
+    const result = this.getControllersRegistry().layerCreatorController.addGeoviewLayer(gvConfig);
 
     // Creating the configuration
     test.addStep('Waiting for the layer to be added...');
@@ -1455,16 +1427,12 @@ export class LayerTester extends GVAbstractTester {
    * @param uuid - The GeoCore UUID used to add the layer
    * @returns A promise that resolves to the fully loaded GeoView layer instance
    */
-  static async helperStepAddLayerOnMapFromUUID<T>(
-    test: Test<T>,
-    mapViewer: MapViewer,
-    uuid: string
-  ): Promise<GeoViewLayerAddedResult | void> {
+  async helperStepAddLayerOnMapFromUUID<T>(test: Test<T>, uuid: string): Promise<GeoViewLayerAddedResult | void> {
     // Adding the layer on the map
     test.addStep('Adding the layer on the map...');
 
     // Add the geoview layer by geocore uuid
-    const result = await mapViewer.layer.addGeoviewLayerByGeoCoreUUID(uuid);
+    const result = await this.getControllersRegistry().layerCreatorController.addGeoviewLayerByGeoCoreUUID(uuid);
 
     // Creating the configuration
     test.addStep('Waiting for the layer to be added...');
@@ -1490,9 +1458,8 @@ export class LayerTester extends GVAbstractTester {
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
    * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
    */
-  static async helperStepCheckLayerAtLayerPath<T>(
+  async helperStepCheckLayerAtLayerPath<T>(
     test: Test<T>,
-    mapViewer: MapViewer,
     layerPath: string,
     timeoutOnLoad: number = 30000,
     waitStyle: boolean = true
@@ -1501,7 +1468,7 @@ export class LayerTester extends GVAbstractTester {
     test.addStep(`Find the layer ${layerPath} on the map...`);
 
     // Get the layer
-    const layer = mapViewer.layer.getGeoviewLayerRegular(layerPath);
+    const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
 
     // Creating the configuration
     test.addStep(`Waiting for the layer to be loaded...`);
@@ -1532,7 +1499,7 @@ export class LayerTester extends GVAbstractTester {
    * `helperStepAssertStyleApplied`.
    *
    * @param test - The test instance used to record the verification steps
-   * @param mapViewer - The map viewer instance containing the layer store
+   * @param mapId - The map id
    * @param layerPath - The path or ID of the layer to verify
    * @param checkIconImage - Optional expected icon image.
    *   If provided, the function will additionally check that the legend contains a matching icon
@@ -1541,13 +1508,13 @@ export class LayerTester extends GVAbstractTester {
    */
   static helperStepAssertLayerExists(
     test: Test<AbstractGVLayer>,
-    mapViewer: MapViewer,
+    mapId: string,
     layerPath: string,
     checkIconImage?: string,
     checkIconsList?: Partial<TypeLegendItem>[]
   ): void {
     // Get the layer legend
-    const legendLayer = LegendEventProcessor.getLegendLayerInfo(mapViewer.mapId, layerPath);
+    const legendLayer = getStoreLayerStateLegendLayerByPath(mapId, layerPath);
 
     // Verify the layer has a legend information
     test.addStep(`Verify the layer ${layerPath} has legend information...`);
@@ -1556,7 +1523,7 @@ export class LayerTester extends GVAbstractTester {
     // If checking the style
     if (checkIconImage || checkIconsList) {
       // Redirect
-      this.helperStepAssertStyleApplied(test, mapViewer, layerPath, checkIconImage, checkIconsList);
+      this.helperStepAssertStyleApplied(test, mapId, layerPath, checkIconImage, checkIconsList);
     }
   }
 
@@ -1571,20 +1538,20 @@ export class LayerTester extends GVAbstractTester {
    * - that the first icon's list of legend items matches `checkIconsList`
    *
    * @param test - The test instance used to record the verification steps
-   * @param mapViewer - The map viewer instance containing the layer store
+   * @param mapId - The map id
    * @param layerPath - The path or ID of the layer whose style icons are being verified
    * @param checkIconImage - Optional expected icon image to validate against the legend
    * @param checkIconsList - Optional expected list of legend icon items
    */
   static helperStepAssertStyleApplied(
     test: Test<AbstractGVLayer>,
-    mapViewer: MapViewer,
+    mapId: string,
     layerPath: string,
     checkIconImage?: string,
     checkIconsList?: Partial<TypeLegendItem>[]
   ): void {
     // Get the layer legend from the store
-    const legendLayer = LegendEventProcessor.getLegendLayerInfo(mapViewer.mapId, layerPath);
+    const legendLayer = getStoreLayerStateLegendLayerByPath(mapId, layerPath);
 
     // Verify the icon were also loaded for the layer
     test.addStep(`Verify the icons were loaded for the layer...`);
@@ -1617,47 +1584,26 @@ export class LayerTester extends GVAbstractTester {
    *
    * @param test - The test instance used to record each step of the removal process
    * @param mapViewer - The map viewer instance from which the layer is removed
-   * @param layerPath - The unique path or ID of the layer to be removed
-   */
-  static helperFinalizeStepRemoveLayerAndAssert<T>(test: Test<T>, mapViewer: MapViewer, layerPath: string): void {
-    // Check that the layer is indeed there
-    test.addStep(`Checking the layer path ${layerPath} exists on the map...`);
-    Test.assertArrayIncludes(mapViewer.layer.getGeoviewLayerPaths(), layerPath);
-
-    // Remove the added layer
-    test.addStep(`Removing the layer ${layerPath} from the map...`);
-    mapViewer.layer.removeLayerUsingPath(layerPath);
-
-    // Check the removal worked
-    test.addStep(`Check that the layer is indeed removed...`);
-    const legendLayers = LegendEventProcessor.getLegendLayers(mapViewer.mapId);
-    Test.assertArrayExcludes(
-      legendLayers.map((legendLayer) => legendLayer.layerPath),
-      layerPath
-    );
-  }
-
-  /**
-   * Removes a layer from the map using its path and asserts that it no longer exists in the legend store.
-   *
-   * Each step is logged to the provided test instance for traceability.
-   *
-   * @param test - The test instance used to record each step of the removal process
-   * @param mapViewer - The map viewer instance from which the layer is removed
    * @param geoviewLayerId - The geoview layer id of the layer config to be removed
    */
-  static helperFinalizeStepRemoveLayerConfigAndAssert<T>(test: Test<T>, mapViewer: MapViewer, geoviewLayerId: string): void {
+  helperFinalizeStepRemoveLayerConfigAndAssert<T>(test: Test<T>, geoviewLayerId: string): void {
     // Check that the layer is indeed there
     test.addStep(`Checking the geoview layer ${geoviewLayerId} exists on the map...`);
-    Test.assertIsDefined('layerEntryConfig ' + geoviewLayerId, mapViewer.layer.getLayerEntryConfigIfExists(geoviewLayerId));
+    Test.assertIsDefined(
+      'layerEntryConfig ' + geoviewLayerId,
+      this.getControllersRegistry().layerController.getLayerEntryConfigIfExists(geoviewLayerId)
+    );
 
     // Remove the added layer
     test.addStep(`Removing the geoview layer ${geoviewLayerId} from the map...`);
-    mapViewer.layer.removeLayerUsingPath(geoviewLayerId);
+    this.getControllersRegistry().layerCreatorController.removeLayerUsingPath(geoviewLayerId);
 
     // Validate that it's gone
     test.addStep(`Validate that the layer is indeed gone...`);
-    Test.assertIsUndefined('layerEntryConfig ' + geoviewLayerId, mapViewer.layer.getLayerEntryConfigIfExists(geoviewLayerId));
+    Test.assertIsUndefined(
+      'layerEntryConfig ' + geoviewLayerId,
+      this.getControllersRegistry().layerController.getLayerEntryConfigIfExists(geoviewLayerId)
+    );
   }
 
   // #endregion HELPERS
