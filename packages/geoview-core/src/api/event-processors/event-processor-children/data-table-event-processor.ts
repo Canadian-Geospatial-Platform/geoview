@@ -6,7 +6,7 @@ import type {
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import type { TypeFeatureInfoEntry, TypeFeatureInfoResult, TypeLayerData, TypeResultSetEntry } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoEntry, TypeFeatureInfoResult, TypeLayerData } from '@/api/types/map-schema-types';
 import { UIEventProcessor } from './ui-event-processor';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
@@ -147,7 +147,7 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
    */
   static deleteFeatureAllInfo(mapId: string, layerPath: string): void {
     // Redirect to helper function
-    this.#deleteFromArray(this.getDataTableState(mapId).allFeaturesDataArray, layerPath, (layerArrayResult) => {
+    this.helperDeleteFromArray(this.getDataTableState(mapId).allFeaturesDataArray, layerPath, (layerArrayResult) => {
       // Update the layer data array in the store
       this.getDataTableState(mapId).setterActions.setAllFeaturesDataArray(layerArrayResult);
 
@@ -159,31 +159,5 @@ export class DataTableEventProcessor extends AbstractEventProcessor {
       // Log
       logger.logInfo('Removed Data Table Info in stores for layer path:', layerPath);
     });
-  }
-
-  /**
-   * Helper function to delete a layer information from an array when found
-   * @param {T[]} layerArray - The layer array to work with
-   * @param {string} layerPath - The layer path to delete
-   * @param {(layerArray: T[]) => void} onDeleteCallback - The callback executed when the array is updated
-   * @private
-   */
-  static #deleteFromArray<T extends TypeResultSetEntry>(
-    layerArray: T[],
-    layerPath: string,
-    onDeleteCallback: (layerArray: T[]) => void
-  ): void {
-    // TODO: Refactor - Move this function in Abstract class (along with other duplicate function in FeatureInfoEventProcessor)
-    // Find the layer data info to delete from the array
-    const layerDataInfoToDelIndex = layerArray.findIndex((layerInfo) => layerInfo.layerPath === layerPath);
-
-    // If found
-    if (layerDataInfoToDelIndex >= 0) {
-      // Remove from the array
-      layerArray.splice(layerDataInfoToDelIndex, 1);
-
-      // Callback with updated array
-      onDeleteCallback(layerArray);
-    }
   }
 }

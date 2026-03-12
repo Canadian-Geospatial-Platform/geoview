@@ -200,6 +200,31 @@ export abstract class AbstractEventProcessor {
     }
   }
 
+  /**
+   * Helper function to delete a layer information from an array when found.
+   *
+   * @param {T[]} layerArray - The layer array to work with
+   * @param {string} layerPath - The layer path to delete
+   * @param {(layerArray: T[]) => void} onDeleteCallback - The callback executed when the array is updated
+   */
+  protected static helperDeleteFromArray<T extends TypeResultSetEntry>(
+    layerArray: T[],
+    layerPath: string,
+    onDeleteCallback: (layerArray: T[]) => void
+  ): void {
+    // Find the layer data info to delete from the array
+    const layerDataInfoToDelIndex = layerArray.findIndex((layerInfo) => layerInfo.layerPath === layerPath);
+
+    // If found
+    if (layerDataInfoToDelIndex >= 0) {
+      // Remove from the array
+      layerArray.splice(layerDataInfoToDelIndex, 1);
+
+      // Callback with updated array
+      onDeleteCallback(layerArray);
+    }
+  }
+
   // #endregion STATIC METHODS
 }
 
