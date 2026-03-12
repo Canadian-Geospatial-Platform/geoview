@@ -43,6 +43,7 @@ export default [
         crypto: 'readonly',
         self: 'readonly',
         requestAnimationFrame: 'readonly',
+        cancelAnimationFrame: 'readonly',
         location: 'readonly',
         localStorage: 'readonly',
         Image: 'readonly',
