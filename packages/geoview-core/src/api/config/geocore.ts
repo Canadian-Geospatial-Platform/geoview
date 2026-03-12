@@ -9,6 +9,7 @@ import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { DEFAULT_MAP_FEATURE_CONFIG } from '@/api/types/map-schema-types';
 import type { GeoCoreLayerConfig, RCSLayerConfig, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { AbstractEventProcessor } from '../event-processors/abstract-event-processor';
 
 /** Class used to add GeoCore layers to the map. */
 export class GeoCore {
@@ -34,7 +35,7 @@ export class GeoCore {
 
     if (mapId) {
       // Get the map config
-      const map = MapEventProcessor.getMapViewer(mapId);
+      const map = AbstractEventProcessor.getMapViewer(mapId);
       if (map.layer.getGeoviewLayerIds().includes(uuid)) {
         // eslint-disable-next-line no-param-reassign
         uuid = `${uuid}:${generateId(8)}`;

@@ -6,6 +6,7 @@ import type BaseLayer from 'ol/layer/Base';
 import type { EventTypes } from 'ol/Observable';
 import type BaseEvent from 'ol/events/Event';
 
+import type { SwipeOrientation } from 'geoview-core/core/stores/store-interface-and-intial-values/swiper-state';
 import { useSwiperLayerPaths, useSwiperOrientation } from 'geoview-core/core/stores/store-interface-and-intial-values/swiper-state';
 import { logger } from 'geoview-core/core/utils/logger';
 import { getLocalizedMessage, delay } from 'geoview-core/core/utils/utilities';
@@ -28,7 +29,7 @@ type SwiperProps = {
 /** Configuration properties for the Swiper plugin. */
 export type ConfigProps = {
   layers: string[];
-  orientation: string;
+  orientation: SwipeOrientation;
 };
 
 /** Maximum wait time in milliseconds for layers to be ready. */

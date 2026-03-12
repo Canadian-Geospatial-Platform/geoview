@@ -4,6 +4,10 @@ import { useTheme } from '@mui/material/styles';
 
 import type { TypeTabs } from '@/ui';
 import { Box, Tabs } from '@/ui';
+// default tabs icon and class
+import { LegendIcon, InfoOutlinedIcon, LayersOutlinedIcon, StorageIcon, QuestionMarkIcon } from '@/ui/icons';
+
+import { useUIController } from '@/core/controllers/ui-controller';
 import { getSxClasses } from './footer-bar-style';
 import { ResizeFooterPanel } from '@/core/components/footer-bar/hooks/resize-footer-panel';
 import { useAppFullscreenActive, useAppHeight, useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -11,16 +15,12 @@ import { useDetailsLayerDataArrayBatch } from '@/core/stores/store-interface-and
 import {
   useUIActiveFooterBarTab,
   useUIFooterPanelResizeValue,
-  useUIStoreActions,
   useUIActiveTrapGeoView,
   useUIHiddenTabs,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { FooterBarApi, FooterTabCreatedEvent, FooterTabRemovedEvent } from '@/core/components';
 import { DEFAULT_FOOTER_TABS_ORDER } from '@/api/types/map-schema-types';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
-
-// default tabs icon and class
-import { LegendIcon, InfoOutlinedIcon, LayersOutlinedIcon, StorageIcon, QuestionMarkIcon } from '@/ui/icons';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { Legend } from '@/core/components/legend/legend';
 import { LayersPanel } from '@/core/components/layers/layers-panel';
@@ -70,7 +70,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   const activeFooterBarTab = useUIActiveFooterBarTab();
   const activeTrapGeoView = useUIActiveTrapGeoView();
   const shellContainer = useAppShellContainer();
-  const { setActiveFooterBarTab, enableFocusTrap, disableFocusTrap, setFooterBarIsOpen } = useUIStoreActions();
+  const uiController = useUIController();
   const backupAppHeight: number = useAppHeight();
   const appHeight = document.getElementById(mapId)?.getAttribute('data-footer-height') ?? `${backupAppHeight}px`;
   const hiddenTabs: string[] = useUIHiddenTabs();
@@ -202,10 +202,10 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
 
   // Update the active footer tab based on footer tabs created from configuration.
   useEffect(() => {
-    if (!activeFooterBarTab.tabId && activeFooterBarTab.isOpen) setActiveFooterBarTab(memoFooterBarTabs?.[0]?.id ?? '');
+    if (!activeFooterBarTab.tabId && activeFooterBarTab.isOpen) uiController.setActiveFooterBarTab(memoFooterBarTabs?.[0]?.id ?? '');
     // No need to update when selected tab changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [memoFooterBarTabs, setActiveFooterBarTab]);
+  }, [memoFooterBarTabs, uiController]);
 
   /**
    * Whenever the array layer data batch changes if we're on 'details' tab and it's collapsed, make sure we uncollapse it
@@ -220,10 +220,10 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     // If we're on the details panel and the footer is collapsed
     if (activeFooterBarTab.tabId === 'details' && !activeFooterBarTab.isOpen) {
       // Uncollapse it
-      setFooterBarIsOpen(true);
+      uiController.setFooterBarIsOpen(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [arrayOfLayerDataBatch, activeFooterBarTab, setFooterBarIsOpen]);
+  }, [arrayOfLayerDataBatch, activeFooterBarTab, uiController]);
   // Don't add isCollapsed in the dependency array, because it'll retrigger the useEffect
 
   /**
@@ -243,14 +243,14 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
       }
       tabsContainerRef.current = tabsContainer;
     }
-  }, [activeFooterBarTab.isOpen, setActiveFooterBarTab]);
+  }, [activeFooterBarTab.isOpen, uiController]);
 
   /**
    * Handle a collapse, expand event for the tabs component
    */
   const handleToggleCollapse = (): void => {
-    if (activeFooterBarTab.isOpen) setActiveFooterBarTab(undefined);
-    setFooterBarIsOpen(!activeFooterBarTab.isOpen);
+    if (activeFooterBarTab.isOpen) uiController.setActiveFooterBarTab(undefined);
+    uiController.setFooterBarIsOpen(!activeFooterBarTab.isOpen);
   };
 
   /**
@@ -258,8 +258,8 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
    * @param {TypeTabs} tab - The newly selected tab
    */
   const handleSelectedTabChanged = (tab: TypeTabs): void => {
-    setActiveFooterBarTab(tab.id);
-    setFooterBarIsOpen(true);
+    uiController.setActiveFooterBarTab(tab.id);
+    uiController.setFooterBarIsOpen(true);
   };
 
   /**
@@ -404,8 +404,8 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
         isCollapsed={!activeFooterBarTab.isOpen}
         onToggleCollapse={handleToggleCollapse}
         onSelectedTabChanged={handleSelectedTabChanged}
-        onOpenKeyboard={enableFocusTrap}
-        onCloseKeyboard={disableFocusTrap}
+        onOpenKeyboard={(e) => uiController.enableFocusTrap(e)}
+        onCloseKeyboard={() => uiController.disableFocusTrap()}
         selectedTab={memoFooterBarTabs.findIndex((t) => t.id === activeFooterBarTab.tabId)}
         tabProps={{ disableRipple: true }}
         tabs={memoFooterBarTabs}

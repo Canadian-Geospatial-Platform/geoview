@@ -1,17 +1,18 @@
-import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
-import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
 import type { QueryType, TypeFeatureInfoResult } from '@/api/types/map-schema-types';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
-import type {
-  TypeAllFeatureInfoResultSet,
-  TypeAllFeatureInfoResultSetEntry,
+import {
+  deleteStoreFeatureAllInfo,
+  propagateFeatureInfoDataTableToStore,
+  setStoreInitialSettings,
+  type TypeAllFeatureInfoResultSet,
+  type TypeAllFeatureInfoResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { logger } from '@/core/utils/logger';
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
+import { logger } from '@/core/utils/logger';
 
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
@@ -49,7 +50,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     }
 
     if (isQueryable) {
-      UIEventProcessor.showTabButton(this.getMapId(), 'data-table');
+      this.layerApi.mapViewer.controllers.uiController.showTabButton('data-table');
     }
 
     // Return
@@ -71,7 +72,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     this.resultSet[layerPath].features = undefined;
 
     // Extra initialization of settings
-    DataTableEventProcessor.setInitialSettings(this.getMapId(), layerPath);
+    setStoreInitialSettings(this.getMapId(), layerPath);
   }
 
   /**
@@ -93,7 +94,9 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    */
   protected override onDeleteFromStore(layerPath: string): void {
     // Remove it from data table info array
-    DataTableEventProcessor.deleteFeatureAllInfo(this.getMapId(), layerPath);
+    deleteStoreFeatureAllInfo(this.getMapId(), layerPath, () => {
+      this.layerApi.mapViewer.controllers.uiController.hideTabButton('data-table');
+    });
   }
 
   /**
@@ -214,6 +217,6 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
    */
   #propagateToStore(resultSetEntry: TypeAllFeatureInfoResultSetEntry): void {
     // Propagate
-    DataTableEventProcessor.propagateFeatureInfoToStore(this.getMapId(), resultSetEntry);
+    propagateFeatureInfoDataTableToStore(this.getMapId(), resultSetEntry);
   }
 }

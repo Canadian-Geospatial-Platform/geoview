@@ -2,11 +2,20 @@ import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-t
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import { UIEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/ui-event-processor';
-import { DataTableEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/data-table-event-processor';
-import { LegendEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/legend-event-processor';
 import { delay } from 'geoview-core/core/utils/utilities';
 import { MapEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/map-event-processor';
+import {
+  getStoreActiveAppBarTab,
+  getStoreActiveFooterBarTab,
+  getStoreAppBarComponents,
+  getStoreFooterBarComponents,
+  getStoreNavBarComponents,
+} from 'geoview-core/core/stores/store-interface-and-intial-values/ui-state';
+import {
+  getStoreDataTableAllFeaturesArray,
+  getStoreDataTableSelectedLayerPath,
+} from 'geoview-core/core/stores/store-interface-and-intial-values/data-table-state';
+import { getStoreLayerStateLayerBounds } from 'geoview-core/app';
 
 /**
  * Main Map Config testing class.
@@ -48,17 +57,17 @@ export class MapConfigTester extends GVAbstractTester {
       (test) => {
         // Verify the footer bar tab is selected
         test.addStep('Verifying data-table tab is selected in footer bar...');
-        const { tabId } = UIEventProcessor.getActiveFooterBarTab(mapId);
+        const { tabId } = getStoreActiveFooterBarTab(mapId);
         Test.assertIsEqual(tabId, 'data-table');
 
         // Verify the selected layer path in data table store
         test.addStep('Verifying selectedLayerPath in data table store...');
-        const selectedLayerPath = DataTableEventProcessor.getSingleDataTableState(mapId, 'selectedLayerPath');
+        const selectedLayerPath = getStoreDataTableSelectedLayerPath(mapId);
         Test.assertIsEqual(selectedLayerPath, 'geojsonLYR5/polygons.json');
 
         // Verify that layer data exists (table was created)
         test.addStep('Verifying data table is defined...');
-        const allFeaturesData = DataTableEventProcessor.getSingleDataTableState(mapId, 'allFeaturesDataArray');
+        const allFeaturesData = getStoreDataTableAllFeaturesArray(mapId);
         Test.assertIsDefined('allFeaturesDataArray', allFeaturesData);
 
         // Verify if there is an array of data tables with content
@@ -104,17 +113,17 @@ export class MapConfigTester extends GVAbstractTester {
       (test) => {
         // Verify that data-table is not in footer tabs
         test.addStep('Verifying data-table is selected in app bar...');
-        const activeTab = UIEventProcessor.getActiveAppBarTab(mapId);
+        const activeTab = getStoreActiveAppBarTab(mapId);
         Test.assertIsEqual(activeTab.tabId, 'data-table');
 
         // Verify the selected layer path in data table store
         test.addStep('Verifying selectedLayerPath in data table store...');
-        const selectedLayerPath = DataTableEventProcessor.getSingleDataTableState(mapId, 'selectedLayerPath');
+        const selectedLayerPath = getStoreDataTableSelectedLayerPath(mapId);
         Test.assertIsEqual(selectedLayerPath, 'geojsonLYR5/polygons.json');
 
         // Verify that layer data exists (table was created)
         test.addStep('Verifying data table is defined...');
-        const allFeaturesData = DataTableEventProcessor.getSingleDataTableState(mapId, 'allFeaturesDataArray');
+        const allFeaturesData = getStoreDataTableAllFeaturesArray(mapId);
         Test.assertIsDefined('allFeaturesDataArray', allFeaturesData);
 
         // Verify if there is an array of data tables with content
@@ -157,7 +166,7 @@ export class MapConfigTester extends GVAbstractTester {
       (test) => {
         // Verify that footer bar exists with default tabs
         test.addStep('Verifying footer bar has default tabs...');
-        const footerBarTabs = UIEventProcessor.getFooterBarComponents(mapId);
+        const footerBarTabs = getStoreFooterBarComponents(mapId);
         Test.assertIsDefined('footerBarTabs', footerBarTabs);
 
         // Verify default tabs are present (layers, data-table)
@@ -166,7 +175,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Verify that app bar exists with default tabs
         test.addStep('Verifying app bar has default tabs...');
-        const appBarTabs = UIEventProcessor.getAppBarComponents(mapId);
+        const appBarTabs = getStoreAppBarComponents(mapId);
         Test.assertIsDefined('appBarTabs', appBarTabs);
 
         // Verify default tabs are present (geolocator, legend, details, export)
@@ -200,12 +209,12 @@ export class MapConfigTester extends GVAbstractTester {
       (test) => {
         // Verify that footer bar has no tabs
         test.addStep('Verifying footer bar has no tabs...');
-        const footerBarTabs = UIEventProcessor.getFooterBarComponents(mapId);
+        const footerBarTabs = getStoreFooterBarComponents(mapId);
         Test.assertIsArrayLengthEqual(footerBarTabs, 0);
 
         // Verify that app bar has no tabs
         test.addStep('Verifying app bar has no tabs...');
-        const appBarTabs = UIEventProcessor.getAppBarComponents(mapId);
+        const appBarTabs = getStoreAppBarComponents(mapId);
         Test.assertIsArrayLengthEqual(appBarTabs, 0);
       }
     );
@@ -231,7 +240,7 @@ export class MapConfigTester extends GVAbstractTester {
       (test) => {
         // Verify that navBar exists with default controls
         test.addStep('Verifying navBar has default controls...');
-        const navBarComponents = UIEventProcessor.getNavBarComponents(mapId);
+        const navBarComponents = getStoreNavBarComponents(mapId);
         Test.assertIsDefined('navBarComponents', navBarComponents);
 
         // Verify default controls are present
@@ -261,7 +270,7 @@ export class MapConfigTester extends GVAbstractTester {
       (test) => {
         // Verify that navBar exists
         test.addStep('Verifying navBar exists...');
-        const navBarComponents = UIEventProcessor.getNavBarComponents(mapId);
+        const navBarComponents = getStoreNavBarComponents(mapId);
         Test.assertIsDefined('navBarComponents', navBarComponents);
 
         // Verify no buttons are present
@@ -299,7 +308,7 @@ export class MapConfigTester extends GVAbstractTester {
         test.addStep('Getting layer bound extent...');
         const geoviewLayer = newMapViewer.layer.getGeoviewLayerRegular('geojsonLYR5/polygons.json');
         Test.assertIsDefined('geoviewLayer', geoviewLayer);
-        const layerExtent = LegendEventProcessor.getLayerBounds(this.getMapId(), 'geojsonLYR5/polygons.json');
+        const layerExtent = getStoreLayerStateLayerBounds(this.getMapId(), 'geojsonLYR5/polygons.json');
         Test.assertIsArray(layerExtent);
 
         await delay(2000);

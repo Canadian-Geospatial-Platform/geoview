@@ -3,7 +3,9 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Box, CircularProgressBase, DeleteOutlineIcon, IconButton, UndoIcon } from '@/ui';
-import { useLayerSelectorDeletionStartTime, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerSelectorDeletionStartTime } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import { TIMEOUT } from '@/core/utils/constant';
 
@@ -72,8 +74,8 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   const deleteButtonRef = useRef<HTMLButtonElement>(null);
   const undoButtonRef = useRef<HTMLButtonElement>(null);
 
-  // get store actions
-  const { deleteLayer, deleteLayerAbort } = useLayerStoreActions();
+  // Store hooks
+  const mapId = useGeoViewMapId();
   const layerDeletionStartTime = useLayerSelectorDeletionStartTime(layerPath);
 
   // state
@@ -94,7 +96,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     }
 
     // Delete the layer
-    deleteLayer(layerPath, TIMEOUT.deleteLayerUndoWindow)
+    LegendEventProcessor.deleteLayerStartTimer(mapId, layerPath, TIMEOUT.deleteLayerUndoWindow)
       .then((deleted) => {
         // If deleted, set focus elsewhere
         if (deleted && focusTargetIdAfterDelete) {
@@ -117,7 +119,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
    */
   const performUndo = (wasKeyboardActivated: boolean): void => {
     // Call the action
-    deleteLayerAbort(layerPath);
+    LegendEventProcessor.deleteLayerAbort(mapId, layerPath);
 
     // If was keyboard activated on clicking
     if (wasKeyboardActivated) {

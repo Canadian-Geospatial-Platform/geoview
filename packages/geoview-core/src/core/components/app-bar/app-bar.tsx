@@ -16,6 +16,7 @@ import {
   LayersOutlinedIcon,
 } from '@/ui';
 
+import { useUIController } from '@/core/controllers/ui-controller';
 import { Geolocator } from '@/core/components/geolocator/geolocator';
 import type { TypeButtonPanel, TypePanelProps } from '@/ui/panel/panel-types';
 import ExportButton from '@/core/components/export/export-modal-button';
@@ -25,7 +26,6 @@ import {
   useUIAppbarComponents,
   useUIActiveAppBarTab,
   useUIHiddenTabs,
-  useUIStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useMapInteraction, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
@@ -90,7 +90,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   const geoviewElement = useAppGeoviewHTMLElement().querySelector('[id^="mapTargetElement-"]') as HTMLElement;
 
-  const { setActiveAppBarTab } = useUIStoreActions();
+  const uiController = useUIController();
 
   // get store config for app bar to add (similar logic as in footer-bar)
   const appBarConfig = useGeoViewConfig()?.appBar;
@@ -161,9 +161,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
     (buttonId: string) => {
       // Get the button panel
       const buttonPanel = buttonPanels[buttonId];
-      setActiveAppBarTab(buttonId, !buttonPanel.panel?.status, !buttonPanel.panel?.status);
+      uiController.setActiveAppBarTab(buttonId, !buttonPanel.panel?.status, !buttonPanel.panel?.status);
     },
-    [buttonPanels, setActiveAppBarTab]
+    [buttonPanels, uiController]
   );
 
   const handleGeneralCloseClicked = useCallback(
@@ -175,9 +175,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
         }, TIMEOUT.dataPanelLoading);
       }
 
-      setActiveAppBarTab(buttonId, false, false);
+      uiController.setActiveAppBarTab(buttonId, false, false);
     },
-    [setActiveAppBarTab, isFocusTrapped, getButtonElementId]
+    [uiController, isFocusTrapped, getButtonElementId]
   );
 
   const handleAddButtonPanel = useCallback(
@@ -442,7 +442,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
                   }
                 }
                 handleEscapeKey(event.key, getButtonElementId(buttonPanel.button?.id ?? '', '-panel-btn'), isFocusTrapped, () => {
-                  setActiveAppBarTab(buttonPanel.button?.id ?? '', false, false);
+                  uiController.setActiveAppBarTab(buttonPanel.button?.id ?? '', false, false);
                 });
               }}
               onGeneralClose={() => {

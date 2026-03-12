@@ -17,26 +17,23 @@ import type {
   TypeZoomAndCenter,
   TypeFeatureInfoEntry,
   TypePointMarker,
+  TypeMapMouseInfo,
 } from '@/api/types/map-schema-types';
 import { DEFAULT_HIGHLIGHT_COLOR, MAP_CENTER, MAP_ZOOM_LEVEL } from '@/api/types/map-schema-types';
 import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
 import { type TypeSetStore, type TypeGetStore, useStableSelector } from '@/core/stores/geoview-store';
 import { Projection } from '@/geo/utils/projection';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
-import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import type { Draw } from '@/geo/interaction/draw';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import type { TypeHoverFeatureInfo } from './feature-info-state';
+import { getStoreLayerStateLayerStatus } from './layer-state';
 import { logger } from '@/core/utils/logger';
 
-// GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with MapEventProcessor vs MapState
-
-// #region INTERFACES & TYPES
-
-export const DEFAULT_PROJECTION = 3857 as TypeValidMapProjectionCodes;
+// #region INTERFACE DEFINITION
 
 type MapActions = IMapState['actions'];
 
@@ -168,7 +165,9 @@ export interface IMapState {
   };
 }
 
-// #endregion INTERFACES & TYPES
+// #endregion INTERFACE DEFINITION
+
+// #region STATE INITIALIZATION
 
 /**
  * Initializes a Map State and provide functions which use the get/set Zustand mechanisms.
@@ -184,7 +183,7 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
     centerCoordinates: [0, 0] as Coordinate,
     clickMarker: undefined,
     currentBasemapOptions: { basemapId: 'transport', shaded: true, labeled: true },
-    currentProjection: DEFAULT_PROJECTION,
+    currentProjection: 3857 as TypeValidMapProjectionCodes,
     featureHighlightColor: DEFAULT_HIGHLIGHT_COLOR,
     geolocatorSearchArea: undefined,
     fixNorth: false,
@@ -252,8 +251,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         },
       });
     },
-
-    // #region ACTIONS
 
     actions: {
       /**
@@ -667,7 +664,6 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         const overlay = get().mapState.overlayNorthMarker;
         if (overlay !== undefined) overlay.setElement(htmlRef);
       },
-      // #endregion ACTIONS
     },
 
     setterActions: {
@@ -1152,35 +1148,12 @@ export function initializeMapState(set: TypeSetStore, get: TypeGetStore): IMapSt
         });
       },
     },
-
-    // #endregion ACTIONS
   } as IMapState;
 
   return init;
 }
 
-export interface TypeScaleInfo {
-  lineWidthMetric: string;
-  labelGraphicMetric: string;
-  lineWidthImperial: string;
-  labelGraphicImperial: string;
-  labelNumeric: string;
-}
-
-export interface TypeNorthArrow {
-  degreeRotation: string;
-  isNorthVisible: boolean;
-}
-
-export interface TypeOrderedLayerInfo {
-  layerPath: string;
-  hoverable?: boolean;
-  queryableSource?: boolean;
-  queryableState?: boolean;
-  visible: boolean;
-  inVisibleRange: boolean;
-  legendCollapsed: boolean;
-}
+// #endregion STATE INITIALIZATION
 
 // **********************************************************
 // Map state selectors
@@ -1298,7 +1271,7 @@ export const useMapSelectorLayerQueryable = (layerPaths: string[]): Record<strin
 export const useMapAllLayersVisibleToggle = (): boolean =>
   useStore(useGeoViewStore(), (state) =>
     state.mapState.orderedLayerInfo.every(
-      (layer) => layer.visible || MapEventProcessor.getMapLayerStatus(state.mapId, layer.layerPath) === 'error'
+      (layer) => layer.visible || getStoreLayerStateLayerStatus(state.mapId, layer.layerPath) === 'error'
     )
   );
 export const useMapHasCollapsibleLayersToggle = (): boolean =>
@@ -1308,3 +1281,26 @@ export const useMapAllLayersCollapsedToggle = (): boolean =>
 
 // Store Actions
 export const useMapStoreActions = (): MapActions => useStore(useGeoViewStore(), (state) => state.mapState.actions);
+
+export interface TypeScaleInfo {
+  lineWidthMetric: string;
+  labelGraphicMetric: string;
+  lineWidthImperial: string;
+  labelGraphicImperial: string;
+  labelNumeric: string;
+}
+
+export interface TypeNorthArrow {
+  degreeRotation: string;
+  isNorthVisible: boolean;
+}
+
+export interface TypeOrderedLayerInfo {
+  layerPath: string;
+  hoverable?: boolean;
+  queryableSource?: boolean;
+  queryableState?: boolean;
+  visible: boolean;
+  inVisibleRange: boolean;
+  legendCollapsed: boolean;
+}

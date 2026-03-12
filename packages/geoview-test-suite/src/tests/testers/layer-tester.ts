@@ -8,7 +8,6 @@ import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-
 import { EsriDynamic } from 'geoview-core/geo/layer/geoview-layers/raster/esri-dynamic';
 import { generateId } from 'geoview-core/core/utils/utilities';
 import { AbstractBaseLayerEntryConfig } from 'geoview-core/api/config/validation-classes/abstract-base-layer-entry-config';
-import { LegendEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/legend-event-processor';
 import { EsriFeature } from 'geoview-core/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from 'geoview-core/geo/layer/geoview-layers/raster/esri-image';
 import { WMS } from 'geoview-core/geo/layer/geoview-layers/raster/wms';
@@ -22,6 +21,10 @@ import { KML } from 'geoview-core/geo/layer/geoview-layers/vector/kml';
 import type { GeoViewLayerAddedResult } from 'geoview-core/geo/layer/layer';
 import type { TypeMapFeaturesInstance } from 'geoview-core/api/types/map-schema-types';
 import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
+import {
+  getStoreLayerStateLegendLayerByPath,
+  getStoreLayerStateLegendLayers,
+} from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 
 /**
  * Main Layer testing class.
@@ -1547,7 +1550,7 @@ export class LayerTester extends GVAbstractTester {
     checkIconsList?: Partial<TypeLegendItem>[]
   ): void {
     // Get the layer legend
-    const legendLayer = LegendEventProcessor.getLegendLayerInfo(mapViewer.mapId, layerPath);
+    const legendLayer = getStoreLayerStateLegendLayerByPath(mapViewer.mapId, layerPath);
 
     // Verify the layer has a legend information
     test.addStep(`Verify the layer ${layerPath} has legend information...`);
@@ -1584,7 +1587,7 @@ export class LayerTester extends GVAbstractTester {
     checkIconsList?: Partial<TypeLegendItem>[]
   ): void {
     // Get the layer legend from the store
-    const legendLayer = LegendEventProcessor.getLegendLayerInfo(mapViewer.mapId, layerPath);
+    const legendLayer = getStoreLayerStateLegendLayerByPath(mapViewer.mapId, layerPath);
 
     // Verify the icon were also loaded for the layer
     test.addStep(`Verify the icons were loaded for the layer...`);
@@ -1630,7 +1633,7 @@ export class LayerTester extends GVAbstractTester {
 
     // Check the removal worked
     test.addStep(`Check that the layer is indeed removed...`);
-    const legendLayers = LegendEventProcessor.getLegendLayers(mapViewer.mapId);
+    const legendLayers = getStoreLayerStateLegendLayers(mapViewer.mapId);
     Test.assertArrayExcludes(
       legendLayers.map((legendLayer) => legendLayer.layerPath),
       layerPath

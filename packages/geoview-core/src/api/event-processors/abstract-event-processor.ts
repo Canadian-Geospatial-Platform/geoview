@@ -1,62 +1,70 @@
-import type { GeoviewStoreType, IGeoviewState } from '@/core/stores/geoview-store';
-import type { TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import type {
-  TypeFeatureInfoResultSetEntry,
-  TypeHoverResultSetEntry,
-} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import type { TypeGeochartResultSetEntry } from '@/core/stores/store-interface-and-intial-values/geochart-state';
-import { getGeoViewStore, getGeoViewStoreAsync } from '@/core/stores/stores-managers';
-import { logger } from '@/core/utils/logger';
-import { delay } from '@/core/utils/utilities';
-import type { TypeResultSetEntry } from '@/api/types/map-schema-types';
+import type { IGeoviewState } from '@/core/stores/geoview-store';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
+import { whenThisThen } from '@/core/utils/utilities';
 import { GeoViewStoreOnMapNotFoundError } from '@/core/exceptions/geoview-exceptions';
+import type { MapViewer } from '@/geo/map/map-viewer';
+import type { LayerApi } from '@/geo/layer/layer';
+import type { PluginsContainer } from '@/api/plugin/plugin-types';
+import type { UIController } from '@/core/controllers/ui-controller';
 
 export abstract class AbstractEventProcessor {
-  // The subscription array used to destroy the subscriptions
-  #subscriptionArr: SubscriptionDelegate[] = [];
-
-  // #region OVERRIDES
-
-  /**
-   * Overridable method called when initializing an event processor.
-   * @param store - The store to initialize with
-   * @returns An array of the subscriptions callbacks which were created
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/class-methods-use-this
-  protected onInitialize(store: GeoviewStoreType): SubscriptionDelegate[] {
-    // ? Here, `store` is unused, but used in inherited classes, so the eslint-disable should be kept
-    // This method should be overriden to initialize and return a list of subscribtions so that they can be destroyed later
-    return [];
-  }
-
-  /**
-   * Overridable method called when destroying an event processor.
-   */
-  protected onDestroy(): void {
-    // destroying all subscriptions
-    this.#subscriptionArr.forEach((unsub) => unsub());
-  }
-
-  // #endregion
+  /** The Map Viewers used by the processor and injected on initialization */
+  static mapViewers: Record<string, MapViewer> = {};
 
   // #region PUBLIC METHODS
 
   /**
-   * Initializes the processor
-   * @param {GeoviewStoreType} store the store to initialize the processor with
+   *
+   * @param mapId
+   * @returns
+   * @deprecated Shall not be used with the new controller model
    */
-  initialize(store: GeoviewStoreType): void {
-    // Call on initialize for the inherited classes to initialize and return their subscribtions
-    const subs = this.onInitialize(store);
-    if (subs) this.#subscriptionArr.push(...subs);
+  static getMapViewer(mapId: string): MapViewer {
+    return AbstractEventProcessor.mapViewers[mapId];
   }
 
   /**
-   * Destroys the processor
+   *
+   * @param mapId
+   * @returns
+   * @deprecated Shall not be used with the new controller model
    */
-  destroy(): void {
-    // Call onDestroy for the inherited classes to destroy themselves. Their subscriptions returned upon initializations will already be destroyed.
-    this.onDestroy();
+  static getMapViewerLayerAPI(mapId: string): LayerApi {
+    return this.getMapViewer(mapId).layer;
+  }
+
+  /**
+   *
+   * @param mapId
+   * @returns
+   * @deprecated Shall not be used with the new controller model
+   */
+  static getUIController(mapId: string): UIController {
+    return this.getMapViewer(mapId).controllers.uiController;
+  }
+
+  /**
+   * Shortcut to get the Map Viewer plugins instance for a given map id
+   * This is use to reduce the use of api.getMapViewer(mapId).plugins and be more explicit
+   * @param {string} mapId - map Id
+   * @returns {PluginsContainer} The map plugins container
+   * @static
+   * @deprecated Shall not be used with the new controller model
+   */
+  static async getMapViewerPlugins(mapId: string): Promise<PluginsContainer> {
+    await whenThisThen(() => this.getMapViewer(mapId));
+    return this.getMapViewer(mapId).plugins;
+  }
+
+  /**
+   * Initializes the map viewer in the processor, to be used later in the events processing.
+   * @param mapId - The map id
+   * @param mapViewer - The map viewer instance to initialize
+   * @deprecated Shall not be used with the new controller model
+   */
+  static initializeMapViewer(mapId: string, mapViewer: MapViewer): void {
+    // Keep the map viewer in the processor for later use in the events processing
+    AbstractEventProcessor.mapViewers[mapId] = mapViewer;
   }
 
   // #endregion PUBLIC METHODS
@@ -68,6 +76,8 @@ export abstract class AbstractEventProcessor {
    *
    * @param {string} mapId - The map id to retreive the state for
    * @returns {IGeoviewState} the store state
+   * @deprecated Should not be used with the new controller model, as the state should be accessed through the controller's adaptors.
+   * This is still available for the moment for the event processors that are still used with the old model, but should be removed once all event processors are migrated to the new model.
    */
   protected static getState(mapId: string): IGeoviewState {
     // Get the GeoView Store for the given map
@@ -80,162 +90,5 @@ export abstract class AbstractEventProcessor {
     throw new GeoViewStoreOnMapNotFoundError(mapId);
   }
 
-  /**
-   * Shortcut to get the store state for a given map id
-   *
-   * @param {string} mapId - The map id to retreive the state for
-   * @returns {IGeoviewState} the store state
-   */
-  protected static async getStateAsync(mapId: string): Promise<IGeoviewState> {
-    // Get the GeoView Store for the given map
-    const gvStore = await getGeoViewStoreAsync(mapId);
-
-    // If found
-    if (gvStore) return gvStore.getState();
-
-    // Not found
-    throw new GeoViewStoreOnMapNotFoundError(mapId);
-  }
-
-  /**
-   * Helper method to propagate in the layerDataArray in a batched manner.
-   * The propagation can be bypassed using 'layerPathBypass' parameter which tells the process to
-   * immediately batch out the array in the store for faster triggering of the state, for faster updating of the UI.
-   * @param {string} mapId - The map id
-   * @param {T[]} layerDataArray - The layer data array to hold in buffer during the batch
-   * @param {BatchedPropagationLayerDataArrayByMap<T>} batchPropagationObject - A reference to the BatchedPropagationLayerDataArrayByMap object used to hold all the layer data arrays in the buffer
-   * @param {number} timeDelayBetweenPropagations - The delay between actual propagations in the store
-   * @param {(layerDataArray: T[]) => void} onSetLayerDataArray - The store action callback used to store the layerDataArray in the actual store
-   * @param {string} traceProcessorIndication? - Simple parameter for logging purposes
-   * @param {string} layerPathBypass? - Indicates a layer path which, when processed, should bypass the buffer period and immediately trigger an update to the store
-   * @param {(layerPath: string) => void} onResetBypass? - The store action callback used to reset the layerPathBypass value in the store.
-   *                                                     This is used so that when the bypass occurred once, it's not occuring again for all subsequent checks in the period of batch propagations.
-   *                                                     It's up to the components to re-initialize the layerPathBypass at a certain time.
-   *                                                     When no onResetBypass is specified, once the bypass occurs, all subsequent propagations happen immediately.
-   * @returns {Promise<void>} Promise upon completion
-   */
-  protected static async helperPropagateArrayStoreBatch<
-    T extends TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry | TypeGeochartResultSetEntry,
-  >(
-    mapId: string,
-    layerDataArray: T[],
-    batchPropagationObject: BatchedPropagationLayerDataArrayByMap<T>,
-    timeDelayBetweenPropagations: number,
-    onSetLayerDataArray: (layerDataArray: T[]) => void,
-    traceProcessorIndication?: string,
-    layerPathBypass?: string,
-    onResetBypass?: (layerPath: string) => void
-  ): Promise<void> {
-    // Log
-    logger.logTraceDetailed('propagateArrayStoreBatch', mapId, traceProcessorIndication);
-
-    // Make sure the batch propagation for the map exists
-    // eslint-disable-next-line no-param-reassign
-    if (!batchPropagationObject[mapId]) batchPropagationObject[mapId] = [];
-
-    // Log
-    // logger.logDebug('Propagate in batch - buffering...', mapId, traceProcessorIndication, batchPropagationObject[mapId].length);
-
-    // Clone the layer data array to preserve snapshot of features at this moment, avoiding issues with non-cloneable properties
-    const clonedLayerDataArray = layerDataArray.map((layer) => {
-      if ('features' in layer)
-        return {
-          ...layer,
-          features: layer.features ? [...layer.features] : [],
-        };
-      return layer;
-    });
-
-    // Pile up the array
-    batchPropagationObject[mapId].push(clonedLayerDataArray);
-
-    // If there's a layer path bypass set
-    let layerDataBypass;
-    if (layerPathBypass) {
-      // If the layerDataArray has the layer we have set as the bypass
-      layerDataBypass = layerDataArray.find((layer) => layer.layerPath === layerPathBypass);
-    }
-
-    // If found the layer data according to the layer path to bypass
-    let bypass = false;
-    if (layerDataBypass) {
-      // If it has features in a responded state
-      if (layerDataBypass.queryStatus === 'processed' || layerDataBypass.queryStatus === 'error') {
-        // Bypass
-        bypass = true;
-
-        // Log
-        // logger.logDebug('Propagate in batch - bypass!', mapId, traceProcessorIndication, batchPropagationObject[mapId].length);
-
-        // Reset the flag so it stops bypassing for the rest of the processing
-        onResetBypass?.('');
-      }
-    }
-
-    // If not bypassing the delay
-    if (!bypass) {
-      // Wait to batch the updates of the layerDataArray
-      await delay(timeDelayBetweenPropagations);
-    }
-
-    // If any in the buffer
-    if (batchPropagationObject[mapId].length) {
-      // Alright, take the last one in the pile (the most recent updated state - as this is cumulative)
-      const mostUpdatedState = batchPropagationObject[mapId][batchPropagationObject[mapId].length - 1];
-
-      // Log
-      // logger.logDebug(
-      //   `Propagate in batch - buffered ${batchPropagationObject[mapId].length} layers`,
-      //   mapId,
-      //   traceProcessorIndication,
-      //   JSON.parse(JSON.stringify(mostUpdatedState))
-      // );
-
-      // Propagate that one to the store
-      onSetLayerDataArray(mostUpdatedState);
-
-      // Empty the list
-      // eslint-disable-next-line no-param-reassign
-      batchPropagationObject[mapId] = [];
-    }
-  }
-
-  /**
-   * Helper function to delete a layer information from an array when found.
-   *
-   * @param layerArray - The layer array to work with
-   * @param layerPath - The layer path to delete
-   * @param onDeleteCallback - The callback executed when the array is updated
-   */
-  protected static helperDeleteFromArray<T extends TypeResultSetEntry>(
-    layerArray: T[],
-    layerPath: string,
-    onDeleteCallback: (layerArray: T[]) => void
-  ): void {
-    // Find the layer data info to delete from the array
-    const layerDataInfoToDelIndex = layerArray.findIndex((layerInfo) => layerInfo.layerPath === layerPath);
-
-    // If found
-    if (layerDataInfoToDelIndex >= 0) {
-      // Remove from the array
-      layerArray.splice(layerDataInfoToDelIndex, 1);
-
-      // Callback with updated array
-      onDeleteCallback(layerArray);
-    }
-  }
-
   // #endregion STATIC METHODS
 }
-
-/**
- * Holds the buffer, on a map basis, for the propagation in batch in the layer data array store
- */
-export type BatchedPropagationLayerDataArrayByMap<T extends TypeResultSetEntry> = {
-  [mapId: string]: T[][];
-};
-
-/**
- * Represents a subscription delegate
- */
-export type SubscriptionDelegate = () => void;

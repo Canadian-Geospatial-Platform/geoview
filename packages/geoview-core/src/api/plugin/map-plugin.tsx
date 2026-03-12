@@ -1,5 +1,5 @@
 import type { Root } from 'react-dom/client';
-import { MapContext } from '@/core/app-start';
+import { StoreContext } from '@/core/app-start';
 import { AbstractPlugin } from './abstract-plugin';
 
 /**
@@ -33,7 +33,7 @@ export abstract class MapPlugin extends AbstractPlugin {
     // create the swiper component and render
     const node = this.onCreateContent();
     this.reactRoot = this.createRoot(el);
-    this.reactRoot.render(<MapContext.Provider value={{ mapId: this.mapViewer.mapId }}>{node}</MapContext.Provider>);
+    this.reactRoot.render(<StoreContext.Provider value={this.mapViewer.mapId}>{node}</StoreContext.Provider>);
   }
 
   /**

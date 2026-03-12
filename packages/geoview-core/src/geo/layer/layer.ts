@@ -12,10 +12,6 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { ConfigValidation } from '@/api/config/config-validation';
 import { generateId, isValidUUID, whenThisThen } from '@/core/utils/utilities';
 import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
-import type {
-  LayerStatusChangedDelegate as ConfigLayerStatusChangedDelegate,
-  LayerStatusChangedEvent as ConfigLayerStatusChangedEvent,
-} from '@/api/config/validation-classes/config-base-class';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
 
@@ -106,21 +102,49 @@ import { Projection } from '@/geo/utils/projection';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import {
+  isStoreTimeSliderInitialized,
+  removeStoreTimeSliderLayer,
+  type TypeTimeSliderProps,
+} from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import {
+  deleteStoreDetailsFeatureInfo,
+  type TypeFeatureInfoResultSet,
+} from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import { getStoreDisplayDateMode } from '@/core/stores/store-interface-and-intial-values/app-state';
+import {
+  addStoreGeochartChart,
+  isStoreGeochartInitialized,
+  removeStoreGeochartChart,
+} from '@/core/stores/store-interface-and-intial-values/geochart-state';
+import { isStoreSwiperInitialized, removeStoreSwiperLayerPath } from '@/core/stores/store-interface-and-intial-values/swiper-state';
+import {
+  setStoreLayerBoundsForLayerAndParentsAndForget,
+  setStoreLayerDateTemporal,
+  setStoreLayerDisplayDateFormat,
+  setStoreLayerDisplayDateFormatShort,
+  setStoreLayerHoverable,
+  setStoreLayerItemVisibility,
+  setStoreLayerMosaicRule,
+  setStoreLayerName,
+  setStoreLayerQueryable,
+  setStoreLayerRasterFunction,
+  setStoreLayersAreLoading,
+  setStoreLayerWmsStyle,
+  setStoreOpacity,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { TypeLegendItem } from '@/core/components/layers/types';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
-import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
-import { SwiperEventProcessor } from '@/api/event-processors/event-processor-children/swiper-event-processor';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
-import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
-import { GeoViewError, LayerConfigNotFoundError, LayerNoLastQueryToPerformError } from '@/core/exceptions/geoview-exceptions';
+import { GeoViewError, LayerNoLastQueryToPerformError } from '@/core/exceptions/geoview-exceptions';
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
 import { ShapefileReader } from '@/api/config/reader/shapefile-reader';
 import { GeoPackageReader } from '@/api/config/reader/geopackage-reader';
+import type { ControllerRegistry } from '@/core/controllers/controller-registry';
 import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { CsvLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
 import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
@@ -136,8 +160,7 @@ import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-v
 import { OgcWmtsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
 import { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
-import type { TypeTimeSliderProps } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import type { TypeFeatureInfoResultSet } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import type { ConfigLayerStatusChangedDelegate, ConfigLayerStatusChangedEvent, LayerDomain } from '@/core/domains/layer-domain';
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
@@ -148,6 +171,13 @@ export class LayerApi {
 
   /** Reference on the map viewer */
   mapViewer: MapViewer;
+
+  /** Reference on the ui controller */
+  #controllers: ControllerRegistry;
+
+  /** Reference on the layer domain. */
+  // GV This is stricly to be used in the events relay simplification logic between domain and api, otherwise it'd break separation of concern.
+  #layerDomain: LayerDomain;
 
   /** Used to access geometry API to create and manage geometries */
   geometry: GeometryApi;
@@ -172,9 +202,6 @@ export class LayerApi {
 
   /** All the layer sets */
   #allLayerSets: AbstractLayerSet[];
-
-  /** Layers with valid configuration for this map. */
-  #layerEntryConfigs: { [layerPath: string]: ConfigBaseClass } = {};
 
   /** Dictionary holding all the old geoview layers */
   #geoviewLayers: { [geoviewLayerId: string]: AbstractGeoViewLayer } = {};
@@ -216,16 +243,13 @@ export class LayerApi {
   #onLayerAllLoadedHandlers: LayerConfigDelegate[] = [];
 
   /** Callback delegates for the layer status changed event */
-  #onLayerStatusChangedHandlers: LayerStatusChangedDelegate[] = [];
+  #onLayerStatusChangedHandlers: ConfigLayerStatusChangedDelegate[] = [];
 
   /** Callback delegates for the layer visibility toggled event */
   #onLayerVisibilityToggledHandlers: LayerVisibilityToggledDelegate[] = [];
 
   /** Callback delegates for the layer item visibility toggled event */
   #onLayerItemVisibilityToggledHandlers: LayerItemVisibilityToggledDelegate[] = [];
-
-  /** Keep a bounded reference to the handle layer status changed */
-  #boundedHandleLayerStatusChanged: ConfigLayerStatusChangedDelegate;
 
   /** Keep a bounded reference to the handle layer message */
   #boundedHandleLayerMessage: LayerMessageDelegate;
@@ -271,8 +295,9 @@ export class LayerApi {
    *
    * @param mapViewer - A reference to the map viewer
    */
-  constructor(mapViewer: MapViewer) {
+  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain) {
     this.mapViewer = mapViewer;
+    this.#controllers = controllerRegistry;
     this.legendsLayerSet = new LegendsLayerSet(this);
     this.hoverFeatureInfoLayerSet = new HoverFeatureInfoLayerSet(this);
     this.allFeatureInfoLayerSet = new AllFeatureInfoLayerSet(this);
@@ -282,8 +307,11 @@ export class LayerApi {
     this.geometry = new GeometryApi(this.mapViewer);
     this.featureHighlight = new FeatureHighlight(this.mapViewer);
 
+    // Initialize events on domain for the events relay
+    this.#layerDomain = layerDomain;
+    this.initEventsOnDomain(layerDomain);
+
     // Keep bounded references to the handles
-    this.#boundedHandleLayerStatusChanged = this.#handleLayerStatusChanged.bind(this);
     this.#boundedHandleLayerMessage = this.#handleLayerMessage.bind(this);
     this.#boundedHandleLayerFirstLoaded = this.#handleLayerFirstLoaded.bind(this);
     this.#boundedHandleLayerLoading = this.#handleLayerLoading.bind(this);
@@ -300,9 +328,32 @@ export class LayerApi {
   }
 
   /**
-   * Gets the Map Identifier.
+   * Initializes the events on the domain to listen to changes and re-emit the events higher.
    *
-   * @returns The map identifier
+   * @param layerDomain - The layer domain to listen on
+   */
+  initEventsOnDomain(layerDomain: LayerDomain): void {
+    // Listen on the domain layer status changed
+    layerDomain.onLayerStatusChanged((sender, event) => {
+      // Re-emit
+      this.#emitLayerStatusChanged(event);
+
+      // If the config is a layer entry (not a group)
+      if (event.config instanceof AbstractBaseLayerEntryConfig) {
+        // Check if all layers are loaded/error right now
+        const allLoaded = this.#checkIfAllLayersLoaded();
+        if (allLoaded) {
+          // Emit about it
+          this.#emitLayerAllLoaded({ config: event.config });
+        }
+      }
+    });
+  }
+
+  /**
+   * Gets the Map Id.
+   *
+   * @returns The map id
    */
   getMapId(): string {
     return this.mapViewer.mapId;
@@ -314,21 +365,7 @@ export class LayerApi {
    * @returns The ids of the layers
    */
   getGeoviewLayerIds(): string[] {
-    const uniqueIds = new Set<string>();
-    for (const layerPath of this.getLayerEntryLayerPaths()) {
-      uniqueIds.add(layerPath.split('/')[0]);
-    }
-    return Array.from(uniqueIds);
-  }
-
-  /**
-   * Verifies if a layer is registered. Returns true if registered.
-   *
-   * @param layerPath - The layer path to check.
-   * @returns Returns true if the layer configuration is registered.
-   */
-  isLayerEntryConfigRegistered(layerPath: string): boolean {
-    return !!this.#layerEntryConfigs[layerPath];
+    return this.#controllers.layerController.getGeoviewLayerIds();
   }
 
   /**
@@ -337,7 +374,7 @@ export class LayerApi {
    * @returns The GeoView Layer Paths
    */
   getLayerEntryLayerPaths(): string[] {
-    return Object.keys(this.#layerEntryConfigs);
+    return this.#controllers.layerController.getLayerEntryLayerPaths();
   }
 
   /**
@@ -346,7 +383,7 @@ export class LayerApi {
    * @returns The GeoView Layer Entry Configs
    */
   getLayerEntryConfigs(): ConfigBaseClass[] {
-    return Object.values(this.#layerEntryConfigs);
+    return this.#controllers.layerController.getLayerEntryConfigs();
   }
 
   /**
@@ -357,14 +394,7 @@ export class LayerApi {
    * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
    */
   getLayerEntryConfig(layerPath: string): ConfigBaseClass {
-    // Get the layer config
-    const layerConfig = this.#layerEntryConfigs?.[layerPath];
-
-    // If not found
-    if (!layerConfig) throw new LayerConfigNotFoundError(layerPath);
-
-    // Return the layer config
-    return layerConfig;
+    return this.#controllers.layerController.getLayerEntryConfig(layerPath);
   }
 
   /**
@@ -412,7 +442,7 @@ export class LayerApi {
    * @returns The layer configuration or undefined if not found.
    */
   getLayerEntryConfigIfExists(layerPath: string): ConfigBaseClass | undefined {
-    return this.#layerEntryConfigs?.[layerPath];
+    return this.#controllers.layerController.getLayerEntryConfigIfExists(layerPath);
   }
 
   /**
@@ -731,11 +761,14 @@ export class LayerApi {
       const geoviewLayerConfig = response.config;
 
       // If a Geochart is initialized
-      if (GeochartEventProcessor.isGeochartInitialized(this.getMapId())) {
+      if (isStoreGeochartInitialized(this.getMapId())) {
         // For each geocharts configuration
         Object.entries(response.geocharts).forEach(([layerPath, geochartConfig]) => {
           // Add a GeoChart configuration on-the-fly
-          GeochartEventProcessor.addGeochartChart(this.getMapId(), layerPath, geochartConfig);
+          addStoreGeochartChart(this.getMapId(), layerPath, geochartConfig);
+
+          // Make sure geochart tab is shown
+          this.#controllers.uiController.showTabButton('geochart');
         });
       }
 
@@ -825,7 +858,7 @@ export class LayerApi {
       logger.logTraceCore(`LAYERS - 1 - Registering layer entry config ${layerConfig.layerPath} on map ${this.getMapId()}`, layerConfig);
 
       // Register it
-      this.registerLayerConfigInit(layerConfig);
+      this.#registerLayerConfigInit(layerConfig);
 
       // Add filters to map initial filters, if they exist
       this.#addInitialFilters(layerConfig);
@@ -847,7 +880,7 @@ export class LayerApi {
     const promiseLayer = new Promise<void>((resolve, reject) => {
       // Continue the addition process
       layerBeingAdded
-        .createGeoViewLayers(AppEventProcessor.getDisplayDateMode(this.getMapId()), this.mapViewer.getProjection(), abortSignal)
+        .createGeoViewLayers(getStoreDisplayDateMode(this.getMapId()), this.mapViewer.getProjection(), abortSignal)
         .then(() => {
           // Add the layer on the map
           this.#addToMap(layerBeingAdded, geoviewLayerConfig);
@@ -983,12 +1016,14 @@ export class LayerApi {
    *
    * @param layerConfig - The layer entry config to register
    */
-  registerLayerConfigInit(layerConfig: ConfigBaseClass): void {
+  #registerLayerConfigInit(layerConfig: ConfigBaseClass): void {
     // Log (keep the commented line for now)
     // logger.logDebug('registerLayerConfigInit', layerConfig.layerPath, layerConfig.layerStatus);
 
-    // Keep it
-    this.#layerEntryConfigs[layerConfig.layerPath] = layerConfig;
+    // Register it
+    this.#controllers.layerController.registerLayerEntryConfig(layerConfig);
+
+    // TODO: REFACTOR - MOVE THE REST OF THIS INSIDE THE LAYER DOMAIN
 
     // Register for ordered layer information
     if (layerConfig.getGeoviewLayerConfig().useAsBasemap !== true) this.#registerForOrderedLayerInfo(layerConfig as TypeLayerEntryConfig);
@@ -998,9 +1033,6 @@ export class LayerApi {
       // Register the config to the layer set
       layerSet.registerLayerConfig(layerConfig);
     });
-
-    // Register a handler when the config layer status changes (this allows catching the status >= registered, all the way to loaded/error)
-    layerConfig.onLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
 
     // Set the layer status to registered
     layerConfig.setLayerStatusRegistered();
@@ -1020,21 +1052,27 @@ export class LayerApi {
     }
 
     // If the TimeSlider plugin is initialized
-    if (TimeSliderEventProcessor.isTimeSliderInitialized(this.getMapId())) {
+    if (isStoreTimeSliderInitialized(this.getMapId())) {
       // Remove from the TimeSlider
-      TimeSliderEventProcessor.removeTimeSliderLayer(this.getMapId(), layerConfig.layerPath);
+      removeStoreTimeSliderLayer(this.getMapId(), layerConfig.layerPath, () => {
+        // Remove the tab
+        this.#controllers.uiController.hideTabButton('time-slider');
+      });
     }
 
     // If the geochart plugin is initialized
-    if (GeochartEventProcessor.isGeochartInitialized(this.getMapId())) {
+    if (isStoreGeochartInitialized(this.getMapId())) {
       // Remove from the GeoChart Charts
-      GeochartEventProcessor.removeGeochartChart(this.getMapId(), layerConfig.layerPath);
+      removeStoreGeochartChart(this.getMapId(), layerConfig.layerPath, () => {
+        // Remove the tab
+        this.#controllers.uiController.hideTabButton('geochart');
+      });
     }
 
     // If the swiper plugin is initialized
-    if (SwiperEventProcessor.isSwiperInitialized(this.getMapId())) {
+    if (isStoreSwiperInitialized(this.getMapId())) {
       // Remove it from the Swiper
-      SwiperEventProcessor.removeLayerPath(this.getMapId(), layerConfig.layerPath);
+      removeStoreSwiperLayerPath(this.getMapId(), layerConfig.layerPath);
     }
 
     // Tell the layer sets about it
@@ -1145,7 +1183,7 @@ export class LayerApi {
           }
 
           // Remove from registered layer configs
-          delete this.#layerEntryConfigs[registeredLayerPath];
+          this.#controllers.layerController.deleteLayerEntryConfig(registeredLayerPath);
           delete this.#geoviewLayers[registeredLayerPath];
 
           // Remove from registered layers
@@ -1207,7 +1245,7 @@ export class LayerApi {
       logger.logInfo(`Layer removed for ${layerPath}`);
 
       // Redirect to feature info delete
-      FeatureInfoEventProcessor.deleteFeatureInfo(this.getMapId(), layerPath);
+      deleteStoreDetailsFeatureInfo(this.getMapId(), layerPath);
     }
   }
 
@@ -1397,8 +1435,10 @@ export class LayerApi {
     if (refresh) MapEventProcessor.applyLayerFilters(this.getMapId(), layerPath);
 
     // Update the legend layers if necessary
-    if (refresh)
-      LegendEventProcessor.setItemVisibility(this.getMapId(), layerPath, item, visibility, layer.getLayerFilters().getClassFilter());
+    if (refresh) {
+      // Save in the store
+      setStoreLayerItemVisibility(this.getMapId(), layerPath, item, visibility, layer.getLayerFilters().getClassFilter());
+    }
 
     // Await on the render if we must
     if (waitForRender) {
@@ -1526,8 +1566,8 @@ export class LayerApi {
     let displayDateFormatToSet: TypeDisplayDateFormat = displayDateFormat as TypeDisplayDateFormat;
     if (typeof displayDateFormat === 'string') displayDateFormatToSet = { en: displayDateFormat, fr: displayDateFormat };
 
-    // Redirect
-    LegendEventProcessor.setLayerDisplayDateFormatInStore(this.getMapId(), layerPath, displayDateFormatToSet);
+    // Save in the store
+    setStoreLayerDisplayDateFormat(this.getMapId(), layerPath, displayDateFormatToSet);
   }
 
   /**
@@ -1547,8 +1587,8 @@ export class LayerApi {
     let displayDateFormatToSet: TypeDisplayDateFormat = displayDateFormat as TypeDisplayDateFormat;
     if (typeof displayDateFormat === 'string') displayDateFormatToSet = { en: displayDateFormat, fr: displayDateFormat };
 
-    // Redirect
-    LegendEventProcessor.setLayerDisplayDateFormatShortInStore(this.getMapId(), layerPath, displayDateFormatToSet);
+    // Save in the store
+    setStoreLayerDisplayDateFormatShort(this.getMapId(), layerPath, displayDateFormatToSet);
   }
 
   /**
@@ -1564,7 +1604,7 @@ export class LayerApi {
    */
   setLayerDateTemporalMode(layerPath: string, temporalMode: TemporalMode): void {
     // Redirect
-    LegendEventProcessor.setLayerDateTemporalInStore(this.getMapId(), layerPath, temporalMode);
+    setStoreLayerDateTemporal(this.getMapId(), layerPath, temporalMode);
   }
 
   /**
@@ -1587,7 +1627,7 @@ export class LayerApi {
 
     // Update the store
     //TODO: REFACTOR - The store update should happen through a store adaptor via a setRasterFunctionChanged event raised by the layer
-    LegendEventProcessor.setLayerRasterFunctionInStore(this.getMapId(), layerPath, rasterFunctionId);
+    setStoreLayerRasterFunction(this.getMapId(), layerPath, rasterFunctionId);
 
     // Trigger legend re-query through the layer set system (forced refresh)
     this.legendsLayerSet.queryLegend(layerPath, true);
@@ -1608,7 +1648,7 @@ export class LayerApi {
 
     // Update the store
     //TODO: REFACTOR - The store update should happen through a store adaptor via a setMosaicRuleChanged event raised by the layer
-    LegendEventProcessor.setLayerMosaicRuleInStore(this.getMapId(), layerPath, mosaicRule);
+    setStoreLayerMosaicRule(this.getMapId(), layerPath, mosaicRule);
 
     // Trigger legend re-query through the layer set system
     this.legendsLayerSet.queryLegend(layerPath, true);
@@ -1629,7 +1669,7 @@ export class LayerApi {
 
     // Update the store
     //TODO: REFACTOR - The store update should happen through a store adaptor via a setWmsStyleChanged event raised by the layer
-    LegendEventProcessor.setLayerWmsStyleInStore(this.getMapId(), layerPath, wmsStyle);
+    setStoreLayerWmsStyle(this.getMapId(), layerPath, wmsStyle);
 
     // Trigger legend re-query through the layer set system
     this.legendsLayerSet.queryLegend(layerPath, true);
@@ -1976,27 +2016,6 @@ export class LayerApi {
   }
 
   /**
-   * Handles when any layer status changes during any config processing.
-   *
-   * @param layerConfig - The layer entry config having its layer status changed.
-   * @param event - The layer status changed event.
-   */
-  #handleLayerStatusChanged(layerConfig: ConfigBaseClass, event: ConfigLayerStatusChangedEvent): void {
-    // Emit about it
-    this.#emitLayerStatusChanged({ config: layerConfig, status: event.layerStatus });
-
-    // If the config is a layer entry (not a group)
-    if (layerConfig instanceof AbstractBaseLayerEntryConfig) {
-      // Check if all layers are loaded/error right now
-      const allLoaded = this.#checkIfAllLayersLoaded();
-      if (allLoaded) {
-        // Emit about it
-        this.#emitLayerAllLoaded({ config: layerConfig });
-      }
-    }
-  }
-
-  /**
    * Handles the initialization of a layer-entry registration event.
    *
    * This method is triggered when an additional layer-entry configuration
@@ -2027,7 +2046,7 @@ export class LayerApi {
     }
 
     // Register it
-    this.registerLayerConfigInit(event.config);
+    this.#registerLayerConfigInit(event.config);
   }
 
   /**
@@ -2076,7 +2095,7 @@ export class LayerApi {
     this.#registerLayerHandlers(gvLayer);
 
     // Calculate the bounds upon creation
-    LegendEventProcessor.setLayerBoundsForLayerAndParentsAndForgetInStore(this.getMapId(), gvLayer);
+    setStoreLayerBoundsForLayerAndParentsAndForget(this.getMapId(), gvLayer, this.mapViewer.getProjection(), MapViewer.DEFAULT_STOPS);
 
     // Emit about its creation so that one can attach events on it right away if necessary
     this.#emitLayerCreated({ layer: gvLayer });
@@ -2168,7 +2187,7 @@ export class LayerApi {
     this.#emitLayerLoading({ layer });
 
     // Update the store that at least 1 layer is loading
-    LegendEventProcessor.setLayersAreLoadingInStore(this.getMapId(), true);
+    setStoreLayersAreLoading(this.getMapId(), true);
   }
 
   /**
@@ -2196,7 +2215,7 @@ export class LayerApi {
     // If a vector layer has been loaded
     if (layer instanceof AbstractGVVector) {
       // Calculate the bounds as those depend on the actual features in the layer
-      LegendEventProcessor.setLayerBoundsForLayerAndParentsAndForgetInStore(this.getMapId(), layer);
+      setStoreLayerBoundsForLayerAndParentsAndForget(this.getMapId(), layer, this.mapViewer.getProjection(), MapViewer.DEFAULT_STOPS);
     }
 
     // Emit about it
@@ -2221,7 +2240,7 @@ export class LayerApi {
    * @param event - The event containing the name change.
    */
   #handleLayerNameChanged(layer: AbstractBaseGVLayer, event: LayerNameChangedEvent): void {
-    LegendEventProcessor.setLayerNameInStore(this.getMapId(), layer.getLayerPath(), event.layerName);
+    setStoreLayerName(this.getMapId(), layer.getLayerPath(), event.layerName);
   }
 
   /**
@@ -2232,7 +2251,7 @@ export class LayerApi {
    */
   #handleLayerOpacityChanged(layer: AbstractBaseGVLayer, event: LayerOpacityChangedEvent): void {
     // Update the store
-    LegendEventProcessor.setOpacityInStore(this.getMapId(), layer.getLayerPath(), event.opacity);
+    setStoreOpacity(this.getMapId(), layer.getLayerPath(), event.opacity);
   }
 
   /**
@@ -2257,7 +2276,9 @@ export class LayerApi {
   #handleLayerQueryableChanged(layer: AbstractBaseGVLayer, event: LayerQueryableChangedEvent): void {
     // Redirect
     MapEventProcessor.setMapLayerQueryable(this.getMapId(), layer.getLayerPath(), event.queryable);
-    LegendEventProcessor.setLayerQueryableInStore(this.getMapId(), layer.getLayerPath(), event.queryable);
+
+    // Save in store
+    setStoreLayerQueryable(this.getMapId(), layer.getLayerPath(), event.queryable);
 
     // If not queryable
     if (!event.queryable) {
@@ -2278,7 +2299,9 @@ export class LayerApi {
   #handleLayerHoverableChanged(layer: AbstractBaseGVLayer, event: LayerHoverableChangedEvent): void {
     // Redirect
     MapEventProcessor.setMapLayerHoverable(this.getMapId(), layer.getLayerPath(), event.hoverable);
-    LegendEventProcessor.setLayerHoverableInStore(this.getMapId(), layer.getLayerPath(), event.hoverable);
+
+    // Save in store
+    setStoreLayerHoverable(this.getMapId(), layer.getLayerPath(), event.hoverable);
 
     // If not hoverable
     if (!event.hoverable) {
@@ -2374,14 +2397,15 @@ export class LayerApi {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   #handleLayerGroupLayerAdded(sender: GVGroupLayer, event: GVGroupLayerEvent): void {
     // Calculate the bounds on the group layer which had a layer added
-    LegendEventProcessor.setLayerBoundsForLayerAndParentsAndForgetInStore(this.getMapId(), sender);
+    setStoreLayerBoundsForLayerAndParentsAndForget(this.getMapId(), sender, this.mapViewer.getProjection(), MapViewer.DEFAULT_STOPS);
 
     // Get the initial settings opacity of the group layer
     const initialSettingsOpacity = sender.getLayerConfig().getInitialSettings()?.states?.opacity;
 
     // If any
     if (initialSettingsOpacity !== undefined) {
-      LegendEventProcessor.setOpacityInStore(this.getMapId(), sender.getLayerPath(), initialSettingsOpacity);
+      // Update the store
+      setStoreOpacity(this.getMapId(), sender.getLayerPath(), initialSettingsOpacity);
     }
   }
 
@@ -2399,7 +2423,7 @@ export class LayerApi {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   #handleLayerGroupLayerRemoved(sender: GVGroupLayer, event: GVGroupLayerEvent): void {
     // Calculate the bounds on the group layer which had a layer removed
-    LegendEventProcessor.setLayerBoundsForLayerAndParentsAndForgetInStore(this.getMapId(), sender);
+    setStoreLayerBoundsForLayerAndParentsAndForget(this.getMapId(), sender, this.mapViewer.getProjection(), MapViewer.DEFAULT_STOPS);
   }
 
   /**
@@ -2642,7 +2666,7 @@ export class LayerApi {
     // If all loaded/error
     if (allLoadedOrError) {
       // Update the store that all layers are loaded at this point
-      LegendEventProcessor.setLayersAreLoadingInStore(this.getMapId(), false);
+      setStoreLayersAreLoading(this.getMapId(), false);
     }
 
     // Return result
@@ -2778,9 +2802,9 @@ export class LayerApi {
    *
    * @param event - The event to emit
    */
-  #emitLayerStatusChanged(event: LayerStatusChangedEvent): void {
+  #emitLayerStatusChanged(event: ConfigLayerStatusChangedEvent): void {
     // Emit the layersetupdated event
-    EventHelper.emitEvent(this, this.#onLayerStatusChangedHandlers, event);
+    EventHelper.emitEvent(this.#layerDomain, this.#onLayerStatusChangedHandlers, event);
   }
 
   /**
@@ -2788,7 +2812,7 @@ export class LayerApi {
    *
    * @param callback - The callback function
    */
-  onLayerStatusChanged(callback: LayerStatusChangedDelegate): void {
+  onLayerStatusChanged(callback: ConfigLayerStatusChangedDelegate): void {
     // Register the layersetupdated event callback
     EventHelper.onEvent(this.#onLayerStatusChangedHandlers, callback);
   }
@@ -2798,7 +2822,7 @@ export class LayerApi {
    *
    * @param callback - The callback function to unregister
    */
-  offLayerStatusChanged(callback: LayerStatusChangedDelegate): void {
+  offLayerStatusChanged(callback: ConfigLayerStatusChangedDelegate): void {
     // Unregister the layersetupdated event callback
     EventHelper.offEvent(this.#onLayerStatusChangedHandlers, callback);
   }
@@ -3042,11 +3066,14 @@ export class LayerApi {
       // Working with a GeoCore layer
       promise = GeoCore.createLayerConfigFromUUID(entry.geoviewLayerId, language, mapId, entry).then((response) => {
         // If a Geochart is initialized
-        if (GeochartEventProcessor.isGeochartInitialized(mapId)) {
+        if (isStoreGeochartInitialized(mapId)) {
           // For each geocharts configuration
           Object.entries(response.geocharts).forEach(([layerPath, geochartConfig]) => {
-            // Add a GeoChart configuration on-the-fly
-            GeochartEventProcessor.addGeochartChart(mapId, layerPath, geochartConfig);
+            // Add the chart to the store
+            addStoreGeochartChart(mapId, layerPath, geochartConfig);
+
+            // Log
+            logger.logInfo('Added GeoChart configs for layer path:', layerPath);
           });
         }
         return response.config;
@@ -3326,21 +3353,6 @@ export type LayerConfigEvent = {
  * Define a delegate for the event handler function signature
  */
 export type LayerConfigDelegate = EventDelegateBase<LayerApi, LayerConfigEvent, void>;
-
-/**
- * Define an event for the delegate
- */
-export type LayerStatusChangedEvent = {
-  // The layer entry config changing layer status
-  config: ConfigBaseClass;
-  // The new status
-  status: TypeLayerStatus;
-};
-
-/**
- * Define a delegate for the event handler function signature
- */
-export type LayerStatusChangedDelegate = EventDelegateBase<LayerApi, LayerStatusChangedEvent, void>;
 
 /**
  * Define an event for the delegate

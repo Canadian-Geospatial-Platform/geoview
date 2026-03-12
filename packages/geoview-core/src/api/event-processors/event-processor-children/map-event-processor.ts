@@ -25,6 +25,8 @@ import type {
   TypeFeatureInfoEntry,
   TypeMapConfig,
   TypeMapFeaturesInstance,
+  TypeMapMouseInfo,
+  TypeMapState,
 } from '@/api/types/map-schema-types';
 import { MAP_EXTENTS, MAX_EXTENTS_RESTRICTION } from '@/api/types/map-schema-types';
 import type {
@@ -32,25 +34,21 @@ import type {
   TypeLayerInitialSettings,
   TypeGeoviewLayerConfig,
   TypeLayerEntryConfig,
-  TypeLayerStatus,
 } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-import { api } from '@/app';
 import type { Draw } from '@/geo/interaction/draw';
 
 import { LayerApi, type GeoViewLayerAddedResult } from '@/geo/layer/layer';
-import type { TypeMapState, TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import { MapViewer } from '@/geo/map/map-viewer';
 import type { TypeMapStateForExportLayout } from '@/core/components/export/utilities';
 import { Plugin } from '@/api/plugin/plugin';
-import type { PluginsContainer } from '@/api/plugin/plugin-types';
 import type { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { Projection } from '@/geo/utils/projection';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { getGeoViewStore } from '@/core/stores/stores-managers';
 import { DEFAULT_OL_FITOPTIONS, NORTH_POLE_POSITION, OL_ZOOM_DURATION, OL_ZOOM_PADDING } from '@/core/utils/constant';
 import { logger } from '@/core/utils/logger';
-import { delay, isValidUUID, whenThisThen } from '@/core/utils/utilities';
+import { delay, isValidUUID } from '@/core/utils/utilities';
 import type { TimeDimension } from '@/core/utils/date-mgt';
 import { DateMgt } from '@/core/utils/date-mgt';
 
@@ -59,13 +57,13 @@ import type { TypeClickMarker } from '@/core/components';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
-import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
-import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import type { IMapState, TypeOrderedLayerInfo, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
-import { getAppCrosshairsActive } from '@/core/stores/store-interface-and-intial-values/app-state';
+import {
+  getStoreIsCrosshairsActive,
+  getStoreDisplayTheme,
+  getStoreShowLayerHighlightLayerBbox,
+} from '@/core/stores/store-interface-and-intial-values/app-state';
 import type { TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 
@@ -73,10 +71,24 @@ import { InvalidExtentError, NoBoundsError, PluginError } from '@/core/exception
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
-import type { TypeTimeSliderProps } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import {
+  getStoreTimeSliderFilter,
+  getStoreTimeSliderLayers,
+  getStoreTimeSliderSelectedLayer,
+  isStoreTimeSliderInitialized,
+  type TypeTimeSliderProps,
+} from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { Fetch } from '@/core/utils/fetch-helper';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
+import { getStoreActiveAppBarTab, getStoreActiveFooterBarTab } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { getStoreDataTableSelectedLayerPath, getStoreTableFilter } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import {
+  getStoreLayerStateHighlightedLayer,
+  getStoreLayerStateLayerBounds,
+  getStoreLayerStateLegendLayerByPath,
+  getStoreLayerStateSelectedLayerPath,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
 // GV MapState provides: 'state values', 'actions' and 'setterActions'.
@@ -91,7 +103,7 @@ import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 // GV   - MapEventProcessor ---triggers---> MapViewer events ---calls---> MapState.setterActions
 // GV The reason for this pattern is so that UI components and processes performing back-end code
 // GV both end up running code in MapEventProcessor (UI: via 'actions' and back-end code via 'MapEventProcessor')
-export class MapEventProcessor extends AbstractEventProcessor {
+export abstract class MapEventProcessor extends AbstractEventProcessor {
   /** The minimal delay to wait for the zoom, to be sure.. */
   static readonly ZOOM_MIN_DELAY = 500;
 
@@ -106,6 +118,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // use api to access map because this function will set map element in store
     const mapViewer = this.getMapViewer(mapId);
     const { map } = mapViewer;
+
+    // TODO: REFACTOR - This getGeoviewStore() call shouldn't be here. Use the state getters. (Easy fix)
     const store = getGeoViewStore(mapId);
 
     // Add map controls (scale)
@@ -186,43 +200,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // TODO: REFACTOR - Rename this function when we want to clarify the small confusion with getMapState function below
     // Return the map state
     return this.getState(mapId).mapState;
-  }
-
-  /**
-   * Shortcut to get the Map Viewer instance for a given map id
-   * This is use to reduce the use of api.getMapViewer(mapId) and be more explicit
-   * @param {string} mapId - map Id
-   * @returns {MapViewer} The Map viewer instance
-   * @static
-   */
-  // TODO: REFACTOR? - These functions are the only place in the code where we still import api from '@/app'.
-  static getMapViewer(mapId: string): MapViewer {
-    return api.getMapViewer(mapId);
-  }
-
-  /**
-   * Shortcut to get the Map Viewer layer api instance for a given map id
-   * This is use to reduce the use of api.getMapViewer(mapId).layer and be more explicit
-   * @param {string} mapId - map Id
-   * @returns {LayerApi} The Map viewer layer API instance
-   * @static
-   */
-  // TODO: REFACTOR? - These functions are the only place in the code where we still import api from '@/app'.
-  static getMapViewerLayerAPI(mapId: string): LayerApi {
-    return api.getMapViewer(mapId).layer;
-  }
-
-  /**
-   * Shortcut to get the Map Viewer plugins instance for a given map id
-   * This is use to reduce the use of api.getMapViewer(mapId).plugins and be more explicit
-   * @param {string} mapId - map Id
-   * @returns {PluginsContainer} The map plugins container
-   * @static
-   */
-  // TODO: REFACTOR? - These functions are the only place in the code where we still import api from '@/app'.
-  static async getMapViewerPlugins(mapId: string): Promise<PluginsContainer> {
-    await whenThisThen(() => api && api.hasMapViewer(mapId));
-    return api.getMapViewer(mapId).plugins;
   }
 
   /**
@@ -385,17 +362,6 @@ export class MapEventProcessor extends AbstractEventProcessor {
     });
   }
 
-  /**
-   * Gets the status of a layer.
-   * @param {string} mapId - The map id.
-   * @param {string} layerPath - The layer path.
-   * @returns {TypeLayerStatus | undefined} The layer status
-   * @static
-   */
-  static getMapLayerStatus(mapId: string, layerPath: string): TypeLayerStatus | undefined {
-    return LegendEventProcessor.getLegendLayerInfo(mapId, layerPath)?.layerStatus;
-  }
-
   static getMapState(mapId: string): TypeMapState {
     const mapState = this.getMapStateProtected(mapId);
     return {
@@ -462,7 +428,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     this.getMapStateProtected(mapId).setterActions.setClickCoordinates(clickCoordinates);
 
     // If in WCAG mode, we need to emit the event
-    if (getAppCrosshairsActive(mapId)) this.getMapViewer(mapId).emitMapSingleClick(clickCoordinates);
+    if (getStoreIsCrosshairsActive(mapId)) this.getMapViewer(mapId).emitMapSingleClick(clickCoordinates);
   }
 
   static getLayersInVisibleRange = (mapId: string): string[] => {
@@ -540,7 +506,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static async setProjection(mapId: string, projectionCode: TypeValidMapProjectionCodes): Promise<void> {
     try {
       // Set circular progress to hide basemap switching
-      AppEventProcessor.setCircularProgress(mapId, true);
+      this.getMapViewer(mapId).controllers.uiController.setCircularProgress(true);
 
       // get view status (center and projection) to calculate new center
       const currentView = this.getMapViewer(mapId).map.getView();
@@ -612,7 +578,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       this.getMapViewerLayerAPI(mapId).refreshLayers();
 
       // Remove layer highlight if present to avoid bad reprojection
-      const highlightName = LegendEventProcessor.getLayerPanelState(mapId, 'highlightedLayer') as string;
+      const highlightName = getStoreLayerStateHighlightedLayer(mapId);
       if (highlightName !== '') {
         MapEventProcessor.changeOrRemoveLayerHighlight(mapId, highlightName, highlightName);
       }
@@ -629,7 +595,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
         });
     } finally {
       // Remove circular progress as refresh is done
-      AppEventProcessor.setCircularProgress(mapId, false);
+      this.getMapViewer(mapId).controllers.uiController.setCircularProgress(false);
     }
   }
 
@@ -715,10 +681,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
   static getLegendCollapsibleLayers(mapId: string): TypeOrderedLayerInfo[] {
     // Get collapsible layers
     const orderedLayerInfo = this.getMapOrderedLayerInfo(mapId);
-    const { legendLayers } = this.getState(mapId).layerState;
 
     return orderedLayerInfo.filter((layer) => {
-      const legendLayer = LegendEventProcessor.findLayerByPath(legendLayers, layer.layerPath);
+      const legendLayer = getStoreLayerStateLegendLayerByPath(mapId, layer.layerPath);
       return (
         (legendLayer?.children && legendLayer.children.length > 0) ||
         (legendLayer?.items && legendLayer.items.length > 1) ||
@@ -913,9 +878,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
     MapEventProcessor.getMapViewerLayerAPI(mapId).highlightLayer(layerPath);
 
     // Get bounds and highlight a bounding box for the layer (if true in global settings)
-    const bounds = LegendEventProcessor.getLayerBounds(mapId, layerPath);
-    if (bounds && AppEventProcessor.getShowLayerHighlightLayerBbox(mapId))
-      this.getMapStateProtected(mapId).actions.highlightBBox(bounds, true);
+    const bounds = getStoreLayerStateLayerBounds(mapId, layerPath);
+    if (bounds && getStoreShowLayerHighlightLayerBbox(mapId)) this.getMapStateProtected(mapId).actions.highlightBBox(bounds, true);
 
     return layerPath;
   }
@@ -1041,10 +1005,9 @@ export class MapEventProcessor extends AbstractEventProcessor {
     });
   }
 
-  // TODO: REFACTOR? - These functions are the only place in the code where we still import api from '@/app'.
   static reorderLayer(mapId: string, layerPath: string, move: number): void {
     // Redirect to state API
-    api.getMapViewer(mapId).stateApi.reorderLayers(mapId, layerPath, move);
+    this.getMapViewer(mapId).stateApi.reorderLayers(mapId, layerPath, move);
   }
 
   /**
@@ -1146,14 +1109,14 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
   static resetBasemap(mapId: string): Promise<void> {
     // reset basemap will use the current display language and projection and recreate the basemap
-    const language = AppEventProcessor.getDisplayLanguage(mapId);
+    const language = this.getMapViewer(mapId).getDisplayLanguage();
     const projection = this.getMapState(mapId).currentProjection as TypeValidMapProjectionCodes;
     return this.getMapViewer(mapId).basemap.loadDefaultBasemaps(projection, language);
   }
 
   static async setBasemap(mapId: string, basemapOptions: TypeBasemapOptions): Promise<void> {
     // Set basemap will use the current display language and projection and recreate the basemap
-    const language = AppEventProcessor.getDisplayLanguage(mapId);
+    const language = this.getMapViewer(mapId).getDisplayLanguage();
     const projection = this.getMapState(mapId).currentProjection as TypeValidMapProjectionCodes;
 
     // Create the core basemap
@@ -1410,7 +1373,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const options: FitOptions = fitOptions ?? { padding: OL_ZOOM_PADDING, duration: OL_ZOOM_DURATION };
 
     // Get the layer bounds
-    const bounds = LegendEventProcessor.getLayerBounds(mapId, layerPath);
+    const bounds = getStoreLayerStateLayerBounds(mapId, layerPath);
 
     // If found
     if (bounds) {
@@ -1464,13 +1427,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const classFilter = layer.getFilterFromStyle();
 
     // The data table filter if any
-    const dataFilter = DataTableEventProcessor.getTableFilter(mapId, layerPath);
+    const dataFilter = getStoreTableFilter(mapId, layerPath);
 
     // If the TimeSlider is initialized
     let timeFilter: string | undefined;
-    if (TimeSliderEventProcessor.isTimeSliderInitialized(mapId)) {
+    if (isStoreTimeSliderInitialized(mapId)) {
       // Assign it for the return
-      timeFilter = TimeSliderEventProcessor.getTimeSliderFilter(mapId, layerPath);
+      timeFilter = getStoreTimeSliderFilter(mapId, layerPath);
     }
 
     // Return the current filters in the application
@@ -1702,7 +1665,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
     // Get needed info
     const layerEntryConfig = this.getMapViewerLayerAPI(mapId).getLayerEntryConfig(layerPath);
     const orderedLayerInfo = this.findMapLayerFromOrderedInfo(mapId, layerPath);
-    const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(mapId, layerPath);
+    const legendLayerInfo = getStoreLayerStateLegendLayerByPath(mapId, layerPath);
 
     // Get original layerEntryConfig from map config
     const pathArray = layerPath.split('/');
@@ -1799,7 +1762,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
     // Get info
     const orderedLayerInfo = this.findMapLayerFromOrderedInfo(mapId, layerPath);
-    const legendLayerInfo = LegendEventProcessor.getLegendLayerInfo(mapId, layerPath);
+    const legendLayerInfo = getStoreLayerStateLegendLayerByPath(mapId, layerPath);
 
     // Check if the layer is a geocore layers
     const isGeocore = isValidUUID(layerPath.split('/')[0]);
@@ -1867,7 +1830,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
    */
   static #createTimeSliderConfigs(mapId: string): TypeTimeSliderProps[] | undefined {
     // Get time slider info
-    const timeSliderLayers = TimeSliderEventProcessor.getTimeSliderLayers(mapId);
+    const timeSliderLayers = getStoreTimeSliderLayers(mapId);
 
     if (timeSliderLayers) {
       const timeSliderProps: TypeTimeSliderProps[] = [];
@@ -1994,7 +1957,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
       let { corePackagesConfig } = config;
       // Create time slider config and add to core package configs
-      if (TimeSliderEventProcessor.isTimeSliderInitialized(mapId)) {
+      if (isStoreTimeSliderInitialized(mapId)) {
         const sliders = this.#createTimeSliderConfigs(mapId);
         if (corePackagesConfig && sliders) {
           const configObj = corePackagesConfig?.find((packageConfig) => Object.keys(packageConfig).includes('time-slider'));
@@ -2006,7 +1969,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       // Construct map config
       const newMapConfig: TypeMapFeaturesInstance = {
         map,
-        theme: AppEventProcessor.getDisplayTheme(mapId),
+        theme: getStoreDisplayTheme(mapId),
         navBar: config.navBar,
         footerBar: config.footerBar,
         appBar: config.appBar,
@@ -2022,27 +1985,27 @@ export class MapEventProcessor extends AbstractEventProcessor {
 
       // Set app bar tab settings
       if (newMapConfig.appBar) {
-        newMapConfig.appBar.selectedTab = UIEventProcessor.getActiveAppBarTab(mapId).tabId as TypeValidAppBarCoreProps;
+        newMapConfig.appBar.selectedTab = getStoreActiveAppBarTab(mapId).tabId as TypeValidAppBarCoreProps;
 
-        const selectedDataTableLayerPath = DataTableEventProcessor.getSingleDataTableState(mapId, 'selectedLayerPath');
-        if (selectedDataTableLayerPath) newMapConfig.appBar.selectedDataTableLayerPath = selectedDataTableLayerPath as string;
-        const selectedLayerPath = LegendEventProcessor.getLayerPanelState(mapId, 'selectedLayerPath');
-        if (selectedLayerPath) newMapConfig.appBar.selectedLayersLayerPath = selectedLayerPath as string;
+        const selectedDataTableLayerPath = getStoreDataTableSelectedLayerPath(mapId);
+        if (selectedDataTableLayerPath) newMapConfig.appBar.selectedDataTableLayerPath = selectedDataTableLayerPath;
+        const selectedLayerPath = getStoreLayerStateSelectedLayerPath(mapId);
+        if (selectedLayerPath) newMapConfig.appBar.selectedLayersLayerPath = selectedLayerPath;
       }
 
       // Set footer bar tab settings
       if (newMapConfig.footerBar) {
-        newMapConfig.footerBar.selectedTab = UIEventProcessor.getActiveFooterBarTab(mapId).tabId as TypeValidFooterBarTabsCoreProps;
+        newMapConfig.footerBar.selectedTab = getStoreActiveFooterBarTab(mapId).tabId as TypeValidFooterBarTabsCoreProps;
 
-        const selectedDataTableLayerPath = DataTableEventProcessor.getSingleDataTableState(mapId, 'selectedLayerPath');
-        if (selectedDataTableLayerPath) newMapConfig.footerBar.selectedDataTableLayerPath = selectedDataTableLayerPath as string;
-        const selectedLayerLayerPath = LegendEventProcessor.getLayerPanelState(mapId, 'selectedLayerPath');
-        if (selectedLayerLayerPath) newMapConfig.footerBar.selectedLayersLayerPath = selectedLayerLayerPath as string;
+        const selectedDataTableLayerPath = getStoreDataTableSelectedLayerPath(mapId);
+        if (selectedDataTableLayerPath) newMapConfig.footerBar.selectedDataTableLayerPath = selectedDataTableLayerPath;
+        const selectedLayerLayerPath = getStoreLayerStateSelectedLayerPath(mapId);
+        if (selectedLayerLayerPath) newMapConfig.footerBar.selectedLayersLayerPath = selectedLayerLayerPath;
 
         // If the TimeSlider plugin is initialized
-        if (TimeSliderEventProcessor.isTimeSliderInitialized(mapId)) {
+        if (isStoreTimeSliderInitialized(mapId)) {
           // Store it
-          newMapConfig.footerBar.selectedTimeSliderLayerPath = TimeSliderEventProcessor.getTimeSliderSelectedLayer(mapId);
+          newMapConfig.footerBar.selectedTimeSliderLayerPath = getStoreTimeSliderSelectedLayer(mapId);
         }
       }
 
