@@ -150,6 +150,9 @@ export class LayerApi {
   /** It could be increased slightly if ever we need to, but it might offer worse precision depending on various layers */
   static readonly MIN_MAX_ZOOM_LEVEL_BUFFER = 0.21;
 
+  /** The opacity ratio to use when highlighting a layer vs the other layers */
+  static readonly HIGHLIGHT_OPACITY_RATIO = 4;
+
   /** Reference on the map viewer */
   mapViewer: MapViewer;
 
@@ -190,10 +193,7 @@ export class LayerApi {
   #gvLayers: { [layerPath: string]: AbstractBaseGVLayer } = {};
 
   /** Used to keep a reference of highlighted layer */
-  #highlightedLayer: { layerPath?: string; originalOpacity?: number } = {
-    layerPath: undefined,
-    originalOpacity: undefined,
-  };
+  #highlightedLayerPath: string = '';
 
   /** Keep all callback delegates references */
   #onLayerConfigAddedHandlers: LayerBuilderDelegate[] = [];
@@ -446,6 +446,14 @@ export class LayerApi {
    */
   getGeoviewLayersGroups(): GVGroupLayer[] {
     return this.getGeoviewLayers().filter((l) => l instanceof GVGroupLayer);
+  }
+
+  /**
+   * Gets all GeoView layers that are at the root.
+   * @returns An array containing only the layers at the root level of the registry.
+   */
+  getGeoviewLayersRoot(): AbstractBaseGVLayer[] {
+    return this.getGeoviewLayers().filter((layer) => !layer.getParent());
   }
 
   /**
@@ -1060,25 +1068,6 @@ export class LayerApi {
   }
 
   /**
-   * Removes layer and feature highlights for a given layer.
-   * @param {string} layerPath - The path of the layer to remove highlights from.
-   * @returns {void}
-   */
-  removeLayerHighlights(layerPath: string): void {
-    // Remove layer highlight if layer being removed or its child is highlighted
-    if (this.#highlightedLayer.layerPath?.startsWith(`${layerPath}/`) || this.#highlightedLayer.layerPath === layerPath)
-      this.removeHighlightLayer();
-
-    // Reset the result set for the layer and any children
-    this.getLayerEntryLayerPaths().forEach((registeredLayerPath) => {
-      if (registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) {
-        // Remove feature highlight and result set for features from this layer
-        FeatureInfoEventProcessor.resetResultSet(this.getMapId(), registeredLayerPath);
-      }
-    });
-  }
-
-  /**
    * Removes a layer from the map using its layer path. The path may point to the root geoview layer
    * or a sub layer.
    * @param {string} layerPath - The path or ID of the layer to be removed
@@ -1200,92 +1189,83 @@ export class LayerApi {
    * Highlights layer or sublayer on map
    *
    * @param {string} layerPath - ID of layer to highlight
-   * @returns {void}
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
   highlightLayer(layerPath: string): void {
+    // Clear previous highlights if any
     this.removeHighlightLayer();
-    const theLayerMain = this.getGeoviewLayerIfExists(layerPath);
 
-    this.#highlightedLayer = { layerPath, originalOpacity: theLayerMain?.getOpacity() };
-    theLayerMain?.setOpacity(1);
+    // Find the layer
+    const layer = this.getGeoviewLayer(layerPath);
 
-    // If it is a group layer, highlight sublayers
-    // TODO: CHECK - Change this to theLayerMain.getLayerConfig()?
-    const layer = this.getLayerEntryConfigIfExists(layerPath);
+    // Keep the highlighted layer with its original opacity
+    this.#highlightedLayerPath = layerPath;
 
-    // If found
-    if (layer && layer.getEntryTypeIsGroup()) {
-      this.getLayerEntryLayerPaths().forEach((registeredLayerPath) => {
-        // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
-        const theLayer = this.getGeoviewLayerIfExists(registeredLayerPath);
-        if (theLayer) {
-          if (
-            !(registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) &&
-            theLayer.getLayerConfig().getEntryTypeIsRegular()
-          ) {
-            const otherOpacity = theLayer.getOpacity();
-            theLayer.setOpacity((otherOpacity || 1) * 0.25);
-          } else theLayer.getOLLayer().setZIndex(999);
-        }
-      });
-    } else {
-      this.getLayerEntryLayerPaths().forEach((registeredLayerPath) => {
-        // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
-        const theLayer = this.getGeoviewLayerIfExists(registeredLayerPath);
-        if (theLayer) {
-          if (registeredLayerPath !== layerPath && theLayer.getLayerConfig()?.getEntryTypeIsRegular()) {
-            const otherOpacity = theLayer.getOpacity();
-            theLayer.setOpacity((otherOpacity || 1) * 0.25);
-          }
-        }
-      });
-      this.getOLLayerIfExists(layerPath)?.setZIndex(999);
+    // Build a list of layers to exclude from the opacity adjustments
+    const excludingLayers = [layer];
+
+    // If the layer we're highlighting is a group, we have to exclude all its children from upcoming opacity adjustments
+    if (layer instanceof GVGroupLayer) {
+      excludingLayers.push(...layer.getLayersAllLeafs());
     }
+
+    // Get all other regular gv layers on the map excluding the one we highlight and its children
+    this.getGeoviewLayersRegulars()
+      .filter((otherLayer) => !excludingLayers.includes(otherLayer))
+      .forEach((otherLayer) => {
+        // Reduce the opacity on the other layer using the ratio.
+        otherLayer.setOpacity(otherLayer.getOpacity() / LayerApi.HIGHLIGHT_OPACITY_RATIO);
+      });
+  }
+
+  /**
+   * Removes layer and feature highlights for a given layer.
+   *
+   * @param {string} layerPath - The path of the layer to remove highlights from.
+   */
+  removeLayerHighlights(layerPath: string): void {
+    // Remove layer highlight if layer being removed or its child is highlighted
+    if (this.#highlightedLayerPath === layerPath) this.removeHighlightLayer();
+
+    // Reset the result set for the layer and any children
+    this.getLayerEntryLayerPaths().forEach((registeredLayerPath) => {
+      if (registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) {
+        // Remove feature highlight and result set for features from this layer
+        FeatureInfoEventProcessor.resetResultSet(this.getMapId(), registeredLayerPath);
+      }
+    });
   }
 
   /**
    * Removes layer or sublayer highlight
-   * @returns {void}
    */
   removeHighlightLayer(): void {
     this.featureHighlight.removeBBoxHighlight();
-    if (this.#highlightedLayer.layerPath !== undefined) {
-      const { layerPath, originalOpacity } = this.#highlightedLayer;
 
-      // Get the layer config
-      const layerConfig = this.getLayerEntryConfigIfExists(layerPath);
+    // Get the highlighted layer information
+    const layer = this.getGeoviewLayerIfExists(this.#highlightedLayerPath);
 
-      // IF found and a group
-      if (layerConfig?.getEntryTypeIsGroup()) {
-        this.getLayerEntryLayerPaths().forEach((registeredLayerPath) => {
-          // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
-          const theLayer = this.getGeoviewLayerIfExists(registeredLayerPath);
-          if (theLayer) {
-            if (
-              !(registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) &&
-              theLayer.getLayerConfig().getEntryTypeIsRegular()
-            ) {
-              const otherOpacity = theLayer.getOpacity();
-              theLayer.setOpacity(otherOpacity ? otherOpacity * 4 : 1);
-            } else theLayer.setOpacity(originalOpacity || 1);
-          }
-        });
-      } else {
-        this.getLayerEntryLayerPaths().forEach((registeredLayerPath) => {
-          // Trying to get the layer associated with the layer path, can be undefined because the layer might be in error
-          const theLayer = this.getGeoviewLayerIfExists(registeredLayerPath);
-          if (theLayer) {
-            if (registeredLayerPath !== layerPath && theLayer.getLayerConfig().getEntryTypeIsRegular()) {
-              const otherOpacity = theLayer.getOpacity();
-              theLayer.setOpacity(otherOpacity ? otherOpacity * 4 : 1);
-            } else theLayer.setOpacity(originalOpacity || 1);
-          }
-        });
-      }
-      MapEventProcessor.setLayerZIndices(this.getMapId());
-      this.#highlightedLayer.layerPath = undefined;
-      this.#highlightedLayer.originalOpacity = undefined;
+    // If no current highlight, skip
+    if (!layer) return;
+
+    // Build a list of layers to exclude from the opacity adjustments
+    const excludingLayers = [layer];
+
+    // If the layer we're removing the highlight is a group, we have to exclude all its children from upcoming opacity adjustments
+    if (layer instanceof GVGroupLayer) {
+      excludingLayers.push(...layer.getLayersAllLeafs());
     }
+
+    // Get all other regular gv layers on the map excluding the one we highlight and its children
+    this.getGeoviewLayersRegulars()
+      .filter((otherLayer) => !excludingLayers.includes(otherLayer))
+      .forEach((otherLayer) => {
+        // Resets the opacity on the other layer using the ratio.
+        otherLayer.setOpacity(otherLayer.getOpacity() * LayerApi.HIGHLIGHT_OPACITY_RATIO);
+      });
+
+    // Clear the highlighted layer information
+    this.#highlightedLayerPath = '';
   }
 
   /**
