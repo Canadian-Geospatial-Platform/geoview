@@ -3,12 +3,12 @@ import type GeoTIFFSource from 'ol/source/GeoTIFF';
 import type { Extent } from 'ol/extent';
 import type { Projection as OLProjection } from 'ol/proj';
 
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { GeoTIFFLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/geotiff-layer-entry-config';
+import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
-import { type TypeLegend } from '@/index';
-import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 import { Fetch } from '@/core/utils/fetch-helper';
 import type { RGBA } from '@/core/utils/utilities';

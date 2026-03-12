@@ -3,10 +3,10 @@ import { createElement, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   useMapRotation,
-  useMapStoreActions,
   useMapFixNorth,
   useMapNorthArrow,
   useMapProjectionEPSG,
+  setStoreMapFixNorth,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
@@ -17,6 +17,8 @@ import { useManageArrow } from '@/core/components/north-arrow/hooks/useManageArr
 import type { TypePanelProps } from '@/ui/panel/panel-types';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { IconButton } from '@/ui/icon-button/icon-button';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 /**
  * Create a map rotation button to open the rotation control panel
@@ -29,7 +31,7 @@ export default function MapRotation(): JSX.Element {
   const { t } = useTranslation<string>();
 
   // Get values from store
-  const { setRotation, setFixNorth } = useMapStoreActions();
+  const mapId = useGeoViewMapId();
   const mapRotation = useMapRotation();
   const isFixNorth = useMapFixNorth();
   const isNorthEnable = useMapNorthArrow();
@@ -62,9 +64,9 @@ export default function MapRotation(): JSX.Element {
     (value: number | number[]): void => {
       const degrees = Array.isArray(value) ? value[0] : value;
       const radians = (degrees * Math.PI) / 180;
-      setRotation(radians);
+      MapEventProcessor.rotate(mapId, radians);
     },
-    [setRotation]
+    [mapId]
   );
 
   /**
@@ -73,21 +75,21 @@ export default function MapRotation(): JSX.Element {
   const handleFixNorth = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {
       const isChecked = event.target.checked;
-      setFixNorth(isChecked);
+      setStoreMapFixNorth(mapId, isChecked);
 
       if (!isChecked) {
-        setRotation(0);
+        MapEventProcessor.rotate(mapId, 0);
       }
     },
-    [setFixNorth, setRotation]
+    [mapId]
   );
 
   /**
    * Handles reset button click
    */
   const handleReset = useCallback((): void => {
-    setRotation(0);
-  }, [setRotation]);
+    MapEventProcessor.rotate(mapId, 0);
+  }, [mapId]);
 
   /**
    * Render rotation control panel content

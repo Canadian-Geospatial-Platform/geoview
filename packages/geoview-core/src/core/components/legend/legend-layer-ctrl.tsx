@@ -18,13 +18,14 @@ import {
 } from '@/ui';
 import {
   useLayerHighlightedLayer,
-  useLayerStoreActions,
   useLayerSelectorChildren,
   useLayerSelectorItems,
   useLayerSelectorControls,
   useLayerSelectorStatus,
   useLayerSelectorEntryType,
   useLayerSelectorName,
+  setStoreLayerSelectedLayersTabLayer,
+  getStoreLayerStateLegendLayerByPath,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
   useUIFooterBarComponents,
@@ -32,19 +33,19 @@ import {
   useUIActiveTrapGeoView,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import {
+  getStoreMapLayerParentHidden,
+  getStoreMapOrderedLayerInfoByPath,
   useMapSelectorLayerInVisibleRange,
   useMapSelectorLayerParentHidden,
   useMapSelectorLayerVisibility,
-  useMapStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import type { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
 import { getSxClasses } from './legend-styles';
 import { logger } from '@/core/utils/logger';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { getGeoViewStore } from '@/core/stores/stores-managers';
-import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { useLayerController } from '@/core/controllers/layer-controller';
 
 // TODO: WCAG Issue #3332 - Consider disabling Zoom to Layer button when it's already zoomed to that layer's extent
 // TODO: WCAG - Consider showing Show in Time Slider button in WCAG mode (requires re-working WCAG UX)
@@ -70,79 +71,75 @@ type ControlActions = {
 const useControlActions = (layerPath: string): ControlActions => {
   // Store
   const mapId = useGeoViewMapId();
-  const { setOrToggleLayerVisibility } = useMapStoreActions();
-  const { setHighlightLayer, zoomToLayerExtent, zoomToLayerVisibleScale } = useLayerStoreActions();
+  const layerController = useLayerController();
 
   return useMemo(
     () => ({
       handleZoomToLayerVisibleScale: (event: React.MouseEvent): void => {
         event.stopPropagation();
         // Read current state values when handler executes
-        const store = getGeoViewStore(mapId);
-        const { layerState, mapState } = store.getState();
-        const layer = LegendEventProcessor.findLayerByPath(layerState.legendLayers, layerPath);
+        // TODO: REFACTOR - This isn't an ideal pattern, review.
+        const layer = getStoreLayerStateLegendLayerByPath(mapId, layerPath);
+
         // Use orderedLayerInfo to check visibility range
-        const layerInfo = MapEventProcessor.findMapLayerFromOrderedInfo(mapId, layerPath, mapState.orderedLayerInfo);
+        const layerInfo = getStoreMapOrderedLayerInfoByPath(mapId, layerPath);
         const isInVisibleRange = layerInfo?.inVisibleRange || false;
 
         const isZoomToVisibleScaleCapable = !isInVisibleRange && layer?.entryType !== 'group';
         if (!isZoomToVisibleScaleCapable) {
           return;
         }
-        zoomToLayerVisibleScale(layerPath);
+        MapEventProcessor.zoomToLayerVisibleScale(mapId, layerPath);
       },
       handleToggleVisibility: (event: React.MouseEvent): boolean => {
         event.stopPropagation();
         // Read current state values when handler executes
-        const store = getGeoViewStore(mapId);
-        const { layerState, mapState } = store.getState();
-        const layer = LegendEventProcessor.findLayerByPath(layerState.legendLayers, layerPath);
-        const layerInfo = MapEventProcessor.findMapLayerFromOrderedInfo(mapId, layerPath, mapState.orderedLayerInfo);
+        // TODO: REFACTOR - This isn't an ideal pattern, review.
+        const layer = getStoreLayerStateLegendLayerByPath(mapId, layerPath);
+        const layerInfo = getStoreMapOrderedLayerInfoByPath(mapId, layerPath);
         const isInVisibleRange = layerInfo?.inVisibleRange || false;
-        const parentHidden = MapEventProcessor.getMapLayerParentHidden(mapId, layerPath);
+        const parentHidden = getStoreMapLayerParentHidden(mapId, layerPath);
 
         if (!isInVisibleRange || parentHidden || layer?.layerStatus === 'error') {
           return false;
         }
-        return setOrToggleLayerVisibility(layerPath);
+        return MapEventProcessor.setOrToggleMapLayerVisibility(mapId, layerPath);
       },
       handleHighlightLayer: (event: React.MouseEvent): void => {
         event.stopPropagation();
         // Read current state values when handler executes
-        const store = getGeoViewStore(mapId);
-        const { layerState, mapState } = store.getState();
-        const layer = LegendEventProcessor.findLayerByPath(layerState.legendLayers, layerPath);
-        const layerInfo = MapEventProcessor.findMapLayerFromOrderedInfo(mapId, layerPath, mapState.orderedLayerInfo);
+        // TODO: REFACTOR - This isn't an ideal pattern, review.
+        const layer = getStoreLayerStateLegendLayerByPath(mapId, layerPath);
+        const layerInfo = getStoreMapOrderedLayerInfoByPath(mapId, layerPath);
         const isInVisibleRange = layerInfo?.inVisibleRange || false;
-        const parentHidden = MapEventProcessor.getMapLayerParentHidden(mapId, layerPath);
+        const parentHidden = getStoreMapLayerParentHidden(mapId, layerPath);
         const isVisible = layerInfo?.visible || false;
 
         if (!isInVisibleRange || parentHidden || !isVisible || layer?.layerStatus === 'error') {
           return;
         }
-        setHighlightLayer(layerPath);
+        layerController.setHighlightLayer(layerPath);
       },
       handleZoomTo: (event: React.MouseEvent): void => {
         event.stopPropagation();
         // Read current state values when handler executes
-        const store = getGeoViewStore(mapId);
-        const { layerState, mapState } = store.getState();
-        const layer = LegendEventProcessor.findLayerByPath(layerState.legendLayers, layerPath);
-        const layerInfo = MapEventProcessor.findMapLayerFromOrderedInfo(mapId, layerPath, mapState.orderedLayerInfo);
+        // TODO: REFACTOR - This isn't an ideal pattern, review.
+        const layer = getStoreLayerStateLegendLayerByPath(mapId, layerPath);
+        const layerInfo = getStoreMapOrderedLayerInfoByPath(mapId, layerPath);
         const isInVisibleRange = layerInfo?.inVisibleRange || false;
-        const parentHidden = MapEventProcessor.getMapLayerParentHidden(mapId, layerPath);
+        const parentHidden = getStoreMapLayerParentHidden(mapId, layerPath);
         const isVisible = layerInfo?.visible || false;
 
         const isZoomToLayerDisabled = !isInVisibleRange || parentHidden || !isVisible || layer?.layerStatus === 'error';
         if (isZoomToLayerDisabled) {
           return;
         }
-        zoomToLayerExtent(layerPath).catch((error: unknown) => {
+        MapEventProcessor.zoomToLayerExtent(mapId, layerPath).catch((error: unknown) => {
           logger.logPromiseFailed('in zoomToLayerExtent in legend-layer.handleZoomTo', error);
         });
       },
     }),
-    [layerPath, mapId, setHighlightLayer, setOrToggleLayerVisibility, zoomToLayerExtent, zoomToLayerVisibleScale]
+    [layerPath, mapId, layerController]
   );
 };
 
@@ -170,7 +167,6 @@ const useSubtitle = (layerPath: string, children: TypeLegendLayer[], items: Type
 // SecondaryControls component (no memo to force re render from layers panel modifications)
 export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.Element {
   // Add store actions for selecting layer and UI
-  const { setSelectedLayerPath } = useLayerStoreActions();
   const footerBarComponents = useUIFooterBarComponents();
   const appBarComponents = useUIAppbarComponents();
   const hasFooterLayersTab = footerBarComponents.includes('layers');
@@ -178,7 +174,7 @@ export function SecondaryControls({ layerPath }: SecondaryControlsProps): JSX.El
   const hasLayersTab = hasFooterLayersTab || hasAppBarLayersTab;
 
   // Use navigate hook
-  const navigateToLayers = useNavigateToTab('layers', setSelectedLayerPath);
+  const navigateToLayers = useNavigateToTab('layers', setStoreLayerSelectedLayersTabLayer);
 
   // Create stable handler for layer navigation
   const handleNavigateToLayers = useCallback(

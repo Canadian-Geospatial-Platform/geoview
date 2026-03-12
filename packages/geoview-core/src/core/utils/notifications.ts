@@ -1,9 +1,9 @@
-import type { NotificationType } from '@/core/components/notifications/notifications';
+import type { NotificationDetailsType, NotificationType } from '@/core/components/notifications/notifications';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
-import { AppEventProcessor } from '@/api/event-processors/event-processor-children/app-event-processor';
-import { generateId, getLocalizedMessage } from './utilities';
-import { logger } from './logger';
+import type { UIController } from '@/core/controllers/ui-controller';
+import { generateId, getLocalizedMessage } from '@/core/utils/utilities';
+import { logger } from '@/core/utils/logger';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
 /**
@@ -12,7 +12,8 @@ import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
  * @exports
  */
 export class Notifications {
-  mapId;
+  /** The UI controller */
+  #uiController: UIController;
 
   // Snackbar messages to display
   snackbarMessageQueue: SnackbarProps[] = [];
@@ -22,10 +23,11 @@ export class Notifications {
 
   /**
    * The class constructor to instanciate a notification class
-   * @param {string} mapId - The map id
+   * @param {UIController} uiController - The UI controller instance
    */
-  constructor(mapId: string) {
-    this.mapId = mapId;
+  constructor(uiController: UIController) {
+    // Keep the controller, for actions.
+    this.#uiController = uiController;
   }
 
   // #region NOTIFICATIONS
@@ -38,17 +40,15 @@ export class Notifications {
    * @private
    */
   #addNotification(type: NotificationType, messageKey: string, params: unknown[]): void {
-    const notification = {
+    const notification: NotificationDetailsType = {
       key: generateId(18),
       notificationType: type,
-      message: getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapId), messageKey, params),
+      message: getLocalizedMessage(this.#uiController.getDisplayLanguage(), messageKey, params),
       count: 1,
     };
 
-    AppEventProcessor.addNotification(this.mapId, notification).catch((error: unknown) => {
-      // Log
-      logger.logPromiseFailed('addNotification in Notifications', error);
-    });
+    // Proceed through the ui controller
+    this.#uiController.addNotification(notification);
   }
 
   // TODO: Refactor - Small problem. These 'addNotificationXXXX' and 'showXXXX' functions are public, but the outside devs don't know about the message keys.
@@ -111,7 +111,7 @@ export class Notifications {
    */
   #showSnackbarMessage(type: SnackbarType, messageKey: string, params: unknown[], button?: ISnackbarButton): void {
     // Get the localized message
-    const message = getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapId), messageKey, params);
+    const message = getLocalizedMessage(this.#uiController.getDisplayLanguage(), messageKey, params);
 
     const snackbar: SnackBarOpenEvent = {
       snackbarType: type,
@@ -235,7 +235,7 @@ export class Notifications {
    */
   showWarning(messageKey: string, params: unknown[] = [], withNotification: boolean = true, button: ISnackbarButton = {}): void {
     // Also log the warning in console
-    logger.logWarning(getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapId), messageKey, params));
+    logger.logWarning(getLocalizedMessage(this.#uiController.getDisplayLanguage(), messageKey, params));
 
     // Redirect
     this.#addSnackbarMessage('warning', messageKey, params, withNotification, button);
@@ -251,7 +251,7 @@ export class Notifications {
    */
   showError(messageKey: string, params: unknown[] = [], withNotification: boolean = true, button: ISnackbarButton = {}): void {
     // Log the error in console
-    logger.logError(getLocalizedMessage(AppEventProcessor.getDisplayLanguage(this.mapId), messageKey, params));
+    logger.logError(getLocalizedMessage(this.#uiController.getDisplayLanguage(), messageKey, params));
 
     // Redirect
     this.#addSnackbarMessage('error', messageKey, params, withNotification, button);

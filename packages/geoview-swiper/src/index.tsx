@@ -1,6 +1,5 @@
 import React from 'react'; // GV This import is to validate that we're on the right React at the end of the file
 import { MapPlugin } from 'geoview-core/api/plugin/map-plugin';
-import { SwiperEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/swiper-event-processor';
 import { logger } from 'geoview-core/core/utils/logger';
 
 import schema from '../schema.json';
@@ -8,6 +7,13 @@ import defaultConfig from '../default-config-swiper.json';
 import type { ConfigProps } from './swiper';
 import { Swiper } from './swiper';
 import type { SwipeOrientation } from './swiper-types';
+import {
+  addStoreSwiperLayerPath,
+  removeAllStoreSwipers,
+  removeStoreSwiperLayerPath,
+  setStoreSwiperLayerPaths,
+  setStoreSwiperOrientation,
+} from 'geoview-core/core/stores/store-interface-and-intial-values/swiper-state';
 
 /**
  * Create a class for the plugin instance.
@@ -71,8 +77,8 @@ class SwiperPlugin extends MapPlugin {
     super.onAdd();
 
     // Initialize the store with swiper provided configuration
-    SwiperEventProcessor.setLayerPaths(this.mapViewer.mapId, this.getConfig().layers);
-    SwiperEventProcessor.setOrientation(this.mapViewer.mapId, this.getConfig().orientation as SwipeOrientation);
+    setStoreSwiperLayerPaths(this.mapViewer.mapId, this.getConfig().layers);
+    setStoreSwiperOrientation(this.mapViewer.mapId, this.getConfig().orientation);
   }
 
   /**
@@ -92,10 +98,10 @@ class SwiperPlugin extends MapPlugin {
   activateForLayer(layerPath: string): void {
     try {
       // Check if the layer exists on the map, this call throws when it doesn't exist
-      this.mapViewer.layer.getOLLayer(layerPath);
+      this.mapViewer.controllers.layerController.getGeoviewLayer(layerPath);
 
-      // Add the layer path
-      SwiperEventProcessor.addLayerPath(this.mapViewer.mapId, layerPath);
+      // Add the layer path in the store
+      addStoreSwiperLayerPath(this.mapViewer.mapId, layerPath);
     } catch (error: unknown) {
       // Log
       logger.logError(error);
@@ -108,16 +114,16 @@ class SwiperPlugin extends MapPlugin {
    * @param layerPath - The layer path to deactivate swiper functionality
    */
   deActivateForLayer(layerPath: string): void {
-    // Remove the layer
-    SwiperEventProcessor.removeLayerPath(this.mapViewer.mapId, layerPath);
+    // Remove the layer from the store
+    removeStoreSwiperLayerPath(this.mapViewer.mapId, layerPath);
   }
 
   /**
    * Deactivates the swiper for the layer indicated by the given layer path.
    */
   deActivateAll(): void {
-    // Remove all layers
-    SwiperEventProcessor.removeAll(this.mapViewer.mapId);
+    // Remove all layers from the store
+    removeAllStoreSwipers(this.mapViewer.mapId);
   }
 
   /**
@@ -126,8 +132,8 @@ class SwiperPlugin extends MapPlugin {
    * @param orientation - The orientation to set
    */
   setOrientation(orientation: SwipeOrientation): void {
-    // Set the orientation
-    SwiperEventProcessor.setOrientation(this.mapViewer.mapId, orientation);
+    // Set the orientation in the store
+    setStoreSwiperOrientation(this.mapViewer.mapId, orientation);
   }
 }
 

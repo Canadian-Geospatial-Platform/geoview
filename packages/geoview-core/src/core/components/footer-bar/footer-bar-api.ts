@@ -1,8 +1,8 @@
 import type { TypeTabs } from '@/ui/tabs/tabs';
-import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
 
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
+import type { UIController } from '@/core/controllers/ui-controller';
 import { sanitizeHtmlContent } from '@/core/utils/utilities';
 
 /**
@@ -12,7 +12,8 @@ import { sanitizeHtmlContent } from '@/core/utils/utilities';
  * @class
  */
 export class FooterBarApi {
-  mapId: string;
+  /** The UI controller */
+  #uiController: UIController;
 
   // array that hold added tabs
   tabs: TypeTabs[] = [];
@@ -26,10 +27,11 @@ export class FooterBarApi {
   /**
    * Instantiates a FooterBarApi class.
    *
-   * @param {string} mapId - The map id this footer bar api belongs to
+   * @param {UIController} uiController - The UI controller this footer bar api belongs to
    */
-  constructor(mapId: string) {
-    this.mapId = mapId;
+  constructor(uiController: UIController) {
+    // Keep the controller, for actions.
+    this.#uiController = uiController;
   }
 
   /**
@@ -133,18 +135,24 @@ export class FooterBarApi {
 
   /**
    * Shows a tab by id.
-   * @param {string} id - The id of the tab to be shown
+   *
+   * @param id - The id of the tab to be shown
+   * @deprecated Legacy support. Should use uiController.showTabButton directly instead.
    */
   showTabButton(id: string): void {
-    UIEventProcessor.showTabButton(this.mapId, id);
+    // Redirect to ui controller
+    this.#uiController.showTabButton(id);
   }
 
   /**
-   * Selects a tab by id, if the id is not a tab, the footer bar will close
-   * @param {string} id - The id of the tab to be selected
+   * Selects a tab by id, if the id is not a tab, the footer bar will close.
+   *
+   * @param id - The id of the tab to be selected
+   * @deprecated Legacy support. Should use uiController.setActiveFooterBarTab directly instead.
    */
   selectTab(id: string): void {
-    UIEventProcessor.setActiveFooterBarTab(this.mapId, id);
+    // Redirect to ui controller
+    this.#uiController.setActiveFooterBarTab(id);
   }
 }
 

@@ -1,15 +1,25 @@
-import { GeochartEventProcessor } from '@/api/event-processors/event-processor-children/geochart-event-processor';
-import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { SwiperEventProcessor } from '@/api/event-processors/event-processor-children/swiper-event-processor';
-import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
-import type { GeoChartStoreByLayerPath, TypeGeochartResultSetEntry } from './store-interface-and-intial-values/geochart-state';
-import type { TypeOrderedLayerInfo } from './store-interface-and-intial-values/map-state';
-import type { TimeSliderLayerSet } from './store-interface-and-intial-values/time-slider-state';
-import type { TypeLegendLayer } from '@/core/components/layers/types';
+import {
+  getStoreGeochartChartsConfig,
+  getStoreGeochartLayerDataArray,
+  getStoreGeochartLayerDataArrayBatchLayerPathBypass,
+  getStoreGeochartSelectedLayerPath,
+  type GeoChartStoreByLayerPath,
+  type TypeGeochartResultSetEntry,
+} from './store-interface-and-intial-values/geochart-state';
+import {
+  type TypeOrderedLayerInfo,
+  getStoreMapLegendCollapsedByPath,
+  getStoreMapOrderedLayerInfo,
+  setStoreMapLegendCollapsed,
+  utilFindMapLayerAndChildrenFromOrderedInfo,
+} from './store-interface-and-intial-values/map-state';
+import { getStoreTimeSliderLayers, type TimeSliderLayerSet } from './store-interface-and-intial-values/time-slider-state';
+import { getStoreSwiperLayerPaths } from './store-interface-and-intial-values/swiper-state';
 import { logger } from '@/core/utils/logger';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
+import { setStoreLayerSelectedLayersTabLayer, setStoreReorderLegendLayers } from './store-interface-and-intial-values/layer-state';
 
 /**
  * API to manage states.
@@ -31,31 +41,13 @@ export class StateApi {
   }
 
   /**
-   * Get a specific layer panel state.
-   * @param {'highlightedLayer' | 'selectedLayerPath' | 'displayState'} state - The state to get
-   * @returns {string | boolean | null | undefined} The requested state
-   */
-  getLayerPanelState(state: 'highlightedLayer' | 'selectedLayerPath' | 'displayState'): string | boolean | null | undefined {
-    return LegendEventProcessor.getLayerPanelState(this.mapId, state);
-  }
-
-  /**
-   * Get a legend layer.
-   * @param {string} layerPath - The path of the layer to get
-   * @returns {TypeLegendLayer | undefined} The requested legend layer
-   */
-  getLegendLayerInfo(layerPath: string): TypeLegendLayer | undefined {
-    return LegendEventProcessor.getLegendLayerInfo(this.mapId, layerPath);
-  }
-
-  /**
    * Get the collapsed state of layer's legend.
    * @param {string} layerPath - Path of the layer to get state for.
    * @returns {boolean} If the legend is collapsed.
    */
   getLegendCollapsedState(layerPath: string): boolean {
-    // Redirect to event processor
-    return MapEventProcessor.getMapLegendCollapsedFromOrderedLayerInfo(this.mapId, layerPath);
+    // Get from store
+    return getStoreMapLegendCollapsedByPath(this.mapId, layerPath);
   }
 
   /**
@@ -69,19 +61,31 @@ export class StateApi {
     state: string
   ): string | TypeGeochartResultSetEntry[] | GeoChartStoreByLayerPath | TimeSliderLayerSet | string[] | undefined {
     if (pluginId === 'geochart') {
-      if (['geochartChartsConfig', 'layerDataArray', 'layerDataArrayBatchLayerPathBypass', 'selectedLayerPath'].includes(state))
-        return GeochartEventProcessor.getSingleGeochartState(
-          this.mapId,
-          state as 'geochartChartsConfig' | 'layerDataArray' | 'layerDataArrayBatchLayerPathBypass' | 'selectedLayerPath'
-        );
-      logger.logError(`${state} not available from geochart`);
+      // Depending on the state requested, call the corresponding getter
+      switch (state) {
+        case 'geochartChartsConfig':
+          return getStoreGeochartChartsConfig(this.mapId);
+
+        case 'selectedLayerPath':
+          return getStoreGeochartSelectedLayerPath(this.mapId);
+
+        case 'layerDataArray':
+          return getStoreGeochartLayerDataArray(this.mapId);
+
+        case 'layerDataArrayBatchLayerPathBypass':
+          return getStoreGeochartLayerDataArrayBatchLayerPathBypass(this.mapId);
+
+        default:
+          logger.logError(`${state} not available from geochart`);
+          return undefined;
+      }
     }
     if (pluginId === 'swiper') {
-      if (state === 'layerPaths') return SwiperEventProcessor.getLayerPaths(this.mapId);
+      if (state === 'layerPaths') return getStoreSwiperLayerPaths(this.mapId);
       logger.logError(`${state} not available from swiper`);
     }
     if (pluginId === 'time-slider') {
-      if (state === 'timeSliderLayers') return TimeSliderEventProcessor.getTimeSliderLayers(this.mapId);
+      if (state === 'timeSliderLayers') return getStoreTimeSliderLayers(this.mapId);
       logger.logError(`${state} not available from time slider`);
     }
     return undefined;
@@ -94,8 +98,8 @@ export class StateApi {
    * @returns {boolean} If the legend is collapsed.
    */
   setLegendCollapsedState(layerPath: string, collapsed: boolean): void {
-    // Redirect to event processor
-    MapEventProcessor.setMapLegendCollapsed(this.mapId, layerPath, collapsed);
+    // Save to the store
+    setStoreMapLegendCollapsed(this.mapId, layerPath, collapsed);
   }
 
   /**
@@ -103,14 +107,14 @@ export class StateApi {
    * @param {string} layerPath - The path of the layer to set
    */
   setSelectedLayersTabLayer(layerPath: string): void {
-    LegendEventProcessor.setSelectedLayersTabLayerInStore(this.mapId, layerPath);
+    setStoreLayerSelectedLayersTabLayer(this.mapId, layerPath);
   }
 
   reorderLayers(mapId: string, layerPath: string, move: number): void {
     // Apply some ordering logic
     const direction = move < 0 ? -1 : 1;
     let absoluteMoves = Math.abs(move);
-    const orderedLayers = [...MapEventProcessor.getMapOrderedLayerInfo(this.mapId)];
+    const orderedLayers = [...getStoreMapOrderedLayerInfo(this.mapId)];
     let startingIndex = -1;
     for (let i = 0; i < orderedLayers.length; i++) if (orderedLayers[i].layerPath === layerPath) startingIndex = i;
 
@@ -121,7 +125,7 @@ export class StateApi {
     }
 
     const layerInfo = orderedLayers[startingIndex];
-    const movedLayers = MapEventProcessor.findMapLayerAndChildrenFromOrderedInfo(mapId, layerPath, orderedLayers);
+    const movedLayers = utilFindMapLayerAndChildrenFromOrderedInfo(layerPath, orderedLayers);
     orderedLayers.splice(startingIndex, movedLayers.length);
     let nextIndex = startingIndex;
     const pathLength = layerInfo.layerPath.split('/').length;
@@ -137,7 +141,7 @@ export class StateApi {
     MapEventProcessor.setMapOrderedLayerInfo(mapId, orderedLayers);
 
     // Reorder the legend layers, because the order layer info has changed
-    LegendEventProcessor.reorderLegendLayers(mapId);
+    setStoreReorderLegendLayers(mapId);
 
     // Emit event
     this.#emitLayersReordered({ orderedLayers });

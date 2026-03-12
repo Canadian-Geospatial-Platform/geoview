@@ -2,8 +2,10 @@ import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { IconButton, ZoomOutIcon } from '@/ui';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
-import { useMapStoreActions, useMapZoom } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapZoom } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 /**
  * Create a zoom out button
@@ -19,15 +21,15 @@ export default function ZoomOut(): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   // get store values
+  const mapId = useGeoViewMapId();
   const zoom = useMapZoom();
-  const { setZoom } = useMapStoreActions();
 
   return (
     <IconButton
       id="zoomOut"
       aria-label={t('mapnav.zoomOut')}
       tooltipPlacement="left"
-      onClick={() => setZoom(zoom - 0.5)}
+      onClick={() => MapEventProcessor.zoomMapAndForget(mapId, zoom - 0.5)}
       sx={sxClasses.navButton}
     >
       <ZoomOutIcon />

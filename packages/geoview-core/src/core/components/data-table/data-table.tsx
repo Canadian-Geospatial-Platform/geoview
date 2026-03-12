@@ -35,19 +35,23 @@ import {
 } from '@/ui';
 
 import TopToolbar from './top-toolbar';
-import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useUIController } from '@/core/controllers/ui-controller';
+import { getStoreMapCurrentProjectionEPSG } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
   useLayerDateTemporalMode,
   useLayerDisplayDateFormat,
   useLayerDisplayDateTimezone,
   useLayerSelectorFilterClass,
   useLayerSelectorName,
-  useLayerStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { useDataTableStoreActions, useDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
+import {
+  useDataTableLayerSettings,
+  setStoreColumnFilterModesEntry,
+  setStoreColumnsFiltersVisibility,
+  setStoreSelectedFeature,
+} from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useTimeSliderFiltersSelector } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useAppDisplayLanguage, useAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { DateMgt } from '@/core/utils/date-mgt';
 import linkifyHtml from 'linkify-html';
 import { isImage, delay, sanitizeHtmlContent, enhanceLinksAccessibility } from '@/core/utils/utilities';
@@ -62,6 +66,10 @@ import type { DataTableProps, ColumnsType } from './data-table-types';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { Projection } from '@/geo/utils/projection';
+import { useDataTableController } from '@/core/controllers/data-table-controller';
+import { useLayerController } from '@/core/controllers/layer-controller';
 
 /** The possible filters for numeric columns */
 const NUMERIC_FIELD_FILTERS = [
@@ -96,10 +104,6 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   const sxClasses = getSxClasses(sxtheme);
 
   // get store actions and values
-  const { zoomToExtent, highlightBBox, transformPoints, showClickMarker, addHighlightedFeature, removeHighlightedFeature } =
-    useMapStoreActions();
-  const { applyMapFilters, setSelectedFeature, setColumnsFiltersVisibility, setColumnFilterModesEntry } = useDataTableStoreActions();
-  const { getExtentFromFeatures } = useLayerStoreActions();
   const language = useAppDisplayLanguage();
   const datatableSettings = useDataTableLayerSettings();
   const showUnsymbolizedFeatures = useAppShowUnsymbolizedFeatures();
@@ -110,6 +114,8 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   const displayDateTimezone = useLayerDisplayDateTimezone(layerPath);
   const displayDateTimezoneUniversal = displayDateTimezone === 'local' ? DateMgt.TIME_IANA_LOCAL : displayDateTimezone;
   const layerName = useLayerSelectorName(layerPath);
+  const dataTableController = useDataTableController();
+  const layerController = useLayerController();
 
   // internal state
   const [density, setDensity] = useState<MRTDensityState>('compact');
@@ -135,7 +141,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   const { globalFilter, setGlobalFilter } = useGlobalFilter({ layerPath });
   // #endregion
 
-  const { enableFocusTrap } = useUIStoreActions();
+  const uiController = useUIController();
 
   const mapId = useGeoViewMapId();
 
@@ -146,7 +152,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   const handleToggleColumnFilters = (updaterOrValue: boolean | ((prev: boolean) => boolean)): void => {
     const newValue = typeof updaterOrValue === 'function' ? updaterOrValue(showColumnFilters) : updaterOrValue;
     setShowColumnFilters(newValue);
-    setColumnsFiltersVisibility(newValue, layerPath);
+    setStoreColumnsFiltersVisibility(mapId, newValue, layerPath);
   };
 
   // Utility function to check date
@@ -442,7 +448,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
       if (!extent && oidField) {
         try {
           // Get the feature extent using its oid field
-          extent = await getExtentFromFeatures(layerPath, [feature.fieldInfo[oidField]!.value as number], oidField);
+          extent = await layerController.getExtentFromFeatures(layerPath, [feature.fieldInfo[oidField]!.value as number], oidField);
         } catch (error: unknown) {
           // Log error
           logger.logError(error);
@@ -453,21 +459,21 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
       if (extent) {
         // Project
         const center = getCenter(extent);
-        const newCenter = transformPoints([center], 4326)[0];
+        const newCenter = Projection.transformPoints([center], getStoreMapCurrentProjectionEPSG(mapId), `EPSG:4326`)[0];
 
         // Zoom to extent and wait for it to finish
         // TODO: We have the same patch in details, see if we should create a reusable custom patch / or change design
-        zoomToExtent(extent)
+        MapEventProcessor.zoomToExtent(mapId, extent)
           .then(async () => {
             // Typically, the click marker is removed after a zoom, so wait a bit here and re-add it...
             // TODO: Refactor - Zoom ClickMarker - Improve the logic in general of when/if a click marker should be removed after a zoom
             await delay(150);
 
             // Add (back?) a click marker, a bbox extent who will disapear and remove/add higlight the zoomed feature
-            showClickMarker({ lonlat: newCenter });
-            highlightBBox(extent, false);
-            removeHighlightedFeature('all');
-            addHighlightedFeature(feature);
+            MapEventProcessor.clickMarkerIconShow(mapId, { lonlat: newCenter });
+            MapEventProcessor.highlightBBox(mapId, extent, false);
+            MapEventProcessor.removeHighlightedFeature(mapId, 'all');
+            MapEventProcessor.addHighlightedFeature(mapId, feature);
           })
           .catch((error: unknown) => {
             // Log
@@ -478,16 +484,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
         logger.logError('Cannot zoom to feature, no extent found.');
       }
     },
-    [
-      getExtentFromFeatures,
-      layerPath,
-      transformPoints,
-      zoomToExtent,
-      showClickMarker,
-      highlightBBox,
-      removeHighlightedFeature,
-      addHighlightedFeature,
-    ]
+    [mapId, layerPath, layerController]
   );
 
   /**
@@ -552,8 +549,8 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
             aria-label={t('dataTable.details')}
             tooltipPlacement="top"
             onClick={() => {
-              setSelectedFeature(feature);
-              enableFocusTrap({ activeElementId: 'featureDetailDataTable', callbackElementId: featureDetailsButtonId });
+              setStoreSelectedFeature(mapId, feature);
+              uiController.enableFocusTrap({ activeElementId: 'featureDetailDataTable', callbackElementId: featureDetailsButtonId });
             }}
           >
             <InfoOutlinedIcon />
@@ -843,7 +840,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     const filterStrings = buildFilterList(filters)
       .filter((filterValue) => filterValue.length)
       .join(' and ');
-    applyMapFilters(filterStrings);
+    dataTableController.applyMapFilters(filterStrings);
   }, 500);
 
   const debouncedColumnFilters = useCallback(
@@ -870,9 +867,8 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     // Log
     logger.logTraceUseEffect('DATA-TABLE - columnFilterFns', columnFilterFns);
 
-    setColumnFilterModesEntry(columnFilterFns, layerPath);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [columnFilterFns]);
+    setStoreColumnFilterModesEntry(mapId, columnFilterFns, layerPath);
+  }, [mapId, columnFilterFns, layerPath]);
 
   // Update map when filter map switch is toggled.
   useEffect(() => {

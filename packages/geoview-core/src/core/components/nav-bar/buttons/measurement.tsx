@@ -9,21 +9,21 @@ import type { StyleFunction } from 'ol/style/Style';
 import type { FeatureLike } from 'ol/Feature';
 import type Feature from 'ol/Feature';
 import type { Geometry } from 'ol/geom';
+import { HexagonOutlined as HexagonOutlinedIcon } from '@mui/icons-material';
 
-import { logger } from '@/core/utils/logger';
 import type { TypePanelProps } from '@/ui/panel/panel-types';
 import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { Box, Switch, ToggleButtonGroup, ToggleButton } from '@/ui';
 import { ShowChartIcon, DeleteIcon, StraightenIcon } from '@/ui/icons';
-import { HexagonOutlined as HexagonOutlinedIcon } from '@mui/icons-material';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
-import { GeoUtilities } from '@/geo/utils/utilities';
 import { formatLength, formatArea } from '@/core/utils/utilities';
 import type { Draw } from '@/geo/interaction/draw';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useAppDisplayLanguage, useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { GeoUtilities } from '@/geo/utils/utilities';
 
 const MEASURE_GROUP_KEY = 'geoview-measurement';
 
@@ -69,8 +69,8 @@ export default function Measurement(): JSX.Element {
   const { t } = useTranslation<string>();
 
   // Stores
+  const mapId = useGeoViewMapId();
   const displayLanguage = useAppDisplayLanguage();
-  const { createGeometryGroup, deleteGeometriesFromGroup, forceMapToRender, initDrawInteractions } = useMapStoreActions();
   const mapElement = useAppGeoviewHTMLElement().querySelector(`[id^="mapTargetElement-${useGeoViewMapId()}"]`) as HTMLElement;
 
   // States
@@ -226,11 +226,11 @@ export default function Measurement(): JSX.Element {
       }
 
       // Create or get the geometry group for measurements
-      createGeometryGroup(MEASURE_GROUP_KEY);
+      MapEventProcessor.createGeometryGroup(mapId, MEASURE_GROUP_KEY);
 
       // Start drawing interaction
       const geomType = type === 'line' ? 'LineString' : 'Polygon';
-      const draw = initDrawInteractions(MEASURE_GROUP_KEY, geomType, {
+      const draw = MapEventProcessor.initDrawInteractions(mapId, MEASURE_GROUP_KEY, geomType, {
         strokeColor: STROKE_COLORS,
         strokeWidth: STROKE_WIDTH,
         fillColor: FILL_COLORS,
@@ -262,7 +262,7 @@ export default function Measurement(): JSX.Element {
         mapElement.focus();
       }
     },
-    [mapElement, drawInstance, initDrawInteractions, createGeometryGroup, createSegmentStyle]
+    [drawInstance, mapId, mapElement, createSegmentStyle]
   );
 
   /**
@@ -284,11 +284,11 @@ export default function Measurement(): JSX.Element {
     setMeasurementFeatures([]);
 
     // Delete all geometries from the group
-    deleteGeometriesFromGroup(MEASURE_GROUP_KEY);
+    MapEventProcessor.deleteGeometriesFromGroup(mapId, MEASURE_GROUP_KEY);
 
     // Stop current drawing
     stopMeasurement();
-  }, [stopMeasurement, deleteGeometriesFromGroup]);
+  }, [stopMeasurement, mapId]);
 
   /**
    * Handles measurement mode toggle
@@ -328,9 +328,9 @@ export default function Measurement(): JSX.Element {
       });
 
       // Force map to re-render
-      forceMapToRender();
+      MapEventProcessor.forceMapToRender(mapId);
     },
-    [createSegmentStyle, forceMapToRender]
+    [createSegmentStyle, mapId]
   );
 
   /**

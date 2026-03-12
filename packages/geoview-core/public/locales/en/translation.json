@@ -507,7 +507,7 @@
       "notSupportingDynamicLayers": "Layer '__param__' does not technically support dynamic layers per its metadata.",
       "notAFeatureLayer": "Layer id not a Feature Layer for layer '__param__'.",
       "notQueryableLayer": "Layer '__param__' is not queryable.",
-      "notAbleToQuery": "Not able to download records for '__param__'",
+      "notAbleToQuery": "Unable to download records for '__param__'",
       "noWMSLegend": "Error fetching legend for '__param__': '__param__'",
       "featureParsingError": "Unable to read feature data for layer '__param__'."
     },

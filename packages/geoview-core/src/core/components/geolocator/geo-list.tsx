@@ -4,9 +4,10 @@ import { List, ListItem, ListItemButton, Grid, Tooltip, Typography } from '@/ui'
 import type { GeoListItem } from '@/core/components/geolocator/geolocator';
 import { getSxClassesList } from '@/core/components/geolocator/geolocator-style';
 import { getBoldListTitle, getTooltipTitle } from '@/core/components/geolocator/utilities';
-import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { logger } from '@/core/utils/logger';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 type GeoListProps = {
   geoListItems: GeoListItem[];
@@ -28,12 +29,13 @@ export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Elemen
   const sxClassesList = useMemo(() => getSxClassesList(theme), [theme]);
 
   // Store
-  const { zoomToGeoLocatorLocation } = useMapStoreActions();
+  const mapId = useGeoViewMapId();
 
   // Handle the zoom to geolocation
   const handleZoomToGeoLocator = useCallback(
     (geoListItem: GeoListItem): void => {
-      zoomToGeoLocatorLocation(
+      MapEventProcessor.zoomToGeoLocatorLocation(
+        mapId,
         `${geoListItem.name}, ${geoListItem.province}, ${geoListItem.category}`,
         [geoListItem.lng, geoListItem.lat],
         geoListItem.bbox
@@ -41,7 +43,7 @@ export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Elemen
         logger.logPromiseFailed('Failed to zoomToGeoLocatorLocation in GeoList', error);
       });
     },
-    [zoomToGeoLocatorLocation]
+    [mapId]
   );
 
   /**

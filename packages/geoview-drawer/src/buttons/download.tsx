@@ -1,11 +1,11 @@
-import type { TypeWindow } from 'geoview-core';
+import { type TypeWindow } from 'geoview-core';
 import { getSxClasses } from 'geoview-core/core/components/nav-bar/nav-bar-style';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
-import { useDrawerActions } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 
 import { IconButton, DownloadIcon } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
+import { useDrawerController } from 'geoview-core/core/controllers/drawer-controller';
 
 /**
  * Creates a download button to download all drawings from the viewer.
@@ -24,15 +24,13 @@ export default function Download(): JSX.Element {
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const displayLanguage = useAppDisplayLanguage();
-
-  // Store actions
-  const { downloadDrawings } = useDrawerActions();
+  const drawerController = useDrawerController();
 
   /**
    * Handles a click on the download button
    */
   const handleDownload = (): void => {
-    downloadDrawings();
+    drawerController.downloadDrawings();
   };
 
   return (

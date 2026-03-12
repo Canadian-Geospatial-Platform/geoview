@@ -1,5 +1,5 @@
 import type { ErrorInfo } from 'react';
-import { createContext, StrictMode, Suspense, useMemo, Component } from 'react';
+import { createContext, StrictMode, Suspense, Component } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import type { i18n } from 'i18next';
 
@@ -12,19 +12,10 @@ import { logger } from '@/core/utils/logger';
 import { useAppDisplayThemeById } from '@/core/stores/store-interface-and-intial-values/app-state';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import type { MapViewer } from '@/geo/map/map-viewer';
+import { ControllerContext } from '@/core/controllers/base/controller-manager';
 
-// create a state that will hold map config information
-// TODO: use store, only keep map id on context for store manager to gather right store on hooks
-export const MapContext = createContext<TypeMapContext>({
-  mapId: '',
-});
-
-/**
- * Type used for the map context
- */
-export type TypeMapContext = {
-  mapId: string;
-};
+/** Create contexts for the map, layer controller, and UI controller */
+export const StoreContext = createContext<string | undefined>(undefined);
 
 /**
  * interface used when passing map features configuration
@@ -105,13 +96,6 @@ function AppStart(props: AppStartProps): JSX.Element {
 
   const { mapViewer, i18nLang } = props;
 
-  const mapContextValue = useMemo(() => {
-    // Log
-    logger.logTraceUseMemo('APP-START - mapContextValue', mapViewer.mapId);
-
-    return { mapId: mapViewer.mapId };
-  }, [mapViewer.mapId]);
-
   // GV get store values by id because context is not set.... it is the only atomic selector by id
   // once context is define, map id is available
   const theme = useAppDisplayThemeById(mapViewer.mapId);
@@ -119,19 +103,21 @@ function AppStart(props: AppStartProps): JSX.Element {
   return (
     <ErrorBoundary language={(i18nLang.language as TypeDisplayLanguage) || 'en'}>
       <StyledEngineProvider injectFirst>
-        <MapContext.Provider value={mapContextValue}>
-          <ThemeProvider theme={getTheme(theme)}>
-            <ScopedCssBaseline>
-              <Suspense fallback="">
-                <I18nextProvider i18n={i18nLang}>
-                  <StrictMode>
-                    <Shell mapViewer={mapViewer} />
-                  </StrictMode>
-                </I18nextProvider>
-              </Suspense>
-            </ScopedCssBaseline>
-          </ThemeProvider>
-        </MapContext.Provider>
+        <StoreContext.Provider value={mapViewer.mapId}>
+          <ControllerContext.Provider value={mapViewer.controllers}>
+            <ThemeProvider theme={getTheme(theme)}>
+              <ScopedCssBaseline>
+                <Suspense fallback="">
+                  <I18nextProvider i18n={i18nLang}>
+                    <StrictMode>
+                      <Shell mapViewer={mapViewer} />
+                    </StrictMode>
+                  </I18nextProvider>
+                </Suspense>
+              </ScopedCssBaseline>
+            </ThemeProvider>
+          </ControllerContext.Provider>
+        </StoreContext.Provider>
       </StyledEngineProvider>
     </ErrorBoundary>
   );

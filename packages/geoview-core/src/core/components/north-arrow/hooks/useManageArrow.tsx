@@ -8,10 +8,11 @@ import {
   useMapProjectionEPSG,
   useMapRotation,
   useMapSize,
-  useMapStoreActions,
   useMapZoom,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 interface ArrowReturn {
   rotationAngle: { angle: number };
@@ -31,6 +32,7 @@ export const useManageArrow = (): ArrowReturn => {
   const angle = useRef(0); // keep track of rotation angle for fix north
 
   // Store
+  const mapId = useGeoViewMapId();
   const mapProjectionEPSG = useMapProjectionEPSG();
   const northArrowElement = useMapNorthArrowElement();
   const fixNorth = useMapFixNorth();
@@ -38,7 +40,6 @@ export const useManageArrow = (): ArrowReturn => {
   const mapRotation = useMapRotation();
   const mapCenterCoord = useMapCenterCoordinates();
   const mapSize = useMapSize();
-  const { getPixelFromCoordinate, setRotation } = useMapStoreActions();
 
   // Memoize projection check as it's used multiple times
   const isLCCProjection = useMemo(() => mapProjectionEPSG === Projection.PROJECTION_NAMES.LCC, [mapProjectionEPSG]);
@@ -107,18 +108,18 @@ export const useManageArrow = (): ArrowReturn => {
         const deviationFromCenter = mapCenterLongitude - CENTRAL_MERIDIAN;
 
         if (Math.abs(deviationFromCenter) <= 3) {
-          setRotation(0);
+          MapEventProcessor.rotate(mapId, 0);
           equalCountRef.current = 0;
         } else if (diff > 0.01) {
           // Only set rotation if we haven't already set it for this value
           if (rotationValue !== prevRotationRef.current) {
-            setRotation(rotationValue);
+            MapEventProcessor.rotate(mapId, rotationValue);
             prevRotationRef.current = rotationValue;
             equalCountRef.current = 1; // Set to 1 to indicate we've used this value
           }
           // If values are the same but we haven't set rotation yet
           else if (equalCountRef.current === 0) {
-            setRotation(rotationValue);
+            MapEventProcessor.rotate(mapId, rotationValue);
             equalCountRef.current = 1;
           }
           // Otherwise, do nothing (skip setting rotation)
@@ -130,11 +131,11 @@ export const useManageArrow = (): ArrowReturn => {
 
       // Calculate offset
       let newOffset = offsetX;
-      const northPolePosition = getPixelFromCoordinate(NORTH_POLE_POSITION);
+      const northPolePosition = MapEventProcessor.getPixelFromCoordinate(mapId, NORTH_POLE_POSITION);
 
       if (!fixNorth && northPolePosition !== null) {
         const screenNorthPoint = northPolePosition;
-        const mapCenter = getPixelFromCoordinate(mapCenterCoord);
+        const mapCenter = MapEventProcessor.getPixelFromCoordinate(mapId, mapCenterCoord);
 
         // Calculate distance from north pole using triangle
         const deltaX = screenNorthPoint[0] - mapCenter[0];
@@ -163,18 +164,7 @@ export const useManageArrow = (): ArrowReturn => {
 
     // Should never goes here but failover to default values
     return { calculatedRotation: { angle: 0 }, calculatedOffset: 0 };
-  }, [
-    northArrowElement,
-    isLCCProjection,
-    isWebMercator,
-    fixNorth,
-    mapRotation,
-    mapZoom,
-    mapSize,
-    getPixelFromCoordinate,
-    mapCenterCoord,
-    setRotation,
-  ]);
+  }, [mapSize, northArrowElement, isLCCProjection, isWebMercator, mapCenterCoord, mapZoom, mapRotation, fixNorth, mapId]);
 
   // Update state with calculated values
   // State updates are side effects and belong in useEffect

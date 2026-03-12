@@ -3,12 +3,13 @@ import { UUIDmapConfigReader } from '@/api/config/reader/uuid-config-reader';
 import { Config } from '@/api/config/config';
 import { ConfigValidation } from '@/api/config/config-validation';
 import { generateId } from '@/core/utils/utilities';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 import { DEFAULT_MAP_FEATURE_CONFIG } from '@/api/types/map-schema-types';
 import type { GeoCoreLayerConfig, RCSLayerConfig, TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
 import type { GeoViewError } from '@/core/exceptions/geoview-exceptions';
+import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
+import { getStoreMapConfigServiceUrls, getStoreMapConfigState } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 /** Class used to add GeoCore layers to the map. */
 export class GeoCore {
@@ -34,17 +35,17 @@ export class GeoCore {
 
     if (mapId) {
       // Get the map config
-      const map = MapEventProcessor.getMapViewer(mapId);
+      const map = AbstractEventProcessor.getMapViewer(mapId);
       if (map.layer.getGeoviewLayerIds().includes(uuid)) {
         // eslint-disable-next-line no-param-reassign
         uuid = `${uuid}:${generateId(8)}`;
       }
 
       // Get the map config
-      const mapConfig = MapEventProcessor.getGeoViewMapConfig(mapId);
+      const mapConfig = getStoreMapConfigState(mapId);
 
       // Generate the url using the geocore url
-      ({ geocoreUrl } = mapConfig!.serviceUrls);
+      ({ geocoreUrl } = mapConfig.serviceUrls);
     }
 
     // Get the GV config from UUID and await
@@ -118,7 +119,7 @@ export class GeoCore {
     abortSignal?: AbortSignal
   ): Promise<TypeGeoviewLayerConfig> {
     // Get the map config and rcsUrl if it overrides the default
-    const rcsUrl = MapEventProcessor.getGeoViewMapConfig(mapId)?.serviceUrls?.rcsUrl ?? DEFAULT_MAP_FEATURE_CONFIG.serviceUrls.rcsUrl;
+    const rcsUrl = getStoreMapConfigServiceUrls(mapId)?.rcsUrl ?? DEFAULT_MAP_FEATURE_CONFIG.serviceUrls.rcsUrl;
 
     // Get the GV config from UUID and await
     const response = await UUIDmapConfigReader.getGVConfigFromUUIDsRCS(`${rcsUrl}`, language, [uuid], abortSignal);

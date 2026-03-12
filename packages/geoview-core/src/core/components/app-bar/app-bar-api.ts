@@ -5,9 +5,9 @@ import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { generateId } from '@/core/utils/utilities';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
-import { UIEventProcessor } from '@/api/event-processors/event-processor-children/ui-event-processor';
+import { type ActiveAppBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import type { UIController } from '@/core/controllers/ui-controller';
 import { logger } from '@/core/utils/logger';
-import type { ActiveAppBarTabType } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 /**
  * Class to manage buttons on the app-bar
@@ -16,7 +16,8 @@ import type { ActiveAppBarTabType } from '@/core/stores/store-interface-and-inti
  * @class
  */
 export class AppBarApi {
-  mapId: string;
+  /** The UI controller */
+  #uiController: UIController;
 
   // groups of array of button panels to hold all buttons created on the app-bar
   buttons: Record<string, TypeButtonPanel> = {};
@@ -30,10 +31,11 @@ export class AppBarApi {
   /**
    * Instantiates an AppBarApi class.
    *
-   * @param {string} mapId - The map id this AppBarApi belongs to
+   * @param uiController - The UI controller this app bar api belongs to
    */
-  constructor(mapId: string) {
-    this.mapId = mapId;
+  constructor(uiController: UIController) {
+    // Keep the controller, for actions.
+    this.#uiController = uiController;
   }
 
   /**
@@ -153,15 +155,17 @@ export class AppBarApi {
   }
 
   /**
-   * Selects a tab by id and tab group
+   * Gets the active app bar tab.
+   *
    * @return {ActiveAppBarTabType} The active app bar tab info.
+   * @deprecated Legacy support. Should use uiController.getActiveAppBarTab directly instead.
    */
   getActiveAppBarTab(): ActiveAppBarTabType {
-    return UIEventProcessor.getActiveAppBarTab(this.mapId);
+    return this.#uiController.getActiveAppBarTab();
   }
 
   /**
-   * Removes an app-bar panel using an id
+   * Removes an app-bar panel using an id.
    *
    * @param {string} buttonPanelId - The id of the panel to remove
    */
@@ -179,13 +183,15 @@ export class AppBarApi {
   }
 
   /**
-   * Selects a tab by id
+   * Selects a tab by id.
    *
    * @param {string} tabId - The id of the tab to be selected
    * @param {boolean} open - Open (true) or closed (false) panel: default = true
+   * @deprecated Legacy support. Should use uiController.setActiveAppBarTab directly instead.
    */
   selectTab(tabId: string, open: boolean = true, isFocusTrapped: boolean = true): void {
-    UIEventProcessor.setActiveAppBarTab(this.mapId, tabId, open, isFocusTrapped);
+    // Redirect to ui controller
+    this.#uiController.setActiveAppBarTab(tabId, open, isFocusTrapped);
   }
 }
 

@@ -10,6 +10,7 @@ import type { InteractionOptions } from '../interaction';
 import { Interaction } from '../interaction';
 import { OLTransform, HandleType } from './transform-base';
 import type { TransformEvent, TransformSelectionEvent, TransformDeleteFeatureEvent } from './transform-events';
+import type { GeometryApi } from '@/geo/layer/geometry/geometry';
 
 /**
  * Supported options for transform interactions
@@ -58,7 +59,7 @@ export class Transform extends Interaction {
    *
    * @param options - Object to configure the initialization of the Transform interaction
    */
-  constructor(options: TransformOptions) {
+  constructor(options: TransformOptions, geometryApi: GeometryApi) {
     super(options);
 
     // Set default options with all features enabled
@@ -90,10 +91,8 @@ export class Transform extends Interaction {
     } else if (defaultOptions.geometryGroupKey) {
       // If a geometry group key is set
       // Get the vector source for the geometry group or create one when not existing
-      const geomGroup = this.mapViewer.layer.geometry?.createGeometryGroup(defaultOptions.geometryGroupKey);
-      if (geomGroup) {
-        olOptions.source = geomGroup.vectorSource;
-      }
+      const geomGroup = geometryApi.createGeometryGroup(defaultOptions.geometryGroupKey);
+      olOptions.source = geomGroup.vectorSource;
     }
 
     // Create the OLTransform instance
