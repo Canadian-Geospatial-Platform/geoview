@@ -224,11 +224,6 @@ export type TypeOfServer = 'mapserver' | 'geoserver' | 'qgis';
 
 /** Base type from which we derive the source properties for all the vector leaf nodes in the layer tree. */
 export interface TypeBaseVectorSourceInitialConfig extends TypeBaseSourceInitialConfig {
-  /** Filter to apply on features of this layer. */
-  // TODO: REMOVE this property. The layerFilter isn't on the source object. When removing this, have to remove it from
-  // TO.DOCONT: legacy configs like in 05-esri-feature-and-dynamic.json files.
-  layerFilter?: string;
-
   /** Loading strategy to use (all or bbox). */
   strategy?: VectorStrategy;
 
@@ -276,10 +271,6 @@ export type TypeTileGrid = {
 
 /** Type from which we derive the source properties for all the ESRI dynamic leaf nodes in the layer tree. */
 export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitialConfig {
-  // TODO: REMOVE this property. The layerFilter isn't on the source object. When removing this, have to remove it from
-  // TO.DOCONT: legacy configs like in 05-esri-feature-and-dynamic.json files.
-  layerFilter?: string;
-
   /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
   featureInfo?: TypeFeatureInfoLayerConfig;
 
@@ -341,7 +332,7 @@ export type TypeLayerInitialSettings = {
   /** The geographic bounding box that contains all the layer's features. The bounds are always stored in latlon EPSG:4326 */
   bounds?: Extent;
   /** The extent that constrains the view. Called with [minX, minY, maxX, maxY] extent coordinates. The extent is always stored in latlon EPSG:4326 */
-  extent?: Extent; // TODO: CHECK - Is this property even used or is everything basically relying on 'bounds'? Seems deprecated when browsing its utility? Delete?
+  extent?: Extent;
   /** The minimum view zoom level (exclusive) above which this layer will be visible. */
   minZoom?: number;
   /** The maximum view zoom level (inclusive) below which this layer will be visible. */

@@ -1674,8 +1674,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
       },
       controls: layerEntryConfig.getInitialSettings()?.controls,
       bounds: layerEntryConfig.getInitialSettingsBounds(),
-      className: layerEntryConfig.getInitialSettingsClassName(),
       extent: layerEntryConfig.getInitialSettingsExtent(),
+      className: layerEntryConfig.getInitialSettingsClassName(),
       minZoom: layerEntryConfig.getInitialSettings()?.minZoom,
       maxZoom: layerEntryConfig.getInitialSettings()?.maxZoom,
     };

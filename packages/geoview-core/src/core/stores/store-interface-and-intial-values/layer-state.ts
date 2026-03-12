@@ -666,7 +666,7 @@ export const useLayerIconLayerSet = (layerPath: string): string[] => {
 export const useLayerTimeDimension = (layerPath: string): TimeDimension | undefined => {
   // Hook
   return useStore(useGeoViewStore(), (state) => {
-    // TODO: REFACTOR - This getter has nothing to do with the store state and fakes it via the LegendEventProcessor going through the layerApi.
+    // TODO: REFACTOR - EVENT PROCESSOR - This getter has nothing to do with the store state and fakes it via the LegendEventProcessor going through the layerApi.
     // TO.DOCONT: This pattern shouldn't(?) be allowed in the framework, but the processors allow it via getters jumping on the cgpv.api.
     return LegendEventProcessor.getLayerTimeDimension(state.mapId, layerPath);
   });
