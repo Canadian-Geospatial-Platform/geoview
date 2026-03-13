@@ -12,6 +12,7 @@ import type {
   TypeGeoviewLayerType,
   TypeLayerStatus,
   TypeMetadataEsriRasterFunctionInfos,
+  TypeMetadataWMSCapabilityLayerStyle,
   TypeMosaicMethod,
   TypeMosaicOperation,
   TypeMosaicRule,
@@ -49,6 +50,8 @@ export interface ILayerState {
     getLayerRasterFunction: (layerPath: string) => string | undefined;
     getLayerRasterFunctionPreviews: (layerPath: string) => Map<string, Promise<string>>;
     getLayerAllowedMosaicMethods: (layerPath: string) => TypeMosaicMethod[] | undefined;
+    getLayerWmsStyle: (layerPath: string) => string | undefined;
+    getLayerWmsAvailableStyles: (layerPath: string) => TypeMetadataWMSCapabilityLayerStyle[] | undefined;
     getLayerSettings: (layerPath: string) => string[];
     refreshLayer: (layerPath: string) => Promise<void>;
     reloadLayer: (layerPath: string) => void;
@@ -67,6 +70,7 @@ export interface ILayerState {
     setLayerMosaicRuleAscending: (layerPath: string, value: boolean) => void;
     setLayerMosaicRuleMethod: (layerPath: string, value: TypeMosaicMethod) => void;
     setLayerMosaicRuleOperation: (layerPath: string, value: TypeMosaicOperation) => void;
+    setLayerWmsStyle: (layerPath: string, wmsStyleName: string) => void;
     setSelectedLayerPath: (layerPath: string | undefined) => void;
     zoomToLayerExtent: (layerPath: string) => Promise<void>;
     zoomToLayerVisibleScale: (layerPath: string) => void;
@@ -196,8 +200,31 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         return LegendEventProcessor.getLayerRasterFunctionPreviews(get().mapId, layerPath);
       },
 
+      /**
+       * Gets the allowed mosaic methods for a layer.
+       * @param layerPath - The layer path.
+       * @returns The allowed mosaic methods or undefined.
+       */
       getLayerAllowedMosaicMethods: (layerPath: string): TypeMosaicMethod[] | undefined => {
         return LegendEventProcessor.getLayerAllowedMosaicMethods(get().mapId, layerPath);
+      },
+
+      /**
+       * Gets the available WMS styles for a layer.
+       * @param layerPath - The layer path.
+       * @returns The available WMS styles or undefined.
+       */
+      getLayerWmsStyle: (layerPath: string): string | undefined => {
+        return LegendEventProcessor.getLayerWmsStyle(get().mapId, layerPath);
+      },
+
+      /**
+       * Gets the available WMS styles for a layer.
+       * @param layerPath - The layer path.
+       * @returns The available WMS styles or undefined.
+       */
+      getLayerWmsAvailableStyles: (layerPath: string): TypeMetadataWMSCapabilityLayerStyle[] | undefined => {
+        return LegendEventProcessor.getLayerWmsStyles(get().mapId, layerPath);
       },
 
       /**
@@ -389,6 +416,11 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        */
       setLayerMosaicRuleOperation: (layerPath: string, value: TypeMosaicOperation): void => {
         LegendEventProcessor.setLayerMosaicRuleProperty(get().mapId, layerPath, { mosaicOperation: value });
+      },
+
+      setLayerWmsStyle: (layerPath: string, wmsStyleName: string): void => {
+        // Redirect to processor
+        LegendEventProcessor.setLayerWmsStyle(get().mapId, layerPath, wmsStyleName);
       },
 
       /**
@@ -803,6 +835,7 @@ export const useLayerSelectorCanToggle = createLayerSelectorHook('canToggle');
 export const useLayerSelectorStyleConfig = createLayerSelectorHook('styleConfig');
 export const useLayerSelectorRasterFunction = createLayerSelectorHook('rasterFunction');
 export const useLayerSelectorMosaicRule = createLayerSelectorHook('mosaicRule');
+export const useLayerSelectorWmsStyle = createLayerSelectorHook('wmsStyle');
 
 // Store Actions
 export const useLayerStoreActions = (): LayerActions => useStore(useGeoViewStore(), (state) => state.layerState.actions);

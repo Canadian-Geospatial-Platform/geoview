@@ -67,6 +67,9 @@ export class GVWMS extends AbstractGVRaster {
   /** Indicates if the CRS is to be overridden, because the layer struggles loading on the map */
   #overrideCRS?: CRSOverride;
 
+  /** The currently active WMS style identifier */
+  #wmsStyle?: string;
+
   /**
    * Constructs a GVWMS layer to manage an OpenLayer layer.
    *
@@ -378,7 +381,7 @@ export class GVWMS extends AbstractGVRaster {
     try {
       // Get the layer config in a loaded phase
       const layerConfig = this.getLayerConfig();
-      const legendImage = await GVWMS.#getLegendImage(layerConfig);
+      const legendImage = await GVWMS.#getLegendImage(layerConfig, this.#wmsStyle);
 
       if (legendImage) {
         const image = await GeoviewRenderer.loadImage(legendImage as string);
@@ -606,7 +609,9 @@ export class GVWMS extends AbstractGVRaster {
    * @param {string} wmsStyleId - The style identifier to be used.
    */
   setWmsStyle(wmsStyleId: string): void {
-    // TODO: STYLES - Verify if we can apply more than one style at the same time since the parameter name is STYLES
+    // Update the current style
+    this.#wmsStyle = wmsStyleId;
+
     this.getOLSource()?.updateParams({ STYLES: wmsStyleId });
   }
 

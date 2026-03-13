@@ -1599,6 +1599,20 @@ export class LayerApi {
     this.legendsLayerSet.queryLegend(layerPath, true);
   }
 
+  setLayerWmsStyle(layerPath: string, wmsStyle: string): void {
+    const layer = this.getGeoviewLayer(layerPath);
+    if (!(layer instanceof GVWMS)) return;
+
+    // Update the WMS style
+    layer.setWmsStyle(wmsStyle);
+
+    // Update the store
+    LegendEventProcessor.setLayerWmsStyleInStore(this.getMapId(), layerPath, wmsStyle);
+
+    // Trigger legend re-query through the layer set system
+    this.legendsLayerSet.queryLegend(layerPath, true);
+  }
+
   /**
    * Changes a GeoJson Source of a GeoJSON layer at the given layer path.
    * @param {string} layerPath - The path of the layer.
