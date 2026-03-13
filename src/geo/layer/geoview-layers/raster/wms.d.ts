@@ -27,19 +27,20 @@ export declare class WMS extends AbstractGeoViewRaster {
     static readonly DEFAULT_WMS_LAYER_GROUP_FULL_SUB_LAYERS = true;
     /**
      * Constructs a WMS Layer configuration processor.
-     * @param {TypeWMSLayerConfig} layerConfig the layer configuration
+     *
+     * @param layerConfig - The layer configuration
      */
     constructor(layerConfig: TypeWMSLayerConfig);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeWMSLayerConfig} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed layer configuration specific to this layer.
      */
     getGeoviewLayerConfig(): TypeWMSLayerConfig;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeMetadataWMS | undefined} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed metadata specific to this layer.
      */
     getMetadata(): TypeMetadataWMS | undefined;
     /**

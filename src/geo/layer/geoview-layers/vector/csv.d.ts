@@ -24,13 +24,14 @@ export declare class CSV extends AbstractGeoViewVector {
     #private;
     /**
      * Constructs a CSV Layer configuration processor.
-     * @param {TypeCSVLayerConfig} layerConfig the layer configuration
+     *
+     * @param layerConfig - The layer configuration
      */
     constructor(layerConfig: TypeCSVLayerConfig);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeCSVLayerConfig} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed layer configuration specific to this layer.
      */
     getGeoviewLayerConfig(): TypeCSVLayerConfig;
     /**

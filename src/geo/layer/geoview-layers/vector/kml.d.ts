@@ -22,13 +22,14 @@ export interface TypeKmlLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
 export declare class KML extends AbstractGeoViewVector {
     /**
      * Constructs a KML Layer configuration processor.
-     * @param {TypeKmlLayerConfig} layerConfig the layer configuration
+     *
+     * @param layerConfig - The layer configuration
      */
     constructor(layerConfig: TypeKmlLayerConfig);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeKmlLayerConfig} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed layer configuration specific to this layer.
      */
     getGeoviewLayerConfig(): TypeKmlLayerConfig;
     /**

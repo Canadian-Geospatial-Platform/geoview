@@ -8,6 +8,7 @@ export interface CircularProgressPropsExtend extends CircularProgressProps {
     isLoaded: boolean;
     style?: CSSProperties;
     sx?: SxProps<Theme>;
+    sxCircular?: SxProps<Theme>;
 }
 /**
  * A customized Material UI Circular Progress component with fade animation.

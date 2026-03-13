@@ -396,6 +396,14 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
      */
     static zoomToLayerVisibleScale(mapId: string, layerPath: string): void;
     /**
+     * Zoom to extents of a layer.
+     *
+     * @param mapId - ID of map to zoom on
+     * @param layerPath - The path of the layer to zoom to.
+     * @throws {NoBoundsError} When the layer doesn't have bounds.
+     */
+    static zoomToLayerExtent(mapId: string, layerPath: string, fitOptions?: FitOptions): Promise<void>;
+    /**
      * Set Z index for layers
      *
      * @param {string} mapId - Id of map to set layer Z indices

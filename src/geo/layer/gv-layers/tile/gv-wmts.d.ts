@@ -14,8 +14,9 @@ export declare class GVWMTS extends AbstractGVTile {
     #private;
     /**
      * Constructs a GVWMTS layer to manage an OpenLayer layer.
-     * @param {WMTSSource} olSource - The OpenLayer source.
-     * @param {OgcWmtsLayerEntryConfig} layerConfig - The layer configuration.
+     *
+     * @param olSource - The OpenLayer source.
+     * @param layerConfig - The layer configuration.
      */
     constructor(olSource: WMTSSource, layerConfig: OgcWmtsLayerEntryConfig);
     /**

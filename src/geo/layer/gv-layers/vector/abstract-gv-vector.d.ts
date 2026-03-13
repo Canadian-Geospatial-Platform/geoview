@@ -25,26 +25,27 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
     styleApplied: boolean;
     /**
      * Constructs a GeoView Vector layer to manage an OpenLayer layer.
-     * @param {VectorSource<Feature<Geometry>>} olSource - The OpenLayer source.
-     * @param {VectorLayerEntryConfig} layerConfig - The layer configuration.
+     *
+     * @param olSource - The OpenLayer source.
+     * @param layerConfig - The layer configuration.
      */
     protected constructor(olSource: VectorSource<Feature<Geometry>>, layerConfig: VectorLayerEntryConfig);
     /**
      * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
-     * @returns {VectorLayer<VectorSource>} The strongly-typed OpenLayers type.
-     * @override
+     *
+     * @returns The strongly-typed OpenLayers type.
      */
     getOLLayer(): VectorLayer<VectorSource>;
     /**
      * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
-     * @returns {GVVectorSource} The VectorSource source instance associated with this layer.
-     * @override
+     *
+     * @returns The VectorSource source instance associated with this layer.
      */
     getOLSource(): GVVectorSource;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     *
      * @returns {VectorLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
-     * @override
      */
     getLayerConfig(): VectorLayerEntryConfig;
     /**

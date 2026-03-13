@@ -18,6 +18,10 @@ import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values
 import type { TypeLegendItem, TypeLegendLayerItem } from '@/core/components/layers/types';
 import type { TypeVectorLayerStyles } from './renderer/geoview-renderer';
 export declare const layerTypes: Record<"CSV" | "KML" | "WKB" | "ESRI_DYNAMIC" | "ESRI_FEATURE" | "ESRI_IMAGE" | "IMAGE_STATIC" | "GEOJSON" | "GEOTIFF" | "XYZ_TILES" | "VECTOR_TILES" | "OGC_FEATURE" | "WFS" | "WMS" | "WMTS", TypeGeoviewLayerType>;
+interface EsriJSONReadResult {
+    features: Feature<Geometry>[];
+    hadInvalidGeometries: boolean;
+}
 export declare abstract class GeoUtilities {
     #private;
     /**
@@ -289,9 +293,10 @@ export declare abstract class GeoUtilities {
      * Reads OpenLayers features from an Esri features object.
      * @param {unknown} features - The Features data to read.
      * @param {import('ol/format/Feature').ReadOptions} [options] - Optional read options such as projection or extent.
-     * @returns {import('ol/Feature').default[]} An array of parsed OpenLayers Feature instances.
+     * @returns {EsriJSONReadResult} An array of parsed OpenLayers Feature and whether there were any invalid geometries
+     * @throws {Error} If the EsriJSON data is invalid and cannot be parsed, even after attempting to clean invalid geometries.
      */
-    static readFeaturesFromEsriJSON(features: unknown, options: ReadOptions | undefined): Feature<Geometry>[];
+    static readFeaturesFromEsriJSON(features: unknown, options: ReadOptions | undefined): EsriJSONReadResult;
     /**
      * Reads OpenLayers features from a GeoJSON object.
      * @param {unknown} geojson - The GeoJSON data to read.
@@ -479,4 +484,5 @@ export type CallbackNewMetadataDelegate = (proxyUsed: string) => void;
 export interface TypeVectorLegend extends TypeLegend {
     legend: TypeVectorLayerStyles;
 }
+export {};
 //# sourceMappingURL=utilities.d.ts.map

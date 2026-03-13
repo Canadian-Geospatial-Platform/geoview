@@ -1,6 +1,6 @@
 import type { Extent } from 'ol/extent';
 import type { TypeLayerStyleConfig, TypeStyleGeometry } from '@/api/types/map-schema-types';
-import type { TypeGeoviewLayerType, TypeLayerControls, TypeLayerEntryType, TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerType, TypeLayerControls, TypeLayerEntryType, TypeLayerStatus, TypeMosaicRule } from '@/api/types/layer-schema-types';
 import type { LegendQueryStatus } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { TemporalMode, TimeIANA, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 export type TypeLayersViewDisplayState = 'add' | 'view';
@@ -21,6 +21,7 @@ export interface TypeLegendLayer {
     bounds?: Extent;
     bounds4326?: Extent;
     controls?: TypeLayerControls;
+    deletionStartTime?: number;
     layerId: string;
     layerPath: string;
     layerAttribution?: string[];
@@ -44,8 +45,11 @@ export interface TypeLegendLayer {
     icons: TypeLegendLayerItem[];
     items: TypeLegendItem[];
     children: TypeLegendLayer[];
+    rasterFunction?: string;
+    mosaicRule?: TypeMosaicRule;
+    wmsStyle?: string;
     opacity?: number;
-    opacityFromParent?: number;
+    opacityMaxFromParent?: number;
     zoom?: number;
 }
 //# sourceMappingURL=types.d.ts.map

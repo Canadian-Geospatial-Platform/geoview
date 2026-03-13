@@ -33,6 +33,23 @@ export declare abstract class AbstractBaseGVLayer {
      */
     protected abstract onRefresh(projection: OLProjection | undefined): void;
     /**
+     * Overridable method to set the opacity of the layer.
+     *
+     * If the layer has a parent, the provided opacity is clamped so that it cannot be greater than
+     * the parent's opacity. The resulting opacity is applied to the underlying OpenLayers layer.
+     *
+     * If the layer is a {@link GVGroupLayer}, the computed opacity is recursively applied to all
+     * child layers to maintain consistency within the layer hierarchy.
+     *
+     * Optionally emits a layer opacity change event.
+     *
+     * @param opacity - The desired opacity for the layer, typically between `0` (fully transparent)
+     * and `1` (fully opaque).
+     * @param emitOpacityChanged - Optional, whether to emit a layer opacity changed event after
+     * updating the opacity. Defaults to true.
+     */
+    protected onSetOpacity(opacity: number, emitOpacityChanged?: boolean): void;
+    /**
      * Gets the attributions for the layer by calling the overridable function 'onGetAttributions'.
      * When the layer is a GVLayer, its layer attributions are returned.
      * When the layer is a GVGroup, all layers attributions in the group are returned.
@@ -118,16 +135,55 @@ export declare abstract class AbstractBaseGVLayer {
      */
     setExtent(layerExtent: Extent): void;
     /**
+     * Returns the direct parent `GVGroupLayer` of this layer, if any.
+     *
+     * @returns The direct parent group layer, or `undefined` if this layer is not
+     *   contained within any group.
+     * @description
+     * This method searches through the provided root group layer collection to
+     * determine which group directly contains this layer. If the layer is nested
+     * within multiple groups, only the immediate parent group is returned.
+     */
+    getParent(): GVGroupLayer | undefined;
+    /**
+     * Sets the parent layer
+     * @param parent - The parent layer for the current layer if any.
+     */
+    setParent(parent: GVGroupLayer | undefined): void;
+    /**
+     * Returns the top-most (root) `GVGroupLayer` ancestor of this layer, if any.
+     *
+     * @returns The highest ancestor group layer in the hierarchy, or `undefined`
+     *   if this layer does not belong to any group.
+     * @description
+     * This method traverses upward through the parent chain starting from the
+     * immediate parent of this layer. It returns the last valid parent found.
+     * A protection mechanism prevents infinite loops in case of circular
+     * parent references.
+     */
+    getParentRoot(): GVGroupLayer | undefined;
+    /**
      * Gets the opacity of the layer (between 0 and 1).
      * @returns {number} The opacity of the layer.
      */
     getOpacity(): number;
     /**
-     * Sets the opacity of the layer (between 0 and 1).
-     * @param {number} layerOpacity The opacity of the layer.
-     * @param {boolean} emitOpacityChange - Whether to emit the event or not (false to avoid updating the legend layers)
+     * Sets the opacity of the layer while ensuring it does not exceed the opacity of its parent layer.
+     *
+     * If the layer has a parent, the provided opacity is clamped so that it cannot be greater than
+     * the parent's opacity. The resulting opacity is applied to the underlying OpenLayers layer.
+     *
+     * If the layer is a {@link GVGroupLayer}, the computed opacity is recursively applied to all
+     * child layers to maintain consistency within the layer hierarchy.
+     *
+     * Optionally emits a layer opacity change event.
+     *
+     * @param opacity - The desired opacity for the layer, typically between `0` (fully transparent)
+     * and `1` (fully opaque).
+     * @param emitOpacityChanged - Optional, whether to emit a layer opacity change event after
+     * updating the opacity. Defaults to true.
      */
-    setOpacity(layerOpacity: number, emitOpacityChange?: boolean): void;
+    setOpacity(opacity: number, emitOpacityChanged?: boolean): void;
     /**
      * Gets the visibility of the layer (true or false).
      * @returns {boolean} The visibility of the layer.
@@ -140,13 +196,10 @@ export declare abstract class AbstractBaseGVLayer {
      *   - every parent GVGroupLayer up the hierarchy is also visible.
      * This function walks upward through the group layer tree until it reaches
      * the root, returning `false` immediately if any parent is not visible.
-     * @param {GVGroupLayer[]} groupLayers - The top-level group layers from which
-     *   the layer hierarchy is searched. This must represent the root collection
-     *   of the layer tree.
      * @returns {boolean} `true` if this layer and all its parent groups are visible;
      *   otherwise `false`.
      */
-    getVisibleIncludingParents(groupLayers: GVGroupLayer[]): boolean;
+    getVisibleIncludingParents(): boolean;
     /**
      * Sets the visibility of the layer (true or false).
      * @param {boolean} layerVisibility The visibility of the layer.
@@ -179,31 +232,6 @@ export declare abstract class AbstractBaseGVLayer {
      */
     inVisibleRange(zoom: number): boolean;
     /**
-     * Returns the direct parent `GVGroupLayer` of this layer, if any.
-     * @param groupLayers - The root-level group layers to search when locating
-     *   this layer’s immediate parent.
-     * @returns The direct parent group layer, or `undefined` if this layer is not
-     *   contained within any group.
-     * @description
-     * This method searches through the provided root group layer collection to
-     * determine which group directly contains this layer. If the layer is nested
-     * within multiple groups, only the immediate parent group is returned.
-     */
-    getParent(groupLayers: GVGroupLayer[]): GVGroupLayer | undefined;
-    /**
-     * Returns the top-most (root) `GVGroupLayer` ancestor of this layer, if any.
-     * @param groupLayers - The root-level group layers used to resolve the
-     *   parent hierarchy.
-     * @returns The highest ancestor group layer in the hierarchy, or `undefined`
-     *   if this layer does not belong to any group.
-     * @description
-     * This method traverses upward through the parent chain starting from the
-     * immediate parent of this layer. It returns the last valid parent found.
-     * A protection mechanism prevents infinite loops in case of circular
-     * parent references.
-     */
-    getParentRoot(groupLayers: GVGroupLayer[]): GVGroupLayer | undefined;
-    /**
      * Registers a layer name changed event handler.
      * @param {LayerNameChangedDelegate} callback - The callback to be executed whenever the event is emitted
      */
@@ -233,6 +261,23 @@ export declare abstract class AbstractBaseGVLayer {
      * @param {LayerOpacityChangedDelegate} callback - The callback to stop being called whenever the event is emitted
      */
     offLayerOpacityChanged(callback: LayerOpacityChangedDelegate): void;
+    /**
+     * Recursively searches the layer tree to find the parent GVGroupLayer
+     * of a given layer. The search begins from the provided list of layers,
+     * which should represent the root-level layer collection.
+     * This method walks top-down through all nested GVGroupLayers until it
+     * finds the group whose children contain the specified layer.
+     * It proceeds this way, because OpenLayers doesn't have a way to start from a leaf - have to start from the root.
+     * @param {AbstractBaseGVLayer} layer - The layer for which the parent
+     *   group is being searched.
+     * @param {AbstractBaseGVLayer[]} groupLayers - The list of layers to
+     *   search within. Typically this is the root layer group of the map.
+     * @returns {GVGroupLayer | undefined} The parent group layer if found,
+     *   otherwise `undefined` if the layer has no parent.
+     * @private
+     * @static
+     */
+    static getParent(layer: AbstractBaseGVLayer, groupLayers: AbstractBaseGVLayer[]): GVGroupLayer | undefined;
 }
 /**
  * Define an event for the delegate.

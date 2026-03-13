@@ -52,7 +52,6 @@ export declare class MapViewer {
     static DEFAULT_DPI: number;
     /** Default inches per meter used by OpenLayers */
     static readonly DEFAULT_INCHES_PER_METER = 39.3700787;
-    static INIT_TIMEOUT_NORTH_VISIBILITY: number;
     mapFeaturesConfig: TypeMapFeaturesConfig;
     mapId: string;
     map: OLMap;
@@ -382,9 +381,9 @@ export declare class MapViewer {
     waitAllLayersStatus(layerStatus: TypeLayerStatus): Promise<number>;
     /**
      * Waits for the map layers loaded event to be emitted.
-     * @returns {Promise<MapViewer>} Promise resolved when the map layers loaded event is emitted
+     * @returns {Promise<number>} A promise that resolves with the number of layers that have reached the specified status.
      */
-    waitForLayersLoaded(): Promise<MapViewer>;
+    waitForLayersLoaded(): Promise<number>;
     /**
      * Waits for the rendercomplete event to be triggered
      * @returns {Promise<void>} Promise resolved when map render is complete
@@ -430,11 +429,11 @@ export declare class MapViewer {
      */
     initTransformInteractions(options?: Partial<TransformOptions>): Transform;
     /**
-     * Gets if north is visible. This is not a perfect solution and is more a work around
+     * Gets if north pole is visible. This is not a perfect solution and is more a work around
      *
      * @returns {Promise<boolean>} true if visible, false otherwise
      */
-    getNorthVisibility(): Promise<boolean>;
+    getNorthPoleVisibility(): Promise<boolean>;
     /**
      * Get north arrow bearing. Angle use to rotate north arrow for non Web Mercator projection
      * https://www.movable-type.co.uk/scripts/latlong.html

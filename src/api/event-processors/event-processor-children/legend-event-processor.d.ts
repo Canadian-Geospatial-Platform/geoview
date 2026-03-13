@@ -1,12 +1,11 @@
 import type { Projection as OLProjection } from 'ol/proj';
 import type { Extent } from '@/api/types/map-schema-types';
 import type { TemporalMode, TimeDimension, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
-import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { TypeLayerStatus, TypeMetadataEsriRasterFunctionInfos, TypeMetadataWMSCapabilityLayerStyle, TypeMosaicMethod, TypeMosaicRule } from '@/api/types/layer-schema-types';
 import type { TypeLegendLayer, TypeLegendItem } from '@/core/components/layers/types';
 import type { ILayerState, LegendQueryStatus, TypeLegend, TypeLegendResultSetEntry } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
-import type { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 export declare class LegendEventProcessor extends AbstractEventProcessor {
     #private;
     /**
@@ -17,16 +16,29 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      * @protected
      */
     protected static getLayerState(mapId: string): ILayerState;
+    /**
+     * Sets the selected layer in the layers tab
+     * @param mapId - The map id
+     * @param layerPath - The layer path
+     * @returns {void}
+     * @static
+     */
     static setSelectedLayersTabLayerInStore(mapId: string, layerPath: string): void;
+    /**
+     * Reorders the legend layers based on the ordered layer info
+     * @param mapId - The map id
+     * @returns {void}
+     * @static
+     */
     static reorderLegendLayers(mapId: string): void;
     /**
      * Gets a specific state.
      * @param {string} mapId - The mapId
-     * @param {'highlightedLayer' | 'selectedLayerPath' | 'displayState' | 'layerDeleteInProgress'} state - The state to get
+     * @param {'highlightedLayer' | 'selectedLayerPath' | 'displayState'} state - The state to get
      * @returns {string | boolean | null | undefined} The requested state
      * @static
      */
-    static getLayerPanelState(mapId: string, state: 'highlightedLayer' | 'selectedLayerPath' | 'displayState' | 'layerDeleteInProgress'): string | boolean | null | undefined;
+    static getLayerPanelState(mapId: string, state: 'highlightedLayer' | 'selectedLayerPath' | 'displayState'): string | boolean | null | undefined;
     /**
      * Gets a legend layer.
      * @param {string} mapId - The mapId
@@ -74,8 +86,6 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      *
      * @param mapId - The unique identifier of the map instance.
      * @param gvLayer - The layer from which bounds recalculation should begin.
-     * @param allGroups - The collection of root-level group layers used to
-     * resolve parent relationships.
      * @description
      * This method invokes {@link setLayerBoundsForLayerAndParentsInStore} using a
      * fire-and-forget pattern. The returned promise is intentionally not awaited,
@@ -85,14 +95,12 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      * where bounds propagation should not delay execution. Callers requiring
      * completion guarantees should use the awaited version instead.
      */
-    static setLayerBoundsForLayerAndParentsAndForgetInStore(mapId: string, gvLayer: AbstractBaseGVLayer, allGroups: GVGroupLayer[]): void;
+    static setLayerBoundsForLayerAndParentsAndForgetInStore(mapId: string, gvLayer: AbstractBaseGVLayer): void;
     /**
      * Recalculates and stores bounds for a layer and all of its parent groups.
      *
      * @param mapId - The unique identifier of the map instance.
      * @param gvLayer - The starting layer for which bounds should be computed.
-     * @param allGroups - The collection of root-level group layers used to
-     *   resolve parent relationships.
      * @returns A promise that resolves once bounds have been computed and
      * propagated up the entire parent hierarchy.
      * @description
@@ -100,7 +108,127 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      * iteratively walks up the layer hierarchy, recalculating and storing
      * bounds for each parent group layer.
      */
-    static setLayerBoundsForLayerAndParentsInStore(mapId: string, gvLayer: AbstractBaseGVLayer, allGroups: GVGroupLayer[]): Promise<void>;
+    static setLayerBoundsForLayerAndParentsInStore(mapId: string, gvLayer: AbstractBaseGVLayer): Promise<void>;
+    /**
+     * Retrieves the layer's rasterFunctionInfos and returns it
+     *
+     * @param mapId - The unique identifier of the map instance.
+     * @param layerPath - The path to the layer.
+     * @returns The raster function infos of the layer, or `undefined` if not available.
+     */
+    static getLayerRasterFunctionInfos(mapId: string, layerPath: string): TypeMetadataEsriRasterFunctionInfos[] | undefined;
+    /**
+     * Gets the active raster function for a layer.
+     *
+     * @param mapId - The map identifier.
+     * @param layerPath - The layer path.
+     * @returns The active raster function identifier.
+     */
+    static getLayerRasterFunction(mapId: string, layerPath: string): string | undefined;
+    /**
+     * Sets the active raster function for a layer.
+     *
+     * @param mapId - The map identifier.
+     * @param layerPath - The layer path.
+     * @param rasterFunctionId - The raster function identifier to set.
+     */
+    static setLayerRasterFunction(mapId: string, layerPath: string, rasterFunctionId: string | undefined): void;
+    /**
+     * Updates the active raster function for a layer in the store.
+     *
+     * @param mapId - The map identifier.
+     * @param layerPath - The layer path.
+     * @param rasterFunctionId - The raster function identifier to set.
+     */
+    static setLayerRasterFunctionInStore(mapId: string, layerPath: string, rasterFunctionId: string | undefined): void;
+    /**
+     * Gets the allowed mosaic methods for a layer.
+     *
+     * @param mapId - The map identifier.
+     * @param layerPath - The layer path.
+     * @returns The allowed mosaic methods or undefined.
+     */
+    static getLayerAllowedMosaicMethods(mapId: string, layerPath: string): TypeMosaicMethod[] | undefined;
+    /**
+     * Gets the active mosaic rule for a layer.
+     *
+     * @param mapId - The map identifier.
+     * @param layerPath - The layer path.
+     * @returns The active mosaic rule or undefined.
+     */
+    static getLayerMosaicRule(mapId: string, layerPath: string): TypeMosaicRule | undefined;
+    /**
+     * Sets the active mosaic rule for a layer.
+     *
+     * @param mapId - The map identifier.
+     * @param layerPath - The layer path.
+     * @param mosaicRule - The mosaic rule to set.
+     */
+    static setLayerMosaicRule(mapId: string, layerPath: string, mosaicRule: TypeMosaicRule | undefined): void;
+    /**
+     * Updates the mosaicRule for a layer by merging new properties.
+     *
+     * @param mapId - The map id.
+     * @param layerPath - The layer path.
+     * @param partialMosaicRule - An object with one or more mosaicRule properties to update.
+     */
+    static setLayerMosaicRuleProperty(mapId: string, layerPath: string, partialMosaicRule: Partial<TypeMosaicRule>): void;
+    /**
+     * Updates the active mosaic rule for a layer in the store.
+     *
+     * @param mapId - The map identifier.
+     * @param layerPath - The layer path.
+     * @param mosaicRule - The mosaic rule to set.
+     */
+    static setLayerMosaicRuleInStore(mapId: string, layerPath: string, mosaicRule: TypeMosaicRule | undefined): void;
+    /**
+     * Gets the active WMS style for a layer.
+     *
+     * @param mapId - The map identifier.
+     * @param layerPath - The layer path.
+     * @returns The active WMS style name.
+     */
+    static getLayerWmsStyle(mapId: string, layerPath: string): string | undefined;
+    /**
+     * Sets the active WMS style for a layer.
+     *
+     * @param mapId - The map identifier.
+     * @param layerPath - The layer path.
+     * @param wmsStyleName - The WMS style name to set.
+     */
+    static setLayerWmsStyle(mapId: string, layerPath: string, wmsStyleName: string | undefined): void;
+    /**
+     * Updates the active WMS style for a layer in the store.
+     *
+     * @param mapId - The map identifier.
+     * @param layerPath - The layer path.
+     * @param wmsStyleName - The WMS style name to set.
+     */
+    static setLayerWmsStyleInStore(mapId: string, layerPath: string, wmsStyleName: string | undefined): void;
+    /**
+     * Gets the raster function previews for the ESRI image layer.
+     *
+     * @param mapId - The map identifier.
+     * @param layerPath - The layer path.
+     * @returns The raster function previews.
+     */
+    static getLayerRasterFunctionPreviews(mapId: string, layerPath: string): Map<string, Promise<string>>;
+    /**
+     * Retrieves the layer's available WMS styles.
+     *
+     * @param mapId - The unique identifier of the map instance.
+     * @param layerPath - The path to the layer.
+     * @returns The available WMS style names, or `undefined` if not available.
+     */
+    static getLayerWmsStyles(mapId: string, layerPath: string): TypeMetadataWMSCapabilityLayerStyle[] | undefined;
+    /**
+     * Gets the available settings for a layer.
+     *
+     * @param mapId - The map identifier.
+     * @param layerPath - The layer path.
+     * @returns Array of available setting types.
+     */
+    static getLayerSettings(mapId: string, layerPath: string): string[];
     /**
      * Sets the layer bounds for a layer path.
      *
@@ -313,6 +441,40 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      */
     static deleteLayerFromLegendLayers(mapId: string, layerPath: string): void;
     /**
+     * Starts the delayed deletion process for a layer, allowing a short
+     * time window for the user to undo the operation.
+     *
+     * During this period:
+     * - The layer is temporarily hidden.
+     * - A deletion start timestamp is stored so the UI can derive progress locally.
+     * - The user may abort the deletion via {@link deleteLayerAbort}.
+     *
+     * If the undo window expires, the layer is permanently deleted.
+     * If called again for the same layer while a previous timer is running,
+     * the previous timer is cancelled and a new one starts, preserving the
+     * original visibility state from the first call.
+     *
+     * @param mapId - Identifier of the map instance.
+     * @param layerPath - Unique path identifying the layer within the map.
+     * @param undoWindowDuration - Duration in milliseconds of the undo window before deletion is finalized.
+     * @returns A promise resolving to:
+     * - `true` if the deletion completed successfully.
+     * - `false` if the deletion was aborted, superseded by a newer call, or
+     *   if the layer was already in the deletion process.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+     */
+    static deleteLayerStartTimer(mapId: string, layerPath: string, undoWindowDuration: number): Promise<boolean>;
+    /**
+     * Aborts an ongoing layer deletion process if it has not yet been finalized.
+     *
+     * This restores the layer to its previous visibility state and stops
+     * the deletion timer.
+     *
+     * @param mapId - Identifier of the map instance.
+     * @param layerPath - Unique path identifying the layer within the map.
+     */
+    static deleteLayerAbort(mapId: string, layerPath: string): void;
+    /**
      * Delete layer.
      * @param {string} mapId - The ID of the map.
      * @param {string} layerPath - The layer path of the layer to change.
@@ -406,14 +568,15 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
     static setLayerNameInStore(mapId: string, layerPath: string, layerName: string | undefined): void;
     /**
      * Sets the opacity of the layer and its children in the store.
-     * @param {string} mapId - The ID of the map.
-     * @param {string} layerPath - The layer path of the layer to change.
-     * @param {number} opacity - The opacity to set.
-     * @static
+     *
+     * @param mapId - The ID of the map.
+     * @param layerPath - The layer path of the layer to change.
+     * @param opacity - The opacity to set.
      */
     static setOpacityInStore(mapId: string, layerPath: string, opacity: number): void;
     /**
      * Sets the opacity of a layer.
+     *
      * @param {string} mapId - The ID of the map.
      * @param {string} layerPath - The layer path of the layer to change.
      * @param {number} opacity - The opacity to set.

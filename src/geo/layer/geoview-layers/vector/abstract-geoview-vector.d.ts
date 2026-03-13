@@ -61,7 +61,7 @@ export declare abstract class AbstractGeoViewVector extends AbstractGeoViewLayer
     protected onCreateVectorSource(layerConfig: VectorLayerEntryConfig, sourceOptions: SourceOptions<Feature>): GVVectorSource;
     /**
      * Creates a VectorSource from a layer config.
-     * @param {VectorTilesLayerEntryConfig} layerConfig - Configuration object for the vector tile layer.
+     * @param layerConfig - Configuration object for the vector tile layer.
      * @returns An initialized VectorSource ready for use in a layer.
      */
     createVectorSource(layerConfig: VectorLayerEntryConfig): GVVectorSource;

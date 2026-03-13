@@ -57,15 +57,17 @@ export declare class FeatureInfoLayerSet extends AbstractLayerSet {
     protected onDeleteFromStore(layerPath: string): void;
     /**
      * Repeats the last query if there was one.
-     * @returns {void}
+     *
+     * @returns A promise which will hold the result of the query.
+     * @throws {LayerNoLastQueryToPerformError} When there's no last query to perform.
      */
-    repeatLastQuery(): void;
+    repeatLastQuery(): Promise<TypeFeatureInfoResultSet>;
     /**
      * Queries the features at the provided coordinate for all the registered layers.
-     * @param {Coordinate} lonLatCoordinate - The longitude/latitude coordinate where to query the features
-     * @param {boolean} fromClick - True if the query is from a user click, false otherwise.
-     * @returns {Promise<TypeFeatureInfoResultSet>} A promise which will hold the result of the query
-     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+     *
+     * @param lonLatCoordinate - The longitude/latitude coordinate where to query the features
+     * @param fromClick - True if the query is from a user click, false otherwise.
+     * @returns A promise which will hold the result of the query.
      */
     queryLayers(lonLatCoordinate: Coordinate, fromClick?: boolean): Promise<TypeFeatureInfoResultSet>;
     /**

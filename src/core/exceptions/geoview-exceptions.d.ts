@@ -336,4 +336,13 @@ export declare class LayerImageFailedNoImageError extends GeoViewError {
      */
     constructor(layerName: string);
 }
+/**
+ * Error thrown when there's no last query to perform.
+ */
+export declare class LayerNoLastQueryToPerformError extends GeoViewError {
+    /**
+     * Creates an instance of LayerNoLastQueryToPerformError.
+     */
+    constructor();
+}
 //# sourceMappingURL=geoview-exceptions.d.ts.map

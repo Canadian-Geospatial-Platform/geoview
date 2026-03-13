@@ -377,4 +377,18 @@ export declare class LayerConfigWFSMissingError extends LayerError {
      */
     constructor(layerPath: string);
 }
+/**
+ * Custom error class thrown when feature data cannot be read or parsed.
+ * This error is typically used when feature parsing fails even after attempting to clean invalid data.
+ * @extends {LayerError}
+ */
+export declare class LayerFeatureParsingError extends LayerError {
+    /**
+     * Constructor to initialize the LayerFeatureParsingError with the layer ID.
+     * @param {string} geoviewLayerId - The ID of the GeoView layer with parsing errors.
+     * @param {string | undefined} layerName - The layer name.
+     * @param {Error} cause - The underlying error that caused this exception (e.g., network failure or timeout).
+     */
+    constructor(geoviewLayerId: string, layerName: string | undefined, cause?: Error);
+}
 //# sourceMappingURL=layer-exceptions.d.ts.map

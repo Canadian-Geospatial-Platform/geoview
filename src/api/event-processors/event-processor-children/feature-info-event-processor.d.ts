@@ -2,7 +2,7 @@ import type { TypeMapMouseInfo } from '@/geo/map/map-viewer';
 import type { SubscriptionDelegate } from '@/api/event-processors/abstract-event-processor';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
-import type { IFeatureInfoState, TypeFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
+import type { IFeatureInfoState, TypeFeatureInfoResultSet, TypeFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 import type { GeoviewStoreType } from '@/core/stores/geoview-store';
 /**
  * Event processor focusing on interacting with the feature info state in the store (currently called detailsState).
@@ -65,11 +65,12 @@ export declare class FeatureInfoEventProcessor extends AbstractEventProcessor {
     static deleteFeatureInfo(mapId: string, layerPath: string): void;
     /**
      * Repeats the last feature info query if any.
-     * @param {string} mapId - The map identifier
-     * @returns {void}
-     * @static
+     *
+     * @param mapId - The map identifier
+     * @returns A promise which will hold the result of the query.
+     * @throws {LayerNoLastQueryToPerformError} When there's no last query to perform.
      */
-    static repeatLastQuery(mapId: string): void;
+    static repeatLastQuery(mapId: string): Promise<TypeFeatureInfoResultSet>;
     /**
      * Switch the open panel to details when a map click occurs, if it is not already geochart or details.
      * @param {string} mapId - The map identifier of the modified result set.

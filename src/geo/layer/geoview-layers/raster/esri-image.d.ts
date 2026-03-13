@@ -2,7 +2,7 @@ import { ImageArcGISRest } from 'ol/source';
 import type { Projection as OLProjection } from 'ol/proj';
 import { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import { AbstractGeoViewRaster } from '@/geo/layer/geoview-layers/raster/abstract-geoview-raster';
-import type { TypeGeoviewLayerConfig } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig, TypeMetadataEsriImage } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
@@ -20,15 +20,22 @@ export interface TypeEsriImageLayerConfig extends TypeGeoviewLayerConfig {
 export declare class EsriImage extends AbstractGeoViewRaster {
     /**
      * Constructs an EsriImage Layer configuration processor.
-     * @param {TypeEsriImageLayerConfig} layerConfig The layer configuration.
+     *
+     * @param layerConfig - The layer configuration.
      */
     constructor(layerConfig: TypeEsriImageLayerConfig);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeEsriImageLayerConfig} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed layer configuration specific to this layer.
      */
     getGeoviewLayerConfig(): TypeEsriImageLayerConfig;
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     *
+     * @returns The strongly-typed layer configuration specific to this layer.
+     */
+    getMetadata(): TypeMetadataEsriImage | undefined;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
      * @returns A promise resolved once the layer entries have been initialized.

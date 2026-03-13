@@ -16,20 +16,21 @@ export declare class GVGroupLayer extends AbstractBaseGVLayer {
     #private;
     /**
      * Constructs a Group layer to manage an OpenLayer Group Layer.
-     * @param {LayerGroup} olLayerGroup - The OpenLayer group layer.
-     * @param {GroupLayerEntryConfig} layerConfig - The layer configuration.
+     *
+     * @param layerGroupOptions - The OpenLayer group layer.
+     * @param layerConfig - The layer configuration.
      */
     constructor(layerGroupOptions: LayerGroupOptions, layerConfig: GroupLayerEntryConfig);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @override
-     * @returns {GroupLayerEntryConfig} The strongly-typed layer configuration specific to this group layer.
+     *
+     * @returns The strongly-typed layer configuration specific to this group layer.
      */
     getLayerConfig(): GroupLayerEntryConfig;
     /**
      * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
-     * @override
-     * @returns {LayerGroup} The strongly-typed OpenLayers type.
+     *
+     * @returns The OpenLayers generic type for groups.
      */
     getOLLayer(): LayerGroup;
     /**
@@ -52,6 +53,15 @@ export declare class GVGroupLayer extends AbstractBaseGVLayer {
      * @override
      */
     onRefresh(projection: OLProjection | undefined): void;
+    /**
+     * Overrides the set opacity function to set the opacity to all the children as well.
+     *
+     * @param opacity - The desired opacity for the layer, typically between `0` (fully transparent)
+     * and `1` (fully opaque).
+     * @param emitOpacityChanged - Optional, whether to emit a layer opacity change event after
+     * updating the opacity. Defaults to true.
+     */
+    protected onSetOpacity(opacity: number, emitOpacityChanged?: boolean): void;
     /**
      * Gets the immediate layers in the group.
      * @returns {AbstractBaseGVLayer[]} The layers in the group.

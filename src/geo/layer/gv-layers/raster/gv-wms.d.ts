@@ -27,34 +27,33 @@ export declare class GVWMS extends AbstractGVRaster {
     static readonly DEFAULT_GET_FEATURE_INFO_TOLERANCE: number;
     /**
      * Constructs a GVWMS layer to manage an OpenLayer layer.
-     * @param {ImageWMS} olSource - The OpenLayer source.
-     * @param {OgcWmsLayerEntryConfig} layerConfig - The layer configuration.
+     *
+     * @param olSource - The OpenLayer source.
+     * @param layerConfig - The layer configuration.
      */
     constructor(olSource: ImageWMS, layerConfig: OgcWmsLayerEntryConfig);
     /**
      * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
-     * @returns {ImageLayer<ImageWMS>} The strongly-typed OpenLayers type.
-     * @override
+     *
+     * @returns The strongly-typed OpenLayers type.
      */
     getOLLayer(): ImageLayer<ImageWMS>;
     /**
      * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
-     * @returns {ImageWMS} The ImageWMS source instance associated with this layer.
-     * @override
+     *
+     * @returns The ImageWMS source instance associated with this layer.
      */
     getOLSource(): ImageWMS;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {OgcWmsLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed layer configuration specific to this layer.
      */
     getLayerConfig(): OgcWmsLayerEntryConfig;
     /**
      * Overrides when the layer image is in error and couldn't be loaded correctly.
-     * @param {Event} event - The event which is being triggered.
-     * @returns {void}
-     * @override
-     * @protected
+     *
+     * @param error - The error which has been triggered.
      */
     protected onImageLoadError(error: GeoViewError): void;
     /**
@@ -68,10 +67,9 @@ export declare class GVWMS extends AbstractGVRaster {
      * - An empty image response (zero width or height).
      * If none of the specific conditions are met, a generic image load error
      * message key is returned.
+     *
      * @param event - The image load error event triggered by the image source.
      * @returns A GeoView Error representing the error.
-     * @override
-     * @protected
      */
     protected onImageLoadErrorDecipherError(event: Event): GeoViewError;
     /**

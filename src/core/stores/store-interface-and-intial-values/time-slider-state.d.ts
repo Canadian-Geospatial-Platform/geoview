@@ -42,6 +42,7 @@ export interface ITimeSliderState {
 }
 /**
  * Initializes an TimeSlider State and provide functions which use the get/set Zustand mechanisms.
+ *
  * @param {TypeSetStore} set - The setter callback to be used by this state
  * @param {TypeGetStore} get - The getter callback to be used by this state
  * @returns {ITimeSliderState} - The initialized TimeSlider State
@@ -86,7 +87,6 @@ export type TypeTimeSliderProps = {
 export declare const useTimeSliderLayers: () => TimeSliderLayerSet | undefined;
 export declare const useTimeSliderLayersSelector: (layerPath: string) => TypeTimeSliderValues | undefined;
 export declare const useTimeSliderSelectedLayerPath: () => string;
-export declare const useTimeSliderFilters: () => Record<string, string>;
 export declare const useTimeSliderFiltersSelector: (layerPath: string) => string | undefined;
 export declare const useTimeSliderStoreActions: () => TimeSliderActions | undefined;
 export {};

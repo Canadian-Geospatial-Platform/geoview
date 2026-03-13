@@ -15,26 +15,27 @@ export declare class GVImageStatic extends AbstractGVRaster {
     #private;
     /**
      * Constructs a GVImageStatic layer to manage an OpenLayer layer.
-     * @param {Static} olSource - The OpenLayer source.
-     * @param {ImageStaticLayerEntryConfig} layerConfig - The layer configuration.
+     *
+     * @param olSource - The OpenLayer source.
+     * @param layerConfig - The layer configuration.
      */
     constructor(olSource: Static, layerConfig: ImageStaticLayerEntryConfig);
     /**
      * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
-     * @returns {ImageLayer<Static>} The strongly-typed OpenLayers type.
-     * @override
+     *
+     * @returns The strongly-typed OpenLayers type.
      */
     getOLLayer(): ImageLayer<Static>;
     /**
      * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
-     * @returns {Static} The Static source instance associated with this layer.
-     * @override
+     *
+     * @returns The Static source instance associated with this layer.
      */
     getOLSource(): Static;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {ImageStaticLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed layer configuration specific to this layer.
      */
     getLayerConfig(): ImageStaticLayerEntryConfig;
     /**

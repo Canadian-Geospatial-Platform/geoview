@@ -39,9 +39,9 @@ export type GeoChartStoreByLayerPath = {
 };
 export type TypeGeochartResultSetEntry = TypeResultSetEntry & GeoChartResultInfo;
 export declare const useGeochartConfigs: () => GeoChartStoreByLayerPath | undefined;
-export declare const useGeochartLayerDataArray: () => TypeGeochartResultSetEntry[] | undefined;
+export declare const useGeochartLayerDataArray: () => TypeGeochartResultSetEntry[];
 export declare const useGeochartLayerDataArrayBatch: () => TypeGeochartResultSetEntry[] | undefined;
-export declare const useGeochartSelectedLayerPath: () => string | undefined;
+export declare const useGeochartSelectedLayerPath: () => string;
 export declare const useGeochartStoreActions: () => GeochartActions | undefined;
 export {};
 //# sourceMappingURL=geochart-state.d.ts.map

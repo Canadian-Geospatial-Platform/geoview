@@ -10,8 +10,8 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 export declare abstract class AbstractGVRaster extends AbstractGVLayer {
     /**
      * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
-     * @returns {BaseImageLayer<ImageSource, LayerRenderer>} The strongly-typed OpenLayers type.
-     * @override
+     *
+     * @returns The strongly-typed OpenLayers type.
      */
     getOLLayer(): BaseImageLayer<ImageSource, LayerRenderer<any>>;
     /**

@@ -22,22 +22,21 @@ export declare abstract class AbstractBaseLayerEntryConfig extends ConfigBaseCla
     listOfLayerEntryConfig: never;
     /**
      * The class constructor.
-     * @param {AbstractBaseLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+     *
+     * @param layerConfig - The layer configuration we want to instanciate.
      */
     protected constructor(layerConfig: AbstractBaseLayerEntryConfigProps | AbstractBaseLayerEntryConfig, schemaTag: TypeGeoviewLayerType, entryType: TypeLayerEntryType);
     /**
-     * Sets the service metadata for the layer.
-     * @param {unknown} metadata - The service metadata to set
-     * @returns {void}
-     * @override
+     * Overrides the setting of the service metadata.
+     *
+     * @param metadata - The service metadata to set
      */
-    onSetServiceMetadata(metadata: unknown): void;
+    protected onSetServiceMetadata(metadata: unknown): void;
     /**
-     * Sets the data access path for the source object.
+     * Overrides the setting of the data access path for the source object.
      * This method is called when the data access path is being set.
-     * @param {string} dataAccessPath - The path string used to access data.
-     * @returns {void}
-     * @override
+     *
+     * @param dataAccessPath - The path string used to access data.
      */
     protected onSetDataAccessPath(dataAccessPath: string): void;
     /**

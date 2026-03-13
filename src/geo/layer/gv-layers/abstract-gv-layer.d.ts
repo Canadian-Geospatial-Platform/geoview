@@ -21,6 +21,7 @@ import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values
 import { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { SnackbarType } from '@/core/utils/notifications';
 import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
+import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 /**
  * Abstract Geoview Layer managing an OpenLayer layer.
  */
@@ -37,20 +38,21 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     loadingMarker: number;
     /**
      * Constructs a GeoView layer to manage an OpenLayer layer.
-     * @param {Source} olSource - The OpenLayer Source.
-     * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration.
+     *
+     * @param olSource - The OpenLayer Source.
+     * @param layerConfig - The layer configuration.
      */
     protected constructor(olSource: Source, layerConfig: AbstractBaseLayerEntryConfig);
     /**
      * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
-     * @override
-     * @returns {Layer} The strongly-typed OpenLayers type.
+     *
+     * @returns The OpenLayers generic type.
      */
     getOLLayer(): Layer;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @override
-     * @returns {AbstractBaseLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
+     *
+     * @returns The strongly-typed layer configuration specific to this layer.
      */
     getLayerConfig(): AbstractBaseLayerEntryConfig;
     /**
@@ -388,7 +390,7 @@ export declare abstract class AbstractGVLayer extends AbstractBaseGVLayer {
      * @param {TemporalMode | undefined} [serviceDateTemporalMode] - When `calendar`, treats the input as a calendar-date-only value (no timezones). When 'instant', treats the input as moment in time (timezones aware).
      * @returns {TypeFeatureInfoEntry[]} An array of TypeFeatureInfoEntry objects.
      */
-    protected formatFeatureInfoResult(features: Feature[], layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | VectorLayerEntryConfig, serviceDateFormat: string | undefined, serviceDateIANA: string | undefined, serviceDateTemporalMode: TemporalMode | undefined): TypeFeatureInfoEntry[];
+    protected formatFeatureInfoResult(features: Feature[], layerConfig: OgcWmsLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig | VectorLayerEntryConfig, serviceDateFormat: string | undefined, serviceDateIANA: string | undefined, serviceDateTemporalMode: TemporalMode | undefined): TypeFeatureInfoEntry[];
     /**
      * Emits a layer-specific message event with localization support
      * @param {string} messageKey - The key used to lookup the localized message OR message

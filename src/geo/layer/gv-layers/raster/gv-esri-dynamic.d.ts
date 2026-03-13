@@ -22,10 +22,29 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
     static DEFAULT_HIT_TOLERANCE: number;
     /**
      * Constructs a GVEsriDynamic layer to manage an OpenLayer layer.
-     * @param {ImageArcGISRest} olSource - The OpenLayer source.
-     * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer configuration.
+     *
+     * @param olSource - The OpenLayer source.
+     * @param layerConfig - The layer configuration.
      */
     constructor(olSource: ImageArcGISRest, layerConfig: EsriDynamicLayerEntryConfig);
+    /**
+     * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
+     *
+     * @returns The strongly-typed OpenLayers type.
+     */
+    getOLLayer(): ImageLayer<ImageArcGISRest>;
+    /**
+     * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
+     *
+     * @returns The ImageArcGISRest source instance associated with this layer.
+     */
+    getOLSource(): ImageArcGISRest;
+    /**
+     * Overrides the parent class's getter to provide a more specific return type (covariant return).
+     *
+     * @returns The strongly-typed layer configuration specific to this layer.
+     */
+    getLayerConfig(): EsriDynamicLayerEntryConfig;
     /**
      * Overrides the fetching of the legend for an Esri Dynamic layer.
      * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
@@ -63,24 +82,6 @@ export declare class GVEsriDynamic extends AbstractGVRaster {
      * @override
      */
     onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
-    /**
-     * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
-     * @returns {ImageLayer<ImageArcGISRest>} The strongly-typed OpenLayers type.
-     * @override
-     */
-    getOLLayer(): ImageLayer<ImageArcGISRest>;
-    /**
-     * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
-     * @returns {ImageArcGISRest} The ImageArcGISRest source instance associated with this layer.
-     * @override
-     */
-    getOLSource(): ImageArcGISRest;
-    /**
-     * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {EsriDynamicLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
-     * @override
-     */
-    getLayerConfig(): EsriDynamicLayerEntryConfig;
     /**
      * Overrides the hit tolerance of the layer.
      * @returns {number} The hit tolerance for a GV Esri Dynamic layer

@@ -81,5 +81,12 @@ export declare class LegendsLayerSet extends AbstractLayerSet {
      * @protected
      */
     protected onDeleteFromStore(layerPath: string): void;
+    /**
+     * Queries the legend for the given layer path.
+     * @param {string} layerPath - The layer path to query the legend for
+     * @param {boolean} [forced=false] - Whether to force the query even if already queried
+     * @returns {void}
+     */
+    queryLegend(layerPath: string, forced?: boolean): void;
 }
 //# sourceMappingURL=legends-layer-set.d.ts.map

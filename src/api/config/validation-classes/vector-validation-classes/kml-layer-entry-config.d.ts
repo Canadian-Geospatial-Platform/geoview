@@ -7,13 +7,14 @@ export interface KmlLayerEntryConfigProps extends VectorLayerEntryConfigProps {
 export declare class KmlLayerEntryConfig extends VectorLayerEntryConfig {
     /**
      * The class constructor.
-     * @param {KmlLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+     *
+     * @param layerConfig - The layer configuration we want to instanciate.
      */
     constructor(layerConfig: KmlLayerEntryConfigProps);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeKmlLayerConfig} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed layer configuration specific to this layer.
      */
     getGeoviewLayerConfig(): TypeKmlLayerConfig;
     /**
