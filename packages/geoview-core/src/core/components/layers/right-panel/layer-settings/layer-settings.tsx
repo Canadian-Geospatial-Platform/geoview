@@ -2,19 +2,22 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import { Menu, MenuItem, ListItemIcon, ListItemText, IconButton } from '@/ui';
-import { SettingsIcon, FunctionsIcon, CollectionsIcon } from '@/ui';
+import { SettingsIcon, FunctionsIcon, CollectionsIcon, PaletteIcon } from '@/ui';
 
 import { getSxClasses } from './layer-settings-style';
 import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 import { RasterFunctionSelector } from './raster-function-selector';
+import { MosaicRuleSelector } from './mosaic-rule-selector';
+import { WmsStyleSelector } from './wms-style-selector';
 import type { TypeLegendLayer } from '../../types';
 import { logger } from '@/core/utils/logger';
-import { MosaicRuleSelector } from './mosaic-rule-selector';
 
 interface LayerSettingsProps {
   layerDetails: TypeLegendLayer;
 }
+
+type LayerSettingsTypes = 'rasterFunction' | 'mosaicRule' | 'wmsStyles';
 
 export function LayerSettings({ layerDetails }: LayerSettingsProps): JSX.Element | null {
   // Log
@@ -28,7 +31,7 @@ export function LayerSettings({ layerDetails }: LayerSettingsProps): JSX.Element
   // Hooks
   const { getLayerSettings } = useLayerStoreActions();
   const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null);
-  const [openSettingsType, setOpenSettingsType] = useState<'rasterFunction' | 'mosaicRule' | null>(null);
+  const [openSettingsType, setOpenSettingsType] = useState<LayerSettingsTypes | null>(null);
 
   // State
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -125,6 +128,21 @@ export function LayerSettings({ layerDetails }: LayerSettingsProps): JSX.Element
             <ListItemText>{t('layers.settings.updateMosaicRule')}</ListItemText>
           </MenuItem>
         )}
+
+        {availableSettings.includes('wmsStyles') && (
+          <MenuItem
+            selected={Boolean(settingsAnchorEl)}
+            onClick={(event) => {
+              setSettingsAnchorEl(event.currentTarget);
+              setOpenSettingsType('wmsStyles');
+            }}
+          >
+            <ListItemIcon>
+              <PaletteIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>{t('layers.settings.selectWmsStyle')}</ListItemText>
+          </MenuItem>
+        )}
       </Menu>
 
       {openSettingsType === 'rasterFunction' && (
@@ -141,6 +159,18 @@ export function LayerSettings({ layerDetails }: LayerSettingsProps): JSX.Element
 
       {openSettingsType === 'mosaicRule' && (
         <MosaicRuleSelector
+          layerDetails={layerDetails}
+          anchorEl={settingsAnchorEl}
+          onClose={() => {
+            setSettingsAnchorEl(null);
+            setOpenSettingsType(null);
+          }}
+          onClickOutside={handleClose}
+        />
+      )}
+
+      {openSettingsType === 'wmsStyles' && (
+        <WmsStyleSelector
           layerDetails={layerDetails}
           anchorEl={settingsAnchorEl}
           onClose={() => {

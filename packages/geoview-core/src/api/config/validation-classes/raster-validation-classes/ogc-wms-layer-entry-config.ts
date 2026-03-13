@@ -194,6 +194,16 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   }
 
   /**
+   * Retrieves the full style metadata objects available for this layer.
+   * Returns the complete `TypeMetadataWMSCapabilityLayerStyle` objects from the layer metadata,
+   * which include style names, legend URLs, and other style-related information.
+   * @returns {TypeMetadataWMSCapabilityLayerStyle[] | undefined} The list of available style metadata objects, or `undefined` if none are defined.
+   */
+  getStylesMetadata(): TypeMetadataWMSCapabilityLayerStyle[] | undefined {
+    return this.getLayerMetadata()?.Style;
+  }
+
+  /**
    * Determines the style to apply for this layer.
    * Retrieves the list of available styles from the layer config/metadata and returns
    * the first available one as the default style to use. If no styles are defined,

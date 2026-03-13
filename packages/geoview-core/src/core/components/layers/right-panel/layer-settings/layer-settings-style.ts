@@ -15,6 +15,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
 
+  // ESRI Image Styles
   rasterFunctionMenu: {
     '& .MuiPaper-root': {
       padding: '8px',
@@ -76,6 +77,77 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
 
   rasterFunctionListItemText: {
+    '& .MuiListItemText-primary': {
+      fontWeight: 600,
+    },
+  },
+
+  // WMS Styles
+  wmsStyleMenu: {
+    '& .MuiPaper-root': {
+      padding: '8px',
+      maxHeight: '400px',
+      paddingRight: '16px',
+      '&::-webkit-scrollbar': {
+        width: '8px',
+      },
+      '&::-webkit-scrollbar-track': {
+        background: 'transparent',
+      },
+      '&::-webkit-scrollbar-thumb': {
+        backgroundColor: theme.palette.action.disabled,
+        borderRadius: '4px',
+        '&:hover': {
+          backgroundColor: theme.palette.action.hover,
+        },
+      },
+      scrollbarWidth: 'thin',
+      scrollbarColor: `${theme.palette.action.disabled} transparent`,
+    },
+  },
+
+  wmsStyleMenuItem: {
+    border: '1px solid',
+    borderColor: 'divider',
+    borderRadius: 2,
+    margin: '4px 0',
+    padding: '12px',
+    alignItems: 'center', // Vertically center image and text
+    '&:hover': {
+      borderColor: 'primary.main',
+    },
+    '&.Mui-selected': {
+      borderColor: 'primary.main',
+    },
+  },
+
+  wmsStylePreviewImageContainer: {
+    width: 100,
+    minHeight: 100,
+    maxHeight: 200, // Cap maximum height
+    border: '2px solid',
+    borderColor: 'divider',
+    borderRadius: 2,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    marginRight: '16px',
+  },
+
+  wmsStylePreviewImage: {
+    width: '100%',
+    height: 'auto', // Preserve aspect ratio
+    maxHeight: '200px',
+    objectFit: 'contain', // Show full image without cropping
+  },
+
+  wmsStylePreviewIcon: {
+    width: 100,
+    height: 100,
+  },
+
+  wmsStyleListItemText: {
     '& .MuiListItemText-primary': {
       fontWeight: 600,
     },

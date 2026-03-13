@@ -60,6 +60,7 @@ export interface TypeLegendLayer {
 
   rasterFunction?: string; // Active raster function for ESRI Image layers
   mosaicRule?: TypeMosaicRule; // Active mosaic rule for ESRI Image layers
+  wmsStyle?: string; // Active style for WMS layers
   opacity?: number;
   opacityMaxFromParent?: number;
   zoom?: number;

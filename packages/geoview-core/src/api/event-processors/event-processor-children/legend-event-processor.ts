@@ -6,6 +6,7 @@ import type {
   TypeLayerControls,
   TypeLayerStatus,
   TypeMetadataEsriRasterFunctionInfos,
+  TypeMetadataWMSCapabilityLayerStyle,
   TypeMosaicMethod,
   TypeMosaicRule,
 } from '@/api/types/layer-schema-types';
@@ -30,6 +31,7 @@ import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-la
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { logger } from '@/core/utils/logger';
 import { doTimeout, type DelayJob } from '@/core/utils/utilities';
+import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 
@@ -348,6 +350,43 @@ export class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
+   * Gets the active WMS style for a layer.
+   * @param mapId - The map identifier.
+   * @param layerPath - The layer path.
+   * @returns The active WMS style name.
+   */
+  static getLayerWmsStyle(mapId: string, layerPath: string): string | undefined {
+    return LegendEventProcessor.getLegendLayerInfo(mapId, layerPath)?.wmsStyle;
+  }
+
+  /**
+   * Sets the active WMS style for a layer.
+   * @param mapId - The map identifier.
+   * @param layerPath - The layer path.
+   * @param wmsStyleName - The WMS style name to set.
+   */
+  static setLayerWmsStyle(mapId: string, layerPath: string, wmsStyleName: string | undefined): void {
+    if (!wmsStyleName) return;
+    MapEventProcessor.getMapViewerLayerAPI(mapId).setLayerWmsStyle(layerPath, wmsStyleName);
+  }
+
+  /**
+   * Updates the active WMS style for a layer in the store.
+   * @param mapId - The map identifier.
+   * @param layerPath - The layer path.
+   * @param wmsStyleName - The WMS style name to set.
+   */
+  static setLayerWmsStyleInStore(mapId: string, layerPath: string, wmsStyleName: string | undefined): void {
+    const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
+    const layer = this.findLayerByPath(layers, layerPath);
+
+    if (layer) {
+      layer.wmsStyle = wmsStyleName;
+      this.getLayerState(mapId).setterActions.setLegendLayers(layers);
+    }
+  }
+
+  /**
    * Gets the raster function previews for the ESRI image layer.
    * @param mapId - The map identifier.
    * @param layerPath - The layer path.
@@ -358,6 +397,25 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     if (!geoviewLayer || !(geoviewLayer instanceof GVEsriImage)) return new Map<string, Promise<string>>();
 
     return geoviewLayer.getRasterFunctionPreviews();
+  }
+
+  /**
+   * Retrieves the layer's available WMS styles.
+   *
+   * @param mapId - The unique identifier of the map instance.
+   * @param layerPath - The path to the layer.
+   * @returns The available WMS style names, or `undefined` if not available.
+   */
+  static getLayerWmsStyles(mapId: string, layerPath: string): TypeMetadataWMSCapabilityLayerStyle[] | undefined {
+    // Get the layer config
+    const layerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfigIfExists(layerPath);
+
+    // Check if it's a WMS layer config
+    if (layerConfig && layerConfig instanceof OgcWmsLayerEntryConfig) {
+      return layerConfig.getStylesMetadata();
+    }
+
+    return undefined;
   }
 
   /**
@@ -382,6 +440,12 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     const mosaicRule = this.getLayerMosaicRule(mapId, layerPath);
     if (mosaicRule) {
       settings.push('mosaicRule');
+    }
+
+    // Check if multiple WMS styles are available
+    const styles = this.getLayerWmsStyles(mapId, layerPath);
+    if (styles && styles.length > 1) {
+      settings.push('wmsStyles');
     }
 
     // Add other layer types with settings here
