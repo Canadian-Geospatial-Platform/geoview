@@ -15,6 +15,7 @@ import type { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/cor
 import { MapViewer } from '@/geo/map/map-viewer';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 import type {
   ILayerState,
   LegendQueryStatus,
@@ -30,7 +31,6 @@ import { Projection } from '@/geo/utils/projection';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { logger } from '@/core/utils/logger';
-import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wms-layer-entry-config';
 
 // GV Important: See notes in header of MapEventProcessor file for information on the paradigm to apply when working with UIEventProcessor vs UIState
 

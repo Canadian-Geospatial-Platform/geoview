@@ -418,6 +418,11 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         LegendEventProcessor.setLayerMosaicRuleProperty(get().mapId, layerPath, { mosaicOperation: value });
       },
 
+      /**
+       * Sets the WMS style for a layer.
+       * @param layerPath - The layer path.
+       * @param wmsStyleName - The name of the WMS style to set.
+       */
       setLayerWmsStyle: (layerPath: string, wmsStyleName: string): void => {
         // Redirect to processor
         LegendEventProcessor.setLayerWmsStyle(get().mapId, layerPath, wmsStyleName);
