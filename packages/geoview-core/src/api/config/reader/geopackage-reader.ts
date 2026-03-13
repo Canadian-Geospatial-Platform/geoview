@@ -576,7 +576,6 @@ export class GeoPackageReader {
         name: fieldEntryKey,
         alias: fieldEntryKey,
         type: fieldType as 'string' | 'number' | 'date',
-        domain: null,
       };
 
       outfields.push(newOutfield);

@@ -217,7 +217,6 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
           feature.geoviewLayerType !== 'ogcWms' && feature.geoviewLayerType !== 'ogcWfs'
             ? field!.alias || fieldName
             : (field!.alias || fieldName).split('.').pop() || '',
-        domain: null,
       }));
   }, [feature]);
 

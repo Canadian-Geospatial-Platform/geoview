@@ -1453,7 +1453,6 @@ export class GVWMS extends AbstractGVRaster {
             value: dataValue ?? '',
             dataType,
             alias: fullFieldName,
-            domain: null,
           };
         }
       });

@@ -56,7 +56,6 @@ export default function FeatureDetailModal(): JSX.Element {
         value: feature.fieldInfo[fieldName]!.value,
         dataType: feature.fieldInfo[fieldName]!.dataType,
         alias: feature.fieldInfo[fieldName]!.alias ? feature.fieldInfo[fieldName]!.alias : fieldName,
-        domain: null,
       };
     });
 
