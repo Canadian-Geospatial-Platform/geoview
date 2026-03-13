@@ -6,7 +6,7 @@ import type { Extent } from 'ol/extent';
 import { getUid } from 'ol/util';
 import type { ReadOptions } from 'ol/format/Feature';
 
-import type { TypeOutfields } from '@/api/types/map-schema-types';
+import type { TypeOutfields, TypeOutfieldsType } from '@/api/types/map-schema-types';
 import type { TypePostSettings } from '@/api/types/layer-schema-types';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
@@ -254,14 +254,13 @@ export abstract class AbstractGeoViewVector extends AbstractGeoViewLayer {
             return;
           }
 
-          let type = 'string';
+          let type = 'string' as TypeOutfieldsType;
           if (firstRow[index] && firstRow[index] !== '' && Number(firstRow[index])) type = 'number';
 
           const newOutfield: TypeOutfields = {
             name: header,
             alias: header,
-            type: type as 'string' | 'number',
-            domain: null,
+            type: type,
           };
           outfields!.push(newOutfield);
         }

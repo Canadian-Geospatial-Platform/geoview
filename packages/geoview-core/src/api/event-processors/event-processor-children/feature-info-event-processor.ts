@@ -356,11 +356,11 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
           {
             uid: 'coordinate-info-feature',
             fieldInfo: {
-              latitude: { value: lat.toFixed(6), fieldKey: 0, dataType: 'number', alias: 'Latitude', domain: null },
-              longitude: { value: lng.toFixed(6), fieldKey: 1, dataType: 'number', alias: 'Longitude', domain: null },
-              utmZone: { value: utmIdentifier, fieldKey: 2, dataType: 'string', alias: 'UTM Identifier', domain: null },
-              easting: { value: easting?.toFixed(2), fieldKey: 3, dataType: 'number', alias: 'Easting', domain: null },
-              northing: { value: northing?.toFixed(2), fieldKey: 4, dataType: 'number', alias: 'Northing', domain: null },
+              latitude: { value: lat.toFixed(6), fieldKey: 0, dataType: 'number', alias: 'Latitude' },
+              longitude: { value: lng.toFixed(6), fieldKey: 1, dataType: 'number', alias: 'Longitude' },
+              utmZone: { value: utmIdentifier, fieldKey: 2, dataType: 'string', alias: 'UTM Identifier' },
+              easting: { value: easting?.toFixed(2), fieldKey: 3, dataType: 'number', alias: 'Easting' },
+              northing: { value: northing?.toFixed(2), fieldKey: 4, dataType: 'number', alias: 'Northing' },
               ntsMapsheet: {
                 value: ntsData?.features
                   .filter((f) => f.properties.name !== '')
@@ -373,14 +373,12 @@ export class FeatureInfoEventProcessor extends AbstractEventProcessor {
                 fieldKey: 5,
                 dataType: 'string',
                 alias: 'NTS Mapsheets',
-                domain: null,
               },
               elevation: {
                 value: elevationData?.altitude ? `${elevationData.altitude} m` : undefined,
                 fieldKey: 6,
                 dataType: 'string',
                 alias: 'Elevation',
-                domain: null,
               },
             },
             extent: undefined,

@@ -4,7 +4,7 @@ import type { Options as SourceOptions } from 'ol/source/Vector';
 import type { Projection as OLProjection } from 'ol/proj';
 
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
-import type { DisplayDateMode, TypeOutfields } from '@/api/types/map-schema-types';
+import type { DisplayDateMode, TypeOutfields, TypeOutfieldsType } from '@/api/types/map-schema-types';
 import type {
   TypeGeoviewLayerConfig,
   TypeMetadataOGCFeature,
@@ -292,15 +292,14 @@ export class OgcFeature extends AbstractGeoViewVector {
         const fieldEntry = fields[fieldEntryKey];
         if (fieldEntry.type === 'Geometry') return;
 
-        let fieldType = 'string';
+        let fieldType = 'string' as TypeOutfieldsType;
         if (fieldEntry.type === 'date') fieldType = 'date';
         else if (['bigint', 'number'].includes(typeof fieldEntry)) fieldType = 'number';
 
         const newOutfield: TypeOutfields = {
           name: fieldEntryKey,
           alias: fieldEntryKey,
-          type: fieldType as 'string' | 'number' | 'date',
-          domain: null,
+          type: fieldType,
         };
         outfields!.push(newOutfield);
       });

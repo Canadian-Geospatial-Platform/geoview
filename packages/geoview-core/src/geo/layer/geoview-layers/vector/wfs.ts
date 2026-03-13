@@ -636,7 +636,6 @@ export class WFS extends AbstractGeoViewVector {
           name: fieldEntry.name,
           alias: fieldEntry.alias ?? fieldEntry.name,
           type: WFS.getFieldType(fieldEntry.name, layerConfig),
-          domain: null,
         };
 
         outfields!.push(newOutfield);

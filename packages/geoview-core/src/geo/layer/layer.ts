@@ -1696,7 +1696,6 @@ export class LayerApi {
             name,
             alias: fieldAliases ? fieldAliases[index] : name,
             type: types[index],
-            domain: null,
           };
         });
 

@@ -26,6 +26,7 @@ import type {
   TypeMetadataEsriLayerSummary,
   TypeMetadataEsriImage,
   TypeMosaicRule,
+  TypeLayerMetadataFields,
 } from '@/api/types/layer-schema-types';
 import { Fetch } from '@/core/utils/fetch-helper';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
@@ -377,7 +378,7 @@ export class EsriUtilities {
         throw new LayerServiceMetadataUnableToFetchError(layerConfig.getGeoviewLayerId(), layerConfig.getLayerName(), formatError(error));
       }
     } else {
-      // The layer metadata was alredy queried (same as the service metadata), use that
+      // In the case of an EsriImage, the layer metadata was already queried (same as the service metadata), use that
       layerMetadata = layerConfig.getServiceMetadata()!;
     }
 
@@ -435,7 +436,8 @@ export class EsriUtilities {
 
     // Read variables
     const queryable = layerMetadata.capabilities.includes('Query') || layerMetadata.capabilities.includes('Catalog');
-    const hasFields = !!layerMetadata.fields?.length;
+    const { fields } = layerMetadata;
+    const hasFields = !!fields?.length;
     const isGroupLayer = layerMetadataEsriDynamicLayer.type === 'Group Layer';
     const isMetadataGroup = layerConfig.getIsMetadataLayerGroup();
 
@@ -444,7 +446,7 @@ export class EsriUtilities {
 
     // Initialize the outfields
     // dynamic group layer doesn't have fields definition
-    if (layerMetadata.fields && !isGroupLayer) {
+    if (hasFields && !isGroupLayer) {
       // Get the outfields
       let outfields = layerConfig.getOutfields();
 
@@ -454,14 +456,15 @@ export class EsriUtilities {
         outfields = [];
 
         // Loop
-        layerMetadata.fields.forEach((fieldEntry) => {
+        fields.forEach((fieldEntry) => {
           // If the field is the geometry field
           if (layerMetadataEsriDynamicLayer.geometryField && fieldEntry?.name === layerMetadataEsriDynamicLayer.geometryField?.name) {
             // Keep the geometry field for future use
             layerConfig.setGeometryField({
               name: fieldEntry.name,
               alias: fieldEntry.alias || fieldEntry.name,
-              type: layerMetadataEsriDynamicLayer.geometryType as TypeOutfieldsType, // Force the typing, because the type doesn't include all geometry type values
+              // TODO: CHECK - Mismatch of TypeOutfieldsType and geometryType as string. This seems wrong, should the TypeOutfieldsType be enhanced to include geometry types?
+              type: layerMetadataEsriDynamicLayer.geometryType as TypeOutfieldsType,
             });
 
             // Skip that geometry field
@@ -472,8 +475,8 @@ export class EsriUtilities {
           const newOutfield: TypeOutfields = {
             name: fieldEntry.name,
             alias: fieldEntry.alias || fieldEntry.name,
-            type: this.esriGetFieldType(layerConfig, fieldEntry.name),
-            domain: this.esriGetFieldDomain(layerConfig, fieldEntry.name),
+            type: this.esriGetFieldType(layerConfig, fields, fieldEntry.name),
+            domain: this.esriGetFieldDomain(fields, fieldEntry.name),
           };
 
           outfields!.push(newOutfield);
@@ -782,18 +785,32 @@ export class EsriUtilities {
 
   /**
    * Returns the type of the specified field.
-   * @param {EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig The ESRI layer config
-   * @param {string} fieldName field name for which we want to get the type.
-   * @returns {TypeOutfieldsType} The type of the field.
-   * @static
+   *
+   * For ESRI Image layers, well-known pixel fields (`PixelValue`, `ProcessedValue`, `Name`)
+   * are short-circuited to `'string'` because they have no metadata entry.
+   *
+   * @param layerConfig - The ESRI layer config, used to detect EsriImage-specific fields.
+   * @param fields - The metadata field definitions to search.
+   * @param fieldName - Field name for which we want to get the type.
+   * @returns The mapped outfield type (`'date'`, `'oid'`, `'number'`, or `'string'`).
    */
   static esriGetFieldType(
     layerConfig: EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig,
+    fields: TypeLayerMetadataFields[],
     fieldName: string
   ): TypeOutfieldsType {
-    const esriFieldDefinitions = layerConfig.getLayerMetadata()?.fields;
-    const fieldDefinition = esriFieldDefinitions?.find((metadataEntry) => metadataEntry.name === fieldName);
+    // For EsriImage layers, handle well-known pixel fields that have no metadata entry
+    if (layerConfig instanceof EsriImageLayerEntryConfig) {
+      const lowerFieldName = fieldName.toLowerCase();
+      if (lowerFieldName === 'pixelvalue' || lowerFieldName === 'processedvalue' || lowerFieldName === 'name') {
+        return 'string';
+      }
+    }
+
+    // Find the field definition in the provided fields array
+    const fieldDefinition = fields?.find((metadataEntry) => metadataEntry.name === fieldName);
     if (!fieldDefinition) return 'string';
+
     const esriFieldType = fieldDefinition.type;
     if (esriFieldType === 'esriFieldTypeDate') return 'date';
     if (esriFieldType === 'esriFieldTypeOID') return 'oid';
@@ -808,20 +825,16 @@ export class EsriUtilities {
 
   /**
    * Returns the domain of the specified field.
-   * @param {EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig The ESRI layer config
-   * @param {string} fieldName field name for which we want to get the domain.
-   * @returns {codedValueType | rangeDomainType | null} The domain of the field.
-   * @static
+   *
+   * @param fields - The metadata field definitions to search.
+   * @param fieldName - Field name for which we want to get the domain.
+   * @returns The domain of the field, or `null` if not found.
    */
   // TODO: ESRI domains are translated to GeoView domains in the configuration. Any GeoView layer that support geoview domains can
   // TO.DOCONT: call a method getFieldDomain that use config.source.featureInfo.outfields to find a field domain.
-  static esriGetFieldDomain(
-    layerConfig: EsriDynamicLayerEntryConfig | EsriFeatureLayerEntryConfig | EsriImageLayerEntryConfig,
-    fieldName: string
-  ): codedValueType | rangeDomainType | null {
-    const esriFieldDefinitions = layerConfig.getLayerMetadata()?.fields;
-    const fieldDefinition = esriFieldDefinitions?.find((metadataEntry) => metadataEntry.name === fieldName);
-    return fieldDefinition ? fieldDefinition.domain : null;
+  static esriGetFieldDomain(fields: TypeLayerMetadataFields[], fieldName: string): codedValueType | rangeDomainType | undefined {
+    // Find the field definition in the provided fields array
+    return fields?.find((metadataEntry) => metadataEntry.name === fieldName)?.domain;
   }
 
   // #endregion PARSING METHODS

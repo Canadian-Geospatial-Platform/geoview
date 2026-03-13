@@ -406,7 +406,6 @@ export abstract class AbstractLayerSet {
           alias: 'geoviewID',
           dataType: 'string',
           value: generateId(),
-          domain: null,
         };
       });
     }

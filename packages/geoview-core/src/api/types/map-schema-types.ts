@@ -581,7 +581,7 @@ export type TypeOutfields = {
   name: string;
   alias: string;
   type: TypeOutfieldsType;
-  domain?: null | codedValueType | rangeDomainType;
+  domain?: codedValueType | rangeDomainType;
 };
 
 /** The types supported by the outfields object. */
@@ -610,7 +610,7 @@ export type TypeFieldEntry = {
   value: unknown;
   dataType: TypeOutfieldsType;
   alias: string;
-  domain: null | codedValueType | rangeDomainType;
+  domain?: codedValueType | rangeDomainType;
 };
 
 // Definition of the alias lookup for matching field names to aliases
