@@ -1089,49 +1089,58 @@ export function delay(timeout: number): Promise<void> {
  * @returns The job object containing the cancel function and interval ID.
  */
 export function doUntil<T>(callback: (elapsed: number) => T, intervalMs: number, timeout?: number, startImmediately = false): DoUntilJob {
-  // Keep track of the start time
+  // Note the start time
   const start = Date.now();
 
+  // Mutable state: tracks whether the loop has been stopped
   let stopped = false;
   let interval: ReturnType<typeof setInterval> | undefined = undefined;
 
+  // Idempotent — safe to call multiple times
   const cancel = (): void => {
     if (stopped) return;
     stopped = true;
     clearInterval(interval);
   };
 
+  // Returns true when the loop should no longer run
   const tick = (): boolean => {
+    // Already cancelled externally
     if (stopped) return true;
 
     const elapsed = Date.now() - start;
 
+    // Timeout reached — stop
     if (timeout && elapsed >= timeout) {
       cancel();
       return true;
     }
 
+    // Invoke the caller's logic; truthy = "I'm done"
     const shouldStop = callback(elapsed);
 
-    // Abort might have happened during callback
+    // The callback itself may have called cancel()
     if (stopped) return true;
 
+    // Callback signalled completion
     if (shouldStop) {
       cancel();
       return true;
     }
 
+    // Keep going
     return false;
   };
 
+  // Optional first invocation before the interval kicks in
   if (startImmediately) tick();
 
-  // If stopped immediately, don't even interval it
+  // If the immediate tick already stopped us, skip scheduling
   if (!stopped) {
     interval = setInterval(tick, intervalMs);
   }
 
-  // Return the cancel function and interval ID for potential manual cleanup
+  // Return the job
   return {
     start,
     cancel,
