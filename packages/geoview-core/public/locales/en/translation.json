@@ -267,7 +267,8 @@
       "mosaicOperationSum": "Sum",
       "orderAscending": "Oldest to Newest",
       "orderDescending": "Newest to Oldest",
-      "selectWmsStyle": "Select WMS style"
+      "selectWmsStyle": "Select WMS style",
+      "back": "Back to layer details"
     }
   },
   "details": {

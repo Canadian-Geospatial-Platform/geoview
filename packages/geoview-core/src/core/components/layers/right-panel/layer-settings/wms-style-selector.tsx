@@ -1,29 +1,33 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { Menu, MenuItem, ListItemIcon, ListItemText, Box, CircularProgress } from '@/ui';
-import { ImageNotSupportedIcon } from '@/ui';
+import type { SxProps } from '@mui/material';
+
+import { Box, CircularProgress, Collapse, Typography } from '@/ui';
+import { ImageNotSupportedIcon, PaletteIcon, ExpandMoreIcon, ExpandLessIcon } from '@/ui';
+
 import { getSxClasses } from './layer-settings-style';
 import { useLayerStoreActions, useLayerSelectorWmsStyle } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import type { TypeMetadataWMSCapabilityLayerStyle } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 
-interface WmsStyleSelectorProps {
-  layerDetails: TypeLegendLayer;
-  anchorEl: HTMLElement | null;
-  onClose: () => void;
-  onClickOutside: (event: {}, reason?: 'backdropClick' | 'escapeKeyDown') => void;
-}
-
-interface WmsStyleMenuItemProps {
+interface WmsStyleItemProps {
   style: TypeMetadataWMSCapabilityLayerStyle;
   isSelected: boolean;
   onSelect: (name: string) => void;
 }
 
-function WmsStyleMenuItem({ style, isSelected, onSelect }: WmsStyleMenuItemProps): JSX.Element {
+/**
+ * Card component displaying a WMS style option with legend preview.
+ *
+ * @param style - The WMS style metadata.
+ * @param isSelected - Whether this style is currently selected.
+ * @param onSelect - Callback invoked when the user selects this style.
+ */
+function WmsStyleItem({ style, isSelected, onSelect }: WmsStyleItemProps): JSX.Element {
   // Log
-  logger.logTraceRender('components/layers/right-panel/layer-settings/wms-style-selector > WmsStyleMenuItem');
+  logger.logTraceRender('components/layers/right-panel/layer-settings/wms-style-selector > WmsStyleItem');
 
   // Hooks
   const theme = useTheme();
@@ -35,18 +39,17 @@ function WmsStyleMenuItem({ style, isSelected, onSelect }: WmsStyleMenuItemProps
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect(`WMS STYLE MENU ITEM - legend image - ${style.Name}`, style.LegendURL);
+    logger.logTraceUseEffect(`WMS STYLE ITEM - legend image - ${style.Name}`, style.LegendURL);
 
     // Get the first legend URL if available
     const legendUrl = style.LegendURL?.[0]?.OnlineResource?.['@attributes']?.['xlink:href'];
 
     if (legendUrl) {
       setLegendSrc(legendUrl);
-      setLoading(false);
     } else {
       setLegendSrc(null);
-      setLoading(false);
     }
+    setLoading(false);
   }, [style]);
 
   const renderIcon = (): JSX.Element => {
@@ -82,21 +85,53 @@ function WmsStyleMenuItem({ style, isSelected, onSelect }: WmsStyleMenuItemProps
     );
   };
 
+  const handleClick = useCallback((): void => {
+    onSelect(style.Name);
+  }, [onSelect, style.Name]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>): void => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onSelect(style.Name);
+      }
+    },
+    [onSelect, style.Name]
+  );
+
   return (
-    <MenuItem onClick={() => onSelect(style.Name)} selected={isSelected} sx={sxClasses.wmsStyleMenuItem}>
-      <ListItemIcon>{renderIcon()}</ListItemIcon>
-      <ListItemText primary={style.Name} sx={sxClasses.settingSelectorListItemText} />
-    </MenuItem>
+    <Box
+      role="button"
+      tabIndex={0}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      sx={[sxClasses.wmsStyleCard, isSelected && sxClasses.wmsStyleCardSelected] as SxProps}
+    >
+      {renderIcon()}
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography sx={{ fontWeight: 600 }}>{style.Name}</Typography>
+      </Box>
+    </Box>
   );
 }
 
-export function WmsStyleSelector(props: WmsStyleSelectorProps): JSX.Element {
+interface WmsStylePanelProps {
+  layerDetails: TypeLegendLayer;
+}
+
+/**
+ * Inline panel section for selecting WMS styles.
+ *
+ * Displays available styles as cards within a collapsible section,
+ * consistent with the raster function panel pattern.
+ *
+ * @param layerDetails - The legend layer to configure WMS styles for.
+ */
+export function WmsStylePanel({ layerDetails }: WmsStylePanelProps): JSX.Element {
   // Log
-  logger.logTraceRender('components/layers/right-panel/layer-settings/wms-style-selector > WmsStyleSelector');
+  logger.logTraceRender('components/layers/right-panel/layer-settings/wms-style-selector > WmsStylePanel');
 
-  const { layerDetails, anchorEl, onClose, onClickOutside } = props;
-
-  // Hooks
+  const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
@@ -112,66 +147,44 @@ export function WmsStyleSelector(props: WmsStyleSelectorProps): JSX.Element {
     [getLayerWmsAvailableStyles, layerDetails.layerPath]
   );
 
-  const handleSelect = (wmsStyleName: string): void => {
-    setLayerWmsStyle(layerDetails.layerPath, wmsStyleName);
-  };
+  // State
+  const [expanded, setExpanded] = useState(false);
 
-  const handleClose = (event: {}, reason: 'backdropClick' | 'escapeKeyDown'): void => {
-    if (reason === 'backdropClick' && onClickOutside) {
-      // Clicking outside should close both menus
-      onClickOutside(event, reason);
-    } else if (reason === 'escapeKeyDown') {
-      // Escape should only close submenu
-      onClose();
-    }
-  };
+  const handleSelect = useCallback(
+    (wmsStyleName: string): void => {
+      setLayerWmsStyle(layerDetails.layerPath, wmsStyleName);
+    },
+    [layerDetails.layerPath, setLayerWmsStyle]
+  );
 
-  const handleKeyDown = (event: React.KeyboardEvent): void => {
-    if (event.key === 'Tab') {
-      event.preventDefault();
+  const handleToggle = useCallback((): void => {
+    setExpanded((prev) => !prev);
+  }, []);
 
-      // Get all menu items
-      const menuItems = event.currentTarget.querySelectorAll('[role="menuitem"]');
-      const currentIndex = Array.from(menuItems).findIndex((item) => item === document.activeElement);
-
-      let nextIndex;
-      if (currentIndex === -1) {
-        // No item focused, focus first item
-        nextIndex = 0;
-      } else if (event.shiftKey) {
-        // Shift+Tab: move up
-        nextIndex = currentIndex > 0 ? currentIndex - 1 : menuItems.length - 1;
-      } else {
-        // Tab: move down
-        nextIndex = currentIndex < menuItems.length - 1 ? currentIndex + 1 : 0;
+  const handleToggleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>): void => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleToggle();
       }
-
-      (menuItems[nextIndex] as HTMLElement)?.focus();
-    } else if (event.key === 'Escape') {
-      onClose();
-    }
-  };
+    },
+    [handleToggle]
+  );
 
   return (
-    <Menu
-      anchorEl={anchorEl}
-      open={Boolean(anchorEl)}
-      onClose={handleClose}
-      onKeyDown={handleKeyDown}
-      disableScrollLock
-      anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-      transformOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      sx={sxClasses.settingSelectorMenu}
-      slotProps={{
-        list: {
-          autoFocus: true,
-          autoFocusItem: true,
-        },
-      }}
-    >
-      {wmsStyleArray.map((style) => (
-        <WmsStyleMenuItem key={style.Name} style={style} isSelected={currentWmsStyle === style.Name} onSelect={handleSelect} />
-      ))}
-    </Menu>
+    <Box sx={sxClasses.settingsSection}>
+      <Box sx={sxClasses.settingsSectionHeader} onClick={handleToggle} onKeyDown={handleToggleKeyDown} role="button" tabIndex={0}>
+        <PaletteIcon fontSize="small" />
+        <Typography sx={sxClasses.settingsSectionTitle}>{t('layers.settings.selectWmsStyle')}</Typography>
+        {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+      </Box>
+      <Collapse in={expanded} sx={{ marginTop: expanded ? '12px' : 0 }}>
+        <Box sx={sxClasses.wmsStyleList}>
+          {wmsStyleArray.map((style) => (
+            <WmsStyleItem key={style.Name} style={style} isSelected={currentWmsStyle === style.Name} onSelect={handleSelect} />
+          ))}
+        </Box>
+      </Collapse>
+    </Box>
   );
 }
