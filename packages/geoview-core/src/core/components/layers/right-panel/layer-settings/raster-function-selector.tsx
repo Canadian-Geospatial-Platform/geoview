@@ -1,7 +1,11 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
-import { Menu, MenuItem, ListItemIcon, ListItemText, Box, CircularProgress } from '@/ui';
-import { ImageNotSupportedIcon } from '@/ui';
+import type { SxProps } from '@mui/material';
+
+import { Box, CircularProgress, Collapse, Typography } from '@/ui';
+import { ImageNotSupportedIcon, FunctionsIcon, ExpandMoreIcon, ExpandLessIcon } from '@/ui';
+
 import { getSxClasses } from './layer-settings-style';
 import {
   useLayerStoreActions,
@@ -12,23 +16,25 @@ import type { TypeLegendLayer } from '@/core/components/layers/types';
 import type { TypeMetadataEsriRasterFunctionInfos } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 
-interface RasterFunctionSelectorProps {
-  layerDetails: TypeLegendLayer;
-  anchorEl: HTMLElement | null;
-  onClose: () => void;
-  onClickOutside: (event: {}, reason?: 'backdropClick' | 'escapeKeyDown') => void;
-}
-
-interface RasterFunctionMenuItemProps {
+interface RasterFunctionItemProps {
   info: TypeMetadataEsriRasterFunctionInfos;
   isSelected: boolean;
   previewPromise: Promise<string> | undefined;
   onSelect: (name: string) => void;
 }
 
-function RasterFunctionMenuItem({ info, isSelected, previewPromise, onSelect }: RasterFunctionMenuItemProps): JSX.Element {
+/**
+ * Card component displaying a raster function option with image preview.
+ *
+ * @param info - The raster function metadata.
+ * @param isSelected - Whether this function is currently selected.
+ * @param previewPromise - Promise resolving to the preview image URL.
+ * @param onSelect - Callback invoked when the user selects this function.
+ * @returns A JSX element representing the raster function card.
+ */
+function RasterFunctionItem({ info, isSelected, previewPromise, onSelect }: RasterFunctionItemProps): JSX.Element {
   // Log
-  logger.logTraceRender('components/layers/right-panel/layer-settings/raster-function-selector > RasterFunctionMenuItem');
+  logger.logTraceRender('components/layers/right-panel/layer-settings/raster-function-selector > RasterFunctionItem');
 
   // Hooks
   const theme = useTheme();
@@ -40,7 +46,7 @@ function RasterFunctionMenuItem({ info, isSelected, previewPromise, onSelect }: 
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect(`RASTER FUNCTION MENU ITEM - image preview - ${info.name}`, previewPromise);
+    logger.logTraceUseEffect(`RASTER FUNCTION ITEM - image preview - ${info.name}`, previewPromise);
 
     if (!previewPromise) return;
     previewPromise
@@ -82,21 +88,59 @@ function RasterFunctionMenuItem({ info, isSelected, previewPromise, onSelect }: 
     );
   };
 
+  const handleClick = useCallback((): void => {
+    onSelect(info.name);
+  }, [onSelect, info.name]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>): void => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onSelect(info.name);
+      }
+    },
+    [onSelect, info.name]
+  );
+
   return (
-    <MenuItem onClick={() => onSelect(info.name)} selected={isSelected} sx={sxClasses.settingSelectorMenuItem}>
-      <ListItemIcon>{renderIcon()}</ListItemIcon>
-      <ListItemText primary={info.name} secondary={info.description} sx={sxClasses.settingSelectorListItemText} />
-    </MenuItem>
+    <Box
+      role="button"
+      tabIndex={0}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      sx={[sxClasses.rasterFunctionCard, isSelected && sxClasses.rasterFunctionCardSelected] as SxProps}
+    >
+      {renderIcon()}
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography sx={{ fontWeight: 600 }}>{info.name}</Typography>
+        {info.description && (
+          <Typography variant="body2" color="text.secondary">
+            {info.description}
+          </Typography>
+        )}
+      </Box>
+    </Box>
   );
 }
 
-export function RasterFunctionSelector(props: RasterFunctionSelectorProps): JSX.Element {
+interface RasterFunctionPanelProps {
+  layerDetails: TypeLegendLayer;
+}
+
+/**
+ * Inline panel section for selecting raster functions.
+ *
+ * Replaces the previous Menu-based approach with cards displayed
+ * directly within the settings panel.
+ *
+ * @param layerDetails - The legend layer to configure raster functions for.
+ * @returns A JSX element representing the RasterFunctionPanel component.
+ */
+export function RasterFunctionPanel({ layerDetails }: RasterFunctionPanelProps): JSX.Element {
   // Log
-  logger.logTraceRender('components/layers/right-panel/layer-settings/raster-function-selector > RasterFunctionSelector');
+  logger.logTraceRender('components/layers/right-panel/layer-settings/raster-function-selector > RasterFunctionPanel');
 
-  const { layerDetails, anchorEl, onClose, onClickOutside } = props;
-
-  // Hooks
+  const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
@@ -110,10 +154,11 @@ export function RasterFunctionSelector(props: RasterFunctionSelectorProps): JSX.
 
   // State
   const [previewPromises, setPreviewPromises] = useState<Map<string, Promise<string>>>(new Map());
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('RASTER FUNCTION SELECTOR - Layer Raster Function Infos sync', rasterFunctionInfos);
+    logger.logTraceUseEffect('RASTER FUNCTION PANEL - Layer Raster Function Infos sync', rasterFunctionInfos);
 
     if (rasterFunctionInfos.length > 0) {
       const promises = getLayerRasterFunctionPreviews(layerDetails.layerPath);
@@ -121,72 +166,47 @@ export function RasterFunctionSelector(props: RasterFunctionSelectorProps): JSX.
     }
   }, [layerDetails.layerPath, rasterFunctionInfos, getLayerRasterFunctionPreviews]);
 
-  const handleSelect = (rasterFunctionName: string): void => {
-    setLayerRasterFunction(layerDetails.layerPath, rasterFunctionName);
-  };
+  const handleSelect = useCallback(
+    (rasterFunctionName: string): void => {
+      setLayerRasterFunction(layerDetails.layerPath, rasterFunctionName);
+    },
+    [layerDetails.layerPath, setLayerRasterFunction]
+  );
 
-  const handleClose = (event: {}, reason: 'backdropClick' | 'escapeKeyDown'): void => {
-    if (reason === 'backdropClick' && onClickOutside) {
-      // Clicking outside should close both menus
-      onClickOutside(event, reason);
-    } else if (reason === 'escapeKeyDown') {
-      // Escape should only close submenu
-      onClose();
-    }
-  };
+  const handleToggle = useCallback((): void => {
+    setExpanded((prev) => !prev);
+  }, []);
 
-  const handleKeyDown = (event: React.KeyboardEvent): void => {
-    if (event.key === 'Tab') {
-      event.preventDefault();
-
-      // Get all menu items
-      const menuItems = event.currentTarget.querySelectorAll('[role="menuitem"]');
-      const currentIndex = Array.from(menuItems).findIndex((item) => item === document.activeElement);
-
-      let nextIndex;
-      if (currentIndex === -1) {
-        // No item focused, focus first item
-        nextIndex = 0;
-      } else if (event.shiftKey) {
-        // Shift+Tab: move up
-        nextIndex = currentIndex > 0 ? currentIndex - 1 : menuItems.length - 1;
-      } else {
-        // Tab: move down
-        nextIndex = currentIndex < menuItems.length - 1 ? currentIndex + 1 : 0;
+  const handleToggleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>): void => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleToggle();
       }
-
-      (menuItems[nextIndex] as HTMLElement)?.focus();
-    } else if (event.key === 'Escape') {
-      onClose();
-    }
-  };
+    },
+    [handleToggle]
+  );
 
   return (
-    <Menu
-      anchorEl={anchorEl}
-      open={Boolean(anchorEl)}
-      onClose={handleClose}
-      onKeyDown={handleKeyDown}
-      disableScrollLock
-      anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-      transformOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      sx={sxClasses.settingSelectorMenu}
-      slotProps={{
-        list: {
-          autoFocus: true,
-          autoFocusItem: true,
-        },
-      }}
-    >
-      {rasterFunctionInfos.map((info) => (
-        <RasterFunctionMenuItem
-          key={info.name}
-          info={info}
-          isSelected={currentRasterFunction === info.name}
-          previewPromise={previewPromises.get(info.name)}
-          onSelect={handleSelect}
-        />
-      ))}
-    </Menu>
+    <Box sx={sxClasses.settingsSection}>
+      <Box sx={sxClasses.settingsSectionHeader} onClick={handleToggle} onKeyDown={handleToggleKeyDown} role="button" tabIndex={0}>
+        <FunctionsIcon fontSize="small" />
+        <Typography sx={sxClasses.settingsSectionTitle}>{t('layers.settings.selectRasterFunction')}</Typography>
+        {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+      </Box>
+      <Collapse in={expanded} sx={{ marginTop: expanded ? '12px' : 0 }}>
+        <Box sx={sxClasses.rasterFunctionList}>
+          {rasterFunctionInfos.map((info) => (
+            <RasterFunctionItem
+              key={info.name}
+              info={info}
+              isSelected={currentRasterFunction === info.name}
+              previewPromise={previewPromises.get(info.name)}
+              onSelect={handleSelect}
+            />
+          ))}
+        </Box>
+      </Collapse>
+    </Box>
   );
 }

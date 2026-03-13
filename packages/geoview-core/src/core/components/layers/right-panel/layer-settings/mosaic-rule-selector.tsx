@@ -1,32 +1,40 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, Checkbox, Menu, MenuItem, FormControl, Select } from '@/ui';
 import { useTheme } from '@mui/material/styles';
+
+import { Box, Checkbox, Collapse, FormControl, Select, Typography } from '@/ui';
+import { CollectionsIcon, ExpandMoreIcon, ExpandLessIcon } from '@/ui';
 
 import { getSxClasses } from './layer-settings-style';
 import { useLayerStoreActions, useLayerSelectorMosaicRule } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 import type { TypeLegendLayer } from '../../types';
 import type { TypeMosaicMethod, TypeMosaicOperation } from '@/api/types/layer-schema-types';
+import { logger } from '@/core/utils/logger';
 
-interface MosaicRuleSelectorProps {
+interface MosaicRulePanelProps {
   layerDetails: TypeLegendLayer;
-  anchorEl: HTMLElement | null;
-  onClose: () => void;
-  onClickOutside: (event: {}, reason?: 'backdropClick' | 'escapeKeyDown') => void;
 }
 
 /**
+ * Inline panel section for configuring mosaic rules on ArcGIS ImageServer layers.
+ *
+ * Displays method, operation, and ascending controls directly within
+ * the settings panel instead of a floating menu.
+ *
  * An ArcGIS ImageServer mosaicRule defines how multiple raster datasets within a mosaic dataset
  * are ordered, mosaicked, and displayed on-the-fly when viewed or queried.
  * It specifies which rasters are included (e.g., by ID or attribute), their sorting order,
- * and how overlapping pixels are resolved (e.g., via blending, maximum, or minimum values)
- * @link https://developers.arcgis.com/javascript/latest/references/core/layers/support/MosaicRule
- * @param props - The properties for the MosaicRuleSelector component.
- * @returns A JSX element representing the MosaicRuleSelector component.
+ * and how overlapping pixels are resolved (e.g., via blending, maximum, or minimum values).
+ *
+ * @see {@link https://developers.arcgis.com/javascript/latest/references/core/layers/support/MosaicRule}
+ * @param layerDetails - The legend layer to configure mosaic rules for.
+ * @returns A JSX element representing the MosaicRulePanel component.
  */
-export function MosaicRuleSelector(props: MosaicRuleSelectorProps): JSX.Element {
-  const { layerDetails, anchorEl, onClose, onClickOutside } = props;
+export function MosaicRulePanel({ layerDetails }: MosaicRulePanelProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/layers/right-panel/layer-settings/mosaic-rule-selector > MosaicRulePanel');
+
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
   const { t } = useTranslation();
@@ -38,12 +46,15 @@ export function MosaicRuleSelector(props: MosaicRuleSelectorProps): JSX.Element 
   // Store hooks
   const mosaicRule = useLayerSelectorMosaicRule(layerDetails.layerPath);
 
+  // State
+  const [expanded, setExpanded] = useState(false);
+
   // Current values
   const currentMethod = mosaicRule?.mosaicMethod ?? 'esriMosaicNone';
   const currentOperation = mosaicRule?.mosaicOperation ?? 'MT_FIRST';
   const currentAscending = mosaicRule?.ascending ?? true;
 
-  // Handlers - use useCallback for stable references
+  // Handlers with stable references
   const handleChangeMethod = useCallback(
     (event: React.ChangeEvent<HTMLInputElement> | (Event & { target: { value: unknown; name: string } })): void => {
       setLayerMosaicRuleMethod(layerDetails.layerPath, event.target.value as TypeMosaicMethod);
@@ -65,18 +76,7 @@ export function MosaicRuleSelector(props: MosaicRuleSelectorProps): JSX.Element 
     [layerDetails.layerPath, setLayerMosaicRuleAscending]
   );
 
-  const handleClose = useCallback(
-    (event: {}, reason: 'backdropClick' | 'escapeKeyDown'): void => {
-      if (reason === 'backdropClick' && onClickOutside) {
-        onClickOutside(event, reason);
-      } else if (reason === 'escapeKeyDown') {
-        onClose();
-      }
-    },
-    [onClose, onClickOutside]
-  );
-
-  // Menu items with translations - memoized to prevent recreation on every render
+  // Menu items with translations
   const methodMenuItems = useMemo(
     () =>
       [
@@ -123,54 +123,55 @@ export function MosaicRuleSelector(props: MosaicRuleSelectorProps): JSX.Element 
     [t]
   );
 
+  const handleToggle = useCallback((): void => {
+    setExpanded((prev) => !prev);
+  }, []);
+
+  const handleToggleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>): void => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handleToggle();
+      }
+    },
+    [handleToggle]
+  );
+
   return (
-    <Menu
-      anchorEl={anchorEl}
-      open={Boolean(anchorEl)}
-      onClose={handleClose}
-      disableScrollLock
-      anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-      transformOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      sx={sxClasses.rasterFunctionMenu}
-      slotProps={{
-        list: {
-          autoFocus: true,
-          autoFocusItem: true,
-        },
-      }}
-    >
-      <MenuItem>
-        <FormControl fullWidth>
-          <Select
-            value={currentMethod}
-            onChange={handleChangeMethod}
-            label={t('layers.settings.mosaicMethod')}
-            menuItems={methodMenuItems}
-            inputLabel={{ id: 'mosaic-method-label' }}
-          />
-        </FormControl>
-      </MenuItem>
-      <MenuItem>
-        <FormControl fullWidth>
-          <Select
-            value={currentOperation}
-            onChange={handleChangeOperation}
-            label={t('layers.settings.mosaicOperation')}
-            menuItems={operationMenuItems}
-            inputLabel={{
-              id: 'mosaic-operation-label',
-            }}
-          />
-        </FormControl>
-      </MenuItem>
-      <MenuItem>
-        <Box display="flex" alignItems="center" width="100%">
-          <Checkbox checked={currentAscending} onChange={handleChangeAscending} />
-          <Box component="span" ml={1}>
-            {t('layers.settings.ascending')}
+    <Box sx={sxClasses.settingsSection}>
+      <Box sx={sxClasses.settingsSectionHeader} onClick={handleToggle} onKeyDown={handleToggleKeyDown} role="button" tabIndex={0}>
+        <CollectionsIcon fontSize="small" />
+        <Typography sx={sxClasses.settingsSectionTitle}>{t('layers.settings.updateMosaicRule')}</Typography>
+        {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+      </Box>
+      <Collapse in={expanded} sx={{ marginTop: expanded ? '12px' : 0 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <FormControl fullWidth>
+            <Select
+              value={currentMethod}
+              onChange={handleChangeMethod}
+              label={t('layers.settings.mosaicMethod')}
+              menuItems={methodMenuItems}
+              inputLabel={{ id: 'mosaic-method-label' }}
+            />
+          </FormControl>
+          <FormControl fullWidth>
+            <Select
+              value={currentOperation}
+              onChange={handleChangeOperation}
+              label={t('layers.settings.mosaicOperation')}
+              menuItems={operationMenuItems}
+              inputLabel={{ id: 'mosaic-operation-label' }}
+            />
+          </FormControl>
+          <Box display="flex" alignItems="center">
+            <Checkbox checked={currentAscending} onChange={handleChangeAscending} />
+            <Box component="span" ml={1}>
+              {t('layers.settings.ascending')}
+            </Box>
           </Box>
         </Box>
-      </MenuItem>
-    </Menu>
+      </Collapse>
+    </Box>
   );
 }
