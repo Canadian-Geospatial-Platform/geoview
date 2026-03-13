@@ -52,7 +52,7 @@ function RasterFunctionMenuItem({ info, isSelected, previewPromise, onSelect }: 
   const renderIcon = (): JSX.Element => {
     if (loading) {
       return (
-        <Box sx={sxClasses.previewImageContainer}>
+        <Box sx={sxClasses.rasterFunctionPreviewImageContainer}>
           <CircularProgress
             isLoaded={false}
             size={24}
@@ -70,22 +70,22 @@ function RasterFunctionMenuItem({ info, isSelected, previewPromise, onSelect }: 
     }
     if (previewSrc) {
       return (
-        <Box sx={sxClasses.previewImageContainer}>
-          <Box component="img" src={previewSrc} alt={info.name} sx={sxClasses.previewImage} />
+        <Box sx={sxClasses.rasterFunctionPreviewImageContainer}>
+          <Box component="img" src={previewSrc} alt={info.name} sx={sxClasses.rasterFunctionPreviewImage} />
         </Box>
       );
     }
     return (
-      <Box sx={sxClasses.previewImageContainer}>
-        <ImageNotSupportedIcon sx={sxClasses.previewIcon} />
+      <Box sx={sxClasses.rasterFunctionPreviewImageContainer}>
+        <ImageNotSupportedIcon sx={sxClasses.settingSelectorPreviewIcon} />
       </Box>
     );
   };
 
   return (
-    <MenuItem onClick={() => onSelect(info.name)} selected={isSelected} sx={sxClasses.rasterFunctionMenuItem}>
+    <MenuItem onClick={() => onSelect(info.name)} selected={isSelected} sx={sxClasses.settingSelectorMenuItem}>
       <ListItemIcon>{renderIcon()}</ListItemIcon>
-      <ListItemText primary={info.name} secondary={info.description} sx={sxClasses.rasterFunctionListItemText} />
+      <ListItemText primary={info.name} secondary={info.description} sx={sxClasses.settingSelectorListItemText} />
     </MenuItem>
   );
 }
@@ -170,7 +170,7 @@ export function RasterFunctionSelector(props: RasterFunctionSelectorProps): JSX.
       disableScrollLock
       anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       transformOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      sx={sxClasses.rasterFunctionMenu}
+      sx={sxClasses.settingSelectorMenu}
       slotProps={{
         list: {
           autoFocus: true,
