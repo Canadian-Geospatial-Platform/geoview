@@ -105,7 +105,7 @@ function WmsStyleItem({ style, isSelected, onSelect }: WmsStyleItemProps): JSX.E
       tabIndex={0}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
-      sx={[sxClasses.wmsStyleCard, isSelected && sxClasses.wmsStyleCardSelected] as SxProps}
+      sx={[sxClasses.settingsCard, isSelected && sxClasses.settingsCardSelected] as SxProps}
     >
       {renderIcon()}
       <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -179,7 +179,7 @@ export function WmsStylePanel({ layerDetails }: WmsStylePanelProps): JSX.Element
         {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
       </Box>
       <Collapse in={expanded} sx={{ marginTop: expanded ? '12px' : 0 }}>
-        <Box sx={sxClasses.wmsStyleList}>
+        <Box sx={sxClasses.settingsCardList}>
           {wmsStyleArray.map((style) => (
             <WmsStyleItem key={style.Name} style={style} isSelected={currentWmsStyle === style.Name} onSelect={handleSelect} />
           ))}

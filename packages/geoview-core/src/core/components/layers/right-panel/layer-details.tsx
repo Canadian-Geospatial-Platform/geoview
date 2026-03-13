@@ -37,7 +37,6 @@ import {
   useDataTableLayerSettings,
   useDataTableStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { generateId } from '@/core/utils/utilities';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { LayerOpacityControl } from './layer-opacity-control/layer-opacity-control';
 import { LayerSettingsPanel } from './layer-settings/layer-settings';
@@ -458,7 +457,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   }
 
   function renderSettingsButton(): JSX.Element | null {
-    if (!availableSettings?.length) return null;
+    const hasInteraction = layerDetails.controls?.hover || layerDetails.controls?.query;
+    if (!availableSettings?.length && !hasInteraction) return null;
 
     if (activeView === 'settings') {
       return (
@@ -618,17 +618,22 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
               <Typography sx={{ ...sxClasses.categoryTitle, ...(layerHidden && hiddenStyle) }} title={layerDetails.layerName}>
                 {layerDetails.layerName}
               </Typography>
-              {getSubTitle() && (
-                <Typography
-                  sx={{
-                    fontSize: theme.palette.geoViewFontSize.sm,
-                    ...(layerHidden && hiddenStyle),
-                  }}
-                >
-                  {' '}
-                  {getSubTitle()}{' '}
-                </Typography>
-              )}
+              {(() => {
+                const subTitle = getSubTitle();
+                return (
+                  subTitle && (
+                    <Typography
+                      sx={{
+                        fontSize: theme.palette.geoViewFontSize.sm,
+                        ...(layerHidden && hiddenStyle),
+                      }}
+                    >
+                      {' '}
+                      {subTitle}{' '}
+                    </Typography>
+                  )
+                );
+              })()}
             </Box>
             {renderSettingsButton()}
             {renderInfoButton()}
@@ -694,7 +699,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
                               fontSize: theme.palette.geoViewFontSize.sm,
                               textAlign: 'center',
                             }}
-                            key={generateId(18)}
+                            key={attribution}
                           >
                             {attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}
                           </Typography>

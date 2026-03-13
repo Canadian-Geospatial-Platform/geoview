@@ -46,8 +46,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     fontSize: theme.palette.geoViewFontSize.default,
   },
 
-  // Raster function card list and items
-  rasterFunctionList: {
+  // Shared card list styles (used by raster function and WMS style selectors)
+  settingsCardList: {
     display: 'flex',
     flexDirection: 'column',
     gap: '8px',
@@ -71,7 +71,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     scrollbarColor: `${theme.palette.action.disabled} transparent`,
   },
 
-  rasterFunctionCard: {
+  settingsCard: {
     display: 'flex',
     alignItems: 'center',
     padding: '12px',
@@ -90,7 +90,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
 
-  rasterFunctionCardSelected: {
+  settingsCardSelected: {
     borderColor: theme.palette.primary.main,
     backgroundColor: theme.palette.action.selected,
   },
@@ -117,54 +117,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
 
   // WMS Style specific styles
-  wmsStyleList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-    maxHeight: '400px',
-    overflowY: 'auto',
-    // Custom scrollbar styling
-    '&::-webkit-scrollbar': {
-      width: '8px',
-    },
-    '&::-webkit-scrollbar-track': {
-      background: 'transparent',
-    },
-    '&::-webkit-scrollbar-thumb': {
-      backgroundColor: theme.palette.action.disabled,
-      borderRadius: '4px',
-      '&:hover': {
-        backgroundColor: theme.palette.action.hover,
-      },
-    },
-    scrollbarWidth: 'thin',
-    scrollbarColor: `${theme.palette.action.disabled} transparent`,
-  },
-
-  wmsStyleCard: {
-    display: 'flex',
-    alignItems: 'center',
-    padding: '12px',
-    border: '1px solid',
-    borderColor: theme.palette.divider,
-    borderRadius: '8px',
-    cursor: 'pointer',
-    transition: 'border-color 0.2s, background-color 0.2s',
-    '&:hover': {
-      borderColor: theme.palette.primary.main,
-      backgroundColor: theme.palette.action.hover,
-    },
-    '&:focus-visible': {
-      outline: `2px solid ${theme.palette.primary.main}`,
-      outlineOffset: '2px',
-    },
-  },
-
-  wmsStyleCardSelected: {
-    borderColor: theme.palette.primary.main,
-    backgroundColor: theme.palette.action.selected,
-  },
-
   wmsStylePreviewImageContainer: {
     width: 100,
     minHeight: 100,
