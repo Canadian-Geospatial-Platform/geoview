@@ -242,6 +242,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Gets the active raster function for a layer.
+   *
    * @param mapId - The map identifier.
    * @param layerPath - The layer path.
    * @returns The active raster function identifier.
@@ -252,6 +253,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Sets the active raster function for a layer.
+   *
    * @param mapId - The map identifier.
    * @param layerPath - The layer path.
    * @param rasterFunctionId - The raster function identifier to set.
@@ -262,6 +264,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Updates the active raster function for a layer in the store.
+   *
    * @param mapId - The map identifier.
    * @param layerPath - The layer path.
    * @param rasterFunctionId - The raster function identifier to set.
@@ -281,6 +284,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Gets the allowed mosaic methods for a layer.
+   *
    * @param mapId - The map identifier.
    * @param layerPath - The layer path.
    * @returns The allowed mosaic methods or undefined.
@@ -295,6 +299,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Gets the active mosaic rule for a layer.
+   *
    * @param mapId - The map identifier.
    * @param layerPath - The layer path.
    * @returns The active mosaic rule or undefined.
@@ -305,6 +310,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Sets the active mosaic rule for a layer.
+   *
    * @param mapId - The map identifier.
    * @param layerPath - The layer path.
    * @param mosaicRule - The mosaic rule to set.
@@ -315,6 +321,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Updates the mosaicRule for a layer by merging new properties.
+   *
    * @param mapId - The map id.
    * @param layerPath - The layer path.
    * @param partialMosaicRule - An object with one or more mosaicRule properties to update.
@@ -336,6 +343,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Updates the active mosaic rule for a layer in the store.
+   *
    * @param mapId - The map identifier.
    * @param layerPath - The layer path.
    * @param mosaicRule - The mosaic rule to set.
@@ -351,6 +359,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Gets the active WMS style for a layer.
+   *
    * @param mapId - The map identifier.
    * @param layerPath - The layer path.
    * @returns The active WMS style name.
@@ -361,6 +370,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Sets the active WMS style for a layer.
+   *
    * @param mapId - The map identifier.
    * @param layerPath - The layer path.
    * @param wmsStyleName - The WMS style name to set.
@@ -372,6 +382,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Updates the active WMS style for a layer in the store.
+   *
    * @param mapId - The map identifier.
    * @param layerPath - The layer path.
    * @param wmsStyleName - The WMS style name to set.
@@ -388,6 +399,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Gets the raster function previews for the ESRI image layer.
+   *
    * @param mapId - The map identifier.
    * @param layerPath - The layer path.
    * @returns The raster function previews.
@@ -420,6 +432,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
 
   /**
    * Gets the available settings for a layer.
+   *
    * @param mapId - The map identifier.
    * @param layerPath - The layer path.
    * @returns Array of available setting types.

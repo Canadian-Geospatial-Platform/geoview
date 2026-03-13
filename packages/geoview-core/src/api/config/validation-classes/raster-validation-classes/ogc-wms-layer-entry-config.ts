@@ -175,13 +175,14 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * If styles are not yet cached, the method reads them from the layer metadata
    * and initializes the internal style list. The styles correspond to named
    * style definitions advertised by the WMS service (from the `Style` section of the metadata).
-   * @returns {string[] | undefined} The list of available style names, or `undefined` if none are defined.
+   *
+   * @returns The list of available style names, or `undefined` if none are defined.
    */
   getStyles(): string[] | undefined {
     // If no styles defined
     if (!this.#styles) {
       // Read styles from the metadata
-      const styles = this.getLayerMetadata()?.Style;
+      const styles = this.getStylesMetadata();
 
       // Update internal styles list
       if (styles?.length || 0 > 1) {
@@ -197,6 +198,7 @@ export class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig {
    * Retrieves the full style metadata objects available for this layer.
    * Returns the complete `TypeMetadataWMSCapabilityLayerStyle` objects from the layer metadata,
    * which include style names, legend URLs, and other style-related information.
+   *
    * @returns The list of available style metadata objects, or `undefined` if none are defined.
    */
   getStylesMetadata(): TypeMetadataWMSCapabilityLayerStyle[] | undefined {
