@@ -2,19 +2,12 @@ import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
 
 /**
- * Get custom sx classes for the layer settings components
+ * Get custom sx classes for the layer settings components.
  *
- * @param {Theme} theme the theme object
- * @returns {Object} the sx classes object
+ * @param theme - The MUI theme object.
+ * @returns The sx classes object for layer settings panel and sub-components.
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
-  layerSettingsMenu: {
-    '& .MuiMenuItem-root': {
-      borderRadius: 1,
-      margin: '4px 8px',
-    },
-  },
-
   // Shared styles for setting selector submenus (raster function, WMS style, etc.)
   settingSelectorMenu: {
     '& .MuiPaper-root': {
@@ -41,20 +34,6 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     },
   },
 
-  settingSelectorMenuItem: {
-    border: '1px solid',
-    borderColor: 'divider',
-    borderRadius: 2,
-    margin: '4px 0',
-    padding: '12px',
-    '&:hover': {
-      borderColor: 'primary.main',
-    },
-    '&.Mui-selected': {
-      borderColor: 'primary.main',
-    },
-  },
-
   settingSelectorListItemText: {
     '& .MuiListItemText-primary': {
       fontWeight: 600,
@@ -66,18 +45,101 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     height: 100,
   },
 
+  // Section container for each settings group (raster function, mosaic rule)
+  settingsSection: {
+    marginBottom: '24px',
+    border: '1px solid',
+    borderColor: theme.palette.divider,
+    borderRadius: '8px',
+    padding: '12px',
+    transition: 'border-color 0.2s',
+  },
+
+  settingsSectionHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    color: theme.palette.geoViewColor.textColor.main,
+    cursor: 'pointer',
+    userSelect: 'none',
+    transition: 'color 0.2s',
+    '&:hover': {
+      color: theme.palette.primary.main,
+    },
+    '&:focus-visible': {
+      outline: `2px solid ${theme.palette.primary.main}`,
+      outlineOffset: '2px',
+      borderRadius: '4px',
+    },
+  },
+
+  settingsSectionTitle: {
+    fontWeight: 600,
+    fontSize: theme.palette.geoViewFontSize.default,
+  },
+
+  // Raster function card list and items
+  rasterFunctionList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+    maxHeight: '400px',
+    overflowY: 'auto',
+    // Custom scrollbar styling
+    '&::-webkit-scrollbar': {
+      width: '8px',
+    },
+    '&::-webkit-scrollbar-track': {
+      background: 'transparent',
+    },
+    '&::-webkit-scrollbar-thumb': {
+      backgroundColor: theme.palette.action.disabled,
+      borderRadius: '4px',
+      '&:hover': {
+        backgroundColor: theme.palette.action.hover,
+      },
+    },
+    scrollbarWidth: 'thin',
+    scrollbarColor: `${theme.palette.action.disabled} transparent`,
+  },
+
+  rasterFunctionCard: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: '12px',
+    border: '1px solid',
+    borderColor: theme.palette.divider,
+    borderRadius: '8px',
+    cursor: 'pointer',
+    transition: 'border-color 0.2s, background-color 0.2s',
+    '&:hover': {
+      borderColor: theme.palette.primary.main,
+      backgroundColor: theme.palette.action.hover,
+    },
+    '&:focus-visible': {
+      outline: `2px solid ${theme.palette.primary.main}`,
+      outlineOffset: '2px',
+    },
+  },
+
+  rasterFunctionCardSelected: {
+    borderColor: theme.palette.primary.main,
+    backgroundColor: theme.palette.action.selected,
+  },
+
   // ESRI Image Raster Function specific styles
   rasterFunctionPreviewImageContainer: {
     width: 100,
     height: 100,
     border: '2px solid',
-    borderColor: 'divider',
-    borderRadius: 2,
+    borderColor: theme.palette.divider,
+    borderRadius: '8px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
     marginRight: '16px',
+    flexShrink: 0,
   },
 
   rasterFunctionPreviewImage: {

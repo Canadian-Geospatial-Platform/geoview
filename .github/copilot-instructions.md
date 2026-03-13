@@ -31,6 +31,34 @@ npm run fix         # ESLint auto-fix
 
 **NEVER** run `npm install` directly - always use `rush update`. Rush manages the monorepo and ensures consistent versions.
 
+### Prettier Configuration
+
+The Prettier config lives at `packages/.prettierrc`:
+
+```json
+{
+  "printWidth": 140,
+  "tabWidth": 2,
+  "singleQuote": true,
+  "bracketSpacing": true,
+  "semi": true,
+  "arrowParens": "always",
+  "trailingComma": "es5",
+  "endOfLine": "lf"
+}
+```
+
+Key rules: **140-char print width**, single quotes, always-parens on arrows, ES5 trailing commas, LF line endings.
+
+### TypeScript Strict Mode
+
+`packages/tsconfig.base.json` enables `strict: true` plus additional flags:
+
+- `noUnusedLocals: true` — unused variables/imports are compile errors
+- `noImplicitReturns: true` — all code paths must return a value
+- `noImplicitOverride: true` — `override` keyword required
+- `isolatedModules: true` — each file must be independently compilable
+
 ## Architecture Fundamentals
 
 ### Three-Layer System
@@ -85,11 +113,35 @@ import { createRoot } from "react-dom/client";
 
 import { useTranslation } from "react-i18next";
 
-import { Card } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 
 import { Layer } from "ol/layer";
 
+import { Box, Typography, IconButton } from "@/ui";
+import { SettingsIcon, ArrowBackIcon } from "@/ui";
 import { MapEventProcessor } from "@/api/event-processors";
+```
+
+**MUI import rules:**
+
+- Import UI components (`Box`, `Typography`, `IconButton`, `Divider`, `Collapse`, `Fade`, etc.) from `@/ui` — NEVER directly from `@mui/material`
+- Import icons from `@/ui` (barrel re-exports from `@/ui/icons/index.ts` with domain-specific aliases like `AccessTime` → `TimeSliderIcon`)
+- MUI hooks/utilities (`useTheme`, `useMediaQuery`) import directly from `@mui/material` or `@mui/material/styles`
+- MUI types (`SxProps`, `SelectChangeEvent`) import directly from `@mui/material`
+
+### Component Export Patterns
+
+- **Named exports** (not default exports): `export function MyComponent()` or `export const MyComponent = ...`
+- `React.memo()` components must set `.displayName` immediately after:
+
+```typescript
+const Sublayer = memo(function Sublayer({
+  layer,
+  depth,
+}: SublayerProps): JSX.Element {
+  // ...
+});
+Sublayer.displayName = "Sublayer";
 ```
 
 ### Inheritance & Polymorphism
@@ -127,10 +179,130 @@ const handleClickWrapper = useCallback(
 - Derive parameters from event target (id, data attributes) instead of closure
 - Apply to both `onClick`, `onKeyDown`, and other event handlers
 - Reduces unnecessary re-renders of memoized child components
+- Module-level constants (`const FADE_DURATION = 200`) belong **outside** the component function to avoid re-creation on every render
+
+### Function Order in Components
+
+Per [best-practices.md](../docs/programming/best-practices.md), order functions within components as:
+
+1. Core reusable functions (no dependencies)
+2. Event handler functions (state changes, callbacks)
+3. Hooks section (`useEffect`, `useCallback` grouped together — order matters)
+4. Rendering helper methods (JSX rendering)
+
+### Function Order in Classes
+
+1. Class name → 2. Abstracts → 3. Overrides → 4. Public → 5. Private → 6. Event emits/hooks → 7. Static public → 8. Static private → 9. Event types
+
+## Styling System
+
+### getSxClasses Pattern
+
+Every component with non-trivial styles has a companion `*-style.ts` file exporting a `getSxClasses` function:
+
+```typescript
+// my-component-style.ts
+import type { Theme } from "@mui/material/styles";
+import type { SxStyles } from "@/ui/style/types";
+
+export const getSxClasses = (theme: Theme): SxStyles => ({
+  container: {
+    display: "flex",
+    gap: "8px",
+    padding: theme.spacing(1),
+  },
+  title: {
+    fontWeight: 600,
+    fontSize: theme.palette.geoViewFontSize.lg,
+    color: theme.palette.geoViewColor.textColor.main,
+  },
+});
+```
+
+**`SxStyles`** is defined in `@/ui/style/types` as `Record<string, SxProps<Theme> | SxProps>`.
+
+**Usage in component:**
+
+```typescript
+const theme = useTheme();
+const sxClasses = getSxClasses(theme);
+// ...
+<Box sx={sxClasses.container}>
+```
+
+### Theme Tokens
+
+Use theme tokens instead of hard-coded colors/sizes:
+
+- **Colors**: `theme.palette.geoViewColor.primary.main`, `.primary.dark[200]`, `.primary.light[100]`, `.bgColor.dark[100]`, `.textColor.main`, `.textColor.light[200]`, `.white`
+- **Font sizes**: `theme.palette.geoViewFontSize.sm`, `.default`, `.lg`
+- **Spacing**: `theme.spacing(1)` for standard MUI spacing
+
+### Combining sx Styles
+
+When combining multiple sx style objects (e.g., for conditional styling), use the array syntax with `SxProps` cast:
+
+```typescript
+import type { SxProps } from '@mui/material';
+
+<Box sx={[sxClasses.card, isSelected && sxClasses.cardSelected] as SxProps} />
+```
+
+## UI Component Library (`@/ui`)
+
+### Barrel Exports
+
+All UI components are exported from `@/ui` (`packages/geoview-core/src/ui/index.ts`). This barrel re-exports custom wrappers around MUI components.
+
+**Custom wrappers add GeoView-specific behavior.** For example, `IconButton`:
+
+- Makes `aria-label` **required** (not optional like MUI's)
+- Auto-wraps with `<Tooltip>` using aria-label as fallback tooltip text
+- Adds `tooltip`, `tooltipPlacement`, `iconRef`, `visible` props
+- Uses `logTraceRenderDetailed` internally
+
+### Icons
+
+Icons are re-exported from `@/ui/icons/index.ts` which maps MUI Material Icons to **domain-specific aliases**:
+
+```typescript
+// In @/ui/icons/index.ts
+export { AccessTime as TimeSliderIcon } from "@mui/icons-material";
+export { DynamicFeed as LayerGroupIcon } from "@mui/icons-material";
+export { Functions as FunctionsIcon } from "@mui/icons-material";
+```
+
+One MUI icon can have multiple aliases. Custom SVG icons (`LegendIcon`, `ClearHighlightIcon`) come from `@/ui/svg/svg-icon`.
+
+**Always import icons from `@/ui`**, never directly from `@mui/icons-material`.
 
 ## State Management (Zustand Store)
 
-**No Store Leakage in .ts Files** - pattern from [using-store.md](../docs/programming/using-store.md):
+### Store Hook Naming Convention
+
+Store hooks live in `packages/geoview-core/src/core/stores/store-interface-and-intial-values/` with files per slice: `map-state.ts`, `layer-state.ts`, `ui-state.ts`, `data-table-state.ts`, etc.
+
+**Naming pattern**: `use{SliceName}{PropertyName}`
+
+```typescript
+// Selector hooks — one per state property
+export const useMapZoom = (): number =>
+  useStore(useGeoViewStore(), (state) => state.mapState.zoom);
+
+export const useLayerLegendLayers = (): TypeLegendLayer[] =>
+  useStore(useGeoViewStore(), (state) => state.layerState.legendLayers);
+
+// Actions hook — one per slice
+export const useMapStoreActions = (): MapActions =>
+  useStore(useGeoViewStore(), (state) => state.mapState.actions);
+
+export const useLayerStoreActions = (): LayerActions =>
+  useStore(useGeoViewStore(), (state) => state.layerState.actions);
+```
+
+### No Store Leakage in .ts Files
+
+Pattern from [using-store.md](../docs/programming/using-store.md):
 
 ```typescript
 // ✅ In TypeScript file
@@ -161,6 +333,39 @@ logger.logWarning(); // Abnormal events - always shown
 logger.logError(); // Exceptions - always shown
 ```
 
+### Logger Trace Conventions
+
+**Every component must call `logTraceRender` at the top of the function body:**
+
+```typescript
+// Business components — path relative to src/ using components/ prefix
+logger.logTraceRender("components/layers/right-panel/layer-details");
+
+// Sub-components within a file — append ' > SubName'
+logger.logTraceRender(
+  "components/layers/right-panel/layer-settings/raster-function-selector > RasterFunctionItem",
+);
+
+// UI wrapper components — use logTraceRenderDetailed with ui/ prefix
+logger.logTraceRenderDetailed("ui/icon-button/icon-button");
+
+// Plugin components — use package-relative paths
+logger.logTraceRender("geoview-time-slider/time-slider");
+```
+
+**Additional trace calls:**
+
+```typescript
+// useEffect hooks — CAPITALIZED description + watched dependencies
+logger.logTraceUseEffect(
+  "RASTER FUNCTION PANEL - Layer Raster Function Infos sync",
+  rasterFunctionInfos,
+);
+
+// useCallback — similar pattern
+logger.logTraceUseCallback("LAYER DETAILS - handle visibility toggle");
+```
+
 Control via localStorage:
 
 - `GEOVIEW_LOG_ACTIVE`: Enable logging outside dev mode
@@ -180,11 +385,13 @@ Control via localStorage:
 **Golden Rule of JSDoc in TypeScript Projects:**
 
 JSDoc should:
+
 - Explain **why** something works the way it does
 - Explain **behavior** and side effects
 - Explain **non-obvious constraints**
 
 JSDoc should NOT:
+
 - Repeat type information already in the signature
 - Replace TypeScript visibility keywords (`private`, `protected`, `public`)
 - Duplicate what the compiler already guarantees
@@ -245,6 +452,63 @@ function setLayerVisibility(layerPath: string, visible: boolean): void {}
 
 **TypeDoc Generation:** Run `npm run doc` in geoview-core to generate API documentation.
 
+## Accessibility
+
+### Required Patterns
+
+- **`aria-label` is required on `<IconButton>`** — enforced by the type system (custom wrapper makes it non-optional)
+- **Labels must use translated strings** from `t()`, never hardcoded English:
+
+```typescript
+aria-label={t('layers.settings.title')}
+aria-label={t('general.close')}
+
+// Dynamic labels with interpolation:
+aria-label={layerVisible
+  ? t('layers.hideLayer', { name: layer.layerName })
+  : t('layers.showLayer', { name: layer.layerName })}
+```
+
+- **`role="button"` on non-button interactive elements** must always be paired with `tabIndex={0}` and a keyboard handler for Enter/Space:
+
+```typescript
+const handleToggle = useCallback((): void => {
+  setExpanded((prev) => !prev);
+}, []);
+
+const handleToggleKeyDown = useCallback(
+  (e: React.KeyboardEvent<HTMLDivElement>): void => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleToggle();
+    }
+  },
+  [handleToggle]
+);
+
+<Box onClick={handleToggle} onKeyDown={handleToggleKeyDown} role="button" tabIndex={0}>
+```
+
+- `role="checkbox"` with `aria-checked` for toggle-visibility buttons
+- `role="search"` on `<form>` elements containing search inputs
+
+## Internationalization (i18n)
+
+### Translation Key Structure
+
+Keys use **dot-separated namespaces** (2-3 levels deep):
+
+| Domain      | Examples                                                                           |
+| ----------- | ---------------------------------------------------------------------------------- |
+| `layers`    | `t('layers.dropzone')`, `t('layers.settings.title')`, `t('layers.settings.back')`  |
+| `legend`    | `t('legend.title')`, `t('legend.highlightLayer')`, `t('legend.subLayersCount')`    |
+| `general`   | `t('general.close')`, `t('general.cancel')`, `t('general.overview')`               |
+| `appbar`    | `t('appbar.share')`, `t('appbar.navLabel')`                                        |
+| `mapctrl`   | `t('mapctrl.attribution.tooltip')`, `t('mapctrl.crosshair')`                       |
+| `dataTable` | `t('dataTable.zoom')`, `t('dataTable.details')`, `t('dataTable.searchInputLabel')` |
+
+**Interpolation**: Uses i18next `{{ }}` syntax — `t('layers.hideLayer', { name: layer.layerName })`.
+
 ## Testing & Quality
 
 - **Testing**: Use `geoview-test-suite` package to create and run tests (NOT Jest)
@@ -271,13 +535,20 @@ packages/geoview-core/src/
 │   └── plugin/       # Plugin registration APIs
 ├── core/             # Core utilities, stores, workers
 │   ├── stores/       # Zustand store slices
+│   │   └── store-interface-and-intial-values/  # Hook exports per slice
 │   ├── components/   # Shared React components
+│   │   └── layers/   # Layer panel, details, settings
+│   │       └── right-panel/
+│   │           └── layer-settings/  # Settings components + *-style.ts files
 │   └── workers/      # Web Workers
 ├── geo/              # OpenLayers layer management
 │   ├── layer/        # GeoView & GV layer classes
 │   ├── map/          # MapViewer
 │   └── interaction/
 └── ui/               # UI components & layout
+    ├── icons/        # Icon barrel (index.ts) re-exporting @mui/icons-material
+    ├── style/        # Theme, types (SxStyles), default tokens
+    └── [component]/  # One folder per wrapped MUI component
 ```
 
 **Webpack Path Aliases** (from tsconfig):

@@ -1,4 +1,4 @@
-import { Fragment, memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { Fragment, memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import type { TypeLegendLayer, TypeLegendItem } from '@/core/components/layers/types';
@@ -9,10 +9,12 @@ import {
   CheckBoxIcon,
   CheckBoxOutlineBlankIcon,
   Divider,
+  Fade,
   Grid,
   HighlightIcon,
   HighlightOutlinedIcon,
   IconButton,
+  InfoOutlinedIcon,
   List,
   ListItem,
   Paper,
@@ -20,56 +22,38 @@ import {
   TableViewIcon,
   TimeSliderIcon,
   Typography,
+  SettingsIcon,
   ZoomInSearchIcon,
 } from '@/ui';
-import { ListItemText } from '@/ui/list';
+import { ArrowBackIcon } from '@/ui/icons';
 import {
-  useLayerDateTemporalMode,
-  useLayerDisplayDateFormat,
-  useLayerDisplayDateFormatShort,
-  useLayerDisplayDateTimezone,
   useLayerHighlightedLayer,
   useLayerSelectorBounds,
-  useLayerSelectorBounds4326,
-  useLayerSelectorFilter,
-  useLayerSelectorFilterClass,
   useLayerStoreActions,
-  useLayerTimeDimension,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useUIStoreActions, useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import {
   useDataTableAllFeaturesDataArray,
-  useDataTableFilterSelector,
   useDataTableLayerSettings,
   useDataTableStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
-import { generateId, getLocalizedMessage, isValidUUID } from '@/core/utils/utilities';
+import { generateId } from '@/core/utils/utilities';
 import { LayerIcon } from '@/core/components/common/layer-icon';
 import { LayerOpacityControl } from './layer-opacity-control/layer-opacity-control';
-import { LayerSettings } from './layer-settings/layer-settings';
+import { LayerSettingsPanel } from './layer-settings/layer-settings';
+import { LayerInfoPanel } from './layer-info/layer-info';
 import { logger } from '@/core/utils/logger';
 import { LAYER_STATUS, TABS } from '@/core/utils/constant';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
-import { Collapse } from '@/ui/collapse/collapse';
-import { Button } from '@/ui/button/button';
-import { KeyboardArrowDownIcon, KeyboardArrowUpIcon } from '@/ui/icons';
-import { useAppDisplayLanguage, useAppMetadataServiceURL } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { Switch } from '@/ui/switch/switch';
-import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
+
 import {
   useMapVisibleLayers,
   useMapSelectorIsLayerHiddenOnMap,
   useMapSelectorLayerVisibility,
   useMapStoreActions,
   useMapSelectorLayerParentHidden,
-  useMapProjectionEPSG,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
-import {
-  useTimeSliderFiltersSelector,
-  useTimeSliderLayers,
-  useTimeSliderLayersSelector,
-  useTimeSliderStoreActions,
-} from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import { useTimeSliderLayers, useTimeSliderStoreActions } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { DeleteUndoButton } from '@/core/components/layers/delete-undo-button';
@@ -130,6 +114,9 @@ const Sublayer = memo(({ layer }: SubLayerProps): JSX.Element => {
 
 Sublayer.displayName = 'Sublayer';
 
+// Duration for fade-out and fade-in halves (ms) when crossfading between details and settings views
+const FADE_DURATION = 200;
+
 export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/right-panel/layer-details');
@@ -142,45 +129,27 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const sxClasses = getSxClasses(theme);
   const hiddenStyle = { color: theme.palette.grey[600], fontStyle: 'italic' };
 
-  const [isInfoCollapse, setIsInfoCollapse] = useState(false);
   const [allSublayersVisible, setAllSublayersVisible] = useState(true);
+  const [contentVisible, setContentVisible] = useState(true);
+  const [activeView, setActiveView] = useState<'details' | 'settings' | 'info'>('details');
+
+  // Ref for settings button focus restoration
+  const settingsButtonRef = useRef<HTMLButtonElement>(null);
+  const infoButtonRef = useRef<HTMLButtonElement>(null);
   const mapId = useGeoViewMapId();
 
   // get store actions
   const highlightedLayer = useLayerHighlightedLayer();
-  const {
-    setAllItemsVisibility,
-    toggleItemVisibility,
-    setHighlightLayer,
-    refreshLayer,
-    zoomToLayerExtent,
-    getLayerServiceProjection,
-    getLayerSettings,
-    setLayerHoverable,
-    setLayerQueryable,
-  } = useLayerStoreActions();
+  const { setAllItemsVisibility, toggleItemVisibility, setHighlightLayer, refreshLayer, zoomToLayerExtent, getLayerSettings } =
+    useLayerStoreActions();
+  const availableSettings = getLayerSettings(layerDetails.layerPath);
   const { setOrToggleLayerVisibility } = useMapStoreActions();
   const { enableFocusTrap } = useUIStoreActions();
   const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
   const visibleLayers = useMapVisibleLayers();
   const datatableSettings = useDataTableLayerSettings();
   const layersData = useDataTableAllFeaturesDataArray();
-  const language = useAppDisplayLanguage();
-  const metadataUrl = useAppMetadataServiceURL();
-  const mapProjectionEPSG = useMapProjectionEPSG();
-  const layerFilter = useLayerSelectorFilter(layerDetails.layerPath);
-  const classFilter = useLayerSelectorFilterClass(layerDetails.layerPath);
-  const dataFilter = useDataTableFilterSelector(layerDetails.layerPath);
-  const timeFilter = useTimeSliderFiltersSelector(layerDetails.layerPath);
   const bounds = useLayerSelectorBounds(layerDetails.layerPath);
-  const bounds4326 = useLayerSelectorBounds4326(layerDetails.layerPath);
-  const layerDisplayDateFormat = useLayerDisplayDateFormat(layerDetails.layerPath);
-  const layerDisplayDateFormatShort = useLayerDisplayDateFormatShort(layerDetails.layerPath);
-  const layerDateTemporalMode = useLayerDateTemporalMode(layerDetails.layerPath);
-  const layerDisplayDateTimezone = useLayerDisplayDateTimezone(layerDetails.layerPath);
-  const layerTimeDimension = useLayerTimeDimension(layerDetails.layerPath);
-  const timeSliderDimension = useTimeSliderLayersSelector(layerDetails.layerPath);
-  const layerNativeProjection = getLayerServiceProjection(layerDetails.layerPath);
   const layerVisible = useMapSelectorLayerVisibility(layerDetails.layerPath);
   const parentHidden = useMapSelectorLayerParentHidden(layerDetails.layerPath);
   const layerHidden = useMapSelectorIsLayerHiddenOnMap(layerDetails.layerPath);
@@ -200,19 +169,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   // Is zoom to extent button disabled?
   const isLayerZoomToExtentCapable = layerDetails.controls?.zoom;
 
-  // Is layer hoverable or queryable
-  const isLayerHoverable = layerDetails.controls?.hover;
-  const isLayerQueryable = layerDetails.controls?.query;
-
-  // Get the localized layer type
-  const memoLocalizedLayerType = useMemo(() => UtilAddLayer.getLocalizeLayerType(language, true), [language]);
-
   // Generate unique table details button ID
   const tableDetailsButtonId = `table-details-${containerType}-${mapId}`;
-
-  // Round the bounds
-  const boundsRounded = bounds?.map((value) => Math.round(value));
-  const boundsRounded4326 = bounds4326?.map((value) => Math.round(value * 100) / 100);
 
   /**
    * Recursively checks if all children of a layer are visible.
@@ -500,22 +458,99 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   }
 
   function renderSettingsButton(): JSX.Element | null {
-    const settings = getLayerSettings(layerDetails.layerPath);
+    if (!availableSettings?.length) return null;
 
-    if (!settings || settings.length === 0) return null;
+    if (activeView === 'settings') {
+      return (
+        <IconButton
+          ref={settingsButtonRef}
+          aria-label={t('layers.settings.back')}
+          className="buttonOutline"
+          onClick={() => {
+            // Sequential fade: fade out → swap → fade in
+            setContentVisible(false);
+            setTimeout(() => {
+              setActiveView('details');
+              setContentVisible(true);
+              requestAnimationFrame(() => settingsButtonRef.current?.focus());
+            }, FADE_DURATION);
+          }}
+          tooltipPlacement="bottom"
+        >
+          <ArrowBackIcon />
+        </IconButton>
+      );
+    }
 
-    return <LayerSettings layerDetails={layerDetails} />;
+    return (
+      <IconButton
+        ref={settingsButtonRef}
+        aria-label={t('layers.settings.title')}
+        className="buttonOutline"
+        onClick={() => {
+          // Sequential fade: fade out → swap → fade in
+          setContentVisible(false);
+          setTimeout(() => {
+            setActiveView('settings');
+            setContentVisible(true);
+          }, FADE_DURATION);
+        }}
+        tooltipPlacement="bottom"
+      >
+        <SettingsIcon />
+      </IconButton>
+    );
+  }
+
+  function renderInfoButton(): JSX.Element {
+    if (activeView === 'info') {
+      return (
+        <IconButton
+          ref={infoButtonRef}
+          aria-label={t('layers.settings.back')}
+          className="buttonOutline"
+          onClick={() => {
+            setContentVisible(false);
+            setTimeout(() => {
+              setActiveView('details');
+              setContentVisible(true);
+              requestAnimationFrame(() => infoButtonRef.current?.focus());
+            }, FADE_DURATION);
+          }}
+          tooltipPlacement="bottom"
+        >
+          <ArrowBackIcon />
+        </IconButton>
+      );
+    }
+
+    return (
+      <IconButton
+        ref={infoButtonRef}
+        aria-label={t('layers.moreInfo')}
+        className="buttonOutline"
+        onClick={() => {
+          setContentVisible(false);
+          setTimeout(() => {
+            setActiveView('info');
+            setContentVisible(true);
+          }, FADE_DURATION);
+        }}
+        tooltipPlacement="bottom"
+      >
+        <InfoOutlinedIcon />
+      </IconButton>
+    );
   }
 
   function renderLayerButtons(): JSX.Element {
     const timeSliderButton = renderTimeSliderButton();
     const hasDataTable = datatableSettings[layerDetails.layerPath];
     const deleteButton = renderDeleteButton();
-    const layerSettingsButton = renderSettingsButton();
     const showDivider = hasDataTable || timeSliderButton;
 
     return (
-      <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px', marginLeft: 'auto' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '15px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
         {hasDataTable && renderDetailsButton()}
         {timeSliderButton}
         {showDivider && <Box sx={sxClasses.verticalDivider} />}
@@ -524,7 +559,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         </IconButton>
         {renderHighlightButton()}
         {renderZoomButton()}
-        {layerSettingsButton}
         {deleteButton && <Box sx={sxClasses.verticalDivider} />}
         {deleteButton}
       </Box>
@@ -565,219 +599,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     return null;
   };
 
-  const renderInfo = (): JSX.Element | null => {
-    const { schemaTag, url, layerPath } = layerDetails;
-
-    // Set Ressource
-    const wfsParams = '?service=WFS&version=2.0.0&request=GetCapabilities';
-    const wmsParams = '?service=WMS&version=1.3.0&request=GetCapabilities';
-    let resources: string = '';
-
-    // Check if we can set the resource url
-    if (url) {
-      switch (schemaTag) {
-        case CONST_LAYER_TYPES.WMS:
-          // Check if URL already includes WMS GetCapabilities parameters
-          // eslint-disable-next-line no-nested-ternary
-          resources = url.toLowerCase().endsWith('.xml')
-            ? `${url}`
-            : url.includes('?')
-              ? url
-              : `${url}${wmsParams}&layers=${layerPath.split('/').slice(-1)[0]}`;
-          break;
-        case CONST_LAYER_TYPES.ESRI_DYNAMIC:
-        case CONST_LAYER_TYPES.ESRI_FEATURE:
-          resources = `${url}${url.endsWith('/') ? '' : '/'}${layerPath.split('/').slice(-1)[0]}`;
-          break;
-        case CONST_LAYER_TYPES.XYZ_TILES:
-        case CONST_LAYER_TYPES.ESRI_IMAGE:
-          resources = `${url}`;
-          break;
-        case CONST_LAYER_TYPES.WFS:
-          // Check if URL already includes WFS GetCapabilities parameters
-          resources = url.includes('?') ? url : `${url}${wfsParams}`;
-          break;
-        case CONST_LAYER_TYPES.OGC_FEATURE:
-          resources = `${url}/collections/${layerPath.split('/').slice(-1)[0]}`;
-          break;
-        case CONST_LAYER_TYPES.VECTOR_TILES:
-          resources = `${url}?f=html`;
-          break;
-        default:
-          break;
-      }
-    }
-
-    // Check if we can set the metadata from layerPath
-    const id = layerDetails.layerPath.split('/')[0].split(':')[0];
-    const validId = isValidUUID(id) && metadataUrl !== '';
-
-    // Find the localized name for the current layer type
-    const localizedTypeEntry = memoLocalizedLayerType.find(([memoType]) => memoType === schemaTag);
-    let localizedTypeName = localizedTypeEntry ? localizedTypeEntry[1] : t('layers.serviceGroup');
-
-    // Special case if type is GeoJSON and url end by zip or shp. It is a GeoJSON format derived from a shapefile
-    if (localizedTypeName === CONST_LAYER_TYPES.GEOJSON && (layerDetails.url?.includes('.zip') || layerDetails.url?.includes('.shp'))) {
-      localizedTypeName = `${localizedTypeName} - ${t('layers.serviceEsriShapefile')}`;
-    }
-
-    return (
-      <Box>
-        <Button
-          type="text"
-          sx={{ fontSize: theme.palette.geoViewFontSize.sm }}
-          onClick={() => setIsInfoCollapse(!isInfoCollapse)}
-          endIcon={isInfoCollapse ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-        >
-          {isInfoCollapse ? `${t('layers.lessInfo')}` : `${t('layers.moreInfo')}`}
-        </Button>
-        <Collapse in={isInfoCollapse} sx={sxClasses.layerInfo}>
-          <Box>{`${t('layers.layerType')}${localizedTypeName}`}</Box>
-          {layerNativeProjection && <Box>{`${t('layers.layerServiceProjection')}${layerNativeProjection}`}</Box>}
-          <Box>{`${getLocalizedMessage(language, 'layers.layerBounds', [mapProjectionEPSG])}: ${boundsRounded?.join(', ')}`}</Box>
-          <Box>{`${t('layers.layerBounds4326')}: ${boundsRounded4326?.join(', ')}`}</Box>
-          <Box>
-            <Box>
-              {t('layers.layerActiveFilters')}
-              <List sx={sxClasses.layerDetailsListGroup}>
-                {layerFilter && (
-                  <ListItem sx={sxClasses.layerDetailsListItem}>
-                    <ListItemText primary={`${t('layers.layerDefaultFilter')}${layerFilter}`} />
-                  </ListItem>
-                )}
-                {classFilter && (
-                  <ListItem sx={sxClasses.layerDetailsListItem}>
-                    <ListItemText primary={`${t('layers.layerClassFilter')}${classFilter}`} />
-                  </ListItem>
-                )}
-                {dataFilter && (
-                  <ListItem sx={sxClasses.layerDetailsListItem}>
-                    <ListItemText primary={`${t('layers.layerDataTableFilter')}${dataFilter}`} />
-                  </ListItem>
-                )}
-                {timeFilter && (
-                  <ListItem sx={sxClasses.layerDetailsListItem}>
-                    <ListItemText primary={`${t('layers.layerTimeFilter')}${timeFilter}`} />
-                  </ListItem>
-                )}
-                {!layerFilter && !classFilter && !dataFilter && !timeFilter && (
-                  <ListItem sx={sxClasses.layerDetailsListItem}>
-                    <ListItemText primary={t('layers.layerActiveFiltersNone')} />
-                  </ListItem>
-                )}
-              </List>
-            </Box>
-          </Box>
-          <Box>
-            <Box>
-              {t('layers.layerTemporalSettings')}
-              <List sx={sxClasses.layerDetailsListGroup}>
-                {layerDisplayDateFormat && (
-                  <ListItem sx={sxClasses.layerDetailsListItem}>
-                    <ListItemText primary={`${t('layers.layerDisplayDateFormat')}${layerDisplayDateFormat[language]}`} />
-                  </ListItem>
-                )}
-                {layerDisplayDateFormatShort && (
-                  <ListItem sx={sxClasses.layerDetailsListItem}>
-                    <ListItemText primary={`${t('layers.layerDisplayDateFormatShort')}${layerDisplayDateFormatShort[language]}`} />
-                  </ListItem>
-                )}
-                {layerDateTemporalMode && (
-                  <ListItem sx={sxClasses.layerDetailsListItem}>
-                    <ListItemText primary={`${t('layers.layerDateTemporalMode')}${layerDateTemporalMode}`} />
-                  </ListItem>
-                )}
-                {layerDisplayDateTimezone && (
-                  <ListItem sx={sxClasses.layerDetailsListItem}>
-                    <ListItemText primary={`${t('layers.layerDisplayDateTimezone')}${layerDisplayDateTimezone}`} />
-                  </ListItem>
-                )}
-                {layerTimeDimension?.field && (
-                  <ListItem sx={sxClasses.layerDetailsListItem}>
-                    <ListItemText primary={`${t('layers.layerTimeDimensionField')}${layerTimeDimension.field}`} />
-                  </ListItem>
-                )}
-                {layerTimeDimension?.rangeItems?.range?.[0] && (
-                  <ListItem sx={sxClasses.layerDetailsListItem}>
-                    <ListItemText
-                      primary={`${'Min/Max: '}${layerTimeDimension.rangeItems.range[0]} / ${layerTimeDimension.rangeItems.range[layerTimeDimension.rangeItems.range.length - 1]}`}
-                    />
-                  </ListItem>
-                )}
-              </List>
-            </Box>
-          </Box>
-          {timeSliderDimension && (
-            <Box>
-              {t('layers.layerTimeDimension')}
-              <List sx={sxClasses.layerDetailsListGroup}>
-                {timeSliderDimension.displayDateFormat?.[language] && (
-                  <ListItem sx={sxClasses.layerDetailsListItem}>
-                    <ListItemText primary={`${t('layers.layerDisplayDateFormat')}${timeSliderDimension.displayDateFormat?.[language]}`} />
-                  </ListItem>
-                )}
-                {timeSliderDimension.serviceDateTemporalMode && (
-                  <ListItem sx={sxClasses.layerDetailsListItem}>
-                    <ListItemText primary={`${t('layers.layerDateTemporalMode')}${timeSliderDimension.serviceDateTemporalMode}`} />
-                  </ListItem>
-                )}
-                {timeSliderDimension.displayDateTimezone && (
-                  <ListItem sx={sxClasses.layerDetailsListItem}>
-                    <ListItemText primary={`${t('layers.layerDisplayDateTimezone')}${timeSliderDimension.displayDateTimezone}`} />
-                  </ListItem>
-                )}
-                {timeSliderDimension?.field && timeSliderDimension?.field !== layerTimeDimension?.field && (
-                  <ListItem sx={sxClasses.layerDetailsListItem}>
-                    <ListItemText primary={`${t('layers.layerTimeDimensionField')}${timeSliderDimension.field}`} />
-                  </ListItem>
-                )}
-                {timeSliderDimension?.range?.[0] && (
-                  <ListItem sx={sxClasses.layerDetailsListItem}>
-                    <ListItemText
-                      primary={`${'Min/Max: '}${timeSliderDimension.range[0]} / ${timeSliderDimension.range[timeSliderDimension.range.length - 1]}`}
-                    />
-                  </ListItem>
-                )}
-              </List>
-            </Box>
-          )}
-          {resources !== '' && (
-            <Box className="info-container">
-              {`${t('layers.layerResource')}`}
-              <a href={resources} target="_blank" rel="noopener noreferrer">
-                {resources}
-              </a>
-            </Box>
-          )}
-          {validId && (
-            <Box className="info-container">
-              {`${t('layers.layerMetadata')}`}
-              <a href={`${metadataUrl}${id}`} target="_blank" rel="noopener noreferrer">
-                {`${id}`}
-              </a>
-            </Box>
-          )}
-          {isLayerHoverable && (
-            <Switch
-              size="small"
-              onChange={() => setLayerHoverable(layerDetails.layerPath, !layerDetails.hoverable!)}
-              label={t('layers.layerHoverable')!}
-              checked={layerDetails.hoverable}
-            />
-          )}
-          {isLayerQueryable && (
-            <Switch
-              size="small"
-              onChange={() => setLayerQueryable(layerDetails.layerPath, !layerDetails.queryable!)}
-              label={t('layers.layerQueryable')!}
-              checked={layerDetails.queryable}
-            />
-          )}
-        </Collapse>
-      </Box>
-    );
-  };
-
   // TODO: WCAG Issue #3116 - Consider using CSS rather than Divider for cleaner HTML structure
   // Render
   return (
@@ -793,7 +614,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
               alignItems: 'center',
             }}
           >
-            <Box sx={{ textAlign: 'left', maxWidth: '70%', [theme.breakpoints.down('sm')]: { display: 'none' } }}>
+            <Box sx={{ textAlign: 'left', flex: 1, minWidth: 0, [theme.breakpoints.down('sm')]: { display: 'none' } }}>
               <Typography sx={{ ...sxClasses.categoryTitle, ...(layerHidden && hiddenStyle) }} title={layerDetails.layerName}>
                 {layerDetails.layerName}
               </Typography>
@@ -809,71 +630,84 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
                 </Typography>
               )}
             </Box>
-            {renderLayerButtons()}
+            {renderSettingsButton()}
+            {renderInfoButton()}
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap-reverse' }}>
-            {layerDetails.items.length > 1 &&
-              layerDetails.items.some((item) => layerDetails.styleConfig?.[item.geometryType]?.fields[0] !== undefined) && (
-                <Grid container direction="row" alignItems="center" justifyItems="stretch">
-                  <Grid size={{ xs: 'auto' }}>{renderHeaderCheckbox()}</Grid>
-                  <Grid size={{ xs: 'auto' }}>
-                    <Box component="span" sx={{ fontWeight: 'bold', ...(layerHidden && hiddenStyle) }}>
-                      {t('layers.toggleItemsVisibility')}
-                    </Box>
-                  </Grid>
-                </Grid>
-              )}
-            {layerDetails.children.length > 0 && (
-              <Grid container direction="row" alignItems="center" justifyItems="stretch">
-                <Grid size={{ xs: 'auto' }}>
-                  <IconButton
-                    role="checkbox"
-                    aria-label={allSublayersVisible ? t('layers.hideAllLayers') : t('layers.showAllLayers')}
-                    aria-checked={allSublayersVisible === true}
-                    tooltipPlacement="left"
-                    color="primary"
-                    onClick={handleToggleAllVisibility}
-                    disabled={layerHidden}
-                  >
-                    {allSublayersVisible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
-                  </IconButton>
-                </Grid>
-                <Grid size={{ xs: 'auto' }}>
-                  <Box component="span" sx={{ fontWeight: 'bold', ...(layerHidden && hiddenStyle) }}>
-                    {t('layers.toggleSublayersVisibility')}
+
+          {/* Sequential crossfade: fade out → swap content → fade in */}
+          <Fade in={contentVisible} timeout={FADE_DURATION}>
+            <Box>
+              {activeView === 'details' && (
+                <>
+                  {renderLayerButtons()}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap-reverse' }}>
+                    {layerDetails.items.length > 1 &&
+                      layerDetails.items.some((item) => layerDetails.styleConfig?.[item.geometryType]?.fields[0] !== undefined) && (
+                        <Grid container direction="row" alignItems="center" justifyItems="stretch">
+                          <Grid size={{ xs: 'auto' }}>{renderHeaderCheckbox()}</Grid>
+                          <Grid size={{ xs: 'auto' }}>
+                            <Box component="span" sx={{ fontWeight: 'bold', ...(layerHidden && hiddenStyle) }}>
+                              {t('layers.toggleItemsVisibility')}
+                            </Box>
+                          </Grid>
+                        </Grid>
+                      )}
+                    {layerDetails.children.length > 0 && (
+                      <Grid container direction="row" alignItems="center" justifyItems="stretch">
+                        <Grid size={{ xs: 'auto' }}>
+                          <IconButton
+                            role="checkbox"
+                            aria-label={allSublayersVisible ? t('layers.hideAllLayers') : t('layers.showAllLayers')}
+                            aria-checked={allSublayersVisible === true}
+                            tooltipPlacement="left"
+                            color="primary"
+                            onClick={handleToggleAllVisibility}
+                            disabled={layerHidden}
+                          >
+                            {allSublayersVisible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
+                          </IconButton>
+                        </Grid>
+                        <Grid size={{ xs: 'auto' }}>
+                          <Box component="span" sx={{ fontWeight: 'bold', ...(layerHidden && hiddenStyle) }}>
+                            {t('layers.toggleSublayersVisibility')}
+                          </Box>
+                        </Grid>
+                      </Grid>
+                    )}
+                    {layerDetails.controls?.opacity !== false && <LayerOpacityControl layerDetails={layerDetails} />}
                   </Box>
-                </Grid>
-              </Grid>
-            )}
-            {layerDetails.controls?.opacity !== false && <LayerOpacityControl layerDetails={layerDetails} />}
-          </Box>
-          <Divider sx={{ height: 'auto', marginTop: '10px', marginBottom: '10px' }} variant="middle" />
-          {renderWMSImage()}
-          <Box>
-            {layerDetails.items?.length > 0 && renderItems()}
-            {layerDetails.children.length > 0 && renderSubLayers(layerDetails)}
-          </Box>
-          <Divider sx={{ height: 'auto', marginTop: '10px', marginBottom: '10px' }} variant="middle" />
-          {renderInfo()}
-          {layerDetails.layerAttribution &&
-            layerDetails.layerAttribution.map((attribution) => {
-              if (attribution) {
-                return (
-                  <Typography
-                    sx={{
-                      marginTop: '10px',
-                      color: theme.palette.geoViewColor.textColor.light[200],
-                      fontSize: theme.palette.geoViewFontSize.sm,
-                      textAlign: 'center',
-                    }}
-                    key={generateId(18)}
-                  >
-                    {attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}
-                  </Typography>
-                );
-              }
-              return null;
-            })}
+                  <Divider sx={{ height: 'auto', marginTop: '10px', marginBottom: '10px' }} variant="middle" />
+                  {renderWMSImage()}
+                  <Box>
+                    {layerDetails.items?.length > 0 && renderItems()}
+                    {layerDetails.children.length > 0 && renderSubLayers(layerDetails)}
+                  </Box>
+                  <Divider sx={{ height: 'auto', marginTop: '10px', marginBottom: '10px' }} variant="middle" />
+                  {layerDetails.layerAttribution &&
+                    layerDetails.layerAttribution.map((attribution) => {
+                      if (attribution) {
+                        return (
+                          <Typography
+                            sx={{
+                              marginTop: '10px',
+                              color: theme.palette.geoViewColor.textColor.light[200],
+                              fontSize: theme.palette.geoViewFontSize.sm,
+                              textAlign: 'center',
+                            }}
+                            key={generateId(18)}
+                          >
+                            {attribution.indexOf('©') === -1 ? `© ${attribution}` : attribution}
+                          </Typography>
+                        );
+                      }
+                      return null;
+                    })}
+                </>
+              )}
+              {activeView === 'settings' && <LayerSettingsPanel layerDetails={layerDetails} />}
+              {activeView === 'info' && <LayerInfoPanel layerDetails={layerDetails} />}
+            </Box>
+          </Fade>
         </>
       )}
     </Paper>
