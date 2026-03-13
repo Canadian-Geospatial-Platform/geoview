@@ -52,7 +52,7 @@ function WmsStyleMenuItem({ style, isSelected, onSelect }: WmsStyleMenuItemProps
   const renderIcon = (): JSX.Element => {
     if (loading) {
       return (
-        <Box sx={sxClasses.previewImageContainer}>
+        <Box sx={sxClasses.wmsStylePreviewImageContainer}>
           <CircularProgress
             isLoaded={false}
             size={24}
@@ -77,7 +77,7 @@ function WmsStyleMenuItem({ style, isSelected, onSelect }: WmsStyleMenuItemProps
     }
     return (
       <Box sx={sxClasses.wmsStylePreviewImageContainer}>
-        <ImageNotSupportedIcon sx={sxClasses.wmsStylePreviewIcon} />
+        <ImageNotSupportedIcon sx={sxClasses.settingSelectorPreviewIcon} />
       </Box>
     );
   };
@@ -85,7 +85,7 @@ function WmsStyleMenuItem({ style, isSelected, onSelect }: WmsStyleMenuItemProps
   return (
     <MenuItem onClick={() => onSelect(style.Name)} selected={isSelected} sx={sxClasses.wmsStyleMenuItem}>
       <ListItemIcon>{renderIcon()}</ListItemIcon>
-      <ListItemText primary={style.Name} sx={sxClasses.wmsStyleListItemText} />
+      <ListItemText primary={style.Name} sx={sxClasses.settingSelectorListItemText} />
     </MenuItem>
   );
 }
@@ -161,7 +161,7 @@ export function WmsStyleSelector(props: WmsStyleSelectorProps): JSX.Element {
       disableScrollLock
       anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       transformOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      sx={sxClasses.wmsStyleMenu}
+      sx={sxClasses.settingSelectorMenu}
       slotProps={{
         list: {
           autoFocus: true,
