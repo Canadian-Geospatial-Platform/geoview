@@ -1599,6 +1599,11 @@ export class LayerApi {
     this.legendsLayerSet.queryLegend(layerPath, true);
   }
 
+  /**
+   * Sets the WMS style for a WMS layer.
+   * @param layerPath - The layer path
+   * @param wmsStyle - The WMS style to apply
+   */
   setLayerWmsStyle(layerPath: string, wmsStyle: string): void {
     const layer = this.getGeoviewLayer(layerPath);
     if (!(layer instanceof GVWMS)) return;
