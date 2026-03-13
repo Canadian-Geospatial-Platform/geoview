@@ -14,8 +14,6 @@ import { logger } from '@/core/utils/logger';
 import { Fetch } from '@/core/utils/fetch-helper';
 import type { EsriImageLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-image-layer-entry-config';
 import type {
-  codedValueType,
-  rangeDomainType,
   TypeFeatureInfoEntry,
   TypeFeatureInfoResult,
   TypeFieldEntry,
@@ -23,7 +21,6 @@ import type {
   TypeLayerStyleConfig,
   TypeLayerStyleConfigInfo,
   TypeLayerStyleSettings,
-  TypeOutfieldsType,
 } from '@/api/types/map-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { GeometryJson } from '@/geo/layer/gv-layers/utils';
@@ -32,7 +29,7 @@ import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raste
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
-import type { TypeMetadataEsriImage, TypeMetadataEsriRasterFunctionInfos, TypeMosaicRule } from '@/api/types/layer-schema-types';
+import type { TypeMetadataEsriRasterFunctionInfos, TypeMosaicRule } from '@/api/types/layer-schema-types';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import type { TemporalMode } from '@/index';
 
@@ -383,74 +380,6 @@ export class GVEsriImage extends AbstractGVRaster {
       layerConfig.getServiceDateTemporalMode()
     );
     return featureInfoResult;
-  }
-
-  /**
-   * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
-   * @param {string} fieldName - The field name for which we want to get the type.
-   * @returns {TypeOutfieldsType} The type of the field.
-   * @override
-   */
-  protected override onGetFieldType(fieldName: string): TypeOutfieldsType {
-    // Handle special ESRI Image pixel fields
-    const lowerFieldName = fieldName.toLowerCase();
-
-    // Pixel-specific fields
-    if (lowerFieldName === 'pixelvalue' || lowerFieldName === 'processedvalue') {
-      return 'string';
-    }
-
-    if (lowerFieldName === 'name') {
-      return 'string';
-    }
-
-    // Check catalog item fields from metadata
-    const metadata = this.getLayerConfig().getServiceMetadata() as TypeMetadataEsriImage;
-
-    if (metadata?.fields) {
-      const field = metadata.fields.find((f) => f.name.toLowerCase() === lowerFieldName);
-      if (field) {
-        // Map ESRI field types to our types
-        switch (field.type) {
-          case 'esriFieldTypeSmallInteger':
-          case 'esriFieldTypeInteger':
-          case 'esriFieldTypeOID':
-            return 'number';
-          case 'esriFieldTypeSingle':
-          case 'esriFieldTypeDouble':
-            return 'number';
-          case 'esriFieldTypeDate':
-            return 'date';
-          case 'esriFieldTypeString':
-          case 'esriFieldTypeGeometry':
-          default:
-            return 'string';
-        }
-      }
-    }
-
-    // Default to string for unknown fields
-    return 'string';
-  }
-
-  /**
-   * Overrides the return of the domain of the specified field.
-   * @param {string} fieldName - The field name for which we want to get the domain.
-   * @returns {null | codedValueType | rangeDomainType} The domain of the field.
-   * @override
-   */
-  protected override onGetFieldDomain(fieldName: string): null | codedValueType | rangeDomainType {
-    // Get metadata
-    const metadata = this.getLayerConfig().getServiceMetadata() as TypeMetadataEsriImage;
-
-    // If no fields in metadata, return null
-    if (!metadata?.fields) return null;
-
-    // Find the field
-    const field = metadata.fields.find((f) => f.name.toLowerCase() === fieldName.toLowerCase());
-
-    // Return the domain if found
-    return field?.domain || null;
   }
 
   /**
