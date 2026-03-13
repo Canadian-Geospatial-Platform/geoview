@@ -8,38 +8,6 @@ import type { SxStyles } from '@/ui/style/types';
  * @returns The sx classes object for layer settings panel and sub-components.
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
-  // Shared styles for setting selector submenus (raster function, WMS style, etc.)
-  settingSelectorMenu: {
-    '& .MuiPaper-root': {
-      padding: '8px',
-      maxHeight: '400px',
-      paddingRight: '16px',
-      // Custom scrollbar styling
-      '&::-webkit-scrollbar': {
-        width: '8px',
-      },
-      '&::-webkit-scrollbar-track': {
-        background: 'transparent',
-      },
-      '&::-webkit-scrollbar-thumb': {
-        backgroundColor: theme.palette.action.disabled,
-        borderRadius: '4px',
-        '&:hover': {
-          backgroundColor: theme.palette.action.hover,
-        },
-      },
-      // Firefox scrollbar
-      scrollbarWidth: 'thin',
-      scrollbarColor: `${theme.palette.action.disabled} transparent`,
-    },
-  },
-
-  settingSelectorListItemText: {
-    '& .MuiListItemText-primary': {
-      fontWeight: 600,
-    },
-  },
-
   settingSelectorPreviewIcon: {
     width: 100,
     height: 100,
@@ -149,19 +117,52 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   },
 
   // WMS Style specific styles
-  wmsStyleMenuItem: {
-    border: '1px solid',
-    borderColor: 'divider',
-    borderRadius: 2,
-    margin: '4px 0',
-    padding: '12px',
+  wmsStyleList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+    maxHeight: '400px',
+    overflowY: 'auto',
+    // Custom scrollbar styling
+    '&::-webkit-scrollbar': {
+      width: '8px',
+    },
+    '&::-webkit-scrollbar-track': {
+      background: 'transparent',
+    },
+    '&::-webkit-scrollbar-thumb': {
+      backgroundColor: theme.palette.action.disabled,
+      borderRadius: '4px',
+      '&:hover': {
+        backgroundColor: theme.palette.action.hover,
+      },
+    },
+    scrollbarWidth: 'thin',
+    scrollbarColor: `${theme.palette.action.disabled} transparent`,
+  },
+
+  wmsStyleCard: {
+    display: 'flex',
     alignItems: 'center',
+    padding: '12px',
+    border: '1px solid',
+    borderColor: theme.palette.divider,
+    borderRadius: '8px',
+    cursor: 'pointer',
+    transition: 'border-color 0.2s, background-color 0.2s',
     '&:hover': {
-      borderColor: 'primary.main',
+      borderColor: theme.palette.primary.main,
+      backgroundColor: theme.palette.action.hover,
     },
-    '&.Mui-selected': {
-      borderColor: 'primary.main',
+    '&:focus-visible': {
+      outline: `2px solid ${theme.palette.primary.main}`,
+      outlineOffset: '2px',
     },
+  },
+
+  wmsStyleCardSelected: {
+    borderColor: theme.palette.primary.main,
+    backgroundColor: theme.palette.action.selected,
   },
 
   wmsStylePreviewImageContainer: {
@@ -169,13 +170,14 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     minHeight: 100,
     maxHeight: 200, // Cap maximum height to handle tall legend images
     border: '2px solid',
-    borderColor: 'divider',
-    borderRadius: 2,
+    borderColor: theme.palette.divider,
+    borderRadius: '8px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
     marginRight: '16px',
+    flexShrink: 0,
   },
 
   wmsStylePreviewImage: {
