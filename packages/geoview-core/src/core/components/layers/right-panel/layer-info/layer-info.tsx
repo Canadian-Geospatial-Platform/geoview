@@ -1,10 +1,9 @@
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 
-import { Box, Divider, List, ListItem } from '@/ui';
+import { Box, Divider, List, ListItem, Typography } from '@/ui';
 import { ListItemText } from '@/ui/list';
-import { Switch } from '@/ui/switch/switch';
 
 import { getSxClasses } from '../layer-details-style';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
@@ -44,8 +43,8 @@ interface LayerInfoPanelProps {
  * Panel view for layer information content.
  *
  * Displays layer type, projection, bounds, active filters, temporal settings,
- * resource links, metadata links, and hover/query toggles. The header and
- * back navigation are handled by the parent.
+ * resource links, and metadata links. The header and back navigation are
+ * handled by the parent.
  *
  * @param layerDetails - The legend layer to display information for.
  */
@@ -61,7 +60,7 @@ export function LayerInfoPanel({ layerDetails }: LayerInfoPanelProps): JSX.Eleme
   const language = useAppDisplayLanguage();
   const metadataUrl = useAppMetadataServiceURL();
   const mapProjectionEPSG = useMapProjectionEPSG();
-  const { getLayerServiceProjection, setLayerHoverable, setLayerQueryable } = useLayerStoreActions();
+  const { getLayerServiceProjection } = useLayerStoreActions();
 
   const layerFilter = useLayerSelectorFilter(layerDetails.layerPath);
   const classFilter = useLayerSelectorFilterClass(layerDetails.layerPath);
@@ -78,20 +77,9 @@ export function LayerInfoPanel({ layerDetails }: LayerInfoPanelProps): JSX.Eleme
   const layerNativeProjection = getLayerServiceProjection(layerDetails.layerPath);
 
   // Derived values
-  const isLayerHoverable = layerDetails.controls?.hover;
-  const isLayerQueryable = layerDetails.controls?.query;
   const memoLocalizedLayerType = useMemo(() => UtilAddLayer.getLocalizeLayerType(language, true), [language]);
   const boundsRounded = bounds?.map((value) => Math.round(value));
   const boundsRounded4326 = bounds4326?.map((value) => Math.round(value * 100) / 100);
-
-  // Stable handlers for hover/query toggles
-  const handleToggleHoverable = useCallback((): void => {
-    setLayerHoverable(layerDetails.layerPath, !layerDetails.hoverable!);
-  }, [layerDetails.layerPath, layerDetails.hoverable, setLayerHoverable]);
-
-  const handleToggleQueryable = useCallback((): void => {
-    setLayerQueryable(layerDetails.layerPath, !layerDetails.queryable!);
-  }, [layerDetails.layerPath, layerDetails.queryable, setLayerQueryable]);
 
   const { schemaTag, url, layerPath } = layerDetails;
 
@@ -142,13 +130,38 @@ export function LayerInfoPanel({ layerDetails }: LayerInfoPanelProps): JSX.Eleme
   return (
     <Box sx={sxClasses.layerInfo}>
       <Divider sx={{ height: 'auto', marginTop: '10px', marginBottom: '10px' }} variant="middle" />
-      <Box>{`${t('layers.layerType')}${localizedTypeName}`}</Box>
-      {layerNativeProjection && <Box>{`${t('layers.layerServiceProjection')}${layerNativeProjection}`}</Box>}
-      <Box>{`${getLocalizedMessage(language, 'layers.layerBounds', [mapProjectionEPSG])}: ${boundsRounded?.join(', ')}`}</Box>
-      <Box>{`${t('layers.layerBounds4326')}: ${boundsRounded4326?.join(', ')}`}</Box>
-      <Box>
-        <Box>
-          {t('layers.layerActiveFilters')}
+
+      {/* Service Information */}
+      <Box sx={sxClasses.infoSection}>
+        <Typography sx={sxClasses.infoSectionTitle}>{t('layers.layerInfoServiceInfo')}</Typography>
+        <Box sx={sxClasses.infoSectionContent}>
+          <Box>{`${t('layers.layerType')}${localizedTypeName}`}</Box>
+          {layerNativeProjection && <Box>{`${t('layers.layerServiceProjection')}${layerNativeProjection}`}</Box>}
+          {resources !== '' && (
+            <Box className="info-container">
+              {`${t('layers.layerResource')}`}
+              <a href={resources} target="_blank" rel="noopener noreferrer">
+                {resources}
+              </a>
+            </Box>
+          )}
+          {validId && (
+            <Box className="info-container">
+              {`${t('layers.layerMetadata')}`}
+              <a href={`${metadataUrl}${id}`} target="_blank" rel="noopener noreferrer">
+                {`${id}`}
+              </a>
+            </Box>
+          )}
+          <Box>{`${getLocalizedMessage(language, 'layers.layerBounds', [mapProjectionEPSG])}: ${boundsRounded?.join(', ')}`}</Box>
+          <Box>{`${t('layers.layerBounds4326')}: ${boundsRounded4326?.join(', ')}`}</Box>
+        </Box>
+      </Box>
+
+      {/* Active Filters */}
+      <Box sx={sxClasses.infoSection}>
+        <Typography sx={sxClasses.infoSectionTitle}>{t('layers.layerInfoActiveFilters')}</Typography>
+        <Box sx={sxClasses.infoSectionContent}>
           <List sx={sxClasses.layerDetailsListGroup}>
             {layerFilter && (
               <ListItem sx={sxClasses.layerDetailsListItem}>
@@ -178,100 +191,90 @@ export function LayerInfoPanel({ layerDetails }: LayerInfoPanelProps): JSX.Eleme
           </List>
         </Box>
       </Box>
-      <Box>
-        <Box>
-          {t('layers.layerTemporalSettings')}
-          <List sx={sxClasses.layerDetailsListGroup}>
-            {layerDisplayDateFormat && (
-              <ListItem sx={sxClasses.layerDetailsListItem}>
-                <ListItemText primary={`${t('layers.layerDisplayDateFormat')}${layerDisplayDateFormat[language]}`} />
-              </ListItem>
-            )}
-            {layerDisplayDateFormatShort && (
-              <ListItem sx={sxClasses.layerDetailsListItem}>
-                <ListItemText primary={`${t('layers.layerDisplayDateFormatShort')}${layerDisplayDateFormatShort[language]}`} />
-              </ListItem>
-            )}
-            {layerDateTemporalMode && (
-              <ListItem sx={sxClasses.layerDetailsListItem}>
-                <ListItemText primary={`${t('layers.layerDateTemporalMode')}${layerDateTemporalMode}`} />
-              </ListItem>
-            )}
-            {layerDisplayDateTimezone && (
-              <ListItem sx={sxClasses.layerDetailsListItem}>
-                <ListItemText primary={`${t('layers.layerDisplayDateTimezone')}${layerDisplayDateTimezone}`} />
-              </ListItem>
-            )}
-            {layerTimeDimension?.field && (
-              <ListItem sx={sxClasses.layerDetailsListItem}>
-                <ListItemText primary={`${t('layers.layerTimeDimensionField')}${layerTimeDimension.field}`} />
-              </ListItem>
-            )}
-            {layerTimeDimension?.rangeItems?.range?.[0] && (
-              <ListItem sx={sxClasses.layerDetailsListItem}>
-                <ListItemText
-                  primary={`${'Min/Max: '}${layerTimeDimension.rangeItems.range[0]} / ${layerTimeDimension.rangeItems.range[layerTimeDimension.rangeItems.range.length - 1]}`}
-                />
-              </ListItem>
-            )}
-          </List>
+
+      {/* Temporal Settings */}
+      {(layerDisplayDateFormat ||
+        layerDisplayDateFormatShort ||
+        layerDateTemporalMode ||
+        layerDisplayDateTimezone ||
+        layerTimeDimension?.field) && (
+        <Box sx={sxClasses.infoSection}>
+          <Typography sx={sxClasses.infoSectionTitle}>{t('layers.layerInfoTemporalSettings')}</Typography>
+          <Box sx={sxClasses.infoSectionContent}>
+            <List sx={sxClasses.layerDetailsListGroup}>
+              {layerDisplayDateFormat && (
+                <ListItem sx={sxClasses.layerDetailsListItem}>
+                  <ListItemText primary={`${t('layers.layerDisplayDateFormat')}${layerDisplayDateFormat[language]}`} />
+                </ListItem>
+              )}
+              {layerDisplayDateFormatShort && (
+                <ListItem sx={sxClasses.layerDetailsListItem}>
+                  <ListItemText primary={`${t('layers.layerDisplayDateFormatShort')}${layerDisplayDateFormatShort[language]}`} />
+                </ListItem>
+              )}
+              {layerDateTemporalMode && (
+                <ListItem sx={sxClasses.layerDetailsListItem}>
+                  <ListItemText primary={`${t('layers.layerDateTemporalMode')}${layerDateTemporalMode}`} />
+                </ListItem>
+              )}
+              {layerDisplayDateTimezone && (
+                <ListItem sx={sxClasses.layerDetailsListItem}>
+                  <ListItemText primary={`${t('layers.layerDisplayDateTimezone')}${layerDisplayDateTimezone}`} />
+                </ListItem>
+              )}
+              {layerTimeDimension?.field && (
+                <ListItem sx={sxClasses.layerDetailsListItem}>
+                  <ListItemText primary={`${t('layers.layerTimeDimensionField')}${layerTimeDimension.field}`} />
+                </ListItem>
+              )}
+              {layerTimeDimension?.rangeItems?.range?.[0] && (
+                <ListItem sx={sxClasses.layerDetailsListItem}>
+                  <ListItemText
+                    primary={`${'Min/Max: '}${layerTimeDimension.rangeItems.range[0]} / ${layerTimeDimension.rangeItems.range[layerTimeDimension.rangeItems.range.length - 1]}`}
+                  />
+                </ListItem>
+              )}
+            </List>
+          </Box>
         </Box>
-      </Box>
+      )}
+
+      {/* Temporal Dimension (Time Slider) */}
       {timeSliderDimension && (
-        <Box>
-          {t('layers.layerTimeDimension')}
-          <List sx={sxClasses.layerDetailsListGroup}>
-            {timeSliderDimension.displayDateFormat?.[language] && (
-              <ListItem sx={sxClasses.layerDetailsListItem}>
-                <ListItemText primary={`${t('layers.layerDisplayDateFormat')}${timeSliderDimension.displayDateFormat?.[language]}`} />
-              </ListItem>
-            )}
-            {timeSliderDimension.serviceDateTemporalMode && (
-              <ListItem sx={sxClasses.layerDetailsListItem}>
-                <ListItemText primary={`${t('layers.layerDateTemporalMode')}${timeSliderDimension.serviceDateTemporalMode}`} />
-              </ListItem>
-            )}
-            {timeSliderDimension.displayDateTimezone && (
-              <ListItem sx={sxClasses.layerDetailsListItem}>
-                <ListItemText primary={`${t('layers.layerDisplayDateTimezone')}${timeSliderDimension.displayDateTimezone}`} />
-              </ListItem>
-            )}
-            {timeSliderDimension?.field && timeSliderDimension?.field !== layerTimeDimension?.field && (
-              <ListItem sx={sxClasses.layerDetailsListItem}>
-                <ListItemText primary={`${t('layers.layerTimeDimensionField')}${timeSliderDimension.field}`} />
-              </ListItem>
-            )}
-            {timeSliderDimension?.range?.[0] && (
-              <ListItem sx={sxClasses.layerDetailsListItem}>
-                <ListItemText
-                  primary={`${'Min/Max: '}${timeSliderDimension.range[0]} / ${timeSliderDimension.range[timeSliderDimension.range.length - 1]}`}
-                />
-              </ListItem>
-            )}
-          </List>
+        <Box sx={sxClasses.infoSection}>
+          <Typography sx={sxClasses.infoSectionTitle}>{t('layers.layerInfoTemporalDimension')}</Typography>
+          <Box sx={sxClasses.infoSectionContent}>
+            <List sx={sxClasses.layerDetailsListGroup}>
+              {timeSliderDimension.displayDateFormat?.[language] && (
+                <ListItem sx={sxClasses.layerDetailsListItem}>
+                  <ListItemText primary={`${t('layers.layerDisplayDateFormat')}${timeSliderDimension.displayDateFormat[language]}`} />
+                </ListItem>
+              )}
+              {timeSliderDimension.serviceDateTemporalMode && (
+                <ListItem sx={sxClasses.layerDetailsListItem}>
+                  <ListItemText primary={`${t('layers.layerDateTemporalMode')}${timeSliderDimension.serviceDateTemporalMode}`} />
+                </ListItem>
+              )}
+              {timeSliderDimension.displayDateTimezone && (
+                <ListItem sx={sxClasses.layerDetailsListItem}>
+                  <ListItemText primary={`${t('layers.layerDisplayDateTimezone')}${timeSliderDimension.displayDateTimezone}`} />
+                </ListItem>
+              )}
+              {timeSliderDimension?.field && timeSliderDimension?.field !== layerTimeDimension?.field && (
+                <ListItem sx={sxClasses.layerDetailsListItem}>
+                  <ListItemText primary={`${t('layers.layerTimeDimensionField')}${timeSliderDimension.field}`} />
+                </ListItem>
+              )}
+              {timeSliderDimension?.range?.[0] && (
+                <ListItem sx={sxClasses.layerDetailsListItem}>
+                  <ListItemText
+                    primary={`${'Min/Max: '}${timeSliderDimension.range[0]} / ${timeSliderDimension.range[timeSliderDimension.range.length - 1]}`}
+                  />
+                </ListItem>
+              )}
+            </List>
+          </Box>
         </Box>
-      )}
-      {resources !== '' && (
-        <Box className="info-container">
-          {`${t('layers.layerResource')}`}
-          <a href={resources} target="_blank" rel="noopener noreferrer">
-            {resources}
-          </a>
-        </Box>
-      )}
-      {validId && (
-        <Box className="info-container">
-          {`${t('layers.layerMetadata')}`}
-          <a href={`${metadataUrl}${id}`} target="_blank" rel="noopener noreferrer">
-            {`${id}`}
-          </a>
-        </Box>
-      )}
-      {isLayerHoverable && (
-        <Switch size="small" onChange={handleToggleHoverable} label={t('layers.layerHoverable')!} checked={layerDetails.hoverable} />
-      )}
-      {isLayerQueryable && (
-        <Switch size="small" onChange={handleToggleQueryable} label={t('layers.layerQueryable')!} checked={layerDetails.queryable} />
       )}
     </Box>
   );

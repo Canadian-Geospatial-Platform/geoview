@@ -108,7 +108,7 @@ function RasterFunctionItem({ info, isSelected, previewPromise, onSelect }: Rast
       tabIndex={0}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
-      sx={[sxClasses.rasterFunctionCard, isSelected && sxClasses.rasterFunctionCardSelected] as SxProps}
+      sx={[sxClasses.settingsCard, isSelected && sxClasses.settingsCardSelected] as SxProps}
     >
       {renderIcon()}
       <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -195,7 +195,7 @@ export function RasterFunctionPanel({ layerDetails }: RasterFunctionPanelProps):
         {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
       </Box>
       <Collapse in={expanded} sx={{ marginTop: expanded ? '12px' : 0 }}>
-        <Box sx={sxClasses.rasterFunctionList}>
+        <Box sx={sxClasses.settingsCardList}>
           {rasterFunctionInfos.map((info) => (
             <RasterFunctionItem
               key={info.name}
