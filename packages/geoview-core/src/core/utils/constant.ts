@@ -117,6 +117,7 @@ export const TIMEOUT: Record<string, number> = {
   notification: 1000,
   northPoleVisibility: 1000,
 
+  deleteLayerUndoWindow: 2500,
   featureHighlight: 5000,
   geolocationReturn: 10000,
   deleteLayerLoading: 10000,

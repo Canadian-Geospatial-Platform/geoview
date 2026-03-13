@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Box, CircularProgressBase, DeleteOutlineIcon, IconButton, UndoIcon } from '@/ui';
 import { useLayerSelectorDeletionStartTime, useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
+import { TIMEOUT } from '@/core/utils/constant';
 
 interface UndoButtonProps {
   progressValue: number;
@@ -63,9 +64,6 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/delete-undo-button/DeleteUndoButton');
 
-  /** The undo window duration the user can abort the delete operation */
-  const UNDO_WINDOW_DURATION = 2500;
-
   const { layerPath, layerRemovable, focusTargetIdAfterDelete } = props;
 
   const { t } = useTranslation<string>();
@@ -96,7 +94,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     }
 
     // Delete the layer
-    deleteLayer(layerPath, UNDO_WINDOW_DURATION)
+    deleteLayer(layerPath, TIMEOUT.deleteLayerUndoWindow)
       .then((deleted) => {
         // If deleted, set focus elsewhere
         if (deleted && focusTargetIdAfterDelete) {
@@ -163,7 +161,7 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
     let frameId: number;
     const animate = (): void => {
       const elapsed = Date.now() - layerDeletionStartTime;
-      const pct = Math.min((elapsed / UNDO_WINDOW_DURATION) * 100, 100);
+      const pct = Math.min((elapsed / TIMEOUT.deleteLayerUndoWindow) * 100, 100);
       setProgress(pct);
       if (pct < 100) {
         frameId = requestAnimationFrame(animate);
