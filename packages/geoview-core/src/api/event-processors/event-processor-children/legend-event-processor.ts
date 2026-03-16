@@ -1208,16 +1208,18 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       existingJob.delayedJob.cancel();
     }
 
-    // Get the layer
+    // Get the layer api
     const layerApi = MapEventProcessor.getMapViewerLayerAPI(mapId);
-    const gvLayer = layerApi.getGeoviewLayer(layerPath);
+
+    // Get the layer if it exists, it's possible it doesn't exist if the layer failed to process
+    const gvLayer = layerApi.getGeoviewLayerIfExists(layerPath);
 
     // Note the original visibility state of the layer before starting the deletion process.
     // If there was already a pending deletion, preserve its original visibility since the layer is already hidden.
-    const originalVisibility = existingJob?.originalVisibility ?? gvLayer.getVisible();
+    const originalVisibility = existingJob?.originalVisibility ?? gvLayer?.getVisible() ?? false;
 
     // Hide layer immediately
-    gvLayer.setVisible(false);
+    gvLayer?.setVisible(false);
     layerApi.removeLayerHighlights(layerPath);
 
     // Update the store with the start time of the deletion of the layer
@@ -1252,8 +1254,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
     }
 
     // Undo deletion — restore original visibility
-    const gvLayerIfExists = layerApi.getGeoviewLayerIfExists(layerPath);
-    gvLayerIfExists?.setVisible(originalVisibility);
+    gvLayer?.setVisible(originalVisibility);
 
     // Negative
     return false;

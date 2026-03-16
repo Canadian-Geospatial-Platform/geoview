@@ -203,9 +203,9 @@ export abstract class AbstractEventProcessor {
   /**
    * Helper function to delete a layer information from an array when found.
    *
-   * @param {T[]} layerArray - The layer array to work with
-   * @param {string} layerPath - The layer path to delete
-   * @param {(layerArray: T[]) => void} onDeleteCallback - The callback executed when the array is updated
+   * @param layerArray - The layer array to work with
+   * @param layerPath - The layer path to delete
+   * @param onDeleteCallback - The callback executed when the array is updated
    */
   protected static helperDeleteFromArray<T extends TypeResultSetEntry>(
     layerArray: T[],
