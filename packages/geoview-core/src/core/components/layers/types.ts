@@ -53,6 +53,9 @@ export interface TypeLegendLayer {
   hoverable?: boolean;
   queryable?: boolean;
 
+  hasText?: boolean;
+  textVisible?: boolean;
+
   icons: TypeLegendLayerItem[];
   // data: TypeLegend | undefined | null;
   items: TypeLegendItem[];

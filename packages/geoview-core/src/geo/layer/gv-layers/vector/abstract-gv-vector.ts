@@ -5,7 +5,7 @@ import type { Geometry } from 'ol/geom';
 import VectorLayer from 'ol/layer/Vector';
 import type VectorSource from 'ol/source/Vector';
 import type { Options as VectorLayerOptions } from 'ol/layer/VectorImage';
-import type Style from 'ol/style/Style';
+import Style from 'ol/style/Style';
 import type { Coordinate } from 'ol/coordinate';
 import type { Extent } from 'ol/extent';
 import type { Pixel } from 'ol/pixel';
@@ -25,6 +25,7 @@ import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { Projection } from '@/geo/utils/projection';
 import { GeoViewError, NoExtentError } from '@/core/exceptions/geoview-exceptions';
+import { GeoviewTextRenderer } from '@/geo/utils/renderer/geoview-text-renderer';
 
 /**
  * Abstract Geoview Layer managing an OpenLayer vector type layer.
@@ -35,6 +36,15 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /** Keep all callback delegate references */
   #onStyleAppliedHandlers: StyleAppliedDelegate[] = [];
+
+  /** Optional text-only layer for text labels */
+  #textOLLayer?: VectorLayer<VectorSource<Feature<Geometry>>>;
+
+  /** Indicates if the text layer is visible */
+  #textVisible: boolean = true;
+
+  /** Keep all callback delegate references */
+  #onTextVisibleChangedHandlers: TextVisibleChangedDelegate[] = [];
 
   /**
    * Constructs a GeoView Vector layer to manage an OpenLayer layer.
@@ -90,6 +100,31 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
     // Create and set the OpenLayer layer
     this.setOLLayer(new VectorLayer<VectorSource<Feature<Geometry>>>(layerOptions));
+
+    if (layerConfig.getLayerText() || GeoviewTextRenderer.hasStyleText(layerConfig.getLayerStyle())) {
+      const textLayerOptions: VectorLayerOptions<VectorSource<Feature<Geometry>>> = {
+        properties: { layerConfig, isAuxiliaryLayer: true },
+        source: olSource, // Share the same source
+        style: (feature, resolution) => {
+          // Calculate text-only style for the feature
+          const style = AbstractGVVector.calculateTextStyleForFeature(this as AbstractGVLayer, feature, resolution);
+          return style;
+        },
+        // Enable declutter based on layerText.declutterMode
+        declutter: layerConfig.getLayerText()?.declutterMode !== 'none',
+      };
+
+      // Set declutterMode on layer options if specified
+      if (layerConfig.getLayerText()?.declutterMode) {
+        textLayerOptions.declutter = layerConfig.getLayerText()?.declutterMode;
+      }
+
+      // Init the text layer options with initial settings
+      AbstractGVVector.initOptionsWithInitialSettings(textLayerOptions, layerConfig);
+
+      // Create the text layer
+      this.#textOLLayer = new VectorLayer<VectorSource<Feature<Geometry>>>(textLayerOptions);
+    }
   }
 
   // #region OVERRIDES
@@ -122,6 +157,37 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   override getLayerConfig(): VectorLayerEntryConfig {
     // Call parent and cast
     return super.getLayerConfig() as VectorLayerEntryConfig;
+  }
+
+  /**
+   * Sets the visibility of the layer.
+   * @param layerVisibility - The visibility state to set.
+   */
+  override setVisible(layerVisibility: boolean): void {
+    // Call parent to handle geometry layer
+    super.setVisible(layerVisibility);
+
+    // Sync text layer visibility if it exists
+    // Text layer visibility = layerVisibility && textVisible
+    if (this.#textOLLayer) {
+      this.#textOLLayer.setVisible(layerVisibility && this.#textVisible);
+    }
+  }
+
+  /**
+   * Sets the opacity of the layer.
+   *
+   * @param opacity - The opacity value to set.
+   * @param emitOpacityChanged - Whether to emit the opacity changed event.
+   */
+  protected override onSetOpacity(opacity: number, emitOpacityChanged: boolean = true): void {
+    // Call parent to handle geometry layer
+    super.onSetOpacity(opacity, emitOpacityChanged);
+
+    // Sync text layer opacity if it exists
+    if (this.#textOLLayer) {
+      this.#textOLLayer.setOpacity(opacity);
+    }
   }
 
   /**
@@ -344,6 +410,48 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     if (changed) this.#emitStyleApplied({ styleApplied });
   }
 
+  /**
+   * Gets the OpenLayers text layer if one exists.
+   * @returns {VectorLayer<VectorSource> | undefined} The text layer or undefined if no text layer exists.
+   */
+  getTextOLLayer(): VectorLayer<VectorSource> | undefined {
+    return this.#textOLLayer;
+  }
+
+  /**
+   * Gets the independent visibility state of the text layer.
+   * @returns {boolean} True if text layer is set to visible independently.
+   */
+  getTextVisible(): boolean {
+    return this.#textVisible;
+  }
+
+  /**
+   * Sets the independent visibility of the text layer.
+   * The text layer's actual visibility is: layerVisible && textVisible
+   * @param {boolean} visible - Whether text should be visible independently.
+   */
+  setTextVisible(visible: boolean): void {
+    this.#textVisible = visible;
+
+    // Update text layer actual visibility if it exists
+    if (this.#textOLLayer) {
+      this.#textOLLayer.setVisible(this.getVisible() && visible);
+    }
+
+    // Emit event for text visibility change
+    this.#emitTextVisibleChanged({ textVisible: visible });
+  }
+
+  /**
+   * Gets the actual visibility state of the text layer on the map.
+   * This considers both layer visibility and independent text visibility.
+   * @returns {boolean} True if the text layer is currently visible on the map.
+   */
+  getTextLayerVisible(): boolean {
+    return this.#textOLLayer?.getVisible() ?? false;
+  }
+
   // #endregion METHODS
 
   // #region EVENTS
@@ -376,6 +484,31 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     EventHelper.offEvent(this.#onStyleAppliedHandlers, callback);
   }
 
+  /**
+   * Emits an event to all handlers.
+   * @param {TextVisibleChangedEvent} event - The event to emit
+   * @private
+   */
+  #emitTextVisibleChanged(event: TextVisibleChangedEvent): void {
+    EventHelper.emitEvent(this, this.#onTextVisibleChangedHandlers, event);
+  }
+
+  /**
+   * Registers a text visible changed event handler.
+   * @param {TextVisibleChangedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onTextVisibleChanged(callback: TextVisibleChangedDelegate): void {
+    EventHelper.onEvent(this.#onTextVisibleChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a text visible changed event handler.
+   * @param {TextVisibleChangedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offTextVisibleChanged(callback: TextVisibleChangedDelegate): void {
+    EventHelper.offEvent(this.#onTextVisibleChangedHandlers, callback);
+  }
+
   // #endregion EVENTS
 
   // #region STATIC METHODS
@@ -398,31 +531,54 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     // Get the style
     const style = layer.getStyle() || {};
 
-    // Create lookup dictionary of names to alias
+    // Get and create Feature style if necessary
+    return GeoviewRenderer.getAndCreateFeatureStyle(feature, resolution, style, label, filterEquation, (geometryType, theStyle) => {
+      // A new style has been created
+      logger.logDebug('A new style has been created on-the-fly', geometryType, layer);
+
+      // Update the layer style
+      layer.setStyle({
+        ...style,
+        [geometryType]: { type: 'simple', hasDefault: false, fields: [], info: [theStyle] },
+      });
+    });
+  }
+
+  /**
+   * Calculates a text-only style (no geometry) for the given feature.
+   * @param {AbstractGVLayer} layer - The layer on which to work for the style.
+   * @param {FeatureLike} feature - Feature that needs its style defined.
+   * @param {number} resolution - The map resolution.
+   * @returns {Style | undefined} The text-only style.
+   * @static
+   */
+  static calculateTextStyleForFeature(layer: AbstractGVLayer, feature: FeatureLike, resolution: number): Style | undefined {
+    // Get the layer config and style
+    const style = layer.getStyle() || {};
     const outfields = layer.getLayerConfig().getOutfields();
     const aliasLookup = GVLayerUtilities.createAliasLookup(outfields);
     const layerText = layer.getLayerConfig().getLayerText();
 
-    // Get and create Feature style if necessary
-    return GeoviewRenderer.getAndCreateFeatureStyle(
-      feature,
-      resolution,
-      style,
-      label,
-      filterEquation,
-      aliasLookup,
-      layerText,
-      (geometryType, theStyle) => {
-        // A new style has been created
-        logger.logDebug('A new style has been created on-the-fly', geometryType, layer);
+    // If no text configured, return undefined
+    if (!layerText) return undefined;
 
-        // Update the layer style
-        layer.setStyle({
-          ...style,
-          [geometryType]: { type: 'simple', hasDefault: false, fields: [], info: [theStyle] },
-        });
-      }
-    );
+    // Get the geometry type
+    const geometryType = GeoviewRenderer.readGeometryTypeSimplifiedFromFeature(feature, style);
+    const styleSettings = style?.[geometryType];
+
+    // If no style settings, return undefined
+    if (!styleSettings) return undefined;
+
+    // Get the text style
+    const textStyle = GeoviewTextRenderer.getTextStyle(feature, resolution, styleSettings, layerText, aliasLookup);
+
+    // If no text style, return undefined
+    if (!textStyle) return undefined;
+
+    // Create a new transparent style with only text
+    return new Style({
+      text: textStyle,
+    });
   }
 
   // #endregion STATIC METHODS
@@ -440,3 +596,15 @@ export type StyleAppliedEvent = {
  * Define a delegate for the event handler function signature
  */
 export type StyleAppliedDelegate = EventDelegateBase<AbstractGVVector, StyleAppliedEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type TextVisibleChangedEvent = {
+  textVisible: boolean;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type TextVisibleChangedDelegate = EventDelegateBase<AbstractGVVector, TextVisibleChangedEvent, void>;

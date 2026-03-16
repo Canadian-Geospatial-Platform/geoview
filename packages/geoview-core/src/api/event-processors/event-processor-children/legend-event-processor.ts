@@ -25,6 +25,7 @@ import type {
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import { Projection } from '@/geo/utils/projection';
@@ -958,6 +959,8 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           // TODO: Encapsulate rasterFunction and possibly other 'settings' into their own object
           rasterFunction: layer instanceof GVEsriImage ? layer.getRasterFunction() : undefined,
           mosaicRule: layer instanceof GVEsriImage ? layer.getMosaicRule() : undefined,
+          hasText: layer instanceof AbstractGVVector ? layer.getTextOLLayer() !== undefined : undefined,
+          textVisible: layer instanceof AbstractGVVector ? layer.getTextVisible() : undefined,
         };
 
         // If layer is regular (not group)
@@ -1476,6 +1479,82 @@ export class LegendEventProcessor extends AbstractEventProcessor {
       // Get the layer
       const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerRegular(layerPath);
       await layer.waitForRender();
+    }
+  }
+
+  /**
+   * Checks if a layer has a text layer.
+   *
+   * @param mapId - The ID of the map.
+   * @param layerPath - The layer path of the layer to check.
+   * @returns True if the layer has a text layer, false otherwise.
+   */
+  static getLayerHasText(mapId: string, layerPath: string): boolean {
+    const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerRegularIfExists(layerPath);
+
+    // Check if it's a vector layer with a text layer
+    if (layer && layer instanceof AbstractGVVector) {
+      return layer.getTextOLLayer() !== undefined;
+    }
+
+    return false;
+  }
+
+  /**
+   * Gets the text visibility state for a layer.
+   *
+   * @param mapId - The ID of the map.
+   * @param layerPath - The layer path of the layer to check.
+   * @returns True if text is visible, false otherwise. Returns undefined if layer has no text.
+   */
+  static getLayerTextVisibility(mapId: string, layerPath: string): boolean | undefined {
+    const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerRegularIfExists(layerPath);
+
+    // Check if it's a vector layer with a text layer
+    if (layer && layer instanceof AbstractGVVector && layer.getTextOLLayer()) {
+      return layer.getTextVisible();
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Sets the text visibility for a layer.
+   *
+   * @param mapId - The ID of the map.
+   * @param layerPath - The layer path of the layer to change.
+   * @param visible - True to show text, false to hide text.
+   */
+  static setLayerTextVisibility(mapId: string, layerPath: string, visible: boolean): void {
+    // Get the layer
+    const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerRegular(layerPath);
+    if (!layer) return;
+
+    // If it's a vector layer, set text visibility
+    if (layer instanceof AbstractGVVector) {
+      layer.setTextVisible(visible);
+
+      this.setLayerTextVisibilityInStore(mapId, layerPath, visible);
+    }
+  }
+
+  /**
+   * Updates the text visibility state in the store.
+   *
+   * @param mapId - The ID of the map.
+   * @param layerPath - The layer path.
+   * @param textVisible - The new text visibility state.
+   */
+  static setLayerTextVisibilityInStore(mapId: string, layerPath: string, textVisible: boolean): void {
+    // Find the layer for the given layer path
+    const layers = LegendEventProcessor.getLayerState(mapId).legendLayers;
+    const layer = this.findLayerByPath(layers, layerPath);
+
+    if (layer) {
+      // Set text visibility
+      layer.textVisible = textVisible;
+      // Set updated legend layers
+      this.getLayerState(mapId).setterActions.setLegendLayers(layers);
     }
   }
 

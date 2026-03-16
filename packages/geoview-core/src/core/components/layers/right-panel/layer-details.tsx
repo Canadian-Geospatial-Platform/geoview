@@ -21,6 +21,8 @@ import {
   TimeSliderIcon,
   Typography,
   ZoomInSearchIcon,
+  TitleIcon,
+  FormatClearIcon,
 } from '@/ui';
 import { ListItemText } from '@/ui/list';
 import {
@@ -35,6 +37,8 @@ import {
   useLayerSelectorFilterClass,
   useLayerStoreActions,
   useLayerTimeDimension,
+  useLayerSelectorHasText,
+  useLayerSelectorTextVisibility,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { useUIStoreActions, useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import {
@@ -158,6 +162,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     getLayerSettings,
     setLayerHoverable,
     setLayerQueryable,
+    setLayerTextVisibility,
   } = useLayerStoreActions();
   const { setOrToggleLayerVisibility } = useMapStoreActions();
   const { enableFocusTrap } = useUIStoreActions();
@@ -187,6 +192,8 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const timeSliderLayers = useTimeSliderLayers();
   const timeSliderActions = useTimeSliderStoreActions();
   const isFocusTrap = useUIActiveTrapGeoView();
+  const hasText = useLayerSelectorHasText(layerDetails.layerPath);
+  const textVisible = useLayerSelectorTextVisibility(layerDetails.layerPath);
 
   // Use navigate hook for time slider (only if time slider state exists)
   const navigateToTimeSlider = useNavigateToTab(
@@ -469,6 +476,22 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     return null;
   }
 
+  function renderToggleTextButton(): JSX.Element | null {
+    if (hasText) {
+      return (
+        <IconButton
+          aria-label={textVisible ? t('legend.hideText') : t('legend.showText')}
+          onClick={() => setLayerTextVisibility(layerDetails.layerPath, !textVisible)}
+          className="buttonOutline"
+          disabled={layerHidden}
+        >
+          {textVisible ? <TitleIcon /> : <FormatClearIcon />}
+        </IconButton>
+      );
+    }
+    return null;
+  }
+
   function renderZoomButton(): JSX.Element | null {
     if (isLayerZoomToExtentCapable)
       return (
@@ -523,6 +546,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           <RestartAltIcon />
         </IconButton>
         {renderHighlightButton()}
+        {renderToggleTextButton()}
         {renderZoomButton()}
         {layerSettingsButton}
         {deleteButton && <Box sx={sxClasses.verticalDivider} />}
