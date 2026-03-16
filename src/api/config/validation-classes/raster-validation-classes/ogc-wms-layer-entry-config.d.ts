@@ -1,5 +1,5 @@
 import type { Extent } from 'ol/extent';
-import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeMetadataWMS, TypeMetadataWMSCapabilityLayer, TypeOfServer, TypeSourceImageWmsInitialConfig } from '@/api/types/layer-schema-types';
+import type { ConfigClassOrType, TypeGeoviewLayerConfig, TypeMetadataWMS, TypeMetadataWMSCapabilityLayer, TypeMetadataWMSCapabilityLayerStyle, TypeOfServer, TypeSourceImageWmsInitialConfig } from '@/api/types/layer-schema-types';
 import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/wfs-layer-entry-config';
 import type { AbstractBaseLayerEntryConfigProps } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
@@ -15,31 +15,32 @@ export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig
     #private;
     /**
      * The class constructor.
-     * @param {OgcWmsLayerEntryConfigProps} layerConfig - The layer configuration we want to instanciate.
+     *
+     * @param layerConfig - The layer configuration we want to instanciate.
      */
     constructor(layerConfig: OgcWmsLayerEntryConfigProps);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeWMSLayerConfig} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed layer configuration specific to this layer.
      */
     getGeoviewLayerConfig(): TypeWMSLayerConfig;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeSourceImageWmsInitialConfig} The strongly-typed source configuration specific to this layer entry config.
-     * @override
+     *
+     * @returns The strongly-typed source configuration specific to this layer entry config.
      */
     getSource(): TypeSourceImageWmsInitialConfig;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeMetadataWMS | undefined} The strongly-typed layer configuration specific to this layer entry config.
-     * @override
+     *
+     * @returns The strongly-typed service metadata specific to this layer entry config.
      */
     getServiceMetadata(): TypeMetadataWMS | undefined;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeMetadataWMSCapabilityLayer | undefined} The strongly-typed layer metadata specific to this layer entry config.
-     * @override
+     *
+     * @returns The strongly-typed layer metadata specific to this layer entry config.
      */
     getLayerMetadata(): TypeMetadataWMSCapabilityLayer | undefined;
     /**
@@ -47,7 +48,8 @@ export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig
      * If attributions are not yet cached, this method attempts
      * to read them from the layer's metadata (via the `Attribution.Title` property)
      * and sets them accordingly. Once set, the attributions are cached in the layer.
-     * @returns {string[] | undefined} The list of layer attributions, or `undefined` if none are available.
+     *
+     * @returns The list of layer attributions, or `undefined` if none are available.
      */
     getAttributions(): string[] | undefined;
     /**
@@ -81,9 +83,18 @@ export declare class OgcWmsLayerEntryConfig extends AbstractBaseLayerEntryConfig
      * If styles are not yet cached, the method reads them from the layer metadata
      * and initializes the internal style list. The styles correspond to named
      * style definitions advertised by the WMS service (from the `Style` section of the metadata).
-     * @returns {string[] | undefined} The list of available style names, or `undefined` if none are defined.
+     *
+     * @returns The list of available style names, or `undefined` if none are defined.
      */
     getStyles(): string[] | undefined;
+    /**
+     * Retrieves the full style metadata objects available for this layer.
+     * Returns the complete `TypeMetadataWMSCapabilityLayerStyle` objects from the layer metadata,
+     * which include style names, legend URLs, and other style-related information.
+     *
+     * @returns The list of available style metadata objects, or `undefined` if none are defined.
+     */
+    getStylesMetadata(): TypeMetadataWMSCapabilityLayerStyle[] | undefined;
     /**
      * Determines the style to apply for this layer.
      * Retrieves the list of available styles from the layer config/metadata and returns

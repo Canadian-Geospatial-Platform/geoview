@@ -20,19 +20,20 @@ export interface TypeVectorTilesConfig extends Omit<TypeGeoviewLayerConfig, 'lis
 export declare class VectorTiles extends AbstractGeoViewRaster {
     /**
      * Constructs a VectorTiles Layer configuration processor.
-     * @param {TypeVectorTilesConfig} layerConfig - The layer configuration
+     *
+     * @param layerConfig - The layer configuration
      */
     constructor(layerConfig: TypeVectorTilesConfig);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeVectorTilesConfig} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed layer configuration specific to this layer.
      */
     getGeoviewLayerConfig(): TypeVectorTilesConfig;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeMetadataVectorTiles | undefined} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed metadata specific to this layer.
      */
     getMetadata(): TypeMetadataVectorTiles | undefined;
     /**

@@ -1,13 +1,14 @@
 import type BaseLayer from 'ol/layer/Base';
 import type { Extent } from 'ol/extent';
 import type { GeoJSONObject } from 'ol/format/GeoJSON';
+import type { FitOptions } from 'ol/View';
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { FeatureHighlight } from '@/geo/map/feature-highlight';
 import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import type { AbstractGeoViewLayer } from '@/geo/layer/geoview-layers/abstract-geoview-layers';
 import { type TypeDisplayLanguage, type TypeOutfieldsType } from '@/api/types/map-schema-types';
-import type { MapConfigLayerEntry, TypeGeoviewLayerConfig, TypeLayerStatus } from '@/api/types/layer-schema-types';
+import type { MapConfigLayerEntry, TypeGeoviewLayerConfig, TypeLayerStatus, TypeMosaicRule } from '@/api/types/layer-schema-types';
 import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
 import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
 import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
@@ -21,6 +22,7 @@ import { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { TypeLegendItem } from '@/core/components/layers/types';
+import type { TypeFeatureInfoResultSet } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
  * @exports
@@ -285,6 +287,14 @@ export declare class LayerApi {
      */
     getExtentOfMultipleLayers(layerIds?: string[]): Promise<Extent | undefined>;
     /**
+     * Zoom to extents of a layer.
+     *
+     * @param layerPath - The path of the layer to zoom to.
+     * @param fitOptions - Optional fit options for zooming.
+     * @throws {NoBoundsError} When the layer doesn't have bounds.
+     */
+    zoomToLayerExtent(layerPath: string, fitOptions?: FitOptions): Promise<void>;
+    /**
      * Loops through all geoview layers and refresh their respective source.
      * Use this function on projection change or other viewer modification who may affect rendering.
      * @returns {void}
@@ -400,6 +410,29 @@ export declare class LayerApi {
      */
     setLayerDateTemporalMode(layerPath: string, temporalMode: TemporalMode): void;
     /**
+     * Updates the raster function for an ESRI Image layer.
+     *
+     * @param layerPath - The path of the layer.
+     * @param rasterFunctionId - The raster function ID to apply or undefined to remove it.
+     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+     * @throws {LayerWrongTypeError} When the layer is not an ESRI Image layer.
+     */
+    setLayerRasterFunction(layerPath: string, rasterFunctionId: string | undefined): void;
+    /**
+     * Sets the mosaic rule for an ESRI Image layer.
+     *
+     * @param layerPath - The layer path
+     * @param mosaicRule - The mosaic rule to apply or undefined to remove it
+     */
+    setLayerMosaicRule(layerPath: string, mosaicRule: TypeMosaicRule | undefined): void;
+    /**
+     * Sets the WMS style for a WMS layer.
+     *
+     * @param layerPath - The layer path
+     * @param wmsStyle - The WMS style to apply
+     */
+    setLayerWmsStyle(layerPath: string, wmsStyle: string): void;
+    /**
      * Changes a GeoJson Source of a GeoJSON layer at the given layer path.
      * @param {string} layerPath - The path of the layer.
      * @param {GeoJSONObject | string} geojson - The new geoJSON.
@@ -456,10 +489,20 @@ export declare class LayerApi {
      */
     clearVectorFeaturesFromAllFeatureInfoLayerSet(): void;
     /**
-     * Repeats the last feature info query if any.
-     * @returns {void}
+     * Repeats the last feature info query.
+     * This method waits for the layers to be loaded before performing the query.
+     *
+     * @returns A promise which will hold the result of the query.
+     * @throws {LayerNoLastQueryToPerformError} When there's no last query to perform.
      */
-    repeatLastQuery(): void;
+    repeatLastQuery(): Promise<TypeFeatureInfoResultSet>;
+    /**
+     * Repeats the last feature info query, if any.
+     * This method waits for the layers to be loaded before performing the query.
+     *
+     * @returns A promise which will hold the result of the query or undefined when no query to repeat.
+     */
+    repeatLastQueryIfAny(): Promise<TypeFeatureInfoResultSet | undefined>;
     /**
      * Registers a layer config error event handler.
      * @param {LayerConfigErrorDelegate} callback - The callback to be executed whenever the event is emitted

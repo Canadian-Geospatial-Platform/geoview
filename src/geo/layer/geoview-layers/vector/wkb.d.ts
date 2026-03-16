@@ -24,19 +24,20 @@ export declare class WKB extends AbstractGeoViewVector {
     #private;
     /**
      * Constructs a WKB Layer configuration processor.
-     * @param {TypeWkbLayerConfig} layerConfig the layer configuration
+     *
+     * @param layerConfig - The layer configuration
      */
     constructor(layerConfig: TypeWkbLayerConfig);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeWkbLayerConfig} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed layer configuration specific to this layer.
      */
     getGeoviewLayerConfig(): TypeWkbLayerConfig;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeMetadataGeoJSON | undefined} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed metadata specific to this layer.
      */
     getMetadata(): TypeMetadataGeoJSON | undefined;
     /**

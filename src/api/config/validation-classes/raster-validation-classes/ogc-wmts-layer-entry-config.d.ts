@@ -30,14 +30,13 @@ export declare class OgcWmtsLayerEntryConfig extends TileLayerEntryConfig {
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
-     * @returns {TypeMetadataWMTS | undefined} The strongly-typed layer configuration specific to this layer entry config.
-     * @override
+     * @returns The strongly-typed service metadata specific to this layer entry config.
      */
     getServiceMetadata(): TypeMetadataWMTS | undefined;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
-     * @returns The strongly-typed layer configuration specific to this layer entry config.
+     * @returns The strongly-typed layer metadata specific to this layer entry config.
      */
     getLayerMetadata(): TypeMetadataWMTSContents | undefined;
     /**

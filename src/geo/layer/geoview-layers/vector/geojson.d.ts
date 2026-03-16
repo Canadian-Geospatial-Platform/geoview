@@ -24,19 +24,19 @@ export declare class GeoJSON extends AbstractGeoViewVector {
     #private;
     /**
      * Constructs a GeoJSON Layer configuration processor.
-     * @param {TypeGeoJSONLayerConfig} layerConfig the layer configuration
+     * @param layerConfig - The layer configuration
      */
     constructor(layerConfig: TypeGeoJSONLayerConfig);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeGeoJSONLayerConfig} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed layer configuration specific to this layer.
      */
     getGeoviewLayerConfig(): TypeGeoJSONLayerConfig;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeMetadataGeoJSON | undefined} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed metadata specific to this layer.
      */
     getMetadata(): TypeMetadataGeoJSON | undefined;
     /**

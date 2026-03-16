@@ -24,19 +24,20 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
     hitTolerance: number;
     /**
      * Constructs an EsriDynamic Layer configuration processor.
-     * @param {TypeEsriDynamicLayerConfig} layerConfig The layer configuration.
+     *
+     * @param layerConfig - The layer configuration.
      */
     constructor(layerConfig: TypeEsriDynamicLayerConfig);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeEsriDynamicLayerConfig} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed layer configuration specific to this layer.
      */
     getGeoviewLayerConfig(): TypeEsriDynamicLayerConfig;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeMetadataEsriDynamic | undefined} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed layer configuration specific to this layer.
      */
     getMetadata(): TypeMetadataEsriDynamic | undefined;
     /**
@@ -138,7 +139,7 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      */
     static buildLayerEntriesTree(entries: {
         layerId: number;
-        subLayerIds: number[];
+        subLayerIds: number[] | null;
     }[]): TypeLayerEntryShell[];
 }
 //# sourceMappingURL=esri-dynamic.d.ts.map

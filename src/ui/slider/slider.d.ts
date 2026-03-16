@@ -7,7 +7,8 @@ import type { Mark } from '@mui/base';
 type SliderProps = {
     min: number;
     max: number;
-    value: Array<number> | number;
+    value?: number[] | number;
+    defaultValue?: number[] | number;
     className?: string;
     style?: CSSProperties;
     sx?: SxProps<Theme>;

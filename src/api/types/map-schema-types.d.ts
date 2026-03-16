@@ -79,7 +79,7 @@ export type TypeFooterBarProps = {
     selectedTimeSliderLayerPath: string;
 };
 /** Supported app bar values. */
-export type TypeValidAppBarCoreProps = 'geolocator' | 'share' | 'export' | 'aoi-panel' | 'about-panel' | 'custom-legend' | 'guide' | 'legend' | 'details' | 'data-table' | 'layers';
+export type TypeValidAppBarCoreProps = 'geolocator' | 'export' | 'aoi-panel' | 'about-panel' | 'custom-legend' | 'guide' | 'legend' | 'details' | 'data-table' | 'layers';
 /** Configuration available on the application bar. Default = ['geolocator']. The about GeoView and notification are always there. */
 export type TypeAppBarProps = {
     tabs: {
@@ -264,7 +264,7 @@ export type TypeMapViewSettings = {
     layerIds?: string[];
 };
 /** Type used to define valid map projection codes. */
-export type TypeValidMapProjectionCodes = 3978 | 3857;
+export type TypeValidMapProjectionCodes = 3978 | 3857 | 3573;
 /** Constant mainly used to test if a TypeValidMapProjectionCodes variable is a valid projection codes. */
 export declare const VALID_PROJECTION_CODES: number[];
 /**

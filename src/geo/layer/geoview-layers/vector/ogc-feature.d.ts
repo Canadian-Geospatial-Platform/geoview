@@ -24,19 +24,20 @@ export declare class OgcFeature extends AbstractGeoViewVector {
     #private;
     /**
      * Constructs a OgcFeature Layer configuration processor.
-     * @param {TypeOgcFeatureLayerConfig} layerConfig the layer configuration
+     *
+     * @param layerConfig - The layer configuration
      */
     constructor(layerConfig: TypeOgcFeatureLayerConfig);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeOgcFeatureLayerConfig} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed layer configuration specific to this layer.
      */
     getGeoviewLayerConfig(): TypeOgcFeatureLayerConfig;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeMetadataOGCFeature | undefined} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed metadata specific to this layer.
      */
     getMetadata(): TypeMetadataOGCFeature | undefined;
     /**

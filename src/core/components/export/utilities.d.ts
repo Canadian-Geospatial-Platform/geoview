@@ -18,6 +18,7 @@ export type TypeMapStateForExportLayout = {
     northArrowElement: TypeNorthArrow;
     mapScale: TypeScaleInfo;
     mapRotation: number;
+    currentProjection: number;
 };
 export type NorthArrowSVG = {
     d: string | null;

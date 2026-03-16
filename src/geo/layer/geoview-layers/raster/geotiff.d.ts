@@ -20,19 +20,20 @@ export declare class GeoTIFF extends AbstractGeoViewRaster {
     #private;
     /**
      * Constructs a GeoTIFF Layer configuration processor.
-     * @param {TypeGeoTIFFLayerConfig} layerConfig the layer configuration
+     *
+     * @param layerConfig - The layer configuration
      */
     constructor(layerConfig: TypeGeoTIFFLayerConfig);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeGeoTIFFLayerConfig} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed layer configuration specific to this layer.
      */
     getGeoviewLayerConfig(): TypeGeoTIFFLayerConfig;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeMetadataGeoTIFF | undefined} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed metadata specific to this layer.
      */
     getMetadata(): TypeMetadataGeoTIFF | undefined;
     /**

@@ -11,6 +11,8 @@ import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/grou
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
 export interface TypeSourceImageWMTSInitialConfig extends TypeSourceTileInitialConfig {
     wmtsStyle?: string;
+    extent?: [number, number, number, number];
+    resolutionLevels?: number;
 }
 export interface TypeWmtsLayerConfig extends TypeGeoviewLayerConfig {
     geoviewLayerType: typeof CONST_LAYER_TYPES.WMTS;
@@ -25,6 +27,7 @@ export declare class WMTS extends AbstractGeoViewRaster {
     #private;
     /**
      * Constructs a WMTS Layer configuration processor.
+     *
      * @param layerConfig - The layer configuration
      */
     constructor(layerConfig: TypeWmtsLayerConfig);
@@ -37,7 +40,7 @@ export declare class WMTS extends AbstractGeoViewRaster {
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
-     * @returns The strongly-typed layer configuration specific to this layer.
+     * @returns The strongly-typed metadata specific to this layer.
      */
     getMetadata(): TypeMetadataWMTS | undefined;
     /**
@@ -144,7 +147,7 @@ export declare class WMTS extends AbstractGeoViewRaster {
      *
      * @param layerConfig - The configuration for the WMTS layer.
      * @returns A fully configured WMTS source.
-     * @throws {LayerWMTSMetadataError} When the tileMatrixSet and layer information are missing, likely because onProcessMetadata wasn't called.
+     * @throws {LayerWMTSMetadataError} When we don't have enough info to create a source, throw an error.
      */
     static createWMTSSource(layerConfig: OgcWmtsLayerEntryConfig): WMTSSource;
 }

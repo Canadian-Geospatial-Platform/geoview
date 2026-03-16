@@ -18,10 +18,10 @@ export declare class StateApi {
     constructor(mapId: string);
     /**
      * Get a specific layer panel state.
-     * @param {'highlightedLayer' | 'selectedLayerPath' | 'displayState' | 'layerDeleteInProgress'} state - The state to get
+     * @param {'highlightedLayer' | 'selectedLayerPath' | 'displayState'} state - The state to get
      * @returns {string | boolean | null | undefined} The requested state
      */
-    getLayerPanelState(state: 'highlightedLayer' | 'selectedLayerPath' | 'displayState' | 'layerDeleteInProgress'): string | boolean | null | undefined;
+    getLayerPanelState(state: 'highlightedLayer' | 'selectedLayerPath' | 'displayState'): string | boolean | null | undefined;
     /**
      * Get a legend layer.
      * @param {string} layerPath - The path of the layer to get

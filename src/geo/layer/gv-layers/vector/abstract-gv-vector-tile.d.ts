@@ -9,14 +9,14 @@ import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 export declare abstract class AbstractGVVectorTile extends AbstractGVLayer {
     /**
      * Overrides the parent method to return a more specific OpenLayers layer type (covariant return).
-     * @override
-     * @returns {VectorTileLayer<VectorTile>} The strongly-typed OpenLayers type.
+     *
+     * @returns The strongly-typed OpenLayers type.
      */
     getOLLayer(): VectorTileLayer<VectorTile>;
     /**
      * Overrides the parent class's method to return a more specific OpenLayers source type (covariant return).
-     * @returns {VectorTile} The VectorTile source instance associated with this layer.
-     * @override
+     *
+     * @returns The VectorTile source instance associated with this layer.
      */
     getOLSource(): VectorTile;
     /**

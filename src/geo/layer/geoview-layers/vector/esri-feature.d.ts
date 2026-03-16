@@ -6,7 +6,7 @@ import type { ConfigBaseClass, TypeLayerEntryShell } from '@/api/config/validati
 import { AbstractGeoViewVector } from '@/geo/layer/geoview-layers/vector/abstract-geoview-vector';
 import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import type { TypeGeoviewLayerConfig, TypeMetadataEsriFeature } from '@/api/types/layer-schema-types';
+import type { TypeGeoviewLayerConfig, TypeMetadataEsriDynamic, TypeMetadataEsriDynamicLayer, TypeMetadataEsriFeature } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 import type { DisplayDateMode } from '@/api/types/map-schema-types';
@@ -24,31 +24,39 @@ export declare class EsriFeature extends AbstractGeoViewVector {
     #private;
     /**
      * Constructs an EsriFeature Layer configuration processor.
-     * @param {TypeEsriFeatureLayerConfig} layerConfig The layer configuration.
+     *
+     * @param layerConfig - The layer configuration.
      */
     constructor(layerConfig: TypeEsriFeatureLayerConfig);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeEsriFeatureLayerConfig} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed layer configuration specific to this layer.
      */
     getGeoviewLayerConfig(): TypeEsriFeatureLayerConfig;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeMetadataEsriFeature | undefined} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @remarks Sometimes, the layer processing uses metadata coming from MapServer/?f=json (TypeMetadataEsriDynamic) and sometimes
+     * from FeatureServer/?f=json (TypeMetadataEsriFeature) which is the reason for the double types.
+     *
+     * @returns The strongly-typed layer metadata specific to this layer.
      */
-    getMetadata(): TypeMetadataEsriFeature | undefined;
+    getMetadata(): TypeMetadataEsriDynamic | TypeMetadataEsriFeature | undefined;
     /**
      * Overrides the way the metadata is fetched.
      * Resolves with the Json object or undefined when no metadata is to be expected for a particular layer type.
+     *
+     * @remarks This function returns TypeMetadataEsriDynamic | TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeature because sometimes the url is
+     * MapServer/?f=json, sometimes MapServer/{layerId}?f=json and sometimes FeatureServer/?f=json which all return different payloads.
+     *
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-     * @returns {Promise<T = TypeMetadataEsriFeature | undefined>} A promise with the metadata or undefined when no metadata for the particular layer type.
+     * @returns A promise with the metadata or undefined when no metadata for the particular layer type.
      * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
      * @override
      * @protected
      */
-    protected onFetchServiceMetadata<T = TypeMetadataEsriFeature | undefined>(abortSignal?: AbortSignal): Promise<T>;
+    protected onFetchServiceMetadata<T = TypeMetadataEsriDynamic | TypeMetadataEsriDynamicLayer | TypeMetadataEsriFeature | undefined>(abortSignal?: AbortSignal): Promise<T>;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.

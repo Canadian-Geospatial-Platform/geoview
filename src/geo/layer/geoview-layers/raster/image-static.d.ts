@@ -20,13 +20,14 @@ export interface TypeImageStaticLayerConfig extends Omit<TypeGeoviewLayerConfig,
 export declare class ImageStatic extends AbstractGeoViewRaster {
     /**
      * Constructs a ImageStatic Layer configuration processor.
-     * @param {TypeImageStaticLayerConfig} layerConfig the layer configuration
+     *
+     * @param layerConfig - The layer configuration
      */
     constructor(layerConfig: TypeImageStaticLayerConfig);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeImageStaticLayerConfig} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed layer configuration specific to this layer.
      */
     getGeoviewLayerConfig(): TypeImageStaticLayerConfig;
     /**

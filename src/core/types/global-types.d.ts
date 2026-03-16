@@ -10,8 +10,6 @@ import type { useWhatChanged } from '@/core/utils/useWhatChanged';
 import type * as UI from '@/ui';
 import type { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import type { MapViewer } from '@/geo/map/map-viewer';
-export { getGeoViewStore } from '@/core/stores/stores-managers';
-export type { SelectChangeEvent } from '@mui/material';
 /**
  * Definition of the map feature configuration according to what can be specified in the map div and in the schema for the
  * type extension TypeMapFeaturesInstance.
@@ -107,4 +105,5 @@ type AbstractClassType<T> = abstract new (...args: any[]) => T;
  * @template T - The type of the instance the constructor produces.
  */
 export type ClassType<T> = RegularClassType<T> | AbstractClassType<T>;
+export {};
 //# sourceMappingURL=global-types.d.ts.map

@@ -20,8 +20,12 @@ export type TypeStyleProcessorOptions = {
 };
 export declare abstract class GeoviewRenderer {
     #private;
-    static DEFAULT_FILTER_1EQUALS1: string;
-    static DEFAULT_FILTER_1EQUALS0: string;
+    static readonly DEFAULT_FILTER_1EQUALS1: string;
+    static readonly DEFAULT_FILTER_1EQUALS0: string;
+    /** Default value of the legend canvas width when the settings do not provide one. */
+    static readonly LEGEND_CANVAS_WIDTH = 50;
+    /** Default value of the legend canvas height when the settings do not provide one. */
+    static readonly LEGEND_CANVAS_HEIGHT = 50;
     /**
      * Get the default color using the default color index.
      *

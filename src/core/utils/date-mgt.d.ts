@@ -60,8 +60,11 @@ export type GuessedTimeInformation = {
  */
 export type TimeDimensionESRI = {
     startTimeField: string;
-    timeExtent: number[];
+    endTimeField?: string;
+    trackIdField?: string;
+    timeExtent?: [number, number];
     timeInterval: number;
+    hasLiveData?: boolean;
     timeIntervalUnits: 'esriTimeUnitsHours' | 'esriTimeUnitsDays' | 'esriTimeUnitsWeeks' | 'esriTimeUnitsMonths' | 'esriTimeUnitsYears';
 };
 /**

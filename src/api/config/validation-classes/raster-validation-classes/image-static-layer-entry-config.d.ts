@@ -12,19 +12,20 @@ export interface ImageStaticLayerEntryConfigProps extends AbstractBaseLayerEntry
 export declare class ImageStaticLayerEntryConfig extends AbstractBaseLayerEntryConfig {
     /**
      * The class constructor.
-     * @param {ImageStaticLayerEntryConfigProps} layerConfig -  The layer configuration we want to instanciate.
+     *
+     * @param layerConfig -  The layer configuration we want to instanciate.
      */
     constructor(layerConfig: ImageStaticLayerEntryConfigProps);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeImageStaticLayerConfig} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed layer configuration specific to this layer.
      */
     getGeoviewLayerConfig(): TypeImageStaticLayerConfig;
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {TypeSourceImageStaticInitialConfig} The strongly-typed source configuration specific to this layer entry config.
-     * @override
+     *
+     * @returns The strongly-typed source configuration specific to this layer entry config.
      */
     getSource(): TypeSourceImageStaticInitialConfig;
     /**
