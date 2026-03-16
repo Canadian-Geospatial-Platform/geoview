@@ -1,5 +1,5 @@
 import { asArray, asString } from 'ol/color';
-import { Style, Stroke, Fill, RegularShape, Circle as StyleCircle, Icon as StyleIcon, Text, Circle } from 'ol/style';
+import { Style, Stroke, Fill, RegularShape, Circle as StyleCircle, Icon as StyleIcon, Circle } from 'ol/style';
 import type { Geometry } from 'ol/geom';
 import { LineString, Point, Polygon } from 'ol/geom';
 import type { Options as IconOptions } from 'ol/style/Icon';
@@ -30,10 +30,8 @@ import type {
   TypeLayerStyleConfig,
   TypeLayerStyleConfigInfo,
   TypeLayerStyleValueCondition,
-  TypeLayerTextConfig,
   TypeLayerStyleVisualVariable,
   TypeAliasLookup,
-  TypeValidMapProjectionCodes,
   codedValueType,
   TypeOutfields,
 } from '@/api/types/map-schema-types';
@@ -2336,8 +2334,6 @@ export abstract class GeoviewRenderer {
     layerStyle: TypeLayerStyleConfig,
     label: string,
     filterEquation?: FilterNodeType[],
-    aliasLookup?: TypeAliasLookup,
-    layerText?: TypeLayerTextConfig,
     callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeLayerStyleConfigInfo) => void
   ): Style | undefined {
     // Determine geometry type, favoring the feature itself
@@ -2361,7 +2357,6 @@ export abstract class GeoviewRenderer {
     // Prepare style processor options
     const options: TypeStyleProcessorOptions = {
       filterEquation,
-      aliasLookup,
       visualVariables: styleSettings.visualVariables,
     };
 
@@ -2372,13 +2367,6 @@ export abstract class GeoviewRenderer {
     // Create feature style
     const featureStyle = processor(styleSettings, feature as Feature, options);
     if (!featureStyle) return undefined;
-
-    // Apply text styling if applicable
-    const textStyle = GeoviewRenderer.getTextStyle(feature, resolution, styleSettings, layerText, aliasLookup);
-
-    if (textStyle) {
-      featureStyle.setText(textStyle);
-    }
 
     return featureStyle;
   }
@@ -2719,306 +2707,6 @@ export abstract class GeoviewRenderer {
       MultiPolygon: GeoviewRenderer.processClassBreaksPolygon.bind(GeoviewRenderer),
     },
   };
-
-  /**
-   * Method for getting the text style
-   * @param {FeatureLike} feature - The feature to get the text style for
-   * @param {number} resolution - The resolution of the map
-   * @param {TypeLayerStyleSettings} styleSettings - The style settings
-   * @param {TypeLayerTextConfig} layerText - The layer text configuration
-   * @param {TypeAliasLookup} aliasLookup - The alias lookup
-   * @returns {Text | undefined} The text style
-   * @static
-   */
-  static getTextStyle = (
-    feature: FeatureLike,
-    resolution: number,
-    styleSettings: TypeLayerStyleSettings,
-    layerText?: TypeLayerTextConfig,
-    aliasLookup?: TypeAliasLookup
-  ): Text | undefined => {
-    const { type, info } = styleSettings;
-    let symbolText: TypeLayerTextConfig | undefined;
-
-    if (type === 'simple') {
-      // For simple styles, use the first (and only) style info
-      symbolText = info[0]?.text;
-    }
-
-    if (type === 'uniqueValue') {
-      // Find the matching unique value entry
-      const foundUniqueValueInfo = this.searchUniqueValueEntry(
-        styleSettings.fields,
-        info,
-        feature as Feature,
-        undefined, // domainsLookup
-        aliasLookup
-      );
-      symbolText = foundUniqueValueInfo?.text;
-    }
-
-    if (type === 'classBreaks') {
-      // Find the matching class break entry
-      const foundClassBreakInfo = this.searchClassBreakEntry(styleSettings.fields[0], info, feature as Feature, aliasLookup);
-      symbolText = foundClassBreakInfo?.text;
-    }
-
-    const textSettings = symbolText || layerText;
-    if (!textSettings) return undefined;
-    if (textSettings.minZoomLevel !== undefined && resolution > GeoviewRenderer.getApproximateResolution(textSettings.minZoomLevel))
-      return undefined;
-    if (textSettings.maxZoomLevel !== undefined && resolution < GeoviewRenderer.getApproximateResolution(textSettings.maxZoomLevel))
-      return undefined;
-
-    return GeoviewRenderer.createTextStyle(feature, textSettings);
-  };
-
-  /**
-   * Method for creating Text Style
-   * @param {FeatureLike} feature - The feature to create the text style for
-   * @param {TypeLayerTextConfig} textSettings - The text style settings
-   * @returns {Text | undefined} The text style
-   * @static
-   */
-  static createTextStyle = (feature: FeatureLike, textSettings: TypeLayerTextConfig): Text | undefined => {
-    const {
-      field,
-      fontSize = 10,
-      fontFamily = 'sans-serif',
-      bold = false,
-      italic = false,
-      maxAngle,
-      offsetX,
-      offsetY,
-      overflow,
-      placement,
-      repeat,
-      scale,
-      rotateWithView,
-      keepUpright,
-      rotation,
-      text,
-      textAlign,
-      justify,
-      textBaseline,
-      fill,
-      haloColor,
-      haloWidth,
-      backgroundFill,
-      backgroundStrokeColor,
-      backgroundStrokeWidth,
-      padding,
-      declutterMode = 'declutter',
-      wrap,
-      wrapCount = 16,
-      wrapLines,
-    } = textSettings;
-
-    // Get text from feature field or use static text
-    let textValue: string | string[] | undefined;
-    if (field) {
-      textValue = String(feature.get(field) || undefined);
-    } else if (text) {
-      if (Array.isArray(text)) {
-        // Process rich text array - only process text elements: ['text value', 'bold 10px sans-serif', '\n', '', 'text value 2', 'italic 8px serif']
-        textValue = text.map((item, index) => {
-          if (index % 2 === 0 && typeof item === 'string') {
-            return item.includes('{') ? GeoviewRenderer.processTextTemplate(item, feature) : item;
-          }
-          return item;
-        });
-      } else {
-        textValue = text.includes('{') ? GeoviewRenderer.processTextTemplate(text, feature) : text;
-      }
-    }
-    if (!textValue) return undefined;
-
-    if (wrap && typeof textValue === 'string') {
-      textValue = GeoviewRenderer.wrapText(textValue, wrapCount, wrapLines);
-    }
-
-    // Build font string
-    let fontStyle = '';
-    if (italic) fontStyle += 'italic ';
-    if (bold) fontStyle += 'bold ';
-    const font = `${fontStyle}${fontSize}px ${fontFamily}`;
-
-    // Convert rotation from degrees to radians
-    const rotationRadians = rotation ? (rotation * Math.PI) / 180 : undefined;
-
-    // Convert maxAngle from degrees to radians
-    const maxAngleRadians = maxAngle ? (maxAngle * Math.PI) / 180 : undefined;
-
-    return new Text({
-      text: textValue,
-      font,
-      maxAngle: maxAngleRadians,
-      offsetX,
-      offsetY,
-      overflow,
-      placement,
-      repeat,
-      scale,
-      rotateWithView,
-      keepUpright,
-      rotation: rotationRadians,
-      textAlign,
-      justify,
-      textBaseline,
-      fill: fill ? new Fill({ color: fill }) : undefined,
-      stroke: haloColor ? new Stroke({ color: haloColor, width: haloWidth || 1 }) : undefined,
-      backgroundFill: backgroundFill ? new Fill({ color: backgroundFill }) : undefined,
-      backgroundStroke: backgroundStrokeColor ? new Stroke({ color: backgroundStrokeColor, width: backgroundStrokeWidth || 1 }) : undefined,
-      padding,
-      declutterMode,
-    });
-  };
-
-  /**
-   * Get approximate resolution for common zoom levels by projection
-   * @param {number} zoom - The zoom level (0-20)
-   * @param {TypeValidMapProjectionCodes} projection - The map projection (3857 for Web Mercator, 3978 for Canada Lambert)
-   * @returns {number} Approximate resolution for the given zoom and projection
-   * @static
-   */
-  static getApproximateResolution(zoom: number, projection: TypeValidMapProjectionCodes = 3857): number {
-    if (projection === 3978) {
-      // Lambert Conformal Conic Canada: resolution ≈ 38364.660062653464 / (2^zoom)
-      return 38364.660062653464 / Math.pow(2, zoom);
-    }
-    // Default to Web Mercator: resolution ≈ 156543.03392804097 / (2^zoom)
-    return 156543.03392804097 / Math.pow(2, zoom);
-  }
-
-  /**
-   * Wrap text to fit within specified constraints
-   * @param {string} str - The text to wrap
-   * @param {number} width - The maximum width per line
-   * @param {number} maxLines - Maximum number of lines (optional, overrides width if needed)
-   * @returns {string} The wrapped text
-   * @static
-   */
-  static wrapText(str: string, width: number, maxLines?: number): string {
-    if (!maxLines) {
-      // Original behavior when no maxLines specified
-      return GeoviewRenderer.wrapTextByWidth(str, width);
-    }
-
-    // Split text into words
-    const words = str.split(/\s+/);
-    if (words.length === 0) return str;
-
-    // If we can fit everything in maxLines with normal wrapping, do that
-    const normalWrap = GeoviewRenderer.wrapTextByWidth(str, width);
-    const normalLines = normalWrap.split('\n');
-
-    if (normalLines.length <= maxLines) {
-      return normalWrap;
-    }
-
-    // Need to fit into fewer lines - calculate optimal width per line
-    const totalChars = str.length;
-    const targetWidth = Math.ceil(totalChars / maxLines);
-
-    // Build lines with the calculated width
-    const lines: string[] = [];
-    let currentLine = '';
-
-    for (const word of words) {
-      const testLine = currentLine ? `${currentLine} ${word}` : word;
-
-      if (testLine.length <= targetWidth || currentLine === '') {
-        currentLine = testLine;
-      } else {
-        lines.push(currentLine);
-        currentLine = word;
-
-        // If we've reached maxLines, truncate remaining text
-        if (lines.length >= maxLines - 1) {
-          // Add ellipsis if there are more words
-          const remainingWords = words.slice(words.indexOf(word));
-          if (remainingWords.length > 1) {
-            currentLine = `${currentLine}...`;
-          }
-          break;
-        }
-      }
-    }
-
-    if (currentLine) lines.push(currentLine);
-    return lines.slice(0, maxLines).join('\n');
-  }
-
-  /**
-   * Wrap text to a specified width using word boundaries
-   * @param {string} str - The text to wrap
-   * @param {number} width - The maximum width of each line
-   * @returns {string} The wrapped text
-   * @static
-   */
-  static wrapTextByWidth(str: string, width: number): string {
-    // No wrapping required
-    if (str.length <= width) return str;
-
-    const words = str.split(/\s+/);
-    const lines: string[] = [];
-    let currentLine = '';
-
-    for (const word of words) {
-      const testLine = currentLine ? `${currentLine} ${word}` : word;
-
-      if (testLine.length <= width) {
-        currentLine = testLine;
-      } else {
-        // If current line has content, push it and start new line
-        if (currentLine) {
-          lines.push(currentLine);
-          currentLine = word;
-        } else {
-          // Single word longer than width - force break it
-          currentLine = word;
-        }
-      }
-    }
-
-    // Add the last line if it has content
-    if (currentLine) {
-      lines.push(currentLine);
-    }
-
-    return lines.join('\n');
-  }
-
-  /**
-   * Process text template by replacing field placeholders with feature values
-   * Expects somewhat clean field names, so we shouldn't need to worry about escaping special characters (Dates may still have characters after the colon)
-   * @param {string} template - The text template with {field-name} placeholders
-   * @param {FeatureLike} feature - The feature to get field values from
-   * @returns {string} The processed text with field values substituted
-   * @static
-   */
-  static processTextTemplate(template: string, feature: FeatureLike): string {
-    return template.replace(/\{(\w+)(?::([^}]+))?\}/g, (match, fieldName, format) => {
-      const fieldValue = feature.get(fieldName.trim());
-      if (fieldValue === undefined) return match;
-
-      // If format is specified, try to format as date
-      if (format) {
-        try {
-          // TODO: CHECK DATETIME - Here, it's assuming 2 things to check:
-          // TO.DOCONT: (1) that when a 'format' is specified it's always a date format, okay?
-          // TO.DOCONT: (2) the fieldValue, when it's a date, will always be a UTC date. Is this okay or should the function
-          // TO.DOCONT: be made aware that the layer config might have defined another timezone for its data via serviceDateTimezone ?
-          return DateMgt.formatDate(fieldValue, format);
-        } catch (e) {
-          // Fall back to string conversion if date parsing fails
-          logger.logWarning(`There was an issue replacing the field, ${fieldName}, with a value:`, e);
-        }
-      }
-
-      return String(fieldValue);
-    });
-  }
 
   /**
    * Builds a filter string (SQL-like or OGC-compliant) for a given layer and style configuration.

@@ -94,7 +94,7 @@ import type {
   LayerHoverableChangedEvent,
 } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import { AbstractGVVector } from './gv-layers/vector/abstract-gv-vector';
+import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { GVGeoJSON } from '@/geo/layer/gv-layers/vector/gv-geojson';
 import type { LayerDelegate as GVGroupLayerDelegate, LayerEvent as GVGroupLayerEvent } from '@/geo/layer/gv-layers/gv-group-layer';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
@@ -2060,6 +2060,14 @@ export class LayerApi {
     // Keep track
     this.#gvLayers[layerConfig.layerPath] = gvLayer;
     this.#olLayers[layerConfig.layerPath] = gvLayer.getOLLayer();
+
+    // Handle text layer for vector layers
+    if (gvLayer instanceof AbstractGVVector) {
+      const textLayer = gvLayer.getTextOLLayer();
+      if (textLayer) {
+        this.mapViewer.map.addLayer(textLayer);
+      }
+    }
 
     // Register events handler for the layer
     this.#registerLayerHandlers(gvLayer);

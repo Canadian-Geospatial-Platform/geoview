@@ -97,7 +97,7 @@
               "haloColor": "rgba(255, 255, 255, 0.7)",
               "haloWidth": 2,
               "declutterMode": "obstacle",
-              "minZoomLevel": 7
+              "minZoomLevel": 6
             }
           }
         ]
@@ -121,7 +121,7 @@
               "haloColor": "#ffffff",
               "haloWidth": 2,
               "declutterMode": "declutter",
-              "minZoomLevel": 10
+              "minZoomLevel": 5
             }
           }
         ]

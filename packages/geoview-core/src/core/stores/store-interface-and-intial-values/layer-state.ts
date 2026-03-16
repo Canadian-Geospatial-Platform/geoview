@@ -52,10 +52,13 @@ export interface ILayerState {
     getLayerWmsStyle: (layerPath: string) => string | undefined;
     getLayerWmsAvailableStyles: (layerPath: string) => TypeMetadataWMSCapabilityLayerStyle[] | undefined;
     getLayerSettings: (layerPath: string) => string[];
+    getLayerHasText: (layerPath: string) => boolean;
+    getLayerTextVisibility: (layerPath: string) => boolean;
     refreshLayer: (layerPath: string) => Promise<void>;
     reloadLayer: (layerPath: string) => void;
     toggleItemVisibility: (layerPath: string, item: TypeLegendItem) => void;
     toggleItemVisibilityAndWait: (layerPath: string, item: TypeLegendItem) => Promise<void>;
+    setLayerTextVisibility: (layerPath: string, visible: boolean) => void;
     setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
     setAllItemsVisibilityAndWait: (layerPath: string, visibility: boolean) => Promise<void>;
     setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
@@ -268,6 +271,26 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       },
 
       /**
+       * Checks if a layer has a text layer.
+       * @param {string} layerPath - The layer path of the layer to check.
+       * @returns {boolean} True if the layer has a text layer, false otherwise.
+       */
+      getLayerHasText: (layerPath: string): boolean => {
+        // Redirect to event processor
+        return LegendEventProcessor.getLayerHasText(get().mapId, layerPath);
+      },
+
+      /**
+       * Gets the text visibility state for a layer.
+       * @param {string} layerPath - The layer path of the layer to check.
+       * @returns {boolean | undefined} True if text is visible, false otherwise. Returns undefined if layer has no text.
+       */
+      getLayerTextVisibility: (layerPath: string): boolean | undefined => {
+        // Redirect to event processor
+        return LegendEventProcessor.getLayerTextVisibility(get().mapId, layerPath);
+      },
+
+      /**
        * Refresh layer and set states to original values.
        * @param {string} layerPath - The layer path of the layer to change.
        */
@@ -313,6 +336,16 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
       toggleItemVisibilityAndWait: (layerPath: string, item: TypeLegendItem): Promise<void> => {
         // Redirect to processor
         return LegendEventProcessor.toggleItemVisibility(get().mapId, layerPath, item, true);
+      },
+
+      /**
+       * Sets the text visibility for a layer.
+       * @param {string} layerPath - The layer path of the layer to change.
+       * @param {boolean} visible - True to show text, false to hide text.
+       */
+      setLayerTextVisibility: (layerPath: string, visible: boolean): void => {
+        // Redirect to event processor
+        LegendEventProcessor.setLayerTextVisibility(get().mapId, layerPath, visible);
       },
 
       /**
@@ -904,6 +937,8 @@ export const useLayerSelectorStyleConfig = createLayerSelectorHook('styleConfig'
 export const useLayerSelectorRasterFunction = createLayerSelectorHook('rasterFunction');
 export const useLayerSelectorMosaicRule = createLayerSelectorHook('mosaicRule');
 export const useLayerSelectorWmsStyle = createLayerSelectorHook('wmsStyle');
+export const useLayerSelectorHasText = createLayerSelectorHook('hasText');
+export const useLayerSelectorTextVisibility = createLayerSelectorHook('textVisible');
 
 // Store Actions
 export const useLayerStoreActions = (): LayerActions => useStore(useGeoViewStore(), (state) => state.layerState.actions);
