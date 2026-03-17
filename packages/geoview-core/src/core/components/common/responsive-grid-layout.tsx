@@ -409,7 +409,8 @@ const ResponsiveGridLayout = forwardRef(
           return customGet(guide?.footerPanel?.children, `${key}.content`);
         })
         .filter((item) => item !== undefined)
-        .join('\n')
+        // Use \n\n (blank line) so markdown-to-jsx treats each section as a new block
+        .join('\n\n')
         // Remove Top/Haut anchor links when rendering individual sections in tabs
         .replace(/<a href="[^"]*">(Top|Haut de page)<\/a>/g, '');
 

@@ -313,20 +313,27 @@ Les couches peuvent être en format de trame ou vectoriel. Voici les types de co
 | Tuile XYZ                     | Couche d’entités OGC API    |
 | WMS                           | CSV                         |
 | Image statique                | WFS                         |
-| Couche de tuiles vectorielles |
+| Couche de tuiles vectorielles | KML                         |
+| Vector tiles layer            | WKB                         |
+| COG - Geotiff                 | Shapefile                   |
+| WMTS                          |                             |
 
 _N.B. : Si une couche ne se charge pas correctement, un message d’erreur s’affichera dans l’outil de *notification* de la barre latérale. Au lieu d’utiliser les actions standard pour les couches, vous pouvez soit recharger la couche (surtout utile s’il y a un problème temporaire de connexion réseau), soit la retirer. Si vous retirez la couche, elle sera retirée complètement du sélecteur de couches._
 
 =3!layerSettings=
 
-#### Paramètres des couches
+#### Détails de la couche
 
-Si vous cliquez sur une couche dans la section de gauche, ses paramètres s’afficheront dans celle de droite.
+Si vous cliquez sur une couche dans la section de gauche, ses détails s'afficheront dans celle de droite.
 
-_N.B. : Les paramètres accessibles dépendent de plusieurs facteurs, comme le type de couche et la configuration._
+L'en-tête de la section de droite affiche le nom de la couche, un sous-titre (p. ex. le nombre de classes visibles), ainsi que les boutons **Info** et **Paramètres** décrits ci-dessous.
+
+_N.B. : Les boutons accessibles dépendent de plusieurs facteurs, comme le type de couche et la configuration._
 
 | Symbole                                                                                                                            | Nom                                   | Description                                                                                                                                                                                                 |
 | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <img src="{{assetsURL}}/img/guide/layers/settings_60.svg" alt="Une icône représentant la fonction « Paramètres »" />               | Paramètres                            | Ouvre le panneau des paramètres pour la couche sélectionnée (_voir la section Panneau des paramètres ci-dessous_). L'icône se change en flèche de retour pour revenir à la vue des détails.                 |
+| <img src="{{assetsURL}}/img/guide/layers/info_60.svg" alt="Une icône représentant la fonction « Info »" />                         | Info                                  | Ouvre le panneau d'information pour la couche sélectionnée (_voir la section Panneau d'information ci-dessous_). L'icône se change en flèche de retour pour revenir à la vue des détails.                   |
 | <img src="{{assetsURL}}/img/guide/layers/table_view_60.svg" alt="Une icône représentant la fonction « Table détaillée »" />        | Table détaillée                       | Ouvre une vue de table de base avec des fonctionnalités simplifiées. Pour la table avancée complète, si disponible, accédez directement au panneau Tableau de Données ou ouvrez-le depuis la table de base. |
 | <img src="{{assetsURL}}/img/guide/layers/time_slider_30.svg" alt="Une icône représentant la fonction « Curseur Temporel »" />      | Voir dans le panneau Curseur Temporel | Ouvre le panneau Curseur Temporel pour cette couche, vous permettant de visualiser les données temporelles.                                                                                                 |
 | <img src="{{assetsURL}}/img/guide/layers/refresh_60.svg" alt="Une icône représentant la fonction « Réinitialiser la couche »" />   | Réinitialiser la couche               | Réinitialiser la couche dans sont état initial.                                                                                                                                                             |
@@ -339,23 +346,82 @@ _N.B. : Lorsque la couche est cachée, les fonctions affectant la couche sur la 
 
 **Classes de couches**
 
-Si la couche possède des classes, elles seront indiquées dans ses paramètres. Cochez ou décochez la case à côté de la classe pour afficher ou masquer celle-ci.
+Si la couche possède des classes, elles seront indiquées dans ses détails. Cochez ou décochez la case à côté de la classe pour afficher ou masquer celle-ci.
 
 On voit le nombre de classes visibles sous le nom de la couche.
 
-**Plus d'informations**
+#### Panneau d'information de la couche
 
-Des détails techniques supplémentaires sur la couche sont affichés dans cette section, qui peut inclure :
+Cliquez sur le bouton **Info** <img src="{{assetsURL}}/img/guide/layers/info_60.svg" alt="Icône info" /> dans l'en-tête des détails de la couche pour ouvrir le panneau d'information. Ce panneau affiche les détails techniques en lecture seule de la couche. Cliquez sur la flèche de retour pour revenir à la vue des détails.
+
+Le panneau d'information peut inclure les sections suivantes :
+
+**Informations du service**
 
 - **Type** : Le type de couche (p. ex., service dynamique ESRI, GeoJSON, WMS)
 - **Projection du service** : Le système de référence de coordonnées utilisé par le service (p. ex., EPSG:3978, EPSG:3857)
-- **Filtres actifs** : les filtres actifs appliqués à la couche
-- **Dimension temporelle** : Si la couche contient des données temporelles, cela indique le nom du champ et la plage de dates minimum/maximum
 - **Ressource** : L'URL ou le chemin vers la source de données
+- **Métadonnées** : Un lien vers l'enregistrement de métadonnées (si disponible)
+- **Étendue** : L'étendue de la couche dans la projection actuelle de la carte et en EPSG:4326
+
+**Filtres actifs**
+
+Liste de tous les filtres actuellement appliqués à la couche, qui peuvent inclure :
+
+- Filtre de couche par défaut
+- Filtre de classe
+- Filtre du tableau de données
+- Filtre du curseur temporel
+
+Si aucun filtre n'est actif, « Aucun » est affiché.
+
+**Paramètres temporels**
+
+Si la couche contient des données temporelles, cette section affiche :
+
+- Format d'affichage de la date
+- Mode temporel
+- Fuseau horaire
+- Nom du champ de dimension temporelle et plage de dates min/max
+
+**Dimension temporelle (Curseur Temporel)**
+
+Si la couche possède une configuration de Curseur Temporel, des détails temporels supplémentaires spécifiques au curseur sont affichés.
 
 **Attribution**
 
-Si des informations d'attribution sont disponibles pour la couche, elles seront affichées dans cette section. L'attribution comprend généralement les avis de droits d'auteur, les sources de données et les remerciements requis par le fournisseur de données.
+Si des informations d'attribution sont disponibles pour la couche, elles seront affichées ici. L'attribution comprend généralement les avis de droits d'auteur, les sources de données et les remerciements requis par le fournisseur de données.
+
+#### Panneau des paramètres de la couche
+
+Cliquez sur le bouton **Paramètres** <img src="{{assetsURL}}/img/guide/layers/settings_60.svg" alt="Icône paramètres" /> dans l'en-tête des détails de la couche pour ouvrir le panneau des paramètres. Ce panneau fournit des contrôles interactifs pour personnaliser le rendu de la couche. Cliquez sur la flèche de retour pour revenir à la vue des détails.
+
+_N.B. : Le bouton Paramètres n'apparaît que si la couche possède au moins un paramètre configurable ou un interrupteur d'interaction._
+
+Le panneau des paramètres peut inclure les sections suivantes (selon le type de couche) :
+
+**Fonction raster** _(couches ESRI Image uniquement)_
+
+Sélectionnez une fonction raster pour modifier le rendu de l'imagerie. Les fonctions disponibles sont affichées sous forme de cartes avec des aperçus miniatures. Le nom de la fonction actuellement sélectionnée est affiché dans l'en-tête de la section. Cliquez sur une carte pour appliquer une fonction raster différente.
+
+**Règle de mosaïque** _(couches ESRI Image uniquement)_
+
+Configurez l'ordre et l'affichage de plusieurs rasters au sein d'un jeu de données en mosaïque. Cette section repliable affiche la méthode et l'opération actuelles dans l'en-tête et fournit les contrôles suivants :
+
+- **Méthode** : Comment les rasters sont priorisés (p. ex., Aucune, Centre, Nadir, Point de vue, Attribut, Verrouiller le raster, Nord-ouest, Ligne de raccord). Les méthodes disponibles dépendent de la configuration du service.
+- **Opération** : Comment les pixels superposés sont résolus (p. ex., Premier, Dernier, Minimum, Maximum, Moyenne, Mélange, Somme).
+- **Ascendant** : Case à cocher pour basculer l'ordre de tri ascendant.
+
+**Style WMS** _(couches WMS uniquement)_
+
+Sélectionnez un style visuel pour la couche WMS. Les styles disponibles sont affichés sous forme de cartes avec des aperçus de légende. Le nom du style actuellement sélectionné est affiché dans l'en-tête de la section. Cliquez sur une carte pour appliquer un style différent.
+
+**Interaction**
+
+Interrupteurs pour contrôler le comportement d'interaction de la couche :
+
+- **Survol** : Lorsqu'activé, le survol d'un élément sur la carte affiche une infobulle avec les informations de l'élément.
+- **Interrogeable** : Lorsqu'activé, cliquer sur la carte interroge les éléments de cette couche.
 
 =3!add=
 
