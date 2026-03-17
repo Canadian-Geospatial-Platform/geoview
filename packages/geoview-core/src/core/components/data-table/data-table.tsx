@@ -49,7 +49,8 @@ import { useTimeSliderFiltersSelector } from '@/core/stores/store-interface-and-
 import { useAppDisplayLanguage, useAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { isImage, delay } from '@/core/utils/utilities';
+import linkifyHtml from 'linkify-html';
+import { isImage, delay, sanitizeHtmlContent, enhanceLinksAccessibility } from '@/core/utils/utilities';
 import { debounce } from '@/core/utils/debounce';
 import { logger } from '@/core/utils/logger';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
@@ -170,6 +171,22 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     );
   }, []);
 
+  const linkifyOptions = useMemo(
+    () => ({
+      attributes: {
+        target: '_blank',
+        rel: 'noopener noreferrer',
+        title: t('details.externalLink'),
+      },
+      defaultProtocol: 'https',
+      format: {
+        url: (value: string) => (value.length > 50 ? `${value.slice(0, 40)}…${value.slice(value.length - 10)}` : value),
+      },
+      ignoreTags: ['script', 'style', 'img'],
+    }),
+    [t]
+  );
+
   /**
    * Create image button which will trigger lightbox.
    * @param {string | number} cellValue value to be rendered in cell.
@@ -178,7 +195,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
    */
   const createLightBoxButton = useCallback(
     (cellValue: string | number, cellId: string): string | number | JSX.Element => {
-      const uniqueButtonId = `${mapId}-${containerType}-btn-${cellId}`;
+      const uniqueButtonId = `${mapId}-${containerType}-btn-${cellId}`; // Create unique ID for focus management after lightbox closes
 
       if (typeof cellValue === 'string' && isImage(cellValue)) {
         return (
@@ -196,12 +213,17 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
 
       // convert string to react component.
       return (typeof cellValue === 'string' && cellValue.length) || typeof cellValue === 'number' ? (
-        <UseHtmlToReact htmlContent={cellValue.toString()} itemOptions={{ tabIndex: 0 }} />
+        <UseHtmlToReact
+          htmlContent={sanitizeHtmlContent(
+            enhanceLinksAccessibility(linkifyHtml(cellValue.toString(), linkifyOptions), t('general.opensInNewTab'))
+          )}
+          itemOptions={{ tabIndex: 0 }}
+        />
       ) : (
         cellValue
       );
     },
-    [initLightBox, t, containerType, mapId]
+    [initLightBox, t, containerType, mapId, linkifyOptions]
   );
 
   /**
@@ -499,7 +521,8 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
       const featureDetailsButtonId = `${mapId}-${containerType}-table-details-btn-${featureIndex}`;
 
       const icon = feature.featureIcon ? (
-        <Box component="img" alt={feature?.nameField ?? ''} src={feature.featureIcon} className="layer-icon" />
+        // WCAG - Using empty alt text for images as descriptive text is not available
+        <Box component="img" alt="" src={feature.featureIcon} className="layer-icon" />
       ) : (
         <Box component="div" aria-label={feature?.nameField ?? ''} className="layer-icon">
           <BrowserNotSupportedIcon />

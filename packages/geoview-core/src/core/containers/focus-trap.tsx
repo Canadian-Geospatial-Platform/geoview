@@ -7,12 +7,12 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 
 import { Modal, Button } from '@/ui';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
+import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 import { getFocusTrapSxClasses } from './containers-style';
-import { ARROW_KEY_CODES, TIMEOUT } from '@/core/utils/constant';
+import { ARROW_KEY_CODES } from '@/core/utils/constant';
+import { logger } from '@/core/utils/logger';
 import { useAppGeoviewHTMLElement, useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { logger } from '@/core/utils/logger';
-import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 
 /**
  * Interface for the focus trap properties
@@ -76,36 +76,11 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   }, [geoviewElement]);
 
   /**
-   * Add effects to intercept first Tab key press and make sure focus goes to the top link
-   * When the app loads and focus is inside the map container, keyboard users won't see the Keyboard navigation dialog
-   * This sets focus to top link and ensures keyboard users will tab into the dialog
+   * Tracks whether the keyboard navigation dialog has been shown to the user.
+   * Tab key presses are intercepted and redirected to skip links until this flag is set.
    */
   const hasBeenPromptedRef = useRef(false);
 
-  // Set initial focus to toplink on mount
-  useEffect(() => {
-    logger.logTraceUseEffect('FOCUS-TRAP - initial focus setup');
-
-    // Small delay to ensure DOM is ready and other components have initialized
-    const focusTimeout = setTimeout(() => {
-      const topLink = document.getElementById(`toplink-${focusTrapId}`);
-
-      if (topLink && !activeTrapGeoView && !hasBeenPromptedRef.current) {
-        const currentFocus = document.activeElement;
-
-        // Only set focus if current focus is within the geoview container
-        // This prevents stealing focus from elements outside the viewer
-        if (geoviewElement.contains(currentFocus)) {
-          topLink.focus();
-          hasBeenPromptedRef.current = true;
-        }
-      }
-    }, TIMEOUT.topLinkFocusDelay); // Delay to let panels initialize
-
-    return () => clearTimeout(focusTimeout);
-  }, [focusTrapId, activeTrapGeoView, geoviewElement]);
-
-  // Intercept Tab navigation within geoview container to ensure toplink is visited
   useEffect(() => {
     logger.logTraceUseEffect('FOCUS-TRAP - Tab navigation guard');
 
@@ -149,7 +124,7 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   }, [open]);
 
   /**
-   * Disable scrolling on keydown space, so that screen doesnt scroll down.
+   * Disable scrolling on keydown space, so that screen doesn't scroll down.
    * when focus is set to map and arrows and enter keys are used to navigate the map
    *
    * @param {KeyboardEvent} evt the keyboard event to trap
