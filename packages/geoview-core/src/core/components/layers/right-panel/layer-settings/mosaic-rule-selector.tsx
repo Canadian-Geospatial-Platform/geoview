@@ -54,6 +54,41 @@ export function MosaicRulePanel({ layerDetails }: MosaicRulePanelProps): JSX.Ele
   const currentOperation = mosaicRule?.mosaicOperation ?? 'MT_FIRST';
   const currentAscending = mosaicRule?.ascending ?? true;
 
+  // Maps for translating method/operation keys to display labels
+  const METHOD_LABEL_KEYS: Record<string, string> = useMemo(
+    () => ({
+      esriMosaicNone: 'layers.settings.mosaicMethodNone',
+      esriMosaicCenter: 'layers.settings.mosaicMethodCenter',
+      esriMosaicNadir: 'layers.settings.mosaicMethodNadir',
+      esriMosaicViewpoint: 'layers.settings.mosaicMethodViewpoint',
+      esriMosaicAttribute: 'layers.settings.mosaicMethodAttribute',
+      esriMosaicLockRaster: 'layers.settings.mosaicMethodLockRaster',
+      esriMosaicNorthwest: 'layers.settings.mosaicMethodNorthwest',
+      esriMosaicSeamline: 'layers.settings.mosaicMethodSeamline',
+    }),
+    []
+  );
+
+  const OPERATION_LABEL_KEYS: Record<string, string> = useMemo(
+    () => ({
+      MT_FIRST: 'layers.settings.mosaicOperationFirst',
+      MT_LAST: 'layers.settings.mosaicOperationLast',
+      MT_MIN: 'layers.settings.mosaicOperationMin',
+      MT_MAX: 'layers.settings.mosaicOperationMax',
+      MT_MEAN: 'layers.settings.mosaicOperationMean',
+      MT_BLEND: 'layers.settings.mosaicOperationBlend',
+      MT_SUM: 'layers.settings.mosaicOperationSum',
+    }),
+    []
+  );
+
+  // Build a summary showing the current selections
+  const selectionSummary = useMemo(() => {
+    const methodLabel = t(METHOD_LABEL_KEYS[currentMethod] ?? currentMethod);
+    const operationLabel = t(OPERATION_LABEL_KEYS[currentOperation] ?? currentOperation);
+    return `${methodLabel} · ${operationLabel}`;
+  }, [currentMethod, currentOperation, t, METHOD_LABEL_KEYS, OPERATION_LABEL_KEYS]);
+
   // Handlers with stable references
   const handleChangeMethod = useCallback(
     (event: React.ChangeEvent<HTMLInputElement> | (Event & { target: { value: unknown; name: string } })): void => {
@@ -141,7 +176,12 @@ export function MosaicRulePanel({ layerDetails }: MosaicRulePanelProps): JSX.Ele
     <Box sx={sxClasses.settingsSection}>
       <Box sx={sxClasses.settingsSectionHeader} onClick={handleToggle} onKeyDown={handleToggleKeyDown} role="button" tabIndex={0}>
         <CollectionsIcon fontSize="small" />
-        <Typography sx={sxClasses.settingsSectionTitle}>{t('layers.settings.updateMosaicRule')}</Typography>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography sx={sxClasses.settingsSectionTitle}>{t('layers.settings.updateMosaicRule')}</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ fontSize: theme.palette.geoViewFontSize.sm }} noWrap>
+            {selectionSummary}
+          </Typography>
+        </Box>
         {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
       </Box>
       <Collapse in={expanded} sx={{ marginTop: expanded ? '12px' : 0 }}>

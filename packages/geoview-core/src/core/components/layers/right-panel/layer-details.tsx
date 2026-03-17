@@ -633,6 +633,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
               justifyContent: 'space-between',
               width: '100%',
               alignItems: 'center',
+              gap: '15px',
             }}
           >
             <Box sx={{ textAlign: 'left', flex: 1, minWidth: 0, [theme.breakpoints.down('sm')]: { display: 'none' } }}>

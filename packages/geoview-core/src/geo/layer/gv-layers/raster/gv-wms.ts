@@ -78,6 +78,9 @@ export class GVWMS extends AbstractGVRaster {
   constructor(olSource: ImageWMS, layerConfig: OgcWmsLayerEntryConfig) {
     super(olSource, layerConfig);
 
+    // Initialize the active WMS style from the source params or layer config
+    this.#wmsStyle = (olSource.getParams()?.STYLES as string) || layerConfig.getStyleToUse();
+
     // Create the image layer options.
     const imageLayerOptions: ImageOptions<ImageWMS> = {
       source: olSource,
@@ -601,6 +604,15 @@ export class GVWMS extends AbstractGVRaster {
    */
   setGetFeatureInfoTolerance(value: number): void {
     this.#getFeatureInfoTolerance = value;
+  }
+
+  /**
+   * Gets the currently active WMS style identifier.
+   *
+   * @returns The active WMS style name, or undefined if none is set.
+   */
+  getWmsStyle(): string | undefined {
+    return this.#wmsStyle;
   }
 
   /**

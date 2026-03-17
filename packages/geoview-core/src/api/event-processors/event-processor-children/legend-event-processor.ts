@@ -31,6 +31,7 @@ import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raste
 import { Projection } from '@/geo/utils/projection';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
+import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { logger } from '@/core/utils/logger';
 import { doTimeout, type DelayJob } from '@/core/utils/utilities';
 
@@ -961,6 +962,7 @@ export class LegendEventProcessor extends AbstractEventProcessor {
           mosaicRule: layer instanceof GVEsriImage ? layer.getMosaicRule() : undefined,
           hasText: layer instanceof AbstractGVVector ? layer.getTextOLLayer() !== undefined : undefined,
           textVisible: layer instanceof AbstractGVVector ? layer.getTextVisible() : undefined,
+          wmsStyle: layer instanceof GVWMS ? layer.getWmsStyle() : undefined,
         };
 
         // If layer is regular (not group)

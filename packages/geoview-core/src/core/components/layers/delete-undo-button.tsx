@@ -185,8 +185,6 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
         iconRef={deleteButtonRef}
         onClick={handleDeleteClick}
         className="buttonOutline"
-        edge="end"
-        size="small"
         onKeyDown={handleDeleteKeyDown}
         aria-label={t('layers.deleteLayer')}
       >
@@ -201,8 +199,6 @@ export function DeleteUndoButton(props: DeleteUndoButtonProps): JSX.Element {
         aria-label={t('layers.deleteLayer')}
         onClick={handleDeleteClick}
         className="buttonOutline"
-        edge="end"
-        size="small"
         disabled
       >
         <DeleteOutlineIcon color="disabled" />

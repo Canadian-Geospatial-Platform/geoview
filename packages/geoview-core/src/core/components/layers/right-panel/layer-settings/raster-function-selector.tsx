@@ -191,7 +191,14 @@ export function RasterFunctionPanel({ layerDetails }: RasterFunctionPanelProps):
     <Box sx={sxClasses.settingsSection}>
       <Box sx={sxClasses.settingsSectionHeader} onClick={handleToggle} onKeyDown={handleToggleKeyDown} role="button" tabIndex={0}>
         <FunctionsIcon fontSize="small" />
-        <Typography sx={sxClasses.settingsSectionTitle}>{t('layers.settings.selectRasterFunction')}</Typography>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography sx={sxClasses.settingsSectionTitle}>{t('layers.settings.selectRasterFunction')}</Typography>
+          {currentRasterFunction && (
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: theme.palette.geoViewFontSize.sm }} noWrap>
+              {currentRasterFunction}
+            </Typography>
+          )}
+        </Box>
         {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
       </Box>
       <Collapse in={expanded} sx={{ marginTop: expanded ? '12px' : 0 }}>
