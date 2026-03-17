@@ -6,7 +6,7 @@ import type { LayerListEntry } from './layer-list';
 import { LayerList } from './layer-list';
 import type { ResponsiveGridLayoutExposedMethods } from './responsive-grid-layout';
 import { ResponsiveGridLayout } from './responsive-grid-layout';
-import { Tooltip, Typography } from '@/ui';
+import { Typography } from '@/ui';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { useLayerSelectorName } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -31,10 +31,6 @@ interface LayoutProps {
 // Constants outside component to prevent recreating every render
 const TITLE_STYLES = {
   fontWeight: '600',
-  overflow: 'hidden',
-  display: '-webkit-box',
-  webkitBoxOrient: 'vertical',
-  webkitLineClamp: '2',
 } as const;
 
 interface LayoutExposedMethods {
@@ -110,11 +106,9 @@ const Layout = forwardRef(
       };
 
       return (
-        <Tooltip title={layerName} placement="top" arrow>
           <Typography sx={sxClasses} component="h3">
             {layerName}
           </Typography>
-        </Tooltip>
       );
     }, [containerType, layerName, theme.breakpoints, theme.palette.geoViewFontSize.lg, toggleMode]);
 

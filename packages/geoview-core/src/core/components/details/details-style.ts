@@ -1,5 +1,6 @@
 import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
+import { visuallyHidden } from '@/ui/style/default';
 
 /**
  * Get custom sx classes for the details
@@ -41,8 +42,10 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     overflowX: 'hidden',
   },
   featureInfoRow: {
-    margin: '5px 0',
-    padding: '5px',
+    '& td, & th': {
+      padding: '5px',
+      borderBottom: 'none',
+    },
     '&:nth-of-type(odd)': {
       backgroundColor: theme.palette.geoViewColor.bgColor.darken(0.1),
       color: theme.palette.geoViewColor.bgColor.darken(0.9),
@@ -53,6 +56,7 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     wordBreak: 'break-word',
     overflowX: 'auto',
     textOverflow: 'ellipsis',
+    whiteSpace: 'pre-wrap',
     ' table': {
       border: '1px solid',
       width: '100%',
@@ -66,10 +70,19 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
       whiteSpace: 'nowrap',
     },
   },
+  featureInfoItemImage: {
+    maxWidth: '100%',
+    height: 'auto',
+    display: 'block',
+  },
   boxContainerFeatureInfo: {
     wordWrap: 'break-word',
     fontSize: theme.palette.geoViewFontSize.default,
     lineHeight: '19px',
+    '& .MuiTable-root': {
+      borderCollapse: 'separate',
+      borderSpacing: 0,
+    },
   },
   flexBoxAlignCenter: {
     display: 'flex',
@@ -91,6 +104,12 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     marginBottom: '10px',
     width: '100%',
   },
+  imageButton: {
+    background: 'transparent',
+    '&:focus-visible': {
+      border: '2px solid currentColor',
+    },
+  },
   coordinateInfoContainer: {
     backgroundColor: theme.palette.geoViewColor.bgColor.light[600],
     padding: '16px',
@@ -106,4 +125,5 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
   coordinateInfoSectionTitle: {
     fontWeight: 'bold',
   },
+  visuallyHidden,
 });

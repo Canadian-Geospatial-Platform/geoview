@@ -1,27 +1,25 @@
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { Box } from '@/ui';
 import type { LightBoxSlides } from '@/core/components/lightbox/lightbox';
 import { LightboxImg } from '@/core/components/lightbox/lightbox';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
-import { TIMEOUT, LIGHTBOX_SELECTORS } from '@/core/utils/constant';
+import { TIMEOUT } from '@/core/utils/constant';
 
 // Constants outside component to prevent recreating every render
 const BASE64_IMAGE_PATTERN = /^data:image\/(png|jpeg|gif|webp);base64/;
-const MIN_SCALE = 1;
 
 // Define props interface for BaseLightBoxComponent
 interface BaseLightBoxProps {
   isLightBoxOpen: boolean;
   slides: LightBoxSlides[];
   slidesIndex: number;
-  imgScale?: number;
   returnFocusId: string;
   onExit: () => void;
   onSlideChange?: (index: number) => void;
 }
 interface UseLightBoxReturnType {
-  initLightBox: (images: string, altText: string, returnFocusId: string, index?: number, scale?: number) => void;
+  initLightBox: (images: string, altText: string, returnFocusId: string, index?: number) => void;
   LightBoxComponent: () => JSX.Element;
 }
 
@@ -31,66 +29,20 @@ const BaseLightBoxComponent = memo(function BaseLightBoxComponent({
   isLightBoxOpen,
   slides,
   slidesIndex,
-  imgScale,
   returnFocusId,
   onExit,
   onSlideChange,
 }: BaseLightBoxProps) {
   logger.logTraceRender('components/common/use-lightbox (BaseLightBoxComponent)');
 
-  const [currentScale, setCurrentScale] = useState(imgScale);
   const activeTrapGeoView = useUIActiveTrapGeoView();
-
-  // Calculate scale when image changes
-  const calculateScale = useCallback((imageUrl: string) => {
-    const img = new Image();
-    img.onload = () => {
-      const container = document.querySelector(LIGHTBOX_SELECTORS.CONTAINER);
-      if (container) {
-        const containerRect = container.getBoundingClientRect();
-        const availableWidth = containerRect.width - 40;
-        const availableHeight = containerRect.height - 40;
-
-        // Calculate aspect ratios
-        const containerAspectRatio = availableWidth / availableHeight;
-        const imageAspectRatio = img.width / img.height;
-
-        // If image is taller than container (portrait)
-        let finalScale;
-        if (imageAspectRatio < containerAspectRatio) {
-          // Use height as the primary constraint
-          finalScale = availableHeight / img.height;
-        } else {
-          // Use width as the primary constraint
-          finalScale = availableWidth / img.width;
-        }
-
-        // Set a minimum scale to prevent images from being too small
-        finalScale = Math.max(finalScale, MIN_SCALE);
-
-        setCurrentScale(finalScale);
-        logger.logDebug('LightBox Scale', finalScale, img.width, img.height);
-      }
-    };
-    img.src = imageUrl;
-  }, []);
 
   const handleSlideChange = useCallback(
     (index: number) => {
-      if (slides[index]) {
-        calculateScale(slides[index].src);
-      }
-      onSlideChange?.(index); // Call the prop if provided
+      onSlideChange?.(index);
     },
-    [calculateScale, onSlideChange, slides]
+    [onSlideChange]
   );
-
-  // Update scale when slides or index changes
-  useEffect(() => {
-    if (slides[slidesIndex]) {
-      calculateScale(slides[slidesIndex].src);
-    }
-  }, [slides, slidesIndex, calculateScale]);
 
   const handleLightboxExit = useCallback(() => {
     onExit();
@@ -111,14 +63,7 @@ const BaseLightBoxComponent = memo(function BaseLightBoxComponent({
   if (!isLightBoxOpen) return <Box />;
 
   return (
-    <LightboxImg
-      open={isLightBoxOpen}
-      slides={slides}
-      index={slidesIndex}
-      scale={currentScale}
-      exited={handleLightboxExit}
-      onSlideChange={handleSlideChange}
-    />
+    <LightboxImg open={isLightBoxOpen} slides={slides} index={slidesIndex} exited={handleLightboxExit} onSlideChange={handleSlideChange} />
   );
 });
 
@@ -130,7 +75,6 @@ export function useLightBox(): UseLightBoxReturnType {
   const [isLightBoxOpen, setIsLightBoxOpen] = useState(false);
   const [slides, setSlides] = useState<LightBoxSlides[]>([]);
   const [slidesIndex, setSlidesIndex] = useState(0);
-  const [imgScale, setImgScale] = useState<number | undefined>();
   const [storedReturnFocusId, setStoredReturnFocusId] = useState('0');
 
   // Callbacks
@@ -152,11 +96,10 @@ export function useLightBox(): UseLightBoxReturnType {
   }, []);
 
   const initLightBox = useCallback(
-    (images: string, altText: string, returnFocusId: string, index?: number, scale?: number): void => {
+    (images: string, altText: string, returnFocusId: string, index?: number): void => {
       setIsLightBoxOpen(true);
       setSlides(createSlidesList(images, altText));
       setSlidesIndex(index ?? 0);
-      setImgScale(scale);
       setStoredReturnFocusId(returnFocusId);
     },
     [createSlidesList]
@@ -168,12 +111,11 @@ export function useLightBox(): UseLightBoxReturnType {
         isLightBoxOpen={isLightBoxOpen}
         slides={slides}
         slidesIndex={slidesIndex}
-        imgScale={imgScale}
         returnFocusId={storedReturnFocusId}
         onExit={handleExit}
       />
     );
-  }, [isLightBoxOpen, slides, slidesIndex, imgScale, storedReturnFocusId, handleExit]);
+  }, [isLightBoxOpen, slides, slidesIndex, storedReturnFocusId, handleExit]);
 
   return {
     initLightBox,

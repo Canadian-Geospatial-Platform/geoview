@@ -209,5 +209,16 @@ export const getSxClasses = (theme: Theme): SxClasses => ({
       borderLeft: 'none !important',
     },
   },
+  imageButton: {
+    backgroundColor: 'transparent',
+    '&:focus-visible': {
+      border: '2px solid currentColor',
+    },
+  },
+  wmsImage: {
+    maxWidth: '100%',
+    height: 'auto',
+    display: 'block',
+  },
   visuallyHidden,
 });

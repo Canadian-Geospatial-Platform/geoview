@@ -422,6 +422,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
    * Handles click to remove all features in right panel.
    */
   const handleClearAllHighlights = (): void => {
+    if (checkedFeatures.length === 0) return;
     // clear all highlights from features on the map in all layers
     removeHighlightedFeature('all');
     // clear checked features array
@@ -717,7 +718,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
         <Box sx={sxClasses.rightPanelContainer} className="guide-content-container">
           <Grid container sx={sxClasses.rightPanelBtnHolder}>
             <Grid size={{ xs: 6 }} sx={{ alignSelf: 'center' }}>
-              <Box>
+              <Box role="status" aria-live="polite" aria-atomic="true">
                 {t('details.featureDetailsTitle')
                   .replace('{count}', `${currentFeatureIndex + 1}`)
                   .replace('{total}', `${memoSelectedLayerDataFeatures?.length}`)}
@@ -737,11 +738,6 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
                       }
                     }}
                     aria-disabled={isPrevDisabled}
-                    sx={{
-                      opacity: isPrevDisabled ? 0.5 : 1,
-                      cursor: isPrevDisabled ? 'not-allowed' : 'pointer',
-                      pointerEvents: isPrevDisabled ? 'none' : 'auto',
-                    }}
                     className="buttonOutline"
                   >
                     <ArrowBackIosOutlinedIcon />
@@ -750,9 +746,6 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
                     iconRef={nextButtonRef}
                     sx={{
                       marginLeft: '16px',
-                      opacity: isNextDisabled ? 0.5 : 1,
-                      cursor: isNextDisabled ? 'not-allowed' : 'pointer',
-                      pointerEvents: isNextDisabled ? 'none' : 'auto',
                     }}
                     aria-label={t('details.nextFeatureBtn')}
                     tooltipPlacement="top"
@@ -797,7 +790,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
             tooltipPlacement="top"
             onClick={() => handleClearAllHighlights()}
             className="buttonOutline"
-            disabled={checkedFeatures.length === 0}
+            aria-disabled={checkedFeatures.length === 0}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', height: 24 }}>
               <ClearHighlightIcon sx={{ fontSize: 24 }} />

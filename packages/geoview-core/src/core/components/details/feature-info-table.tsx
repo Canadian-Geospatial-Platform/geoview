@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import linkifyHtml from 'linkify-html';
 
-import { CardMedia, Box, Grid } from '@/ui';
-import { isImage, stringify, generateId, sanitizeHtmlContent } from '@/core/utils/utilities';
+import { Box, Button, Table, TableHead, TableBody, TableRow, TableCell, TableContainer } from '@/ui';
+import { isImage, stringify, sanitizeHtmlContent, enhanceLinksAccessibility } from '@/core/utils/utilities';
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { useAppDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import {
@@ -17,7 +17,6 @@ import type { TypeDisplayLanguage, TypeFieldEntry } from '@/api/types/map-schema
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { DateMgt, type TemporalMode, type TimeIANA, type TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { useLightBox } from '@/core/components/common';
-import { Button } from '@/ui/button/button';
 import { getSxClasses } from './details-style';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
@@ -35,12 +34,12 @@ interface FeatureItemProps {
   mapId: string;
   containerType: TypeContainerBox;
   featureInfoItem: TypeFieldEntry;
-  onInitLightBox: (images: string, altText: string, returnFocusId: string, index?: number, scale?: number) => void;
+  onInitLightBox: (images: string, altText: string, returnFocusId: string, index?: number) => void;
 }
 
 interface FeatureRowProps {
   featureInfoItem: TypeFieldEntry;
-  onInitLightBox: (images: string, altText: string, returnFocusId: string, index?: number, scale?: number) => void;
+  onInitLightBox: (images: string, altText: string, returnFocusId: string, index?: number) => void;
   language: TypeDisplayLanguage;
   layerDateTemporalMode: TemporalMode;
   displayDateFormat: TypeDisplayDateFormat;
@@ -67,62 +66,57 @@ export const FeatureItem = memo(function FeatureItem({
   const linkifyOptions = useMemo(
     () => ({
       attributes: {
-        title: t('details.externalLink'),
+        target: '_blank',
+        rel: 'noopener noreferrer',
       },
       defaultProtocol: 'https',
       format: {
-        url: (value: string) => (value.length > 50 ? `${value.slice(0, 40)}…${value.slice(value.length - 10)}` : value),
+        url: (value: string) => `${alias || value}`,
       },
       ignoreTags: ['script', 'style', 'img'],
-      target: '_blank',
     }),
-    [t]
+    [alias]
   );
 
   if (alias === 'html') {
     return (
-      <Box key={generateId()} sx={sxClasses.featureInfoItemValue}>
+      <Box sx={sxClasses.featureInfoItemValue}>
         <UseHtmlToReact htmlContent={sanitizeHtmlContent(item)} />
       </Box>
     );
   }
 
   if (typeof item === 'string' && isImage(item)) {
-    const imageElementId = `${mapId}-${containerType}-img-${uniqueItemId}`;
-    const buttonElementId = `${mapId}-${containerType}-btn-${uniqueItemId}`;
+    const buttonElementId = `${mapId}-${containerType}-image-btn-${uniqueItemId}`; // Create unique ID for focus management after lightbox closes
 
     return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginBottom: '5px' }}>
-        <CardMedia
-          key={generateId()}
-          id={imageElementId}
-          sx={{ ...sxClasses.featureInfoItemValue, cursor: 'pointer' }}
-          alt={`${alias} ${index}`}
+      <Button
+        type="icon"
+        sx={sxClasses.imageButton}
+        id={buttonElementId}
+        onClick={() => onInitLightBox(featureInfoItem.value as string, '', buttonElementId, index)}
+        tooltip={t('general.enlargeImage')!} // Tooltip for visual users to indicate the image can be enlarged
+        tooltipPlacement="top"
+        aria-label={t('general.enlargeImageName', { title: index === 0 ? alias : `${alias} ${index + 1}` })!} // WCAG - Descriptive aria-label for screen readers
+        disableRipple
+      >
+        <Box
           src={item}
-          tabIndex={0}
-          title={t('general.clickEnlarge')!}
-          onClick={() => onInitLightBox(featureInfoItem.value as string, `${alias} ${index}`, imageElementId, index)}
-          onKeyDown={(event: React.KeyboardEvent) => {
-            if (event.key === 'Enter') {
-              onInitLightBox(featureInfoItem.value as string, `${alias} ${index}`, imageElementId, index);
-            }
-          }}
+          component="img"
+          sx={sxClasses.featureInfoItemImage}
+          alt="" // WCAG - Using empty alt text for images as descriptive text is not available
         />
-        <Button
-          id={buttonElementId}
-          type="text"
-          sx={{ fontSize: theme.palette.geoViewFontSize.xs }}
-          onClick={() => onInitLightBox(featureInfoItem.value as string, t('general.clickEnlarge'), buttonElementId, index)}
-        >
-          {t('general.clickEnlarge')!}
-        </Button>
-      </Box>
+      </Button>
     );
   }
 
   return (
-    <Box key={generateId()} sx={sxClasses.featureInfoItemValue}>
-      <UseHtmlToReact htmlContent={sanitizeHtmlContent(linkifyHtml(item.toString(), linkifyOptions))} />
+    <Box sx={sxClasses.featureInfoItemValue}>
+      <UseHtmlToReact
+        htmlContent={sanitizeHtmlContent(
+          enhanceLinksAccessibility(linkifyHtml(item.toString(), linkifyOptions), t('general.opensInNewTab'))
+        )}
+      />
     </Box>
   );
 });
@@ -170,43 +164,65 @@ export const FeatureRow = memo(function FeatureRow({
   );
 
   return (
-    <Grid container spacing={5} className="feature-info-row" sx={sxClasses.featureInfoRow}>
-      {featureInfoItem.alias !== 'html' && (
-        <Grid
+    <TableRow className="feature-info-row" sx={sxClasses.featureInfoRow}>
+      {featureInfoItem.alias !== 'html' ? (
+        <>
+          <TableCell
+            component="th"
+            scope="row"
+            sx={{
+              fontWeight: 'bold',
+              width: '50%',
+              verticalAlign: 'top',
+            }}
+          >
+            {alias}
+          </TableCell>
+          <TableCell
+            sx={{
+              wordWrap: 'break-word',
+              paddingRight: '0.3125rem',
+            }}
+          >
+            {stringValues.map((item: string, idx: number) => (
+              <FeatureItem
+                key={`${alias}-${itemIds[idx]}`}
+                item={item}
+                alias={alias}
+                index={idx}
+                uniqueItemId={itemIds[idx]}
+                mapId={mapId}
+                containerType={containerType}
+                featureInfoItem={featureInfoItem}
+                onInitLightBox={onInitLightBox}
+              />
+            ))}
+          </TableCell>
+        </>
+      ) : (
+        <TableCell
+          colSpan={2}
           sx={{
-            fontWeight: 'bold',
-            width: '80%',
-            flexGrow: 0,
-            maxWidth: 'none',
-            flexBasis: 'auto',
+            wordWrap: 'break-word',
+            paddingRight: '0.3125rem',
           }}
         >
-          {alias}
-        </Grid>
+          {stringValues.map((item: string, idx: number) => (
+            <FeatureItem
+              key={`${alias}-${itemIds[idx]}`}
+              item={item}
+              alias={alias}
+              index={idx}
+              uniqueItemId={itemIds[idx]}
+              mapId={mapId}
+              containerType={containerType}
+              featureInfoItem={featureInfoItem}
+              onInitLightBox={onInitLightBox}
+            />
+          ))}
+        </TableCell>
       )}
-      <Grid
-        sx={{
-          marginLeft: 'auto',
-          wordWrap: 'break-word',
-          paddingRight: '0.3125rem',
-          flexGrow: 1,
-        }}
-      >
-        {stringValues.map((item: string, idx: number) => (
-          <FeatureItem
-            key={`${alias}_${itemIds[idx]}`}
-            item={item}
-            alias={alias}
-            index={idx}
-            uniqueItemId={itemIds[idx]}
-            mapId={mapId}
-            containerType={containerType}
-            featureInfoItem={featureInfoItem}
-            onInitLightBox={onInitLightBox}
-          />
-        ))}
-      </Grid>
-    </Grid>
+    </TableRow>
   );
 });
 
@@ -218,6 +234,7 @@ export const FeatureInfoTable = memo(function FeatureInfoTable({
   logger.logTraceRender('components/details/feature-info-table');
 
   // Hooks
+  const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
@@ -234,20 +251,36 @@ export const FeatureInfoTable = memo(function FeatureInfoTable({
   if (featureInfoList.length > 0 && featureInfoList[featureInfoList.length - 1].alias === 'geoviewID') featureInfoList.pop();
 
   return (
-    <Box className="details-feature-info-table" sx={sxClasses.boxContainerFeatureInfo}>
-      {featureInfoList.map((featureInfoItem) => (
-        <FeatureRow
-          key={`${featureInfoItem.alias}_${generateId()}`}
-          featureInfoItem={featureInfoItem}
-          language={language}
-          layerDateTemporalMode={layerDateTemporalMode}
-          displayDateFormat={displayDateFormat}
-          displayDateTimezone={displayDateTimezone}
-          onInitLightBox={initLightBox}
-          containerType={containerType}
-        />
-      ))}
+    <>
+      <TableContainer className="details-feature-info-table" sx={sxClasses.boxContainerFeatureInfo}>
+        <Table aria-label={t('details.featureInfoTable')!}>
+          <TableHead sx={sxClasses.visuallyHidden}>
+            <TableRow>
+              <TableCell component="th" scope="col">
+                {t('details.featureInfoTableField')}
+              </TableCell>
+              <TableCell component="th" scope="col">
+                {t('details.featureInfoTableValue')}
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {featureInfoList.map((featureInfoItem) => (
+              <FeatureRow
+                key={`${layerPath}-${featureInfoItem.fieldKey}`}
+                featureInfoItem={featureInfoItem}
+                language={language}
+                layerDateTemporalMode={layerDateTemporalMode}
+                displayDateFormat={displayDateFormat}
+                displayDateTimezone={displayDateTimezone}
+                onInitLightBox={initLightBox}
+                containerType={containerType}
+              />
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
       <LightBoxComponent />
-    </Box>
+    </>
   );
 });

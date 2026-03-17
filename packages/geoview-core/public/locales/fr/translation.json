@@ -16,11 +16,12 @@
     "started": "démarré",
     "openFullscreen": "Ouvrir en plein écran",
     "closeFullscreen": "Fermer le plein écran",
-    "openGuide": "Ouvrir le guide",
+    "fullScreenAriaLabel": "Plein écran, {{title}}",
     "guide": "Guide",
     "fullScreen": "Plein écran",
     "processing": "Traitement de __param__ element(s) sur __param__",
-    "clickEnlarge": "Cliquer pour agrandir",
+    "enlargeImage": "Agrandir l'image",
+    "enlargeImageName": "Agrandir l'image, {{title}}",
     "show": "Afficher",
     "hide": "Masquer",
     "toggle": "Basculer",
@@ -28,7 +29,8 @@
     "clearSearch": "Effacer la recherche",
     "enable": "Activer",
     "disable": "Désactiver",
-    "panelLabel": "Panneau de {{title}}"
+    "panelLabel": "Panneau de {{title}}",
+    "opensInNewTab": " (s'ouvre dans un nouvel onglet)"
   },
   "mapnav": {
     "arianavbar": "Groupe de buttons vertical pour navigation sur la carte",
@@ -315,7 +317,11 @@
     "ntsMapsheet": "Carte SNRC",
     "elevation": "Élévation",
     "guideControls": "Commandes du guide",
-    "selectLayerAndScrollChart": "Voir dans le panneau Graphique"
+    "selectLayerAndScrollChart": "Voir dans le panneau Graphique",
+    "featureInfoTable": "Informations sur les éléments",
+    "featureInfoTableField": "Champ",
+    "featureInfoTableValue": "Valeur",
+    "featureActions": "Actions sur les éléments"
   },
   "lightbox": {
     "next": "Prochaine",
@@ -459,7 +465,8 @@
     "errorMessage": "Désolé, impossible de trouver le document d'aide!",
     "arrowUp": "Correspondance précédente",
     "arrowDown": "Correspondance suivante",
-    "closeGuide": "Fermer le guide"
+    "closeGuide": "Fermer le guide",
+    "toggleGuide": "Basculer le guide"
   },
   "footerBar": {
     "resizeTooltip": "Redimensionner",
