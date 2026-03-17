@@ -163,16 +163,15 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * Sets the visibility of the layer.
    *
    * @param layerVisibility - The visibility state to set.
+   * @param emitVisibleChanged - Optional, whether to emit a visible changed event after updating the visibility. Defaults to true.
    */
-  override setVisible(layerVisibility: boolean): void {
+  override onSetVisible(layerVisibility: boolean, emitVisibleChanged: boolean = true): void {
     // Call parent to handle geometry layer
-    super.setVisible(layerVisibility);
+    super.onSetVisible(layerVisibility, emitVisibleChanged);
 
     // Sync text layer visibility if it exists
     // Text layer visibility = layerVisibility && textVisible
-    if (this.#textOLLayer) {
-      this.#textOLLayer.setVisible(layerVisibility && this.#textVisible);
-    }
+    this.#textOLLayer?.setVisible(layerVisibility && this.#textVisible);
   }
 
   /**
@@ -186,9 +185,21 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     super.onSetOpacity(opacity, emitOpacityChanged);
 
     // Sync text layer opacity if it exists
-    if (this.#textOLLayer) {
-      this.#textOLLayer.setOpacity(opacity);
-    }
+    this.#textOLLayer?.setOpacity(opacity);
+  }
+
+  /**
+   * Sets the z-index of the layer.
+   *
+   * @param zIndex - The z-index value to set.
+   * @param emitZIndexChanged - Whether to emit the z-index changed event.
+   */
+  protected override onSetZIndex(zIndex: number, emitZIndexChanged: boolean = true): void {
+    // Set z-index for geometry layer
+    super.onSetZIndex(zIndex, emitZIndexChanged);
+
+    // Set z-index for text layer if it exists, ensuring it's above the geometry layers
+    this.#textOLLayer?.setZIndex(zIndex + 100);
   }
 
   /**
@@ -438,9 +449,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     this.#textVisible = visible;
 
     // Update text layer actual visibility if it exists
-    if (this.#textOLLayer) {
-      this.#textOLLayer.setVisible(this.getVisible() && visible);
-    }
+    this.#textOLLayer?.setVisible(this.getVisible() && visible);
 
     // Emit event for text visibility change
     this.#emitTextVisibleChanged({ textVisible: visible });

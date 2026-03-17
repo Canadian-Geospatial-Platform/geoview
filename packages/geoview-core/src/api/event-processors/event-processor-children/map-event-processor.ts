@@ -70,7 +70,6 @@ import type { TypeHoverFeatureInfo } from '@/core/stores/store-interface-and-int
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 
 import { InvalidExtentError, NoBoundsError, PluginError } from '@/core/exceptions/geoview-exceptions';
-import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-vector-tile';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
@@ -1425,24 +1424,13 @@ export class MapEventProcessor extends AbstractEventProcessor {
   /**
    * Set Z index for layers
    *
-   * @param {string} mapId - Id of map to set layer Z indices
-   * @returns {void}
-   * @static
+   * @param mapId - Id of map to set layer Z indices
    */
   static setLayerZIndices = (mapId: string): void => {
     const reversedLayers = [...this.getMapStateProtected(mapId).orderedLayerInfo].reverse();
     reversedLayers.forEach((orderedLayerInfo, index) => {
-      const olLayer = this.getMapViewerLayerAPI(mapId).getOLLayerIfExists(orderedLayerInfo.layerPath);
-      if (olLayer) {
-        olLayer?.setZIndex(index + 10);
-
-        // Make sure text layer z-index above other vector layers
-        const gvLayer = this.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(orderedLayerInfo.layerPath);
-        if (gvLayer instanceof AbstractGVVector) {
-          const textLayer = gvLayer.getTextOLLayer();
-          if (textLayer) textLayer.setZIndex(index + 110);
-        }
-      }
+      const gvLayer = this.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(orderedLayerInfo.layerPath);
+      gvLayer?.setZIndex(index + 10);
     });
   };
 

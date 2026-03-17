@@ -36,6 +36,9 @@ export abstract class AbstractBaseGVLayer {
   /** Keep all callback delegate references */
   #onLayerOpacityChangedHandlers: LayerOpacityChangedDelegate[] = [];
 
+  /** Keep all callback delegate references */
+  #onLayerZIndexChangedHandlers: LayerZIndexChangedDelegate[] = [];
+
   /**
    * Constructs a GeoView base layer to manage an OpenLayer layer, including group layers.
    * @param {ConfigBaseClass} layerConfig - The layer configuration.
@@ -97,6 +100,31 @@ export abstract class AbstractBaseGVLayer {
 
     // If emitting
     if (emitOpacityChanged) this.#emitLayerOpacityChanged({ opacity });
+  }
+
+  /**
+   * Overridable method to set the visibility of the layer.
+   *
+   * @param visible - The desired visibility for the layer.
+   * @param emitVisibleChanged - Optional, whether to emit a visible changed event after updating the visibility. Defaults to true.
+   */
+  protected onSetVisible(visible: boolean, emitVisibleChanged: boolean = true): void {
+    // Internally set the visibility on the actual OL object
+    this.getOLLayer().setVisible(visible);
+
+    // If emitting
+    if (emitVisibleChanged) this.#emitVisibleChanged({ visible });
+  }
+
+  /**
+   * Overridable method to set the z-index of the layer.
+   *
+   * @param zIndex - The desired z-index for the layer.
+   * @param emitZIndexChanged - Optional, whether to emit a z-index changed event after updating the z-index. Defaults to true.
+   */
+  protected onSetZIndex(zIndex: number, emitZIndexChanged: boolean = true): void {
+    this.getOLLayer().setZIndex(zIndex);
+    if (emitZIndexChanged) this.#emitZIndexChanged({ zIndex });
   }
 
   // #endregion OVERRIDES
@@ -386,12 +414,23 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Sets the visibility of the layer (true or false).
-   * @param {boolean} layerVisibility The visibility of the layer.
+   *
+   * @param layerVisibility The visibility of the layer.
+   * @param emitVisibleChanged Optional, whether to emit a visible changed event after updating the visibility. Defaults to true.
    */
-  setVisible(layerVisibility: boolean): void {
-    const curVisible = this.getVisible();
-    this.getOLLayer().setVisible(layerVisibility);
-    if (layerVisibility !== curVisible) this.#emitVisibleChanged({ visible: layerVisibility });
+  setVisible(layerVisibility: boolean, emitVisibleChanged: boolean = true): void {
+    // Redirect
+    this.onSetVisible(layerVisibility, emitVisibleChanged);
+  }
+
+  /**
+   * Sets the z-index of the layer.
+   *
+   * @param zIndex The z-index of the layer.
+   * @param emitZIndexChanged Optional, whether to emit a z-index changed event after updating the z-index. Defaults to true.
+   */
+  setZIndex(zIndex: number, emitZIndexChanged: boolean = true): void {
+    this.onSetZIndex(zIndex, emitZIndexChanged);
   }
 
   /**
@@ -525,6 +564,34 @@ export abstract class AbstractBaseGVLayer {
     EventHelper.offEvent(this.#onLayerOpacityChangedHandlers, callback);
   }
 
+  /**
+   * Emits a z-index changed event.
+   * @param {LayerZIndexChangedEvent} event - The event to emit
+   * @private
+   */
+  #emitZIndexChanged(event: LayerZIndexChangedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerZIndexChangedHandlers, event);
+  }
+
+  /**
+   * Registers a z-index changed event handler.
+   * @param {LayerZIndexChangedDelegate} callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerZIndexChanged(callback: LayerZIndexChangedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerZIndexChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a z-index changed event handler.
+   * @param {LayerZIndexChangedDelegate} callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerZIndexChanged(callback: LayerZIndexChangedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerZIndexChangedHandlers, callback);
+  }
+
   // #endregion EVENTS
 
   // #region STATIC METHODS
@@ -611,3 +678,16 @@ export type LayerOpacityChangedEvent = {
  * Define a delegate for the event handler function signature
  */
 export type LayerOpacityChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, LayerOpacityChangedEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type LayerZIndexChangedEvent = {
+  // The new z-index
+  zIndex: number;
+};
+
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type LayerZIndexChangedDelegate = EventDelegateBase<AbstractBaseGVLayer, LayerZIndexChangedEvent, void>;
