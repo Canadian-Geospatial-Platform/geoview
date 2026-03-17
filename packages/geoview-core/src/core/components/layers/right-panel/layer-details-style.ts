@@ -84,6 +84,8 @@ export const getSxClasses = (theme: Theme): SxStyles => ({
     width: '1px',
     height: '30px',
     backgroundColor: theme.palette.geoViewColor.bgColor.dark[300],
+    // Absorb flex gap so divider spacing equals half a normal gap on each side (7.5px + 1px + 7.5px)
+    margin: '0 -7.5px',
   },
   layerDetailsListGroup: {
     listStyleType: 'disc',
