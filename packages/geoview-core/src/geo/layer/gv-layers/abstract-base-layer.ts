@@ -52,12 +52,14 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Must override method to get the layer attributions
+   *
    * @returns The layer attributions
    */
   protected abstract onGetAttributions(): string[];
 
   /**
    * Must override method to get the layer bounds
+   *
    * @returns A promise of layer bounding box.
    */
   protected abstract onGetBounds(projection: OLProjection, stops: number): Promise<Extent | undefined>;
@@ -135,6 +137,7 @@ export abstract class AbstractBaseGVLayer {
    * Gets the attributions for the layer by calling the overridable function 'onGetAttributions'.
    * When the layer is a GVLayer, its layer attributions are returned.
    * When the layer is a GVGroup, all layers attributions in the group are returned.
+   *
    * @returns The layer attributions.
    */
   getAttributions(): string[] {
@@ -146,6 +149,7 @@ export abstract class AbstractBaseGVLayer {
    * Gets the bounds for the layer in the given projection.
    * When the layer is a GVLayer, its layer bounds are returned.
    * When the layer is a GVGroup, an Extent union of all layers bounds in the group is returned.
+   *
    * @param projection - The projection to get the bounds into.
    * @param stops - The number of stops to use to generate the extent.
    * @returns A promise of layer bounding box.
@@ -159,7 +163,8 @@ export abstract class AbstractBaseGVLayer {
    * Refreshes the layer by calling the overridable function 'onRefresh'.
    * When the layer is a GVLayer its layer source is refreshed.
    * When the layer is a GVGroup, all layers in the group are refreshed.
-   * @param {OLProjection | undefined} projection - Optional, the projection to refresh to.
+   *
+   * @param projection - Optional, the projection to refresh to.
    */
   refresh(projection: OLProjection | undefined): void {
     // Redirect
@@ -176,7 +181,8 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Gets the layer configuration associated with the layer.
-   * @returns {ConfigBaseClass} The layer configuration
+   *
+   * @returns The layer configuration
    */
   getLayerConfig(): ConfigBaseClass {
     return this.#layerConfig;
@@ -184,7 +190,8 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Sets the OpenLayers Layer
-   * @param {BaseLayer} layer - The OpenLayers Layer
+   *
+   * @param layer - The OpenLayers Layer
    */
   protected setOLLayer(layer: BaseLayer): void {
     this.#olLayer = layer;
@@ -192,6 +199,7 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Gets the OpenLayers Layer
+   *
    * @returns The OpenLayers Layer
    */
   getOLLayer(): BaseLayer {
@@ -200,7 +208,8 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Gets the layer path associated with the layer.
-   * @returns {string} The layer path
+   *
+   * @returns The layer path
    */
   getLayerPath(): string {
     return this.#layerConfig.layerPath;
@@ -208,7 +217,8 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Gets the Geoview layer id.
-   * @returns {string} The geoview layer id
+   *
+   * @returns The geoview layer id
    */
   getGeoviewLayerId(): string {
     return this.#layerConfig.getGeoviewLayerId();
@@ -216,7 +226,8 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Gets the geoview layer name.
-   * @returns {string | undefined} The layer name
+   *
+   * @returns The layer name
    */
   getGeoviewLayerName(): string | undefined {
     return this.#layerConfig.getGeoviewLayerName();
@@ -224,6 +235,7 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Gets the layer status
+   *
    * @returns The layer status
    */
   getLayerStatus(): TypeLayerStatus {
@@ -233,6 +245,7 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Gets the layer name or falls back on the layer name in the layer configuration.
+   *
    * @returns The layer name
    */
   getLayerName(): string {
@@ -241,7 +254,8 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Sets the layer name
-   * @param {string | undefined} name - The layer name
+   *
+   * @param name - The layer name
    */
   setLayerName(name: string | undefined): void {
     this.#layerName = name;
@@ -252,7 +266,8 @@ export abstract class AbstractBaseGVLayer {
    * Returns the extent of the layer or undefined if it will be visible regardless of extent. The layer extent is an array of
    * numbers representing an extent: [minx, miny, maxx, maxy].
    * The extent is used to clip the data displayed on the map.
-   * @returns {Extent | undefined} The layer extent.
+   *
+   * @returns The layer extent.
    */
   getExtent(): Extent | undefined {
     return this.getOLLayer().getExtent();
@@ -283,6 +298,7 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Sets the parent layer
+   *
    * @param parent - The parent layer for the current layer if any.
    */
   setParent(parent: GVGroupLayer | undefined): void {
@@ -338,7 +354,8 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Gets the opacity of the layer (between 0 and 1).
-   * @returns {number} The opacity of the layer.
+   *
+   * @returns The opacity of the layer.
    */
   getOpacity(): number {
     return this.getOLLayer().getOpacity();
@@ -367,7 +384,8 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Gets the visibility of the layer (true or false).
-   * @returns {boolean} The visibility of the layer.
+   *
+   * @returns The visibility of the layer.
    */
   getVisible(): boolean {
     return this.getOLLayer().getVisible();
@@ -380,7 +398,8 @@ export abstract class AbstractBaseGVLayer {
    *   - every parent GVGroupLayer up the hierarchy is also visible.
    * This function walks upward through the group layer tree until it reaches
    * the root, returning `false` immediately if any parent is not visible.
-   * @returns {boolean} `true` if this layer and all its parent groups are visible;
+   *
+   * @returns `true` if this layer and all its parent groups are visible;
    *   otherwise `false`.
    */
   getVisibleIncludingParents(): boolean {
@@ -415,8 +434,8 @@ export abstract class AbstractBaseGVLayer {
   /**
    * Sets the visibility of the layer (true or false).
    *
-   * @param layerVisibility The visibility of the layer.
-   * @param emitVisibleChanged Optional, whether to emit a visible changed event after updating the visibility. Defaults to true.
+   * @param layerVisibility - The visibility of the layer.
+   * @param emitVisibleChanged - Optional, whether to emit a visible changed event after updating the visibility. Defaults to true.
    */
   setVisible(layerVisibility: boolean, emitVisibleChanged: boolean = true): void {
     // Redirect
@@ -426,8 +445,8 @@ export abstract class AbstractBaseGVLayer {
   /**
    * Sets the z-index of the layer.
    *
-   * @param zIndex The z-index of the layer.
-   * @param emitZIndexChanged Optional, whether to emit a z-index changed event after updating the z-index. Defaults to true.
+   * @param zIndex - The z-index of the layer.
+   * @param emitZIndexChanged - Optional, whether to emit a z-index changed event after updating the z-index. Defaults to true.
    */
   setZIndex(zIndex: number, emitZIndexChanged: boolean = true): void {
     this.onSetZIndex(zIndex, emitZIndexChanged);
@@ -435,7 +454,8 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Gets the min zoom of the layer.
-   * @returns {number} The min zoom of the layer.
+   *
+   * @returns The min zoom of the layer.
    */
   getMinZoom(): number {
     return this.getOLLayer().getMinZoom();
@@ -443,7 +463,8 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Sets the min zoom of the layer.
-   * @param {number} minZoom The min zoom of the layer.
+   *
+   * @param minZoom - The min zoom of the layer.
    */
   setMinZoom(minZoom: number): void {
     this.getOLLayer().setMinZoom(minZoom);
@@ -451,7 +472,8 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Gets the max zoom of the layer.
-   * @returns {number} The max zoom of the layer.
+   *
+   * @returns The max zoom of the layer.
    */
   getMaxZoom(): number {
     return this.getOLLayer().getMaxZoom();
@@ -459,16 +481,18 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Sets the max zoom of the layer.
-   * @param {number} maxZoom The max zoom of the layer.
+   *
+   * @param maxZoom - The max zoom of the layer.
    */
   setMaxZoom(maxZoom: number): void {
     this.getOLLayer().setMaxZoom(maxZoom);
   }
 
   /**
-   * Checks if layer is visible at the given zoom
-   * @param zoom Zoom level to be compared
-   * @returns {boolean} If the layer is visible at this zoom level
+   * Checks if layer is visible at the given zoo
+   *
+   * @param zoom - Zoom level to be compared
+   * @returns If the layer is visible at this zoom level
    */
   inVisibleRange(zoom: number): boolean {
     const minZoom = this.getOLLayer().getMinZoom();
@@ -482,8 +506,8 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {LayerNameChangedEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitLayerNameChanged(event: LayerNameChangedEvent): void {
     // Emit the event for all handlers
@@ -492,7 +516,8 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Registers a layer name changed event handler.
-   * @param {LayerNameChangedDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onLayerNameChanged(callback: LayerNameChangedDelegate): void {
     // Register the event handler
@@ -501,7 +526,8 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Unregisters a layer name changed event handler.
-   * @param {LayerNameChangedDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offLayerNameChanged(callback: LayerNameChangedDelegate): void {
     // Unregister the event handler
@@ -510,8 +536,8 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {VisibleChangedEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitVisibleChanged(event: VisibleChangedEvent): void {
     // Emit the event for all handlers
@@ -520,7 +546,8 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Registers a visible changed event handler.
-   * @param {VisibleChangedDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onVisibleChanged(callback: VisibleChangedDelegate): void {
     // Register the event handler
@@ -529,7 +556,8 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Unregisters a visible changed event handler.
-   * @param {VisibleChangedDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offVisibleChanged(callback: VisibleChangedDelegate): void {
     // Unregister the event handler
@@ -538,8 +566,8 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Emits opacity changed event.
-   * @param {LayerOpacityChangedEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitLayerOpacityChanged(event: LayerOpacityChangedEvent): void {
     // Emit the event for all handlers
@@ -548,7 +576,8 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Registers an opacity changed event handler.
-   * @param {LayerOpacityChangedDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onLayerOpacityChanged(callback: LayerOpacityChangedDelegate): void {
     // Register the event handler
@@ -557,7 +586,8 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Unregisters an opacity changed event handler.
-   * @param {LayerOpacityChangedDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offLayerOpacityChanged(callback: LayerOpacityChangedDelegate): void {
     // Unregister the event handler
@@ -566,8 +596,8 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Emits a z-index changed event.
-   * @param {LayerZIndexChangedEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitZIndexChanged(event: LayerZIndexChangedEvent): void {
     // Emit the event for all handlers
@@ -576,7 +606,8 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Registers a z-index changed event handler.
-   * @param {LayerZIndexChangedDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onLayerZIndexChanged(callback: LayerZIndexChangedDelegate): void {
     // Register the event handler
@@ -585,7 +616,8 @@ export abstract class AbstractBaseGVLayer {
 
   /**
    * Unregisters a z-index changed event handler.
-   * @param {LayerZIndexChangedDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offLayerZIndexChanged(callback: LayerZIndexChangedDelegate): void {
     // Unregister the event handler
@@ -603,14 +635,12 @@ export abstract class AbstractBaseGVLayer {
    * This method walks top-down through all nested GVGroupLayers until it
    * finds the group whose children contain the specified layer.
    * It proceeds this way, because OpenLayers doesn't have a way to start from a leaf - have to start from the root.
-   * @param {AbstractBaseGVLayer} layer - The layer for which the parent
+   * @param layer - The layer for which the parent
    *   group is being searched.
-   * @param {AbstractBaseGVLayer[]} groupLayers - The list of layers to
+   * @param groupLayers - The list of layers to
    *   search within. Typically this is the root layer group of the map.
-   * @returns {GVGroupLayer | undefined} The parent group layer if found,
+   * @returns The parent group layer if found,
    *   otherwise `undefined` if the layer has no parent.
-   * @private
-   * @static
    */
   static getParent(layer: AbstractBaseGVLayer, groupLayers: AbstractBaseGVLayer[]): GVGroupLayer | undefined {
     // GV This function proceeds this way, because OpenLayers doesn't have a way to start from a leaf - have to start from the root.

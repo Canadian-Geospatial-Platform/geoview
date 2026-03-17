@@ -16,8 +16,9 @@ import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vec
 export class GeoviewTextRenderer {
   /**
    * This method returns true if a style config has a text configuration
-   * @param {TypeLayerStyleConfig} layerStyle - The layer style
-   * @returns {boolean} If the style has a text config
+   *
+   * @param layerStyle - The layer style
+   * @returns If the style has a text config
    */
   static hasStyleText(layerStyle?: TypeLayerStyleConfig): boolean {
     if (!layerStyle) return false;
@@ -26,8 +27,9 @@ export class GeoviewTextRenderer {
 
   /**
    * Check if decluttering should be enabled for the text layer
-   * @param {VectorLayerEntryConfig} layerConfig - The layer configuration
-   * @returns {boolean} Whether decluttering should be enabled
+   *
+   * @param layerConfig - The layer configuration
+   * @returns Whether decluttering should be enabled
    */
   static shouldEnableDeclutter(layerConfig: VectorLayerEntryConfig): boolean {
     // Check layer-wide text config
@@ -53,13 +55,13 @@ export class GeoviewTextRenderer {
 
   /**
    * Method for getting the text style
-   * @param {FeatureLike} feature - The feature to get the text style for
-   * @param {number} resolution - The resolution of the map
-   * @param {TypeLayerStyleSettings} styleSettings - The style settings
-   * @param {TypeLayerTextConfig} layerText - The layer text configuration
-   * @param {TypeAliasLookup} aliasLookup - The alias lookup
-   * @returns {Text | undefined} The text style
-   * @static
+   *
+   * @param feature - The feature to get the text style for
+   * @param resolution - The resolution of the map
+   * @param styleSettings - The style settings
+   * @param layerText - The layer text configuration
+   * @param aliasLookup - The alias lookup
+   * @returns The text style
    */
   static getTextStyle = (
     feature: FeatureLike,
@@ -106,10 +108,10 @@ export class GeoviewTextRenderer {
 
   /**
    * Method for creating Text Style
-   * @param {FeatureLike} feature - The feature to create the text style for
-   * @param {TypeLayerTextConfig} textSettings - The text style settings
-   * @returns {Text | undefined} The text style
-   * @static
+   *
+   * @param feature - The feature to create the text style for
+   * @param textSettings - The text style settings
+   * @returns The text style
    */
   static createTextStyle = (feature: FeatureLike, textSettings: TypeLayerTextConfig): Text | undefined => {
     const {
@@ -207,10 +209,10 @@ export class GeoviewTextRenderer {
 
   /**
    * Get approximate resolution for common zoom levels by projection
-   * @param {number} zoom - The zoom level (0-20)
-   * @param {TypeValidMapProjectionCodes} projection - The map projection (3857 for Web Mercator, 3978 for Canada Lambert)
-   * @returns {number} Approximate resolution for the given zoom and projection
-   * @static
+   *
+   * @param zoom - The zoom level (0-20)
+   * @param projection - The map projection (3857 for Web Mercator, 3978 for Canada Lambert)
+   * @returns Approximate resolution for the given zoom and projection
    */
   static getApproximateResolution(zoom: number, projection: TypeValidMapProjectionCodes = 3857): number {
     if (projection === 3978) {
@@ -228,12 +230,13 @@ export class GeoviewTextRenderer {
 
   /**
    * Wrap text to fit within specified constraints
-   * @param {string} str - The text to wrap
-   * @param {number} width - The maximum width per line
-   * @param {number} maxLines - Maximum number of lines (optional, overrides width if needed)
-   * @returns {string} The wrapped text
-   * @static
+   *
+   * @param str - The text to wrap
+   * @param width - The maximum width per line
+   * @param maxLines - Maximum number of lines (optional, overrides width if needed)
+   * @returns The wrapped text
    */
+
   static wrapText(str: string, width: number, maxLines?: number): string {
     if (!maxLines) {
       // Original behavior when no maxLines specified
@@ -287,10 +290,10 @@ export class GeoviewTextRenderer {
 
   /**
    * Wrap text to a specified width using word boundaries
-   * @param {string} str - The text to wrap
-   * @param {number} width - The maximum width of each line
-   * @returns {string} The wrapped text
-   * @static
+   *
+   * @param str - The text to wrap
+   * @param width - The maximum width of each line
+   * @returns The wrapped text
    */
   static wrapTextByWidth(str: string, width: number): string {
     // No wrapping required
@@ -328,10 +331,10 @@ export class GeoviewTextRenderer {
   /**
    * Process text template by replacing field placeholders with feature values
    * Expects somewhat clean field names, so we shouldn't need to worry about escaping special characters (Dates may still have characters after the colon)
-   * @param {string} template - The text template with {field-name} placeholders
-   * @param {FeatureLike} feature - The feature to get field values from
-   * @returns {string} The processed text with field values substituted
-   * @static
+   *
+   * @param template - The text template with {field-name} placeholders
+   * @param feature - The feature to get field values from
+   * @returns The processed text with field values substituted
    */
   static processTextTemplate(template: string, feature: FeatureLike): string {
     return template.replace(/\{(\w+)(?::([^}]+))?\}/g, (match, fieldName, format) => {
