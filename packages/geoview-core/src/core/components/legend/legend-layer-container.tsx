@@ -2,9 +2,9 @@ import { memo, useId, useMemo, type ComponentType } from 'react';
 
 import { useTranslation } from 'react-i18next';
 
-import { useTheme, ButtonBase } from '@mui/material';
+import { useTheme } from '@mui/material';
 
-import { Box, Collapse, List } from '@/ui';
+import { Box, Button, Collapse, List } from '@/ui';
 import { getSxClasses } from './legend-styles';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { ItemsList } from './legend-layer-items';
@@ -13,6 +13,7 @@ import {
   useLayerSelectorChildren,
   useLayerSelectorIcons,
   useLayerSelectorItems,
+  useLayerSelectorName,
   useLayerSelectorStatus,
   useLayerSelectorSchemaTag,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
@@ -23,7 +24,7 @@ import type { TypeContainerBox } from '@/core/types/global-types';
 
 interface CollapsibleContentProps {
   layerPath: string;
-  initLightBox: (images: string, altText: string, returnFocusId: string, index?: number, scale?: number) => void;
+  initLightBox: (images: string, altText: string, returnFocusId: string, index?: number) => void;
   LegendLayerComponent: ComponentType<LegendLayerProps>;
   showControls: boolean;
   containerType: TypeContainerBox;
@@ -33,31 +34,14 @@ interface CollapsibleContentProps {
 
 interface WMSLegendImageProps {
   imgSrc: string;
-  title: string;
-  initLightBox: (images: string, altText: string, returnFocusId: string, index?: number, scale?: number) => void;
+  title?: string;
+  initLightBox: (images: string, altText: string, returnFocusId: string, index?: number) => void;
   legendExpanded: boolean;
   sxClasses: Record<string, object>;
   mapId: string;
   containerType: TypeContainerBox;
   collapseContainerId: string;
 }
-
-const styles = {
-  imageButton: {
-    padding: 0,
-    border: 'none',
-    background: 'transparent',
-    display: 'block',
-    maxWidth: '90%',
-    '&:focus-visible': {
-      outline: '2px solid',
-      outlineColor: 'primary.main',
-    },
-  },
-  wmsImage: {
-    display: 'block',
-  },
-} as const;
 
 // Extracted WMS Legend Component
 const WMSLegendImage = memo(
@@ -71,21 +55,25 @@ const WMSLegendImage = memo(
     containerType,
     collapseContainerId,
   }: WMSLegendImageProps): JSX.Element => {
+    const { t } = useTranslation();
     const id = useId();
     const buttonId = `${mapId}-${containerType}-legend-image-btn-${id}`; // Create unique ID for focus management after lightbox closes
+    const altText = title ? `${t('legend.title')}, ${title}` : t('legend.title');
 
     return (
       <Collapse id={collapseContainerId} in={legendExpanded} sx={sxClasses.collapsibleContainer} timeout="auto">
-        <ButtonBase
+        <Button
+          type="icon"
+          sx={sxClasses.imageButton}
           id={buttonId}
-          sx={styles.imageButton}
-          onClick={() => initLightBox(imgSrc, '', buttonId, 0, 2)} // WCAG - Using empty alt text for images as descriptive text is not available
-          aria-label={title}
-          title={title}
+          onClick={() => initLightBox(imgSrc, altText, buttonId, 0)}
+          tooltip={t('general.enlargeImage')!}
+          tooltipPlacement="top"
+          aria-label={title ? t('general.enlargeImageName', { title })! : t('general.enlargeImage')!} // WCAG - Descriptive aria-label for screen readers
           disableRipple
         >
-          <Box component="img" src={imgSrc} alt="" sx={styles.wmsImage} />
-        </ButtonBase>
+          <Box component="img" src={imgSrc} alt={altText} sx={sxClasses.wmsImage} />
+        </Button>
       </Collapse>
     );
   }
@@ -102,7 +90,6 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   layerNameId,
 }: CollapsibleContentProps): JSX.Element | null {
   // Hooks
-  const { t } = useTranslation();
   const mapId = useGeoViewMapId();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
@@ -112,6 +99,7 @@ export const CollapsibleContent = memo(function CollapsibleContent({
   const layerChildren = useLayerSelectorChildren(layerPath);
   const layerIcons = useLayerSelectorIcons(layerPath);
   const layerStatus = useLayerSelectorStatus(layerPath);
+  const layerName = useLayerSelectorName(layerPath);
 
   // Log
   logger.logTraceUseMemo('components/legend/legend-layer-container - CollapsibleContent', layerPath, layerChildren?.length);
@@ -129,7 +117,7 @@ export const CollapsibleContent = memo(function CollapsibleContent({
         initLightBox={initLightBox}
         legendExpanded={!isCollapsed}
         sxClasses={sxClasses}
-        title={t('general.clickEnlarge')}
+        title={layerName}
         mapId={mapId}
         containerType={containerType}
         collapseContainerId={collapseContainerId}

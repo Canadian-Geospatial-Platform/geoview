@@ -133,4 +133,5 @@ export const TIMEOUT: Record<string, number> = {
 export const LIGHTBOX_SELECTORS = {
   ROOT: '.yarl__root',
   CONTAINER: '.yarl__container',
+  TOOLBAR: '.yarl__toolbar',
 } as const;

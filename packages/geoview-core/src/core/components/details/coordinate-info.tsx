@@ -43,7 +43,7 @@ export function CoordinateInfoSwitch({ disabled }: CoordinateInfoSwitchProps): J
   }, [toggleCoordinateInfoEnabled]);
 
   return (
-    <Tooltip title={t('details.toggleCoordinateInfo')}>
+    <Tooltip title={t('details.toggleCoordinateInfo')} placement="top">
       <span>
         <Switch
           size={isSmallScreen ? 'small' : 'medium'}
