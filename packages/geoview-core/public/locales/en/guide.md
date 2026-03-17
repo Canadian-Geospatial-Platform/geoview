@@ -349,6 +349,10 @@ Classes for the layer are listed in the layer details if available. Check the ch
 
 The number of classes visible is displayed under the layer name.
 
+**Attribution**
+
+If attribution information is available for the layer, it will be displayed here. Attribution typically includes copyright notices, data sources, and acknowledgments required by the data provider.
+
 #### Layer Info Panel
 
 Click the **Info** button <img src="{{assetsURL}}/img/guide/layers/info_60.svg" alt="Info icon" /> in the layer details header to open the information panel. This panel displays read-only technical details about the layer. Click the back arrow to return to the details view.
@@ -386,10 +390,6 @@ If the layer has time-based data, this section shows:
 **Temporal Dimension (Time Slider)**
 
 If the layer has a Time Slider configuration, additional temporal details specific to the slider are shown.
-
-**Attribution**
-
-If attribution information is available for the layer, it will be displayed here. Attribution typically includes copyright notices, data sources, and acknowledgments required by the data provider.
 
 #### Layer Settings Panel
 

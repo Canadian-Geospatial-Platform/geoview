@@ -350,6 +350,10 @@ Si la couche possède des classes, elles seront indiquées dans ses détails. Co
 
 On voit le nombre de classes visibles sous le nom de la couche.
 
+**Attribution**
+
+Si des informations d'attribution sont disponibles pour la couche, elles seront affichées ici. L'attribution comprend généralement les avis de droits d'auteur, les sources de données et les remerciements requis par le fournisseur de données.
+
 #### Panneau d'information de la couche
 
 Cliquez sur le bouton **Info** <img src="{{assetsURL}}/img/guide/layers/info_60.svg" alt="Icône info" /> dans l'en-tête des détails de la couche pour ouvrir le panneau d'information. Ce panneau affiche les détails techniques en lecture seule de la couche. Cliquez sur la flèche de retour pour revenir à la vue des détails.
@@ -387,10 +391,6 @@ Si la couche contient des données temporelles, cette section affiche :
 **Dimension temporelle (Curseur Temporel)**
 
 Si la couche possède une configuration de Curseur Temporel, des détails temporels supplémentaires spécifiques au curseur sont affichés.
-
-**Attribution**
-
-Si des informations d'attribution sont disponibles pour la couche, elles seront affichées ici. L'attribution comprend généralement les avis de droits d'auteur, les sources de données et les remerciements requis par le fournisseur de données.
 
 #### Panneau des paramètres de la couche
 
