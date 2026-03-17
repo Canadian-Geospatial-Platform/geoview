@@ -1,10 +1,13 @@
 import type { ReactNode, Ref } from 'react';
 import { useState, useCallback, forwardRef, useImperativeHandle, useEffect, useRef, useMemo } from 'react';
+
 import { useTranslation } from 'react-i18next';
+
 import { useMediaQuery } from '@mui/material';
 import type { SxProps } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
 import Markdown from 'markdown-to-jsx';
+
 import { Box, FullscreenIcon, ButtonGroup, Button, Typography, IconButton } from '@/ui';
 import { FocusTrap } from '@/ui';
 
@@ -19,7 +22,6 @@ import { useAppGuide, useAppFullscreenActive, useAppShellContainer } from '@/cor
 import { useUIActiveTrapGeoView, useUIActiveFocusItem } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE, TIMEOUT, LIGHTBOX_SELECTORS } from '@/core/utils/constant';
-
 
 interface ResponsiveGridLayoutProps {
   leftTop?: ReactNode;
@@ -217,10 +219,10 @@ const ResponsiveGridLayout = forwardRef(
       if (isGuideOpen) {
         // Use RAF for next frame
         requestAnimationFrame(() => {
-          document.getElementById(`layout-close-guide-${mapId}`)?.focus();
+          document.getElementById(`${mapId}-${containerType}-guide-close-btn`)?.focus();
         });
       }
-    }, [isGuideOpen, mapId]);
+    }, [isGuideOpen, mapId, containerType]);
 
     // Add a handler to close the guide and return focus to the Guide button
     const handleCloseGuide = useCallback(() => {
@@ -238,6 +240,19 @@ const ResponsiveGridLayout = forwardRef(
         });
       }
     }, [isRightPanelVisible, hasContent, isGuideOpen]);
+
+    const handleEnlargeToggle = useCallback(() => {
+      handleIsEnlarge(!isEnlarged);
+    }, [isEnlarged, handleIsEnlarge]);
+
+    const handleClosePanel = useCallback(() => {
+      setIsRightPanelVisible(false);
+      onRightPanelClosed?.();
+    }, [onRightPanelClosed]);
+
+    const handleToggleFullScreen = useCallback(() => {
+      setIsFullScreen(!isFullScreen);
+    }, [isFullScreen]);
 
     // Add keyboard handler for guide
     const handleGuideKeyDown = useCallback(
@@ -296,7 +311,7 @@ const ResponsiveGridLayout = forwardRef(
           variant="outlined"
           startIcon={isEnlarged ? <ArrowForwardIcon /> : <ArrowBackIcon />}
           sx={{ boxShadow: 'none' }}
-          onClick={() => handleIsEnlarge(!isEnlarged)}
+          onClick={handleEnlargeToggle}
           tooltip={isEnlarged ? t('dataTable.reduceBtn')! : t('dataTable.enlargeBtn')!}
         >
           {isEnlarged ? t('dataTable.reduceBtn') : t('dataTable.enlargeBtn')}
@@ -329,11 +344,9 @@ const ResponsiveGridLayout = forwardRef(
           variant="outlined"
           color="primary"
           startIcon={<CloseIcon sx={{ fontSize: theme.palette.geoViewFontSize.sm }} />}
-          onClick={() => {
-            setIsRightPanelVisible(false);
-            onRightPanelClosed?.();
-          }}
+          onClick={handleClosePanel}
           tooltip={t('general.closeSelection')!}
+          aria-label={t('general.closeSelection')!}
         >
           {t('general.close')}
         </Button>
@@ -341,6 +354,8 @@ const ResponsiveGridLayout = forwardRef(
     };
 
     const renderGuideButton = (): JSX.Element | null => {
+      const isDisabled = isGuideOpen && !hasContent;
+
       return (
         <Button
           ref={guideToggleBtnRef}
@@ -349,10 +364,11 @@ const ResponsiveGridLayout = forwardRef(
           variant="outlined"
           size="small"
           onClick={handleOpenGuide}
-          tooltip={t('general.openGuide')!}
           startIcon={<QuestionMarkIcon />}
           className={`guideButton ${isGuideOpen ? 'active' : ''}`}
-          disabled={isGuideOpen && !hasContent}
+          disabled={isDisabled}
+          aria-pressed={!isDisabled ? isGuideOpen : undefined}
+          tooltip={t('guide.toggleGuide')!}
         >
           {t('general.guide')}
         </Button>
@@ -367,8 +383,13 @@ const ResponsiveGridLayout = forwardRef(
           type="text"
           variant="outlined"
           size="small"
-          onClick={() => setIsFullScreen(!isFullScreen)}
+          onClick={handleToggleFullScreen}
           tooltip={isFullScreen ? t('general.closeFullscreen')! : t('general.openFullscreen')!}
+          aria-label={
+            isGuideOpen
+              ? t('general.fullScreenAriaLabel', { title: t('guide.title') })!
+              : t('general.fullScreenAriaLabel', { title: titleFullscreen })!
+          }
           startIcon={<FullscreenIcon />}
         >
           {t('general.fullScreen')!}
@@ -429,7 +450,7 @@ const ResponsiveGridLayout = forwardRef(
 
             {isFocusTrap && !isFullScreen && hasContent && (
               <IconButton
-                id={`layout-close-guide-${mapId}`}
+                id={`${mapId}-${containerType}-guide-close-btn`}
                 onClick={handleCloseGuide}
                 sx={{
                   position: 'absolute',
@@ -438,7 +459,7 @@ const ResponsiveGridLayout = forwardRef(
                   zIndex: 1000,
                 }}
                 tabIndex={0}
-                aria-label={t('guide.closeGuide') || 'Close guide'}
+                aria-label={t('guide.closeGuide')}
               >
                 <CloseIcon />
               </IconButton>

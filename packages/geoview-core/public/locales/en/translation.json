@@ -14,13 +14,14 @@
     "view": "View",
     "failed": "failed",
     "started": "started",
-    "openFullscreen": "Open in fullscreen",
-    "closeFullscreen": "Close fullscreen",
-    "openGuide": "Open guide",
+    "openFullscreen": "Open in full screen",
+    "closeFullscreen": "Close full screen",
+    "fullScreenAriaLabel": "Full screen, {{title}}",
     "guide": "Guide",
     "fullScreen": "Full screen",
     "processing": "Processing __param__ element(s) of __param__",
-    "clickEnlarge": "Click to enlarge",
+    "enlargeImage": "Enlarge image",
+    "enlargeImageName": "Enlarge image, {{title}}",
     "show": "Show",
     "hide": "Hide",
     "toggle": "Toggle",
@@ -28,7 +29,8 @@
     "clearSearch": "Clear search",
     "enable": "Enable",
     "disable": "Disable",
-    "panelLabel": "{{title}} panel"
+    "panelLabel": "{{title}} panel",
+    "opensInNewTab": " (opens in new tab)"
   },
   "mapnav": {
     "arianavbar": "Vertical button group for map navigation",
@@ -315,7 +317,11 @@
     "ntsMapsheet": "NTS Mapsheet",
     "elevation": "Elevation",
     "guideControls": "Guide controls",
-    "selectLayerAndScrollChart": "Show in Chart panel"
+    "selectLayerAndScrollChart": "Show in Chart panel",
+    "featureInfoTable": "Feature information",
+    "featureInfoTableField": "Field",
+    "featureInfoTableValue": "Value",
+    "featureActions": "Feature actions"
   },
   "lightbox": {
     "next": "Next",
@@ -459,7 +465,8 @@
     "errorMessage": "Sorry, unable to find the help document!",
     "arrowUp": "Previous match",
     "arrowDown": "Next match",
-    "closeGuide": "Close guide"
+    "closeGuide": "Close guide",
+    "toggleGuide": "Toggle guide"
   },
   "footerBar": {
     "resizeTooltip": "Resize",

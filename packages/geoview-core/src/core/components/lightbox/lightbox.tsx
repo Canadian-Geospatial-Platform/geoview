@@ -11,6 +11,7 @@ import { CloseIcon, ArrowRightIcon, ArrowLeftIcon, DownloadIcon, Tooltip } from 
 import { logger } from '@/core/utils/logger';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { LIGHTBOX_SELECTORS } from '@/core/utils/constant';
+import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
 /**
  * Interface used for lightbox properties and slides
@@ -25,7 +26,6 @@ export interface LightboxProps {
   slides: LightBoxSlides[];
   index: number;
   exited: () => void;
-  scale?: number;
   onSlideChange?: (index: number) => void;
 }
 
@@ -33,7 +33,6 @@ export interface LightboxProps {
 const LIGHTBOX_CONSTANTS = {
   FADE_DURATION: 250,
   SWIPE_DURATION: 500,
-  DEFAULT_SCALE: 1,
 } as const;
 
 /**
@@ -43,14 +42,7 @@ const LIGHTBOX_CONSTANTS = {
  * @returns {JSX.Element} created lightbox element
  */
 // Memoizes entire component, preventing re-renders if props haven't changed
-export const LightboxImg = memo(function LightboxImg({
-  open,
-  slides,
-  index,
-  exited,
-  scale = LIGHTBOX_CONSTANTS.DEFAULT_SCALE,
-  onSlideChange,
-}: LightboxProps): JSX.Element {
+export const LightboxImg = memo(function LightboxImg({ open, slides, index, exited, onSlideChange }: LightboxProps): JSX.Element {
   logger.logTraceRender('components/lightbox/lightbox');
 
   // Hooks
@@ -63,12 +55,67 @@ export const LightboxImg = memo(function LightboxImg({
 
   // Store
   const mapId = useGeoViewMapId();
+  const activeTrapGeoView = useUIActiveTrapGeoView();
 
   // Update open state when prop changes
   useEffect(() => {
     logger.logTraceUseEffect('LIGHTBOX - open', open);
     setIsOpen(open);
   }, [open]);
+
+  // Make shell's children inert when lightbox opens, except the lightbox itself
+  useEffect(() => {
+    if (!activeTrapGeoView) return;
+
+    const shellElement = document.getElementById(`shell-${mapId}`);
+    if (!shellElement) return;
+
+    if (isOpen) {
+      // Make all shell children inert except the lightbox
+      Array.from(shellElement.children).forEach((child) => {
+        // Don't make the lightbox root inert
+        if (!child.classList.contains('yarl__root')) {
+          child.setAttribute('inert', '');
+        }
+      });
+    } else {
+      // Remove inert from all children
+      Array.from(shellElement.children).forEach((child) => {
+        child.removeAttribute('inert');
+      });
+    }
+
+    return () => {
+      if (!shellElement) return;
+    };
+  }, [isOpen, activeTrapGeoView, mapId]);
+
+  // Trap focus within lightbox buttons
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+
+      const lightboxRoot = document.querySelector(LIGHTBOX_SELECTORS.ROOT);
+      if (!lightboxRoot) return;
+
+      const focusableElements = lightboxRoot.querySelectorAll('button:not([disabled])');
+      const firstElement = focusableElements[0] as HTMLElement;
+      const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+      if (e.shiftKey && document.activeElement === firstElement) {
+        e.preventDefault();
+        lastElement?.focus();
+      } else if (!e.shiftKey && document.activeElement === lastElement) {
+        e.preventDefault();
+        firstElement?.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
 
   // Memoized labels
   const labels = {
@@ -83,7 +130,6 @@ export const LightboxImg = memo(function LightboxImg({
       styles={{
         root: { width: '90%', height: '90%', margin: 'auto' },
         container: { backgroundColor: 'rgba(0, 0, 0, .9)' },
-        slide: { transform: `scale(${scale})` },
       }}
       portal={{ root: document.getElementById(`shell-${mapId}`) }}
       open={isOpen}
