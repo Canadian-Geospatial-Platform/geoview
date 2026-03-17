@@ -1,5 +1,6 @@
 import type { Ref } from 'react';
 import { forwardRef, useCallback } from 'react';
+
 import { useTheme } from '@mui/material/styles';
 import { Button as MaterialButton, Tooltip, useMediaQuery } from '@mui/material';
 
@@ -57,6 +58,7 @@ function ButtonUI(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element 
   logger.logTraceRenderDetailed('ui/button/button');
 
   // Get constant from props
+  // Add commonly used aria attributes for WCAG compliance
   const {
     id,
     sx,
@@ -76,6 +78,12 @@ function ButtonUI(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element 
     fullWidth,
     onKeyDown,
     'aria-label': ariaLabel,
+    'aria-pressed': ariaPressed,
+    'aria-expanded': ariaExpanded,
+    'aria-checked': ariaChecked,
+    'aria-controls': ariaControls,
+    'aria-haspopup': ariaHaspopup,
+    'aria-hidden': ariaHidden,
   } = props;
 
   // Hooks
@@ -114,6 +122,12 @@ function ButtonUI(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element 
         startIcon={startIcon}
         endIcon={endIcon}
         aria-label={ariaLabel}
+        aria-pressed={ariaPressed}
+        aria-expanded={ariaExpanded}
+        aria-checked={ariaChecked}
+        aria-controls={ariaControls}
+        aria-haspopup={ariaHaspopup}
+        aria-hidden={ariaHidden}
         {...(onKeyDown && { onKeyDown })}
         ref={ref}
       >
@@ -126,6 +140,13 @@ function ButtonUI(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element 
     return createButtonUI();
   }
 
+  // Determine if tooltip should be shown
+  const shouldShowTooltip = tooltip && (!makeResponsive || (makeResponsive && mobileView));
+
+  if (disabled || !shouldShowTooltip) {
+    return createButtonUI();
+  }
+
   return (
     <Tooltip title={tooltip} placement={tooltipPlacement}>
       {createButtonUI()}
@@ -134,7 +155,7 @@ function ButtonUI(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element 
 }
 
 // Export the Button using forwardRef so that passing ref is permitted and functional in the react standards
-// TODO: WCAG Issue #2390 - This (forwardRef) prevents TypeDoc from documenting the 'Button' component as expected...
-// TODO: WCAG Issue #2390 - IconButton uses a custom prop ('iconRef') to work around this issue...
-// TODO: WCAG Issue #2390 - Investigate if similar approach could work here.
+// TODO: This (forwardRef) prevents TypeDoc from documenting the 'Button' component as expected...
+// TODO: IconButton uses a custom prop ('iconRef') to work around this issue...
+// TODO: Investigate if similar approach could work here.
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(ButtonUI);
