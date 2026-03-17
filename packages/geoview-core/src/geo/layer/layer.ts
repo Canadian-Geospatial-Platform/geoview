@@ -1104,6 +1104,12 @@ export class LayerApi {
           // Get the layer being removed
           const layerBeingRemoved = this.#gvLayers[registeredLayerPath];
 
+          // Remove the text layer if it is a vector layer
+          if (layerBeingRemoved instanceof AbstractGVVector) {
+            const textLayer = layerBeingRemoved.getTextOLLayer();
+            if (textLayer) this.mapViewer.map.removeLayer(textLayer);
+          }
+
           // If the layer had a parent
           const parent = layerBeingRemoved?.getParent();
           if (parent) {
