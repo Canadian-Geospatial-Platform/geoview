@@ -152,7 +152,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns {VectorLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getLayerConfig(): VectorLayerEntryConfig {
     // Call parent and cast
@@ -161,6 +161,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Sets the visibility of the layer.
+   *
    * @param layerVisibility - The visibility state to set.
    */
   override setVisible(layerVisibility: boolean): void {
@@ -192,6 +193,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Overridable method called to get a more specific error code for all errors.
+   *
    * @param event - The event which is being triggered.
    * @returns The GeoViewError stored in the GVVectorSource if any or the one from the parent method.
    */
@@ -213,12 +215,11 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Overrides the get all feature information for all the features stored in the layer.
-   * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
-   * @param {LayerFilters} layerFilters - The layer filters to apply when querying the features.
-   * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
-   * @override
-   * @protected
+   *
+   * @param map - The Map so that we can grab the resolution/projection we want to get features on.
+   * @param layerFilters - The layer filters to apply when querying the features.
+   * @param abortController - The optional abort controller.
+   * @returns A promise of a TypeFeatureInfoResult.
    */
   protected override getAllFeatureInfo(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -244,11 +245,10 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Overrides the return of feature information at a given pixel location.
-   * @param {OLMap} map - The Map where to get Feature Info At Pixel from.
-   * @param {Pixel} location - The pixel coordinate that will be used by the query.
-   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
-   * @override
-   * @protected
+   *
+   * @param map - The Map where to get Feature Info At Pixel from.
+   * @param location - The pixel coordinate that will be used by the query.
+   * @returns A promise of a TypeFeatureInfoResult.
    */
   protected override getFeatureInfoAtPixel(map: OLMap, location: Pixel): Promise<TypeFeatureInfoResult> {
     // Get the layer source
@@ -284,13 +284,12 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Overrides the return of feature information at a given coordinate.
-   * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.
-   * @param {Coordinate} location - The coordinate that will be used by the query.
-   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-   * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
-   * @override
-   * @protected
+   *
+   * @param map - The Map where to get Feature Info At Coordinate from.
+   * @param location - The coordinate that will be used by the query.
+   * @param queryGeometry - Whether to include geometry in the query, default is true.
+   * @param abortController - The optional abort controller.
+   * @returns A promise of a TypeFeatureInfoResult.
    */
   protected override getFeatureInfoAtCoordinate(
     map: OLMap,
@@ -306,13 +305,12 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Overrides the return of feature information at the provided long lat coordinate.
-   * @param {OLMap} map - The Map where to get Feature Info At LonLat from.
-   * @param {Coordinate} lonlat - The coordinate that will be used by the query.
-   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-   * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
-   * @override
-   * @protected
+   *
+   * @param map - The Map where to get Feature Info At LonLat from.
+   * @param lonlat - The coordinate that will be used by the query.
+   * @param queryGeometry - Whether to include geometry in the query, default is true.
+   * @param abortController - The optional abort controller.
+   * @returns A promise of a TypeFeatureInfoResult.
    */
   protected override getFeatureInfoAtLonLat(
     map: OLMap,
@@ -331,6 +329,7 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Overrides the way to get the bounds for this layer type.
+   *
    * @param projection - The projection to get the bounds into.
    * @param stops - The number of stops to use to generate the extent.
    * @returns A promise of layer bounding box.
@@ -355,11 +354,11 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Gets the extent of an array of features.
-   * @param {number[] | string[]} objectIds - The uids of the features to calculate the extent from.
-   * @param {OLProjection} outProjection - The output projection for the extent.
-   * @param {string?} outfield - ID field to return for services that require a value in outfields.
-   * @returns {Promise<Extent>} The extent of the features, if available.
-   * @override
+   *
+   * @param objectIds - The uids of the features to calculate the extent from.
+   * @param outProjection - The output projection for the extent.
+   * @param outfield - ID field to return for services that require a value in outfields.
+   * @returns The extent of the features, if available.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
@@ -402,7 +401,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Sets the style applied flag indicating when a style has been applied for the AbstractGVVector via the style callback function.
-   * @param {boolean} styleApplied - Indicates if the style has been applied on the AbstractGVVector.
+   *
+   * @param styleApplied - Indicates if the style has been applied on the AbstractGVVector.
    */
   setStyleApplied(styleApplied: boolean): void {
     const changed = this.styleApplied !== styleApplied;
@@ -412,7 +412,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Gets the OpenLayers text layer if one exists.
-   * @returns {VectorLayer<VectorSource> | undefined} The text layer or undefined if no text layer exists.
+   *
+   * @returns The text layer or undefined if no text layer exists.
    */
   getTextOLLayer(): VectorLayer<VectorSource> | undefined {
     return this.#textOLLayer;
@@ -420,7 +421,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Gets the independent visibility state of the text layer.
-   * @returns {boolean} True if text layer is set to visible independently.
+   *
+   * @returns True if text layer is set to visible independently.
    */
   getTextVisible(): boolean {
     return this.#textVisible;
@@ -429,7 +431,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   /**
    * Sets the independent visibility of the text layer.
    * The text layer's actual visibility is: layerVisible && textVisible
-   * @param {boolean} visible - Whether text should be visible independently.
+   *
+   * @param visible - Whether text should be visible independently.
    */
   setTextVisible(visible: boolean): void {
     this.#textVisible = visible;
@@ -446,7 +449,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
   /**
    * Gets the actual visibility state of the text layer on the map.
    * This considers both layer visibility and independent text visibility.
-   * @returns {boolean} True if the text layer is currently visible on the map.
+   *
+   * @returns True if the text layer is currently visible on the map.
    */
   getTextLayerVisible(): boolean {
     return this.#textOLLayer?.getVisible() ?? false;
@@ -458,8 +462,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {StyleAppliedEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitStyleApplied(event: StyleAppliedEvent): void {
     // Emit the event for all handlers
@@ -468,7 +472,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Registers a style applied event handler.
-   * @param {StyleAppliedDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onStyleApplied(callback: StyleAppliedDelegate): void {
     // Register the event handler
@@ -477,7 +482,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Unregisters a style applied event handler.
-   * @param {StyleAppliedDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offStyleApplied(callback: StyleAppliedDelegate): void {
     // Unregister the event handler
@@ -486,8 +492,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {TextVisibleChangedEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitTextVisibleChanged(event: TextVisibleChangedEvent): void {
     EventHelper.emitEvent(this, this.#onTextVisibleChangedHandlers, event);
@@ -495,7 +501,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Registers a text visible changed event handler.
-   * @param {TextVisibleChangedDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onTextVisibleChanged(callback: TextVisibleChangedDelegate): void {
     EventHelper.onEvent(this.#onTextVisibleChangedHandlers, callback);
@@ -503,7 +510,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Unregisters a text visible changed event handler.
-   * @param {TextVisibleChangedDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offTextVisibleChanged(callback: TextVisibleChangedDelegate): void {
     EventHelper.offEvent(this.#onTextVisibleChangedHandlers, callback);
@@ -515,11 +523,12 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Calculates a style for the given feature, based on the layer current style and options.
-   * @param {AbstractGVLayer} layer - The layer on which to work for the style.
-   * @param {FeatureLike} feature - Feature that need its style to be defined.
-   * @param {string} label - The style label when one has to be created
-   * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
-   * @returns {Style} The style for the feature
+   *
+   * @param layer - The layer on which to work for the style.
+   * @param feature - Feature that need its style to be defined.
+   * @param label - The style label when one has to be created
+   * @param filterEquation - Filter equation associated to the layer.
+   * @returns The style for the feature
    */
   static calculateStyleForFeature(
     layer: AbstractGVLayer,
@@ -546,11 +555,11 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
 
   /**
    * Calculates a text-only style (no geometry) for the given feature.
-   * @param {AbstractGVLayer} layer - The layer on which to work for the style.
-   * @param {FeatureLike} feature - Feature that needs its style defined.
-   * @param {number} resolution - The map resolution.
-   * @returns {Style | undefined} The text-only style.
-   * @static
+   *
+   * @param layer - The layer on which to work for the style.
+   * @param feature - Feature that needs its style defined.
+   * @param resolution - The map resolution.
+   * @returns The text-only style.
    */
   static calculateTextStyleForFeature(layer: AbstractGVLayer, feature: FeatureLike, resolution: number): Style | undefined {
     // Get the layer config and style
