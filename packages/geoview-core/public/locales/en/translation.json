@@ -122,6 +122,8 @@
     "noLayersAdded": "No layers added to the map",
     "noLayersAddedDescription": "Add layers to the map by clicking on the 'Layers' button and adding the layers you want to display.",
     "selectLayerAndScroll": "Show in Layers panel",
+    "hideText": "Hide feature text labels",
+    "showText": "Show feature text labels",
     "layerLoadingDescriptive": "Loading layer {{layerName}}",
     "layerLoadedDescriptive": "Layer {{layerName}} loaded successfully",
     "layerErrorDescriptive": "Error loading layer {{layerName}}",

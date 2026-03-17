@@ -118,14 +118,16 @@
     "highlightLayer": "Couche mise en évidence",
     "subLayersCount": "{count} sous-couches",
     "itemsCount": "{count} sur {totalCount} classes",
-    "legendInstructions": "Legend Instructions",
+    "legendInstructions": "Instructions de la légende",
     "noLayersAdded": "Aucune couche ajoutée",
     "noLayersAddedDescription": "Ajoutez des couches à la carte en cliquant sur le bouton 'Couches' et en sélectionnant les couches que vous souhaitez afficher.",
     "selectLayerAndScroll": "Voir dans le panneau Couches",
     "layerLoadingDescriptive": "Chargement de la couche {{layerName}}",
     "layerLoadedDescriptive": "La couche {{layerName}} a été chargée avec succès",
     "layerErrorDescriptive": "Erreur lors du chargement de la couche {{layerName}}",
-    "layerOutOfRangeScreenReader": "(visibilité limitée par l'échelle)"
+    "layerOutOfRangeScreenReader": "(visibilité limitée par l'échelle)",
+    "hideText": "Masquer les étiquettes de texte des éléments",
+    "showText": "Afficher les étiquettes de texte des éléments"
   },
   "layers": {
     "title": "Couches",
