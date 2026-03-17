@@ -16,6 +16,18 @@ import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
 /** The observers to monitor element removals from the DOM tree */
 const observers: Record<string, MutationObserver> = {};
 
+/** Regex patterns for image URL validation - compiled once to avoid recreation on every isImage() call */
+const IMAGE_VALIDATION_PATTERNS = {
+  /** URLs ending with image extensions (with optional query params/fragments) */
+  IMAGE_EXTENSION: /^https?:\/\/.+\.(jpe?g|png|gif|bmp|webp)(\?[^?]*)?$/i,
+
+  /** Base64 data URLs */
+  DATA_URL: /^data:image\/.+;base64,/,
+
+  /** Known image endpoint patterns (aspx, php, jsp) */
+  KNOWN_ENDPOINT: /\/(image|getimage|photo|thumbnail)\.(aspx|php|jsp)(\?|$)/i,
+} as const;
+
 interface TypeDocument extends Document {
   webkitExitFullscreen: () => void;
   msExitFullscreen: () => void;
@@ -768,9 +780,59 @@ export function addUiComponent(targetDivId: string, component: React.ReactElemen
 export function sanitizeHtmlContent(contentHtml: string): string {
   return sanitizeHtml(contentHtml, {
     allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
-    allowedAttributes: { img: ['src'], a: ['href'] },
+    allowedAttributes: { img: ['src'], a: ['href', 'target', 'rel', 'title'], span: ['class'] },
+    allowedClasses: {
+      span: ['visually-hidden'], // Whitelist only this class
+    },
     allowedSchemes: ['data', 'http', 'https'],
+    transformTags: {
+      a: (tagName, attribs) => ({
+        tagName,
+        attribs: {
+          ...attribs,
+          rel: 'noopener noreferrer',
+          target: attribs.target || '_blank',
+        },
+      }),
+    },
   });
+}
+/**
+ * Enhances links accessibility by adding screen reader announcements for external links.
+ *
+ * Uses DOM parsing to safely inject visually-hidden span elements with announcement text
+ * for screen readers.
+ *
+ * **Security Note:** This function does NOT sanitize output. Callers MUST sanitize the result
+ * using `sanitizeHtmlContent()` before rendering to prevent XSS risks.
+ *
+ * @param html - HTML string containing links (typically from linkifyHtml)
+ * @param announcementText - Translated announcement text for screen readers (e.g., "opens in new tab")
+ * @returns HTML string with visually-hidden accessibility announcements injected into external links, or the original HTML if parsing fails
+ *
+ * @example
+ * Input: '<a href="..." target="_blank">View</a>'
+ * Output: '<a href="..." target="_blank">View <span class="visually-hidden"> (opens in new tab)</span></a>'
+ */
+export function enhanceLinksAccessibility(html: string, announcementText: string): string {
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+
+    const externalLinks = doc.querySelectorAll('a[target="_blank"]');
+
+    externalLinks.forEach((link) => {
+      const announcementSpan = doc.createElement('span');
+      announcementSpan.className = 'visually-hidden';
+      announcementSpan.textContent = `${announcementText}`;
+      link.appendChild(announcementSpan);
+    });
+
+    return doc.body.innerHTML;
+  } catch (error) {
+    logger.logWarning('Failed to enhance links accessibility', error);
+    return html;
+  }
 }
 
 /**
@@ -984,7 +1046,19 @@ export function findPropertyByRegexPath<T = Record<string, unknown>>(
  * @returns {boolean} true if it is an image, false otherwise
  */
 export function isImage(item: string): boolean {
-  return /^https:\/\/.+\.(jpg|jpeg|png|gif|bmp)$/.test(item);
+  // Pattern 1: URLs ending with image extensions (with optional query parameters)
+  // Examples: file.jpg, file.png?size=large
+  const hasImageExtension = IMAGE_VALIDATION_PATTERNS.IMAGE_EXTENSION.test(item);
+
+  // Pattern 2: Base64 data URLs
+  const isDataUrl = IMAGE_VALIDATION_PATTERNS.DATA_URL.test(item);
+
+  // Pattern 3: Specific known image endpoint patterns (very conservative)
+  // Only match exact patterns like "Image.aspx?id=", "getImage.php?id=", etc.
+  // Example: https://www.pc.gc.ca/apps/dfhd/Resources/Images/Image.aspx?id=69866
+  const isKnownImageEndpoint = IMAGE_VALIDATION_PATTERNS.KNOWN_ENDPOINT.test(item);
+
+  return hasImageExtension || isDataUrl || isKnownImageEndpoint;
 }
 
 /**

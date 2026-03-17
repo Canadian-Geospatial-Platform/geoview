@@ -9,7 +9,6 @@ import type { SxStyles } from '@/ui/style/types';
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
   formControl: {
-    width: '100%',
     marginRight: '5px',
     marginLeft: '5px',
     borderRadius: '6px',

@@ -144,7 +144,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
             </Box>
           </Box>
           {layer.layerPath !== 'coordinate-info' && (layer.numOffeatures ?? 0) > 0 && (
-            <Badge badgeContent={layer.numOffeatures} max={99} color="info" sx={sxClasses.layerCount} className="layer-count"></Badge>
+            <Badge badgeContent={layer.numOffeatures} max={99} color="info" sx={sxClasses.layerCount} className="layer-count" aria-hidden="true"></Badge>
           )}
         </ListItemButton>
         {layerStatus === 'loading' && (

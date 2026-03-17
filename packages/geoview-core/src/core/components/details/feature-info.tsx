@@ -61,7 +61,7 @@ const PAPER_STYLES = {
 } as const;
 
 const TYPOGRAPHY_STYLES = {
-  display: 'inline-block',
+  overflowWrap: 'anywhere',
 } as const;
 
 const ZOOM_PADDING = [5, 5, 5, 5];
@@ -97,7 +97,7 @@ const FeatureHeader = memo(function FeatureHeader({
     <Box sx={HEADER_STYLES.container}>
       <Box sx={sxClasses.flexBoxAlignCenter}>
         {iconSrc ? (
-          <Box component="img" src={iconSrc} alt={name} className="layer-icon" />
+          <Box component="img" src={iconSrc} alt="" className="layer-icon" />
         ) : (
           <Box component="div" aria-label={name} className="layer-icon">
             <BrowserNotSupportedIcon />
@@ -117,10 +117,12 @@ const FeatureHeader = memo(function FeatureHeader({
         </Typography>
       </Box>
       <Box
+        role="group"
         sx={{
           ...sxClasses.flexBoxAlignCenter,
           [theme.breakpoints.down('sm')]: { display: 'none' },
         }}
+        aria-label={t('details.featureActions')!}
       >
         {/* Hidden in WCAG mode - keyboard users can Tab to layer panel instead */}
         {hasGeochart && !isFocusTrap && (
@@ -138,10 +140,11 @@ const FeatureHeader = memo(function FeatureHeader({
         <IconButton
           aria-label={t('details.keepFeatureSelected')}
           tooltipPlacement="top"
-          disabled={!hasGeometry}
+          aria-disabled={!hasGeometry}
           onClick={handleChecked}
           className="buttonOutline"
           size="small"
+          aria-pressed={checked}
         >
           {checked ? <HighlightIcon /> : <HighlightOutlinedIcon />}
         </IconButton>
@@ -149,7 +152,7 @@ const FeatureHeader = memo(function FeatureHeader({
           color="primary"
           aria-label={t('details.zoomTo')}
           tooltipPlacement="top"
-          disabled={!hasGeometry}
+          aria-disabled={!hasGeometry}
           onClick={onZoomIn}
           className="buttonOutline"
           size="small"

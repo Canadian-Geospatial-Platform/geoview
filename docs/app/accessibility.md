@@ -1,15 +1,19 @@
 # Accessibility
 
+# Accessibility
+
 _Work in progress_
 
 The viewer needs to be accessible for keyboard and screen reader. It's should follow WCAG 2.1 requirements: https://www.w3.org/TR/WCAG21
 
+React and accessibility documentation: https://reactjs.org/docs/accessibility.html
 React and accessibility documentation: https://reactjs.org/docs/accessibility.html
 
 We need to trap the navigation inside the map element: https://mui.com/base-ui/react-focus-trap and add a skip link to go over
 
 Manage focus (Modal Dialogs or any full-screen tasks): https://www.npmjs.com/package/react-focus-on
 
+Further documentation: https://simplyaccessible.com/article/react-a11y/
 Further documentation: https://simplyaccessible.com/article/react-a11y/
 
 Additional tools:
@@ -85,12 +89,20 @@ From the browsers's developer tools, copy a section of generated code from a map
 - aria-controls:
 - ...
 
-### 7- Focus management: Use aria-disabled instead of disabled on UI elements that toggle between enabled/disabled states
+### 7- Using aria-disabled Instead of disabled for Icon Buttons
 
-When a button has keyboard focus and becomes disabled on press, focus is lost and jumps unpredictably to another element, disorienting keyboard users who lose track of their position in the interface.
+In many cases, Icon Buttons use aria-disabled="true" instead of the native disabled attribute. This keeps disabled buttons focusable and in the tab order.
+
+**Why:**
+
+- **Focus stability**: Prevents focus from jumping unexpectedly when a button transitions between disabled and enabled states
+- **Keyboard discoverability**: Keyboard users can navigate to disabled buttons and understand the full set of available controls
+- **Consistency**: Grouped buttons in the same area behave uniformly, reinforcing their relationship
+
+**How:**
 
 - Use aria-disabled instead of disabled
-- Style the aria-disabled element to look like it would if disabled
+- Style the aria-disabled element to look like it would if disabled (global styles are already in place that handle most instances)
 - Add early return in event handler to prevent action when aria-disabled is true
 
 ```typescript
@@ -99,28 +111,44 @@ const handleClick = (e) => {
   // real logic
 };
 
-<button
+<IconButton
   aria-disabled={isDisabled}
+  aria-label="Button label"
   onClick={handleClick}
 >
-  Submit
-</button>
+</IconButton>
+
 ```
 
-### 8- Focus management: Avoid removing buttons from the DOM
+### 8- Image Alt Text
+
+Some images in the application — such as map legend images — cannot have descriptive alt text generated programmatically. In these cases, use alt="" to explicitly mark the image as decorative, so assistive technology skips it cleanly.
+
+**Do not use non-descriptive "placeholder" alt text.** An unhelpful value is worse than alt="" because it creates noise for screen reader users without conveying meaning. Avoid things like:
+
+alt="image"
+alt="icon"
+alt="chart"
+alt="img_legend_04.png"
+
+If you can describe the image meaningfully, do so. If you cannot — or if the image is decorative or already described by surrounding content — use alt="" explicitly.
+
+Note: When an image has alt="" it is already correctly marked as decorative and will be ignored by assistive technology. Adding aria-hidden="true" is redundant but not harmful.
+
+### 9- Focus management: Avoid removing buttons from the DOM
 
 - Causes focus management issues
 - Add example here
 
-### 9- Focus management: Restore focus when removing elements from the DOM
+### 10- Focus management: Restore focus when removing elements from the DOM
 
 - If removing elements from the DOM, ensure that focus is placed somewhere that is logical to keyboard users.
 
-### 10- Handle esc key
+### 11- Handle esc key
 
 - Use “handleEscapeKey”
 
-### 11- Announce loading states and progress updates using ARIA live regions
+### 12- Announce loading states and progress updates using ARIA live regions
 
 ```typescript
 {/* WCAG - ARIA live region for screen reader announcements */}
@@ -135,9 +163,54 @@ const handleClick = (e) => {
 )}
 ```
 
+### 13- Open links in a new tab
+
+Under WCAG Technique G200, opening a new window or tab is explicitly recommended when navigating away would disrupt a multi-step workflow or result in data loss. A complex map application with active selections, open panels, and custom layers fits this "disruptive workflow" exception perfectly.
+
+- Giving users advanced warning when opening a new window
+
+### 14. Opening images in a lightbox
+
+- Wrap the image to be loaded in a button element which handles the lightbox
+- If the image does have descriptive alt text available to it (preferred), ensure the button has a meaningful `aria-label`
+- If the image does not have descriptive alt text available to it, hide the button from screen readers (`aria-hidden="true"`), as it is of no value to them
+
+```html
+<!-- no descriptive alt text available -->
+<button aria-hidden="true" onClick="() => initLightBox(...)">
+  <img src="..." alt="" />
+</button>
+
+<!-- descriptive alt text available -->
+<button
+  aria-label="Enlarge image - [description]"
+  onClick="() => initLightBox(...)"
+>
+  <img src="..." alt="[description]" />
+</button>
+```
+
+### 15. External Links
+
+- Open links in new tab
+- For screen readers, add "Opens in new tab" text to the end of the link
+- Avoid using raw url text, use human-readable text
+- use enhanceLinksAccessibility and linkifyHtml to automate this
+
+WCAG SC 2.4.4 – Link Purpose
+
+- A screen reader user navigating by links only hears the raw URL with no context
+
+```html
+<a href="https://www.veterans.gc.ca/" target="_blank" rel="noopener noreferrer"
+  >Adélard Joseph Farand – Canadian Virtual War Memorial
+  <span class="visually-hidden"> (opens in new tab)</span>
+</a>
+```
+
 ## Quick Testing Tips and Notes
 
-_Work in progress_
+Some simple tips for quickly evaluating and testing for WCAG compliance.
 
 ### WCAG SC 1.4.4 - Resize text
 
@@ -153,7 +226,7 @@ This does not include text that is part of a picture that contains significant o
 
 - Resize browser window to 1280 pixels wide and set zoom to 400%
 
-## Limitations
+## Limitations and Constraints
 
 _Work in progress_
 
@@ -168,13 +241,13 @@ English layer names embedded in French UI may lack lang="en" (and vice versa). T
 
 [Reference 2](https://www.canada.ca/en/employment-social-development/programs/accessible-canada/regulations-summary-act/amendment.html)
 
-### 2 - Legend Panel
-
 #### WCAG SC 1.1.1 Non-text Content — Known limitation
 
-Images that appear in the legend panel (and their corresponding light boxes) do not have descriptive text available for them. Therefore, they have been made to use empty alt attributes.
+The app often uses alt="" for images that would ideally include descriptive text instead (alt="a description of the image"). Creating descriptive alt text is not programmatically feasible at this time.
 
-The legend symbol images cannot be programmatically described at this time. See SC 1.3.1 — Known limitation. Fixing that issue would resolve this limitation as well.
+- Images that appear in panels (and their corresponding light boxes) do not have descriptive text available for them. Therefore, they have been made to use empty alt attributes.
+
+- The legend symbol images cannot be programmatically described at this time. See SC 1.3.1 — Known limitation. Fixing that issue would resolve this limitation as well.
 
 #### WCAG SC 1.3.1 Info and Relationships — Known limitation
 
@@ -183,3 +256,13 @@ The legend symbol images cannot be programmatically described at this time. The 
 **What this means for users in practice** — AT users are not blocked from operating the legend (they can show/hide classes by name), but they cannot independently interpret what the map symbols look like. This is a partial conformance gap rather than a complete barrier to use.
 
 **What would unblock the fix** — if the symbology data driving each legend image is available in the layer configuration (e.g. colour hex, symbol type, size range), those values could be used to auto-generate sr-only descriptions programmatically without manual authoring per symbol. That might be worth investigating as a future enhancement.
+
+### 2 - Legend Panel
+
+- Impacted by: WCAG SC 1.1.1 Non-text Content — Known limitation
+- Impacted by: WCAG SC 1.3.1 Info and Relationships — Known limitation
+
+### 3 - Details Panel
+
+- Impacted by: WCAG SC 1.1.1 Non-text Content — Known limitation
+- Impacted by: WCAG SC 1.3.1 Info and Relationships — Known limitation

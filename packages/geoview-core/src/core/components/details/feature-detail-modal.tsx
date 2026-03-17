@@ -84,7 +84,7 @@ export default function FeatureDetailModal(): JSX.Element {
         <>
           <Box display="flex" flexDirection="row" alignItems="center" pb={10}>
             {feature.featureIcon ? (
-              <Box component="img" alt={feature?.nameField ?? ''} src={feature.featureIcon} className="layer-icon" />
+              <Box component="img" alt="" src={feature.featureIcon} className="layer-icon" />
             ) : (
               <Box component="div" aria-label={feature?.nameField ?? ''} className="layer-icon">
                 <BrowserNotSupportedIcon />
