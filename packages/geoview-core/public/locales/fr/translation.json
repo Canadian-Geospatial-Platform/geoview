@@ -118,7 +118,6 @@
     "highlightLayer": "Couche mise en évidence",
     "subLayersCount": "{count} sous-couches",
     "itemsCount": "{count} sur {totalCount} classes",
-    "legendInstructions": "Instructions de la légende",
     "noLayersAdded": "Aucune couche ajoutée",
     "noLayersAddedDescription": "Ajoutez des couches à la carte en cliquant sur le bouton 'Couches' et en sélectionnant les couches que vous souhaitez afficher.",
     "selectLayerAndScroll": "Voir dans le panneau Couches",
