@@ -313,20 +313,26 @@ Layers can either be in raster format or vector format. The following layer type
 | XYZ Tile           | OGC Feature API Layer |
 | WMS                | CSV                   |
 | Static Image       | WFS                   |
-| Vector tiles layer |
+| Vector tiles layer | KML                   |
+| COG - Geotiff      | WKB                   |
+| WMTS               | Shapefile             |
 
 _Note: If a layer fails to load correctly it will be identified by an error notice in the notifications tool on the Side Bar. Instead of the standard layer actions you can select to either reload the layer (this is particularly helpful if there is a temporary network connectivity issue) or remove the layer. If a layer is removed it will be taken out of the layer selector completely._
 
 =3!layerSettings=
 
-#### Layer Settings
+#### Layer Details
 
-Click a layer in the left section of the layers view tab, and the layer settings are displayed in right section.
+Click a layer in the left section of the layers view tab, and the layer details are displayed in right section.
 
-_Note: Some settings may not be available depending on various factors such as layer type or configuration._
+The right section header shows the layer name, a subtitle (e.g. number of visible classes), and the **Info** and **Settings** buttons described below.
+
+_Note: Some buttons may not be available depending on various factors such as layer type or configuration._
 
 | Symbol                                                                                                                | Name                      | Description                                                                                                                                                                              |
 | --------------------------------------------------------------------------------------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <img src="{{assetsURL}}/img/guide/layers/settings_60.svg" alt="An icon representing the Settings function" />         | Settings                  | Opens the settings panel for the selected layer (_see Layer Settings Panel section below_). When active, the icon changes to a back arrow to return to the details view.                 |
+| <img src="{{assetsURL}}/img/guide/layers/info_60.svg" alt="An icon representing the Info function" />                 | Info                      | Opens the information panel for the selected layer (_see Layer Info Panel section below_). When active, the icon changes to a back arrow to return to the details view.                  |
 | <img src="{{assetsURL}}/img/guide/layers/table_view_60.svg" alt="An icon representing the Table details function" />  | Table details             | Opens a basic table view with simplified functionality. For the full-featured advanced table, if available, access the Data Table panel directly or open it from within the basic table. |
 | <img src="{{assetsURL}}/img/guide/layers/time_slider_30.svg" alt="An icon representing the Time Slider function" />   | Show in Time Slider panel | Opens the Time Slider panel for this layer, allowing you to visualize temporal data.                                                                                                     |
 | <img src="{{assetsURL}}/img/guide/layers/refresh_60.svg" alt="An icon representing the Reset layer function" />       | Reset layer               | Reset the layer to its initial state.                                                                                                                                                    |
@@ -339,23 +345,82 @@ _Note: When the layer is hidden, functions affecting the layer on the map will b
 
 **Layer Classes**
 
-Classes for the layer are listed in the layer settings if available. Checked the checkbox next to the class to toggle visibiity for this particular class.
+Classes for the layer are listed in the layer details if available. Check the checkbox next to a class to toggle visibility for that particular class.
 
 The number of classes visible is displayed under the layer name.
 
-**More Information**
+#### Layer Info Panel
 
-Additional technical details about the layer are displayed in this section, which may include:
+Click the **Info** button <img src="{{assetsURL}}/img/guide/layers/info_60.svg" alt="Info icon" /> in the layer details header to open the information panel. This panel displays read-only technical details about the layer. Click the back arrow to return to the details view.
+
+The info panel may include the following sections:
+
+**Service Information**
 
 - **Type**: The layer type (e.g., ESRI Dynamic Service, GeoJSON, WMS)
 - **Service projection**: The coordinate reference system used by the service (e.g., EPSG:3978, EPSG:3857)
-- **Active filters**: The active filters applied to the layer
-- **Temporal dimension**: If the layer has time-based data, this shows the field name and the minimum/maximum date range
 - **Resource**: The URL or path to the data source
+- **Metadata**: A link to the metadata record (when available)
+- **Bounds**: The layer extent in the current map projection and in EPSG:4326
+
+**Active Filters**
+
+Lists all filters currently applied to the layer, which may include:
+
+- Default layer filter
+- Class filter
+- Data table filter
+- Time slider filter
+
+If no filters are active, "None" is displayed.
+
+**Temporal Settings**
+
+If the layer has time-based data, this section shows:
+
+- Display date format
+- Temporal mode
+- Timezone
+- Time dimension field name and min/max date range
+
+**Temporal Dimension (Time Slider)**
+
+If the layer has a Time Slider configuration, additional temporal details specific to the slider are shown.
 
 **Attribution**
 
-If attribution information is available for the layer, it will be displayed in this section. Attribution typically includes copyright notices, data sources, and acknowledgments required by the data provider.
+If attribution information is available for the layer, it will be displayed here. Attribution typically includes copyright notices, data sources, and acknowledgments required by the data provider.
+
+#### Layer Settings Panel
+
+Click the **Settings** button <img src="{{assetsURL}}/img/guide/layers/settings_60.svg" alt="Settings icon" /> in the layer details header to open the settings panel. This panel provides interactive controls to customize how the layer is rendered. Click the back arrow to return to the details view.
+
+_Note: The settings button only appears if the layer has at least one configurable setting or interaction toggle._
+
+The settings panel may include the following sections (depending on layer type):
+
+**Raster Function** _(ESRI Image layers only)_
+
+Select a raster function to change how the imagery is rendered. Available functions are displayed as cards with preview thumbnails. The currently selected function name is shown in the section header. Click a card to apply a different raster function.
+
+**Mosaic Rule** _(ESRI Image layers only)_
+
+Configure how multiple rasters within a mosaic dataset are ordered and displayed. This collapsible section shows the current method and operation in the header and provides the following controls:
+
+- **Method**: How rasters are prioritized (e.g., None, Center, Nadir, Viewpoint, Attribute, Lock Raster, Northwest, Seamline). Available methods depend on the service configuration.
+- **Operation**: How overlapping pixels are resolved (e.g., First, Last, Minimum, Maximum, Mean, Blend, Sum).
+- **Ascending**: Checkbox to toggle ascending sort order.
+
+**WMS Style** _(WMS layers only)_
+
+Select a visual style for the WMS layer. Available styles are displayed as cards with legend previews. The currently selected style name is shown in the section header. Click a card to apply a different style.
+
+**Interaction**
+
+Toggle switches to control layer interaction behavior:
+
+- **Hoverable**: When enabled, hovering over a feature on the map displays a tooltip with feature information.
+- **Queryable**: When enabled, clicking on the map queries features from this layer.
 
 =3!add=
 

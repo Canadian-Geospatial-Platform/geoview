@@ -77,14 +77,16 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
       let { content } = guide[item];
 
       // Appends the subsection content to the section content
+      // Use \n\n (blank line) so markdown-to-jsx treats the next section as a new block.
+      // A single \n after a list item causes the following heading to be parsed as a lazy continuation line inside the <li>.
       if (guide[item].children) {
         Object.entries(guide[item].children).forEach(([, child]) => {
-          content += `\n${child.content}`;
+          content += `\n\n${child.content}`;
 
           // Appends sub subsection content
           if (child.children) {
             Object.values(child.children).forEach((grandChild) => {
-              content += `\n${grandChild.content}`;
+              content += `\n\n${grandChild.content}`;
             });
           }
         });
@@ -134,12 +136,14 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
     let { content } = guide[currentGuideKey];
 
     // Append subsection content
+    // Use \n\n (blank line) so markdown-to-jsx treats the next section as a new block.
+    // A single \n after a list item causes the following heading to be parsed as a lazy continuation line inside the <li>.
     if (guide[currentGuideKey].children) {
       Object.entries(guide[currentGuideKey].children).forEach(([, child]) => {
-        content += `\n${child.content}`;
+        content += `\n\n${child.content}`;
         if (child.children) {
           Object.values(child.children).forEach((grandChild) => {
-            content += `\n${grandChild.content}`;
+            content += `\n\n${grandChild.content}`;
           });
         }
       });
