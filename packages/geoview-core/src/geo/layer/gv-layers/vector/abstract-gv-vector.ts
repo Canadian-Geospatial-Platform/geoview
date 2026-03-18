@@ -163,11 +163,10 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
    * Sets the visibility of the layer.
    *
    * @param layerVisibility - The visibility state to set.
-   * @param emitVisibleChanged - Optional, whether to emit a visible changed event after updating the visibility. Defaults to true.
    */
-  override onSetVisible(layerVisibility: boolean, emitVisibleChanged: boolean = true): void {
+  protected override onSetVisible(layerVisibility: boolean): void {
     // Call parent to handle geometry layer
-    super.onSetVisible(layerVisibility, emitVisibleChanged);
+    super.onSetVisible(layerVisibility);
 
     // Sync text layer visibility if it exists
     // Text layer visibility = layerVisibility && textVisible

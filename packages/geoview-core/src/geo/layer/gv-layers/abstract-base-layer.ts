@@ -108,14 +108,16 @@ export abstract class AbstractBaseGVLayer {
    * Overridable method to set the visibility of the layer.
    *
    * @param visible - The desired visibility for the layer.
-   * @param emitVisibleChanged - Optional, whether to emit a visible changed event after updating the visibility. Defaults to true.
    */
-  protected onSetVisible(visible: boolean, emitVisibleChanged: boolean = true): void {
+  protected onSetVisible(visible: boolean): void {
+    // Skip if the visibility is not changing
+    if (this.getVisible() === visible) return;
+
     // Internally set the visibility on the actual OL object
     this.getOLLayer().setVisible(visible);
 
-    // If emitting
-    if (emitVisibleChanged) this.#emitVisibleChanged({ visible });
+    // Emit the visibility change event
+    this.#emitVisibleChanged({ visible });
   }
 
   /**
@@ -125,7 +127,10 @@ export abstract class AbstractBaseGVLayer {
    * @param emitZIndexChanged - Optional, whether to emit a z-index changed event after updating the z-index. Defaults to true.
    */
   protected onSetZIndex(zIndex: number, emitZIndexChanged: boolean = true): void {
+    // Internally set the z-index on the actual OL object
     this.getOLLayer().setZIndex(zIndex);
+
+    // If emitting
     if (emitZIndexChanged) this.#emitZIndexChanged({ zIndex });
   }
 
@@ -435,11 +440,10 @@ export abstract class AbstractBaseGVLayer {
    * Sets the visibility of the layer (true or false).
    *
    * @param layerVisibility - The visibility of the layer.
-   * @param emitVisibleChanged - Optional, whether to emit a visible changed event after updating the visibility. Defaults to true.
    */
-  setVisible(layerVisibility: boolean, emitVisibleChanged: boolean = true): void {
+  setVisible(layerVisibility: boolean): void {
     // Redirect
-    this.onSetVisible(layerVisibility, emitVisibleChanged);
+    this.onSetVisible(layerVisibility);
   }
 
   /**
