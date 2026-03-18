@@ -116,7 +116,7 @@ export class ConfigTester extends GVAbstractTester {
       testName,
       (test) => {
         // Set step
-        test.addStep('Initializing config on url: ' + url);
+        test.addStep(`Initializing config on url: ${url}`);
 
         // Initialize the layer config
         return EsriDynamic.initGeoviewLayerConfig(gvLayerId, gvLayerName, url);
@@ -235,7 +235,7 @@ export class ConfigTester extends GVAbstractTester {
       testName,
       (test) => {
         // Set step
-        test.addStep('Initializing config on url: ' + url);
+        test.addStep(`Initializing config on url: ${url}`);
 
         // Initialize the layer config
         return EsriFeature.initGeoviewLayerConfig(gvLayerId, gvLayerName, url);
@@ -320,7 +320,7 @@ export class ConfigTester extends GVAbstractTester {
       testName,
       (test) => {
         // Set step
-        test.addStep('Initializing config on url: ' + url);
+        test.addStep(`Initializing config on url: ${url}`);
 
         // Initialize the layer config
         return EsriImage.initGeoviewLayerConfig(gvLayerId, gvLayerName, url);
@@ -390,7 +390,7 @@ export class ConfigTester extends GVAbstractTester {
       'Test a WMS with OWS Mundialis',
       (test) => {
         // Set step
-        test.addStep('Initializing config on url: ' + url);
+        test.addStep(`Initializing config on url: ${url}`);
 
         // Initialize the layer config
         return WMS.initGeoviewLayerConfig(gvLayerId, gvLayerName, url, false, fullSubLayers);
@@ -448,7 +448,7 @@ export class ConfigTester extends GVAbstractTester {
       'Test a WMS with OWS Mundialis no full sub layers',
       (test) => {
         // Set step
-        test.addStep('Initializing config on url: ' + url);
+        test.addStep(`Initializing config on url: ${url}`);
 
         // Initialize the layer config
         return WMS.initGeoviewLayerConfig(gvLayerId, gvLayerName, url, false, fullSubLayers);
@@ -499,7 +499,7 @@ export class ConfigTester extends GVAbstractTester {
       'Test a WMS with Datacube MSI',
       (test) => {
         // Set step
-        test.addStep('Initializing config on url: ' + url);
+        test.addStep(`Initializing config on url: ${url}`);
 
         // Initialize the layer config
         return WMS.initGeoviewLayerConfig(gvLayerId, gvLayerName, url, false, fullSubLayers);
@@ -563,7 +563,7 @@ export class ConfigTester extends GVAbstractTester {
       'Test a WMS with Datacube MSI',
       (test) => {
         // Set step
-        test.addStep('Initializing config on url: ' + url);
+        test.addStep(`Initializing config on url: ${url}`);
 
         // Initialize the layer config
         return WMS.initGeoviewLayerConfig(gvLayerId, gvLayerName, url, false, fullSubLayers);
@@ -642,7 +642,7 @@ export class ConfigTester extends GVAbstractTester {
       'Test a WFS with Geomet Current Conditions',
       (test) => {
         // Set step
-        test.addStep('Initializing config on url: ' + url);
+        test.addStep(`Initializing config on url: ${url}`);
 
         // Initialize the layer config
         return WFS.initGeoviewLayerConfig(gvLayerId, gvLayerName, url);
@@ -742,7 +742,7 @@ export class ConfigTester extends GVAbstractTester {
       'Test a Geojson with metadata.meta file',
       (test) => {
         // Set step
-        test.addStep('Initializing config on url: ' + url);
+        test.addStep(`Initializing config on url: ${url}`);
 
         // Initialize the layer config
         return GeoJSON.initGeoviewLayerConfig(gvLayerId, gvLayerName, url);
@@ -851,7 +851,7 @@ export class ConfigTester extends GVAbstractTester {
       'Test a CSV with CSV file',
       (test) => {
         // Set step
-        test.addStep('Initializing config on url: ' + url);
+        test.addStep(`Initializing config on url: ${url}`);
 
         // Initialize the layer config
         return CSV.initGeoviewLayerConfig(gvLayerId, gvLayerName, url);
@@ -934,7 +934,7 @@ export class ConfigTester extends GVAbstractTester {
       'Test an OGC Feature with Pygeoapi',
       (test) => {
         // Set step
-        test.addStep('Initializing config on url: ' + url);
+        test.addStep(`Initializing config on url: ${url}`);
 
         // Initialize the layer config
         return OgcFeature.initGeoviewLayerConfig(gvLayerId, gvLayerName, url);
@@ -1010,7 +1010,7 @@ export class ConfigTester extends GVAbstractTester {
       'Test a WKB with South Africa',
       (test) => {
         // Set step
-        test.addStep('Initializing config on url: ' + url);
+        test.addStep(`Initializing config on url: ${url}`);
 
         // Initialize the layer config
         return WKB.initGeoviewLayerConfig(gvLayerId, gvLayerName, url);
@@ -1086,7 +1086,7 @@ export class ConfigTester extends GVAbstractTester {
       'Test a KML with Tornado file',
       (test) => {
         // Set step
-        test.addStep('Initializing config on url: ' + url);
+        test.addStep(`Initializing config on url: ${url}`);
 
         // Initialize the layer config
         return KML.initGeoviewLayerConfig(gvLayerId, gvLayerName, url);
@@ -1167,7 +1167,7 @@ export class ConfigTester extends GVAbstractTester {
       'Test a GeoTIFF with Vegetation',
       (test) => {
         // Set step
-        test.addStep('Initializing config on url: ' + url);
+        test.addStep(`Initializing config on url: ${url}`);
 
         // Initialize the layer config
         return GeoTIFF.initGeoviewLayerConfig(gvLayerId, gvLayerName, url);

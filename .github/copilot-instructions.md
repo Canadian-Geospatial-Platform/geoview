@@ -64,6 +64,20 @@ Backend/Map Events → Event Processors → Zustand Store
 - **Always define hook types**: `useState<TypeBasemapProps[]>([])` not `useState([])`
 - **Avoid name collisions**: Use `GVLayer` not `Layer` when OpenLayers has a `Layer` class
 
+### String Concatenation
+
+- **Always use template literals** instead of `+` for string concatenation:
+
+```typescript
+// ❌ Bad: String concatenation with +
+const layerPath = gvLayerId + "/" + layerId;
+const message = "Initializing config on url: " + url;
+
+// ✅ Good: Template literals
+const layerPath = `${gvLayerId}/${layerId}`;
+const message = `Initializing config on url: ${url}`;
+```
+
 ### Code Organization (per [best-practices.md](../docs/programming/best-practices.md))
 
 **Component order:**
@@ -180,11 +194,13 @@ Control via localStorage:
 **Golden Rule of JSDoc in TypeScript Projects:**
 
 JSDoc should:
+
 - Explain **why** something works the way it does
 - Explain **behavior** and side effects
 - Explain **non-obvious constraints**
 
 JSDoc should NOT:
+
 - Repeat type information already in the signature
 - Replace TypeScript visibility keywords (`private`, `protected`, `public`)
 - Duplicate what the compiler already guarantees
@@ -267,6 +283,7 @@ TestSuitePlugin (index.tsx) — AbstractPlugin that manages all Test Suites
 ```
 
 **Three-layer hierarchy:**
+
 1. **Suite** — groups related Testers and orchestrates their execution order
 2. **Tester** — contains individual test methods and shared helper methods
 3. **Test** — single test instance with lifecycle (running → verifying → success/failed)
@@ -312,9 +329,7 @@ Tests are triggered from HTML pages in `packages/geoview-core/public/templates/t
 ```json
 {
   "corePackages": ["test-suite"],
-  "corePackagesConfig": [
-    { "test-suite": { "suites": ["suite-layer"] } }
-  ]
+  "corePackagesConfig": [{ "test-suite": { "suites": ["suite-layer"] } }]
 }
 ```
 
@@ -368,22 +383,22 @@ Test.assertJsonObject(actual, expected)
 
 ```typescript
 this.test(
-  'Test description...',
+  "Test description...",
   async (test) => {
     // STEP 1: Setup & execute
-    test.addStep('Doing something...');
+    test.addStep("Doing something...");
     const result = await someOperation();
     return result;
   },
   (test, result) => {
     // STEP 2: Assert on result
-    Test.assertIsDefined('result', result);
-    Test.assertIsEqual(result.status, 'loaded');
+    Test.assertIsDefined("result", result);
+    Test.assertIsEqual(result.status, "loaded");
   },
   (test) => {
     // STEP 3: Cleanup (optional)
     cleanup();
-  }
+  },
 );
 ```
 
@@ -412,11 +427,11 @@ this.testError(
 All test URLs, UUIDs, coordinates, and expected icon lists are defined as `static readonly` constants on `GVAbstractTester`. Reuse these rather than hardcoding:
 
 ```typescript
-GVAbstractTester.BAD_URL                    // 'https://badurl/oops'
-GVAbstractTester.QUEBEC_LONLAT              // [-71.356, 46.780]
-GVAbstractTester.ONTARIO_CENTER_LONLAT      // [-87, 51]
-GVAbstractTester.HISTORICAL_FLOOD_URL_MAP_SERVER
-GVAbstractTester.FOREST_INDUSTRY_MAP_SERVER
+GVAbstractTester.BAD_URL; // 'https://badurl/oops'
+GVAbstractTester.QUEBEC_LONLAT; // [-71.356, 46.780]
+GVAbstractTester.ONTARIO_CENTER_LONLAT; // [-87, 51]
+GVAbstractTester.HISTORICAL_FLOOD_URL_MAP_SERVER;
+GVAbstractTester.FOREST_INDUSTRY_MAP_SERVER;
 // ... etc.
 ```
 
@@ -458,7 +473,7 @@ LayerTester.helperFinalizeStepRemoveLayerConfigAndAssert(test, mapViewer, gvLaye
 testAddMyNewLayer(): Promise<Test<AbstractGVLayer>> {
   const gvLayerId = generateId();
   const layerUrl = GVAbstractTester.MY_NEW_LAYER_URL;
-  const layerPath = gvLayerId + '/' + GVAbstractTester.MY_NEW_LAYER_ID;
+  const layerPath = `${gvLayerId}/${GVAbstractTester.MY_NEW_LAYER_ID}`;
   const gvLayerName = 'My New Layer';
 
   return this.test(
@@ -491,7 +506,7 @@ testAddMyNewLayer(): Promise<Test<AbstractGVLayer>> {
 testAddMyNewLayerBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
   const gvLayerId = generateId();
   const layerUrl = GVAbstractTester.BAD_URL;
-  const layerPath = gvLayerId + '/' + GVAbstractTester.MY_NEW_LAYER_ID;
+  const layerPath = `${gvLayerId}/${GVAbstractTester.MY_NEW_LAYER_ID}`;
   const gvLayerName = 'My New Layer';
 
   return this.testError(
@@ -671,20 +686,26 @@ testMyConfigScenario(): Promise<Test<TypeMapFeaturesInstance>> {
 1. **Create the Tester** — `tests/testers/my-feature-tester.ts`
 
 ```typescript
-import { Test } from '../core/test';
-import { GVAbstractTester } from './abstract-gv-tester';
+import { Test } from "../core/test";
+import { GVAbstractTester } from "./abstract-gv-tester";
 
 export class MyFeatureTester extends GVAbstractTester {
   override getName(): string {
-    return 'MyFeatureTester';
+    return "MyFeatureTester";
   }
 
   testSomething(): Promise<Test<SomeType>> {
     return this.test(
-      'Test something...',
-      async (test) => { /* execute */ },
-      (test, result) => { /* assert */ },
-      (test) => { /* cleanup */ }
+      "Test something...",
+      async (test) => {
+        /* execute */
+      },
+      (test, result) => {
+        /* assert */
+      },
+      (test) => {
+        /* cleanup */
+      },
     );
   }
 }
@@ -693,10 +714,10 @@ export class MyFeatureTester extends GVAbstractTester {
 2. **Create the Suite** — `tests/suites/suite-my-feature.ts`
 
 ```typescript
-import type { API } from 'geoview-core/api/api';
-import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
-import { GVAbstractTestSuite } from './abstract-gv-test-suite';
-import { MyFeatureTester } from '../testers/my-feature-tester';
+import type { API } from "geoview-core/api/api";
+import type { MapViewer } from "geoview-core/geo/map/map-viewer";
+import { GVAbstractTestSuite } from "./abstract-gv-test-suite";
+import { MyFeatureTester } from "../testers/my-feature-tester";
 
 export class GVTestSuiteMyFeature extends GVAbstractTestSuite {
   #tester: MyFeatureTester;
@@ -707,8 +728,12 @@ export class GVTestSuiteMyFeature extends GVAbstractTestSuite {
     this.addTester(this.#tester);
   }
 
-  override getName(): string { return 'My Feature Test Suite'; }
-  override getDescriptionAsHtml(): string { return 'Tests for My Feature.'; }
+  override getName(): string {
+    return "My Feature Test Suite";
+  }
+  override getDescriptionAsHtml(): string {
+    return "Tests for My Feature.";
+  }
 
   // Optional: Guard — only run if the feature is enabled
   // protected override async onCanExecuteTestSuite(): Promise<boolean> {
@@ -753,11 +778,11 @@ import { GVTestSuiteMyFeature } from './tests/suites/suite-my-feature';
 
 ### Test Execution Patterns Reference
 
-| Pattern | When to Use | Example Suite |
-|---|---|---|
-| `Promise.all()` (fully parallel) | Independent tests, no shared state | `suite-config`, `suite-layer`, `suite-ui` |
-| Sequential `await` + final `Promise.all()` | Tests modify shared map state | `suite-map-varia`, `suite-map-config` |
-| `onCanExecuteTestSuite()` guard | Suite requires specific plugin/feature | `suite-geochart`, `suite-details` |
+| Pattern                                    | When to Use                            | Example Suite                             |
+| ------------------------------------------ | -------------------------------------- | ----------------------------------------- |
+| `Promise.all()` (fully parallel)           | Independent tests, no shared state     | `suite-config`, `suite-layer`, `suite-ui` |
+| Sequential `await` + final `Promise.all()` | Tests modify shared map state          | `suite-map-varia`, `suite-map-config`     |
+| `onCanExecuteTestSuite()` guard            | Suite requires specific plugin/feature | `suite-geochart`, `suite-details`         |
 
 ### Key Rules for Writing Tests
 

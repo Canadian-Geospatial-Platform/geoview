@@ -6,9 +6,10 @@ import { LayerNoCapabilitiesError, LayerServiceMetadataUnableToFetchError } from
 import type { TypeGeoviewLayerConfig } from 'geoview-core/api/types/layer-schema-types';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { EsriDynamic } from 'geoview-core/geo/layer/geoview-layers/raster/esri-dynamic';
-import { generateId } from 'geoview-core/core/utils/utilities';
+import { generateId, whenThisThen } from 'geoview-core/core/utils/utilities';
 import { AbstractBaseLayerEntryConfig } from 'geoview-core/api/config/validation-classes/abstract-base-layer-entry-config';
 import { LegendEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/legend-event-processor';
+import { DataTableEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/data-table-event-processor';
 import { EsriFeature } from 'geoview-core/geo/layer/geoview-layers/vector/esri-feature';
 import { EsriImage } from 'geoview-core/geo/layer/geoview-layers/raster/esri-image';
 import { WMS } from 'geoview-core/geo/layer/geoview-layers/raster/wms';
@@ -20,7 +21,7 @@ import { OgcFeature } from 'geoview-core/geo/layer/geoview-layers/vector/ogc-fea
 import { WKB } from 'geoview-core/geo/layer/geoview-layers/vector/wkb';
 import { KML } from 'geoview-core/geo/layer/geoview-layers/vector/kml';
 import type { GeoViewLayerAddedResult } from 'geoview-core/geo/layer/layer';
-import type { TypeMapFeaturesInstance } from 'geoview-core/api/types/map-schema-types';
+import type { TypeMapFeaturesInstance, TypeFeatureInfoResult, codedValueType } from 'geoview-core/api/types/map-schema-types';
 import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
 
 /**
@@ -46,7 +47,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.HISTORICAL_FLOOD_URL_MAP_SERVER;
-    const layerPath = gvLayerId + '/' + GVAbstractTester.HISTORICAL_FLOOD_URL_LAYER_ID;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.HISTORICAL_FLOOD_URL_LAYER_ID}`;
     const gvLayerName = 'Esri Dynamic Histo Flood Events';
 
     // Test
@@ -92,13 +93,13 @@ export class LayerTester extends GVAbstractTester {
    */
   testAddEsriDynamicWithRasterLayersViaGeocore(): Promise<Test<AbstractGVLayer>> {
     const gvLayerId = GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_UUID;
-    const layerPathGroup = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_GROUP;
-    const layerPathPetroleum = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_PETROLEUM;
-    const layerPathMinerals = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_MINERALS;
-    const layerPathForestry = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_FORESTRY;
-    const layerPathFisheries = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_FISHERIES;
-    const layerPathAgriculture = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_AGRICULTURE;
-    const layerPathCanecumene = gvLayerId + '/' + GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_CANECUMENE;
+    const layerPathGroup = `${gvLayerId}/${GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_GROUP}`;
+    const layerPathPetroleum = `${gvLayerId}/${GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_PETROLEUM}`;
+    const layerPathMinerals = `${gvLayerId}/${GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_MINERALS}`;
+    const layerPathForestry = `${gvLayerId}/${GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_FORESTRY}`;
+    const layerPathFisheries = `${gvLayerId}/${GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_FISHERIES}`;
+    const layerPathAgriculture = `${gvLayerId}/${GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_AGRICULTURE}`;
+    const layerPathCanecumene = `${gvLayerId}/${GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_CANECUMENE}`;
 
     // Test
     return this.test(
@@ -183,7 +184,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.BAD_URL;
-    const layerPath = gvLayerId + '/' + GVAbstractTester.HISTORICAL_FLOOD_URL_LAYER_ID;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.HISTORICAL_FLOOD_URL_LAYER_ID}`;
     const gvLayerName = 'Esri Dynamic Histo Flood Events';
 
     // Test
@@ -222,7 +223,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.FOREST_INDUSTRY_MAP_SERVER;
-    const layerPath = gvLayerId + '/' + GVAbstractTester.FOREST_INDUSTRY_LAYER_ID;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.FOREST_INDUSTRY_LAYER_ID}`;
     const gvLayerName = 'Esri Feature Forest Industry';
 
     // Test
@@ -273,7 +274,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.BAD_URL;
-    const layerPath = gvLayerId + '/' + GVAbstractTester.FOREST_INDUSTRY_LAYER_ID;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.FOREST_INDUSTRY_LAYER_ID}`;
     const gvLayerName = 'Esri Feature Forest Industry';
 
     // Test
@@ -308,7 +309,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.LOW_HEAD_HYDRO_DATABASE;
-    const layerPath = gvLayerId + '/' + GVAbstractTester.LOW_HEAD_HYDRO_DATABASE_YUKON_ID;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.LOW_HEAD_HYDRO_DATABASE_YUKON_ID}`;
     const gvLayerName = 'Yukon Low Head Hydro';
 
     // Test
@@ -353,7 +354,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.IMAGE_SERVER_ELEVATION_URL;
-    const layerPath = gvLayerId + '/' + GVAbstractTester.IMAGE_SERVER_ELEVATION_LAYER_ID;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.IMAGE_SERVER_ELEVATION_LAYER_ID}`;
     const gvLayerName = 'Esri Image Elevation';
 
     // Test
@@ -392,9 +393,9 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.IMAGE_SERVER_USA_URL;
-    const layerPathGroup = gvLayerId + '/base-group';
-    const layerPathCities = gvLayerId + '/base-group/' + GVAbstractTester.IMAGE_SERVER_USA_LAYER_ID_CITIES;
-    const layerPathRoads = gvLayerId + '/base-group/' + GVAbstractTester.IMAGE_SERVER_USA_LAYER_ID_ROADS;
+    const layerPathGroup = `${gvLayerId}/base-group`;
+    const layerPathCities = `${gvLayerId}/base-group/${GVAbstractTester.IMAGE_SERVER_USA_LAYER_ID_CITIES}`;
+    const layerPathRoads = `${gvLayerId}/base-group/${GVAbstractTester.IMAGE_SERVER_USA_LAYER_ID_ROADS}`;
     const gvLayerName = 'Esri Image USA';
 
     // Test
@@ -447,8 +448,8 @@ export class LayerTester extends GVAbstractTester {
   testAddEsriImageBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // Create a random geoview layer id
     const gvLayerId = generateId();
-    const layerUrl = GVAbstractTester.BAD_URL + '/' + GVAbstractTester.IMAGE_SERVER_ELEVATION_LAYER_ID + '/ImageServer'; // Has to be formatted like this, because we're guessing the layer id with url parsing!
-    const layerPath = gvLayerId + '/' + GVAbstractTester.IMAGE_SERVER_ELEVATION_LAYER_ID;
+    const layerUrl = `${GVAbstractTester.BAD_URL}/${GVAbstractTester.IMAGE_SERVER_ELEVATION_LAYER_ID}/ImageServer`; // Has to be formatted like this, because we're guessing the layer id with url parsing!
+    const layerPath = `${gvLayerId}/${GVAbstractTester.IMAGE_SERVER_ELEVATION_LAYER_ID}`;
     const gvLayerName = 'Esri Image Elevation';
 
     // Test
@@ -485,7 +486,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.OWS_MUNDIALIS;
-    const layerPath = gvLayerId + '/' + GVAbstractTester.OWS_MUNDIALIS_LAYER_ID;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.OWS_MUNDIALIS_LAYER_ID}`;
     const gvLayerName = 'OWS Mundialis';
 
     // Test
@@ -526,7 +527,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.DATACUBE_MSI;
-    const layerPath = gvLayerId + '/' + GVAbstractTester.DATACUBE_MSI_LAYER_NAME_MSI_OR_MORE;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.DATACUBE_MSI_LAYER_NAME_MSI_OR_MORE}`;
     const gvLayerName = 'Datacube MSI';
 
     // Test
@@ -573,7 +574,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.DATACUBE_RING_FIRE;
-    const layerPath = gvLayerId + '/' + GVAbstractTester.DATACUBE_RING_FIRE_LAYER_ID_HALIFAX;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.DATACUBE_RING_FIRE_LAYER_ID_HALIFAX}`;
     const gvLayerName = 'Halifax';
 
     // Test
@@ -632,7 +633,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.BAD_URL;
-    const layerPath = gvLayerId + '/' + GVAbstractTester.DATACUBE_MSI_LAYER_NAME_MSI_OR_MORE;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.DATACUBE_MSI_LAYER_NAME_MSI_OR_MORE}`;
     const gvLayerName = 'Datacube MSI';
 
     // Test
@@ -677,7 +678,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.GEOMET_URL;
-    const layerPath = gvLayerId + '/' + GVAbstractTester.GEOMET_URL_CURRENT_COND_LAYER_ID;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOMET_URL_CURRENT_COND_LAYER_ID}`;
     const gvLayerName = 'Current Conditions';
 
     // Test
@@ -722,7 +723,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.BAD_URL;
-    const layerPath = gvLayerId + '/' + GVAbstractTester.GEOMET_URL_CURRENT_COND_LAYER_ID;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOMET_URL_CURRENT_COND_LAYER_ID}`;
     const gvLayerName = 'Current Conditions';
 
     // Test
@@ -761,7 +762,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.FAKE_URL_ALWAYS_RETURNING_RESPONSE_INSTEAD_OF_NETWORK_ERROR;
-    const layerPath = gvLayerId + '/' + GVAbstractTester.GEOMET_URL_CURRENT_COND_LAYER_ID;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOMET_URL_CURRENT_COND_LAYER_ID}`;
     const gvLayerName = 'Current Conditions';
 
     // Test
@@ -800,7 +801,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.GEOJSON_METADATA_META;
-    const layerPath = gvLayerId + '/' + GVAbstractTester.GEOJSON_POLYGONS;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOJSON_POLYGONS}`;
     const gvLayerName = 'Polygons JSON';
 
     // Test
@@ -856,7 +857,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.BAD_URL;
-    const layerPath = gvLayerId + '/' + GVAbstractTester.GEOJSON_POLYGONS;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOJSON_POLYGONS}`;
     const gvLayerName = 'Polygons JSON';
 
     // Test
@@ -899,7 +900,7 @@ export class LayerTester extends GVAbstractTester {
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.GEOTIFF_VEGETATION;
     const gvLayerName = 'Datacube Vegetation';
-    const layerPath = gvLayerId + '/' + GVAbstractTester.GEOTIFF_VEGETATION_FILE;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOTIFF_VEGETATION_FILE}`;
 
     // Test
     return this.test(
@@ -945,7 +946,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.BAD_URL;
-    const layerPath = gvLayerId + '/' + GVAbstractTester.GEOTIFF_VEGETATION_FILE;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.GEOTIFF_VEGETATION_FILE}`;
     const gvLayerName = 'GeoTIFF Vegetation';
 
     // Test
@@ -987,7 +988,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.CSV_STATION_LIST;
-    const layerPath = gvLayerId + '/' + GVAbstractTester.CSV_STATION_LIST_FILE;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.CSV_STATION_LIST_FILE}`;
     const gvLayerName = 'Station List CSV';
 
     // Test
@@ -1034,7 +1035,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.BAD_URL;
-    const layerPath = gvLayerId + '/' + GVAbstractTester.CSV_STATION_LIST_FILE;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.CSV_STATION_LIST_FILE}`;
     const gvLayerName = 'Station List CSV';
 
     // Test
@@ -1076,7 +1077,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.PYGEOAPI_B6RYUVAKK5;
-    const layerPath = gvLayerId + '/' + GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES}`;
     const gvLayerName = GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES;
 
     // Test
@@ -1127,7 +1128,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.BAD_URL;
-    const layerPath = gvLayerId + '/' + GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES}`;
     const gvLayerName = GVAbstractTester.PYGEOAPI_B6RYUVAKK5_LAKES;
 
     // Test
@@ -1166,7 +1167,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.WKB_SOUTH_AFRICA;
-    const layerPath = gvLayerId + '/' + GVAbstractTester.WKB_SOUTH_AFRICA;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.WKB_SOUTH_AFRICA}`;
     const gvLayerName = 'WKB South Africa';
 
     // Test
@@ -1211,7 +1212,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.BAD_URL;
-    const layerPath = gvLayerId + '/' + GVAbstractTester.WKB_SOUTH_AFRICA;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.WKB_SOUTH_AFRICA}`;
     const gvLayerName = GVAbstractTester.WKB_SOUTH_AFRICA;
 
     // Test
@@ -1251,7 +1252,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.KML_TORNADO;
-    const layerPath = gvLayerId + '/' + GVAbstractTester.KML_TORNADO_FILE;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.KML_TORNADO_FILE}`;
     const gvLayerName = 'KML Tornado';
 
     // Test
@@ -1296,7 +1297,7 @@ export class LayerTester extends GVAbstractTester {
     // Create a random geoview layer id
     const gvLayerId = generateId();
     const layerUrl = GVAbstractTester.BAD_URL;
-    const layerPath = gvLayerId + '/' + GVAbstractTester.KML_TORNADO_FILE;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.KML_TORNADO_FILE}`;
     const gvLayerName = GVAbstractTester.KML_TORNADO_FILE;
 
     // Test
@@ -1384,6 +1385,303 @@ export class LayerTester extends GVAbstractTester {
   }
 
   // #endregion SETTINGS
+
+  // #region DOMAIN FIELDS
+
+  /**
+   * Tests adding an Esri Dynamic layer that has fields with coded value domains and verifies
+   * that the "material" field on layer 16 has a domain in the generated config.
+   *
+   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   */
+  testAddEsriDynamicWithDomainField(): Promise<Test<AbstractGVLayer>> {
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.WATER_NETWORK_MAP_SERVER;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.WATER_NETWORK_LAYER_ID}`;
+    const gvLayerName = 'Esri Dynamic Water Network';
+
+    return this.test(
+      `Test Adding Esri Dynamic Water Network and checking domain field...`,
+      async (test) => {
+        test.addStep('Creating the GeoView Layer Configuration...');
+        const gvConfig = EsriDynamic.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
+          { id: GVAbstractTester.WATER_NETWORK_LAYER_ID },
+        ]);
+
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+      },
+      (test) => {
+        // Verify the layer exists
+        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath);
+
+        // Get the layer entry config to check for the domain on the "material" field
+        test.addStep('Getting the layer entry config...');
+        const layerEntryConfig = this.getMapViewer().layer.getLayerEntryConfigRegular(layerPath);
+        Test.assertIsDefined('layerEntryConfig', layerEntryConfig);
+
+        // Get the outfields
+        test.addStep('Getting the outfields from the config...');
+        const outfields = layerEntryConfig.getOutfields();
+        Test.assertIsDefined('outfields', outfields);
+        Test.assertIsArrayLengthMinimal(outfields, 1);
+
+        // Find the "material" field
+        test.addStep(`Finding the "${GVAbstractTester.WATER_NETWORK_DOMAIN_FIELD_NAME}" field...`);
+        const materialField = outfields!.find((f) => f.name === GVAbstractTester.WATER_NETWORK_DOMAIN_FIELD_NAME);
+        Test.assertIsDefined('materialField', materialField);
+
+        // Verify it has a domain
+        test.addStep('Verifying the field has a domain...');
+        Test.assertIsDefined('materialField.domain', materialField!.domain);
+
+        // Verify the domain type is codedValue
+        test.addStep('Verifying the domain type is codedValue...');
+        Test.assertIsEqual(materialField!.domain!.type, 'codedValue');
+
+        // Verify the domain has coded values
+        test.addStep('Verifying the domain has coded values...');
+        const codedDomain = materialField!.domain! as { type: string; codedValues: unknown[] };
+        Test.assertIsDefined('codedValues', codedDomain.codedValues);
+        Test.assertIsArrayLengthMinimal(codedDomain.codedValues, 1);
+      },
+      (test) => {
+        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests adding an Esri Feature layer that has fields with coded value domains and verifies
+   * that the "material" field on layer 16 has a domain in the generated config.
+   *
+   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   */
+  testAddEsriFeatureWithDomainField(): Promise<Test<AbstractGVLayer>> {
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.WATER_NETWORK_MAP_SERVER;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.WATER_NETWORK_LAYER_ID}`;
+    const gvLayerName = 'Esri Feature Water Network';
+
+    return this.test(
+      `Test Adding Esri Feature Water Network and checking domain field...`,
+      async (test) => {
+        test.addStep('Creating the GeoView Layer Configuration...');
+        const gvConfig = EsriFeature.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
+          { id: GVAbstractTester.WATER_NETWORK_LAYER_ID },
+        ]);
+
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+      },
+      (test) => {
+        // Verify the layer exists
+        LayerTester.helperStepAssertLayerExists(test, this.getMapViewer(), layerPath);
+
+        // Get the layer entry config to check for the domain on the "material" field
+        test.addStep('Getting the layer entry config...');
+        const layerEntryConfig = this.getMapViewer().layer.getLayerEntryConfigRegular(layerPath);
+        Test.assertIsDefined('layerEntryConfig', layerEntryConfig);
+
+        // Get the outfields
+        test.addStep('Getting the outfields from the config...');
+        const outfields = layerEntryConfig.getOutfields();
+        Test.assertIsDefined('outfields', outfields);
+        Test.assertIsArrayLengthMinimal(outfields, 1);
+
+        // Find the "material" field
+        test.addStep(`Finding the "${GVAbstractTester.WATER_NETWORK_DOMAIN_FIELD_NAME}" field...`);
+        const materialField = outfields!.find((f) => f.name === GVAbstractTester.WATER_NETWORK_DOMAIN_FIELD_NAME);
+        Test.assertIsDefined('materialField', materialField);
+
+        // Verify it has a domain
+        test.addStep('Verifying the field has a domain...');
+        Test.assertIsDefined('materialField.domain', materialField!.domain);
+
+        // Verify the domain type is codedValue
+        test.addStep('Verifying the domain type is codedValue...');
+        Test.assertIsEqual(materialField!.domain!.type, 'codedValue');
+
+        // Verify the domain has coded values
+        test.addStep('Verifying the domain has coded values...');
+        const codedDomain = materialField!.domain! as { type: string; codedValues: unknown[] };
+        Test.assertIsDefined('codedValues', codedDomain.codedValues);
+        Test.assertIsArrayLengthMinimal(codedDomain.codedValues, 1);
+      },
+      (test) => {
+        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests adding an Esri Dynamic layer with domain fields, querying all features,
+   * and verifying that the "material" field value in the query results is the
+   * domain-translated value (human-readable name) rather than the raw code.
+   *
+   * @returns {Promise<Test<TypeFeatureInfoResult>>} A Promise resolving when the test completes.
+   */
+  testEsriDynamicDomainFieldQueryValue(): Promise<Test<TypeFeatureInfoResult>> {
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.WATER_NETWORK_MAP_SERVER;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.WATER_NETWORK_LAYER_ID}`;
+    const gvLayerName = 'Esri Dynamic Water Network Query';
+
+    return this.test(
+      `Test Esri Dynamic Water Network domain field query value translation...`,
+      async (test) => {
+        test.addStep('Creating the GeoView Layer Configuration...');
+        const gvConfig = EsriDynamic.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
+          { id: GVAbstractTester.WATER_NETWORK_LAYER_ID },
+        ]);
+
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+
+        // Wait for the layer to be registered in the allFeatureInfoLayerSet
+        test.addStep('Waiting for the layer to be registered in the allFeatureInfoLayerSet...');
+        // prettier-ignore
+        await whenThisThen(() => this.getMapViewer().layer.allFeatureInfoLayerSet.getRegisteredLayerPaths().includes(layerPath), 30000);
+
+        // Set the zoom to 17.4 so the layer is within its visible scale range for the query
+        test.addStep('Setting zoom to 17.4 for the layer visible range...');
+        await this.getMapViewer().setMapZoomLevel(17.4);
+
+        // Query all features
+        test.addStep('Triggering getAllFeatureInfo query...');
+        const result = await DataTableEventProcessor.triggerGetAllFeatureInfo(this.getMapId(), layerPath);
+        return result;
+      },
+      (test, result) => {
+        // Verify we got results
+        test.addStep('Verifying query returned results...');
+        Test.assertIsDefined('result', result);
+        Test.assertIsDefined('result.results', result.results);
+        Test.assertIsArrayLengthMinimal(result.results, 1);
+
+        // Get the first feature's fieldInfo
+        test.addStep('Getting the first feature fieldInfo...');
+        const firstFeature = result.results[0];
+        Test.assertIsDefined('firstFeature.fieldInfo', firstFeature.fieldInfo);
+
+        // Get the material field value
+        const fieldName = GVAbstractTester.WATER_NETWORK_DOMAIN_FIELD_NAME;
+        test.addStep(`Getting the "${fieldName}" field from the feature...`);
+        const materialFieldEntry = firstFeature.fieldInfo[fieldName];
+        Test.assertIsDefined('materialFieldEntry', materialFieldEntry);
+        Test.assertIsDefined('materialFieldEntry.value', materialFieldEntry!.value);
+
+        // Get the coded values from the domain on the field entry
+        test.addStep('Verifying the field has a codedValue domain...');
+        Test.assertIsDefined('materialFieldEntry.domain', materialFieldEntry!.domain);
+        Test.assertIsEqual(materialFieldEntry!.domain!.type, 'codedValue');
+
+        const codedDomain = materialFieldEntry!.domain! as codedValueType;
+        const codedValueNames = codedDomain.codedValues.map((cv) => cv.name);
+        const codedValueCodes = codedDomain.codedValues.map((cv) => cv.code);
+
+        // Verify the value is one of the translated names, not a raw code
+        test.addStep('Verifying the value is a domain-translated name...');
+        Test.assertArrayIncludes(codedValueNames, materialFieldEntry!.value as string);
+
+        // Verify the value is NOT a raw code (unless name === code, which is unlikely)
+        test.addStep('Verifying the value is not a raw code...');
+        // Only assert if the translated name differs from the code for this value
+        const matchingEntry = codedDomain.codedValues.find((cv) => cv.name === materialFieldEntry!.value);
+        if (matchingEntry && matchingEntry.code !== matchingEntry.name) {
+          Test.assertArrayExcludes(codedValueCodes as string[], materialFieldEntry!.value as string);
+        }
+      },
+      (test) => {
+        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+      }
+    );
+  }
+
+  /**
+   * Tests adding an Esri Feature layer with domain fields, querying all features,
+   * and verifying that the "material" field value in the query results is the
+   * domain-translated value (human-readable name) rather than the raw code.
+   *
+   * @returns {Promise<Test<TypeFeatureInfoResult>>} A Promise resolving when the test completes.
+   */
+  testEsriFeatureDomainFieldQueryValue(): Promise<Test<TypeFeatureInfoResult>> {
+    const gvLayerId = generateId();
+    const layerUrl = GVAbstractTester.WATER_NETWORK_MAP_SERVER;
+    const layerPath = `${gvLayerId}/${GVAbstractTester.WATER_NETWORK_LAYER_ID}`;
+    const gvLayerName = 'Esri Feature Water Network Query';
+
+    return this.test(
+      `Test Esri Feature Water Network domain field query value translation...`,
+      async (test) => {
+        test.addStep('Creating the GeoView Layer Configuration...');
+        const gvConfig = EsriFeature.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
+          { id: GVAbstractTester.WATER_NETWORK_LAYER_ID },
+        ]);
+
+        await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+        await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+
+        // Wait for the layer to be registered in the allFeatureInfoLayerSet
+        test.addStep('Waiting for the layer to be registered in the allFeatureInfoLayerSet...');
+        // prettier-ignore
+        await whenThisThen(() => this.getMapViewer().layer.allFeatureInfoLayerSet.getRegisteredLayerPaths().includes(layerPath), 30000);
+
+        // Set the zoom to 17.4 so the layer is within its visible scale range for the query
+        test.addStep('Setting zoom to 17.4 for the layer visible range...');
+        await this.getMapViewer().setMapZoomLevel(17.4);
+
+        // Query all features
+        test.addStep('Triggering getAllFeatureInfo query...');
+        const result = await DataTableEventProcessor.triggerGetAllFeatureInfo(this.getMapId(), layerPath);
+        return result;
+      },
+      (test, result) => {
+        // Verify we got results
+        test.addStep('Verifying query returned results...');
+        Test.assertIsDefined('result', result);
+        Test.assertIsDefined('result.results', result.results);
+        Test.assertIsArrayLengthMinimal(result.results, 1);
+
+        // Get the first feature's fieldInfo
+        test.addStep('Getting the first feature fieldInfo...');
+        const firstFeature = result.results[0];
+        Test.assertIsDefined('firstFeature.fieldInfo', firstFeature.fieldInfo);
+
+        // Get the material field value
+        const fieldName = GVAbstractTester.WATER_NETWORK_DOMAIN_FIELD_NAME;
+        test.addStep(`Getting the "${fieldName}" field from the feature...`);
+        const materialFieldEntry = firstFeature.fieldInfo[fieldName];
+        Test.assertIsDefined('materialFieldEntry', materialFieldEntry);
+        Test.assertIsDefined('materialFieldEntry.value', materialFieldEntry!.value);
+
+        // Get the coded values from the domain on the field entry
+        test.addStep('Verifying the field has a codedValue domain...');
+        Test.assertIsDefined('materialFieldEntry.domain', materialFieldEntry!.domain);
+        Test.assertIsEqual(materialFieldEntry!.domain!.type, 'codedValue');
+
+        const codedDomain = materialFieldEntry!.domain! as codedValueType;
+        const codedValueNames = codedDomain.codedValues.map((cv) => cv.name);
+        const codedValueCodes = codedDomain.codedValues.map((cv) => cv.code);
+
+        // Verify the value is one of the translated names, not a raw code
+        test.addStep('Verifying the value is a domain-translated name...');
+        Test.assertArrayIncludes(codedValueNames, materialFieldEntry!.value as string);
+
+        // Verify the value is NOT a raw code (unless name === code, which is unlikely)
+        test.addStep('Verifying the value is not a raw code...');
+        const matchingEntry = codedDomain.codedValues.find((cv) => cv.name === materialFieldEntry!.value);
+        if (matchingEntry && matchingEntry.code !== matchingEntry.name) {
+          Test.assertArrayExcludes(codedValueCodes as string[], materialFieldEntry!.value as string);
+        }
+      },
+      (test) => {
+        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+      }
+    );
+  }
+
+  // #endregion DOMAIN FIELDS
 
   // #region HELPERS
 
@@ -1616,7 +1914,7 @@ export class LayerTester extends GVAbstractTester {
   static helperFinalizeStepRemoveLayerConfigAndAssert<T>(test: Test<T>, mapViewer: MapViewer, geoviewLayerId: string): void {
     // Check that the layer is indeed there
     test.addStep(`Checking the geoview layer ${geoviewLayerId} exists on the map...`);
-    Test.assertIsDefined('layerEntryConfig ' + geoviewLayerId, mapViewer.layer.getLayerEntryConfigIfExists(geoviewLayerId));
+    Test.assertIsDefined(`layerEntryConfig ${geoviewLayerId}`, mapViewer.layer.getLayerEntryConfigIfExists(geoviewLayerId));
 
     // Remove the added layer
     test.addStep(`Removing the geoview layer ${geoviewLayerId} from the map...`);
@@ -1624,7 +1922,7 @@ export class LayerTester extends GVAbstractTester {
 
     // Validate that it's gone
     test.addStep(`Validate that the layer is indeed gone...`);
-    Test.assertIsUndefined('layerEntryConfig ' + geoviewLayerId, mapViewer.layer.getLayerEntryConfigIfExists(geoviewLayerId));
+    Test.assertIsUndefined(`layerEntryConfig ${geoviewLayerId}`, mapViewer.layer.getLayerEntryConfigIfExists(geoviewLayerId));
   }
 
   // #endregion HELPERS

@@ -42,7 +42,7 @@ export class GeochartTester extends GVAbstractTester {
         Test.assertIsEqual(UIEventProcessor.getActiveFooterBarTab(this.getMapId()).tabId, 'geochart');
 
         // Check that layer path is selected
-        test.addStep('Verifying ' + layerPath + ' is the selected layer for the geochart...');
+        test.addStep(`Verifying ${layerPath} is the selected layer for the geochart...`);
         Test.assertIsEqual(GeochartEventProcessor.getSingleGeochartState(this.getMapId(), 'selectedLayerPath'), layerPath);
       }
     );
@@ -135,7 +135,7 @@ export class GeochartTester extends GVAbstractTester {
         Test.assertIsEqual(UIEventProcessor.getActiveFooterBarTab(this.getMapId()).tabId, 'geochart');
 
         // Check that layer path is selected
-        test.addStep('Verifying ' + layerPathAdd + ' is the selected layer for the geochart...');
+        test.addStep(`Verifying ${layerPathAdd} is the selected layer for the geochart...`);
         Test.assertIsEqual(GeochartEventProcessor.getSingleGeochartState(this.getMapId(), 'selectedLayerPath'), layerPathAdd);
       },
       (test) => {
