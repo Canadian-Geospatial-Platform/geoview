@@ -25,17 +25,18 @@ const COLUMNS_TO_REMOVE = ['ICON', 'ZOOM', 'DETAILS', 'geoviewID'];
 
 /**
  * Custom  export button which will help to download data table data in csv format.
- * @param {string} layerPath id of the layer
- * @param {ColumnsType} rows list of rows to be displayed in data table
- * @param {MRTColumnDef<ColumnsType>[]} columns array of object represent column header data.
- * @param {ReactElement} children Menu item to be rendered in Menu.
- * @returns {JSX.Element} returns export button
+ * @param props - The props for the export button component
+ * @returns The export button
  *
  */
-function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps): JSX.Element {
+function ExportButton(props: ExportButtonProps): JSX.Element {
   // Log
   logger.logTraceRender('components/data-table/export-button');
 
+  // Props
+  const { layerPath, rows, columns, children } = props;
+
+  // Hook
   const { t } = useTranslation<string>();
   const layerName = useLayerSelectorName(layerPath) ?? '';
 

@@ -8,9 +8,14 @@ import {
   useDataTableAllFeaturesDataArray,
   useDataTableLayerSettings,
   useDataTableStoreActions,
+  useDataTableFilterDataToExtent,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useMapStoreActions, useMapAllVisibleandInRangeLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
+import {
+  useMapStoreActions,
+  useMapAllVisibleandInRangeLayers,
+  useMapExtent,
+} from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useLayerNames, useLayerStatuses } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
   useUIActiveAppBarTab,
@@ -52,6 +57,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   const layerData = useDataTableAllFeaturesDataArray();
   const selectedLayerPath = useDataTableSelectedLayerPath();
   const datatableSettings = useDataTableLayerSettings();
+  const filterDataToExtent = useDataTableFilterDataToExtent();
   const { setSelectedLayerPath } = useDataTableStoreActions();
   const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
   const { isLayerHiddenOnMap } = useMapStoreActions();
@@ -63,6 +69,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   const { disableFocusTrap } = useUIStoreActions();
   const layerNames = useLayerNames();
   const layerStatuses = useLayerStatuses();
+  const mapExtent = useMapExtent();
 
   // Create columns for data table.
   const mappedLayerData = useFeatureFieldInfos(layerData);
@@ -71,10 +78,25 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
    * Order the layers by visible layer order.
    */
   const orderedLayerData = useMemo(() => {
-    return visibleInRangeLayers
+    let result = visibleInRangeLayers
       .map((layerPath) => mappedLayerData.filter((data) => data.layerPath === layerPath)[0])
       .filter((layer) => layer !== undefined && !isLayerHiddenOnMap(layer.layerPath));
-  }, [mappedLayerData, visibleInRangeLayers, isLayerHiddenOnMap]);
+
+    // If filter data to extent is on, filter the features of each layer to the features in the current map extent
+    result = result.map((layer) => {
+      if (layer.layerPath !== selectedLayerPath || !filterDataToExtent || !mapExtent) return layer;
+
+      return {
+        ...layer,
+        features: layer.features?.filter((feature) => {
+          const { geometry } = feature;
+          return geometry?.intersectsExtent(mapExtent);
+        }),
+      };
+    });
+
+    return result;
+  }, [visibleInRangeLayers, mappedLayerData, isLayerHiddenOnMap, selectedLayerPath, filterDataToExtent, mapExtent]);
 
   /**
    * Update local states when layer is changed from layer list.

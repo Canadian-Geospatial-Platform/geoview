@@ -82,13 +82,15 @@ const STRING_FIELD_FILTERS = ['contains', 'startsWith', 'endsWith'];
 
 /**
  * Build Data table from map.
- * @param {DataTableProps} data map data which will be used to build data table.
- * @param {string} mapId id of the map.
- * @param {string} layerKey key of the layer.
- * @returns {JSX.Element} Data table as react element.
+ * @param props - The props for the data table component
+ * @returns The data table as a react element
  */
 
-function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Element {
+function DataTable(props: DataTableProps): JSX.Element {
+  // Props
+  const { data, layerPath, containerType } = props;
+
+  // Hook
   const { t } = useTranslation();
 
   const sxtheme = useTheme();
@@ -598,7 +600,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     enableBottomToolbar: false,
     positionToolbarAlertBanner: 'none', // hide existing row count
     renderTopToolbar: useCallback(
-      (props: { table: MRTTableInstance<ColumnsType> }): ReactNode => (
+      (toolbarProps: { table: MRTTableInstance<ColumnsType> }): ReactNode => (
         <TopToolbar
           sxClasses={sxClasses}
           datatableSettings={datatableSettings}
@@ -608,7 +610,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
           useTable={useTable}
           columns={columns}
           data={data}
-          table={props.table}
+          table={toolbarProps.table}
         />
       ),
       [datatableSettings, layerPath, globalFilter, columns, data, sxClasses, t, useTable] // Include dependencies
