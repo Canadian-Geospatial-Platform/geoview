@@ -25,6 +25,7 @@ export interface IDataTableState {
   selectedFeature: TypeFeatureInfoEntry | null;
   selectedLayerPath: string;
   tableFilters: Record<string, string>;
+  filterDataToExtent: boolean;
   setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => void;
 
   actions: {
@@ -34,6 +35,7 @@ export interface IDataTableState {
     setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
     setColumnFilterModesEntry: (filterModes: Record<string, string>, layerPath: string) => void;
     setColumnsFiltersVisibility: (visible: boolean, layerPath: string) => void;
+    setFilterDataToExtent: (filterDataToExtent: boolean) => void;
     setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
     setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
     setRowsFilteredEntry: (rows: number, layerPath: string) => void;
@@ -49,6 +51,7 @@ export interface IDataTableState {
     setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
     setColumnFilterModesEntry: (filterModes: Record<string, string>, layerPath: string) => void;
     setColumnsFiltersVisibility: (visible: boolean, layerPath: string) => void;
+    setFilterDataToExtent: (filterDataToExtent: boolean) => void;
     setInitiallayerDataTableSetting: (layerPath: string) => void;
     setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
     setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
@@ -77,6 +80,7 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
     selectedFeature: null,
     selectedLayerPath: '',
     tableFilters: {},
+    filterDataToExtent: false,
     // Initialize default
     setDefaultConfigValues: (geoviewConfig: TypeMapFeaturesConfig) => {
       set({
@@ -118,6 +122,10 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
       setColumnsFiltersVisibility: (visible: boolean, layerPath: string) => {
         // Redirect to setter
         get().dataTableState.setterActions.setColumnsFiltersVisibility(visible, layerPath);
+      },
+      setFilterDataToExtent: (filterDataToExtent: boolean) => {
+        // Redirect to setter
+        get().dataTableState.setterActions.setFilterDataToExtent(filterDataToExtent);
       },
       setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => {
         // Redirect to setter
@@ -214,6 +222,14 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
           dataTableState: {
             ...get().dataTableState,
             layersDataTableSetting: { ...get().dataTableState.layersDataTableSetting, [layerPath]: layerSettings },
+          },
+        });
+      },
+      setFilterDataToExtent: (filterDataToExtent: boolean) => {
+        set({
+          dataTableState: {
+            ...get().dataTableState,
+            filterDataToExtent,
           },
         });
       },
@@ -327,6 +343,8 @@ export const useDataTableLayerSettings = (): Record<string, IDataTableSettings> 
   useStore(useGeoViewStore(), (state) => state.dataTableState.layersDataTableSetting);
 export const useDataTableSelectedFeature = (): TypeFeatureInfoEntry | null =>
   useStore(useGeoViewStore(), (state) => state.dataTableState.selectedFeature);
+export const useDataTableFilterDataToExtent = (): boolean =>
+  useStore(useGeoViewStore(), (state) => state.dataTableState.filterDataToExtent);
 
 // Store Actions
 export const useDataTableStoreActions = (): DataTableActions => useStore(useGeoViewStore(), (state) => state.dataTableState.actions);

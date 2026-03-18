@@ -13,14 +13,16 @@ interface FilterMapProps {
 
 /**
  * Custom Filter map toggle button.
- * @param {string} layerPath key of the layer displayed in the map.
- * @param {boolean} isGlobalFilterOn is global filter on
- * @returns {JSX.Element} returns Switch
+ * @param props - The props for the filter map component
+ * @returns The filter switch
  *
  */
-function FilterMap({ layerPath, isGlobalFilterOn }: FilterMapProps): JSX.Element {
+function FilterMap(props: FilterMapProps): JSX.Element {
   // Log
   logger.logTraceRender('components/data-table/filter-map');
+
+  // Props
+  const { layerPath, isGlobalFilterOn } = props;
 
   // Hook
   const { t } = useTranslation();

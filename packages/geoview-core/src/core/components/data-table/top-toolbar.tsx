@@ -12,6 +12,7 @@ import { Box, IconButton, Switch } from '@/ui';
 import ExportButton from './export-button';
 import JSONExportButton from './json-export-button';
 import FilterMap from './filter-map';
+import FilterDataToExtent from './filter-data-extent';
 import type { ColumnsType } from './data-table-types';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import type { SxStyles } from '@/ui/style/types';
@@ -84,6 +85,7 @@ function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
         </Box>
         <Box display="flex">
           <FilterMap layerPath={layerPath} isGlobalFilterOn={!!globalFilter?.length} />
+          <FilterDataToExtent />
         </Box>
       </Box>
       <Box display="flex" sx={{ flexDirection: 'column' }}>
