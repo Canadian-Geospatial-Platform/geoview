@@ -23,6 +23,10 @@ interface RasterFunctionItemProps {
   onSelect: (name: string) => void;
 }
 
+interface RasterFunctionPanelProps {
+  layerDetails: TypeLegendLayer;
+}
+
 /**
  * Card component displaying a raster function option with image preview.
  *
@@ -123,10 +127,6 @@ function RasterFunctionItem({ info, isSelected, previewPromise, onSelect }: Rast
   );
 }
 
-interface RasterFunctionPanelProps {
-  layerDetails: TypeLegendLayer;
-}
-
 /**
  * Inline panel section for selecting raster functions.
  *
@@ -140,6 +140,7 @@ export function RasterFunctionPanel({ layerDetails }: RasterFunctionPanelProps):
   // Log
   logger.logTraceRender('components/layers/right-panel/layer-settings/raster-function-selector > RasterFunctionPanel');
 
+  // Hooks
   const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);

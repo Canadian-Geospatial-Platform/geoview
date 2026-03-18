@@ -12,6 +12,29 @@ import type { TypeLegendLayer } from '../../types';
 import type { TypeMosaicMethod, TypeMosaicOperation } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
 
+// Maps mosaic method keys to their filter name and translation key
+const METHOD_ENTRIES: Record<string, { name: string; labelKey: string }> = {
+  esriMosaicNone: { name: 'None', labelKey: 'layers.settings.mosaicMethodNone' },
+  esriMosaicCenter: { name: 'Center', labelKey: 'layers.settings.mosaicMethodCenter' },
+  esriMosaicNadir: { name: 'Nadir', labelKey: 'layers.settings.mosaicMethodNadir' },
+  esriMosaicViewpoint: { name: 'Viewpoint', labelKey: 'layers.settings.mosaicMethodViewpoint' },
+  esriMosaicAttribute: { name: 'ByAttribute', labelKey: 'layers.settings.mosaicMethodAttribute' },
+  esriMosaicLockRaster: { name: 'LockRaster', labelKey: 'layers.settings.mosaicMethodLockRaster' },
+  esriMosaicNorthwest: { name: 'NorthWest', labelKey: 'layers.settings.mosaicMethodNorthwest' },
+  esriMosaicSeamline: { name: 'Seamline', labelKey: 'layers.settings.mosaicMethodSeamline' },
+};
+
+// Maps mosaic operation keys to their translation key
+const OPERATION_ENTRIES: Record<string, string> = {
+  MT_FIRST: 'layers.settings.mosaicOperationFirst',
+  MT_LAST: 'layers.settings.mosaicOperationLast',
+  MT_MIN: 'layers.settings.mosaicOperationMin',
+  MT_MAX: 'layers.settings.mosaicOperationMax',
+  MT_MEAN: 'layers.settings.mosaicOperationMean',
+  MT_BLEND: 'layers.settings.mosaicOperationBlend',
+  MT_SUM: 'layers.settings.mosaicOperationSum',
+};
+
 interface MosaicRulePanelProps {
   layerDetails: TypeLegendLayer;
 }
@@ -35,6 +58,7 @@ export function MosaicRulePanel({ layerDetails }: MosaicRulePanelProps): JSX.Ele
   // Log
   logger.logTraceRender('components/layers/right-panel/layer-settings/mosaic-rule-selector > MosaicRulePanel');
 
+  // Hooks
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
   const { t } = useTranslation();
@@ -54,40 +78,12 @@ export function MosaicRulePanel({ layerDetails }: MosaicRulePanelProps): JSX.Ele
   const currentOperation = mosaicRule?.mosaicOperation ?? 'MT_FIRST';
   const currentAscending = mosaicRule?.ascending ?? true;
 
-  // Maps for translating method/operation keys to display labels
-  const METHOD_LABEL_KEYS: Record<string, string> = useMemo(
-    () => ({
-      esriMosaicNone: 'layers.settings.mosaicMethodNone',
-      esriMosaicCenter: 'layers.settings.mosaicMethodCenter',
-      esriMosaicNadir: 'layers.settings.mosaicMethodNadir',
-      esriMosaicViewpoint: 'layers.settings.mosaicMethodViewpoint',
-      esriMosaicAttribute: 'layers.settings.mosaicMethodAttribute',
-      esriMosaicLockRaster: 'layers.settings.mosaicMethodLockRaster',
-      esriMosaicNorthwest: 'layers.settings.mosaicMethodNorthwest',
-      esriMosaicSeamline: 'layers.settings.mosaicMethodSeamline',
-    }),
-    []
-  );
-
-  const OPERATION_LABEL_KEYS: Record<string, string> = useMemo(
-    () => ({
-      MT_FIRST: 'layers.settings.mosaicOperationFirst',
-      MT_LAST: 'layers.settings.mosaicOperationLast',
-      MT_MIN: 'layers.settings.mosaicOperationMin',
-      MT_MAX: 'layers.settings.mosaicOperationMax',
-      MT_MEAN: 'layers.settings.mosaicOperationMean',
-      MT_BLEND: 'layers.settings.mosaicOperationBlend',
-      MT_SUM: 'layers.settings.mosaicOperationSum',
-    }),
-    []
-  );
-
   // Build a summary showing the current selections
   const selectionSummary = useMemo(() => {
-    const methodLabel = t(METHOD_LABEL_KEYS[currentMethod] ?? currentMethod);
-    const operationLabel = t(OPERATION_LABEL_KEYS[currentOperation] ?? currentOperation);
+    const methodLabel = t(METHOD_ENTRIES[currentMethod]?.labelKey ?? currentMethod);
+    const operationLabel = t(OPERATION_ENTRIES[currentOperation] ?? currentOperation);
     return `${methodLabel} · ${operationLabel}`;
-  }, [currentMethod, currentOperation, t, METHOD_LABEL_KEYS, OPERATION_LABEL_KEYS]);
+  }, [currentMethod, currentOperation, t]);
 
   // Handlers with stable references
   const handleChangeMethod = useCallback(
@@ -111,50 +107,20 @@ export function MosaicRulePanel({ layerDetails }: MosaicRulePanelProps): JSX.Ele
     [layerDetails.layerPath, setLayerMosaicRuleAscending]
   );
 
-  // Menu items with translations
+  // Menu items derived from the module-level entry maps
   const methodMenuItems = useMemo(
     () =>
-      [
-        { key: 'esriMosaicNone', item: { value: 'esriMosaicNone', name: 'None', children: t('layers.settings.mosaicMethodNone') } },
-        { key: 'esriMosaicCenter', item: { value: 'esriMosaicCenter', name: 'Center', children: t('layers.settings.mosaicMethodCenter') } },
-        { key: 'esriMosaicNadir', item: { value: 'esriMosaicNadir', name: 'Nadir', children: t('layers.settings.mosaicMethodNadir') } },
-        {
-          key: 'esriMosaicViewpoint',
-          item: { value: 'esriMosaicViewpoint', name: 'Viewpoint', children: t('layers.settings.mosaicMethodViewpoint') },
-        },
-        {
-          key: 'esriMosaicAttribute',
-          item: { value: 'esriMosaicAttribute', name: 'ByAttribute', children: t('layers.settings.mosaicMethodAttribute') },
-        },
-        {
-          key: 'esriMosaicLockRaster',
-          item: { value: 'esriMosaicLockRaster', name: 'LockRaster', children: t('layers.settings.mosaicMethodLockRaster') },
-        },
-        {
-          key: 'esriMosaicNorthwest',
-          item: { value: 'esriMosaicNorthwest', name: 'NorthWest', children: t('layers.settings.mosaicMethodNorthwest') },
-        },
-        {
-          key: 'esriMosaicSeamline',
-          item: { value: 'esriMosaicSeamline', name: 'Seamline', children: t('layers.settings.mosaicMethodSeamline') },
-        },
-      ].filter((option) => {
-        const allowedMethods = getLayerAllowedMosaicMethods(layerDetails.layerPath);
-        return !allowedMethods || allowedMethods.includes(option.item.name as TypeMosaicMethod);
-      }),
+      Object.entries(METHOD_ENTRIES)
+        .map(([key, { name, labelKey }]) => ({ key, item: { value: key, name, children: t(labelKey) } }))
+        .filter((option) => {
+          const allowedMethods = getLayerAllowedMosaicMethods(layerDetails.layerPath);
+          return !allowedMethods || allowedMethods.includes(option.item.name as TypeMosaicMethod);
+        }),
     [t, layerDetails.layerPath, getLayerAllowedMosaicMethods]
   );
 
   const operationMenuItems = useMemo(
-    () => [
-      { key: 'MT_FIRST', item: { value: 'MT_FIRST', children: t('layers.settings.mosaicOperationFirst') } },
-      { key: 'MT_LAST', item: { value: 'MT_LAST', children: t('layers.settings.mosaicOperationLast') } },
-      { key: 'MT_MIN', item: { value: 'MT_MIN', children: t('layers.settings.mosaicOperationMin') } },
-      { key: 'MT_MAX', item: { value: 'MT_MAX', children: t('layers.settings.mosaicOperationMax') } },
-      { key: 'MT_MEAN', item: { value: 'MT_MEAN', children: t('layers.settings.mosaicOperationMean') } },
-      { key: 'MT_BLEND', item: { value: 'MT_BLEND', children: t('layers.settings.mosaicOperationBlend') } },
-      { key: 'MT_SUM', item: { value: 'MT_SUM', children: t('layers.settings.mosaicOperationSum') } },
-    ],
+    () => Object.entries(OPERATION_ENTRIES).map(([key, labelKey]) => ({ key, item: { value: key, children: t(labelKey) } })),
     [t]
   );
 

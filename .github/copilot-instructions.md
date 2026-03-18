@@ -132,17 +132,6 @@ import { MapEventProcessor } from "@/api/event-processors";
 ### Component Export Patterns
 
 - **Named exports** (not default exports): `export function MyComponent()` or `export const MyComponent = ...`
-- `React.memo()` components must set `.displayName` immediately after:
-
-```typescript
-const Sublayer = memo(function Sublayer({
-  layer,
-  depth,
-}: SublayerProps): JSX.Element {
-  // ...
-});
-Sublayer.displayName = "Sublayer";
-```
 
 ### Inheritance & Polymorphism
 

@@ -18,12 +18,17 @@ interface WmsStyleItemProps {
   onSelect: (name: string) => void;
 }
 
+interface WmsStylePanelProps {
+  layerDetails: TypeLegendLayer;
+}
+
 /**
  * Card component displaying a WMS style option with legend preview.
  *
  * @param style - The WMS style metadata.
  * @param isSelected - Whether this style is currently selected.
  * @param onSelect - Callback invoked when the user selects this style.
+ * @returns A JSX element representing the WMS style card.
  */
 function WmsStyleItem({ style, isSelected, onSelect }: WmsStyleItemProps): JSX.Element {
   // Log
@@ -115,10 +120,6 @@ function WmsStyleItem({ style, isSelected, onSelect }: WmsStyleItemProps): JSX.E
   );
 }
 
-interface WmsStylePanelProps {
-  layerDetails: TypeLegendLayer;
-}
-
 /**
  * Inline panel section for selecting WMS styles.
  *
@@ -126,11 +127,13 @@ interface WmsStylePanelProps {
  * consistent with the raster function panel pattern.
  *
  * @param layerDetails - The legend layer to configure WMS styles for.
+ * @returns A JSX element representing the WMS style panel.
  */
 export function WmsStylePanel({ layerDetails }: WmsStylePanelProps): JSX.Element {
   // Log
   logger.logTraceRender('components/layers/right-panel/layer-settings/wms-style-selector > WmsStylePanel');
 
+  // Hooks
   const { t } = useTranslation();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
@@ -141,14 +144,14 @@ export function WmsStylePanel({ layerDetails }: WmsStylePanelProps): JSX.Element
   // Store hooks
   const currentWmsStyle = useLayerSelectorWmsStyle(layerDetails.layerPath);
 
+  // State
+  const [expanded, setExpanded] = useState(false);
+
   // Get the full style metadata
   const wmsStyleArray = useMemo(
     () => getLayerWmsAvailableStyles(layerDetails.layerPath) || [],
     [getLayerWmsAvailableStyles, layerDetails.layerPath]
   );
-
-  // State
-  const [expanded, setExpanded] = useState(false);
 
   const handleSelect = useCallback(
     (wmsStyleName: string): void => {

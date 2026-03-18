@@ -113,6 +113,8 @@ export const TIMEOUT: Record<string, number> = {
   focusDelayLightbox: 250,
   guideSearchSectionExpand: 300,
 
+  fadingPanelDuration: 300, // Duration for fade-out and fade-in halves (ms) when crossfading between e.g. details and settings views
+
   modalFocusClose: 500,
   notification: 1000,
   northPoleVisibility: 1000,
