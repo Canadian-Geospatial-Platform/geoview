@@ -935,11 +935,528 @@ Keys use **dot-separated namespaces** (2-3 levels deep):
 
 ## Testing & Quality
 
-- **Testing**: Use `geoview-test-suite` package to create and run tests (NOT Jest)
 - **Never commit dead/commented code** - use Git history instead
 - Run `npm run format && npm run fix` before committing (from packages/)
 - Use descriptive variable names (`elementOfTheList` not `e`)
 - React Dev Tools + store inspection when `GEOVIEW_DEVTOOLS` localStorage key is set
+
+## GeoView Test Suite (`geoview-test-suite`)
+
+GeoView uses its own **custom test framework** (NOT Jest/Vitest/Mocha). The `geoview-test-suite` package is a GeoView plugin that runs in-browser tests against a live map instance. Tests run inside actual map HTML pages with real OpenLayers rendering.
+
+### Architecture Overview
+
+```
+TestSuitePlugin (index.tsx) — AbstractPlugin that manages all Test Suites
+   └── GVAbstractTestSuite (extends AbstractTestSuite)
+         └── *Tester (extends GVAbstractTester → AbstractTester)
+               └── Test<T> — individual test with lifecycle, steps, assertions
+                     └── TestStep — sub-step logging within a test
+```
+
+**Three-layer hierarchy:**
+1. **Suite** — groups related Testers and orchestrates their execution order
+2. **Tester** — contains individual test methods and shared helper methods
+3. **Test** — single test instance with lifecycle (running → verifying → success/failed)
+
+### File Structure
+
+```
+packages/geoview-test-suite/src/
+├── index.tsx                            # Plugin entry — registers suites from config
+└── tests/
+    ├── core/                            # Framework base classes (DO NOT MODIFY)
+    │   ├── abstract-test-suite.ts       # Base suite — addTester(), launchTestSuite()
+    │   ├── abstract-tester.ts           # Base tester — test(), testError(), assertions
+    │   ├── test.ts                      # Test<T> class — lifecycle, static assertions
+    │   ├── test-step.ts                 # TestStep class
+    │   └── exceptions.ts                # All assertion/test error types
+    ├── suites/                          # GeoView-specific suites
+    │   ├── abstract-gv-test-suite.ts    # GV base — holds API + MapViewer refs
+    │   ├── suite-core.ts                # Date/utility tests
+    │   ├── suite-config.ts              # Layer config validation tests
+    │   ├── suite-layer.ts               # Layer add/remove/legend tests
+    │   ├── suite-map-varia.ts           # Map zoom/projection/basemap/UI tests
+    │   ├── suite-map-config.ts          # Map config creation/destruction tests
+    │   ├── suite-geochart.ts            # Geochart plugin tests
+    │   ├── suite-details.ts             # Details panel tests
+    │   └── suite-ui.ts                  # UI/DOM tests
+    └── testers/                         # GeoView-specific testers
+        ├── abstract-gv-tester.ts        # GV base — constants, URLs, helper methods
+        ├── core-tester.ts               # Date parsing tests
+        ├── config-tester.ts             # Config validation tests
+        ├── layer-tester.ts              # Layer lifecycle tests + static helpers
+        ├── map-tester.ts                # Map state/interaction tests
+        ├── map-config-tester.ts         # Map config override tests
+        ├── geochart-tester.ts           # Geochart tests
+        ├── details-tester.ts            # Details panel tests
+        └── ui-tester.ts                 # DOM-level UI tests
+```
+
+### How Tests Run
+
+Tests are triggered from HTML pages in `packages/geoview-core/public/templates/tests.html`. Each map div specifies which suites to run via the plugin config:
+
+```json
+{
+  "corePackages": ["test-suite"],
+  "corePackagesConfig": [
+    { "test-suite": { "suites": ["suite-layer"] } }
+  ]
+}
+```
+
+Suite names: `suite-core`, `suite-config`, `suite-layer`, `suite-map`, `suite-geochart`, `suite-map-config`, `suite-ui`, `suite-details`
+
+### Test Lifecycle (in AbstractTester)
+
+Each test follows this lifecycle:
+
+```
+1. onCreatingTest(message)        → Creates Test<T> instance
+2. onPerformingTest(test)         → Sets status='running', emits started
+3. await callback(test)           → Executes test logic, returns result
+4. test.setResult(result)         → Stores result
+5. onPerformingTestAssertions()   → Sets status='verifying'
+6. await callbackAssert(test, result) → Runs assertions (throw = fail)
+7. onPerformingTestSuccess()      → Sets status='success'
+   — OR onPerformingTestFailure() → Sets status='failed'
+8. await callbackFinalize?()      → Cleanup (remove layers, etc.)
+9. onPerformingTestDone()         → Moves test to done list
+```
+
+### Assertion API (static methods on `Test`)
+
+```typescript
+// Primitives
+Test.assertIsEqual(actual, expected, roundToPrecision?)
+Test.assertIsNotEqual(actual, expected, roundToPrecision?)
+Test.assertIsDefined('propertyName', value)
+Test.assertIsUndefined('propertyName', value)
+Test.assertIsInstance(value, ExpectedClass)
+Test.assertIsErrorInstance(error, ExpectedErrorClass)
+Test.assertFail('reason')
+
+// Arrays
+Test.assertIsArray(value)
+Test.assertIsArrayLengthEqual(array, expectedLength)
+Test.assertIsArrayLengthMinimal(array, minLength)
+Test.assertArrayIncludes(array, expectedValue)
+Test.assertArrayExcludes(array, excludedValue)
+Test.assertIsArrayEqual(actual, expected, roundToPrecision?)
+Test.assertIsArrayEqualJsons(actual, expected)
+
+// Objects
+Test.assertJsonObject(actual, expected)
+```
+
+### Two Test Methods
+
+**`this.test(message, callback, callbackAssert, callbackFinalize?)`** — Standard test
+
+```typescript
+this.test(
+  'Test description...',
+  async (test) => {
+    // STEP 1: Setup & execute
+    test.addStep('Doing something...');
+    const result = await someOperation();
+    return result;
+  },
+  (test, result) => {
+    // STEP 2: Assert on result
+    Test.assertIsDefined('result', result);
+    Test.assertIsEqual(result.status, 'loaded');
+  },
+  (test) => {
+    // STEP 3: Cleanup (optional)
+    cleanup();
+  }
+);
+```
+
+**`this.testError(message, ErrorClass, callback, callbackAssert?, callbackFinalize?)`** — True-negative test (expects error)
+
+```typescript
+this.testError(
+  'Test with bad url should fail...',
+  LayerServiceMetadataUnableToFetchError,
+  async (test) => {
+    // This should throw the expected error
+    test.addStep('Creating config with bad URL...');
+    const config = SomeLayer.createGeoviewLayerConfig(id, name, BAD_URL, false, [...]);
+    await helperStepAddLayerOnMap(test, mapViewer, config);
+  },
+  undefined,  // optional additional assertion on the error
+  (test) => {
+    // Cleanup
+    helperFinalizeStepRemoveLayerConfigAndAssert(test, mapViewer, layerPath);
+  }
+);
+```
+
+### Shared Constants (on `GVAbstractTester`)
+
+All test URLs, UUIDs, coordinates, and expected icon lists are defined as `static readonly` constants on `GVAbstractTester`. Reuse these rather than hardcoding:
+
+```typescript
+GVAbstractTester.BAD_URL                    // 'https://badurl/oops'
+GVAbstractTester.QUEBEC_LONLAT              // [-71.356, 46.780]
+GVAbstractTester.ONTARIO_CENTER_LONLAT      // [-87, 51]
+GVAbstractTester.HISTORICAL_FLOOD_URL_MAP_SERVER
+GVAbstractTester.FOREST_INDUSTRY_MAP_SERVER
+// ... etc.
+```
+
+### Static Helper Methods (on `LayerTester`)
+
+```typescript
+// Add layer to map and wait
+LayerTester.helperStepAddLayerOnMap(test, mapViewer, gvConfig)
+LayerTester.helperStepAddLayerOnMapFromUUID(test, mapViewer, uuid)
+
+// Check layer loaded
+LayerTester.helperStepCheckLayerAtLayerPath(test, mapViewer, layerPath, timeout?, waitStyle?)
+
+// Assert layer exists with optional icon checks
+LayerTester.helperStepAssertLayerExists(test, mapViewer, layerPath, iconImage?, iconsList?)
+LayerTester.helperStepAssertStyleApplied(test, mapViewer, layerPath, iconImage?, iconsList?)
+
+// Cleanup
+LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, mapViewer, layerPath)
+LayerTester.helperFinalizeStepRemoveLayerConfigAndAssert(test, mapViewer, gvLayerId)
+```
+
+---
+
+### Algorithm: Creating a New Layer Test
+
+**When to use:** Testing that a new layer type loads correctly, validates legend/icons, and cleans up.
+
+**Steps:**
+
+1. **Add constants** to `GVAbstractTester` (URL, layer ID, icon list)
+2. **Add test method** to `LayerTester`
+3. **Register in Suite** (`suite-layer.ts` → `onLaunchTestSuite` → `Promise.all`)
+
+**Template — Happy-path layer test:**
+
+```typescript
+// In layer-tester.ts
+testAddMyNewLayer(): Promise<Test<AbstractGVLayer>> {
+  const gvLayerId = generateId();
+  const layerUrl = GVAbstractTester.MY_NEW_LAYER_URL;
+  const layerPath = gvLayerId + '/' + GVAbstractTester.MY_NEW_LAYER_ID;
+  const gvLayerName = 'My New Layer';
+
+  return this.test(
+    `Test Adding My New Layer on map...`,
+    async (test) => {
+      test.addStep('Creating the GeoView Layer Configuration...');
+      const gvConfig = MyLayerClass.createGeoviewLayerConfig(
+        gvLayerId, gvLayerName, layerUrl, false,
+        [{ id: GVAbstractTester.MY_NEW_LAYER_ID }]
+      );
+      await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+      return LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+    },
+    (test) => {
+      LayerTester.helperStepAssertLayerExists(
+        test, this.getMapViewer(), layerPath, undefined,
+        GVAbstractTester.MY_NEW_LAYER_ICON_LIST
+      );
+    },
+    (test) => {
+      LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+    }
+  );
+}
+```
+
+**Template — Bad-URL layer test (true-negative):**
+
+```typescript
+testAddMyNewLayerBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
+  const gvLayerId = generateId();
+  const layerUrl = GVAbstractTester.BAD_URL;
+  const layerPath = gvLayerId + '/' + GVAbstractTester.MY_NEW_LAYER_ID;
+  const gvLayerName = 'My New Layer';
+
+  return this.testError(
+    `Test Adding My New Layer with bad url...`,
+    LayerServiceMetadataUnableToFetchError,
+    async (test) => {
+      test.addStep('Creating the GeoView Layer Configuration...');
+      const gvConfig = MyLayerClass.createGeoviewLayerConfig(
+        gvLayerId, gvLayerName, layerUrl, false,
+        [{ id: GVAbstractTester.MY_NEW_LAYER_ID }]
+      );
+      await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+    },
+    undefined,
+    (test) => {
+      LayerTester.helperFinalizeStepRemoveLayerConfigAndAssert(test, this.getMapViewer(), layerPath);
+    }
+  );
+}
+```
+
+**Wiring into the suite (in `suite-layer.ts`):**
+
+```typescript
+protected override onLaunchTestSuite(): Promise<unknown> {
+  // ... existing tests ...
+  const pMyNewLayer = this.#layerTester.testAddMyNewLayer();
+  const pMyNewLayerBadUrl = this.#layerTester.testAddMyNewLayerBadUrl();
+
+  return Promise.all([
+    // ... existing promises ...
+    pMyNewLayer,
+    pMyNewLayerBadUrl,
+  ]);
+}
+```
+
+---
+
+### Algorithm: Creating a New Config Validation Test
+
+**When to use:** Testing that a layer config is correctly created and validated (without adding it to the map).
+
+**Steps:**
+
+1. **Add test method** to `ConfigTester`
+2. **Register in Suite** (`suite-config.ts` → `onLaunchTestSuite` → `Promise.all`)
+
+**Template:**
+
+```typescript
+// In config-tester.ts
+testMyLayerConfigValidation(): Promise<Test<TypeGeoviewLayerConfig>> {
+  const gvLayerId = generateId();
+  const layerUrl = GVAbstractTester.MY_LAYER_URL;
+  const gvLayerName = 'My Layer Config Test';
+
+  return this.test(
+    `Test My Layer Config Validation...`,
+    (test) => {
+      test.addStep('Creating the GeoView Layer Configuration...');
+      const gvConfig = MyLayerClass.createGeoviewLayerConfig(
+        gvLayerId, gvLayerName, layerUrl, false,
+        [{ id: GVAbstractTester.MY_LAYER_ID }]
+      );
+      return gvConfig;
+    },
+    (test, result) => {
+      test.addStep('Verifying config properties...');
+      Test.assertIsDefined('geoviewLayerConfig', result);
+      Test.assertIsEqual(result.geoviewLayerId, gvLayerId);
+      Test.assertIsEqual(result.geoviewLayerName!.en, gvLayerName);
+      Test.assertIsEqual(result.geoviewLayerType, 'myLayerType');
+      // Assert nested list
+      Test.assertIsArrayLengthEqual(result.listOfLayerEntryConfig, 1);
+    }
+  );
+}
+```
+
+---
+
+### Algorithm: Creating a New Map Interaction Test
+
+**When to use:** Testing map state changes (zoom, projection, basemap, UI tabs).
+
+**Steps:**
+
+1. **Add test method** to `MapTester`
+2. **Register in Suite** (`suite-map-varia.ts` → `onLaunchTestSuite` — use **sequential `await`** if test depends on map state)
+
+**Key pattern:** Tests that modify shared map state (zoom, projection) must run **sequentially** via `await`. Independent tests can be grouped in `Promise.all()`.
+
+**Template:**
+
+```typescript
+// In map-tester.ts
+testMyMapInteraction(): Promise<Test<SomeResultType>> {
+  return this.test(
+    `Test my map interaction...`,
+    async (test) => {
+      test.addStep('Setting up map state...');
+      MapEventProcessor.setZoom(this.getMapId(), 5);
+      await someWaitCondition();
+      return getResult();
+    },
+    (test, result) => {
+      Test.assertIsEqual(result.zoom, 5);
+    },
+    (test) => {
+      // Cleanup: reset to initial state
+      MapEventProcessor.zoomToInitialExtent(this.getMapId());
+    }
+  );
+}
+```
+
+**Wiring (sequential in suite-map-varia.ts):**
+
+```typescript
+protected override async onLaunchTestSuite(): Promise<unknown> {
+  // Sequential — modifies map state
+  const pZoom = await this.#mapTester.testMapZoom();
+  const pMyInteraction = await this.#mapTester.testMyMapInteraction();
+
+  return Promise.all([pZoom, pMyInteraction]);
+}
+```
+
+---
+
+### Algorithm: Creating a New Map Config Test
+
+**When to use:** Testing different map configuration scenarios (footer bar, nav bar, view settings). Each test creates a fresh map instance with specific config overrides.
+
+**Steps:**
+
+1. **Add test method** to `MapConfigTester`
+2. **Register in Suite** (`suite-map-config.ts` → `onLaunchTestSuite` — always **sequential `await`**)
+
+**Key pattern:** Each test uses `#helperCreateMapConfig(test, mapId, configOverrides)` to create a **new map instance**, runs assertions, then destroys it. This ensures config-level isolation.
+
+**Template:**
+
+```typescript
+// In map-config-tester.ts
+testMyConfigScenario(): Promise<Test<TypeMapFeaturesInstance>> {
+  return this.test(
+    `Test my config scenario...`,
+    async (test) => {
+      test.addStep('Creating map with custom config...');
+      return this.#helperCreateMapConfig(test, 'test-map-id', {
+        footerBar: { tabs: { core: ['legend'] } },
+        navBar: { zoom: true },
+      });
+    },
+    (test, result) => {
+      Test.assertIsDefined('map config', result);
+      // Assert config was applied
+      Test.assertIsEqual(result.footerBar?.tabs?.core?.length, 1);
+    },
+    (test) => {
+      // Map destruction happens automatically in the helper
+    }
+  );
+}
+```
+
+---
+
+### Algorithm: Creating a New Test Suite & Tester (Full Stack)
+
+**When to use:** Adding an entirely new category of tests (e.g., for a new plugin or a new feature domain).
+
+**Steps:**
+
+1. **Create the Tester** — `tests/testers/my-feature-tester.ts`
+
+```typescript
+import { Test } from '../core/test';
+import { GVAbstractTester } from './abstract-gv-tester';
+
+export class MyFeatureTester extends GVAbstractTester {
+  override getName(): string {
+    return 'MyFeatureTester';
+  }
+
+  testSomething(): Promise<Test<SomeType>> {
+    return this.test(
+      'Test something...',
+      async (test) => { /* execute */ },
+      (test, result) => { /* assert */ },
+      (test) => { /* cleanup */ }
+    );
+  }
+}
+```
+
+2. **Create the Suite** — `tests/suites/suite-my-feature.ts`
+
+```typescript
+import type { API } from 'geoview-core/api/api';
+import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
+import { GVAbstractTestSuite } from './abstract-gv-test-suite';
+import { MyFeatureTester } from '../testers/my-feature-tester';
+
+export class GVTestSuiteMyFeature extends GVAbstractTestSuite {
+  #tester: MyFeatureTester;
+
+  constructor(api: API, mapViewer: MapViewer) {
+    super(api, mapViewer);
+    this.#tester = new MyFeatureTester(api, mapViewer);
+    this.addTester(this.#tester);
+  }
+
+  override getName(): string { return 'My Feature Test Suite'; }
+  override getDescriptionAsHtml(): string { return 'Tests for My Feature.'; }
+
+  // Optional: Guard — only run if the feature is enabled
+  // protected override async onCanExecuteTestSuite(): Promise<boolean> {
+  //   const config = this.getMapViewer().mapFeaturesConfig;
+  //   return config.footerBar?.tabs?.core?.includes('my-feature') ?? false;
+  // }
+
+  protected override onLaunchTestSuite(): Promise<unknown> {
+    const p1 = this.#tester.testSomething();
+    return Promise.all([p1]);
+  }
+}
+```
+
+3. **Register in `index.tsx`** — Add import + else-if branch
+
+```typescript
+import { GVTestSuiteMyFeature } from './tests/suites/suite-my-feature';
+
+// In onAdd():
+} else if (suite === 'suite-my-feature') {
+  this.addTestSuite(new GVTestSuiteMyFeature(window.cgpv.api, this.mapViewer));
+}
+```
+
+4. **Add HTML test page entry** (in `tests.html`) — Create a map div with the suite config
+
+```html
+<div
+  id="mapMyFeature"
+  class="geoviewMap"
+  data-lang="en"
+  data-config="{
+    'map': { 'viewSettings': { 'projection': 3978 }, ... },
+    'corePackages': ['test-suite'],
+    'corePackagesConfig': [{ 'test-suite': { 'suites': ['suite-my-feature'] } }]
+  }"
+></div>
+```
+
+---
+
+### Test Execution Patterns Reference
+
+| Pattern | When to Use | Example Suite |
+|---|---|---|
+| `Promise.all()` (fully parallel) | Independent tests, no shared state | `suite-config`, `suite-layer`, `suite-ui` |
+| Sequential `await` + final `Promise.all()` | Tests modify shared map state | `suite-map-varia`, `suite-map-config` |
+| `onCanExecuteTestSuite()` guard | Suite requires specific plugin/feature | `suite-geochart`, `suite-details` |
+
+### Key Rules for Writing Tests
+
+1. **Always use `test.addStep()`** to log progress — this creates visibility in the test UI
+2. **Use static assertions** from `Test` class — never use `if/else` to check results
+3. **Always clean up** in the `callbackFinalize` — remove layers, reset map state
+4. **Use `generateId()`** for layer IDs — prevents conflicts between parallel tests
+5. **Reuse existing helpers** — `LayerTester.helperStep*` methods handle common patterns
+6. **Add constants to `GVAbstractTester`** — URLs, UUIDs, expected icon lists go there
+7. **True negative tests** use `testError()` with an expected error class
+8. **Import layer classes directly** — e.g., `EsriDynamic`, `WMS`, `GeoJSON` for `createGeoviewLayerConfig()`
 
 ## Key Files to Reference
 
