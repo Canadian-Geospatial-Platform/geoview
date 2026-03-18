@@ -45,7 +45,7 @@ export class GeochartTester extends GVAbstractTester {
         Test.assertIsEqual(getStoreActiveFooterBarTab(this.getMapId()).tabId, 'geochart');
 
         // Check that layer path is selected
-        test.addStep('Verifying ' + layerPath + ' is the selected layer for the geochart...');
+        test.addStep(`Verifying ${layerPath} is the selected layer for the geochart...`);
         Test.assertIsEqual(getStoreGeochartSelectedLayerPath(this.getMapId()), layerPath);
       }
     );
@@ -139,7 +139,7 @@ export class GeochartTester extends GVAbstractTester {
         Test.assertIsEqual(getStoreActiveFooterBarTab(this.getMapId()).tabId, 'geochart');
 
         // Check that layer path is selected
-        test.addStep('Verifying ' + layerPathAdd + ' is the selected layer for the geochart...');
+        test.addStep(`Verifying ${layerPathAdd} is the selected layer for the geochart...`);
         Test.assertIsEqual(getStoreGeochartSelectedLayerPath(this.getMapId()), layerPathAdd);
       },
       (test) => {

@@ -53,7 +53,21 @@ export class GVTestSuiteCore extends GVAbstractTestSuite {
     const pDatesUSStandard = this.#coreTester.testDatesUSStandard();
     const pDatesCustomFormat = this.#coreTester.testDatesSpecialFormats();
 
+    // Test validateAndPingUrl
+    const pPingValidReachable = this.#coreTester.testValidateAndPingUrlValidReachable();
+    const pPingInvalidFormat = this.#coreTester.testValidateAndPingUrlInvalidFormat();
+    const pPingUnreachable = this.#coreTester.testValidateAndPingUrlUnreachable();
+    const pPingWmsService = this.#coreTester.testValidateAndPingUrlWmsService();
+
     // Resolve when all
-    return Promise.all([pDatesEpoch, pDatesUSStandard, pDatesCustomFormat]);
+    return Promise.all([
+      pDatesEpoch,
+      pDatesUSStandard,
+      pDatesCustomFormat,
+      pPingValidReachable,
+      pPingInvalidFormat,
+      pPingUnreachable,
+      pPingWmsService,
+    ]);
   }
 }

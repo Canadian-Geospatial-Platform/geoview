@@ -1993,7 +1993,10 @@ export abstract class AbstractGVLayer extends AbstractBaseGVLayer {
     inputTemporalMode: TemporalMode | undefined
   ): unknown {
     const fieldValue = feature.get(fieldName);
-    if (fieldType === 'date' && fieldValue) {
+    if (fieldType === 'date') {
+      // If the value is null or undefined, return it as-is instead of trying to parse it as a date
+      if (fieldValue === null || fieldValue === undefined) return fieldValue;
+
       // Read the date
       return DateMgt.createDate(fieldValue, inputFormat, inputTimezone, inputTemporalMode);
     }

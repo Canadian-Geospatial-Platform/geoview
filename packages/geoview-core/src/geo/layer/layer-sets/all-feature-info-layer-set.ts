@@ -144,6 +144,9 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
       // When the promise is done, propagate to store
       promise
         .then((promiseResult) => {
+          // Guard against the layer having been removed during the query
+          if (!this.resultSet[layerPath]) return;
+
           // Get the array of records in the results
           const arrayOfRecords = promiseResult.results;
 
@@ -161,7 +164,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
           if (error instanceof RequestAbortedError) {
             // Log
             logger.logDebug('Query aborted and replaced by another one.. keep spinning..');
-          } else {
+          } else if (this.resultSet[layerPath]) {
             // Error
             this.resultSet[layerPath].features = undefined;
             this.resultSet[layerPath].queryStatus = 'error';
@@ -176,8 +179,10 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
             this.resultSet[path].isDisabled = false;
           });
 
-          // Propagate to the store
-          this.#propagateToStore(this.resultSet[layerPath]);
+          // Propagate to the store (guard against the layer having been removed during the query)
+          if (this.resultSet[layerPath]) {
+            this.#propagateToStore(this.resultSet[layerPath]);
+          }
         });
 
       // Return the promise

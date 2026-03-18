@@ -47,7 +47,7 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
    *
    * @returns A promise that resolves when tests are completed
    */
-  protected override onLaunchTestSuite(): Promise<unknown> {
+  protected override async onLaunchTestSuite(): Promise<unknown> {
     // // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME
     // // Test DEBUG
     // const pDevTest0 = this.#layerTester.testAddWMSLayerWithOWSMundialis();
@@ -144,8 +144,12 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
     // Test initial settings cascade
     const pInitialSettingsCascade = this.#layerTester.testInitialSettingsCascade();
 
-    // Resolve when all
-    return Promise.all([
+    // Test domain fields
+    const pEsriDynamicDomainField = this.#layerTester.testAddEsriDynamicWithDomainField();
+    const pEsriFeatureDomainField = this.#layerTester.testAddEsriFeatureWithDomainField();
+
+    // Resolve when all parallel tests are done
+    await Promise.all([
       pLayerEsriDynamicHistoFloods,
       // pLayerEsriDynamicWithRasterLayersViaGeocore,
       pLayerEsriDynamicBadUrl,
@@ -174,6 +178,13 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
       pLayerGeoTIFFVegetation,
       pLayerGeoTIFFBadUrl,
       pInitialSettingsCascade,
+      pEsriDynamicDomainField,
+      pEsriFeatureDomainField,
     ]);
+
+    // Test domain field query value translation — run sequentially at the end
+    // because they change the zoom level to 17.4 which would affect other tests
+    await this.#layerTester.testEsriDynamicDomainFieldQueryValue();
+    return this.#layerTester.testEsriFeatureDomainFieldQueryValue();
   }
 }
