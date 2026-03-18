@@ -31,6 +31,7 @@ export function LayerSettingsPanel({ layerDetails }: LayerSettingsPanelProps): J
   // Log
   logger.logTraceRender('components/layers/right-panel/layer-settings/layer-settings');
 
+  // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);

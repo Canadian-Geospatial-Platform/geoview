@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
 import type { TypeLegendLayer, TypeLegendItem } from '@/core/components/layers/types';
 import { getSxClasses } from './layer-details-style';
+import { delay } from '@/core/utils/utilities';
 import {
   Box,
   BrowserNotSupportedIcon,
@@ -44,7 +45,7 @@ import { LayerOpacityControl } from './layer-opacity-control/layer-opacity-contr
 import { LayerSettingsPanel } from './layer-settings/layer-settings';
 import { LayerInfoPanel } from './layer-info/layer-info';
 import { logger } from '@/core/utils/logger';
-import { LAYER_STATUS, TABS } from '@/core/utils/constant';
+import { LAYER_STATUS, TABS, TIMEOUT } from '@/core/utils/constant';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 import {
@@ -114,9 +115,6 @@ const Sublayer = memo(({ layer }: SubLayerProps): JSX.Element => {
 });
 
 Sublayer.displayName = 'Sublayer';
-
-// Duration for fade-out and fade-in halves (ms) when crossfading between details and settings views
-const FADE_DURATION = 200;
 
 export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   // Log
@@ -236,6 +234,64 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const handleHighlightLayer = (): void => {
     setHighlightLayer(layerDetails.layerPath);
   };
+
+  /**
+   * Crossfades from settings view back to details view, restoring focus to the settings button.
+   */
+  const handleSettingsBackToDetails = useCallback((): void => {
+    logger.logTraceUseCallback('LAYER-DETAILS - handleSettingsBackToDetails');
+    setContentVisible(false);
+    delay(TIMEOUT.fadingPanelDuration)
+      .then(() => {
+        setActiveView('details');
+        setContentVisible(true);
+        requestAnimationFrame(() => settingsButtonRef.current?.focus());
+      })
+      .catch((error) => logger.logPromiseFailed('in delay in handleSettingsBackToDetails', error));
+  }, []);
+
+  /**
+   * Crossfades from details view to settings view.
+   */
+  const handleOpenSettings = useCallback((): void => {
+    logger.logTraceUseCallback('LAYER-DETAILS - handleOpenSettings');
+    setContentVisible(false);
+    delay(TIMEOUT.fadingPanelDuration)
+      .then(() => {
+        setActiveView('settings');
+        setContentVisible(true);
+      })
+      .catch((error) => logger.logPromiseFailed('in delay in handleOpenSettings', error));
+  }, []);
+
+  /**
+   * Crossfades from info view back to details view, restoring focus to the info button.
+   */
+  const handleInfoBackToDetails = useCallback((): void => {
+    logger.logTraceUseCallback('LAYER-DETAILS - handleInfoBackToDetails');
+    setContentVisible(false);
+    delay(TIMEOUT.fadingPanelDuration)
+      .then(() => {
+        setActiveView('details');
+        setContentVisible(true);
+        requestAnimationFrame(() => infoButtonRef.current?.focus());
+      })
+      .catch((error) => logger.logPromiseFailed('in delay in handleInfoBackToDetails', error));
+  }, []);
+
+  /**
+   * Crossfades from details view to info view.
+   */
+  const handleOpenInfo = useCallback((): void => {
+    logger.logTraceUseCallback('LAYER-DETAILS - handleOpenInfo');
+    setContentVisible(false);
+    delay(TIMEOUT.fadingPanelDuration)
+      .then(() => {
+        setActiveView('info');
+        setContentVisible(true);
+      })
+      .catch((error) => logger.logPromiseFailed('in delay in handleOpenInfo', error));
+  }, []);
 
   /**
    * Recursively sets child layer visibility.
@@ -486,15 +542,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           ref={settingsButtonRef}
           aria-label={t('layers.settings.back')}
           className="buttonOutline"
-          onClick={() => {
-            // Sequential fade: fade out → swap → fade in
-            setContentVisible(false);
-            setTimeout(() => {
-              setActiveView('details');
-              setContentVisible(true);
-              requestAnimationFrame(() => settingsButtonRef.current?.focus());
-            }, FADE_DURATION);
-          }}
+          onClick={handleSettingsBackToDetails}
           tooltipPlacement="bottom"
         >
           <ArrowBackIcon />
@@ -507,14 +555,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         ref={settingsButtonRef}
         aria-label={t('layers.settings.title')}
         className="buttonOutline"
-        onClick={() => {
-          // Sequential fade: fade out → swap → fade in
-          setContentVisible(false);
-          setTimeout(() => {
-            setActiveView('settings');
-            setContentVisible(true);
-          }, FADE_DURATION);
-        }}
+        onClick={handleOpenSettings}
         tooltipPlacement="bottom"
       >
         <SettingsIcon />
@@ -529,14 +570,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           ref={infoButtonRef}
           aria-label={t('layers.settings.back')}
           className="buttonOutline"
-          onClick={() => {
-            setContentVisible(false);
-            setTimeout(() => {
-              setActiveView('details');
-              setContentVisible(true);
-              requestAnimationFrame(() => infoButtonRef.current?.focus());
-            }, FADE_DURATION);
-          }}
+          onClick={handleInfoBackToDetails}
           tooltipPlacement="bottom"
         >
           <ArrowBackIcon />
@@ -549,13 +583,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
         ref={infoButtonRef}
         aria-label={t('layers.moreInfo')}
         className="buttonOutline"
-        onClick={() => {
-          setContentVisible(false);
-          setTimeout(() => {
-            setActiveView('info');
-            setContentVisible(true);
-          }, FADE_DURATION);
-        }}
+        onClick={handleOpenInfo}
         tooltipPlacement="bottom"
       >
         <InfoOutlinedIcon />
@@ -662,7 +690,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
           </Box>
 
           {/* Sequential crossfade: fade out → swap content → fade in */}
-          <Fade in={contentVisible} timeout={FADE_DURATION}>
+          <Fade in={contentVisible} timeout={TIMEOUT.fadingPanelDuration}>
             <Box>
               {activeView === 'details' && (
                 <>

@@ -52,6 +52,7 @@ export function LayerInfoPanel({ layerDetails }: LayerInfoPanelProps): JSX.Eleme
   // Log
   logger.logTraceRender('components/layers/right-panel/layer-info/layer-info');
 
+  // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
@@ -60,8 +61,6 @@ export function LayerInfoPanel({ layerDetails }: LayerInfoPanelProps): JSX.Eleme
   const language = useAppDisplayLanguage();
   const metadataUrl = useAppMetadataServiceURL();
   const mapProjectionEPSG = useMapProjectionEPSG();
-  const { getLayerServiceProjection } = useLayerStoreActions();
-
   const layerFilter = useLayerSelectorFilter(layerDetails.layerPath);
   const classFilter = useLayerSelectorFilterClass(layerDetails.layerPath);
   const dataFilter = useDataTableFilterSelector(layerDetails.layerPath);
@@ -74,6 +73,7 @@ export function LayerInfoPanel({ layerDetails }: LayerInfoPanelProps): JSX.Eleme
   const layerDisplayDateTimezone = useLayerDisplayDateTimezone(layerDetails.layerPath);
   const layerTimeDimension = useLayerTimeDimension(layerDetails.layerPath);
   const timeSliderDimension = useTimeSliderLayersSelector(layerDetails.layerPath);
+  const { getLayerServiceProjection } = useLayerStoreActions();
   const layerNativeProjection = getLayerServiceProjection(layerDetails.layerPath);
 
   // Derived values
@@ -81,6 +81,7 @@ export function LayerInfoPanel({ layerDetails }: LayerInfoPanelProps): JSX.Eleme
   const boundsRounded = bounds?.map((value) => Math.round(value));
   const boundsRounded4326 = bounds4326?.map((value) => Math.round(value * 100) / 100);
 
+  // Props
   const { schemaTag, url, layerPath } = layerDetails;
 
   // Build resource URL based on layer type
