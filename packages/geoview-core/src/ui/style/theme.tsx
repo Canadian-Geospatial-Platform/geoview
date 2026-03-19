@@ -14,6 +14,12 @@ declare module '@mui/material/styles/createPalette' {
   }
 }
 
+/**
+ * Resolves theme options based on display mode.
+ *
+ * @param mode - Display theme mode ('light', 'dark', or 'geo.ca')
+ * @returns MUI ThemeOptions for the selected mode
+ */
 function getThemeOptions(mode: TypeDisplayTheme): ThemeOptions {
   switch (mode) {
     case 'dark':
@@ -25,8 +31,15 @@ function getThemeOptions(mode: TypeDisplayTheme): ThemeOptions {
   }
 }
 
+/**
+ * Creates a Material-UI theme for the given display mode.
+ *
+ * @param mode - Display theme mode ('light', 'dark', or 'geo.ca')
+ * @returns Fully configured MUI Theme object
+ */
 export const getTheme = (mode: TypeDisplayTheme): Theme => {
   return createTheme(getThemeOptions(mode));
 };
 
+/** Default GeoView theme using the geo.ca color scheme */
 export const cgpvTheme = getTheme('geo.ca');

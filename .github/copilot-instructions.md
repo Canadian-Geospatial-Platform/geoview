@@ -443,15 +443,58 @@ JSDoc should NOT:
 6. `@returns` (if applicable)
 7. `@throws` (if applicable)
 
+**@param Best Practices:**
+
+- **Don't explode props from library wrappers:** When wrapping Material-UI components or other libraries, reference the interface instead of listing each property:
+
+```typescript
+/**
+ * AppBar with fade-in animation.
+ *
+ * Wraps Material-UI's AppBar with animations.
+ * All Material-UI AppBar props are supported.
+ *
+ * @param props - Material-UI AppBar properties (see MUI docs)
+ * @returns Animated AppBar element
+ */
+function AppBarUI(props: AppBarProps): JSX.Element {}
+```
+
+- **Do explode custom props for domain-specific interfaces:** When you define the interface and it has non-obvious behavior or constraints:
+
+```typescript
+/**
+ * Accordion with loading states.
+ *
+ * Manages section expansion and animation states.
+ *
+ * @param props - Accordion configuration (see AccordionProps interface)
+ * @returns Rendered accordion
+ */
+function Accordion(props: AccordionProps): JSX.Element {}
+```
+
+- **Single parameters:** Describe them individually when function signature is clear:
+
+```typescript
+/**
+ * Updates layer visibility state.
+ *
+ * @param layerPath - Target layer path
+ * @param visible - New visibility state
+ */
+function setLayerVisibility(layerPath: string, visible: boolean): void {}
+```
+
 **Examples:**
 
 ```typescript
 /**
  * Fetches layer metadata from GeoCore.
  *
- * @param geoviewLayerId - UUID of the GeoView layer.
- * @param signal - Optional abort signal for request cancellation.
- * @returns Parsed layer metadata object.
+ * @param geoviewLayerId - UUID of the GeoView layer
+ * @param signal - Optional abort signal for request cancellation
+ * @returns Parsed layer metadata object
  */
 async function fetchMetadata(
   geoviewLayerId: string,
@@ -465,11 +508,52 @@ async function fetchMetadata(
  * It dispatches an event to the EventProcessor, which
  * will trigger the appropriate GeoView API call.
  *
- * @param layerPath - Target layer path.
- * @param visible - New visibility state.
+ * @param layerPath - Target layer path
+ * @param visible - New visibility state
  */
 function setLayerVisibility(layerPath: string, visible: boolean): void {}
 ```
+
+**Handler Comment Pattern:**
+
+Event handlers in React components should use JSDoc-style comments with a single concise description. Handler comments should describe WHAT the handler does (the action) without documenting parameters/returns (parameters are self-documenting via event object property names).
+
+Use `#region Handlers` / `#endregion` to group related handlers for clarity.
+
+**Pattern Structure:**
+
+```typescript
+// #region Handlers
+
+/**
+ * Handles when the user clicks on the element
+ */
+const handleClick = useCallback(() => {
+  logger.logTraceUseCallback("COMPONENT_NAME - action");
+  // Implementation
+}, [dependencies]);
+
+/**
+ * Handles keyboard events on the element
+ */
+const handleKeyDown = useCallback(
+  (event: React.KeyboardEvent) => {
+    logger.logTraceUseCallback("COMPONENT_NAME - action");
+    // Implementation
+  },
+  [dependencies],
+);
+
+// #endregion
+```
+
+**Guidelines:**
+
+- **Comment format**: JSDoc block with single sentence describing what happens
+- **Naming**: Use verb-based names like `handleClick`, `handleToggle`, `handleMenuItemClick`, `handleClickAway`
+- **No @param/@returns tags**: Handler parameters are event objects with self-documenting property names
+- **Group with regions**: Use `#region Handlers` / `#endregion` comments to organize multiple handlers
+- **Logger pattern**: Include `logger.logTraceUseCallback()` with component name and action description
 
 **TypeDoc Generation:** Run `npm run doc` in geoview-core to generate API documentation.
 

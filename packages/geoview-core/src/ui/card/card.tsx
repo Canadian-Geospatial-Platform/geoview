@@ -16,9 +16,16 @@ export interface CardPropsExtend extends CardProps {
 }
 
 /**
- * A customized Material UI Card component with header and content sections.
+ * Material-UI Card component with header and content sections.
  *
- * @component
+ * Wraps Material-UI's Card to provide a container with built-in CardHeader
+ * and CardContent areas. Supports custom heading levels for semantic HTML and
+ * flexible content rendering. All Material-UI Card props are supported and
+ * passed through directly.
+ *
+ * @param props - Card configuration (see CardPropsExtend interface)
+ * @returns Card component with header and content sections
+ *
  * @example
  * ```tsx
  * // Basic usage
@@ -44,12 +51,6 @@ export interface CardPropsExtend extends CardProps {
  *   contentCard={<Typography>Custom styled card content</Typography>}
  * />
  * ```
- *
- * @param {CardPropsExtend} props - The properties for the Card component
- * @returns {JSX.Element} A rendered Card component
- *
- * @note For performance optimization in cases of frequent parent re-renders,
- * consider wrapping this component with React.memo at the consumption level.
  *
  * @see {@link https://mui.com/material-ui/react-card/}
  */

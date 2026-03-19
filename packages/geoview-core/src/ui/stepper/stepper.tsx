@@ -24,53 +24,25 @@ interface TypeStep {
 }
 
 /**
- * Create a customized Material UI Stepper component.
- * This component provides a step-by-step interface with configurable
- * labels and content for each step.
+ * Material-UI Stepper component for step-by-step workflows.
  *
- * @component
+ * Wraps Material-UI's Stepper with configurable labels and content for each step.
+ * Supports vertical and horizontal orientations with optional step content sections.
+ * Steps can be skipped by passing null in the steps array.
+ *
+ * @param props - Stepper configuration (see StepperPropsExtend interface)
+ * @returns Stepper component with step indicators and optional content sections
+ *
  * @example
  * ```tsx
- * // Basic usage
  * <Stepper
  *   activeStep={1}
  *   steps={[
- *     {
- *       stepLabel: { label: 'Step 1' },
- *       stepContent: { children: 'Content for step 1' }
- *     },
- *     {
- *       stepLabel: { label: 'Step 2' },
- *       stepContent: { children: 'Content for step 2' }
- *     }
- *   ]}
- * />
- *
- * // With custom styling and optional step
- * <Stepper
- *   activeStep={0}
- *   orientation="vertical"
- *   steps={[
- *     {
- *       id: "step1",
- *       stepLabel: {
- *         label: 'First Step',
- *         optional: <Typography variant="caption">Optional</Typography>
- *       },
- *       stepContent: { children: 'Step content' },
- *       props: { sx: { my: 1 } }
- *     },
- *     null,  // Skip this step
- *     {
- *       stepLabel: { label: 'Final Step' },
- *       stepContent: { children: 'Final content' }
- *     }
+ *     { stepLabel: { label: 'Step 1' }, stepContent: { children: 'Content 1' } },
+ *     { stepLabel: { label: 'Step 2' }, stepContent: { children: 'Content 2' } }
  *   ]}
  * />
  * ```
- *
- * @param {StepperPropsExtend} props - The properties passed to the Stepper element
- * @returns {JSX.Element} The Stepper component
  *
  * @see {@link https://mui.com/material-ui/react-stepper/}
  */

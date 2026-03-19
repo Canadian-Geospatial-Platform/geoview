@@ -5,28 +5,22 @@ import { Typography as MaterialTypography } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**
- * Create a customized Material UI Typography component.
+ * Material-UI Typography component for semantic text rendering.
  *
- * @component
+ * Wraps Material-UI's Typography to provide styled text with semantic HTML elements.
+ * Supports multiple font variants (h1-h6, body, caption, etc.) and colors.
+ * All Material-UI Typography props are supported and passed through directly.
+ *
+ * @param props - Typography configuration (see TypographyProps)
+ * @param ref - Reference to underlying HTML element
+ * @returns Typography element with variant-based styling
+ *
  * @example
  * ```tsx
- * // Basic usage
- * <Typography>
- *   Regular text content
- * </Typography>
- *
- * // With variant
- * <Typography
- *   variant="h1"
- *   color="primary"
- * >
- *   Heading Text
- * </Typography>
+ * <Typography variant="h1">Heading</Typography>
+ * <Typography variant="body1">Regular text</Typography>
+ * <Typography variant="caption" color="textSecondary">Small text</Typography>
  * ```
- *
- * @param {TypographyProps} props - All valid Material-UI Typography props
- * @param {Ref<HTMLElement>} ref - Reference to the underlying HTML element
- * @returns {JSX.Element} The Typography component
  *
  * @see {@link https://mui.com/material-ui/react-typography/}
  */

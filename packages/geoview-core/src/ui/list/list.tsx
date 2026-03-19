@@ -19,11 +19,15 @@ const sxClasses = {
 };
 
 /**
- * Create a customized Material UI List
+ * Material-UI List component with semantic HTML support.
  *
- * @param {TypeListProps} props the properties passed to the List element
- * @param {Ref<HTMLUListElement>} ref - Reference to the underlying lu list element
- * @returns {JSX.Element} the created List element
+ * Wraps Material-UI's List to provide ordered/unordered list container with
+ * semantic HTML support via the `type` prop. Renders as <ul> or <ol> element.
+ * All Material-UI List props are supported and passed through directly.
+ *
+ * @param props - List configuration (see TypeListProps interface)
+ * @param ref - Reference to the underlying list element
+ * @returns List container component with semantic HTML structure
  */
 function ListUI(props: TypeListProps, ref: Ref<HTMLUListElement>): JSX.Element {
   logger.logTraceRenderDetailed('ui/list/list', props);

@@ -12,20 +12,20 @@ import { generateId } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
 /**
- * Properties for the Accordion element
+ * Configuration properties for the Accordion component.
  */
 export interface AccordionProps {
-  /** Unique identifier for the accordion */
+  /** Unique identifier for the accordion container (auto-generated if omitted) */
   id: string;
-  /** Custom styles using CSS properties */
+  /** MUI theme-compatible styles applied to accordion container */
   sx: CSSProperties;
-  /** Array of accordion items to display */
+  /** Array of collapsible sections with title and content */
   items: Array<AccordionItem>;
-  /** Custom class name for styling */
+  /** CSS class applied to each accordion section for custom styling */
   className: string;
-  /** Whether the accordion should be expanded by default */
+  /** Initial expanded state for all accordion sections on mount */
   defaultExpanded: boolean;
-  /** Whether to show a loading icon during transitions */
+  /** Display rotating loading icon during open/close transitions for async operations */
   showLoadingIcon: boolean;
 }
 
@@ -35,12 +35,12 @@ interface AccordionState {
 }
 
 /**
- * Structure for individual accordion items
+ * Single accordion section with title and expandable content.
  */
 export type AccordionItem = {
-  /** The title text displayed in the accordion header */
+  /** Display text shown in accordion header */
   title: string;
-  /** The content to be displayed when the accordion section is expanded */
+  /** Content rendered when section is expanded (can be any React node) */
   content: ReactNode;
 };
 
@@ -60,8 +60,15 @@ const sxClasses = {
 };
 
 /**
- * Internal component for rendering the expand/loading icon
- * @internal
+ * Renders the expand icon with optional loading animation.
+ *
+ * Displays a loading spinner when transitioning between expand/collapse states,
+ * otherwise shows the default expand arrow. This provides visual feedback during
+ * asynchronous content loading operations.
+ *
+ * @param showLoadingIcon - Whether to show loading animation during transitions
+ * @param isTransitioning - Whether accordion is currently transitioning
+ * @returns Loading spinner icon if both flags are true, otherwise expand arrow icon
  */
 const AccordionExpandIcon = memo(function AccordionExpandIcon({
   showLoadingIcon,
@@ -77,10 +84,16 @@ const AccordionExpandIcon = memo(function AccordionExpandIcon({
 });
 
 /**
- * A customizable accordion component built on Material-UI's Accordion.
- * Provides expandable/collapsible sections with optional loading states and animations.
+ * Customizable accordion component with expandable sections and optional loading states.
  *
- * @component
+ * Wraps Material-UI's Accordion to provide collapsible content sections with loading animation
+ * support. Manages individual section states internally and renders a loading spinner icon
+ * during transitions when showLoadingIcon is enabled. Useful for hierarchical information
+ * display and progressive content disclosure.
+ *
+ * @param props - Accordion configuration (see AccordionProps interface)
+ * @returns Rendered accordion with expandable sections
+ *
  * @example
  * ```tsx
  * // Basic usage
@@ -113,13 +126,6 @@ const AccordionExpandIcon = memo(function AccordionExpandIcon({
  * />
  * ```
  *
- * @param {AccordionProps} props - The properties for the Accordion component
- * @returns {JSX.Element} A rendered accordion component
- *
- * @note For performance optimization in cases of frequent parent re-renders,
- * consider wrapping this component with React.memo at the consumption level.
- *
- * @see {@link AccordionItem} for the structure of individual accordion items
  * @see {@link https://mui.com/material-ui/react-accordion/}
  */
 function AccordionUI(props: AccordionProps): ReactNode {
@@ -133,7 +139,11 @@ function AccordionUI(props: AccordionProps): ReactNode {
     Array(items.length).fill({ expanded: defaultExpanded, transition: false })
   );
 
-  // Handle accordion expansion/collapse
+  // #region Handlers
+
+  /**
+   * Handles accordion section expand/collapse events
+   */
   const handleAccordionChange = useCallback(
     (index: number) => (event: React.SyntheticEvent, expanded: boolean) => {
       logger.logTraceUseCallback('UI.ACCORDION - change collapse', expanded);
@@ -150,7 +160,9 @@ function AccordionUI(props: AccordionProps): ReactNode {
     []
   );
 
-  // Handle transition states
+  /**
+   * Handles height transition animations during expand/collapse
+   */
   const handleTransitionEnd = useCallback(
     (index: number) => (event: React.TransitionEvent) => {
       logger.logTraceUseCallback('UI.ACCORDION - transition end');
@@ -181,6 +193,8 @@ function AccordionUI(props: AccordionProps): ReactNode {
     },
     [accordionStates, showLoadingIcon]
   );
+
+  // #endregion
 
   return (
     <Box id={id || generateId(18)} sx={sx} className="accordion-group">

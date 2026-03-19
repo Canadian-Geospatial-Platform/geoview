@@ -4,13 +4,16 @@ import { ListItemButton as MaterialListItemButton } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**
- * Create a customized Material UI List Item Button component.
- * This is a simple wrapper around MaterialListItemButton that maintains
- * full compatibility with Material-UI's List Item Button props.
+ * Material-UI ListItemButton component for clickable list items.
  *
- * @param {ListItemButtonProps} props - All valid Material-UI List Item Button props
- * @param {Ref<HTMLDivElement>} ref - Reference to the underlying HTML element
- * @returns {JSX.Element} The List Item Button component
+ * Wraps Material-UI's ListItemButton to provide interactive list item button
+ * with built-in click handling and hover effects. Maintains full compatibility
+ * with Material-UI ListItemButton props. Best used within List with ListItem,
+ * ListItemIcon, and ListItemText components.
+ *
+ * @param props - ListItemButton configuration (see MUI docs for all available props)
+ * @param ref - Reference to the underlying HTML element
+ * @returns ListItemButton component for clickable list items
  */
 function ListItemButtonUI(props: ListItemButtonProps, ref: Ref<HTMLDivElement>): JSX.Element {
   logger.logTraceRenderDetailed('ui/list/list-item-button', props);

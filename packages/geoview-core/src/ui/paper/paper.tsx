@@ -5,9 +5,16 @@ import { Paper as MaterialPaper } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**
- * Create a customized Material UI Paper component.
+ * Material-UI Paper component for surface containers.
  *
- * @component
+ * Wraps Material-UI's Paper to provide elevated surface element with customizable
+ * elevation, variant, and styling. Useful for card-like containers, panels, and
+ * surface elements. All Material-UI Paper props are supported and passed through directly.
+ *
+ * @param props - Paper configuration (see MUI docs for all available props)
+ * @param ref - Reference to the paper element
+ * @returns Paper component with elevation and styling support
+ *
  * @example
  * ```tsx
  * // Basic usage
@@ -38,10 +45,6 @@ import { logger } from '@/core/utils/logger';
  *   <Typography>Square paper</Typography>
  * </Paper>
  * ```
- *
- * @param {PaperProps} props - All valid Material-UI Paper props
- * @param {Ref<HTMLDivElement>} ref - Reference to the paper element
- * @returns {JSX.Element} The Paper component
  *
  * @see {@link https://mui.com/material-ui/react-paper/}
  */

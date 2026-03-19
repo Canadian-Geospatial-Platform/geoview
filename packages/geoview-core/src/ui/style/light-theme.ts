@@ -2,6 +2,7 @@ import { geoViewColors as defaultGeoViewColors } from '@/ui/style/default';
 import type { IGeoViewColors } from '@/ui/style/types';
 import { GeoViewColorClass } from '@/ui/style/types';
 
+/** Light theme color palette for GeoView */
 export const lightThemeColors: IGeoViewColors = {
   ...defaultGeoViewColors,
 

@@ -4,10 +4,10 @@ import type { SxStyles } from '@/ui/style/types';
 const drawerWidth = 200;
 
 /**
- * Get custom sx classes for the MUI drawer
+ * Gets custom sx classes for the drawer component.
  *
- * @param {Theme} theme the theme object
- * @returns {Object} the sx classes object
+ * @param theme - The MUI theme object
+ * @returns The sx classes object
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
   drawer: {

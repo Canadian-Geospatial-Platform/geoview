@@ -25,41 +25,35 @@ const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) 
 });
 
 /**
- * Create a customized Material UI Snackbar component for displaying app/map messages.
- * This component combines MaterialSnackbar with MaterialAlert to provide
- * informative feedback messages with animations.
+ * Material-UI Snackbar component for displaying app/map notification messages.
  *
- * @component
+ * Combines Material-UI's Snackbar with Alert to provide animated feedback messages
+ * with type-based styling (success, error, warning, info). Supports custom action buttons
+ * and close callbacks. Uses React Spring animations for fade-in effect.
+ *
+ * @param props - Snackbar configuration (see SnackBarProps)
+ * @returns Snackbar component with animated alert message
+ *
  * @example
  * ```tsx
- * // Basic success message
+ * // Success notification
  * <Snackbar
- *   snackBarId="success-message"
- *   message="Operation completed successfully"
+ *   snackBarId="success-msg"
+ *   message="Operation completed"
  *   open={isOpen}
  *   type="success"
+ *   onClose={handleClose}
  * />
  *
- * // Error message with close handler
+ * // Error with action button
  * <Snackbar
- *   snackBarId="error-message"
+ *   snackBarId="error-msg"
  *   message="An error occurred"
  *   open={isOpen}
  *   type="error"
- *   onClose={() => setIsOpen(false)}
- * />
- *
- * // Warning message
- * <Snackbar
- *   snackBarId="warning-message"
- *   message="Please review your changes"
- *   open={isOpen}
- *   type="warning"
+ *   button={<Button onClick={handleRetry}>Retry</Button>}
  * />
  * ```
- *
- * @param {SnackBarProps} props - The properties passed to the Snackbar element
- * @returns {JSX.Element} The Snackbar component
  *
  * @see {@link https://mui.com/material-ui/react-snackbar/}
  */

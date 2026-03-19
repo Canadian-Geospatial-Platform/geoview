@@ -12,39 +12,25 @@ interface ExtendedSwitchProps extends SwitchProps {
 }
 
 /**
- * Create a customized Material UI Switch component.
+ * Material-UI Switch component with integrated label using FormControlLabel.
  *
- * Wraps the Material-UI Switch with a FormControlLabel to ensure
- * proper labeling and accessibility. Generates unique IDs to associate
- * the label with the switch control.
+ * Wraps Material-UI's Switch with FormControlLabel for proper labeling and accessibility.
+ * Auto-generates unique IDs to associate labels with switch controls.
+ * All Material-UI Switch props are supported and passed through directly.
  *
- * @component
+ * @param props - Switch configuration (see ExtendedSwitchProps)
+ * @returns Switch component wrapped in FormControlLabel with label
+ *
  * @example
  * ```tsx
- * // Basic usage
  * <Switch
- *   label="Toggle Switch"
- *   checked={isChecked}
+ *   label="Enable notifications"
+ *   checked={isEnabled}
  *   onChange={handleChange}
  * />
  *
- * // Disabled state
- * <Switch
- *   label="Disabled Switch"
- *   disabled
- *   checked={false}
- * />
- *
- * // With size variant
- * <Switch
- *   label="Small Switch"
- *   size="small"
- *   checked={isChecked}
- * />
+ * <Switch label="Disabled" disabled checked={false} />
  * ```
- *
- * @param {ExtendedSwitchProps} props - All valid Material-UI Switch props
- * @returns {JSX.Element} The Switch component wrapped in FormControlLabel
  *
  * @see {@link https://mui.com/material-ui/react-switch/}
  */

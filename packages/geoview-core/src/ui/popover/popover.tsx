@@ -16,9 +16,16 @@ const handleKeyDown = (event: KeyboardEvent): void => {
 };
 
 /**
- * Create a customized Material UI Popover component.
+ * Material-UI Popover component with keyboard and focus management.
  *
- * @component
+ * Wraps Material-UI's Popover to provide popup panel positioned relative to an anchor
+ * element. Includes keyboard event handling (disables arrow keys/space to prevent page
+ * scrolling while open), automatic focus management, and focus trap support. Useful for
+ * tooltips, dropdown menus, and positioned content panels.
+ *
+ * @param props - Popover configuration (see MUI docs for all available props)
+ * @returns Popover component with keyboard management and focus handling
+ *
  * @example
  * ```tsx
  * // Basic usage
@@ -59,10 +66,7 @@ const handleKeyDown = (event: KeyboardEvent): void => {
  * </Popover>
  * ```
  *
- * @param {PopoverProps} props - All valid Material-UI Popover props
- * @returns {JSX.Element} The Popover component
- *
- * @see {@link https://mui.com/material-ui/react-popover/|Material-UI Popover}
+ * @see {@link https://mui.com/material-ui/react-popover/}
  */
 function PopoverUI({ open, children, ...props }: PopoverProps): JSX.Element {
   logger.logTraceRenderDetailed('ui/popover/popover');

@@ -3,13 +3,25 @@ import type { IGeoViewColors } from '@/ui/style/types';
 import { font, headingStyles, opacity, geoViewColors as defaultGeoViewColors, geoViewFontSizes } from '@/ui/style/default';
 import { logger } from '@/core/utils/logger';
 
-// this function is fixing tooltips not appearing in fullscreen mode, #1685
-// https://github.com/mui/material-ui/issues/15618#issuecomment-1893503162
+/**
+ * Returns the fullscreen element container for tooltip popper placement.
+ *
+ * Fixes tooltips not appearing in fullscreen mode.
+ *
+ * @returns The fullscreen element if active, otherwise document body
+ * @see https://github.com/mui/material-ui/issues/15618#issuecomment-1893503162
+ */
 function tooltipsPopperContainer(): Element | null {
   // Use the fullscreen element if in fullscreen mode, otherwise just the document's body
   return document.fullscreenElement ?? document.body;
 }
 
+/**
+ * Generates button style overrides for all button variants.
+ *
+ * @param geoViewColors - GeoView color palette to derive button styles from
+ * @returns Style override object for MUI Button component
+ */
 // ? I doubt we want to define an explicit type for style properties?
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getButtonStyleOverrides = (geoViewColors: IGeoViewColors): any => ({
@@ -90,6 +102,15 @@ const getButtonStyleOverrides = (geoViewColors: IGeoViewColors): any => ({
   },
 });
 
+/**
+ * Generates complete MUI ThemeOptions from a GeoView color palette.
+ *
+ * Configures all MUI component overrides, typography, palette, and spacing
+ * to match GeoView's design system.
+ *
+ * @param geoViewColors - Color palette to generate theme from
+ * @returns Complete MUI ThemeOptions configuration
+ */
 export const generateThemeOptions = (geoViewColors: IGeoViewColors = defaultGeoViewColors): ThemeOptions => {
   logger.logTraceCore('ui/style/themeOptionsGenerator - generateThemeOptions', geoViewColors);
 

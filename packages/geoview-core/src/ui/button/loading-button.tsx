@@ -12,9 +12,15 @@ export interface LoadingButtonPropsExtend extends LoadingButtonProps {
 }
 
 /**
- * A customized Material-UI Loading Button component.
+ * Material-UI LoadingButton with optional tooltip support.
  *
- * @component
+ * Wraps Material-UI's LoadingButton to provide button with built-in loading
+ * indicator and optional tooltip. Useful for async operations like form submission
+ * or data fetching where visual feedback of in-progress state is needed.
+ * All Material-UI LoadingButton props are supported and passed through directly.
+ *
+ * @param props - LoadingButton configuration (see LoadingButtonPropsExtend interface)
+ * @returns LoadingButton with optional tooltip wrapper on hover
  * @example
  * ```tsx
  * // Basic usage
@@ -42,12 +48,6 @@ export interface LoadingButtonPropsExtend extends LoadingButtonProps {
  *   Submit
  * </LoadingButton>
  * ```
- *
- * @param {LoadingButtonPropsExtend} props - The properties for the LoadingButton component
- * @returns {JSX.Element} A rendered LoadingButton component
- *
- * @note For performance optimization in cases of frequent parent re-renders,
- * consider wrapping this component with React.memo at the consumption level.
  *
  * @see {@link https://mui.com/material-ui/api/loading-button/}
  */

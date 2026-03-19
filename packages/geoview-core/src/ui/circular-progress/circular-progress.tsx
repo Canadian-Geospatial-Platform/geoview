@@ -19,9 +19,16 @@ export interface CircularProgressPropsExtend extends CircularProgressProps {
 }
 
 /**
- * A customized Material UI Circular Progress component with fade animation.
+ * Material-UI CircularProgress with fade-in/out animation.
  *
- * @component
+ * Wraps Material-UI's CircularProgress with Fade animation controlled by the
+ * `isLoaded` prop. Shows loading spinner when isLoaded is false, fades out when
+ * true using theme transitions. All Material-UI CircularProgress props are supported.
+ * Useful for displaying loading states with smooth visibility transitions.
+ *
+ * @param props - CircularProgress configuration (see CircularProgressPropsExtend interface)
+ * @returns Fading CircularProgress component showing when not loaded
+ *
  * @example
  * ```tsx
  * // Basic usage with loading state
@@ -50,12 +57,6 @@ export interface CircularProgressPropsExtend extends CircularProgressProps {
  *   size={50}
  * />
  * ```
- *
- * @param {CircularProgressPropsExtend} props - The properties for the CircularProgress component
- * @returns {JSX.Element} A rendered CircularProgress component
- *
- * @note For performance optimization in cases of frequent parent re-renders,
- * consider wrapping this component with React.memo at the consumption level.
  *
  * @see {@link https://mui.com/material-ui/react-progress/}
  */

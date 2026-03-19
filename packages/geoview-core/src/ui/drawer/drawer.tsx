@@ -18,9 +18,16 @@ export interface DrawerPropsExtend extends DrawerProps {
 }
 
 /**
- * Create a customized Material UI Drawer component.
+ * Material-UI Drawer component with collapsible toggle functionality.
  *
- * @component
+ * Wraps Material-UI's Drawer to provide a slide-out side panel with built-in
+ * toggle button for opening/closing. Supports status prop for controlled state.
+ * Default variant is temporary (slides over content). All Material-UI Drawer props
+ * are supported and passed through directly.
+ *
+ * @param props - Drawer configuration (see DrawerPropsExtend interface)
+ * @returns Drawer component with toggle button and theme-aware styling
+ *
  * @example
  * ```tsx
  * // Basic usage
@@ -49,12 +56,6 @@ export interface DrawerPropsExtend extends DrawerProps {
  * </Drawer>
  * ```
  *
- * @param {DrawerPropsExtend} props - The properties passed to the Drawer element
- * @returns {JSX.Element} The Drawer component
- *
- * @note For performance optimization in cases of frequent parent re-renders,
- * consider wrapping this component with React.memo at the consumption level.
- *
  * @see {@link https://mui.com/material-ui/react-drawer/}
  */
 function DrawerUI(props: DrawerPropsExtend): JSX.Element {
@@ -71,12 +72,18 @@ function DrawerUI(props: DrawerPropsExtend): JSX.Element {
   // State
   const [open, setOpen] = useState(false);
 
-  // Memoize toggle handler
+  // #region Handlers
+
+  /**
+   * Handles when the user toggles the drawer open/closed
+   */
   const handleDrawerToggle = useCallback((drawerStatus: boolean): void => {
     logger.logTraceUseCallback('UI.DRAWER - handleDrawerToggle', drawerStatus);
 
     setOpen(drawerStatus);
   }, []);
+
+  // #endregion
 
   // Update open state when status prop changes
   useEffect(() => {

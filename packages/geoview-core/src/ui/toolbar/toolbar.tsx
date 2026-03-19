@@ -3,27 +3,25 @@ import { Toolbar as MaterialToolbar } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**
- * Create a customized Material UI Toolbar component.
+ * Material-UI Toolbar component for app bar content.
  *
- * @component
+ * Wraps Material-UI's Toolbar for consistent spacing and alignment of content within AppBars.
+ * Automatically handles responsive padding and provides flex layout for organizing elements.
+ * All Material-UI Toolbar props are supported.
+ *
+ * @param props - Toolbar configuration (see ToolbarProps)
+ * @returns Toolbar component with responsive spacing
+ *
  * @example
  * ```tsx
- * // Basic usage
  * <Toolbar>
  *   <Typography>Title</Typography>
  * </Toolbar>
  *
- * // With custom styling
- * <Toolbar
- *   sx={{
- *     backgroundColor: 'primary.main',
- *     color: 'primary.contrastText'
- *   }}
- * />
+ * <Toolbar sx={{ backgroundColor: 'primary.main' }}>
+ *   <IconButton>Menu</IconButton>
+ * </Toolbar>
  * ```
- *
- * @param {ToolbarProps} props - All valid Material-UI Toolbar props
- * @returns {JSX.Element} The Toolbar component
  *
  * @see {@link https://mui.com/material-ui/react-app-bar/}
  */

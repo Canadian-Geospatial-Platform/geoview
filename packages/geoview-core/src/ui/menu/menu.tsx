@@ -3,9 +3,15 @@ import { Menu as MaterialMenu } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**
- * Create a customized Material UI Menu component.
+ * Material-UI Menu component for dropdown menu container.
  *
- * @component
+ * Wraps Material-UI's Menu to provide dropdown menu container positioned relative
+ * to an anchor element. Supports custom positioning, animations, and all Material-UI
+ * Menu props. Best used with MenuItem components for complete menu hierarchies.
+ *
+ * @param props - Menu configuration (see MUI docs for all available props)
+ * @returns Menu component with positioning and animation support
+ *
  * @example
  * ```tsx
  * // Basic usage
@@ -39,9 +45,6 @@ import { logger } from '@/core/utils/logger';
  *   <MenuItem>Positioned Item</MenuItem>
  * </Menu>
  * ```
- *
- * @param {MenuProps} props - All valid Material-UI Menu props
- * @returns {JSX.Element} The Menu component
  *
  * @see {@link https://mui.com/material-ui/react-menu/}
  */

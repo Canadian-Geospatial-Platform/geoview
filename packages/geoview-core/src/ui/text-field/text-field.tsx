@@ -6,38 +6,31 @@ import type { TypeTextFieldProps } from '@/ui/panel/panel-types';
 import { logger } from '@/core/utils/logger';
 
 /**
- * Create a customized Material UI Text Field component.
+ * Material-UI TextField component for text input.
  *
- * @component
+ * Wraps Material-UI's TextField for text input with integrated label, error states,
+ * and helper text support. Supports all variant types (standard, outlined, filled)
+ * and customizable sizing. All Material-UI TextField props are supported.
+ *
+ * @param props - TextField configuration (see TypeTextFieldProps)
+ * @param ref - Reference to underlying input element
+ * @returns TextField component with label and validation support
+ *
  * @example
  * ```tsx
- * // Basic usage
  * <TextField
  *   label="Username"
  *   value={username}
  *   onChange={handleChange}
  * />
  *
- * // With validation
  * <TextField
  *   label="Email"
- *   error={!!emailError}
- *   helperText={emailError}
+ *   error={!!error}
+ *   helperText={error}
  *   required
  * />
- *
- * // With different variants
- * <TextField
- *   label="Password"
- *   type="password"
- *   variant="outlined"
- *   size="small"
- * />
  * ```
- *
- * @param {TypeTextFieldProps} props - All valid Material-UI Text Field props
- * @param {Ref<HTMLDivElement>} ref - Reference to the underlying div element
- * @returns {JSX.Element} The Text Field component
  *
  * @see {@link https://mui.com/material-ui/react-text-field/}
  */

@@ -44,10 +44,30 @@ type SliderProps = {
 };
 
 /**
- * Create a customized Material UI Slider (https://mui.com/material-ui/api/slider/)
+ * Custom Material-UI Slider component with advanced label and mark management.
  *
- * @param {TypeSliderProps} props the properties passed to the slider element
- * @returns {JSX.Element} the created Slider element
+ * Wraps Material-UI's Slider with intelligent mark limiting (max 30 visible marks)
+ * and overlap detection for labels. Handles both single and range values, controlled
+ * and uncontrolled modes. Includes keyboard focus workaround for arrow key interactions.
+ *
+ * @param props - Slider configuration (see SliderProps)
+ * @returns Slider component with optimized mark/label rendering
+ *
+ * @example
+ * ```tsx
+ * // Basic range slider
+ * <Slider min={0} max={100} value={[30, 70]} onChange={handleChange} />
+ *
+ * // With marks and labels
+ * <Slider
+ *   min={0}
+ *   max={100}
+ *   marks={[{ value: 0, label: '0' }, { value: 100, label: '100' }]}
+ *   valueLabelDisplay="on"
+ * />
+ * ```
+ *
+ * @see {@link https://mui.com/material-ui/react-slider/}
  */
 function SliderUI(props: SliderProps): JSX.Element {
   logger.logTraceRenderDetailed('ui/slider/slider');
@@ -89,7 +109,7 @@ function SliderUI(props: SliderProps): JSX.Element {
 
   // TODO: Refactor - when refactor time slider, re work logic for marks and label to have all of them inside slider (geochart-time slider)
   // Limit visible marks to max 30
-  const processedMarks = useMemo(() => {
+  const memoProcessedMarks = useMemo(() => {
     if (!marks || marks.length === 0) return marks;
 
     const maxVisibleMarks = 30;
@@ -130,7 +150,7 @@ function SliderUI(props: SliderProps): JSX.Element {
   }, [marks]);
 
   // Memoize the className calculation
-  const finalClassName = useMemo(() => {
+  const memoFinalClassName = useMemo(() => {
     const shouldSpreadLabel = Array.isArray(sliderValue) && sliderValue.length >= 2 && (!orientation || orientation === 'horizontal');
 
     if (!shouldSpreadLabel) return className;
@@ -138,7 +158,11 @@ function SliderUI(props: SliderProps): JSX.Element {
     return className ? `${className} MuiSlider-labelSpread` : 'MuiSlider-labelSpread';
   }, [sliderValue, orientation, className]);
 
-  // handle constant change on the slider to set active thumb and instant values
+  // #region Handlers
+
+  /**
+   * Handles when the user drags the slider thumb to change the value
+   */
   const handleChange = (event: React.SyntheticEvent | Event, newValue: number | number[], activeThumb: number): void => {
     // Update the internal state if not controlled, meaning 'value' isn't provided by the parent component
     if (!isControlled) {
@@ -151,7 +175,9 @@ function SliderUI(props: SliderProps): JSX.Element {
     onChange?.(newValue, activeThumb);
   };
 
-  // handle the commit change event when mouseup is fired
+  /**
+   * Handles when the user completes a slider drag (mouseup)
+   */
   const handleChangeCommitted = (event: React.SyntheticEvent | Event, newValue: number | number[]): void => {
     // Callback
     onChangeCommitted?.(newValue);
@@ -174,6 +200,9 @@ function SliderUI(props: SliderProps): JSX.Element {
   // GV This is a workaround until the issue is fixed in the Material UI library.
   // GV When there is 2 handles, the focus on the second handle is lost and the focus is back to first handle
   // TODO: https://github.com/Canadian-Geospatial-Platform/geoview/issues/2560
+  /**
+   * Handles keyboard events on the slider to maintain focus during arrow key interactions
+   */
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
       if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
@@ -183,13 +212,15 @@ function SliderUI(props: SliderProps): JSX.Element {
     [focusSlider]
   );
 
+  // #endregion
+
   /**
    * Checks if two HTML elements overlap, considering the slider's orientation and adding padding.
    *
-   * @param {HTMLElement} el1 - The first element to check for overlap.
-   * @param {HTMLElement} el2 - The second element to check for overlap.
-   * @param {string} [orientationIn='horizontal'] - The orientation of the slider ('horizontal' or 'vertical').
-   * @returns {boolean} True if the elements overlap, false otherwise.
+   * @param el1 - The first element to check for overlap
+   * @param el2 - The second element to check for overlap
+   * @param orientationIn - The orientation of the slider ('horizontal' or 'vertical')
+   * @returns True if the elements overlap, false otherwise
    */
   const checkOverlap = useCallback((el1: HTMLElement, el2: HTMLElement, orientationIn: string): boolean => {
     if (!el1 || !el2) return false;
@@ -205,7 +236,6 @@ function SliderUI(props: SliderProps): JSX.Element {
   /**
    * Hides marks that exceed the maximum visible limit.
    *
-   * @description
    * This function hides slider tick marks when there are more than 20 marks total.
    * It keeps all marks in the DOM for proper slider snapping behavior, but visually
    * hides marks (those beyond the 20 visible limit).
@@ -241,7 +271,6 @@ function SliderUI(props: SliderProps): JSX.Element {
   /**
    * Removes overlapping labels in a slider component.
    *
-   * @description
    * This function identifies and hides overlapping labels in a slider component.
    * It works for both horizontal and vertical sliders, starting from both ends
    * and moving towards the center. The function ensures that the maximum number
@@ -316,13 +345,13 @@ function SliderUI(props: SliderProps): JSX.Element {
       {...properties}
       id={containerId}
       sx={disabled ? null : sxClasses.slider}
-      className={finalClassName}
+      className={memoFinalClassName}
       ref={sliderRef}
       orientation={orientation}
       value={sliderValue}
       min={min}
       max={max}
-      marks={processedMarks}
+      marks={memoProcessedMarks}
       disableSwap
       valueLabelDisplay={valueLabelDisplayOption}
       valueLabelFormat={onValueLabelFormat}

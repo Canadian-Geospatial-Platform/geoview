@@ -22,9 +22,16 @@ const DEFAULT_STYLES = {
 } as const;
 
 /**
- * A customized Material UI Card Media component with keyboard accessibility support.
+ * Material-UI CardMedia component with keyboard accessibility and click handling.
  *
- * @component
+ * Wraps Material-UI's CardMedia to provide flexible image/video rendering with
+ * keyboard event support for accessibility. Supports both image and video components
+ * with click and keyDown callbacks. All Material-UI CardMedia props are supported
+ * and passed through directly.
+ *
+ * @param props - CardMedia configuration (see CardMediaPropsExtend interface)
+ * @returns CardMedia component with click and keyboard event handling
+ *
  * @example
  * ```tsx
  * // Basic image usage
@@ -65,12 +72,6 @@ const DEFAULT_STYLES = {
  * />
  * ```
  *
- * @param {CardMediaPropsExtend} props - The properties for the Card Media element
- * @returns {JSX.Element} A rendered Card Media element
- *
- * @note For performance optimization in cases of frequent parent re-renders,
- * consider wrapping this component with React.memo at the consumption level.
- *
  * @see {@link https://mui.com/material-ui/react-card/#media}
  */
 function CardMediaUI(props: CardMediaPropsExtend): JSX.Element {
@@ -79,13 +80,20 @@ function CardMediaUI(props: CardMediaPropsExtend): JSX.Element {
   // Get constant from props
   const { sx, src, alt, cardComponent = 'img', click, keyDown, ...rest } = props;
 
-  // Memoize event handlers
+  // #region Handlers
+
+  /**
+   * Handles when the user clicks on the card media element
+   */
   const handleClick = useCallback(() => {
     logger.logTraceUseCallback('UI.CARD MEDIA - click');
 
     click?.();
   }, [click]);
 
+  /**
+   * Handles keyboard events on the card media element
+   */
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
       logger.logTraceUseCallback('UI.CARD MEDIA - keyboard click');
@@ -97,6 +105,8 @@ function CardMediaUI(props: CardMediaPropsExtend): JSX.Element {
     },
     [keyDown]
   );
+
+  // #endregion
 
   // Combine custom styles with default styles
   const combinedSx = {

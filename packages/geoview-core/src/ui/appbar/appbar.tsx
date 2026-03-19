@@ -8,9 +8,16 @@ import { logger } from '@/core/utils/logger';
 const AnimatedAppBar = animated(MaterialAppBar);
 
 /**
- * A customized Material-UI AppBar component with fade-in animation support.
+ * Material-UI AppBar with automatic fade-in animation on mount.
  *
- * @component
+ * Wraps Material-UI's AppBar component with React Spring animations to provide
+ * a smooth fade-in effect when the component initially renders. All Material-UI
+ * AppBar props are supported and passed through directly. Useful for providing
+ * visual continuity and polish to page transitions.
+ *
+ * @param props - Material-UI AppBar properties (see MUI docs for all available props)
+ * @returns AppBar element with fade-in animation applied on render
+ *
  * @example
  * ```tsx
  * // Basic usage
@@ -34,12 +41,6 @@ const AnimatedAppBar = animated(MaterialAppBar);
  *   </Toolbar>
  * </AppBarUI>
  * ```
- *
- * @param {AppBarUIProps} props - The properties for the AppBar component
- * @returns {JSX.Element} A rendered AppBar component with fade-in animation
- *
- * @note For performance optimization in cases of frequent parent re-renders,
- * consider wrapping this component with React.memo at the consumption level.
  *
  * @see {@link https://mui.com/material-ui/api/app-bar/}
  */

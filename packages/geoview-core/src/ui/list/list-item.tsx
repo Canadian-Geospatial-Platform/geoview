@@ -12,13 +12,15 @@ const sxClasses = {
 };
 
 /**
- * Create a customized Material UI List Item component.
- * This is a simple wrapper around MaterialListItem that maintains
- * full compatibility with Material-UI's List Item props.
+ * Material-UI ListItem component for list content containers.
  *
- * @param {ListItemProps} props - All valid Material-UI List Item props
- * @param {Ref<HTMLLIElement>} ref - Reference to the underlying li element
- * @returns {JSX.Element} The List Item component
+ * Wraps Material-UI's ListItem to provide content container within lists.
+ * Maintains full compatibility with Material-UI ListItem props. Use with
+ * ListItemButton, ListItemIcon, and ListItemText for complete list item layouts.
+ *
+ * @param props - ListItem configuration (see MUI docs for all available props)
+ * @param ref - Reference to the underlying li element
+ * @returns ListItem component for list item content
  */
 function ListItemUI(props: ListItemProps, ref: Ref<HTMLLIElement>): JSX.Element {
   logger.logTraceRenderDetailed('ui/list/list-item', props);

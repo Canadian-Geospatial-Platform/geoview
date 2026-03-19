@@ -121,11 +121,16 @@ export interface ModalActionsType {
 }
 
 /**
- * Create a customized Material UI Modal component.
- * This component extends the Material-UI Dialog to provide enhanced modal functionality
- * with support for headers, content, and footer actions.
+ * Material-UI Dialog-based Modal component with header, content, and footer sections.
  *
- * @component
+ * Wraps Material-UI's Dialog to provide enhanced modal dialog with configurable
+ * header (title + actions), content area, and footer (actions). Supports fade
+ * animation, custom closing behavior, and flexible content rendering (HTML strings
+ * or JSX). All Material-UI Dialog props are supported and passed through directly.
+ *
+ * @param props - Modal configuration (see DialogPropsExtend interface)
+ * @returns Modal component with structured header, content, and footer layout
+ *
  * @example
  * ```tsx
  * // Basic usage
@@ -165,10 +170,7 @@ export interface ModalActionsType {
  * />
  * ```
  *
- * @param {DialogPropsExtend} props - The properties passed to the Modal element
- * @returns {JSX.Element} The Modal component
- *
- * @see {@link https://mui.com/material-ui/react-dialog/|Material-UI Dialog}
+ * @see {@link https://mui.com/material-ui/react-dialog/}
  */
 function ModalUI(props: DialogPropsExtend): JSX.Element {
   logger.logTraceRenderDetailed('ui/modal/modal');

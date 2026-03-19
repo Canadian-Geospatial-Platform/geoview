@@ -17,9 +17,15 @@ export interface DividerPropsExtend extends DividerProps {
 }
 
 /**
- * Create a customized Material UI Divider component.
+ * Material-UI Divider component with orientation and growth options.
  *
- * @component
+ * Wraps Material-UI's Divider to provide flexible visual separation between content.
+ * Supports horizontal/vertical orientation with optional flex-grow behavior for
+ * layout spacing. All Material-UI Divider props are supported and passed through directly.
+ *
+ * @param props - Divider configuration (see DividerPropsExtend interface)
+ * @returns Divider component with theme-aware styling
+ *
  * @example
  * ```tsx
  * // Basic usage
@@ -39,9 +45,6 @@ export interface DividerPropsExtend extends DividerProps {
  *   }}
  * />
  * ```
- *
- * @param {DividerPropsExtend} props - The properties passed to the Divider element
- * @returns {JSX.Element} The Divider component
  *
  * @see {@link https://mui.com/material-ui/react-divider/}
  */

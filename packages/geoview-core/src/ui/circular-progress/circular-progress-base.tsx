@@ -3,9 +3,16 @@ import { CircularProgress as MaterialCircularProgress } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**
- * A customized Material UI Circular Progress Base component.
+ * Material-UI CircularProgress without animation wrapper.
  *
- * @component
+ * Base circular progress component with direct Material-UI CircularProgress
+ * rendering without fade animation or additional container. Use this for simple
+ * progress indicators where animation is not needed. All Material-UI CircularProgress
+ * props are supported and passed through directly.
+ *
+ * @param props - CircularProgress configuration (see MUI docs for all available props)
+ * @returns Base CircularProgress component without animation
+ *
  * @example
  * ```tsx
  * // Basic usage
@@ -27,12 +34,6 @@ import { logger } from '@/core/utils/logger';
  *   value={80}
  * />
  * ```
- *
- * @param {CircularProgressProps} props - The properties for the CircularProgressBase component
- * @returns {JSX.Element} A rendered CircularProgressBase component
- *
- * @note For performance optimization in cases of frequent parent re-renders,
- * consider wrapping this component with React.memo at the consumption level.
  *
  * @see {@link https://mui.com/material-ui/react-progress/}
  */

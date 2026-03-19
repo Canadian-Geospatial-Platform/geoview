@@ -9,8 +9,17 @@ const ColorKeyValues = range(50, 1000, 50);
 type ColorKey = (typeof ColorKeyValues)[number];
 type ColorRecord = Record<ColorKey, string>;
 
+/** Record mapping sx property names to MUI SxProps values */
 export type SxStyles = Record<string, SxProps<Theme> | SxProps>;
 
+/**
+ * Generates color shades and variants from a base color.
+ *
+ * Creates dark and light variations at intensity levels 50-1000 using MUI's
+ * darken/lighten functions. Supports inverse mode where lighten/darken are swapped.
+ *
+ * @throws {NotSupportedError} When color format is invalid
+ */
 export class GeoViewColorClass {
   main: string;
 
@@ -20,6 +29,12 @@ export class GeoViewColorClass {
 
   light: ColorRecord = {};
 
+  /**
+   * Creates a new color variation generator.
+   *
+   * @param mainColor - Valid hex, rgb, or rgba color string
+   * @param isInverse - Whether to invert lighten/darken operations
+   */
   constructor(mainColor: string, isInverse = false) {
     if (!GeoViewColorClass.#isValidColor(mainColor)) {
       throw new NotSupportedError(`Invalid color format '${mainColor}'`);
@@ -33,6 +48,9 @@ export class GeoViewColorClass {
     });
   }
 
+  /**
+   * Validates whether a color string is a valid hex, rgb, or rgba format.
+   */
   static #isValidColor(color: string): boolean {
     // Implement a color validation logic, or use a library like chroma.js
     // For simplicity, you can check if it's a valid hex, rgb, or rgba color string
@@ -40,15 +58,34 @@ export class GeoViewColorClass {
     return colorRegex.test(color);
   }
 
+  /**
+   * Returns the main color with optional opacity.
+   *
+   * @param opacity - Alpha value between 0 and 1
+   * @returns Color string with applied opacity
+   */
   // eslint-disable-next-line no-underscore-dangle
   _main(opacity = 1): string {
     return alpha(this.main, opacity);
   }
 
+  /**
+   * Returns the main color with the specified opacity.
+   *
+   * @param opacity - Alpha value between 0 and 1
+   * @returns Color string with applied opacity
+   */
   opacity(opacity: number): string {
     return alpha(this.main, opacity);
   }
 
+  /**
+   * Lightens the main color by a coefficient (inverted in inverse mode).
+   *
+   * @param coefficient - Lighten intensity between 0 and 1
+   * @param opacity - Optional alpha value between 0 and 1
+   * @returns Lightened color string
+   */
   lighten(coefficient: number, opacity = 1): string {
     if (this.isInverse) {
       return alpha(darken(this.main, coefficient), opacity);
@@ -56,6 +93,13 @@ export class GeoViewColorClass {
     return alpha(lighten(this.main, coefficient), opacity);
   }
 
+  /**
+   * Darkens the main color by a coefficient (inverted in inverse mode).
+   *
+   * @param coefficient - Darken intensity between 0 and 1
+   * @param opacity - Optional alpha value between 0 and 1
+   * @returns Darkened color string
+   */
   darken(coefficient: number, opacity = 1): string {
     if (this.isInverse) {
       return alpha(lighten(this.main, coefficient), opacity);
@@ -63,7 +107,11 @@ export class GeoViewColorClass {
     return alpha(darken(this.main, coefficient), opacity);
   }
 
-  // returns black or white color depending on the contrast ratio
+  /**
+   * Returns black or white text color based on contrast ratio with the main color.
+   *
+   * @returns '#000000' for light backgrounds, '#FFFFFF' for dark backgrounds
+   */
   contrastText(): string {
     const hex = this.main.slice(1); // removing the #
 
@@ -76,6 +124,7 @@ export class GeoViewColorClass {
   }
 }
 
+/** GeoView color palette interface with semantic color categories */
 export interface IGeoViewColors {
   white: string;
 
@@ -91,6 +140,7 @@ export interface IGeoViewColors {
   warning: GeoViewColorClass;
 }
 
+/** GeoView font size scale interface from xs to xxl with dynamic key support */
 export interface IGeoViewFontSizes {
   xxl: string;
   xl: string;
@@ -102,6 +152,7 @@ export interface IGeoViewFontSizes {
   [key: string]: string;
 }
 
+/** GeoView spacing and sizing configuration for UI layout */
 export interface IGeoViewSpacingAndSizing {
   layersTitleHeight?: string;
 }

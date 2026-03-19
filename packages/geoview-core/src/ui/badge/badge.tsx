@@ -3,9 +3,16 @@ import { Badge as MaterialBadge } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**
- * A customized Material-UI Badge component.
+ * Material-UI Badge component for displaying count badges on content.
  *
- * @component
+ * Wraps Material-UI's Badge to display notification badges, counters, or status
+ * indicators on icons, buttons, or other UI elements. All Material-UI Badge props
+ * are supported and passed through directly. Useful for showing unread counts,
+ * status notifications, or highlighting important information.
+ *
+ * @param props - Badge configuration (see MUI docs for all available props)
+ * @returns Badge component with content and badge content shown
+ *
  * @example
  * ```tsx
  * // Basic usage
@@ -36,12 +43,6 @@ import { logger } from '@/core/utils/logger';
  *   </IconButton>
  * </Badge>
  * ```
- *
- * @param {BadgeProps} props - The properties for the Badge component
- * @returns {JSX.Element} A rendered Badge component
- *
- * @note For performance optimization in cases of frequent parent re-renders,
- * consider wrapping this component with React.memo at the consumption level.
  *
  * @see {@link https://mui.com/material-ui/api/badge/}
  */

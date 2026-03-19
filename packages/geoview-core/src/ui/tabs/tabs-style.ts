@@ -2,10 +2,12 @@ import type { Theme } from '@mui/material';
 import type { SxStyles } from '@/ui/style/types';
 
 /**
- * Get custom sx classes for the MUI tabs
+ * Gets custom sx classes for the tabs component.
  *
- * @param {Theme} theme the theme object
- * @returns {Object} the sx classes object
+ * @param theme - The MUI theme object
+ * @param isMapFullScreen - Whether the map is in fullscreen mode
+ * @param appHeight - The application height value
+ * @returns The sx classes object
  */
 export const getSxClasses = (theme: Theme, isMapFullScreen: boolean, appHeight: string): SxStyles => ({
   rightIcons: {

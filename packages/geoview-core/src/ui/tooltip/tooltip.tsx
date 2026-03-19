@@ -5,30 +5,26 @@ import { Tooltip as MaterialTooltip } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**
- * Create a customized Material UI Tooltip component.
+ * Material-UI Tooltip component for displaying help text on hover.
  *
- * @component
+ * Wraps Material-UI's Tooltip with increased enter delay (1000ms) and next delay (200ms)
+ * for better UX. Provides accessible help text that appears on element hover or focus.
+ * All Material-UI Tooltip props are supported.
+ *
+ * @param props - Tooltip configuration (see TooltipProps)
+ * @param ref - Reference to underlying HTML element
+ * @returns Tooltip component wrapping children with hover help text
+ *
  * @example
  * ```tsx
- * // Basic usage
- * <Tooltip title="Help text">
- *   <Button>Hover me</Button>
+ * <Tooltip title="Click to save">
+ *   <Button>Save</Button>
  * </Tooltip>
  *
- * // With placement
- * <Tooltip
- *   title="Top placement"
- *   placement="top"
- * >
- *   <IconButton>
- *     <InfoIcon />
- *   </IconButton>
+ * <Tooltip title="Settings" placement="left">
+ *   <IconButton>Settings</IconButton>
  * </Tooltip>
  * ```
- *
- * @param {TooltipProps} props - All valid Material-UI Tooltip props
- * @param {Ref<HTMLElement>} ref - Reference to the underlying HTML element
- * @returns {JSX.Element} The Tooltip component
  *
  * @see {@link https://mui.com/material-ui/react-tooltip/}
  */

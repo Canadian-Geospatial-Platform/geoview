@@ -7,14 +7,21 @@ import { logger } from '@/core/utils/logger';
  * Properties for the Avatar component extending Material-UI's AvatarProps
  */
 export interface AvatarPropsExtend extends AvatarProps {
-  /** Content to be rendered inside the Avatar */
+  /** React node rendered inside the Avatar (text, icons, or images) */
   children?: React.ReactNode;
 }
 
 /**
- * A customized Material-UI Avatar component.
+ * Material-UI Avatar component for displaying user profile images or initials.
  *
- * @component
+ * Wraps Material-UI's Avatar to provide a flexible component for rendering
+ * avatar images, initials, or custom icons. All Material-UI Avatar props are
+ * supported and passed through directly. Useful for user profiles, team displays,
+ * and authentication status indicators.
+ *
+ * @param props - Avatar configuration (see AvatarPropsExtend interface and MUI docs)
+ * @returns Avatar component with children or image shown
+ *
  * @example
  * ```tsx
  * // Basic usage with text
@@ -37,12 +44,6 @@ export interface AvatarPropsExtend extends AvatarProps {
  *   <PersonIcon />
  * </Avatar>
  * ```
- *
- * @param {AvatarPropsExtend} props - The properties for the Avatar component
- * @returns {JSX.Element} A rendered Avatar component
- *
- * @note For performance optimization in cases of frequent parent re-renders,
- * consider wrapping this component with React.memo at the consumption level.
  *
  * @see {@link https://mui.com/material-ui/api/avatar/}
  */

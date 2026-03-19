@@ -11,12 +11,15 @@ export type ButtonProps = {
 } & TypeButtonProps;
 
 /**
- * A customized Material-UI Button component with tooltip and responsive support.
+ * Material-UI Button component with optional tooltip and responsive support.
  *
- * @component
- * @param {ButtonProps} props - The properties for the Button component
- * @param {Ref<HTMLButtonElement>} ref - The ref forwarded to the underlying MaterialButton
- * @returns {JSX.Element} A rendered Button component
+ * Wraps Material-UI's Button to provide flexible action trigger with optional
+ * tooltip display and responsive behavior configuration. Supports all Material-UI
+ * Button props in addition to custom `makeResponsive` and tooltip properties.
+ *
+ * @param props - Button configuration (see ButtonProps interface)
+ * @param ref - Reference forwarded to underlying Material-UI Button
+ * @returns Button component with optional tooltip overlay on hover
  * @example
  * ```tsx
  * // Basic usage
@@ -48,11 +51,7 @@ export type ButtonProps = {
  * </Button>
  * ```
  *
- *
- * @note For performance optimization in cases of frequent parent re-renders,
- * consider wrapping this component with React.memo at the consumption level.
- *
- * @see {@link https://mui.com/material-ui/api/button/}
+ * @see {@link https://mui.com/material-ui/react-button/}
  */
 function ButtonUI(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element {
   logger.logTraceRenderDetailed('ui/button/button');
@@ -83,7 +82,11 @@ function ButtonUI(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element 
   const theme = useTheme();
   const mobileView = useMediaQuery(theme.breakpoints.down('md'));
 
-  // Memoize click handler
+  // #region Handlers
+
+  /**
+   * Handles when the user clicks on the button
+   */
   const handleClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
       logger.logTraceUseCallback('UI.BUTTON - click');
@@ -94,6 +97,8 @@ function ButtonUI(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element 
     },
     [disabled, onClick]
   );
+
+  // #endregion
 
   function createButtonUI(): JSX.Element {
     return (

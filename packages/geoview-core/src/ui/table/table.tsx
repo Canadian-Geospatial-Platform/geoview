@@ -3,41 +3,24 @@ import { MaterialReactTable, type MRT_RowData as MRTRowData } from 'material-rea
 import { logger } from '@/core/utils/logger';
 
 /**
- * Create a Material React Table component wrapper.
- * This is a wrapper around Material React Table that maintains
- * full compatibility with MRT props.
+ * Material React Table (MRT) component wrapper for advanced data tables.
  *
- * @component
+ * Wraps Material React Table with full prop compatibility for features like pagination,
+ * row selection, sorting, and filtering. Maintains clean pass-through of all MRT options.
+ * All Material React Table props are supported.
+ *
+ * @param props - Table configuration (see MRTTableOptions)
+ * @returns Material React Table component with enhanced functionality
+ *
  * @example
  * ```tsx
- * // Basic usage
  * <MRTTable
  *   data={tableData}
  *   columns={tableColumns}
  *   enablePagination
- * />
- *
- * // With row selection
- * <MRTTable
- *   data={tableData}
- *   columns={tableColumns}
  *   enableRowSelection
- *   onRowSelectionChange={handleSelection}
- * />
- *
- * // With custom styling
- * <MRTTable
- *   data={tableData}
- *   columns={tableColumns}
- *   className="custom-table"
- *   muiTableHeadCellProps={{
- *     sx: { backgroundColor: 'lightgray' }
- *   }}
  * />
  * ```
- *
- * @param {MRTTableProps} props - All valid Material React Table props
- * @returns {JSX.Element} The MRT table component with enhanced functionality
  *
  * @see {@link https://www.material-react-table.com/}
  */

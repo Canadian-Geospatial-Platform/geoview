@@ -2,6 +2,11 @@ import type { SvgIconProps } from '@mui/material';
 import { SvgIcon } from '@mui/material';
 
 // ? I doubt we want to define an explicit type for this?
+/**
+ * Canadian Geospatial Platform logo SVG icon.
+ *
+ * @returns SVG element with Canada map graphic
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function GeoCaIcon(): any {
   return (
@@ -25,6 +30,12 @@ export function GeoCaIcon(): any {
   );
 }
 
+/**
+ * Legend display SVG icon for layer legend panels.
+ *
+ * @param props - MUI SvgIcon properties
+ * @returns SVG icon element
+ */
 export function LegendIcon(props: SvgIconProps): JSX.Element {
   return (
     <SvgIcon {...props}>
@@ -40,6 +51,12 @@ export function LegendIcon(props: SvgIconProps): JSX.Element {
   );
 }
 
+/**
+ * Clear highlight SVG icon with diagonal strikethrough.
+ *
+ * @param props - MUI SvgIcon properties
+ * @returns SVG icon element
+ */
 export function ClearHighlightIcon(props: SvgIconProps): JSX.Element {
   return (
     <SvgIcon {...props} viewBox="0 0 24 24">

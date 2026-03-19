@@ -19,38 +19,28 @@ export interface TypeTabPanelProps {
 }
 
 /**
- * Create a tab panel that will be used to display the content of a tab.
- * This is a wrapper around Box component that maintains proper ARIA attributes
- * and visibility states while providing focus trap functionality.
+ * Accessible tab panel component for displaying tab content.
  *
- * @component
+ * Wraps Box component with proper ARIA attributes (role="tabpanel") and visibility states.
+ * Integrates with focus trap for keyboard navigation within fullscreen containers.
+ * Maintains hidden state when tab is inactive.
+ *
+ * @param props - Tab panel configuration (see TypeTabPanelProps)
+ * @param ref - Reference to underlying div element
+ * @returns Tab panel element with proper ARIA attributes and focus management
+ *
  * @example
  * ```tsx
- * // Basic usage
  * <TabPanel
  *   index={0}
  *   value={0}
  *   id="panel-0"
  *   tabId="tab-0"
- * >
- *   Panel Content
- * </TabPanel>
- *
- * // With container type
- * <TabPanel
- *   index={1}
- *   value={1}
- *   id="panel-1"
- *   tabId="tab-1"
  *   containerType="panel"
  * >
- *   Panel Content
+ *   Panel content here
  * </TabPanel>
  * ```
- *
- * @param {TypeTabPanelProps} props - Properties for the tab panel
- * @param {Ref<HTMLDivElement>} ref - Reference to the underlying div element
- * @returns {JSX.Element} The tab panel component
  *
  * @see {@link https://mui.com/material-ui/react-tabs/}
  */

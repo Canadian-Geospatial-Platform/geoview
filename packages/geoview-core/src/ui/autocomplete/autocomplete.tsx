@@ -13,13 +13,22 @@ export interface AutocompletePropsExtend<
   DisableClearable extends boolean | undefined = undefined,
   FreeSolo extends boolean | undefined = undefined,
 > extends AutocompleteProps<T, Multiple, DisableClearable, FreeSolo> {
+  /** Apply full width to the autocomplete wrapper using FormControl */
   fullWidth: boolean;
 }
 
 /**
- * A customized Material-UI Autocomplete component with enhanced functionality.
+ * Material-UI Autocomplete with support for full-width layout.
  *
- * @component
+ * Wraps Material-UI's Autocomplete component with FormControl to provide
+ * a fullWidth prop that applies width: 100% styling. Maintains all Material-UI
+ * Autocomplete functionality including generic type support for strongly-typed
+ * option objects. Supports ref forwarding for direct access to the input element.
+ *
+ * @param props - Autocomplete configuration (see AutocompletePropsExtend interface)
+ * @param ref - Ref forwarded to the underlying input element
+ * @returns Autocomplete component with FormControl wrapper
+ *
  * @example
  * ```tsx
  * // Basic usage
@@ -37,13 +46,6 @@ export interface AutocompletePropsExtend<
  *   getOptionLabel={(option) => option.label}
  * />
  * ```
- *
- * @param {AutocompletePropsExtend} props - The properties for the Autocomplete component
- * @param {Ref<HTMLElement>} ref - The ref forwarded to the underlying MaterialAutocomplete
- * @returns {JSX.Element} A rendered Autocomplete component
- *
- * @note For performance optimization in cases of frequent parent re-renders,
- * consider wrapping this component with React.memo at the consumption level.
  *
  * @see {@link https://mui.com/material-ui/react-autocomplete/}
  */

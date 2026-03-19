@@ -10,9 +10,16 @@ import { logger } from '@/core/utils/logger';
 const AnimatedButtonGroup = animated(MaterialButtonGroup);
 
 /**
- * A customized Material UI button group with fade-in animation.
+ * Material-UI ButtonGroup with fade-in animation.
  *
- * @component
+ * Wraps Material-UI's ButtonGroup and adds a fade-in animation effect using
+ * React Spring. Useful for grouping related action buttons with visual emphasis
+ * on component mount. All Material-UI ButtonGroup props are supported and passed
+ * through directly.
+ *
+ * @param props - ButtonGroup configuration (see ButtonGroupProps interface)
+ * @param ref - Reference forwarded to underlying Material-UI ButtonGroup
+ * @returns ButtonGroup component with fade-in animation on mount
  * @example
  * ```tsx
  * // Basic usage
@@ -42,14 +49,6 @@ const AnimatedButtonGroup = animated(MaterialButtonGroup);
  *   <Button>Bottom</Button>
  * </ButtonGroup>
  * ```
- *
- * @param {ButtonGroupProps} props - The properties for the ButtonGroup component
- * @param {Ref<HTMLDivElement>} ref - The ref forwarded to the underlying MaterialButtonGroup
- * @returns {JSX.Element} A rendered Button Group element
- *
- *
- * @note For performance optimization in cases of frequent parent re-renders,
- * consider wrapping this component with React.memo at the consumption level.
  *
  * @see {@link https://mui.com/material-ui/react-button-group/}
  */

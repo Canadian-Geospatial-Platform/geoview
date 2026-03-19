@@ -5,9 +5,16 @@ import { Checkbox as MaterialCheckbox } from '@mui/material';
 import { logger } from '@/core/utils/logger';
 
 /**
- * A customized Material UI Checkbox component.
+ * Material-UI Checkbox component for boolean selections.
  *
- * @component
+ * Wraps Material-UI's Checkbox to provide a styled boolean input control.
+ * Supports all Material-UI Checkbox props. Use with FormControlLabel for
+ * labeled checkboxes or controlled/uncontrolled state management.
+ *
+ * @param props - Checkbox configuration (see MUI docs for all available props)
+ * @param ref - Reference forwarded to underlying Material-UI Checkbox
+ * @returns Checkbox component for boolean state selection
+ *
  * @example
  * ```tsx
  * // Basic usage
@@ -24,13 +31,7 @@ import { logger } from '@/core/utils/logger';
  *   color="primary"
  *   defaultChecked
  * />
- *
- * @param {CheckboxProps} props - The properties for the Checkbox component
- * @param {Ref<HTMLButtonElement>} ref - The ref forwarded to the underlying MaterialCheckbox
- * @returns {JSX.Element} A rendered Checkbox component
- *
- * @note For performance optimization in cases of frequent parent re-renders,
- * consider wrapping this component with React.memo at the consumption level.
+ * ```
  *
  * @see {@link https://mui.com/material-ui/react-checkbox/}
  */

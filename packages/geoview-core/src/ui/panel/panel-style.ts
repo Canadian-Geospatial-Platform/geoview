@@ -5,10 +5,12 @@ import type { SxStyles } from '@/ui/style/types';
 const appBarWidth = 50;
 
 /**
- * Get custom sx classes for the MUI panel
+ * Gets custom sx classes for the panel component.
  *
- * @param {Theme} theme the theme object
- * @returns {Object} the sx classes object
+ * @param theme - The MUI theme object
+ * @param open - Whether the panel is currently open
+ * @param panelWidth - The panel width as percentage or pixel value
+ * @returns The sx classes object
  */
 export const getSxClasses = (theme: Theme, open: boolean, panelWidth: string | number): SxStyles => ({
   panelContainer: {

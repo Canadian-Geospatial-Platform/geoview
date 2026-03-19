@@ -43,10 +43,27 @@ export interface TypeMenuItemProps {
 }
 
 /**
- * Create a Material UI Select component
+ * Custom Material-UI Select component with data-driven menu items.
  *
- * @param {TypeSelectProps} props custom select properties
- * @returns {JSX.Element} the auto complete ui component
+ * Wraps Material-UI's Select with FormControl and InputLabel for complete form control.
+ * Supports menu item grouping (headers and items) and container placement for fullscreen scenarios.
+ * Handles both controlled and uncontrolled value modes.
+ *
+ * @param props - Select configuration (see TypeSelectProps interface)
+ * @param ref - Reference to underlying FormControl div
+ * @returns Select component with form control wrapper
+ *
+ * @example
+ * ```tsx
+ * <Select
+ *   value={selected}
+ *   onChange={handleChange}
+ *   label="Choose option"
+ *   menuItems={[{ item: { value: '1', children: 'Option 1' } }]}
+ * />
+ * ```
+ *
+ * @see {@link https://mui.com/material-ui/react-select/}
  */
 function SelectUI(props: TypeSelectProps, ref: Ref<HTMLDivElement>): JSX.Element {
   logger.logTraceRenderDetailed('ui/select/select');

@@ -11,13 +11,16 @@ const typographyProps = {
 };
 
 /**
- * Create a customized Material UI List Item Text component.
- * This is a simple wrapper around MaterialListItemText that maintains
- * full compatibility with Material-UI's List Item Text props.
+ * Material-UI ListItemText component for list item text content.
  *
- * @param {ListItemTextProps} props - All valid Material-UI List Item Text props
- * @param {Ref<HTMLDivElement>} ref - Reference to the underlying div element
- * @returns {JSX.Element} The List Item Text component
+ * Wraps Material-UI's ListItemText to provide text content container within
+ * list items with auto-truncation and typography styling. Maintains full
+ * compatibility with Material-UI ListItemText props. Use with ListItem and
+ * optionally ListItemIcon for complete list item compositions.
+ *
+ * @param props - ListItemText configuration (see MUI docs for all available props)
+ * @param ref - Reference to the underlying div element
+ * @returns ListItemText component for list item text layout
  */
 function ListItemTextUI(props: ListItemTextProps, ref: Ref<HTMLDivElement>): JSX.Element {
   return <MaterialListItemText ref={ref} {...props} slotProps={typographyProps} />;
