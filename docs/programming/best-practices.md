@@ -233,3 +233,38 @@ In classes, functions should be ordered in the following way:
 - static public
 - static private
 - event types
+
+## 12- React Performance Patterns
+
+### useMemo Naming Convention
+
+When using `useMemo`, prefix the variable name with `memo` followed by camelCase to clearly indicate the variable is memoized:
+
+```typescript
+// ❌ Bad: Generic variable name doesn't indicate memoization
+const filteredList = useMemo(() => {
+  return items.filter(item => item.active);
+}, [items]);
+
+// ✅ Good: Prefix with 'memo' to indicate memoized value
+const memoFilteredList = useMemo(() => {
+  return items.filter(item => item.active);
+}, [items]);
+
+// ✅ Good: Even for computed objects
+const memoSortedUsers = useMemo(() => {
+  return users.sort((a, b) => a.name.localeCompare(b.name));
+}, [users]);
+
+const memoFormattedDate = useMemo(() => {
+  return new Date(timestamp).toLocaleDateString();
+}, [timestamp]);
+```
+
+**Key principles for useMemo:**
+
+- Prefix with `memo` to indicate the variable is memoized
+- Use camelCase for the rest of the name
+- Only memoize expensive computations (filtering, sorting, complex calculations)
+- Be cautious: `useMemo` has a cost—use only when profiling shows performance issues
+- Always include proper dependencies array to ensure the memoized value updates correctly

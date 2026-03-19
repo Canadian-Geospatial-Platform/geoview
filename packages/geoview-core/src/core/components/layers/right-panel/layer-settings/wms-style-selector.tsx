@@ -148,7 +148,7 @@ export function WmsStylePanel({ layerDetails }: WmsStylePanelProps): JSX.Element
   const [expanded, setExpanded] = useState(false);
 
   // Get the full style metadata
-  const wmsStyleArray = useMemo(
+  const memoWmsStyleArray = useMemo(
     () => getLayerWmsAvailableStyles(layerDetails.layerPath) || [],
     [getLayerWmsAvailableStyles, layerDetails.layerPath]
   );
@@ -190,7 +190,7 @@ export function WmsStylePanel({ layerDetails }: WmsStylePanelProps): JSX.Element
       </Box>
       <Collapse in={expanded} sx={{ marginTop: expanded ? '12px' : 0 }}>
         <Box sx={sxClasses.settingsCardList}>
-          {wmsStyleArray.map((style) => (
+          {memoWmsStyleArray.map((style) => (
             <WmsStyleItem key={style.Name} style={style} isSelected={currentWmsStyle === style.Name} onSelect={handleSelect} />
           ))}
         </Box>

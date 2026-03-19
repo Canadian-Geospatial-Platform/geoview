@@ -85,7 +85,7 @@ export function LayerInfoPanel({ layerDetails }: LayerInfoPanelProps): JSX.Eleme
   const { schemaTag, url, layerPath } = layerDetails;
 
   // Build resource URL based on layer type
-  const resources = useMemo((): string => {
+  const memoResources = useMemo((): string => {
     if (!url) return '';
     const leafSegment = layerPath.split('/').slice(-1)[0];
 
@@ -117,7 +117,7 @@ export function LayerInfoPanel({ layerDetails }: LayerInfoPanelProps): JSX.Eleme
   const validId = isValidUUID(id) && metadataUrl !== '';
 
   // Find the localized name for the current layer type
-  const localizedTypeName = useMemo((): string => {
+  const memoLocalizedTypeName = useMemo((): string => {
     const localizedTypeEntry = memoLocalizedLayerType.find(([memoType]) => memoType === schemaTag);
     let name = localizedTypeEntry ? localizedTypeEntry[1] : t('layers.serviceGroup');
 
@@ -136,13 +136,13 @@ export function LayerInfoPanel({ layerDetails }: LayerInfoPanelProps): JSX.Eleme
       <Box sx={sxClasses.infoSection}>
         <Typography sx={sxClasses.infoSectionTitle}>{t('layers.layerInfoServiceInfo')}</Typography>
         <Box sx={sxClasses.infoSectionContent}>
-          <Box>{`${t('layers.layerType')}${localizedTypeName}`}</Box>
+          <Box>{`${t('layers.layerType')}${memoLocalizedTypeName}`}</Box>
           {layerNativeProjection && <Box>{`${t('layers.layerServiceProjection')}${layerNativeProjection}`}</Box>}
-          {resources !== '' && (
+          {memoResources !== '' && (
             <Box className="info-container">
               {`${t('layers.layerResource')}`}
-              <a href={resources} target="_blank" rel="noopener noreferrer">
-                {resources}
+              <a href={memoResources} target="_blank" rel="noopener noreferrer">
+                {memoResources}
               </a>
             </Box>
           )}

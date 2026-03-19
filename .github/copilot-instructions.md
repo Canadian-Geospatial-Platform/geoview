@@ -170,6 +170,38 @@ const handleClickWrapper = useCallback(
 - Reduces unnecessary re-renders of memoized child components
 - Module-level constants (`const FADE_DURATION = 200`) belong **outside** the component function to avoid re-creation on every render
 
+**useMemo Naming Convention:**
+
+When using `useMemo`, prefix the variable name with `memo` followed by camelCase:
+
+```typescript
+// ❌ Bad: Generic variable name doesn't indicate memoization
+const filteredList = useMemo(() => {
+  return items.filter(item => item.active);
+}, [items]);
+
+// ✅ Good: Prefix with 'memo' to indicate memoized value
+const memoFilteredList = useMemo(() => {
+  return items.filter(item => item.active);
+}, [items]);
+
+// ✅ Good: Even for computed objects
+const memoSortedUsers = useMemo(() => {
+  return users.sort((a, b) => a.name.localeCompare(b.name));
+}, [users]);
+
+const memoFormattedDate = useMemo(() => {
+  return new Date(timestamp).toLocaleDateString();
+}, [timestamp]);
+```
+
+**Key principles for useMemo:**
+
+- Prefix with `memo` to indicate the variable is memoized
+- Use camelCase for the rest of the name
+- Only memoize expensive computations (filtering, sorting, complex calculations)
+- Be cautious: `useMemo` has a cost—use only when profiling shows performance issues
+
 ### Function Order in Components
 
 Per [best-practices.md](../docs/programming/best-practices.md), order functions within components as:

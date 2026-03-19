@@ -150,7 +150,7 @@ export function RasterFunctionPanel({ layerDetails }: RasterFunctionPanelProps):
 
   // Store hooks
   const storeRasterFunctionInfos = useLayerSelectorRasterFunctionInfos(layerDetails.layerPath);
-  const rasterFunctionInfos = useMemo(() => storeRasterFunctionInfos || [], [storeRasterFunctionInfos]);
+  const memoRasterFunctionInfos = useMemo(() => storeRasterFunctionInfos || [], [storeRasterFunctionInfos]);
   const currentRasterFunction = useLayerSelectorRasterFunction(layerDetails.layerPath);
 
   // State
@@ -159,13 +159,13 @@ export function RasterFunctionPanel({ layerDetails }: RasterFunctionPanelProps):
 
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('RASTER FUNCTION PANEL - Layer Raster Function Infos sync', rasterFunctionInfos);
+    logger.logTraceUseEffect('RASTER FUNCTION PANEL - Layer Raster Function Infos sync', memoRasterFunctionInfos);
 
-    if (rasterFunctionInfos.length > 0) {
+    if (memoRasterFunctionInfos.length > 0) {
       const promises = getLayerRasterFunctionPreviews(layerDetails.layerPath);
       setPreviewPromises(promises);
     }
-  }, [layerDetails.layerPath, rasterFunctionInfos, getLayerRasterFunctionPreviews]);
+  }, [layerDetails.layerPath, memoRasterFunctionInfos, getLayerRasterFunctionPreviews]);
 
   const handleSelect = useCallback(
     (rasterFunctionName: string): void => {
@@ -204,7 +204,7 @@ export function RasterFunctionPanel({ layerDetails }: RasterFunctionPanelProps):
       </Box>
       <Collapse in={expanded} sx={{ marginTop: expanded ? '12px' : 0 }}>
         <Box sx={sxClasses.settingsCardList}>
-          {rasterFunctionInfos.map((info) => (
+          {memoRasterFunctionInfos.map((info) => (
             <RasterFunctionItem
               key={info.name}
               info={info}

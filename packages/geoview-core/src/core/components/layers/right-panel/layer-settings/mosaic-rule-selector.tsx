@@ -79,7 +79,7 @@ export function MosaicRulePanel({ layerDetails }: MosaicRulePanelProps): JSX.Ele
   const currentAscending = mosaicRule?.ascending ?? true;
 
   // Build a summary showing the current selections
-  const selectionSummary = useMemo(() => {
+  const memoSelectionSummary = useMemo(() => {
     const methodLabel = t(METHOD_ENTRIES[currentMethod]?.labelKey ?? currentMethod);
     const operationLabel = t(OPERATION_ENTRIES[currentOperation] ?? currentOperation);
     return `${methodLabel} · ${operationLabel}`;
@@ -108,7 +108,7 @@ export function MosaicRulePanel({ layerDetails }: MosaicRulePanelProps): JSX.Ele
   );
 
   // Menu items derived from the module-level entry maps
-  const methodMenuItems = useMemo(
+  const memoMethodMenuItems = useMemo(
     () =>
       Object.entries(METHOD_ENTRIES)
         .map(([key, { name, labelKey }]) => ({ key, item: { value: key, name, children: t(labelKey) } }))
@@ -119,7 +119,7 @@ export function MosaicRulePanel({ layerDetails }: MosaicRulePanelProps): JSX.Ele
     [t, layerDetails.layerPath, getLayerAllowedMosaicMethods]
   );
 
-  const operationMenuItems = useMemo(
+  const memoOperationMenuItems = useMemo(
     () => Object.entries(OPERATION_ENTRIES).map(([key, labelKey]) => ({ key, item: { value: key, children: t(labelKey) } })),
     [t]
   );
@@ -145,7 +145,7 @@ export function MosaicRulePanel({ layerDetails }: MosaicRulePanelProps): JSX.Ele
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography sx={sxClasses.settingsSectionTitle}>{t('layers.settings.updateMosaicRule')}</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ fontSize: theme.palette.geoViewFontSize.sm }} noWrap>
-            {selectionSummary}
+            {memoSelectionSummary}
           </Typography>
         </Box>
         {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
@@ -157,7 +157,7 @@ export function MosaicRulePanel({ layerDetails }: MosaicRulePanelProps): JSX.Ele
               value={currentMethod}
               onChange={handleChangeMethod}
               label={t('layers.settings.mosaicMethod')}
-              menuItems={methodMenuItems}
+              menuItems={memoMethodMenuItems}
               inputLabel={{ id: 'mosaic-method-label' }}
             />
           </FormControl>
@@ -166,7 +166,7 @@ export function MosaicRulePanel({ layerDetails }: MosaicRulePanelProps): JSX.Ele
               value={currentOperation}
               onChange={handleChangeOperation}
               label={t('layers.settings.mosaicOperation')}
-              menuItems={operationMenuItems}
+              menuItems={memoOperationMenuItems}
               inputLabel={{ id: 'mosaic-operation-label' }}
             />
           </FormControl>
