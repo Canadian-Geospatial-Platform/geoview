@@ -17,6 +17,9 @@ import type { GeometryApi } from 'geoview-core/geo/layer/geometry/geometry';
 export abstract class GVAbstractTester extends AbstractTester {
   /** GLOBAL CONSTANTS FOR THE TESTS */
 
+  /** timeout value for waiting for layer registration */
+  static readonly LAYER_REGISTRATION_TIMEOUT_MS = 30000;
+
   /** Some long lat coordinates for map investigations */
   static readonly QUEBEC_LONLAT: Coordinate = [-71.356054449131, 46.78077550041052];
   static readonly OTTAWA_LONLAT: Coordinate = [-75.8, 45.24];

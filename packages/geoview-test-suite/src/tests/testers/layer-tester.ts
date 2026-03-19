@@ -1542,8 +1542,10 @@ export class LayerTester extends GVAbstractTester {
 
         // Wait for the layer to be registered in the allFeatureInfoLayerSet
         test.addStep('Waiting for the layer to be registered in the allFeatureInfoLayerSet...');
-        // prettier-ignore
-        await whenThisThen(() => this.getMapViewer().layer.allFeatureInfoLayerSet.getRegisteredLayerPaths().includes(layerPath), 30000);
+        await whenThisThen(
+          () => this.getMapViewer().layer.allFeatureInfoLayerSet.getRegisteredLayerPaths().includes(layerPath),
+          GVAbstractTester.LAYER_REGISTRATION_TIMEOUT_MS
+        );
 
         // Set the zoom to 17.4 so the layer is within its visible scale range for the query
         test.addStep('Setting zoom to 17.4 for the layer visible range...');
@@ -1626,8 +1628,10 @@ export class LayerTester extends GVAbstractTester {
 
         // Wait for the layer to be registered in the allFeatureInfoLayerSet
         test.addStep('Waiting for the layer to be registered in the allFeatureInfoLayerSet...');
-        // prettier-ignore
-        await whenThisThen(() => this.getMapViewer().layer.allFeatureInfoLayerSet.getRegisteredLayerPaths().includes(layerPath), 30000);
+        await whenThisThen(
+          () => this.getMapViewer().layer.allFeatureInfoLayerSet.getRegisteredLayerPaths().includes(layerPath),
+          GVAbstractTester.LAYER_REGISTRATION_TIMEOUT_MS
+        );
 
         // Set the zoom to 17.4 so the layer is within its visible scale range for the query
         test.addStep('Setting zoom to 17.4 for the layer visible range...');
