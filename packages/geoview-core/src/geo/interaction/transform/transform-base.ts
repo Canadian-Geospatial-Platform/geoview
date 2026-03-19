@@ -177,6 +177,9 @@ export interface TransformBaseOptions {
   mapViewer?: MapViewer; // MapViewer type
 }
 
+/**
+ * Properties for creating a handle feature.
+ */
 export interface CreateHandleProps {
   vertexIndex?: number;
   isCircleCenter?: boolean;
@@ -188,9 +191,7 @@ export interface CreateHandleProps {
 // #region Class Start
 
 /**
- * OpenLayers Transform interaction
- * @class OLTransform
- * @extends {OLPointer}
+ * OpenLayers Transform interaction for manipulating features on the map.
  */
 export class OLTransform extends OLPointer {
   /** The collection of features to transform */
@@ -291,7 +292,8 @@ export class OLTransform extends OLPointer {
 
   /**
    * Initializes a OLTransform component.
-   * @param {TransformBaseOptions} options - Object to configure the initialization.
+   *
+   * @param options - Object to configure the initialization
    */
   constructor(options: TransformBaseOptions = {}) {
     super();
@@ -335,7 +337,8 @@ export class OLTransform extends OLPointer {
 
   /**
    * Handles when a feature is removed from the collection.
-   * @param {Event} event - The event.
+   *
+   * @param event - The event containing the removed feature
    */
   onFeatureRemove(event: { element: Feature }): void {
     const feature = event.element;
@@ -348,8 +351,9 @@ export class OLTransform extends OLPointer {
 
   /**
    * Selects a feature for transformation.
-   * @param {Feature<Geometry>} feature - The feature to select.
-   * @param {boolean} clearHistory - Whether to clear the history.
+   *
+   * @param feature - The feature to select
+   * @param clearHistory - Whether to clear the history
    */
   selectFeature(feature: Feature<Geometry>, clearHistory: boolean = true): void {
     const previousFeature = this.selectedFeature;
@@ -390,8 +394,9 @@ export class OLTransform extends OLPointer {
 
   /**
    * Checks if a feature is currently being transformed.
-   * @param {Feature} feature - The feature to check.
-   * @returns {boolean} True if the feature is being transformed.
+   *
+   * @param feature - The feature to check
+   * @returns True if the feature is being transformed
    */
   isFeatureBeingTransformed(feature: Feature): boolean {
     return this.#isTransforming && this.selectedFeature === feature;
@@ -399,7 +404,8 @@ export class OLTransform extends OLPointer {
 
   /**
    * Gets the currently selected/transforming feature.
-   * @returns {Feature | undefined} The selected feature or undefined.
+   *
+   * @returns The selected feature or undefined
    */
   getSelectedFeature(): Feature | undefined {
     return this.selectedFeature;
@@ -407,7 +413,8 @@ export class OLTransform extends OLPointer {
 
   /**
    * Checks if any transformation is currently active.
-   * @returns {boolean} True if transformation is active.
+   *
+   * @returns True if transformation is active
    */
   isTransforming(): boolean {
     return this.#isTransforming;
@@ -415,7 +422,8 @@ export class OLTransform extends OLPointer {
 
   /**
    * Clears the current selection.
-   * @param {boolean} keepHistory - Whether the history should be kept when clearing the selection
+   *
+   * @param keepHistory - Whether the history should be kept when clearing the selection
    */
   clearSelection(keepHistory: boolean = false): void {
     if (this.onSelectionChange) {
@@ -432,7 +440,8 @@ export class OLTransform extends OLPointer {
 
   /**
    * Gets padding based on map resolution for consistent visual spacing.
-   * @returns {number} Padding in map units.
+   *
+   * @returns Padding in map units
    */
   #getMapBasedPadding(): number {
     if (!this.mapViewer?.map) return 0; // fallback
@@ -451,10 +460,11 @@ export class OLTransform extends OLPointer {
   // ? TODO Could these two coordinate functions be moved to a utility file?
   /**
    * Rotates a coordinate around a center point by an angle.
-   * @param {Coordinate} coordinate - The coordinate to rotate.
-   * @param {Coordinate} center - The center point.
-   * @param {number} angle - The angle in radians.
-   * @returns {Coordinate} The rotated coordinate.
+   *
+   * @param coordinate - The coordinate to rotate
+   * @param center - The center point
+   * @param angle - The angle in radians
+   * @returns The rotated coordinate
    */
   static rotateCoordinate(coordinate: Coordinate, center: Coordinate, angle: number): Coordinate {
     const cos = Math.cos(angle);
@@ -466,12 +476,13 @@ export class OLTransform extends OLPointer {
   }
 
   /**
-   * Scales a coordinate relative to a fixed point
-   * @param {Coordinate} coordinate - The coordinate to scale.
-   * @param {Coordinate} fixedPoint - The fixed point.
-   * @param {number} scaleX - The X scale factor.
-   * @param {number} scaleY - The Y scale factor.
-   * @returns {Coordinate} The scaled coordinate.
+   * Scales a coordinate relative to a fixed point.
+   *
+   * @param coordinate - The coordinate to scale
+   * @param fixedPoint - The fixed point
+   * @param scaleX - The X scale factor
+   * @param scaleY - The Y scale factor
+   * @returns The scaled coordinate
    */
   static scaleCoordinate(coordinate: Coordinate, fixedPoint: Coordinate, scaleX: number, scaleY: number): Coordinate {
     const dx = coordinate[0] - fixedPoint[0];
@@ -482,7 +493,8 @@ export class OLTransform extends OLPointer {
 
   /**
    * Deletes a vertex from the geometry.
-   * @param {Feature} vertexHandle - The vertex handle to delete.
+   *
+   * @param vertexHandle - The vertex handle to delete
    */
   #deleteVertex(vertexHandle: Feature): void {
     if (!this.selectedFeature) return;
@@ -523,9 +535,10 @@ export class OLTransform extends OLPointer {
 
   /**
    * Gets the handle feature at the specified coordinate.
-   * @param {Coordinate} coordinate - The coordinate to check.
-   * @param {OLMap} map - The map instance.
-   * @returns {Feature | undefined} The handle feature if found.
+   *
+   * @param coordinate - The coordinate to check
+   * @param map - The map instance
+   * @returns The handle feature if found
    */
   #getHandleAtCoordinate(coordinate: Coordinate, map: OLMap): Feature | undefined {
     const pixel = map.getPixelFromCoordinate(coordinate);
@@ -637,8 +650,9 @@ export class OLTransform extends OLPointer {
 
   /**
    * Creates a handle at the specified coordinate with the given type.
-   * @param {Coordinate} coordinate - The coordinate for the handle.
-   * @param {HandleType} type - The type of handle.
+   *
+   * @param coordinate - The coordinate for the handle
+   * @param type - The type of handle
    */
   createHandle(coordinate: Coordinate, type: HandleType, properties?: CreateHandleProps): void {
     const handle = new Feature({
@@ -695,7 +709,8 @@ export class OLTransform extends OLPointer {
 
   /**
    * Creates the extent boundary rectangle.
-   * @param {Extent} extent - The expanded extent.
+   *
+   * @param extent - The expanded extent
    */
   createExtentBoundary(extent: Extent): void {
     const [minX, minY, maxX, maxY] = extent;
@@ -718,7 +733,8 @@ export class OLTransform extends OLPointer {
 
   /**
    * Creates scale handles at the corners of the extent.
-   * @param {Extent} extent - The extent of the feature.
+   *
+   * @param extent - The extent of the feature
    */
   createScaleHandles(extent: Extent): void {
     const [minX, minY, maxX, maxY] = extent;
@@ -732,7 +748,8 @@ export class OLTransform extends OLPointer {
 
   /**
    * Creates stretch handles at the middle of each side of the extent.
-   * @param {Extent} extent - The extent of the feature.
+   *
+   * @param extent - The extent of the feature
    */
   createStretchHandles(extent: Extent): void {
     const [minX, minY, maxX, maxY] = extent;
@@ -748,7 +765,8 @@ export class OLTransform extends OLPointer {
 
   /**
    * Creates a rotation handle above the feature.
-   * @param {Extent} extent - The extent of the feature.
+   *
+   * @param extent - The extent of the feature
    */
   createRotateHandle(extent: Extent): void {
     const [minX, , maxX, maxY] = extent;
@@ -772,7 +790,8 @@ export class OLTransform extends OLPointer {
 
   /**
    * Creates a delete handle for the feature.
-   * @param {Extent} extent - The extent of the feature.
+   *
+   * @param extent - The extent of the feature
    */
   createDeleteHandle(extent: Extent): void {
     const [, minY, maxX] = extent;
@@ -784,7 +803,8 @@ export class OLTransform extends OLPointer {
 
   /**
    * Creates vertex handles for LineString and Polygon geometries.
-   * @param {LineString | Polygon} geometry - The geometry to create vertex handles for.
+   *
+   * @param geometry - The geometry to create vertex handles for
    */
   createVertexHandles(geometry: LineString | Polygon): void {
     let coordinates: Coordinate[];
@@ -832,8 +852,9 @@ export class OLTransform extends OLPointer {
 
   /**
    * Gets the cursor style for a handle type.
-   * @param {HandleType} handleType - The handle type.
-   * @returns {string} The cursor style.
+   *
+   * @param handleType - The handle type
+   * @returns The cursor style
    */
   static getCursorForHandleType(handleType: HandleType): string {
     switch (handleType) {
@@ -880,9 +901,10 @@ export class OLTransform extends OLPointer {
 
   /**
    * Gets the event type from a handle type.
-   * @param {HandleType} handleType - The handle type.
-   * @param {string} suffix - The event suffix (start, ing, end).
-   * @returns {string} The event type.
+   *
+   * @param handleType - The handle type
+   * @param suffix - The event suffix (start, ing, end)
+   * @returns The event type
    */
   static getEventTypeFromHandleType(handleType: HandleType, suffix: string): string {
     switch (handleType) {
@@ -933,8 +955,9 @@ export class OLTransform extends OLPointer {
 
   /**
    * Handles translation of a feature.
-   * @param {number} deltaX - The change in X coordinate.
-   * @param {number} deltaY - The change in Y coordinate.
+   *
+   * @param deltaX - The change in X coordinate
+   * @param deltaY - The change in Y coordinate
    */
   handleTranslate(deltaX: number, deltaY: number): void {
     if (!this.selectedFeature || !this.startGeometry) return;
@@ -971,7 +994,8 @@ export class OLTransform extends OLPointer {
 
   /**
    * Handles rotation of a feature.
-   * @param {Coordinate} coordinate - The current coordinate.
+   *
+   * @param coordinate - The current coordinate
    */
   handleRotate(coordinate: Coordinate): void {
     if (!this.selectedFeature || !this.startGeometry || !this.center || !this.startCoordinate) return;
@@ -1015,9 +1039,10 @@ export class OLTransform extends OLPointer {
 
   /**
    * Handles scaling of a feature.
-   * @param {Coordinate} coordinate - The current coordinate.
-   * @param {HandleType} handleType - The type of handle being dragged.
-   * @param {boolean} ctrlKey - If the ctrlKey is being pressed to maintain the ratio
+   *
+   * @param coordinate - The current coordinate
+   * @param handleType - The type of handle being dragged
+   * @param ctrlKey - If the ctrlKey is being pressed to maintain the ratio
    */
   handleScale(coordinate: Coordinate, handleType: HandleType, ctrlKey: boolean = false): void {
     if (!this.selectedFeature || !this.startGeometry) return;
@@ -1102,8 +1127,9 @@ export class OLTransform extends OLPointer {
 
   /**
    * Handles stretching of a feature.
-   * @param {Coordinate} coordinate - The current coordinate.
-   * @param {HandleType} handleType - The type of handle being dragged.
+   *
+   * @param coordinate - The current coordinate
+   * @param handleType - The type of handle being dragged
    */
   handleStretch(coordinate: Coordinate, handleType: HandleType): void {
     if (!this.selectedFeature || !this.startGeometry) return;
@@ -1166,9 +1192,10 @@ export class OLTransform extends OLPointer {
   }
 
   /**
-   * Handle all events, including double-click
-   * @param {MapBrowserEvent} event - The map browser event.
-   * @returns {boolean} Whether the event was handled.
+   * Handles all events, including double-click.
+   *
+   * @param event - The map browser event
+   * @returns Whether the event was handled
    */
   override handleEvent(event: MapBrowserEvent<PointerEvent>): boolean {
     if (event.type === 'dblclick') {
@@ -1178,9 +1205,10 @@ export class OLTransform extends OLPointer {
   }
 
   /**
-   * Handle double-click events for text editing
-   * @param {MapBrowserEvent} event - The map browser event.
-   * @returns {boolean} Whether the event was handled.
+   * Handles double-click events for text editing.
+   *
+   * @param event - The map browser event
+   * @returns Whether the event was handled
    */
   #handleDoubleClick(event: MapBrowserEvent<PointerEvent>): boolean {
     const { map } = event;
@@ -1206,10 +1234,10 @@ export class OLTransform extends OLPointer {
   }
 
   /**
-   * Handle Click Events
-   * @param {MapBrowserEvent} event - The map browser event.
-   * @override
-   * @returns {boolean} Whether the event was handled.
+   * Handles click events for feature selection and handle interaction.
+   *
+   * @param event - The map browser event
+   * @returns Whether the event was handled
    */
   // TODO: Rewrite the function name, if this function overrides a mother function, it probably shouldn't be prefixed with 'handle'.
   override handleDownEvent(event: MapBrowserEvent<PointerEvent>): boolean {
@@ -1354,9 +1382,9 @@ export class OLTransform extends OLPointer {
   }
 
   /**
-   * Handle pointer drag events.
-   * @param {MapBrowserEvent} event - The map browser event.
-   * @override
+   * Handles pointer drag events for feature transformation.
+   *
+   * @param event - The map browser event
    */
   // TODO: Rewrite the function name, if this function overrides a mother function, it probably shouldn't be prefixed with 'handle'.
   override handleDragEvent(event: MapBrowserEvent<PointerEvent>): void {
@@ -1409,10 +1437,10 @@ export class OLTransform extends OLPointer {
   }
 
   /**
-   * Handle pointer up events.
-   * @param {MapBrowserEvent} event - The map browser event.
-   * @override
-   * @returns {boolean} Whether the event was handled.
+   * Handles pointer up events to finalize transformation.
+   *
+   * @param event - The map browser event
+   * @returns Whether the event was handled
    */
   // TODO: Rewrite the function name, if this function overrides a mother function, it probably shouldn't be prefixed with 'handle'.
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -1489,10 +1517,11 @@ export class OLTransform extends OLPointer {
   }
 
   /**
-   * Handle pointer move events. Not to be confused with moving handles.
-   * This overrides the move event from OL Pointer
-   * @param {MapBrowserEvent} event - The map browser event.
-   * @override
+   * Handles pointer move events for cursor updates.
+   *
+   * Not to be confused with moving handles. This overrides the move event from OL Pointer.
+   *
+   * @param event - The map browser event
    */
   // TODO: Rewrite the function name, if this function overrides a mother function, it probably shouldn't be prefixed with 'handle'.
   override handleMoveEvent(event: MapBrowserEvent<PointerEvent>): void {
@@ -1532,8 +1561,9 @@ export class OLTransform extends OLPointer {
 
   /**
    * Handles moving a vertex.
-   * @param {Coordinate} coordinate - The new coordinate.
-   * @param {Feature} vertexHandle - The vertex handle being dragged.
+   *
+   * @param coordinate - The new coordinate
+   * @param vertexHandle - The vertex handle being dragged
    */
   handleVertexMove(coordinate: Coordinate, vertexHandle?: Feature): void {
     if (!this.selectedFeature || !vertexHandle) return;
@@ -1575,8 +1605,9 @@ export class OLTransform extends OLPointer {
 
   /**
    * Handles adding a new vertex.
-   * @param {Coordinate} coordinate - The coordinate for the new vertex.
-   * @param {Feature} midpointHandle - The midpoint handle being dragged.
+   *
+   * @param coordinate - The coordinate for the new vertex
+   * @param midpointHandle - The midpoint handle being dragged
    */
   handleAddVertex(coordinate: Coordinate, midpointHandle?: Feature): void {
     if (!this.selectedFeature || !midpointHandle || this.#vertexAdded) return;
@@ -1604,8 +1635,10 @@ export class OLTransform extends OLPointer {
   // #region Text Editing
 
   /**
-   * Checks if a feature is a text feature
-   * @returns {boolean} True if it's a text feature
+   * Checks if a feature is a text feature.
+   *
+   * @param feature - Optional feature to check, defaults to the selected feature
+   * @returns True if it's a text feature
    */
   #isTextFeature(feature?: Feature): boolean {
     return (feature || this.selectedFeature)?.get('text') !== undefined;
@@ -1711,13 +1744,9 @@ export class OLTransform extends OLPointer {
   }
 
   /**
-   * Calculates the visual extent of text based on its properties
-   * @param {Feature} feature - The text feature
-   * @returns {Extent | null} The text extent or null if calculation fails
-   */
-  /**
-   * Calculates the visual extent of text based on its properties
-   * @returns {Extent | null} The text extent or null if calculation fails
+   * Calculates the visual extent of text based on its properties.
+   *
+   * @returns The text extent or null if calculation fails
    */
   #calculateTextExtent(): Extent | null {
     if (!this.selectedFeature) return null;
@@ -1749,9 +1778,10 @@ export class OLTransform extends OLPointer {
   }
 
   /**
-   * Handles scaling for text features
-   * @param {Coordinate} coordinate - The current coordinate
-   * @param {HandleType} handleType - The handle type being dragged
+   * Handles scaling for text features.
+   *
+   * @param coordinate - The current coordinate
+   * @param handleType - The handle type being dragged
    */
   #handleTextScale(coordinate: Coordinate, handleType: HandleType): void {
     if (!this.selectedFeature || !this.startCoordinate) return;
@@ -1832,8 +1862,9 @@ export class OLTransform extends OLPointer {
   }
 
   /**
-   * Handles rotation for text features
-   * @param {Coordinate} coordinate - The current coordinate
+   * Handles rotation for text features.
+   *
+   * @param coordinate - The current coordinate
    */
   #handleTextRotate(coordinate: Coordinate): void {
     if (!this.selectedFeature || !this.center || !this.startCoordinate) return;
@@ -2070,7 +2101,8 @@ export class OLTransform extends OLPointer {
 
   /**
    * Undoes the last transformation.
-   * @returns {boolean} True if undo was successful.
+   *
+   * @returns True if undo was successful
    */
   undo(callback?: () => void): boolean {
     if (!this.selectedFeature) return false;
@@ -2093,7 +2125,8 @@ export class OLTransform extends OLPointer {
 
   /**
    * Redoes the next transformation.
-   * @returns {boolean} True if redo was successful.
+   *
+   * @returns True if redo was successful
    */
   redo(callback?: () => void): boolean {
     if (!this.selectedFeature || this.#historyIndex >= this.#geometryHistory.length - 1) return false;
@@ -2111,7 +2144,8 @@ export class OLTransform extends OLPointer {
 
   /**
    * Checks if undo is available.
-   * @returns {boolean} True if undo is available.
+   *
+   * @returns True if undo is available
    */
   canUndo(): boolean {
     return this.#historyIndex >= 0;
@@ -2119,7 +2153,8 @@ export class OLTransform extends OLPointer {
 
   /**
    * Checks if redo is available.
-   * @returns {boolean} True if redo is available.
+   *
+   * @returns True if redo is available
    */
   canRedo(): boolean {
     return this.#historyIndex !== -1 && this.#historyIndex < this.#geometryHistory.length - 1;

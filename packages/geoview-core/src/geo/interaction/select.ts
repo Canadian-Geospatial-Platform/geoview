@@ -23,9 +23,6 @@ export type SelectOptions = InteractionOptions & {
 
 /**
  * Class used for selecting features on a map.
- * @class Select
- * @extends {Interaction}
- * @exports
  */
 export class Select extends Interaction {
   /** The embedded OpenLayers Select component */
@@ -37,7 +34,8 @@ export class Select extends Interaction {
 
   /**
    * Initializes a Select component.
-   * @param {SelectOptions} options - Object to configure the initialization of the Select interaction.
+   *
+   * @param options - Object to configure the initialization of the Select interaction
    */
   constructor(options: SelectOptions) {
     super(options);
@@ -59,7 +57,6 @@ export class Select extends Interaction {
 
   /**
    * Starts the interaction on the map.
-   * @override
    */
   override startInteraction(): void {
     // Redirect to super method to start interaction
@@ -68,7 +65,6 @@ export class Select extends Interaction {
 
   /**
    * Stops the interaction on the map.
-   * @override
    */
   override stopInteraction(): void {
     // Redirect to super method to stop interaction
@@ -77,16 +73,17 @@ export class Select extends Interaction {
 
   /**
    * Gets the selected features.
-   * @returns {Collection<Feature<Geometry>>} The selected features.
+   *
+   * @returns The selected features
    */
   getFeatures(): Collection<Feature<Geometry>> {
     return this.#ol_select.getFeatures();
   }
 
   /**
-   * Emits an event the all registered handlers.
-   * @param {OLSelectEvent} event - The event to emit.
-   * @private
+   * Emits an event to all registered handlers.
+   *
+   * @param event - The event to emit
    */
   #emitSelectChanged(event: OLSelectEvent): void {
     // Emit the select changed event
@@ -95,7 +92,8 @@ export class Select extends Interaction {
 
   /**
    * Registers a select changed event handler.
-   * @param {SelectChangedDelegate} callback - The callback to be executed whenever the event is emitted.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onSelectChanged(callback: SelectChangedDelegate): void {
     // Register the select changed event callback
@@ -104,7 +102,8 @@ export class Select extends Interaction {
 
   /**
    * Unregisters a select changed event handler.
-   * @param {SelectChangedDelegate} callback - The callback to stop being called whenever the event is emitted.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offSelectChanged(callback: SelectChangedDelegate): void {
     // Unregister the select changed event callback
@@ -113,6 +112,6 @@ export class Select extends Interaction {
 }
 
 /**
- * Define a delegate for the event handler function signature
+ * Delegate for the select changed event handler function signature.
  */
 type SelectChangedDelegate = EventDelegateBase<Select, OLSelectEvent, void>;

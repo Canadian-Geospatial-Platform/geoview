@@ -13,10 +13,7 @@ import { logger } from '@/core/utils/logger';
 import type { TypePointMarker } from '@/api/types/map-schema-types';
 
 /**
- * A class to handle point markers
- *
- * @exports
- * @class PointMarkers
+ * A class to handle point markers.
  */
 export class PointMarkers {
   /** The feature highlight class, used to access overlay layer source */
@@ -32,9 +29,10 @@ export class PointMarkers {
   #featureIds: string[] = [];
 
   /**
-   * Initializes point marker classes
-   * @param {MapViewer} mapViewer - The map viewer
-   * @param {FeatureHighlight} featureHighlight - The feature highlight class
+   * Initializes point marker classes.
+   *
+   * @param mapViewer - The map viewer
+   * @param featureHighlight - The feature highlight class
    */
   constructor(mapViewer: MapViewer, featureHighlight: FeatureHighlight) {
     this.mapProjection = mapViewer.map.getView().getProjection().getCode();
@@ -46,7 +44,8 @@ export class PointMarkers {
 
   /**
    * Update the point markers on the map.
-   * @param {Record<string, TypePointMarker[]>} mapPointMarkers - The markers
+   *
+   * @param mapPointMarkers - The markers
    */
   updatePointMarkers(mapPointMarkers: Record<string, TypePointMarker[]>): void {
     // Remove existing markers
@@ -86,7 +85,6 @@ export class PointMarkers {
 
   /**
    * Remove the point markers from the map.
-   * @private
    */
   #removePointMarkersFromMap(): void {
     this.#featureIds.forEach((id) => {
@@ -98,8 +96,9 @@ export class PointMarkers {
 
   /**
    * Add point markers.
-   * @param {string} group - The group to add the markers to.
-   * @param {Record<string, TypePointMarker>[]} pointMarkers - The masrker to add.
+   *
+   * @param group - The group to add the markers to
+   * @param pointMarkers - The markers to add
    */
   addPointMarkers(group: string, pointMarkers: TypePointMarker[]): void {
     // Redirect to event processor
@@ -108,8 +107,9 @@ export class PointMarkers {
 
   /**
    * Remove an array of point markers or a point marker group.
-   * @param {string} group - The group to remove the markers from.
-   * @param {string[] | Coordinate[]} idsOrCoordinates - The id or coordinate of the marker to remove.
+   *
+   * @param group - The group to remove the markers from
+   * @param idsOrCoordinates - The id or coordinate of the marker to remove
    */
   removePointMarkersOrGroup(group: string, idsOrCoordinates?: string[] | Coordinate[]): void {
     // Redirect to event processor
@@ -118,7 +118,8 @@ export class PointMarkers {
 
   /**
    * Zoom to point marker group.
-   * @param {string} group - The group to zoom to.
+   *
+   * @param group - The group to zoom to
    */
   zoomToPointMarkerGroup(group: string): void {
     const groupMarkers = MapEventProcessor.getPointMarkers(this.mapId)[group];
@@ -135,8 +136,9 @@ export class PointMarkers {
 
   /**
    * Zoom to point markers.
-   * @param {string} group - The group containing the markers to zoom to.
-   * @param {string | Coordinate} ids - The ids of the markers to zoom to.
+   *
+   * @param group - The group containing the markers to zoom to
+   * @param ids - The ids of the markers to zoom to
    */
   zoomToPointMarkers(group: string, ids: string[]): void {
     // Create list of feature IDs
@@ -154,8 +156,9 @@ export class PointMarkers {
 
   /**
    * Get the extent of point markers.
-   * @param {string[]} ids - The ids of markers to get the extents of.
-   * @returns {Extent | undefined} The calculated extent or undefined.
+   *
+   * @param ids - The ids of markers to get the extents of
+   * @returns The calculated extent or undefined
    */
   getExtentFromMarkerIds(ids: string[]): Extent | undefined {
     if (ids.length) {

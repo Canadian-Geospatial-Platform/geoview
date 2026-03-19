@@ -18,9 +18,6 @@ export type TranslateOptions = InteractionOptions & {
 
 /**
  * Class used to translate drawings on a map.
- * @class
- * @extends {Interaction}
- * @exports
  */
 export class Translate extends Interaction {
   /** The embedded OpenLayers Translate component */
@@ -36,7 +33,8 @@ export class Translate extends Interaction {
 
   /**
    * Initializes the Translate component.
-   * @param {TranslateOptions} options - Object to configure the initialization of the Translate interaction.
+   *
+   * @param options - Object to configure the initialization of the Translate interaction
    */
   constructor(options: TranslateOptions) {
     super(options);
@@ -59,7 +57,6 @@ export class Translate extends Interaction {
 
   /**
    * Starts the interaction on the map.
-   * @override
    */
   override startInteraction(): void {
     // Redirect to super method to start interaction
@@ -68,7 +65,6 @@ export class Translate extends Interaction {
 
   /**
    * Stops the interaction on the map.
-   * @override
    */
   override stopInteraction(): void {
     // Redirect to super method to stop interaction
@@ -76,9 +72,9 @@ export class Translate extends Interaction {
   }
 
   /**
-   * Emits the translate started event the all registered handlers.
-   * @param {OLTranslateEvent} event - The event to emit.
-   * @private
+   * Emits the translate started event to all registered handlers.
+   *
+   * @param event - The event to emit
    */
   #emitTranslateStarted(event: OLTranslateEvent): void {
     // Emit the translatestarted event
@@ -87,7 +83,8 @@ export class Translate extends Interaction {
 
   /**
    * Registers an event handler for translate started event.
-   * @param {TranslateDelegate} callback - The callback to be executed whenever the event is emitted.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onTranslateStarted(callback: TranslateDelegate): void {
     // Register the translatestarted event callback
@@ -96,7 +93,8 @@ export class Translate extends Interaction {
 
   /**
    * Unregisters an event handler for translate started event.
-   * @param {TranslateDelegate} callback - The callback to stop being called whenever the event is emitted.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offTranslateStarted(callback: TranslateDelegate): void {
     // Unregister the translatestarted event callback
@@ -104,9 +102,9 @@ export class Translate extends Interaction {
   }
 
   /**
-   * Emits the translate ended event the all registered handlers.
-   * @param {OLTranslateEvent} event - The event to emit.
-   * @private
+   * Emits the translate ended event to all registered handlers.
+   *
+   * @param event - The event to emit
    */
   #emitTranslateEnded(event: OLTranslateEvent): void {
     // Emit the translateended event
@@ -115,7 +113,8 @@ export class Translate extends Interaction {
 
   /**
    * Registers an event handler for translate ended event.
-   * @param {TranslateDelegate} callback - The callback to be executed whenever the event is emitted.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onTranslateEnded(callback: TranslateDelegate): void {
     // Register the translateended event callback
@@ -124,7 +123,8 @@ export class Translate extends Interaction {
 
   /**
    * Unregisters an event handler for translate ended event.
-   * @param {TranslateDelegate} callback - The callback to stop being called whenever the event is emitted.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offTranslateEnded(callback: TranslateDelegate): void {
     // Unregister the translateended event callback
@@ -133,6 +133,6 @@ export class Translate extends Interaction {
 }
 
 /**
- * Define a delegate for the event handler function signature
+ * Delegate for the translate event handler function signature.
  */
 type TranslateDelegate = EventDelegateBase<Translate, OLTranslateEvent, void>;

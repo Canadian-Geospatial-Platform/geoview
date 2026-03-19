@@ -16,9 +16,6 @@ export type SnapOptions = InteractionOptions & {
 
 /**
  * Class used for snapping features on a map.
- * @class Snap
- * @extends {Interaction}
- * @exports
  */
 export class Snap extends Interaction {
   /** The embedded OpenLayers Snap component */
@@ -27,7 +24,8 @@ export class Snap extends Interaction {
 
   /**
    * Initializes a Snap component.
-   * @param {SnapOptions} options - Object to configure the initialization of the Snap interaction.
+   *
+   * @param options - Object to configure the initialization of the Snap interaction
    */
   constructor(options: SnapOptions) {
     super(options);
@@ -51,7 +49,6 @@ export class Snap extends Interaction {
 
   /**
    * Starts the interaction on the map.
-   * @override
    */
   override startInteraction(): void {
     // Redirect to super method to start interaction
@@ -60,7 +57,6 @@ export class Snap extends Interaction {
 
   /**
    * Stops the interaction on the map.
-   * @override
    */
   override stopInteraction(): void {
     // Redirect to super method to stop interaction

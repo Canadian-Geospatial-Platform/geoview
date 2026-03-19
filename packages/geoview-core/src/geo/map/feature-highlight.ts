@@ -17,10 +17,7 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { TIMEOUT } from '@/core/utils/constant';
 
 /**
- * A class to handle highlighting of features
- *
- * @exports
- * @class FeatureHighlight
+ * A class to handle highlighting of features.
  */
 export class FeatureHighlight {
   /** Reference on the map viewer */
@@ -55,8 +52,9 @@ export class FeatureHighlight {
   #bboxTimeout: ReturnType<typeof setTimeout> | null = null;
 
   /**
-   * Constructor
-   * @param {MapViewer} mapViewer - A reference to the map viewer
+   * Constructor.
+   *
+   * @param mapViewer - A reference to the map viewer
    */
   constructor(mapViewer: MapViewer) {
     // Keep the reference
@@ -75,8 +73,9 @@ export class FeatureHighlight {
   }
 
   /**
-   * Changes the highlight color
-   * @param {TypeHighlightColors} color - New color
+   * Changes the highlight color.
+   *
+   * @param color - New color
    */
   changeHighlightColor(color: TypeHighlightColors): void {
     this.#highlightColor = color;
@@ -121,10 +120,10 @@ export class FeatureHighlight {
   }
 
   /**
-   * Styles and registers feature for highlighting
-   * @param {Feature} feature - Feature to add
-   * @param {string} id - Id of the feature
-   * @private
+   * Styles and registers feature for highlighting.
+   *
+   * @param feature - Feature to add
+   * @param id - Id of the feature
    */
   #styleHighlightedFeature(feature: Feature, id: string): void {
     feature.setStyle(this.#highlightStyle);
@@ -134,8 +133,9 @@ export class FeatureHighlight {
   }
 
   /**
-   * Removes feature highlight(s)
-   * @param {string} id - Uid of the feature to deselect, or 'all' to clear all
+   * Removes feature highlight(s).
+   *
+   * @param id - Uid of the feature to deselect, or 'all' to clear all
    */
   removeHighlight(id: string): void {
     if (id === 'all' && this.#highlightedFeatureIds.length) {
@@ -155,8 +155,9 @@ export class FeatureHighlight {
   }
 
   /**
-   * Highlights a feature with a plain overlay
-   * @param {TypeFeatureInfoEntry} feature - Feature to highlight
+   * Highlights a feature with a plain overlay.
+   *
+   * @param feature - Feature to highlight
    */
   highlightFeature(feature: TypeFeatureInfoEntry): void {
     const { geometry } = feature;
@@ -208,9 +209,10 @@ export class FeatureHighlight {
   }
 
   /**
-   * Highlights a bounding box
-   * @param {Extent} extent - Extent to highlight
-   * @param {boolean} isLayerHighlight - Optional if it is a layer highlight
+   * Highlights a bounding box.
+   *
+   * @param extent - Extent to highlight
+   * @param isLayerHighlight - Optional if it is a layer highlight
    */
   highlightGeolocatorBBox(extent: Extent, isLayerHighlight = false): void {
     if (this.highlightSource.getFeatureById('geoLocatorFeature')) {

@@ -29,9 +29,6 @@ export type TransformOptions = InteractionOptions & {
 
 /**
  * Class used for transforming features on a map.
- * @class Transform
- * @extends {Interaction}
- * @exports
  */
 export class Transform extends Interaction {
   /** The embedded OpenLayers Transform component */
@@ -58,7 +55,8 @@ export class Transform extends Interaction {
 
   /**
    * Initializes a Transform component.
-   * @param {TransformOptions} options - Object to configure the initialization of the Transform interaction.
+   *
+   * @param options - Object to configure the initialization of the Transform interaction
    */
   constructor(options: TransformOptions) {
     super(options);
@@ -146,7 +144,8 @@ export class Transform extends Interaction {
 
   /**
    * Gets the features being transformed.
-   * @returns {Collection<Feature<Geometry>>} The features.
+   *
+   * @returns The features collection
    */
   getFeatures(): Collection<Feature<Geometry>> {
     return this.#ol_transform.features;
@@ -154,7 +153,8 @@ export class Transform extends Interaction {
 
   /**
    * Sets the features to be transformed.
-   * @param {Collection<Feature<Geometry>>} features - The features to transform.
+   *
+   * @param features - The features to transform
    */
   setFeatures(features: Collection<Feature<Geometry>>): void {
     // Clear existing features
@@ -168,7 +168,8 @@ export class Transform extends Interaction {
 
   /**
    * Adds a feature to be transformed.
-   * @param {Feature<Geometry>} feature - The feature to add.
+   *
+   * @param feature - The feature to add
    */
   addFeature(feature: Feature<Geometry>): void {
     this.#ol_transform.features.push(feature);
@@ -176,7 +177,8 @@ export class Transform extends Interaction {
 
   /**
    * Removes a feature from being transformed.
-   * @param {Feature<Geometry>} feature - The feature to remove.
+   *
+   * @param feature - The feature to remove
    */
   removeFeature(feature: Feature<Geometry>): void {
     this.#ol_transform.features.remove(feature);
@@ -184,8 +186,9 @@ export class Transform extends Interaction {
 
   /**
    * Checks if a feature is currently being transformed.
-   * @param {Feature<Geometry>} feature - The feature to check.
-   * @returns {boolean} True if the feature is being transformed.
+   *
+   * @param feature - The feature to check
+   * @returns True if the feature is being transformed
    */
   isFeatureBeingTransformed(feature: Feature<Geometry>): boolean {
     return this.#ol_transform.isFeatureBeingTransformed(feature);
@@ -193,7 +196,8 @@ export class Transform extends Interaction {
 
   /**
    * Gets the currently selected/transforming feature.
-   * @returns {Feature<Geometry> | undefined} The selected feature.
+   *
+   * @returns The selected feature
    */
   getSelectedFeature(): Feature<Geometry> | undefined {
     return this.#ol_transform.getSelectedFeature();
@@ -201,7 +205,8 @@ export class Transform extends Interaction {
 
   /**
    * Checks if any transformation is currently active.
-   * @returns {boolean} True if transformation is active.
+   *
+   * @returns True if transformation is active
    */
   isTransforming(): boolean {
     return this.#ol_transform.isTransforming();
@@ -209,8 +214,9 @@ export class Transform extends Interaction {
 
   /**
    * Selects a feature for transformation.
-   * @param {Feature<Geometry>} feature - The feature to select.
-   * @param {boolean} clearHistory - If true, clears the previous history stack. Default is true.
+   *
+   * @param feature - The feature to select
+   * @param clearHistory - If true, clears the previous history stack. Default is true
    */
   selectFeature(feature: Feature<Geometry>, clearHistory: boolean = true): void {
     this.#ol_transform.selectFeature(feature, clearHistory);
@@ -260,7 +266,8 @@ export class Transform extends Interaction {
 
   /**
    * Emits a transform start event to all handlers.
-   * @param {TransformEvent} event - The event to emit.
+   *
+   * @param event - The event to emit
    * @private
    */
   #emitTransformStart(event: TransformEvent): void {
@@ -269,7 +276,8 @@ export class Transform extends Interaction {
 
   /**
    * Registers a transform start event handler.
-   * @param {TransformEventDelegate} callback - The callback to be executed whenever the event is emitted.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onTransformStart(callback: TransformEventDelegate): void {
     EventHelper.onEvent(this.#onTransformStartHandlers, callback);
@@ -277,7 +285,8 @@ export class Transform extends Interaction {
 
   /**
    * Unregisters a transform start event handler.
-   * @param {TransformEventDelegate} callback - The callback to stop being called whenever the event is emitted.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offTransformStart(callback: TransformEventDelegate): void {
     EventHelper.offEvent(this.#onTransformStartHandlers, callback);
@@ -285,7 +294,8 @@ export class Transform extends Interaction {
 
   /**
    * Emits a transforming event to all handlers.
-   * @param {TransformEvent} event - The event to emit.
+   *
+   * @param event - The event to emit
    * @private
    */
   #emitTransforming(event: TransformEvent): void {
@@ -294,7 +304,8 @@ export class Transform extends Interaction {
 
   /**
    * Registers a transforming event handler.
-   * @param {TransformEventDelegate} callback - The callback to be executed whenever the event is emitted.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onTransforming(callback: TransformEventDelegate): void {
     EventHelper.onEvent(this.#onTransformingHandlers, callback);
@@ -302,7 +313,8 @@ export class Transform extends Interaction {
 
   /**
    * Unregisters a transforming event handler.
-   * @param {TransformEventDelegate} callback - The callback to stop being called whenever the event is emitted.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offTransforming(callback: TransformEventDelegate): void {
     EventHelper.offEvent(this.#onTransformingHandlers, callback);
@@ -310,7 +322,8 @@ export class Transform extends Interaction {
 
   /**
    * Emits a transform end event to all handlers.
-   * @param {TransformEvent} event - The event to emit.
+   *
+   * @param event - The event to emit
    * @private
    */
   #emitTransformEnd(event: TransformEvent): void {
@@ -319,7 +332,8 @@ export class Transform extends Interaction {
 
   /**
    * Registers a transform end event handler.
-   * @param {TransformEventDelegate} callback - The callback to be executed whenever the event is emitted.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onTransformEnd(callback: TransformEventDelegate): void {
     EventHelper.onEvent(this.#onTransformEndHandlers, callback);
@@ -327,7 +341,8 @@ export class Transform extends Interaction {
 
   /**
    * Unregisters a transform end event handler.
-   * @param {TransformEventDelegate} callback - The callback to stop being called whenever the event is emitted.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offTransformEnd(callback: TransformEventDelegate): void {
     EventHelper.offEvent(this.#onTransformEndHandlers, callback);
@@ -335,7 +350,8 @@ export class Transform extends Interaction {
 
   /**
    * Emits a delete feature event to all handlers.
-   * @param {DeleteFeatureEvent} event - The event to emit.
+   *
+   * @param event - The event to emit
    * @private
    */
   #emitDeleteFeature(event: TransformDeleteFeatureEvent): void {
@@ -344,7 +360,8 @@ export class Transform extends Interaction {
 
   /**
    * Registers a delete feature event handler.
-   * @param {TransformDeleteFeatureEventDelegate} callback - The callback to be executed whenever the event is emitted.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onDeleteFeature(callback: TransformDeleteFeatureEventDelegate): void {
     EventHelper.onEvent(this.#onDeleteFeatureHandlers, callback);
@@ -352,7 +369,8 @@ export class Transform extends Interaction {
 
   /**
    * Unregisters a delete feature event handler.
-   * @param {TransformDeleteFeatureEventDelegate} callback - The callback to stop being called whenever the event is emitted.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offDeleteFeature(callback: TransformDeleteFeatureEventDelegate): void {
     EventHelper.offEvent(this.#onDeleteFeatureHandlers, callback);
@@ -360,7 +378,8 @@ export class Transform extends Interaction {
 
   /**
    * Emits a selection change event to all handlers.
-   * @param {SelectionEvent} event - The event to emit.
+   *
+   * @param event - The event to emit
    * @private
    */
   #emitSelectionChange(event: TransformSelectionEvent): void {
@@ -369,7 +388,8 @@ export class Transform extends Interaction {
 
   /**
    * Registers a selection change event handler.
-   * @param {SelectionEventDelegate} callback - The callback to be executed whenever the event is emitted.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onSelectionChange(callback: TransformSelectionEventDelegate): void {
     EventHelper.onEvent(this.#onSelectionChangeHandlers, callback);
@@ -377,7 +397,8 @@ export class Transform extends Interaction {
 
   /**
    * Unregisters a selection change event handler.
-   * @param {SelectionEventDelegate} callback - The callback to stop being called whenever the event is emitted.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offSelectionChange(callback: TransformSelectionEventDelegate): void {
     EventHelper.offEvent(this.#onSelectionChangeHandlers, callback);
@@ -385,17 +406,17 @@ export class Transform extends Interaction {
 }
 
 /**
- * Define a delegate for the event handler function signature.
+ * Delegate for transform event handler function signature.
  */
 export type TransformEventDelegate = EventDelegateBase<Transform, TransformEvent, void>;
 
 /**
- * Define a delegate for the delete feature event handler function signature.
+ * Delegate for delete feature event handler function signature.
  */
 export type TransformDeleteFeatureEventDelegate = EventDelegateBase<Transform, TransformDeleteFeatureEvent, void>;
 
 /**
- * Define a delegate for the selection event handler function signature.
+ * Delegate for selection event handler function signature.
  */
 export type TransformSelectionEventDelegate = EventDelegateBase<Transform, TransformSelectionEvent, void>;
 

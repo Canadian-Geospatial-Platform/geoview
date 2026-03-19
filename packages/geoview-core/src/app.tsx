@@ -46,8 +46,8 @@ let cgpvCallbackMapReady: MapViewerDelegate;
 /**
  * Checks if a root is mounted for a given map ID
  *
- * @param {string} mapId - The map identifier
- * @returns {boolean} True if the root exists and is mounted
+ * @param mapId - The map identifier
+ * @returns True if the root exists and is mounted
  */
 const isRootMounted = (mapId: string): boolean => {
   return !!reactRoots[mapId];
@@ -55,8 +55,9 @@ const isRootMounted = (mapId: string): boolean => {
 
 /**
  * Safely unmounts a map and cleans up its resources
- * @param {string} mapId - The map id to unmount
- * @param {HTMLElement?} mapContainer - Optional, the html element where the map was mounted
+ *
+ * @param mapId - The map identifier to unmount
+ * @param mapContainer - Optional, the html element where the map was mounted
  */
 export function unmountMap(mapId: string, mapContainer?: HTMLElement): void {
   if (isRootMounted(mapId)) {
@@ -75,14 +76,15 @@ export function unmountMap(mapId: string, mapContainer?: HTMLElement): void {
 }
 
 /**
- * Function to get a configuration from a div element who contains attributes to read from.
+ * Get a configuration from a div element who contains attributes to read from.
+ *
  * If the div has one of the following atttributes data-config, data-config-url or data-shared,
  * it will try to get a valid configuration from the attribute content. If there is no such attributes,
  * it will return a default config. If the data-geocore is present, it will inject the layer in the
  * configuration automatically.
  *
- * @param {Element} mapElement - Div map element with attributes
- * @returns {Promise<TypeMapFeaturesConfig>} A promise that contains the configuration to use
+ * @param mapElement - Div map element with attributes
+ * @returns A promise that contains the configuration to use
  */
 async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig> {
   // get language in wich we need to have the config file (if not provided, default to English)
@@ -173,7 +175,8 @@ async function getMapConfig(mapElement: Element): Promise<TypeMapFeaturesConfig>
 
 /**
  * Handles when the div containing the MapViewer disappears from the DOM, likely by a dev manipulation.
- * @param {string} mapId - The MapId of the MapViewer which had its div disappear from the DOM.
+ *
+ * @param mapId - The map identifier of the MapViewer which had its div disappear from the DOM.
  */
 function handleMapViewerDivRemoved(mapId: string): void {
   // If the MapViewer is still present
@@ -187,9 +190,10 @@ function handleMapViewerDivRemoved(mapId: string): void {
 }
 
 /**
- * Function to render the map for inline map and map create from a function call
+ * Render the map for inline map and map create from a function call
  *
- * @param {HTMLElement} mapElement - The html element div who will contain the map
+ * @param mapElement - The html element div who will contain the map
+ * @returns A Promise containing the MapViewer
  */
 async function renderMap(mapElement: HTMLElement): Promise<MapViewer> {
   // if a config is provided from either inline div, url params or json file, validate it with against the schema
@@ -249,11 +253,13 @@ async function renderMap(mapElement: HTMLElement): Promise<MapViewer> {
 
 /**
  * Initialize a basic div from a function call.
+ *
  * GV The div MUST NOT have a geoview-map class or a warning will be shown.
  * If is present, the div will be created with a default config
  *
- * @param {HTMLElement} mapDiv - The basic div to initialise
- * @param {string} mapConfig - The new config passed in from the function call
+ * @param mapDiv - The basic div to initialize
+ * @param mapConfig - The new config passed in from the function call
+ * @returns A Promise containing the MapViewer
  */
 export function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig: string): Promise<MapViewer> {
   // If the div has a geoview-map class (therefore is supposed to be loaded via init())
@@ -336,7 +342,8 @@ function init(): void {
 
 /**
  * Registers a callback when the map has been initialized
- * @param {MapViewerDelegate} callback - The callback to be called
+ *
+ * @param callback - The callback to be called
  */
 export function onMapInit(callback: MapViewerDelegate): void {
   // Keep the callback
@@ -345,7 +352,8 @@ export function onMapInit(callback: MapViewerDelegate): void {
 
 /**
  * Registers a callback when the map has turned ready / layers were registered
- * @param {MapViewerDelegate} callback - The callback to be called
+ *
+ * @param callback - The callback to be called
  */
 export function onMapReady(callback: MapViewerDelegate): void {
   // Keep the callback

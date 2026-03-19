@@ -26,9 +26,6 @@ export type ModifyOptions = InteractionOptions & {
 
 /**
  * Class used for modifying features on a map.
- * @class Modify
- * @extends {Interaction}
- * @exports
  */
 export class Modify extends Interaction {
   /** The embedded OpenLayers Modify component. */
@@ -49,7 +46,8 @@ export class Modify extends Interaction {
 
   /**
    * Initializes a Modify component.
-   * @param {ModifyOptions} options - Object to configure the initialization of the Modify interaction.
+   *
+   * @param options - Object to configure the initialization of the Modify interaction
    */
   constructor(options: ModifyOptions) {
     super(options);
@@ -115,7 +113,6 @@ export class Modify extends Interaction {
 
   /**
    * Starts the interaction on the map.
-   * @override
    */
   override startInteraction(): void {
     // Redirect to super method to start interaction
@@ -124,7 +121,6 @@ export class Modify extends Interaction {
 
   /**
    * Stops the interaction on the map.
-   * @override
    */
   override stopInteraction(): void {
     // Redirect to super method to stop interaction
@@ -132,9 +128,9 @@ export class Modify extends Interaction {
   }
 
   /**
-   * Emits the modifystart event the all registered handlers.
-   * @param {OLModifyEvent} event - The event to emit.
-   * @private
+   * Emits the modifystart event to all registered handlers.
+   *
+   * @param event - The event to emit
    */
   #emitModifyStarted(event: OLModifyEvent): void {
     // Emit the modifystarted event
@@ -143,7 +139,8 @@ export class Modify extends Interaction {
 
   /**
    * Registers a callback handler for the modifystart event.
-   * @param {ModifyDelegate} callback - The callback to be executed whenever the event is emitted.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onModifyStarted(callback: ModifyDelegate): void {
     // Register the modifystarted event callback
@@ -152,7 +149,8 @@ export class Modify extends Interaction {
 
   /**
    * Unregisters a callback handler for the modifystart event.
-   * @param {ModifyDelegate} callback - The callback to stop being called whenever the event is emitted.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offModifyStarted(callback: ModifyDelegate): void {
     // Unregister the modifystarted event callback
@@ -160,9 +158,9 @@ export class Modify extends Interaction {
   }
 
   /**
-   * Emits the modifyend event the all registered handlers.
-   * @param {OLModifyEvent} event - The event to emit.
-   * @private
+   * Emits the modifyend event to all registered handlers.
+   *
+   * @param event - The event to emit
    */
   #emitModifyEnded(event: OLModifyEvent): void {
     // Emit the modifyended event
@@ -171,7 +169,8 @@ export class Modify extends Interaction {
 
   /**
    * Registers a callback handler for the modifyend event.
-   * @param {ModifyDelegate} callback - The callback to be executed whenever the event is emitted.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onModifyEnded(callback: ModifyDelegate): void {
     // Register the modifyended event callback
@@ -180,7 +179,8 @@ export class Modify extends Interaction {
 
   /**
    * Unregisters a callback handler for the modifyend event.
-   * @param {ModifyDelegate} callback - The callback to stop being called whenever the event is emitted.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offModifyEnded(callback: ModifyDelegate): void {
     // Unregister the modifyended event callback
@@ -189,7 +189,6 @@ export class Modify extends Interaction {
 
   /**
    * Emits the modifydrag event for all registered handlers.
-   * @private
    */
   #emitModifyDragged(): void {
     if (this.#activeFeature) {
@@ -200,7 +199,8 @@ export class Modify extends Interaction {
 
   /**
    * Registers a callback handler for the modifydrag event.
-   * @param {ModifyDelegate} callback - The callback to be executed whenever the event is emitted.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onModifyDragged(callback: ModifyDelegate): void {
     EventHelper.onEvent(this.#onModifyDraggedHandlers, callback);
@@ -208,7 +208,8 @@ export class Modify extends Interaction {
 
   /**
    * Unregisters a callback handler for the modifydrag event.
-   * @param {ModifyDelegate} callback - The callback to stop being called whenever the event is emitted.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offModifyDragged(callback: ModifyDelegate): void {
     EventHelper.offEvent(this.#onModifyDraggedHandlers, callback);
@@ -216,6 +217,6 @@ export class Modify extends Interaction {
 }
 
 /**
- * Define a delegate for the event handler function signature
+ * Delegate for the modify event handler function signature.
  */
 type ModifyDelegate = EventDelegateBase<Modify, OLModifyEvent, void>;

@@ -20,9 +20,6 @@ export type ExtentOptions = InteractionOptions & {
 
 /**
  * Class used for drawing an extent on a map.
- * @class Extent
- * @extends {Interaction}
- * @exports
  */
 export class Extent extends Interaction {
   /** The embedded OpenLayers Extent component */
@@ -34,7 +31,8 @@ export class Extent extends Interaction {
 
   /**
    * Initializes an Extent component.
-   * @param {ExtentOptions} options - An object to configure the initialization of the Extent interaction.
+   *
+   * @param options - An object to configure the initialization of the Extent interaction
    */
   constructor(options: ExtentOptions) {
     super(options);
@@ -55,7 +53,6 @@ export class Extent extends Interaction {
 
   /**
    * Starts the interaction on the map.
-   * @override
    */
   override startInteraction(): void {
     // Redirect to super method to start interaction
@@ -64,7 +61,6 @@ export class Extent extends Interaction {
 
   /**
    * Stops the interaction on the map.
-   * @override
    */
   override stopInteraction(): void {
     // Redirect to super method to stop interaction
@@ -73,8 +69,8 @@ export class Extent extends Interaction {
 
   /**
    * Emits an event to all registered extent change event handlers.
-   * @param {OLExtentEvent} event - The event to emit.
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitExtentChanged(event: OLExtentEvent): void {
     // Emit the extentchanged event
@@ -83,7 +79,8 @@ export class Extent extends Interaction {
 
   /**
    * Registers an event handler for extent change events.
-   * @param {ExtentDelegate} callback - The callback to be executed whenever the event is emitted.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onExtentChanged(callback: ExtentDelegate): void {
     // Register the extentchanged event callback
@@ -92,7 +89,8 @@ export class Extent extends Interaction {
 
   /**
    * Unregisters an event handler for extent change events.
-   * @param {ExtentDelegate} callback - The callback to stop being called whenever the event is emitted.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offExtentChanged(callback: ExtentDelegate): void {
     // Unregister the extentchanged event callback
@@ -101,6 +99,6 @@ export class Extent extends Interaction {
 }
 
 /**
- * Define a delegate for the event handler function signature
+ * Delegate for the extent event handler function signature.
  */
 type ExtentDelegate = EventDelegateBase<Extent, OLExtentEvent, void>;
