@@ -5,7 +5,11 @@ import { useTheme } from '@mui/material/styles';
 import { Box, Divider, Typography } from '@/ui';
 import { Switch } from '@/ui/switch/switch';
 
-import { useLayerStoreActions } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  useLayerSelectorHasText,
+  useLayerSelectorTextVisibility,
+  useLayerStoreActions,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 import { getSxClasses } from '../layer-details-style';
 import { RasterFunctionPanel } from './raster-function-selector';
@@ -37,8 +41,10 @@ export function LayerSettingsPanel({ layerDetails }: LayerSettingsPanelProps): J
   const sxClasses = getSxClasses(theme);
 
   // Store
-  const { getLayerSettings, setLayerHoverable, setLayerQueryable } = useLayerStoreActions();
+  const { getLayerSettings, setLayerHoverable, setLayerQueryable, setLayerTextVisibility } = useLayerStoreActions();
   const availableSettings = getLayerSettings(layerDetails.layerPath);
+  const hasText = useLayerSelectorHasText(layerDetails.layerPath);
+  const textVisible = useLayerSelectorTextVisibility(layerDetails.layerPath);
 
   // Derived values
   const isLayerHoverable = layerDetails.controls?.hover;
@@ -53,30 +59,51 @@ export function LayerSettingsPanel({ layerDetails }: LayerSettingsPanelProps): J
     setLayerQueryable(layerDetails.layerPath, !layerDetails.queryable!);
   }, [layerDetails.layerPath, layerDetails.queryable, setLayerQueryable]);
 
+  const handleToggleText = useCallback((): void => {
+    setLayerTextVisibility(layerDetails.layerPath, !textVisible);
+  }, [layerDetails.layerPath, textVisible, setLayerTextVisibility]);
+
+  function renderToggleTextButton(): JSX.Element {
+    return (
+      <Switch
+        size="small"
+        onChange={handleToggleText}
+        label={textVisible ? t('legend.hideText') : t('legend.showText')}
+        checked={textVisible}
+      />
+    );
+  }
+
+  function renderInteractionSection(): JSX.Element | null {
+    if (!(isLayerHoverable || isLayerQueryable || hasText)) {
+      return null;
+    }
+
+    return (
+      <Box sx={sxClasses.infoSection}>
+        <Typography sx={sxClasses.infoSectionTitle}>{t('layers.layerInfoInteraction')}</Typography>
+        <Box sx={sxClasses.infoSectionContent}>
+          {isLayerHoverable && (
+            <Switch size="small" onChange={handleToggleHoverable} label={t('layers.layerHoverable')} checked={layerDetails.hoverable} />
+          )}
+          {isLayerQueryable && (
+            <Switch size="small" onChange={handleToggleQueryable} label={t('layers.layerQueryable')} checked={layerDetails.queryable} />
+          )}
+          {hasText && renderToggleTextButton()}
+        </Box>
+      </Box>
+    );
+  }
+
   return (
     <Box>
       <Divider sx={{ height: 'auto', marginTop: '10px', marginBottom: '10px' }} variant="middle" />
 
       {availableSettings?.includes('rasterFunction') && <RasterFunctionPanel layerDetails={layerDetails} />}
-
       {availableSettings?.includes('mosaicRule') && <MosaicRulePanel layerDetails={layerDetails} />}
-
       {availableSettings?.includes('wmsStyles') && <WmsStylePanel layerDetails={layerDetails} />}
 
-      {/* Interaction NEEDED */}
-      {(isLayerHoverable || isLayerQueryable) && (
-        <Box sx={sxClasses.infoSection}>
-          <Typography sx={sxClasses.infoSectionTitle}>{t('layers.layerInfoInteraction')}</Typography>
-          <Box sx={sxClasses.infoSectionContent}>
-            {isLayerHoverable && (
-              <Switch size="small" onChange={handleToggleHoverable} label={t('layers.layerHoverable')!} checked={layerDetails.hoverable} />
-            )}
-            {isLayerQueryable && (
-              <Switch size="small" onChange={handleToggleQueryable} label={t('layers.layerQueryable')!} checked={layerDetails.queryable} />
-            )}
-          </Box>
-        </Box>
-      )}
+      {renderInteractionSection()}
     </Box>
   );
 }
