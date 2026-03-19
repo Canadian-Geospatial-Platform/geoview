@@ -12,7 +12,12 @@ import { logger } from '@/core/utils/logger';
  * @returns The filter switch
  *
  */
-function FilterDataToExtent(): JSX.Element {
+interface FilterDataToExtentProps {
+  disabled?: boolean;
+}
+
+function FilterDataToExtent(props: FilterDataToExtentProps): JSX.Element {
+  const { disabled } = props;
   // Log
   logger.logTraceRender('components/data-table/filter-map');
 
@@ -31,6 +36,7 @@ function FilterDataToExtent(): JSX.Element {
       checked={filterDataToExtent}
       sx={sxClasses.filterMap}
       label={t('dataTable.filterDataToExtent')!}
+      disabled={disabled}
     />
   );
 }

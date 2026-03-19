@@ -17,6 +17,7 @@ import type { ColumnsType } from './data-table-types';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import type { SxStyles } from '@/ui/style/types';
 import { ClearFiltersIcon } from '@/ui/icons';
+import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 // GV: Disabled prop-types for this to work. From the react 19 ugprade guide it seems that prop-types are deprecated.
 interface TopToolbarProps<TData extends ColumnsType> {
@@ -70,6 +71,10 @@ interface TopToolbarProps<TData extends ColumnsType> {
 
 function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
   const { sxClasses, datatableSettings, layerPath, t, globalFilter, useTable, columns, data, table } = props;
+
+  // ESRI Dynamic layer data does not include geometry and can't be filtered to extent
+  const isEsriDynamic = data.features?.[0]?.geoviewLayerType === CONST_LAYER_TYPES.ESRI_DYNAMIC;
+
   return (
     <Box
       className="data-table-top-toolbar"
@@ -85,7 +90,7 @@ function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
         </Box>
         <Box display="flex">
           <FilterMap layerPath={layerPath} isGlobalFilterOn={!!globalFilter?.length} />
-          <FilterDataToExtent />
+          <FilterDataToExtent disabled={isEsriDynamic} />
         </Box>
       </Box>
       <Box display="flex" sx={{ flexDirection: 'column' }}>
