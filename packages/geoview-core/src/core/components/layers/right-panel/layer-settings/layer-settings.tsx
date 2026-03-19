@@ -63,7 +63,7 @@ export function LayerSettingsPanel({ layerDetails }: LayerSettingsPanelProps): J
 
       {availableSettings?.includes('wmsStyles') && <WmsStylePanel layerDetails={layerDetails} />}
 
-      {/* Interaction */}
+      {/* Interaction NEEDED */}
       {(isLayerHoverable || isLayerQueryable) && (
         <Box sx={sxClasses.infoSection}>
           <Typography sx={sxClasses.infoSectionTitle}>{t('layers.layerInfoInteraction')}</Typography>
