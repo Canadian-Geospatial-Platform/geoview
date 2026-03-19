@@ -546,6 +546,137 @@ protected override onLaunchTestSuite(): Promise<unknown> {
 
 ---
 
+### Algorithm: Creating a Core/Utility Function Test
+
+**When to use:** Testing standalone utility functions (e.g., URL validation, date parsing) that don't require a map layer.
+
+**Steps:**
+
+1. **Add test method** to `CoreTester`
+2. **Import the function** directly from geoview-core
+3. **Register in Suite** (`suite-core.ts` → `onLaunchTestSuite` → `Promise.all`)
+
+**Key pattern:** No layer setup/teardown needed. Directly call the utility function and assert results. Reuse existing constants from `GVAbstractTester` for URLs.
+
+**Template:**
+
+```typescript
+// In core-tester.ts
+import { myUtilityFunction } from 'geoview-core/core/utils/utilities';
+
+testMyUtilityFunction(): Promise<Test<MyResultType>> {
+  return this.test(
+    `Test myUtilityFunction with valid input...`,
+    async (test) => {
+      const input = GVAbstractTester.SOME_CONSTANT;
+      test.addStep(`Calling myUtilityFunction with: ${input}...`);
+      const result = await myUtilityFunction(input);
+      return result;
+    },
+    (test, result) => {
+      test.addStep('Verifying expected property...');
+      Test.assertIsEqual(result.someProperty, expectedValue);
+    }
+  );
+}
+```
+
+**Wiring (in `suite-core.ts`):**
+
+```typescript
+protected override onLaunchTestSuite(): Promise<unknown> {
+  const p1 = this.#coreTester.testMyUtilityFunction();
+  return Promise.all([p1]);
+}
+```
+
+---
+
+### Algorithm: Creating a Layer Query Test (getAllFeatureInfo)
+
+**When to use:** Testing that querying a layer's features returns correct results (e.g., domain field value translation, field content validation).
+
+**Steps:**
+
+1. **Add constants** to `GVAbstractTester` (URL, layer ID, field names)
+2. **Add test method** to `LayerTester`
+3. **Register in Suite** — run **sequentially after** parallel tests because query tests change zoom level
+
+**Critical requirements:**
+
+- **Wait for `allFeatureInfoLayerSet` registration** using `whenThisThen()` before querying
+- **Set zoom level** using `await this.getMapViewer().setMapZoomLevel(zoom)` — NOT `MapEventProcessor.setZoom()` (see Gotchas)
+- **Run sequentially** at the end of the suite to avoid zoom conflicts with other tests
+
+**Template:**
+
+```typescript
+// In layer-tester.ts
+testMyLayerQuery(): Promise<Test<TypeFeatureInfoResult>> {
+  const gvLayerId = generateId();
+  const layerUrl = GVAbstractTester.MY_LAYER_URL;
+  const layerPath = `${gvLayerId}/${GVAbstractTester.MY_LAYER_ID}`;
+  const gvLayerName = 'My Layer Query';
+
+  return this.test(
+    `Test My Layer query...`,
+    async (test) => {
+      test.addStep('Creating the GeoView Layer Configuration...');
+      const gvConfig = EsriDynamic.createGeoviewLayerConfig(gvLayerId, gvLayerName, layerUrl, false, [
+        { id: GVAbstractTester.MY_LAYER_ID },
+      ]);
+
+      await LayerTester.helperStepAddLayerOnMap(test, this.getMapViewer(), gvConfig);
+      await LayerTester.helperStepCheckLayerAtLayerPath(test, this.getMapViewer(), layerPath);
+
+      // Wait for registration in allFeatureInfoLayerSet (required before querying)
+      test.addStep('Waiting for allFeatureInfoLayerSet registration...');
+      // prettier-ignore
+      await whenThisThen(() => this.getMapViewer().layer.allFeatureInfoLayerSet.getRegisteredLayerPaths().includes(layerPath), 30000);
+
+      // Set zoom to layer's visible range (required — query returns empty if out of range)
+      test.addStep('Setting zoom level...');
+      await this.getMapViewer().setMapZoomLevel(REQUIRED_ZOOM);
+
+      // Query all features
+      test.addStep('Triggering getAllFeatureInfo query...');
+      return DataTableEventProcessor.triggerGetAllFeatureInfo(this.getMapId(), layerPath);
+    },
+    (test, result) => {
+      test.addStep('Verifying query returned results...');
+      Test.assertIsDefined('result', result);
+      Test.assertIsArrayLengthMinimal(result.results, 1);
+
+      // Assert on feature field values
+      const firstFeature = result.results[0];
+      Test.assertIsDefined('firstFeature.fieldInfo', firstFeature.fieldInfo);
+      // ... additional assertions on field values
+    },
+    (test) => {
+      LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPath);
+    }
+  );
+}
+```
+
+**Wiring (mixed parallel + sequential in suite):**
+
+```typescript
+protected override async onLaunchTestSuite(): Promise<unknown> {
+  // Parallel tests first
+  const pLayer1 = this.#layerTester.testAddSomeLayer();
+  const pLayer2 = this.#layerTester.testAddAnotherLayer();
+
+  await Promise.all([pLayer1, pLayer2]);
+
+  // Sequential query tests at the end — they change zoom level
+  await this.#layerTester.testMyLayerQuery();
+  return this.#layerTester.testMyOtherLayerQuery();
+}
+```
+
+---
+
 ### Algorithm: Creating a New Config Validation Test
 
 **When to use:** Testing that a layer config is correctly created and validated (without adding it to the map).
@@ -776,14 +907,6 @@ import { GVTestSuiteMyFeature } from './tests/suites/suite-my-feature';
 
 ---
 
-### Test Execution Patterns Reference
-
-| Pattern                                    | When to Use                            | Example Suite                             |
-| ------------------------------------------ | -------------------------------------- | ----------------------------------------- |
-| `Promise.all()` (fully parallel)           | Independent tests, no shared state     | `suite-config`, `suite-layer`, `suite-ui` |
-| Sequential `await` + final `Promise.all()` | Tests modify shared map state          | `suite-map-varia`, `suite-map-config`     |
-| `onCanExecuteTestSuite()` guard            | Suite requires specific plugin/feature | `suite-geochart`, `suite-details`         |
-
 ### Key Rules for Writing Tests
 
 1. **Always use `test.addStep()`** to log progress — this creates visibility in the test UI
@@ -794,6 +917,49 @@ import { GVTestSuiteMyFeature } from './tests/suites/suite-my-feature';
 6. **Add constants to `GVAbstractTester`** — URLs, UUIDs, expected icon lists go there
 7. **True negative tests** use `testError()` with an expected error class
 8. **Import layer classes directly** — e.g., `EsriDynamic`, `WMS`, `GeoJSON` for `createGeoviewLayerConfig()`
+
+### Gotchas & Pitfalls
+
+**`MapEventProcessor.setZoom()` vs `mapViewer.setMapZoomLevel()`:**
+
+- `MapEventProcessor.setZoom(mapId, zoom)` only updates the **Zustand store** — it does NOT change the actual OpenLayers map view zoom. The map will not visually zoom and `getView().getZoom()` will return the old value.
+- `await this.getMapViewer().setMapZoomLevel(zoom)` sets the **actual OL view zoom** via `getView().setZoom()` and returns a Promise that resolves on `rendercomplete`.
+- **Always use `setMapZoomLevel()`** in tests when you need the map to actually change zoom (e.g., before querying features that have visibility range constraints).
+
+**`queryLayerFeatures()` visibility guards:**
+
+- Before querying, `queryLayerFeatures()` in `abstract-layer-set.ts` checks two conditions:
+  1. `geoviewLayer.getVisibleIncludingParents()` — layer and all parents must be visible
+  2. `geoviewLayer.getInVisibleRange(currentZoom)` — current zoom must be within layer's min/max zoom
+- If either check fails, it returns `{ results: [] }` silently (no error thrown)
+- **You must set the zoom to a level within the layer's visible range** before calling `triggerGetAllFeatureInfo()`
+
+**`whenThisThen()` for async conditions:**
+
+- Use `whenThisThen(() => condition, timeout)` from `geoview-core/core/utils/utilities` to wait for async conditions
+- Common use case: waiting for a layer to be registered in `allFeatureInfoLayerSet` before querying
+- Import: `import { whenThisThen } from 'geoview-core/core/utils/utilities'`
+- Add `// prettier-ignore` before long single-line calls to prevent Prettier from breaking them
+
+**Sequential tests that change map state:**
+
+- Tests that modify shared map state (zoom, projection, center) must run **sequentially** using `await`
+- Run them **after** all parallel tests complete via `await Promise.all([...])`
+- The last sequential test should use `return` (not `await`) to satisfy the `Promise<unknown>` return type
+
+**Race conditions with layer removal during async operations:**
+
+- When a layer is removed while an async operation (like `queryLayer()`) is still running, handlers may try to access `this.resultSet[layerPath]` after it's been deleted
+- Always add guard checks like `if (this.resultSet[layerPath])` in `.then()`, `.catch()`, and `.finally()` handlers of async layer operations
+
+### Test Execution Patterns Reference
+
+| Pattern                                                       | When to Use                              | Example Suite                         |
+| ------------------------------------------------------------- | ---------------------------------------- | ------------------------------------- |
+| `Promise.all()` (fully parallel)                              | Independent tests, no shared state       | `suite-config`, `suite-ui`            |
+| Mixed: parallel `await Promise.all()` then sequential `await` | Some tests modify map state (zoom, etc.) | `suite-layer`                         |
+| Sequential `await` + final `Promise.all()`                    | All tests modify shared map state        | `suite-map-varia`, `suite-map-config` |
+| `onCanExecuteTestSuite()` guard                               | Suite requires specific plugin/feature   | `suite-geochart`, `suite-details`     |
 
 ## Key Files to Reference
 
