@@ -171,6 +171,13 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   // Generate unique table details button ID
   const tableDetailsButtonId = `table-details-${containerType}-${mapId}`;
 
+  // Reset view to details when layer changes
+  useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('LAYER DETAILS - reset activeView on layer change', layerDetails.layerPath);
+    setActiveView('details');
+  }, [layerDetails.layerPath]);
+
   /**
    * Recursively checks if all children of a layer are visible.
    * @param {TypeLegendLayer} legendLayer - The legend layer to check
