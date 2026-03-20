@@ -5,40 +5,41 @@ import type { WkbLayerEntryConfig } from '@/api/config/validation-classes/vector
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 /**
  * Manages a WKB layer.
- *
- * @exports
- * @class GVWKB
  */
 export declare class GVWKB extends AbstractGVVector {
     #private;
     /**
      * Constructs a GVWKB layer to manage an OpenLayer layer.
-     * @param {VectorSource} olSource - The OpenLayer source.
-     * @param {WkbLayerEntryConfig} layerConfig - The layer configuration.
+     *
+     * @param olSource - The OpenLayer source.
+     * @param layerConfig - The layer configuration.
      */
     constructor(olSource: VectorSource, layerConfig: WkbLayerEntryConfig);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {WkbLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed layer configuration specific to this layer.
      */
     getLayerConfig(): WkbLayerEntryConfig;
     /**
      * Overrides the refresh to reload the WKB object in the layer source once the refresh completes.
-     * @param {OLProjection | undefined} projection - Optional, the projection to refresh to.
-     * @returns {void}
-     * @override
+     *
+     * @param projection - Optional projection to refresh to.
      */
     onRefresh(projection: OLProjection | undefined): void;
     /**
      * Loads a WKB object as the layer source features, overriding the current features if any.
-     * @param {WkbObject | string} wkb - The WKB object.
-     * @param {OLProjection} projection - The output projection.
+     *
+     * @param wkb - The WKB object.
+     * @param projection - The output projection.
+     * @returns A promise that resolves once the source has been updated with the new features.
      */
     setWkbSource(wkb: WKBObject | string, projection: OLProjection): Promise<void>;
     /**
      * Updates the WKB object, if any, to reproject the features into the new provided projection.
-     * @param {OLProjection} projection - The projection to project the wkb source features into.
+     *
+     * @param projection - The projection to project the wkb source features into.
+     * @returns A promise that resolves once the source has been updated with the reprojected features, or immediately if no wkb source is defined.
      */
     updateWkbSource(projection: OLProjection): Promise<void>;
 }

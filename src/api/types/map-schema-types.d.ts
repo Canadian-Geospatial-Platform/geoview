@@ -364,7 +364,7 @@ export type TypeOutfields = {
     name: string;
     alias: string;
     type: TypeOutfieldsType;
-    domain?: null | codedValueType | rangeDomainType;
+    domain?: codedValueType | rangeDomainType;
 };
 /** The types supported by the outfields object. */
 export type TypeOutfieldsType = 'string' | 'date' | 'number' | 'url' | 'oid';
@@ -388,7 +388,7 @@ export type TypeFieldEntry = {
     value: unknown;
     dataType: TypeOutfieldsType;
     alias: string;
-    domain: null | codedValueType | rangeDomainType;
+    domain?: codedValueType | rangeDomainType;
 };
 export type TypeAliasLookup = {
     [key: string]: string;

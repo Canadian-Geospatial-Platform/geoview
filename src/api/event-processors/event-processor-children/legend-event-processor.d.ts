@@ -559,6 +559,38 @@ export declare class LegendEventProcessor extends AbstractEventProcessor {
      */
     static setAllItemsVisibility(mapId: string, layerPath: string, visibility: boolean, waitForRender: boolean): Promise<void>;
     /**
+     * Checks if a layer has a text layer.
+     *
+     * @param mapId - The ID of the map.
+     * @param layerPath - The layer path of the layer to check.
+     * @returns True if the layer has a text layer, false otherwise.
+     */
+    static getLayerHasText(mapId: string, layerPath: string): boolean;
+    /**
+     * Gets the text visibility state for a layer.
+     *
+     * @param mapId - The ID of the map.
+     * @param layerPath - The layer path of the layer to check.
+     * @returns True if text is visible, false otherwise. Returns undefined if layer has no text.
+     */
+    static getLayerTextVisibility(mapId: string, layerPath: string): boolean | undefined;
+    /**
+     * Sets the text visibility for a layer.
+     *
+     * @param mapId - The ID of the map.
+     * @param layerPath - The layer path of the layer to change.
+     * @param visible - True to show text, false to hide text.
+     */
+    static setLayerTextVisibility(mapId: string, layerPath: string, visible: boolean): void;
+    /**
+     * Updates the text visibility state in the store.
+     *
+     * @param mapId - The ID of the map.
+     * @param layerPath - The layer path.
+     * @param textVisible - The new text visibility state.
+     */
+    static setLayerTextVisibilityInStore(mapId: string, layerPath: string, textVisible: boolean): void;
+    /**
      * Sets the opacity of the layer and its children in the store.
      * @param {string} mapId - The ID of the map.
      * @param {string} layerPath - The layer path of the layer to change.

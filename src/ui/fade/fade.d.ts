@@ -8,9 +8,15 @@ export interface FadePropsExtend extends Omit<FadeProps, 'children'> {
     children: ReactElement;
 }
 /**
- * Create a customized Material UI Fade component.
+ * Material-UI Fade component for opacity-based visibility transitions.
  *
- * @component
+ * Wraps Material-UI's Fade to provide smooth opacity transition when showing/hiding
+ * content. Controls visibility via the `in` prop with optional timeout and unmount
+ * behaviors. All Material-UI Fade props are supported and passed through directly.
+ *
+ * @param props - Fade configuration (see FadePropsExtend interface)
+ * @returns Fade component with smooth opacity transition effect
+ *
  * @example
  * ```tsx
  * // Basic usage
@@ -34,9 +40,6 @@ export interface FadePropsExtend extends Omit<FadeProps, 'children'> {
  *   <Typography>Content unmounts when faded out</Typography>
  * </Fade>
  * ```
- *
- * @param {FadePropsExtend} props - All valid Material-UI Fade props
- * @returns {JSX.Element} The Fade component
  *
  * @see {@link https://mui.com/material-ui/transitions/#fade}
  */

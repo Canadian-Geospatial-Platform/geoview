@@ -11,9 +11,16 @@ interface PopperPropsExtend extends PopperProps {
     children: ReactElement;
 }
 /**
- * Create a customized Material UI Popper component.
+ * Material-UI Popper component with fade animation and keyboard management.
  *
- * @component
+ * Wraps Material-UI's Popper to provide floating layer positioned relative to an
+ * anchor element. Includes React Spring fade-in animation, keyboard event handling,
+ * focus trap support, and automatic focus management. Useful for dropdown menus,
+ * select options, and floating UI panels.
+ *
+ * @param props - Popper configuration (see PopperPropsExtend interface)
+ * @returns Popper component with fade animation and focus management
+ *
  * @example
  * ```tsx
  * // Basic usage
@@ -54,10 +61,7 @@ interface PopperPropsExtend extends PopperProps {
  * </Popper>
  * ```
  *
- * @param {PopperPropsExtend} props - The properties passed to the Popper element
- * @returns {JSX.Element} The Popper component
- *
- * @see {@link https://mui.com/material-ui/react-popper/|Material-UI Popper}
+ * @see {@link https://mui.com/material-ui/react-popper/}
  */
 declare function PopperUI({ open, onClose, handleKeyDown, focusSelector, focusTrap, children, ...props }: PopperPropsExtend): JSX.Element;
 export declare const Popper: typeof PopperUI;

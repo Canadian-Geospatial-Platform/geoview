@@ -3,14 +3,14 @@ import type { FeatureLike } from 'ol/Feature';
 import type { Geometry } from 'ol/geom';
 import VectorLayer from 'ol/layer/Vector';
 import type VectorSource from 'ol/source/Vector';
-import type Style from 'ol/style/Style';
+import Style from 'ol/style/Style';
 import type { Coordinate } from 'ol/coordinate';
 import type { Extent } from 'ol/extent';
 import type { Pixel } from 'ol/pixel';
 import type { Projection as OLProjection } from 'ol/proj';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
-import type { TypeFeatureInfoResult, TypeOutfieldsType } from '@/api/types/map-schema-types';
+import type { TypeFeatureInfoResult } from '@/api/types/map-schema-types';
 import type { FilterNodeType } from '@/geo/utils/renderer/geoview-renderer-types';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { GVVectorSource } from '@/geo/layer/source/vector-source';
@@ -45,104 +45,165 @@ export declare abstract class AbstractGVVector extends AbstractGVLayer {
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
      *
-     * @returns {VectorLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
+     * @returns The strongly-typed layer configuration specific to this layer.
      */
     getLayerConfig(): VectorLayerEntryConfig;
     /**
-     * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
-     * @param {string} fieldName - The field name for which we want to get the type.
-     * @returns {TypeOutfieldsType} The type of the field or 'string' when undefined.
-     * @override
-     * @protected
+     * Sets the visibility of the layer.
+     *
+     * @param layerVisibility - The visibility state to set.
      */
-    protected onGetFieldType(fieldName: string): TypeOutfieldsType;
+    protected onSetVisible(layerVisibility: boolean): void;
+    /**
+     * Sets the opacity of the layer.
+     *
+     * @param opacity - The opacity value to set.
+     * @param emitOpacityChanged - Whether to emit the opacity changed event.
+     */
+    protected onSetOpacity(opacity: number, emitOpacityChanged?: boolean): void;
+    /**
+     * Sets the z-index of the layer.
+     *
+     * @param zIndex - The z-index value to set.
+     * @param emitZIndexChanged - Whether to emit the z-index changed event.
+     */
+    protected onSetZIndex(zIndex: number, emitZIndexChanged?: boolean): void;
     /**
      * Overridable method called to get a more specific error code for all errors.
+     *
      * @param event - The event which is being triggered.
      * @returns The GeoViewError stored in the GVVectorSource if any or the one from the parent method.
      */
     protected onErrorDecipherError(event: Event): GeoViewError;
     /**
      * Overrides the get all feature information for all the features stored in the layer.
-     * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
-     * @param {LayerFilters} layerFilters - The layer filters to apply when querying the features.
-     * @param {AbortController?} [abortController] - The optional abort controller.
-     * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
-     * @override
-     * @protected
+     *
+     * @param map - The Map so that we can grab the resolution/projection we want to get features on.
+     * @param layerFilters - The layer filters to apply when querying the features.
+     * @param abortController - Optional {@link AbortController} to cancel the request.
+     * @returns A promise that resolves with the feature info result.
      */
     protected getAllFeatureInfo(map: OLMap, layerFilters: LayerFilters, abortController?: AbortController): Promise<TypeFeatureInfoResult>;
     /**
      * Overrides the return of feature information at a given pixel location.
-     * @param {OLMap} map - The Map where to get Feature Info At Pixel from.
-     * @param {Pixel} location - The pixel coordinate that will be used by the query.
-     * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
-     * @override
-     * @protected
+     *
+     * @param map - The Map where to get Feature Info At Pixel from.
+     * @param location - The pixel coordinate that will be used by the query.
+     * @returns A promise that resolves with the feature info result.
      */
     protected getFeatureInfoAtPixel(map: OLMap, location: Pixel): Promise<TypeFeatureInfoResult>;
     /**
      * Overrides the return of feature information at a given coordinate.
-     * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.
-     * @param {Coordinate} location - The coordinate that will be used by the query.
-     * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-     * @param {AbortController?} [abortController] - The optional abort controller.
-     * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
-     * @override
-     * @protected
+     *
+     * @param map - The Map where to get Feature Info At Coordinate from.
+     * @param location - The coordinate that will be used by the query.
+     * @param queryGeometry - Whether to include geometry in the query, default is true.
+     * @param abortController - Optional {@link AbortController} to cancel the request.
+     * @returns A promise that resolves with the feature info result.
      */
     protected getFeatureInfoAtCoordinate(map: OLMap, location: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
     /**
      * Overrides the return of feature information at the provided long lat coordinate.
-     * @param {OLMap} map - The Map where to get Feature Info At LonLat from.
-     * @param {Coordinate} lonlat - The coordinate that will be used by the query.
-     * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-     * @param {AbortController?} [abortController] - The optional abort controller.
-     * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
-     * @override
-     * @protected
+     *
+     * @param map - The Map where to get Feature Info At LonLat from.
+     * @param lonlat - The coordinate that will be used by the query.
+     * @param queryGeometry - Whether to include geometry in the query, default is true.
+     * @param abortController - Optional {@link AbortController} to cancel the request.
+     * @returns A promise that resolves with the feature info result.
      */
     protected getFeatureInfoAtLonLat(map: OLMap, lonlat: Coordinate, queryGeometry?: boolean, abortController?: AbortController | undefined): Promise<TypeFeatureInfoResult>;
     /**
      * Overrides the way to get the bounds for this layer type.
+     *
      * @param projection - The projection to get the bounds into.
      * @param stops - The number of stops to use to generate the extent.
-     * @returns A promise of layer bounding box.
+     * @returns A promise that resolves with the layer bounding box, or undefined if not available.
      */
     onGetBounds(projection: OLProjection, stops: number): Promise<Extent | undefined>;
     /**
      * Gets the extent of an array of features.
-     * @param {number[] | string[]} objectIds - The uids of the features to calculate the extent from.
-     * @param {OLProjection} outProjection - The output projection for the extent.
-     * @param {string?} outfield - ID field to return for services that require a value in outfields.
-     * @returns {Promise<Extent>} The extent of the features, if available.
-     * @override
+     *
+     * @param objectIds - The uids of the features to calculate the extent from.
+     * @param outProjection - The output projection for the extent.
+     * @param outfield - Optional ID field to return for services that require a value in outfields.
+     * @returns A promise that resolves with the extent of the features.
      */
     onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent>;
     /**
      * Sets the style applied flag indicating when a style has been applied for the AbstractGVVector via the style callback function.
-     * @param {boolean} styleApplied - Indicates if the style has been applied on the AbstractGVVector.
+     *
+     * @param styleApplied - Indicates if the style has been applied on the AbstractGVVector.
      */
     setStyleApplied(styleApplied: boolean): void;
     /**
+     * Gets the OpenLayers text layer if one exists.
+     *
+     * @returns The text layer or undefined if no text layer exists.
+     */
+    getTextOLLayer(): VectorLayer<VectorSource> | undefined;
+    /**
+     * Gets the independent visibility state of the text layer.
+     *
+     * @returns True if text layer is set to visible independently.
+     */
+    getTextVisible(): boolean;
+    /**
+     * Sets the independent visibility of the text layer.
+     * The text layer's actual visibility is: layerVisible && textVisible
+     *
+     * @param visible - Whether text should be visible independently.
+     */
+    setTextVisible(visible: boolean): void;
+    /**
+     * Gets the actual visibility state of the text layer on the map.
+     * This considers both layer visibility and independent text visibility.
+     *
+     * @returns True if the text layer is currently visible on the map.
+     */
+    getTextLayerVisible(): boolean;
+    /**
      * Registers a style applied event handler.
-     * @param {StyleAppliedDelegate} callback - The callback to be executed whenever the event is emitted
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
      */
     onStyleApplied(callback: StyleAppliedDelegate): void;
     /**
      * Unregisters a style applied event handler.
-     * @param {StyleAppliedDelegate} callback - The callback to stop being called whenever the event is emitted
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
      */
     offStyleApplied(callback: StyleAppliedDelegate): void;
     /**
+     * Registers a text visible changed event handler.
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
+     */
+    onTextVisibleChanged(callback: TextVisibleChangedDelegate): void;
+    /**
+     * Unregisters a text visible changed event handler.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
+     */
+    offTextVisibleChanged(callback: TextVisibleChangedDelegate): void;
+    /**
      * Calculates a style for the given feature, based on the layer current style and options.
-     * @param {AbstractGVLayer} layer - The layer on which to work for the style.
-     * @param {FeatureLike} feature - Feature that need its style to be defined.
-     * @param {string} label - The style label when one has to be created
-     * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
-     * @returns {Style} The style for the feature
+     *
+     * @param layer - The layer on which to work for the style.
+     * @param feature - Feature that need its style to be defined.
+     * @param label - The style label when one has to be created
+     * @param filterEquation - Filter equation associated to the layer.
+     * @returns The style for the feature or undefined if no style could be calculated.
      */
     static calculateStyleForFeature(layer: AbstractGVLayer, feature: FeatureLike, resolution: number, label: string, filterEquation?: FilterNodeType[]): Style | undefined;
+    /**
+     * Calculates a text-only style (no geometry) for the given feature.
+     *
+     * @param layer - The layer on which to work for the style.
+     * @param feature - Feature that needs its style defined.
+     * @param resolution - The map resolution.
+     * @returns The text-only style or undefined if no text style could be calculated.
+     */
+    static calculateTextStyleForFeature(layer: AbstractGVLayer, feature: FeatureLike, resolution: number): Style | undefined;
 }
 /**
  * Define an event for the delegate
@@ -154,4 +215,14 @@ export type StyleAppliedEvent = {
  * Define a delegate for the event handler function signature
  */
 export type StyleAppliedDelegate = EventDelegateBase<AbstractGVVector, StyleAppliedEvent, void>;
+/**
+ * Define an event for the delegate
+ */
+export type TextVisibleChangedEvent = {
+    textVisible: boolean;
+};
+/**
+ * Define a delegate for the event handler function signature
+ */
+export type TextVisibleChangedDelegate = EventDelegateBase<AbstractGVVector, TextVisibleChangedEvent, void>;
 //# sourceMappingURL=abstract-gv-vector.d.ts.map

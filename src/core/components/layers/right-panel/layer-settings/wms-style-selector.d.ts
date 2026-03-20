@@ -1,10 +1,16 @@
 import type { TypeLegendLayer } from '@/core/components/layers/types';
-interface WmsStyleSelectorProps {
+interface WmsStylePanelProps {
     layerDetails: TypeLegendLayer;
-    anchorEl: HTMLElement | null;
-    onClose: () => void;
-    onClickOutside: (event: {}, reason?: 'backdropClick' | 'escapeKeyDown') => void;
 }
-export declare function WmsStyleSelector(props: WmsStyleSelectorProps): JSX.Element;
+/**
+ * Inline panel section for selecting WMS styles.
+ *
+ * Displays available styles as cards within a collapsible section,
+ * consistent with the raster function panel pattern.
+ *
+ * @param layerDetails - The legend layer to configure WMS styles for.
+ * @returns A JSX element representing the WMS style panel.
+ */
+export declare function WmsStylePanel({ layerDetails }: WmsStylePanelProps): JSX.Element;
 export {};
 //# sourceMappingURL=wms-style-selector.d.ts.map

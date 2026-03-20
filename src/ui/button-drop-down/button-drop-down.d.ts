@@ -3,15 +3,22 @@ import type { ButtonGroupProps } from '@mui/material';
  * Properties for the ButtonDropDown component extending Material-UI's ButtonGroupProps
  */
 export interface ButtonDropDownPropsExtend extends ButtonGroupProps {
-    /** Array of options to display in the dropdown */
+    /** Array of option strings displayed as buttons in the dropdown menu */
     options: string[];
-    /** Callback fired when a button is clicked */
+    /** Callback fired when a button or menu item is selected with (index, text) */
     onButtonClick?: (index: number, text: string) => void;
 }
 /**
- * A customized Material-UI Button Drop Down component.
+ * Split button dropdown component for selecting from multiple options.
  *
- * @component
+ * Combines a main action button with a dropdown menu to provide quick access
+ * to the current selection while allowing users to switch between alternatives.
+ * Uses Material-UI's ButtonGroup, Popper, and MenuItem components. Manages
+ * dropdown open/close state and notifies parent of selection changes via callback.
+ *
+ * @param props - ButtonDropDown configuration (see ButtonDropDownPropsExtend interface)
+ * @returns Split button with dropdown menu that appears below on toggle
+ *
  * @example
  * ```tsx
  * // Basic usage
@@ -28,12 +35,6 @@ export interface ButtonDropDownPropsExtend extends ButtonGroupProps {
  *   }}
  * />
  * ```
- *
- * @param {ButtonDropDownPropsExtend} props - The properties for the ButtonDropDown component
- * @returns {JSX.Element} A rendered ButtonDropDown component
- *
- * @note For performance optimization in cases of frequent parent re-renders,
- * consider wrapping this component with React.memo at the consumption level.
  *
  * @see {@link https://mui.com/material-ui/react-button-group/}
  */

@@ -7,8 +7,6 @@ import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
 import type { TypeLegend } from '@/index';
 /**
  * Manages a WMTS layer.
- *
- * @class GVWMTS
  */
 export declare class GVWMTS extends AbstractGVTile {
     #private;
@@ -42,13 +40,13 @@ export declare class GVWMTS extends AbstractGVTile {
      *
      * @param projection - The projection to get the bounds into.
      * @param stops - The number of stops to use to generate the extent.
-     * @returns The layer bounding box.
+     * @returns A promise that resolves with the layer bounding box or undefined when not found
      */
     onGetBounds(projection: OLProjection, stops: number): Promise<Extent | undefined>;
     /**
      * Overrides the fetching of the legend for a WMTS layer.
      *
-     * @returns The legend of the layer or null.
+     * @returns A promise that resolves with the legend of the layer or null
      */
     onFetchLegend(): Promise<TypeLegend | null>;
 }

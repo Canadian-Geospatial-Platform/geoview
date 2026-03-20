@@ -90,8 +90,6 @@ export interface TypeSourceGeoTIFFInitialConfig extends TypeBaseSourceInitialCon
 export type TypeOfServer = 'mapserver' | 'geoserver' | 'qgis';
 /** Base type from which we derive the source properties for all the vector leaf nodes in the layer tree. */
 export interface TypeBaseVectorSourceInitialConfig extends TypeBaseSourceInitialConfig {
-    /** Filter to apply on features of this layer. */
-    layerFilter?: string;
     /** Loading strategy to use (all or bbox). */
     strategy?: VectorStrategy;
     /** The projection code of the source. */
@@ -132,7 +130,6 @@ export type TypeTileGrid = {
 };
 /** Type from which we derive the source properties for all the ESRI dynamic leaf nodes in the layer tree. */
 export interface TypeSourceEsriDynamicInitialConfig extends TypeBaseSourceInitialConfig {
-    layerFilter?: string;
     /** Definition of the feature information structure that will be used by the getFeatureInfo method. */
     featureInfo?: TypeFeatureInfoLayerConfig;
     /** The format used by the image layer. */

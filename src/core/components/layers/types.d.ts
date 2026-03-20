@@ -42,6 +42,8 @@ export interface TypeLegendLayer {
     url?: string;
     hoverable?: boolean;
     queryable?: boolean;
+    hasText?: boolean;
+    textVisible?: boolean;
     icons: TypeLegendLayerItem[];
     items: TypeLegendItem[];
     children: TypeLegendLayer[];

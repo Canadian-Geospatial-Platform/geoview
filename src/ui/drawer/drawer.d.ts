@@ -6,9 +6,16 @@ export interface DrawerPropsExtend extends DrawerProps {
     status?: boolean;
 }
 /**
- * Create a customized Material UI Drawer component.
+ * Material-UI Drawer component with collapsible toggle functionality.
  *
- * @component
+ * Wraps Material-UI's Drawer to provide a slide-out side panel with built-in
+ * toggle button for opening/closing. Supports status prop for controlled state.
+ * Default variant is temporary (slides over content). All Material-UI Drawer props
+ * are supported and passed through directly.
+ *
+ * @param props - Drawer configuration (see DrawerPropsExtend interface)
+ * @returns Drawer component with toggle button and theme-aware styling
+ *
  * @example
  * ```tsx
  * // Basic usage
@@ -36,12 +43,6 @@ export interface DrawerPropsExtend extends DrawerProps {
  *   <div>Drawer content</div>
  * </Drawer>
  * ```
- *
- * @param {DrawerPropsExtend} props - The properties passed to the Drawer element
- * @returns {JSX.Element} The Drawer component
- *
- * @note For performance optimization in cases of frequent parent re-renders,
- * consider wrapping this component with React.memo at the consumption level.
  *
  * @see {@link https://mui.com/material-ui/react-drawer/}
  */

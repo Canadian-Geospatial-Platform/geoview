@@ -29,7 +29,6 @@ export * from './menu/menu-item';
 export * from './modal';
 export * from './paper/paper';
 export * from './panel';
-export * from './paper/paper';
 export * from './popover/popover';
 export * from './popper/popper';
 export * from './select/select';

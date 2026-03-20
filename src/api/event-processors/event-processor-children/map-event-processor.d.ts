@@ -406,9 +406,7 @@ export declare class MapEventProcessor extends AbstractEventProcessor {
     /**
      * Set Z index for layers
      *
-     * @param {string} mapId - Id of map to set layer Z indices
-     * @returns {void}
-     * @static
+     * @param mapId - Id of map to set layer Z indices
      */
     static setLayerZIndices: (mapId: string) => void;
     static getPixelFromCoordinate: (mapId: string, coord: Coordinate) => Pixel;

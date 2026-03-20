@@ -1,4 +1,4 @@
-import type { ExtentEvent as OLExtentEvent } from 'ol/interaction/Extent';
+import type { ExtentEvent as olExtentEvent } from 'ol/interaction/Extent';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import type { InteractionOptions } from './interaction';
@@ -12,41 +12,39 @@ export type ExtentOptions = InteractionOptions & {
 };
 /**
  * Class used for drawing an extent on a map.
- * @class Extent
- * @extends {Interaction}
- * @exports
  */
 export declare class Extent extends Interaction {
     #private;
     /**
      * Initializes an Extent component.
-     * @param {ExtentOptions} options - An object to configure the initialization of the Extent interaction.
+     *
+     * @param options - An object to configure the initialization of the Extent interaction
      */
     constructor(options: ExtentOptions);
     /**
      * Starts the interaction on the map.
-     * @override
      */
     startInteraction(): void;
     /**
      * Stops the interaction on the map.
-     * @override
      */
     stopInteraction(): void;
     /**
      * Registers an event handler for extent change events.
-     * @param {ExtentDelegate} callback - The callback to be executed whenever the event is emitted.
+     *
+     * @param callback - The callback to be executed whenever the event is emitted
      */
     onExtentChanged(callback: ExtentDelegate): void;
     /**
      * Unregisters an event handler for extent change events.
-     * @param {ExtentDelegate} callback - The callback to stop being called whenever the event is emitted.
+     *
+     * @param callback - The callback to stop being called whenever the event is emitted
      */
     offExtentChanged(callback: ExtentDelegate): void;
 }
 /**
- * Define a delegate for the event handler function signature
+ * Delegate for the extent event handler function signature.
  */
-type ExtentDelegate = EventDelegateBase<Extent, OLExtentEvent, void>;
+type ExtentDelegate = EventDelegateBase<Extent, olExtentEvent, void>;
 export {};
 //# sourceMappingURL=extent.d.ts.map

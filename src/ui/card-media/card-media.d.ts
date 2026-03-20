@@ -9,9 +9,16 @@ export interface CardMediaPropsExtend extends CardMediaProps {
     keyDown?(event: React.KeyboardEvent): void;
 }
 /**
- * A customized Material UI Card Media component with keyboard accessibility support.
+ * Material-UI CardMedia component with keyboard accessibility and click handling.
  *
- * @component
+ * Wraps Material-UI's CardMedia to provide flexible image/video rendering with
+ * keyboard event support for accessibility. Supports both image and video components
+ * with click and keyDown callbacks. All Material-UI CardMedia props are supported
+ * and passed through directly.
+ *
+ * @param props - CardMedia configuration (see CardMediaPropsExtend interface)
+ * @returns CardMedia component with click and keyboard event handling
+ *
  * @example
  * ```tsx
  * // Basic image usage
@@ -51,12 +58,6 @@ export interface CardMediaPropsExtend extends CardMediaProps {
  *   }}
  * />
  * ```
- *
- * @param {CardMediaPropsExtend} props - The properties for the Card Media element
- * @returns {JSX.Element} A rendered Card Media element
- *
- * @note For performance optimization in cases of frequent parent re-renders,
- * consider wrapping this component with React.memo at the consumption level.
  *
  * @see {@link https://mui.com/material-ui/react-card/#media}
  */

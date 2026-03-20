@@ -2,7 +2,6 @@ import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-pr
 import type { IDataTableState, IDataTableSettings, TypeAllFeatureInfoResultSetEntry } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import type { TypeFeatureInfoEntry, TypeFeatureInfoResult, TypeLayerData } from '@/api/types/map-schema-types';
 export declare class DataTableEventProcessor extends AbstractEventProcessor {
-    #private;
     /**
      * Shortcut to get the DataTable state for a given map id
      * @param {string} mapId - The mapId

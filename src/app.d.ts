@@ -18,17 +18,20 @@ export * from './core/types/external-types';
 export declare const api: API;
 /**
  * Safely unmounts a map and cleans up its resources
- * @param {string} mapId - The map id to unmount
- * @param {HTMLElement?} mapContainer - Optional, the html element where the map was mounted
+ *
+ * @param mapId - The map identifier to unmount
+ * @param mapContainer - Optional, the html element where the map was mounted
  */
 export declare function unmountMap(mapId: string, mapContainer?: HTMLElement): void;
 /**
  * Initialize a basic div from a function call.
+ *
  * GV The div MUST NOT have a geoview-map class or a warning will be shown.
  * If is present, the div will be created with a default config
  *
- * @param {HTMLElement} mapDiv - The basic div to initialise
- * @param {string} mapConfig - The new config passed in from the function call
+ * @param mapDiv - The basic div to initialize
+ * @param mapConfig - The new config passed in from the function call
+ * @returns A Promise containing the MapViewer
  */
 export declare function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfig: string): Promise<MapViewer>;
 /**
@@ -37,12 +40,14 @@ export declare function initMapDivFromFunctionCall(mapDiv: HTMLElement, mapConfi
 declare function init(): void;
 /**
  * Registers a callback when the map has been initialized
- * @param {MapViewerDelegate} callback - The callback to be called
+ *
+ * @param callback - The callback to be called
  */
 export declare function onMapInit(callback: MapViewerDelegate): void;
 /**
  * Registers a callback when the map has turned ready / layers were registered
- * @param {MapViewerDelegate} callback - The callback to be called
+ *
+ * @param callback - The callback to be called
  */
 export declare function onMapReady(callback: MapViewerDelegate): void;
 export declare const cgpv: {

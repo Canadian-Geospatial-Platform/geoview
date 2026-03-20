@@ -6,9 +6,6 @@ import type { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/r
 import { AbstractGVTile } from '@/geo/layer/gv-layers/tile/abstract-gv-tile';
 /**
  * Manages a Tile<XYZ> layer.
- *
- * @exports
- * @class GVXYZTiles
  */
 export declare class GVXYZTiles extends AbstractGVTile {
     /**
@@ -38,9 +35,10 @@ export declare class GVXYZTiles extends AbstractGVTile {
     getLayerConfig(): XYZTilesLayerEntryConfig;
     /**
      * Overrides the way to get the bounds for this layer type.
-     * @param projection - The projection to get the bounds into.
-     * @param stops - The number of stops to use to generate the extent.
-     * @returns A promise of layer bounding box.
+     *
+     * @param projection - The projection to get the bounds into
+     * @param stops - The number of stops to use to generate the extent
+     * @returns A promise that resolves with the layer bounding box or undefined when not found
      */
     onGetBounds(projection: OLProjection, stops: number): Promise<Extent | undefined>;
 }
