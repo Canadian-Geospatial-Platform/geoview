@@ -14,10 +14,11 @@ import { logger } from '@/core/utils/logger';
  */
 interface FilterDataToExtentProps {
   disabled?: boolean;
+  layerPath?: string;
 }
 
 function FilterDataToExtent(props: FilterDataToExtentProps): JSX.Element {
-  const { disabled } = props;
+  const { disabled, layerPath } = props;
   // Log
   logger.logTraceRender('components/data-table/filter-map');
 
@@ -26,16 +27,16 @@ function FilterDataToExtent(props: FilterDataToExtentProps): JSX.Element {
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
-  const filterDataToExtent = useDataTableFilterDataToExtent();
+  const filterDataToExtent = useDataTableFilterDataToExtent(layerPath ?? '');
   const { setFilterDataToExtent } = useDataTableStoreActions();
 
   return (
     <Switch
       size="medium"
-      onChange={() => setFilterDataToExtent(!filterDataToExtent)}
+      onChange={() => setFilterDataToExtent(!filterDataToExtent, layerPath ?? '')}
       checked={filterDataToExtent}
       sx={sxClasses.filterMap}
-      label={t('dataTable.filterDataToExtent')!}
+      label={t('dataTable.filterDataToExtent')}
       disabled={disabled}
     />
   );

@@ -52,7 +52,6 @@ export class GeoviewTextRenderer {
    * Method for getting the text style
    *
    * @param feature - The feature to get the text style for
-   * @param resolution - The resolution of the map
    * @param styleSettings - The style settings
    * @param layerText - The layer text configuration
    * @param aliasLookup - The alias lookup
@@ -60,7 +59,6 @@ export class GeoviewTextRenderer {
    */
   static getTextStyle = (
     feature: FeatureLike,
-    resolution: number,
     styleSettings: TypeLayerStyleSettings,
     layerText?: TypeLayerTextConfig,
     aliasLookup?: TypeAliasLookup

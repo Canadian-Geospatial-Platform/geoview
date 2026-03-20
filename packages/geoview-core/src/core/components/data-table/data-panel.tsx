@@ -57,7 +57,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   const layerData = useDataTableAllFeaturesDataArray();
   const selectedLayerPath = useDataTableSelectedLayerPath();
   const datatableSettings = useDataTableLayerSettings();
-  const filterDataToExtent = useDataTableFilterDataToExtent();
+  const filterDataToExtent = useDataTableFilterDataToExtent(selectedLayerPath);
   const { setSelectedLayerPath } = useDataTableStoreActions();
   const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
   const { isLayerHiddenOnMap } = useMapStoreActions();
