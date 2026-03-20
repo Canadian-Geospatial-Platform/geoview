@@ -186,23 +186,8 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     // Call parent to handle geometry layer
     super.onSetOpacity(opacity, emitOpacityChanged);
 
-    // Sync text layer opacity if it exists
-    if (this.#textOLLayer) {
-      // Check if renderer exists and is ready before setting opacity
-      const layerWithRenderer = this.#textOLLayer;
-      const hasRenderer =
-        layerWithRenderer.getRenderer && typeof layerWithRenderer.getRenderer === 'function' && layerWithRenderer.getRenderer();
-
-      if (hasRenderer) {
-        // Renderer exists, safe to set opacity
-        this.#textOLLayer.setOpacity(opacity);
-      } else {
-        // Renderer doesn't exist yet - set up handler for when layer first renders
-        this.#textOLLayer.once('postrender', () => {
-          this.#textOLLayer?.setOpacity(opacity);
-        });
-      }
-    }
+    // Set opacity for text layer if it exists
+    this.#textOLLayer?.setOpacity(opacity);
   }
 
   /**
