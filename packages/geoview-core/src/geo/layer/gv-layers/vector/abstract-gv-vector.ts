@@ -112,6 +112,9 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
         },
         // Enable declutter based on layerText.declutterMode
         declutter: layerConfig.getLayerText()?.declutterMode !== 'none',
+        // set zoom constraints
+        minZoom: layerConfig.getLayerText()?.minZoomLevel || -Infinity,
+        maxZoom: layerConfig.getLayerText()?.maxZoomLevel || Infinity,
       };
 
       // Set declutterMode on layer options if specified
@@ -184,7 +187,22 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
     super.onSetOpacity(opacity, emitOpacityChanged);
 
     // Sync text layer opacity if it exists
-    this.#textOLLayer?.setOpacity(opacity);
+    if (this.#textOLLayer) {
+      // Check if renderer exists and is ready before setting opacity
+      const layerWithRenderer = this.#textOLLayer;
+      const hasRenderer =
+        layerWithRenderer.getRenderer && typeof layerWithRenderer.getRenderer === 'function' && layerWithRenderer.getRenderer();
+
+      if (hasRenderer) {
+        // Renderer exists, safe to set opacity
+        this.#textOLLayer.setOpacity(opacity);
+      } else {
+        // Renderer doesn't exist yet - set up handler for when layer first renders
+        this.#textOLLayer.once('postrender', () => {
+          this.#textOLLayer?.setOpacity(opacity);
+        });
+      }
+    }
   }
 
   /**

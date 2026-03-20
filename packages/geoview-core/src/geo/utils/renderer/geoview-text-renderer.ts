@@ -2,17 +2,12 @@ import { Stroke, Fill, Text } from 'ol/style';
 import type { FeatureLike } from 'ol/Feature';
 import type Feature from 'ol/Feature';
 
-import type {
-  TypeLayerStyleSettings,
-  TypeLayerStyleConfig,
-  TypeLayerTextConfig,
-  TypeAliasLookup,
-  TypeValidMapProjectionCodes,
-} from '@/api/types/map-schema-types';
+import type { TypeLayerStyleSettings, TypeLayerStyleConfig, TypeLayerTextConfig, TypeAliasLookup } from '@/api/types/map-schema-types';
 import { logger } from '@/core/utils/logger';
 import { DateMgt } from '@/core/utils/date-mgt';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import type { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
+
 export class GeoviewTextRenderer {
   /**
    * This method returns true if a style config has a text configuration
@@ -98,10 +93,6 @@ export class GeoviewTextRenderer {
 
     const textSettings = symbolText || layerText;
     if (!textSettings) return undefined;
-    if (textSettings.minZoomLevel !== undefined && resolution > GeoviewTextRenderer.getApproximateResolution(textSettings.minZoomLevel))
-      return undefined;
-    if (textSettings.maxZoomLevel !== undefined && resolution < GeoviewTextRenderer.getApproximateResolution(textSettings.maxZoomLevel))
-      return undefined;
 
     return GeoviewTextRenderer.createTextStyle(feature, textSettings);
   };
@@ -206,27 +197,6 @@ export class GeoviewTextRenderer {
       declutterMode,
     });
   };
-
-  /**
-   * Get approximate resolution for common zoom levels by projection
-   *
-   * @param zoom - The zoom level (0-20)
-   * @param projection - The map projection (3857 for Web Mercator, 3978 for Canada Lambert)
-   * @returns Approximate resolution for the given zoom and projection
-   */
-  static getApproximateResolution(zoom: number, projection: TypeValidMapProjectionCodes = 3857): number {
-    if (projection === 3978) {
-      // Lambert Conformal Conic Canada: resolution ≈ 38364.660062653464 / (2^zoom)
-      return 38364.660062653464 / Math.pow(2, zoom);
-    }
-    if (projection === 3573) {
-      // TODO: Update this value when there's an active service
-      // North Pole LAEA Canada: resolution ≈ 38364.660062653464 / (2^zoom)
-      return 38364.660062653464 / Math.pow(2, zoom);
-    }
-    // Default to Web Mercator: resolution ≈ 156543.03392804097 / (2^zoom)
-    return 156543.03392804097 / Math.pow(2, zoom);
-  }
 
   /**
    * Wrap text to fit within specified constraints

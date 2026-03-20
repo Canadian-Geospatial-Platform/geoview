@@ -528,7 +528,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     if (activeView === 'settings') {
       return (
         <IconButton
-          ref={settingsButtonRef}
+          iconRef={settingsButtonRef}
           aria-label={t('layers.settings.back')}
           className="buttonOutline"
           onClick={handleSettingsBackToDetails}
@@ -541,7 +541,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
     return (
       <IconButton
-        ref={settingsButtonRef}
+        iconRef={settingsButtonRef}
         aria-label={t('layers.settings.title')}
         className="buttonOutline"
         onClick={handleOpenSettings}
@@ -556,7 +556,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     if (activeView === 'info') {
       return (
         <IconButton
-          ref={infoButtonRef}
+          iconRef={infoButtonRef}
           aria-label={t('layers.settings.back')}
           className="buttonOutline"
           onClick={handleInfoBackToDetails}
@@ -569,7 +569,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
     return (
       <IconButton
-        ref={infoButtonRef}
+        iconRef={infoButtonRef}
         aria-label={t('layers.moreInfo')}
         className="buttonOutline"
         onClick={handleOpenInfo}
