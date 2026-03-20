@@ -103,27 +103,28 @@ export abstract class AbstractGeoViewLayer {
   /** The service metadata. */
   #metadata?: unknown;
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the layer entry register init event */
   #onLayerEntryRegisterInitHandlers: LayerEntryRegisterInitDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the layer entry processed event */
   #onLayerEntryProcessedHandlers: LayerEntryProcessedDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the layer config created event */
   #onLayerConfigCreatedHandlers: LayerConfigCreatedDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the layer group created event */
   #onLayerGroupCreatedHandlers: LayerGroupCreatedDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the layer GV created event */
   #onLayerGVCreatedHandlers: LayerGVCreatedDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the layer message event */
   #onLayerMessageHandlers: LayerMessageDelegate[] = [];
 
   /**
    * Constructor
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The GeoView layer configuration options.
+   *
+   * @param geoviewLayerConfig - The GeoView layer configuration options
    */
   constructor(geoviewLayerConfig: TypeGeoviewLayerConfig) {
     // Keep it internally
@@ -137,25 +138,28 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Must override method to read the service metadata from the metadataAccessPath.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns {Promise<T>} A promise resolved once the metadata has been fetched.
-   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
+   *
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves once the metadata has been fetched
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    */
   protected abstract onFetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T>;
 
   /**
    * Must override method to initialize a layer entry based on a GeoView layer config.
-   * @returns A promise resolved once the layer entries have been initialized.
+   *
+   * @returns A promise that resolves once the layer entries have been initialized
    */
   protected abstract onInitLayerEntries(): Promise<TypeGeoviewLayerConfig>;
 
   /**
    * Must override method to process a layer entry and return a Promise of an Open Layer Base Layer object.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - Information needed to create the GeoView layer.
-   * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
-   * @param {OLProjection?} [mapProjection] - The map projection.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} The Promise that the config metadata has been processed.
+   *
+   * @param layerConfig - Information needed to create the GeoView layer
+   * @param displayDateMode - The display date mode to use for processing time dimensions in the metadata
+   * @param mapProjection - Optional map projection
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves once the config metadata has been processed
    */
   protected abstract onProcessLayerMetadata(
     layerConfig: AbstractBaseLayerEntryConfig,
@@ -166,14 +170,16 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Must override method to create a GV Layer from a layer configuration.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
-   * @returns {AbstractGVLayer} The GV Layer that has been created.
+   *
+   * @param layerConfig - Information needed to create the GeoView layer
+   * @returns The GV Layer that has been created
    */
   protected abstract onCreateGVLayer(layerConfig: AbstractBaseLayerEntryConfig): AbstractGVLayer;
 
   /**
    * Overridable method to validate the configuration of the layer entries to ensure that each layer is correctly defined.
-   * @param {ConfigBaseClass[]} listOfLayerEntryConfig - The list of layer entries configuration to validate.
+   *
+   * @param listOfLayerEntryConfig - The list of layer entries configuration to validate
    */
   protected onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: ConfigBaseClass[]): void {
     // Loop on each layer entry config
@@ -210,6 +216,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Overridable method to validate the configuration of the layer entries to ensure that each layer is correctly defined.
+   *
+   * @param layerConfig - The layer entry config to validate
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/class-methods-use-this
   protected onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
@@ -218,8 +226,9 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Overridable method to process a layer entry and return a Promise of an Open Layer Base Layer object.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - Information needed to create the GeoView layer.
-   * @returns {Promise<AbstractGVLayer>} The Geoview Layer that has been created.
+   *
+   * @param layerConfig - Information needed to create the GeoView layer
+   * @returns A promise that resolves with the Geoview Layer that has been created
    */
   protected onProcessOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractGVLayer> {
     // Redirect
@@ -234,8 +243,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Overridable function to perform additional initialization on the created GV Layer.
-   * @param {AbstractGVLayer} layer - The GV layer to initialize
-   * @returns {void}
+   *
+   * @param layer - The GV layer to initialize
    */
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
   protected onInitGVLayer(layer: AbstractGVLayer): void {
@@ -248,7 +257,10 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Overridable method to get the metadata.
+   *
    * Override this function to return the more precise type (covariant return).
+   *
+   * @returns The metadata, if it exists, or undefined if it does not exist
    */
   getMetadata(): unknown | undefined {
     return this.#metadata;
@@ -256,6 +268,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * A quick getter to help identify which layer class the current instance is coming from.
+   *
+   * @returns The name of the class of the current instance
    */
   getClassName(): string {
     // Return the name of the class
@@ -264,7 +278,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Gets the Geoview layer config.
-   * @returns {string} The geoview layer config
+   *
+   * @returns The geoview layer config
    */
   getGeoviewLayerConfig(): TypeGeoviewLayerConfig {
     return this.#geoviewLayerConfig;
@@ -272,7 +287,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Gets the Geoview layer id.
-   * @returns {string} The geoview layer id
+   *
+   * @returns The geoview layer id
    */
   getGeoviewLayerId(): string {
     return this.getGeoviewLayerConfig().geoviewLayerId;
@@ -280,7 +296,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Returns the display name of the GeoView layer, if defined.
-   * @returns {string} The GeoView layer name.
+   *
+   * @returns The GeoView layer name
    */
   getGeoviewLayerName(): string {
     return this.getGeoviewLayerConfig().geoviewLayerName || DEFAULT_LAYER_NAMES[this.getGeoviewLayerConfig().geoviewLayerType];
@@ -288,7 +305,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Indicates if the metadata access path is defined in the config.
-   * @returns {boolean} True if the configuration has a metadata access path.
+   *
+   * @returns True if the configuration has a metadata access path
    */
   hasMetadataAccessPath(): boolean {
     // Check if there's a metadataAccessPath
@@ -297,7 +315,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Gets the metadata access path if it exists.
-   * @returns {string | undefined} The trimmed metadata access path, or `undefined` if not defined.
+   *
+   * @returns The trimmed metadata access path, or undefined if not defined
    */
   getMetadataAccessPathIfExists(): string | undefined {
     return this.getGeoviewLayerConfig().metadataAccessPath?.trim();
@@ -305,8 +324,9 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Retrieves the metadata access path used by this GeoView layer.
-   * @returns {string} The metadata access path.
-   * @throws {LayerMetadataAccessPathMandatoryError} When the metadataAccessPath is undefined.
+   *
+   * @returns The metadata access path
+   * @throws {LayerMetadataAccessPathMandatoryError} When the metadataAccessPath is undefined
    */
   getMetadataAccessPath(): string {
     // Get the metadata access path
@@ -326,7 +346,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Sets the metadata access path used by this GeoView layer.
-   * @param {string} metadataAccessPath - The metadata access path to set.
+   *
+   * @param metadataAccessPath - The metadata access path to set
    */
   setMetadataAccessPath(metadataAccessPath: string): void {
     this.getGeoviewLayerConfig().metadataAccessPath = metadataAccessPath.trim();
@@ -334,7 +355,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Gets the first layer entry name if any sub-layers exist or else gets the geoviewLayerName or even the geoviewLayerId.
-   * @returns {string} The layer entry name if any sub-layers exist or the geoviewLayerName or even the geoviewLayerId.
+   *
+   * @returns The layer entry name if any sub-layers exist or the geoviewLayerName or even the geoviewLayerId
    */
   getLayerEntryNameOrGeoviewLayerName(): string {
     if (this.listOfLayerEntryConfig?.length === 1) {
@@ -347,7 +369,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Initializes the layer entries based on the GeoviewLayerConfig that was initially provided in the constructor.
-   * @returns A promise resolved once the layer entries have been initialized.
+   *
+   * @returns A promise that resolves once the layer entries have been initialized
    */
   initGeoViewLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Redirect
@@ -356,6 +379,7 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * This method is used to create the layers specified in the listOfLayerEntryConfig attribute inherited from its parent.
+   *
    * Normally, it is the second method called in the life cycle of a GeoView layer, the first one being the constructor.
    * Its code is the same for all child classes. It must first validate that the olLayers attribute is null indicating
    * that the method has never been called before for this layer. If this is not the case, an error message must be sent.
@@ -371,10 +395,11 @@ export abstract class AbstractGeoViewLayer {
    * is queryable, it will subscribe to the details-panel and every time the user clicks on the map, the panel will ask the layer
    * to return the descriptive information of all the features in a tolerance radius. This information will be used to populate
    * the details-panel.
-   * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
-   * @param {OLProjection?} [mapProjection] - The map projection.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns {Promise<ConfigBaseClass[]>} A promise of the config base classes created.
+   *
+   * @param displayDateMode - The display date mode to use for processing time dimensions in the metadata
+   * @param mapProjection - Optional map projection
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves with the config base classes created
    */
   async createGeoViewLayers(
     displayDateMode: DisplayDateMode,
@@ -443,10 +468,11 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Fetches the metadata by calling onFetchServiceMetadata.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns {Promise<T>} Returns a Promise of a metadata
-   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
-   * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities) (WMS/WFS layers).
+   *
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves with the metadata
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+   * @throws {LayerNoCapabilitiesError} When the metadata is empty (no Capabilities) (WMS/WFS layers)
    */
   fetchServiceMetadata<T>(abortSignal?: AbortSignal): Promise<T> {
     // Redirect
@@ -455,7 +481,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Recursively validates the configuration of the layer entries to ensure that each layer is correctly defined.
-   * @param {ConfigBaseClass[]} listOfLayerEntryConfig - The list of layer entries configuration to validate.
+   *
+   * @param listOfLayerEntryConfig - The list of layer entries configuration to validate
    */
   validateListOfLayerEntryConfig(listOfLayerEntryConfig: ConfigBaseClass[]): void {
     // Log
@@ -479,7 +506,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Validates the configuration of the layer entries to ensure that each layer is correctly defined.
-   * @param {ConfigBaseClass} layerConfig - The layer entry config to validate
+   *
+   * @param layerConfig - The layer entry config to validate
    */
   validateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     // Set the layer status to processing
@@ -494,8 +522,9 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Creates a GV Layer from a layer configuration.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig Information needed to create the GeoView layer.
-   * @returns {AbstractGVLayer} The GV Layer that has been created.
+   *
+   * @param layerConfig - Information needed to create the GeoView layer
+   * @returns The GV Layer that has been created
    */
   createGVLayer(layerConfig: AbstractBaseLayerEntryConfig): AbstractGVLayer {
     // Redirect
@@ -510,8 +539,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Initializes the GV Layer.
-   * @param {AbstractGVLayer} layer - The layer to initialize.
-   * @returns {void}
+   *
+   * @param layer - The layer to initialize
    */
   initGVLayer(layer: AbstractGVLayer): void {
     // Get the layer config
@@ -525,11 +554,12 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Emits a layer-specific message event with localization support
-   * @param {string} messageKey - The key used to lookup the localized message OR message
-   * @param {string[] | undefined} messageParams - Array of parameters to be interpolated into the localized message
-   * @param {SnackbarType} messageType - The message type
-   * @param {boolean} [notification=false] - Whether to show this as a notification. Defaults to false
+   * Emits a layer-specific message event with localization support.
+   *
+   * @param messageKey - The key used to lookup the localized message OR message
+   * @param messageParams - Optional array of parameters to be interpolated into the localized message
+   * @param messageType - The message type
+   * @param notification - Optional whether to show this as a notification. Defaults to false
    *
    * @example
    * this.emitMessage(
@@ -538,9 +568,6 @@ export abstract class AbstractGeoViewLayer {
    *   messageType: 'error',
    *   true
    * );
-   *
-   * @fires LayerMessageEvent
-   * @protected
    */
   protected emitMessage(
     messageKey: string,
@@ -554,8 +581,9 @@ export abstract class AbstractGeoViewLayer {
   /**
    * Adds a GeoViewLayerLoadedFailedError in the internal list of errors for a layer being loaded.
    * It also sets the layer status to error.
-   * @param {Error} error - The error
-   * @param {ConfigBaseClass | undefined} layerConfig - Optional layer config
+   *
+   * @param error - The error
+   * @param layerConfig - Optional layer config
    */
   addLayerLoadError(error: Error, layerConfig: ConfigBaseClass | undefined): void {
     // Add the error to the list
@@ -567,8 +595,9 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Recursively processes the list of layer entries to see if all of them are greater than or equal to the provided layer status.
-   * @param {TypeLayerStatus} layerStatus The layer status to compare with the internal value of the config.
-   * @returns {boolean} true when all layers are greater than or equal to the layerStatus parameter.
+   *
+   * @param layerStatus - The layer status to compare with the internal value of the config
+   * @returns true when all layers are greater than or equal to the layerStatus parameter
    */
   allLayerStatusAreGreaterThanOrEqualTo(layerStatus: TypeLayerStatus): boolean {
     // Redirect
@@ -577,7 +606,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Recursively gets all layer entry configs in the GeoView Layer.
-   * @returns {ConfigBaseClass[]} The list of layer entry configs
+   *
+   * @returns The list of layer entry configs
    */
   getAllLayerEntryConfigs(): ConfigBaseClass[] {
     // Prepare the container
@@ -599,6 +629,7 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Initializes and normalizes the list of layer entry configurations for this GeoView layer.
+   *
    * Behavior:
    * - If no layer entries are provided, nothing is initialized.
    * - If a single layer entry is provided:
@@ -610,11 +641,9 @@ export abstract class AbstractGeoViewLayer {
    * Side effects:
    * - Sets {@link this.listOfLayerEntryConfig}.
    * - May mutate layer entry configs by setting their name or parent.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig
-   *   The GeoView layer configuration owning the layer entries.
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig
-   *   The layer entry configurations to initialize and normalize.
-   * @private
+   *
+   * @param geoviewLayerConfig - The GeoView layer configuration owning the layer entries
+   * @param listOfLayerEntryConfig - The layer entry configurations to initialize and normalize
    */
   #initListOfLayerEntryConfig(geoviewLayerConfig: TypeGeoviewLayerConfig, listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     if (!listOfLayerEntryConfig?.length) return;
@@ -654,11 +683,11 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * This method reads the service metadata from the metadataAccessPath and stores it in the 'metadata' property.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns {Promise<void>} A promise resolved once the metadata has been fetched and assigned to the 'metadata' property.
-   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
-   * @throws {LayerServiceMetadataEmptyError} When the metadata fetch return empty metadata.
-   * @private
+   *
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves once the metadata has been fetched and assigned to the 'metadata' property
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
+   * @throws {LayerServiceMetadataEmptyError} When the metadata fetch return empty metadata
    */
   async #fetchAndSetServiceMetadata(abortSignal?: AbortSignal): Promise<void> {
     try {
@@ -704,13 +733,13 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Recursively processes the metadata of each layer in the "layer list" configuration.
-   * @param {ConfigBaseClass[]} listOfLayerEntryConfig - The list of layers to process.
-   * @param {LayerConfigCreatedDelegate} callbackLayerConfigCreated - Callback when a layer config has been created.
-   * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
-   * @param {OLProjection?} [mapProjection] - The map projection.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns {Promise<void>} A promise that the execution is completed.
-   * @private
+   *
+   * @param listOfLayerEntryConfig - The list of layers to process
+   * @param callbackLayerConfigCreated - Callback when a layer config has been created
+   * @param displayDateMode - The display date mode to use for processing time dimensions in the metadata
+   * @param mapProjection - Optional map projection
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves once the execution is completed
    */
   async #processListOfLayerMetadata(
     listOfLayerEntryConfig: ConfigBaseClass[],
@@ -774,12 +803,12 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Recursively gathers all the promises of layer metadata for all the layer entry configs.
-   * @param {ConfigBaseClass[]} listOfLayerEntryConfig - The list of layer entry config currently being processed.
-   * @param {Promise<ConfigBaseClass>[]} promisesEntryMetadata - The gathered promises as the recursive function is called.
-   * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
-   * @param {OLProjection?} [mapProjection] - The map projection.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @private
+   *
+   * @param listOfLayerEntryConfig - The list of layer entry config currently being processed
+   * @param promisesEntryMetadata - The gathered promises as the recursive function is called
+   * @param displayDateMode - The display date mode to use for processing time dimensions in the metadata
+   * @param mapProjection - Optional map projection
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
    */
   #processLayerMetadataRec(
     listOfLayerEntryConfig: ConfigBaseClass[],
@@ -813,16 +842,18 @@ export abstract class AbstractGeoViewLayer {
   }
 
   /**
-   * Processes the layer metadata. It will fill the empty outfields and aliasFields properties of the
+   * Processes the layer metadata.
+   *
+   * It will fill the empty outfields and aliasFields properties of the
    * layer configuration when applicable.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig The layer entry configuration to process.
-   * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
-   * @param {OLProjection?} [mapProjection] - The map projection.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns {Promise<AbstractBaseLayerEntryConfig>} A promise that the AbstractBaseLayerEntryConfig has its metadata processed.
-                                                      When the promise fails, the reason is wrapped in a PromiseRejectErrorWrapper
-                                                      to attach the layerConfig with it.
-   * @private
+   * When the promise fails, the reason is wrapped in a PromiseRejectErrorWrapper
+   * to attach the layerConfig with it.
+   *
+   * @param layerConfig - The layer entry configuration to process
+   * @param displayDateMode - The display date mode to use for processing time dimensions in the metadata
+   * @param mapProjection - Optional map projection
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves once the layer entry config has its metadata processed
    */
   async #processLayerMetadata(
     layerConfig: AbstractBaseLayerEntryConfig,
@@ -847,11 +878,11 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Recursively processes the list of layer Entries to create the layers and the layer groups.
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entries to process.
-   * @param {LayerGroup} layerGroup - Optional layer group to use when we have many layers. The very first call to
+   *
+   * @param listOfLayerEntryConfig - The list of layer entries to process
+   * @param layerGroup - Optional layer group to use when we have many layers. The very first call to
    *  processListOfLayerEntryConfig must not provide a value for this parameter. It is defined for internal use.
-   * @returns {Promise<BaseLayer | undefined>} The promise that the layers were processed.
-   * @private
+   * @returns A promise that resolves with the processed layers
    */
   async #processListOfLayerEntryConfig(
     listOfLayerEntryConfig: TypeLayerEntryConfig[],
@@ -964,10 +995,11 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Processes a layer entry and returns a Promise of an Open Layer Base Layer object.
+   *
    * This method sets the 'loading' status on the layer config and then calls the overridable method 'onProcessOneLayerEntry'.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig - Information needed to create the GeoView layer.
-   * @returns {Promise<AbstractGVLayer>} The Geoview Layer that has been created.
-   * @private
+   *
+   * @param layerConfig - Information needed to create the GeoView layer
+   * @returns A promise that resolves with the Geoview Layer that has been created
    */
   #processOneLayerEntry(layerConfig: AbstractBaseLayerEntryConfig): Promise<AbstractGVLayer> {
     // Process
@@ -976,10 +1008,10 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Creates a layer group.
-   * @param {GroupLayerEntryConfig} layerConfig The layer group configuration.
-   * @param {TypeLayerInitialSettings } initialSettings Initial settings to apply to the layer.
-   * @returns {LayerGroup} A new layer group.
-   * @private
+   *
+   * @param layerConfig - The layer group configuration
+   * @param initialSettings - Initial settings to apply to the layer
+   * @returns A new layer group
    */
   #createLayerGroup(layerConfig: GroupLayerEntryConfig, initialSettings: TypeLayerInitialSettings): GVGroupLayer {
     const layerGroupOptions: LayerGroupOptions = {
@@ -1017,6 +1049,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Aggregates the errors that might have happened during processing and that are stored in layerLoadError, if any.
+   *
+   * @returns An AggregateError if there are multiple errors, or undefined if there are no errors
    */
   #aggregateLayerLoadErrors(): AggregateError | undefined {
     // If any errors compiled up
@@ -1031,17 +1065,18 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Gets if the layer processing has generated errors.
-   * @returns {boolean} True when the layer processing has generated errors in the 'layerLoadError' list.
+   *
+   * @returns True when the layer processing has generated errors in the 'layerLoadError' list
    */
   #hasLayerLoadedErrors(): boolean {
     return this.#layerLoadError.length > 0;
   }
 
   /**
-   * Recursively gathers the layer entry configs
-   * @param {ConfigBaseClass[]} totalList - The total gathered thus far
-   * @param {TypeLayerEntryConfig} currentNode - The current layer entry config being worked on
-   * @private
+   * Recursively gathers the layer entry configs.
+   *
+   * @param totalList - The total gathered thus far
+   * @param currentNode - The current layer entry config being worked on
    */
   #getAllLayerEntryConfigsRec(totalList: ConfigBaseClass[], currentNode: TypeLayerEntryConfig): void {
     // Add it
@@ -1056,13 +1091,13 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Monitors the metadata fetch process for this GeoView layer.
+   *
    * After a predefined wait period (`DEFAULT_WAIT_PERIOD_METADATA_WARNING`), it verifies whether all layer configurations
    * have reached at least the 'processed' status. If not, it emits a warning message indicating that metadata loading
    * is taking longer than expected. The warning continues to emit at regular intervals (`DEFAULT_WAIT_PERIOD_METADATA_WARNING_RECALL`)
    * until processing is complete.
    *
    * This helps notify users or the system of potential delays in loading metadata.
-   * @private
    */
   #startMetadataFetchWatcher(): void {
     delay(AbstractGeoViewLayer.DEFAULT_WAIT_PERIOD_METADATA_WARNING).then(
@@ -1097,7 +1132,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {LayerEntryRegisterInitEvent} event - The event to emit
+   *
+   * @param event - The event to emit
    */
   protected emitLayerEntryRegisterInit(event: LayerEntryRegisterInitEvent): void {
     // Emit the event for all handlers
@@ -1106,7 +1142,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Registers a layer entry config processed event handler.
-   * @param {LayerEntryRegisterInitDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onLayerEntryRegisterInit(callback: LayerEntryRegisterInitDelegate): void {
     // Register the event handler
@@ -1115,7 +1152,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Unregisters a layer entry config processed event handler.
-   * @param {LayerEntryRegisterInitDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offLayerEntryRegisterInit(callback: LayerEntryRegisterInitDelegate): void {
     // Unregister the event handler
@@ -1124,8 +1162,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {LayerEntryProcessedEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitLayerEntryProcessed(event: LayerEntryProcessedEvent): void {
     // Emit the event for all handlers
@@ -1134,7 +1172,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Registers a layer entry config processed event handler.
-   * @param {LayerEntryProcessedDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onLayerEntryProcessed(callback: LayerEntryProcessedDelegate): void {
     // Register the event handler
@@ -1143,7 +1182,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Unregisters a layer entry config processed event handler.
-   * @param {LayerEntryProcessedDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offLayerEntryProcessed(callback: LayerEntryProcessedDelegate): void {
     // Unregister the event handler
@@ -1152,8 +1192,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {LayerConfigCreatedEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitLayerConfigCreated(event: LayerConfigCreatedEvent): void {
     // Emit the event for all handlers
@@ -1162,7 +1202,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Registers a config created event handler.
-   * @param {LayerConfigCreatedDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onLayerConfigCreated(callback: LayerConfigCreatedDelegate): void {
     // Register the event handler
@@ -1171,7 +1212,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Unregisters a config created event handler.
-   * @param {LayerConfigCreatedDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offLayerConfigCreated(callback: LayerConfigCreatedDelegate): void {
     // Unregister the event handler
@@ -1180,8 +1222,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {LayerGVCreatedEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitLayerGVCreated(event: LayerGVCreatedEvent): void {
     // Emit the event for all handlers
@@ -1190,7 +1232,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Registers a config created event handler.
-   * @param {LayerGVCreatedDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onLayerGVCreated(callback: LayerGVCreatedDelegate): void {
     // Register the event handler
@@ -1199,7 +1242,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Unregisters a config created event handler.
-   * @param {LayerGVCreatedDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offLayerGVCreated(callback: LayerGVCreatedDelegate): void {
     // Unregister the event handler
@@ -1208,8 +1252,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Emits an event to all handlers.
-   * @param {LayerGroupCreatedEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitLayerGroupCreated(event: LayerGroupCreatedEvent): void {
     // Emit the event for all handlers
@@ -1218,7 +1262,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Registers a layer creation event handler.
-   * @param {LayerGroupCreatedDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onLayerGroupCreated(callback: LayerGroupCreatedDelegate): void {
     // Register the event handler
@@ -1227,7 +1272,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Unregisters a layer creation event handler.
-   * @param {LayerGroupCreatedDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offLayerGroupCreated(callback: LayerGroupCreatedDelegate): void {
     // Unregister the event handler
@@ -1236,8 +1282,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Emits an event to all handlers when the layer's sent a message.
-   * @param {LayerMessageEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitLayerMessage(event: LayerMessageEvent): void {
     // Emit the event for all handlers
@@ -1246,7 +1292,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Registers a layer message event handler.
-   * @param {LayerMessageEventDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onLayerMessage(callback: LayerMessageDelegate): void {
     // Register the event handler
@@ -1255,7 +1302,8 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Unregisters a layer message event handler.
-   * @param {LayerMessageEventDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offLayerMessage(callback: LayerMessageDelegate): void {
     // Unregister the event handler
@@ -1268,10 +1316,9 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Calls #logErrorAndSetStatusError for each layer entry config found in the list.
-   * @param {Error} error - The error to log.
-   * @param {TypeLayerEntryConfig[]} listOfLayerEntryConfig - The list of layer entry configs to update the status.
-   * @private
-   * @static
+   *
+   * @param error - The error to log
+   * @param listOfLayerEntryConfig - The list of layer entry configs to update the status
    */
   static #setStatusErrorAll(error: Error, listOfLayerEntryConfig: TypeLayerEntryConfig[]): void {
     // For each layer entry config in the list
@@ -1294,10 +1341,9 @@ export abstract class AbstractGeoViewLayer {
 
   /**
    * Processes a Layer Config by calling 'createGeoViewLayers' on the provided layer.
-   * @param {AbstractGeoViewLayer} layer - The layer to use to process the configuration
-   * @returns {Promise<ConfigBaseClass>} The promise of a generated ConfigBaseClass.
-   * @static
-   * @protected
+   *
+   * @param layer - The layer to use to process the configuration
+   * @returns A promise that resolves with the generated ConfigBaseClass array
    */
   protected static processConfig(layer: AbstractGeoViewLayer): Promise<ConfigBaseClass[]> {
     // Create a promise that the layer config will be created

@@ -66,8 +66,9 @@ export abstract class GeoUtilities {
   /**
    * Extracts the base URL (origin + pathname) from a full URL string,
    * removing any query parameters, hash fragments, or authentication data.
-   * @param {string} url - The full URL string to process.
-   * @returns {string} The normalized base URL consisting of the origin and pathname.
+   *
+   * @param url - The full URL string to process
+   * @returns The normalized base URL consisting of the origin and pathname
    */
   static getBaseUrl(url: string): string {
     // Create the URL object
@@ -80,14 +81,16 @@ export abstract class GeoUtilities {
   /**
    * Ensures a service URL includes standardized OGC parameters (`SERVICE`, `REQUEST`, `VERSION`),
    * overriding any existing ones with the correct casing and values.
+   *
    * The function normalizes query parameter keys, removes lowercase variants (`service`, `request`),
    * and ensures the final URL contains correctly capitalized parameters with the specified values.
    * If the `VERSION` parameter is missing, a default value is added.
-   * @param {string} url - The input service URL, which may be absolute or relative.
-   * @param {string} service - The OGC service type (e.g., `"WMS"`, `"WFS"`, `"WMTS"`).
-   * @param {string} request - The OGC request type (e.g., `"GetMap"`, `"GetFeature"`, `"GetCapabilities"`).
-   * @param {string} [version='1.3.0'] - The default service version to enforce if not already present.
-   * @returns {string} The normalized and fully qualified service request URL.
+   *
+   * @param url - The input service URL, which may be absolute or relative
+   * @param service - The OGC service type (e.g., `"WMS"`, `"WFS"`, `"WMTS"`)
+   * @param request - The OGC request type (e.g., `"GetMap"`, `"GetFeature"`, `"GetCapabilities"`)
+   * @param version - The default service version to enforce if not already present
+   * @returns The normalized and fully qualified service request URL
    */
   static ensureServiceRequestUrl(url: string, service: string, request: string, version: string = '1.3.0'): string {
     return ensureServiceRequestUrl(url, service, request, version);
@@ -95,10 +98,11 @@ export abstract class GeoUtilities {
 
   /**
    * Builds a complete GetCapabilities URL for a specific OGC service.
-   * @param {string} url - The base service URL.
-   * @param {string} service - The service type (e.g., "WMS", "WFS").
-   * @param {string} [layers] - Optional layer name(s) to include in the request.
-   * @returns {string} A fully qualified GetCapabilities request URL.
+   *
+   * @param url - The base service URL
+   * @param service - The service type (e.g., "WMS", "WFS")
+   * @param layers - Optional layer name(s) to include in the request
+   * @returns A fully qualified GetCapabilities request URL
    */
   static ensureServiceRequestUrlGetCapabilities(url: string, service: string, layers?: string): string {
     // Redirect
@@ -109,10 +113,11 @@ export abstract class GeoUtilities {
 
   /**
    * Builds a complete GetStyles URL for a WMS service.
-   * @param {string} url - The base WMS service URL.
-   * @param {string} [layers] - Optional layer name(s) to include in the request.
-   * @param {string} [version] - Optional WMS version.
-   * @returns {string} A fully qualified GetStyles request URL.
+   *
+   * @param url - The base WMS service URL
+   * @param layers - Optional layer name(s) to include in the request
+   * @param version - Optional WMS version
+   * @returns A fully qualified GetStyles request URL
    */
   static ensureServiceRequestUrlGetStyles(url: string, layers?: string, version?: string): string {
     // Redirect
@@ -122,11 +127,12 @@ export abstract class GeoUtilities {
 
   /**
    * Builds a complete GetLegendGraphic URL for a WMS service.
-   * @param {string} url - The base WMS service URL.
-   * @param {string} layerId - The layer name for which to retrieve the legend.
-   * @param {string} version - The WMS version.
-   * @param {string} [format] - Optional image format for the legend (e.g., "image/png").
-   * @returns {string} A fully qualified GetLegendGraphic request URL.
+   *
+   * @param url - The base WMS service URL
+   * @param layerId - The layer name for which to retrieve the legend
+   * @param version - The WMS version
+   * @param format - Optional image format for the legend (e.g., "image/png")
+   * @returns A fully qualified GetLegendGraphic request URL
    */
   static ensureServiceRequestUrlGetLegendGraphic(url: string, layerId: string, version: string, format: string = 'image/png'): string {
     // Redirect
@@ -135,11 +141,12 @@ export abstract class GeoUtilities {
 
   /**
    * Builds a complete DescribeFeatureType URL for a WFS service.
-   * @param {string} url - The base WFS service URL.
-   * @param {string} layerId - The layer or feature type name to describe.
-   * @param {string} version - The WFS version.
-   * @param {string} [outputFormat] - Optional output format (e.g., "application/json", "text/xml").
-   * @returns {string} A fully qualified DescribeFeatureType request URL.
+   *
+   * @param url - The base WFS service URL
+   * @param layerId - The layer or feature type name to describe
+   * @param version - The WFS version
+   * @param outputFormat - Optional output format (e.g., "application/json", "text/xml")
+   * @returns A fully qualified DescribeFeatureType request URL
    */
   static ensureServiceRequestUrlDescribeFeatureType(
     url: string,
@@ -154,11 +161,12 @@ export abstract class GeoUtilities {
 
   /**
    * Builds a complete GetFeature URL for a WMS/WFS service.
-   * @param {string} url - The base WFS service URL.
-   * @param {string} layerId - The layer or feature type name to request.
-   * @param {string} version - The WFS version.
-   * @param {string} [outputFormat] - Optional output format (e.g., "application/json").
-   * @returns {string} A fully qualified GetFeature request URL.
+   *
+   * @param url - The base WFS service URL
+   * @param layerId - The layer or feature type name to request
+   * @param version - The WFS version
+   * @param outputFormat - Optional output format (e.g., "application/json")
+   * @returns A fully qualified GetFeature request URL
    */
   static ensureServiceRequestUrlGetFeature(
     url: string,
@@ -179,14 +187,15 @@ export abstract class GeoUtilities {
 
   /**
    * Removes specified query parameters from a URL, preserving all others.
+   *
    * This method normalizes a URL by stripping out any query parameters whose
    * keys match the ones provided in `removeParams`. It works even if the URL
    * contains multiple `?` or `&` characters (e.g., proxy-wrapped URLs).
-   * @param {string} url - The URL to normalize.
-   * @param {string[]} removeParams - Array of parameter names (case-insensitive)
-   *   to remove from the URL.
-   * @returns {string} - The normalized URL with the specified parameters removed.
-   * @static
+   *
+   * @param url - The URL to normalize
+   * @param removeParams - Array of parameter names (case-insensitive)
+   *   to remove from the URL
+   * @returns The normalized URL with the specified parameters removed
    */
   static ensureURLForOpenLayersSource(url: string, removeParams: string[]): string {
     const lowerRemove = removeParams.map((p) => p.toLowerCase());
@@ -215,8 +224,9 @@ export abstract class GeoUtilities {
 
   /**
    * Fetch the json response from the ESRI map server to get REST endpoint metadata.
-   * @param {string} url - The url of the ESRI map server.
-   * @returns {Promise<unknown>} A json promise containing the result of the query.
+   *
+   * @param url - The url of the ESRI map server
+   * @returns A promise that resolves with the JSON metadata from the server
    */
   static getESRIServiceMetadata(url: string): Promise<unknown> {
     // fetch the map server returning a json object
@@ -225,11 +235,12 @@ export abstract class GeoUtilities {
 
   /**
    * Fetch the json response from the XML response of a WMS getCapabilities request.
-   * @param {string} url - The url the url of the WMS server.
-   * @param {CallbackNewMetadataDelegate?} [callbackNewMetadataUrl] - Callback executed when a proxy had to be used to fetch the metadata.
+   *
+   * @param url - The url the url of the WMS server
+   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns {Promise<TypeMetadataWMS>} A json promise containing the result of the query.
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves with the capabilities XML as a string
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
    * @throws {ResponseError} When the response is not OK (non-2xx).
@@ -271,12 +282,13 @@ export abstract class GeoUtilities {
 
   /**
    * Fetch the json response from the XML response of a WMS getCapabilities request.
-   * @param {string} url - The url the url of the WMS server.
-   * @param {string} layers - The layers to query separate by.
-   * @param {CallbackNewMetadataDelegate?} [callbackNewMetadataUrl] - Callback executed when a proxy had to be used to fetch the metadata.
+   *
+   * @param url - The url the url of the WMS server
+   * @param layers - The layers to query separate by
+   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns {Promise<TypeMetadataWMS>} A json promise containing the result of the query.
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves with the parsed WMS metadata
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
    * @throws {ResponseError} When the response is not OK (non-2xx).
@@ -340,7 +352,7 @@ export abstract class GeoUtilities {
    * @param url - The url the url of the WMS server.
    * @param layers - The layers to query separate by.
    * @param abortSignal - Optional abort signal to handle cancelling of the process.
-   * @returns A json promise containing the result of the query.
+   * @returns A promise that resolves with the parsed WMTS metadata
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
    * @throws {ResponseError} When the response is not OK (non-2xx).
@@ -366,11 +378,13 @@ export abstract class GeoUtilities {
 
   /**
    * Detects whether a WMS GetCapabilities document was produced by QGIS Server.
+   *
    * QGIS Server responses can be identified by:
    * - The presence of the QGIS-specific namespace (`xmlns:qgs="http://www.qgis.org/wms"`)
    * - Or schema references to `qgis.org/wms` in the `xsi:schemaLocation`
-   * @param {string | Document} xml - The GetCapabilities XML string or parsed XML Document.
-   * @returns {boolean} True if the capabilities document appears to be from QGIS Server.
+   *
+   * @param xml - The GetCapabilities XML string or parsed XML Document
+   * @returns True if the capabilities document appears to be from QGIS Server
    */
   static #isQgisServer(xml: string | Document): boolean {
     let xmlDoc: Document;
@@ -399,12 +413,14 @@ export abstract class GeoUtilities {
 
   /**
    * Detects whether a WMS GetCapabilities XML response was generated by GeoServer.
+   *
    * Detection logic looks for:
    * - GeoServer namespaces (e.g., "http://geoserver.org")
    * - Schema locations referencing GeoServer (e.g., "/geoserver/")
    * - GeoServer-specific Service metadata (keywords, OnlineResource, etc.)
-   * @param {string} xml - The raw WMS GetCapabilities XML string.
-   * @returns {boolean} True if the response appears to be from GeoServer, false otherwise.
+   *
+   * @param xml - The raw WMS GetCapabilities XML string
+   * @returns True if the response appears to be from GeoServer, false otherwise
    */
   static #isGeoServer(xml: string): boolean {
     // Quick check for obvious GeoServer signatures
@@ -441,12 +457,14 @@ export abstract class GeoUtilities {
 
   /**
    * Detects whether a WMS GetCapabilities XML response was generated by MapServer.
+   *
    * Detection logic looks for:
    * - MapServer-specific namespaces or schema URLs
    * - Service metadata fields referencing MapServer
    * - MapServer URLs in OnlineResource or schemaLocation
-   * @param {string} xml - The raw WMS GetCapabilities XML string.
-   * @returns {boolean} True if the response appears to be from MapServer, false otherwise.
+   *
+   * @param xml - The raw WMS GetCapabilities XML string
+   * @returns True if the response appears to be from MapServer, false otherwise
    */
   static #isMapServer(xml: string): boolean {
     const lowerXml = xml.toLowerCase();
@@ -487,11 +505,13 @@ export abstract class GeoUtilities {
 
   /**
    * Normalizes a property of an object so that its value is always an array.
+   *
    * This helper is used when parsing WMS Capabilities documents, where
    * some fields may be expressed as a single object or as an array of objects.
    * Ensuring array form simplifies processing logic elsewhere.
-   * @param {any} object - The object containing the property to normalize.
-   * @param {string} property - The property name whose value should be normalized.
+   *
+   * @param object - The object containing the property to normalize
+   * @param property - The property name whose value should be normalized
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static #helperParseCapabilityNormalizeArray(object: any, property: string): void {
@@ -507,7 +527,9 @@ export abstract class GeoUtilities {
 
   /**
    * Recursively normalizes a WMS Capability Layer object so its structure is
-   * consistent and easier to work with. This function was created to **simulate
+   * consistent and easier to work with.
+   *
+   * This function was created to **simulate
    * the normalizations previously performed by OpenLayers' `WMSCapabilities`
    * parser (`ol/format/WMSCapabilities`) before that logic was replaced**.
    * The function:
@@ -516,7 +538,8 @@ export abstract class GeoUtilities {
    * - Normalizes `SRS` to `CRS` when only `SRS` is provided (as OpenLayers used to do).
    * - Generates convenience `extent` arrays for `BoundingBox` and `EX_GeographicBoundingBox`,
    *   again mimicking old OpenLayers parsing behavior.
-   * @param {TypeMetadataWMSCapabilityLayer} layer - A WMS capability layer object.
+   *
+   * @param layer - A WMS capability layer object
    */
   static #helperParseCapabilityLayer(layer: TypeMetadataWMSCapabilityLayer): void {
     // Check for recursion
@@ -588,12 +611,13 @@ export abstract class GeoUtilities {
 
   /**
    * Fetch the json response from the XML response of a WMS getCapabilities request.
-   * @param {string} url - The url the url of the WMS server.
-   * @param {string} layers - The layers to query separate by.
-   * @param {CallbackNewMetadataDelegate?} [callbackNewMetadataUrl] - Callback executed when a proxy had to be used to fetch the metadata.
+   *
+   * @param url - The url the url of the WMS server
+   * @param layers - The layers to query separate by
+   * @param callbackNewMetadataUrl - Optional callback executed when a proxy had to be used to fetch the metadata.
    * The parameter sent in the callback is the proxy prefix with the '?' at the end.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns {Promise<TypeStylesWMS>} A json promise containing the result of the query.
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves with the parsed WMS styles
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
    * @throws {ResponseError} When the response is not OK (non-2xx).
@@ -618,9 +642,10 @@ export abstract class GeoUtilities {
 
   /**
    * Return the map server url from a layer service.
-   * @param {string} url - The service url for a wms / dynamic or feature layers.
-   * @param {boolean} rest - Boolean value to add rest services if not present (default false).
-   * @returns {string} The map server url.
+   *
+   * @param url - The service url for a wms / dynamic or feature layers
+   * @param rest - Boolean value to add rest services if not present (default false)
+   * @returns The map server url
    * @deprecated
    */
   static getMapServerUrl(url: string, rest: boolean = false): string {
@@ -642,8 +667,9 @@ export abstract class GeoUtilities {
 
   /**
    * Return the root server url from a OGC layer service.
-   * @param {string} url - The service url for an ogc layer.
-   * @returns {string} The root ogc server url.
+   *
+   * @param url - The service url for an ogc layer
+   * @returns The root ogc server url
    * @deprecated
    */
   static getOGCServerUrl(url: string): string {
@@ -656,10 +682,11 @@ export abstract class GeoUtilities {
 
   /**
    * Replaces or adds the BBOX parameter in a WMS GetMap URL.
-   * @param {string} url - The original WMS GetMap URL
-   * @param {string} newCRS - The new CRS
-   * @param {number[]} newBBOX - The new BBOX to set, as an array of 4 numbers: [minX, minY, maxX, maxY]
-   * @returns {string} A new URL string with the updated BBOX parameter
+   *
+   * @param url - The original WMS GetMap URL
+   * @param newCRS - The new CRS
+   * @param newBBOX - The new BBOX to set, as an array of 4 numbers: [minX, minY, maxX, maxY]
+   * @returns A new URL string with the updated BBOX parameter
    */
   static replaceCRSandBBOXParam(url: string, newCRS: string, newBBOX: number[]): string {
     const urlObj = new URL(url);
@@ -680,6 +707,7 @@ export abstract class GeoUtilities {
 
   /**
    * Generates legend layer icon metadata from a layer legend definition.
+   *
    * This method extracts icon imagery and legend item details from the provided
    * `layerLegend`, handling both vector and non-vector legends.
    * Behavior:
@@ -698,10 +726,9 @@ export abstract class GeoUtilities {
    * - Duplicate legend labels within categorized styles are filtered out.
    * - Visibility defaults to `true` unless explicitly set to `false`.
    * - Returns `undefined` if `layerLegend` is `null` or `undefined`.
-   * @param schemaTag - The layer schema type used to determine
-   * whether the legend should be interpreted as vector-based.
-   * @param layerLegend - The legend configuration
-   * object associated with the layer.
+   *
+   * @param schemaTag - The layer schema type used to determine whether the legend should be interpreted as vector-based.
+   * @param layerLegend - The legend configuration object associated with the layer.
    * @returns An array of legend layer item metadata containing icon images and legend entries,
    * or `undefined` if no legend is provided.
    */
@@ -776,6 +803,7 @@ export abstract class GeoUtilities {
 
   /**
    * Extracts and normalizes legend items from a collection of legend layer icons.
+   *
    * This method:
    * - Flattens all `iconList` entries from the provided legend layer items.
    * - Handles special layer types (`imageStatic` and `GeoTIFF`) by dynamically
@@ -786,6 +814,7 @@ export abstract class GeoUtilities {
    * - `name` set to `'image'`
    * - `icon` set from `icons[0].iconImage`
    * - `isVisible` set to `true`
+   *
    * @param schemaTag - The layer schema type used to determine
    * special handling logic (e.g., `'imageStatic'`, `'GeoTIFF'`).
    * @param icons - The list of legend layer items containing
@@ -830,12 +859,13 @@ export abstract class GeoUtilities {
   }
 
   /**
-   * type guard function that redefines a TypeLegend as a TypeVectorLegend
-   * if the type attribute of the verifyIfLegend parameter is valid. The type ascention
-   * applies only to the true block of the if clause.
+   * Type guard function that redefines a TypeLegend as a TypeVectorLegend
+   * if the type attribute of the verifyIfLegend parameter is valid.
    *
-   * @param {TypeLegend} verifyIfLegend object to test in order to determine if the type ascention is valid
-   * @returns {boolean} returns true if the payload is valid
+   * The type ascention applies only to the true block of the if clause.
+   *
+   * @param verifyIfLegend - Object to test in order to determine if the type ascention is valid
+   * @returns True if the payload is valid
    */
   static isVectorLegend(verifyIfLegend: TypeLegend, schemaTag: TypeGeoviewLayerType): verifyIfLegend is TypeVectorLegend {
     return validVectorLayerLegendTypes.includes(schemaTag);
@@ -847,8 +877,9 @@ export abstract class GeoUtilities {
 
   /**
    * Returns the WKT representation of a given geometry.
-   * @param {string} geometry - The geometry
-   * @returns {string | undefined} The WKT representation of the geometry
+   *
+   * @param geometry - The geometry
+   * @returns The WKT representation of the geometry, or undefined if no geometry is provided
    */
   static geometryToWKT(geometry: Geometry): string | undefined {
     if (geometry) {
@@ -861,9 +892,10 @@ export abstract class GeoUtilities {
 
   /**
    * Returns the Geometry representation of a given wkt.
-   * @param {string} wkt - The well known text
-   * @param {ReadOptions} readOptions - Read options to convert the wkt to a geometry
-   * @returns {Geometry | undefined} The Geometry representation of the wkt
+   *
+   * @param wkt - The well known text
+   * @param readOptions - Read options to convert the wkt to a geometry
+   * @returns The Geometry representation of the wkt, or undefined if no wkt is provided
    */
   static wktToGeometry(wkt: string, readOptions: ReadOptions): Geometry | undefined {
     if (wkt) {
@@ -875,10 +907,11 @@ export abstract class GeoUtilities {
   }
 
   /**
-   * Returns the Geometry representation of a given geojson
-   * @param {string} geojson - The geojson
-   * @param {ReadOptions} readOptions - Read options to convert the geojson to a geometry
-   * @returns {Geometry | undefined} - The Geometry representation of the geojson
+   * Returns the Geometry representation of a given geojson.
+   *
+   * @param geojson - The geojson
+   * @param readOptions - Read options to convert the geojson to a geometry
+   * @returns The Geometry representation of the geojson, or undefined if no geojson is provided
    */
   static geojsonToGeometry(geojson: string, readOptions: ReadOptions): Geometry | undefined {
     if (geojson) {
@@ -891,8 +924,9 @@ export abstract class GeoUtilities {
 
   /**
    * Checks whether a given value is a valid GeoJSON FeatureCollection object.
-   * @param {any} value - The value to test (can be any type).
-   * @returns {boolean} `true` if the value appears to be a GeoJSON FeatureCollection, otherwise `false`.
+   *
+   * @param value - The value to test (can be any type)
+   * @returns True if the value appears to be a GeoJSON FeatureCollection, otherwise false
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static isGeoJSONObject(value: any): boolean {
@@ -901,12 +935,13 @@ export abstract class GeoUtilities {
 
   /**
    * Extracts the EPSG code from a GeoJSON object's CRS definition.
+   *
    * Accepts either a GeoJSON object or a JSON string. If the GeoJSON contains
    * a `crs` entry with a `properties.name` field in the form
    * `"urn:ogc:def:crs:EPSG::<code>"`, it is normalized to `"EPSG:<code>"`.
-   * @param {object|string} geojson - A GeoJSON object or a JSON string representing one.
-   * @returns {string|undefined} The normalized EPSG code (e.g., `"EPSG:3005"`), or
-   * `undefined` if the CRS is not defined.
+   *
+   * @param geojson - A GeoJSON object or a JSON string representing one
+   * @returns The normalized EPSG code (e.g., `"EPSG:3005"`), or undefined if the CRS is not defined
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static readEPSGOfGeoJSON(geojson: any): string | undefined {
@@ -926,13 +961,14 @@ export abstract class GeoUtilities {
   }
 
   /**
-   * Extracts the EPSG code from a GeoJSON object's CRS definition.
-   * Accepts either a GeoJSON object or a JSON string. If the GeoJSON contains
-   * a `crs` entry with a `properties.name` field in the form
+   * Extracts the EPSG code from a GML object's CRS definition.
+   *
+   * Accepts either a GML object or an XML string. If the GML contains
+   * an element with a `srsName` attribute in the form
    * `"urn:ogc:def:crs:EPSG::<code>"`, it is normalized to `"EPSG:<code>"`.
-   * @param {object|string} geojson - A GeoJSON object or a JSON string representing one.
-   * @returns {string|undefined} The normalized EPSG code (e.g., `"EPSG:3005"`), or
-   * `undefined` if the CRS is not defined.
+   *
+   * @param gml - A GML object or an XML string representing one
+   * @returns The normalized EPSG code (e.g., `"EPSG:3005"`), or undefined if the CRS is not defined
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static readEPSGOfGML(gml: any): string | undefined {
@@ -954,6 +990,7 @@ export abstract class GeoUtilities {
 
   /**
    * Extracts an EPSG code from a SRS/CRS standard string.
+   *
    * Supports common formats used in GeoJSON/WFS/GML.
    */
   static #parseEPSGFromName(name: string): string | undefined {
@@ -975,10 +1012,11 @@ export abstract class GeoUtilities {
 
   /**
    * Reads OpenLayers features from an Esri features object.
-   * @param {unknown} features - The Features data to read.
-   * @param {import('ol/format/Feature').ReadOptions} [options] - Optional read options such as projection or extent.
-   * @returns {EsriJSONReadResult} An array of parsed OpenLayers Feature and whether there were any invalid geometries
-   * @throws {Error} If the EsriJSON data is invalid and cannot be parsed, even after attempting to clean invalid geometries.
+   *
+   * @param features - The Features data to read
+   * @param options - Optional read options such as projection or extent
+   * @returns An array of parsed OpenLayers Feature and whether there were any invalid geometries
+   * @throws {Error} When the EsriJSON data is invalid and cannot be parsed, even after attempting to clean invalid geometries.
    */
   static readFeaturesFromEsriJSON(features: unknown, options: ReadOptions | undefined): EsriJSONReadResult {
     // GV Anything other than numbers in the geometry will throw errors in EsriJSON().readFeatures()
@@ -1008,10 +1046,9 @@ export abstract class GeoUtilities {
 
   /**
    * Cleans invalid geometries in Esri feature collection by setting invalid coordinates to NaN or empty arrays.
-   * @param {unknown} features - The Features data to clean.
-   * @returns {EsriFeatureCollection} A cleaned copy of the features.
-   * @static
-   * @private
+   *
+   * @param features - The Features data to clean
+   * @returns A cleaned copy of the features collection
    */
   static #cleanEsriGeometries(features: unknown): EsriFeatureCollection {
     const cleanedFeatures = JSON.parse(JSON.stringify(features)) as EsriFeatureCollection;
@@ -1065,9 +1102,10 @@ export abstract class GeoUtilities {
 
   /**
    * Reads OpenLayers features from a GeoJSON object.
-   * @param {unknown} geojson - The GeoJSON data to read.
-   * @param {import('ol/format/Feature').ReadOptions} [options] - Optional read options such as projection or extent.
-   * @returns {import('ol/Feature').default[]} An array of parsed OpenLayers Feature instances.
+   *
+   * @param geojson - The GeoJSON data to read
+   * @param options - Optional read options such as projection or extent
+   * @returns An array of parsed OpenLayers Feature instances
    */
   static readFeaturesFromGeoJSON(geojson: unknown, options: ReadOptions | undefined): Feature<Geometry>[] {
     // Read the features
@@ -1076,9 +1114,11 @@ export abstract class GeoUtilities {
 
   /**
    * Reads OpenLayers features from an WFS features object.
-   * @param {unknown} features - The Features data to read.
-   * @param {import('ol/format/Feature').ReadOptions} [options] - Optional read options such as projection or extent.
-   * @returns {import('ol/Feature').default[]} An array of parsed OpenLayers Feature instances.
+   *
+   * @param features - The Features data to read
+   * @param version - The WFS version
+   * @param options - Optional read options such as projection or extent
+   * @returns An array of parsed OpenLayers Feature instances
    */
   static readFeaturesFromWFS(features: unknown, version: string, options: ReadOptions | undefined): Feature<Geometry>[] {
     // Read the features
@@ -1089,9 +1129,10 @@ export abstract class GeoUtilities {
 
   /**
    * Reads OpenLayers features from a WKBObject object.
-   * @param {string | ArrayBuffer | ArrayBufferView<ArrayBufferLike>} wkbObject - The WKBObject data to read.
-   * @param {import('ol/format/Feature').ReadOptions} [options] - Optional read options such as projection or extent.
-   * @returns {import('ol/Feature').default[]} An array of parsed OpenLayers Feature instances.
+   *
+   * @param wkbObject - The WKBObject data to read
+   * @param options - Optional read options such as projection or extent
+   * @returns An array of parsed OpenLayers Feature instances
    */
   static readFeaturesFromWKB(
     wkbObject: string | ArrayBuffer | ArrayBufferView<ArrayBufferLike>,
@@ -1102,17 +1143,22 @@ export abstract class GeoUtilities {
 
   /**
    * Reads OpenLayers features from a KML object.
-   * @param {unknown} kmlObject - The KML data to read.
-   * @param {import('ol/format/Feature').ReadOptions} [options] - Optional read options such as projection or extent.
-   * @returns {import('ol/Feature').default[]} An array of parsed OpenLayers Feature instances.
+   *
+   * @param kmlObject - The KML data to read
+   * @param options - Optional read options such as projection or extent
+   * @returns An array of parsed OpenLayers Feature instances
    */
   static readFeaturesFromKML(kmlObject: unknown, options: ReadOptions | undefined): Feature<Geometry>[] {
     return new KML().readFeatures(kmlObject, options);
   }
 
   /**
-   * Default drawing style for GeoView
-   * @returns {Style} An Open Layers styling for drawing on a map
+   * Default drawing style for GeoView.
+   *
+   * @param strokeColor - Optional stroke color
+   * @param strokeWidth - Optional stroke width
+   * @param fillColor - Optional fill color
+   * @returns An Open Layers styling for drawing on a map
    */
   static getDefaultDrawingStyle(strokeColor?: Color | string, strokeWidth?: number, fillColor?: Color | string): Style {
     return new Style({
@@ -1140,9 +1186,9 @@ export abstract class GeoUtilities {
 
   /**
    * Create empty basemap tilelayer to use as initial basemap while we load basemap
-   * so the viewer will not fails if basemap is not avialable
+   * so the viewer will not fails if basemap is not avialable.
    *
-   * @returns {TileLayer<XYZ>} The created empty basemap
+   * @returns The created empty basemap
    */
   static createEmptyBasemap(): TileLayer<XYZ | OSM | VectorTile> {
     // create empty tilelayer to use as initial basemap while we load basemap
@@ -1164,9 +1210,10 @@ export abstract class GeoUtilities {
   }
 
   /**
-   * Format the coordinates for degrees - minutes - seconds (lat, long)
-   * @param {number} value the value to format
-   * @returns {string} the formatted value
+   * Format the coordinates for degrees - minutes - seconds (lat, long).
+   *
+   * @param value - The value to format
+   * @returns The formatted value
    */
   static coordFormatDMS(value: number): string {
     // degree char
@@ -1180,7 +1227,9 @@ export abstract class GeoUtilities {
 
   /**
    * Converts a TypeFeatureStyle to an Open Layers Style object.
-   * @returns an Open Layers styling for drawing on a map or undefined
+   *
+   * @param style - Optional feature style to convert
+   * @returns An Open Layers styling for drawing on a map
    */
   static convertTypeFeatureStyleToOpenLayersStyle(style?: TypeFeatureStyle): Style {
     // Redirect
@@ -1189,9 +1238,10 @@ export abstract class GeoUtilities {
 
   // #region EXTENT
   /**
-   * Check if a point is contained in an extent
-   * @param {Coordinate} point - The point
-   * @param {Extent} extent - The extent
+   * Check if a point is contained in an extent.
+   *
+   * @param point - The point
+   * @param extent - The extent
    * @returns True if point is within the extent, false otherwise
    */
   static isPointInExtent(point: Coordinate, extent: Extent): boolean {
@@ -1200,9 +1250,10 @@ export abstract class GeoUtilities {
 
   /**
    * Returns the union of 2 extents.
-   * @param {Extent | undefined} extentA First extent
-   * @param {Extent | undefined} extentB Optional second extent
-   * @returns {Extent | undefined} The union of the extents
+   *
+   * @param extentA - First extent
+   * @param extentB - Optional second extent
+   * @returns The union of the extents, or undefined if both are undefined
    */
   static getExtentUnion(extentA: Extent | undefined, extentB?: Extent | undefined): Extent | undefined {
     // If no A, return B which may be undefined too
@@ -1222,9 +1273,10 @@ export abstract class GeoUtilities {
 
   /**
    * Returns the intersection of 2 extents.
-   * @param {Extent | undefined} extentA First extent
-   * @param {Extent | undefined} extentB Optional second extent
-   * @returns {Extent | undefined} The intersection of the extents
+   *
+   * @param extentA - First extent
+   * @param extentB - Optional second extent
+   * @returns The intersection of the extents, or undefined if both are undefined
    */
   static getExtentIntersection(extentA: Extent | undefined, extentB?: Extent | undefined): Extent | undefined {
     // If no B, return A
@@ -1243,9 +1295,10 @@ export abstract class GeoUtilities {
   }
 
   /**
-   * Converts an extent to a polygon
-   * @param {Extent} extent - The extent to convert
-   * @returns {Polygon} The created polygon
+   * Converts an extent to a polygon.
+   *
+   * @param extent - The extent to convert
+   * @returns The created polygon
    */
   static extentToPolygon(extent: Extent): Polygon {
     const polygon = new Polygon([
@@ -1260,9 +1313,10 @@ export abstract class GeoUtilities {
   }
 
   /**
-   * Converts a polygon to an extent
-   * @param {Polygon} polygon - The polygon to convert
-   * @returns {Extent} The created extent
+   * Converts a polygon to an extent.
+   *
+   * @param polygon - The polygon to convert
+   * @returns The created extent
    */
   static polygonToExtent(polygon: Polygon): Extent {
     const outerRing = polygon.getCoordinates()[0];
@@ -1282,9 +1336,10 @@ export abstract class GeoUtilities {
 
   /**
    * Checks validity of lat long, LCC, or Web Mercator extent and updates values if invalid.
-   * @param {Extent} extent - The extent to validate.
-   * @param {string} code - The projection code of the extent. Default EPSG:4326.
-   * @returns {Extent} The validated extent
+   *
+   * @param extent - The extent to validate
+   * @param code - The projection code of the extent. Default EPSG:4326
+   * @returns The validated extent
    */
   static validateExtent(extent: Extent, code: string = 'EPSG:4326'): Extent {
     // Max extents for projections
@@ -1314,9 +1369,10 @@ export abstract class GeoUtilities {
 
   /**
    * Validates lat long, LCC, or Web Mercator extent if it is defined.
-   * @param {Extent} extent - The extent to validate.
-   * @param {string} code - The projection code of the extent. Default EPSG:4326.
-   * @returns {Extent | undefined} The validated extent if it was defined.
+   *
+   * @param extent - The extent to validate
+   * @param code - The projection code of the extent. Default EPSG:4326
+   * @returns The validated extent if it was defined, or undefined
    */
   static validateExtentWhenDefined(extent: Extent | undefined, code: string = 'EPSG:4326'): Extent | undefined {
     // Validate extent if it is defined
@@ -1326,8 +1382,9 @@ export abstract class GeoUtilities {
 
   /**
    * Checks if a given extent is long/lat.
-   * @param {Extent} extent - The extent to check.
-   * @returns {boolean} Whether or not the extent is long/lat
+   *
+   * @param extent - The extent to check
+   * @returns Whether or not the extent is long/lat
    */
   static isExtentLonLat(extent: Extent): boolean {
     if (
@@ -1348,9 +1405,10 @@ export abstract class GeoUtilities {
   // #endregion EXTENT
 
   /**
-   * Gets the area of a given geometry
-   * @param {Geometry} geometry the geometry to calculate the area
-   * @returns the area of the given geometry
+   * Gets the area of a given geometry.
+   *
+   * @param geometry - The geometry to calculate the area
+   * @returns The area of the given geometry
    */
   static getArea(geometry: Geometry): number {
     // Note that the geometry.getLength() and geometry.getArea() methods return measures of projected (planar) geometries.
@@ -1360,9 +1418,10 @@ export abstract class GeoUtilities {
   }
 
   /**
-   * Gets the length of a given geometry
-   * @param {Geometry} geometry the geometry to calculate the length
-   * @returns the length of the given geometry
+   * Gets the length of a given geometry.
+   *
+   * @param geometry - The geometry to calculate the length
+   * @returns The length of the given geometry
    */
   static getLength(geometry: Geometry): number {
     // Note that the geometry.getLength() and geometry.getArea() methods return measures of projected (planar) geometries.
@@ -1372,11 +1431,12 @@ export abstract class GeoUtilities {
   }
 
   /**
-   * Calculates distance along a path define by array of Coordinates
-   * @param  {Coordinate[]} coordinates - Array of corrdinates
-   * @param {string} inProj - Input projection (EPSG:4326, EPSG:3978, ESPG:3857)
-   * @param {string} outProj - Output projection (EPSG:3978, ESPG:3857)
-   * @returns { total: number; sections: number[] } - The total distance in kilometers and distance for each section
+   * Calculates distance along a path define by array of Coordinates.
+   *
+   * @param coordinates - Array of coordinates
+   * @param inProj - Input projection (EPSG:4326, EPSG:3978, ESPG:3857)
+   * @param outProj - Output projection (EPSG:3978, ESPG:3857)
+   * @returns The total distance in kilometers and distance for each section
    */
   static calculateDistance(coordinates: Coordinate[], inProj: string, outProj: string): { total: number; sections: number[] } {
     const arr = Projection.transformPoints(coordinates, inProj, outProj);
@@ -1391,11 +1451,12 @@ export abstract class GeoUtilities {
   }
 
   /**
-   * Gets meters per pixel for different projections
-   * @param {TypeValidMapProjectionCodes} projection - The projection of the map
-   * @param {number} resolution - The resolution of the map
-   * @param {number?} lat - The latitude, only needed for Web Mercator
-   * @returns {number} Number representing meters per pixel
+   * Gets meters per pixel for different projections.
+   *
+   * @param projection - The projection of the map
+   * @param resolution - The resolution of the map
+   * @param lat - Optional latitude, only needed for Web Mercator
+   * @returns Number representing meters per pixel
    */
   static getMetersPerPixel(projection: TypeValidMapProjectionCodes, resolution: number, lat?: number): number {
     if (!resolution) return 0;
@@ -1413,9 +1474,10 @@ export abstract class GeoUtilities {
 
   /**
    * Gets the pointer position information from a Map Event and a specified projection.
-   * @param {MapEvent} mapEvent - The map event
-   * @param {string} projCode - The map projection code
-   * @returns {TypeMapMouseInfo} An object representing pointer position information
+   *
+   * @param mapEvent - The map event
+   * @param projCode - The map projection code
+   * @returns An object representing pointer position information
    */
   static getPointerPositionFromMapEvent(mapEvent: MapBrowserEvent, projCode: string): TypeMapMouseInfo {
     // Return an object representing pointer position information
@@ -1428,10 +1490,11 @@ export abstract class GeoUtilities {
   }
 
   /**
-   * Function for checking if two geometries have the same coordinates
-   * @param {Geometry} geom1 - The first geometry
-   * @param {Geometry} geom2 - The second geometry
-   * @returns {boolean} Whether the two geometries are equal or not
+   * Function for checking if two geometries have the same coordinates.
+   *
+   * @param geom1 - The first geometry
+   * @param geom2 - The second geometry
+   * @returns Whether the two geometries are equal or not
    */
   static geometriesAreEqual(geom1: Geometry, geom2: Geometry): boolean {
     if (geom1.getType() !== geom2.getType()) return false;
@@ -1446,7 +1509,8 @@ export abstract class GeoUtilities {
   }
 
   /**
-   * Apply buffer to extent
+   * Apply buffer to extent.
+   *
    * @param extent - The extent to check and buffer
    * @param bufferSize - Buffer size in map units (default: 5000)
    * @returns Buffered extent
@@ -1457,13 +1521,14 @@ export abstract class GeoUtilities {
 
   /**
    * Serializes an OpenLayers geometry into a GML3 string.
+   *
    * This method uses the OpenLayers `GML3` format to convert the provided
    * `Geometry` object into a GML XML string, using the specified spatial
    * reference system (`srsName`).
-   * @param {Geometry} geometry - The OpenLayers geometry to serialize.
-   * @param {string} srsName - The spatial reference system (e.g., 'EPSG:3857')
-   *                            to assign to the GML geometry.
-   * @returns {string} The serialized GML geometry as a string.
+   *
+   * @param geometry - The OpenLayers geometry to serialize
+   * @param srsName - The spatial reference system (e.g., 'EPSG:3857') to assign to the GML geometry
+   * @returns The serialized GML geometry as a string
    */
   static writeGeometryToGML(geometry: Geometry, srsName: string): string {
     // GV I've tried a simplified approach for this function, even some suggested by AI, and they all failed to some degree.
@@ -1495,8 +1560,9 @@ export abstract class GeoUtilities {
 
   /**
    * Converts a WFS geometry type string to a TypeStyleGeometry.
-   * @param {string} wfsGeometryType - The wfs geometry type to convert
-   * @returns {TypeStyleGeometry} The corresponding TypeStyleGeometry
+   *
+   * @param wfsGeometryType - The wfs geometry type to convert
+   * @returns The corresponding TypeStyleGeometry
    * @throws {NotSupportedError} When the geometry type is not supported.
    */
   static wfsConvertGeometryTypeToOLGeometryType(wfsGeometryType: string): TypeStyleGeometry {
@@ -1525,8 +1591,9 @@ export abstract class GeoUtilities {
 
   /**
    * Converts an esri geometry type string to a TypeStyleGeometry.
-   * @param {string} esriGeometryType - The esri geometry type to convert
-   * @returns {TypeStyleGeometry} The corresponding TypeStyleGeometry
+   *
+   * @param esriGeometryType - The esri geometry type to convert
+   * @returns The corresponding TypeStyleGeometry
    * @throws {NotSupportedError} When the geometry type is not supported.
    */
   static esriConvertEsriGeometryTypeToOLGeometryType(esriGeometryType: string): TypeStyleGeometry {

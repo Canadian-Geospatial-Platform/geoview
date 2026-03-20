@@ -19,8 +19,7 @@ export type SnapOptions = InteractionOptions & {
  */
 export class Snap extends Interaction {
   /** The embedded OpenLayers Snap component */
-  // eslint-disable-next-line camelcase
-  #ol_snap: OLSnap;
+  #olSnap: OLSnap;
 
   /**
    * Initializes a Snap component.
@@ -44,7 +43,7 @@ export class Snap extends Interaction {
     }
 
     // Instantiate the OpenLayers Snap interaction
-    this.#ol_snap = new OLSnap(olOptions);
+    this.#olSnap = new OLSnap(olOptions);
   }
 
   /**
@@ -52,7 +51,7 @@ export class Snap extends Interaction {
    */
   override startInteraction(): void {
     // Redirect to super method to start interaction
-    super.startInteraction(this.#ol_snap);
+    super.startInteraction(this.#olSnap);
   }
 
   /**
@@ -60,6 +59,6 @@ export class Snap extends Interaction {
    */
   override stopInteraction(): void {
     // Redirect to super method to stop interaction
-    super.stopInteraction(this.#ol_snap);
+    super.stopInteraction(this.#olSnap);
   }
 }

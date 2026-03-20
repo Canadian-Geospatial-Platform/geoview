@@ -17,7 +17,6 @@ import { logger } from '@/core/utils/logger';
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
  * events happening on them (in this case when the user hovers on the map) with a store
  * for UI updates.
- * @class HoverFeatureInfoLayerSet
  */
 export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   /** The query type */
@@ -26,12 +25,13 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   /** The resultSet object as existing in the base class, retyped here as a TypeHoverFeatureInfoResultSet */
   declare resultSet: TypeHoverResultSet;
 
-  // Keep all abort controllers per layer path
+  /** The abort controllers per layer path */
   #abortControllers: { [layerPath: string]: AbortController } = {};
 
   /**
-   * The class constructor that instanciate a set of layer.
-   * @param {LayerApi} layerApi - The layer Api to work with.
+   * The class constructor that instantiates a set of layers.
+   *
+   * @param layerApi - The layer Api to work with
    */
   constructor(layerApi: LayerApi) {
     super(layerApi);
@@ -54,10 +54,9 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a hover-feature-info-layer-set wants to check for condition to register a layer in its set.
-   * @param {AbstractBaseGVLayer} layer - The layer
-   * @returns {boolean} True when the layer should be registered to this hover-feature-info-layer-set.
-   * @override
-   * @protected
+   *
+   * @param layer - The layer
+   * @returns True when the layer should be registered to this hover-feature-info-layer-set
    */
   protected override onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean {
     // Return if the layer is of queryable type and source is queryable
@@ -80,12 +79,10 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Overrides the behavior to apply when propagating to the store
-   * @param {TypeHoverResultSetEntry} resultSetEntry - The result set entry to propagate to the store
-   * @param {PropagationType} type - The propagation type
-   * @returns {void}
-   * @override
-   * @protected
+   * Overrides the behavior to apply when propagating to the store.
+   *
+   * @param resultSetEntry - The result set entry to propagate to the store
+   * @param type - The propagation type
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override onPropagateToStore(resultSetEntry: TypeHoverResultSetEntry, type: PropagationType): void {
@@ -93,11 +90,9 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Overrides the behavior to apply when deleting from the store
-   * @param {string} layerPath - The layer path to delete from the store
-   * @returns {void}
-   * @override
-   * @protected
+   * Overrides the behavior to apply when deleting from the store.
+   *
+   * @param layerPath - The layer path to delete from the store
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override onDeleteFromStore(layerPath: string): void {
@@ -106,12 +101,10 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Queries the features at the provided coordinate for all the registered layers.
-   * @param {Coordinate} coordinate - The pixel coordinate where to query the features when the queryType is 'at_pixel' or the map coordinate otherwise.
-   * @param {QueryType} queryType - The query type, default: HoverFeatureInfoLayerSet.QUERY_TYPE.
-   * @returns {Promise<TypeHoverResultSet>} The hover result set results.
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
-   * @async
+   *
+   * @param coordinate - The pixel coordinate where to query the features when the queryType is 'at_pixel' or the map coordinate otherwise
+   * @param queryType - The query type, default: HoverFeatureInfoLayerSet.QUERY_TYPE
+   * @returns A promise that resolves with the hover result set results
    */
   async queryLayers(coordinate: Coordinate, queryType: QueryType = HoverFeatureInfoLayerSet.QUERY_TYPE): Promise<TypeHoverResultSet> {
     // FIXME: Watch out for code reentrancy between queries!
@@ -220,7 +213,8 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Clears the results for the provided layer path.
-   * @param {string} layerPath - The layer path
+   *
+   * @param layerPath - The layer path
    */
   clearResults(layerPath: string): void {
     // Edit the result set
@@ -231,9 +225,9 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Propagates the resultSetEntry to the store
-   * @param {TypeHoverFeatureInfo} hoverFeatureInfo - The hover info to propagate to the store
-   * @private
+   * Propagates the resultSetEntry to the store.
+   *
+   * @param hoverFeatureInfo - The hover info to propagate to the store
    */
   #propagateToStore(hoverFeatureInfo: TypeHoverFeatureInfo | undefined): void {
     // Propagate
@@ -241,8 +235,9 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Get the ordered layer paths to query
-   * @returns {string[]} The ordered layer paths to query
+   * Gets the ordered layer paths to query.
+   *
+   * @returns The ordered layer paths to query
    */
   #getOrderedLayerPaths(): string[] {
     // Get the map layer order

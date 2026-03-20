@@ -40,8 +40,6 @@ export interface TypeWmtsLayerConfig extends TypeGeoviewLayerConfig {
 
 /**
  * A class to add wmts layer
- *
- * @class WMTS
  */
 export class WMTS extends AbstractGeoViewRaster {
   /**
@@ -86,7 +84,7 @@ export class WMTS extends AbstractGeoViewRaster {
    *   - If layer configs are present (e.g., Geomet use case), individual layer metadata is merged.
    *
    * @param abortSignal - Optional abort signal to handle cancelling of the process.
-   * @returns A promise resolving to the parsed metadata object,
+   * @returns A promise that resolves to the parsed metadata object,
    * or `undefined` if metadata could not be retrieved or no capabilities were found.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    */
@@ -107,7 +105,7 @@ export class WMTS extends AbstractGeoViewRaster {
    *
    * @param metadataUrl - The metadataAccessPath
    * @param abortSignal - Optional abort signal to handle cancelling of the process.
-   * @returns A promise that the execution is completed.
+   * @returns A promise that resolves once the execution is completed.
    * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
    */
   async #fetchXmlServiceMetadata(metadataUrl: string, abortSignal?: AbortSignal): Promise<TypeMetadataWMTS> {
@@ -131,7 +129,7 @@ export class WMTS extends AbstractGeoViewRaster {
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
    *
-   * @returns A promise resolved once the layer entries have been initialized.
+   * @returns A promise that resolves once the layer entries have been initialized.
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Fetch the metadata
@@ -169,6 +167,7 @@ export class WMTS extends AbstractGeoViewRaster {
 
   /**
    * Overrides the validation of a layer entry config.
+   *
    * @param layerConfig - The layer entry config to validate.
    */
   protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
@@ -187,7 +186,7 @@ export class WMTS extends AbstractGeoViewRaster {
    * @param layerConfig - The layer entry configuration to process.
    * @param mapProjection - Optional map projection.
    * @param abortSignal - Optional abort signal to handle cancelling of the process.
-   * @returns A promise that the layer entry configuration has gotten its metadata processed.
+   * @returns A promise that resolves once the layer entry configuration has gotten its metadata processed.
    * @throws {LayerWMTSMetadataError} When the metadata is missing necessary information or contains an error.
    */
   protected override async onProcessLayerMetadata(
@@ -315,6 +314,7 @@ export class WMTS extends AbstractGeoViewRaster {
    *
    * @param url - The url to query the metadata from.
    * @param abortSignal - Optional abort signal to handle cancelling of the process.
+   * @returns A promise that resolves to the parsed metadata object.
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
    * @throws {ResponseError} When the response is not OK (non-2xx).
@@ -328,6 +328,7 @@ export class WMTS extends AbstractGeoViewRaster {
 
   /**
    * Initializes a GeoView layer configuration for a WMTS layer.
+   *
    * This method creates a basic TypeGeoviewLayerConfig using the provided
    * ID, name, and metadata access path URL. It then initializes the layer entries by calling
    * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
@@ -351,6 +352,7 @@ export class WMTS extends AbstractGeoViewRaster {
 
   /**
    * Creates a configuration object for a WMTS layer.
+   *
    * This function constructs a `TypeWMTSConfig` object that describes a WMTS layer
    * and its associated entry configurations based on the provided parameters.
    *
@@ -436,7 +438,7 @@ export class WMTS extends AbstractGeoViewRaster {
    *
    * @param layerConfig - The configuration for the WMTS layer.
    * @returns A fully configured WMTS source.
-   * @throws {LayerWMTSMetadataError} When we don't have enough info to create a source, throw an error.
+   * @throws {LayerWMTSMetadataError} When we don't have enough info to create a source.
    */
   static createWMTSSource(layerConfig: OgcWmtsLayerEntryConfig): WMTSSource {
     const metadata = layerConfig.getLayerMetadata();

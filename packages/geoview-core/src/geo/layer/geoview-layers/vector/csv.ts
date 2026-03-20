@@ -23,10 +23,7 @@ export interface TypeCSVLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
 }
 
 /**
- * Class used to add a CSV layer to the map
- *
- * @exports
- * @class CSV
+ * Class used to add a CSV layer to the map.
  */
 export class CSV extends AbstractGeoViewVector {
   /**
@@ -53,9 +50,8 @@ export class CSV extends AbstractGeoViewVector {
 
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
-   * @returns A promise resolved once the layer entries have been initialized.
-   * @override
-   * @protected
+   *
+   * @returns A promise that resolves once the layer entries have been initialized
    */
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Get the folder url
@@ -69,13 +65,12 @@ export class CSV extends AbstractGeoViewVector {
 
   /**
    * Overrides the way the layer metadata is processed.
-   * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration to process.
-   * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
-   * @param {OLProjection?} [mapProjection] - The map projection.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
-   * @override
-   * @protected
+   *
+   * @param layerConfig - The layer entry configuration to process
+   * @param displayDateMode - The display date mode to use for processing time dimensions in the metadata
+   * @param mapProjection - Optional map projection
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves once the layer entry configuration has gotten its metadata processed
    */
   protected override onProcessLayerMetadata(
     layerConfig: VectorLayerEntryConfig,
@@ -96,19 +91,11 @@ export class CSV extends AbstractGeoViewVector {
   /**
    * Overrides the loading of the vector features for the layer by fetching CSV data and converting it
    * into OpenLayers {@link Feature} feature instances.
-   * @param {VectorLayerEntryConfig} layerConfig -
-   * The configuration object for the vector layer, containing source and
-   * data access information.
-   * @param {SourceOptions<Feature>} sourceOptions -
-   * The OpenLayers vector source options associated with the layer. This may be
-   * used by implementations to customize loading behavior or source configuration.
-   * @param {ReadOptions} readOptions -
-   * Options controlling how features are read, including the target
-   * `featureProjection`.
-   * @returns {Promise<Feature[]>}
-   * A promise that resolves to an array of OpenLayers features.
-   * @override
-   * @protected
+   *
+   * @param layerConfig - The configuration object for the vector layer, containing source and data access information
+   * @param sourceOptions - The OpenLayers vector source options associated with the layer
+   * @param readOptions - Options controlling how features are read, including the target `featureProjection`
+   * @returns A promise that resolves to an array of OpenLayers features
    */
   protected override async onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
@@ -123,11 +110,10 @@ export class CSV extends AbstractGeoViewVector {
   }
 
   /**
-   * Overrides the creation of the GV Layer
-   * @param {CsvLayerEntryConfig} layerConfig - The layer entry configuration.
-   * @returns {GVCSV} The GV Layer
-   * @override
-   * @protected
+   * Overrides the creation of the GV Layer.
+   *
+   * @param layerConfig - The layer entry configuration
+   * @returns The GV Layer
    */
   protected override onCreateGVLayer(layerConfig: CsvLayerEntryConfig): GVCSV {
     // Create the source
@@ -144,15 +130,16 @@ export class CSV extends AbstractGeoViewVector {
 
   /**
    * Initializes a GeoView layer configuration for a CSV layer.
+   *
    * This method creates a basic TypeGeoviewLayerConfig using the provided
    * ID, name, and metadata access path URL. It then initializes the layer entries by calling
    * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
+   *
    * @param geoviewLayerId - A unique identifier for the layer.
    * @param geoviewLayerName - The display name of the layer.
    * @param metadataAccessPath - The full service URL to the layer endpoint.
    * @param isTimeAware - Indicates whether the layer supports time-based filtering.
    * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries.
-   * @static
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -167,15 +154,16 @@ export class CSV extends AbstractGeoViewVector {
 
   /**
    * Creates a configuration object for a CSV Feature layer.
+   *
    * This function constructs a `TypeCSVLayerConfig` object that describes a CSV Feature layer
    * and its associated entry configurations based on the provided parameters.
+   *
    * @param geoviewLayerId - A unique identifier for the GeoView layer.
    * @param geoviewLayerName - The display name of the GeoView layer.
    * @param metadataAccessPath - The full service URL to the layer endpoint.
    * @param isTimeAware - Indicates whether the layer supports time-based filtering.
    * @param layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns The constructed configuration object for the CSV Feature layer.
-   * @static
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -213,13 +201,13 @@ export class CSV extends AbstractGeoViewVector {
    * 1. Creates a Geoview layer configuration using the provided parameters.
    * 2. Instantiates a layer with that configuration.
    * 3. Processes the layer configuration and returns the result.
-   * @param {string} geoviewLayerId - The unique identifier for the GeoView layer.
-   * @param {string} geoviewLayerName - The display name for the GeoView layer.
-   * @param {string} url - The URL of the service endpoint.
-   * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
-   * @param {boolean} isTimeAware - Indicates if the layer is time aware.
-   * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
-   * @static
+   *
+   * @param geoviewLayerId - The unique identifier for the GeoView layer
+   * @param geoviewLayerName - The display name for the GeoView layer
+   * @param url - The URL of the service endpoint
+   * @param layerIds - An array of layer IDs to include in the configuration
+   * @param isTimeAware - Indicates if the layer is time aware
+   * @returns A promise that resolves to an array of layer configurations
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -248,12 +236,11 @@ export class CSV extends AbstractGeoViewVector {
 
   /**
    * Converts csv text to feature array.
-   * @param {string} csvData - The data from the .csv file.
-   * @param {CsvLayerEntryConfig} layerConfig - The config of the layer.
-   * @param {ProjectionLike} outProjection - The output projection for the features.
-   * @returns {Feature[]} The array of features.
-   * @private
-   * @static
+   *
+   * @param csvData - The data from the .csv file
+   * @param layerConfig - The config of the layer
+   * @param outProjection - The output projection for the features
+   * @returns The array of features
    */
   static convertCsv(csvData: string, layerConfig: CsvLayerEntryConfig, outProjection: ProjectionLike): Feature[] {
     const inProjection: string = layerConfig.getSource().dataProjection || Projection.PROJECTION_NAMES.LONLAT; // default: LONLAT
@@ -306,11 +293,10 @@ export class CSV extends AbstractGeoViewVector {
 
   /**
    * Converts csv to array of rows of separated values.
-   * @param {string} csvData The raw csv text.
-   * @param {string} separator The character used to separate the values.
-   * @returns {string[][]} An array of the rows of the csv, split by separator.
-   * @private
-   * @static
+   *
+   * @param csvData - The raw csv text
+   * @param separator - The character used to separate the values
+   * @returns An array of the rows of the csv, split by separator
    */
   static #csvStringToArray(csvData: string, separator: string): string[][] {
     const regex = new RegExp(`(\\${separator}|\\r?\\n|\\r|^)(?:"([^"]*(?:""[^"]*)*)"|([^\\${separator}\\r\\n]*))`, 'gi');

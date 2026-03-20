@@ -35,6 +35,7 @@ import { isNumeric } from '@/core/utils/utilities';
 export abstract class WfsRenderer {
   /**
    * Builds a layer style settings object from a WMS Styled Layer Descriptor (SLD).
+   *
    * This method parses the given `styles` object, iterates through its `Rule` elements,
    * and constructs a standardized record mapping geometry types (`Point`, `LineString`, etc.)
    * to their corresponding layer style settings.
@@ -44,10 +45,11 @@ export abstract class WfsRenderer {
    * - Extraction of filter property names for unique value fields
    * - Delegation to helper methods for building individual symbolizer configurations
    * If no valid symbolizer rules are found, the method returns `undefined`.
-   * @param {TypeStylesWMS} styles - A WMS SLD styles object to parse.
-   * @returns {Record<TypeStyleGeometry, TypeLayerStyleSettings>} A record mapping geometry types to their layer style settings.
-   * @throws {NotSupportedError} If the symbolizer type in a rule is unsupported.
-   * @static
+   *
+   * @param styles - A WMS SLD styles object to parse
+   * @param geomTypeMetadata - Optional geometry type from metadata
+   * @returns A record mapping geometry types to their layer style settings
+   * @throws {NotSupportedError} When the symbolizer type in a rule is unsupported
    */
   static buildLayerStyleInfo(
     styles: TypeStylesWMS,
@@ -169,6 +171,7 @@ export abstract class WfsRenderer {
 
   /**
    * Parses a user style rule filter and extracts normalized filter information.
+   *
    * This method supports only simple numeric comparison filters typically found
    * in SLD/OGC style rules, such as:
    * - `PropertyIsEqualTo`
@@ -180,16 +183,11 @@ export abstract class WfsRenderer {
    * Unsupported cases:
    * - Function-based filters (e.g., `ogc:Function` inside `PropertyIsEqualTo`)
    * - Complex logical filters that cannot be reduced to numeric comparisons
-   * @param {TypeUserStyleRuleFilter} filter
-   *   The raw OGC filter extracted from a UserStyle rule.
-   * @returns {FilterInfo}
-   *   A normalized structure describing the property name, comparison types,
-   *   and associated threshold values.
-   * @throws {NotSupportedError}
-   *   If the filter uses `ogc:Function` or cannot be interpreted as a numeric
-   *   comparison rule.
-   * @private
-   * @static
+   *
+   * @param filter - The raw OGC filter extracted from a UserStyle rule
+   * @returns A normalized structure describing the property name, comparison types,
+   *   and associated threshold values
+   * @throws {NotSupportedError} When the filter uses `ogc:Function` or cannot be interpreted
    */
   static #readFilterFromRule(filter: TypeUserStyleRuleFilter): FilterInfo {
     // If the filter is based on a function, throw error
@@ -215,6 +213,7 @@ export abstract class WfsRenderer {
 
   /**
    * Attempts to read numeric comparison filter information from an OGC filter block.
+   *
    * This method interprets filters of the following forms:
    * - `ogc:PropertyIsEqualTo`
    * - `ogc:PropertyIsGreaterThan`
@@ -229,13 +228,10 @@ export abstract class WfsRenderer {
    * - `valuesConditions`: operators (`>=`, `>`, `<=`, `<`) corresponding to each value
    * - `hasGreaterOrLessThan`: whether the rule represents range-based comparisons
    * If no supported comparison operator is found, the method returns `undefined`.
-   * @param {TypeUserStyleRuleFilter} filter
-   *   The OGC filter block to evaluate.
-   * @returns {FilterInfo | undefined}
-   *   A normalized filter description, or `undefined` if the filter does not
-   *   contain recognizable numeric comparison operators.
-   * @private
-   * @static
+   *
+   * @param filter - The OGC filter block to evaluate
+   * @returns A normalized filter description, or undefined if the filter does not
+   *   contain recognizable numeric comparison operators
    */
   static #readFilterInfoNumberOptionFromFilter(filter: TypeUserStyleRuleFilter): FilterInfo | undefined {
     // Read equal to first
@@ -301,18 +297,21 @@ export abstract class WfsRenderer {
   }
 
   /**
-   * Determines the style configuration type (`'simple'` or `'uniqueValue'`) based on
+   * Determines the style configuration type ('simple' or 'uniqueValue') based on
    * the provided symbolizer rules and available attribute fields.
+   *
    * The method analyzes the list of SLD/SE rules to identify whether the style
    * contains multiple symbolizer-based rules (e.g., point, line, or polygon symbolizers),
    * which implies a unique-value rendering type. If only one such rule exists,
    * the style is treated as a simple renderer.
    * If multiple rules exist but no attribute fields are available to determine
    * filtering logic, a {@link NotSupportedError} is thrown.
-   * @param {TypeUserStyleRule[]} rules - The list of user style rules from the SLD or SE definition.
-   * @param {string[]} fields - The list of available attribute field names for filtering or symbolization.
-   * @returns {TypeLayerStyleConfigType} The detected style configuration type, either `'simple'` or `'uniqueValue'`.
-   * @throws {NotSupportedError} When a unique-value style is detected but no fields are available for filtering.
+   *
+   * @param rules - The list of user style rules from the SLD or SE definition
+   * @param hasClassBreaks - Whether class breaks were detected
+   * @param fields - The list of available attribute field names for filtering or symbolization
+   * @returns The detected style configuration type, either 'simple' or 'uniqueValue'
+   * @throws {NotSupportedError} When a unique-value style is detected but no fields are available for filtering
    */
   static #readTypeFromSymbolizers(rules: TypeUserStyleRule[], hasClassBreaks: boolean, fields: string[]): TypeLayerStyleConfigType {
     // Default type
@@ -347,18 +346,16 @@ export abstract class WfsRenderer {
 
   /**
    * Builds a complete style configuration object for a point symbolizer layer.
+   *
    * This method processes one or more SE/SLD `<se:PointSymbolizer>` definitions,
    * parses their graphical content, merges all SVG graphics into a single
    * base64-encoded SVG image, and constructs a standardized layer style configuration.
    * It supports both well-known marks and external SVG graphics and computes
    * the correct scaling, opacity, and positioning metadata for rendering
    * in a GeoView layer configuration.
-   * @param {TypeUserStyleSymbolizer | TypeUserStyleSymbolizer[]} symbolizer -
-   *   A single point symbolizer or an array of symbolizers defining the graphic appearance.
-   * @returns {TypeLayerStyleConfigInfo | undefined} A complete layer style configuration
-   *   object containing the merged SVG symbol, or `undefined` if no valid graphics were found.
-   * @private
-   * @static
+   *
+   * @param symbolizer - A single point symbolizer or an array of symbolizers defining the graphic appearance
+   * @returns A complete layer style configuration object containing the merged SVG symbol, or undefined if no valid graphics were found
    */
   static #buildLayerStyleInfoPointSymbolizer(
     symbolizer: TypeUserStyleSymbolizer | TypeUserStyleSymbolizer[]
@@ -418,15 +415,14 @@ export abstract class WfsRenderer {
 
   /**
    * Builds a complete style configuration object for a line symbolizer layer.
+   *
    * This method processes an SE/SLD `<se:LineSymbolizer>` definition, reads its stroke
    * parameters, and constructs a standardized layer style configuration object.
    * It supports stroke color, width, opacity, and dash array (line style) settings.
    * If no meaningful stroke information is found, it returns `undefined`.
-   * @param {TypeUserStyleSymbolizer} symbolizer - The point symbolizer defining the line appearance.
-   * @returns {TypeLayerStyleConfigInfo | undefined} A complete layer style configuration
-   *   object containing the stroke settings, or `undefined` if the symbolizer has no valid stroke.
-   * @private
-   * @static
+   *
+   * @param symbolizer - The line symbolizer defining the line appearance
+   * @returns A complete layer style configuration object containing the stroke settings, or undefined if no valid stroke
    */
   static #buildLayerStyleInfoLineSymbolizer(
     symbolizer: TypeUserStyleSymbolizer | TypeUserStyleSymbolizer[]
@@ -533,14 +529,13 @@ export abstract class WfsRenderer {
 
   /**
    * Builds a complete style configuration object for a polygon symbolizer layer.
+   *
    * This method processes an SE/SLD `<se:PolygonSymbolizer>` definition, reads its fill
    * and stroke parameters, and constructs a standardized layer style configuration object.
    * It supports fill color, opacity, stroke settings and pattern fills.
-   * @param {TypeUserStyleSymbolizer} symbolizer - The polygon symbolizer defining the appearance.
-   * @returns {TypeLayerStyleConfigInfo | undefined} A complete layer style configuration
-   *   object containing the fill and stroke settings, or `undefined` if no valid style found.
-   * @private
-   * @static
+   *
+   * @param symbolizer - The polygon symbolizer defining the appearance
+   * @returns A complete layer style configuration object containing the fill and stroke settings, or undefined if no valid style found
    */
   static #buildLayerStyleInfoPolygonSymbolizer(
     symbolizer: TypeUserStyleSymbolizer | TypeUserStyleSymbolizer[]
@@ -674,14 +669,14 @@ export abstract class WfsRenderer {
 
   /**
    * Creates a modified copy of a line style configuration to be used for polygon rendering.
+   *
    * This private static method deep-clones the provided line style settings and adjusts them
    * so that the resulting style represents a polygon with only an outline (no fill color).
    * It changes each style entry's `type` to `'filledPolygon'`, sets the `color` to `'transparent'`,
    * and uses a `'solid'` fill style to maintain the border.
-   * @param {TypeLayerStyleSettings} styleSettings - The original line style configuration to clone and modify.
-   * @returns {TypeLayerStyleSettings} A deep-cloned copy of the input style settings, adapted for polygon outlines.
-   * @private
-   * @static
+   *
+   * @param styleSettings - The original line style configuration to clone and modify
+   * @returns A deep-cloned copy of the input style settings, adapted for polygon outlines
    */
   static #copyLineStyleForPolygon(styleSettings: TypeLayerStyleSettings): TypeLayerStyleSettings {
     // Clone it
@@ -703,8 +698,13 @@ export abstract class WfsRenderer {
   }
 
   /**
-   * Extract stroke parameters from a <se:Stroke> node (SvgParameter/CssParameter)
-   * and return a normalized object. Does not mutate existing values; caller may merge.
+   * Extracts stroke parameters from a `<se:Stroke>` node (SvgParameter/CssParameter)
+   * and returns a normalized object.
+   *
+   * Does not mutate existing values; caller may merge.
+   *
+   * @param strokeNode - The `<se:Stroke>` XML node to extract parameters from
+   * @returns A normalized object containing stroke color, width, opacity, dasharray, lineJoin, and lineCap
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static #extractStrokeParams(strokeNode: any): {
@@ -758,7 +758,10 @@ export abstract class WfsRenderer {
   }
 
   /**
-   * Extract fill parameters from a <se:Fill> node (SvgParameter/CssParameter)
+   * Extracts fill parameters from a `<se:Fill>` node (SvgParameter/CssParameter).
+   *
+   * @param fillNode - The `<se:Fill>` XML node to extract parameters from
+   * @returns A normalized object containing fill color, opacity, and pattern
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static #extractFillParams(fillNode: any): {
@@ -797,9 +800,12 @@ export abstract class WfsRenderer {
   }
 
   /**
-   * Build a graphicStroke settings object from a <se:Graphic> node.
+   * Builds a graphicStroke settings object from a `<se:Graphic>` node.
+   *
    * Delegates to the point symbolizer builder to reuse external/mark parsing.
-   * Returns the internal settings object or undefined.
+   *
+   * @param graphicNode - The `<se:Graphic>` XML node to parse
+   * @returns The internal settings object, or undefined if the node is falsy or no graphics were found
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static #buildGraphicStrokeFromGraphic(graphicNode: any): any | undefined {
@@ -814,8 +820,10 @@ export abstract class WfsRenderer {
   }
 
   /**
-   * Extract placement vendor options from a symbolizer node.
-   * Returns an array of unique placements found (lower-cased).
+   * Extracts placement vendor options from a symbolizer node.
+   *
+   * @param sym - The symbolizer node to extract vendor options from
+   * @returns An array of unique placements found (lower-cased)
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static #extractPlacementsFromVendorOptions(sym: any): string[] {
@@ -837,7 +845,10 @@ export abstract class WfsRenderer {
   }
 
   /**
-   * Extract fill pattern from vendor options
+   * Extracts fill pattern from vendor options.
+   *
+   * @param sym - The symbolizer node to extract vendor options from
+   * @returns The fill pattern string (lower-cased), or undefined if not found
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static #extractFillPatternFromVendorOptions(sym: any): string | undefined {
@@ -857,20 +868,19 @@ export abstract class WfsRenderer {
   }
 
   /**
-   * Parses a point symbolizer definition and extracts its graphical representation
-   * as an `ExternalGraphicsInfo` object.
+   * Parses a point symbolizer definition and extracts its graphical representation.
+   *
    * This method inspects the provided SE/SLD `<se:PointSymbolizer>` definition
    * to determine whether it contains an `<se:ExternalGraphic>` (embedded SVG image)
    * or an `<se:Mark>` (well-known geometric shape). It then delegates parsing to
    * the appropriate internal helper function for building the SVG representation.
-   * @param {TypeUserStyleGraphic} graphic - A Styled Layer Descriptor (SLD) or
-   *   Symbology Encoding (SE) point symbolizer describing the graphic to render.
-   * @returns {ExternalGraphicsInfo} The parsed graphic information, including SVG markup,
-   *   viewport dimensions, MIME type, and size metadata.
-   * @throws {NotSupportedError} Thrown if the symbolizer contains an unsupported
-   *   or unrecognized graphic type.
-   * @private
-   * @static
+   *
+   * @param graphic - A Styled Layer Descriptor (SLD) or
+   *   Symbology Encoding (SE) point symbolizer describing the graphic to render
+   * @returns The parsed graphic information, including SVG markup,
+   *   viewport dimensions, MIME type, and size metadata
+   * @throws {NotSupportedError} When the symbolizer contains an unsupported
+   *   or unrecognized graphic type
    */
   static #parseGraphic(graphic: TypeUserStyleGraphic | undefined): ExternalGraphicsInfo {
     // Get the graphic size right away
@@ -896,19 +906,19 @@ export abstract class WfsRenderer {
 
   /**
    * Parses and extracts embedded SVG graphics from a list of SE/SLD external graphic definitions.
+   *
    * This method processes an array of `<se:ExternalGraphic>` objects, decoding their
    * Base64-encoded SVG content, stripping outer `<svg>` wrappers, and collecting
-   * their viewport and viewBox information into a unified `ExternalGraphicsInfo` structure.
+   * their viewport and viewBox information into a unified structure.
    * It automatically determines the maximum viewBox size across all graphics and
    * captures the MIME type from the first encountered graphic format.
-   * @param {TypeUserStyleExternalGraphic[]} graphics - An array of SE/SLD external graphic
-   *   objects containing Base64-encoded SVG data and associated metadata.
-   * @param {number} sizeGraphic - The default target size (in pixels) used for viewBox fallback
-   *   when dimensions are not defined in the SVG.
-   * @returns {ExternalGraphicsInfo} An object containing all extracted graphic elements,
-   *   their viewBox and size information, and the detected MIME type.
-   * @private
-   * @static
+   *
+   * @param graphics - An array of SE/SLD external graphic
+   *   objects containing Base64-encoded SVG data and associated metadata
+   * @param sizeGraphic - The default target size (in pixels) used for viewBox fallback
+   *   when dimensions are not defined in the SVG
+   * @returns An object containing all extracted graphic elements,
+   *   their viewBox and size information, and the detected MIME type
    */
   static #parseGraphicsGatherSVGs(graphics: TypeUserStyleExternalGraphic[], sizeGraphic: number): ExternalGraphicsInfo {
     let maxViewBox = 0;
@@ -956,16 +966,18 @@ export abstract class WfsRenderer {
   }
 
   /**
-   * Computes the bounding box–based `viewBox` for a given SVG string.
+   * Computes the bounding box-based `viewBox` for a given SVG string.
+   *
    * This method parses the provided SVG markup, temporarily attaches it to
    * an off-screen DOM element, and uses the browser's native `getBBox()` API
    * to measure the actual drawing extent of all SVG contents.
    * The result can be used directly as a `viewBox` value for re-rendering or
    * scaling the SVG proportionally.
-   * @param {string} svgString - The raw SVG XML string to measure.
-   * @returns {number[] | undefined} An array of four numbers `[x, y, width, height]`
-   * representing the computed `viewBox`, or `undefined` if the bounding box
-   * could not be calculated (for example, if the SVG is invalid or cannot be rendered).
+   *
+   * @param svgString - The raw SVG XML string to measure
+   * @returns An array of four numbers `[x, y, width, height]`
+   *   representing the computed `viewBox`, or `undefined` if the bounding box
+   *   could not be calculated (for example, if the SVG is invalid or cannot be rendered)
    */
   static #computeViewBoxFromSvg(svgString: string): number[] {
     // Parse the SVG text into a DOM
@@ -994,19 +1006,19 @@ export abstract class WfsRenderer {
 
   /**
    * Parses a user-defined or well-known marker description into an SVG graphic definition.
+   *
    * This method takes a Styled Layer Descriptor (SLD) or SE (Symbology Encoding)
-   * `<se:Mark>` definition and converts it into an internal `ExternalGraphicsInfo`
-   * representation, including an SVG string that visually represents the marker
+   * `<se:Mark>` definition and converts it into an internal representation,
+   * including an SVG string that visually represents the marker
    * (e.g., circle, square, triangle, star).
    * The resulting object includes calculated stroke, fill, and geometric properties,
    * suitable for rendering within a composed symbol or style preview.
-   * @param {TypeUserStyleMark} marker - A WellKnownName string (e.g., `'circle'`) or an SE/SLD
-   *   `<se:Mark>` object describing the graphic mark definition.
-   * @param {number} sizeGraphic - The target size (in pixels) of the generated marker.
-   * @returns {ExternalGraphicsInfo} An object containing the generated SVG markup (`innerSVG`),
-   *   its viewport dimensions, MIME type, and scaling metadata for rendering.
-   * @private
-   * @static
+   *
+   * @param marker - A WellKnownName string (e.g., `'circle'`) or an SE/SLD
+   *   `<se:Mark>` object describing the graphic mark definition
+   * @param sizeGraphic - The target size (in pixels) of the generated marker
+   * @returns An object containing the generated SVG markup (`innerSVG`),
+   *   its viewport dimensions, MIME type, and scaling metadata for rendering
    */
   static #parseGraphicsMarkers(marker: TypeUserStyleMark, sizeGraphic: number): ExternalGraphicsInfo {
     const graphicsInfo: GraphicInfo[] = [];
@@ -1106,15 +1118,15 @@ export abstract class WfsRenderer {
   }
 
   /**
-   * Extracts name–value parameter pairs from an XML-like object or array of objects.
+   * Extracts name-value parameter pairs from an XML-like object or array of objects.
+   *
    * This method is designed to normalize XML nodes (as parsed JSON objects) into
-   * a flat key–value map, using the `name` attribute or property as the key and
+   * a flat key-value map, using the `name` attribute or property as the key and
    * the node text or value as the map value.
-   * @param {any} obj - A single XML node or an array of XML nodes, each possibly containing
-   *   attributes (e.g., `@attributes.name`) and text content (`#text` or `#value`).
-   * @returns {Record<string, string>} A map of lowercase parameter names to their trimmed string values.
-   * @private
-   * @static
+   *
+   * @param obj - A single XML node or an array of XML nodes, each possibly containing
+   *   attributes (e.g., `@attributes.name`) and text content (`#text` or `#value`)
+   * @returns A map of lowercase parameter names to their trimmed string values
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static #readXMLParam(obj: any): Record<string, string> {
@@ -1146,16 +1158,16 @@ export abstract class WfsRenderer {
 
   /**
    * Merges multiple SVG fragments into a single combined SVG element.
+   *
    * If more than one graphic is provided, each SVG is scaled and translated
    * based on its viewport coordinates so that all graphics fit within a shared
    * outer viewBox. If only one SVG is provided, it is returned as-is.
-   * @param {GraphicInfo[]} graphicsInfo - An array of graphic information objects, each containing
-   *   the SVG markup (`innerSVG`) and its viewport dimensions (`vx`, `vy`, `vw`, `vh`).
-   * @param {number} maxViewBox - The maximum width and height for the combined SVG viewBox.
-   * @param {number} size - The target rendering size used to calculate scaling.
-   * @returns {string} A formatted SVG string containing all merged graphics.
-   * @private
-   * @static
+   *
+   * @param graphicsInfo - An array of graphic information objects, each containing
+   *   the SVG markup (`innerSVG`) and its viewport dimensions (`vx`, `vy`, `vw`, `vh`)
+   * @param maxViewBox - The maximum width and height for the combined SVG viewBox
+   * @param size - The target rendering size used to calculate scaling
+   * @returns A formatted SVG string containing all merged graphics
    */
   static #mergeSVGs(graphicsInfo: GraphicInfo[], maxViewBox: number, size: number, fromSVGsOrMarkers: 'svg' | 'marker'): string {
     if (!graphicsInfo.length) return '';
@@ -1194,17 +1206,16 @@ export abstract class WfsRenderer {
   }
 
   /**
-   * Pretty-prints a raw SVG string into a human-readable,
-   * indented XML format.
+   * Pretty-prints a raw SVG string into a human-readable, indented XML format.
+   *
    * This method parses the provided SVG markup into a DOM tree,
    * then recursively serializes each node with consistent indentation,
    * returning a formatted string suitable for display or inspection.
-   * @param {string} svg - The raw SVG string.
-   * @param {number} [indent=2] - The number of spaces per indentation level (used only when `minify` is false).
-   * @param {boolean} [minify=false] - If true, removes all unnecessary whitespace and line breaks.
-   * @returns {string} The formatted (or minified) SVG string.
-   * @private
-   * @static
+   *
+   * @param svg - The raw SVG string
+   * @param indent - Optional the number of spaces per indentation level (used only when `minify` is false)
+   * @param minify - Optional if true, removes all unnecessary whitespace and line breaks
+   * @returns The formatted (or minified) SVG string
    */
   static #prettyPrintSVG(svg: string, indent: number = 2, minify: boolean = false): string {
     const parser = new DOMParser();
@@ -1273,6 +1284,7 @@ export abstract class WfsRenderer {
 
   /**
    * Converts a SQL-like filter string into an OpenLayers WFS-compatible OGC filter XML fragment.
+   *
    * This function handles:
    *  - Standard SQL-like expressions (>, >=, <, <=, =, IN, BETWEEN)
    *  - Boolean operators (AND, OR, NOT)
@@ -1286,12 +1298,12 @@ export abstract class WfsRenderer {
    *  3. Serializes the filter object into XML suitable for WFS requests.
    * Only the inner children of the `<Filter>` element are returned; you can wrap them
    * in `<ogc:Filter>` as needed for a full WFS request.
-   * @param {string} filterStr - The SQL-like filter expression to convert.
-   * @param {string} version - The WFS version to target (only '1.0.0', '1.1.0', '2.0.0' supported; defaults to '1.1.0').
-   * @param {string} fieldNameForNegativeQueries - The field name to use in "always false" filters (cases of 1=0 and such).
-   * @returns {string} An XML string representing the inner contents of an OGC `<Filter>` element.
-   *                   This can be directly used inside a WFS GetFeature request's `<Filter>` element.
-   * @static
+   *
+   * @param filterStr - The SQL-like filter expression to convert
+   * @param version - The WFS version to target (only '1.0.0', '1.1.0', '2.0.0' supported; defaults to '1.1.0')
+   * @param fieldNameForNegativeQueries - The field name to use in "always false" filters (cases of 1=0 and such)
+   * @returns An XML string representing the inner contents of an OGC `<Filter>` element.
+   *   This can be directly used inside a WFS GetFeature request's `<Filter>` element
    */
   static sqlToOlFilterXml(filterStr: string, version: string, fieldNameForNegativeQueries: string): string {
     // Trim the filter
@@ -1323,18 +1335,17 @@ export abstract class WfsRenderer {
 
   /**
    * Unescapes comparison operators inside OGC <Literal> elements.
+   *
    * XMLSerializer always escapes ">" and "<" characters in text nodes
    * (producing "&gt;" and "&lt;"). While this is correct XML behavior,
    * some WMS / OGC servers (e.g. QGIS WMS) expect raw comparison operators
    * such as ">=6" to appear directly inside <Literal> values.
    * This function post-processes the serialized XML string and converts
-   * "&gt;" and "&lt;" back to their literal characters, but **only**
+   * "&gt;" and "&lt;" back to their literal characters, but only
    * within <Literal> elements, leaving the rest of the XML untouched.
-   * @param {string} xml - Serialized OGC Filter XML.
-   * @returns {string} The XML string with comparison operators unescaped
-   *                   inside <Literal> elements.
-   * @private
-   * @static
+   *
+   * @param xml - Serialized OGC Filter XML
+   * @returns The XML string with comparison operators unescaped inside <Literal> elements
    */
   static #unescapeComparisonOperatorsInLiterals(xml: string): string {
     return xml.replace(/<Literal>([\s\S]*?)<\/Literal>/g, (match, literalContent) => {
@@ -1345,8 +1356,8 @@ export abstract class WfsRenderer {
   }
 
   /**
-   * Parse a simple SQL-like filter expression string into an internal AST
-   * suitable for later conversion into OGC/OL WFS filters.
+   * Parses a simple SQL-like filter expression string into an internal AST.
+   *
    * This parser supports the following constructs:
    * - Parentheses for grouping: `( ... )`
    * - Logical operators at top level: `AND`, `OR`, `NOT`
@@ -1494,7 +1505,8 @@ export abstract class WfsRenderer {
   }
 
   /**
-   * Convert an internal SQL-AST node into an OpenLayers WFS filter object.
+   * Converts an internal SQL-AST node into an OpenLayers WFS filter object.
+   *
    * This method takes the AST produced by `#sqlToOlWfsFilterXmlParse` and
    * recursively builds the corresponding OpenLayers filter instances from
    * `ol/format/filter`. The resulting filter can be passed to
@@ -1524,12 +1536,10 @@ export abstract class WfsRenderer {
    *  • An unsupported comparison operator is encountered
    *  • A BETWEEN clause is missing its second literal
    *  • An unrecognized AST node type is provided
-   * @param {AST} node - The AST node describing a comparison, logical operator, or IN/BETWEEN expression.
-   * @returns {Filter} An OpenLayers filter object from `ol/format/filter/*`,
-   *   suitable for WFS GetFeature serialization.
-   * @throws {Error} If the AST node type or operator is unsupported.
-   * @private
-   * @static
+   *
+   * @param node - The AST node describing a comparison, logical operator, or IN/BETWEEN expression.
+   * @returns An OpenLayers filter object from `ol/format/filter/*`, suitable for WFS GetFeature serialization.
+   * @throws {Error} When the AST node type or operator is unsupported.
    */
   static #astToOlFilter(node: AST, fieldNameForNegativeQueries: string): Filter {
     switch (node.type) {
@@ -1602,11 +1612,11 @@ export abstract class WfsRenderer {
   }
 
   /**
-   * Combine a spatial GML filter and an attribute GML filter
-   * into a single OGC <Filter> with <And>.
-   * @param {string | undefined} spatialFilter - XML string for spatial filter, e.g. <ogc:Intersects>...</ogc:Intersects>
-   * @param {string | undefined} attributeFilter - XML string for attribute filter, e.g. <ogc:Or>...</ogc:Or>
-   * @returns {string | undefined} Combined XML <ogc:Filter> or undefined if nothing to combine
+   * Combines a spatial GML filter and an attribute GML filter into a single OGC filter with `<And>`.
+   *
+   * @param spatialFilter - Optional XML string for spatial filter, e.g. `<ogc:Intersects>...</ogc:Intersects>`
+   * @param attributeFilter - Optional XML string for attribute filter, e.g. `<ogc:Or>...</ogc:Or>`
+   * @returns Combined XML `<ogc:Filter>` or undefined if nothing to combine
    */
   static combineGmlFilters(spatialFilter?: string, attributeFilter?: string): string | undefined {
     // If neither filter is defined, nothing to do
@@ -1644,10 +1654,11 @@ export abstract class WfsRenderer {
    * WFS 2.0
    * └── FES 2.0
    *     └── fes:Filter
-   * @param ogcFilterToWrap
-   * @param wmsOrWfs
-   * @param version
-   * @returns
+   *
+   * @param ogcFilterToWrap - The OGC filter XML string to wrap, or undefined
+   * @param wmsOrWfs - Whether the service is WMS or WFS
+   * @param version - The service version
+   * @returns The wrapped filter XML string, or undefined if nothing to wrap
    */
   static wrapOGCFilter(ogcFilterToWrap: string | undefined, wmsOrWfs: 'wms' | 'wfs', version: string): string | undefined {
     // If nothing to wrap

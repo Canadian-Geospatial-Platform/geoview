@@ -132,6 +132,35 @@ import { MapEventProcessor } from "@/api/event-processors";
 ### Component Export Patterns
 
 - **Named exports** (not default exports): `export function MyComponent()` or `export const MyComponent = ...`
+### Class Property Comments
+
+All class properties (public, private, static, readonly) must use JSDoc-style `/** ... */` single-line comments — never `//` line comments:
+
+```typescript
+// ❌ Bad: line comment on class property
+// the id of the map
+mapId: string;
+
+// ✅ Good: JSDoc single-line comment
+/** The id of the map */
+mapId: string;
+```
+
+Each comment must be **specific** to the property it describes. Avoid generic/repeated descriptions:
+
+```typescript
+// ❌ Bad: generic, repeated across all handler arrays
+/** Keep all callback delegates references */
+#onMapInitHandlers: MapInitDelegate[] = [];
+/** Keep all callback delegates references */
+#onMapReadyHandlers: MapReadyDelegate[] = [];
+
+// ✅ Good: specific to each property
+/** Callback delegates for the map init event */
+#onMapInitHandlers: MapInitDelegate[] = [];
+/** Callback delegates for the map ready event */
+#onMapReadyHandlers: MapReadyDelegate[] = [];
+```
 
 ### Inheritance & Polymorphism
 
@@ -419,9 +448,11 @@ JSDoc should NOT:
 
 **Recommended Tags:**
 
-- `@param` - Parameter descriptions
+- `@param` - Parameter descriptions. Add **Optional** for optional parameter (e.g., `@param signal - Optional abort signal for request cancellation`)
 - `@returns` - Return value descriptions
-- `@throws` - Document thrown exceptions (@throws {TheErrorType} (description)  e.g. @throws {LayerNotGeoJsonError} When ...)
+  - For methods returning a `Promise`, `@returns` must start with **"A promise that resolves..."** (e.g., `@returns A promise that resolves with the parsed metadata`)
+  - When the return type includes `| undefined`, mention `undefined` in the `@returns` description
+- `@throws` - Document thrown exceptions. Description **must** start with **"When"** (e.g., `@throws {LayerNotGeoJsonError} When the layer type is not GeoJSON`)
 - `@example` - Usage examples
 - `@deprecated` - Mark deprecated APIs
 - `@see` - Reference related code
@@ -494,7 +525,7 @@ function setLayerVisibility(layerPath: string, visible: boolean): void {}
  *
  * @param geoviewLayerId - UUID of the GeoView layer
  * @param signal - Optional abort signal for request cancellation
- * @returns Parsed layer metadata object
+ * @returns A promise that resolves with the parsed layer metadata object
  */
 async function fetchMetadata(
   geoviewLayerId: string,

@@ -23,9 +23,8 @@ import { logger } from '@/core/utils/logger';
 
 /**
  * A class to hold a set of layers associated with a value of any type.
+ *
  * Layers are added/removed to the layer-set via the registerOrUnregisterLayer function.
- * @class AbstractLayerSet
- * @exports
  */
 export abstract class AbstractLayerSet {
   /** The LayerApi to work with */
@@ -39,15 +38,16 @@ export abstract class AbstractLayerSet {
   // GV: The other layer sets register the layer OBJECTS instead of the layer CONFIGS.
   #defaultRegisterLayerConfigCheck = false;
 
-  // The registered layers
+  /** The registered layers */
   #registeredLayers: AbstractBaseGVLayer[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the layer set updated event */
   #onLayerSetUpdatedHandlers: LayerSetUpdatedDelegate[] = [];
 
   /**
    * Constructs a new LayerSet instance.
-   * @param {LayerApi} layerApi - The LayerApi instance to work with.
+   *
+   * @param layerApi - The LayerApi instance to work with
    */
   constructor(layerApi: LayerApi) {
     this.layerApi = layerApi;
@@ -56,19 +56,17 @@ export abstract class AbstractLayerSet {
   // #region OVERRIDES
 
   /**
-   * A must-override method called to propagate the result set entry to the store
-   * @param {TypeResultSetEntry} resultSetEntry - The result set entry to propagate
-   * @param {PropagationType} type - The propagation type
-   * @returns {void}
-   * @protected
+   * A must-override method called to propagate the result set entry to the store.
+   *
+   * @param resultSetEntry - The result set entry to propagate
+   * @param type - The propagation type
    */
   protected abstract onPropagateToStore(resultSetEntry: TypeResultSetEntry, type: PropagationType): void;
 
   /**
-   * A must-override method called to delete a result set entry from the store
-   * @param {string} layerPath - The layer path to delete from store
-   * @returns {void}
-   * @protected
+   * A must-override method called to delete a result set entry from the store.
+   *
+   * @param layerPath - The layer path to delete from store
    */
   protected abstract onDeleteFromStore(layerPath: string): void;
 
@@ -100,9 +98,8 @@ export abstract class AbstractLayerSet {
   /**
    * An overridable unregistration function for a layer-set that the registration process will use to
    * unregister a specific layer config.
-   * @param {ConfigBaseClass | undefined} layerConfig - The layer config
-   * @returns {void}
-   * @protected
+   *
+   * @param layerConfig - The layer config
    */
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this, @typescript-eslint/no-unused-vars
   protected onUnregisterLayerConfig(layerConfig: ConfigBaseClass | undefined): void {
@@ -112,9 +109,9 @@ export abstract class AbstractLayerSet {
   /**
    * An overridable registration condition function for a layer-set to check if the registration
    * should happen for a specific geoview layer and layer path. By default, a layer-set always registers layers except when they are group layers.
-   * @param {AbstractBaseGVLayer} layer - The layer
-   * @returns {boolean} True if the layer should be registered, false otherwise
-   * @protected
+   *
+   * @param layer - The layer
+   * @returns True if the layer should be registered, false otherwise
    */
   // Added eslint-disable here, because we do want to override this method in children and keep 'this'.
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
@@ -134,9 +131,8 @@ export abstract class AbstractLayerSet {
   /**
    * An overridable registration function for a layer-set that the registration process will use to
    * create a new entry in the layer set for a specific geoview layer and layer path.
-   * @param {AbstractBaseGVLayer} layer - The layer config
-   * @returns {void}
-   * @protected
+   *
+   * @param layer - The layer config
    */
   protected onRegisterLayer(layer: AbstractBaseGVLayer): void {
     // Get layer name
@@ -155,9 +151,8 @@ export abstract class AbstractLayerSet {
 
   /**
    * An overridable layer set updated function for a layer-set to indicate the layer set has been updated.
-   * @param {string} layerPath - The layer path
-   * @returns {void}
-   * @protected
+   *
+   * @param layerPath - The layer path
    */
   protected onLayerSetUpdatedProcess(layerPath: string): void {
     // Emit layer set updated event to the outside
@@ -177,8 +172,9 @@ export abstract class AbstractLayerSet {
   }
 
   /**
-   * Gets the registered layer paths based on the registered layers
-   * @returns {string[]} An array of layer paths
+   * Gets the registered layer paths based on the registered layers.
+   *
+   * @returns An array of layer paths
    */
   getRegisteredLayerPaths(): string[] {
     return this.#registeredLayers.map((layer) => layer.getLayerPath());
@@ -186,7 +182,8 @@ export abstract class AbstractLayerSet {
 
   /**
    * Registers the layer config in the layer-set.
-   * @param {ConfigBaseClass} layerConfig - The layer config
+   *
+   * @param layerConfig - The layer config
    */
   registerLayerConfig(layerConfig: ConfigBaseClass): void {
     // Update the registration of all layer sets if !payload.layerSetId or update only the specified layer set
@@ -212,8 +209,10 @@ export abstract class AbstractLayerSet {
 
   /**
    * Registers the layer in the layer-set.
+   *
    * If the layer is already registered, the function returns immediately.
-   * @param {AbstractBaseGVLayer} layer - The layer to register
+   *
+   * @param layer - The layer to register
    */
   async registerLayer(layer: AbstractBaseGVLayer): Promise<void> {
     // If the layer is already registered, skip it, we don't register twice
@@ -238,7 +237,8 @@ export abstract class AbstractLayerSet {
 
   /**
    * Unregisters the layer config and layer from the layer-set.
-   * @param {string} layerPath - The layer path
+   *
+   * @param layerPath - The layer path
    */
   unregister(layerPath: string): void {
     // Call the unregistration function for the layer-set. This method is different for each child.
@@ -262,8 +262,9 @@ export abstract class AbstractLayerSet {
   // #region PROTECTED METHODS
 
   /**
-   * Gets the MapId for the layer set
-   * @returns
+   * Gets the MapId for the layer set.
+   *
+   * @returns The map id
    */
   protected getMapId(): string {
     return this.layerApi.getMapId();
@@ -271,12 +272,13 @@ export abstract class AbstractLayerSet {
 
   /**
    * Processes layer data to query features on it, if the layer path can be queried.
-   * @param {AbstractGVLayer} geoviewLayer - The geoview layer
-   * @param {QueryType} queryType - The query type
-   * @param {TypeLocation} location - The location for the query
-   * @param {boolean} queryGeometry - The query geometry boolean
-   * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoResult>} A promise resolving to the query results
+   *
+   * @param geoviewLayer - The geoview layer
+   * @param queryType - The query type
+   * @param location - The location for the query
+   * @param queryGeometry - Optional whether to query geometry
+   * @param abortController - Optional abort controller
+   * @returns A promise that resolves with the query results
    */
   protected queryLayerFeatures(
     geoviewLayer: AbstractGVLayer,
@@ -301,12 +303,13 @@ export abstract class AbstractLayerSet {
 
   /**
    * Prepares a layer configuration for automatic registration once the layer becomes loaded.
+   *
    * This method sets up a listener on the provided layer configuration that monitors its status.
    * When the layer's status changes to `loaded`, it attempts to retrieve the corresponding layer
    * from the layer API and registers it into the system's layer set. If registration fails, errors
    * are logged appropriately.
-   * @param {ConfigBaseClass} layerConfig - The configuration object for the layer to be monitored.
-   * @private
+   *
+   * @param layerConfig - The configuration object for the layer to be monitored
    */
   #prepareConfigForLayerRegistration(layerConfig: ConfigBaseClass): void {
     // Listen to the status changes so that when it gets loaded it automatically gets registered as a layer
@@ -340,8 +343,9 @@ export abstract class AbstractLayerSet {
   // #region STATIC METHODS
 
   /**
-   * Checks if the layer is of queryable type based on its class definition
-   * @param {AbstractBaseGVLayer} layer - The layer
+   * Checks if the layer is of queryable type based on its class definition.
+   *
+   * @param layer - The layer
    * @returns True if the layer is of queryable type
    */
   protected static isQueryableType(layer: AbstractBaseGVLayer): boolean {
@@ -350,8 +354,9 @@ export abstract class AbstractLayerSet {
 
   /**
    * Checks if the layer config source is queryable.
-   * @param {AbstractBaseGVLayer} layer - The layer
-   * @returns {boolean} True if the source is queryable or undefined
+   *
+   * @param layer - The layer
+   * @returns True if the source is queryable or undefined
    */
   protected static isSourceQueryable(layer: AbstractBaseGVLayer): boolean {
     // Cast
@@ -362,12 +367,12 @@ export abstract class AbstractLayerSet {
   }
 
   /**
-   * Align records with informatiom provided by OutFields from layer config.
-   * This will update fields in and delete unwanted fields from the arrayOfRecords
-   * @param {AbstractBaseLayerEntryConfig} layerEntryConfig - The layer entry config object.
-   * @param {TypeFeatureInfoEntry[]} arrayOfRecords - Features to delete fields from.
-   * @static
-   * @protected
+   * Aligns records with information provided by OutFields from layer config.
+   *
+   * This will update fields in and delete unwanted fields from the arrayOfRecords.
+   *
+   * @param layerEntryConfig - The layer entry config object
+   * @param arrayOfRecords - Features to delete fields from
    */
   protected static alignRecordsWithOutFields(layerEntryConfig: AbstractBaseLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): void {
     // Get outfields
@@ -413,6 +418,7 @@ export abstract class AbstractLayerSet {
 
   /**
    * Determines whether the retrieved feature info records contain real attribute fields
+   *
    * (i.e., key-value properties) or whether they were returned in a fallback
    * HTML/plain-text form, which commonly occurs with WMS `GetFeatureInfo` responses.
    * This is used primarily to detect when a WMS service cannot return structured
@@ -424,15 +430,11 @@ export abstract class AbstractLayerSet {
    *     either `html` or `plain_text`, the method considers the response *not*
    *     to contain actual fields.
    * - For all other cases, the method assumes records contain valid structured attributes.
-   * @param {AbstractBaseLayerEntryConfig} layerConfig
-   *   The layer configuration used to determine whether special WMS handling applies.
-   * @param {TypeFeatureInfoEntry[]} arrayOfRecords
-   *   The retrieved feature info entries representing attributes or raw text content.
-   * @returns {boolean}
-   *   `true` if the feature info records contain real attribute fields;
-   *   `false` if they consist only of fallback HTML or plain-text content.
-   * @static
-   * @protected
+   *
+   * @param layerConfig - The layer configuration used to determine whether special WMS handling applies
+   * @param arrayOfRecords - The retrieved feature info entries representing attributes or raw text content
+   * @returns `true` if the feature info records contain real attribute fields;
+   *   `false` if they consist only of fallback HTML or plain-text content
    */
   protected static recordsContainActualFields(layerConfig: AbstractBaseLayerEntryConfig, arrayOfRecords: TypeFeatureInfoEntry[]): boolean {
     // If the layer is WMS and there's only 1 property and it's html or plain_text, let it be, the getFeatureInfo couldn't query object by properties nicely
@@ -457,8 +459,8 @@ export abstract class AbstractLayerSet {
 
   /**
    * Emits an event to all registered handlers.
-   * @param {LayerSetUpdatedEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitLayerSetUpdated(event: LayerSetUpdatedEvent): void {
     // Emit the layersetupdated event
@@ -467,7 +469,8 @@ export abstract class AbstractLayerSet {
 
   /**
    * Registers a callback to be executed whenever the layer set is updated.
-   * @param {LayerSetUpdatedDelegate} callback - The callback function
+   *
+   * @param callback - The callback function
    */
   onLayerSetUpdated(callback: LayerSetUpdatedDelegate): void {
     // Register the layersetupdated event callback
@@ -476,7 +479,8 @@ export abstract class AbstractLayerSet {
 
   /**
    * Unregisters a callback from being called whenever the layer set is updated.
-   * @param {LayerSetUpdatedDelegate} callback - The callback function to unregister
+   *
+   * @param callback - The callback function to unregister
    */
   offLayerSetUpdated(callback: LayerSetUpdatedDelegate): void {
     // Unregister the layersetupdated event callback

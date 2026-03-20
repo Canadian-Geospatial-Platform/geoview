@@ -28,24 +28,24 @@ import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-l
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
  * events happening on them (in this case when the layers are going through the layer statuses and legend querying) with a store
  * for UI updates.
- * @class LegendsLayerSet
  */
 export class LegendsLayerSet extends AbstractLayerSet {
   /** The resultSet object as existing in the base class, retyped here as a TypeLegendResultSet */
   declare resultSet: TypeLegendResultSet;
 
-  // Keep a bounded reference to the handle layer status changed
+  /** A bounded reference to the handle layer status changed */
   #boundedHandleLayerStatusChanged: LayerStatusChangedDelegate;
 
-  // Keep a bounded reference to the handle layer status changed
+  /** A bounded reference to the handle layer style changed */
   #boundedHandleLayerStyleChanged: StyleChangedDelegate;
 
-  // Keep a bounded reference to the handle layer style applied
+  /** A bounded reference to the handle layer style applied */
   #boundedHandleLayerStyleApplied: StyleAppliedDelegate;
 
   /**
    * Constructs a Legends LayerSet to manage layers legends.
-   * @param {LayerApi} layerApi - The layer api
+   *
+   * @param layerApi - The layer api
    */
   constructor(layerApi: LayerApi) {
     super(layerApi);
@@ -56,6 +56,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when an all-feature-info-layer-set wants to check for condition to register a layer in its set.
+   *
    * @param layerConfig - The layer config
    * @returns True when the layer should be registered to this legends-layer-set
    */
@@ -67,6 +68,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when an all-feature-info-layer-set wants to check for condition to register a layer in its set.
+   *
    * @param layer - The layer
    * @returns True when the layer should be registered to this legends-layer-set
    */
@@ -78,10 +80,8 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a legends-layer-set wants to register a layer in its set.
-   * @param {ConfigBaseClass} layerConfig - The layer config
-   * @returns {void}
-   * @override
-   * @protected
+   *
+   * @param layerConfig - The layer config
    */
   protected override onRegisterLayerConfig(layerConfig: ConfigBaseClass): void {
     // Call parent
@@ -96,9 +96,8 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a legends-layer-set wants to unregister a layer in its set.
-   * @param {ConfigBaseClass | undefined} layerConfig - The layer config
-   * @returns {void}
-   * @protected
+   *
+   * @param layerConfig - The layer config
    */
   protected override onUnregisterLayerConfig(layerConfig: ConfigBaseClass | undefined): void {
     // Unregister the layer status changed handler
@@ -107,10 +106,8 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a legends-layer-set wants to register a layer in its set.
-   * @param {AbstractBaseGVLayer} layer - The layer
-   * @returns {void}
-   * @override
-   * @protected
+   *
+   * @param layer - The layer
    */
   protected override onRegisterLayer(layer: AbstractBaseGVLayer): void {
     // Call parent
@@ -131,11 +128,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
   /**
    * Processes action when the layer status changes.
-   * @param {ConfigBaseClass} layerConfig - The layer config
-   * @param {TypeLayerStatus} layerStatus - The new layer status
-   * @returns {void}
-   * @override
-   * @protected
+   *
+   * @param layerConfig - The layer config
+   * @param layerStatus - The new layer status
    */
   protected processLayerStatusChanged(layerConfig: ConfigBaseClass, layerStatus: TypeLayerStatus): void {
     // Change the layer status!
@@ -146,12 +141,10 @@ export class LegendsLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Overrides the behavior to apply when propagating to the store
-   * @param {TypeLegendResultSetEntry} resultSetEntry - The result set entry to propagate
-   * @param {PropagationType} type - The propagation type
-   * @returns {void}
-   * @override
-   * @protected
+   * Overrides the behavior to apply when propagating to the store.
+   *
+   * @param resultSetEntry - The result set entry to propagate
+   * @param type - The propagation type
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override onPropagateToStore(resultSetEntry: TypeLegendResultSetEntry, type: PropagationType): void {
@@ -160,11 +153,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Overrides the behavior to apply when deleting from the store
-   * @param {string} layerPath - The layer path to delete form the store
-   * @returns {void}
-   * @override
-   * @protected
+   * Overrides the behavior to apply when deleting from the store.
+   *
+   * @param layerPath - The layer path to delete from the store
    */
   protected override onDeleteFromStore(layerPath: string): void {
     // Delete from store
@@ -173,9 +164,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
   /**
    * Queries the legend for the given layer path.
-   * @param {string} layerPath - The layer path to query the legend for
-   * @param {boolean} [forced=false] - Whether to force the query even if already queried
-   * @returns {void}
+   *
+   * @param layerPath - The layer path to query the legend for
+   * @param forced - Whether to force the query even if already queried
    */
   queryLegend(layerPath: string, forced: boolean = false): void {
     // Get the layer config
@@ -188,9 +179,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
   /**
    * Checks if the layer config has reached the 'processed' status or greater and if so queries the legend.
-   * @param {ConfigBaseClass} layerConfig - The layer config
-   * @param {boolean} forced - Indicates if the legend query should be forced to happen (example when refreshing the legend)
-   * @private
+   *
+   * @param layerConfig - The layer config
+   * @param forced - Indicates if the legend query should be forced to happen (example when refreshing the legend)
    */
   #checkQueryLegend(layerConfig: ConfigBaseClass, forced: boolean): void {
     // Get the layer path
@@ -249,8 +240,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Propagates the resultSetEntry to the store
-   * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate to the store
+   * Propagates the resultSetEntry to the store.
+   *
+   * @param resultSetEntry - The result set entry to propagate to the store
    */
   #propagateToStore(resultSetEntry: TypeLegendResultSetEntry): void {
     // Propagate
@@ -267,11 +259,12 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
   /**
    * Checks if the legend should be queried as part of the regular layer status progression and legend fetching.
-   * Also performs a Type guard on the 'layer' parameter that must be AbstractGVLayer.
-   * @param {AbstractBaseGVLayer} layer - The layer
-   * @param {ConfigBaseClass} layerConfig - The layer config
-   * @param {boolean} forced - Flag to force a query to happen, even if the legendQueryStatus isn't 'init' or style isn't applied.
-   * @private
+   *
+   * Also performs a type guard on the 'layer' parameter that must be AbstractGVLayer.
+   *
+   * @param layer - The layer
+   * @param layerConfig - The layer config
+   * @param forced - Flag to force a query to happen, even if the legendQueryStatus isn't 'init' or style isn't applied
    */
   #legendShouldBeQueried(layer: AbstractBaseGVLayer, layerConfig: ConfigBaseClass, forced: boolean): layer is AbstractGVLayer {
     // A legend is ready to be queried if its status is > processed
@@ -304,8 +297,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
 
   /**
    * Handles when a layer status changed on a layer config.
-   * @param {ConfigBaseClass} layerConfig - The layer config
-   * @param {LayerStatusChangedEvent} layerStatusEvent - The new layer status
+   *
+   * @param layerConfig - The layer config
+   * @param layerStatusEvent - The new layer status
    */
   #handleLayerStatusChanged(layerConfig: ConfigBaseClass, layerStatusEvent: LayerStatusChangedEvent): void {
     try {
@@ -327,10 +321,10 @@ export class LegendsLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Handles when a layer style changes on a registered layer
-   * @param {AbstractGVLayer} layer - The layer which changed its styles
-   * @param {StyleChangedEvent} event - The layer style changed event
-   * @private
+   * Handles when a layer style changes on a registered layer.
+   *
+   * @param layer - The layer which changed its styles
+   * @param event - The layer style changed event
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   #handleLayerStyleChanged(layer: AbstractGVLayer, event: StyleChangedEvent): void {
@@ -339,10 +333,10 @@ export class LegendsLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Handles when a layer style has been applied on a registered AbstractGVVector layer
-   * @param {AbstractGVVector} layer - The layer which got its style applied
-   * @param {StyleAppliedEvent} event - The StyleAppliedEvent
-   * @private
+   * Handles when a layer style has been applied on a registered AbstractGVVector layer.
+   *
+   * @param layer - The layer which got its style applied
+   * @param event - The StyleAppliedEvent
    */
   #handleStyleApplied(layer: AbstractGVVector, event: StyleAppliedEvent): void {
     // If the style has been applied

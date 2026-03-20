@@ -34,10 +34,7 @@ import { formatError } from '@/core/exceptions/core-exceptions';
 /**
  * A class to get a Basemap for a define projection and language. For the moment, a list maps are available and
  * can be filtered by projection (currently only WM and LCC projections are listed,
- * in case other projections needed, they need to be added to the list)
- *
- * @exports
- * @class Basemap
+ * in case other projections needed, they need to be added to the list).
  */
 export class BasemapApi {
   /** The maximum delay to wait before we warn about the basemap taking a long time */
@@ -46,34 +43,35 @@ export class BasemapApi {
   /** Indicates if the basemap has been created successfully */
   created: boolean = false;
 
-  // The map viewer
+  /** The map viewer */
   mapViewer: MapViewer;
 
-  // Active basemap
+  /** The active basemap */
   activeBasemap?: TypeBasemapProps;
 
-  // Default origin
+  /** The default origin */
   defaultOrigin?: number[];
 
-  // Default resolution
+  /** The default resolutions */
   defaultResolutions?: number[];
 
-  // Default extent
+  /** The default extent */
   defaultExtent?: Extent;
 
-  // Default overview map layer
+  /** The overview map basemap */
   overviewMap?: TypeBasemapProps;
 
-  // overview map control
+  /** The overview map control */
   overviewMapCtrl?: OLOverviewMap;
 
-  // The basemap options passed from the map config
+  /** The basemap options passed from the map config */
   basemapOptions: TypeBasemapOptions;
 
   /**
-   * Initialize basemap api
-   * @param {string} mapViewer - The map viewer.
-   * @param {TypeBasemapOptions} basemapOptions - Optional basemap option properties, passed in from map config.
+   * Initializes the basemap API.
+   *
+   * @param mapViewer - The map viewer
+   * @param basemapOptions - The basemap option properties, passed in from map config
    */
   constructor(mapViewer: MapViewer, basemapOptions: TypeBasemapOptions) {
     // Keep the properties
@@ -87,9 +85,7 @@ export class BasemapApi {
     });
   }
 
-  /**
-   * Basemap list
-   */
+  /** The basemap creation configuration list */
   basemapsList: BasemapCreationList = {
     3978: {
       transport: {
@@ -153,13 +149,20 @@ export class BasemapApi {
     },
   };
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the basemap changed event */
   #onBasemapChangedHandlers: BasemapChangedDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the basemap error event */
   #onBasemapErrorHandlers: BasemapErrorDelegate[] = [];
 
   // #region OVERVIEW MAP
+  /**
+   * Gets or creates the overview map control.
+   *
+   * @param olMap - The OpenLayers map instance
+   * @param toggleButton - The toggle button element for the overview map
+   * @returns The overview map control
+   */
   getOverviewMapControl(olMap: OLMap, toggleButton: HTMLDivElement): OLOverviewMap {
     if (this.overviewMapCtrl) {
       return this.overviewMapCtrl;
@@ -181,6 +184,11 @@ export class BasemapApi {
     return overviewMapControl;
   }
 
+  /**
+   * Creates the layers for the overview map.
+   *
+   * @returns The array of base layers for the overview map
+   */
   createOverviewMapLayers(): BaseLayer[] {
     const newLayers: BaseLayer[] = [];
     this.overviewMap?.layers.forEach((layer) => {
@@ -215,6 +223,11 @@ export class BasemapApi {
     return newLayers;
   }
 
+  /**
+   * Creates and sets the overview map basemap.
+   *
+   * @returns A promise that resolves when the overview map basemap has been created and set
+   */
   async setOverviewMap(): Promise<void> {
     try {
       // Create the Core Basemap
@@ -231,6 +244,12 @@ export class BasemapApi {
     }
   }
 
+  /**
+   * Sets the visibility of the overview map control.
+   *
+   * @param olMap - The OpenLayers map instance
+   * @param visible - Whether the overview map control should be visible
+   */
   setOverviewMapControlVisibility(olMap: OLMap, visible: boolean): void {
     if (visible) {
       this.overviewMapCtrl?.setMap(olMap);
@@ -244,13 +263,13 @@ export class BasemapApi {
   // #region CREATE BASEMAPS
 
   /**
-   * Create a basemap layer.
-   * @param {string} basemapId - The id of the layer.
-   * @param {BasemapCreation} basemapLayer - The basemap layer url and json url.
-   * @param {number} opacity - The opacity to use for this layer.
-   * @param {boolean} rest - Should we do a get request to get the info from the server.
-   * @returns {TypeBasemapLayer} The created basemap layer.
-   * @private
+   * Creates a basemap layer.
+   *
+   * @param basemapId - The id of the layer
+   * @param basemapLayer - The basemap layer url and json url
+   * @param opacity - The opacity to use for this layer
+   * @param rest - Whether to do a GET request to get the info from the server
+   * @returns A promise that resolves with the created basemap layer, or null if rest is false or jsonUrl is missing
    */
   async #createBasemapLayer(
     basemapId: string,
@@ -354,10 +373,10 @@ export class BasemapApi {
 
   /**
    * Checks the basemap creation process.
+   *
    * After a predefined maximum wait period (`DEFAULT_WAIT_PERIOD_BASEMAP_WARNING`), it verifies whether the basemap has been created.
    * If not, it emits a `BasemapTakingLongTimeError` to notify the system of a potential delay or failure.
    * This serves as a safeguard against stalled or unresponsive basemap creation.
-   * @private
    */
   #startBasemapCreationWatcher(): void {
     delay(BasemapApi.DEFAULT_WAIT_PERIOD_BASEMAP_WARNING).then(
@@ -375,11 +394,13 @@ export class BasemapApi {
   }
 
   /**
-   * Create the core basemap and add the layers to it.
-   * @param {TypeBasemapOptions} basemapOptions - Basemap options.
-   * @param {TypeValidMapProjectionCodes} projection - Optional projection code.
-   * @param {TypeDisplayLanguage} language - Optional language.
-   * @return {Promise<TypeBasemapProps>} The core basemap.
+   * Creates the core basemap and adds the layers to it.
+   *
+   * @param basemapOptions - The basemap options
+   * @param projection - Optional projection code
+   * @param language - Optional display language
+   * @returns A promise that resolves with the core basemap
+   * @throws {CoreBasemapCreationError} When no basemap layers are created and the basemap is not 'nogeom'
    */
   async createCoreBasemap(
     basemapOptions: TypeBasemapOptions,
@@ -583,9 +604,10 @@ export class BasemapApi {
   // #endregion
 
   /**
-   * Load the default basemap that was passed in the map config.
-   * @param {TypeValidMapProjectionCodes} projection - Optional projection code.
-   * @param {TypeDisplayLanguage} language - Optional language.
+   * Loads the default basemap that was passed in the map config.
+   *
+   * @param projection - Optional projection code
+   * @param language - Optional display language
    */
   async loadDefaultBasemaps(projection?: TypeValidMapProjectionCodes, language?: TypeDisplayLanguage): Promise<void> {
     // Create the core basemap
@@ -623,8 +645,9 @@ export class BasemapApi {
   }
 
   /**
-   * Set the current basemap and update the basemap layers on the map.
-   * @param {TypeBasemapProps} basemap - The basemap.
+   * Sets the current basemap and updates the basemap layers on the map.
+   *
+   * @param basemap - The basemap to set as active
    */
   setBasemap(basemap: TypeBasemapProps): void {
     // Set active basemap
@@ -693,8 +716,8 @@ export class BasemapApi {
 
   /**
    * Emits a basemap changed event to all handlers.
-   * @param {BasemapChangedEvent} event - The event to be emitted
-   * @private
+   *
+   * @param event - The event to be emitted
    */
   #emitBasemapChanged(event: BasemapChangedEvent): void {
     // Emit the basemap changed event for all handlers
@@ -703,7 +726,8 @@ export class BasemapApi {
 
   /**
    * Registers a basemap changed event callback.
-   * @param {BasemapChangedDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onBasemapChanged(callback: BasemapChangedDelegate): void {
     // Register the basemap changed event handler
@@ -712,7 +736,8 @@ export class BasemapApi {
 
   /**
    * Unregisters a basemap changed event callback.
-   * @param {BasemapChangedDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offBasemapChanged(callback: BasemapChangedDelegate): void {
     // Unregister the basemap changed event handler
@@ -721,8 +746,8 @@ export class BasemapApi {
 
   /**
    * Emits a basemap error event to all handlers.
-   * @param {BasemapErrorEvent} event - The event to be emitted
-   * @private
+   *
+   * @param event - The event to be emitted
    */
   #emitBasemapError(event: BasemapErrorEvent): void {
     // Emit the basemap error event for all handlers
@@ -731,7 +756,8 @@ export class BasemapApi {
 
   /**
    * Registers a basemap error event callback.
-   * @param {BasemapErrorDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onBasemapError(callback: BasemapErrorDelegate): void {
     // Register the basemap error event handler
@@ -740,7 +766,8 @@ export class BasemapApi {
 
   /**
    * Unregisters a basemap error event callback.
-   * @param {BasemapErrorDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offBasemapError(callback: BasemapErrorDelegate): void {
     // Unregister the basemap error event handler

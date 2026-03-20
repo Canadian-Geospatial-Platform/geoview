@@ -97,6 +97,7 @@ export class EsriUtilities {
 
   /**
    * Validates a group layer entry configuration and recursively validates its children.
+   *
    * This method performs three main tasks:
    * 1. Initializes the group layer name using metadata when the name is missing.
    * 2. Recursively validates all child layer entry configurations.
@@ -134,6 +135,7 @@ export class EsriUtilities {
 
   /**
    * Validates a regular (non-group) layer entry configuration against the service metadata.
+   *
    * This method performs the validation workflow for a single layer entry:
    * 1. Marks the layer entry configuration as processing.
    * 2. Initializes extent and bounds settings defined in the configuration.
@@ -220,6 +222,7 @@ export class EsriUtilities {
   /**
    * Expands a regular layer entry configuration into a group layer configuration
    * when the corresponding metadata layer contains sublayers.
+   *
    * This method transforms the provided `layerConfig` into a {@link GroupLayerEntryConfig}
    * and dynamically generates child layer entry configurations for each sublayer defined
    * in the ESRI service metadata. The original layer entry configuration in the
@@ -304,6 +307,7 @@ export class EsriUtilities {
 
   /**
    * Checks the ESRI layer metadata and logs warnings when unsupported or unexpected conditions are detected.
+   *
    * This method does **not** throw errors; it only emits warnings to help developers diagnose configuration or
    * server-side metadata inconsistencies. It checks two cases:
    * 1. **EsriDynamic layers** — Logs a warning if the metadata explicitly indicates that dynamic layers
@@ -342,14 +346,17 @@ export class EsriUtilities {
   }
 
   /**
-   * This method is used to process the layer's metadata. It will fill the empty fields of the layer's configuration (renderer,
+   * This method is used to process the layer's metadata.
+   *
+   * It will fill the empty fields of the layer's configuration (renderer,
    * initial settings, fields and aliases).
-   * @param {EsriDynamic | EsriFeature | EsriImage} layer The ESRI layer instance pointer.
-   * @param {TypeLayerEntryConfig} layerConfig The layer entry configuration to process.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns {Promise<TypeLayerEntryConfig>} A promise that the layer configuration has its metadata processed.
-   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error.
-   * @static
+   *
+   * @param layer - The ESRI layer instance pointer
+   * @param layerConfig - The layer entry configuration to process
+   * @param displayDateMode - Optional display date mode
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves once the layer configuration has its metadata processed
+   * @throws {LayerServiceMetadataUnableToFetchError} When the metadata fetch fails or contains an error
    */
   static async commonProcessLayerMetadata<
     T extends EsriDynamic | EsriFeature | EsriImage,
@@ -420,9 +427,9 @@ export class EsriUtilities {
 
   /**
    * This method verifies if the layer is queryable and sets the outfields and aliasFields of the source feature info.
-   * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig - The layer entry to configure.
-   * @private
-   * @static
+   *
+   * @param layerConfig - The layer entry to configure
+   * @param layerMetadata - The layer metadata
    */
   static #commonProcessFeatureInfoConfig(
     layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig,
@@ -496,9 +503,9 @@ export class EsriUtilities {
 
   /**
    * This method set the initial settings based on the service metadata. Priority is given to the layer configuration.
-   * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig - The layer entry to configure.
-   * @static
-   * @private
+   *
+   * @param layerConfig - The layer entry to configure
+   * @param layerMetadata - The layer metadata
    */
   static #commonProcessInitialSettings(
     layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig,
@@ -539,13 +546,14 @@ export class EsriUtilities {
   }
 
   /**
-   * This method will create a Geoview temporal dimension if it exist in the service metadata
-   * @param {EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig - The layer entry to configure
-   * @param {TimeDimensionESRI} esriTimeDimension - The ESRI time dimension object
-   * @param {boolean} singleHandle - True for ESRI Image
-   * @throws {InvalidTimeDimensionError} When range couldn't be computed, or when duration is invalid, or non-positive or when an infinite loop is detected.
-   * @throws {InvalidDateError} When input has invalid dates.
-   * @static
+   * This method will create a Geoview temporal dimension if it exist in the service metadata.
+   *
+   * @param layerConfig - The layer entry to configure
+   * @param esriTimeDimension - The ESRI time dimension object
+   * @param displayDateMode - Optional display date mode
+   * @param singleHandle - Optional true for ESRI Image
+   * @throws {InvalidTimeDimensionError} When range couldn't be computed, or when duration is invalid, or non-positive or when an infinite loop is detected
+   * @throws {InvalidDateError} When input has invalid dates
    */
   static #commonProcessTimeDimension(
     layerConfig: EsriFeatureLayerEntryConfig | EsriDynamicLayerEntryConfig | EsriImageLayerEntryConfig,
@@ -563,11 +571,11 @@ export class EsriUtilities {
 
   /**
    * Processes ESRI Image Server metadata to set the default raster function if one wasn't configured.
+   *
    * The first non-"None" raster function is used as the default.
-   * @param layerConfig - The ESRI Image layer configuration.
-   * @param metadata - The service metadata response.
-   * @private
-   * @static
+   *
+   * @param layerConfig - The ESRI Image layer configuration
+   * @param metadata - The service metadata response
    */
   static #processImageLayerDefaultRasterFunction(layerConfig: EsriImageLayerEntryConfig, metadata: TypeMetadataEsriImage): void {
     // Skip if user already configured a raster function
@@ -587,11 +595,11 @@ export class EsriUtilities {
 
   /**
    * Processes ESRI Image Server metadata to extract default mosaic rule parameters.
+   *
    * Stores the mosaic rule in the layer config for use during source creation and querying.
-   * @param layerConfig - The ESRI Image layer configuration.
-   * @param metadata - The service metadata response.
-   * @private
-   * @static
+   *
+   * @param layerConfig - The ESRI Image layer configuration
+   * @param metadata - The service metadata response
    */
   static #processImageLayerMosaicRule(layerConfig: EsriImageLayerEntryConfig, metadata: TypeMetadataEsriImage): void {
     // Check if metadata has default mosaic settings
@@ -622,9 +630,9 @@ export class EsriUtilities {
 
   /**
    * Converts metadata mosaic method to ESRI REST API format.
-   * @param {string} method - The metadata mosaic method.
-   * @returns {TypeMosaicRule['mosaicMethod']} The ESRI API mosaic method string.
-   * @static
+   *
+   * @param method - The metadata mosaic method
+   * @returns The ESRI API mosaic method string
    */
   static convertMosaicMethod(method: string): TypeMosaicRule['mosaicMethod'] {
     const methodMap: Record<string, TypeMosaicRule['mosaicMethod']> = {
@@ -642,9 +650,9 @@ export class EsriUtilities {
 
   /**
    * Converts metadata mosaic operator to ESRI REST API format.
-   * @param {string} operator - The metadata mosaic operator.
-   * @returns {TypeMosaicRule['mosaicOperation']} The ESRI API mosaic operation string.
-   * @static
+   *
+   * @param operator - The metadata mosaic operator
+   * @returns The ESRI API mosaic operation string
    */
   static convertMosaicOperator(operator: string): TypeMosaicRule['mosaicOperation'] {
     const operatorMap: Record<string, TypeMosaicRule['mosaicOperation']> = {
@@ -665,18 +673,18 @@ export class EsriUtilities {
 
   /**
    * Asynchronously queries an Esri feature layer given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
-   * @param {string} url - An Esri url indicating a feature layer to query
-   * @param {TypeStyleGeometry?} geometryType - The geometry type for the geometries in the layer being queried (used when geometries are returned)
-   * @param {boolean} parseFeatureInfoEntries - A boolean to indicate if we use the raw esri output or if we parse it, defaults to true.
-   * @returns {Promise<TypeFeatureInfoEntryPartial[]>} A promise of an array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
-   * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
-   * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
-   * @throws {ResponseError} When the response is not OK (non-2xx).
-   * @throws {ResponseEmptyError} When the JSON response is empty.
-   * @throws {ResponseTypeError} When the response from the service is not an object.
-   * @throws {ResponseContentError} When the response actually contains an error within it.
-   * @throws {NetworkError} When a network issue happened.
-   * @static
+   *
+   * @param url - An Esri url indicating a feature layer to query
+   * @param geometryType - Optional geometry type for the geometries in the layer being queried (used when geometries are returned)
+   * @param parseFeatureInfoEntries - Optional boolean to indicate if we use the raw esri output or if we parse it, defaults to true
+   * @returns A promise that resolves with an array of related records of type TypeFeatureInfoEntryPartial, or an empty array
+   * @throws {RequestTimeoutError} When the request exceeds the timeout duration
+   * @throws {RequestAbortedError} When the request was aborted by the caller's signal
+   * @throws {ResponseError} When the response is not OK (non-2xx)
+   * @throws {ResponseEmptyError} When the JSON response is empty
+   * @throws {ResponseTypeError} When the response from the service is not an object
+   * @throws {ResponseContentError} When the response actually contains an error within it
+   * @throws {NetworkError} When a network issue happened
    */
   static async queryRecordsByUrl(
     url: string,
@@ -694,11 +702,11 @@ export class EsriUtilities {
 
   /**
    * Asynchronously queries an Esri relationship table given the url and returns an array of `TypeFeatureInfoEntryPartial` records.
-   * @param {string} url - An Esri url indicating a relationship table to query
-   * @param {number} recordGroupIndex - The group index of the relationship layer on which to read the related records
-   * @returns {Promise<TypeFeatureInfoEntryPartial[]>} A promise of an array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
-   * @static
-   * @deprecated Doesn't seem to be called anywhere.
+   *
+   * @param url - An Esri url indicating a relationship table to query
+   * @param recordGroupIndex - The group index of the relationship layer on which to read the related records
+   * @returns A promise that resolves with an array of related records of type TypeFeatureInfoEntryPartial, or an empty array
+   * @deprecated Doesn't seem to be called anywhere
    */
   static async queryRelatedRecordsByUrl(url: string, recordGroupIndex: number): Promise<TypeFeatureInfoEntryPartial[]> {
     // Query the data
@@ -713,16 +721,16 @@ export class EsriUtilities {
 
   /**
    * Asynchronously queries an Esri feature layer given the url and object ids and returns an array of `TypeFeatureInfoEntryPartial` records.
-   * @param {string} layerUrl - An Esri url indicating a feature layer to query
-   * @param {TypeStyleGeometry} geometryType - The geometry type for the geometries in the layer being queried (used when returnGeometry is true)
-   * @param {number[]} objectIds - The list of objectids to filter the query on
-   * @param {string} fields - The list of field names to include in the output
-   * @param {boolean} geometry - True to return the geometries in the output
-   * @param {number} outSR - The spatial reference of the output geometries from the query
-   * @param {number} maxOffset - The max allowable offset value to simplify geometry
-   * @param {boolean} parseFeatureInfoEntries - A boolean to indicate if we use the raw esri output or if we parse it
-   * @returns {Promise<TypeFeatureInfoEntryPartial[]>} A promise of an array of relared records of type TypeFeatureInfoEntryPartial, or an empty array.
-   * @static
+   *
+   * @param layerUrl - An Esri url indicating a feature layer to query
+   * @param geometryType - Optional geometry type for the geometries in the layer being queried (used when returnGeometry is true)
+   * @param objectIds - The list of objectids to filter the query on
+   * @param fields - The list of field names to include in the output
+   * @param geometry - True to return the geometries in the output
+   * @param outSR - Optional spatial reference of the output geometries from the query
+   * @param maxOffset - Optional max allowable offset value to simplify geometry
+   * @param parseFeatureInfoEntries - Optional boolean to indicate if we use the raw esri output or if we parse it
+   * @returns A promise that resolves with an array of related records of type TypeFeatureInfoEntryPartial, or an empty array
    */
   static queryRecordsByUrlObjectIds(
     layerUrl: string,
@@ -751,12 +759,13 @@ export class EsriUtilities {
 
   /**
    * Transforms the query results of an Esri service response - when not querying on the Layers themselves (giving a 'reduced' FeatureInfoEntry).
+   *
    * The transformation reads the Esri formatted information and return a list of `TypeFeatureInfoEntryPartial` records.
    * In a similar fashion and response object as the "Query Feature Infos" functionalities done via the Layers.
-   * @param {EsriRelatedRecordsJsonResponseRelatedRecord[]} records The records representing the data from Esri.
-   * @param {TypeStyleGeometry?} geometryType - Optional, the geometry type.
-   * @returns TypeFeatureInfoEntryPartial[] An array of relared records of type TypeFeatureInfoEntryPartial
-   * @static
+   *
+   * @param records - The records representing the data from Esri
+   * @param geometryType - Optional geometry type
+   * @returns An array of related records of type TypeFeatureInfoEntryPartial
    */
   static esriParseFeatureInfoEntries(
     records: EsriRelatedRecordsJsonResponseRelatedRecord[],

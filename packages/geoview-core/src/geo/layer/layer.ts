@@ -141,8 +141,6 @@ import type { TypeFeatureInfoResultSet } from '@/core/stores/store-interface-and
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
- * @exports
- * @class LayerApi
  */
 export class LayerApi {
   /** A zoom level buffer to guarantee that the calculations being done via the resolutions, inches per meter, dpi are more strict than not enough */
@@ -195,40 +193,40 @@ export class LayerApi {
   /** Used to keep a reference of highlighted layer */
   #highlightedLayerPath: string = '';
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the layer config added event */
   #onLayerConfigAddedHandlers: LayerBuilderDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the layer config error event */
   #onLayerConfigErrorHandlers: LayerConfigErrorDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the layer config removed event */
   #onLayerConfigRemovedHandlers: LayerPathDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the layer created event */
   #onLayerCreatedHandlers: LayerDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the layer first loaded event */
   #onLayerLoadedFirstHandlers: LayerDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the layer loading event */
   #onLayerLoadingHandlers: LayerDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the layer loaded event */
   #onLayerLoadedHandlers: LayerDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the layer error event */
   #onLayerErrorHandlers: LayerErrorDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the all layers loaded event */
   #onLayerAllLoadedHandlers: LayerConfigDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the layer status changed event */
   #onLayerStatusChangedHandlers: LayerStatusChangedDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the layer visibility toggled event */
   #onLayerVisibilityToggledHandlers: LayerVisibilityToggledDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the layer item visibility toggled event */
   #onLayerItemVisibilityToggledHandlers: LayerItemVisibilityToggledDelegate[] = [];
 
   /** Keep a bounded reference to the handle layer status changed */
@@ -275,6 +273,7 @@ export class LayerApi {
 
   /**
    * Initializes layer types and listen to add/remove layer events from outside
+   *
    * @param mapViewer - A reference to the map viewer
    */
   constructor(mapViewer: MapViewer) {
@@ -306,8 +305,9 @@ export class LayerApi {
   }
 
   /**
-   * Gets the Map Id.
-   * @returns The map id
+   * Gets the Map Identifier.
+   *
+   * @returns The map identifier
    */
   getMapId(): string {
     return this.mapViewer.mapId;
@@ -315,6 +315,7 @@ export class LayerApi {
 
   /**
    * Gets the GeoView Layer Ids / UUIDs.
+   *
    * @returns The ids of the layers
    */
   getGeoviewLayerIds(): string[] {
@@ -327,6 +328,7 @@ export class LayerApi {
 
   /**
    * Verifies if a layer is registered. Returns true if registered.
+   *
    * @param layerPath - The layer path to check.
    * @returns Returns true if the layer configuration is registered.
    */
@@ -336,6 +338,7 @@ export class LayerApi {
 
   /**
    * Gets the Layer Entry layer paths
+   *
    * @returns The GeoView Layer Paths
    */
   getLayerEntryLayerPaths(): string[] {
@@ -344,6 +347,7 @@ export class LayerApi {
 
   /**
    * Gets the Layer Entry Configs
+   *
    * @returns The GeoView Layer Entry Configs
    */
   getLayerEntryConfigs(): ConfigBaseClass[] {
@@ -352,6 +356,7 @@ export class LayerApi {
 
   /**
    * Gets the layer configuration of the specified layer path.
+   *
    * @param layerPath - The layer path.
    * @returns The layer configuration.
    * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
@@ -369,6 +374,7 @@ export class LayerApi {
 
   /**
    * Gets the layer configuration of a regular layer (not a group) at the specified layer path.
+   *
    * @param layerPath - The layer path.
    * @returns The layer configuration.
    * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
@@ -387,6 +393,7 @@ export class LayerApi {
 
   /**
    * Gets the layer configuration of a group layer (not a regular) at the specified layer path.
+   *
    * @param layerPath - The layer path.
    * @returns The layer configuration.
    * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
@@ -405,6 +412,7 @@ export class LayerApi {
 
   /**
    * Gets the layer configuration of the specified layer path.
+   *
    * @param layerPath - The layer path.
    * @returns The layer configuration or undefined if not found.
    */
@@ -414,6 +422,7 @@ export class LayerApi {
 
   /**
    * Gets the GeoView Layer Paths.
+   *
    * @returns The layer paths of the GV Layers
    */
   getGeoviewLayerPaths(): string[] {
@@ -422,6 +431,7 @@ export class LayerApi {
 
   /**
    * Gets all GeoView Layers
+   *
    * @returns The list of new Geoview Layers
    */
   getGeoviewLayers(): AbstractBaseGVLayer[] {
@@ -430,8 +440,10 @@ export class LayerApi {
 
   /**
    * Gets all GeoView layers that are regular layers (not groups).
+   *
    * This method filters the list returned by `getGeoviewLayers()` and
    * returns only the layers that are instances of `AbstractGVLayer`.
+   *
    * @returns An array containing only the regular layers from the current GeoView layer collection.
    */
   getGeoviewLayersRegulars(): AbstractGVLayer[] {
@@ -440,8 +452,10 @@ export class LayerApi {
 
   /**
    * Gets all GeoView layers that are group layers.
+   *
    * This method filters the list returned by `getGeoviewLayers()` and
    * returns only the layers that are instances of `GVGroupLayer`.
+   *
    * @returns An array containing only the group layers from the current GeoView layer collection.
    */
   getGeoviewLayersGroups(): GVGroupLayer[] {
@@ -450,6 +464,7 @@ export class LayerApi {
 
   /**
    * Gets all GeoView layers that are at the root.
+   *
    * @returns An array containing only the layers at the root level of the registry.
    */
   getGeoviewLayersRoot(): AbstractBaseGVLayer[] {
@@ -458,6 +473,7 @@ export class LayerApi {
 
   /**
    * Returns the GeoView instance associated to the layer path.
+   *
    * @param layerPath - The layer path
    * @returns The new Geoview Layer
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
@@ -475,8 +491,10 @@ export class LayerApi {
 
   /**
    * Returns the AbstractGVLayer instance associated to the layer path.
+   *
    * This returns an actual AbstractGVLayer and throws a LayerWrongTypeError if the layerPath points to a GVGroupLayer object.
    * An AbstractGVLayer is essentially a layer that's not a group layer.
+   *
    * @param layerPath - The layer path
    * @returns The new Geoview Layer
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
@@ -495,8 +513,10 @@ export class LayerApi {
 
   /**
    * Returns the GeoView Layer instance associated to the layer path.
+   *
    * This returns an actual AbstractGVLayer (or undefined) and throws a LayerWrongTypeError if the layerPath points to a GVGroupLayer object.
    * An AbstractGVLayer is essentially a layer that's not a group layer.
+   *
    * @param layerPath - The layer path
    * @returns The AbstractGVLayer or undefined when not found
    * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
@@ -517,6 +537,7 @@ export class LayerApi {
 
   /**
    * Returns the GeoView Layer instance associated to the layer path.
+   *
    * @param layerPath - The layer path
    * @returns The AbstractBaseGVLayer or undefined when not found
    */
@@ -526,6 +547,7 @@ export class LayerApi {
 
   /**
    * Returns the OpenLayer instance associated with the layer path.
+   *
    * @param layerPath - The layer path to the layer's configuration.
    * @returns Returns the geoview instance associated to the layer path.
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
@@ -537,6 +559,7 @@ export class LayerApi {
 
   /**
    * Returns the OpenLayer instance associated with the layer path.
+   *
    * @param layerPath - The layer path to the layer's configuration.
    * @returns Returns the geoview instance associated to the layer path.
    */
@@ -547,12 +570,14 @@ export class LayerApi {
 
   /**
    * Asynchronously returns the OpenLayer layer associated to a specific layer path.
+   *
    * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
    * Note this function uses the 'Async' suffix to differentiate it from 'getOLLayer'.
+   *
    * @param layerPath - The layer path to the layer's configuration.
    * @param timeout - Optionally indicate the timeout after which time to abandon the promise
    * @param checkFrequency - Optionally indicate the frequency at which to check for the condition on the layerabstract
-   * @returns Returns a Promise of an OpenLayer layer associated to the layer path.
+   * @returns A promise that resolves to an OpenLayer layer associated to the layer path.
    */
   getOLLayerAsync(layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer> {
     // Make sure the open layer has been created, sometimes it can still be in the process of being created
@@ -568,8 +593,9 @@ export class LayerApi {
 
   /**
    * Load layers that was passed in with the map config
+   *
    * @param mapConfigLayerEntries - An optional array containing layers passed within the map config
-   * @returns A Promise resolving when everything is done
+   * @returns A promise that resolves when everything is done
    */
   async loadListOfGeoviewLayer(mapConfigLayerEntries: MapConfigLayerEntry[]): Promise<void> {
     const validGeoviewLayerConfigs = this.#deleteDuplicateAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries);
@@ -655,9 +681,10 @@ export class LayerApi {
 
   /**
    * Adds a Geoview Layer by GeoCore UUID.
+   *
    * @param uuid - The GeoCore UUID to add to the map
    * @param layerEntryConfig - The optional layer configuration
-   * @returns A Promise which resolves when done adding
+   * @returns A promise that resolves with the added layer result or undefined when an error occurs
    */
   async addGeoviewLayerByGeoCoreUUID(uuid: string, layerEntryConfig?: string): Promise<GeoViewLayerAddedResult | undefined> {
     // Add a place holder to the ordered layer info array
@@ -783,11 +810,11 @@ export class LayerApi {
 
   /**
    * Continues the addition of the geoview layer.
+   *
    * @param geoviewLayerConfig - The geoview layer configuration to add.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
    * @returns The result of the addition of the geoview layer.
    * The result contains the instanciated GeoViewLayer along with a promise that will resolve when the layer will be officially on the map.
-   * @private
    */
   #addGeoviewLayerStep2(geoviewLayerConfig: TypeGeoviewLayerConfig, abortSignal?: AbortSignal): GeoViewLayerAddedResult {
     // Create the layer for the processing
@@ -848,7 +875,6 @@ export class LayerApi {
 
   /**
    * Refreshes GeoCore Layers
-   * @returns {void}
    */
   reloadGeocoreLayers(): void {
     const configs = this.getLayerEntryConfigs();
@@ -913,8 +939,8 @@ export class LayerApi {
 
   /**
    * Attempt to reload a layer.
-   * @param {string} layerPath - The path to the layer to reload
-   * @returns {void}
+   *
+   * @param layerPath - The path to the layer to reload
    */
   reloadLayer(layerPath: string): void {
     const layerEntryConfig = this.getLayerEntryConfig(layerPath);
@@ -959,8 +985,8 @@ export class LayerApi {
 
   /**
    * Registers the layer identifier.
-   * @param {ConfigBaseClass} layerConfig - The layer entry config to register
-   * @returns {void}
+   *
+   * @param layerConfig - The layer entry config to register
    */
   registerLayerConfigInit(layerConfig: ConfigBaseClass): void {
     // Log (keep the commented line for now)
@@ -987,9 +1013,9 @@ export class LayerApi {
 
   /**
    * Unregisters the layer in the LayerApi to stop managing it.
-   * @param {ConfigBaseClass} layerConfig - The layer entry config to unregister
-   * @param {boolean} unregisterOrderedLayerInfo - Should it be unregistered from orderedLayerInfo
-   * @returns {void}
+   *
+   * @param layerConfig - The layer entry config to unregister
+   * @param unregisterOrderedLayerInfo - Should it be unregistered from orderedLayerInfo
    */
   unregisterLayerConfig(layerConfig: ConfigBaseClass, unregisterOrderedLayerInfo: boolean = true): void {
     // Unregister from ordered layer info
@@ -1025,7 +1051,8 @@ export class LayerApi {
 
   /**
    * Checks if the layer results sets are all greater than or equal to the provided status
-   * @returns {[boolean, number]} Indicates if all layers passed the callback and how many have passed the callback.
+   *
+   * @returns Indicates if all layers passed the callback and how many have passed the callback
    */
   checkLayerStatus(status: TypeLayerStatus, callbackNotGood?: (layerConfig: ConfigBaseClass) => void): [boolean, number] {
     // If no layer entries at all or there are layer entries and there are geoview layers to check
@@ -1047,7 +1074,6 @@ export class LayerApi {
 
   /**
    * Removes all geoview layers from the map
-   * @returns {void}
    */
   removeAllGeoviewLayers(): void {
     this.getLayerEntryLayerPaths().forEach((layerEntryConfigId) => {
@@ -1058,7 +1084,6 @@ export class LayerApi {
 
   /**
    * Removes all layers in error from the map
-   * @returns {void}
    */
   removeAllLayersInError(): void {
     this.getLayerEntryConfigs().forEach((layerEntryConfig) => {
@@ -1070,8 +1095,8 @@ export class LayerApi {
   /**
    * Removes a layer from the map using its layer path. The path may point to the root geoview layer
    * or a sub layer.
-   * @param {string} layerPath - The path or ID of the layer to be removed
-   * @returns {void}
+   *
+   * @param layerPath - The path or ID of the layer to be removed
    */
   removeLayerUsingPath(layerPath: string): void {
     // Remove any highlights associated with the layer
@@ -1194,7 +1219,7 @@ export class LayerApi {
   /**
    * Highlights layer or sublayer on map
    *
-   * @param {string} layerPath - ID of layer to highlight
+   * @param layerPath - Identifier of layer to highlight
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
   highlightLayer(layerPath: string): void {
@@ -1227,7 +1252,7 @@ export class LayerApi {
   /**
    * Removes layer and feature highlights for a given layer.
    *
-   * @param {string} layerPath - The path of the layer to remove highlights from.
+   * @param layerPath - The path of the layer to remove highlights from.
    */
   removeLayerHighlights(layerPath: string): void {
     // Remove layer highlight if layer being removed or its child is highlighted
@@ -1277,8 +1302,8 @@ export class LayerApi {
   /**
    * Gets the max extent of all layers on the map, or of a provided subset of layers.
    *
-   * @param {string[]} layerIds - IDs or layerPaths of layers to get max extents from.
-   * @returns {Extent} The overall extent.
+   * @param layerIds - Identifiers or layerPaths of layers to get max extents from.
+   * @returns A promise that resolves with the overall extent or undefined when no bounds are found
    */
   async getExtentOfMultipleLayers(layerIds: string[] = this.getLayerEntryLayerPaths()): Promise<Extent | undefined> {
     const layerBoundsPromises: Promise<Extent | undefined>[] = [];
@@ -1317,6 +1342,7 @@ export class LayerApi {
    *
    * @param layerPath - The path of the layer to zoom to.
    * @param fitOptions - Optional fit options for zooming.
+   * @returns A promise that resolves when the zoom operation is complete
    * @throws {NoBoundsError} When the layer doesn't have bounds.
    */
   zoomToLayerExtent(layerPath: string, fitOptions?: FitOptions): Promise<void> {
@@ -1327,7 +1353,6 @@ export class LayerApi {
   /**
    * Loops through all geoview layers and refresh their respective source.
    * Use this function on projection change or other viewer modification who may affect rendering.
-   * @returns {void}
    */
   refreshLayers(): void {
     // For each geoview layer
@@ -1346,15 +1371,15 @@ export class LayerApi {
    * render cycle before resolving. Finally, it emits an event indicating the visibility
    * change.
    *
-   * @param {string} layerPath - The path identifying the target layer within the map.
-   * @param {TypeLegendItem} item - The legend item whose visibility will be updated.
-   * @param {boolean} visibility - Whether the item should be visible.
-   * @param {boolean} refresh - If `true`, updates the legend layers store
+   * @param layerPath - The path identifying the target layer within the map.
+   * @param item - The legend item whose visibility will be updated.
+   * @param visibility - Whether the item should be visible.
+   * @param refresh - If `true`, updates the legend layers store
    * to reflect this change (used to avoid repeated rerenders when updating multiple items).
-   * @param {boolean} waitForRender - If `true`, the promise resolves only after the
+   * @param waitForRender - If `true`, the promise resolves only after the
    * underlying layer has finished its next render cycle.
-   * @returns {Promise<void>} A promise that resolves once the visibility has been applied,
-   * optional legend store updated, filters applied, and render completed if requested.
+   * @returns A promise that resolves once the visibility has been applied,
+   * optional legend store updated, filters applied, and render completed if requested
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    * @throws {LayerWrongTypeError} When the layer was of wrong type.
    */
@@ -1392,8 +1417,8 @@ export class LayerApi {
 
   /**
    * Sets the visibility of all geoview layers on the map.
-   * @param {boolean} newValue - The new visibility.
-   * @returns {void}
+   *
+   * @param newValue - The new visibility.
    */
   setAllLayersVisibility(newValue: boolean): void {
     this.getLayerEntryLayerPaths().forEach((layerPath) => {
@@ -1407,13 +1432,15 @@ export class LayerApi {
 
   /**
    * Sets or toggles the visibility of a layer within the current map.
+   *
    * Retrieves the current visibility of the layer, determines the resulting visibility
    * based on the optional `newValue`, and applies the change only if the visibility
    * actually differs. If `newValue` is provided, the visibility is set explicitly;
    * if omitted, the method toggles the current visibility.
-   * @param {string} layerPath - The path of the layer whose visibility is being updated.
-   * @param {boolean} [newValue] - Optional. The new visibility value to apply. If omitted, the current visibility is toggled.
-   * @returns {boolean} The resulting visibility state of the layer after the update.
+   *
+   * @param layerPath - The path of the layer whose visibility is being updated.
+   * @param newValue - Optional. The new visibility value to apply. If omitted, the current visibility is toggled.
+   * @returns The resulting visibility state of the layer after the update
    * @throws {LayerNotFoundError} If the layer cannot be found at the given path.
    */
   setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean {
@@ -1433,9 +1460,9 @@ export class LayerApi {
 
   /**
    * Renames a layer.
-   * @param {string} layerPath - The path of the layer.
-   * @param {string} name - The new name to use.
-   * @returns {void}
+   *
+   * @param layerPath - The path of the layer.
+   * @param name - The new name to use.
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
   setLayerName(layerPath: string, name: string): void {
@@ -1445,10 +1472,10 @@ export class LayerApi {
 
   /**
    * Sets opacity for a layer.
-   * @param {string} layerPath - The path of the layer.
-   * @param {number} opacity - The new opacity to use.
-   * @param {boolean} emitOpacityChange - Whether to emit the event or not (false to avoid updating the legend layers)
-   * @returns {void}
+   *
+   * @param layerPath - The path of the layer.
+   * @param opacity - The new opacity to use.
+   * @param emitOpacityChange - Whether to emit the event or not (false to avoid updating the legend layers)
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
    */
   setLayerOpacity(layerPath: string, opacity: number, emitOpacityChange?: boolean): void {
@@ -1458,9 +1485,9 @@ export class LayerApi {
 
   /**
    * Sets queryable state for a layer.
-   * @param {string} layerPath - The path of the layer.
-   * @param {boolean} queryable - The new queryable state for the layer.
-   * @returns {void}
+   *
+   * @param layerPath - The path of the layer.
+   * @param queryable - The new queryable state for the layer.
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    * @throws {LayerWrongTypeError} When the layer was of wrong type.
    */
@@ -1474,9 +1501,9 @@ export class LayerApi {
 
   /**
    * Sets hoverable state for a layer.
-   * @param {string} layerPath - The path of the layer.
-   * @param {boolean} hoverable - The new hoverable state for the layer.
-   * @returns {void}
+   *
+   * @param layerPath - The path of the layer.
+   * @param hoverable - The new hoverable state for the layer.
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    * @throws {LayerWrongTypeError} When the layer was of wrong type.
    */
@@ -1490,13 +1517,14 @@ export class LayerApi {
 
   /**
    * Sets the date display format for a specific layer.
+   *
    * This updates the layer-level configuration used to control how date values
    * are formatted when displayed (e.g., in legends, tooltips, or UI components).
    * The value is stored in the application state via the LegendEventProcessor.
-   * @param {string} layerPath - The unique path identifying the layer.
-   * @param {TypeDisplayDateFormat} displayDateFormat - The date format to apply
+   *
+   * @param layerPath - The unique path identifying the layer.
+   * @param displayDateFormat - The date format to apply
    * for displaying date values associated with this layer.
-   * @returns {void}
    */
   setLayerDisplayDateFormat(layerPath: string, displayDateFormat: TypeDisplayDateFormat | string): void {
     // Make sure of the input format
@@ -1509,14 +1537,15 @@ export class LayerApi {
 
   /**
    * Sets the date display format (short) for a specific layer.
+   *
    * Short means the date should be displayed in a more compact format.
    * This updates the layer-level configuration used to control how date values
    * are formatted when displayed (e.g., in legends, tooltips, or UI components).
    * The value is stored in the application state via the LegendEventProcessor.
-   * @param {string} layerPath - The unique path identifying the layer.
-   * @param {TypeDisplayDateFormat} displayDateFormat - The date format to apply
+   *
+   * @param layerPath - The unique path identifying the layer.
+   * @param displayDateFormat - The date format to apply
    * for displaying date values associated with this layer.
-   * @returns {void}
    */
   setLayerDisplayDateFormatShort(layerPath: string, displayDateFormat: TypeDisplayDateFormat | string): void {
     // Make sure of the input format
@@ -1529,13 +1558,14 @@ export class LayerApi {
 
   /**
    * Sets the date temporal mode for the specific layer.
+   *
    * This updates the layer-level configuration used to control how date values
    * are interpreted.
    * The value is stored in the application state via the LegendEventProcessor.
-   * @param {string} layerPath - The unique path identifying the layer.
-   * @param {TemporalMode} temporalMode - The date format to apply
+   *
+   * @param layerPath - The unique path identifying the layer.
+   * @param temporalMode - The date format to apply
    * for displaying date values associated with this layer.
-   * @returns {void}
    */
   setLayerDateTemporalMode(layerPath: string, temporalMode: TemporalMode): void {
     // Redirect
@@ -1612,9 +1642,10 @@ export class LayerApi {
 
   /**
    * Changes a GeoJson Source of a GeoJSON layer at the given layer path.
-   * @param {string} layerPath - The path of the layer.
-   * @param {GeoJSONObject | string} geojson - The new geoJSON.
-   * @returns {Promise<void>} A promise that resolves when the geojson source has been set.
+   *
+   * @param layerPath - The path of the layer.
+   * @param geojson - The new geoJSON.
+   * @returns A promise that resolves when the geojson source has been set
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
    * @throws {LayerNotGeoJsonError} When the layer is not a GeoJson layer.
@@ -1644,10 +1675,10 @@ export class LayerApi {
 
   /**
    * Redefine feature info fields.
-   * @param {string} layerPath - The path of the layer.
-   * @param {string[]} fieldNames - The new field names to use.
-   * @param {'alias' | 'name'} fields - The fields to change.
-   * @returns {void}
+   *
+   * @param layerPath - The path of the layer.
+   * @param fieldNames - The new field names to use.
+   * @param fields - The fields to change.
    * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
    * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
    * @throws {LayerDifferingFieldLengthsError} When the layer configuration has different field lengths.
@@ -1675,11 +1706,11 @@ export class LayerApi {
 
   /**
    * Replace outfield names, aliases and types with any number of new values, provided an identical count of each are supplied.
-   * @param {string} layerPath - The path of the layer.
-   * @param {string[]} types - The new field types (TypeOutfieldsType) to use.
-   * @param {string[]} fieldNames - The new field names to use.
-   * @param {string[]} fieldAliases - The new field aliases to use.
-   * @returns {void}
+   *
+   * @param layerPath - The path of the layer.
+   * @param types - The new field types (TypeOutfieldsType) to use.
+   * @param fieldNames - The new field names to use.
+   * @param fieldAliases - Optional, the new field aliases to use.
    * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
    * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
    * @throws {LayerDifferingFieldLengthsError} When the layer configuration has different field lengths.
@@ -1713,11 +1744,12 @@ export class LayerApi {
 
   /**
    * Show the errors that happened during layers loading.
+   *
    * If it's an aggregate error, log and show all of them.
    * If it's a regular error, log and show only that error.
-   * @param {unknown} error - The error to log and show.
-   * @param {string} geoviewLayerId - The Geoview layer id for which the error happened.
-   * @returns {void}
+   *
+   * @param error - The error to log and show.
+   * @param geoviewLayerId - The Geoview layer id for which the error happened.
    */
   showLayerError(error: unknown, geoviewLayerId: string): void {
     // If an aggregation error
@@ -1753,9 +1785,9 @@ export class LayerApi {
 
   /**
    * Clears any overridden CRS settings on all WMS layers in the map.
+   *
    * Iterates through all GeoView layers, identifies those that are instances of `GVWMS`,
    * and resets their override CRS to `undefined`, allowing them to use the default projection behavior.
-   * @returns {void}
    */
   clearWMSLayersWithOverrideCRS(): void {
     // Get all WMS layers
@@ -1765,7 +1797,6 @@ export class LayerApi {
 
   /**
    * Clears all vector features from every layer in the All Feature Info Layer Set.
-   * @returns {void}
    */
   clearVectorFeaturesFromAllFeatureInfoLayerSet(): void {
     // Get all vector layers
@@ -1784,7 +1815,7 @@ export class LayerApi {
    * Repeats the last feature info query.
    * This method waits for the layers to be loaded before performing the query.
    *
-   * @returns A promise which will hold the result of the query.
+   * @returns A promise that resolves with the result of the query
    * @throws {LayerNoLastQueryToPerformError} When there's no last query to perform.
    */
   async repeatLastQuery(): Promise<TypeFeatureInfoResultSet> {
@@ -1799,7 +1830,7 @@ export class LayerApi {
    * Repeats the last feature info query, if any.
    * This method waits for the layers to be loaded before performing the query.
    *
-   * @returns A promise which will hold the result of the query or undefined when no query to repeat.
+   * @returns A promise that resolves with the result of the query or undefined when no query to repeat
    */
   async repeatLastQueryIfAny(): Promise<TypeFeatureInfoResultSet | undefined> {
     try {
@@ -1817,11 +1848,8 @@ export class LayerApi {
   // #region PRIVATE FUNCTIONS
 
   /**
-   * Attaches event handlers to a layer
-   * @private
-   * @param {AbstractGVLayer} gvLayer - The layer instance to attach events to
-   * @returns {void}
-   * @description
+   * Attaches event handlers to a layer.
+   *
    * This method sets up the following event handlers:
    * - Layer message handling through onLayerMessage
    * - Layer first loading completion through onLayerFirstLoaded
@@ -1829,7 +1857,8 @@ export class LayerApi {
    * - All layer loaded states through onLayerLoaded
    * - Layer opacity changed through onLayerOpacityChanged
    * - Layer visibility changed through onVisibleChanged
-   * @private
+   *
+   * @param gvLayer - The layer instance to attach events to
    */
   #registerLayerHandlers(gvLayer: AbstractGVLayer): void {
     // Add a handler on layer's message
@@ -1867,10 +1896,9 @@ export class LayerApi {
   }
 
   /**
-   * Detaches the events registration on the layer
-   * @param {AbstractGVLayer} gvLayer - The layer to detach events registrations from.
-   * @returns {void}
-   * @private
+   * Detaches the events registration on the layer.
+   *
+   * @param gvLayer - The layer to detach events registrations from.
    */
   #unregisterLayerHandlers(gvLayer: AbstractGVLayer): void {
     // Unregisters handler on layer's message
@@ -1905,15 +1933,13 @@ export class LayerApi {
   }
 
   /**
-   * Attaches event handlers to a group layer
-   * @private
-   * @param groupLayer - The group layer instance to attach events to
-   * @description
+   * Attaches event handlers to a group layer.
+   *
    * This method sets up the following event handlers:
    * - Layer opacity changed through onLayerOpacityChanged
    * - Layer visibility changed through onVisibleChanged
-   * @returns {void}
-   * @private
+   *
+   * @param groupLayer - The group layer instance to attach events to
    */
   #registerGroupLayerHandlers(groupLayer: GVGroupLayer): void {
     // Register a hook when a layer is added to the group layer
@@ -1933,10 +1959,9 @@ export class LayerApi {
   }
 
   /**
-   * Detaches the events registration on the group layer
+   * Detaches the events registration on the group layer.
+   *
    * @param groupLayer - The group layer to detach events registrations from.
-   * @returns {void}
-   * @private
    */
   #unregisterGroupLayerHandlers(groupLayer: GVGroupLayer): void {
     // Register a hook when a layer is added to the group layer
@@ -1956,10 +1981,10 @@ export class LayerApi {
   }
 
   /**
-   * Handles when any layer status changes during any config processing
-   * @param {ConfigBaseClass} layerConfig - The layer entry config having its layer status changed.
-   * @param {ConfigLayerStatusChangedEvent} event - The layer status changed event.
-   * @returns {void}
+   * Handles when any layer status changes during any config processing.
+   *
+   * @param layerConfig - The layer entry config having its layer status changed.
+   * @param event - The layer status changed event.
    */
   #handleLayerStatusChanged(layerConfig: ConfigBaseClass, event: ConfigLayerStatusChangedEvent): void {
     // Emit about it
@@ -1978,20 +2003,19 @@ export class LayerApi {
 
   /**
    * Handles the initialization of a layer-entry registration event.
+   *
    * This method is triggered when an additional layer-entry configuration
    * (typically created dynamically) needs to be registered in the map's
    * layer configuration system.
+   *
    * Behavior:
    *  1. Checks whether a configuration for the given `layerPath` already exists.
    *  2. If it exists, unregisters the old configuration (without triggering
    *     cleanup actions tied to removal).
    *  3. Registers the new layer-entry configuration using `registerLayerConfigInit`.
-   * @param {AbstractGeoViewLayer} geoviewLayer - The GeoView layer associated
-   *   with this registration event.
-   * @param {LayerEntryRegisterInitEvent} event - The event containing the
-   *   layer-entry configuration to be registered.
-   * @returns {void}
-   * @private
+   *
+   * @param geoviewLayer - The GeoView layer associated with this registration event.
+   * @param event - The event containing the layer-entry configuration to be registered.
    */
   #handleLayerEntryRegisterInit(geoviewLayer: AbstractGeoViewLayer, event: LayerEntryRegisterInitEvent): void {
     // Log
@@ -2014,21 +2038,20 @@ export class LayerApi {
   /**
    * Handles the creation of a GeoView layer (`GVLayer`) after its underlying
    * OL layer and configuration have been fully initialized.
+   *
    * This method is triggered once a layer has completed its construction,
    * allowing the system to register it, attach handlers, and notify any
    * listeners that the layer is now ready for interaction.
+   *
    * Behavior:
    *  1. Stores references to the GV layer and the underlying OL layer,
    *     indexed by their `layerPath`.
    *  2. Registers internal event handlers for the new layer.
    *  3. Emits a "layer created" event so external code can bind to it immediately.
    *  4. Calls the layer's `init()` method to finalize initialization.
-   * @param {AbstractGeoViewLayer} geoviewLayer - The parent or context
-   *   GeoView layer associated with this creation event.
-   * @param {LayerGVCreatedEvent} event - The event containing the newly
-   *   created GV layer instance and its configuration.
-   * @returns {void}
-   * @private
+   *
+   * @param geoviewLayer - The parent or context GeoView layer associated with this creation event.
+   * @param event - The event containing the newly created GV layer instance and its configuration.
    */
   #handleLayerGVCreated(geoviewLayer: AbstractGeoViewLayer, event: LayerGVCreatedEvent): void {
     // Get the GV Layer and the config
@@ -2069,20 +2092,21 @@ export class LayerApi {
 
   /**
    * Handles the creation of a GeoView group layer (`GVGroupLayer`).
+   *
    * This method is invoked once a group layer has been fully instantiated,
    * allowing the system to register it, attach handlers, and initialize its
    * visibility constraints.
+   *
    * Behavior:
    *  1. Stores references to the GV group layer and its corresponding
    *     OpenLayers layer, indexed by `layerPath`.
    *  2. Registers internal event handlers specific to group layers.
    *  3. Computes and stores the layer's initial "in visible range" state.
-   * @param {AbstractGeoViewLayer} geoviewLayer - The parent or context layer
+   *
+   * @param geoviewLayer - The parent or context layer
    *   associated with this creation event.
-   * @param {LayerGroupCreatedEvent} event - The event containing the newly
+   * @param event - The event containing the newly
    *   created group layer instance and its configuration.
-   * @returns {void}
-   * @private
    */
   #handleLayerGroupCreated(geoviewLayer: AbstractGeoViewLayer, event: LayerGroupCreatedEvent): void {
     // Get the Group Layer and the config
@@ -2108,13 +2132,10 @@ export class LayerApi {
   }
 
   /**
-   * Handles layer-specific messages and displays them through the map viewer's notification system
-   * @param {AbstractGVLayer} layer - The layer instance that triggered the message
-   * @param {LayerMessageEvent} layerMessageEvent - The message event containing notification details
-   * @param {string} layerMessageEvent.messageKey - Key for localized message lookup
-   * @param {string[]} layerMessageEvent.messageParams - Parameters to be inserted into the localized message
-   * @param {boolean} layerMessageEvent.notification - Notification configuration options
-   * @returns {void}
+   * Handles layer-specific messages and displays them through the map viewer's notification system.
+   *
+   * @param layer - The layer instance that triggered the message
+   * @param layerMessageEvent - The message event containing notification details
    *
    * @example
    * handleLayerMessage(myLayer, {
@@ -2123,8 +2144,6 @@ export class LayerApi {
    *   messageType: 'error',
    *   notification: true
    * });
-   *
-   * @private
    */
   #handleLayerMessage(layer: AbstractGVLayer | AbstractGeoViewLayer, layerMessageEvent: LayerMessageEvent): void {
     // Read event params for clarity
@@ -2145,9 +2164,9 @@ export class LayerApi {
   }
 
   /**
-   * Handles when a layer gets in loading stage on the map
-   * @param {AbstractGVLayer} layer - The layer that's become loading.
-   * @returns {void}
+   * Handles when a layer gets in loading stage on the map.
+   *
+   * @param layer - The layer that's become loading.
    */
   #handleLayerLoading(layer: AbstractGVLayer): void {
     // Emit about it
@@ -2158,9 +2177,9 @@ export class LayerApi {
   }
 
   /**
-   * Handles when a layer is loaded on the map
-   * @param {AbstractGVLayer} layer - The layer that's become loaded.
-   * @returns {void}
+   * Handles when a layer is loaded on the map.
+   *
+   * @param layer - The layer that's become loaded.
    */
   #handleLayerFirstLoaded(layer: AbstractGVLayer): void {
     // Set in visible range property for all newly added layers
@@ -2174,9 +2193,9 @@ export class LayerApi {
   }
 
   /**
-   * Handles when a layer gets in loaded stage on the map
-   * @param {AbstractGVLayer} layer - The layer that's become loaded.
-   * @returns {void}
+   * Handles when a layer gets in loaded stage on the map.
+   *
+   * @param layer - The layer that's become loaded.
    */
   #handleLayerLoaded(layer: AbstractGVLayer): void {
     // If a vector layer has been loaded
@@ -2190,10 +2209,10 @@ export class LayerApi {
   }
 
   /**
-   * Handles when a layer gets in error stage on the map
-   * @param {AbstractGVLayer} layer - The layer that's become loaded.
-   * @param {GVLayerErrorEvent} event - The event containing the error.
-   * @returns {void}
+   * Handles when a layer gets in error stage on the map.
+   *
+   * @param layer - The layer that's become loaded.
+   * @param event - The event containing the error.
    */
   #handleLayerError(layer: AbstractGVLayer, event: GVLayerErrorEvent): void {
     // Emit about it
@@ -2202,6 +2221,7 @@ export class LayerApi {
 
   /**
    * Handles when a layer name is changed on the map.
+   *
    * @param layer - The layer that's become changed.
    * @param event - The event containing the name change.
    */
@@ -2211,6 +2231,7 @@ export class LayerApi {
 
   /**
    * Handles when a layer opacity is changed on the map.
+   *
    * @param layer - The layer that's become changed.
    * @param event - The event containing the opacity change.
    */
@@ -2221,9 +2242,9 @@ export class LayerApi {
 
   /**
    * Handles when a layer visibility is changed on the map.
-   * @param {AbstractBaseGVLayer} layer - The layer that's become changed.
-   * @param {VisibleChangedEvent} event - The event containing the visibility change.
-   * @returns {void}
+   *
+   * @param layer - The layer that's become changed.
+   * @param event - The event containing the visibility change.
    */
   #handleLayerVisibleChanged(layer: AbstractBaseGVLayer, event: VisibleChangedEvent): void {
     MapEventProcessor.setMapLayerVisibilityInStore(this.getMapId(), layer.getLayerPath(), event.visible);
@@ -2234,9 +2255,9 @@ export class LayerApi {
 
   /**
    * Handles when a layer queryable state is changed on the map.
-   * @param {AbstractBaseGVLayer} layer - The layer that's become changed.
-   * @param {LayerQueryableChangedEvent} event - The event containing the queryable state change.
-   * @returns {void}
+   *
+   * @param layer - The layer that's become changed.
+   * @param event - The event containing the queryable state change.
    */
   #handleLayerQueryableChanged(layer: AbstractBaseGVLayer, event: LayerQueryableChangedEvent): void {
     // Redirect
@@ -2255,9 +2276,9 @@ export class LayerApi {
 
   /**
    * Handles when a layer hoverable state is changed on the map.
-   * @param {AbstractBaseGVLayer} layer - The layer that's become changed.
-   * @param {LayerHoverableChangedEvent} event - The event containing the hoverable state change.
-   * @returns {void}
+   *
+   * @param layer - The layer that's become changed.
+   * @param event - The event containing the hoverable state change.
    */
   #handleLayerHoverableChanged(layer: AbstractBaseGVLayer, event: LayerHoverableChangedEvent): void {
     // Redirect
@@ -2276,11 +2297,12 @@ export class LayerApi {
 
   /**
    * Handles when a WMS layer failed to render an image on the map and we're trying to rescue it on-the-fly before officializing the error.
+   *
    * This callback is useful when a WMS doesn't officially support the map projection, but we still want to attempt to pull an image and put it on the map.
-   * @param {GVWMS} sender - The WMS layer which is attempting to render its image on the map.
-   * @param {ImageLoadRescueEvent} event - The error event which happened when the image tried to be rendered.
-   * @returns {boolean} True if the rescue was attempted, false if we let it fail.
-   * @private
+   *
+   * @param sender - The WMS layer which is attempting to render its image on the map.
+   * @param event - The error event which happened when the image tried to be rendered.
+   * @returns True if the rescue was attempted, false if we let it fail
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   #handleLayerWMSImageLoadRescue(sender: GVWMS, event: ImageLoadRescueEvent): boolean {
@@ -2343,16 +2365,16 @@ export class LayerApi {
 
   /**
    * Handles the event triggered when a layer is added to a `GVGroupLayer`.
-   * @param sender - The group layer receiving the new child layer.
-   * @param event - The event payload containing information about the layer addition.
-   * @description
+   *
    * When a layer is added to a group, this handler checks whether the added
    * layer is a concrete `AbstractGVLayer` (i.e., not another group wrapper type).
    * If so, it waits for the layer's source to become ready before recalculating
    * and propagating its bounds to the store. This ensures bounds are computed
    * only after the layer has sufficient metadata (e.g., extent) available.
    * Bounds propagation may also affect the parent group hierarchy.
-   * @private
+   *
+   * @param sender - The group layer receiving the new child layer.
+   * @param event - The event payload containing information about the layer addition.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   #handleLayerGroupLayerAdded(sender: GVGroupLayer, event: GVGroupLayerEvent): void {
@@ -2370,13 +2392,14 @@ export class LayerApi {
 
   /**
    * Handles the event triggered when a layer is removed from a `GVGroupLayer`.
-   * @param sender - The group layer from which the child layer was removed.
-   * @param event - The event payload containing information about the layer removal.
-   * @description
+   *
    * When a child layer is removed from a group, this handler recalculates the
    * bounds of the group layer to reflect the updated set of children. The
    * recalculated bounds are then stored and may propagate upward in the
    * layer hierarchy.
+   *
+   * @param sender - The group layer from which the child layer was removed.
+   * @param event - The event payload containing information about the layer removal.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   #handleLayerGroupLayerRemoved(sender: GVGroupLayer, event: GVGroupLayerEvent): void {
@@ -2386,9 +2409,9 @@ export class LayerApi {
 
   /**
    * Validates the geoview layer configuration array to eliminate duplicate entries and inform the user.
-   * @param {MapConfigLayerEntry[]} mapConfigLayerEntries - The Map Config Layer Entries to validate.
-   * @returns {MapConfigLayerEntry[]} The new configuration with duplicate entries eliminated.
-   * @private
+   *
+   * @param mapConfigLayerEntries - The Map Config Layer Entries to validate.
+   * @returns The new configuration with duplicate entries eliminated
    */
   #deleteDuplicateAndMultipleUuidGeoviewLayerConfig(mapConfigLayerEntries?: MapConfigLayerEntry[]): MapConfigLayerEntry[] {
     if (mapConfigLayerEntries && mapConfigLayerEntries.length > 0) {
@@ -2416,9 +2439,8 @@ export class LayerApi {
 
   /**
    * Prints an error message for the duplicate geoview layer configuration.
-   * @param {MapConfigLayerEntry} mapConfigLayerEntry - The Map Config Layer Entry in error.
-   * @returns {void}
-   * @private
+   *
+   * @param mapConfigLayerEntry - The Map Config Layer Entry in error.
    */
   #printDuplicateGeoviewLayerConfigError(mapConfigLayerEntry: MapConfigLayerEntry): void {
     // Log
@@ -2429,9 +2451,10 @@ export class LayerApi {
   }
 
   /**
-   * Gets all child paths from a parent path
-   * @param {string} parentPath - The parent path
-   * @returns {string[]} Child layer paths
+   * Gets all child paths from a parent path.
+   *
+   * @param parentPath - The parent path
+   * @returns Child layer paths
    * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
    * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
    */
@@ -2447,6 +2470,7 @@ export class LayerApi {
    * Updates the visible-range settings (min/max zoom) of a GeoView layer and
    * stores whether the layer is currently within the visible range based on
    * the map's zoom level.
+   *
    * Behavior:
    *  - Reads the layer's configuration to determine min/max zoom or min/max scale.
    *  - Converts scale-based limits into zoom levels when necessary.
@@ -2455,10 +2479,9 @@ export class LayerApi {
    *     correct configuration and visibility is handled elsewhere.)
    *  - Computes whether the layer is currently in visible range and updates
    *    the store via `MapEventProcessor`.
-   * @param {AbstractGVLayer | GVGroupLayer} gvLayer - The layer whose visibility
+   *
+   * @param gvLayer - The layer whose visibility
    *   range should be recalculated and stored.
-   * @returns {void}
-   * @private
    */
   #setLayerInVisibleRange(gvLayer: AbstractGVLayer | GVGroupLayer): void {
     // Get the layer config
@@ -2498,9 +2521,8 @@ export class LayerApi {
   /**
    * Continues the addition of the geoview layer.
    * Adds the layer to the map if valid. If not (is a string) emits an error.
-   * @param {AbstractGeoViewLayer} geoviewLayer - The layer
-   * @returns {void}
-   * @private
+   *
+   * @param geoviewLayer - The layer
    */
   #addToMap(geoviewLayer: AbstractGeoViewLayer, geoviewLayerConfig: TypeGeoviewLayerConfig): void {
     // If no root layer is set, forget about it
@@ -2525,9 +2547,8 @@ export class LayerApi {
 
   /**
    * Registers layer information for the ordered layer info in the store.
-   * @param {ConfigBaseClass} layerConfig - The layer configuration to be reordered.
-   * @returns {void}
-   * @private
+   *
+   * @param layerConfig - The layer configuration to be reordered.
    */
   #registerForOrderedLayerInfo(layerConfig: ConfigBaseClass): void {
     // If the map index for the given layer path hasn't been set yet
@@ -2575,7 +2596,8 @@ export class LayerApi {
 
   /**
    * Registers layer information for TimeSlider.
-   * @param {AbstractGVLayer} layer - The layer to be registered.
+   *
+   * @param layer - The layer to be registered.
    */
   #registerForTimeSlider(layer: AbstractGVLayer): void {
     try {
@@ -2603,8 +2625,8 @@ export class LayerApi {
 
   /**
    * Adds initial filters to layers, if provided.
-   * @param {ConfigBaseClass} layerConfig - The layer config being processed
-   * @returns {void}
+   *
+   * @param layerConfig - The layer config being processed
    */
   #addInitialFilters(layerConfig: ConfigBaseClass): void {
     // If correct subclass, otherwise skip
@@ -2621,7 +2643,8 @@ export class LayerApi {
 
   /**
    * Checks if all layers are loaded or error and update the store when so.
-   * @returns {boolean} True if all layers are loaded
+   *
+   * @returns True if all layers are loaded
    */
   #checkIfAllLayersLoaded(): boolean {
     // Get if all layers are loaded or error
@@ -2643,8 +2666,8 @@ export class LayerApi {
 
   /**
    * Emits an event to all handlers when a layer config has been flag as error.
-   * @param {LayerConfigErrorEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitLayerConfigError(event: LayerConfigErrorEvent): void {
     // Emit the event for all handlers
@@ -2653,7 +2676,8 @@ export class LayerApi {
 
   /**
    * Registers a layer config error event handler.
-   * @param {LayerConfigErrorDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onLayerConfigError(callback: LayerConfigErrorDelegate): void {
     // Register the event handler
@@ -2662,7 +2686,8 @@ export class LayerApi {
 
   /**
    * Unregisters a layer config error event handler.
-   * @param {LayerConfigErrorDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offLayerConfigError(callback: LayerConfigErrorDelegate): void {
     // Unregister the event handler
@@ -2671,8 +2696,8 @@ export class LayerApi {
 
   /**
    * Emits an event to all handlers when a layer config has been added.
-   * @param {LayerBuilderEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitLayerConfigAdded(event: LayerBuilderEvent): void {
     // Emit the event for all handlers
@@ -2681,7 +2706,8 @@ export class LayerApi {
 
   /**
    * Registers a layer config added event handler.
-   * @param {LayerBuilderDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onLayerConfigAdded(callback: LayerBuilderDelegate): void {
     // Register the event handler
@@ -2690,7 +2716,8 @@ export class LayerApi {
 
   /**
    * Unregisters a layer config added event handler.
-   * @param {LayerBuilderDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offLayerConfigAdded(callback: LayerBuilderDelegate): void {
     // Unregister the event handler
@@ -2699,8 +2726,8 @@ export class LayerApi {
 
   /**
    * Emits an event to all handlers.
-   * @param {LayerPathEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitLayerConfigRemoved(event: LayerPathEvent): void {
     // Emit the event for all handlers
@@ -2709,7 +2736,8 @@ export class LayerApi {
 
   /**
    * Registers a layer removed event handler.
-   * @param {LayerPathDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onLayerConfigRemoved(callback: LayerPathDelegate): void {
     // Register the event handler
@@ -2718,7 +2746,8 @@ export class LayerApi {
 
   /**
    * Unregisters a layer removed event handler.
-   * @param {LayerPathDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offLayerConfigRemoved(callback: LayerPathDelegate): void {
     // Unregister the event handler
@@ -2727,8 +2756,8 @@ export class LayerApi {
 
   /**
    * Emits an event to all handlers.
-   * @param {LayerEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitLayerCreated(event: LayerEvent): void {
     // Emit the event for all handlers
@@ -2737,7 +2766,8 @@ export class LayerApi {
 
   /**
    * Registers a layer created event handler.
-   * @param {LayerDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onLayerCreated(callback: LayerDelegate): void {
     // Register the event handler
@@ -2746,7 +2776,8 @@ export class LayerApi {
 
   /**
    * Unregisters a layer created event handler.
-   * @param {LayerDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offLayerCreated(callback: LayerDelegate): void {
     // Unregister the event handler
@@ -2755,8 +2786,8 @@ export class LayerApi {
 
   /**
    * Emits an event to all registered handlers.
-   * @param {LayerStatusChangedEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitLayerStatusChanged(event: LayerStatusChangedEvent): void {
     // Emit the layersetupdated event
@@ -2765,7 +2796,8 @@ export class LayerApi {
 
   /**
    * Registers a callback to be executed whenever the layer status is updated.
-   * @param {LayerStatusChangedDelegate} callback - The callback function
+   *
+   * @param callback - The callback function
    */
   onLayerStatusChanged(callback: LayerStatusChangedDelegate): void {
     // Register the layersetupdated event callback
@@ -2774,7 +2806,8 @@ export class LayerApi {
 
   /**
    * Unregisters a callback from being called whenever the layer status is updated.
-   * @param {LayerStatusChangedDelegate} callback - The callback function to unregister
+   *
+   * @param callback - The callback function to unregister
    */
   offLayerStatusChanged(callback: LayerStatusChangedDelegate): void {
     // Unregister the layersetupdated event callback
@@ -2783,8 +2816,8 @@ export class LayerApi {
 
   /**
    * Emits an event to all handlers when all layers have turned into a loaded/error state on the map.
-   * @param {LayerConfigEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitLayerAllLoaded(event: LayerConfigEvent): void {
     // Emit the event for all handlers
@@ -2793,7 +2826,8 @@ export class LayerApi {
 
   /**
    * Registers a layer all loaded/error event handler.
-   * @param {LayerConfigDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onLayerAllLoaded(callback: LayerConfigDelegate): void {
     // Register the event handler
@@ -2802,7 +2836,8 @@ export class LayerApi {
 
   /**
    * Unregisters a layer all loaded/error event handler.
-   * @param {LayerConfigDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offLayerAllLoaded(callback: LayerConfigDelegate): void {
     // Unregister the event handler
@@ -2811,8 +2846,8 @@ export class LayerApi {
 
   /**
    * Emits an event to all handlers when a layer has been loaded for the first time on the map.
-   * @param {LayerEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitLayerFirstLoaded(event: LayerEvent): void {
     // Emit the event for all handlers
@@ -2821,7 +2856,8 @@ export class LayerApi {
 
   /**
    * Registers a layer first loaded event handler.
-   * @param {LayerDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onLayerFirstLoaded(callback: LayerDelegate): void {
     // Register the event handler
@@ -2830,7 +2866,8 @@ export class LayerApi {
 
   /**
    * Unregisters a layer first loaded event handler.
-   * @param {LayerDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offLayerFirstLoaded(callback: LayerDelegate): void {
     // Unregister the event handler
@@ -2839,8 +2876,8 @@ export class LayerApi {
 
   /**
    * Emits an event to all handlers when a layer has turned into a loading state on the map.
-   * @param {LayerEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitLayerLoading(event: LayerEvent): void {
     // Emit the event for all handlers
@@ -2849,7 +2886,8 @@ export class LayerApi {
 
   /**
    * Registers a layer loading event handler.
-   * @param {LayerDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onLayerLoading(callback: LayerDelegate): void {
     // Register the event handler
@@ -2858,7 +2896,8 @@ export class LayerApi {
 
   /**
    * Unregisters a layer loading event handler.
-   * @param {LayerDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offLayerLoading(callback: LayerDelegate): void {
     // Unregister the event handler
@@ -2867,8 +2906,8 @@ export class LayerApi {
 
   /**
    * Emits an event to all handlers when a layer has turned into a loaded state on the map.
-   * @param {LayerEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitLayerLoaded(event: LayerEvent): void {
     // Emit the event for all handlers
@@ -2877,7 +2916,8 @@ export class LayerApi {
 
   /**
    * Registers a layer loaded event handler.
-   * @param {LayerDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onLayerLoaded(callback: LayerDelegate): void {
     // Register the event handler
@@ -2886,7 +2926,8 @@ export class LayerApi {
 
   /**
    * Unregisters a layer loaded event handler.
-   * @param {LayerDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offLayerLoaded(callback: LayerDelegate): void {
     // Unregister the event handler
@@ -2895,8 +2936,8 @@ export class LayerApi {
 
   /**
    * Emits an event to all handlers when a layer has been flag as error on the map.
-   * @param {LayerErrorEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitLayerError(event: LayerErrorEvent): void {
     // Emit the event for all handlers
@@ -2905,7 +2946,8 @@ export class LayerApi {
 
   /**
    * Registers a layer error event handler.
-   * @param {LayerErrorDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onLayerError(callback: LayerErrorDelegate): void {
     // Register the event handler
@@ -2914,7 +2956,8 @@ export class LayerApi {
 
   /**
    * Unregisters a layer error event handler.
-   * @param {LayerErrorDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offLayerError(callback: LayerErrorDelegate): void {
     // Unregister the event handler
@@ -2923,7 +2966,8 @@ export class LayerApi {
 
   /**
    * Emits layer visibility toggled event.
-   * @param {LayerVisibilityToggledEvent} event - The event to emit
+   *
+   * @param event - The event to emit
    */
   #emitLayerVisibilityToggled(event: LayerVisibilityToggledEvent): void {
     // Emit the event for all handlers
@@ -2932,7 +2976,8 @@ export class LayerApi {
 
   /**
    * Registers a layer visibility toggled event handler.
-   * @param {LayerVisibilityToggledDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onLayerVisibilityToggled(callback: LayerVisibilityToggledDelegate): void {
     // Register the event handler
@@ -2941,7 +2986,8 @@ export class LayerApi {
 
   /**
    * Unregisters a layer  visibility toggled event handler.
-   * @param {LayerVisibilityToggledDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offLayerVisibilityToggled(callback: LayerVisibilityToggledDelegate): void {
     // Unregister the event handler
@@ -2950,7 +2996,8 @@ export class LayerApi {
 
   /**
    * Emits layer item visibility toggled event.
-   * @param {LayerItemVisibilityToggledEvent} event - The event to emit
+   *
+   * @param event - The event to emit
    */
   #emitLayerItemVisibilityToggled(event: LayerItemVisibilityToggledEvent): void {
     // Emit the event for all handlers
@@ -2959,7 +3006,8 @@ export class LayerApi {
 
   /**
    * Registers a layer item visibility toggled event handler.
-   * @param {LayerItemVisibilityToggledDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onLayerItemVisibilityToggled(callback: LayerItemVisibilityToggledDelegate): void {
     // Register the event handler
@@ -2968,7 +3016,8 @@ export class LayerApi {
 
   /**
    * Unregisters a layer item visibility toggled event handler.
-   * @param {LayerItemVisibilityToggledDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offLayerItemVisibilityToggled(callback: LayerItemVisibilityToggledDelegate): void {
     // Unregister the event handler
@@ -2981,15 +3030,16 @@ export class LayerApi {
 
   /**
    * Converts a map configuration layer entry into a promise of a GeoView layer configuration.
+   *
    * Depending on the type of the layer entry (e.g., GeoCore, GeoPackage, Shapefile, RCS, or standard GeoView),
    * this function processes each entry accordingly and wraps the result in a `Promise`.
    * Errors encountered during asynchronous operations are handled via a provided callback.
-   * @param {string} mapId - The unique identifier of the map instance this configuration applies to.
-   * @param {TypeDisplayLanguage} language - The language setting used for layer labels and metadata.
-   * @param {MapConfigLayerEntry} entry - The array of layer entry to convert.
-   * @param {(mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void} errorCallback - Callback invoked when an error occurs during layer processing.
-   * @returns {Promise<TypeGeoviewLayerConfig>} The promise resolving to a `TypeGeoviewLayerConfig` object.
-   * @static
+   *
+   * @param mapId - The unique identifier of the map instance this configuration applies to.
+   * @param language - The language setting used for layer labels and metadata.
+   * @param entry - The array of layer entry to convert.
+   * @param errorCallback - Callback invoked when an error occurs during layer processing.
+   * @returns A promise that resolves to a `TypeGeoviewLayerConfig` object
    */
   static convertMapConfigToGeoviewLayerConfig(
     mapId: string,
@@ -3038,12 +3088,12 @@ export class LayerApi {
   /**
    * Converts a list of map configuration layer entries into an array of promises,
    * each resolving to one or more GeoView layer configuration objects.
-   * @param {string} mapId - The unique identifier of the map instance this configuration applies to.
-   * @param {TypeDisplayLanguage} language - The language setting used for layer labels and metadata.
-   * @param {MapConfigLayerEntry[]} mapConfigLayerEntries - The array of layer entries to convert.
-   * @param {(mapConfigLayerEntry: MapConfigLayerEntry, error: unknown) => void} errorCallback - Callback invoked when an error occurs during layer processing.
-   * @returns {Promise<TypeGeoviewLayerConfig[]>[]} An array of promises, each resolving to an array of `TypeGeoviewLayerConfig` objects.
-   * @static
+   *
+   * @param mapId - The unique identifier of the map instance this configuration applies to.
+   * @param language - The language setting used for layer labels and metadata.
+   * @param mapConfigLayerEntries - The array of layer entries to convert.
+   * @param errorCallback - Callback invoked when an error occurs during layer processing.
+   * @returns An array of promises, each resolving to a `TypeGeoviewLayerConfig` object
    */
   static convertMapConfigsToGeoviewLayerConfig(
     mapId: string,
@@ -3060,8 +3110,9 @@ export class LayerApi {
 
   /**
    * Generate an array of layer info for the orderedLayerList.
-   * @param {TypeGeoviewLayerConfig | ConfigBaseClass} geoviewLayerConfig - The config to get the info from.
-   * @returns {TypeOrderedLayerInfo[]} The array of ordered layer info.
+   *
+   * @param geoviewLayerConfig - The config to get the info from.
+   * @returns The array of ordered layer info
    */
   static generateArrayOfLayerOrderInfo(geoviewLayerConfig: TypeGeoviewLayerConfig | ConfigBaseClass): TypeOrderedLayerInfo[] {
     const newOrderedLayerInfos: TypeOrderedLayerInfo[] = [];
@@ -3129,16 +3180,18 @@ export class LayerApi {
 
   /**
    * Creates an instance of a specific `AbstractGeoViewLayer` subclass based on the given GeoView layer configuration.
+   *
    * This function determines the correct layer type from the configuration and instantiates it accordingly.
+   *
    * @remarks
    * - This method currently supports GeoJSON, CSV, WMS, Esri Dynamic, Esri Feature, Esri Image, GeoTIFF
    *   ImageStatic, KML, WFS, WKB, OGC Feature, XYZ Tiles, and Vector Tiles.
    * - If the layer type is not supported, an error is thrown.
    * - TODO: Refactor to use the validated configuration with metadata already fetched.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The configuration object for the GeoView layer.
-   * @returns {AbstractGeoViewLayer} An instance of the corresponding `AbstractGeoViewLayer` subclass.
-   * @throws {NotSupportedError} If the configuration does not match any supported layer type.
-   * @static
+   *
+   * @param geoviewLayerConfig - The configuration object for the GeoView layer.
+   * @returns An instance of the corresponding `AbstractGeoViewLayer` subclass
+   * @throws {NotSupportedError} When the configuration does not match any supported layer type.
    */
   static createLayerConfigFromType(geoviewLayerConfig: TypeGeoviewLayerConfig): AbstractGeoViewLayer {
     // Depending on the layer type of config

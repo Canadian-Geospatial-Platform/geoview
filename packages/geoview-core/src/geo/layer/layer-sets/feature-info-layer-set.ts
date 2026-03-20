@@ -21,7 +21,6 @@ import { GVEsriImage } from '../gv-layers/raster/gv-esri-image';
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
  * events happening on them (in this case when the user click a location on the map) with a store
  * for UI updates.
- * @class FeatureInfoLayerSet
  */
 export class FeatureInfoLayerSet extends AbstractLayerSet {
   /** The query type */
@@ -30,18 +29,19 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   /** The resultSet object as existing in the base class, retyped here as a TypeFeatureInfoResultSet */
   declare resultSet: TypeFeatureInfoResultSet;
 
-  /** Keep lon/lat of last query */
+  /** The lon/lat of the last query */
   #lastQueryLonLat: Coordinate | null = null;
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the query ended event */
   #onQueryEndedHandlers: QueryEndedDelegate[] = [];
 
-  // Keep all abort controllers per layer path
+  /** The abort controllers per layer path */
   #abortControllers: { [layerPath: string]: AbortController } = {};
 
   /**
-   * The class constructor that instanciate a set of layer.
-   * @param {LayerApi} layerApi - The layer Api to work with.
+   * The class constructor that instantiates a set of layers.
+   *
+   * @param layerApi - The layer Api to work with
    */
   constructor(layerApi: LayerApi) {
     super(layerApi);
@@ -58,10 +58,9 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a feature-info-layer-set wants to check for condition to register a layer in its set.
-   * @param {AbstractBaseGVLayer} layer - The layer
-   * @returns {boolean} True when the layer should be registered to this feature-info-layer-set.
-   * @override
-   * @protected
+   *
+   * @param layer - The layer
+   * @returns True when the layer should be registered to this feature-info-layer-set
    */
   protected override onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean {
     // Return if the layer is of queryable type and source is queryable
@@ -70,10 +69,8 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Overrides the behavior to apply when a feature-info-layer-set wants to register a layer in its set.
-   * @param {AbstractBaseGVLayer} layer - The layer
-   * @returns {void}
-   * @override
-   * @protected
+   *
+   * @param layer - The layer
    */
   protected override onRegisterLayer(layer: AbstractBaseGVLayer): void {
     // Call parent
@@ -87,12 +84,10 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Overrides the behavior to apply when propagating to the store
-   * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate
-   * @param {PropagationType} type - The propagation type
-   * @returns {void}
-   * @override
-   * @protected
+   * Overrides the behavior to apply when propagating to the store.
+   *
+   * @param resultSetEntry - The result set entry to propagate
+   * @param type - The propagation type
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected override onPropagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry, type: PropagationType): void {
@@ -101,11 +96,9 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Overrides the behavior to apply when deleting from the store
-   * @param {string} layerPath - The layer path to delete from the store
-   * @returns {void}
-   * @override
-   * @protected
+   * Overrides the behavior to apply when deleting from the store.
+   *
+   * @param layerPath - The layer path to delete from the store
    */
   protected override onDeleteFromStore(layerPath: string): void {
     // Remove it from feature info array (propagating to the store)
@@ -115,8 +108,8 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   /**
    * Repeats the last query if there was one.
    *
-   * @returns A promise which will hold the result of the query.
-   * @throws {LayerNoLastQueryToPerformError} When there's no last query to perform.
+   * @returns A promise that resolves with the result of the query
+   * @throws {LayerNoLastQueryToPerformError} When there's no last query to perform
    */
   repeatLastQuery(): Promise<TypeFeatureInfoResultSet> {
     // If no last query to perform
@@ -130,8 +123,8 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
    * Queries the features at the provided coordinate for all the registered layers.
    *
    * @param lonLatCoordinate - The longitude/latitude coordinate where to query the features
-   * @param fromClick - True if the query is from a user click, false otherwise.
-   * @returns A promise which will hold the result of the query.
+   * @param fromClick - Optional whether the query is from a user click
+   * @returns A promise that resolves with the result of the query
    */
   async queryLayers(lonLatCoordinate: Coordinate, fromClick: boolean = true): Promise<TypeFeatureInfoResultSet> {
     // FIXME: Watch out for code reentrancy between queries!
@@ -273,7 +266,8 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Clears the results for the provided layer path.
-   * @param {string} layerPath - The layer path
+   *
+   * @param layerPath - The layer path
    */
   clearResults(layerPath: string): void {
     // Edit the result set
@@ -285,9 +279,9 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
   }
 
   /**
-   * Propagates the resultSetEntry to the store
-   * @param {TypeFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate to the store
-   * @private
+   * Propagates the resultSetEntry to the store.
+   *
+   * @param resultSetEntry - The result set entry to propagate to the store
    */
   #propagateToStore(resultSetEntry: TypeFeatureInfoResultSetEntry): void {
     // Propagate
@@ -296,8 +290,8 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Emits a query ended event to all handlers.
-   * @param {QueryEndedEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitQueryEnded(event: QueryEndedEvent): void {
     // Emit the event for all handlers
@@ -306,7 +300,8 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Registers a query ended event handler.
-   * @param {QueryEndedDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onQueryEnded(callback: QueryEndedDelegate): void {
     // Register the event handler
@@ -315,7 +310,8 @@ export class FeatureInfoLayerSet extends AbstractLayerSet {
 
   /**
    * Unregisters a query ended event handler.
-   * @param {QueryEndedDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offQueryEnded(callback: QueryEndedDelegate): void {
     // Unregister the event handler

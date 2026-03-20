@@ -27,8 +27,7 @@ export type DrawOptions = InteractionOptions & {
  */
 export class Draw extends Interaction {
   /** The embedded OpenLayers Draw component. */
-  // eslint-disable-next-line camelcase
-  #ol_draw: OLDraw;
+  #olDraw: OLDraw;
 
   /** Callback handlers for the drawstart event. */
   #onDrawStartHandlers: DrawDelegate[] = [];
@@ -65,17 +64,17 @@ export class Draw extends Interaction {
     };
 
     // Instantiate the OpenLayers Draw interaction
-    this.#ol_draw = new OLDraw(olOptions);
+    this.#olDraw = new OLDraw(olOptions);
 
     // Register handlers for draw events
-    this.#ol_draw.on('drawstart', this.#emitDrawStart.bind(this));
-    this.#ol_draw.on('drawend', this.#emitDrawEnd.bind(this));
-    this.#ol_draw.on('drawabort', this.#emitDrawAbort.bind(this));
+    this.#olDraw.on('drawstart', this.#emitDrawStart.bind(this));
+    this.#olDraw.on('drawend', this.#emitDrawEnd.bind(this));
+    this.#olDraw.on('drawabort', this.#emitDrawAbort.bind(this));
 
     // Create and store the keyboard handler
     this.#keyboardHandler = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && this.#ol_draw.getActive()) {
-        this.#ol_draw.abortDrawing();
+      if (event.key === 'Escape' && this.#olDraw.getActive()) {
+        this.#olDraw.abortDrawing();
       }
     };
 
@@ -88,7 +87,7 @@ export class Draw extends Interaction {
    */
   override startInteraction(): void {
     // Redirect to super method to start interaction
-    super.startInteraction(this.#ol_draw);
+    super.startInteraction(this.#olDraw);
   }
 
   /**
@@ -99,7 +98,7 @@ export class Draw extends Interaction {
     document.removeEventListener('keydown', this.#keyboardHandler);
 
     // Redirect to super method to stop interaction
-    super.stopInteraction(this.#ol_draw);
+    super.stopInteraction(this.#olDraw);
   }
 
   /**

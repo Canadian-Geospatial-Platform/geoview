@@ -26,8 +26,7 @@ export type SelectOptions = InteractionOptions & {
  */
 export class Select extends Interaction {
   /** The embedded OpenLayers Select component */
-  // eslint-disable-next-line camelcase
-  #ol_select: OLSelect;
+  #olSelect: OLSelect;
 
   /** Callback handlers for the selectchanged event. */
   #onSelectChangedHandlers: SelectChangedDelegate[] = [];
@@ -49,10 +48,10 @@ export class Select extends Interaction {
     };
 
     // Instantiate the OpenLayers Select interaction
-    this.#ol_select = new OLSelect(olOptions);
+    this.#olSelect = new OLSelect(olOptions);
 
     // Register a handler when select is changed and immediately re-emit
-    this.#ol_select.on('select', this.#emitSelectChanged.bind(this));
+    this.#olSelect.on('select', this.#emitSelectChanged.bind(this));
   }
 
   /**
@@ -60,7 +59,7 @@ export class Select extends Interaction {
    */
   override startInteraction(): void {
     // Redirect to super method to start interaction
-    super.startInteraction(this.#ol_select);
+    super.startInteraction(this.#olSelect);
   }
 
   /**
@@ -68,7 +67,7 @@ export class Select extends Interaction {
    */
   override stopInteraction(): void {
     // Redirect to super method to stop interaction
-    super.stopInteraction(this.#ol_select);
+    super.stopInteraction(this.#olSelect);
   }
 
   /**
@@ -77,7 +76,7 @@ export class Select extends Interaction {
    * @returns The selected features
    */
   getFeatures(): Collection<Feature<Geometry>> {
-    return this.#ol_select.getFeatures();
+    return this.#olSelect.getFeatures();
   }
 
   /**

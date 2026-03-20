@@ -100,146 +100,146 @@ export class MapViewer {
   /** Default inches per meter used by OpenLayers */
   static readonly DEFAULT_INCHES_PER_METER = 39.3700787;
 
-  // map config properties
+  /** Map features configuration properties */
   mapFeaturesConfig: TypeMapFeaturesConfig;
 
-  // the id of the map
+  /** The id of the map */
   mapId: string;
 
-  // the openlayer map
+  /** The OpenLayers map instance */
   // Note: The '!' is used here, because it's being created just a bit late, but not late enough that we want to keep checking for undefined throughout the code base
   map!: OLMap;
 
-  // plugins attach to the map
+  /** Plugins attached to the map */
   plugins: PluginsContainer = {};
 
-  // the overview map reat root
+  /** The overview map React root */
   overviewRoot: Root | undefined;
 
-  // used to access button bar API to create buttons and button panels on the app-bar
+  /** Used to access button bar API to create buttons and button panels on the app-bar */
   appBarApi: AppBarApi;
 
-  // used to access button bar API to create buttons and button panels on the nav-bar
+  /** Used to access button bar API to create buttons and button panels on the nav-bar */
   navBarApi: NavBarApi;
 
-  // used to access the footer bar API to create buttons and footer panels on the footer-bar
+  /** Used to access the footer bar API to create buttons and footer panels on the footer-bar */
   footerBarApi: FooterBarApi;
 
-  // used to manage states
+  /** Used to manage states */
   stateApi: StateApi;
 
-  // used to access basemap functions
+  /** Used to access basemap functions */
   basemap: BasemapApi;
 
-  // used to attach the notification class
+  /** Used to attach the notification class */
   notifications: Notifications;
 
-  // used to access layers functions
+  /** Used to access layers functions */
   layer: LayerApi;
 
-  // modals creation
+  /** Modals creation */
   modal: ModalApi;
 
-  // max number of icons cached
+  /** Max number of icons cached */
   iconImageCacheSize: number;
 
-  // i18n instance
+  /** The i18n instance */
   #i18nInstance: i18n;
 
-  // Indicate if the map has been initialized
+  /** Indicates if the map has been initialized */
   #mapInit = false;
 
-  // Indicate if the map is ready
+  /** Indicates if the map is ready */
   #mapReady = false;
 
-  // Indicate if the map has all its layers processed upon launch
+  /** Indicates if the map has all its layers processed upon launch */
   #mapLayersProcessed = false;
 
-  // Indicate if the map has all its layers loaded upon launch
+  /** Indicates if the map has all its layers loaded upon launch */
   #mapLayersLoaded = false;
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the map init event */
   #onMapInitHandlers: MapInitDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the map ready event */
   #onMapReadyHandlers: MapReadyDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the map layers processed event */
   #onMapLayersProcessedHandlers: MapLayersProcessedDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the map layers loaded event */
   #onMapLayersLoadedHandlers: MapLayersLoadedDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the map move end event */
   #onMapMoveEndHandlers: MapMoveEndDelegate[] = [];
 
   /** Whether pointer events should be handled */
   #pointerHandlersEnabled: boolean = true;
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the map pointer move event */
   #onMapPointerMoveHandlers: MapPointerMoveDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the map pointer stop event */
   #onMapPointerStopHandlers: MapPointerMoveDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the map single click event */
   #onMapSingleClickHandlers: MapSingleClickDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the map zoom end event */
   #onMapZoomEndHandlers: MapZoomEndDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the map rotation event */
   #onMapRotationHandlers: MapRotationDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the map change size event */
   #onMapChangeSizeHandlers: MapChangeSizeDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the map projection changed event */
   #onMapProjectionChangedHandlers: MapProjectionChangedDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the map component added event */
   #onMapComponentAddedHandlers: MapComponentAddedDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the map component removed event */
   #onMapComponentRemovedHandlers: MapComponentRemovedDelegate[] = [];
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the map language changed event */
   #onMapLanguageChangedHandlers: MapLanguageChangedDelegate[] = [];
 
-  // The starting time of the timer for the map ready
+  /** The starting time of the timer for the map ready */
   #checkMapReadyStartTime: number | undefined;
 
-  // Keep a bounded reference to the handle map pointer move
+  /** Bounded reference to the handle map pointer move */
   #boundedHandleMapPointerMove: (event: MapBrowserEvent) => void;
 
-  // Keep a bounded reference to the handle map pointer stopped
+  /** Bounded reference to the handle map pointer stopped */
   #boundedHandleMapPointerStopped: (event: MapBrowserEvent) => void;
 
-  // Keep a bounded reference to the handle map single click
+  /** Bounded reference to the handle map single click */
   #boundedHandleMapSingleClick: (event: MapBrowserEvent) => void;
 
-  // Keep a bounded reference to the debounced handle map pointer stopped
+  /** Bounded reference to the debounced handle map pointer stopped */
   #boundedHandleMapPointerStoppedDebounced: (event: MapBrowserEvent) => void;
 
-  // Keep a bounded reference to the debounced handle map single click
+  /** Bounded reference to the debounced handle map single click */
   #boundedHandleMapSingleClickDebounced: (event: MapBrowserEvent) => void;
 
-  // Getter for map is init
+  /** Getter for map is init */
   get mapInit(): boolean {
     return this.#mapInit;
   }
 
-  // Getter for map is ready. A Map is ready when all layers have been processed.
+  /** Getter for map is ready. A Map is ready when all layers have been processed. */
   get mapReady(): boolean {
     return this.#mapReady;
   }
 
-  // Getter for map layers processed
+  /** Getter for map layers processed */
   get mapLayersProcessed(): boolean {
     return this.#mapLayersProcessed;
   }
 
-  // Getter for map layers loaded
+  /** Getter for map layers loaded */
   get mapLayersLoaded(): boolean {
     return this.#mapLayersLoaded;
   }
@@ -400,7 +400,7 @@ export class MapViewer {
   // #region MAP STATES
 
   /**
-   * Asynchronously attempts to get a plugin by its id.
+   * Gets a plugin by its id.
    *
    * @param pluginId - The plugin id
    * @returns The plugin
@@ -413,7 +413,7 @@ export class MapViewer {
    * Asynchronously attempts to get a plugin by its id.
    *
    * @param pluginId - The plugin id
-   * @returns The plugin
+   * @returns A promise that resolves with the plugin
    */
   getPluginAsync(pluginId: string): Promise<AbstractPlugin> {
     return whenThisThen(() => {
@@ -515,7 +515,7 @@ export class MapViewer {
    * Asynchronously gets the map center coordinate to give a chance for the map to
    * render before returning the value.
    *
-   * @returns The map center
+   * @returns A promise that resolves with the map center
    */
   getCenter(): Promise<Coordinate> {
     // When the getCenter() function actually returns a coordinate
@@ -540,7 +540,7 @@ export class MapViewer {
    * Asynchronously gets the map size to give a chance for the map to
    * render before returning the value.
    *
-   * @returns The map size
+   * @returns A promise that resolves with the map size
    */
   getMapSize(): Promise<Size> {
     // When the getSize() function actually returns a coordinate
@@ -555,7 +555,7 @@ export class MapViewer {
    *
    * @param pointXY - The pixel coordinate to convert
    * @param timeoutMs - The maximum time in milliseconds to wait for the getCoordinateFromPixel to return a value
-   * @returns The map coordinate at the given pixel location
+   * @returns A promise that resolves with the map coordinate at the given pixel location
    */
   getCoordinateFromPixel(pointXY: [number, number], timeoutMs: number): Promise<Coordinate> {
     // When the getCoordinateFromPixel() function actually returns a coordinate
@@ -685,7 +685,7 @@ export class MapViewer {
    * without modifying the underlying stored values.
    *
    * @param displayDateTimezone - The IANA timezone identifier to use for display
-   * @throws {InvalidTimezoneError} If the time zone is not a valid or supported IANA identifier
+   * @throws {InvalidTimezoneError} When the time zone is not a valid or supported IANA identifier
    */
   setDisplayDateTimezone(displayDateTimezone: TimeIANA): void {
     // Validate the timezone
@@ -936,6 +936,7 @@ export class MapViewer {
    * Simulate a map click and return promises of store update and ui update.
    *
    * @param lonlat - The lonlat coordinates to simulate
+   * @returns The simulated map click information
    */
   simulateMapClick(lonlat: Coordinate): SimulatedMapClick {
     // Transform lonlat to map projection
@@ -1048,7 +1049,7 @@ export class MapViewer {
    * Zoom to the specified extent.
    *
    * @param extent - The extent to zoom to
-   * @param options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 })
+   * @param options - Optional options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 })
    * @returns A promise that resolves when the zoom operation completes
    */
   zoomToExtent(extent: Extent, options?: FitOptions): Promise<void> {
@@ -1084,7 +1085,7 @@ export class MapViewer {
    * Zoom to specified extent or coordinate provided in lonlat.
    *
    * @param extent - The extent or coordinate to zoom to
-   * @param options - The options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 })
+   * @param options - Optional options to configure the zoomToExtent (default: { padding: [100, 100, 100, 100], maxZoom: 11 })
    * @returns A promise that resolves when the zoom operation completes
    */
   zoomToLonLatExtentOrCoordinate(extent: Extent | Coordinate, options?: FitOptions): Promise<void> {
@@ -1184,7 +1185,9 @@ export class MapViewer {
   // #region MAP INTERACTIONS
 
   /**
-   * Initializes selection interactions
+   * Initializes selection interactions.
+   *
+   * @returns The select interaction
    */
   initSelectInteractions(): Select {
     // Create selecting capabilities
@@ -1197,7 +1200,9 @@ export class MapViewer {
   }
 
   /**
-   * Initializes extent interactions
+   * Initializes extent interactions.
+   *
+   * @returns The extent interaction
    */
   initExtentInteractions(): ExtentInteraction {
     // Create selecting capabilities
@@ -1210,7 +1215,9 @@ export class MapViewer {
   }
 
   /**
-   * Initializes translation interactions
+   * Initializes translation interactions.
+   *
+   * @returns The translate interaction
    */
   initTranslateInteractions(): Translate {
     // Create selecting capabilities
@@ -1228,6 +1235,8 @@ export class MapViewer {
   /**
    * Initializes translation interactions without requireing the extra selection click.
    * Note: This will limit translation interactions to one feature at a time.
+   *
+   * @returns The translate interaction
    */
   initTranslateOneFeatureInteractions(): Translate {
     // Create translating capabilities
@@ -1244,6 +1253,8 @@ export class MapViewer {
    * @param geomGroupKey - The geometry group key in which to hold the geometries
    * @param type - The type of geometry to draw (Polygon, LineString, Circle, etc)
    * @param style - The styles for the drawing
+   * @param geometryFunction - Optional geometry function for custom drawing behavior
+   * @returns The draw interaction
    */
   initDrawInteractions(geomGroupKey: string, type: string, style: TypeFeatureStyle, geometryFunction?: GeometryFunction): Draw {
     // Create the Draw component
@@ -1262,6 +1273,10 @@ export class MapViewer {
    * Initializes modifying interactions on the given vector source.
    *
    * @param geomGroupKey - The geometry group key in which to hold the geometries
+   * @param style - Optional styles for the modification
+   * @param insertVertexCondition - Optional condition for inserting vertices
+   * @param pixelTolerance - Optional pixel tolerance for modification
+   * @returns The modify interaction
    */
   initModifyInteractions(
     geomGroupKey: string,
@@ -1285,6 +1300,7 @@ export class MapViewer {
    * Initializes snapping interactions on the given vector source.
    *
    * @param geomGroupKey - The geometry group key in which to hold the geometries
+   * @returns The snap interaction
    */
   initSnapInteractions(geomGroupKey: string): Snap {
     // Create snapping capabilities
@@ -1299,7 +1315,8 @@ export class MapViewer {
   /**
    * Initializes transform interactions for feature manipulation.
    *
-   * @param options - Options for the transform interaction
+   * @param options - Optional options for the transform interaction
+   * @returns The transform interaction
    */
   initTransformInteractions(options?: Partial<TransformOptions>): Transform {
     // Create transform capabilities
@@ -1318,7 +1335,7 @@ export class MapViewer {
   /**
    * Gets if north pole is visible. This is not a perfect solution and is more a work around.
    *
-   * @returns True if visible, false otherwise
+   * @returns A promise that resolves with true if visible, false otherwise
    */
   async getNorthPoleVisibility(): Promise<boolean> {
     // Check the container value for top middle of the screen
@@ -1486,7 +1503,7 @@ export class MapViewer {
   /**
    * Creates a map config based on current map state.
    *
-   * @param overrideGeocoreServiceNames - Indicates if geocore layer names should be kept as is or returned to defaults.
+   * @param overrideGeocoreServiceNames - Optional - Indicates if geocore layer names should be kept as is or returned to defaults.
    *   Set to false after a language change to update the layer names with the new language.
    * @returns Map config with current map state, or undefined if unavailable
    */
@@ -1498,8 +1515,8 @@ export class MapViewer {
    * Searches through a map config and replaces any matching layer names with their provided partner.
    *
    * @param namePairs - The array of name pairs. Presumably one english and one french name in each pair
-   * @param mapConfig - The config to modify, or one created using the current map state if not provided
-   * @param removeUnlisted - Whether or not names not provided should be removed from config
+   * @param mapConfig - Optional config to modify, or one created using the current map state if not provided
+   * @param removeUnlisted - Optional - Whether or not names not provided should be removed from config
    * @returns Map config with updated names, or undefined if no config is available
    */
   replaceMapConfigLayerNames(

@@ -36,9 +36,6 @@ export interface TypeXYZTilesConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
 
 /**
  * A class to add xyz-tiles layer
- *
- * @exports
- * @class XYZTiles
  */
 export class XYZTiles extends AbstractGeoViewRaster {
   /**
@@ -74,9 +71,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
-   * @returns A promise resolved once the layer entries have been initialized.
-   * @override
-   * @protected
+   *
+   * @returns A promise that resolves once the layer entries have been initialized.
    */
   protected override onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Redirect
@@ -93,10 +89,8 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
   /**
    * Overrides the validation of a layer entry config.
-   * @param {ConfigBaseClass} layerConfig - The layer entry config to validate.
-   * @returns {void}
-   * @override
-   * @protected
+   *
+   * @param layerConfig - The layer entry config to validate.
    */
   protected override onValidateLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     // TODO: Update to properly use metadata from map server
@@ -133,13 +127,12 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
   /**
    * Overrides the way the layer metadata is processed.
-   * @param {XYZTilesLayerEntryConfig} layerConfig - The layer entry configuration to process.
-   * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
-   * @param {OLProjection?} [mapProjection] - The map projection.
+   *
+   * @param layerConfig - The layer entry configuration to process.
+   * @param displayDateMode - The display date mode to use for processing time dimensions in the metadata.
+   * @param mapProjection - Optional map projection.
    * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns {Promise<XYZTilesLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
-   * @override
-   * @protected
+   * @returns A promise that resolves once the layer entry configuration has gotten its metadata processed.
    */
   protected override onProcessLayerMetadata(
     layerConfig: XYZTilesLayerEntryConfig,
@@ -197,9 +190,9 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
   /**
    * Overrides the creation of the GV Layer
-   * @param {XYZTilesLayerEntryConfig} layerConfig - The layer entry configuration.
-   * @returns {GVXYZTiles} The GV Layer
-   * @override
+   *
+   * @param layerConfig - The layer entry configuration.
+   * @returns The GV Layer
    */
   protected override onCreateGVLayer(layerConfig: XYZTilesLayerEntryConfig): GVXYZTiles {
     // Create the source
@@ -218,15 +211,16 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
   /**
    * Initializes a GeoView layer configuration for a XYZ Tiles layer.
+   *
    * This method creates a basic TypeGeoviewLayerConfig using the provided
    * ID, name, and metadata access path URL. It then initializes the layer entries by calling
    * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
+   *
    * @param geoviewLayerId - A unique identifier for the layer.
    * @param geoviewLayerName - The display name of the layer.
    * @param metadataAccessPath - The full service URL to the layer endpoint.
-   * @param isTimeAware - Indicates whether the layer supports time-based filtering.
+   * @param isTimeAware - Optional to indicates whether the layer supports time-based filtering.
    * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries.
-   * @static
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -241,8 +235,10 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
   /**
    * Creates a configuration object for a XYZTiles layer.
+   *
    * This function constructs a `TypeXYZTilesConfig` object that describes an XYZTiles layer
    * and its associated entry configurations based on the provided parameters.
+   *
    * @param geoviewLayerId - A unique identifier for the GeoView layer.
    * @param geoviewLayerName - The display name of the GeoView layer.
    * @param metadataAccessPath - The URL or path to access metadata.
@@ -250,7 +246,6 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * @param layerEntries - An array of layer entries objects to be included
    * in the configuration.
    * @returns The constructed configuration object for the XYZTiles layer.
-   * @static
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -288,13 +283,13 @@ export class XYZTiles extends AbstractGeoViewRaster {
    * 1. Creates a Geoview layer configuration using the provided parameters.
    * 2. Instantiates a layer with that configuration.
    * 3. Processes the layer configuration and returns the result.
-   * @param {string} geoviewLayerId - The unique identifier for the GeoView layer.
-   * @param {string} geoviewLayerName - The display name for the GeoView layer.
-   * @param {string} url - The URL of the service endpoint.
-   * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
-   * @param {boolean} isTimeAware - Indicates if the layer is time aware.
-   * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
-   * @static
+   *
+   * @param geoviewLayerId - The unique identifier for the GeoView layer.
+   * @param geoviewLayerName - The display name for the GeoView layer.
+   * @param url - The URL of the service endpoint.
+   * @param layerIds - An array of layer IDs to include in the configuration.
+   * @param isTimeAware - Indicates if the layer is time aware.
+   * @returns A promise that resolves to an array of layer configurations.
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -323,10 +318,10 @@ export class XYZTiles extends AbstractGeoViewRaster {
 
   /**
    * Creates an XYZ source from a layer config.
-   * @param {XYZTilesLayerEntryConfig} layerConfig - The configuration for the XYZ layer.
+   *
+   * @param layerConfig - The configuration for the XYZ layer.
    * @returns A fully configured XYZ source.
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
-   * @static
    */
   static createXYZSource(layerConfig: XYZTilesLayerEntryConfig): XYZ {
     const sourceOptions: SourceOptions = {

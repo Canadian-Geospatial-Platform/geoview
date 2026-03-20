@@ -20,9 +20,7 @@ export interface TypeKmlLayerConfig extends Omit<TypeGeoviewLayerConfig, 'listOf
 }
 
 /**
- * Class used to add KML layer to the map
- * @exports
- * @class KML
+ * Class used to add KML layer to the map.
  */
 export class KML extends AbstractGeoViewVector {
   /**
@@ -49,9 +47,8 @@ export class KML extends AbstractGeoViewVector {
 
   /**
    * Overrides the way a geoview layer config initializes its layer entries.
-   * @returns A promise resolved once the layer entries have been initialized.
-   * @override
-   * @protected
+   *
+   * @returns A promise that resolves once the layer entries have been initialized
    */
   protected override async onInitLayerEntries(): Promise<TypeGeoviewLayerConfig> {
     // Get the folder url
@@ -68,13 +65,12 @@ export class KML extends AbstractGeoViewVector {
 
   /**
    * Overrides the way the layer metadata is processed.
-   * @param {VectorLayerEntryConfig} layerConfig - The layer entry configuration to process.
-   * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
-   * @param {OLProjection?} [mapProjection] - The map projection.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns {Promise<VectorLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
-   * @override
-   * @protected
+   *
+   * @param layerConfig - The layer entry configuration to process
+   * @param displayDateMode - The display date mode to use for processing time dimensions in the metadata
+   * @param mapProjection - Optional map projection
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves once the layer entry configuration has gotten its metadata processed
    */
   protected override onProcessLayerMetadata(
     layerConfig: VectorLayerEntryConfig,
@@ -95,19 +91,11 @@ export class KML extends AbstractGeoViewVector {
   /**
    * Overrides the loading of the vector features for the layer by fetching KML data and converting it
    * into OpenLayers {@link Feature} feature instances.
-   * @param {VectorLayerEntryConfig} layerConfig -
-   * The configuration object for the vector layer, containing source and
-   * data access information.
-   * @param {SourceOptions<Feature>} sourceOptions -
-   * The OpenLayers vector source options associated with the layer. This may be
-   * used by implementations to customize loading behavior or source configuration.
-   * @param {ReadOptions} readOptions -
-   * Options controlling how features are read, including the target
-   * `featureProjection`.
-   * @returns {Promise<Feature[]>}
-   * A promise that resolves to an array of OpenLayers features.
-   * @override
-   * @protected
+   *
+   * @param layerConfig - The configuration object for the vector layer, containing source and data access information
+   * @param sourceOptions - The OpenLayers vector source options associated with the layer
+   * @param readOptions - Options controlling how features are read, including the target `featureProjection`
+   * @returns A promise that resolves to an array of OpenLayers features
    */
   protected override async onCreateVectorSourceLoadFeatures(
     layerConfig: VectorLayerEntryConfig,
@@ -131,11 +119,10 @@ export class KML extends AbstractGeoViewVector {
   }
 
   /**
-   * Overrides the creation of the GV Layer
-   * @param {KmlLayerEntryConfig} layerConfig - The layer entry configuration.
-   * @returns {GVKML} The GV Layer
-   * @override
-   * @protected
+   * Overrides the creation of the GV Layer.
+   *
+   * @param layerConfig - The layer entry configuration
+   * @returns The GV Layer
    */
   protected override onCreateGVLayer(layerConfig: KmlLayerEntryConfig): GVKML {
     // Create the source
@@ -152,15 +139,16 @@ export class KML extends AbstractGeoViewVector {
 
   /**
    * Initializes a GeoView layer configuration for a KML layer.
+   *
    * This method creates a basic TypeGeoviewLayerConfig using the provided
    * ID, name, and metadata access path URL. It then initializes the layer entries by calling
    * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
+   *
    * @param geoviewLayerId - A unique identifier for the layer.
    * @param geoviewLayerName - The display name of the layer.
    * @param metadataAccessPath - The full service URL to the layer endpoint.
    * @param isTimeAware - Indicates whether the layer supports time-based filtering.
    * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries.
-   * @static
    */
   static initGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -175,15 +163,16 @@ export class KML extends AbstractGeoViewVector {
 
   /**
    * Creates a configuration object for a KML Feature layer.
+   *
    * This function constructs a `TypeKmlLayerConfig` object that describes an KML Feature layer
    * and its associated entry configurations based on the provided parameters.
+   *
    * @param geoviewLayerId - A unique identifier for the GeoView layer.
    * @param geoviewLayerName - The display name of the GeoView layer.
    * @param metadataAccessPath - The full service URL to the layer endpoint.
    * @param isTimeAware - Indicates whether the layer supports time-based filtering.
    * @param layerEntries - An array of layer entries objects to be included in the configuration.
    * @returns The constructed configuration object for the KML Feature layer.
-   * @static
    */
   static createGeoviewLayerConfig(
     geoviewLayerId: string,
@@ -224,13 +213,13 @@ export class KML extends AbstractGeoViewVector {
    * 1. Creates a Geoview layer configuration using the provided parameters.
    * 2. Instantiates a layer with that configuration.
    * 3. Processes the layer configuration and returns the result.
-   * @param {string} geoviewLayerId - The unique identifier for the GeoView layer.
-   * @param {string} geoviewLayerName - The display name for the GeoView layer.
-   * @param {string} url - The URL of the service endpoint.
-   * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
-   * @param {boolean} isTimeAware - Indicates if the layer is time aware.
-   * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
-   * @static
+   *
+   * @param geoviewLayerId - The unique identifier for the GeoView layer
+   * @param geoviewLayerName - The display name for the GeoView layer
+   * @param url - The URL of the service endpoint
+   * @param layerIds - An array of layer IDs to include in the configuration
+   * @param isTimeAware - Indicates if the layer is time aware
+   * @returns A promise that resolves to an array of layer configurations
    */
   static processGeoviewLayerConfig(
     geoviewLayerId: string,

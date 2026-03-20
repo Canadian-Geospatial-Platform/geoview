@@ -1,5 +1,5 @@
-import { Modify as OLModify } from 'ol/interaction';
-import type { ModifyEvent as OLModifyEvent, Options as OLModifyOptions } from 'ol/interaction/Modify';
+import { Modify as olModify } from 'ol/interaction';
+import type { ModifyEvent as olModifyEvent, Options as olModifyOptions } from 'ol/interaction/Modify';
 import Collection from 'ol/Collection';
 import type Feature from 'ol/Feature';
 import type { FlatStyle } from 'ol/style/flat';
@@ -29,8 +29,7 @@ export type ModifyOptions = InteractionOptions & {
  */
 export class Modify extends Interaction {
   /** The embedded OpenLayers Modify component. */
-  // eslint-disable-next-line camelcase
-  #ol_modify: OLModify;
+  #olModify: olModify;
 
   /** Callback handlers for the modifystart event. */
   #onModifyStartedHandlers: ModifyDelegate[] = [];
@@ -54,7 +53,7 @@ export class Modify extends Interaction {
 
     // The OpenLayers Modify options
     // TODO: Enhancements - Add support for more modifying options
-    const olOptions: OLModifyOptions = {
+    const olOptions: olModifyOptions = {
       style: GeoUtilities.convertTypeFeatureStyleToOpenLayersStyle(options.style) as FlatStyle,
     };
 
@@ -83,18 +82,18 @@ export class Modify extends Interaction {
     }
 
     // Instantiate the OpenLayers Modify interaction
-    this.#ol_modify = new OLModify(olOptions);
+    this.#olModify = new olModify(olOptions);
 
     // Register handlers for modify events
-    this.#ol_modify.on('modifystart', this.#emitModifyStarted.bind(this));
-    this.#ol_modify.on('modifyend', this.#emitModifyEnded.bind(this));
+    this.#olModify.on('modifystart', this.#emitModifyStarted.bind(this));
+    this.#olModify.on('modifyend', this.#emitModifyEnded.bind(this));
 
     // Since the openlayers modify interaction doesn't fire any events while
     // the active feature is being modified, we can register handlers for the
     // custom modifyDrag event by tracking changes to the active feature instead.
     // We can wrap this inside modifystart and modifyend event handlers
     // to ensure we only track the changes during the modify interaction
-    this.#ol_modify.on('modifystart', (event: OLModifyEvent) => {
+    this.#olModify.on('modifystart', (event: olModifyEvent) => {
       this.#activeFeature = event.features.item(0); // Track active feature
 
       if (this.#activeFeature) {
@@ -103,7 +102,7 @@ export class Modify extends Interaction {
     });
 
     // Unregister the modifyDrag event when the modify interaction ends
-    this.#ol_modify.on('modifyend', () => {
+    this.#olModify.on('modifyend', () => {
       if (this.#activeFeature) {
         this.#activeFeature.un('change', this.#emitModifyDragged.bind(this));
         this.#activeFeature = null; // Reset active feature
@@ -116,7 +115,7 @@ export class Modify extends Interaction {
    */
   override startInteraction(): void {
     // Redirect to super method to start interaction
-    super.startInteraction(this.#ol_modify);
+    super.startInteraction(this.#olModify);
   }
 
   /**
@@ -124,7 +123,7 @@ export class Modify extends Interaction {
    */
   override stopInteraction(): void {
     // Redirect to super method to stop interaction
-    super.stopInteraction(this.#ol_modify);
+    super.stopInteraction(this.#olModify);
   }
 
   /**
@@ -132,7 +131,7 @@ export class Modify extends Interaction {
    *
    * @param event - The event to emit
    */
-  #emitModifyStarted(event: OLModifyEvent): void {
+  #emitModifyStarted(event: olModifyEvent): void {
     // Emit the modifystarted event
     EventHelper.emitEvent(this, this.#onModifyStartedHandlers, event);
   }
@@ -162,7 +161,7 @@ export class Modify extends Interaction {
    *
    * @param event - The event to emit
    */
-  #emitModifyEnded(event: OLModifyEvent): void {
+  #emitModifyEnded(event: olModifyEvent): void {
     // Emit the modifyended event
     EventHelper.emitEvent(this, this.#onModifyEndedHandlers, event);
   }
@@ -192,7 +191,7 @@ export class Modify extends Interaction {
    */
   #emitModifyDragged(): void {
     if (this.#activeFeature) {
-      const event: OLModifyEvent = { features: new Collection([this.#activeFeature]) } as OLModifyEvent;
+      const event: olModifyEvent = { features: new Collection([this.#activeFeature]) } as olModifyEvent;
       EventHelper.emitEvent(this, this.#onModifyDraggedHandlers, event);
     }
   }
@@ -219,4 +218,4 @@ export class Modify extends Interaction {
 /**
  * Delegate for the modify event handler function signature.
  */
-type ModifyDelegate = EventDelegateBase<Modify, OLModifyEvent, void>;
+type ModifyDelegate = EventDelegateBase<Modify, olModifyEvent, void>;

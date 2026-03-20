@@ -1,5 +1,5 @@
-import { Extent as OLExtent } from 'ol/interaction';
-import type { ExtentEvent as OLExtentEvent, Options as OLExtentOptions } from 'ol/interaction/Extent';
+import { Extent as olExtent } from 'ol/interaction';
+import type { ExtentEvent as olExtentEvent, Options as olExtentOptions } from 'ol/interaction/Extent';
 import { shiftKeyOnly } from 'ol/events/condition';
 
 import type { EventDelegateBase } from '@/api/events/event-helper';
@@ -23,8 +23,7 @@ export type ExtentOptions = InteractionOptions & {
  */
 export class Extent extends Interaction {
   /** The embedded OpenLayers Extent component */
-  // eslint-disable-next-line camelcase
-  #ol_extent: OLExtent;
+  #olExtent: olExtent;
 
   /** Callback handlers for the extentchanged event. */
   #onExtentChangedHandlers: ExtentDelegate[] = [];
@@ -38,17 +37,17 @@ export class Extent extends Interaction {
     super(options);
 
     // Configure OpenLayers Extent options
-    const olOptions: OLExtentOptions = {
+    const olOptions: olExtentOptions = {
       condition: shiftKeyOnly,
       boxStyle: GeoUtilities.convertTypeFeatureStyleToOpenLayersStyle(options.boxStyle),
       pixelTolerance: options.pixelTolerance || 0,
     };
 
     // Instantiate the OpenLayers Extent interaction
-    this.#ol_extent = new OLExtent(olOptions);
+    this.#olExtent = new olExtent(olOptions);
 
     // Register event handler for extent change
-    this.#ol_extent.on('extentchanged', this.#emitExtentChanged.bind(this));
+    this.#olExtent.on('extentchanged', this.#emitExtentChanged.bind(this));
   }
 
   /**
@@ -56,7 +55,7 @@ export class Extent extends Interaction {
    */
   override startInteraction(): void {
     // Redirect to super method to start interaction
-    super.startInteraction(this.#ol_extent);
+    super.startInteraction(this.#olExtent);
   }
 
   /**
@@ -64,7 +63,7 @@ export class Extent extends Interaction {
    */
   override stopInteraction(): void {
     // Redirect to super method to stop interaction
-    super.stopInteraction(this.#ol_extent);
+    super.stopInteraction(this.#olExtent);
   }
 
   /**
@@ -72,7 +71,7 @@ export class Extent extends Interaction {
    *
    * @param event - The event to emit
    */
-  #emitExtentChanged(event: OLExtentEvent): void {
+  #emitExtentChanged(event: olExtentEvent): void {
     // Emit the extentchanged event
     EventHelper.emitEvent(this, this.#onExtentChangedHandlers, event);
   }
@@ -101,4 +100,4 @@ export class Extent extends Interaction {
 /**
  * Delegate for the extent event handler function signature.
  */
-type ExtentDelegate = EventDelegateBase<Extent, OLExtentEvent, void>;
+type ExtentDelegate = EventDelegateBase<Extent, olExtentEvent, void>;

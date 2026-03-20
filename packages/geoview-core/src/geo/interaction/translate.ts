@@ -21,9 +21,7 @@ export type TranslateOptions = InteractionOptions & {
  */
 export class Translate extends Interaction {
   /** The embedded OpenLayers Translate component */
-  // TODO: fix - fix all camelcase for ol interactions
-  // eslint-disable-next-line camelcase
-  #ol_translate: OLTranslate;
+  #olTranslate: OLTranslate;
 
   /** Keep all callback delegates references */
   #onTranslateStartedHandlers: TranslateDelegate[] = [];
@@ -48,11 +46,11 @@ export class Translate extends Interaction {
     }
 
     // Instantiate the OpenLayers Translate interaction
-    this.#ol_translate = new OLTranslate(olOptions);
+    this.#olTranslate = new OLTranslate(olOptions);
 
     // Register handler when translation starts/ends
-    this.#ol_translate.on('translatestart', this.#emitTranslateStarted.bind(this));
-    this.#ol_translate.on('translateend', this.#emitTranslateEnded.bind(this));
+    this.#olTranslate.on('translatestart', this.#emitTranslateStarted.bind(this));
+    this.#olTranslate.on('translateend', this.#emitTranslateEnded.bind(this));
   }
 
   /**
@@ -60,7 +58,7 @@ export class Translate extends Interaction {
    */
   override startInteraction(): void {
     // Redirect to super method to start interaction
-    super.startInteraction(this.#ol_translate);
+    super.startInteraction(this.#olTranslate);
   }
 
   /**
@@ -68,7 +66,7 @@ export class Translate extends Interaction {
    */
   override stopInteraction(): void {
     // Redirect to super method to stop interaction
-    super.stopInteraction(this.#ol_translate);
+    super.stopInteraction(this.#olTranslate);
   }
 
   /**
