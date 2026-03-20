@@ -1,10 +1,10 @@
 import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
 /**
- * Get custom sx classes for the MUI drawer
+ * Gets custom sx classes for the drawer component.
  *
- * @param {Theme} theme the theme object
- * @returns {Object} the sx classes object
+ * @param theme - The MUI theme object
+ * @returns The sx classes object
  */
 export declare const getSxClasses: (theme: Theme) => SxStyles;
 //# sourceMappingURL=drawer-style.d.ts.map

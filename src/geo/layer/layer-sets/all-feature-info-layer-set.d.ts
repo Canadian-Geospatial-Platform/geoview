@@ -7,7 +7,6 @@ import type { TypeAllFeatureInfoResultSet, TypeAllFeatureInfoResultSetEntry } fr
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
  * events happening on them (in this case when the user queries for all records within a layer) with a store
  * for UI updates.
- * @class AllFeatureInfoLayerSet
  */
 export declare class AllFeatureInfoLayerSet extends AbstractLayerSet {
     #private;
@@ -24,45 +23,40 @@ export declare class AllFeatureInfoLayerSet extends AbstractLayerSet {
     protected onRegisterLayerCheck(layer: AbstractBaseGVLayer): boolean;
     /**
      * Overrides the behavior to apply when an all-feature-info-layer-set wants to register a layer in its set.
-     * @param {AbstractBaseGVLayer} layer - The layer
-     * @returns {void}
-     * @override
-     * @protected
+     *
+     * @param layer - The layer
      */
     protected onRegisterLayer(layer: AbstractBaseGVLayer): void;
     /**
-     * Overrides the behavior to apply when propagating to the store
-     * @param {TypeAllFeatureInfoResultSetEntry} resultSetEntry - The result set entry to propagate
-     * @param {PropagationType} type - The propagation type
-     * @returns {void}
-     * @override
-     * @protected
+     * Overrides the behavior to apply when propagating to the store.
+     *
+     * @param resultSetEntry - The result set entry to propagate
+     * @param type - The propagation type
      */
     protected onPropagateToStore(resultSetEntry: TypeAllFeatureInfoResultSetEntry, type: PropagationType): void;
     /**
-     * Overrides the behavior to apply when deleting from the store
-     * @param {string} layerPath - The layer path to delete from the store
-     * @returns {void}
-     * @override
-     * @protected
+     * Overrides the behavior to apply when deleting from the store.
+     *
+     * @param layerPath - The layer path to delete from the store
      */
     protected onDeleteFromStore(layerPath: string): void;
     /**
      * Helper function used to launch the query on a layer to get all of its feature information.
-     * @param {string} layerPath - The layerPath that will be queried
-     * @param {QueryType} queryType - The query type, default: AllFeatureInfoLayerSet.QUERY_TYPE.
-     * @returns {Promise<TypeFeatureInfoResult>} A promise which will hold the result of the query
-     * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+     *
+     * @param layerPath - The layerPath that will be queried
+     * @param queryType - The query type, default: AllFeatureInfoLayerSet.QUERY_TYPE
+     * @returns A promise that resolves with the result of the query
      */
     queryLayer(layerPath: string, queryType?: QueryType): Promise<TypeFeatureInfoResult>;
     /**
      * Clears all stored features for a specific layer in the Feature Info result set.
+     *
      * If the given `layerPath` exists in the internal `resultSet`, this method:
      * - Sets its `features` property to `null`, effectively removing all features.
      * - Propagates the updated layer result to the external store.
      * If the layer path does not exist in the result set, the method does nothing.
-     * @param {string} layerPath - The unique path identifying the layer to clear.
-     * @returns {void}
+     *
+     * @param layerPath - The unique path identifying the layer to clear
      */
     clearLayerFeatures(layerPath: string): void;
 }

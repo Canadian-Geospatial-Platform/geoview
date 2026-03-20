@@ -11,25 +11,21 @@ export type SnapOptions = InteractionOptions & {
 };
 /**
  * Class used for snapping features on a map.
- * @class Snap
- * @extends {Interaction}
- * @exports
  */
 export declare class Snap extends Interaction {
     #private;
     /**
      * Initializes a Snap component.
-     * @param {SnapOptions} options - Object to configure the initialization of the Snap interaction.
+     *
+     * @param options - Object to configure the initialization of the Snap interaction
      */
     constructor(options: SnapOptions);
     /**
      * Starts the interaction on the map.
-     * @override
      */
     startInteraction(): void;
     /**
      * Stops the interaction on the map.
-     * @override
      */
     stopInteraction(): void;
 }

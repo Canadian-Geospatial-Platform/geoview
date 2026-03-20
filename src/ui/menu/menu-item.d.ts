@@ -1,8 +1,14 @@
 import type { MenuItemProps } from '@mui/material';
 /**
- * Create a customized Material UI Menu Item component.
+ * Material-UI MenuItem component for menu item options.
  *
- * @component
+ * Wraps Material-UI's MenuItem to provide interactive menu option element.
+ * Supports click handling, disabled state, and custom styling. Best used within
+ * Menu component. All Material-UI MenuItem props are supported.
+ *
+ * @param props - MenuItem configuration (see MUI docs for all available props)
+ * @returns MenuItem component for menu selection options
+ *
  * @example
  * ```tsx
  * // Basic usage
@@ -26,9 +32,6 @@ import type { MenuItemProps } from '@mui/material';
  *   Disabled Option
  * </MenuItem>
  * ```
- *
- * @param {MenuItemProps} props - All valid Material-UI Menu Item props
- * @returns {JSX.Element} The Menu Item component
  *
  * @see {@link https://mui.com/material-ui/api/menu-item/}
  */

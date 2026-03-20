@@ -1,8 +1,15 @@
 import type { CollapseProps } from '@mui/material';
 /**
- * Create a customized Material UI Collapse component.
+ * Material-UI Collapse component for expandable/collapsible content.
  *
- * @component
+ * Wraps Material-UI's Collapse to provide smooth height-based animation for
+ * showing/hiding content. Controls visibility via the `in` prop with optional
+ * timeout and unmount behaviors. All Material-UI Collapse props are supported
+ * and passed through directly.
+ *
+ * @param props - Collapse configuration (see MUI docs for all available props)
+ * @returns Collapse component with smooth expand/collapse animation
+ *
  * @example
  * ```tsx
  * // Basic usage
@@ -36,13 +43,7 @@ import type { CollapseProps } from '@mui/material';
  * </Collapse>
  * ```
  *
- * @param {CollapseProps} props - All valid Material-UI Collapse props
- * @returns {JSX.Element} The Collapse component
- *
- * @note For performance optimization in cases of frequent parent re-renders,
- * consider wrapping this component with React.memo at the consumption level.
- *
- * @see {@link https://mui.com/material-ui/react-collapse/|Material-UI Collapse}
+ * @see {@link https://mui.com/material-ui/react-collapse/}
  */
 declare function CollapseUI(props: CollapseProps): JSX.Element;
 export declare const Collapse: typeof CollapseUI;

@@ -1,9 +1,9 @@
-import { Style, Text } from 'ol/style';
+import { Style } from 'ol/style';
 import type { Geometry } from 'ol/geom';
 import type { Options as StrokeOptions } from 'ol/style/Stroke';
 import type { FeatureLike } from 'ol/Feature';
 import type Feature from 'ol/Feature';
-import type { TypeLayerStyleConfigType, TypePolygonVectorConfig, TypeIconSymbolVectorConfig, TypeLineStyle, TypeLineStringVectorConfig, TypeSimpleSymbolVectorConfig, TypeKindOfVectorSettings, TypeStyleGeometry, TypeLayerStyleSettings, TypeLayerStyleConfig, TypeLayerStyleConfigInfo, TypeLayerStyleValueCondition, TypeLayerTextConfig, TypeLayerStyleVisualVariable, TypeAliasLookup, TypeValidMapProjectionCodes, TypeOutfields } from '@/api/types/map-schema-types';
+import type { TypeLayerStyleConfigType, TypePolygonVectorConfig, TypeIconSymbolVectorConfig, TypeLineStyle, TypeLineStringVectorConfig, TypeSimpleSymbolVectorConfig, TypeKindOfVectorSettings, TypeStyleGeometry, TypeLayerStyleSettings, TypeLayerStyleConfig, TypeLayerStyleConfigInfo, TypeLayerStyleValueCondition, TypeLayerStyleVisualVariable, TypeAliasLookup, TypeOutfields } from '@/api/types/map-schema-types';
 import type { TypeLayerMetadataFields } from '@/api/types/layer-schema-types';
 import type { FillPatternLine, FillPatternSettings, FilterNodeType } from './geoview-renderer-types';
 type TypeStyleProcessor = (styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions) => Style | undefined;
@@ -20,7 +20,9 @@ export type TypeStyleProcessorOptions = {
 };
 export declare abstract class GeoviewRenderer {
     #private;
+    /** The default filter expression when all features should be included */
     static readonly DEFAULT_FILTER_1EQUALS1: string;
+    /** The default filter expression when no features should be included */
     static readonly DEFAULT_FILTER_1EQUALS0: string;
     /** Default value of the legend canvas width when the settings do not provide one. */
     static readonly LEGEND_CANVAS_WIDTH = 50;
@@ -29,34 +31,37 @@ export declare abstract class GeoviewRenderer {
     /**
      * Get the default color using the default color index.
      *
-     * @param {number} alpha - Alpha value to associate to the color.
-     * @param {boolean} increment - True, if we want to skip to next color
-     *
-     * @returns {string} The current default color string.
-     * @static
+     * @param alpha - Alpha value to associate to the color
+     * @param increment - Optional true, if we want to skip to next color
+     * @returns The current default color string
      */
     static getDefaultColor(alpha: number, increment?: boolean): string;
     /**
-     * This method returns the type of geometry. It removes the Multi prefix because for the geoviewRenderer, a MultiPoint has
+     * Returns the type of geometry.
+     *
+     * It removes the Multi prefix because for the geoviewRenderer, a MultiPoint has
      * the same behaviour than a Point.
-     * @param {FeatureLike} feature - The feature to check
-     * @param {TypeLayerStyleConfig} defaultLayerStyle - The default layer style config to use when the feature has no geometry
-     * @returns {TypeStyleGeometry} The type of geometry (Point, LineString, Polygon).
-     * @static
+     *
+     * @param feature - The feature to check
+     * @param defaultLayerStyle - The default layer style config to use when the feature has no geometry
+     * @returns The type of geometry (Point, LineString, Polygon)
      */
     static readGeometryTypeSimplifiedFromFeature(feature: FeatureLike, defaultLayerStyle: TypeLayerStyleConfig): TypeStyleGeometry;
     /**
-     * This method returns the type of geometry. It removes the Multi prefix because for the geoviewRenderer, a MultiPoint has
+     * Returns the type of geometry.
+     *
+     * It removes the Multi prefix because for the geoviewRenderer, a MultiPoint has
      * the same behaviour than a Point.
-     * @param {TypeStyleGeometry} geometryType - The feature to check
-     * @returns {TypeStyleGeometry} The type of geometry (Point, LineString, Polygon).
-     * @static
+     *
+     * @param geometryType - The geometry type to check
+     * @returns The type of geometry (Point, LineString, Polygon)
      */
     static readGeometryTypeSimplified(geometryType: TypeStyleGeometry): TypeStyleGeometry;
     /**
-     * Decodes a base64-encoded SVG string and replaces parameterized placeholders
-     * (e.g., `param(fill)` or `param(outline)`) with actual values provided
-     * as query parameters appended to the base64 string.
+     * Decodes a base64-encoded SVG string and replaces parameterized placeholders.
+     *
+     * Placeholders like `param(fill)` or `param(outline)` are replaced with actual values
+     * provided as query parameters appended to the base64 string.
      * This is particularly useful for decoding and normalizing SVG symbols
      * exported from QGIS, which may include dynamic styling parameters such as
      * `fill`, `stroke`, or `outline` values.
@@ -65,551 +70,489 @@ export declare abstract class GeoviewRenderer {
      * - Corrects malformed opacity or width attributes
      * - Removes extraneous `<title>`, `<desc>`, `<defs>` tags
      * - Removes XML headers that can cause encoding errors
-     * @param {string} base64 - The base64-encoded SVG string, optionally including
-     *   query parameters (e.g. `"base64:...?...fill=%23ff0000&outline=%23000000"`).
-     * @returns {string} The decoded, cleaned, and parameter-substituted SVG XML string.
-     * @static
+     *
+     * @param base64 - The base64-encoded SVG string, optionally including
+     *   query parameters (e.g. `"base64:...?...fill=%23ff0000&outline=%23000000"`)
+     * @returns The decoded, cleaned, and parameter-substituted SVG XML string
      */
     static base64ToSVGString(base64: string): string;
     /**
      * Encodes an SVG XML string into a base64-encoded string.
+     *
      * This is the inverse of {@link base64ToSVGString}, allowing you to safely
      * embed or transmit SVG data in formats where raw XML is not permitted.
-     * @param {string} svgXML - The raw SVG XML string to encode.
-     * @returns {string} A base64-encoded representation of the SVG string.
-     * @static
+     *
+     * @param svgXML - The raw SVG XML string to encode
+     * @returns A base64-encoded representation of the SVG string
      */
     static SVGStringToBase64(svgXML: string): string;
     /**
-     * This method loads the image of an icon that compose the legend.
+     * Loads the image of an icon that compose the legend.
      *
-     * @param {string} src - Source information (base64 image) of the image to load.
-     *
-     * @returns {Promise<HTMLImageElement>} A promise that the image is loaded.
-     * @static
+     * @param src - Source information (base64 image) of the image to load
+     * @returns A promise that resolves with the loaded image, or null if loading fails
      */
     static loadImage(src: string): Promise<HTMLImageElement | null>;
     /**
-     * This method creates a canvas with the image of an icon that is defined in the point style.
+     * Creates a canvas with the image of an icon that is defined in the point style.
      *
-     * @param {Style} pointStyle - Style associated to the point symbol.
-     *
-     * @returns {Promise<HTMLCanvasElement>} A promise that the canvas is created.
-     * @static
+     * @param pointStyle - Optional style associated to the point symbol
+     * @returns A promise that resolves with the created canvas, or null if creation fails
      */
     static createIconCanvas(pointStyle?: Style): Promise<HTMLCanvasElement | null>;
     /**
-     * This method creates a canvas with the vector point settings that are defined in the point style.
+     * Creates a canvas with the vector point settings that are defined in the point style.
      *
-     * @param {Style} pointStyle - Style associated to the point symbol.
-     *
-     * @returns {Promise<HTMLCanvasElement>} A promise that the canvas is created.
-     * @static
+     * @param pointStyle - Optional style associated to the point symbol
+     * @returns The created canvas
      */
     static createPointCanvas(pointStyle?: Style): HTMLCanvasElement;
     /**
-     * This method creates a canvas with the lineString settings that are defined in the style.
+     * Creates a canvas with the lineString settings that are defined in the style.
      *
-     * @param {Style} lineStringStyle - Style associated to the lineString.
-     *
-     * @returns {Promise<HTMLCanvasElement>} A promise that the canvas is created.
-     * @static
+     * @param lineStringStyle - Optional style associated to the lineString
+     * @returns The created canvas
      */
     static createLineStringCanvas(lineStringStyle?: Style): HTMLCanvasElement;
     /**
-     * This method creates a canvas with the polygon settings that are defined in the style.
+     * Creates a canvas with the polygon settings that are defined in the style.
      *
-     * @param {Style} polygonStyle - Style associated to the polygon.
-     *
-     * @returns {Promise<HTMLCanvasElement>} A promise that the canvas is created.
-     * @static
+     * @param polygonStyle - Optional style associated to the polygon
+     * @returns The created canvas
      */
     static createPolygonCanvas(polygonStyle?: Style): HTMLCanvasElement;
     /**
      * Create the stroke options using the specified settings.
      *
-     * @param {TypeSimpleSymbolVectorConfig | TypeLineStringVectorConfig | TypePolygonVectorConfig} settings - Settings to use
-     * for the stroke options creation.
-     *
-     * @returns {StrokeOptions} The stroke options created.
-     * @static
+     * @param settings - Settings to use for the stroke options creation
+     * @returns The stroke options created
      */
     static createStrokeOptions(settings: TypeSimpleSymbolVectorConfig | TypeLineStringVectorConfig | TypePolygonVectorConfig): StrokeOptions;
     /**
-     * Execute an operator using the nodes on the data stack. The filter equation is evaluated using a postfix notation. The result
+     * Execute an operator using the nodes on the data stack.
+     *
+     * The filter equation is evaluated using a postfix notation. The result
      * is pushed back on the data stack. If a problem is detected, an error object is thrown with an explanatory message.
      *
-     * @param {FilterNodeType} operator - Operator to execute.
-     * @param {FilterNodeType[]} dataStack - Data stack to use for the operator execution.
-     * @static
+     * @param operator - Operator to execute
+     * @param dataStack - Data stack to use for the operator execution
      */
     static executeOperator(operator: FilterNodeType, dataStack: FilterNodeType[]): void;
     /**
      * Evaluates whether a feature satisfies a parsed filter equation.
+     *
      * The filter equation is expected to be in infix order and is evaluated using
      * a stack-based (shunting-yard–style) algorithm that respects operator
      * precedence and grouping.
-     * @param {Feature} feature - The feature whose attributes are used to resolve variable nodes.
-     * @param {FilterNodeType[] | undefined} [filterEquation] - Parsed filter expression tokens.
-     * @returns {boolean | undefined} True if the feature satisfies the filter, false otherwise.
-     * @throws {Error} If the filter expression is invalid or cannot be evaluated.
-     * @static
+     *
+     * @param feature - The feature whose attributes are used to resolve variable nodes
+     * @param filterEquation - Optional parsed filter expression tokens
+     * @returns True if the feature satisfies the filter, false otherwise
+     * @throws {Error} When the filter expression is invalid or cannot be evaluated
      */
     static featureRespectsFilterEquation(feature: Feature, filterEquation?: FilterNodeType[]): boolean;
     /**
      * Process a circle symbol using the settings.
      *
-     * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
-     *
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param settings - Settings to use for the Style creation
+     * @returns The Style created, or undefined if unable to create it
      */
     static processCircleSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined;
     /**
      * Process a star shape symbol using the settings.
      *
-     * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
-     * @param {number} points - Number of points needed to create the symbol.
-     * @param {number} angle - Angle to use for the symbol creation.
-     *
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param settings - Settings to use for the Style creation
+     * @param points - Number of points needed to create the symbol
+     * @param angle - Angle to use for the symbol creation
+     * @returns The Style created, or undefined if unable to create it
      */
     static processStarShapeSymbol(settings: TypeSimpleSymbolVectorConfig, points: number, angle: number): Style | undefined;
     /**
      * Process a star symbol using the settings.
      *
-     * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
-     *
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param settings - Settings to use for the Style creation
+     * @returns The Style created, or undefined if unable to create it
      */
     static processStarSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined;
     /**
      * Process a X symbol using the settings.
      *
-     * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
-     *
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param settings - Settings to use for the Style creation
+     * @returns The Style created, or undefined if unable to create it
      */
     static processXSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined;
     /**
      * Process a + symbol using the settings.
      *
-     * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
-     *
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param settings - Settings to use for the Style creation
+     * @returns The Style created, or undefined if unable to create it
      */
     static processPlusSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined;
     /**
      * Process a regular shape using the settings, the number of points, the angle and the scale.
      *
-     * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
-     * @param {number} points - Number of points needed to create the symbol.
-     * @param {number} angle - Angle to use for the symbol creation.
-     * @param {[number, number]} scale - Scale to use for the symbol creation.
-     *
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param settings - Settings to use for the Style creation
+     * @param points - Number of points needed to create the symbol
+     * @param angle - Angle to use for the symbol creation
+     * @param scale - Scale to use for the symbol creation
+     * @returns The Style created, or undefined if unable to create it
      */
     static processRegularShape(settings: TypeSimpleSymbolVectorConfig, points: number, angle: number, scale: [number, number]): Style | undefined;
     /**
      * Process a square symbol using the settings.
      *
-     * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
-     *
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param settings - Settings to use for the Style creation
+     * @returns The Style created, or undefined if unable to create it
      */
     static processSquareSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined;
     /**
      * Process a Diamond symbol using the settings.
      *
-     * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
-     *
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param settings - Settings to use for the Style creation
+     * @returns The Style created, or undefined if unable to create it
      */
     static processDiamondSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined;
     /**
      * Process a triangle symbol using the settings.
      *
-     * @param {TypeSimpleSymbolVectorConfig} settings - Settings to use for the Style creation.
-     *
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param settings - Settings to use for the Style creation
+     * @returns The Style created, or undefined if unable to create it
      */
     static processTriangleSymbol(settings: TypeSimpleSymbolVectorConfig): Style | undefined;
     /**
      * Process an icon symbol using the settings.
      *
-     * @param {TypeIconSymbolVectorConfig} settings - Settings to use for the Style creation.
-     *
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param settings - Settings to use for the Style creation
+     * @returns The Style created, or undefined if unable to create it
      */
     static processIconSymbol(settings: TypeIconSymbolVectorConfig): Style | undefined;
     /**
-     * Process a simple point symbol using the settings. Simple point symbol may be an icon or a vector symbol.
+     * Process a simple point symbol using the settings.
      *
-     * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Settings to use for the Style creation.
-     * @param {Feature} feature - Optional feature. This method does not use it, it is there to have a homogeneous signature.
-     * @param {TypeStyleProcessorOptions} options - Optional processing options.
+     * Simple point symbol may be an icon or a vector symbol.
      *
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param styleSettings - Settings to use for the Style creation
+     * @param feature - Optional feature. This method does not use it, it is there to have a homogeneous signature
+     * @param options - Optional processing options
+     * @returns The Style created, or undefined if unable to create it
      */
     static processSimplePoint(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions): Style | undefined;
     /**
      * Process a simple lineString using the settings.
      *
-     * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Settings to use for the Style creation.
-     * @param {Feature} feature - Optional feature. This method does not use it, it is there to have a homogeneous signature.
-     * @param {TypeStyleProcessorOptions} options - Optional processing options.
-     *
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param styleSettings - Settings to use for the Style creation
+     * @param feature - Optional feature. This method does not use it, it is there to have a homogeneous signature
+     * @param options - Optional processing options
+     * @returns The Style created, or undefined if unable to create it
      */
     static processSimpleLineString(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions): Style | undefined;
     /**
      * Process a simple solid fill (polygon) using the settings.
      *
-     * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
-     *
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param settings - Settings to use for the Style creation
+     * @param geometry - Optional geometry to associate with the style
+     * @returns The Style created, or undefined if unable to create it
      */
     static processSolidFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined;
     /**
      * Process a null fill (polygon with fill opacity = 0) using the settings.
      *
-     * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
-     *
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param settings - Settings to use for the Style creation
+     * @param geometry - Optional geometry to associate with the style
+     * @returns The Style created, or undefined if unable to create it
      */
     static processNullFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined;
     /**
      * Process a pattern fill using the settings.
      *
-     * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
-     * @param {FillPatternLine[]} FillPatternLines - Fill pattern lines needed to create the fill.
-     *
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param settings - Settings to use for the Style creation
+     * @param FillPatternLines - Fill pattern lines needed to create the fill
+     * @param geometry - Optional geometry to associate with the style
+     * @returns The Style created, or undefined if unable to create it
      */
     static processPatternFill(settings: TypePolygonVectorConfig, FillPatternLines: FillPatternLine[], geometry?: Geometry): Style | undefined;
     /**
      * Process a backward diagonal fill using the settings.
      *
-     * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
-     *
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param settings - Settings to use for the Style creation
+     * @param geometry - Optional geometry to associate with the style
+     * @returns The Style created, or undefined if unable to create it
      */
     static processBackwardDiagonalFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined;
     /**
      * Process a forward diagonal fill using the settings.
      *
-     * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
-     *
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param settings - Settings to use for the Style creation
+     * @param geometry - Optional geometry to associate with the style
+     * @returns The Style created, or undefined if unable to create it
      */
     static processForwardDiagonalFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined;
     /**
      * Process a cross fill using the settings.
      *
-     * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
-     *
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param settings - Settings to use for the Style creation
+     * @param geometry - Optional geometry to associate with the style
+     * @returns The Style created, or undefined if unable to create it
      */
     static processCrossFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined;
     /**
      * Process a diagonal cross fill using the settings.
      *
-     * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
-     *
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param settings - Settings to use for the Style creation
+     * @param geometry - Optional geometry to associate with the style
+     * @returns The Style created, or undefined if unable to create it
      */
     static processDiagonalCrossFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined;
     /**
      * Process a horizontal fill using the settings.
      *
-     * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
-     *
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param settings - Settings to use for the Style creation
+     * @param geometry - Optional geometry to associate with the style
+     * @returns The Style created, or undefined if unable to create it
      */
     static processHorizontalFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined;
     /**
      * Process a vertical fill using the settings.
      *
-     * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
-     *
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param settings - Settings to use for the Style creation
+     * @param geometry - Optional geometry to associate with the style
+     * @returns The Style created, or undefined if unable to create it
      */
     static processVerticalFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined;
     /**
      * Process a dot fill using the settings.
      *
-     * @param {TypePolygonVectorConfig} settings - Settings to use for the Style creation.
-     *
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param settings - Settings to use for the Style creation
+     * @param geometry - Optional geometry to associate with the style
+     * @returns The Style created, or undefined if unable to create it
      */
     static processDotFill(settings: TypePolygonVectorConfig, geometry?: Geometry): Style | undefined;
     /**
      * Process a simple polygon using the settings.
      *
-     * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Settings to use for the Style creation.
-     * @param {Feature} feature - Optional feature. This method does not use it, it is there to have a homogeneous signature.
-     * @param {TypeStyleProcessorOptions} options - Optional processing options
-     *
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param styleSettings - Settings to use for the Style creation
+     * @param feature - Optional feature. This method does not use it, it is there to have a homogeneous signature
+     * @param options - Optional processing options
+     * @returns The Style created, or undefined if unable to create it
      */
     static processSimplePolygon(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions): Style | undefined;
     /**
-     * This method is used to process the array of point styles as described in the pointStyleConfig.
+     * Processes the array of point styles as described in the pointStyleConfig.
      *
-     * @param {TypeVectorLayerStyles} layerStyle - Object that will receive the created canvas.
-     * @param {TypeLayerStyleConfigInfo[]} arrayOfPointStyleConfig - Array of point style configuration.
-     * @returns {Promise<TypeVectorLayerStyles>} A promise that the vector layer style is created.
-     * @static
+     * @param layerStyles - Object that will receive the created canvas
+     * @param arrayOfPointStyleConfig - Array of point style configuration
+     * @returns A promise that resolves with the vector layer style
      */
     static processArrayOfPointStyleConfig(layerStyles: TypeVectorLayerStyles, arrayOfPointStyleConfig: TypeLayerStyleConfigInfo[]): Promise<TypeVectorLayerStyles>;
     /**
-     * This method gets the legend styles used by the the layer as specified by the style configuration.
+     * Gets the legend styles used by the layer as specified by the style configuration.
      *
-     * @param {TypeStyleConfig} styleConfig - The style configuration.
-     *
-     * @returns {Promise<TypeVectorLayerStyles>} A promise that the layer styles are processed.
-     * @static
+     * @param styleConfig - The style configuration
+     * @returns A promise that resolves with the layer styles
      */
     static getLegendStyles(styleConfig: TypeLayerStyleConfig | undefined): Promise<TypeVectorLayerStyles>;
     /**
      * Create a default style to use with a vector feature that has no style configuration.
      *
-     * @param {TypeStyleGeometry} geometryType - Type of geometry (Point, LineString, Polygon).
-     * @param {string} label - Label for the style.
-     *
-     * @returns {TypeLayerStyleConfigInfo | undefined} The Style configuration created. Undefined if unable to create it.
-     * @static
+     * @param geometryType - Type of geometry (Point, LineString, Polygon)
+     * @param label - Label for the style
+     * @returns The Style configuration created, or undefined if unable to create it
      */
     static createDefaultStyle(geometryType: TypeStyleGeometry, label: string): TypeLayerStyleSettings | undefined;
     /**
      * Interpolate a value between two stops linearly.
      *
-     * @param {number} value - The data value to interpolate for.
-     * @param {number} value1 - The lower data value.
-     * @param {number} value2 - The upper data value.
-     * @param {number} output1 - The output at the lower value.
-     * @param {number} output2 - The output at the upper value.
-     * @returns {number} The interpolated output value.
-     * @static
+     * @param value - The data value to interpolate for
+     * @param value1 - The lower data value
+     * @param value2 - The upper data value
+     * @param output1 - The output at the lower value
+     * @param output2 - The output at the upper value
+     * @returns The interpolated output value
      */
     static interpolateValue(value: number, value1: number, value2: number, output1: number, output2: number): number;
     /**
      * Interpolate a color between two hex colors.
      *
-     * @param {number} value - The data value to interpolate for.
-     * @param {number} value1 - The lower data value.
-     * @param {number} value2 - The upper data value.
-     * @param {string | number[]} color1 - The hex color at the lower value.
-     * @param {string | number[]} color2 - The hex color at the upper value.
-     * @returns {string} The interpolated color in rgba format.stat
-     * @static
+     * @param value - The data value to interpolate for
+     * @param value1 - The lower data value
+     * @param value2 - The upper data value
+     * @param color1 - The hex color at the lower value
+     * @param color2 - The hex color at the upper value
+     * @returns The interpolated color in rgba format
      */
     static interpolateColor(value: number, value1: number, value2: number, color1: string | number[], color2: string | number[]): string;
     /**
      * Evaluate a simple value expression using feature data.
+     *
      * Supports basic arithmetic operations and field references.
      *
-     * @param {string} expression - Expression string (e.g., "$feature[\"FIELD_NAME\"] + 90")
-     * @param {Feature} feature - Feature containing field data
-     * @returns {number | null} The evaluated result or null if evaluation fails
-     * @static
+     * @param expression - Expression string (e.g., "$feature[\"FIELD_NAME\"] + 90")
+     * @param feature - Feature containing field data
+     * @returns The evaluated result or null if evaluation fails
      */
     static evaluateValueExpression(expression: string, feature: Feature): number | null;
     /**
      * Search the unique value entry using the field values stored in the feature.
      *
-     * @param {string[]} fields - Fields involved in the unique value definition.
-     * @param {TypeLayerStyleConfigInfo[]?} uniqueValueStyleInfo - Unique value configuration.
-     * @param {Feature?} feature - Feature used to test the unique value conditions.
-     * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
-     * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
-     * @returns {TypeLayerStyleConfigInfo | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param fields - Fields involved in the unique value definition
+     * @param uniqueValueStyleInfo - Unique value configuration
+     * @param feature - Optional feature used to test the unique value conditions
+     * @param domainsLookup - Optional lookup table to handle coded value domains
+     * @param aliasLookup - Optional lookup table to handle field name aliases
+     * @returns The Style created, or undefined if unable to create it
      */
     static searchUniqueValueEntry(fields: string[], uniqueValueStyleInfo: TypeLayerStyleConfigInfo[], feature?: Feature, domainsLookup?: TypeLayerMetadataFields[], aliasLookup?: TypeAliasLookup): TypeLayerStyleConfigInfo | undefined;
     /**
      * Process the unique value settings using a point feature to get its Style.
      *
-     * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
-     * @param {Feature?} feature - Feature used to test the unique value conditions.
-     * @param {TypeStyleProcessorOptions?} options - Optional processing options.
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param styleSettings - Style settings to use
+     * @param feature - Optional feature used to test the unique value conditions
+     * @param options - Optional processing options
+     * @returns The Style created, or undefined if unable to create it
      */
     static processUniqueValuePoint(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions): Style | undefined;
     /**
      * Process the unique value settings using a lineString feature to get its Style.
      *
-     * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
-     * @param {Feature?} feature - Feature used to test the unique value conditions.
-     * @param {TypeStyleProcessorOptions?} options - Optional processing options.
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param styleSettings - Style settings to use
+     * @param feature - Optional feature used to test the unique value conditions
+     * @param options - Optional processing options
+     * @returns The Style created, or undefined if unable to create it
      */
     static processUniqueLineString(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions): Style | undefined;
     /**
      * Process the unique value settings using a polygon feature to get its Style.
      *
-     * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
-     * @param {Feature?} feature - Feature used to test the unique value conditions.
-     * @param {TypeStyleProcessorOptions?} options - Optional processing options.
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param styleSettings - Style settings to use
+     * @param feature - Optional feature used to test the unique value conditions
+     * @param options - Optional processing options
+     * @returns The Style created, or undefined if unable to create it
      */
     static processUniquePolygon(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions): Style | undefined;
     /**
-     * Search the class breakentry using the field value stored in the feature.
+     * Search the class break entry using the field value stored in the feature.
      *
-     * @param {string} field - Field involved in the class break definition.
-     * @param {TypeLayerStyleConfigInfo[]} classBreakStyleInfo - Class break configuration.
-     * @param {Feature} feature - Feature used to test the class break conditions.
-     * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
-     * @returns {number | undefined} The index of the entry. Undefined if unable to find it.
-     * @static
+     * @param field - Field involved in the class break definition
+     * @param classBreakStyleInfo - Class break configuration
+     * @param feature - Feature used to test the class break conditions
+     * @param aliasLookup - Optional lookup table to handle field name aliases
+     * @returns The matching entry, or undefined if unable to find it
      */
     static searchClassBreakEntry(field: string, classBreakStyleInfo: TypeLayerStyleConfigInfo[], feature: Feature, aliasLookup?: TypeAliasLookup): TypeLayerStyleConfigInfo | undefined;
     /**
      * Check whether a numeric value falls within a class-break interval using provided boundary conditions.
+     *
      * The `conditions` parameter is expected to be a two-element array where:
      * - conditions[0] is the lower-bound operator: 'gt' (>) or 'gte' (>=)
      * - conditions[1] is the upper-bound operator: 'lt' (<) or 'lte' (<=)
      * Examples:
      * - ['gte','lte'] => min <= value <= max
      * - ['gt','lte']  => min < value <= max
-     * @param {number} value - The numeric value to test.
-     * @param {number} min - The lower bound of the interval.
-     * @param {number} max - The upper bound of the interval.
-     * @param {TypeLayerStyleValueCondition[]} conditions - Two-element array describing the boundary operators.
-     * @returns {boolean} True if the value satisfies the interval according to the conditions, false otherwise.
-     * @throws {NotSupportedError} If `conditions` contains an unsupported combination of operators.
-     * @static
+     *
+     * @param value - The numeric value to test
+     * @param min - The lower bound of the interval
+     * @param max - The upper bound of the interval
+     * @param conditions - Two-element array describing the boundary operators
+     * @returns True if the value satisfies the interval according to the conditions, false otherwise
+     * @throws {NotSupportedError} When `conditions` contains an unsupported combination of operators
      */
     static searchClassBreakEntryCheck(value: number, min: number, max: number, conditions: TypeLayerStyleValueCondition[]): boolean;
     /**
      * Process the class break settings using a Point feature to get its Style.
      *
-     * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
-     * @param {Feature} feature - Feature used to test the unique value conditions.
-     * @param {TypeStyleProcessorOptions?} options - Optional processing options.
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param styleSettings - Style settings to use
+     * @param feature - Optional feature used to test the unique value conditions
+     * @param options - Optional processing options
+     * @returns The Style created, or undefined if unable to create it
      */
     static processClassBreaksPoint(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions): Style | undefined;
     /**
      * Process the class break settings using a lineString feature to get its Style.
      *
-     * @param {TypeStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
-     * @param {Feature} feature - Feature used to test the unique value conditions.
-     * @param {TypeStyleProcessorOptions?} options - Optional processing options.
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param styleSettings - Style settings to use
+     * @param feature - Optional feature used to test the unique value conditions
+     * @param options - Optional processing options
+     * @returns The Style created, or undefined if unable to create it
      */
     static processClassBreaksLineString(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions): Style | undefined;
     /**
      * Process the class break settings using a Polygon feature to get its Style.
      *
-     * @param {TypeLayerStyleSettings | TypeKindOfVectorSettings} styleSettings - Style settings to use.
-     * @param {Feature} feature - Feature used to test the unique value conditions.
-     * @param {TypeStyleProcessorOptions?} options - Optional processing options.
-     * @returns {Style | undefined} The Style created. Undefined if unable to create it.
-     * @static
+     * @param styleSettings - Style settings to use
+     * @param feature - Optional feature used to test the unique value conditions
+     * @param options - Optional processing options
+     * @returns The Style created, or undefined if unable to create it
      */
     static processClassBreaksPolygon(styleSettings: TypeLayerStyleSettings | TypeKindOfVectorSettings, feature?: Feature, options?: TypeStyleProcessorOptions): Style | undefined;
     /**
-     * This method gets the style of the feature using the layer entry config. If the style does not exist for the geometryType,
-     * create it using the default style strategy.
-     * @param {FeatureLike} feature - Feature that need its style to be defined.
-     * @param {number} resolution - The resolution of the map
-     * @param {TypeStyleConfig} layerStyle - The style to use
-     * @param {string} label - The style label when one has to be created
-     * @param {FilterNodeType[]} filterEquation - Filter equation associated to the layer.
-     * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
-     * @param {TypeLayerTextConfig?} layerText - An optional text configuration to apply to the feature
-     * @param {() => Promise<string | null>} callbackWhenCreatingStyle - An optional callback to execute when a new style had to be created
-     * @returns {Style | undefined} The style applied to the feature or undefined if not found.
-     * @static
+     * Gets the style of the feature using the layer entry config.
+     *
+     * If the style does not exist for the geometryType, create it using the default style strategy.
+     *
+     * @param feature - Feature that need its style to be defined
+     * @param resolution - The resolution of the map
+     * @param layerStyle - The style to use
+     * @param label - The style label when one has to be created
+     * @param filterEquation - Optional filter equation associated to the layer
+     * @param callbackWhenCreatingStyle - Optional callback to execute when a new style had to be created
+     * @returns The style applied to the feature, or undefined if not found
      */
-    static getAndCreateFeatureStyle(feature: FeatureLike, resolution: number, layerStyle: TypeLayerStyleConfig, label: string, filterEquation?: FilterNodeType[], aliasLookup?: TypeAliasLookup, layerText?: TypeLayerTextConfig, callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeLayerStyleConfigInfo) => void): Style | undefined;
+    static getAndCreateFeatureStyle(feature: FeatureLike, resolution: number, layerStyle: TypeLayerStyleConfig, label: string, filterEquation?: FilterNodeType[], callbackWhenCreatingStyle?: (geometryType: TypeStyleGeometry, style: TypeLayerStyleConfigInfo) => void): Style | undefined;
     /**
-     * This method gets the image source from the style of the feature using the layer entry config.
-     * @param {Feature} feature - The feature that need its icon to be defined.
-     * @param {TypeStyleConfig} style - The style to use
-     * @param {FilterNodeType[]?} filterEquation - Filter equation associated to the layer.
-     * @param {TypeLayerMetadataFields[]?} domainsLookup - An optional lookup table to handle coded value domains.
-     * @param {TypeAliasLookup?} aliasLookup - An optional lookup table to handle field name aliases.
-     * @returns {string} The icon associated to the feature or a default empty one.
-     * @static
+     * Gets the image source from the style of the feature using the layer entry config.
+     *
+     * @param style - The style to use
+     * @param geometryType - The type of geometry
+     * @param styleSettings - The layer style settings
+     * @returns The icon source associated to the feature, or undefined
      */
     static getFeatureIconSource(style: Style | undefined, geometryType: TypeStyleGeometry, styleSettings: TypeLayerStyleSettings | undefined): string | undefined;
     /**
-     * Classify the remaining nodes to complete the classification. The plus and minus can be a unary or a binary operator. It is
-     * only at the end that we can determine there node type. Nodes that start with a number are numbers, otherwise they are
+     * Classify the remaining nodes to complete the classification.
+     *
+     * The plus and minus can be a unary or a binary operator. It is
+     * only at the end that we can determine their node type. Nodes that start with a number are numbers, otherwise they are
      * variables. If a problem is detected, an error object is thrown with an explanatory message.
      *
-     * @param {FilterNodeType[]} keywordArray - Array of keywords to process.
-     *
-     * @returns {FilterNodeType[]} The new keywords array with all nodes classified.
-     * @static
+     * @param keywordArray - Array of keywords to process
+     * @returns The new keywords array with all nodes classified
      */
     static classifyUnprocessedNodes(keywordArray: FilterNodeType[]): FilterNodeType[];
     /**
-     * Extract the specified keyword and associate a node type to their nodes. In some cases, the extraction uses an optionally
-     * regular expression.
+     * Extract the specified keyword and associate a node type to their nodes.
      *
-     * @param {FilterNodeType[]} FilterNodeArrayType - Array of keywords to process.
-     * @param {string} keyword - Keyword to extract.
-     * @param {RegExp} regExp - An optional regular expression to use for the extraction.
+     * In some cases, the extraction uses an optional regular expression.
      *
-     * @returns {FilterNodeType[]} The new keywords array.
-     * @static
+     * @param filterNodeArray - Array of keywords to process
+     * @param keyword - Keyword to extract
+     * @param regExp - Optional regular expression to use for the extraction
+     * @returns The new keywords array
      */
     static extractKeyword(filterNodeArray: FilterNodeType[], keyword: string, regExp?: RegExp): FilterNodeType[];
     /**
-     * Extract the string nodes from the keyword array. This operation is done at the beginning of the classification. This allows
-     * to considere Keywords in a string as a normal word. If a problem is detected, an error object is thrown with an explanatory
+     * Extract the string nodes from the keyword array.
+     *
+     * This operation is done at the beginning of the classification. This allows
+     * to consider keywords in a string as a normal word. If a problem is detected, an error object is thrown with an explanatory
      * message.
      *
-     * @param {FilterNodeType[]} keywordArray - Array of keywords to process.
-     *
-     * @returns {FilterNodeType[]} The new keywords array with all string nodes classified.
-     * @static
+     * @param keywordArray - Array of keywords to process
+     * @returns The new keywords array with all string nodes classified
      */
     static extractStrings(keywordArray: FilterNodeType[]): FilterNodeType[];
     /**
      * Creates a filter equation from a filter string.
-     * @param {string} filter - The filter string to convert.
-     * @returns {FilterNodeType[]} The filter equation as an array of FilterNodeType.
-     * @static
+     *
+     * @param filter - The filter string to convert
+     * @returns The filter equation as an array of FilterNodeType
      */
     static createFilterNodeFromFilter(filter: string): FilterNodeType[];
     /**
-     * Analyse the filter and split it in syntaxique nodes.  If a problem is detected, an error object is thrown with an
-     * explanatory message.
-     * @param {FilterNodeType[]} filterNodeArrayType - Node array to analyse.
-     * @returns {FilterNodeType[]} The new node array with all nodes classified.
-     * @static
+     * Analyse the filter and split it in syntactic nodes.
+     *
+     * @param filterNodeArrayType - Node array to analyse
+     * @returns The new node array with all nodes classified
+     * @throws {Error} When the filter contains unbalanced parentheses or unclosed strings
      */
     static analyzeLayerFilter(filterNodeArrayType: FilterNodeType[]): FilterNodeType[];
     /** Table used to define line symbology to use when drawing lineString and polygon perimeters */
@@ -619,67 +562,17 @@ export declare abstract class GeoviewRenderer {
     /** Table of function to process the style settings based on the feature geometry and the kind of style settings. */
     static processStyle: Record<TypeLayerStyleConfigType, Record<TypeStyleGeometry, TypeStyleProcessor>>;
     /**
-     * Method for getting the text style
-     * @param {FeatureLike} feature - The feature to get the text style for
-     * @param {number} resolution - The resolution of the map
-     * @param {TypeLayerStyleSettings} styleSettings - The style settings
-     * @param {TypeLayerTextConfig} layerText - The layer text configuration
-     * @param {TypeAliasLookup} aliasLookup - The alias lookup
-     * @returns {Text | undefined} The text style
-     * @static
-     */
-    static getTextStyle: (feature: FeatureLike, resolution: number, styleSettings: TypeLayerStyleSettings, layerText?: TypeLayerTextConfig, aliasLookup?: TypeAliasLookup) => Text | undefined;
-    /**
-     * Method for creating Text Style
-     * @param {FeatureLike} feature - The feature to create the text style for
-     * @param {TypeLayerTextConfig} textSettings - The text style settings
-     * @returns {Text | undefined} The text style
-     * @static
-     */
-    static createTextStyle: (feature: FeatureLike, textSettings: TypeLayerTextConfig) => Text | undefined;
-    /**
-     * Get approximate resolution for common zoom levels by projection
-     * @param {number} zoom - The zoom level (0-20)
-     * @param {TypeValidMapProjectionCodes} projection - The map projection (3857 for Web Mercator, 3978 for Canada Lambert)
-     * @returns {number} Approximate resolution for the given zoom and projection
-     * @static
-     */
-    static getApproximateResolution(zoom: number, projection?: TypeValidMapProjectionCodes): number;
-    /**
-     * Wrap text to fit within specified constraints
-     * @param {string} str - The text to wrap
-     * @param {number} width - The maximum width per line
-     * @param {number} maxLines - Maximum number of lines (optional, overrides width if needed)
-     * @returns {string} The wrapped text
-     * @static
-     */
-    static wrapText(str: string, width: number, maxLines?: number): string;
-    /**
-     * Wrap text to a specified width using word boundaries
-     * @param {string} str - The text to wrap
-     * @param {number} width - The maximum width of each line
-     * @returns {string} The wrapped text
-     * @static
-     */
-    static wrapTextByWidth(str: string, width: number): string;
-    /**
-     * Process text template by replacing field placeholders with feature values
-     * Expects somewhat clean field names, so we shouldn't need to worry about escaping special characters (Dates may still have characters after the colon)
-     * @param {string} template - The text template with {field-name} placeholders
-     * @param {FeatureLike} feature - The feature to get field values from
-     * @returns {string} The processed text with field values substituted
-     * @static
-     */
-    static processTextTemplate(template: string, feature: FeatureLike): string;
-    /**
      * Builds a filter string (SQL-like or OGC-compliant) for a given layer and style configuration.
+     *
      * This method supports:
-     * - **simple styles** → returns the base layer filter or a default `(1=1)` condition.
-     * - **unique value styles** → builds an optimized filter for visible categories.
-     * - **class breaks styles** → builds numeric range filters based on visibility flags.
-     * @param {AbstractBaseLayerEntryConfig} layerConfig - The layer configuration.
-     * @param {TypeLayerStyleConfig | undefined} style - The style configuration (optional).
-     * @returns {string | undefined} The filter expression, or `undefined` if not applicable.
+     * - simple styles: returns the base layer filter or a default `(1=1)` condition.
+     * - unique value styles: builds an optimized filter for visible categories.
+     * - class breaks styles: builds numeric range filters based on visibility flags.
+     *
+     * @param outFields - The outfields information
+     * @param style - The style configuration (optional)
+     * @param styleSettings - The layer style settings
+     * @returns The filter expression, or undefined if not applicable
      */
     static getFilterFromStyle(outFields: TypeOutfields[] | undefined, style: TypeLayerStyleConfig | undefined, styleSettings: TypeLayerStyleSettings | undefined): string | undefined;
 }

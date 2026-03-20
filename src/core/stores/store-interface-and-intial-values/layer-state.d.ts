@@ -28,10 +28,13 @@ export interface ILayerState {
         getLayerWmsStyle: (layerPath: string) => string | undefined;
         getLayerWmsAvailableStyles: (layerPath: string) => TypeMetadataWMSCapabilityLayerStyle[] | undefined;
         getLayerSettings: (layerPath: string) => string[];
+        getLayerHasText: (layerPath: string) => boolean;
+        getLayerTextVisibility: (layerPath: string) => boolean;
         refreshLayer: (layerPath: string) => Promise<void>;
         reloadLayer: (layerPath: string) => void;
         toggleItemVisibility: (layerPath: string, item: TypeLegendItem) => void;
         toggleItemVisibilityAndWait: (layerPath: string, item: TypeLegendItem) => Promise<void>;
+        setLayerTextVisibility: (layerPath: string, visible: boolean) => void;
         setAllItemsVisibility: (layerPath: string, visibility: boolean) => void;
         setAllItemsVisibilityAndWait: (layerPath: string, visibility: boolean) => Promise<void>;
         setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
@@ -180,6 +183,8 @@ export declare const useLayerSelectorStyleConfig: (layerPath: string) => Partial
 export declare const useLayerSelectorRasterFunction: (layerPath: string) => string | undefined;
 export declare const useLayerSelectorMosaicRule: (layerPath: string) => TypeMosaicRule | undefined;
 export declare const useLayerSelectorWmsStyle: (layerPath: string) => string | undefined;
+export declare const useLayerSelectorHasText: (layerPath: string) => boolean | undefined;
+export declare const useLayerSelectorTextVisibility: (layerPath: string) => boolean | undefined;
 export declare const useLayerStoreActions: () => LayerActions;
 export {};
 //# sourceMappingURL=layer-state.d.ts.map

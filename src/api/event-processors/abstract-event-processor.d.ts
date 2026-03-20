@@ -56,6 +56,14 @@ export declare abstract class AbstractEventProcessor {
      * @returns {Promise<void>} Promise upon completion
      */
     protected static helperPropagateArrayStoreBatch<T extends TypeFeatureInfoResultSetEntry | TypeAllFeatureInfoResultSetEntry | TypeHoverResultSetEntry | TypeGeochartResultSetEntry>(mapId: string, layerDataArray: T[], batchPropagationObject: BatchedPropagationLayerDataArrayByMap<T>, timeDelayBetweenPropagations: number, onSetLayerDataArray: (layerDataArray: T[]) => void, traceProcessorIndication?: string, layerPathBypass?: string, onResetBypass?: (layerPath: string) => void): Promise<void>;
+    /**
+     * Helper function to delete a layer information from an array when found.
+     *
+     * @param layerArray - The layer array to work with
+     * @param layerPath - The layer path to delete
+     * @param onDeleteCallback - The callback executed when the array is updated
+     */
+    protected static helperDeleteFromArray<T extends TypeResultSetEntry>(layerArray: T[], layerPath: string, onDeleteCallback: (layerArray: T[]) => void): void;
 }
 /**
  * Holds the buffer, on a map basis, for the propagation in batch in the layer data array store

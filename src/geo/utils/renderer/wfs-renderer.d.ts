@@ -7,6 +7,7 @@ export declare abstract class WfsRenderer {
     #private;
     /**
      * Builds a layer style settings object from a WMS Styled Layer Descriptor (SLD).
+     *
      * This method parses the given `styles` object, iterates through its `Rule` elements,
      * and constructs a standardized record mapping geometry types (`Point`, `LineString`, etc.)
      * to their corresponding layer style settings.
@@ -16,14 +17,16 @@ export declare abstract class WfsRenderer {
      * - Extraction of filter property names for unique value fields
      * - Delegation to helper methods for building individual symbolizer configurations
      * If no valid symbolizer rules are found, the method returns `undefined`.
-     * @param {TypeStylesWMS} styles - A WMS SLD styles object to parse.
-     * @returns {Record<TypeStyleGeometry, TypeLayerStyleSettings>} A record mapping geometry types to their layer style settings.
-     * @throws {NotSupportedError} If the symbolizer type in a rule is unsupported.
-     * @static
+     *
+     * @param styles - A WMS SLD styles object to parse
+     * @param geomTypeMetadata - Optional geometry type from metadata
+     * @returns A record mapping geometry types to their layer style settings
+     * @throws {NotSupportedError} When the symbolizer type in a rule is unsupported
      */
     static buildLayerStyleInfo(styles: TypeStylesWMS, geomTypeMetadata: TypeStyleGeometry | undefined): Record<TypeStyleGeometry, TypeLayerStyleSettings>;
     /**
      * Converts a SQL-like filter string into an OpenLayers WFS-compatible OGC filter XML fragment.
+     *
      * This function handles:
      *  - Standard SQL-like expressions (>, >=, <, <=, =, IN, BETWEEN)
      *  - Boolean operators (AND, OR, NOT)
@@ -37,20 +40,20 @@ export declare abstract class WfsRenderer {
      *  3. Serializes the filter object into XML suitable for WFS requests.
      * Only the inner children of the `<Filter>` element are returned; you can wrap them
      * in `<ogc:Filter>` as needed for a full WFS request.
-     * @param {string} filterStr - The SQL-like filter expression to convert.
-     * @param {string} version - The WFS version to target (only '1.0.0', '1.1.0', '2.0.0' supported; defaults to '1.1.0').
-     * @param {string} fieldNameForNegativeQueries - The field name to use in "always false" filters (cases of 1=0 and such).
-     * @returns {string} An XML string representing the inner contents of an OGC `<Filter>` element.
-     *                   This can be directly used inside a WFS GetFeature request's `<Filter>` element.
-     * @static
+     *
+     * @param filterStr - The SQL-like filter expression to convert
+     * @param version - The WFS version to target (only '1.0.0', '1.1.0', '2.0.0' supported; defaults to '1.1.0')
+     * @param fieldNameForNegativeQueries - The field name to use in "always false" filters (cases of 1=0 and such)
+     * @returns An XML string representing the inner contents of an OGC `<Filter>` element.
+     *   This can be directly used inside a WFS GetFeature request's `<Filter>` element
      */
     static sqlToOlFilterXml(filterStr: string, version: string, fieldNameForNegativeQueries: string): string;
     /**
-     * Combine a spatial GML filter and an attribute GML filter
-     * into a single OGC <Filter> with <And>.
-     * @param {string | undefined} spatialFilter - XML string for spatial filter, e.g. <ogc:Intersects>...</ogc:Intersects>
-     * @param {string | undefined} attributeFilter - XML string for attribute filter, e.g. <ogc:Or>...</ogc:Or>
-     * @returns {string | undefined} Combined XML <ogc:Filter> or undefined if nothing to combine
+     * Combines a spatial GML filter and an attribute GML filter into a single OGC filter with `<And>`.
+     *
+     * @param spatialFilter - Optional XML string for spatial filter, e.g. `<ogc:Intersects>...</ogc:Intersects>`
+     * @param attributeFilter - Optional XML string for attribute filter, e.g. `<ogc:Or>...</ogc:Or>`
+     * @returns Combined XML `<ogc:Filter>` or undefined if nothing to combine
      */
     static combineGmlFilters(spatialFilter?: string, attributeFilter?: string): string | undefined;
     /**
@@ -65,10 +68,11 @@ export declare abstract class WfsRenderer {
      * WFS 2.0
      * └── FES 2.0
      *     └── fes:Filter
-     * @param ogcFilterToWrap
-     * @param wmsOrWfs
-     * @param version
-     * @returns
+     *
+     * @param ogcFilterToWrap - The OGC filter XML string to wrap, or undefined
+     * @param wmsOrWfs - Whether the service is WMS or WFS
+     * @param version - The service version
+     * @returns The wrapped filter XML string, or undefined if nothing to wrap
      */
     static wrapOGCFilter(ogcFilterToWrap: string | undefined, wmsOrWfs: 'wms' | 'wfs', version: string): string | undefined;
 }

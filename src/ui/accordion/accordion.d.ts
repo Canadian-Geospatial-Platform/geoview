@@ -1,35 +1,41 @@
 import type { ReactNode, CSSProperties } from 'react';
 /**
- * Properties for the Accordion element
+ * Configuration properties for the Accordion component.
  */
 export interface AccordionProps {
-    /** Unique identifier for the accordion */
+    /** Unique identifier for the accordion container (auto-generated if omitted) */
     id: string;
-    /** Custom styles using CSS properties */
+    /** MUI theme-compatible styles applied to accordion container */
     sx: CSSProperties;
-    /** Array of accordion items to display */
+    /** Array of collapsible sections with title and content */
     items: Array<AccordionItem>;
-    /** Custom class name for styling */
+    /** CSS class applied to each accordion section for custom styling */
     className: string;
-    /** Whether the accordion should be expanded by default */
+    /** Initial expanded state for all accordion sections on mount */
     defaultExpanded: boolean;
-    /** Whether to show a loading icon during transitions */
+    /** Display rotating loading icon during open/close transitions for async operations */
     showLoadingIcon: boolean;
 }
 /**
- * Structure for individual accordion items
+ * Single accordion section with title and expandable content.
  */
 export type AccordionItem = {
-    /** The title text displayed in the accordion header */
+    /** Display text shown in accordion header */
     title: string;
-    /** The content to be displayed when the accordion section is expanded */
+    /** Content rendered when section is expanded (can be any React node) */
     content: ReactNode;
 };
 /**
- * A customizable accordion component built on Material-UI's Accordion.
- * Provides expandable/collapsible sections with optional loading states and animations.
+ * Customizable accordion component with expandable sections and optional loading states.
  *
- * @component
+ * Wraps Material-UI's Accordion to provide collapsible content sections with loading animation
+ * support. Manages individual section states internally and renders a loading spinner icon
+ * during transitions when showLoadingIcon is enabled. Useful for hierarchical information
+ * display and progressive content disclosure.
+ *
+ * @param props - Accordion configuration (see AccordionProps interface)
+ * @returns Rendered accordion with expandable sections
+ *
  * @example
  * ```tsx
  * // Basic usage
@@ -62,13 +68,6 @@ export type AccordionItem = {
  * />
  * ```
  *
- * @param {AccordionProps} props - The properties for the Accordion component
- * @returns {JSX.Element} A rendered accordion component
- *
- * @note For performance optimization in cases of frequent parent re-renders,
- * consider wrapping this component with React.memo at the consumption level.
- *
- * @see {@link AccordionItem} for the structure of individual accordion items
  * @see {@link https://mui.com/material-ui/react-accordion/}
  */
 declare function AccordionUI(props: AccordionProps): ReactNode;

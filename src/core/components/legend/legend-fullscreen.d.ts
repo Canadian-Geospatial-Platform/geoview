@@ -8,6 +8,7 @@ import type { TypeContainerBox } from '@/core/types/global-types';
  * @property {TypeContainerBox} containerType - The type of container where the legend is displayed.
  * @property {boolean} isOpen - Controls whether the fullscreen dialog is open.
  * @property {() => void} onClose - Callback function invoked when the fullscreen dialog is closed.
+ * @property {React.RefObject<HTMLButtonElement>} buttonRef - Reference to the fullscreen button for focus restoration.
  */
 interface LegendFullscreenProps {
     layersList: TypeLegendLayer[];
@@ -15,16 +16,19 @@ interface LegendFullscreenProps {
     containerType: TypeContainerBox;
     isOpen: boolean;
     onClose: () => void;
+    buttonRef: React.RefObject<HTMLButtonElement>;
 }
 /**
  * Properties for the LegendFullscreenButton component.
  * @interface FullscreenButtonProps
  * @property {TypeContainerBox} containerType - The type of container where the button is displayed.
  * @property {() => void} onClick - Callback function invoked when the button is clicked.
+ * @property {React.RefObject<HTMLButtonElement>} buttonRef - Reference to the button element for focus management.
  */
 interface FullscreenButtonProps {
     containerType: TypeContainerBox;
     onClick: () => void;
+    buttonRef: React.RefObject<HTMLButtonElement>;
 }
 /**
  * Renders a button that opens the legend in fullscreen mode.
@@ -34,7 +38,7 @@ interface FullscreenButtonProps {
  * @param {() => void} props.onClick - Callback function invoked when the fullscreen button is clicked.
  * @returns {JSX.Element | null} The fullscreen button element, or null if not in the app bar.
  */
-export declare function LegendFullscreenButton({ containerType, onClick }: FullscreenButtonProps): JSX.Element | null;
+export declare function LegendFullscreenButton({ containerType, onClick, buttonRef }: FullscreenButtonProps): JSX.Element | null;
 /**
  * Renders the legend in a fullscreen dialog with responsive multi-column layout.
  * Manages layer collapse state by expanding all layers when entering fullscreen and
@@ -47,6 +51,6 @@ export declare function LegendFullscreenButton({ containerType, onClick }: Fulls
  * @param {() => void} props.onClose - Callback function invoked when the dialog is closed.
  * @returns {JSX.Element} The fullscreen legend dialog component.
  */
-export declare function LegendFullscreen({ layersList, mapId, containerType, isOpen, onClose }: LegendFullscreenProps): JSX.Element;
+export declare function LegendFullscreen({ layersList, mapId, containerType, isOpen, onClose, buttonRef }: LegendFullscreenProps): JSX.Element;
 export {};
 //# sourceMappingURL=legend-fullscreen.d.ts.map

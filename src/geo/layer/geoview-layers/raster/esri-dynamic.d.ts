@@ -14,9 +14,6 @@ export interface TypeEsriDynamicLayerConfig extends TypeGeoviewLayerConfig {
 }
 /**
  * A class to add an EsriDynamic layer.
- *
- * @exports
- * @class EsriDynamic
  */
 export declare class EsriDynamic extends AbstractGeoViewRaster {
     #private;
@@ -42,55 +39,53 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
     getMetadata(): TypeMetadataEsriDynamic | undefined;
     /**
      * Overrides the way a geoview layer config initializes its layer entries.
+     *
      * @returns A promise resolved once the layer entries have been initialized.
-     * @override
-     * @protected
      */
     protected onInitLayerEntries(): Promise<TypeGeoviewLayerConfig>;
     /**
      * Overrides the way the validation of the list of layer entry config happens.
-     * @param {ConfigBaseClass[]} listOfLayerEntryConfig The list of layer entries configuration to validate.
-     * @returns {void}
-     * @override
-     * @protected
+     *
+     * @param listOfLayerEntryConfig - The list of layer entries configuration to validate.
      */
     protected onValidateListOfLayerEntryConfig(listOfLayerEntryConfig: ConfigBaseClass[]): void;
     /**
      * Overrides the way the layer metadata is processed.
-     * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer entry configuration to process.
-     * @param {DisplayDateMode} displayDateMode - The display date mode to use for processing time dimensions in the metadata.
-     * @param {OLProjection?} [mapProjection] - The map projection.
+     *
+     * @param layerConfig - The layer entry configuration to process.
+     * @param displayDateMode - The display date mode to use for processing time dimensions in the metadata.
+     * @param mapProjection - Optional map projection.
      * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-     * @returns {Promise<EsriDynamicLayerEntryConfig>} A promise that the layer entry configuration has gotten its metadata processed.
-     * @override
-     * @protected
+     * @returns A promise that the layer entry configuration has gotten its metadata processed.
      */
     protected onProcessLayerMetadata(layerConfig: EsriDynamicLayerEntryConfig, displayDateMode: DisplayDateMode, mapProjection?: OLProjection, abortSignal?: AbortSignal): Promise<EsriDynamicLayerEntryConfig>;
     /**
      * Overrides the creation of the GV Layer
-     * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer entry configuration.
-     * @returns {GVEsriDynamic} The GV Layer
-     * @override
-     * @protected
+     *
+     * @param layerConfig - The layer entry configuration.
+     * @returns The GV Layer
      */
     protected onCreateGVLayer(layerConfig: EsriDynamicLayerEntryConfig): GVEsriDynamic;
     /**
      * Initializes a GeoView layer configuration for an Esri Dynamic layer.
+     *
      * This method creates a basic TypeGeoviewLayerConfig using the provided
      * ID, name, and metadata access path URL. It then initializes the layer entries by calling
      * `initGeoViewLayerEntries`, which may involve fetching metadata or sublayer info.
+     *
      * @param geoviewLayerId - A unique identifier for the layer.
      * @param geoviewLayerName - The display name of the layer.
      * @param metadataAccessPath - The full service URL to the layer endpoint.
      * @param isTimeAware - Indicates whether the layer supports time-based filtering.
      * @returns A promise that resolves to an initialized GeoView layer configuration with layer entries.
-     * @static
      */
     static initGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware?: boolean): Promise<TypeGeoviewLayerConfig>;
     /**
      * Creates a configuration object for a Esri Dynamic layer.
+     *
      * This function constructs a `TypeEsriDynamicLayerConfig` object that describes an Esri Dynamic layer
      * and its associated entry configurations based on the provided parameters.
+     *
      * @param geoviewLayerId - A unique identifier for the GeoView layer.
      * @param geoviewLayerName - The display name of the GeoView layer.
      * @param metadataAccessPath - The URL or path to access metadata.
@@ -98,7 +93,6 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      * @param layerEntries - An array of layer entries objects to be included in the configuration.
      * @param customGeocoreLayerConfig - An optional layer config from Geocore.
      * @returns The constructed configuration object for the Esri Dynamic layer.
-     * @static
      */
     static createGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, metadataAccessPath: string, isTimeAware: boolean | undefined, layerEntries: TypeLayerEntryShell[], customGeocoreLayerConfig?: unknown): TypeEsriDynamicLayerConfig;
     /**
@@ -109,33 +103,34 @@ export declare class EsriDynamic extends AbstractGeoViewRaster {
      * 1. Creates a Geoview layer configuration using the provided parameters.
      * 2. Instantiates a layer with that configuration.
      * 3. Processes the layer configuration and returns the result.
-     * @param {string} geoviewLayerId - The unique identifier for the GeoView layer.
-     * @param {string} geoviewLayerName - The display name for the GeoView layer.
-     * @param {string} url - The URL of the service endpoint.
-     * @param {string[]} layerIds - An array of layer IDs to include in the configuration.
-     * @param {boolean} isTimeAware - Indicates if the layer is time aware.
-     * @returns {Promise<ConfigBaseClass[]>} A promise that resolves to an array of layer configurations.
-     * @static
+     *
+     * @param geoviewLayerId - The unique identifier for the GeoView layer.
+     * @param geoviewLayerName - The display name for the GeoView layer.
+     * @param url - The URL of the service endpoint.
+     * @param layerIds - An array of layer IDs to include in the configuration.
+     * @param isTimeAware - Indicates if the layer is time aware.
+     * @returns A promise that resolves to an array of layer configurations.
      */
     static processGeoviewLayerConfig(geoviewLayerId: string, geoviewLayerName: string, url: string, layerIds: number[], isTimeAware: boolean): Promise<ConfigBaseClass[]>;
     /**
      * Creates an ImageArcGISRest source from a layer config.
-     * @param {EsriDynamicLayerEntryConfig} layerConfig - The configuration for the EsriDynamic layer.
-     * @returns {ImageArcGISRest} A fully configured ImageArcGISRest source.
+     *
+     * @param layerConfig - The configuration for the EsriDynamic layer.
+     * @returns A fully configured ImageArcGISRest source.
      * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
-     * @static
      */
     static createEsriDynamicSource(layerConfig: EsriDynamicLayerEntryConfig): ImageArcGISRest;
     /**
      * Builds a hierarchical tree structure from a flat array of ESRI layer entries by linking parent layers
      * with their corresponding sublayers based on `subLayerIds`.
+     *
      * @remarks
      * - Each entry is deep-cloned to avoid mutating the original input.
      * - Entries that are referenced as sublayers are nested under their parent in the `subLayers` array.
      * - Only root-level entries (those not referenced as sublayers) are returned at the top level of the tree.
-     * @param {{ layerId: number; subLayerIds: number[] }[]} entries - A flat array of layer entry objects, each potentially referencing sublayers by ID.
-     * @returns {TypeLayerEntryShell[]} A nested array representing the hierarchical layer structure with `subLayers` assigned to parents.
-     * @static
+     *
+     * @param entries - A flat array of layer entry objects, each potentially referencing sublayers by ID.
+     * @returns A nested array representing the hierarchical layer structure with `subLayers` assigned to parents.
      */
     static buildLayerEntriesTree(entries: {
         layerId: number;

@@ -5,10 +5,7 @@ import { type TypeHighlightColors, type TypeFeatureInfoEntry } from '@/api/types
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { PointMarkers } from './point-markers';
 /**
- * A class to handle highlighting of features
- *
- * @exports
- * @class FeatureHighlight
+ * A class to handle highlighting of features.
  */
 export declare class FeatureHighlight {
     #private;
@@ -20,8 +17,9 @@ export declare class FeatureHighlight {
     overlayLayer?: VectorLayer;
     pointMarkers?: PointMarkers;
     /**
-     * Constructor
-     * @param {MapViewer} mapViewer - A reference to the map viewer
+     * Constructor.
+     *
+     * @param mapViewer - A reference to the map viewer
      */
     constructor(mapViewer: MapViewer);
     /**
@@ -29,24 +27,28 @@ export declare class FeatureHighlight {
      */
     init(): void;
     /**
-     * Changes the highlight color
-     * @param {TypeHighlightColors} color - New color
+     * Changes the highlight color.
+     *
+     * @param color - New color
      */
     changeHighlightColor(color: TypeHighlightColors): void;
     /**
-     * Removes feature highlight(s)
-     * @param {string} id - Uid of the feature to deselect, or 'all' to clear all
+     * Removes feature highlight(s).
+     *
+     * @param id - Uid of the feature to deselect, or 'all' to clear all
      */
     removeHighlight(id: string): void;
     /**
-     * Highlights a feature with a plain overlay
-     * @param {TypeFeatureInfoEntry} feature - Feature to highlight
+     * Highlights a feature with a plain overlay.
+     *
+     * @param feature - Feature to highlight
      */
     highlightFeature(feature: TypeFeatureInfoEntry): void;
     /**
-     * Highlights a bounding box
-     * @param {Extent} extent - Extent to highlight
-     * @param {boolean} isLayerHighlight - Optional if it is a layer highlight
+     * Highlights a bounding box.
+     *
+     * @param extent - Extent to highlight
+     * @param isLayerHighlight - Optional if it is a layer highlight
      */
     highlightGeolocatorBBox(extent: Extent, isLayerHighlight?: boolean): void;
     /**

@@ -1,15 +1,26 @@
 /**
- * Properties for the Progress Bar component extending Material-UI's LinearProgressProps
+ * Properties for the Progress Bar component.
+ *
+ * Extends Material-UI's LinearProgress functionality with
+ * additional accessibility support.
  */
 interface ProgressbarProps {
     className?: string;
     variant?: 'determinate' | 'indeterminate' | 'buffer' | 'query';
     value?: number;
+    'aria-label'?: string;
 }
 /**
- * Create a customized Material UI Linear Progress Bar component.
+ * Material-UI LinearProgress component for progress indication.
  *
- * @component
+ * Wraps Material-UI's LinearProgress to provide horizontal progress bar with
+ * multiple variants (determinate, indeterminate, buffer, query). Supports custom
+ * values, accessibility labels, and theme-aware styling. All Material-UI
+ * LinearProgress props are supported and passed through directly.
+ *
+ * @param props - ProgressBar configuration (see ProgressbarProps interface)
+ * @returns Progress bar component with theme styling
+ *
  * @example
  * ```tsx
  * // Basic usage
@@ -30,9 +41,6 @@ interface ProgressbarProps {
  * // Indeterminate loading
  * <ProgressBar variant="indeterminate" />
  * ```
- *
- * @param {ProgressbarProps} props - The properties passed to the Progress Bar element
- * @returns {JSX.Element} The Progress Bar component
  *
  * @see {@link https://mui.com/material-ui/react-progress/}
  */

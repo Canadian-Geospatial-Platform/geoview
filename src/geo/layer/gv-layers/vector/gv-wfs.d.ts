@@ -4,36 +4,27 @@ import type { OgcWfsLayerEntryConfig } from '@/api/config/validation-classes/vec
 import type { TypeOutfields, TypeOutfieldsType } from '@/api/types/map-schema-types';
 /**
  * Manages a WFS layer.
- *
- * @exports
- * @class GVWFS
  */
 export declare class GVWFS extends AbstractGVVector {
     /**
      * Constructs a GVWFS layer to manage an OpenLayer layer.
-     * @param {VectorSource} olSource - The OpenLayer source.
-     * @param {OgcWfsLayerEntryConfig} layerConfig - The layer configuration.
+     *
+     * @param olSource - The OpenLayer source.
+     * @param layerConfig - The layer configuration.
      */
     constructor(olSource: VectorSource, layerConfig: OgcWfsLayerEntryConfig);
     /**
      * Overrides the parent class's getter to provide a more specific return type (covariant return).
-     * @returns {OgcWfsLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
-     * @override
+     *
+     * @returns The strongly-typed layer configuration specific to this layer.
      */
     getLayerConfig(): OgcWfsLayerEntryConfig;
     /**
-     * Overrides the return of the field type from the metadata. If the type can not be found, return 'string'.
-     * @param {string} fieldName - The field name for which we want to get the type.
-     * @returns {TypeOutfieldsType} The type of the field.
-     * @override
-     * @protected
-     */
-    protected onGetFieldType(fieldName: string): TypeOutfieldsType;
-    /**
-     * Returns field type of the given field name using the povided WFS metadata.
-     * @param {TypeOutfields[]} layerMetadata - The WFS metadata
-     * @param {string} fieldName - The field name to get the field type information
-     * @returns {TypeOutfieldsType} The field type information for the given field name
+     * Returns field type of the given field name using the provided WFS metadata.
+     *
+     * @param layerMetadata - The WFS metadata.
+     * @param fieldName - The field name to get the field type information.
+     * @returns The field type information for the given field name.
      */
     static getFieldType(layerMetadata: TypeOutfields[] | undefined, fieldName: string): TypeOutfieldsType;
 }

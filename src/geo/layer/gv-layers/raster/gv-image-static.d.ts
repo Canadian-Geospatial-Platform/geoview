@@ -7,9 +7,6 @@ import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raste
 import type { TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 /**
  * Manages an Image static layer.
- *
- * @exports
- * @class GVImageStatic
  */
 export declare class GVImageStatic extends AbstractGVRaster {
     #private;
@@ -40,15 +37,16 @@ export declare class GVImageStatic extends AbstractGVRaster {
     getLayerConfig(): ImageStaticLayerEntryConfig;
     /**
      * Overrides the fetching of the legend for a static image layer.
-     * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
-     * @override
+     *
+     * @returns A promise that resolves with the legend of the layer or null
      */
     onFetchLegend(): Promise<TypeLegend | null>;
     /**
      * Overrides the way to get the bounds for this layer type.
+     *
      * @param projection - The projection to get the bounds into.
      * @param stops - The number of stops to use to generate the extent.
-     * @returns A promise of layer bounding box.
+     * @returns A promise that resolves with the layer bounding box or undefined when not found
      */
     onGetBounds(projection: OLProjection, stops: number): Promise<Extent | undefined>;
 }
