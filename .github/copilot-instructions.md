@@ -457,12 +457,77 @@ JSDoc should NOT:
 - `@deprecated` - Mark deprecated APIs
 - `@see` - Reference related code
 
-**Tags to Avoid in TypeScript** (use TS keywords instead):
+**Tags to Avoid in TypeScript** (use TS keywords or omit entirely):
 
 - `@private`, `@protected`, `@public` - Use TS visibility modifiers
 - `@readonly` - Use TS `readonly` keyword
 - `@override` - Use TS `override` keyword
 - `@static` - Use TS `static` keyword
+- `@exports`, `@class` - Unnecessary, TypeScript `export` and `class` keywords are sufficient
+- `@abstract` - Use TS `abstract` keyword
+- `@async` - TypeScript already indicates async via `async` keyword and `Promise` return type
+- `@description` - Redundant, the JSDoc block description itself serves this purpose
+- `@fires` - Not used in this project
+- `@return` - Use `@returns` (with trailing "s") consistently
+
+**Additional `@returns` Rules:**
+
+- Use `@returns` (with trailing "s"), never `@return`
+- **No `@returns` for void methods** — omit the tag entirely
+- `@returns` should describe the **semantics** of the return value, not just mirror the TypeScript type:
+
+```typescript
+// ❌ Bad: mirrors the type
+/** @returns Map of string to promise of string */
+
+// ✅ Good: describes semantics
+/** @returns A map of raster function names to their preview image promises */
+```
+
+- No trailing periods on `@param` and `@returns` descriptions:
+
+```typescript
+// ❌ Bad: trailing period
+/** @param layerPath - Target layer path. */
+
+// ✅ Good: no trailing period
+/** @param layerPath - Target layer path */
+```
+
+**`@param` for AbortController:**
+
+When a parameter is an `AbortController`, use `{@link AbortController}` in the description:
+
+```typescript
+// ✅ Good: uses {@link}
+/** @param abortController - Optional {@link AbortController} to cancel the request */
+```
+
+**Override Methods Must Document All Parameters:**
+
+When overriding a parent method, document ALL parameters in the override's JSDoc, even if the parent already documents them. Each override should be self-contained:
+
+```typescript
+// ❌ Bad: only documents one of five params
+/**
+ * Formats feature info results.
+ *
+ * @param features - The features to format
+ */
+override formatFeatureInfoResult(features, layerConfig, dateFormat, timezone, mode) {}
+
+// ✅ Good: documents all params
+/**
+ * Formats feature info results.
+ *
+ * @param features - The features to format
+ * @param layerConfig - The layer configuration
+ * @param dateFormat - The date format string
+ * @param timezone - The service date timezone
+ * @param mode - The service date temporal mode
+ */
+override formatFeatureInfoResult(features, layerConfig, dateFormat, timezone, mode) {}
+```
 
 **Format Structure:**
 

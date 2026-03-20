@@ -15,14 +15,13 @@ import type { RGBA } from '@/core/utils/utilities';
 
 /**
  * Manages a GeoTIFF layer.
- * @exports
- * @class GVGeoTIFF
  */
 export class GVGeoTIFF extends AbstractGVTile {
   /**
    * Constructs a GVGeoTIFF layer to manage an OpenLayer layer.
-   * @param {GeoTIFFSource} olSource - The OpenLayer source.
-   * @param {GeoTIFFLayerEntryConfig} layerConfig - The layer configuration.
+   *
+   * @param olSource - The OpenLayer source
+   * @param layerConfig - The layer configuration
    */
   constructor(olSource: GeoTIFFSource, layerConfig: GeoTIFFLayerEntryConfig) {
     // Call parent constructor with source
@@ -78,9 +77,10 @@ export class GVGeoTIFF extends AbstractGVTile {
 
   /**
    * Overrides the way to get the bounds for this layer type.
-   * @param projection - The projection to get the bounds into.
-   * @param stops - The number of stops to use to generate the extent.
-   * @returns A promise of layer bounding box.
+   *
+   * @param projection - The projection to get the bounds into
+   * @param stops - The number of stops to use to generate the extent
+   * @returns A promise that resolves with the layer bounding box or undefined when not found
    */
   override async onGetBounds(projection: OLProjection, stops: number): Promise<Extent | undefined> {
     // Wait for the source to be ready, just in case the caller is early
@@ -130,9 +130,9 @@ export class GVGeoTIFF extends AbstractGVTile {
 
   /**
    * Gets the legend image of a layer.
-   * @param {GeoTIFFLayerEntryConfig} layerConfig - The layer configuration.
-   * @returns {blob} A promise of an image blob
-   * @private
+   *
+   * @param layerConfig - The layer configuration
+   * @returns A promise that resolves with the image data or null
    */
   static #getLegendImage(layerConfig: GeoTIFFLayerEntryConfig): Promise<string | ArrayBuffer | null> {
     const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
@@ -162,8 +162,8 @@ export class GVGeoTIFF extends AbstractGVTile {
 
   /**
    * Overrides the fetching of the legend for a geotiff layer.
-   * @override
-   * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
+   *
+   * @returns A promise that resolves with the legend of the layer or null
    */
   override async onFetchLegend(): Promise<TypeLegend | null> {
     // Get the config

@@ -10,9 +10,6 @@ import { logger } from '@/core/utils/logger';
 
 /**
  * Manages a GeoJSON layer.
- *
- * @exports
- * @class GVGeoJSON
  */
 export class GVGeoJSON extends AbstractGVVector {
   /** Custom source features */
@@ -20,8 +17,9 @@ export class GVGeoJSON extends AbstractGVVector {
 
   /**
    * Constructs a GVGeoJSON layer to manage an OpenLayer layer.
-   * @param {VectorSource} olSource - The OpenLayer source.
-   * @param {GeoJSONLayerEntryConfig} layerConfig - The layer configuration.
+   *
+   * @param olSource - The OpenLayer source.
+   * @param layerConfig - The layer configuration.
    */
   // The constructor is not useless, it narrows down the accepted parameter type.
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
@@ -33,8 +31,8 @@ export class GVGeoJSON extends AbstractGVVector {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {GeoJSONLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getLayerConfig(): GeoJSONLayerEntryConfig {
     // Call parent and cast
@@ -43,9 +41,8 @@ export class GVGeoJSON extends AbstractGVVector {
 
   /**
    * Overrides the refresh to reload the Geojson object in the layer source once the refresh completes.
-   * @param {OLProjection | undefined} projection - Optional, the projection to refresh to.
-   * @returns {void}
-   * @override
+   *
+   * @param projection - Optional projection to refresh to.
    */
   override onRefresh(projection: OLProjection | undefined): void {
     // Sure
@@ -67,8 +64,10 @@ export class GVGeoJSON extends AbstractGVVector {
 
   /**
    * Loads a Geojson object as the layer source features, overriding the current features if any.
-   * @param {GeoJSONObject | string} geojson - The geoJSON object.
-   * @param {OLProjection} projection - The output projection.
+   *
+   * @param geojson - The geoJSON object.
+   * @param projection - The output projection.
+   * @returns A promise that resolves once the source has been updated with the new features.
    */
   async setGeojsonSource(geojson: GeoJSONObject | string, projection: OLProjection): Promise<void> {
     // Convert string to geoJSON if necessary
@@ -107,7 +106,9 @@ export class GVGeoJSON extends AbstractGVVector {
 
   /**
    * Updates the Geojson object, if any, to reproject the features into the new provided projection.
-   * @param {OLProjection} projection - The projection to project the geojson source features into.
+   *
+   * @param projection - The projection to project the geojson source features into.
+   * @returns A promise that resolves once the source has been updated with the reprojected features, or immediately if no geojson source is defined.
    */
   async updateGeojsonSource(projection: OLProjection): Promise<void> {
     // If a custom geojson is defined

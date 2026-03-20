@@ -33,7 +33,8 @@ export abstract class AbstractGVRaster extends AbstractGVLayer {
 
   /**
    * Gets the metadata extent projection, if any.
-   * @returns {OLProjection | undefined} The OpenLayer projection
+   *
+   * @returns The OpenLayer projection or undefined when not found
    */
   getMetadataProjection(): OLProjection | undefined {
     // Get metadata
@@ -47,7 +48,8 @@ export abstract class AbstractGVRaster extends AbstractGVLayer {
 
   /**
    * Gets the metadata extent, if any.
-   * @returns {Extent | undefined} The OpenLayer projection
+   *
+   * @returns The metadata extent or undefined when not found
    */
   getMetadataExtent(): Extent | undefined {
     // Get the layer metadata precisely

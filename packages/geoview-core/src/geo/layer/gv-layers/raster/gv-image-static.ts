@@ -16,9 +16,6 @@ import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 
 /**
  * Manages an Image static layer.
- *
- * @exports
- * @class GVImageStatic
  */
 export class GVImageStatic extends AbstractGVRaster {
   /**
@@ -74,8 +71,8 @@ export class GVImageStatic extends AbstractGVRaster {
 
   /**
    * Overrides the fetching of the legend for a static image layer.
-   * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
-   * @override
+   *
+   * @returns A promise that resolves with the legend of the layer or null
    */
   override async onFetchLegend(): Promise<TypeLegend | null> {
     // Get the config
@@ -119,9 +116,10 @@ export class GVImageStatic extends AbstractGVRaster {
 
   /**
    * Overrides the way to get the bounds for this layer type.
+   *
    * @param projection - The projection to get the bounds into.
    * @param stops - The number of stops to use to generate the extent.
-   * @returns A promise of layer bounding box.
+   * @returns A promise that resolves with the layer bounding box or undefined when not found
    */
   override async onGetBounds(projection: OLProjection, stops: number): Promise<Extent | undefined> {
     // Wait for the source to be ready, just in case the caller is early
@@ -150,9 +148,9 @@ export class GVImageStatic extends AbstractGVRaster {
 
   /**
    * Gets the legend image of a layer.
-   * @param {ImageStaticLayerEntryConfig} layerConfig - The layer configuration.
-   * @returns {blob} A promise of an image blob
-   * @private
+   *
+   * @param layerConfig - The layer configuration.
+   * @returns A promise that resolves with the image blob or null when not found
    */
   static #getLegendImage(layerConfig: ImageStaticLayerEntryConfig): Promise<string | ArrayBuffer | null> {
     const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {

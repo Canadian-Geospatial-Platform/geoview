@@ -42,15 +42,12 @@ import type { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 
 /**
  * Manages an Esri Dynamic layer.
- *
- * @exports
- * @class GVEsriDynamic
  */
 export class GVEsriDynamic extends AbstractGVRaster {
   /** The worker pool used when fetching records */
   #fetchWorkerPool: FetchEsriWorkerPool;
 
-  // The default hit tolerance the query should be using
+  /** The default hit tolerance the query should be using */
   static override DEFAULT_HIT_TOLERANCE: number = 7;
 
   /**
@@ -125,8 +122,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Overrides the fetching of the legend for an Esri Dynamic layer.
-   * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
-   * @override
+   *
+   * @returns A promise that resolves with the legend of the layer or null
    */
   override async onFetchLegend(): Promise<TypeLegend | null> {
     // Get the config
@@ -206,9 +203,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Overrides when the style should be set by the fetched legend.
-   * @param {TypeLegend} legend - The legend type
-   * @returns {void}
-   * @override
+   *
+   * @param legend - The legend type
    */
   override onSetStyleAccordingToLegend(legend: TypeLegend): void {
     // Set the style
@@ -217,9 +213,10 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Overrides the way to get the bounds for this layer type.
+   *
    * @param projection - The projection to get the bounds into.
    * @param stops - The number of stops to use to generate the extent.
-   * @returns A promise of layer bounding box.
+   * @returns A promise that resolves with the layer bounding box or undefined when not found
    */
   override onGetBounds(projection: OLProjection, stops: number): Promise<Extent | undefined> {
     // Get the metadata projection
@@ -241,10 +238,11 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Sends a query to get ESRI Dynamic feature geometries and calculates an extent from them.
-   * @param {number[] | string[]} objectIds - The IDs of the features to calculate the extent from.
-   * @param {OLProjection} outProjection - The output projection for the extent.
-   * @param {string?} outfield - ID field to return for services that require a value in outfields.
-   * @returns {Promise<Extent>} The extent of the features, if available.
+   *
+   * @param objectIds - The IDs of the features to calculate the extent from.
+   * @param outProjection - The output projection for the extent.
+   * @param outfield - Optional ID field to return for services that require a value in outfields.
+   * @returns A promise that resolves with the extent of the features
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
@@ -253,7 +251,6 @@ export class GVEsriDynamic extends AbstractGVRaster {
    * @throws {ResponseTypeError} When the response from the service is not an object.
    * @throws {ResponseContentError} When the response actually contains an error within it.
    * @throws {NetworkError} When a network issue happened.
-   * @override
    */
   override async onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
     // Get url for service from layer entry config
@@ -275,8 +272,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Overrides the hit tolerance of the layer.
-   * @returns {number} The hit tolerance for a GV Esri Dynamic layer
-   * @override
+   *
+   * @returns The hit tolerance for a GV Esri Dynamic layer
    */
   override getHitTolerance(): number {
     // Override the hit tolerance for a GVEsriDynamic layer
@@ -285,12 +282,11 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Overrides the get all feature information for all the features stored in the layer.
-   * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
-   * @param {LayerFilters} layerFilters - The layer filters to apply when querying the features.
-   * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
-   * @override
-   * @protected
+   *
+   * @param map - The Map so that we can grab the resolution/projection we want to get features on.
+   * @param layerFilters - The layer filters to apply when querying the features.
+   * @param abortController - Optional {@link AbortController} to cancel the operation.
+   * @returns A promise that resolves with the feature info result
    */
   protected override async getAllFeatureInfo(
     map: OLMap,
@@ -339,13 +335,12 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Overrides the return of feature information at a given coordinate.
-   * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.
-   * @param {Coordinate} location - The coordinate that will be used by the query.
-   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-   * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
-   * @override
-   * @protected
+   *
+   * @param map - The Map where to get Feature Info At Coordinate from.
+   * @param location - The coordinate that will be used by the query.
+   * @param queryGeometry - Whether to include geometry in the query, default is true.
+   * @param abortController - Optional {@link AbortController} to cancel the operation.
+   * @returns A promise that resolves with the feature info result
    */
   protected override getFeatureInfoAtCoordinate(
     map: OLMap,
@@ -362,14 +357,13 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Overrides the return of feature information at the provided long lat coordinate.
-   * @param {OLMap} map - The Map where to get Feature Info At LonLat from.
-   * @param {Coordinate} lonlat - The coordinate that will be used by the query.
-   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-   * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
+   *
+   * @param map - The Map where to get Feature Info At LonLat from.
+   * @param lonlat - The coordinate that will be used by the query.
+   * @param queryGeometry - Whether to include geometry in the query, default is true.
+   * @param abortController - Optional {@link AbortController} to cancel the operation.
+   * @returns A promise that resolves with the feature info result
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
-   * @override
-   * @protected
    */
   protected override async getFeatureInfoAtLonLat(
     map: OLMap,
@@ -541,10 +535,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Overrides the way an EsriDynamic layer applies a view filter. It does so by updating the source layerDefs parameter.
-   * @param {LayerFilters} [filter] - The raw filter string input (defaults to an empty string if not provided).
-   * @returns {void}
-   * @override
-   * @protected
+   *
+   * @param filter - The raw filter string input (defaults to an empty string if not provided).
    */
   protected override onSetLayerFilters(filter?: LayerFilters): void {
     // Redirect
@@ -557,14 +549,16 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Retrieves feature records from the layer using their Object IDs (OIDs).
+   *
    * This method queries the underlying layer for the specified object IDs and returns
    * a Promise resolving to an array of partial feature info entries.
    * The method automatically determines the geometry type and output fields from
    * the layer configuration. If an output spatial reference (`outSR`) is provided,
    * the geometries are projected accordingly.
-   * @param {number[]} objectIDs - An array of Object IDs to query.
-   * @param {number} [outSR] - Optional output spatial reference (WKID) for geometry projection.
-   * @returns {Promise<TypeFeatureInfoEntryPartial[]>} A promise resolving to an array of partial feature info entries.
+   *
+   * @param objectIDs - An array of Object IDs to query.
+   * @param outSR - Optional output spatial reference (WKID) for geometry projection.
+   * @returns A promise that resolves with an array of partial feature info entries
    */
   getRecordsByOIDs(objectIDs: number[], outSR?: number | undefined): Promise<TypeFeatureInfoEntryPartial[]> {
     // Get the layer config
@@ -593,8 +587,9 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Query all features with a web worker
-   * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer config
-   * @returns {Promise<EsriFeaturesJsonResponse>} A promise of esri response for query.
+   *
+   * @param layerConfig - The layer config
+   * @returns A promise that resolves with the esri response for query
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    */
   #fetchAllFeatureInfoWithWorker(
@@ -619,12 +614,13 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Query the features geometry with a web worker
-   * @param {EsriDynamicLayerEntryConfig} layerConfig - The layer config
-   * @param {number[]} objectIds - Array of object IDs to query
-   * @param {boolean} queryGeometry - Whether to include geometry in the query
-   * @param {number} projection - The spatial reference ID for the output
-   * @param {number} maxAllowableOffset - The maximum allowable offset for geometry simplification
-   * @returns {Promise<EsriFeaturesJsonResponse>} A promise of esri response for query.
+   *
+   * @param layerConfig - The layer config
+   * @param objectIds - Array of object IDs to query
+   * @param queryGeometry - Whether to include geometry in the query
+   * @param projection - The spatial reference ID for the output
+   * @param maxAllowableOffset - The maximum allowable offset for geometry simplification
+   * @returns A promise that resolves with the esri response for query
    * @throws {LayerDataAccessPathMandatoryError} When the Data Access Path was undefined, likely because initDataAccessPath wasn't called.
    */
   #fetchFeatureInfoGeometryWithWorker(
@@ -653,7 +649,8 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Handles progress messages from a worker to update layer loading status
-   * @param {MessageEvent} event - The message event from the worker containing progress data.
+   *
+   * @param event - The message event from the worker containing progress data.
    */
   #handleWorkerMessage(event: MessageEvent): void {
     // Log
@@ -695,12 +692,14 @@ export class GVEsriDynamic extends AbstractGVRaster {
 
   /**
    * Applies a view filter to an Esri Dynamic layer's source by updating the `layerDefs` parameter.
+   *
    * This function is responsible for generating the appropriate filter expression based on the layer configuration,
    * optional style, and time-based fragments. It ensures the filter is only applied if it has changed or needs to be reset.
-   * @param {EsriDynamicLayerEntryConfig} layerConfig - The configuration object for the Esri Dynamic layer.
-   * @param {ImageArcGISRest} source - The OpenLayers `ImageArcGISRest` source instance to which the filter will be applied.
-   * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
-   * @throws {LayerInvalidLayerFilterError} If the filter expression fails to parse or cannot be applied.
+   *
+   * @param layerConfig - The configuration object for the Esri Dynamic layer.
+   * @param source - The OpenLayers `ImageArcGISRest` source instance to which the filter will be applied.
+   * @param filter - The raw filter string input (defaults to an empty string if not provided).
+   * @throws {LayerInvalidLayerFilterError} When the filter expression fails to parse or cannot be applied.
    */
   static applyViewFilterOnSource(
     layerConfig: EsriDynamicLayerEntryConfig,

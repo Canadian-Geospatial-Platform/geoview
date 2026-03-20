@@ -8,15 +8,13 @@ import { AbstractGVVectorTile } from '@/geo/layer/gv-layers/vector/abstract-gv-v
 
 /**
  * Manages a Vector Tiles layer.
- *
- * @exports
- * @class GVVectorTiles
  */
 export class GVVectorTiles extends AbstractGVVectorTile {
   /**
    * Constructs a GVVectorTiles layer to manage an OpenLayer layer.
-   * @param {VectorTile} olSource - The OpenLayer source.
-   * @param {VectorTilesLayerEntryConfig} layerConfig - The layer configuration.
+   *
+   * @param olSource - The OpenLayer source.
+   * @param layerConfig - The layer configuration.
    */
   constructor(olSource: VectorTile, layerConfig: VectorTilesLayerEntryConfig) {
     super(olSource, layerConfig);
@@ -36,8 +34,8 @@ export class GVVectorTiles extends AbstractGVVectorTile {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {VectorTilesLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getLayerConfig(): VectorTilesLayerEntryConfig {
     // Call parent and cast
@@ -50,8 +48,9 @@ export class GVVectorTiles extends AbstractGVVectorTile {
 
   /**
    * Used to change the style of the vector tile layer.
-   * @param styleUrl The style URL to apply to the layer
-   * @returns Promise<void>
+   *
+   * @param styleUrl - The style URL to apply to the layer.
+   * @returns A promise that resolves when the style has been applied.
    */
   changeStyle(styleUrl: string): Promise<void> {
     if (styleUrl) {

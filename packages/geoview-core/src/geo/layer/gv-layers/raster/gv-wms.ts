@@ -40,9 +40,6 @@ import { logger } from '@/core/utils/logger';
 
 /**
  * Manages a WMS layer.
- *
- * @exports
- * @class GVWMS
  */
 export class GVWMS extends AbstractGVRaster {
   /** The max feature count returned by the GetFeatureInfo */
@@ -60,7 +57,7 @@ export class GVWMS extends AbstractGVRaster {
   /** The feature out put format for the WMS that we know have worked */
   #featureOutputFormatWMSWorked?: string;
 
-  /** Keep all callback delegates references */
+  /** Callback delegates for the image load rescue event */
   #onImageLoadRescueHandlers: ImageLoadRescueDelegate[] = [];
 
   /** Indicates if the CRS is to be overridden, because the layer struggles loading on the map */
@@ -171,6 +168,7 @@ export class GVWMS extends AbstractGVRaster {
   /**
    * Deciphers an image load error event and returns a corresponding
    * localized error message key.
+   *
    * This override inspects the failed image request to detect more specific
    * failure scenarios before falling back to a generic error message.
    * The method currently checks for:
@@ -217,13 +215,12 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Overrides the return of feature information at a given coordinate.
-   * @param {OLMap} map - The Map where to get Feature Info At Coordinate from.
-   * @param {Coordinate} location - The coordinate that will be used by the query.
-   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-   * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
-   * @override
-   * @protected
+   *
+   * @param map - The Map where to get Feature Info At Coordinate from.
+   * @param location - The coordinate that will be used by the query.
+   * @param queryGeometry - Whether to include geometry in the query, default is true.
+   * @param abortController - Optional {@link AbortController} to cancel the operation.
+   * @returns A promise that resolves with the feature info result
    */
   protected override getFeatureInfoAtCoordinate(
     map: OLMap,
@@ -240,14 +237,13 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Overrides the return of feature information at the provided long lat coordinate.
-   * @param {OLMap} map - The Map where to get Feature Info At LonLat from.
-   * @param {Coordinate} lonlat - The coordinate that will be used by the query.
-   * @param {boolean} queryGeometry - Whether to include geometry in the query, default is true.
-   * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
-   * @throws {LayerConfigWFSMissingError} If no WFS layer configuration is defined for this WMS layer.
-   * @override
-   * @protected
+   *
+   * @param map - The Map where to get Feature Info At LonLat from.
+   * @param lonlat - The coordinate that will be used by the query.
+   * @param queryGeometry - Whether to include geometry in the query, default is true.
+   * @param abortController - Optional {@link AbortController} to cancel the operation.
+   * @returns A promise that resolves with the feature info result
+   * @throws {LayerConfigWFSMissingError} When no WFS layer configuration is defined for this WMS layer.
    */
   protected override async getFeatureInfoAtLonLat(
     map: OLMap,
@@ -321,19 +317,19 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Overrides the get all feature information for all the features stored in the layer.
+   *
    * This function performs a WFS 'GetFeature' query operation using the WFS layer configuration embedded in the WMS layer configuration.
-   * @param {OLMap} map - The Map so that we can grab the resolution/projection we want to get features on.
-   * @param {LayerFilters} layerFilters - The layer filters to apply when querying the features.
-   * @param {AbortController?} [abortController] - The optional abort controller.
-   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
-   * @throws {LayerConfigWFSMissingError} If no WFS layer configuration is defined for this WMS layer.
+   *
+   * @param map - The Map so that we can grab the resolution/projection we want to get features on.
+   * @param layerFilters - The layer filters to apply when querying the features.
+   * @param abortController - Optional {@link AbortController} to cancel the operation.
+   * @returns A promise that resolves with the feature info result
+   * @throws {LayerConfigWFSMissingError} When no WFS layer configuration is defined for this WMS layer.
    * @throws {ResponseError} When the response is not OK (non-2xx).
    * @throws {ResponseEmptyError} When the JSON response is empty.
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
    * @throws {NetworkError} When a network issue happened.
-   * @override
-   * @protected
    */
   protected override getAllFeatureInfo(
     map: OLMap,
@@ -360,8 +356,8 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Overrides the fetching of the legend for a WMS layer.
-   * @returns {Promise<TypeLegend | null>} The legend of the layer or null.
-   * @override
+   *
+   * @returns A promise that resolves with the legend of the layer or null
    */
   override async onFetchLegend(): Promise<TypeLegend | null> {
     try {
@@ -426,9 +422,10 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Overrides the way to get the bounds for this layer type.
+   *
    * @param projection - The projection to get the bounds into.
    * @param stops - The number of stops to use to generate the extent.
-   * @returns A promise of layer bounding box.
+   * @returns A promise that resolves with the layer bounding box or undefined when not found
    */
   override onGetBounds(projection: OLProjection, stops: number): Promise<Extent | undefined> {
     const layerConfig = this.getLayerConfig();
@@ -473,11 +470,12 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Sends a query to get feature and calculates an extent from them.
-   * @param {number[] | string[]} objectIds - The IDs of the features to calculate the extent from.
-   * @param {OLProjection} outProjection - The output projection for the extent.
-   * @param {string?} outfield - ID field to return for services that require a value in outfields.
-   * @returns {Promise<Extent>} The extent of the features, if available.
-   * @throws {LayerConfigWFSMissingError} If no WFS layer configuration is defined for this WMS layer.
+   *
+   * @param objectIds - The IDs of the features to calculate the extent from.
+   * @param outProjection - The output projection for the extent.
+   * @param outfield - Optional ID field to return for services that require a value in outfields.
+   * @returns A promise that resolves with the extent of the features
+   * @throws {LayerConfigWFSMissingError} When no WFS layer configuration is defined for this WMS layer.
    * @throws {NoPrimaryKeyFieldError} When the no outfields has the type 'oid'.
    * @throws {NoExtentError} When the extent couldn't be computed.
    * @throws {ResponseError} When the response is not OK (non-2xx).
@@ -485,7 +483,6 @@ export class GVWMS extends AbstractGVRaster {
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
    * @throws {NetworkError} When a network issue happened.
-   * @override
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   override async onGetExtentFromFeatures(objectIds: number[] | string[], outProjection: OLProjection, outfield?: string): Promise<Extent> {
@@ -544,10 +541,8 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Overrides the way a WMS layer applies a view filter. It does so by updating the source FILTER and TIME parameters.
-   * @param {LayerFilters} [filter] - An optional filter to be used in place of the getViewFilter value.
-   * @returns {void}
-   * @override
-   * @protected
+   *
+   * @param filter - An optional filter to be used in place of the getViewFilter value.
    */
   protected override onSetLayerFilters(filter?: LayerFilters): void {
     // Process the layer filtering using the static method shared between EsriImage and WMS
@@ -560,7 +555,8 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Gets if the CRS is to be overridden, because the layer struggles with the current map projection.
-   * @returns {CRSOverride | undefined} The CRS Override properties if any.
+   *
+   * @returns The CRS Override properties or undefined when not set
    */
   getOverrideCRS(): CRSOverride | undefined {
     return this.#overrideCRS;
@@ -568,7 +564,8 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Sets if the CRS is to be overridden, because the layer struggles with the current map projection.
-   * @param {CRSOverride | undefined} value - The CRS Override properties or undefined.
+   *
+   * @param value - The CRS Override properties or undefined.
    */
   setOverrideCRS(value: CRSOverride | undefined): void {
     this.#overrideCRS = value;
@@ -576,7 +573,8 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Gets the feature count used for GetFeatureInfo requests.
-   * @returns {number} The current GetFeatureInfo feature count.
+   *
+   * @returns The current GetFeatureInfo feature count
    */
   getGetFeatureInfoFeatureCount(): number {
     return this.#getFeatureInfoFeatureCount;
@@ -584,7 +582,8 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Sets the feature count used for GetFeatureInfo requests.
-   * @param {number} value - The new GetFeatureInfo feature count.
+   *
+   * @param value - The new GetFeatureInfo feature count.
    */
   setGetFeatureInfoFeatureCount(value: number): void {
     this.#getFeatureInfoFeatureCount = value;
@@ -592,7 +591,8 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Gets the current pixel tolerance used for GetFeatureInfo requests for QGIS Server Services.
-   * @returns {number} The current GetFeatureInfo pixel tolerance.
+   *
+   * @returns The current GetFeatureInfo pixel tolerance
    */
   getGetFeatureInfoTolerance(): number {
     return this.#getFeatureInfoTolerance;
@@ -600,7 +600,8 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Sets the current pixel tolerance used for GetFeatureInfo requests for QGIS Server Services.
-   * @param {number} value - The new GetFeatureInfo pixel tolerance.
+   *
+   * @param value - The new GetFeatureInfo pixel tolerance.
    */
   setGetFeatureInfoTolerance(value: number): void {
     this.#getFeatureInfoTolerance = value;
@@ -617,7 +618,8 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Sets the style id to be used by the WMS layer.
-   * @param {string} wmsStyleId - The style identifier to be used.
+   *
+   * @param wmsStyleId - The style identifier to be used.
    */
   setWmsStyle(wmsStyleId: string): void {
     // Update the current style
@@ -630,26 +632,27 @@ export class GVWMS extends AbstractGVRaster {
    * Fetches feature data from a WFS GetFeature request URL (expected to return GeoJSON),
    * parses the response into OpenLayers features, and converts them into GeoView
    * Feature Info entries with appropriate attribute formatting.
+   *
    * This method:
    * - Performs an HTTP request to a WFS GetFeature endpoint.
    * - Parses the returned GeoJSON into OL features.
    * - Applies WFS/WMS configuration (schema, outfields, styles, filters).
    * - Formats fields according to WFS metadata, including date parsing rules.
    * - Returns an array of standardized `TypeFeatureInfoEntry` objects.
-   * @param {string} urlWithOutputJson - The full WFS GetFeature request URL. Must specify an output format compatible
+   *
+   * @param urlWithOutputJson - The full WFS GetFeature request URL. Must specify an output format compatible
    *   with GeoJSON (e.g., `outputFormat=application/json`).
-   * @param {OgcWmsLayerEntryConfig} wmsLayerConfig - The associated WMS layer configuration. Styling and filter settings from this
+   * @param wmsLayerConfig - The associated WMS layer configuration. Styling and filter settings from this
    *   config are applied when formatting the Feature Info results.
-   * @param {OgcWfsLayerEntryConfig} wfsLayerConfig - The WFS layer configuration used for schema tags, outfields, metadata, and
+   * @param wfsLayerConfig - The WFS layer configuration used for schema tags, outfields, metadata, and
    *   date formatting.
-   * @param {AbortController} [abortController] - Optional `AbortController` used to cancel the fetch request.
-   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
+   * @param abortController - Optional {@link AbortController} used to cancel the fetch request.
+   * @returns A promise that resolves with the feature info result
    * @throws {ResponseError} When the response is not OK (non-2xx).
    * @throws {ResponseEmptyError} When the JSON response is empty.
    * @throws {RequestTimeoutError} When the request exceeds the timeout duration.
    * @throws {RequestAbortedError} When the request was aborted by the caller's signal.
    * @throws {NetworkError} When a network issue happened.
-   * @static
    */
   static async fetchAndParseFeaturesFromWFSUrl(
     urlWithOutputJson: string,
@@ -691,6 +694,7 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Retrieves feature information from a WFS layer based on a clicked map location.
+   *
    * This method is used internally to perform a "GetFeatureInfo" style request
    * using WFS. If a click coordinate and view resolution are provided, it:
    * 1. Buffers the clicked point into a small polygon based on the current resolution
@@ -699,20 +703,19 @@ export class GVWMS extends AbstractGVRaster {
    * 3. Creates a spatial <Intersects> filter for the WFS request.
    * 4. Builds a WFS GetFeature URL with the appropriate output format and filter.
    * 5. Fetches the WFS features and parses them into a consistent format.
-   * @param {OgcWmsLayerEntryConfig} wmsLayerConfig - The current WMS layer config of the WMS layer.
-   * @param {OgcWfsLayerEntryConfig} wfsLayerConfig - The current WFS layer config of the WMS layer.
-   * @param {Coordinate | undefined} clickCoordinate - The clicked map coordinate
+   *
+   * @param wmsLayerConfig - The current WMS layer config of the WMS layer.
+   * @param wfsLayerConfig - The current WFS layer config of the WMS layer.
+   * @param clickCoordinate - The clicked map coordinate
    *        in the map projection. If undefined, the query is non-spatial.
-   * @param {number | undefined} viewResolution - Current map view resolution
+   * @param viewResolution - Current map view resolution
    *        (map units per pixel). Required for buffering the click location.
-   * @param {string} projectionCode - The map projection code (e.g., 'EPSG:3857')
+   * @param projectionCode - The map projection code (e.g., 'EPSG:3857')
    *        to use for the WFS request and geometry serialization.
-   * @param {LayerFilters} [layerFilters] - The layer filters to use to filter the query, if any.
-   * @param {AbortController} [abortController] - Optional AbortController to
+   * @param layerFilters - Optional layer filters to use to filter the query.
+   * @param abortController - Optional {@link AbortController} to
    *        allow cancellation of the WFS request.
-   * @returns {Promise<TypeFeatureInfoResult>} A promise resolving to an array
-   *          of feature info entries retrieved from the WFS service.
-   * @private
+   * @returns A promise that resolves with the feature info result
    */
   #getFeatureInfoUsingWFS(
     wmsLayerConfig: OgcWmsLayerEntryConfig,
@@ -791,16 +794,17 @@ export class GVWMS extends AbstractGVRaster {
   /**
    * Attempts to retrieve feature information from a WMS layer using a prioritized list of supported formats:
    * `application/geojson`, `application/json`, `text/xml`, `text/html`, and `text/plain`, in that order.
+   *
    * For each supported format found in the layer's WMS capabilities, the method tries to fetch feature info
    * using that format. If no format returns usable feature info, an error is thrown.
-   * @param {OgcWmsLayerEntryConfig} wmsLayerConfig - The current WMS layer config of the WMS layer.
-   * @param {Coordinate} clickCoordinate - The coordinate on the map where the user clicked.
-   * @param {number} viewResolution - The current resolution of the map view.
-   * @param {ProjectionLike} projectionCode - The projection used for the request (e.g., 'EPSG:3857').
-   * @param {AbortController?} [abortController] - Optional abort controller to cancel the request if needed.
-   * @returns {Promise<TypeFeatureInfoResult>} A promise of a TypeFeatureInfoResult.
-   * @throws {LayerInvalidFeatureInfoFormatWMSError} If no supported format returns usable feature info data.
-   * @private
+   *
+   * @param wmsLayerConfig - The current WMS layer config of the WMS layer.
+   * @param clickCoordinate - The coordinate on the map where the user clicked.
+   * @param viewResolution - The current resolution of the map view.
+   * @param projectionCode - The projection used for the request (e.g., 'EPSG:3857').
+   * @param abortController - Optional {@link AbortController} to cancel the request if needed.
+   * @returns A promise that resolves with the feature info result
+   * @throws {LayerInvalidFeatureInfoFormatWMSError} When no supported format returns usable feature info data.
    */
   async #getFeatureInfoUsingWMS(
     wmsLayerConfig: OgcWmsLayerEntryConfig,
@@ -965,13 +969,14 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Applies a view filter to a WMS or an Esri Image layer's source by updating the source parameters.
+   *
    * This function is responsible for generating the appropriate filter expression based on the layer configuration,
    * optional style, and time-based fragments. It ensures the filter is only applied if it has changed or needs to be reset.
-   * @param {OgcWmsLayerEntryConfig | EsriImageLayerEntryConfig} layerConfig - The configuration object for the WMS or Esri Image layer.
-   * @param {ImageWMS | ImageArcGISRest} source - The OpenLayers `ImageWMS` or `ImageArcGISRest` source instance to which the filter will be applied.
-   * @param {string | undefined} filter - The raw filter string input (defaults to an empty string if not provided).
-   * @throws {LayerInvalidLayerFilterError} If the filter expression fails to parse or cannot be applied.
-   * @static
+   *
+   * @param layerConfig - The configuration object for the WMS or Esri Image layer.
+   * @param source - The OpenLayers `ImageWMS` or `ImageArcGISRest` source instance to which the filter will be applied.
+   * @param filter - The raw filter string input (defaults to an empty string if not provided).
+   * @throws {LayerInvalidLayerFilterError} When the filter expression fails to parse or cannot be applied.
    */
   static applyViewFilterOnSource(
     layerConfig: OgcWmsLayerEntryConfig | EsriImageLayerEntryConfig,
@@ -1058,20 +1063,20 @@ export class GVWMS extends AbstractGVRaster {
   }
 
   /**
-   * Retrieves feature information from a WMS layer using the `text/xml` info format.
+   * Retrieves feature information from a WMS layer using the `application/json` or `application/geojson` info format.
+   *
    * This method performs a `GetFeatureInfo` request at the specified map coordinate,
    * using the provided WMS source and projection. It returns a Promise of a Record<string, unknown> response.
-   * @param {OgcWmsLayerEntryConfig} layerConfig - Configuration object for the target WMS layer.
-   * @param {ImageWMS} wmsSource - The OpenLayers WMS source used to construct the request.
-   * @param {Coordinate} clickCoordinate - The coordinate on the map where the user clicked.
-   * @param {number} viewResolution - The current resolution of the map view.
-   * @param {ProjectionLike} projectionCode - The projection in which the request should be made (e.g., 'EPSG:3857').
-   * @param {'application/json' | 'application/geojson'} infoFormat - The info format to query in.
-   * @param {number | undefined} maxFeatures - The maximum number of features to include in response when we want more than 1.
-   * @param {AbortController} [abortController] - Optional AbortController to allow cancellation of the request.
-   * @returns {Promise<Record<string, unknown>>} A promise that resolves to a Record<string, unknown>.
-   * @private
-   * @static
+   *
+   * @param layerConfig - Configuration object for the target WMS layer.
+   * @param wmsSource - The OpenLayers WMS source used to construct the request.
+   * @param clickCoordinate - The coordinate on the map where the user clicked.
+   * @param viewResolution - The current resolution of the map view.
+   * @param projectionCode - The projection in which the request should be made (e.g., 'EPSG:3857').
+   * @param infoFormat - The info format to query in.
+   * @param maxFeatures - Optional maximum number of features to include in response when we want more than 1.
+   * @param abortController - Optional {@link AbortController} to allow cancellation of the request.
+   * @returns A promise that resolves with an array of feature member records
    */
   static async #getFeatureInfoUsingJSON(
     layerConfig: OgcWmsLayerEntryConfig,
@@ -1137,17 +1142,17 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Retrieves feature information from a WMS layer using the `text/xml` info format.
+   *
    * This method performs a `GetFeatureInfo` request at the specified map coordinate,
    * using the provided WMS source and projection. It returns a Promise of a Record<string, unknown> response.
-   * @param {OgcWmsLayerEntryConfig} layerConfig - Configuration object for the target WMS layer.
-   * @param {ImageWMS} wmsSource - The OpenLayers WMS source used to construct the request.
-   * @param {Coordinate} clickCoordinate - The coordinate on the map where the user clicked.
-   * @param {number} viewResolution - The current resolution of the map view.
-   * @param {ProjectionLike} projectionCode - The projection in which the request should be made (e.g., 'EPSG:3857').
-   * @param {AbortController} [abortController] - Optional AbortController to allow cancellation of the request.
-   * @returns {Promise<Record<string, unknown>>} A promise that resolves to a Record<string, unknown>.
-   * @private
-   * @static
+   *
+   * @param layerConfig - Configuration object for the target WMS layer.
+   * @param wmsSource - The OpenLayers WMS source used to construct the request.
+   * @param clickCoordinate - The coordinate on the map where the user clicked.
+   * @param viewResolution - The current resolution of the map view.
+   * @param projectionCode - The projection in which the request should be made (e.g., 'EPSG:3857').
+   * @param abortController - Optional {@link AbortController} to allow cancellation of the request.
+   * @returns A promise that resolves with the feature member record
    */
   static async #getFeatureInfoUsingXML(
     layerConfig: OgcWmsLayerEntryConfig,
@@ -1216,19 +1221,18 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Retrieves feature information from a WMS layer using the `text/html` info format.
+   *
    * This method performs a `GetFeatureInfo` request at the specified map coordinate,
    * using the provided WMS source and projection. It returns the html response
    * wrapped in a structured object for downstream compatibility.
-   * @param {OgcWmsLayerEntryConfig} layerConfig - Configuration object for the target WMS layer.
-   * @param {ImageWMS} wmsSource - The OpenLayers WMS source used to construct the request.
-   * @param {Coordinate} clickCoordinate - The coordinate on the map where the user clicked.
-   * @param {number} viewResolution - The current resolution of the map view.
-   * @param {ProjectionLike} projectionCode - The projection in which the request should be made (e.g., 'EPSG:3857').
-   * @param {AbortController} [abortController] - Optional AbortController to allow cancellation of the request.
-   * @returns {Promise<Record<string, unknown>>} A promise that resolves to an object containing the html info response
-   *                                             under the key `html`.
-   * @private
-   * @static
+   *
+   * @param layerConfig - Configuration object for the target WMS layer.
+   * @param wmsSource - The OpenLayers WMS source used to construct the request.
+   * @param clickCoordinate - The coordinate on the map where the user clicked.
+   * @param viewResolution - The current resolution of the map view.
+   * @param projectionCode - The projection in which the request should be made (e.g., 'EPSG:3857').
+   * @param abortController - Optional {@link AbortController} to allow cancellation of the request.
+   * @returns A promise that resolves with an object containing the html info response under the key `html`
    */
   static async #getFeatureInfoUsingHTML(
     layerConfig: OgcWmsLayerEntryConfig,
@@ -1272,19 +1276,19 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Retrieves feature information from a WMS layer using the `text/plain` info format.
+   *
    * This method performs a `GetFeatureInfo` request at the specified map coordinate,
    * using the provided WMS source and projection. It returns the plain-text response
    * wrapped in a structured object for downstream compatibility.
-   * @param {OgcWmsLayerEntryConfig} layerConfig - Configuration object for the target WMS layer.
-   * @param {ImageWMS} wmsSource - The OpenLayers WMS source used to construct the request.
-   * @param {Coordinate} clickCoordinate - The coordinate on the map where the user clicked.
-   * @param {number} viewResolution - The current resolution of the map view.
-   * @param {ProjectionLike} projectionCode - The projection in which the request should be made (e.g., 'EPSG:3857').
-   * @param {AbortController} [abortController] - Optional AbortController to allow cancellation of the request.
-   * @returns {Promise<Record<string, unknown>>} A promise that resolves to an object containing the plain-text feature info response
-   *                                             under the key `plain_text['#text']`.
-   * @private
-   * @static
+   *
+   * @param layerConfig - Configuration object for the target WMS layer.
+   * @param wmsSource - The OpenLayers WMS source used to construct the request.
+   * @param clickCoordinate - The coordinate on the map where the user clicked.
+   * @param viewResolution - The current resolution of the map view.
+   * @param projectionCode - The projection in which the request should be made (e.g., 'EPSG:3857').
+   * @param abortController - Optional {@link AbortController} to allow cancellation of the request.
+   * @returns A promise that resolves with an object containing the plain-text feature info response
+   *          under the key `plain_text['#text']`
    */
   static async #getFeatureInfoUsingPlain(
     layerConfig: OgcWmsLayerEntryConfig,
@@ -1315,21 +1319,21 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Attempts to retrieve feature information from a WMS layer at a specified coordinate.
+   *
    * Builds a GetFeatureInfo URL using the WMS source and fetches the response as plain text.
    * If the feature info URL cannot be generated, an error is thrown.
-   * @param {OgcWmsLayerEntryConfig} layerConfig - The configuration object for the WMS layer.
-   * @param {ImageWMS} wmsSource - The OpenLayers WMS source used to construct the GetFeatureInfo URL.
-   * @param {Coordinate} clickCoordinate - The map coordinate where the user clicked.
-   * @param {number} viewResolution - The current map view resolution.
-   * @param {ProjectionLike} projectionCode - The projection of the map (e.g., 'EPSG:3857').
-   * @param {string} infoFormat - The desired format for the feature info response (e.g., 'text/xml', 'application/json').
-   * @param {number | undefined} maxFeatures - The maximum number of features to include in response when we want more than 1.
-   * @param {AbortController} [abortController] - Optional abort controller to cancel the request if needed.
-   * @returns {Promise<string>} A promise that resolves to the response text from the GetFeatureInfo request.
-   * @throws {LayerInvalidFeatureInfoFormatWMSError} If the GetFeatureInfo URL could not be constructed,
+   *
+   * @param layerConfig - The configuration object for the WMS layer.
+   * @param wmsSource - The OpenLayers WMS source used to construct the GetFeatureInfo URL.
+   * @param clickCoordinate - The map coordinate where the user clicked.
+   * @param viewResolution - The current map view resolution.
+   * @param projectionCode - The projection of the map (e.g., 'EPSG:3857').
+   * @param infoFormat - The desired format for the feature info response (e.g., 'text/xml', 'application/json').
+   * @param maxFeatures - Optional maximum number of features to include in response when we want more than 1.
+   * @param abortController - Optional {@link AbortController} to cancel the request if needed.
+   * @returns A promise that resolves with the response text from the GetFeatureInfo request
+   * @throws {LayerInvalidFeatureInfoFormatWMSError} When the GetFeatureInfo URL could not be constructed,
    *         which likely indicates the info format is unsupported or the layer is misconfigured.
-   * @private
-   * @static
    */
   static #readFeatureInfo(
     layerConfig: OgcWmsLayerEntryConfig,
@@ -1372,12 +1376,11 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Formats one or more WMS feature members into standardized feature info entries.
-   * @param {string} layerPath - The layer path used to identify the WMS layer.
-   * @param {unknown} featureMember - A single feature member or an array of feature members.
-   * @param {Coordinate} clickCoordinate - The coordinate where the user clicked on the map.
-   * @returns {TypeFeatureInfoEntry[]} An array of formatted feature info entries.
-   * @private
-   * @static
+   *
+   * @param layerPath - The layer path used to identify the WMS layer.
+   * @param featureMember - A single feature member or an array of feature members.
+   * @param clickCoordinate - The coordinate where the user clicked on the map.
+   * @returns An array of formatted feature info entries
    */
   static #formatWmsFeatureInfoResult(
     layerPath: string,
@@ -1402,13 +1405,12 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Creates a TypeFeatureInfoEntry from a single WMS feature object.
-   * @param {any} feature - The raw feature object from a WMS GetFeatureInfo response.
-   * @param {string} layerPath - The WMS layer path.
-   * @param {Coordinate} clickCoordinate - The map click coordinate.
-   * @param {number} featureKey - The unique feature key.
-   * @returns {TypeFeatureInfoEntry} The formatted feature info entry.
-   * @private
-   * @static
+   *
+   * @param feature - The raw feature object from a WMS GetFeatureInfo response.
+   * @param layerPath - The WMS layer path.
+   * @param clickCoordinate - The map click coordinate.
+   * @param featureKey - The unique feature key.
+   * @returns The formatted feature info entry
    */
   static #formatWmsFeatureInfoResultParser(
     feature: unknown,
@@ -1479,7 +1481,7 @@ export class GVWMS extends AbstractGVRaster {
    *
    * @param layerConfig - The layer configuration.
    * @param chosenStyle - Style to get the legend image for.
-   * @returns A promise of an image blob
+   * @returns A promise that resolves to an image blob or null if it fails to retrieve the legend image
    */
   static async #getLegendImage(layerConfig: OgcWmsLayerEntryConfig, chosenStyle?: string): Promise<string | ArrayBuffer | null> {
     // Get the legend URL from the layer metadata
@@ -1524,11 +1526,10 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Returns the attribute of an object that ends with the specified ending string or null if not found.
-   * @param {unknown} jsonObject - The object that is supposed to have the needed attribute.
-   * @param {string} attributeEnding - The attribute searched.
-   * @returns {unknown | undefined} The attribute information.
-   * @private
-   * @static
+   *
+   * @param jsonObject - The object that is supposed to have the needed attribute.
+   * @param attributeEnding - The attribute searched.
+   * @returns The attribute information or undefined when not found
    */
   static #getAttribute(jsonObject: unknown, attributeEnding: string): Record<string, unknown> | undefined {
     if (typeof jsonObject === 'object' && jsonObject !== null && !Array.isArray(jsonObject)) {
@@ -1541,10 +1542,12 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Build a buffered polygon (GML) around a clicked coordinate.
-   * @param {Coordinate} clickCoordinate - coordinate in map projection
-   * @param {number} resolution
-   * @param {number} pixelTolerance - number of screen pixels (like ArcGIS Identify)
-   * @returns {string} GML polygon snippet
+   *
+   * @param clickCoordinate - coordinate in map projection
+   * @param srsName - The srs name
+   * @param resolution - The map resolution
+   * @param pixelTolerance - number of screen pixels (like ArcGIS Identify)
+   * @returns The buffered polygon
    */
   static #buildBufferPolygon(clickCoordinate: Coordinate, srsName: string, resolution: number, pixelTolerance: number = 10): Polygon {
     // The buffer radius
@@ -1572,8 +1575,9 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Emits an event to all handlers when the layer's sent a message.
-   * @param {ImageLoadRescueEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
+   * @returns An array of boolean values returned by each event handler, indicating whether the event was handled
    */
   #emitImageLoadRescue(event: ImageLoadRescueEvent): boolean[] {
     // Emit the event for all handlers
@@ -1582,7 +1586,8 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Registers an image load callback event handler.
-   * @param {ImageLoadRescueDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onImageLoadRescue(callback: ImageLoadRescueDelegate): void {
     // Register the event handler
@@ -1591,7 +1596,8 @@ export class GVWMS extends AbstractGVRaster {
 
   /**
    * Unregisters an image load callback event handler.
-   * @param {ImageLoadRescueDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offImageLoadRescue(callback: ImageLoadRescueDelegate): void {
     // Unregister the event handler

@@ -5,15 +5,13 @@ import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vecto
 
 /**
  * Manages an Esri Feature layer.
- *
- * @exports
- * @class GVEsriFeature
  */
 export class GVEsriFeature extends AbstractGVVector {
   /**
    * Constructs a GVEsriFeature layer to manage an OpenLayer layer.
-   * @param {VectorSource} olSource - The OpenLayer source.
-   * @param {EsriFeatureLayerEntryConfig} layerConfig - The layer configuration.
+   *
+   * @param olSource - The OpenLayer source.
+   * @param layerConfig - The layer configuration.
    */
   // The constructor is not useless, it narrows down the accepted parameter type.
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
@@ -25,9 +23,8 @@ export class GVEsriFeature extends AbstractGVVector {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {EsriFeatureLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
-   * @protected
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getLayerConfig(): EsriFeatureLayerEntryConfig {
     // Call parent and cast

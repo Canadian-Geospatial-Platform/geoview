@@ -6,15 +6,13 @@ import type { TypeLayerMetadataOGC } from '@/api/types/layer-schema-types';
 
 /**
  * Manages an OGC-Feature layer.
- *
- * @exports
- * @class GVOGCFeature
  */
 export class GVOGCFeature extends AbstractGVVector {
   /**
    * Constructs a GVOGCFeature layer to manage an OpenLayer layer.
-   * @param {VectorSource} olSource - The OpenLayer source.
-   * @param {OgcFeatureLayerEntryConfig} layerConfig - The layer configuration.
+   *
+   * @param olSource - The OpenLayer source.
+   * @param layerConfig - The layer configuration.
    */
   // The constructor is not useless, it narrows down the accepted parameter type.
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
@@ -26,8 +24,8 @@ export class GVOGCFeature extends AbstractGVVector {
 
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
-   * @returns {OgcFeatureLayerEntryConfig} The strongly-typed layer configuration specific to this layer.
-   * @override
+   *
+   * @returns The strongly-typed layer configuration specific to this layer.
    */
   override getLayerConfig(): OgcFeatureLayerEntryConfig {
     // Call parent and cast
@@ -39,11 +37,11 @@ export class GVOGCFeature extends AbstractGVVector {
   // #region STATIC
 
   /**
-   * Returns field type of the given field name using the povided OGC Feature metadata.
-   * @param {TypeLayerMetadataOGC} layerMetadata - The OGC Feature metadata
-   * @param {string} fieldName - The field name to get the field type information
-   * @returns {TypeOutfieldsType} The field type information for the given field name
-   * @static
+   * Returns field type of the given field name using the provided OGC Feature metadata.
+   *
+   * @param layerMetadata - The OGC Feature metadata.
+   * @param fieldName - The field name to get the field type information.
+   * @returns The field type information for the given field name.
    */
   static getFieldType(layerMetadata: TypeLayerMetadataOGC | undefined, fieldName: string): TypeOutfieldsType {
     const fieldEntryType = layerMetadata?.[fieldName].type.split(':').slice(-1)[0];

@@ -18,8 +18,6 @@ import { logger } from '@/core/utils/logger';
 
 /**
  * Manages a WMTS layer.
- *
- * @class GVWMTS
  */
 export class GVWMTS extends AbstractGVTile {
   /**
@@ -78,7 +76,7 @@ export class GVWMTS extends AbstractGVTile {
    *
    * @param projection - The projection to get the bounds into.
    * @param stops - The number of stops to use to generate the extent.
-   * @returns The layer bounding box.
+   * @returns A promise that resolves with the layer bounding box or undefined when not found
    */
   override async onGetBounds(projection: OLProjection, stops: number): Promise<Extent | undefined> {
     // Wait for the source to be ready, just in case the caller is early
@@ -108,7 +106,7 @@ export class GVWMTS extends AbstractGVTile {
    * Gets the legend image of a layer.
    *
    * @param layerConfig - The layer configuration.
-   * @returns A promise of an image blob
+   * @returns A promise that resolves with an image blob or null
    */
   static #getLegendImage(layerConfig: OgcWmtsLayerEntryConfig): Promise<string | ArrayBuffer | null> {
     const promisedImage = new Promise<string | ArrayBuffer | null>((resolve) => {
@@ -143,7 +141,7 @@ export class GVWMTS extends AbstractGVTile {
   /**
    * Overrides the fetching of the legend for a WMTS layer.
    *
-   * @returns The legend of the layer or null.
+   * @returns A promise that resolves with the legend of the layer or null
    */
   override async onFetchLegend(): Promise<TypeLegend | null> {
     // Get the config

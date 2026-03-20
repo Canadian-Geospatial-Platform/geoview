@@ -13,18 +13,15 @@ import { GeoUtilities } from '@/geo/utils/utilities';
 
 /**
  * Manages a Group Layer.
- *
- * @exports
- * @class GVGroupLayer
  */
 export class GVGroupLayer extends AbstractBaseGVLayer {
   /** The layers in the group */
   #layers: AbstractBaseGVLayer[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the layer added event */
   #onLayerAddedHandlers: LayerDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the layer removed event */
   #onLayerRemovedHandlers: LayerDelegate[] = [];
 
   /**
@@ -71,8 +68,8 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
 
   /**
    * Overrides the way the attributions are retrieved.
-   * @returns {string[]} The layer attributions.
-   * @override
+   *
+   * @returns The layer attributions
    */
   override onGetAttributions(): string[] {
     // For each layer in the group
@@ -88,9 +85,10 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
 
   /**
    * Overrides the way to get the bounds for this layer type.
-   * @param projection - The projection to get the bounds into.
-   * @param stops - The number of stops to use to generate the extent.
-   * @returns A promise of layer bounding box.
+   *
+   * @param projection - The projection to get the bounds into
+   * @param stops - The number of stops to use to generate the extent
+   * @returns A promise that resolves with the layer bounding box or undefined when not found
    */
   override async onGetBounds(projection: OLProjection, stops: number): Promise<Extent | undefined> {
     // Current bounds
@@ -112,9 +110,8 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
 
   /**
    * Overrides the refresh function to refresh each layer in the group.
-   * @param {OLProjection | undefined} projection - Optional, the projection to refresh to.
-   * @returns {void}
-   * @override
+   *
+   * @param projection - Optional projection to refresh to
    */
   override onRefresh(projection: OLProjection | undefined): void {
     // Loops on each layer in the group
@@ -146,7 +143,8 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
 
   /**
    * Gets the immediate layers in the group.
-   * @returns {AbstractBaseGVLayer[]} The layers in the group.
+   *
+   * @returns The layers in the group
    */
   getLayers(): AbstractBaseGVLayer[] {
     return this.#layers;
@@ -155,13 +153,14 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
   /**
    * Returns all leaf layers (non-group layers) contained within this group,
    * including those nested in child groups.
-   * @returns An array of `AbstractGVLayer` instances representing all
-   * leaf layers in the group hierarchy.
-   * @description
+   *
    * This is a convenience method that retrieves all descendant layers and
    * filters them to include only concrete `AbstractGVLayer` instances
    * (i.e., excluding `GVGroupLayer` containers).
    * The returned collection is flattened and traversed depth-first.
+   *
+   * @returns An array of `AbstractGVLayer` instances representing all
+   * leaf layers in the group hierarchy
    */
   getLayersAllLeafs(): AbstractGVLayer[] {
     // Redirect
@@ -170,16 +169,16 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
 
   /**
    * Returns all layers contained within this group, including nested layers.
-   * @param filter - Optional predicate function used to filter the returned layers.
-   * If provided, only layers matching the condition will be included in the result.
-   * @returns A flattened array of all descendant layers (including group layers),
-   * optionally filtered.
-   * @description
+   *
    * This method performs a depth-first traversal of the group hierarchy,
    * collecting all child layers recursively. If a `filter` function is provided,
    * it is applied to each layer before inclusion in the result.
    * Both `GVGroupLayer` instances and concrete layer types may be returned,
    * depending on the filter criteria.
+   *
+   * @param filter - Optional predicate function used to filter the returned layers
+   * @returns A flattened array of all descendant layers (including group layers),
+   * optionally filtered
    */
   getLayersAll(filter?: (layer: AbstractBaseGVLayer) => boolean): AbstractBaseGVLayer[] {
     // To hold the results
@@ -208,6 +207,7 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
 
   /**
    * Adds a layer to the group layer.
+   *
    * @param layer - The layer to add.
    */
   addLayer(layer: AbstractBaseGVLayer): void {
@@ -226,6 +226,7 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
 
   /**
    * Removes a layer from the group layer.
+   *
    * @param layer - The layer to remove.
    */
   removeLayer(layer: AbstractBaseGVLayer): void {
@@ -250,10 +251,12 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
 
   /**
    * Recursively gathers all bounds on the layers associated with the given layer path and store them in the bounds parameter.
+   *
    * @param bounds - The currently gathered bounds during the recursion
    * @param layer - The layer being processed
-   * @param projection - The projection to get the bounds into.
-   * @param stops - The number of stops to use to generate the extent.
+   * @param projection - The projection to get the bounds into
+   * @param stops - The number of stops to use to generate the extent
+   * @returns A promise that resolves when all bounds have been gathered and stored in the bounds parameter
    */
   async #gatherAllBoundsRec(bounds: Extent[], layer: AbstractBaseGVLayer, projection: OLProjection, stops: number): Promise<void> {
     // If a leaf
@@ -274,8 +277,8 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
 
   /**
    * Emits an event to all handlers.
+   *
    * @param event - The event to emit
-   * @private
    */
   #emitLayerAdded(event: LayerEvent): void {
     // Emit the event for all handlers
@@ -284,6 +287,7 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
 
   /**
    * Registers a layer added event handler.
+   *
    * @param callback - The callback to be executed whenever the event is emitted
    */
   onLayerAdded(callback: LayerDelegate): void {
@@ -293,6 +297,7 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
 
   /**
    * Unregisters a layer added event handler.
+   *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
   offLayerAdded(callback: LayerDelegate): void {
@@ -302,8 +307,8 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
 
   /**
    * Emits an event to all handlers.
+   *
    * @param event - The event to emit
-   * @private
    */
   #emitLayerRemoved(event: LayerEvent): void {
     // Emit the event for all handlers
@@ -312,6 +317,7 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
 
   /**
    * Registers a layer removed event handler.
+   *
    * @param callback - The callback to be executed whenever the event is emitted
    */
   onLayerRemoved(callback: LayerDelegate): void {
@@ -321,6 +327,7 @@ export class GVGroupLayer extends AbstractBaseGVLayer {
 
   /**
    * Unregisters a layer removed event handler.
+   *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
   offLayerRemoved(callback: LayerDelegate): void {

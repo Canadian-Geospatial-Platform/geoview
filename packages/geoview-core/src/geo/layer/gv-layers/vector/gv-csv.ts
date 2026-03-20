@@ -4,15 +4,13 @@ import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vecto
 
 /**
  * Manages a CSV Feature layer.
- *
- * @exports
- * @class GVCSV
  */
 export class GVCSV extends AbstractGVVector {
   /**
    * Constructs a GVCSV layer to manage an OpenLayer layer.
-   * @param {VectorSource} olSource - The OpenLayer source.
-   * @param {CsvLayerEntryConfig} layerConfig - The layer configuration.
+   *
+   * @param olSource - The OpenLayer source.
+   * @param layerConfig - The layer configuration.
    */
   // The constructor is not useless, it narrows down the accepted parameter type.
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
