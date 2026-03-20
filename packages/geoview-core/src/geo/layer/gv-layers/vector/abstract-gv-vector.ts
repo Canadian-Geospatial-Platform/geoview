@@ -112,14 +112,24 @@ export abstract class AbstractGVVector extends AbstractGVLayer {
         },
         // Enable declutter based on layerText.declutterMode
         declutter: layerConfig.getLayerText()?.declutterMode !== 'none',
-        // set zoom constraints
-        minZoom: layerConfig.getLayerText()?.minZoomLevel || -Infinity,
-        maxZoom: layerConfig.getLayerText()?.maxZoomLevel || Infinity,
       };
 
       // Set declutterMode on layer options if specified
-      if (layerConfig.getLayerText()?.declutterMode) {
-        textLayerOptions.declutter = layerConfig.getLayerText()?.declutterMode;
+      const declutterMode = layerConfig.getLayerText()?.declutterMode;
+      if (declutterMode) {
+        textLayerOptions.declutter = declutterMode;
+      }
+
+      // Set minZoom for text layer if specified in layerText config
+      const textMinZoom = layerConfig.getLayerText()?.minZoomLevel;
+      if (textMinZoom) {
+        textLayerOptions.minZoom = textMinZoom;
+      }
+
+      // Set maxZoom for text layer if specified in layerText config
+      const textMaxZoom = layerConfig.getLayerText()?.maxZoomLevel;
+      if (textMaxZoom) {
+        textLayerOptions.maxZoom = textMaxZoom;
       }
 
       // Init the text layer options with initial settings
