@@ -81,7 +81,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   }, [visibleInRangeLayers, mappedLayerData, isLayerHiddenOnMap]);
 
   /**
-   * Applies all client-side filtering (extent + unsymbolized features) to the ordered layer data.
+   * Applies filtering to the ordered layer data features.
    */
   const filteredOrderedLayerData = useMemo(() => {
     return orderedLayerData.map((layer) => {
