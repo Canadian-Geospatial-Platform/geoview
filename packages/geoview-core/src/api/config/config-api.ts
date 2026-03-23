@@ -59,17 +59,14 @@ import { XYZTiles } from '@/geo/layer/geoview-layers/raster/xyz-tiles';
 import schema from '@/core/../../schema.json';
 
 /**
- * The API class that create configuration object. It is used to validate and read the service and layer metadata.
- * @exports
- * @class DefaultConfig
+ * The API class that creates configuration objects. It is used to validate and read the service and layer metadata.
  */
 export class ConfigApi {
   /**
    * Attempts to determine the layer type based on the URL format.
    *
-   * @param {string} url The URL of the service for which we want to guess the GeoView layer type.
-   *
-   * @returns {string | undefined} The GeoView layer type or undefined if it cannot be guessed.
+   * @param url - The URL of the service for which we want to guess the GeoView layer type
+   * @returns The GeoView layer type or undefined if it cannot be guessed
    */
   static guessLayerType(url: string): string | undefined {
     if (!url) return undefined;
@@ -111,11 +108,11 @@ export class ConfigApi {
     return undefined;
   }
 
-  /** ***************************************************************************************************************************
+  /**
    * Parses the parameters obtained from a url.
-   * @param {string} urlParams - The parameters found on the url after the ?.
-   * @returns {any} Object containing the parsed params.
-   * @static @private
+   *
+   * @param urlParams - The parameters found on the url after the ?
+   * @returns Object containing the parsed params
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static #getMapPropsFromUrlParams(urlParams: string): any {
@@ -140,10 +137,9 @@ export class ConfigApi {
 
   /**
    * Converts the stringMapFeatureConfig to a json object. Comments will be removed from the string.
-   * @param {string} stringMapFeatureConfig - The map configuration string to convert to JSON format.
-   * @returns {MapFeatureConfig | undefined} A JSON map feature configuration object.
-   * @static
-   * @private
+   *
+   * @param stringMapFeatureConfig - The map configuration string to convert to JSON format
+   * @returns A JSON map feature configuration object, or undefined if the string is not valid JSON
    */
   static #convertStringToJson(stringMapFeatureConfig: string): MapFeatureConfig | undefined {
     // Erase comments in the config file.
@@ -164,10 +160,10 @@ export class ConfigApi {
 
   /**
    * Gets a map feature config from url parameters.
-   * @param {string} urlStringParams - The url parameters.
-   * @param {string[]} [existingUuids] - Optional array of existing layer UUIDs to check for duplicates.
-   * @returns {MapFeatureConfig} A map feature configuration object generated from url parameters.
-   * @static
+   *
+   * @param urlStringParams - The url parameters
+   * @param existingUuids - Optional array of existing layer UUIDs to check for duplicates
+   * @returns A map feature configuration object generated from url parameters
    */
   static getConfigFromUrl(urlStringParams: string, existingUuids?: string[]): MapFeatureConfig {
     // return the parameters as an object if url contains any params
@@ -260,8 +256,8 @@ export class ConfigApi {
   /**
    * Gets the default values that are applied to the map feature configuration when the user doesn't provide a value for a field
    * that is covered by a default value.
-   * @returns {MapFeatureConfig} The map feature configuration default values.
-   * @static
+   *
+   * @returns The map feature configuration default values
    */
   static getDefaultMapFeatureConfig(): MapFeatureConfig {
     return new MapFeatureConfig(DEFAULT_MAP_FEATURE_CONFIG);
@@ -269,6 +265,7 @@ export class ConfigApi {
 
   /**
    * This method validates the configuration of map elements using the json string or json object supplied by the user.
+   *
    * The returned value is a configuration object initialized only from the configuration passed as a parameter.
    * Validation of the configuration based on metadata and application of default values is not performed here,
    * but will be done later using another method.
@@ -278,9 +275,8 @@ export class ConfigApi {
    * errors are detected, the configuration will be corrected to the best of our ability to avoid crashing the viewer,
    * and all changes made will be logged in the console.
    *
-   * @param {string | MapFeatureConfig} mapConfig - The map feature configuration to validate.
-   * @returns {MapFeatureConfig} The validated map feature configuration.
-   * @static
+   * @param mapConfig - The map feature configuration to validate
+   * @returns The validated map feature configuration
    */
   static validateMapConfig(mapConfig: string | MapFeatureConfig): MapFeatureConfig {
     // If the user provided a string config, translate it to a json object because the MapFeatureConfig constructor
@@ -315,10 +311,10 @@ export class ConfigApi {
 
   /**
    * Validates an object against a JSON schema using Ajv.
-   * @param {string} schemaPath - The JSON schema path used to retrieve the validator function.
-   * @param {object} targetObject - The object to be validated against the schema.
-   * @returns {boolean} Returns `true` if validation passes, `false` otherwise.
-   * @static
+   *
+   * @param schemaPath - The JSON schema path used to retrieve the validator function
+   * @param targetObject - The object to be validated against the schema
+   * @returns `true` if validation passes, `false` otherwise
    */
   static validateSchema(schemaPath: string, targetObject: object): boolean {
     // create a validator object
@@ -366,9 +362,9 @@ export class ConfigApi {
 
   /**
    * Converts an ESRI renderer (in stringified JSON format) into a GeoView-compatible layer style configuration.
-   * @param {string} rendererAsString - A stringified JSON representation of the ESRI renderer.
-   * @returns {TypeLayerStyleConfig | undefined} The corresponding layer style configuration, or `undefined` if parsing or conversion fails.
-   * @static
+   *
+   * @param rendererAsString - A stringified JSON representation of the ESRI renderer
+   * @returns The corresponding layer style configuration, or undefined if parsing or conversion fails
    */
   static getStyleFromESRIRenderer(rendererAsString: string): TypeLayerStyleConfig | undefined {
     // Redirect
@@ -378,13 +374,13 @@ export class ConfigApi {
   /**
    * Fetches and returns the WMS Styles content (SLD or XML) for the specified layer(s)
    * from a given WMS service URL.
+   *
    * This function ensures that the request URL is properly formatted
    * as a valid WMS `GetStyles` request before fetching the style definition.
-   * @param {string} wmsUrl - The base WMS service URL.
-   * @param {string} layers - A comma-separated list of WMS layer names to request styles for.
-   * @returns {Promise<string>} A promise that resolves to the style definition
-   * (typically an XML or SLD string) retrieved from the WMS service.
-   * @static
+   *
+   * @param wmsUrl - The base WMS service URL
+   * @param layers - A comma-separated list of WMS layer names to request styles for
+   * @returns A promise that resolves to the style definition (typically an XML or SLD string) retrieved from the WMS service
    */
   static fetchStyleFromWMS(wmsUrl: string, layers: string): Promise<string> {
     // Make sure the URL has necessary information
@@ -396,9 +392,9 @@ export class ConfigApi {
 
   /**
    * Converts a WMS XML Styles renderer into a GeoView-compatible layer style configuration.
-   * @param {string} xmlContent - An XML representation of the WMS renderer.
-   * @returns {TypeLayerStyleConfig} The corresponding layer style configuration, or `undefined` if parsing or conversion fails.
-   * @static
+   *
+   * @param xmlContent - An XML representation of the WMS renderer
+   * @returns The corresponding layer style configuration, or undefined if parsing or conversion fails
    */
   static getStyleFromWMSRenderer(xmlContent: string): TypeLayerStyleConfig {
     // Read styles as json
@@ -411,20 +407,21 @@ export class ConfigApi {
 
   /**
    * Creates and initializes a GeoView layer configuration based on the specified layer type.
+   *
    * This method dynamically selects the appropriate layer class (e.g., EsriDynamic, WMS, GeoJSON, etc.)
    * based on the provided `layerType`, and calls its `initGeoviewLayerConfig` method using the
    * supplied ID, name, and URL. If the layer type is not supported, an error is thrown.
-   * @param geoviewLayerId - A unique identifier for the GeoView layer.
-   * @param geoviewLayerName - The display name of the layer.
-   * @param layerType - The type of GeoView layer to initialize (e.g., 'esriDynamic', 'ogcWms', 'GeoJSON', etc.).
-   * @param layerURL - The URL endpoint associated with the layer (e.g., service URL, file path).
-   * @param isTimeAware - Indicates whether the layer supports time-based filtering.
-   * @param language - The language, used for the geocore layer types to know which language to use when extracting layer information.
-   * @param mapId - The map id, used for the geocore layer types, to determine the layer id.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns A Promise of a fully initialized `TypeGeoviewLayerConfig`.
-   * @throws {NotSupportedError} If the provided layer type is not recognized or supported.
-   * @static
+   *
+   * @param layerType - The type of GeoView layer to initialize (e.g., 'esriDynamic', 'ogcWms', 'GeoJSON', etc.)
+   * @param geoviewLayerId - A unique identifier for the GeoView layer
+   * @param geoviewLayerName - The display name of the layer
+   * @param layerURL - The URL endpoint associated with the layer (e.g., service URL, file path)
+   * @param isTimeAware - Optional indicates whether the layer supports time-based filtering
+   * @param language - Optional language, used for the geocore layer types to know which language to use when extracting layer information
+   * @param mapId - Optional map id, used for the geocore layer types, to determine the layer id
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves with a fully initialized TypeGeoviewLayerConfig
+   * @throws {NotSupportedError} When the provided layer type is not recognized or supported
    */
   static async createInitConfigFromType(
     layerType: TypeInitialGeoviewLayerType,
@@ -535,15 +532,15 @@ export class ConfigApi {
 
   /**
    * Processes the layer to generate a list of ConfigBaseClass objects.
-   * @param {TypeInitialGeoviewLayerType} layerType - The layer type
-   * @param {string} geoviewLayerId - The geoview layer id
-   * @param {string} geoviewLayerName - The geoview layer name
-   * @param {string} layerURL - The layer url
-   * @param {number[] | string[]} layerIds - The layer ids for each layer entry config.
-   * @param {boolean} isTimeAware - Indicates if the layer is time aware.
-   * @returns {Promise<ConfigBaseClass[]>} A Promise of a list of ConfigBaseClass objects.
-   * @throws {NotSupportedError} If the provided layer type is not recognized or supported.
-   * @static
+   *
+   * @param layerType - The layer type
+   * @param geoviewLayerId - The geoview layer id
+   * @param geoviewLayerName - The geoview layer name
+   * @param layerURL - The layer url
+   * @param layerIds - The layer ids for each layer entry config
+   * @param isTimeAware - Indicates if the layer is time aware
+   * @returns A promise that resolves with a list of ConfigBaseClass objects
+   * @throws {NotSupportedError} When the provided layer type is not recognized or supported
    */
   static processLayerFromType(
     layerType: TypeInitialGeoviewLayerType,
@@ -602,9 +599,9 @@ export class ConfigApi {
 
   /**
    * Utility function to serialize to string a TypeGeoviewLayerConfig object.
-   * @param {TypeGeoviewLayerConfig} geoviewLayerConfig - The TypeGeoviewLayerConfig to serialize.
-   * @returns {string} The serialized TypeGeoviewLayerConfig.
-   * @static
+   *
+   * @param geoviewLayerConfig - The TypeGeoviewLayerConfig to serialize
+   * @returns The serialized TypeGeoviewLayerConfig
    */
   static serializeGeoviewLayerConfig(geoviewLayerConfig: TypeGeoviewLayerConfig): string {
     // Clone the object
@@ -620,9 +617,9 @@ export class ConfigApi {
 
   /**
    * Utility function to serialize an array of ConfigBaseClass objects.
-   * @param {ConfigBaseClass[]} layerConfigs - The array of ConfigBaseClass objects to serialize.
-   * @returns {string} The serialized array of ConfigBaseClass.
-   * @static
+   *
+   * @param layerConfigs - The array of ConfigBaseClass objects to serialize
+   * @returns The serialized array of ConfigBaseClass
    */
   static serializeConfigClasses(layerConfigs: ConfigBaseClass[]): string {
     // Serialize
@@ -634,10 +631,9 @@ export class ConfigApi {
 
   /**
    * Utility function to convert an array of ConfigBaseClass objects to a simpler array of JSON objects.
-   * @param {ConfigBaseClass[]} layerConfigs - The array of ConfigBaseClass objects to convert to simpler array of JSON objects.
-   * @returns {unknown[]} An array of JSON objects.
-   * @static
-   * @private
+   *
+   * @param layerConfigs - The array of ConfigBaseClass objects to convert to simpler array of JSON objects
+   * @returns An array of JSON objects
    */
   static #configClassesToLayerEntryConfigs(layerConfigs: ConfigBaseClass[]): unknown[] {
     // Serialize
@@ -646,9 +642,9 @@ export class ConfigApi {
 
   /**
    * Utility function to validate a UUID.
-   * @param {string} uuid - The uuid to test.
-   * @returns {boolean} True if the provided uuid is a valid uuid.
-   * @static
+   *
+   * @param uuid - The uuid to test
+   * @returns True if the provided uuid is a valid uuid
    */
   static isValidUUID(uuid: string): boolean {
     // Redirect to the exported function in utilities

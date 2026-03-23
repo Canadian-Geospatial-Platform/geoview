@@ -86,11 +86,6 @@ export class MapFeatureConfig {
     // Get a cloned copy of a default map config for a given projection
     const gvMapDefault = MapFeatureConfig.#getDefaultMapConfig(gvMapFromUser?.viewSettings?.projection);
 
-    // TODO: REFACTOR - Remove all the deepMerge and spread operations happening here and deal with the optional settings at the application level.
-    // TO.DOCONT: Indeed, forcing values at this level makes it difficult for the application to know if a value is coming from
-    // TO.DOCONT: the user config or from the default config, which can be important information for the application in some cases
-    // TO.DOCONT: (e.g., to decide if a setting should be modifiable by the user or not).
-
     // Combine the default values.
     this.map = deepMerge(gvMapDefault, gvMapFromUser);
 
@@ -99,29 +94,30 @@ export class MapFeatureConfig {
       delete this.map.viewSettings.initialView.zoomAndCenter;
 
     this.serviceUrls = deepMerge(DEFAULT_MAP_FEATURE_CONFIG.serviceUrls, userMapFeatureConfig.serviceUrls);
-    this.theme = userMapFeatureConfig.theme ?? DEFAULT_MAP_FEATURE_CONFIG.theme;
+    this.theme = userMapFeatureConfig.theme || DEFAULT_MAP_FEATURE_CONFIG.theme;
     this.navBar = [...(userMapFeatureConfig.navBar ?? DEFAULT_MAP_FEATURE_CONFIG.navBar ?? [])];
     this.appBar = deepMerge(DEFAULT_MAP_FEATURE_CONFIG.appBar, userMapFeatureConfig.appBar);
     this.footerBar = deepMerge(DEFAULT_MAP_FEATURE_CONFIG.footerBar, userMapFeatureConfig.footerBar);
     this.overviewMap = deepMerge(DEFAULT_MAP_FEATURE_CONFIG.overviewMap, userMapFeatureConfig.overviewMap);
 
-    // TODO: CLEANUP - Remove commented code 2026-02-13. I've commented it because I couldn't understand why we were defaulting this after a deepMerge happening just before
-    // this.appBar!.tabs.core = userMapFeatureConfig.appBar?.tabs.core ?? DEFAULT_MAP_FEATURE_CONFIG.appBar?.tabs.core ?? [];
-    // this.footerBar!.tabs.core = userMapFeatureConfig.footerBar?.tabs.core ?? DEFAULT_MAP_FEATURE_CONFIG.footerBar?.tabs.core ?? [];
+    // Apply tabs from user config if exists, otherwise use default config tabs
+    this.appBar!.tabs.core = userMapFeatureConfig.appBar?.tabs.core ?? DEFAULT_MAP_FEATURE_CONFIG.appBar?.tabs.core ?? [];
+    this.footerBar!.tabs.core = userMapFeatureConfig.footerBar?.tabs.core ?? DEFAULT_MAP_FEATURE_CONFIG.footerBar?.tabs.core ?? [];
 
     this.components = [...(userMapFeatureConfig.components ?? DEFAULT_MAP_FEATURE_CONFIG.components ?? [])];
     this.corePackages = [...(userMapFeatureConfig.corePackages ?? DEFAULT_MAP_FEATURE_CONFIG.corePackages ?? [])];
     this.corePackagesConfig = [...(userMapFeatureConfig.corePackagesConfig ?? DEFAULT_MAP_FEATURE_CONFIG.corePackagesConfig ?? [])];
     this.externalPackages = [...(userMapFeatureConfig.externalPackages ?? DEFAULT_MAP_FEATURE_CONFIG.externalPackages ?? [])];
-    this.globalSettings = deepMerge(DEFAULT_MAP_FEATURE_CONFIG.globalSettings, userMapFeatureConfig.globalSettings);
-    this.schemaVersionUsed = userMapFeatureConfig.schemaVersionUsed ?? DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed;
+    this.globalSettings = userMapFeatureConfig.globalSettings || DEFAULT_MAP_FEATURE_CONFIG.globalSettings;
+    this.schemaVersionUsed = userMapFeatureConfig.schemaVersionUsed || DEFAULT_MAP_FEATURE_CONFIG.schemaVersionUsed;
   }
 
   /**
    * Get the default values for the mapFeatureConfig.map using the projection code.
-   * @param {TypeValidMapProjectionCodes?} projection - The projection code.
-   * @returns {TypeMapConfig} The default map configuration associated to the projection.
-   * @static @private
+   * @param {TypeValidMapProjectionCodes} [projection] - The projection code.
+   * @return {TypeMapConfig} The default map configuration associated to the projection.
+   * @static
+   * @private
    */
   static #getDefaultMapConfig(projection?: TypeValidMapProjectionCodes): TypeMapConfig {
     // Clone the default config, because we want to start from it and modify it
