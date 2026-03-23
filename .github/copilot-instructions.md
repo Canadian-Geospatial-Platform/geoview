@@ -132,6 +132,7 @@ import { MapEventProcessor } from "@/api/event-processors";
 ### Component Export Patterns
 
 - **Named exports** (not default exports): `export function MyComponent()` or `export const MyComponent = ...`
+
 ### Class Property Comments
 
 All class properties (public, private, static, readonly) must use JSDoc-style `/** ... */` single-line comments — never `//` line comments:
@@ -206,12 +207,12 @@ When using `useMemo`, prefix the variable name with `memo` followed by camelCase
 ```typescript
 // ❌ Bad: Generic variable name doesn't indicate memoization
 const filteredList = useMemo(() => {
-  return items.filter(item => item.active);
+  return items.filter((item) => item.active);
 }, [items]);
 
 // ✅ Good: Prefix with 'memo' to indicate memoized value
 const memoFilteredList = useMemo(() => {
-  return items.filter(item => item.active);
+  return items.filter((item) => item.active);
 }, [items]);
 
 // ✅ Good: Even for computed objects
@@ -468,6 +469,7 @@ JSDoc should NOT:
 - `@async` - TypeScript already indicates async via `async` keyword and `Promise` return type
 - `@description` - Redundant, the JSDoc block description itself serves this purpose
 - `@fires` - Not used in this project
+- `@extends` - Document class inheritance. Use TS `extends` keyword
 - `@return` - Use `@returns` (with trailing "s") consistently
 
 **Additional `@returns` Rules:**
@@ -484,7 +486,7 @@ JSDoc should NOT:
 /** @returns A map of raster function names to their preview image promises */
 ```
 
-- No trailing periods on `@param` and `@returns` descriptions:
+- No trailing periods on `@param`, `@returns`, and `@throws` descriptions:
 
 ```typescript
 // ❌ Bad: trailing period
@@ -492,6 +494,39 @@ JSDoc should NOT:
 
 // ✅ Good: no trailing period
 /** @param layerPath - Target layer path */
+```
+
+**No `{Type}` Annotations in `@param` and `@returns`:**
+
+TypeScript provides type information — do not duplicate it in JSDoc tags. The exception is `@throws`, which keeps `{ErrorType}` braces:
+
+```typescript
+// ❌ Bad: duplicates TypeScript types
+/** @param {string} layerPath - Target layer path */
+/** @returns {Promise<void>} A promise that resolves when done */
+
+// ✅ Good: omit types, TypeScript already has them
+/** @param layerPath - Target layer path */
+/** @returns A promise that resolves when done */
+
+// ✅ Good: @throws keeps {ErrorType}
+/** @throws {LayerNotFoundError} When the layer is not found */
+```
+
+**Single-line JSDoc for Types and Interfaces:**
+
+When a type or interface export has only a simple description (no `@param`/`@returns`/`@throws`), use single-line JSDoc format:
+
+```typescript
+// ❌ Bad: multi-line for simple description
+/**
+ * Represents the layer configuration options.
+ */
+type LayerConfig = { ... };
+
+// ✅ Good: single-line for simple type/interface
+/** Represents the layer configuration options. */
+type LayerConfig = { ... };
 ```
 
 **`@param` for AbortController:**
@@ -531,8 +566,8 @@ override formatFeatureInfoResult(features, layerConfig, dateFormat, timezone, mo
 
 **Format Structure:**
 
-1. Short description (one sentence)
-2. Blank line
+1. Short description (one sentence, **must end with a period**)
+2. Blank line (**always required** before tags, even without a detailed description)
 3. Detailed behavior explanation (if needed)
 4. Blank line (if detailed explanation)
 5. `@param` list (parameter - description, Add Optional for optional parameter)
