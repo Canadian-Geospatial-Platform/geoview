@@ -78,25 +78,37 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
    * Order the layers by visible layer order.
    */
   const orderedLayerData = useMemo(() => {
-    let result = visibleInRangeLayers
+    return visibleInRangeLayers
       .map((layerPath) => mappedLayerData.filter((data) => data.layerPath === layerPath)[0])
       .filter((layer) => layer !== undefined && !isLayerHiddenOnMap(layer.layerPath));
+  }, [visibleInRangeLayers, mappedLayerData, isLayerHiddenOnMap]);
 
-    // If filter data to extent is on, filter the features of each layer to the features in the current map extent
-    result = result.map((layer) => {
-      if (layer.layerPath !== selectedLayerPath || !filterDataToExtent || !mapExtent) return layer;
+  /**
+   * Applies all client-side filtering (extent + unsymbolized features) to the ordered layer data.
+   */
+  const filteredOrderedLayerData = useMemo(() => {
+    return orderedLayerData.map((layer) => {
+      let { features } = layer;
+
+      // Apply extent filtering if enabled for the selected layer
+      if (features && layer.layerPath === selectedLayerPath && filterDataToExtent && mapExtent) {
+        features = features.filter((feature) => {
+          const { geometry } = feature;
+          return geometry?.intersectsExtent(mapExtent);
+        });
+      }
+
+      // Apply unsymbolized feature filtering if configured
+      if (features && !showUnsymbolizedFeatures) {
+        features = features.filter((feature) => feature.featureIcon);
+      }
 
       return {
         ...layer,
-        features: layer.features?.filter((feature) => {
-          const { geometry } = feature;
-          return geometry?.intersectsExtent(mapExtent);
-        }),
+        features,
       };
     });
-
-    return result;
-  }, [visibleInRangeLayers, mappedLayerData, isLayerHiddenOnMap, selectedLayerPath, filterDataToExtent, mapExtent]);
+  }, [orderedLayerData, selectedLayerPath, filterDataToExtent, mapExtent, showUnsymbolizedFeatures]);
 
   /**
    * Update local states when layer is changed from layer list.
@@ -134,19 +146,14 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
       }
 
       let featureStr = t('dataTable.noFeatures');
-      let features = orderedLayerData?.find((layer) => layer.layerPath === layerPath)?.features;
-
-      // Filter unsymbolized features if configured
-      if (!showUnsymbolizedFeatures) {
-        features = features?.filter((feature) => feature.featureIcon);
-      }
+      const features = filteredOrderedLayerData?.find((layer) => layer.layerPath === layerPath)?.features;
 
       if (features !== undefined) {
         featureStr = `${features?.length} ${t('dataTable.features')}`;
       }
       return featureStr;
     },
-    [datatableSettings, orderedLayerData, showUnsymbolizedFeatures, t]
+    [datatableSettings, filteredOrderedLayerData, t]
   );
 
   /**
@@ -294,7 +301,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
     if (!isLayerDisabled() && isSelectedLayerHasFeatures()) {
       return (
         <>
-          {orderedLayerData
+          {filteredOrderedLayerData
             .filter((data) => data.layerPath === selectedLayerPath)
             .map((data: MappedLayerDataType) => (
               <Box key={data.layerPath} ref={dataTableRef} className="data-table-panel" sx={{ height: '100%' }}>

@@ -486,15 +486,10 @@ function DataTable(props: DataTableProps): JSX.Element {
     const layerFilterEquation = GeoviewRenderer.createFilterNodeFromFilter(layerFilterClassAndTime);
 
     // Filter each features
-    let filterArray =
+    const filterArray =
       data?.features?.filter((f) => {
         return f.feature && GeoviewRenderer.featureRespectsFilterEquation(f.feature, layerFilterEquation);
       }) ?? [];
-
-    // Filter out unsymbolized features if the showUnsymbolizedFeatures config is false
-    if (!showUnsymbolizedFeatures) {
-      filterArray = filterArray.filter((record) => record.featureIcon);
-    }
 
     return (filterArray ?? []).map((feature, featureIndex) => {
       // Create unique button ID per feature
