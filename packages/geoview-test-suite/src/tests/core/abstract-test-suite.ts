@@ -165,6 +165,7 @@ export abstract class AbstractTestSuite {
   /**
    * Handles the event indicating that a tester has started running a test,
    * and re-emits it with additional context.
+   *
    * This method allows external consumers to listen for when a test begins
    * execution on a specific tester.
    *

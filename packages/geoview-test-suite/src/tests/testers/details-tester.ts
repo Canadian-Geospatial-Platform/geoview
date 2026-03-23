@@ -235,6 +235,7 @@ export class DetailsTester extends GVAbstractTester {
    * @param test - The test instance used to log each step
    * @param mapViewer - The map viewer containing the layer and UI context
    * @param layerPath - The unique path or ID of the layer to check
+   * @returns A promise that resolves when the check is complete
    */
   static async helperStepCheckDetailsPanel<T>(test: Test<T>, mapViewer: MapViewer, layerPath: string): Promise<void> {
     // Update the step
