@@ -19,12 +19,13 @@ import { Projection } from 'geoview-core/geo/utils/projection';
 
 /**
  * Main Map testing class.
- * @extends {GVAbstractTester}
+ *
  */
 export class MapTester extends GVAbstractTester {
   /**
    * Returns the name of the Tester.
-   * @returns {string} The name of the Tester.
+   *
+   * @returns The name of the Tester
    */
   override getName(): string {
     return 'MapTester';
@@ -32,7 +33,8 @@ export class MapTester extends GVAbstractTester {
 
   /**
    * Tests the map state upon initial loading.
-   * @returns {Promise<Test<TypeMapState>>} A Promise that resolves with the Test containing the map state.
+   *
+   * @returns A promise that resolves with the Test containing the map state
    */
   testInitialMapState(): Promise<Test<TypeMapState>> {
     // Get the projection
@@ -60,9 +62,10 @@ export class MapTester extends GVAbstractTester {
 
   /**
    * Tests a zoom operation on the map.
-   * @param {number} zoomEnd - The zoom target
-   * @param {number} zoomDuration - The duration for the zoom
-   * @returns {Promise<Test<number>>} A Promise that resolves with the Test containing the zoom destination.
+   *
+   * @param zoomEnd - The zoom target
+   * @param zoomDuration - The duration for the zoom
+   * @returns A promise that resolves with the Test containing the zoom destination
    */
   testMapZoom(zoomEnd: number, zoomDuration: number): Promise<Test<number>> {
     // Get the current zoom
@@ -97,6 +100,7 @@ export class MapTester extends GVAbstractTester {
 
   /**
    * Tests switching between projections, zooming, and returning to initial extent.
+   *
    * This test performs the following operations:
    * 1. Switches projection to the second projection
    * 2. Zooms to a specified level
@@ -104,10 +108,10 @@ export class MapTester extends GVAbstractTester {
    * 4. Zooms back to the initial extent
    * 5. Verifies the map extent matches the original extent
    *
-   * @param {TypeValidMapProjectionCodes} initialProjection - The initial projection code.
-   * @param {TypeValidMapProjectionCodes} secondProjection - The target projection code to switch to.
-   * @param {number} zoomLevel - The zoom level to test during projection switch.
-   * @returns {Promise<Test<Extent>>} A Promise that resolves with the Test containing the final map extent.
+   * @param initialProjection - The initial projection code
+   * @param secondProjection - The target projection code to switch to
+   * @param zoomLevel - The zoom level to test during projection switch
+   * @returns A promise that resolves with the Test containing the final map extent
    */
   async testSwitchProjectionAndExtent(
     initialProjection: TypeValidMapProjectionCodes,
@@ -163,6 +167,7 @@ export class MapTester extends GVAbstractTester {
 
   /**
    * Tests geometry group z-index operations.
+   *
    * This test performs the following operations:
    * 1. Creates a circle geometry in a new test group
    * 2. Gets the initial z-index value
@@ -170,7 +175,7 @@ export class MapTester extends GVAbstractTester {
    * 4. Gets the z-index again
    * 5. Verifies both values match expectations
    *
-   * @returns {Promise<Test<{ initialZIndex: number | undefined; finalZIndex: number | undefined }>>} A Promise that resolves with the Test containing the z-index values.
+   * @returns A promise that resolves with the Test containing the z-index values
    */
   testGeometryGroupZIndex(): Promise<Test<{ initialZIndex: number | undefined; finalZIndex: number | undefined }>> {
     const testGroupId = 'testZIndexGroup';
@@ -232,7 +237,8 @@ export class MapTester extends GVAbstractTester {
 
   /**
    * Gets the map config from the store.
-   * @returns {TypeMapFeaturesConfig} The map config as read from the store.
+   *
+   * @returns The map config as read from the store
    */
   #getMapConfigFromStore(): TypeMapFeaturesConfig {
     // Redirect
@@ -243,10 +249,12 @@ export class MapTester extends GVAbstractTester {
 
   /**
    * Tests zooming to a lon/lat extent using zoomToLonLatExtentOrCoordinate.
+   *
    * Note: the map doesn't return to original extent after this test.
-   * @param {Extent} extent - The extent to zoom to.
-   * @param {Extent} expectedExtent - The expected extent after zooming (due to map restrictions).
-   * @returns {Promise<Test<Extent>>} A Promise that resolves with the Test containing the resulting map extent.
+   *
+   * @param extent - The extent to zoom to
+   * @param expectedExtent - The expected extent after zooming (due to map restrictions)
+   * @returns A promise that resolves with the Test containing the resulting map extent
    */
   testZoomToExtent(extent: Extent, expectedExtent: Extent): Promise<Test<Extent>> {
     return this.test(
@@ -273,9 +281,11 @@ export class MapTester extends GVAbstractTester {
 
   /**
    * Tests zooming to a lon/lat coordinate using zoomToLonLatExtentOrCoordinate.
+   *
    * Note: the map doesn't return to original extent after this test.
-   * @param {Coordinate} coordinates - The coordinates to zoom to.
-   * @returns {Promise<Test<Extent>>} A Promise that resolves with the Test containing the resulting map extent.
+   *
+   * @param coordinates - The coordinates to zoom to
+   * @returns A promise that resolves with the Test containing the resulting map extent
    */
   testZoomToCoordinate(coordinates: Coordinate): Promise<Test<Coordinate>> {
     return this.test(
@@ -305,7 +315,8 @@ export class MapTester extends GVAbstractTester {
 
   /**
    * Tests selecting a footer bar tab.
-   * @returns {Promise<Test<string>>} A Promise that resolves with the Test containing the selected tab id.
+   *
+   * @returns A promise that resolves with the Test containing the selected tab id
    */
   testFooterBarSelectTab(): Promise<Test<string>> {
     const targetTab = 'data-table';
@@ -333,7 +344,8 @@ export class MapTester extends GVAbstractTester {
 
   /**
    * Tests selecting an app bar tab.
-   * @returns {Promise<Test<string>>} A Promise that resolves with the Test containing the selected tab id.
+   *
+   * @returns A promise that resolves with the Test containing the selected tab id
    */
   testAppBarSelectTab(): Promise<Test<string>> {
     const targetTab = 'geolocator';
@@ -361,7 +373,8 @@ export class MapTester extends GVAbstractTester {
 
   /**
    * Tests creating a custom footer bar tab.
-   * @returns {Promise<Test<string>>} A Promise that resolves with the Test containing the created tab id.
+   *
+   * @returns A promise that resolves with the Test containing the created tab id
    */
   testFooterBarCreateTab(): Promise<Test<string>> {
     const customTabId = 'custom-test-tab';
@@ -399,7 +412,8 @@ export class MapTester extends GVAbstractTester {
 
   /**
    * Tests changing the language.
-   * @returns {Promise<Test<string>>} A Promise that resolves with the Test containing the new language.
+   *
+   * @returns A promise that resolves with the Test containing the new language
    */
   testSetLanguage(): Promise<Test<string>> {
     const targetLanguage = 'fr';
@@ -433,8 +447,10 @@ export class MapTester extends GVAbstractTester {
 
   /**
    * Tests creating and setting a basemap.
+   *
    * Note: The basemap stays changed after this test.
-   * @returns {Promise<Test<string>>} A Promise that resolves with the Test containing the basemap id.
+   *
+   * @returns A promise that resolves with the Test containing the basemap id
    */
   testCreateAndSetBasemap(): Promise<Test<string>> {
     const targetBasemapId: TypeBasemapId = 'simple';
@@ -473,13 +489,14 @@ export class MapTester extends GVAbstractTester {
 
   /**
    * Tests north arrow rotation in LCC projection when zoomed to British Columbia.
+   *
    * This test performs the following operations:
    * 1. Switches to LCC projection (3978)
    * 2. Zooms to British Columbia extent
    * 3. Gets the north arrow rotation from DOM element
    * 4. Verifies the rotation matches expected value
    *
-   * @returns {Promise<Test<number>>} A Promise that resolves with the Test containing the north arrow angle.
+   * @returns A promise that resolves with the Test containing the north arrow angle
    */
   testNorthArrowRotationLCC(): Promise<Test<number>> {
     // British Columbia approximate extent in lon/lat (EPSG:4326)
@@ -539,12 +556,16 @@ export class MapTester extends GVAbstractTester {
 
   /**
    * Tests that non-queryable layers do not appear in details state when clicking on the map.
+   *
    * This test performs the following operations:
    * 1. Gets the first layer from the map
    * 2. Sets the layer as non-queryable
    * 3. Simulates a map click
    * 4. Verifies that the layer results does not appear in the details state
-   * @returns {Promise<Test<LayerWithBeforeAfterFeature<AbstractGVLayer>>>} A Promise that resolves with the Test containing the number of layers in details state.
+   *
+   * @param layerPath - The layer path to test
+   * @param lonlat - The coordinates to query
+   * @returns A promise that resolves with the Test containing the number of layers in details state
    */
   testNonQueryableLayerNotInDetails(layerPath: string, lonlat: Coordinate): Promise<Test<LayerWithBeforeAfterFeature<AbstractGVLayer>>> {
     return this.test(
@@ -627,13 +648,16 @@ export class MapTester extends GVAbstractTester {
 
   /**
    * Tests that non-hoverable layers do not appear in hover state when hovering on the map.
+   *
    * This test performs the following operations:
    * 1. Gets the first layer from the map
    * 2. Sets the layer as non-hoverable
    * 3. Simulates a map hover
    * 4. Verifies that the layer results does not appear in the hover state
-   * @param {string} layerPath - The layer path to test
-   * @returns {Promise<Test<LayerWithBeforeAfterHover<AbstractGVLayer>>>} A Promise that resolves with the Test containing the hover states.
+   *
+   * @param layerPath - The layer path to test
+   * @param lonlat - The coordinates to query
+   * @returns A promise that resolves with the Test containing the hover states
    */
   testLayerHoverableState(layerPath: string, lonlat: Coordinate): Promise<Test<LayerWithBeforeAfterHover<AbstractGVLayer>>> {
     return this.test(
@@ -712,18 +736,20 @@ export class MapTester extends GVAbstractTester {
   /**
    * Tests that the selected layer in the details panel persists correctly
    * when clicking on different map locations.
+   *
    * Test flow:
    * 1. Clicks on the map at the first location and verifies the auto-selected layer.
    * 2. Manually switches selection to the alternate layer.
    * 3. Clicks on a second map location.
    * 4. Verifies the manually selected layer remains selected and that its
    *    feature count is correct.
-   * @param {string} layerPath1 - The path of the first candidate layer that may be auto-selected after the initial click.
-   * @param {string} layerPath2 - The path of the second candidate layer used as the alternate manual selection.
-   * @param {Coordinate} clickCoordinates1 - The map coordinates used for the first simulated click.
-   * @param {Coordinate} clickCoordinates2 - The map coordinates used for the second simulated click.
-   * @returns {Promise<Test<LayerDetails>>} A test instance resolving with details about the original selected layer,
-   * the persisted alternate layer, and the feature count after the second click.
+   *
+   * @param layerPath1 - The path of the first candidate layer that may be auto-selected after the initial click
+   * @param layerPath2 - The path of the second candidate layer used as the alternate manual selection
+   * @param clickCoordinates1 - The map coordinates used for the first simulated click
+   * @param clickCoordinates2 - The map coordinates used for the second simulated click
+   * @returns A promise that resolves with details about the original selected layer,
+   * the persisted alternate layer, and the feature count after the second click
    */
   testDetailsLayerSelectionPersistence(
     layerPath1: string,
@@ -787,21 +813,13 @@ export class MapTester extends GVAbstractTester {
   }
 }
 
-/**
- * Represents a layer paired with feature information results
- * collected before and after an operation (e.g., filtering, ordering, or updates).
- */
+/** Represents a layer paired with feature information results collected before and after an operation (e.g., filtering, ordering, or updates). */
 type LayerWithBeforeAfterFeature<T> = LayerWithResults<T, (TypeFeatureInfoResultSetEntry | undefined)[]>;
 
-/**
- * Represents a layer paired with hover feature information results
- * collected before and after an operation.
- */
+/** Represents a layer paired with hover feature information results collected before and after an operation. */
 type LayerWithBeforeAfterHover<T> = LayerWithResults<T, (TypeHoverFeatureInfo | undefined)[]>;
 
-/**
- * Generic structure associating a layer with a set of related results.
- */
+/** Generic structure associating a layer with a set of related results. */
 type LayerWithResults<T, U> = {
   /** The layer instance. */
   layer: T;
@@ -809,12 +827,9 @@ type LayerWithResults<T, U> = {
   results: U;
 };
 
-/**
- * Describes layer path information and comparison metadata used
- * when evaluating differences between layers.
- */
+/** Describes layer path information and comparison metadata used when evaluating differences between layers. */
 type LayerDetails = {
-  /** The path identifying the original layer.*/
+  /** The path identifying the original layer. */
   originalLayerPath: string;
   /** The path identifying the alternate or comparison layer. */
   alternateLayerPath: string;

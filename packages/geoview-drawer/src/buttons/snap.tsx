@@ -19,9 +19,9 @@ const SnappingIcon = createSvgIcon(
 );
 
 /**
- * Create a measure button to toggle measurement overlays on drawings
+ * Creates a snapping button to toggle snapping on drawings.
  *
- * @returns {JSX.Element} the created measurement button
+ * @returns The snapping button element
  */
 export default function Snapping(): JSX.Element {
   // Log

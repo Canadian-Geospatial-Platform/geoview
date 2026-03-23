@@ -8,9 +8,9 @@ import { IconButton, DownloadIcon } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 
 /**
- * Create a download button to download all drawings from the viewer
+ * Creates a download button to download all drawings from the viewer.
  *
- * @returns {JSX.Element} the created download button
+ * @returns The download button element
  */
 export default function Download(): JSX.Element {
   // Log
@@ -19,6 +19,7 @@ export default function Download(): JSX.Element {
   const { cgpv } = window as TypeWindow;
   const { useTheme } = cgpv.ui;
   const { useMemo } = cgpv.reactUtilities.react;
+
   // Get store values
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);

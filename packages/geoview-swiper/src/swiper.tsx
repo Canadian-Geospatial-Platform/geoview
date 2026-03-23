@@ -17,6 +17,7 @@ import { getSxClasses } from './swiper-style';
 import { useMemo } from 'react';
 import { TIMEOUT } from 'geoview-core/core/utils/constant';
 
+/** Properties for the Swiper component. */
 type SwiperProps = {
   viewer: MapViewer;
   // We have this eslint here for "standardization between plugins"
@@ -24,15 +25,27 @@ type SwiperProps = {
   config: ConfigProps;
 };
 
+/** Configuration properties for the Swiper plugin. */
 export type ConfigProps = {
   layers: string[];
   orientation: string;
 };
 
+/** Maximum wait time in milliseconds for layers to be ready. */
 const CONST_LAYERS_WAIT = 30000; // 30 seconds
+/** Retry interval in milliseconds for checking layer readiness. */
 const CONST_LAYERS_RETRY = 1000; // 1 second
 
+/**
+ * Swiper component that provides a draggable bar to compare underlying layers.
+ *
+ * @param props - The Swiper component properties
+ * @returns The Swiper JSX element
+ */
 export function Swiper(props: SwiperProps): JSX.Element {
+  // Log
+  logger.logTraceRender('geoview-swiper/swiper');
+
   const { viewer } = props;
 
   const { cgpv } = window;
@@ -66,9 +79,12 @@ export function Swiper(props: SwiperProps): JSX.Element {
   // Grab reference
   const theSwiper = swiperRef.current;
 
+  // #region Handlers
+
   /**
-   * Pre compose, Pre render event callback
-   * @param {Event | BaseEvent} event - The pre compose, pre render event
+   * Pre compose, Pre render event callback.
+   *
+   * @param event - The pre compose, pre render event
    */
   const prerender = useCallback(
     (event: Event | BaseEvent) => {
@@ -100,8 +116,9 @@ export function Swiper(props: SwiperProps): JSX.Element {
   );
 
   /**
-   * Post compose, Post render event callback
-   * @param {Event | BaseEvent} event - The post compose, post render event
+   * Post compose, Post render event callback.
+   *
+   * @param event - The post compose, post render event
    */
   function postcompose(event: Event | BaseEvent): void {
     const evt = event as RenderEvent;
@@ -122,8 +139,9 @@ export function Swiper(props: SwiperProps): JSX.Element {
   }
 
   /**
-   * Calculate the computed style to return values of x and y position
-   * @returns {Number[]} The array of value for x and y position fot the swiper bar
+   * Calculates the computed style to return values of x and y position.
+   *
+   * @returns The array of value for x and y position for the swiper bar
    */
   const getSwiperStyle = (): number[] => {
     const style = window.getComputedStyle(swiperRef.current as HTMLElement);
@@ -132,7 +150,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
   };
 
   /**
-   * On Drag and Drag Stop, calculate the clipping extent
+   * On Drag and Drag Stop, calculates the clipping extent.
    */
   const onStop = debounce(() => {
     if (layerPaths.length) {
@@ -160,8 +178,9 @@ export function Swiper(props: SwiperProps): JSX.Element {
   }, 100);
 
   /**
-   * Update swiper and layers from keyboard CTRL + Arrow key
-   * @param {KeyboardEvent} event - The keyboard event to calculate the swiper position
+   * Updates swiper and layers from keyboard CTRL + Arrow key.
+   *
+   * @param event - The keyboard event to calculate the swiper position
    */
   const updateSwiper = useCallback(
     (event: KeyboardEvent): void => {
@@ -202,8 +221,9 @@ export function Swiper(props: SwiperProps): JSX.Element {
   );
 
   /**
-   * Attaches necessary swiper events to the given layer path layer
-   * @param {string} layerPath - The layer path of the layer to attach swiping events to
+   * Attaches necessary swiper events to the given layer path layer.
+   *
+   * @param layerPath - The layer path of the layer to attach swiping events to
    */
   const attachLayerEventsOnPath = useCallback(
     async (layerPath: string) => {
@@ -228,8 +248,11 @@ export function Swiper(props: SwiperProps): JSX.Element {
     [viewer, prerender]
   );
 
-  // UseEffect for attaching layer events
-  // This will attach the events to the layers at the layer paths
+  // #endregion
+
+  /**
+   * UseEffect for attaching layer events. This will attach the events to the layers at the layer paths.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('SWIPER - layerPaths', layerPaths);
@@ -279,7 +302,9 @@ export function Swiper(props: SwiperProps): JSX.Element {
     };
   }, [viewer, layerPaths, attachLayerEventsOnPath, prerender, visibleLayers]);
 
-  // UseEffect for WCAG keyboard navigation
+  /**
+   * UseEffect for WCAG keyboard navigation.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('SWIPER - mount', viewer.mapId);

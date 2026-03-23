@@ -11,6 +11,7 @@ import schema from '../schema.json';
 import defaultConfig from '../default-config-time-slider-panel.json';
 import type { ConfigProps } from './time-slider-types';
 
+/** Properties for the slider filter configuration. */
 export interface SliderFilterProps {
   title: string;
   description: string;
@@ -26,22 +27,22 @@ export interface SliderFilterProps {
 }
 
 /**
- * Time slider plugin
+ * Time slider plugin.
  */
 class TimeSliderPlugin extends FooterPlugin {
   /**
-   * Return the schema that is defined for this package
+   * Returns the schema that is defined for this package.
    *
-   * @returns {unknown} returns the schema for this package
+   * @returns The schema for this package
    */
   override schema(): unknown {
     return schema;
   }
 
   /**
-   * Return the default config for this package
+   * Returns the default config for this package.
    *
-   * @returns {unknown} the default config
+   * @returns The default config
    */
   override defaultConfig(): unknown {
     return defaultConfig;
@@ -49,7 +50,8 @@ class TimeSliderPlugin extends FooterPlugin {
 
   /**
    * Overrides the default translations for the Plugin.
-   * @returns {Record<string, unknown>} - The translations object for the particular Plugin.
+   *
+   * @returns The translations object for the particular Plugin
    */
   override defaultTranslations(): Record<string, unknown> {
     return {
@@ -116,7 +118,8 @@ class TimeSliderPlugin extends FooterPlugin {
 
   /**
    * Overrides the getConfig in order to return the right type.
-   * @returns {ConfigProps} The Swiper config
+   *
+   * @returns The time slider config
    */
   override getConfig(): ConfigProps {
     // Redirect
@@ -125,8 +128,8 @@ class TimeSliderPlugin extends FooterPlugin {
 
   /**
    * Overrides the creation of the content properties of this TimeSlider Footer Plugin.
-   * @returns {TypeTabs} The TypeTabs for the TimeSlider Footer Plugin
-   * @override
+   *
+   * @returns The TypeTabs for the TimeSlider Footer Plugin
    */
   override onCreateContentProps(): TypeTabs {
     return {
@@ -141,8 +144,6 @@ class TimeSliderPlugin extends FooterPlugin {
 
   /**
    * Overrides the addition of the TimeSlider Footer Plugin to make sure to set the time slider configs in the store and apply filters.
-   * @returns {void}
-   * @override
    */
   override onAdd(): void {
     // Once the map is ready we can initialize the time slider. Layers will be registered for the time slider as they load.
@@ -228,10 +229,10 @@ class TimeSliderPlugin extends FooterPlugin {
   }
 
   /**
-   * Filters an array of legend layers to get usable time slider layer paths
-   * @param {string[]} layerPaths - Array of layer paths to filter
-   * @returns {string[]} A list of usable layer paths
-   * @private
+   * Filters an array of legend layers to get usable time slider layer paths.
+   *
+   * @param layerPaths - Array of layer paths to filter
+   * @returns A list of usable layer paths
    */
   #filterTimeSliderLayers(layerPaths: string[]): string[] {
     // Return the layer paths for the layers that have a time dimension

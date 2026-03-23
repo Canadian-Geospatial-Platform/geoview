@@ -1,7 +1,10 @@
 export class TestStep {
   /**
    * Constructs a TestStep.
-   * @param {string} message - The step message
+   *
+   * @param message - The step message
+   * @param level - The step level
+   * @param color - The step color for display purposes
    */
   constructor(
     public message: string,
@@ -10,7 +13,5 @@ export class TestStep {
   ) {}
 }
 
-/**
- * The level of the Test Step.
- */
+/** The level of the Test Step. */
 export type TestStepLevel = 'regular' | 'major';

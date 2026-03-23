@@ -35,6 +35,11 @@ const sxClasses = {
   },
 };
 
+/**
+ * Renders the style button icon.
+ *
+ * @returns The palette icon element
+ */
 export function StyleButton(): JSX.Element {
   const { PaletteIcon } = (window as TypeWindow).cgpv.ui.elements;
 
@@ -42,8 +47,9 @@ export function StyleButton(): JSX.Element {
 }
 
 /**
- * Create a style button with a panel to customize drawing styles
- * @returns {JSX.Element} the created style button with panel
+ * Creates a style panel to customize drawing styles.
+ *
+ * @returns The style panel element
  */
 export function StylePanel(): JSX.Element {
   // Log
@@ -62,7 +68,7 @@ export function StylePanel(): JSX.Element {
   const selectedDrawingType = useDrawerSelectedDrawingType();
   const displayLanguage = useAppDisplayLanguage();
 
-  const currentGeomType = useMemo(() => {
+  const memoCurrentGeomType = useMemo(() => {
     return selectedDrawingType ?? activeGeom;
   }, [activeGeom, selectedDrawingType]);
 
@@ -88,6 +94,11 @@ export function StylePanel(): JSX.Element {
     setTextFont,
   } = useDrawerActions();
 
+  // #region Handlers
+
+  /**
+   * Handles when the user changes the text value
+   */
   const handleTextChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
       setTextValue(event.target.value);
@@ -95,6 +106,9 @@ export function StylePanel(): JSX.Element {
     [setTextValue]
   );
 
+  /**
+   * Handles when the user changes the font
+   */
   const handleFontChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>): void => {
       const selectedFont = event.target.value;
@@ -110,6 +124,9 @@ export function StylePanel(): JSX.Element {
     [setTextFont]
   );
 
+  /**
+   * Handles when the user changes the text size
+   */
   const handleTextSizeChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>): void => {
       const size = parseInt(event.target.value, 10);
@@ -118,6 +135,9 @@ export function StylePanel(): JSX.Element {
     [setTextSize]
   );
 
+  /**
+   * Handles when the user changes the text halo width
+   */
   const handleTextHaloWidthChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>): void => {
       const size = parseInt(event.target.value, 10);
@@ -126,22 +146,37 @@ export function StylePanel(): JSX.Element {
     [setTextHaloWidth]
   );
 
+  /**
+   * Handles when the user changes the fill color
+   */
   const handleFillColorChange = useCallback((newFillColor: string): void => {
     setLocalFillColor(newFillColor);
   }, []);
 
+  /**
+   * Handles when the fill color picker closes
+   */
   const handleFillColorClose = useCallback((): void => {
     setFillColor(localFillColor);
   }, [setFillColor, localFillColor]);
 
+  /**
+   * Handles when the user changes the stroke color
+   */
   const handleStrokeColorChange = useCallback((newStrokeColor: string): void => {
     setLocalStrokeColor(newStrokeColor);
   }, []);
 
+  /**
+   * Handles when the stroke color picker closes
+   */
   const handleStrokeColorClose = useCallback((): void => {
     setStrokeColor(localStrokeColor);
   }, [setStrokeColor, localStrokeColor]);
 
+  /**
+   * Handles when the user changes the icon size
+   */
   const handleIconSizeChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>): void => {
       const size = parseInt(event.target.value, 10);
@@ -150,22 +185,37 @@ export function StylePanel(): JSX.Element {
     [setIconSize]
   );
 
+  /**
+   * Handles when the user changes the text color
+   */
   const handleTextColorChange = useCallback((newColor: string): void => {
     setLocalTextColor(newColor);
   }, []);
 
+  /**
+   * Handles when the text color picker closes
+   */
   const handleTextColorClose = useCallback((): void => {
     setTextColor(localTextColor);
   }, [setTextColor, localTextColor]);
 
+  /**
+   * Handles when the user changes the text halo color
+   */
   const handleTextHaloColorChange = useCallback((newColor: string): void => {
     setLocalTextHaloColor(newColor);
   }, []);
 
+  /**
+   * Handles when the text halo color picker closes
+   */
   const handleTextHaloColorClose = useCallback((): void => {
     setTextHaloColor(localTextHaloColor);
   }, [setTextHaloColor, localTextHaloColor]);
 
+  /**
+   * Handles when the user changes the stroke width
+   */
   const handleStrokeWidthChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>): void => {
       const width = parseFloat(event.target.value);
@@ -175,16 +225,26 @@ export function StylePanel(): JSX.Element {
     [setStrokeWidth]
   );
 
+  /**
+   * Handles when the user toggles bold formatting
+   */
   const handleToggleBold = useCallback((): void => {
     setTextBold(!style.textBold);
   }, [setTextBold, style.textBold]);
 
+  /**
+   * Handles when the user toggles italic formatting
+   */
   const handleToggleItalic = useCallback((): void => {
     setTextItalic(!style.textItalic);
   }, [setTextItalic, style.textItalic]);
 
+  // #endregion
+
   // Add close button to MUIColorInputs
   useEffect(() => {
+    logger.logTraceUseEffect('STYLE PANEL - Color picker close button setup', displayLanguage);
+
     const addCloseButtons = (): void => {
       // Find all color picker popovers
       const popovers = document.querySelectorAll('.MuiColorInput-PopoverBody');
@@ -255,6 +315,8 @@ export function StylePanel(): JSX.Element {
 
   // Preload all Google Fonts
   useEffect(() => {
+    logger.logTraceUseEffect('STYLE PANEL - Preload Google Fonts');
+
     FONT_OPTIONS.forEach((font) => {
       if (font.isGoogleFont) {
         loadGoogleFont(font.name);
@@ -265,7 +327,7 @@ export function StylePanel(): JSX.Element {
   return (
     <List sx={{ p: 2 }}>
       {/* Text-specific controls */}
-      {currentGeomType === 'Text' && (
+      {memoCurrentGeomType === 'Text' && (
         <>
           <ListItem sx={sxClasses.listItem}>
             <Typography variant="subtitle2" sx={sxClasses.label}>
@@ -396,7 +458,7 @@ export function StylePanel(): JSX.Element {
       )}
 
       {/* Fill color - hide for LineString and Text */}
-      {currentGeomType !== 'LineString' && currentGeomType !== 'Text' && (
+      {memoCurrentGeomType !== 'LineString' && memoCurrentGeomType !== 'Text' && (
         <ListItem sx={sxClasses.listItem}>
           <Typography variant="subtitle2" sx={sxClasses.label}>
             {getLocalizedMessage(displayLanguage, 'drawer.fillColour')}
@@ -406,7 +468,7 @@ export function StylePanel(): JSX.Element {
       )}
 
       {/* Point-specific controls */}
-      {currentGeomType === 'Point' && (
+      {memoCurrentGeomType === 'Point' && (
         <ListItem sx={sxClasses.listItem}>
           <Typography variant="subtitle2" sx={sxClasses.label}>
             {getLocalizedMessage(displayLanguage, 'drawer.iconSize')}
@@ -426,7 +488,7 @@ export function StylePanel(): JSX.Element {
       )}
 
       {/* Stroke controls - show for all except Text */}
-      {currentGeomType !== 'Text' && (
+      {memoCurrentGeomType !== 'Text' && (
         <>
           <ListItem sx={sxClasses.listItem}>
             <Typography variant="subtitle2" sx={sxClasses.label}>

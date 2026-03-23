@@ -9,22 +9,22 @@ import schema from '../schema.json';
 import defaultConfig from '../default-config-aoi-panel.json';
 
 /**
- * Create a class for the plugin instance
+ * Area of Interest panel plugin.
  */
 class AoiPanelPlugin extends AppBarPlugin {
   /**
-   * Return the package schema
+   * Returns the schema that is defined for this package.
    *
-   * @returns {unknown} the package schema
+   * @returns The schema for this package
    */
   override schema(): unknown {
     return schema;
   }
 
   /**
-   * Return the default config for this package
+   * Returns the default config for this package.
    *
-   * @returns {unknown} the default config
+   * @returns The default config
    */
   override defaultConfig(): unknown {
     return defaultConfig;
@@ -32,7 +32,8 @@ class AoiPanelPlugin extends AppBarPlugin {
 
   /**
    * Overrides the default translations for the Plugin.
-   * @returns {Record<string, unknown>} - The translations object for the particular Plugin.
+   *
+   * @returns The translations object for the Plugin
    */
   override defaultTranslations(): Record<string, unknown> {
     return {
@@ -51,13 +52,19 @@ class AoiPanelPlugin extends AppBarPlugin {
 
   /**
    * Overrides the getConfig in order to return the right type.
-   * @returns {TypeAoiProps} The AOI Propos
+   *
+   * @returns The AOI config
    */
   override getConfig(): TypeAoiProps {
     // Redirect
     return super.getConfig() as TypeAoiProps;
   }
 
+  /**
+   * Overrides the onCreateButtonProps to pass the correct props.
+   *
+   * @returns The icon button props
+   */
   override onCreateButtonProps(): IconButtonPropsExtend {
     // Button props
     return {
@@ -69,6 +76,11 @@ class AoiPanelPlugin extends AppBarPlugin {
     };
   }
 
+  /**
+   * Overrides the creation of the content properties of this AOI AppBar Plugin.
+   *
+   * @returns The panel properties for the AOI AppBar Plugin
+   */
   override onCreateContentProps(): TypePanelProps {
     // Panel props
     return {
@@ -79,12 +91,17 @@ class AoiPanelPlugin extends AppBarPlugin {
     };
   }
 
+  /**
+   * Overrides the content creation of the AppBar Plugin.
+   *
+   * @returns The AOI panel content
+   */
   override onCreateContent = (): JSX.Element => {
     return <AoiPanel config={this.getConfig()} />;
   };
 
   /**
-   * Function called when the plugin is removed, used for clean up
+   * Function called when the plugin is removed, used for clean up.
    */
   override onRemoved(): void {}
 }

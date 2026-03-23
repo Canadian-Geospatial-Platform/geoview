@@ -13,9 +13,10 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
   #detailsTester: DetailsTester;
 
   /**
-   * Constructs the Test Suite
-   * @param {API} api - The shared api
-   * @param {MapViewer} mapViewer - The map viewer
+   * Constructs the Test Suite.
+   *
+   * @param api - The shared api
+   * @param mapViewer - The map viewer
    */
   constructor(api: API, mapViewer: MapViewer) {
     super(api, mapViewer);
@@ -27,7 +28,8 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
 
   /**
    * Returns the name of the Test Suite.
-   * @returns {string} The name of the Test Suite.
+   *
+   * @returns The name of the Test Suite
    */
   override getName(): string {
     return 'Details Test Suite';
@@ -35,7 +37,8 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
 
   /**
    * Returns the description of the Test Suite.
-   * @returns {string} The description of the Test Suite.
+   *
+   * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
     return 'Test Suite to perform various Details related tests.';
@@ -43,8 +46,8 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
 
   /**
    * Overrides the check if the Test Suite can be executed.
-   * @returns {Promise<boolean>} A Promise resolving to true when the Test Suite can be launched for the given map.
-   * @override
+   *
+   * @returns A promise that resolves to true when the Test Suite can be launched for the given map
    */
   protected override onCanExecuteTestSuite(): Promise<boolean> {
     // Check if the geochart plugin is part of the corePackage on the testing map
@@ -58,7 +61,8 @@ export class GVTestSuiteDetails extends GVAbstractTestSuite {
 
   /**
    * Overrides the implementation to perform the tests for this Test Suite.
-   * @returns {Promise<unknown>} A Promise which resolves when tests are completed.
+   *
+   * @returns A promise that resolves when tests are completed
    */
   protected override async onLaunchTestSuite(): Promise<unknown> {
     // Test Geochart

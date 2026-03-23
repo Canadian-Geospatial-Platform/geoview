@@ -13,22 +13,22 @@ import { createDrawerButtons } from './draw-navbar';
 import './measurement-styles.css';
 
 /**
- * Create a class for the plugin instance
+ * Drawer plugin.
  */
 class DrawerPlugin extends NavBarPlugin {
   /**
-   * Returns the package schema
+   * Returns the package schema.
    *
-   * @returns {unknown} the package schema
+   * @returns The schema for this package
    */
   override schema(): unknown {
     return schema;
   }
 
   /**
-   * Returns the default config for this package
+   * Returns the default config for this package.
    *
-   * @returns {unknown} the default config
+   * @returns The default config
    */
   override defaultConfig(): unknown {
     return defaultConfig;
@@ -36,7 +36,8 @@ class DrawerPlugin extends NavBarPlugin {
 
   /**
    * Overrides the default translations for the Plugin.
-   * @returns {Record<string, unknown>} - The translations object for the particular Plugin.
+   *
+   * @returns The translations object for the Plugin
    */
   override defaultTranslations(): Record<string, unknown> {
     return {
@@ -125,8 +126,8 @@ class DrawerPlugin extends NavBarPlugin {
 
   /**
    * Overrides the getConfig in order to return the right type.
-   * @returns {TypeDrawerConfig} The Swiper config
-   * @override
+   *
+   * @returns The Drawer config
    */
   override getConfig(): TypeDrawerConfig {
     // Redirect
@@ -135,8 +136,8 @@ class DrawerPlugin extends NavBarPlugin {
 
   /**
    * Overrides the creation of the buttons components to create Buttons with their optional panels.
-   * @returns {Record<string, TypeNavBarButtonConfig>} The buttons to be added to the drawer bar.
-   * @override
+   *
+   * @returns The buttons to be added to the drawer bar
    */
   override onCreateButtonConfigs(): Record<string, TypeNavBarButtonConfig> {
     // Create all drawer buttons

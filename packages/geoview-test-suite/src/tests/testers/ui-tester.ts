@@ -6,12 +6,12 @@ import { AppEventProcessor } from 'geoview-core/api/event-processors/event-proce
 
 /**
  * Main UI testing class.
- * @extends {GVAbstractTester}
  */
 export class UITester extends GVAbstractTester {
   /**
    * Returns the name of the Tester.
-   * @returns {string} The name of the Tester.
+   *
+   * @returns The name of the Tester
    */
   override getName(): string {
     return 'UITester';
@@ -19,7 +19,8 @@ export class UITester extends GVAbstractTester {
 
   /**
    * Test selecting details panel and finding "Top" anchor tag in the DOM for guide container.
-   * @returns {Promise<Test>} A Promise that resolves when the test completes successfully.
+   *
+   * @returns A promise that resolves when the test completes
    */
   testGuideDetailsPanelTopAnchor(): Promise<Test> {
     const mapId = this.getMapId();

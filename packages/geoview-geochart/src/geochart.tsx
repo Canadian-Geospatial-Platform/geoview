@@ -16,7 +16,7 @@ import { GeoChartParsing } from './geochart-parsing';
 import type { PluginGeoChartConfig, GeoViewGeoChartConfig, GeoViewGeoChartConfigLayer } from './geochart-types';
 
 /**
- * Essential properties for the GeoChart
+ * Essential properties for the GeoChart.
  */
 interface GeoChartProps {
   mapId: string;
@@ -31,11 +31,15 @@ interface GeoChartProps {
 }
 
 /**
- * The main React JSX Element which listens to events and updates the GeoChart ui
- * @param props GeoChartProps Essential properties for the GeoChart
+ * The main React JSX Element which listens to events and updates the GeoChart ui.
+ *
+ * @param props - Essential properties for the GeoChart
  * @returns The Geochart JSX
  */
 export function GeoChart(props: GeoChartProps): JSX.Element {
+  // Log
+  logger.logTraceRender('geoview-geochart/geochart');
+
   // Get cgpv
   const { cgpv } = window as TypeWindow;
   const { useTheme } = cgpv.ui;
@@ -47,8 +51,6 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   // Get the theme
   const theme = useTheme();
 
-  // #region USE STATE SECTION ****************************************************************************************
-
   // Use State
   const [inputs, setInputs] = useState<GeoChartConfig<ChartType>>();
   const [action, setAction] = useState<GeoChartAction>();
@@ -59,8 +61,6 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   const displayDateTimezone = useDisplayDateTimezone();
   const { addNotification } = useAppStoreActions();
 
-  // #endregion
-
   // Provide the callback to redraw this component to the parent component
   provideCallbackRedraw?.(() => {
     // Force a redraw
@@ -70,8 +70,9 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   // #region CORE FUNCTIONS *******************************************************************************************
 
   /**
-   * Loads the chart with new inputs
-   * @param newInputs GeoChartConfig<ChartType> | undefined The new inputs to load in the chart
+   * Loads the chart with new inputs.
+   *
+   * @param newInputs - Optional new inputs to load in the chart
    */
   const setChart = (newInputs?: GeoChartConfig<ChartType>): void => {
     // If some data is specified
@@ -90,8 +91,9 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
 
   /**
    * Handles when an error happened with GeoChart.
-   * @param error string The error.
-   * @param exception unknown The exception if any
+   *
+   * @param error - The error message
+   * @param exception - Optional exception if any
    */
   const handleError = useCallback<(error: string, exception: unknown | undefined) => void>(
     (errorMessage: string): void => {
@@ -119,7 +121,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
   }, [theme]);
 
   /**
-   * Memoizes the fetching of the correct config based on the provided layers array (TypeArrayOfLayerData).
+   * Memoizes the fetching of the correct config based on the provided layers array.
    */
   const memoAllInfo = useMemo(() => {
     // Find the right config/layer/data for what we want based on the layerDataArray

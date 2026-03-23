@@ -2,22 +2,27 @@ import { useMemo } from 'react';
 
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { logger } from 'geoview-core/core/utils/logger';
 
 import { getSxClasses } from './custom-legend-style';
 import type { TypeCustomLegendConfig } from './custom-legend-types';
 import { generateLegendItemId } from './custom-legend-types';
 import { LegendItem } from './components';
 
+/** Props for the CustomLegendPanel component. */
 interface CustomLegendPanelProps {
   config: TypeCustomLegendConfig;
 }
 
 /**
  * Main custom legend panel component.
- * @param {CustomLegendPanelProps} props - Component props
- * @returns {JSX.Element} The rendered panel
+ *
+ * @param props - Component props
+ * @returns The rendered panel
  */
 export function CustomLegendPanel(props: CustomLegendPanelProps): JSX.Element {
+  logger.logTraceRender('geoview-custom-legend/custom-legend-panel');
+
   const { config } = props;
   const { legendList } = config;
 

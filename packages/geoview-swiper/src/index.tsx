@@ -10,22 +10,22 @@ import { Swiper } from './swiper';
 import type { SwipeOrientation } from './swiper-types';
 
 /**
- * Create a class for the plugin instance
+ * Create a class for the plugin instance.
  */
 class SwiperPlugin extends MapPlugin {
   /**
-   * Returns the package schema
+   * Returns the package schema.
    *
-   * @returns {unknown} the package schema
+   * @returns The package schema
    */
   override schema(): unknown {
     return schema;
   }
 
   /**
-   * Returns the default config for this package
+   * Returns the default config for this package.
    *
-   * @returns {unknown} the default config
+   * @returns The default config
    */
   override defaultConfig(): unknown {
     return defaultConfig;
@@ -33,7 +33,8 @@ class SwiperPlugin extends MapPlugin {
 
   /**
    * Overrides the default translations for the Plugin.
-   * @returns {Record<string, unknown>} - The translations object for the particular Plugin.
+   *
+   * @returns The translations object for the particular Plugin
    */
   override defaultTranslations(): Record<string, unknown> {
     return {
@@ -54,7 +55,8 @@ class SwiperPlugin extends MapPlugin {
 
   /**
    * Overrides the getConfig in order to return the right type.
-   * @returns {ConfigProps} The Swiper config
+   *
+   * @returns The Swiper config
    */
   override getConfig(): ConfigProps {
     // Redirect
@@ -63,8 +65,6 @@ class SwiperPlugin extends MapPlugin {
 
   /**
    * Overrides the addition of the Swiper Map Plugin to make sure to set the layer paths from the config into the store.
-   * @returns {void}
-   * @override
    */
   override onAdd(): void {
     // Call parent
@@ -77,7 +77,8 @@ class SwiperPlugin extends MapPlugin {
 
   /**
    * Overrides the creation of the content of this Swiper Map Plugin.
-   * @returns {JSX.Element} The JSX.Element representing the Swiper Plugin
+   *
+   * @returns The JSX.Element representing the Swiper Plugin
    */
   override onCreateContent(): JSX.Element {
     return <Swiper viewer={this.mapViewer} config={this.getConfig()} />;
@@ -85,7 +86,8 @@ class SwiperPlugin extends MapPlugin {
 
   /**
    * Activates the swiper for the layer indicated by the given layer path.
-   * @param {string} layerPath - The layer path to activate swiper functionality
+   *
+   * @param layerPath - The layer path to activate swiper functionality
    */
   activateForLayer(layerPath: string): void {
     try {
@@ -102,7 +104,8 @@ class SwiperPlugin extends MapPlugin {
 
   /**
    * Deactivates the swiper for the layer indicated by the given layer path.
-   * @param {string} layerPath - The layer path to deactivate swiper functionality
+   *
+   * @param layerPath - The layer path to deactivate swiper functionality
    */
   deActivateForLayer(layerPath: string): void {
     // Remove the layer
@@ -119,7 +122,8 @@ class SwiperPlugin extends MapPlugin {
 
   /**
    * Sets the orientation of the swiper.
-   * @param {SwipeOrientation} orientation The orientation to set
+   *
+   * @param orientation - The orientation to set
    */
   setOrientation(orientation: SwipeOrientation): void {
     // Set the orientation

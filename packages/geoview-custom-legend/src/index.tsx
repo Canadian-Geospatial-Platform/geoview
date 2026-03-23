@@ -9,22 +9,22 @@ import schema from '../schema.json';
 import defaultConfig from '../default-config-custom-legend.json';
 
 /**
- * Create a class for the plugin instance
+ * Custom Legend panel plugin.
  */
 class CustomLegendPanelPlugin extends AppBarPlugin {
   /**
-   * Return the package schema
+   * Returns the schema that is defined for this package.
    *
-   * @returns {unknown} the package schema
+   * @returns The schema for this package
    */
   override schema(): unknown {
     return schema;
   }
 
   /**
-   * Return the default config for this package
+   * Returns the default config for this package.
    *
-   * @returns {unknown} the default config
+   * @returns The default config
    */
   override defaultConfig(): unknown {
     return defaultConfig;
@@ -32,7 +32,8 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
 
   /**
    * Overrides the default translations for the Plugin.
-   * @returns {Record<string, unknown>} - The translations object for the particular Plugin.
+   *
+   * @returns The translations object for the Plugin
    */
   override defaultTranslations(): Record<string, unknown> {
     return {
@@ -61,13 +62,19 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
 
   /**
    * Overrides the getConfig in order to return the right type.
-   * @returns {TypeCustomLegendConfig} The Geochart config
+   *
+   * @returns The Custom Legend config
    */
   override getConfig(): TypeCustomLegendConfig {
     // Redirect
     return super.getConfig() as TypeCustomLegendConfig;
   }
 
+  /**
+   * Overrides the onCreateButtonProps to pass the correct props.
+   *
+   * @returns The icon button props
+   */
   override onCreateButtonProps(): IconButtonPropsExtend {
     // Button props
     return {
@@ -80,6 +87,11 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
     };
   }
 
+  /**
+   * Overrides the creation of the content properties of this Custom Legend AppBar Plugin.
+   *
+   * @returns The panel properties for the Custom Legend AppBar Plugin
+   */
   override onCreateContentProps(): TypePanelProps {
     // Panel props
     const config = this.getConfig();
@@ -91,14 +103,17 @@ class CustomLegendPanelPlugin extends AppBarPlugin {
     };
   }
 
+  /**
+   * Overrides the content creation of the AppBar Plugin.
+   *
+   * @returns The custom legend panel content
+   */
   override onCreateContent = (): JSX.Element => {
     return <CustomLegendPanel config={this.getConfig()} />;
   };
 
   /**
-   * Function called when the plugin is removed, used for clean up
-   * @returns {void}
-   * @override
+   * Function called when the plugin is removed, used for clean up.
    */
   override onRemoved(): void {}
 }

@@ -16,7 +16,7 @@ import { GVTestSuiteUI } from './tests/suites/suite-ui';
 import { GVTestSuiteDetails } from './tests/suites/suite-details';
 
 /**
- * Create a class for the plugin instance
+ * Create a class for the plugin instance.
  */
 class TestSuitePlugin extends AbstractPlugin {
   /** The Test Suites for the plugin */
@@ -25,31 +25,31 @@ class TestSuitePlugin extends AbstractPlugin {
   /** Indicates the number of suites that completed their tests (the suites are run synchronously) */
   #suitesCompleted: number = 0;
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the test started event */
   #onSuiteTestersTestStartedHandlers: SuiteTesterTestDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the test updated event */
   #onSuiteTestersTestUpdatedHandlers: SuiteTesterTestUpdatedDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the test success event */
   #onSuiteTestersTestSuccessHandlers: SuiteTesterSuccessDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the test failure event */
   #onSuiteTestersTestFailureHandlers: SuiteTesterFailureDelegate[] = [];
 
   /**
-   * Returns the package schema
+   * Returns the package schema.
    *
-   * @returns {unknown} the package schema
+   * @returns The package schema
    */
   override schema(): unknown {
     return {};
   }
 
   /**
-   * Returns the default config for this package
+   * Returns the default config for this package.
    *
-   * @returns {unknown} the default config
+   * @returns The default config
    */
   override defaultConfig(): unknown {
     return {};
@@ -57,16 +57,17 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Overrides the default translations for the Plugin.
-   * @returns {Record<string, unknown>} - The translations object for the particular Plugin.
+   *
+   * @returns The translations object for the particular Plugin
    */
   override defaultTranslations(): Record<string, unknown> {
     return {};
   }
 
   /**
-   * Overrides the get config
-   * @override
-   * @returns {TestSuitePluginConfig} The config
+   * Overrides the get config.
+   *
+   * @returns The config
    */
   override getConfig(): TestSuitePluginConfig {
     return super.getConfig() as TestSuitePluginConfig;
@@ -74,8 +75,6 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Overrides the addition of the Test Suite Plugin.
-   * @returns {void}
-   * @override
    */
   override onAdd(): void {
     // If the plugin has no configured test-suites, throw error
@@ -117,17 +116,17 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Overrides the removal of the Test Suite Plugin.
-   * @returns {void}
-   * @override
    */
   override onRemove(): void {} // Nothing to do
 
   /**
    * Adds a test suite to the manager and registers event handlers to track its lifecycle.
+   *
    * When the test suite emits events such as test start, update, success, or failure,
    * this method attaches listeners that re-emit those events through the manager's own system,
    * augmenting them with the originating suite as additional context.
-   * @param {GVAbstractTestSuite} testSuite - The test suite instance to add and monitor.
+   *
+   * @param testSuite - The test suite instance to add and monitor.
    */
   addTestSuite(testSuite: GVAbstractTestSuite): void {
     this.testSuites.push(testSuite);
@@ -159,9 +158,11 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Launches all test suites sequentially.
+   *
    * This method resets the completed suite counter, then executes each test suite
    * one after the other (not in parallel). Awaits each suite to ensure sequential execution.
-   * @returns {Promise<void>} A promise that resolves once all test suites have completed.
+   *
+   * @returns A promise that resolves once all test suites have completed.
    */
   async launchTestSuites(): Promise<void> {
     // Make sure no test suite is currently running
@@ -200,7 +201,8 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Gets the description, in html format, for all the Test Suites part of this Plugin.
-   * @returns {string} The description of all test suites.
+   *
+   * @returns The description of all test suites.
    */
   getDescriptionAsHtml(): string {
     // For each Test Suite
@@ -209,9 +211,11 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Gets the number of test suites that have been completed.
+   *
    * Caution, a test suite can be completed even though some tests are still running, depending
    * on the promises management in the suite.
-   * @returns {number} The number of completed test suites.
+   *
+   * @returns The number of completed test suites.
    */
   getSuitesCompleted(): number {
     return this.#suitesCompleted;
@@ -219,7 +223,8 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Gets the total number of test suites.
-   *@returns {number} The total count of test suites.
+   *
+   * @returns The total count of test suites.
    */
   getSuitesTotal(): number {
     return this.testSuites.length;
@@ -227,9 +232,11 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Gets if the test suite is done its launch.
+   *
    * Caution, a test suite can be done even though some tests are still running, depending
    * on the promises management in the suite.
-   * @returns {number} The number of completed test suites.
+   *
+   * @returns The number of completed test suites.
    */
   getSuitesDone(): boolean {
     return this.getSuitesCompleted() === this.getSuitesTotal();
@@ -237,7 +244,8 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Gets the total number of tests currently running across all test suites.
-   * @returns {number} The number of tests that are currently running.
+   *
+   * @returns The number of tests that are currently running.
    */
   getTestsRunning(): number {
     // For each test suite
@@ -248,7 +256,8 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Gets the total number of tests completed across all test suites.
-   * @returns {number} The number of completed tests.
+   *
+   * @returns The number of completed tests.
    */
   getTestsDone(): number {
     // For each test suite
@@ -259,7 +268,8 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Gets the total number of currently done successfully across all test suites.
-   * @returns {number} The total number of tests done.
+   *
+   * @returns The total number of tests done successfully.
    */
   getTestsDoneSuccess(): number {
     // For each test suite
@@ -269,8 +279,9 @@ class TestSuitePlugin extends AbstractPlugin {
   }
 
   /**
-   * Gets the total number of currently done failed across all test suites
-   * @returns {number} The total number of tests done.
+   * Gets the total number of currently done failed across all test suites.
+   *
+   * @returns The total number of tests done failed.
    */
   getTestsDoneFailed(): number {
     // For each test suite
@@ -281,7 +292,8 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Gets the total number of tests across all test suites.
-   * @returns {number} The total number of tests.
+   *
+   * @returns The total number of tests.
    */
   getTestsTotal(): number {
     // For each test suite
@@ -292,7 +304,8 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Gets if all tests are done.
-   * @returns {boolean} Indicate if the tests are all done across all test suites.
+   *
+   * @returns Indicate if the tests are all done across all test suites.
    */
   getTestsDoneAll(): boolean {
     return this.testSuites.every((suite) => suite.getTestsDoneAll());
@@ -300,7 +313,8 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Gets if all the tests are done across all test suites.
-   * @returns {boolean} Indicate if the tests are all done across all test suites.
+   *
+   * @returns Indicate if the tests are all done across all test suites.
    */
   getTestsDoneAllAndSuiteDone(): boolean {
     return this.getSuitesDone() && this.getTestsDoneAll();
@@ -308,7 +322,8 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Gets if all the tests are done and successfully.
-   * @returns {boolean} Indicate if the tests are all done and finished successfully.
+   *
+   * @returns Indicate if the tests are all done and finished successfully.
    */
   getTestsDoneAllSuccess(): boolean {
     return this.getTestsDoneAll() && this.testSuites.every((suite) => suite.getTestsDoneAllSuccess());
@@ -316,7 +331,8 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Gets if all the tests are done and successfully and the test suite is done.
-   * @returns {boolean} Indicate if the tests are all done and finished successfully and the test suite is done.
+   *
+   * @returns Indicate if the tests are all done and finished successfully and the test suite is done.
    */
   getTestsDoneAllSuccessAndSuiteDone(): boolean {
     return this.getSuitesDone() && this.getTestsDoneAllSuccess();
@@ -326,8 +342,8 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Emits an event to all handlers.
-   * @param {SuiteTesterTestEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitTestStarted(event: SuiteTesterTestEvent): void {
     // Emit the event for all handlers
@@ -336,7 +352,8 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Registers a test started event handler.
-   * @param {SuiteTesterTestDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onTestStarted(callback: SuiteTesterTestDelegate): void {
     // Register the event handler
@@ -345,7 +362,8 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Unregisters a test started event handler.
-   * @param {SuiteTesterTestDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offTestStarted(callback: SuiteTesterTestDelegate): void {
     // Unregister the event handler
@@ -354,8 +372,8 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Emits an event to all handlers.
-   * @param {SuiteTesterTestUpdatedEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitTestUpdated(event: SuiteTesterTestUpdatedEvent): void {
     // Emit the event for all handlers
@@ -364,7 +382,8 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Registers a test updated event handler.
-   * @param {SuiteTesterTestUpdatedDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onTestUpdated(callback: SuiteTesterTestUpdatedDelegate): void {
     // Register the event handler
@@ -373,7 +392,8 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Unregisters a test updated event handler.
-   * @param {SuiteTesterTestUpdatedDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offTestUpdated(callback: SuiteTesterTestUpdatedDelegate): void {
     // Unregister the event handler
@@ -382,8 +402,8 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Emits an event to all handlers.
-   * @param {SuiteTesterSuccessEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitSuccess(event: SuiteTesterSuccessEvent): void {
     // Emit the event for all handlers
@@ -392,7 +412,8 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Registers a success event handler.
-   * @param {SuiteTesterSuccessDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onSuccess(callback: SuiteTesterSuccessDelegate): void {
     // Register the event handler
@@ -401,7 +422,8 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Unregisters a success event handler.
-   * @param {SuiteTesterSuccessDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offSuccess(callback: SuiteTesterSuccessDelegate): void {
     // Unregister the event handler
@@ -410,8 +432,8 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Emits an event to all handlers.
-   * @param {SuiteTesterFailureEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitFailure(event: SuiteTesterFailureEvent): void {
     // Emit the event for all handlers
@@ -420,7 +442,8 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Registers a failure event handler.
-   * @param {SuiteTesterFailureDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onFailure(callback: SuiteTesterFailureDelegate): void {
     // Register the event handler
@@ -429,7 +452,8 @@ class TestSuitePlugin extends AbstractPlugin {
 
   /**
    * Unregisters a failure event handler.
-   * @param {SuiteTesterFailureDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offFailure(callback: SuiteTesterFailureDelegate): void {
     // Unregister the event handler

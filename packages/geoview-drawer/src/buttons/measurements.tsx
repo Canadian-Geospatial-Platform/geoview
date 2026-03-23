@@ -19,9 +19,9 @@ const HideMeasurementIcon = createSvgIcon(
 );
 
 /**
- * Create a measure button to toggle measurement overlays on drawings
+ * Creates a measurement button to toggle measurement overlays on drawings.
  *
- * @returns {JSX.Element} the created measurement button
+ * @returns The measurement button element
  */
 export default function Measurements(): JSX.Element {
   // Log

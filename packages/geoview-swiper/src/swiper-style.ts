@@ -1,8 +1,8 @@
 /**
- * Get custom sx classes for the swiper
+ * Gets custom sx classes for the swiper.
  *
- * @param {number} mapHeight - The map height
- * @returns {Object} the sx classes object as any
+ * @param mapHeight - The map height
+ * @returns The sx classes object
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getSxClasses = (mapHeight: number): any => ({

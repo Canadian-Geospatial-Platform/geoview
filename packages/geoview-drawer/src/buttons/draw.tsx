@@ -8,9 +8,9 @@ import { IconButton, DrawIcon } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 
 /**
- * Create a draw button to return the user to toggle drawing capabilities
+ * Creates a draw button to toggle drawing capabilities.
  *
- * @returns {JSX.Element} the created draw button
+ * @returns The draw button element
  */
 export default function Draw(): JSX.Element {
   // Log

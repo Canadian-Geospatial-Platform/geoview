@@ -8,9 +8,9 @@ import { IconButton, UndoIcon } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 
 /**
- * Create an undo button to undo the last drawing action
+ * Creates an undo button to undo the last drawing action.
  *
- * @returns {JSX.Element} the created undo button
+ * @returns The undo button element
  */
 export default function Redo(): JSX.Element {
   // Log
@@ -19,6 +19,7 @@ export default function Redo(): JSX.Element {
   const { cgpv } = window as TypeWindow;
   const { useTheme } = cgpv.ui;
   const { useMemo } = cgpv.reactUtilities.react;
+
   // Get store values
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);

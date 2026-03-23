@@ -9,18 +9,28 @@ import {
 } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 
-// import { logger } from 'geoview-core/core/utils/logger';
+import { logger } from 'geoview-core/core/utils/logger';
 
+/** Props for the GeometryPickerPanel component. */
 export interface GeometryPickerPanelProps {
   geomTypes: string[];
   closePanel?: () => void;
 }
 
+/** Props for the PointIcon component. */
 export interface PointIconProps {
   IconComponent: React.ElementType;
 }
 
+/**
+ * Renders a point icon with the current drawing style applied.
+ *
+ * @param props - The component props
+ * @returns The styled point icon element
+ */
 export function PointIcon(props: PointIconProps): JSX.Element {
+  logger.logTraceRender('geoview-drawer/buttons/geometry-picker > PointIcon');
+
   const { cgpv } = window as TypeWindow;
   const { useEffect } = cgpv.reactUtilities.react;
   const { IconComponent } = props;
@@ -29,6 +39,8 @@ export function PointIcon(props: PointIconProps): JSX.Element {
   const { fillColor, strokeColor, strokeWidth } = useDrawerStyle();
 
   useEffect(() => {
+    logger.logTraceUseEffect('POINT ICON - Icon style sync', IconComponent, fillColor, strokeColor, strokeWidth);
+
     // Extract SVG path from the icon
     const iconString = ReactDOMServer.renderToString(<IconComponent />);
     const parser = new DOMParser();
@@ -71,7 +83,14 @@ export function PointIcon(props: PointIconProps): JSX.Element {
   return <IconComponent sx={{ fill: fillColor, stroke: strokeColor, strokeWidth }} />;
 }
 
+/**
+ * Renders the geometry picker button with the active geometry icon.
+ *
+ * @returns The geometry picker button element
+ */
 export function GeometryPickerButton(): JSX.Element {
+  logger.logTraceRender('geoview-drawer/buttons/geometry-picker > GeometryPickerButton');
+
   const { cgpv } = window as TypeWindow;
   const { useMemo } = cgpv.reactUtilities.react;
   const { PlaceIcon, TextFieldsIcon, ShapeLineIcon, ShowChartIcon, HexagonIcon, RectangleIcon, CircleIcon, StarIcon } = cgpv.ui.elements;
@@ -99,11 +118,14 @@ export function GeometryPickerButton(): JSX.Element {
 }
 
 /**
- * Create a geometry picker panel for changing the geometry type for the draw tool
+ * Creates a geometry picker panel for changing the geometry type for the draw tool.
  *
- * @returns {JSX.Element} the created geometry picker panel
+ * @param props - The component props
+ * @returns The geometry picker panel element
  */
 export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Element {
+  logger.logTraceRender('geoview-drawer/buttons/geometry-picker > GeometryPickerPanel');
+
   // const { geomTypes } = props;
   const { cgpv } = window as TypeWindow;
   const { useCallback, useMemo } = cgpv.reactUtilities.react;
@@ -121,7 +143,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
   const activeGeom = useDrawerActiveGeom();
   const isDrawing = useDrawerIsDrawing();
 
-  const iconStyle = useMemo(
+  const memoIconStyle = useMemo(
     () => ({
       color: style.fillColor,
       stroke: style.strokeColor,
@@ -152,6 +174,8 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
       borderRadius: 1,
     },
   };
+
+  // #region Handlers
 
   /**
    * Checks if isDrawing and starts drawing if not
@@ -225,6 +249,8 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
     closePanel?.();
   }, [closePanel, safeStartDrawing, setActiveGeom]);
 
+  // #endregion
+
   return (
     <List sx={sxClasses.list}>
       {geomTypes?.includes('Point') && (
@@ -252,7 +278,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
             onClick={handleGeometrySelectText}
             sx={{ ...sxClasses.iconButton, ...(activeGeom === 'Text' && sxClasses.activeButton) }}
           >
-            <TextFieldsIcon sx={{ color: iconStyle.textColor }} stroke={iconStyle.textHaloColor} />
+            <TextFieldsIcon sx={{ color: memoIconStyle.textColor }} stroke={memoIconStyle.textHaloColor} />
             {getLocalizedMessage(displayLanguage, 'drawer.text')}
           </IconButton>
         </ListItem>
@@ -267,7 +293,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
             onClick={handleGeometrySelectLineString}
             sx={{ ...sxClasses.iconButton, ...(activeGeom === 'LineString' && sxClasses.activeButton) }}
           >
-            <ShowChartIcon sx={{ color: iconStyle.stroke }} />
+            <ShowChartIcon sx={{ color: memoIconStyle.stroke }} />
             {getLocalizedMessage(displayLanguage, 'drawer.linestring')}
           </IconButton>
         </ListItem>
@@ -282,7 +308,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
             onClick={handleGeometrySelectPolygon}
             sx={{ ...sxClasses.iconButton, ...(activeGeom === 'Polygon' && sxClasses.activeButton) }}
           >
-            <HexagonIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />
+            <HexagonIcon sx={{ color: memoIconStyle.color }} stroke={memoIconStyle.stroke} />
             {getLocalizedMessage(displayLanguage, 'drawer.polygon')}
           </IconButton>
         </ListItem>
@@ -297,7 +323,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
             onClick={handleGeometrySelectRectangle}
             sx={{ ...sxClasses.iconButton, ...(activeGeom === 'Rectangle' && sxClasses.activeButton) }}
           >
-            <RectangleIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />
+            <RectangleIcon sx={{ color: memoIconStyle.color }} stroke={memoIconStyle.stroke} />
             {getLocalizedMessage(displayLanguage, 'drawer.rectangle')}
           </IconButton>
         </ListItem>
@@ -312,7 +338,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
             onClick={handleGeometrySelectCircle}
             sx={{ ...sxClasses.iconButton, ...(activeGeom === 'Circle' && sxClasses.activeButton) }}
           >
-            <CircleIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />
+            <CircleIcon sx={{ color: memoIconStyle.color }} stroke={memoIconStyle.stroke} />
             {getLocalizedMessage(displayLanguage, 'drawer.circle')}
           </IconButton>
         </ListItem>
@@ -327,7 +353,7 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
             onClick={handleGeometrySelectStar}
             sx={{ ...sxClasses.iconButton, ...(activeGeom === 'Star' && sxClasses.activeButton) }}
           >
-            <StarIcon sx={{ color: iconStyle.color }} stroke={iconStyle.stroke} />
+            <StarIcon sx={{ color: memoIconStyle.color }} stroke={memoIconStyle.stroke} />
             {getLocalizedMessage(displayLanguage, 'drawer.star')}
           </IconButton>
         </ListItem>

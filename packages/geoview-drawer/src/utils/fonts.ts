@@ -1,10 +1,11 @@
+/** Represents a font option with its display name and CSS value. */
 export interface FontOption {
   name: string;
   value: string;
   isGoogleFont?: boolean;
 }
 
-// System fonts with fallback stacks
+/** System fonts with fallback stacks */
 const SYSTEM_FONTS: FontOption[] = [
   { name: 'Sans Serif', value: 'Arial, Helvetica, sans-serif' },
   { name: 'Serif', value: 'Georgia, "Times New Roman", serif' },
@@ -16,7 +17,7 @@ const SYSTEM_FONTS: FontOption[] = [
   { name: 'Verdana', value: 'Verdana, sans-serif' },
 ];
 
-// Popular Google Fonts
+/** Popular Google Fonts */
 const GOOGLE_FONTS: FontOption[] = [
   { name: 'Open Sans', value: '"Open Sans", sans-serif', isGoogleFont: true },
   { name: 'Roboto', value: 'Roboto, sans-serif', isGoogleFont: true },
@@ -28,7 +29,11 @@ const GOOGLE_FONTS: FontOption[] = [
 export const FONT_OPTIONS = [...SYSTEM_FONTS, ...GOOGLE_FONTS];
 export const DEFAULT_FONT = SYSTEM_FONTS[0].value;
 
-// Load Google Font dynamically
+/**
+ * Loads a Google Font dynamically by injecting a stylesheet link.
+ *
+ * @param fontName - The name of the Google Font to load
+ */
 export function loadGoogleFont(fontName: string): void {
   const existingLink = document.querySelector(`link[href*="${fontName.replace(' ', '+')}"]`);
   if (existingLink) return;

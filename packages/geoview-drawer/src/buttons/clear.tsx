@@ -8,9 +8,9 @@ import { IconButton, DeleteIcon } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 
 /**
- * Create a clear button to clear all drawings from the viewer
+ * Creates a clear button to clear all drawings from the viewer.
  *
- * @returns {JSX.Element} the created clearbutton
+ * @returns The clear button element
  */
 export default function Clear(): JSX.Element {
   // Log
@@ -19,6 +19,7 @@ export default function Clear(): JSX.Element {
   const { cgpv } = window as TypeWindow;
   const { useTheme } = cgpv.ui;
   const { useMemo } = cgpv.reactUtilities.react;
+
   // Get store values
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);

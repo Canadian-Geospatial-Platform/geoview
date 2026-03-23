@@ -1,10 +1,11 @@
+/** Record mapping class names to MUI sx style objects. */
 type SxClasses = Record<string, object>;
 
 /**
- * Get custom sx classes for the legend
+ * Returns the sx style classes for the Custom Legend components.
  *
- * @param {any} theme the theme object
- * @returns {Object} the sx classes object
+ * @param theme - The MUI theme object
+ * @returns The sx style classes
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getSxClasses = (theme: any): SxClasses => ({

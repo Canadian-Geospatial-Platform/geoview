@@ -10,12 +10,12 @@ import { UIEventProcessor } from 'geoview-core/api/event-processors/event-proces
 
 /**
  * Main Map testing class.
- * @extends {GVAbstractTester}
  */
 export class GeochartTester extends GVAbstractTester {
   /**
    * Returns the name of the Tester.
-   * @returns {string} The name of the Tester.
+   *
+   * @returns The name of the Tester
    */
   override getName(): string {
     return 'GeochartTester';
@@ -23,9 +23,10 @@ export class GeochartTester extends GVAbstractTester {
 
   /**
    * Tests opening the Geochart for a given layer path.
-   * @param {string} layerPath - The layer path of the layer.
-   * @param {Coordinate} lonlat - The coordinate on the map to query.
-   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   *
+   * @param layerPath - The layer path of the layer
+   * @param lonlat - The coordinate on the map to query
+   * @returns A Promise that resolves when the test completes
    */
   testGeochartOpenForLayerMapClick(layerPath: string, lonlat: Coordinate): Promise<Test<AbstractGVLayer>> {
     // Test
@@ -50,7 +51,8 @@ export class GeochartTester extends GVAbstractTester {
 
   /**
    * Tests adding a the Airborne Geocore layer, launching a query layers at a given lonlat, set the active footerbar tab to geochart and select the layer in the geochart panel.
-   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   *
+   * @returns A Promise that resolves when the test completes.
    */
   testAddGeocoreLayerUUIDForGeochartAirborne(): Promise<Test<AbstractGVLayer>> {
     // Test it
@@ -91,12 +93,12 @@ export class GeochartTester extends GVAbstractTester {
 
   /**
    * Tests adding a Geocore layer, launching a query layers at a given lonlat, set the active footerbar tab to geochart and select the layer in the geochart panel.
-   * @param {string} uuid - The uuid of the Gecoore layer
-   * @param {string} layerPathAdd - The layer path of the layer that was added
-   * @param {string} layerPathRemove - The layer path of the layer to remove once the test terminates.
-   * @param {Coordinate} lonlat - The coordinate on the map to query.
-   * @param {Record<string, unknown>} expectedGeochartChartsConfig - The expected geochart charts configuration to validate.
-   * @returns
+   *
+   * @param uuid - The uuid of the Gecoore layer
+   * @param layerPathAdd - The layer path of the layer that was added
+   * @param layerPathRemove - The layer path of the layer to remove once the test terminates
+   * @param lonlat - The coordinate on the map to query
+   * @param expectedGeochartChartsConfig - The expected geochart charts configuration to validate
    */
   testAddGeocoreLayerUUIDForGeochart(
     uuid: string,
@@ -148,15 +150,15 @@ export class GeochartTester extends GVAbstractTester {
   /**
    * Retrieves a layer from the map, performs a feature info query at a specific coordinate,
    * and sets up the geochart UI with that layer. Steps are logged to the provided test instance.
-   * @template T - The type parameter for the test instance.
-   * @param {Test<T>} test - The test instance used to log each step of the geochart setup process.
-   * @param {MapViewer} mapViewer - The map viewer containing the layer and UI context.
-   * @param {string} layerPath - The unique path or ID of the layer to interact with.
-   * @param {Coordinate} lonlat - The longitude/latitude coordinate at which to query the layer.
-   * @returns {Promise<AbstractGVLayer>} A promise that resolves to the layer after setup is complete.
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
-   * @static
+   *
+   * @template T - The type parameter for the test instance
+   * @param test - The test instance used to log each step of the geochart setup process
+   * @param mapViewer - The map viewer containing the layer and UI context
+   * @param layerPath - The unique path or ID of the layer to interact with
+   * @param lonlat - The longitude/latitude coordinate at which to query the layer
+   * @returns A promise that resolves to the layer after setup is complete
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
    */
   static async helperStepLayerWithGeochart<T>(
     test: Test<T>,

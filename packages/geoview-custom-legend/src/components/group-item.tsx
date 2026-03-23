@@ -1,5 +1,6 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
+import { logger } from 'geoview-core/core/utils/logger';
 import {
   useMapStoreActions,
   useMapSelectorLayerArrayVisibility,
@@ -12,6 +13,7 @@ import type { getSxClasses } from '../custom-legend-style';
 import { LegendItem } from './legend-item';
 import { DescriptionText } from './description-text';
 
+/** Props for the GroupItem component. */
 interface GroupItemProps {
   item: TypeGroupLayer;
   sxClasses: ReturnType<typeof getSxClasses>;
@@ -19,9 +21,10 @@ interface GroupItemProps {
 }
 
 /**
- * Recursively collect all legend layer paths from group children.
- * @param {TypeLegendItem[]} children - The children to collect from
- * @returns {string[]} Array of layer paths
+ * Recursively collects all legend layer paths from group children.
+ *
+ * @param children - The children to collect from
+ * @returns Array of layer paths
  */
 function collectLayerPaths(children: TypeLegendItem[]): string[] {
   const paths: string[] = [];
@@ -40,10 +43,13 @@ function collectLayerPaths(children: TypeLegendItem[]): string[] {
 
 /**
  * Renders a group item with collapsible children.
- * @param {GroupItemProps} props - Component props
- * @returns {JSX.Element | undefined} The rendered group
+ *
+ * @param props - Component props
+ * @returns The rendered group, or undefined if the item is not a group
  */
 export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.Element | undefined {
+  logger.logTraceRender('geoview-custom-legend/components/group-item');
+
   const { cgpv } = window as TypeWindow;
   const { ui, reactUtilities } = cgpv;
   const { useState, useMemo } = reactUtilities.react;
@@ -75,10 +81,16 @@ export function GroupItem({ item, sxClasses, itemPath }: GroupItemProps): JSX.El
 
   if (!isGroupLayer(item)) return;
 
+  /**
+   * Handles when the user toggles the group collapse state
+   */
   const handleToggleCollapse = (): void => {
     setCollapsed((prev) => !prev);
   };
 
+  /**
+   * Handles when the user toggles the visibility of all child layers
+   */
   const handleToggleVisibility = (): void => {
     const newVisibility = !allVisible;
 

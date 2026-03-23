@@ -1,7 +1,9 @@
+/** Props for the AboutPanel component. */
 export interface AboutPanelProps {
   config: TypeAboutPanelProps;
 }
 
+/** Configuration type for the About Panel plugin. */
 export type TypeAboutPanelConfig = {
   isOpen: boolean;
   aboutTitle: string;
@@ -14,6 +16,7 @@ export type TypeAboutPanelConfig = {
   link: string;
 };
 
+/** Props interface for the About Panel with optional configuration fields. */
 export interface TypeAboutPanelProps {
   /** Whether the panel is initially open */
   isOpen?: boolean;
@@ -37,14 +40,17 @@ export interface TypeAboutPanelProps {
   version?: string;
 }
 
+/** Props for the MarkdownFromPath component. */
 export type TypeMarkdownFromPathProps = {
   mdPath: string;
 };
 
+/** Props for the MarkdownFromContent component. */
 export type TypeMarkdownFromContentProps = {
   mdContent: string[];
 };
 
+/** Props for the DefaultContent component. */
 export type TypeDefaultContentProps = {
   title?: string;
   logoPath?: string;

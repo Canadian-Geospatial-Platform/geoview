@@ -27,16 +27,17 @@ import { GeoChart } from './geochart';
 import type { GeoViewGeoChartRootConfig } from './geochart-types';
 import { convertGeoViewGeoChartConfigFromCore } from './geochart-types';
 
+/** Properties for the GeoChartPanel component. */
 interface GeoChartPanelProps {
   mapId: string;
   provideCallbackRedraw?: (callbackRedraw: () => void) => void;
 }
 
 /**
- * Geo Chart Panel with Layers on the left and Charts on the right
+ * Geo Chart Panel with Layers on the left and Charts on the right.
  *
- * @param {GeoChartPanelProps} props The properties passed to geo chart
- * @returns {JSX.Element} Geo Chart tab
+ * @param props - The properties passed to geo chart
+ * @returns Geo Chart tab
  */
 export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   // Log
@@ -66,7 +67,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const redrawGeochart = useRef<Record<string, () => void>>({});
 
   /**
-   * Redraws the GeoCharts in the Panel
+   * Redraws the GeoCharts in the Panel.
    */
   const redrawGeoCharts = (): void => {
     // We need to redraw when the canvas isn't 'showing' in the DOM and when the user resizes the canvas placeholder.
@@ -82,10 +83,12 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     redrawGeoCharts();
   });
 
+  // #region Handlers
+
   /**
    * Handles click on enlarge button in the layout component.
    *
-   * @param {boolean} isEnlarge Indicates if is enlarged
+   * @param isEnlarge - Indicates if is enlarged
    */
   const handleIsEnlargeClicked = useCallback((isEnlarge: boolean) => {
     // Log
@@ -96,9 +99,10 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   }, []);
 
   /**
-   * Handles when the GeoChart child component is providing its callback to redraw itself
-   * @param {string} key - The GeoChart unique key of the child component
-   * @param {Function} theCallbackRedraw - The callback to execute whenever we want to redraw the GeoChart
+   * Handles when the GeoChart child component is providing its callback to redraw itself.
+   *
+   * @param key - The GeoChart unique key of the child component
+   * @param theCallbackRedraw - The callback to execute whenever we want to redraw the GeoChart
    */
   const handleProvideCallbackRedraw = (key: string, theCallbackRedraw: () => void): void => {
     // Keep the callback
@@ -109,7 +113,8 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
   /**
    * Gets the label for the number of features of a layer.
-   * @returns string
+   *
+   * @returns The label string
    */
   const getNumFeaturesLabel = useCallback(
     (layer: TypeGeochartResultSetEntry): string => {
@@ -131,7 +136,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   /**
    * Handles clicks to layers in left panel. Sets selected layer.
    *
-   * @param {LayerListEntry} layer - The data of the selected layer
+   * @param layer - The data of the selected layer
    */
   const handleLayerChange = useCallback(
     (layer: LayerListEntry): void => {
@@ -143,6 +148,8 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     },
     [setSelectedLayerPath]
   );
+
+  // #endregion
 
   // Convert the config object from core to geoview-geochart type-equivalent
   const memoConfigObj = useMemo(() => {
@@ -197,9 +204,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     mapId,
   ]);
 
-  /**
-   * Memoizes the selected layer for the LayerList component.
-   */
+  /** Memoizes the selected layer for the LayerList component. */
   const memoLayerSelectedItem = useMemo(() => {
     // Log
     logger.logTraceUseMemo('GEOCHART-PANEL - memoLayerSelectedItem', memoLayersList, selectedLayerPath);
@@ -236,7 +241,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   }, [memoLayerSelectedItem, memoLayersList, selectedLayerPath, setLayerDataArrayBatchLayerPathBypass, setSelectedLayerPath]);
 
   /**
-   * Select a layer after a map click happened on the map.
+   * Selects a layer after a map click happened on the map.
    */
   useEffect(() => {
     // Log
@@ -256,10 +261,12 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   // #region RENDERING
 
   /**
-   * Renders a single GeoChart component
-   * @param {GeoViewGeoChartRootConfig} chartsConfig - The Charts Root Config to assign the the GeoChart
-   * @param {CSSProperties} sx - Styling to apply (basically if the GeoChart should be visible or not depending on the selected layer)
-   * @returns {JSX.Element}
+   * Renders a single GeoChart component.
+   *
+   * @param chartsConfig - The Charts Root Config to assign to the GeoChart
+   * @param sx - Styling to apply (basically if the GeoChart should be visible or not depending on the selected layer)
+   * @param layerPath - The layer path for the chart
+   * @returns The rendered GeoChart element
    */
   const renderChart = (chartsConfig: GeoViewGeoChartRootConfig, sx: React.CSSProperties, layerPath: string): JSX.Element => {
     return (
@@ -277,8 +284,9 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   };
 
   /**
-   * Renders the complete GeoChart Panel component
-   * @returns {JSX.Element}
+   * Renders the complete GeoChart Panel component.
+   *
+   * @returns The rendered panel element
    */
   const renderComplete = (): JSX.Element => {
     if (memoLayersList) {

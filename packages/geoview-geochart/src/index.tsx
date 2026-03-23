@@ -15,29 +15,30 @@ import { convertGeoViewGeoChartConfigToCore } from './geochart-types';
  */
 class GeoChartFooterPlugin extends FooterPlugin {
   /**
-   * Return the package schema
+   * Returns the package schema.
    *
-   * @returns {unknown} the package schema
+   * @returns The package schema
    */
   override schema(): unknown {
     return schema;
   }
 
   /**
-   * Return the default config for this package
+   * Returns the default config for this package.
    *
-   * @returns {unknown} the default config
+   * @returns The default config
    */
   override defaultConfig(): unknown {
     return defaultConfig;
   }
 
-  // The callback used to redraw the GeoCharts in the GeoChartPanel
+  /** The callback used to redraw the GeoCharts in the GeoChartPanel. */
   callbackRedraw?: () => void;
 
   /**
    * Overrides the default translations for the Plugin.
-   * @returns {Record<string, unknown>} - The translations object for the particular Plugin.
+   *
+   * @returns The translations object for the particular Plugin
    */
   override defaultTranslations(): Record<string, unknown> {
     return {
@@ -66,7 +67,8 @@ class GeoChartFooterPlugin extends FooterPlugin {
 
   /**
    * Overrides the getConfig in order to return the right type.
-   * @returns {PluginGeoChartConfig} The Geochart config
+   *
+   * @returns The Geochart config
    */
   override getConfig(): PluginGeoChartConfig {
     // Redirect
@@ -75,8 +77,6 @@ class GeoChartFooterPlugin extends FooterPlugin {
 
   /**
    * Overrides the addition of the GeoChart Footer Plugin to make sure to set the chart configs into the store.
-   * @returns {void}
-   * @override
    */
   override onAdd(): void {
     // Call parent
@@ -94,8 +94,8 @@ class GeoChartFooterPlugin extends FooterPlugin {
 
   /**
    * Overrides the creation of the content properties of this GeoChart Footer Plugin.
-   * @returns {TypeTabs} The TypeTabs for the GeoChart Footer Plugin
-   * @override
+   *
+   * @returns The TypeTabs for the GeoChart Footer Plugin
    */
   override onCreateContentProps(): TypeTabs {
     // Create element
@@ -111,7 +111,9 @@ class GeoChartFooterPlugin extends FooterPlugin {
   }
 
   /**
-   * Handles when a redraw callback has been provided by GeoChartPanel
+   * Handles when a redraw callback has been provided by GeoChartPanel.
+   *
+   * @param callbackRedraw - The callback to execute for redrawing
    */
   handleProvideCallbackRedraw(callbackRedraw: () => void): void {
     // Keep it
@@ -119,7 +121,7 @@ class GeoChartFooterPlugin extends FooterPlugin {
   }
 
   /**
-   * Handles when the window resizes
+   * Handles when the window resizes.
    */
   handleWindowResize(): void {
     // Redraw the chart
@@ -128,8 +130,6 @@ class GeoChartFooterPlugin extends FooterPlugin {
 
   /**
    * Overrides when the plugin is selected in the Footer Bar.
-   * @returns {void}
-   * @override
    */
   override onSelect(): void {
     // Call parent

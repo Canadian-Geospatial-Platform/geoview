@@ -1,3 +1,9 @@
+/**
+ * Returns the sx style classes for the About Panel components.
+ *
+ * @param theme - The MUI theme object
+ * @returns The sx style classes
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getSxClasses = (theme: any): any => ({
   container: {

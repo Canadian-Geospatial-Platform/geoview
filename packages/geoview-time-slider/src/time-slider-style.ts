@@ -1,4 +1,9 @@
-// ? I doubt we want to define an explicit type for style properties?
+/**
+ * Gets custom sx classes for the time slider.
+ *
+ * @param theme - The MUI theme
+ * @returns The sx classes object
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getSxClasses = (theme: any): any => ({
   panelHeaders: {

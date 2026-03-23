@@ -11,12 +11,12 @@ import { logger } from 'geoview-core/core/utils/logger';
 
 /**
  * Main Map testing class.
- * @extends {GVAbstractTester}
  */
 export class DetailsTester extends GVAbstractTester {
   /**
    * Returns the name of the Tester.
-   * @returns {string} The name of the Tester.
+   *
+   * @returns The name of the Tester
    */
   override getName(): string {
     return 'DetailsTester';
@@ -24,10 +24,11 @@ export class DetailsTester extends GVAbstractTester {
 
   /**
    * Tests opening the Details panel for a given layer path.
-   * @param {string} layerPath - The layer path of the layer.
-   * @param {Coordinate} lonlat1 - The first coordinate on the map to query.
-   * @param {Coordinate} lonlat2 - The second coordinate on the map to query.
-   * @returns {Promise<Test<unknown>>} A Promise resolving when the test completes.
+   *
+   * @param layerPath - The layer path of the layer
+   * @param lonlat1 - The first coordinate on the map to query
+   * @param lonlat2 - The second coordinate on the map to query
+   * @returns A promise resolving when the test completes
    */
   testDetailsForGeoJSONOntarioAlberta(layerPath: string, lonlat1: Coordinate, lonlat2: Coordinate): Promise<Test<unknown>> {
     // Test
@@ -102,7 +103,7 @@ export class DetailsTester extends GVAbstractTester {
 
   // /**
   //  * Tests adding a the Airborne Geocore layer, launching a query layers at a given lonlat, set the active footerbar tab to geochart and select the layer in the geochart panel.
-  //  * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+  //  * @returns A Promise resolving when the test completes.
   //  */
   // testAddGeocoreLayerUUIDForGeochartAirborne(): Promise<Test<AbstractGVLayer>> {
   //   // Test it
@@ -143,11 +144,11 @@ export class DetailsTester extends GVAbstractTester {
 
   // /**
   //  * Tests adding a Geocore layer, launching a query layers at a given lonlat, set the active footerbar tab to geochart and select the layer in the geochart panel.
-  //  * @param {string} uuid - The uuid of the Gecoore layer
-  //  * @param {string} layerPathAdd - The layer path of the layer that was added
-  //  * @param {string} layerPathRemove - The layer path of the layer to remove once the test terminates.
-  //  * @param {Coordinate} lonlat - The coordinate on the map to query.
-  //  * @param {Record<string, unknown>} expectedGeochartChartsConfig - The expected geochart charts configuration to validate.
+  //  * @param uuid - The uuid of the Gecoore layer
+  //  * @param layerPathAdd - The layer path of the layer that was added
+  //  * @param layerPathRemove - The layer path of the layer to remove once the test terminates.
+  //  * @param lonlat - The coordinate on the map to query.
+  //  * @param expectedGeochartChartsConfig - The expected geochart charts configuration to validate.
   //  * @returns
   //  */
   // testAddGeocoreLayerUUIDForGeochart(
@@ -200,15 +201,15 @@ export class DetailsTester extends GVAbstractTester {
   /**
    * Retrieves a layer from the map, performs a feature info query at a specific coordinate,
    * and sets up the details UI with that layer. Steps are logged to the provided test instance.
-   * @template T - The type parameter for the test instance.
-   * @param {Test<T>} test - The test instance used to log each step of the details setup process.
-   * @param {MapViewer} mapViewer - The map viewer containing the layer and UI context.
-   * @param {string} layerPath - The unique path or ID of the layer to interact with.
-   * @param {Coordinate} lonlat - The longitude/latitude coordinate at which to query the layer.
-   * @returns {Promise<TypeFeatureInfoEntry[] | undefined>} A promise that resolves to the layer after setup is complete.
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
-   * @static
+   *
+   * @template T - The type parameter for the test instance
+   * @param test - The test instance used to log each step of the details setup process
+   * @param mapViewer - The map viewer containing the layer and UI context
+   * @param layerPath - The unique path or ID of the layer to interact with
+   * @param lonlat - The longitude/latitude coordinate at which to query the layer
+   * @returns A promise that resolves to the layer after setup is complete
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
    */
   static async helperStepQueryLayerAtCoordinate<T>(
     test: Test<T>,
@@ -227,6 +228,14 @@ export class DetailsTester extends GVAbstractTester {
     return (await mapViewer.layer.featureInfoLayerSet.queryLayers(lonlat))[layerPath].features;
   }
 
+  /**
+   * Checks that the details panel is selected for the given layer path.
+   *
+   * @template T - The type parameter for the test instance
+   * @param test - The test instance used to log each step
+   * @param mapViewer - The map viewer containing the layer and UI context
+   * @param layerPath - The unique path or ID of the layer to check
+   */
   static async helperStepCheckDetailsPanel<T>(test: Test<T>, mapViewer: MapViewer, layerPath: string): Promise<void> {
     // Update the step
     test.addStep(`Waiting on UI to refresh...`);

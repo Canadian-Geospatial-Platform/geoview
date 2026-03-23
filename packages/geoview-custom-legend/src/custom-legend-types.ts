@@ -41,26 +41,44 @@ export interface TypeCustomLegendConfig {
   version?: string;
 }
 
-/** Type guards for discriminating union types. */
+/**
+ * Checks if the given item is a legend layer.
+ *
+ * @param item - The legend item to check
+ * @returns true if the item is a legend layer
+ */
 export const isLegendLayer = (item: TypeLegendItem): item is TypeLegendLayer => {
   return item.type === 'layer';
 };
 
+/**
+ * Checks if the given item is a header layer.
+ *
+ * @param item - The legend item to check
+ * @returns true if the item is a header layer
+ */
 export const isHeaderLayer = (item: TypeLegendItem): item is TypeHeaderLayer => {
   return item.type === 'header';
 };
 
+/**
+ * Checks if the given item is a group layer.
+ *
+ * @param item - The legend item to check
+ * @returns true if the item is a group layer
+ */
 export const isGroupLayer = (item: TypeLegendItem): item is TypeGroupLayer => {
   return item.type === 'group';
 };
 
 /**
- * Generate a unique ID for a legend item based on its content and position.
- * @param {TypeLegendItem} item - The legend item
- * @param {number} index - The item's position in the list
- * @param {string} parentPath - Optional parent path for nested items
- * @param {string} language - The language of the current text
- * @returns {string} A unique identifier
+ * Generates a unique ID for a legend item based on its content and position.
+ *
+ * @param item - The legend item
+ * @param index - The item's position in the list
+ * @param language - The language of the current text
+ * @param parentPath - Optional parent path for nested items
+ * @returns A unique identifier
  */
 export function generateLegendItemId(item: TypeLegendItem, index: number, language: 'en' | 'fr', parentPath: string = ''): string {
   const basePath = parentPath ? `${parentPath}/` : '';

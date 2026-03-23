@@ -33,18 +33,20 @@ export type PluginGeoChartConfig = {
 };
 
 /**
- * Explicit function to convert the GeoviewGeochart config from geoview-geochart package to type-equivalent type in the geoview-core package
- * @param {GeoViewGeoChartConfig} chartConfigObject - The config
- * @returns {GeoViewGeoChartCoreConfig} The core type-equivalent of the objects
+ * Explicit function to convert the GeoviewGeochart config from geoview-geochart package to type-equivalent type in the geoview-core package.
+ *
+ * @param chartConfigObject - The config
+ * @returns The core type-equivalent of the objects
  */
 export function convertGeoViewGeoChartConfigToCore(chartConfigObject: GeoViewGeoChartConfig): GeoViewGeoChartCoreConfig {
   return chartConfigObject as unknown as GeoViewGeoChartCoreConfig;
 }
 
 /**
- * Explicit function to convert the GeoviewGeochart config from geoview-core package to type-equivalent type in the geoview-geochart package
- * @param {GeoViewGeoChartCoreConfig} chartConfigObject chartConfigObject - The config
- * @returns {GeoViewGeoChartConfig} The geoview-geochart type-equivalent of the objects
+ * Explicit function to convert the GeoviewGeochart config from geoview-core package to type-equivalent type in the geoview-geochart package.
+ *
+ * @param chartConfigObject - The config
+ * @returns The geoview-geochart type-equivalent of the objects
  */
 export function convertGeoViewGeoChartConfigFromCore(chartConfigObject: GeoViewGeoChartCoreConfig): GeoViewGeoChartConfig {
   return chartConfigObject as unknown as GeoViewGeoChartConfig;

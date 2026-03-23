@@ -14,8 +14,9 @@ export abstract class GVAbstractTestSuite extends AbstractTestSuite {
 
   /**
    * Constructs an {@link GVAbstractTestSuite} instance.
-   * @param {API} api - The api, mainly used to retrieve the MapViewer.
-   * @param {string} mapViewer - The map viewer.
+   *
+   * @param api - The api, mainly used to retrieve the MapViewer
+   * @param mapViewer - The map viewer
    */
   protected constructor(api: API, mapViewer: MapViewer) {
     super();
@@ -27,6 +28,8 @@ export abstract class GVAbstractTestSuite extends AbstractTestSuite {
 
   /**
    * Gets the shared api.
+   *
+   * @returns The api
    */
   getApi(): API {
     return this.#api;
@@ -34,6 +37,8 @@ export abstract class GVAbstractTestSuite extends AbstractTestSuite {
 
   /**
    * Gets the MapViewer.
+   *
+   * @returns The map viewer
    */
   getMapViewer(): MapViewer {
     return this.#mapViewer;
@@ -41,6 +46,8 @@ export abstract class GVAbstractTestSuite extends AbstractTestSuite {
 
   /**
    * Gets the Map Id.
+   *
+   * @returns The map id
    */
   getMapId(): string {
     return this.#mapViewer.mapId;

@@ -14,11 +14,15 @@ import type {
 } from './about-panel-types';
 
 /**
- * Component to render markdown content from a file path / markdown document
- * @param {TypeMarkdownFromPathProps} props - The component props
- * @returns {JSX.Element} The created JSX Element from the MD document
+ * Component to render markdown content from a file path / markdown document.
+ *
+ * @param props - The component props
+ * @returns The created JSX Element from the MD document
+ * @throws {Error} When the markdown file cannot be fetched
  */
 function MarkdownFromPath(props: TypeMarkdownFromPathProps): JSX.Element {
+  logger.logTraceRender('geoview-about-panel/about-panel > MarkdownFromPath');
+
   const { mdPath } = props;
   const { cgpv } = window as TypeWindow;
   const { ui, reactUtilities } = cgpv;
@@ -35,6 +39,8 @@ function MarkdownFromPath(props: TypeMarkdownFromPathProps): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   useEffect(() => {
+    logger.logTraceUseEffect('ABOUT-PANEL - fetch markdown', { mdPath });
+
     const fetchMarkdown = async (): Promise<void> => {
       try {
         const response = await fetch(mdPath);
@@ -80,11 +86,14 @@ function MarkdownFromPath(props: TypeMarkdownFromPathProps): JSX.Element {
 }
 
 /**
- * Component to render markdown content from an array of strings
- * @param {TypeMarkdownFromContentProps} props - The component props
- * @returns {JSX.Element} The created JSX Element from the MD Content
+ * Component to render markdown content from an array of strings.
+ *
+ * @param props - The component props
+ * @returns The created JSX Element from the MD content
  */
 function MarkdownFromContent(props: TypeMarkdownFromContentProps): JSX.Element {
+  logger.logTraceRender('geoview-about-panel/about-panel > MarkdownFromContent');
+
   const { mdContent } = props;
   const { cgpv } = window as TypeWindow;
   const { ui } = cgpv;
@@ -106,11 +115,14 @@ function MarkdownFromContent(props: TypeMarkdownFromContentProps): JSX.Element {
 }
 
 /**
- * Component to render default about panel content
- * @param {TypeDefaultContentProps} props - The component props
- * @returns {JSX.Element} The created JSX Element from the configuration options
+ * Component to render default about panel content.
+ *
+ * @param props - The component props
+ * @returns The created JSX Element from the configuration options
  */
 function DefaultContent(props: TypeDefaultContentProps): JSX.Element {
+  logger.logTraceRender('geoview-about-panel/about-panel > DefaultContent');
+
   const { title, logoPath, description, link } = props;
   const { cgpv } = window as TypeWindow;
   const { ui } = cgpv;
@@ -151,12 +163,16 @@ function DefaultContent(props: TypeDefaultContentProps): JSX.Element {
 }
 
 /**
- * Main About Panel component
- * Renders markdown content from path, array of strings, or default content
- * @param {AboutPanelProps} props - The component props
- * @returns {JSX.Element} The returned About Panel element
+ * Main About Panel component.
+ *
+ * Renders markdown content from path, array of strings, or default content.
+ *
+ * @param props - The component props
+ * @returns The About Panel element
  */
 export function AboutPanel(props: AboutPanelProps): JSX.Element {
+  logger.logTraceRender('geoview-about-panel/about-panel');
+
   const { config } = props;
 
   const { cgpv } = window as TypeWindow;

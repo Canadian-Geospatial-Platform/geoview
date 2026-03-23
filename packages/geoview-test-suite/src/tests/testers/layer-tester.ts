@@ -25,12 +25,12 @@ import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
 
 /**
  * Main Layer testing class.
- * @extends {GVAbstractTester}
  */
 export class LayerTester extends GVAbstractTester {
   /**
    * Returns the name of the Tester.
-   * @returns {string} The name of the Tester.
+   *
+   * @returns The name of the Tester
    */
   override getName(): string {
     return 'LayerTester';
@@ -40,7 +40,8 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Tests adding an Esri Dynamic Historical Flood Events layer on the map.
-   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   *
+   * @returns A promise that resolves when the test completes
    */
   testAddEsriDynamicHistoFloodEvents(): Promise<Test<AbstractGVLayer>> {
     // Create a random geoview layer id
@@ -87,8 +88,8 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Tests the behavior of initializing a Geocore layer pointing to an Esri Dynamic layer containing Raster Layers.
-   * @returns {Promise<Test<AbstractGVLayer>>}
-   * A promise that resolves with the test result, expecting a `AbstractGVLayer`.
+   *
+   * @returns A promise that resolves with the test result
    */
   testAddEsriDynamicWithRasterLayersViaGeocore(): Promise<Test<AbstractGVLayer>> {
     const gvLayerId = GVAbstractTester.ESRI_DYNAMIC_LABOUR_FORCE_UUID;
@@ -173,11 +174,12 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Tests the behavior of initializing an Esri Dynamic layer configuration using an invalid metadata URL.
+   *
    * This test verifies that when an Esri Dynamic layer configuration is initialized with an invalid or unreachable
    * metadata URL, the initialization process fails as expected and throws a
    * {@link LayerServiceMetadataUnableToFetchError}.
-   * @returns {Promise<Test<LayerServiceMetadataUnableToFetchError>>}
-   * A promise that resolves with the test result, expecting a `LayerServiceMetadataUnableToFetchError`.
+   *
+   * @returns A promise that resolves with the test result
    */
   testAddEsriDynamicBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // Create a random geoview layer id
@@ -216,7 +218,8 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Tests adding an Esri Feature Forest Industry layer on the map.
-   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   *
+   * @returns A promise that resolves when the test completes
    */
   testAddEsriFeatureForestIndustry(): Promise<Test<AbstractGVLayer>> {
     // Create a random geoview layer id
@@ -263,11 +266,12 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Tests the behavior of initializing an Esri Feature layer configuration using an invalid metadata URL.
+   *
    * This test verifies that when an Esri Feature layer configuration is initialized with an invalid or unreachable
    * metadata URL, the initialization process fails as expected and throws a
    * {@link LayerServiceMetadataUnableToFetchError}.
-   * @returns {Promise<Test<LayerServiceMetadataUnableToFetchError>>}
-   * A promise that resolves with the test result, expecting a `LayerServiceMetadataUnableToFetchError`.
+   *
+   * @returns A promise that resolves with the test result
    */
   testAddEsriFeatureBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // Create a random geoview layer id
@@ -302,7 +306,8 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Tests adding an Esri Feature service that contains some invalid geometries.
-   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   *
+   * @returns A promise that resolves when the test completes
    */
   testAddEsriFeatureInvalidGeometry(): Promise<Test<AbstractGVLayer>> {
     // Create a random geoview layer id
@@ -346,8 +351,9 @@ export class LayerTester extends GVAbstractTester {
   // #region ESRI IMAGE
 
   /**
-   * Tests adding an EsriImage with Elevationlayer on the map.
-   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   * Tests adding an EsriImage with Elevation layer on the map.
+   *
+   * @returns A promise that resolves when the test completes
    */
   testAddEsriImageWithElevation(): Promise<Test<AbstractGVLayer>> {
     // Create a random geoview layer id
@@ -386,7 +392,8 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Tests adding an EsriImage with USA layer on the map.
-   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   *
+   * @returns A promise that resolves when the test completes
    */
   testAddEsriImageWithUSA(): Promise<Test<AbstractGVLayer>> {
     // Create a random geoview layer id
@@ -438,11 +445,12 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Tests the behavior of initializing an Esri Image layer configuration using an invalid metadata URL.
+   *
    * This test verifies that when an Esri Image layer configuration is initialized with an invalid or unreachable
    * metadata URL, the initialization process fails as expected and throws a
    * {@link LayerServiceMetadataUnableToFetchError}.
-   * @returns {Promise<Test<LayerServiceMetadataUnableToFetchError>>}
-   * A promise that resolves with the test result, expecting a `LayerServiceMetadataUnableToFetchError`.
+   *
+   * @returns A promise that resolves with the test result
    */
   testAddEsriImageBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // Create a random geoview layer id
@@ -479,7 +487,8 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Tests adding a WMS Layer from OWS Mundialis on the map.
-   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   *
+   * @returns A promise that resolves when the test completes
    */
   testAddWMSLayerWithOWSMundialis(): Promise<Test<AbstractGVLayer>> {
     // Create a random geoview layer id
@@ -519,8 +528,9 @@ export class LayerTester extends GVAbstractTester {
   }
 
   /**
-   * Tests adding an Esri Feature Forest Industry layer on the map.
-   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   * Tests adding a WMS Layer with Datacube MSI on the map.
+   *
+   * @returns A promise that resolves when the test completes
    */
   testAddWMSLayerWithDatacubeMSI(): Promise<Test<AbstractGVLayer>> {
     // Create a random geoview layer id
@@ -566,8 +576,9 @@ export class LayerTester extends GVAbstractTester {
   }
 
   /**
-   * Tests adding an Esri Feature Forest Industry layer on the map.
-   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   * Tests adding a WMS Layer with Datacube Ring of Fire on the map.
+   *
+   * @returns A promise that resolves when the test completes
    */
   testAddWMSLayerWithDatacubeRingOfFire(): Promise<Test<AbstractGVLayer>> {
     // Create a random geoview layer id
@@ -619,11 +630,12 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Tests the behavior of initializing a WMS layer configuration using an invalid metadata URL.
-   * This test verifies that when an WMS layer configuration is initialized with an invalid or unreachable
+   *
+   * This test verifies that when a WMS layer configuration is initialized with an invalid or unreachable
    * metadata URL, the initialization process fails as expected and throws a
    * {@link LayerNoCapabilitiesError}.
-   * @returns {Promise<Test<LayerNoCapabilitiesError>>}
-   * A promise that resolves with the test result, expecting a `LayerNoCapabilitiesError`.
+   *
+   * @returns A promise that resolves with the test result
    */
   testAddWMSBadUrl(): Promise<Test<LayerNoCapabilitiesError>> {
     // GV: In the case of a WMS, since a proxy is used when the url fails, and that proxy always returns a 200 response (with an internal error inside)
@@ -670,8 +682,9 @@ export class LayerTester extends GVAbstractTester {
   // #region WFS
 
   /**
-   * Tests adding an WFS with Geomet Current Conditions layer on the map.
-   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   * Tests adding a WFS with Geomet Current Conditions layer on the map.
+   *
+   * @returns A promise that resolves when the test completes
    */
   testAddWFSLayerWithWithGeometCurrentConditions(): Promise<Test<AbstractGVLayer>> {
     // Create a random geoview layer id
@@ -711,12 +724,13 @@ export class LayerTester extends GVAbstractTester {
   }
 
   /**
-   * Tests the behavior of initializing a WMS layer configuration using an invalid metadata URL.
-   * This test verifies that when an WMS layer configuration is initialized with an invalid or unreachable
+   * Tests the behavior of initializing a WFS layer configuration using an invalid metadata URL.
+   *
+   * This test verifies that when a WFS layer configuration is initialized with an invalid or unreachable
    * metadata URL, the initialization process fails as expected and throws a
    * {@link LayerServiceMetadataUnableToFetchError}.
-   * @returns {Promise<Test<LayerServiceMetadataUnableToFetchError>>}
-   * A promise that resolves with the test result, expecting a `LayerServiceMetadataUnableToFetchError`.
+   *
+   * @returns A promise that resolves with the test result
    */
   testAddWFSBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // Create a random geoview layer id
@@ -750,12 +764,12 @@ export class LayerTester extends GVAbstractTester {
   }
 
   /**
-   * Tests the behavior of initializing a WFS layer configuration using an invalid metadata URL.
-   * This test verifies that when an WFS layer configuration is initialized with an invalid or unreachable
-   * metadata URL, the initialization process fails as expected and throws a
+   * Tests the behavior of initializing a WFS layer configuration using a valid URL but without a GetCapabilities response.
+   *
+   * This test verifies that when a WFS layer configuration is initialized and the initialization process fails as expected and throws a
    * {@link LayerNoCapabilitiesError}.
-   * @returns {Promise<Test<LayerNoCapabilitiesError>>}
-   * A promise that resolves with the test result, expecting a `LayerNoCapabilitiesError`.
+   *
+   * @returns A promise that resolves with the test result
    */
   testAddWFSOkayUrlNoCap(): Promise<Test<LayerNoCapabilitiesError>> {
     // Create a random geoview layer id
@@ -794,7 +808,8 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Tests adding a GeoJSON with Polygons layer on the map.
-   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   *
+   * @returns A promise that resolves when the test completes
    */
   testAddGeoJSONWithMetadataPolygons(): Promise<Test<AbstractGVLayer>> {
     // Create a random geoview layer id
@@ -844,11 +859,12 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Tests the behavior of initializing a GeoJSON layer configuration using an invalid metadata URL.
+   *
    * This test verifies that when a GeoJSON layer configuration is initialized with an invalid or unreachable
    * metadata URL, the initialization process fails as expected and throws a
    * {@link LayerStatusErrorError}.
-   * @returns {Promise<Test<LayerStatusErrorError>>}
-   * A promise that resolves with the test result, expecting a `LayerStatusErrorError`.
+   *
+   * @returns A promise that resolves with the test result
    */
   testAddGeoJSONBadUrl(): Promise<Test<LayerStatusErrorError>> {
     // GV: In the case of a GeoJSON, since we don't validate the url until we try to fetch the data,
@@ -892,7 +908,8 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Tests adding a GeoTIFF layer on the map.
-   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   *
+   * @returns A promise resolving when the test completes
    */
   testAddGeotiffLayerWithDatacubeVegetation(): Promise<Test<AbstractGVLayer>> {
     // Create a random geoview layer id
@@ -933,11 +950,12 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Tests the behavior of initializing a GeoTIFF layer configuration using an invalid metadata URL.
+   *
    * This test verifies that when a GeoTIFF layer configuration is initialized with an invalid or unreachable
    * metadata URL, the initialization process fails as expected and throws a
    * {@link LayerStatusErrorError}.
-   * @returns {Promise<Test<LayerStatusErrorError>>}
-   * A promise that resolves with the test result, expecting a `LayerStatusErrorError`.
+   *
+   * @returns A promise that resolves with the test result
    */
   testAddGeoTIFFWithBadUrl(): Promise<Test<LayerStatusErrorError>> {
     // GV: In the case of a GeoTIFF, since we don't validate the url until we try to fetch the data,
@@ -981,7 +999,8 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Tests adding a CSV with Station List layer on the map.
-   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   *
+   * @returns A promise that resolves when the test completes
    */
   testAddCSVWithStationList(): Promise<Test<AbstractGVLayer>> {
     // Create a random geoview layer id
@@ -1022,11 +1041,12 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Tests the behavior of initializing a CSV layer configuration using an invalid metadata URL.
+   *
    * This test verifies that when a CSV layer configuration is initialized with an invalid or unreachable
    * metadata URL, the initialization process fails as expected and throws a
    * {@link LayerStatusErrorError}.
-   * @returns {Promise<Test<LayerStatusErrorError>>}
-   * A promise that resolves with the test result, expecting a `LayerStatusErrorError`.
+   *
+   * @returns A promise that resolves with the test result
    */
   testAddCSVWithBadUrl(): Promise<Test<LayerStatusErrorError>> {
     // GV: In the case of a CSV, since we don't validate the url until we try to fetch the data,
@@ -1070,7 +1090,8 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Tests adding an OGC Feature layer with Pygeoapi on the map.
-   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   *
+   * @returns A promise that resolves when the test completes
    */
   testAddOGCFeatureWithPygeoapi(): Promise<Test<AbstractGVLayer>> {
     // Create a random geoview layer id
@@ -1117,11 +1138,12 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Tests the behavior of initializing an OGC Feature layer configuration using an invalid metadata URL.
+   *
    * This test verifies that when an OGC Feature layer configuration is initialized with an invalid or unreachable
    * metadata URL, the initialization process fails as expected and throws a
    * {@link LayerServiceMetadataUnableToFetchError}.
-   * @returns {Promise<Test<LayerServiceMetadataUnableToFetchError>>}
-   * A promise that resolves with the test result, expecting a `LayerServiceMetadataUnableToFetchError`.
+   *
+   * @returns A promise that resolves with the test result
    */
   testAddOGCFeatureWithBadUrl(): Promise<Test<LayerServiceMetadataUnableToFetchError>> {
     // Create a random geoview layer id
@@ -1160,7 +1182,8 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Tests adding a WKB with South Africa on the map.
-   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   *
+   * @returns A promise that resolves when the test completes
    */
   testAddWKBWithSouthAfrica(): Promise<Test<AbstractGVLayer>> {
     // Create a random geoview layer id
@@ -1198,12 +1221,13 @@ export class LayerTester extends GVAbstractTester {
   }
 
   /**
-   * Tests the behavior of initializing an WKB layer configuration using an invalid metadata URL.
-   * This test verifies that when an WKB layer configuration is initialized with an invalid or unreachable
+   * Tests the behavior of initializing a WKB layer configuration using an invalid metadata URL.
+   *
+   * This test verifies that when a WKB layer configuration is initialized with an invalid or unreachable
    * metadata URL, the initialization process fails as expected and throws a
    * {@link LayerStatusErrorError}.
-   * @returns {Promise<Test<LayerStatusErrorError>>}
-   * A promise that resolves with the test result, expecting a `LayerStatusErrorError`.
+   *
+   * @returns A promise that resolves with the test result
    */
   testAddWKBWithBadUrl(): Promise<Test<LayerStatusErrorError>> {
     // GV: In the case of a WKB, since we don't validate the url until we try to fetch the data,
@@ -1245,7 +1269,8 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Tests adding a KML with Tornado on the map.
-   * @returns {Promise<Test<AbstractGVLayer>>} A Promise resolving when the test completes.
+   *
+   * @returns A promise that resolves when the test completes
    */
   testAddKMLWithTornado(): Promise<Test<AbstractGVLayer>> {
     // Create a random geoview layer id
@@ -1284,11 +1309,12 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Tests the behavior of initializing a KML layer configuration using an invalid metadata URL.
+   *
    * This test verifies that when a KML layer configuration is initialized with an invalid or unreachable
    * metadata URL, the initialization process fails as expected and throws a
    * {@link LayerStatusErrorError}.
-   * @returns {Promise<Test<LayerStatusErrorError>>}
-   * A promise that resolves with the test result, expecting a `LayerStatusErrorError`.
+   *
+   * @returns A promise that resolves with the test result
    */
   testAddKMLWithBadUrl(): Promise<Test<LayerStatusErrorError>> {
     // GV: In the case of a KML, since we don't validate the url until we try to fetch the data,
@@ -1330,7 +1356,8 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Tests initial settings properly cascading to sub layers.
-   * @returns {Promise<Test<AbstractGeoViewLayer>>} A Promise that resolves when the test completes successfully.
+   *
+   * @returns A promise that resolves when the test completes
    */
   testInitialSettingsCascade(): Promise<Test<TypeMapFeaturesInstance | undefined>> {
     // The config
@@ -1389,12 +1416,13 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Adds a GeoView layer to the map, waits for it to load completely, and returns the loaded layer instance.
+   *
    * Each step of the process is logged into the provided test instance for traceability and debugging.
-   * @param {Test<AbstractGVLayer>} test - The test instance used to log each step in the layer setup process.
-   * @param {MapViewer} mapViewer - The map viewer to which the layer will be added.
-   * @param {TypeGeoviewLayerConfig} gvConfig - The configuration object defining the GeoView layer to be added.
-   * @returns {Promise<GeoViewLayerAddedResult>} A promise that resolves to the fully loaded GeoView layer instance.
-   * @static
+   *
+   * @param test - The test instance used to log each step in the layer setup process
+   * @param mapViewer - The map viewer to which the layer will be added
+   * @param gvConfig - The configuration object defining the GeoView layer to be added
+   * @returns A promise that resolves to the fully loaded GeoView layer instance
    */
   static async helperStepAddLayerOnMap<T>(
     test: Test<T>,
@@ -1418,13 +1446,14 @@ export class LayerTester extends GVAbstractTester {
   }
 
   /**
-   * Adds a GeoView layer to the map, waits for it to load completely, and returns the loaded layer instance.
+   * Adds a GeoView layer to the map by GeoCore UUID, waits for it to load completely, and returns the loaded layer instance.
+   *
    * Each step of the process is logged into the provided test instance for traceability and debugging.
-   * @param {Test<AbstractGVLayer>} test - The test instance used to log each step in the layer setup process.
-   * @param {MapViewer} mapViewer - The map viewer to which the layer will be added.
-   * @param {TypeGeoviewLayerConfig} gvConfig - The configuration object defining the GeoView layer to be added.
-   * @returns {Promise<GeoViewLayerAddedResult | void>} A promise that resolves to the fully loaded GeoView layer instance.
-   * @static
+   *
+   * @param test - The test instance used to log each step in the layer setup process
+   * @param mapViewer - The map viewer to which the layer will be added
+   * @param uuid - The GeoCore UUID used to add the layer
+   * @returns A promise that resolves to the fully loaded GeoView layer instance
    */
   static async helperStepAddLayerOnMapFromUUID<T>(
     test: Test<T>,
@@ -1448,17 +1477,18 @@ export class LayerTester extends GVAbstractTester {
   }
 
   /**
-   * Adds a GeoView layer to the map, waits for it to load completely, and returns the loaded layer instance.
+   * Checks that a layer exists at the given layer path and waits for it to be fully loaded.
+   *
    * Each step of the process is logged into the provided test instance for traceability and debugging.
-   * @param {Test<AbstractGVLayer>} test - The test instance used to log each step in the layer setup process.
-   * @param {MapViewer} mapViewer - The map viewer to which the layer will be added.
-   * @param {string} layerPath - The unique path or ID used to retrieve the added layer from the map viewer.
-   * @param {number} timeoutOnLoad - A timeout for the period to wait for the layer to be loaded. Defaults to 30,000 ms.
-   * @param {boolean} [waitStyle] - Indicates if should wait for the style to be applied (expecting a style icon). Default: true.
-   * @returns {Promise<AbstractGVLayer>} A promise that resolves to the fully loaded GeoView layer instance.
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
-   * @static
+   *
+   * @param test - The test instance used to log each step in the layer setup process
+   * @param mapViewer - The map viewer to which the layer will be added
+   * @param layerPath - The unique path or ID used to retrieve the added layer from the map viewer
+   * @param timeoutOnLoad - A timeout for the period to wait for the layer to be loaded. Defaults to 30,000 ms
+   * @param waitStyle - Optional indicates if should wait for the style to be applied (expecting a style icon). Default: true
+   * @returns A promise that resolves to the fully loaded GeoView layer instance
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
+   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
    */
   static async helperStepCheckLayerAtLayerPath<T>(
     test: Test<T>,
@@ -1495,18 +1525,19 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Asserts that a layer with the given path exists in the map's legend store.
+   *
    * Logs the verification step in the test instance.
    * If `checkIconImage` or `checkIconsList` is provided, this method will also
    * verify that the layer's style has been applied by delegating to
    * `helperStepAssertStyleApplied`.
-   * @param {Test<AbstractGVLayer>} test - The test instance used to record the verification steps.
-   * @param {MapViewer} mapViewer - The map viewer instance containing the layer store.
-   * @param {string} layerPath - The path or ID of the layer to verify.
-   * @param {string} [checkIconImage] - Optional expected icon image.
-   *   If provided, the function will additionally check that the legend contains a matching icon.
-   * @param {Partial<TypeLegendItem>[]} [checkIconsList] - Optional list of expected legend icon items.
-   *   If provided, the function will additionally verify that the legend's icon list matches this array.
-   * @static
+   *
+   * @param test - The test instance used to record the verification steps
+   * @param mapViewer - The map viewer instance containing the layer store
+   * @param layerPath - The path or ID of the layer to verify
+   * @param checkIconImage - Optional expected icon image.
+   *   If provided, the function will additionally check that the legend contains a matching icon
+   * @param checkIconsList - Optional list of expected legend icon items.
+   *   If provided, the function will additionally verify that the legend's icon list matches this array
    */
   static helperStepAssertLayerExists(
     test: Test<AbstractGVLayer>,
@@ -1531,6 +1562,7 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Asserts that a layer with the given path has icons for its style.
+   *
    * Logs the verification step in the test instance.
    * This validates that the layer's legend contains at least one icon and that the
    * first icon indicates a valid style (i.e., the icon image is present and not `"no data"`).
@@ -1538,12 +1570,11 @@ export class LayerTester extends GVAbstractTester {
    * - that the first icon's image matches `checkIconImage`
    * - that the first icon's list of legend items matches `checkIconsList`
    *
-   * @param {Test<AbstractGVLayer>} test - The test instance used to record the verification steps.
-   * @param {MapViewer} mapViewer - The map viewer instance containing the layer store.
-   * @param {string} layerPath - The path or ID of the layer whose style icons are being verified.
-   * @param {string} [checkIconImage] - Optional expected icon image to validate against the legend.
-   * @param {Partial<TypeLegendItem>[]} [checkIconsList] - Optional expected list of legend icon items.
-   * @static
+   * @param test - The test instance used to record the verification steps
+   * @param mapViewer - The map viewer instance containing the layer store
+   * @param layerPath - The path or ID of the layer whose style icons are being verified
+   * @param checkIconImage - Optional expected icon image to validate against the legend
+   * @param checkIconsList - Optional expected list of legend icon items
    */
   static helperStepAssertStyleApplied(
     test: Test<AbstractGVLayer>,
@@ -1581,11 +1612,12 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Removes a layer from the map using its path and asserts that it no longer exists in the legend store.
+   *
    * Each step is logged to the provided test instance for traceability.
-   * @param {Test<AbstractGVLayer>} test - The test instance used to record each step of the removal process.
-   * @param {MapViewer} mapViewer - The map viewer instance from which the layer is removed.
-   * @param {string} layerPath - The unique path or ID of the layer to be removed.
-   * @static
+   *
+   * @param test - The test instance used to record each step of the removal process
+   * @param mapViewer - The map viewer instance from which the layer is removed
+   * @param layerPath - The unique path or ID of the layer to be removed
    */
   static helperFinalizeStepRemoveLayerAndAssert<T>(test: Test<T>, mapViewer: MapViewer, layerPath: string): void {
     // Check that the layer is indeed there
@@ -1607,11 +1639,12 @@ export class LayerTester extends GVAbstractTester {
 
   /**
    * Removes a layer from the map using its path and asserts that it no longer exists in the legend store.
+   *
    * Each step is logged to the provided test instance for traceability.
-   * @param {Test<AbstractGVLayer>} test - The test instance used to record each step of the removal process.
-   * @param {MapViewer} mapViewer - The map viewer instance from which the layer is removed.
-   * @param {string} geoviewLayerId - The geoview layer id of the layer config to be removed.
-   * @static
+   *
+   * @param test - The test instance used to record each step of the removal process
+   * @param mapViewer - The map viewer instance from which the layer is removed
+   * @param geoviewLayerId - The geoview layer id of the layer config to be removed
    */
   static helperFinalizeStepRemoveLayerConfigAndAssert<T>(test: Test<T>, mapViewer: MapViewer, geoviewLayerId: string): void {
     // Check that the layer is indeed there

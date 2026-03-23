@@ -3,10 +3,12 @@ import { useState } from 'react';
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
+import { logger } from 'geoview-core/core/utils/logger';
 
 import type { getSxClasses } from '../custom-legend-style';
 import type { TypeDescription } from '../custom-legend-types';
 
+/** Props for the DescriptionText component. */
 interface DescriptionTextProps {
   description: TypeDescription;
   sxClasses: ReturnType<typeof getSxClasses>;
@@ -14,10 +16,13 @@ interface DescriptionTextProps {
 
 /**
  * Renders a collapsible description text component.
- * @param {DescriptionTextProps} props - Component props
- * @returns {JSX.Element} The rendered description
+ *
+ * @param props - Component props
+ * @returns The rendered description
  */
 export function DescriptionText({ description, sxClasses }: DescriptionTextProps): JSX.Element {
+  logger.logTraceRender('geoview-custom-legend/components/description-text');
+
   const { cgpv } = window as TypeWindow;
   const { ui } = cgpv;
   const { Box, Typography, KeyboardArrowDownIcon, KeyboardArrowUpIcon, IconButton, Collapse } = ui.elements;
@@ -25,6 +30,9 @@ export function DescriptionText({ description, sxClasses }: DescriptionTextProps
   const displayLanguage = useAppDisplayLanguage();
   const [expanded, setExpanded] = useState<boolean>(!description.collapsed);
 
+  /**
+   * Handles when the user toggles the description visibility
+   */
   const handleToggle = (): void => {
     setExpanded(!expanded);
   };

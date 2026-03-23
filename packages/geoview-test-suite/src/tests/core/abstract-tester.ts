@@ -13,28 +13,28 @@ import { Test } from './test';
  * Extend this class to implement domain-specific test behaviors.
  */
 export abstract class AbstractTester {
-  /** Keep all callback delegate references */
+  /** Callback delegates for the test started event */
   #onTestStartedHandlers: TestDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the test updated event */
   #onTestUpdatedHandlers: TestUpdatedDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the test success event */
   #onSuccessHandlers: SuccessDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the test failure event */
   #onFailureHandlers: FailureDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the test done event */
   #onDoneHandlers: TestDelegate[] = [];
 
-  /** Keep all tests */
+  /** All registered tests */
   #tests: Test[] = [];
 
-  /** Keep the running tests */
+  /** Currently running tests */
   #testsRunning: Test[] = [];
 
-  /** Keep the done tests */
+  /** Completed tests */
   #testsDone: Test[] = [];
 
   /**
@@ -44,7 +44,8 @@ export abstract class AbstractTester {
 
   /**
    * Gets the total number of tests.
-   * @returns {number} The total number of tests.
+   *
+   * @returns The total number of tests
    */
   getTestsTotal(): number {
     return this.#tests.length;
@@ -52,7 +53,8 @@ export abstract class AbstractTester {
 
   /**
    * Gets the total number of currently running tests.
-   * @returns {number} The total number of tests.
+   *
+   * @returns The total number of tests
    */
   getTestsRunning(): number {
     return this.#testsRunning.length;
@@ -60,7 +62,8 @@ export abstract class AbstractTester {
 
   /**
    * Gets the total number of currently done tests.
-   * @returns {number} The total number of tests.
+   *
+   * @returns The total number of tests
    */
   getTestsDone(): number {
     return this.#testsDone.length;
@@ -68,7 +71,8 @@ export abstract class AbstractTester {
 
   /**
    * Gets the total number of currently done successful tests which were successful.
-   * @returns {number} The total number of tests.
+   *
+   * @returns The total number of tests
    */
   getTestsDoneSuccess(): number {
     return this.#testsDone.filter((test) => test.getStatus() === 'success').length;
@@ -76,7 +80,8 @@ export abstract class AbstractTester {
 
   /**
    * Gets the total number of currently done failed tests which were successful.
-   * @returns {number} The total number of tests.
+   *
+   * @returns The total number of tests
    */
   getTestsDoneFailed(): number {
     return this.getTestsDone() - this.getTestsDoneSuccess();
@@ -84,7 +89,8 @@ export abstract class AbstractTester {
 
   /**
    * Gets if all tests are done.
-   * @returns {boolean} Indicate if the tests are all done.
+   *
+   * @returns Indicate if the tests are all done
    */
   getTestsDoneAll(): boolean {
     return this.getTestsDone() === this.getTestsTotal();
@@ -92,7 +98,8 @@ export abstract class AbstractTester {
 
   /**
    * Gets if all the tests are done and successfully.
-   * @returns {boolean} Indicate if the tests are all done and finished successfully.
+   *
+   * @returns Indicate if the tests are all done and finished successfully
    */
   getTestsDoneAllSuccess(): boolean {
     return this.getTestsDoneAll() && this.#tests.every((test) => test.getStatus() === 'success');
@@ -109,12 +116,13 @@ export abstract class AbstractTester {
 
   /**
    * Performs a test using the provided test callback and assertion callback.
+   *
    * @template T The type of the result produced by the test.
-   * @param {string} message - A message describing the test.
-   * @param {BaseTestDelegate<T>} callback - The function to execute to obtain a test result.
-   * @param {BaseAssertionDelegate<T>} callbackAssert - The function to perform assertions on the result.
-   * @param {BaseFinalizeDelegate<T>?} [callbackFinalize] - Optional function to finalize the test after completion.
-   * @returns {Promise<TestResult<T>>} The result wrapped in an {@link TestResult} object.
+   * @param message - A message describing the test
+   * @param callback - The function to execute to obtain a test result
+   * @param callbackAssert - The function to perform assertions on the result
+   * @param [callbackFinalize] - Optional function to finalize the test after completion
+   * @returns A promise that resolves to the {@link Test} result object
    */
   test<T>(
     message: string,
@@ -128,12 +136,14 @@ export abstract class AbstractTester {
 
   /**
    * Performs a test which is supposed to throw an error (a true negative) using the provided test callback and assertion callback.
+   *
    * @template T The expected error that the test should throw.
-   * @param {string} message - A message describing the test.
-   * @param {BaseTestDelegate<T>} callback - The function to execute which should be throwing an error.
-   * @param {BaseAssertionDelegate<T>?} [callbackAssert] - Optional function to perform assertions on the result.
-   * @param {BaseFinalizeDelegate<T>?} [callbackFinalize] - Optional function to finalize the test after completion.
-   * @returns {Promise<TestResult<T>>} The result wrapped in an {@link TestResult} object.
+   * @param message - A message describing the test
+   * @param errorClass - The expected error class that the test should throw
+   * @param callback - The function to execute which should be throwing an error
+   * @param [callbackAssert] - Optional function to perform assertions on the result
+   * @param [callbackFinalize] - Optional function to finalize the test after completion
+   * @returns A promise that resolves to the {@link Test} result object
    */
   testError<T extends Error>(
     message: string,
@@ -150,8 +160,9 @@ export abstract class AbstractTester {
 
   /**
    * Overridable function called when a test is being created for execution.
-   * @returns {Test<T>} test - The test about to be performed.
-   * @protected
+   *
+   * @param message - A message describing the test
+   * @returns The test about to be performed
    */
   protected onCreatingTest<T>(message: string): Test<T> {
     // Create the test
@@ -166,9 +177,8 @@ export abstract class AbstractTester {
 
   /**
    * Overridable function called before any test is executed.
-   * @param {Test} test - The test about to be performed.
-   * @returns {void}
-   * @protected
+   *
+   * @param test - The test about to be performed
    */
   protected onPerformingTest(test: Test): void {
     // Log
@@ -190,9 +200,8 @@ export abstract class AbstractTester {
 
   /**
    * Overridable function called before any test assertion verification is executed.
-   * @param {Test} test - The test about to be assertion verified.
-   * @returns {void}
-   * @protected
+   *
+   * @param test - The test about to be assertion verified
    */
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected onPerformingTestAssertions(test: Test): void {
@@ -206,10 +215,9 @@ export abstract class AbstractTester {
 
   /**
    * Emits a test updated event.
-   * @param {Test} test - The test which updated.
-   * @param {BaseTestChangedEvent} event - The event causing the update.
-   * @returns {void}
-   * @protected
+   *
+   * @param test - The test which updated
+   * @param event - The event causing the update
    */
   protected onPerformingTestStepChanged(test: Test, event: BaseTestChangedEvent): void {
     // Emit
@@ -218,10 +226,9 @@ export abstract class AbstractTester {
 
   /**
    * Emits a success event.
-   * @param {Test} test - The test which succeeded.
-   * @param {T} result - The assertion result.
-   * @returns {void}
-   * @protected
+   *
+   * @param test - The test which succeeded
+   * @param result - The assertion result
    */
   protected onPerformingTestSuccess<T>(test: Test<T>, result: T): void {
     // Update the step - clearing it
@@ -233,11 +240,10 @@ export abstract class AbstractTester {
 
   /**
    * Emits a failure event with a normalized error object.
-   * @param {Test} test - The test which failed.
-   * @param {unknown} error - The thrown error from the assertion or test logic.
-   * @param {boolean} duringFinalization - Indicates if the failure happened during finalization or during the Test regular processing.
-   * @returns {void}
-   * @protected
+   *
+   * @param test - The test which failed
+   * @param error - The thrown error from the assertion or test logic
+   * @param duringFinalization - Indicates if the failure happened during finalization or during the Test regular processing
    */
   protected onPerformingTestFailure<T>(test: Test<T>, error: unknown, duringFinalization: boolean): void {
     // The original status
@@ -263,10 +269,10 @@ export abstract class AbstractTester {
   }
 
   /**
-   * Emits a finalize event.
-   * @param {Test} test - The test which is finalizing.
-   * @returns {void}
-   * @protected
+   * Handles finalization of a test.
+   *
+   * @param test - The test which is finalizing
+   * @param callback - Optional finalization callback
    */
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected onPerformingTestFinalization<T>(test: Test<T>, callback?: BaseFinalizeDelegate<T>): void {
@@ -278,10 +284,9 @@ export abstract class AbstractTester {
   }
 
   /**
-   * Emits a done event.
-   * @param {Test} test - The test which is finalizing.
-   * @returns {void}
-   * @protected
+   * Handles test completion and emits a done event.
+   *
+   * @param test - The test which has completed
    */
   protected onPerformingTestDone<T>(test: Test<T>): void {
     // Move the test from the running list and add it to the done list
@@ -300,6 +305,7 @@ export abstract class AbstractTester {
 
   /**
    * Executes the full lifecycle of a test, including setup, execution, assertion, success/failure handling, and optional finalization.
+   *
    * The lifecycle consists of:
    * - Creating a new test instance
    * - Executing the core test logic via a callback
@@ -307,13 +313,13 @@ export abstract class AbstractTester {
    * - Running assertions on the result
    * - Handling success or failure states
    * - Optionally finalizing the test (e.g., cleanup or logging)
+   *
    * @template T - The type of the result returned by the test.
-   * @param {string} message - A human-readable description of the test.
-   * @param {BaseTestDelegate<T>} callback - Function that performs the main test logic and returns the result.
-   * @param {BaseAssertionDelegate<T>} callbackAssert - Function that asserts the correctness of the test result.
-   * @param {BaseFinalizeDelegate<T>} [callbackFinalize] - Optional finalization callback, called after the test completes (regardless of success or failure).
-   * @returns {Promise<Test<T>>} A promise that resolves to the fully populated {@link Test} object.
-   * @private
+   * @param message - A human-readable description of the test
+   * @param callback - Function that performs the main test logic and returns the result
+   * @param callbackAssert - Function that asserts the correctness of the test result
+   * @param [callbackFinalize] - Optional finalization callback, called after the test completes (regardless of success or failure)
+   * @returns A promise that resolves to the fully populated {@link Test} object
    */
   async #testPerformTest<T>(
     message: string,
@@ -367,6 +373,7 @@ export abstract class AbstractTester {
 
   /**
    * Executes the full lifecycle of a test when testing for an Error to be thrown, including setup, execution, assertion, success/failure handling, and optional finalization.
+   *
    * The lifecycle consists of:
    * - Creating a new test instance
    * - Executing the core test logic via a callback, expecting an error to be thrown
@@ -374,13 +381,13 @@ export abstract class AbstractTester {
    * - Optionally running additional assertions on the result
    * - Handling success or failure states
    * - Optionally finalizing the test (e.g., cleanup or logging)
+   *
    * @template T - The type of the result returned by the test.
-   * @param {string} message - A human-readable description of the test.
-   * @param {BaseTestDelegate<T>} callback - Function that performs the main test logic and is supposed to throw an Error.
-   * @param {BaseAssertionDelegate<T>} callbackAssert - Function that asserts the correctness of the test result.
-   * @param {BaseFinalizeDelegate<T>} [callbackFinalize] - Optional finalization callback, called after the test completes (regardless of success or failure).
-   * @returns {Promise<Test<T>>} A promise that resolves to the fully populated {@link Test} object.
-   * @private
+   * @param message - A human-readable description of the test
+   * @param callback - Function that performs the main test logic and is supposed to throw an Error
+   * @param callbackAssert - Function that asserts the correctness of the test result
+   * @param [callbackFinalize] - Optional finalization callback, called after the test completes (regardless of success or failure)
+   * @returns A promise that resolves to the fully populated {@link Test} object
    */
   async #testPerformTestError<T extends Error>(
     message: string,
@@ -451,7 +458,8 @@ export abstract class AbstractTester {
 
   /**
    * Adds a test to the list of currently running tests.
-   * @param {Test} test - The test instance to add to the running list.
+   *
+   * @param test - The test instance to add to the running list
    */
   #addTestRunning(test: Test): void {
     this.#testsRunning.push(test);
@@ -459,9 +467,11 @@ export abstract class AbstractTester {
 
   /**
    * Moves a test from the list of running tests to the list of completed tests.
+   *
    * This method removes the specified test from the `#testsRunning` list (if found by ID)
    * and appends it to the `#testsDone` list.
-   * @param {Test} test - The test instance to move.
+   *
+   * @param test - The test instance to move
    */
   #moveTestFromRunningToDone(test: Test): void {
     // Find it
@@ -476,8 +486,9 @@ export abstract class AbstractTester {
 
   /**
    * Handles updates to a test by invoking the relevant change handler.
-   * @param {Test} sender - The test instance that triggered the change.
-   * @param {BaseTestChangedEvent} event - The event details describing the change.
+   *
+   * @param sender - The test instance that triggered the change
+   * @param event - The event details describing the change
    */
   #handleTestStepChanged(sender: Test, event: BaseTestChangedEvent): void {
     // Performing test has been updated
@@ -490,8 +501,8 @@ export abstract class AbstractTester {
 
   /**
    * Emits an event to all handlers.
-   * @param {TestEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitStarted(event: TestEvent): void {
     // Emit the event for all handlers
@@ -500,7 +511,8 @@ export abstract class AbstractTester {
 
   /**
    * Registers a test started event handler.
-   * @param {TestDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onStarted(callback: TestDelegate): void {
     // Register the event handler
@@ -509,7 +521,8 @@ export abstract class AbstractTester {
 
   /**
    * Unregisters a test started event handler.
-   * @param {TestDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offStarted(callback: TestDelegate): void {
     // Unregister the event handler
@@ -518,8 +531,8 @@ export abstract class AbstractTester {
 
   /**
    * Emits an event to all handlers.
-   * @param {TestUpdatedEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitStepChanged(event: TestUpdatedEvent): void {
     // Emit the event for all handlers
@@ -528,7 +541,8 @@ export abstract class AbstractTester {
 
   /**
    * Registers a step updated event handler.
-   * @param {TestUpdatedDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onStepUpdated(callback: TestUpdatedDelegate): void {
     // Register the event handler
@@ -537,7 +551,8 @@ export abstract class AbstractTester {
 
   /**
    * Unregisters a step updated event handler.
-   * @param {TestUpdatedDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offStepUpdated(callback: TestUpdatedDelegate): void {
     // Unregister the event handler
@@ -546,8 +561,8 @@ export abstract class AbstractTester {
 
   /**
    * Emits an event to all handlers.
-   * @param {SuccessEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitSuccess(event: SuccessEvent): void {
     // Emit the event for all handlers
@@ -556,7 +571,8 @@ export abstract class AbstractTester {
 
   /**
    * Registers a success event handler.
-   * @param {SuccessDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onSuccess(callback: SuccessDelegate): void {
     // Register the event handler
@@ -565,7 +581,8 @@ export abstract class AbstractTester {
 
   /**
    * Unregisters a success event handler.
-   * @param {SuccessDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offSuccess(callback: SuccessDelegate): void {
     // Unregister the event handler
@@ -574,8 +591,8 @@ export abstract class AbstractTester {
 
   /**
    * Emits an event to all handlers.
-   * @param {FailureEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitFailure(event: FailureEvent): void {
     // Emit the event for all handlers
@@ -584,7 +601,8 @@ export abstract class AbstractTester {
 
   /**
    * Registers a failure event handler.
-   * @param {FailureDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onFailure(callback: FailureDelegate): void {
     // Register the event handler
@@ -593,7 +611,8 @@ export abstract class AbstractTester {
 
   /**
    * Unregisters a failure event handler.
-   * @param {FailureDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offFailure(callback: FailureDelegate): void {
     // Unregister the event handler
@@ -602,8 +621,8 @@ export abstract class AbstractTester {
 
   /**
    * Emits an event to all handlers.
-   * @param {TestEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitDone(event: TestEvent): void {
     // Emit the event for all handlers
@@ -612,7 +631,8 @@ export abstract class AbstractTester {
 
   /**
    * Registers a done event handler.
-   * @param {TestDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onDone(callback: TestDelegate): void {
     // Register the event handler
@@ -621,7 +641,8 @@ export abstract class AbstractTester {
 
   /**
    * Unregisters a done event handler.
-   * @param {TestDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offDone(callback: TestDelegate): void {
     // Unregister the event handler
@@ -631,68 +652,46 @@ export abstract class AbstractTester {
   // #endregion EVENTS
 }
 
-/**
- * Define a delegate for the event handler function signature
- */
+/** Define a delegate for the event handler function signature. */
 export type BaseTestDelegate<T = unknown, U = unknown> = (test: Test<T>) => U | Promise<U>;
 
-/**
- * Define a delegate for the event handler function signature
- */
+/** Define a delegate for the event handler function signature. */
 export type BaseAssertionDelegate<T = unknown> = (test: Test<T>, result: T) => void | Promise<void>;
 
-/**
- * Define a delegate for the event handler function signature
- */
+/** Define a delegate for the event handler function signature. */
 export type BaseFinalizeDelegate<T = unknown> = (test: Test<T>, result: T) => void | Promise<void>;
 
-/**
- * Define an event for the delegate
- */
+/** Define an event for the delegate. */
 export interface TestEvent {
   test: Test;
 }
 
-/**
- * Define a delegate for the event handler function signature
- */
+/** Define a delegate for the event handler function signature. */
 export type TestDelegate = EventDelegateBase<AbstractTester, TestEvent, void>;
 
-/**
- * Define an event for the delegate
- */
+/** Define an event for the delegate. */
 export interface TestUpdatedEvent<T = BaseTestChangedEvent> {
   test: Test;
   event: T;
 }
 
-/**
- * Define a delegate for the event handler function signature
- */
+/** Define a delegate for the event handler function signature. */
 export type TestUpdatedDelegate = EventDelegateBase<AbstractTester, TestUpdatedEvent, void>;
 
-/**
- * Define an event for the delegate
- */
+/** Define an event for the delegate. */
 export interface SuccessEvent<T = unknown> {
   test: Test;
   result: T;
 }
 
-/**
- * Define a delegate for the event handler function signature
- */
+/** Define a delegate for the event handler function signature. */
 export type SuccessDelegate = EventDelegateBase<AbstractTester, SuccessEvent, void>;
 
-/**
- * Define an event for the delegate
- */
+/** Define an event for the delegate. */
 export interface FailureEvent {
   test: Test;
   error: unknown;
 }
 
-/**
- * Define a delegate for the event handler function signature
- */
+/** Define a delegate for the event handler function signature. */
 export type FailureDelegate = EventDelegateBase<AbstractTester, FailureEvent, void>;

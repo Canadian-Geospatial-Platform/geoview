@@ -10,21 +10,23 @@ import { MapEventProcessor } from 'geoview-core/api/event-processors/event-proce
 
 /**
  * Main Map Config testing class.
- * @extends {GVAbstractTester}
  */
 export class MapConfigTester extends GVAbstractTester {
   /**
    * Returns the name of the Tester.
-   * @returns {string} The name of the Tester.
+   *
+   * @returns The name of the Tester
    */
   override getName(): string {
     return 'MapConfigTester';
   }
 
   /**
-   * Test data table with selectedDataTableLayerPath - Layer pre-loaded in config
-   * This tests that the data table is created when a layer is specified in the config and data-table tab is selected
-   * @returns {Promise<Test>} A Promise that resolves when the test completes successfully.
+   * Test data table with selectedDataTableLayerPath - Layer pre-loaded in config.
+   *
+   * This tests that the data table is created when a layer is specified in the config and data-table tab is selected.
+   *
+   * @returns A promise that resolves when the test completes
    */
   testDataTableSelectedTabFooterBar(): Promise<Test> {
     const mapId = this.getMapId();
@@ -76,9 +78,11 @@ export class MapConfigTester extends GVAbstractTester {
   }
 
   /**
-   * Test data table with selectedDataTableLayerPath - Layer pre-loaded in config
-   * This tests that the data table is created when a layer is specified in the config and data-table tab is selected in the app bar
-   * @returns {Promise<Test>} A Promise that resolves when the test completes successfully.
+   * Test data table with selectedDataTableLayerPath - Layer pre-loaded in config.
+   *
+   * This tests that the data table is created when a layer is specified in the config and data-table tab is selected in the app bar.
+   *
+   * @returns A promise that resolves when the test completes
    */
   testDataTableSelectedTabAppBar(): Promise<Test> {
     const mapId = this.getMapId();
@@ -114,7 +118,7 @@ export class MapConfigTester extends GVAbstractTester {
         Test.assertIsDefined('allFeaturesDataArray', allFeaturesData);
 
         // Verify if there is an array of data tables with content
-        test.addStep('Verifying if there si a data-table array with a table inside...');
+        test.addStep('Verifying if there is a data-table array with a table inside...');
         Test.assertIsArray(allFeaturesData);
         Test.assertIsArrayLengthMinimal(allFeaturesData, 1);
 
@@ -131,8 +135,9 @@ export class MapConfigTester extends GVAbstractTester {
 
   /**
    * Test that no footerBar or app bar objects in config results in default footer bar tabs (layers, data-table)
-   * and default app bar tabs (geolocator, legend, details, export)
-   * @returns {Promise<Test>} A Promise that resolves when the test completes successfully.
+   * and default app bar tabs (geolocator, legend, details, export).
+   *
+   * @returns A promise that resolves when the test completes
    */
   testNoFooterBarAppBarConfigHasDefaults(): Promise<Test> {
     const mapId = this.getMapId();
@@ -172,8 +177,9 @@ export class MapConfigTester extends GVAbstractTester {
   }
 
   /**
-   * Test that footerBar/appBar with empty tabs array results in no footer bar an empty app bar
-   * @returns {Promise<Test>} A Promise that resolves when the test completes successfully.
+   * Test that footerBar/appBar with empty tabs array results in no footer bar an empty app bar.
+   *
+   * @returns A promise that resolves when the test completes
    */
   testEmptyFooterBarAppBarTabsHasNoFooter(): Promise<Test> {
     const mapId = this.getMapId();
@@ -206,8 +212,9 @@ export class MapConfigTester extends GVAbstractTester {
   }
 
   /**
-   * Test that no navBar config value results in default navigation controls
-   * @returns {Promise<Test>} A Promise that resolves when the test completes successfully.
+   * Test that no navBar config value results in default navigation controls.
+   *
+   * @returns A promise that resolves when the test completes
    */
   testNoNavBarHasDefaults(): Promise<Test> {
     const mapId = this.getMapId();
@@ -235,8 +242,9 @@ export class MapConfigTester extends GVAbstractTester {
   }
 
   /**
-   * Test that navBar with empty array results in only zoom and rotate controls
-   * @returns {Promise<Test>} A Promise that resolves when the test completes successfully.
+   * Test that navBar with empty array results in only zoom and rotate controls.
+   *
+   * @returns A promise that resolves when the test completes
    */
   testEmptyNavBarHasZoomRotate(): Promise<Test> {
     const mapId = this.getMapId();
@@ -264,8 +272,9 @@ export class MapConfigTester extends GVAbstractTester {
   }
 
   /**
-   * Test that initial view with layerIds sets map extent to layer extent
-   * @returns {Promise<Test>} A Promise that resolves when the test completes successfully.
+   * Test that initial view with layerIds sets map extent to layer extent.
+   *
+   * @returns A promise that resolves when the test completes
    */
   testInitialViewLayerIdsSetExtent(): Promise<Test> {
     const mapId = this.getMapId();
@@ -314,8 +323,9 @@ export class MapConfigTester extends GVAbstractTester {
   }
 
   /**
-   * Test that overlayObjects with pointMarkers are created on the map
-   * @returns {Promise<Test>} A Promise that resolves when the test completes successfully.
+   * Test that overlayObjects with pointMarkers are created on the map.
+   *
+   * @returns A promise that resolves when the test completes
    */
   testOverlayObjectsPointMarkers(): Promise<Test> {
     const mapId = this.getMapId();
@@ -376,8 +386,9 @@ export class MapConfigTester extends GVAbstractTester {
   }
 
   /**
-   * Test that viewSettings minZoom and maxZoom constraints are enforced
-   * @returns {Promise<Test>} A Promise that resolves when the test completes successfully.
+   * Test that viewSettings minZoom and maxZoom constraints are enforced.
+   *
+   * @returns A promise that resolves when the test completes
    */
   testViewSettingsZoomConstraints(): Promise<Test> {
     const mapId = this.getMapId();
@@ -429,13 +440,15 @@ export class MapConfigTester extends GVAbstractTester {
 
   /**
    * Helper function to create a basic map configuration with optional overrides.
-   * @param {[string, unknown][] | [string, unknown]} overrides - Can be:
-   *   - Array of [path, value] pairs:
+   *
+   * @param test - The test instance used to log steps
+   * @param mapId - The map identifier
+   * @param overrides - Optional configuration overrides as path-value pairs
+   *  - Array of [path, value] pairs:
    *     [['footerBar', { tabs: { core: ['data-table'] }, selectedTab: 'data-table' }]]
    *   - Single [path, value] pair:
    *     ['map.viewSettings.initialView', { layerIds: ['geojsonLYR5/polygons.json'] }]
-   * @returns {Promise<MapViewer>} The created map viewer
-   * @private
+   * @returns A promise that resolves to the created map viewer
    */
   async #helperCreateMapConfig(test: Test, mapId: string, overrides: [string, unknown][] | [string, unknown] = []): Promise<MapViewer> {
     const baseConfig = {
@@ -501,10 +514,10 @@ export class MapConfigTester extends GVAbstractTester {
 
   /**
    * Sets a value in an object using a dot-notation path. If value is null or undefined, removes the key.
-   * @param {Record<string, unknown>} obj - The object to modify
-   * @param {string} path - Dot-notation path like 'map.viewSettings.initialView'
-   * @param {unknown} value - The value to set, or null/undefined to remove
-   * @private
+   *
+   * @param obj - The object to modify
+   * @param path - Dot-notation path like 'map.viewSettings.initialView'
+   * @param value - The value to set, or null/undefined to remove
    */
   static #setValueByPath(obj: Record<string, unknown>, path: string, value: unknown): void {
     const keys = path.split('.');

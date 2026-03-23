@@ -8,9 +8,9 @@ import { IconButton, EditIcon, EditOffIcon } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 
 /**
- * Create an edit button to toggle editing capabilities
+ * Creates an edit button to toggle editing capabilities.
  *
- * @returns {JSX.Element} the created edit button
+ * @returns The edit button element
  */
 export default function Edit(): JSX.Element {
   // Log

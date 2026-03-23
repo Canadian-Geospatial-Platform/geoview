@@ -19,15 +19,16 @@ import { DateMgt } from 'geoview-core/core/utils/date-mgt';
 import { getSxClasses } from './time-slider-style';
 import { Switch } from 'geoview-core/ui/switch/switch';
 
+/** Properties for the TimeSlider component. */
 interface TimeSliderProps {
   layerPath: string;
 }
 
 /**
- * Creates a panel with time sliders
+ * Creates a panel with time sliders.
  *
- * @param {TimeSliderProps} props - Time slider properties
- * @returns {JSX.Element} the slider panel
+ * @param props - Time slider properties
+ * @returns The slider panel
  */
 export function TimeSlider(props: TimeSliderProps): JSX.Element {
   // Log
@@ -156,7 +157,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
   /**
    * Moves the slider handles based on the specified direction.
-   * @param direction - The direction to move the slider ('back' or 'forward').
+   *
+   * @param direction - The direction to move the slider ('back' or 'forward')
    */
   const moveSlider = useCallback(
     (direction: 'back' | 'forward'): void => {
@@ -268,28 +270,44 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     moveSlider('forward');
   }, [moveSlider]);
 
-  // #region HANDLE FUNCTIONS
+  // #region Handlers
+
+  /**
+   * Handles when the user clicks the back button.
+   */
   const handleBack = useCallback((): void => {
     sliderValueRef.current = reversed ? values[1] : values[0];
     moveBack();
   }, [moveBack, reversed, values]);
 
+  /**
+   * Handles when the user clicks the forward button.
+   */
   const handleForward = useCallback((): void => {
     [sliderValueRef.current] = values;
     moveForward();
   }, [moveForward, values]);
 
+  /**
+   * Handles when the user clicks the lock button.
+   */
   const handleLock = useCallback((): void => {
     clearTimeout(playIntervalRef.current);
     setLocked(layerPath, !locked);
   }, [layerPath, locked, setLocked]);
 
+  /**
+   * Handles when the user clicks the play/pause button.
+   */
   const handlePlay = useCallback((): void => {
     clearTimeout(playIntervalRef.current);
     sliderValueRef.current = reversed ? values[1] : values[0];
     setIsPlaying(!isPlaying);
   }, [isPlaying, reversed, values]);
 
+  /**
+   * Handles when the user clicks the reverse button.
+   */
   const handleReverse = useCallback((): void => {
     clearTimeout(playIntervalRef.current);
     setReversed(layerPath, !reversed);
@@ -299,6 +317,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     }
   }, [isPlaying, layerPath, moveBack, moveForward, reversed, setReversed]);
 
+  /**
+   * Handles when the user changes the time delay.
+   */
   const handleTimeChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>): void => {
       setDelay(layerPath, Number(event.target.value));
@@ -306,6 +327,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     [layerPath, setDelay]
   );
 
+  /**
+   * Handles when the user changes the step value.
+   */
   const handleStepChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>): void => {
       setStep(layerPath, Number(event.target.value));
@@ -313,6 +337,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     [layerPath, setStep]
   );
 
+  /**
+   * Handles when the user toggles the filtering checkbox.
+   */
   const handleCheckbox = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>, newValue: boolean): void => {
       setFiltering(layerPath, newValue);
@@ -326,6 +353,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
   /**
    * Handles when the slider changes in the UI.
+   *
    * Adjusts the local state so the Slider thumb updates.
    */
   const handleSliderChange = useCallback(
@@ -346,6 +374,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
 
   /**
    * Handles when the slider thumb has committed to a value in the slider.
+   *
    * Adjusts the main time slider store with the values.
    */
   const handleSliderChangeCommitted = useCallback(
@@ -404,10 +433,10 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
   // #endregion
 
   /**
-   * Create labels for values on slider
+   * Creates labels for values on slider.
    *
-   * @param {number} theValue - The value of the slider handle
-   * @returns {string} A formatted time string or ISO date string
+   * @param theValue - The value of the slider handle
+   * @returns A formatted time string or ISO date string
    */
   const handleLabelFormat = useCallback(
     (theValue: number): string => {

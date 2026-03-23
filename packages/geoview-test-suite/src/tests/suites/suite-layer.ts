@@ -11,9 +11,10 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
   #layerTester: LayerTester;
 
   /**
-   * Constructs the Test Suite
-   * @param {API} api - The shared api
-   * @param {MapViewer} mapViewer - The map viewer
+   * Constructs the Test Suite.
+   *
+   * @param api - The shared api
+   * @param mapViewer - The map viewer
    */
   constructor(api: API, mapViewer: MapViewer) {
     super(api, mapViewer);
@@ -25,7 +26,8 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
 
   /**
    * Returns the name of the Test Suite.
-   * @returns {string} The name of the Test Suite.
+   *
+   * @returns The name of the Test Suite
    */
   override getName(): string {
     return 'Layer Test Suite';
@@ -33,7 +35,8 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
 
   /**
    * Returns the description of the Test Suite.
-   * @returns {string} The description of the Test Suite.
+   *
+   * @returns The description of the Test Suite
    */
   override getDescriptionAsHtml(): string {
     return 'Test Suite to perform various layer related tests.';
@@ -41,9 +44,8 @@ export class GVTestSuiteLayer extends GVAbstractTestSuite {
 
   /**
    * Overrides the implementation to perform the tests for this Test Suite.
-   * @returns {Promise<unknown>} A Promise which resolves when tests are completed.
-   * @override
-   * @protected
+   *
+   * @returns A promise that resolves when tests are completed
    */
   protected override onLaunchTestSuite(): Promise<unknown> {
     // // GV START DEBUG SECTION TO NOT HAVE TO TEST EVERYTHING EVERYTIME

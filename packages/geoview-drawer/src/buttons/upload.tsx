@@ -8,9 +8,9 @@ import { IconButton, UploadIcon } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
 
 /**
- * Create a upload button to upload all drawings from the viewer
+ * Creates an upload button to upload drawings to the viewer.
  *
- * @returns {JSX.Element} the created upload button
+ * @returns The upload button element
  */
 export default function Upload(): JSX.Element {
   // Log
@@ -19,6 +19,7 @@ export default function Upload(): JSX.Element {
   const { cgpv } = window as TypeWindow;
   const { useTheme } = cgpv.ui;
   const { useMemo, useCallback } = cgpv.reactUtilities.react;
+
   // Get store values
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);

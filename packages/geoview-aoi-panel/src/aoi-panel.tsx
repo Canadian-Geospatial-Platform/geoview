@@ -7,25 +7,39 @@ import { MapEventProcessor } from 'geoview-core/api/event-processors/event-proce
 import { logger } from 'geoview-core/core/utils/logger';
 import { getSxClasses } from './area-of-interest-style';
 
+/** Props for the AoiPanel component. */
 interface AoiPanelProps {
   config: TypeAoiProps;
 }
 
+/** Represents a single Area of Interest item. */
 interface AoiItem {
   aoiTitle: string;
   imageUrl: string;
   extent: Extent;
 }
 
+/** List of Area of Interest items. */
 type AoiListItems = AoiItem[];
 
+/** Configuration type for the AOI panel plugin. */
 export type TypeAoiProps = {
   isOpen: boolean;
   aoiList: AoiListItems;
   version: string;
 };
 
+/**
+ * Area of Interest panel component.
+ *
+ * Displays a grid of cards for each AOI item, allowing the user to zoom and highlight an extent.
+ *
+ * @param props - The component props
+ * @returns The AOI panel element
+ */
 export function AoiPanel(props: AoiPanelProps): JSX.Element {
+  logger.logTraceRender('geoview-aoi-panel/aoi-panel');
+
   const { config } = props;
   const { aoiList } = config;
 
@@ -42,11 +56,11 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
   const mapProjectionEPSG = useMapProjectionEPSG();
   const { highlightBBox } = useMapStoreActions();
 
+  /**
+   * Handles when the user clicks on an AOI card
+   */
   const handleOnClick = useCallback(
     (aoiItem: AoiItem) => {
-      // Log
-      logger.logTraceUseCallback('AOI-PANEL - handleOnClick');
-
       // Project the extent from lonlatto map projection
       const extentInMapProjection = Projection.transformExtentFromProj(
         aoiItem.extent,

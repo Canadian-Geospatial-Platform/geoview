@@ -6,17 +6,18 @@ import type { TypeDisplayLanguage } from 'geoview-core/api/types/map-schema-type
 
 /**
  * Main Map testing class.
- * @extends {GVAbstractTester}
  */
 export class CoreTester extends GVAbstractTester {
-  // The epoch for new year 2000 midnight
+  /** The epoch for new year 2000 midnight */
   static readonly JAN1_2000_EPOCH = 946684800000; // 2000-01-01 00:00:00 UTC
+  /** The date object for new year 2000 midnight */
   static readonly JAN1_2000_DATE = new Date(CoreTester.JAN1_2000_EPOCH);
+  /** The ISO string with Z for new year 2000 midnight */
   static readonly JAN1_2000_ISO_WITH_Z = '2000-01-01T00:00:00Z';
-  // 19h in Toronto on Dec 31 1999 is the same instant as midnight UTC
+  /** 19h in Toronto on Dec 31 1999 is the same instant as midnight UTC */
   static readonly JAN1_2000_ISO_WITH_EXPLICIT_TIMEZONE = '1999-12-31T19:00:00-05:00';
 
-  // Epoch Results
+  /** Epoch Results */
   static readonly JAN1_2000_0000_ISO = '2000-01-01T00:00:00.000';
   static readonly JAN1_2000_0500_ISO = '2000-01-01T05:00:00.000';
   static readonly JAN1_1999_1900_ISO = '1999-12-31T19:00:00.000';
@@ -41,18 +42,18 @@ export class CoreTester extends GVAbstractTester {
   static readonly JAN2_2000_0700_LONG_EN = 'January 2, 2000 @ 07:00';
   static readonly JAN2_2000_0700_LONG_FR = '2 janvier, 2000 @ 07:00';
 
-  // Jan 2 2000 with month first, standard
+  /** Jan 2 2000 with month first, standard */
   static readonly JAN2_2000_NOTIME_USSTANDARD = '01/02/2000';
-  // Jan 2 2000 with month first with time 10:00
+  /** Jan 2 2000 with month first with time 10:00 */
   static readonly JAN2_2000_0200_USSTANDARD = '01/02/2000 02:00';
-  // Jan 2 2000 with month first with time 10:00
+  /** Jan 2 2000 with month first with time 10:00 */
   static readonly JAN2_2000_1000_USSTANDARD = '01/02/2000 10:00';
-  // Jan 2 2000 with month first with time 6 PM
+  /** Jan 2 2000 with month first with time 6 PM */
   static readonly JAN2_2000_6PM_USSTANDARD = '01/02/2000 6:00 PM';
-  // Jan 2 2000 with month first with time 6 PM
+  /** Jan 2 2000 with month first with time 11 PM */
   static readonly JAN2_2000_2300_USSTANDARD = '01/02/2000 23:00';
 
-  // US Standard Results
+  /** US Standard Results */
   static readonly JAN1_2000_1900_ISO = '2000-01-01T19:00:00.000';
   static readonly JAN1_2000_2100_ISO = '2000-01-01T21:00:00.000';
   static readonly JAN2_2000_0000_ISO = '2000-01-02T00:00:00.000';
@@ -66,17 +67,18 @@ export class CoreTester extends GVAbstractTester {
   static readonly JAN2_2000_2300_ISO = '2000-01-02T23:00:00.000';
   static readonly JAN3_2000_0400_ISO = '2000-01-03T04:00:00.000';
 
-  // Jan 2 2000 with day first, odd format
+  /** Jan 2 2000 with day first, odd format */
   static readonly JAN2_2000_NOTIME_DAY_FIRST = '02/01/2000';
   static readonly JAN2_2000_6PM_DAY_FIRST = '02/01/2000 6:00 PM';
   static readonly JAN2_2000_1800_DAY_FIRST = '02/01/2000 18:00';
 
-  // Toronto IANA
+  /** Toronto IANA */
   static readonly TorontoIANA = 'America/Toronto';
 
   /**
    * Returns the name of the Tester.
-   * @returns {string} The name of the Tester.
+   *
+   * @returns The name of the Tester
    */
   override getName(): string {
     return 'CoreTester';
@@ -86,7 +88,8 @@ export class CoreTester extends GVAbstractTester {
 
   /**
    * Tests dates from epoch timestamps.
-   * @returns {Promise<Test<string[]>>} A Promise resolving when the test completes.
+   *
+   * @returns A promise resolving when the test completes
    */
   testDatesEpochTimestamps(): Promise<Test<DatesSet[]>> {
     // Test
@@ -267,7 +270,8 @@ export class CoreTester extends GVAbstractTester {
 
   /**
    * Tests dates from US standards.
-   * @returns {Promise<Test<string[]>>} A Promise resolving when the test completes.
+   *
+   * @returns A promise resolving when the test completes
    */
   testDatesUSStandard(): Promise<Test<DatesSet[]>> {
     // Test
@@ -422,8 +426,9 @@ export class CoreTester extends GVAbstractTester {
   }
 
   /**
-   * Tests dates from epoch timestamps.
-   * @returns {Promise<Test<string[]>>} A Promise resolving when the test completes.
+   * Tests dates from special formats.
+   *
+   * @returns A promise resolving when the test completes
    */
   testDatesSpecialFormats(): Promise<Test<DatesSet[]>> {
     // Test
@@ -495,17 +500,17 @@ export class CoreTester extends GVAbstractTester {
    * This helper is used by test cases to exhaustively validate that date parsing
    * and formatting semantics behave correctly for all supported combinations,
    * and that calendar dates do not shift due to timezone conversions.
-   * @param {DateLike} date - Input date value to format (string, number, or Date)
-   * @param {string | undefined} outputFormat - Output format string passed to
+   *
+   * @param date - Input date value to format (string, number, or Date)
+   * @param outputFormat - Output format string passed to
    * `formatDate`; when undefined, the default ISO format is used
-   * @param {TypeDisplayLanguage | undefined} language - Locale used when formatting
+   * @param language - Locale used when formatting
    * the date; when undefined, the default locale is 'en'
-   * @param {string | undefined} inputFormat - Optional input format used when
+   * @param inputFormat - Optional input format used when
    * parsing string dates
-   * @returns {DatesSet} Object containing the formatted date values for every
+   * @returns Object containing the formatted date values for every
    * output timezone / temporal mode / input timezone combination, plus the
    * original input string
-   * @static
    */
   static #formatDates(
     date: DateLike,
@@ -616,6 +621,7 @@ export class CoreTester extends GVAbstractTester {
   /**
    * Asserts expected date outputs when parsing epoch values, actual Dates or ISO date strings
    * that include an explicit UTC timezone indicator (`Z`).
+   *
    * In this scenario:
    * - The input represents an absolute instant in UTC.
    * - Calendar temporal mode must ignore timezone context and preserve the
@@ -626,16 +632,15 @@ export class CoreTester extends GVAbstractTester {
    * - dateUTC: the canonical UTC calendar day derived from the instant
    * - dateToronto: the formatted date when the instant is rendered in
    *   America/Toronto, potentially resulting in a previous calendar day
-   * @param {Test} test - Test instance used to record assertion steps
-   * @param {DatesSet} result - Map of actual formatted date outputs,
+   *
+   * @param test - Test instance used to record assertion steps
+   * @param result - Map of actual formatted date outputs,
    * keyed by scenario name
-   * @param {string} dateUTC - Expected formatted date when the output timezone is
+   * @param dateUTC - Expected formatted date when the output timezone is
    * UTC (calendar mode and instant mode without timezone-induced shift)
-   * @param {string} dateBefore - Expected formatted date when the output timezone
+   * @param dateBefore - Expected formatted date when the output timezone
    * is America/Toronto in instant mode, where the instant may resolve to an
    * earlier calendar day
-   * @returns {void}
-   * @static
    */
   static #assertDatesFromEpochDatesStringWithTZ(test: Test, result: DatesSet, dateUTC: string, dateBefore: string): void {
     CoreTester.#assertDates(
@@ -655,6 +660,7 @@ export class CoreTester extends GVAbstractTester {
   /**
    * Asserts expected date outputs when parsing a date-time string **without**
    * an explicit timezone indicator. Coming from Epoch timestamp, actual Date or string without trailing `Z` or offset tz.
+   *
    * In this scenario:
    * - Calendar temporal mode must treat the input as a pure calendar day,
    *   producing the same output regardless of input or output timezone.
@@ -667,17 +673,16 @@ export class CoreTester extends GVAbstractTester {
    *   instant to an earlier civil date
    * - dateLater: the instant result when the timezone conversion moves the
    *   instant to a later civil date
-   * @param {Test} test - Test instance used to record assertion steps
-   * @param {DatesSet} result - Map of actual formatted date outputs,
+   *
+   * @param test - Test instance used to record assertion steps
+   * @param result - Map of actual formatted date outputs,
    * keyed by scenario name
-   * @param {string} dateUTC - Expected formatted date when no day-shift occurs
+   * @param dateUTC - Expected formatted date when no day-shift occurs
    * (calendar mode, or instant mode without timezone-induced change)
-   * @param {string} dateBefore - Expected formatted date when instant-mode
+   * @param dateBefore - Expected formatted date when instant-mode
    * conversion shifts the result to an earlier day
-   * @param {string} dateLater - Expected formatted date when instant-mode
+   * @param dateLater - Expected formatted date when instant-mode
    * conversion shifts the result to a later day
-   * @returns {void}
-   * @static
    */
   static #assertDatesFromStringWithoutZ(test: Test, result: DatesSet, dateUTC: string, dateBefore: string, dateLater: string): void {
     CoreTester.#assertDates(
@@ -710,30 +715,29 @@ export class CoreTester extends GVAbstractTester {
    *   → date formatted in America/Toronto,
    *     interpreted as a calendar date,
    *     read as originating from UTC
-   * @param {Test} test - Test instance used to record assertion steps
-   * @param {DatesSet} result - Map of actual formatted date outputs, keyed by scenario name
-   * @param {string} dateUTCCalendarUTC - Expected value when formatting in UTC, using
+   *
+   * @param test - Test instance used to record assertion steps
+   * @param result - Map of actual formatted date outputs, keyed by scenario name
+   * @param dateUTCCalendarUTC - Expected value when formatting in UTC, using
    * calendar semantics, with the input date originating from UTC
-   * @param {string} dateUTCCalendarToronto - Expected value when formatting in UTC, using
+   * @param dateUTCCalendarToronto - Expected value when formatting in UTC, using
    * calendar semantics, with the input date originating from America/Toronto
-   * @param {string} dateTorontoCalendarUTC - Expected value when formatting in
+   * @param dateTorontoCalendarUTC - Expected value when formatting in
    * America/Toronto, using calendar semantics, with the input date
    * originating from UTC
-   * @param {string} dateTorontoCalendarToronto - Expected value when formatting in
+   * @param dateTorontoCalendarToronto - Expected value when formatting in
    * America/Toronto, using calendar semantics, with the input date
    * originating from America/Toronto
-   * @param {string} dateUTCInstantUTC - Expected value when formatting in UTC, using
+   * @param dateUTCInstantUTC - Expected value when formatting in UTC, using
    * instant semantics, with the input date originating from UTC
-   * @param {string} dateUTCInstantToronto - Expected value when formatting in UTC, using
+   * @param dateUTCInstantToronto - Expected value when formatting in UTC, using
    * instant semantics, with the input date originating from America/Toronto
-   * @param {string} dateTorontoInstantUTC - Expected value when formatting in
+   * @param dateTorontoInstantUTC - Expected value when formatting in
    * America/Toronto, using instant semantics, with the input date
    * originating from UTC
-   * @param {string} dateTorontoInstantToronto - Expected value when formatting in
+   * @param dateTorontoInstantToronto - Expected value when formatting in
    * America/Toronto, using instant semantics, with the input date
    * originating from America/Toronto
-   * @returns {void}
-   * @static
    */
   static #assertDates(
     test: Test,

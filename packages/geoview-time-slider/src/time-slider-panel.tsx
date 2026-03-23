@@ -24,17 +24,22 @@ import { CONTAINER_TYPE, TABS } from 'geoview-core/core/utils/constant';
 
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';
 import { TimeSlider } from './time-slider';
+
+/** Properties for the TimeSliderPanel component. */
 interface TypeTimeSliderProps {
   mapId: string;
 }
 
 /**
- * Time slider tab
+ * Time slider tab.
  *
- * @param {TypeTimeSliderProps} props - The properties passed to slider
- * @returns {JSX.Element} The time slider tab
+ * @param props - The properties passed to slider
+ * @returns The time slider tab
  */
 export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
+  // Log
+  logger.logTraceRender('geoview-time-slider/time-slider-panel');
+
   const { mapId } = props;
   const { cgpv } = window as TypeWindow;
   const { reactUtilities } = cgpv;
@@ -53,9 +58,12 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   const layerDisplayDateTimezones = useLayerDisplayDateTimezones();
   const layerTemporalModes = useLayerDateTemporalModes();
 
+  // #region Handlers
+
   /**
    * Handles Layer list when clicked on each layer.
-   * @param {LayerListEntry} layer - layer clicked by the user.
+   *
+   * @param layer - Layer clicked by the user
    */
   const handleClickLayerList = useCallback(
     (layer: LayerListEntry) => {
@@ -69,8 +77,12 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
   );
 
   /**
-   * Gets dates for current filters
-   * @param {TypeTimeSliderValues} timeSliderLayerInfo - Time slider layer info.
+   * Gets dates for current filters.
+   *
+   * @param layerPath - The layer path
+   * @param timeSliderLayerInfo - Time slider layer info
+   * @param language - The display language
+   * @returns The formatted date string or undefined
    */
   const getFilterInfo = useCallback(
     (layerPath: string, timeSliderLayerInfo: TypeTimeSliderValues, language: TypeDisplayLanguage): string | undefined => {
@@ -96,16 +108,21 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
     [layerDisplayDateFormats, layerDisplayDateTimezones, layerTemporalModes]
   );
 
+  // #endregion
+
   // Reacts when the array of layer data updates
   const memoLayersList = useMemo(() => {
     // Log
     logger.logTraceUseMemo('TIME-SLIDER-PANEL - memoLayersList', timeSliderLayers);
 
     /**
-     * Create layer tooltip
-     * @param {TypeTimeSliderValues} timeSliderLayerInfo Time slider layer info.
-     * @param {string} name Time slider layer name.
-     * @returns
+     * Creates layer tooltip.
+     *
+     * @param layerPath - The layer path
+     * @param timeSliderLayerInfo - Time slider layer info
+     * @param language - The display language
+     * @param name - Time slider layer name
+     * @returns The tooltip JSX element
      */
     const getLayerTooltip = (
       layerPath: string,
@@ -178,7 +195,9 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
       });
   }, [timeSliderLayers, visibleInRangeLayers, getFilterInfo, isLayerHiddenOnMap, layerStatuses, layerNames, displayLanguage, mapId]);
 
-  // Unselect layer if it's removed from visibility array
+  /**
+   * Unselects the layer if it's removed from the visibility array.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('TIME-SLIDER-PANEL - check selected layer visibility');
@@ -191,8 +210,10 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
 
   /**
    * Renders the right panel content based on selected Layer path of time slider.
+   *
    * NOTE: Here we return null, so that in responsive grid layout, it can be used as flag to render the guide for time slider.
-   * @returns {JSX.Element | null} JSX.Element | null
+   *
+   * @returns The rendered content or null
    */
   const renderContent = (): JSX.Element | null => {
     if (selectedLayerPath && timeSliderLayers && selectedLayerPath in timeSliderLayers) {

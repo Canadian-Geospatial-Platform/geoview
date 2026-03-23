@@ -10,22 +10,22 @@ import defaultConfig from '../default-config-about-panel.json';
 import type { TypeAboutPanelConfig } from './about-panel-types';
 
 /**
- * About panel plugin
+ * About panel plugin.
  */
 class AboutPanelPlugin extends AppBarPlugin {
   /**
-   * Return the schema that is defined for this package
+   * Returns the schema that is defined for this package.
    *
-   * @returns {unknown} returns the schema for this package
+   * @returns The schema for this package
    */
   override schema(): unknown {
     return schema;
   }
 
   /**
-   * Return the default config for this package
+   * Returns the default config for this package.
    *
-   * @returns {unknown} the default config
+   * @returns The default config
    */
   override defaultConfig(): unknown {
     return defaultConfig;
@@ -33,7 +33,8 @@ class AboutPanelPlugin extends AppBarPlugin {
 
   /**
    * Overrides the default translations for the Plugin.
-   * @returns {Record<string, unknown>} - The translations object for the particular Plugin.
+   *
+   * @returns The translations object for the Plugin
    */
   override defaultTranslations(): Record<string, unknown> {
     return {
@@ -56,7 +57,8 @@ class AboutPanelPlugin extends AppBarPlugin {
 
   /**
    * Overrides the getConfig in order to return the right type.
-   * @returns {TypeAboutPanelConfig} The Swiper config
+   *
+   * @returns The About Panel config
    */
   override getConfig(): TypeAboutPanelConfig {
     // Redirect
@@ -64,8 +66,9 @@ class AboutPanelPlugin extends AppBarPlugin {
   }
 
   /**
-   * Gets the correct icon (default or configured) for the AppBar
-   * @returns {JSX.Element} The icon to be used in the app bar
+   * Gets the correct icon (default or configured) for the AppBar.
+   *
+   * @returns The icon to be used in the app bar
    */
   getIcon(): JSX.Element {
     const config = this.getConfig();
@@ -75,9 +78,9 @@ class AboutPanelPlugin extends AppBarPlugin {
   }
 
   /**
-   * Overrides the onCreateButtonProps to pass the correct props
-   * @returns {IconButtonPropsExtend} The icon button props
-   * @override
+   * Overrides the onCreateButtonProps to pass the correct props.
+   *
+   * @returns The icon button props
    */
   override onCreateButtonProps(): IconButtonPropsExtend {
     // Button props
@@ -92,8 +95,8 @@ class AboutPanelPlugin extends AppBarPlugin {
 
   /**
    * Overrides the creation of the content properties of this AboutPanel AppBar Plugin.
-   * @returns {TypePanelProps} The TypePanelProps for the AboutPanel AppBar Plugin
-   * @override
+   *
+   * @returns The panel properties for the AboutPanel AppBar Plugin
    */
   override onCreateContentProps(): TypePanelProps {
     return {
@@ -105,9 +108,9 @@ class AboutPanelPlugin extends AppBarPlugin {
   }
 
   /**
-   * Overrides the content creation of the AppBar Plugin
-   * @returns {JSX.Element} The about panel content
-   * @override
+   * Overrides the content creation of the AppBar Plugin.
+   *
+   * @returns The about panel content
    */
   override onCreateContent = (): JSX.Element => {
     return <AboutPanel config={this.getConfig()} />;

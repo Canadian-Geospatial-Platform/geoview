@@ -45,15 +45,16 @@ export class Test<T = unknown> {
   /** The error which occurred during the test if any. */
   #error?: Error;
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the status changed event */
   #onStatusChangedHandlers: TestChangedDelegate[] = [];
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the step changed event */
   #onStepChangedHandlers: TestChangedDelegate[] = [];
 
   /**
    * Constructs an {@link Test} instance.
-   * @param message - A message describing the test.
+   *
+   * @param title - A title describing the test
    */
   constructor(title: string) {
     this.id = generateId();
@@ -62,7 +63,8 @@ export class Test<T = unknown> {
 
   /**
    * Gets the current title.
-   * @returns {string} The title.
+   *
+   * @returns The title
    */
   getTitle(): string {
     return this.#title;
@@ -70,23 +72,26 @@ export class Test<T = unknown> {
 
   /**
    * Sets the title.
-   * @param {string} title - The title to set.
+   *
+   * @param title - The title to set
    */
   setTitle(title: string): void {
     this.#title = title;
   }
 
   /**
-   * Gets the current title.
-   * @returns {TestType} The title.
+   * Gets the current type.
+   *
+   * @returns The type
    */
   getType(): TestType {
     return this.#type;
   }
 
   /**
-   * Sets the title.
-   * @param {TestType} type - The type to set.
+   * Sets the type.
+   *
+   * @param type - The type to set
    */
   setType(type: TestType): void {
     this.#type = type;
@@ -94,7 +99,8 @@ export class Test<T = unknown> {
 
   /**
    * Gets the current status of the test.
-   * @returns {string | undefined} The current step, or undefined if none is set.
+   *
+   * @returns The current status
    */
   getStatus(): TestStatus {
     return this.#status;
@@ -102,7 +108,8 @@ export class Test<T = unknown> {
 
   /**
    * Sets the current status of the test.
-   * @param {TestStatus} status - The status value to set.
+   *
+   * @param status - The status value to set
    */
   setStatus(status: TestStatus): void {
     this.#status = status;
@@ -110,8 +117,9 @@ export class Test<T = unknown> {
   }
 
   /**
-   * Gets the step processed so far.
-   * @returns {TestStep[]} The steps processed so far.
+   * Gets the steps processed so far.
+   *
+   * @returns The steps processed so far
    */
   getSteps(): TestStep[] {
     return this.#steps;
@@ -119,7 +127,8 @@ export class Test<T = unknown> {
 
   /**
    * Gets the steps formatted in html <ul> list.
-   * @returns {string} The steps formatted in html string.
+   *
+   * @returns The steps formatted in html string
    */
   getStepsAsHtml(): string {
     const steps = this.getSteps();
@@ -162,9 +171,10 @@ export class Test<T = unknown> {
 
   /**
    * Adds the step and emits a step change event.
-   * @param {string} step - The step value to add.
-   * @param {TypeStepLevel} level - The step level.
-   * @param {string} color - The step color for display purposes.
+   *
+   * @param step - The step value to add
+   * @param level - The step level
+   * @param color - The step color for display purposes
    */
   addStep(step: string, level: TestStepLevel = 'regular', color: string = 'black'): void {
     this.#steps.push(new TestStep(step, level, color));
@@ -173,7 +183,8 @@ export class Test<T = unknown> {
 
   /**
    * Gets the assertion result associated with this instance.
-   * @returns {T | undefined} The assertion result, or undefined if not set.
+   *
+   * @returns The assertion result, or undefined if not set
    */
   getResult(): T | undefined {
     return this.#result;
@@ -181,7 +192,8 @@ export class Test<T = unknown> {
 
   /**
    * Sets the assertion result for this instance.
-   * @param {T} result - The result to associate.
+   *
+   * @param result - The result to associate
    */
   setResult(result: T): void {
     this.#result = result;
@@ -189,15 +201,17 @@ export class Test<T = unknown> {
 
   /**
    * Gets the error which occurred during the test.
-   * @returns {Error | undefined} The error if any.
+   *
+   * @returns The error if any
    */
   getError(): Error | undefined {
     return this.#error;
   }
 
   /**
-   * Sets the error which occurred during the test..
-   * @param {Error} error - The error.
+   * Sets the error which occurred during the test.
+   *
+   * @param error - The error
    */
   setError(error: Error): void {
     this.#error = error;
@@ -209,11 +223,10 @@ export class Test<T = unknown> {
 
   /**
    * Rounds a number to the specified precision.
-   * @param {number} value - The number to round.
-   * @param {number} precision - The number of decimal places.
-   * @returns {number} The rounded value.
-   * @private
-   * @static
+   *
+   * @param value - The number to round
+   * @param precision - The number of decimal places
+   * @returns The rounded value
    */
   static #roundToPrecision(value: number, precision: number): number {
     const multiplier = Math.pow(10, precision);
@@ -222,11 +235,11 @@ export class Test<T = unknown> {
 
   /**
    * Asserts that two values are strictly equal (`===`).
-   * @param {T} actualValue - The actual value being checked.
-   * @param {T} expectedValue - The expected value to compare against.
-   * @param {number} [roundToPrecision] - Optional number of decimal places to round to before comparing (for numbers only).
+   *
+   * @param actualValue - The actual value being checked
+   * @param expectedValue - The expected value to compare against
+   * @param [roundToPrecision] - Optional number of decimal places to round to before comparing (for numbers only)
    * @throws {AssertionError} If the values are not strictly equal.
-   * @static
    */
   static assertIsEqual<T = unknown>(actualValue: T, expectedValue: T, roundToPrecision?: number): asserts actualValue is T {
     // Redirect
@@ -241,11 +254,11 @@ export class Test<T = unknown> {
 
   /**
    * Asserts that two values are not equal (`!==`).
-   * @param {T} actualValue - The actual value being checked.
-   * @param {T} expectedValue - The expected value to compare against.
-   * @param {number} [roundToPrecision] - Optional number of decimal places to round to before comparing (for numbers only).
+   *
+   * @param actualValue - The actual value being checked
+   * @param expectedValue - The expected value to compare against
+   * @param [roundToPrecision] - Optional number of decimal places to round to before comparing (for numbers only)
    * @throws {AssertionValueDifferentError} If the values are equal.
-   * @static
    */
   static assertIsNotEqual<T = unknown>(actualValue: T, expectedValue: T, roundToPrecision?: number): asserts actualValue is T {
     // Redirect
@@ -260,10 +273,10 @@ export class Test<T = unknown> {
 
   /**
    * Asserts that a value is defined.
-   * @param {string} propertyPath - The name or path of the array being validated.
-   * @param {T | undefined} actualValue - The actual value being checked.
+   *
+   * @param propertyPath - The name or path of the array being validated
+   * @param actualValue - The actual value being checked
    * @throws {AssertionUndefinedError} If the value isn't defined.
-   * @static
    */
   static assertIsDefined<T = unknown>(propertyPath: string, actualValue: T | undefined): void {
     // Checks if the value is defined
@@ -275,10 +288,10 @@ export class Test<T = unknown> {
 
   /**
    * Asserts that a value is undefined.
-   * @param {string} propertyPath - The name or path of the array being validated.
-   * @param {T | undefined} actualValue - The actual value being checked.
+   *
+   * @param propertyPath - The name or path of the array being validated
+   * @param actualValue - The actual value being checked
    * @throws {AssertionUndefinedError} If the value isn't defined.
-   * @static
    */
   static assertIsUndefined<T = unknown>(propertyPath: string, actualValue: T | undefined): void {
     // Checks if the value is defined
@@ -290,10 +303,10 @@ export class Test<T = unknown> {
 
   /**
    * Asserts that a value is of the correct instance type.
-   * @param {unknown} actualValue - The actual value being checked.
-   * @param {Type<T>} expectedType - The expected class type.
+   *
+   * @param actualValue - The actual value being checked
+   * @param expectedType - The expected class type
    * @throws {AssertionWrongInstanceError} If the value isn't defined.
-   * @static
    */
   static assertIsInstance<T>(actualValue: unknown, expectedType: ClassType<T>): asserts actualValue is T {
     // Checks if the value is defined, first
@@ -308,10 +321,10 @@ export class Test<T = unknown> {
 
   /**
    * Asserts that a value is of the correct instance type.
-   * @param {T} actualError - The actual error being checked.
-   * @param {Type<T>} expectedType - The expected class type.
+   *
+   * @param actualError - The actual error being checked
+   * @param expectedType - The expected class type
    * @throws {AssertionWrongInstanceError} If the value isn't defined.
-   * @static
    */
   static assertIsErrorInstance<T extends Error>(actualError: T, expectedType: ClassType<T>): asserts actualError is T {
     // Checks if the value is defined, first
@@ -326,11 +339,12 @@ export class Test<T = unknown> {
 
   /**
    * Manually fails a test with a custom message.
+   *
    * This is useful when you need to explicitly fail a test based on custom logic or conditions
    * that cannot be expressed with the other assertion methods.
-   * @param {string} message - Custom message explaining why the test is being manually failed.
+   *
+   * @param message - Custom message explaining why the test is being manually failed
    * @throws {AssertionManualFailError} Always throws to fail the test.
-   * @static
    */
   static assertFail(message: string = 'Test manually failed'): never {
     // Throw the manual fail error
@@ -339,12 +353,14 @@ export class Test<T = unknown> {
 
   /**
    * Compares two values for strict equality, with optional numeric rounding.
+   *
    * If `roundToPrecision` is provided and both values are numbers, the values are
    * rounded to the given precision before comparison.
-   * @param {T} actualValue - The actual value to compare.
-   * @param {T} expectedValue - The expected value to compare against.
-   * @param {number?} [roundToPrecision] - Optional number of decimal places to round numeric values to.
-   * @returns An object describing whether the values are equal and the values used for comparison.
+   *
+   * @param actualValue - The actual value to compare
+   * @param expectedValue - The expected value to compare against
+   * @param [roundToPrecision] - Optional number of decimal places to round numeric values to
+   * @returns An object describing whether the values are equal and the values used for comparison
    */
   static #checkValuesEqual<T = unknown>(actualValue: T, expectedValue: T, roundToPrecision?: number): EqualHelper<T> {
     // If rounding is specified and both values are numbers, round them first
@@ -364,9 +380,9 @@ export class Test<T = unknown> {
 
   /**
    * Asserts that a value is an array.
-   * @param {unknown} actualValue - The object to check.
+   *
+   * @param actualValue - The object to check
    * @throws {AssertionValueNotAnArrayError} If the value is not an array.
-   * @static
    */
   static assertIsArray(actualValue: unknown | unknown[] | undefined): asserts actualValue is unknown[] {
     if (Array.isArray(actualValue)) return;
@@ -377,11 +393,11 @@ export class Test<T = unknown> {
 
   /**
    * Asserts that a length of a given array is equal to the expected length.
-   * @param {unknown[] | undefined} array - The array to check the length.
-   * @param {number} expectedValue - The expected length of the array.
+   *
+   * @param array - The array to check the length
+   * @param expectedValue - The expected length of the array
    * @throws {AssertionArrayLengthError} If the values are not strictly equal.
    * @throws {AssertionValueNotAnArrayError} If the value is not an array.
-   * @static
    */
   static assertIsArrayLengthEqual(array: unknown[] | undefined, expectedValue: number): void {
     // Test if it is an array
@@ -395,11 +411,11 @@ export class Test<T = unknown> {
 
   /**
    * Asserts that a length of a given array is at least of minimum length.
-   * @param {unknown[] | undefined} array - The array to check the length.
-   * @param {number} expectedMinimumLength - The expected minimum length of the array.
+   *
+   * @param array - The array to check the length
+   * @param expectedMinimumLength - The expected minimum length of the array
    * @throws {AssertionArrayLengthMinimalError} If the values are not strictly equal.
    * @throws {AssertionValueNotAnArrayError} If the value is not an array.
-   * @static
    */
   static assertIsArrayLengthMinimal(array: unknown[] | undefined, expectedMinimumLength: number): void {
     // Test if it is an array
@@ -413,12 +429,12 @@ export class Test<T = unknown> {
 
   /**
    * Asserts that the given array includes the expected value.
+   *
    * @template T - The type of the elements in the array.
-   * @param {T[]} array - The array to search.
-   * @param {T} expectedValue - The value expected to be included in the array.
+   * @param array - The array to search
+   * @param expectedValue - The value expected to be included in the array
    * @throws {AssertionArrayNotIncludingError} Throws if the expected value is not found in the array.
    * @throws {AssertionValueNotAnArrayError} If the value is not an array.
-   * @static
    */
   static assertArrayIncludes<T = unknown>(array: T[], expectedValue: T): void {
     // Test if it is an array
@@ -432,12 +448,12 @@ export class Test<T = unknown> {
 
   /**
    * Asserts that the given array excludes a particular value.
+   *
    * @template T - The type of the elements in the array.
-   * @param {T[]} array - The array to search.
-   * @param {T} expectedValue - The value expected to be included in the array.
+   * @param array - The array to search
+   * @param expectedValue - The value expected to be included in the array
    * @throws {AssertionArrayNotIncludingError} Throws if the expected value is not found in the array.
    * @throws {AssertionValueNotAnArrayError} If the value is not an array.
-   * @static
    */
   static assertArrayExcludes<T = unknown>(array: T[], expectedValue: T): void {
     // Test if it is an array
@@ -451,13 +467,13 @@ export class Test<T = unknown> {
 
   /**
    * Asserts that two arrays have equal values and in the same order (primitive comparison).
-   * @param {T[]} actualValue - The actual array being checked.
-   * @param {T[]} expectedValue - The expected array to compare against.
-   * @param {number} [roundToPrecision] - Optional number of decimal places to round to before comparing (for number arrays only).
+   *
+   * @param actualValue - The actual array being checked
+   * @param expectedValue - The expected array to compare against
+   * @param [roundToPrecision] - Optional number of decimal places to round to before comparing (for number arrays only)
    * @throws {AssertionValueNotAnArrayError} If one value isn't an array.
    * @throws {AssertionArrayLengthError} If the lengths aren't the same between the 2 arrays.
    * @throws {AssertionArraysNotEqualError} If one object isn't the same as the other object in the other array based on the primitive `===` comparer.
-   * @static
    */
   static assertIsArrayEqual<T = unknown>(actualValue: T[], expectedValue: T[], roundToPrecision?: number): void {
     // Redirect using a primitive comparer with optional rounding
@@ -477,13 +493,13 @@ export class Test<T = unknown> {
 
   /**
    * Asserts that calls `assertJsonObject` for each object of the first array against each object of the second array, in the same order.
-   * @param {T[]} actualValue - The actual array being checked.
-   * @param {T[]} expectedValue - The expected array to compare against.
+   *
+   * @param actualValue - The actual array being checked
+   * @param expectedValue - The expected array to compare against
    * @throws {AssertionValueNotAnArrayError} If one value isn't an array.
    * @throws {AssertionArrayLengthError} If the lengths aren't the same between the 2 arrays.
    * @throws {AssertionArraysNotEqualError} If one object isn't the same as the other object in the other array based on the `assertJsonObject` comparer.
    * @throws {AssertionJSONObjectError} If one object isn't the same as the other object in the other array based on the `assertJsonObject` comparer.
-   * @static
    */
   static assertIsArrayEqualJsons<T = unknown>(actualValue: T[], expectedValue: T[]): void {
     // Redirect using a json comparer
@@ -501,13 +517,12 @@ export class Test<T = unknown> {
 
   /**
    * Asserts that two arrays have equal values and in the same order (deep comparison).
-   * @param {T[]} actualValue - The actual array being checked.
-   * @param {T[]} expectedValue - The expected array to compare against.
+   *
+   * @param actualValue - The actual array being checked
+   * @param expectedValue - The expected array to compare against
    * @throws {AssertionValueNotAnArrayError} If one value isn't an array.
    * @throws {AssertionArrayLengthError} If the lengths aren't the same between the 2 arrays.
    * @throws {AssertionArraysNotEqualError} If one object isn't the same as the other object in the other array based on the provided comparer mechanism.
-   * @static
-   * @private
    */
   static #assertIsArrayEqualComparer<T = unknown>(actualValue: T[], expectedValue: T[], comparer: ComparerDelegate<T>): void {
     // Check if both are arrays
@@ -536,11 +551,11 @@ export class Test<T = unknown> {
 
   /**
    * Asserts that a JSON object has at least all the properties/values of the expected JSON object.
-   * @param {unknown} actualObject - The JSON object to check.
-   * @param {unknown} expectedObject - The JSON object to representing the properties/values the actual value should have.
+   *
+   * @param actualObject - The JSON object to check
+   * @param expectedObject - The JSON object to representing the properties/values the actual value should have
    * @throws {TestError} If the JSON object being verified is actually a Promise (likely a dev issue).
    * @throws {AssertionJSONObjectError} If the JSON object being verified is missing properties or has different values.
-   * @static
    */
   static assertJsonObject(actualObject: unknown, expectedObject: unknown): void {
     // If the object is a promise, throw error
@@ -560,9 +575,10 @@ export class Test<T = unknown> {
   /**
    * Recursively checks that the `actual` object contains at least all properties and matching values
    * from the `expected` object. Supports deeply nested structures and arrays.
-   * @param {Record<string, unknown>} actual - The object being validated.
-   * @param {Record<string, unknown>} expected - The minimum required shape and values.
-   * @param {string} basePath - Internal path tracker for nested mismatches (default: '').
+   *
+   * @param actual - The object being validated
+   * @param expected - The minimum required shape and values
+   * @param basePath - Internal path tracker for nested mismatches (default: '')
    * @returns An object with:
    *   - `ok`: `true` if target meets/exceeds the reference
    *   - `mismatches`: a list of string paths where mismatches occurred
@@ -581,8 +597,6 @@ export class Test<T = unknown> {
    *     'user.roles[0] — actual: "editor", expected: "admin"'
    *   ]
    * }
-   * @private
-   * @static
    */
   static #jsonObjectIsAtLeast(
     actual: Record<string, unknown>,
@@ -682,8 +696,8 @@ export class Test<T = unknown> {
 
   /**
    * Emits an event to all handlers.
-   * @param {StatusChangedEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitStatusChanged(event: StatusChangedEvent): void {
     // Emit the event for all handlers
@@ -691,8 +705,9 @@ export class Test<T = unknown> {
   }
 
   /**
-   * Registers a success event handler.
-   * @param {TestChangedDelegate} callback - The callback to be executed whenever the event is emitted
+   * Registers a status changed event handler.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onStatusChanged(callback: TestChangedDelegate): void {
     // Register the event handler
@@ -700,8 +715,9 @@ export class Test<T = unknown> {
   }
 
   /**
-   * Unregisters a success event handler.
-   * @param {TestChangedDelegate} callback - The callback to stop being called whenever the event is emitted
+   * Unregisters a status changed event handler.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offStatusChanged(callback: TestChangedDelegate): void {
     // Unregister the event handler
@@ -710,8 +726,8 @@ export class Test<T = unknown> {
 
   /**
    * Emits an event to all handlers.
-   * @param {StepChangedEvent} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitStepChanged(event: StepChangedEvent): void {
     // Emit the event for all handlers
@@ -719,8 +735,9 @@ export class Test<T = unknown> {
   }
 
   /**
-   * Registers a success event handler.
-   * @param {TestChangedDelegate} callback - The callback to be executed whenever the event is emitted
+   * Registers a step changed event handler.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onStepChanged(callback: TestChangedDelegate): void {
     // Register the event handler
@@ -728,8 +745,9 @@ export class Test<T = unknown> {
   }
 
   /**
-   * Unregisters a success event handler.
-   * @param {TestChangedDelegate} callback - The callback to stop being called whenever the event is emitted
+   * Unregisters a step changed event handler.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offStepChanged(callback: TestChangedDelegate): void {
     // Unregister the event handler
@@ -739,57 +757,33 @@ export class Test<T = unknown> {
   // #endregion EVENTS
 }
 
-/**
- * Define a type for the result of a JSON object assertion check
- */
+/** Define a type for the result of a JSON object assertion check. */
 export type ObjectAssertionResult = { ok: boolean; mismatches: string[] };
 
-/**
- * Define a base event for the delegates
- */
+/** Define a base event for the delegates. */
 export interface BaseTestChangedEvent {}
 
-/**
- * Define an event for the delegate
- */
+/** Define an event for the delegate. */
 export interface StepChangedEvent extends BaseTestChangedEvent {
   step: string | undefined;
 }
 
-/**
- * Define an event for the delegate
- */
+/** Define an event for the delegate. */
 export interface StatusChangedEvent extends BaseTestChangedEvent {
   status: TestStatus;
 }
 
-/**
- * Define a delegate for the event handler function signature
- */
+/** Define a delegate for the event handler function signature. */
 export type TestChangedDelegate = EventDelegateBase<Test, BaseTestChangedEvent, void>;
 
-/**
- * The test types
- */
+/** The test types. */
 export type TestType = 'regular' | 'true-negative';
 
-/**
- * The test statuses
- */
+/** The test statuses. */
 export type TestStatus = 'new' | 'running' | 'verifying' | 'success' | 'failed';
 
-/**
- * A comparer delegate to compare 2 objects and determine if they are equal.
- */
+/** A comparer delegate to compare 2 objects and determine if they are equal. */
 export type ComparerDelegate<T> = (array1: T, array2: T) => boolean;
 
-/**
- * Represents the result of an equality comparison between two values.
- * @property {boolean} equal
- * Indicates whether {@link actualValue} and {@link expectedValue} are considered equal.
- * @property {T} actualValue
- * The value produced or observed during execution.
- * @property {T} expectedValue
- * The value that {@link actualValue} was compared against.
- */
+/** Represents the result of an equality comparison between two values. */
 type EqualHelper<T> = { equal: boolean; actualValue: T; expectedValue: T };

@@ -12,18 +12,18 @@ import defaultConfig from '../default-config-geochart.json';
  */
 export class GeoChartAppBarPlugin extends AppBarPlugin {
   /**
-   * Return the package schema
+   * Returns the package schema.
    *
-   * @returns {unknown} the package schema
+   * @returns The package schema
    */
   override schema(): unknown {
     return schema;
   }
 
   /**
-   * Return the default config for this package
+   * Returns the default config for this package.
    *
-   * @returns {unknown} the default config
+   * @returns The default config
    */
   override defaultConfig(): unknown {
     return defaultConfig;
@@ -31,7 +31,8 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
 
   /**
    * Overrides the default translations for the Plugin.
-   * @returns {Record<string, unknown>} - The translations object for the particular Plugin.
+   *
+   * @returns The translations object for the particular Plugin
    */
   override defaultTranslations(): Record<string, unknown> {
     return {
@@ -48,6 +49,11 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
     };
   }
 
+  /**
+   * Overrides the creation of the button properties for this GeoChart AppBar Plugin.
+   *
+   * @returns The icon button properties
+   */
   override onCreateButtonProps(): IconButtonPropsExtend {
     // Button props
     return {
@@ -59,6 +65,11 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
     };
   }
 
+  /**
+   * Overrides the creation of the content properties for this GeoChart AppBar Plugin.
+   *
+   * @returns The panel properties
+   */
   override onCreateContentProps(): TypePanelProps {
     // Panel props
     return {
@@ -68,6 +79,11 @@ export class GeoChartAppBarPlugin extends AppBarPlugin {
     };
   }
 
+  /**
+   * Overrides the creation of the content for this GeoChart AppBar Plugin.
+   *
+   * @returns The content JSX element
+   */
   override onCreateContent(): JSX.Element {
     // TODO: GEOCHART IN APPBAR - Create a geochart-appbar-panel equivalent to geochart-panel to hold the GeoChart itself and hook on the useGeochartConfigs store the same way geochart-panel does it
     // return <GeoChartAppBarPanel mapId={this.mapViewer.mapId} schemaValidator={new SchemaValidator()} />;

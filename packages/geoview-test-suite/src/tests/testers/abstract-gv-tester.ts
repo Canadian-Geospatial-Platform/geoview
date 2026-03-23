@@ -458,8 +458,9 @@ export abstract class GVAbstractTester extends AbstractTester {
 
   /**
    * Constructs a GeoView specific tester.
-   * @param {API} api - The api.
-   * @param {string} mapViewer - The map viewer.
+   *
+   * @param api - The api
+   * @param mapViewer - The map viewer
    */
   constructor(api: API, mapViewer: MapViewer) {
     super();
@@ -471,6 +472,8 @@ export abstract class GVAbstractTester extends AbstractTester {
 
   /**
    * Gets the shared api.
+   *
+   * @returns The shared api
    */
   getApi(): API {
     return this.#api;
@@ -478,6 +481,8 @@ export abstract class GVAbstractTester extends AbstractTester {
 
   /**
    * Gets the MapViewer.
+   *
+   * @returns The MapViewer
    */
   getMapViewer(): MapViewer {
     return this.#mapViewer;
@@ -485,6 +490,8 @@ export abstract class GVAbstractTester extends AbstractTester {
 
   /**
    * Gets the LayerApi.
+   *
+   * @returns The LayerApi
    */
   getLayerApi(): LayerApi {
     return this.getMapViewer().layer;
@@ -492,6 +499,8 @@ export abstract class GVAbstractTester extends AbstractTester {
 
   /**
    * Gets the Map Id.
+   *
+   * @returns The Map Id
    */
   getMapId(): string {
     return this.getMapViewer().mapId;

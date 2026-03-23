@@ -8,16 +8,12 @@ import { deepClone } from 'geoview-core/core/utils/utilities';
 export class GeoChartParsing {
   /**
    * Finds complete configuration necessary to build a GeoChart based on a given results set.
-   * @param {PluginGeoChartConfig} config - The complete GeoChart Plugin configuration
-   * @param {TypeLayerData[]} layerDataArray - The Results set of results to search for a chart
-   * @param {SearchConfigClassDelegate} onSearchIfExists - Callback function to search for a layer entry config based on a layer path
-   * @return [
-      GeoViewGeoChartConfig | undefined,
-      GeoViewGeoChartConfigLayer | undefined,
-      TypeLayerEntryConfig | undefined,
-      TypeFeatureInfoEntry[] | undefined
-    ] An array of information retrieved from the results set to eventually send to the GeoChart component
-  */
+   *
+   * @param config - The complete GeoChart Plugin configuration
+   * @param layerDataArray - The Results set of results to search for a chart
+   * @param onSearchIfExists - Callback function to search for a layer entry config based on a layer path
+   * @returns An array of information retrieved from the results set to eventually send to the GeoChart component
+   */
   static findLayerDataAndConfigFromQueryResults(
     config: PluginGeoChartConfig,
     layerDataArray: TypeGeochartResultSetEntry[],
@@ -59,13 +55,14 @@ export class GeoChartParsing {
 
   /**
    * Reads the configChart, configChartLayer and layerData information to determine a course of action to do to build a Datasource.
+   *
    * The config might already have a Datasource attached to it, but most cases this function will fetch data from
    * somewhere to build a Datasource and attach it to the configChart.
-   * @param {GeoViewGeoChartConfig} configChart - The complete GeoChart Config
-   * @param {GeoViewGeoChartConfigLayer} configChartLayer - The layers configuration for the GeoChart Config (if existing)
-   * @param {TypeFeatureInfoEntryPartial[]} layerData - The Results set of records to load in the Datasource (when already existing)
-   * @return {GeoViewGeoChartConfig} An promise to return a GeoViewGeoChartConfig with the
-   * final Datasource to send to GeoChart.
+   *
+   * @param configChart - The complete GeoChart Config
+   * @param configChartLayer - The layers configuration for the GeoChart Config (if existing)
+   * @param layerData - The Results set of records to load in the Datasource (when already existing)
+   * @returns A GeoViewGeoChartConfig with the final Datasource to send to GeoChart
    */
   static loadDatasources(
     configChart: GeoViewGeoChartConfig,
@@ -130,11 +127,12 @@ export class GeoChartParsing {
 
   /**
    * Finds, if any, the layer configuration in the plugin configuration that's associated with the layer id given.
+   *
    * When more than one could be found, the first one is returned.
-   * @param {PluginGeoChartConfig} config - The complete GeoChart Plugin configuration
-   * @param {string} layerId - The layer id to search the layer config for
-   * @return [GeoViewGeoChartConfig | undefined, GeoViewGeoChartConfigLayer | undefined]
-   * The GeoViewGeoChartConfig and GeoViewGeoChartConfigLayer configurations
+   *
+   * @param config - The complete GeoChart Plugin configuration
+   * @param layerId - The layer id to search the layer config for
+   * @returns The GeoViewGeoChartConfig and GeoViewGeoChartConfigLayer configurations
    */
   static #findLayerConfig(
     config: PluginGeoChartConfig,
@@ -170,8 +168,9 @@ export class GeoChartParsing {
 
   /**
    * Simplifies the FeatureInfoEntries into more straightforward array of Record<string, unknown>.
-   * @param {TypeFeatureInfoEntryPartial[]} entries - The FeatureInfoEntries to simplify
-   * @return {Record<string, unknown>[]} The simplified JsonObject of the attributes
+   *
+   * @param entries - The FeatureInfoEntries to simplify
+   * @returns The simplified JsonObject of the attributes
    */
   static #simplifyTypeFeatureInfoEntries(entries: TypeFeatureInfoEntryPartial[]): Record<string, unknown>[] {
     // Simplify attributes
@@ -188,11 +187,13 @@ export class GeoChartParsing {
 
   /**
    * Converts a Day.js date format string to a Luxon-compatible format string.
+   *
    * Specifically:
    * - `YYYY` → `yyyy` (year)
    * - `DD` → `dd` (day of month), but avoids replacing `DDD` (ordinal day of year)
-   * @param {string} format - The Day.js format string.
-   * @returns {string} The corresponding Luxon format string.
+   *
+   * @param format - The Day.js format string
+   * @returns The corresponding Luxon format string
    */
   static dayjsToLuxonFormat(format: string): string {
     return format
@@ -203,10 +204,12 @@ export class GeoChartParsing {
 
   /**
    * Converts a Day.js IANA timezone string to a Luxon-compatible string.
+   *
    * Currently only normalizes UTC:
    * - `'UTC'` → `'utc'`
-   * @param {string} format - The Day.js timezone string.
-   * @returns {string} The corresponding Luxon-compatible timezone string.
+   *
+   * @param format - The Day.js timezone string
+   * @returns The corresponding Luxon-compatible timezone string
    */
   static dayjsToLuxonTimeIANA(format: string): string {
     return format.replace('UTC', 'utc');
@@ -215,7 +218,5 @@ export class GeoChartParsing {
 
 /**
  * Type definition for the callback function used to search for a layer entry config based on a layer path.
- * @param {string} layerPath - The unique path or ID of the layer to search for.
- * @returns {ConfigBaseClass | undefined} The layer entry configuration if found, otherwise undefined.
  */
 type SearchConfigClassDelegate = (layerPath: string) => ConfigBaseClass | undefined;
