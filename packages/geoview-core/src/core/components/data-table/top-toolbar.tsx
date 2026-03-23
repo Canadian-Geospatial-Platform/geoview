@@ -90,7 +90,7 @@ function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
         </Box>
         <Box display="flex">
           <FilterMap layerPath={layerPath} isGlobalFilterOn={!!globalFilter?.length} />
-          <FilterDataToExtent layerPath={layerPath} disabled={isEsriDynamic} />
+          {!isEsriDynamic && <FilterDataToExtent layerPath={layerPath} />}
         </Box>
       </Box>
       <Box display="flex" sx={{ flexDirection: 'column' }}>
