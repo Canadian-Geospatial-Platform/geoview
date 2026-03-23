@@ -34,6 +34,7 @@ export interface IDataTableState {
     setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
     setColumnFilterModesEntry: (filterModes: Record<string, string>, layerPath: string) => void;
     setColumnsFiltersVisibility: (visible: boolean, layerPath: string) => void;
+    getFilterDataToExtent: (layerPath: string) => boolean;
     setFilterDataToExtent: (filterDataToExtent: boolean, layerPath: string) => void;
     setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
     setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
@@ -121,6 +122,9 @@ export function initialDataTableState(set: TypeSetStore, get: TypeGetStore): IDa
       setColumnsFiltersVisibility: (visible: boolean, layerPath: string) => {
         // Redirect to setter
         get().dataTableState.setterActions.setColumnsFiltersVisibility(visible, layerPath);
+      },
+      getFilterDataToExtent(layerPath) {
+        return get().dataTableState.layersDataTableSetting[layerPath]?.filterDataToExtent || false;
       },
       setFilterDataToExtent: (filterDataToExtent: boolean, layerPath: string) => {
         // Redirect to setter

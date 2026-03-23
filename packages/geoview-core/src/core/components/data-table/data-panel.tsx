@@ -8,7 +8,6 @@ import {
   useDataTableAllFeaturesDataArray,
   useDataTableLayerSettings,
   useDataTableStoreActions,
-  useDataTableFilterDataToExtent,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
 import {
@@ -57,9 +56,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   const layerData = useDataTableAllFeaturesDataArray();
   const selectedLayerPath = useDataTableSelectedLayerPath();
   const datatableSettings = useDataTableLayerSettings();
-  const filterDataToExtent = useDataTableFilterDataToExtent(selectedLayerPath);
-  const { setSelectedLayerPath } = useDataTableStoreActions();
-  const { triggerGetAllFeatureInfo } = useDataTableStoreActions();
+  const { setSelectedLayerPath, triggerGetAllFeatureInfo, getFilterDataToExtent } = useDataTableStoreActions();
   const { isLayerHiddenOnMap } = useMapStoreActions();
   const visibleInRangeLayers = useMapAllVisibleandInRangeLayers();
   const activeFooterBarTab = useUIActiveFooterBarTab();
@@ -91,7 +88,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
       let { features } = layer;
 
       // Apply extent filtering if enabled for the selected layer
-      if (features && layer.layerPath === selectedLayerPath && filterDataToExtent && mapExtent) {
+      if (features && getFilterDataToExtent(layer.layerPath) && mapExtent) {
         features = features.filter((feature) => {
           const { geometry } = feature;
           return geometry?.intersectsExtent(mapExtent);
@@ -108,7 +105,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
         features,
       };
     });
-  }, [orderedLayerData, selectedLayerPath, filterDataToExtent, mapExtent, showUnsymbolizedFeatures]);
+  }, [orderedLayerData, getFilterDataToExtent, mapExtent, showUnsymbolizedFeatures]);
 
   /**
    * Update local states when layer is changed from layer list.
