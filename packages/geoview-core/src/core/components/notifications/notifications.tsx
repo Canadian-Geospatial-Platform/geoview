@@ -197,6 +197,10 @@ export default memo(function Notifications(): JSX.Element {
     [uiController]
   );
 
+  const handleRemoveAllNotifications = useCallback(() => {
+    uiController.removeAllNotifications();
+  }, [uiController]);
+
   // Effects
   useEffect(() => {
     if (open) {
@@ -300,7 +304,7 @@ export default memo(function Notifications(): JSX.Element {
           <Paper component="section" sx={sxClasses.notificationPanel}>
             <NotificationHeader
               onClose={handleClickAway}
-              onRemoveAll={() => uiController.removeAllNotifications()}
+              onRemoveAll={handleRemoveAllNotifications}
               hasNotifications={notifications.length > 0}
               t={t}
               sxClasses={sxClasses}

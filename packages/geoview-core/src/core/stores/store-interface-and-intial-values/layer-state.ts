@@ -63,51 +63,11 @@ export interface ILayerState {
 
   /** Store setter actions callable from adaptors. */
   actions: {
-    /**
-     * Sets the layers panel display state.
-     *
-     * Acts as a toggle back to 'view' when the same state is selected,
-     * and forces 'add' when no layers exist.
-     *
-     * @param newDisplayState - The display state to set.
-     */
     setDisplayState: (newDisplayState: TypeLayersViewDisplayState) => void;
-
-    /**
-     * Sets the highlighted layer path.
-     *
-     * @param layerPath - The layer path to highlight.
-     */
     setHighlightLayer: (layerPath: string) => void;
-
-    /**
-     * Replaces the entire legend layers array.
-     *
-     * @param legendLayers - The new legend layers array.
-     */
-    // TODO: REFACTOR - All calls to setLegendLayers are probably overkill when updating only parts of the whole objects array
     setLegendLayers: (legendLayers: TypeLegendLayer[]) => void;
-
-    /**
-     * Sets the selected layer path.
-     *
-     * @param layerPath - The layer path to select, or undefined to deselect.
-     */
     setSelectedLayerPath: (layerPath: string | undefined) => void;
-
-    /**
-     * Sets whether layers are currently loading.
-     *
-     * @param areLoading - Whether layers are loading.
-     */
     setLayersAreLoading: (areLoading: boolean) => void;
-
-    /**
-     * Updates the deletion start time for a specific layer.
-     *
-     * @param layerPath - The layer path to update.
-     * @param startTime - The deletion start timestamp, or undefined to clear it.
-     */
     setLayerDeletionStartTime: (layerPath: string, startTime: number | undefined) => void;
   };
 }
@@ -123,7 +83,10 @@ export interface ILayerState {
  * @param layerPath - The layer path to find.
  * @returns The matching legend layer, or undefined if not found.
  */
-const utilLegendLayerByPathRec = (layers: TypeLegendLayer[], layerPath: string): TypeLegendLayer | undefined => {
+const utilLegendLayerByPathRec = (layers: TypeLegendLayer[], layerPath: string | undefined): TypeLegendLayer | undefined => {
+  // If no layer path
+  if (!layerPath) return undefined;
+
   // Loop on the layers
   let foundLayer: TypeLegendLayer | undefined;
   layers.forEach((layer) => {
@@ -268,6 +231,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
        *
        * @param legendLayers - The legend layers to set.
        */
+      // TODO: REFACTOR - All calls to setLegendLayers are probably overkill when updating only parts of the whole objects array
       setLegendLayers: (legendLayers: TypeLegendLayer[]): void => {
         set({
           layerState: {
@@ -288,7 +252,7 @@ export function initializeLayerState(set: TypeSetStore, get: TypeGetStore): ILay
         let theLayerPath: string | undefined = layerPath;
         if (layerPath && layerPath.length === 0) theLayerPath = undefined;
         const curLayers = get().layerState.legendLayers;
-        const layer = utilLegendLayerByPathRec(curLayers, layerPath!);
+        const layer = utilLegendLayerByPathRec(curLayers, layerPath);
         set({
           layerState: {
             ...get().layerState,
@@ -456,7 +420,7 @@ export const useLayerDateTemporalModes = (): Record<string, TemporalMode> => {
  * @param layerPath - Unique path identifying the layer in the legend state.
  * @returns The temporal mode of the dates for the layer. Default: DateMgt.DEFAULT_TEMPORAL_MODE.
  */
-export const useLayerDateTemporalMode = (layerPath: string): TemporalMode => {
+export const useLayerDateTemporalMode = (layerPath: string | undefined): TemporalMode => {
   // Hook
   return useStore(useGeoViewStore(), (state) => {
     return utilLegendLayerByPathRec(state.layerState.legendLayers, layerPath)?.dateTemporalMode ?? DateMgt.DEFAULT_TEMPORAL_MODE;
@@ -499,7 +463,7 @@ export const useLayerDisplayDateFormats = (): Record<string, TypeDisplayDateForm
  * @returns The display date format to use for the layer, falling back to the
  * application's default display date format when none is defined.
  */
-export const useLayerDisplayDateFormat = (layerPath: string): TypeDisplayDateFormat => {
+export const useLayerDisplayDateFormat = (layerPath: string | undefined): TypeDisplayDateFormat => {
   // Hook
   return useStore(useGeoViewStore(), (state) => {
     return (
@@ -520,7 +484,7 @@ export const useLayerDisplayDateFormat = (layerPath: string): TypeDisplayDateFor
  * @returns The display date format to use for the layer, falling back to the
  * application's default display date format when none is defined.
  */
-export const useLayerDisplayDateFormatShort = (layerPath: string): TypeDisplayDateFormat => {
+export const useLayerDisplayDateFormatShort = (layerPath: string | undefined): TypeDisplayDateFormat => {
   // Hook
   return useStore(useGeoViewStore(), (state) => {
     return (
@@ -564,7 +528,7 @@ export const useLayerDisplayDateTimezones = (): Record<string, TimeIANA> => {
  * @returns The display date timezone to use for the layer, falling back to the
  * application's default display date timezone when none is defined.
  */
-export const useLayerDisplayDateTimezone = (layerPath: string): TimeIANA => {
+export const useLayerDisplayDateTimezone = (layerPath: string | undefined): TimeIANA => {
   // Hook
   return useStore(useGeoViewStore(), (state) => {
     return (
@@ -922,7 +886,7 @@ export const setStoreLayerStatus = (mapId: string, layerPath: string, layerStatu
 };
 
 /**
- * Sets the opacity of the layer and its children in the store.
+ * Sets the layer name of the layer and its children in the store.
  * @param mapId - The ID of the map.
  * @param layerPath - The layer path of the layer to change.
  * @param layerName - The layer name to set.
@@ -1127,7 +1091,7 @@ export const setStoreLayerItemVisibility = (
  * @param layer - The layer on which to update the children opacity values.
  * @param opacity - The opacity to set.
  */
-export const setStoreOpacityRec = (layer: TypeLegendLayer, opacity: number): void => {
+const setStoreOpacityRec = (layer: TypeLegendLayer, opacity: number): void => {
   // Set the opacity along with all the children
   layer.children?.forEach((child) => {
     // eslint-disable-next-line no-param-reassign

@@ -4,6 +4,9 @@ import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 
+/**
+ * Domain responsible for managing the UI language and i18n resources.
+ */
 export class UIDomain {
   /** The i18n instance */
   #i18nInstance: i18n;
@@ -11,11 +14,12 @@ export class UIDomain {
   /** The display language for the UI */
   #displayLanguage: TypeDisplayLanguage = 'en';
 
-  /** Keep all callback delegate references */
+  /** Callback delegates for the language changed event */
   #onLanguageChangedHandlers: LanguageChangedDelegate[] = [];
 
   /**
    * Constructor for the UIDomain class.
+   *
    * @param i18nInstance - The i18n instance for the UI domain.
    * @param displayLanguage - The initial display language for the UI domain.
    */
@@ -24,14 +28,30 @@ export class UIDomain {
     this.#displayLanguage = displayLanguage;
   }
 
+  /**
+   * Gets the i18n instance.
+   *
+   * @returns The i18n instance
+   */
   geti18n(): i18n {
     return this.#i18nInstance;
   }
 
+  /**
+   * Gets the current display language.
+   *
+   * @returns The display language
+   */
   getLanguage(): TypeDisplayLanguage {
     return this.#displayLanguage;
   }
 
+  /**
+   * Sets the display language and updates the i18n instance.
+   *
+   * @param lang - The display language to set
+   * @returns A promise that resolves when the language has been changed
+   */
   async setLanguage(lang: TypeDisplayLanguage): Promise<void> {
     if (lang === this.#displayLanguage) return;
     this.#displayLanguage = lang;
@@ -40,11 +60,13 @@ export class UIDomain {
   }
 
   /**
-   * Adds a localization ressource bundle for a supported language (fr, en). Then the new key added can be
-   * access from the utilies function getLocalizesMessage to reuse in ui from outside the core viewer.
+   * Adds a localization resource bundle for a supported language (fr, en).
    *
-   * @param {TypeDisplayLanguage} language - The language to add the ressoruce for (en, fr)
-   * @param {Record<string, unknown>} translations - The translation object to add
+   * The new keys can be accessed from the utilities function getLocalizedMessage
+   * to reuse in UI from outside the core viewer.
+   *
+   * @param language - The language to add the resource for (en, fr)
+   * @param translations - The translation object to add
    */
   addLocalizeRessourceBundle(language: TypeDisplayLanguage, translations: Record<string, unknown>): void {
     this.#i18nInstance.addResourceBundle(language, 'translation', translations, true, false);
@@ -81,15 +103,11 @@ export class UIDomain {
   }
 }
 
-/**
- * Define an event for the delegate
- */
+/** Event payload emitted when the display language changes */
 export type LanguageChangedEvent = {
-  // The language
+  /** The new display language */
   language: TypeDisplayLanguage;
 };
 
-/**
- * Define a delegate for the event handler function signature
- */
+/** Delegate type for language changed event handlers */
 export type LanguageChangedDelegate = EventDelegateBase<UIDomain, LanguageChangedEvent, void>;

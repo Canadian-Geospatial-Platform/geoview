@@ -156,6 +156,7 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
             const fieldInfo = nameField ? arrayOfRecords[0].fieldInfo[nameField] : undefined;
 
             this.resultSet[layerPath].feature = {
+              layerPath,
               featureIcon: arrayOfRecords[0].featureIcon,
               fieldInfo,
               geoviewLayerType: arrayOfRecords[0].geoviewLayerType,

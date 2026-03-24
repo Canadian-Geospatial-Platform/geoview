@@ -1,6 +1,11 @@
 import { AbstractMapViewerAdaptor } from '@/core/adaptors/base/abstract-map-viewer-adaptor';
 import { getGeoViewStore, getGeoViewStoreAsync } from '@/core/stores/stores-managers';
-import type { FocusItemProps, IUIState } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import {
+  getStoreActiveAppBarTab,
+  type ActiveAppBarTabType,
+  type FocusItemProps,
+  type IUIState,
+} from '@/core/stores/store-interface-and-intial-values/ui-state';
 import type { TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
 import type { IAppState, TypeGuideObject } from '@/core/stores/store-interface-and-intial-values/app-state';
 import type { TimeIANA } from '@/core/utils/date-mgt';
@@ -63,6 +68,15 @@ export class UIStateAdaptor extends AbstractMapViewerAdaptor {
 
   setActiveFooterBarTab(tab: string | undefined): void {
     this.#getStoreUIState().actions.setActiveFooterBarTab(tab);
+  }
+
+  /**
+   * Gets the active app bar tab from the store.
+   *
+   * @returns The active app bar tab info.
+   */
+  getActiveAppBarTab(): ActiveAppBarTabType {
+    return getStoreActiveAppBarTab(this.getMapId());
   }
 
   setActiveAppBarTab(tab: string | undefined, isOpen: boolean, isFocusTrapped: boolean): void {

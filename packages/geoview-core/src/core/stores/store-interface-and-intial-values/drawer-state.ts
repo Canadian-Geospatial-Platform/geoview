@@ -56,88 +56,33 @@ export interface IDrawerState {
 
   /** Actions to mutate the Drawer state. */
   actions: {
-    /** Sets the active geometry type. */
     setActiveGeom: (geomType: string) => void;
-
-    /** Sets the full drawing style. */
     setStyle: (style: StyleProps) => void;
-
-    /** Sets the fill color. */
     setFillColor: (fillColor: string) => void;
-
-    /** Sets the stroke color. */
     setStrokeColor: (strokeColor: string) => void;
-
-    /** Sets the stroke width. */
     setStrokeWidth: (strokeWidth: number) => void;
-
-    /** Sets the icon size. */
     setIconSize: (iconSize: number) => void;
-
-    /** Sets the text value. */
     setTextValue: (text: string) => void;
-
-    /** Sets the text size. */
     setTextSize: (textSize: number) => void;
-
-    /** Sets the text font family. */
     setTextFont: (textFont: string) => void;
-
-    /** Sets the text color. */
     setTextColor: (textColor: string) => void;
-
-    /** Sets the text halo color. */
     setTextHaloColor: (textHaloColor: string) => void;
-
-    /** Sets the text halo width. */
     setTextHaloWidth: (textHaloWidth: number) => void;
-
-    /** Sets the text bold state. */
     setTextBold: (textBold: boolean) => void;
-
-    /** Sets the text italic state. */
     setTextItalic: (textItalic: boolean) => void;
-
-    /** Sets the text rotation angle. */
     setTextRotation: (textRotation: number) => void;
-
-    /** Sets the Draw interaction instance. */
     setDrawInstance: (drawInstance: Draw) => void;
-
-    /** Removes the Draw interaction instance. */
     removeDrawInstance: () => void;
-
-    /** Sets the editing state. */
     setIsEditing: (isEditing: boolean) => void;
-
-    /** Sets the Transform interaction instance. */
     setTransformInstance: (transformInstance: Transform) => void;
-
-    /** Removes the Transform interaction instance. */
     removeTransformInstance: () => void;
-
-    /** Sets the Snap interaction instance. */
     setSnapInstance: (snapInstance: Snap) => void;
-
-    /** Removes the Snap interaction instance. */
     removeSnapInstance: () => void;
-
-    /** Sets the selected drawing feature. */
     setSelectedDrawing: (selectedDrawing: Feature | undefined) => void;
-
-    /** Sets the hide measurements flag. */
     setHideMeasurements: (hideMeasurements: boolean) => void;
-
-    /** Sets the icon source URL. */
     setIconSrc: (iconSrc: string) => void;
-
-    /** Sets the undo disabled state. */
     setUndoDisabled: (undoDisabled: boolean) => void;
-
-    /** Sets the redo disabled state. */
     setRedoDisabled: (redoDisabled: boolean) => void;
-
-    /** Updates the style state without triggering feature style refresh. */
     updateStateStyle: (style: StyleProps) => void;
   };
 }
