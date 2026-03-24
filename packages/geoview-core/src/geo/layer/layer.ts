@@ -10,7 +10,7 @@ import { FeatureHighlight } from '@/geo/map/feature-highlight';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 import { ConfigValidation } from '@/api/config/config-validation';
-import { generateId, isValidUUID, whenThisThen } from '@/core/utils/utilities';
+import { generateId, isValidUUID } from '@/core/utils/utilities';
 import type { TemporalMode, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
@@ -64,7 +64,6 @@ import { formatError, NotSupportedError } from '@/core/exceptions/core-exception
 import {
   LayerCreatedTwiceError,
   LayerDifferingFieldLengthsError,
-  LayerNotFoundError,
   LayerNotGeoJsonError,
   LayerNotQueryableError,
   LayerWrongTypeError,
@@ -135,7 +134,7 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
+import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { TypeLegendItem } from '@/core/components/layers/types';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
@@ -176,7 +175,6 @@ export class LayerApi {
   #controllers: ControllerRegistry;
 
   /** Reference on the layer domain. */
-  // GV This is stricly to be used in the events relay simplification logic between domain and api, otherwise it'd break separation of concern.
   #layerDomain: LayerDomain;
 
   /** Used to access geometry API to create and manage geometries */
@@ -203,14 +201,8 @@ export class LayerApi {
   /** All the layer sets */
   #allLayerSets: AbstractLayerSet[];
 
-  /** Dictionary holding all the old geoview layers */
+  /** Dictionary holding all the geoview layers used for processing layer entry configs */
   #geoviewLayers: { [geoviewLayerId: string]: AbstractGeoViewLayer } = {};
-
-  /** Dictionary holding all the OpenLayers layers */
-  #olLayers: { [layerPath: string]: BaseLayer } = {};
-
-  /** Dictionary holding all the new GVLayers */
-  #gvLayers: { [layerPath: string]: AbstractBaseGVLayer } = {};
 
   /** Used to keep a reference of highlighted layer */
   #highlightedLayerPath: string = '';
@@ -359,13 +351,15 @@ export class LayerApi {
     return this.mapViewer.mapId;
   }
 
+  // #region LAYER DOMAIN GETTERS REDIRECTIONS
+
   /**
    * Gets the GeoView Layer Ids / UUIDs.
    *
    * @returns The ids of the layers
    */
   getGeoviewLayerIds(): string[] {
-    return this.#controllers.layerController.getGeoviewLayerIds();
+    return this.#layerDomain.getGeoviewLayerIds();
   }
 
   /**
@@ -374,7 +368,7 @@ export class LayerApi {
    * @returns The GeoView Layer Paths
    */
   getLayerEntryLayerPaths(): string[] {
-    return this.#controllers.layerController.getLayerEntryLayerPaths();
+    return this.#layerDomain.getLayerEntryLayerPaths();
   }
 
   /**
@@ -383,7 +377,7 @@ export class LayerApi {
    * @returns The GeoView Layer Entry Configs
    */
   getLayerEntryConfigs(): ConfigBaseClass[] {
-    return this.#controllers.layerController.getLayerEntryConfigs();
+    return this.#layerDomain.getLayerEntryConfigs();
   }
 
   /**
@@ -394,7 +388,7 @@ export class LayerApi {
    * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
    */
   getLayerEntryConfig(layerPath: string): ConfigBaseClass {
-    return this.#controllers.layerController.getLayerEntryConfig(layerPath);
+    return this.#layerDomain.getLayerEntryConfig(layerPath);
   }
 
   /**
@@ -406,14 +400,7 @@ export class LayerApi {
    * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
    */
   getLayerEntryConfigRegular(layerPath: string): AbstractBaseLayerEntryConfig {
-    // Get the layer entry config
-    const layerConfig = this.getLayerEntryConfig(layerPath);
-
-    // Check if wrong type
-    if (!(layerConfig instanceof AbstractBaseLayerEntryConfig)) throw new LayerWrongTypeError(layerPath, layerConfig.getLayerNameCascade());
-
-    // Return the layer config
-    return layerConfig;
+    return this.#layerDomain.getLayerEntryConfigRegular(layerPath);
   }
 
   /**
@@ -425,14 +412,7 @@ export class LayerApi {
    * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
    */
   getLayerEntryConfigGroup(layerPath: string): GroupLayerEntryConfig {
-    // Get the layer entry config
-    const layerConfig = this.getLayerEntryConfig(layerPath);
-
-    // Check if wrong type
-    if (!(layerConfig instanceof GroupLayerEntryConfig)) throw new LayerWrongTypeError(layerPath, layerConfig.getLayerNameCascade());
-
-    // Return the layer config
-    return layerConfig;
+    return this.#layerDomain.getLayerEntryConfigGroup(layerPath);
   }
 
   /**
@@ -442,7 +422,7 @@ export class LayerApi {
    * @returns The layer configuration or undefined if not found.
    */
   getLayerEntryConfigIfExists(layerPath: string): ConfigBaseClass | undefined {
-    return this.#controllers.layerController.getLayerEntryConfigIfExists(layerPath);
+    return this.#layerDomain.getLayerEntryConfigIfExists(layerPath);
   }
 
   /**
@@ -451,7 +431,7 @@ export class LayerApi {
    * @returns The layer paths of the GV Layers
    */
   getGeoviewLayerPaths(): string[] {
-    return Object.keys(this.#gvLayers);
+    return this.#layerDomain.getGeoviewLayerPaths();
   }
 
   /**
@@ -460,7 +440,7 @@ export class LayerApi {
    * @returns The list of new Geoview Layers
    */
   getGeoviewLayers(): AbstractBaseGVLayer[] {
-    return Object.values(this.#gvLayers);
+    return this.#layerDomain.getGeoviewLayers();
   }
 
   /**
@@ -472,7 +452,7 @@ export class LayerApi {
    * @returns An array containing only the regular layers from the current GeoView layer collection.
    */
   getGeoviewLayersRegulars(): AbstractGVLayer[] {
-    return this.getGeoviewLayers().filter((l) => l instanceof AbstractGVLayer);
+    return this.#layerDomain.getGeoviewLayersRegulars();
   }
 
   /**
@@ -484,7 +464,7 @@ export class LayerApi {
    * @returns An array containing only the group layers from the current GeoView layer collection.
    */
   getGeoviewLayersGroups(): GVGroupLayer[] {
-    return this.getGeoviewLayers().filter((l) => l instanceof GVGroupLayer);
+    return this.#layerDomain.getGeoviewLayersGroups();
   }
 
   /**
@@ -493,7 +473,7 @@ export class LayerApi {
    * @returns An array containing only the layers at the root level of the registry.
    */
   getGeoviewLayersRoot(): AbstractBaseGVLayer[] {
-    return this.getGeoviewLayers().filter((layer) => !layer.getParent());
+    return this.#layerDomain.getGeoviewLayersRoot();
   }
 
   /**
@@ -504,14 +484,7 @@ export class LayerApi {
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
   getGeoviewLayer(layerPath: string): AbstractBaseGVLayer {
-    // Get the layer
-    const layer = this.#gvLayers[layerPath];
-
-    // If not found
-    if (!layer) throw new LayerNotFoundError(layerPath);
-
-    // Return the layer
-    return layer;
+    return this.#layerDomain.getGeoviewLayer(layerPath);
   }
 
   /**
@@ -526,14 +499,7 @@ export class LayerApi {
    * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
    */
   getGeoviewLayerRegular(layerPath: string): AbstractGVLayer {
-    // Get the layer
-    const layer = this.getGeoviewLayer(layerPath);
-
-    // If wrong type
-    if (!(layer instanceof AbstractGVLayer)) throw new LayerWrongTypeError(layerPath, layer.getLayerName());
-
-    // Return the layer
-    return layer;
+    return this.#layerDomain.getGeoviewLayerRegular(layerPath);
   }
 
   /**
@@ -547,17 +513,7 @@ export class LayerApi {
    * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
    */
   getGeoviewLayerRegularIfExists(layerPath: string): AbstractGVLayer | undefined {
-    // Get the layer if any
-    const layer = this.getGeoviewLayerIfExists(layerPath);
-
-    // If found, check if the right type
-    if (layer) {
-      // If wrong type
-      if (!(layer instanceof AbstractGVLayer)) throw new LayerWrongTypeError(layerPath, layer.getLayerName());
-    }
-
-    // Return the layer or undefined
-    return layer;
+    return this.#layerDomain.getGeoviewLayerRegularIfExists(layerPath);
   }
 
   /**
@@ -567,30 +523,7 @@ export class LayerApi {
    * @returns The AbstractBaseGVLayer or undefined when not found
    */
   getGeoviewLayerIfExists(layerPath: string): AbstractBaseGVLayer | undefined {
-    return this.#gvLayers[layerPath];
-  }
-
-  /**
-   * Returns the OpenLayer instance associated with the layer path.
-   *
-   * @param layerPath - The layer path to the layer's configuration.
-   * @returns Returns the geoview instance associated to the layer path.
-   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
-   */
-  getOLLayer(layerPath: string): BaseLayer {
-    // Get the OpenLayer layer as part of the new GVLayer design
-    return this.getGeoviewLayer(layerPath).getOLLayer();
-  }
-
-  /**
-   * Returns the OpenLayer instance associated with the layer path.
-   *
-   * @param layerPath - The layer path to the layer's configuration.
-   * @returns Returns the geoview instance associated to the layer path.
-   */
-  getOLLayerIfExists(layerPath: string): BaseLayer | undefined {
-    // Get the OpenLayer layer as part of the new GVLayer design
-    return this.getGeoviewLayerIfExists(layerPath)?.getOLLayer();
+    return this.#layerDomain.getGeoviewLayerIfExists(layerPath);
   }
 
   /**
@@ -605,16 +538,12 @@ export class LayerApi {
    * @returns A promise that resolves to an OpenLayer layer associated to the layer path.
    */
   getOLLayerAsync(layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer> {
-    // Make sure the open layer has been created, sometimes it can still be in the process of being created
-    return whenThisThen(
-      () => {
-        // Get the ol layer if it exists yet
-        return this.getOLLayerIfExists(layerPath)!;
-      },
-      timeout,
-      checkFrequency
-    );
+    return this.#layerDomain.getOLLayerAsync(layerPath, timeout, checkFrequency);
   }
+
+  // #endregion LAYER DOMAIN GETTERS REDIRECTIONS
+
+  // #region LAYER PROCESSING
 
   /**
    * Load layers that was passed in with the map config
@@ -901,6 +830,8 @@ export class LayerApi {
     return { layer: layerBeingAdded, promiseLayer };
   }
 
+  // #endregion LAYER PROCESSING
+
   /**
    * Refreshes GeoCore Layers
    */
@@ -985,101 +916,32 @@ export class LayerApi {
         // For each layer paths, check each starting with the given layerPath
         this.getLayerEntryLayerPaths().forEach((registeredLayerPath) => {
           if (registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) {
+            // Get the geoview layer if exists
+            const innerGVLayer = this.getGeoviewLayerIfExists(registeredLayerPath);
+
             // Remove actual OL layer from the map
-            const layer = this.getOLLayerIfExists(registeredLayerPath);
+            const layer = innerGVLayer?.getOLLayer();
             if (layer) this.mapViewer.map.removeLayer(layer);
 
             // Unregister the events on the layer
-            if (this.#gvLayers[registeredLayerPath] instanceof AbstractGVLayer)
-              this.#unregisterLayerHandlers(this.#gvLayers[registeredLayerPath]);
-            else if (this.#gvLayers[registeredLayerPath] instanceof GVGroupLayer)
-              this.#unregisterGroupLayerHandlers(this.#gvLayers[registeredLayerPath]);
+            if (innerGVLayer instanceof AbstractGVLayer) this.#unregisterLayerHandlers(innerGVLayer);
+            else if (innerGVLayer instanceof GVGroupLayer) this.#unregisterGroupLayerHandlers(innerGVLayer);
 
             // Remove from registered layers
-            delete this.#gvLayers[registeredLayerPath];
-            delete this.#olLayers[registeredLayerPath];
+            this.#layerDomain.deleteGVLayer(registeredLayerPath);
           }
         });
 
         // Create and register new layer
         const layer = geoviewLayer.createGVLayer(layerEntryConfig as AbstractBaseLayerEntryConfig);
 
-        this.#gvLayers[layerPath] = layer;
-        this.#olLayers[layerPath] = layer.getOLLayer();
+        // Re-register in the domain
+        this.#layerDomain.registerGVLayer(layer);
+
+        // Re-add on the map
         this.mapViewer.map.addLayer(layer.getOLLayer());
       }
     }
-  }
-
-  /**
-   * Registers the layer identifier.
-   *
-   * @param layerConfig - The layer entry config to register
-   */
-  #registerLayerConfigInit(layerConfig: ConfigBaseClass): void {
-    // Log (keep the commented line for now)
-    // logger.logDebug('registerLayerConfigInit', layerConfig.layerPath, layerConfig.layerStatus);
-
-    // Register it
-    this.#controllers.layerController.registerLayerEntryConfig(layerConfig);
-
-    // TODO: REFACTOR - MOVE THE REST OF THIS INSIDE THE LAYER DOMAIN
-
-    // Register for ordered layer information
-    if (layerConfig.getGeoviewLayerConfig().useAsBasemap !== true) this.#registerForOrderedLayerInfo(layerConfig as TypeLayerEntryConfig);
-
-    // Tell the layer sets about it
-    this.#allLayerSets.forEach((layerSet) => {
-      // Register the config to the layer set
-      layerSet.registerLayerConfig(layerConfig);
-    });
-
-    // Set the layer status to registered
-    layerConfig.setLayerStatusRegistered();
-  }
-
-  /**
-   * Unregisters the layer in the LayerApi to stop managing it.
-   *
-   * @param layerConfig - The layer entry config to unregister
-   * @param unregisterOrderedLayerInfo - Should it be unregistered from orderedLayerInfo
-   */
-  unregisterLayerConfig(layerConfig: ConfigBaseClass, unregisterOrderedLayerInfo: boolean = true): void {
-    // Unregister from ordered layer info
-    if (unregisterOrderedLayerInfo) {
-      // Remove from ordered layer info
-      MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), layerConfig.layerPath);
-    }
-
-    // If the TimeSlider plugin is initialized
-    if (isStoreTimeSliderInitialized(this.getMapId())) {
-      // Remove from the TimeSlider
-      removeStoreTimeSliderLayer(this.getMapId(), layerConfig.layerPath, () => {
-        // Remove the tab
-        this.#controllers.uiController.hideTabButton('time-slider');
-      });
-    }
-
-    // If the geochart plugin is initialized
-    if (isStoreGeochartInitialized(this.getMapId())) {
-      // Remove from the GeoChart Charts
-      removeStoreGeochartChart(this.getMapId(), layerConfig.layerPath, () => {
-        // Remove the tab
-        this.#controllers.uiController.hideTabButton('geochart');
-      });
-    }
-
-    // If the swiper plugin is initialized
-    if (isStoreSwiperInitialized(this.getMapId())) {
-      // Remove it from the Swiper
-      removeStoreSwiperLayerPath(this.getMapId(), layerConfig.layerPath);
-    }
-
-    // Tell the layer sets about it
-    this.#allLayerSets.forEach((layerSet) => {
-      // Unregister from the layer set
-      layerSet.unregister(layerConfig.layerPath);
-    });
   }
 
   /**
@@ -1152,43 +1014,42 @@ export class LayerApi {
       // Remove layer info from registered layers
       this.getLayerEntryLayerPaths().forEach((registeredLayerPath) => {
         if (registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) {
+          // Get the geoview layer if exists
+          const innerGVLayer = this.getGeoviewLayerIfExists(registeredLayerPath);
+
           // Remove actual OL layer from the map
-          const layer = this.getOLLayerIfExists(registeredLayerPath);
+          const layer = innerGVLayer?.getOLLayer();
           if (layer) this.mapViewer.map.removeLayer(layer);
 
           // Unregister layer config from the application
-          this.unregisterLayerConfig(this.getLayerEntryConfig(registeredLayerPath));
-
-          // Get the layer being removed
-          const layerBeingRemoved = this.#gvLayers[registeredLayerPath];
+          this.#unregisterLayerConfig(this.getLayerEntryConfig(registeredLayerPath));
 
           // Remove the text layer if it is a vector layer
-          if (layerBeingRemoved instanceof AbstractGVVector) {
-            const textLayer = layerBeingRemoved.getTextOLLayer();
+          if (innerGVLayer instanceof AbstractGVVector) {
+            const textLayer = innerGVLayer.getTextOLLayer();
             if (textLayer) this.mapViewer.map.removeLayer(textLayer);
           }
 
           // If the layer had a parent
-          const parent = layerBeingRemoved?.getParent();
-          if (parent) {
+          const parent = innerGVLayer?.getParent();
+          if (innerGVLayer && parent) {
             // Make sure to remove the layer from the parent and that way when the bounds get recalculated the removed layer won't be included
-            parent.removeLayer(layerBeingRemoved);
+            parent.removeLayer(innerGVLayer);
           }
 
           // Unregister the events on the layer
-          if (layerBeingRemoved instanceof AbstractGVLayer) {
-            this.#unregisterLayerHandlers(layerBeingRemoved);
-          } else if (layerBeingRemoved instanceof GVGroupLayer) {
-            this.#unregisterGroupLayerHandlers(layerBeingRemoved);
+          if (innerGVLayer instanceof AbstractGVLayer) {
+            this.#unregisterLayerHandlers(innerGVLayer);
+          } else if (innerGVLayer instanceof GVGroupLayer) {
+            this.#unregisterGroupLayerHandlers(innerGVLayer);
           }
 
           // Remove from registered layer configs
-          this.#controllers.layerController.deleteLayerEntryConfig(registeredLayerPath);
+          this.#layerDomain.deleteLayerEntryConfig(registeredLayerPath);
           delete this.#geoviewLayers[registeredLayerPath];
 
-          // Remove from registered layers
-          delete this.#gvLayers[registeredLayerPath];
-          delete this.#olLayers[registeredLayerPath];
+          // Unregister from the domain
+          this.#layerDomain.deleteGVLayer(registeredLayerPath);
         }
       });
 
@@ -1883,6 +1744,77 @@ export class LayerApi {
   // #region PRIVATE FUNCTIONS
 
   /**
+   * Registers the layer identifier.
+   *
+   * @param layerConfig - The layer entry config to register
+   */
+  #registerLayerConfigInit(layerConfig: ConfigBaseClass): void {
+    // Log (keep the commented line for now)
+    // logger.logDebug('registerLayerConfigInit', layerConfig.layerPath, layerConfig.layerStatus);
+
+    // Register it
+    this.#layerDomain.registerLayerEntryConfig(layerConfig);
+
+    // TODO: REFACTOR - MOVE THE REST OF THIS INSIDE THE LAYER DOMAIN
+
+    // Register for ordered layer information
+    if (layerConfig.getGeoviewLayerConfig().useAsBasemap !== true) this.#registerForOrderedLayerInfo(layerConfig as TypeLayerEntryConfig);
+
+    // Tell the layer sets about it
+    this.#allLayerSets.forEach((layerSet) => {
+      // Register the config to the layer set
+      layerSet.registerLayerConfig(layerConfig);
+    });
+
+    // Set the layer status to registered
+    layerConfig.setLayerStatusRegistered();
+  }
+
+  /**
+   * Unregisters the layer in the LayerApi to stop managing it.
+   *
+   * @param layerConfig - The layer entry config to unregister
+   * @param unregisterOrderedLayerInfo - Should it be unregistered from orderedLayerInfo
+   */
+  #unregisterLayerConfig(layerConfig: ConfigBaseClass, unregisterOrderedLayerInfo: boolean = true): void {
+    // Unregister from ordered layer info
+    if (unregisterOrderedLayerInfo) {
+      // Remove from ordered layer info
+      MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), layerConfig.layerPath);
+    }
+
+    // If the TimeSlider plugin is initialized
+    if (isStoreTimeSliderInitialized(this.getMapId())) {
+      // Remove from the TimeSlider
+      removeStoreTimeSliderLayer(this.getMapId(), layerConfig.layerPath, () => {
+        // Remove the tab
+        this.#controllers.uiController.hideTabButton('time-slider');
+      });
+    }
+
+    // If the geochart plugin is initialized
+    if (isStoreGeochartInitialized(this.getMapId())) {
+      // Remove from the GeoChart Charts
+      removeStoreGeochartChart(this.getMapId(), layerConfig.layerPath, () => {
+        // Remove the tab
+        this.#controllers.uiController.hideTabButton('geochart');
+      });
+    }
+
+    // If the swiper plugin is initialized
+    if (isStoreSwiperInitialized(this.getMapId())) {
+      // Remove it from the Swiper
+      removeStoreSwiperLayerPath(this.getMapId(), layerConfig.layerPath);
+    }
+
+    // Tell the layer sets about it
+    this.#allLayerSets.forEach((layerSet) => {
+      // Unregister from the layer set
+      layerSet.unregister(layerConfig.layerPath);
+    });
+  }
+
+  /**
    * Attaches event handlers to a layer.
    *
    * This method sets up the following event handlers:
@@ -2042,7 +1974,7 @@ export class LayerApi {
     const alreadyExisting = this.getLayerEntryConfigIfExists(event.config.layerPath);
     if (alreadyExisting) {
       // Unregister the old one
-      this.unregisterLayerConfig(alreadyExisting, false);
+      this.#unregisterLayerConfig(alreadyExisting, false);
     }
 
     // Register it
@@ -2079,9 +2011,8 @@ export class LayerApi {
       layerConfig
     );
 
-    // Keep track
-    this.#gvLayers[layerConfig.layerPath] = gvLayer;
-    this.#olLayers[layerConfig.layerPath] = gvLayer.getOLLayer();
+    // Register in the domain
+    this.#layerDomain.registerGVLayer(gvLayer);
 
     // Handle text layer for vector layers
     if (gvLayer instanceof AbstractGVVector) {
@@ -2134,9 +2065,8 @@ export class LayerApi {
       layerConfig
     );
 
-    // Keep track
-    this.#gvLayers[layerConfig.layerPath] = groupLayer;
-    this.#olLayers[layerConfig.layerPath] = groupLayer.getOLLayer();
+    // Register in the domain
+    this.#layerDomain.registerGVLayer(groupLayer);
 
     // Register events handler for the layer
     this.#registerGroupLayerHandlers(groupLayer);

@@ -1,3 +1,5 @@
+import type BaseLayer from 'ol/layer/Base';
+
 import type {
   ConfigBaseClass,
   LayerStatusChangedDelegate,
@@ -6,12 +8,23 @@ import type {
 import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
 import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
+import { whenThisThen } from '@/core/utils/utilities';
 import { LayerConfigNotFoundError } from '@/core/exceptions/geoview-exceptions';
-import { LayerWrongTypeError } from '@/core/exceptions/layer-exceptions';
+import { LayerWrongTypeError, LayerNotFoundError } from '@/core/exceptions/layer-exceptions';
+import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
+import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 
 export class LayerDomain {
   /** Layers with valid configuration for this map. */
   #layerEntryConfigs: { [layerPath: string]: ConfigBaseClass } = {};
+
+  /** Dictionary holding all the new GVLayers */
+  #gvLayers: { [layerPath: string]: AbstractBaseGVLayer } = {};
+
+  /** Dictionary holding all the OpenLayers layers */
+  #olLayers: { [layerPath: string]: BaseLayer } = {};
 
   /** Keep a bounded reference to the handle layer status changed */
   #boundedHandleLayerStatusChanged: LayerStatusChangedDelegate;
@@ -87,6 +100,25 @@ export class LayerDomain {
   }
 
   /**
+   * Gets the layer configuration of a regular layer (not a group) at the specified layer path.
+   *
+   * @param layerPath - The layer path.
+   * @returns The layer configuration.
+   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
+   * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
+   */
+  getLayerEntryConfigRegular(layerPath: string): AbstractBaseLayerEntryConfig {
+    // Get the layer entry config
+    const layerConfig = this.getLayerEntryConfig(layerPath);
+
+    // Check if wrong type
+    if (!(layerConfig instanceof AbstractBaseLayerEntryConfig)) throw new LayerWrongTypeError(layerPath, layerConfig.getLayerNameCascade());
+
+    // Return the layer config
+    return layerConfig;
+  }
+
+  /**
    * Gets the layer configuration of a group layer (not a regular) at the specified layer path.
    *
    * @param layerPath - The layer path.
@@ -103,6 +135,154 @@ export class LayerDomain {
 
     // Return the layer config
     return layerConfig;
+  }
+
+  /**
+   * Gets the GeoView Layer Paths.
+   *
+   * @returns The layer paths of the GV Layers
+   */
+  getGeoviewLayerPaths(): string[] {
+    return Object.keys(this.#gvLayers);
+  }
+
+  /**
+   * Gets all GeoView Layers
+   *
+   * @returns The list of new Geoview Layers
+   */
+  getGeoviewLayers(): AbstractBaseGVLayer[] {
+    return Object.values(this.#gvLayers);
+  }
+
+  /**
+   * Gets all GeoView layers that are regular layers (not groups).
+   *
+   * This method filters the list returned by `getGeoviewLayers()` and
+   * returns only the layers that are instances of `AbstractGVLayer`.
+   *
+   * @returns An array containing only the regular layers from the current GeoView layer collection.
+   */
+  getGeoviewLayersRegulars(): AbstractGVLayer[] {
+    return this.getGeoviewLayers().filter((l) => l instanceof AbstractGVLayer);
+  }
+
+  /**
+   * Gets all GeoView layers that are group layers.
+   *
+   * This method filters the list returned by `getGeoviewLayers()` and
+   * returns only the layers that are instances of `GVGroupLayer`.
+   *
+   * @returns An array containing only the group layers from the current GeoView layer collection.
+   */
+  getGeoviewLayersGroups(): GVGroupLayer[] {
+    return this.getGeoviewLayers().filter((l) => l instanceof GVGroupLayer);
+  }
+
+  /**
+   * Gets all GeoView layers that are at the root.
+   *
+   * @returns An array containing only the layers at the root level of the registry.
+   */
+  getGeoviewLayersRoot(): AbstractBaseGVLayer[] {
+    return this.getGeoviewLayers().filter((layer) => !layer.getParent());
+  }
+
+  /**
+   * Returns the GeoView instance associated to the layer path.
+   *
+   * @param layerPath - The layer path
+   * @returns The new Geoview Layer
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+   */
+  getGeoviewLayer(layerPath: string): AbstractBaseGVLayer {
+    // Get the layer
+    const layer = this.#gvLayers[layerPath];
+
+    // If not found
+    if (!layer) throw new LayerNotFoundError(layerPath);
+
+    // Return the layer
+    return layer;
+  }
+
+  /**
+   * Returns the GeoView Layer instance associated to the layer path.
+   *
+   * @param layerPath - The layer path
+   * @returns The AbstractBaseGVLayer or undefined when not found
+   */
+  getGeoviewLayerIfExists(layerPath: string): AbstractBaseGVLayer | undefined {
+    return this.#gvLayers[layerPath];
+  }
+
+  /**
+   * Returns the AbstractGVLayer instance associated to the layer path.
+   *
+   * This returns an actual AbstractGVLayer and throws a LayerWrongTypeError if the layerPath points to a GVGroupLayer object.
+   * An AbstractGVLayer is essentially a layer that's not a group layer.
+   *
+   * @param layerPath - The layer path
+   * @returns The new Geoview Layer
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
+   */
+  getGeoviewLayerRegular(layerPath: string): AbstractGVLayer {
+    // Get the layer
+    const layer = this.getGeoviewLayer(layerPath);
+
+    // If wrong type
+    if (!(layer instanceof AbstractGVLayer)) throw new LayerWrongTypeError(layerPath, layer.getLayerName());
+
+    // Return the layer
+    return layer;
+  }
+
+  /**
+   * Returns the GeoView Layer instance associated to the layer path.
+   *
+   * This returns an actual AbstractGVLayer (or undefined) and throws a LayerWrongTypeError if the layerPath points to a GVGroupLayer object.
+   * An AbstractGVLayer is essentially a layer that's not a group layer.
+   *
+   * @param layerPath - The layer path
+   * @returns The AbstractGVLayer or undefined when not found
+   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
+   */
+  getGeoviewLayerRegularIfExists(layerPath: string): AbstractGVLayer | undefined {
+    // Get the layer if any
+    const layer = this.getGeoviewLayerIfExists(layerPath);
+
+    // If found, check if the right type
+    if (layer) {
+      // If wrong type
+      if (!(layer instanceof AbstractGVLayer)) throw new LayerWrongTypeError(layerPath, layer.getLayerName());
+    }
+
+    // Return the layer or undefined
+    return layer;
+  }
+
+  /**
+   * Asynchronously returns the OpenLayer layer associated to a specific layer path.
+   *
+   * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
+   * Note this function uses the 'Async' suffix to differentiate it from 'getOLLayer'.
+   *
+   * @param layerPath - The layer path to the layer's configuration.
+   * @param timeout - Optionally indicate the timeout after which time to abandon the promise
+   * @param checkFrequency - Optionally indicate the frequency at which to check for the condition on the layerabstract
+   * @returns A promise that resolves to an OpenLayer layer associated to the layer path.
+   */
+  getOLLayerAsync(layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer> {
+    // Make sure the open layer has been created, sometimes it can still be in the process of being created
+    return whenThisThen(
+      () => {
+        // Get the ol layer if it exists yet
+        return this.getGeoviewLayerIfExists(layerPath)?.getOLLayer()!;
+      },
+      timeout,
+      checkFrequency
+    );
   }
 
   /**
@@ -125,6 +305,23 @@ export class LayerDomain {
 
     // Delete it
     delete this.#layerEntryConfigs[layerPath];
+  }
+
+  /**
+   * TODO: JSDOC: Implement this...
+   */
+  registerGVLayer(gvLayer: AbstractBaseGVLayer): void {
+    // Keep it
+    this.#gvLayers[gvLayer.getLayerPath()] = gvLayer;
+    this.#olLayers[gvLayer.getLayerPath()] = gvLayer.getOLLayer();
+  }
+
+  /**
+   * TODO: JSDOC: Implement this...
+   */
+  deleteGVLayer(layerPath: string): void {
+    delete this.#gvLayers[layerPath];
+    delete this.#olLayers[layerPath];
   }
 
   // #region PRIVATE HANDLERS
