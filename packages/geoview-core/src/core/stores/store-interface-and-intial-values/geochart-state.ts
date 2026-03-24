@@ -40,39 +40,10 @@ export interface IGeochartState {
 
   /** Store actions callable from adaptors. */
   actions: {
-    /**
-     * Sets the geochart chart configurations.
-     *
-     * @param charts - The chart configurations keyed by layer path.
-     */
     setGeochartCharts: (charts: GeoChartStoreByLayerPath) => void;
-
-    /**
-     * Sets the geochart layer data array.
-     *
-     * @param layerDataArray - The geochart result set entries to set.
-     */
     setLayerDataArray: (layerDataArray: TypeGeochartResultSetEntry[]) => void;
-
-    /**
-     * Sets the batched geochart layer data array.
-     *
-     * @param layerDataArray - The batched geochart result set entries to set.
-     */
     setLayerDataArrayBatch: (layerDataArray: TypeGeochartResultSetEntry[]) => void;
-
-    /**
-     * Sets the layer path that bypasses the batch propagation delay.
-     *
-     * @param layerPath - The layer path to bypass.
-     */
     setLayerDataArrayBatchLayerPathBypass: (layerPath: string) => void;
-
-    /**
-     * Sets the selected geochart layer path.
-     *
-     * @param selectedLayerPath - The layer path to select.
-     */
     setSelectedLayerPath: (selectedLayerPath: string) => void;
   };
 }

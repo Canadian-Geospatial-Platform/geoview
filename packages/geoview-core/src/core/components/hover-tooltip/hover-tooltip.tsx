@@ -11,8 +11,14 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { getSxClasses } from './hover-tooltip-styles';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
-import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { useAppDisplayLanguage, useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from '@/core/utils/logger';
+import { DateMgt } from '@/core/utils/date-mgt';
+import {
+  useLayerDateTemporalModes,
+  useLayerDisplayDateFormats,
+  useLayerDisplayDateTimezones,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
   // Log
@@ -34,6 +40,30 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
   const hoverFeatureInfo = useMapHoverFeatureInfo();
   const isMouseouseInMap = useMapIsMouseInsideMap();
   const mapElem = useAppGeoviewHTMLElement().querySelector(`[id^="mapTargetElement-${useGeoViewMapId()}"]`) as HTMLElement;
+  const language = useAppDisplayLanguage();
+  const layerDateTemporalModes = useLayerDateTemporalModes();
+  const displayDateFormats = useLayerDisplayDateFormats();
+  const displayDateTimezones = useLayerDisplayDateTimezones();
+
+  const memoValue = useMemo(() => {
+    logger.logTraceUseMemo('HOVER TOOLTIP - memoValue', hoverFeatureInfo?.fieldInfo?.value);
+
+    const valueRaw = hoverFeatureInfo?.fieldInfo?.value;
+    let valueString = valueRaw !== undefined ? (valueRaw as string) : undefined;
+
+    // If the value is a date
+    if (valueRaw instanceof Date) {
+      const layerDateTemporalMode = layerDateTemporalModes[hoverFeatureInfo!.layerPath];
+      valueString = DateMgt.formatDate(
+        valueRaw,
+        displayDateFormats[hoverFeatureInfo!.layerPath][language],
+        language,
+        displayDateTimezones[hoverFeatureInfo!.layerPath],
+        layerDateTemporalMode
+      );
+    }
+    return valueString;
+  }, [hoverFeatureInfo, displayDateFormats, displayDateTimezones, language, layerDateTemporalModes]);
 
   // Calculate position with boundary checks
   const position = useMemo(() => {
@@ -42,7 +72,7 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
 
     // Early return in memo
     // Check for all required conditions upfront
-    if (!pointerPosition?.pixel || !mapElem || !hoverFeatureInfo?.fieldInfo?.value || !isMouseouseInMap) {
+    if (!pointerPosition?.pixel || !mapElem || memoValue === undefined || !isMouseouseInMap) {
       return { left: '0px', top: '0px', isValid: false };
     }
     logger.logTraceUseMemo('HOVER TOOLTIP - position', pointerPosition);
@@ -52,7 +82,7 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
 
     // Approximate width calculation (50px for empty tooltip)
     // Assuming average character width of 10px and adding padding/margins
-    let approximateWidth = 25 + String(hoverFeatureInfo.fieldInfo?.value).length * 10;
+    let approximateWidth = 25 + memoValue.length * 10;
 
     // After a certain length, the string is cut off with ellipsis in the tooltip, so we have a max width.
     if (approximateWidth > 370) approximateWidth = 370; // Cap to max width
@@ -71,7 +101,7 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
     if (tooltipY < mapRectRef.current.top) tooltipY = pointerPosition.pixel[1] + 10;
 
     return { left: `${tooltipX}px`, top: `${tooltipY}px`, isValid: true };
-  }, [hoverFeatureInfo, isMouseouseInMap, mapElem, mapId]);
+  }, [mapId, mapElem, memoValue, isMouseouseInMap]);
 
   // Compute tooltip content and visibility
   const tooltipContent = useMemo(() => {
@@ -83,14 +113,15 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
     }
 
     logger.logTraceUseMemo('HOVER TOOLTIP - tooltipContent', hoverFeatureInfo);
+
     return {
       content: {
-        value: (hoverFeatureInfo.fieldInfo?.value as string) || '',
+        value: memoValue,
         icon: hoverFeatureInfo.featureIcon ? hoverFeatureInfo.featureIcon : '',
       },
       isVisible: true,
     };
-  }, [hoverFeatureInfo, position.isValid]);
+  }, [hoverFeatureInfo, memoValue, position.isValid]);
 
   return (
     <Box
@@ -109,7 +140,7 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
           <BrowserNotSupportedIcon />
         </Box>
       )}
-      {tooltipContent.content.value && <Box sx={sxClasses.tooltipText}>{tooltipContent.content.value}</Box>}
+      {tooltipContent.content.value !== undefined && <Box sx={sxClasses.tooltipText}>{tooltipContent.content.value}</Box>}
     </Box>
   );
 });

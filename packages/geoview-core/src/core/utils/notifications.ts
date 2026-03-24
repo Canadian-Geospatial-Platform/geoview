@@ -26,9 +26,7 @@ export class Notifications {
    * @param {UIController} uiController - The UI controller instance
    */
   constructor(uiController: UIController) {
-    // TODO: REFACTOR - Coupling the ui controller inside a utils class isn't ideal. Rethink this? Or
-    // TO.DOCONT: maybe just move this file outside of 'utils' folder because it's becoming a bit 'bigger' than a
-    // TO.DOCONT: 'utils' class. More like a 'manager' class at that point. The store is already coupled anyways too so..
+    // Keep the controller, for actions.
     this.#uiController = uiController;
   }
 

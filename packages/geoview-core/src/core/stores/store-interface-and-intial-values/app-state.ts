@@ -79,59 +79,14 @@ export interface IAppState {
 
   /** Store actions callable from adaptors. */
   actions: {
-    /**
-     * Sets the circular progress indicator visibility.
-     *
-     * @param active - Whether the progress indicator should be shown.
-     */
     setCircularProgress: (active: boolean) => void;
-    /**
-     * Sets the crosshairs overlay visibility.
-     *
-     * @param active - Whether the crosshairs should be shown.
-     */
     setCrosshairActive: (active: boolean) => void;
-    /**
-     * Sets the display language of the viewer.
-     *
-     * @param lang - The language to switch to.
-     */
     setDisplayLanguage: (lang: TypeDisplayLanguage) => void;
-    /**
-     * Sets the date display mode.
-     *
-     * @param displayDateMode - The date display mode to apply.
-     */
     setDisplayDateMode: (displayDateMode: DisplayDateMode) => void;
-    /**
-     * Sets the display date timezone.
-     *
-     * @param displayDateTimezone - The IANA timezone to use for date display.
-     */
     setDisplayDateTimezone: (displayDateTimezone: TimeIANA) => void;
-    /**
-     * Sets the display theme.
-     *
-     * @param theme - The theme to apply.
-     */
     setDisplayTheme: (theme: TypeDisplayTheme) => void;
-    /**
-     * Sets the fullscreen mode state.
-     *
-     * @param active - Whether fullscreen mode should be active.
-     */
     setFullScreenActive: (active: boolean) => void;
-    /**
-     * Sets the guide content object.
-     *
-     * @param guide - The guide object to store.
-     */
     setGuide: (guide: TypeGuideObject) => void;
-    /**
-     * Replaces all current notifications with the provided list.
-     *
-     * @param notifications - The new set of notifications.
-     */
     setNotifications: (notifications: NotificationDetailsType[]) => void;
   };
 }
@@ -194,6 +149,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
     actions: {
       /**
        * Sets the circularProgress state.
+       *
        * @param isCircularProgressActive - The new state.
        */
       setCircularProgress: (isCircularProgressActive: boolean) => {
@@ -207,6 +163,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
 
       /**
        * Sets the isCrosshairsActive state.
+       *
        * @param isCrosshairsActive - The new state.
        */
       setCrosshairActive: (isCrosshairsActive: boolean) => {
@@ -220,6 +177,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
 
       /**
        * Sets the display language.
+       *
        * @param displayLanguage - The new language.
        */
       setDisplayLanguage: (displayLanguage: TypeDisplayLanguage): void => {
@@ -233,6 +191,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
 
       /**
        * Sets the display date mode.
+       *
        * @param displayDateMode - The display date mode.
        */
       setDisplayDateMode: (displayDateMode: DisplayDateMode): void => {
@@ -246,6 +205,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
 
       /**
        * Sets the display date timezone.
+       *
        * @param displayDateTimezone - The display date timezone.
        */
       setDisplayDateTimezone: (displayDateTimezone: TimeIANA): void => {
@@ -259,6 +219,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
 
       /**
        * Sets the display theme.
+       *
        * @param displayTheme - The new theme.
        */
       setDisplayTheme: (displayTheme: TypeDisplayTheme): void => {
@@ -277,6 +238,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
 
       /**
        * Sets the isFullscreenActive state.
+       *
        * @param isFullscreenActive - The new state.
        */
       setFullScreenActive: (isFullscreenActive: boolean): void => {
@@ -290,6 +252,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
 
       /**
        * Sets the guide.
+       *
        * @param guide - The new guide object.
        */
       setGuide: (guide: TypeGuideObject): void => {
@@ -303,6 +266,7 @@ export function initializeAppState(set: TypeSetStore, get: TypeGetStore): IAppSt
 
       /**
        * Sets the notifications.
+       *
        * @param notifications - The new notifications.
        */
       setNotifications: (notifications: NotificationDetailsType[]): void => {

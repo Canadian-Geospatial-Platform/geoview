@@ -2,6 +2,7 @@ import type { TypeTabs } from '@/ui/tabs/tabs';
 
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
+import type { UIController } from '@/core/controllers/ui-controller';
 import { sanitizeHtmlContent } from '@/core/utils/utilities';
 
 /**
@@ -11,7 +12,8 @@ import { sanitizeHtmlContent } from '@/core/utils/utilities';
  * @class
  */
 export class FooterBarApi {
-  mapId: string;
+  /** The UI controller */
+  #uiController: UIController;
 
   // array that hold added tabs
   tabs: TypeTabs[] = [];
@@ -25,10 +27,11 @@ export class FooterBarApi {
   /**
    * Instantiates a FooterBarApi class.
    *
-   * @param {string} mapId - The map id this footer bar api belongs to
+   * @param {UIController} uiController - The UI controller this footer bar api belongs to
    */
-  constructor(mapId: string) {
-    this.mapId = mapId;
+  constructor(uiController: UIController) {
+    // Keep the controller, for actions.
+    this.#uiController = uiController;
   }
 
   /**
@@ -128,6 +131,28 @@ export class FooterBarApi {
       // trigger an event that a tab has been removed
       this.#emitFooterTabRemoved({ tabid: id });
     }
+  }
+
+  /**
+   * Shows a tab by id.
+   *
+   * @param id - The id of the tab to be shown
+   * @deprecated Legacy support. Should use uiController.showTabButton directly instead.
+   */
+  showTabButton(id: string): void {
+    // Redirect to ui controller
+    this.#uiController.showTabButton(id);
+  }
+
+  /**
+   * Selects a tab by id, if the id is not a tab, the footer bar will close.
+   *
+   * @param id - The id of the tab to be selected
+   * @deprecated Legacy support. Should use uiController.setActiveFooterBarTab directly instead.
+   */
+  selectTab(id: string): void {
+    // Redirect to ui controller
+    this.#uiController.setActiveFooterBarTab(id);
   }
 }
 

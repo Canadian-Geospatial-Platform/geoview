@@ -10,11 +10,11 @@ export class AbstractMapViewerController extends AbstractController {
     this.#mapViewer = mapViewer;
   }
 
-  getMapViewer(): MapViewer {
+  protected getMapViewer(): MapViewer {
     return this.#mapViewer;
   }
 
-  getMapId(): string {
+  protected getMapId(): string {
     return this.#mapViewer.mapId;
   }
 }

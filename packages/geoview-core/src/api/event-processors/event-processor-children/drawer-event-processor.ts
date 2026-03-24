@@ -58,6 +58,7 @@ import {
   setStoreUndoDisabled,
   updateStoreStateStyle,
 } from '@/core/stores/store-interface-and-intial-values/drawer-state';
+import { getStoreDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { generateId, formatLength, formatArea } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
@@ -347,11 +348,8 @@ export abstract class DrawerEventProcessor extends AbstractEventProcessor {
     if (!isStoreDrawerInitialized(mapId)) return [];
     if (!getStoreDrawInstance(mapId)) return [];
 
-    // Get the map viewer instance
-    const viewer = this.getMapViewer(mapId);
-
     // Get features from drawing group
-    const geometryGroup = viewer.layer.geometry.getGeometryGroup(this.DRAW_GROUP_KEY);
+    const geometryGroup = this.getMapViewerLayerAPI(mapId).geometry.getGeometryGroup(this.DRAW_GROUP_KEY);
     const features = geometryGroup?.vectorSource.getFeatures();
     if (!features) {
       return [];
@@ -442,13 +440,14 @@ export abstract class DrawerEventProcessor extends AbstractEventProcessor {
    *
    * @param feature - The feature to create a tooltip for
    * @param hideMeasurements - Whether to hide the measurement tooltip
-   * @param mapId - The map ID
+   * @param displayLanguage - The display language
    * @returns The created or updated overlay, or undefined if creation failed
    */
-  static #createMeasureTooltip(feature: Feature<Geometry>, hideMeasurements: boolean, mapId: string): Overlay | undefined {
-    // Get current display language
-    const displayLanguage = this.getMapViewer(mapId).getDisplayLanguage();
-
+  static #createMeasureTooltip(
+    feature: Feature<Geometry>,
+    hideMeasurements: boolean,
+    displayLanguage: TypeDisplayLanguage
+  ): Overlay | undefined {
     // Get the measureTooltip for the feature if one alrady exists
     let measureTooltip = (feature.get('measureTooltip') as Overlay) || undefined;
     if (measureTooltip) {
@@ -850,7 +849,7 @@ export abstract class DrawerEventProcessor extends AbstractEventProcessor {
       if (!(geom instanceof Point)) {
         // GV hideMeasurements has to be here, otherwise the value can be stale, unlike style and geomType which restart the interaction
         const hideMeasurements = getStoreHideMeasurements(mapId);
-        const newOverlay = this.#createMeasureTooltip(feature, hideMeasurements, mapId);
+        const newOverlay = this.#createMeasureTooltip(feature, hideMeasurements, getStoreDisplayLanguage(mapId));
         if (newOverlay) {
           viewer.map.addOverlay(newOverlay);
         }
@@ -1048,7 +1047,7 @@ export abstract class DrawerEventProcessor extends AbstractEventProcessor {
       if (geom instanceof Point) return;
 
       // Update the overlay with new values
-      this.#createMeasureTooltip(feature, true, mapId);
+      this.#createMeasureTooltip(feature, true, getStoreDisplayLanguage(mapId));
 
       // Update the undo redo state
       this.#updateUndoRedoState(mapId);
@@ -1619,7 +1618,7 @@ export abstract class DrawerEventProcessor extends AbstractEventProcessor {
           if (!(olGeometry instanceof Point)) {
             // GV hideMeasurements has to be here, otherwise the value can be stale, unlike style and geomType which restart the interaction
             const hideMeasurements = getStoreHideMeasurements(mapId);
-            const newOverlay = this.#createMeasureTooltip(feature, hideMeasurements, mapId);
+            const newOverlay = this.#createMeasureTooltip(feature, hideMeasurements, getStoreDisplayLanguage(mapId));
             if (newOverlay) {
               viewer.map.addOverlay(newOverlay);
             }
@@ -1838,7 +1837,7 @@ export abstract class DrawerEventProcessor extends AbstractEventProcessor {
       // Recreate measurement overlay
       const geom = feature.getGeometry();
       if (geom && !(geom instanceof Point)) {
-        const overlay = this.#createMeasureTooltip(feature, false, mapId);
+        const overlay = this.#createMeasureTooltip(feature, false, getStoreDisplayLanguage(mapId));
         if (overlay) viewer.map.addOverlay(overlay);
       }
     });
@@ -1906,7 +1905,7 @@ export abstract class DrawerEventProcessor extends AbstractEventProcessor {
           // Recreate measurement overlay only if geometry changed
           const geom = currentFeature.getGeometry();
           if (geom && !(geom instanceof Point)) {
-            const overlay = this.#createMeasureTooltip(currentFeature, false, mapId);
+            const overlay = this.#createMeasureTooltip(currentFeature, false, getStoreDisplayLanguage(mapId));
             if (overlay) viewer.map.addOverlay(overlay);
           }
         }
@@ -1939,7 +1938,7 @@ export abstract class DrawerEventProcessor extends AbstractEventProcessor {
           // Recreate overlay
           const geom = currentFeature.getGeometry();
           if (geom && !(geom instanceof Point)) {
-            const overlay = this.#createMeasureTooltip(currentFeature, false, mapId);
+            const overlay = this.#createMeasureTooltip(currentFeature, false, getStoreDisplayLanguage(mapId));
             if (overlay) viewer.map.addOverlay(overlay);
           }
         }
