@@ -61,9 +61,6 @@ export function useNavigateToTab(tabId: string, onNavigate?: (layerPath: string)
 
   return useCallback(
     (options: NavigateToTabOptions = {}) => {
-      // Log
-      logger.logTraceUseCallback('USE-NAVIGATE-TO-TAB', tabId, options);
-
       // TODO: seems the option for time out is never used different than default, consider removing it
       const { layerPath, delay = TIMEOUT.shortcutToTab } = options;
 

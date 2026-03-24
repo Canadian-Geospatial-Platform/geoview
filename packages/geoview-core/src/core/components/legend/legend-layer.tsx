@@ -139,9 +139,6 @@ export function LegendLayer({ layerPath, showControls, containerType }: LegendLa
 
   const handleExpandGroupClick = useCallback(
     (event: React.MouseEvent): void => {
-      // Log
-      logger.logTraceUseCallback('LEGEND-LAYER - handleExpandGroupClick', layerPath);
-
       event.stopPropagation();
       toggleLegendCollapsed(layerPath); // store value
     },

@@ -129,9 +129,6 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
    */
   const findAllMatches = useCallback(
     (term: string) => {
-      // Log
-      logger.logTraceUseCallback('GUIDE-SEARCH - findAllMatches');
-
       if (!term.trim() || term.trim().length < 3 || !guide) {
         setAllMatches([]);
         setCurrentMatchIndex(0);
@@ -196,9 +193,6 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
    */
   const highlightSearchTerm = useCallback(
     (content: string, sectionIndex: number): string => {
-      // Log
-      logger.logTraceUseCallback('GUIDE-SEARCH - highlightSearchTerm');
-
       if (!searchTerm.trim() || searchTerm.trim().length < 3) return content;
 
       // Parse HTML - anchor tags and images are automatically excluded by DOM structure
@@ -372,9 +366,6 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
    */
   const navigateToMatch = useCallback(
     (index: number) => {
-      // Log
-      logger.logTraceUseCallback('GUIDE-SEARCH - navigateToMatch');
-
       if (allMatches.length === 0) return;
 
       const match = allMatches[index];
@@ -413,9 +404,6 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
    * Navigates to the next search match
    */
   const handleNext = useCallback(() => {
-    // Log
-    logger.logTraceUseCallback('GUIDE-SEARCH - handleNext');
-
     const nextIndex = (currentMatchIndex + 1) % allMatches.length;
     navigateToMatch(nextIndex);
   }, [currentMatchIndex, allMatches.length, navigateToMatch]);
@@ -424,9 +412,6 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
    * Navigates to the previous search match
    */
   const handlePrevious = useCallback(() => {
-    // Log
-    logger.logTraceUseCallback('GUIDE-SEARCH - handlePrevious');
-
     const prevIndex = currentMatchIndex === 0 ? allMatches.length - 1 : currentMatchIndex - 1;
     navigateToMatch(prevIndex);
   }, [currentMatchIndex, allMatches.length, navigateToMatch]);
@@ -435,9 +420,6 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
    * Clears the search term and resets search state
    */
   const handleClear = useCallback(() => {
-    // Log
-    logger.logTraceUseCallback('GUIDE-SEARCH - handleClear');
-
     setSearchTerm('');
     setCurrentMatchIndex(0);
     setAllMatches([]);
@@ -450,9 +432,6 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
    */
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      // Log
-      logger.logTraceUseCallback('GUIDE-SEARCH - handleKeyDown');
-
       if (allMatches.length === 0) return;
 
       if (e.key === 'Enter' || e.key === 'ArrowDown') {

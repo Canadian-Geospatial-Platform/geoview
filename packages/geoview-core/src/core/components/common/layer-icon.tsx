@@ -56,9 +56,6 @@ function IconStack({ layerPath }: TypeIconStackProps): JSX.Element | null {
 
   // TODO: WCAG Issue #3109 - Add meaningful alt text to image icons if needed
   const renderSingleIcon = useCallback((): JSX.Element => {
-    // Log
-    logger.logTraceUseCallback('LAYER-ICON - renderSingleIcon');
-
     return (
       <Icon {...ICON_BUTTON_BASE_PROPS} sx={sxClasses.iconPreview}>
         {iconImage === 'no data' ? (
@@ -73,9 +70,6 @@ function IconStack({ layerPath }: TypeIconStackProps): JSX.Element | null {
   }, [iconImage, sxClasses.iconPreview, sxClasses.legendIcon, sxClasses.maxIconImg]);
 
   const renderStackedIcons = useCallback((): JSX.Element => {
-    // Log
-    logger.logTraceUseCallback('LAYER-ICON - renderStackedIcons');
-
     return (
       <Box component="span" sx={sxClasses.stackIconsBox} aria-hidden="true">
         <Icon {...ICON_BUTTON_BASE_PROPS} sx={sxClasses.iconPreviewStacked}>
@@ -102,9 +96,6 @@ function IconStack({ layerPath }: TypeIconStackProps): JSX.Element | null {
   ]);
 
   const renderNoDataIcon = useCallback((): JSX.Element => {
-    // Log
-    logger.logTraceUseCallback('LAYER-ICON - renderNoDataIcon');
-
     return (
       <Box component="span" sx={sxClasses.stackIconsBox} aria-hidden="true">
         <Icon {...ICON_BUTTON_BASE_PROPS} sx={sxClasses.iconPreviewStacked}>

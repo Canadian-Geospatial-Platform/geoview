@@ -93,9 +93,6 @@ const Layout = forwardRef(
      * @returns JSX.Element
      */
     const renderLayerList = useCallback(() => {
-      // Log
-      logger.logTraceUseCallback('LAYOUT - renderLayerList');
-
       return <LayerList selectedLayerPath={selectedLayerPath} onListItemClick={handleLayerChange} layerList={layerList} />;
     }, [selectedLayerPath, handleLayerChange, layerList]);
 

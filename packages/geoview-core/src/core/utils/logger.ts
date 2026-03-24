@@ -6,8 +6,6 @@ import { LocalStorage } from './localStorage';
 export const LOG_TRACE_DETAILED = 1;
 // For tracing useEffect unmounting. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
 export const LOG_TRACE_USE_EFFECT_UNMOUNT = 2;
-// For tracing useCallback. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
-export const LOG_TRACE_USE_CALLBACK = 3;
 // For tracing rendering. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
 export const LOG_TRACE_RENDER_DETAILED = 4;
 // For tracing rendering. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
@@ -62,7 +60,6 @@ export class ConsoleLogger {
   // The number of logs - only for some log types
   logCount = {
     renderer: 0,
-    useCallback: 0,
     useMemo: 0,
     useEffect: 0,
   };
@@ -131,7 +128,7 @@ export class ConsoleLogger {
   /**
    * Logging function commonly used in the useMemo to log when a value is being memoized.
    * Only shows if LOG_ACTIVE is true.
-   * @param {string} useMemoFunction - The useCallback function identifier
+   * @param {string} useMemoFunction - The useMemo function identifier
    * @param {unknown[]} messages - The messages to log
    */
   logTraceUseMemo(useMemoFunction: string, ...messages: unknown[]): void {
@@ -139,19 +136,6 @@ export class ConsoleLogger {
     if (!LOG_ACTIVE) return;
     // Redirect
     this.#logLevel(LOG_TRACE_USE_MEMO, `U_MEM - ${this.logCount.useMemo++}`, 'orchid', useMemoFunction, ...messages);
-  }
-
-  /**
-   * Logging function commonly used in the useCallback to log when a callback is being memoized.
-   * Only shows if LOG_ACTIVE is true.
-   * @param {string} useCallbackFunction - The useCallback function identifier
-   * @param {unknown[]} messages - The messages to log
-   */
-  logTraceUseCallback(useCallbackFunction: string, ...messages: unknown[]): void {
-    // Validate log active
-    if (!LOG_ACTIVE) return;
-    // Redirect
-    this.#logLevel(LOG_TRACE_USE_CALLBACK, `U_CLB - ${this.logCount.useCallback++}`, 'darkorchid', useCallbackFunction, ...messages);
   }
 
   /**
@@ -490,7 +474,6 @@ logger.logInfo('Logger initialized');
 // logger.logTraceDetailed('trace detailed');
 // logger.logTraceUseEffectUnmount('trace use effect unmount');
 // logger.logTraceRender('trace render');
-// logger.logTraceUseCallback('trace use callback');
 // logger.logTraceUseMemo('trace use memo');
 // logger.logTraceUseEffect('trace use effect');
 // logger.logTraceCoreStoreSubscription('trace store subscription');

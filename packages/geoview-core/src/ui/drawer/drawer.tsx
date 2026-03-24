@@ -78,8 +78,6 @@ function DrawerUI(props: DrawerPropsExtend): JSX.Element {
    * Handles when the user toggles the drawer open/closed
    */
   const handleDrawerToggle = useCallback((drawerStatus: boolean): void => {
-    logger.logTraceUseCallback('UI.DRAWER - handleDrawerToggle', drawerStatus);
-
     setOpen(drawerStatus);
   }, []);
 

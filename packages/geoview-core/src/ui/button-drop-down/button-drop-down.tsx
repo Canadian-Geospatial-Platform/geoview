@@ -73,8 +73,6 @@ function ButtonDropDownUI(props: ButtonDropDownPropsExtend): JSX.Element {
    * Handles a click on the button itself
    */
   const handleClick = useCallback((): void => {
-    logger.logTraceUseCallback('UI.BUTTON DROP DOWN - click', options[selectedIndex]);
-
     // Callback
     onButtonClick?.(selectedIndex, `${options[selectedIndex]}`);
   }, [onButtonClick, options, selectedIndex]);
@@ -83,8 +81,6 @@ function ButtonDropDownUI(props: ButtonDropDownPropsExtend): JSX.Element {
    * Toggles the open state of the drop down
    */
   const handleToggle = useCallback((): void => {
-    logger.logTraceUseCallback('UI.BUTTON DROP DOWN - toggle');
-
     // Toggle the open state
     setOpen(!open);
   }, [open]);
@@ -93,8 +89,6 @@ function ButtonDropDownUI(props: ButtonDropDownPropsExtend): JSX.Element {
    * Handles a click in an item in the drop down menu
    */
   const handleMenuItemClick = useCallback((event: React.MouseEvent<HTMLLIElement, MouseEvent>, index: number): void => {
-    logger.logTraceUseCallback('UI.BUTTON DROP DOWN - menu item click', index);
-
     setSelectedIndex(index);
     setOpen(false);
   }, []);
@@ -103,8 +97,6 @@ function ButtonDropDownUI(props: ButtonDropDownPropsExtend): JSX.Element {
    * Handles a when the user clicks away of the drop down
    */
   const handleClickAway = useCallback((event: Event): void => {
-    logger.logTraceUseCallback('UI.BUTTON DROP DOWN - click away');
-
     if (anchorRef.current && anchorRef.current.contains(event.target as HTMLElement)) {
       return;
     }

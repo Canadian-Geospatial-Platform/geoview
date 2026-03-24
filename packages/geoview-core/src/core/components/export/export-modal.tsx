@@ -99,7 +99,6 @@ export default function ExportModal(): JSX.Element {
 
   // Generate preview at maximum quality (300 DPI) - export will regenerate at selected DPI
   const generatePreview = useCallback(async () => {
-    logger.logTraceUseCallback('EXPORT-MODAL - generatePreview Callback');
     try {
       setIsMapLoading(true);
       const disclaimer = t('mapctrl.disclaimer.message');
@@ -125,7 +124,6 @@ export default function ExportModal(): JSX.Element {
 
   // Export the requested file
   const performExport = useCallback(async () => {
-    logger.logTraceUseCallback('EXPORT-MODAL - performExport');
     try {
       setIsMapExporting(true);
       const disclaimer = t('mapctrl.disclaimer.message');
@@ -209,7 +207,6 @@ export default function ExportModal(): JSX.Element {
 
   // TODO: WCAG Issue #3222 - Review Disable Focus Trap Behaviour
   const handleCloseModal = useCallback(() => {
-    logger.logTraceUseCallback('EXPORT-MODAL - handleCloseModal');
     // Defer disabling the focus trap to the next tick so the Dialog's own focus trap
     // has time to release before we attempt to restore focus via disableFocusTrap
     // (which uses the callbackElementId to re-focus the export button in the app bar).
@@ -224,7 +221,6 @@ export default function ExportModal(): JSX.Element {
   }, [disableFocusTrap]);
 
   const handleExport = useCallback(() => {
-    logger.logTraceUseCallback('EXPORT-MODAL - handleExport');
     performExport().catch((error) => logger.logError(error));
   }, [performExport]);
 
@@ -234,13 +230,11 @@ export default function ExportModal(): JSX.Element {
   };
 
   const handleFormatMenuClose = useCallback(() => {
-    logger.logTraceUseCallback('EXPORT-MODAL - handleFormatMenuClose');
     setFormatMenuOpen(false);
   }, []);
 
   const handleSelectFormat = useCallback(
     (format: FileFormat) => {
-      logger.logTraceUseCallback('EXPORT-MODAL - handleSelectFormat');
       setExportFormat(format);
       if (format === 'pdf') {
         setExportMapResolution(300);
@@ -256,13 +250,11 @@ export default function ExportModal(): JSX.Element {
   };
 
   const handleMenuClose = useCallback(() => {
-    logger.logTraceUseCallback('EXPORT-MODAL - handleMenuClose');
     setDpiMenuOpen(false);
   }, []);
 
   const handleSelectDpi = useCallback(
     (dpi: number) => {
-      logger.logTraceUseCallback('EXPORT-MODAL - handleSelectDpi');
       setExportMapResolution(dpi);
       handleMenuClose();
     },
@@ -275,13 +267,11 @@ export default function ExportModal(): JSX.Element {
   };
 
   const handleQualityMenuClose = useCallback(() => {
-    logger.logTraceUseCallback('EXPORT-MODAL - handleQualityMenuClose');
     setQualityMenuOpen(false);
   }, []);
 
   const handleSelectQuality = useCallback(
     (quality: number) => {
-      logger.logTraceUseCallback('EXPORT-MODAL - handleSelectQuality');
       setJpegQuality(quality);
       handleQualityMenuClose();
     },
@@ -289,7 +279,6 @@ export default function ExportModal(): JSX.Element {
   );
 
   const handleDialogEntered = useCallback(() => {
-    logger.logTraceUseCallback('EXPORT-MODAL - handleDialogEntered');
     titleInputRef.current?.focus();
   }, []);
 

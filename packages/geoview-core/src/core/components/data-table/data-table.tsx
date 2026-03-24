@@ -160,9 +160,6 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
    * @returns JSX.Element
    */
   const getTableHeader = useCallback((header: string) => {
-    // Log
-    logger.logTraceUseCallback('DATA-TABLE - getTableHeader');
-
     return (
       // Tooltip allows long titles to be fully visible on hover
       <Tooltip title={header} placement="top" arrow disableInteractive>
@@ -181,9 +178,6 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
    */
   const createLightBoxButton = useCallback(
     (cellValue: string | number, cellId: string): string | number | JSX.Element => {
-      // Log
-      logger.logTraceUseCallback('DATA-TABLE - createLightBoxButton');
-
       const uniqueButtonId = `${mapId}-${containerType}-btn-${cellId}`;
 
       if (typeof cellValue === 'string' && isImage(cellValue)) {
@@ -218,9 +212,6 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
    */
   const getCellValueWithTooltip = useCallback(
     (cellValue: string | number | JSX.Element, cellId: string): JSX.Element => {
-      // Log
-      logger.logTraceUseCallback('DATA-TABLE - getCellValueWithTooltip');
-
       return typeof cellValue === 'string' || typeof cellValue === 'number' ? (
         <Tooltip title={cellValue} placement="top" arrow>
           <Box component="div" sx={density === 'compact' ? sxClasses.tableCell : {}}>
@@ -243,9 +234,6 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
    */
   const getCellContentDate = useCallback(
     (date: Dayjs): JSX.Element => {
-      // Log
-      logger.logTraceUseCallback('DATA-TABLE - getDateColumnTooltip');
-
       const formattedDate = DateMgt.formatDate(
         date.toDate(),
         displayDateFormat[language],
@@ -402,9 +390,6 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
    */
   const isColumnFilterNumeric = useCallback(
     (columnId: string): boolean => {
-      // Log
-      logger.logTraceUseCallback('DATA-TABLE - isColumnFilterNumeric');
-
       return !!columns.find((col) => {
         if (col.id === columnId) {
           // If the column has a 'lessThanOrEqualTo' filter option, we can assume it's filtering on numbers
@@ -423,9 +408,6 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
    */
   const handleZoomIn = useCallback(
     async (feature: TypeFeatureInfoEntry) => {
-      // Log
-      logger.logTraceUseCallback('DATA-TABLE - handleZoomIn');
-
       let { extent } = feature;
 
       // Get oid field
@@ -730,9 +712,6 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
    */
   const buildFilterList = useCallback(
     (columnFilter: MRTColumnFiltersState) => {
-      // Log
-      logger.logTraceUseCallback('DATA-TABLE - buildFilterList');
-
       const tableState = useTable.getState();
       if (!columnFilter.length) return [''];
 
@@ -846,9 +825,6 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
 
   const debouncedColumnFilters = useCallback(
     (filters: MRTColumnFiltersState) => {
-      // Log
-      logger.logTraceUseCallback('DATA-TABLE - debouncedColumnFilters');
-
       return filterMap(filters);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

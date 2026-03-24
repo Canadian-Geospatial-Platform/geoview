@@ -118,9 +118,6 @@ export function Legend({ containerType }: LegendType): JSX.Element | null {
 
   // Memoize the window resize handler and use the hook to add listener to avoid many creation
   const handleWindowResize = useCallback(() => {
-    // Log
-    logger.logTraceUseCallback('LEGEND - window resize event');
-
     // Update the layer list based on window size
     updateLegendLayerListByWindowSize(layersList);
   }, [layersList, updateLegendLayerListByWindowSize]);

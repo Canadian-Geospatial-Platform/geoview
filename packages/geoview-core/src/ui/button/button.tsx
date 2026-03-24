@@ -89,8 +89,6 @@ function ButtonUI(props: ButtonProps, ref: Ref<HTMLButtonElement>): JSX.Element 
    */
   const handleClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
-      logger.logTraceUseCallback('UI.BUTTON - click');
-
       if (!disabled && onClick) {
         onClick(event);
       }

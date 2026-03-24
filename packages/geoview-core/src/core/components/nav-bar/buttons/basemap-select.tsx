@@ -52,9 +52,6 @@ export default function BasemapSelect(): JSX.Element {
    */
   const handleChoice = useCallback(
     (basemapChoice: string): void => {
-      // Log
-      logger.logTraceUseCallback('BASEMAP-SELECT, handleChoice', basemapChoice);
-
       setSelectedBasemap(basemapChoice);
 
       // If the Geoview basemap layer is present, toggle visibility based on selection. We hide it on nogeom.

@@ -157,7 +157,6 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   const handleScrolling = useCallback((evt: KeyboardEvent): void => {
     if (mapElementRef.current === document.activeElement) {
       if (evt.code === 'Space') {
-        logger.logTraceUseCallback('FOCUS-TRAP - handleScrolling', evt.code);
         evt.preventDefault();
       }
     }
@@ -206,19 +205,16 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   // Create memoized functions that use the handlers
   const exitFocus = useCallback(() => {
-    logger.logTraceUseCallback('FOCUS-TRAP - exitFocus');
     handlers.current?.exit();
   }, []);
 
   const handleExit = useCallback((evt: KeyboardEvent) => {
-    logger.logTraceUseCallback('FOCUS-TRAP - handleExit', evt.code);
     handlers.current?.handleKeyDown(evt);
   }, []);
 
   // Set focus trap function
   const setFocusTrap = useCallback(() => {
     if (shellElementRef.current) {
-      logger.logTraceUseCallback('FOCUS TRAP - setFocusTrap');
       const mapHTMLElement = shellElementRef.current;
 
       setActiveTrapGeoView(true);
@@ -233,8 +229,6 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   // Handle button clicks
   const handleEnable = useCallback((): void => {
-    logger.logTraceUseCallback('FOCUS-TRAP - handleEnable');
-
     setOpen(false);
     setFocusTrap();
   }, [setFocusTrap]);
@@ -256,8 +250,6 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
       if (!(event instanceof KeyboardEvent) || event.key !== 'Tab') {
         return;
       }
-
-      logger.logTraceUseCallback('FOCUS-TRAP - manageLinks', focusTrapId);
 
       // If Tab from topLink or shift+Tab from bottomLink, focus the map element
       const linkId = (event.target as HTMLElement).id.split('-')[0];

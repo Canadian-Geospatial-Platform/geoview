@@ -60,9 +60,6 @@ export default function MapRotation(): JSX.Element {
    */
   const handleSliderChange = useCallback(
     (value: number | number[]): void => {
-      // Log
-      logger.logTraceUseCallback('MAP-ROTATION, handleSliderChange', value);
-
       const degrees = Array.isArray(value) ? value[0] : value;
       const radians = (degrees * Math.PI) / 180;
       setRotation(radians);
@@ -75,9 +72,6 @@ export default function MapRotation(): JSX.Element {
    */
   const handleFixNorth = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {
-      // Log
-      logger.logTraceUseCallback('MAP-ROTATION, handleFixNorth', event.target.checked);
-
       const isChecked = event.target.checked;
       setFixNorth(isChecked);
 
@@ -92,9 +86,6 @@ export default function MapRotation(): JSX.Element {
    * Handles reset button click
    */
   const handleReset = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('MAP-ROTATION, handleReset');
-
     setRotation(0);
   }, [setRotation]);
 

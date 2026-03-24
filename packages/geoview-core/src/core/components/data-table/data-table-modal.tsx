@@ -81,9 +81,6 @@ export default function DataTableModal(): JSX.Element {
    */
   const getCellValue = useCallback(
     (cellValue: string): JSX.Element => {
-      // Log
-      logger.logTraceUseCallback('DATA-TABLE-MODAL - getCellValue');
-
       return (
         <Box component="div" sx={sxClasses.tableCell}>
           {cellValue}
@@ -99,9 +96,6 @@ export default function DataTableModal(): JSX.Element {
    * @returns JSX.Element
    */
   const getTableHeader = useCallback((header: string) => {
-    // Log
-    logger.logTraceUseCallback('DATA-TABLE-MODAL - getTableHeader');
-
     return (
       <Box component="span" sx={{ whiteSpace: 'nowrap' }}>
         {header}

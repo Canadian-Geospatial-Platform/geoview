@@ -242,8 +242,6 @@ function SliderUI(props: SliderProps): JSX.Element {
    * This maintains slider functionality while reducing visual clutter.
    */
   const hideExcessMarks = useCallback((): void => {
-    logger.logTraceUseCallback('UI.SLIDER - hideExcessMarks');
-
     // Get slider container
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -285,8 +283,6 @@ function SliderUI(props: SliderProps): JSX.Element {
    * @see checkOverlap - The helper function used to determine if two labels overlap.
    */
   const removeLabelOverlap = useCallback((): void => {
-    logger.logTraceUseCallback('UI.SLIDER - removeLabelOverlap');
-
     // get slider container
     const container = document.getElementById(containerId);
     if (!container) return;

@@ -123,9 +123,6 @@ export function NavBar(props: NavBarProps): JSX.Element {
   }, [navBarComponents]);
 
   const handleNavApiAddButtonPanel = useCallback((sender: NavBarApi, event: NavBarCreatedEvent) => {
-    // Log
-    logger.logTraceUseCallback('NAV-BAR - addButtonPanel');
-
     setButtonPanelGroups((prevState) => {
       const existingGroup = prevState?.[event.group] || {};
 
@@ -141,9 +138,6 @@ export function NavBar(props: NavBarProps): JSX.Element {
 
   const handleNavApiRemoveButtonPanel = useCallback(
     (sender: NavBarApi, event: NavBarRemovedEvent) => {
-      // Log
-      logger.logTraceUseCallback('NAV-BAR - handleRemoveButtonPanel');
-
       setButtonPanelGroups((prevState) => {
         const state = { ...prevState };
         const group = state[event.group];

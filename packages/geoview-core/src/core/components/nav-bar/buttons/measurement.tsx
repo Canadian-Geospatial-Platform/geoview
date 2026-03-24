@@ -86,9 +86,6 @@ export default function Measurement(): JSX.Element {
    */
   const createSegmentStyle = useCallback(
     (includeSegmentLabels: boolean = true): StyleFunction => {
-      // Log
-      logger.logTraceUseCallback('MEASUREMENT, createSegmentStyle');
-
       return (feature: FeatureLike) => {
         const styles: Style[] = [];
         const geometry = feature.getGeometry();
@@ -220,9 +217,6 @@ export default function Measurement(): JSX.Element {
    */
   const startMeasurement = useCallback(
     (type: MeasureType): void => {
-      // Log
-      logger.logTraceUseCallback('MEASUREMENT, startMeasurement', type);
-
       // Early return if no type
       if (!type) return;
 
@@ -275,9 +269,6 @@ export default function Measurement(): JSX.Element {
    * Stops the current measurement
    */
   const stopMeasurement = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('MEASUREMENT, stopMeasurement');
-
     if (drawInstance) {
       drawInstance.stopInteraction();
       setDrawInstance(null);
@@ -289,9 +280,6 @@ export default function Measurement(): JSX.Element {
    * Clears all measurements
    */
   const clearMeasurements = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('MEASUREMENT, clearMeasurements');
-
     // Clear stored feature references
     setMeasurementFeatures([]);
 
@@ -309,9 +297,6 @@ export default function Measurement(): JSX.Element {
    */
   const handleMeasurementToggle = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {
-      // Log
-      logger.logTraceUseCallback('MEASUREMENT, handleMeasurementToggle', event.target.checked);
-
       if (event.target.checked) {
         // Default to line when enabling
         startMeasurement('line');
@@ -329,9 +314,6 @@ export default function Measurement(): JSX.Element {
    */
   const handleSegmentLabelsToggle = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {
-      // Log
-      logger.logTraceUseCallback('MEASUREMENT, handleSegmentLabelsToggle', event.target.checked);
-
       const shouldShow = event.target.checked;
 
       // Set the segments hook state
@@ -358,9 +340,6 @@ export default function Measurement(): JSX.Element {
    */
   const handleTypeChange = useCallback(
     (_event: React.MouseEvent<HTMLElement>, newType: MeasureType): void => {
-      // Log
-      logger.logTraceUseCallback('MEASUREMENT, handleTypeChange', newType);
-
       if (newType !== null) {
         startMeasurement(newType);
       }

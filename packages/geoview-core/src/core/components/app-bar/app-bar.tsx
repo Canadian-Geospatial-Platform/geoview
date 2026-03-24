@@ -132,8 +132,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   const closePanelById = useCallback(
     (buttonId: string) => {
-      // Log
-      logger.logTraceUseCallback('APP-BAR - closePanelById', buttonId);
       // Callback when removing and focus is lost
       const focusWhenNoElementCallback = (): void => {
         const mapCont = geoviewElement;
@@ -153,8 +151,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   const openPanelById = useCallback(
     (buttonId: string) => {
-      // Log
-      logger.logTraceUseCallback('APP-BAR - openPanelById', buttonId);
       // Redirect to helper
       helpOpenPanelById(buttonId, setButtonPanels, isFocusTrapped);
     },
@@ -163,9 +159,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   const handleButtonClicked = useCallback(
     (buttonId: string) => {
-      // Log
-      logger.logTraceUseCallback('APP-BAR - handleButtonClicked', buttonId);
-
       // Get the button panel
       const buttonPanel = buttonPanels[buttonId];
       setActiveAppBarTab(buttonId, !buttonPanel.panel?.status, !buttonPanel.panel?.status);
@@ -175,9 +168,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   const handleGeneralCloseClicked = useCallback(
     (buttonId: string) => {
-      // Log
-      logger.logTraceUseCallback('APP-BAR - handleGeneralCloseClicked');
-
       // Return focus to the AppBar button that opened this panel
       if (isFocusTrapped) {
         setTimeout(() => {
@@ -192,9 +182,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   const handleAddButtonPanel = useCallback(
     (sender: AppBarApi, event: AppBarCreatedEvent) => {
-      // Log
-      logger.logTraceUseCallback('APP-BAR - handleAddButtonPanel', event);
-
       setButtonPanels((prevState) => {
         return {
           ...prevState,
@@ -211,9 +198,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   const handleRemoveButtonPanel = useCallback(
     (sender: AppBarApi, event: AppBarRemovedEvent) => {
-      // Log
-      logger.logTraceUseCallback('APP-BAR - handleRemoveButtonPanel', event);
-
       setButtonPanels((prevState) => {
         const state = { ...prevState };
 

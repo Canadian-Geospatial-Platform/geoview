@@ -8,7 +8,6 @@ import type { TypeFeatureInfoEntry, TypeQueryStatus } from '@/api/types/map-sche
 import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { getSxClasses } from './layer-list-style';
 import { LayerIcon } from './layer-icon';
-import { logger } from '@/core/utils/logger';
 import { useLayerSelectorStatus } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 export interface LayerListEntry {
@@ -87,9 +86,6 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
    */
   const handleLayerKeyDown = useCallback(
     (event: React.KeyboardEvent, selectedLayer: LayerListEntry): void => {
-      // Log
-      logger.logTraceUseCallback('LAYER-LIST - handleLayerKeyDown');
-
       if ((event.key === 'Enter' || event.key === ' ') && !isDisabled && !isLoading) {
         onListItemClick(selectedLayer);
         // NOTE: did this, bcz when enter is clicked, tab component `handleClick` function is fired,

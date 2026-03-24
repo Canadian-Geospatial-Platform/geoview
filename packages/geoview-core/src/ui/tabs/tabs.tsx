@@ -139,8 +139,6 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
    */
   const updateTabPanel = useCallback(
     (tabValue: number): void => {
-      logger.logTraceUseCallback('UI.TABS - updateTabPanel', tabValue);
-
       // Update panel refs when tab value is changed.
       // handle no tab when mobile dropdown is displayed.
       if (typeof tabValue === 'string') {
@@ -168,8 +166,6 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
    */
   const handleChange = useCallback(
     (event: SyntheticEvent<Element, Event>, newValue: number): void => {
-      logger.logTraceUseCallback('UI.TABS - handleChange', newValue);
-
       updateTabPanel(newValue);
     },
     [updateTabPanel]
@@ -180,8 +176,6 @@ function TabsUI(props: TypeTabsProps): JSX.Element {
    */
   const handleClick = useCallback(
     (event: MouseEvent<HTMLDivElement>): void => {
-      logger.logTraceUseCallback('UI.TABS - handleClick', event);
-
       // Get the tab (if already created to extract the value, set -1 if tab does not exist)
       // We need this information to know if we create, switch or collapse a tab
       const { id } = event.target as HTMLDivElement;

@@ -43,9 +43,6 @@ const BaseLightBoxComponent = memo(function BaseLightBoxComponent({
 
   // Calculate scale when image changes
   const calculateScale = useCallback((imageUrl: string) => {
-    // Log
-    logger.logTraceUseCallback('USE-LIGHT-BOX - calculateScale');
-
     const img = new Image();
     img.onload = () => {
       const container = document.querySelector(LIGHTBOX_SELECTORS.CONTAINER);

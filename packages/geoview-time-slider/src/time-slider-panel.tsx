@@ -67,9 +67,6 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
    */
   const handleClickLayerList = useCallback(
     (layer: LayerListEntry) => {
-      // Log
-      logger.logTraceUseCallback('TIME-SLIDER-PANEL - handleLayerList');
-
       // Set the layer path
       setSelectedLayerPath?.(layer.layerPath);
     },
@@ -86,9 +83,6 @@ export function TimeSliderPanel(props: TypeTimeSliderProps): JSX.Element {
    */
   const getFilterInfo = useCallback(
     (layerPath: string, timeSliderLayerInfo: TypeTimeSliderValues, language: TypeDisplayLanguage): string | undefined => {
-      // Log
-      logger.logTraceUseCallback('TIME-SLIDER-PANEL - getFilterInfo', layerPath, language);
-
       if (timeSliderLayerInfo.filtering) {
         const { values } = timeSliderLayerInfo;
 

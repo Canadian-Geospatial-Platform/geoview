@@ -112,8 +112,6 @@ export default function Share(): JSX.Element | null {
 
   // Handler to open modal
   const handleShareClick = useCallback(() => {
-    logger.logTraceUseCallback('SHARE - click');
-
     // Generate the URL only when opening the modal
     const baseUrl = window.location.origin + window.location.pathname;
     const queryParams = getShareUrl(zoom, center, projection, basemap, layers);
@@ -124,14 +122,11 @@ export default function Share(): JSX.Element | null {
 
   // Handler to close modal
   const handleCloseModal = useCallback(() => {
-    logger.logTraceUseCallback('SHARE - close modal');
     setIsModalOpen(false);
   }, []);
 
   // Handler to copy URL to clipboard
   const handleCopyUrl = useCallback(() => {
-    logger.logTraceUseCallback('SHARE - copy URL');
-
     navigator.clipboard.writeText(shareUrl).then(
       () => {
         logger.logInfo('URL copied to clipboard:', shareUrl);

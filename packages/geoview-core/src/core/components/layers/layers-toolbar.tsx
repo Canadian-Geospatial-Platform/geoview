@@ -53,8 +53,6 @@ export function LayersToolbar({ containerType }: TypeLayersToolbar): JSX.Element
    */
   const handleSetDisplayState = useCallback(
     (displayStateParam: TypeLayersViewDisplayState): void => {
-      logger.logTraceUseCallback('LAYER TOOLBAR - handleSetDisplayState', displayStateParam);
-
       // If user clicks Add, set the flag
       if (displayStateParam === 'add') {
         userClickedAdd.current = true;

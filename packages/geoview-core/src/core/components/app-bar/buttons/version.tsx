@@ -12,7 +12,6 @@ import { handleEscapeKey } from '@/core/utils/utilities';
 import { FocusTrapContainer } from '@/core/components/common/focus-trap-container';
 import { useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { DateMgt } from '@/core/utils/date-mgt';
-import { logger } from '@/core/utils/logger';
 import type { SxStyles } from '@/ui/style/types';
 import { visuallyHidden } from '@/ui/style/default';
 
@@ -96,7 +95,6 @@ export default function Version(): JSX.Element {
   // Handlers
   const handleOpenPopover = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
-      logger.logTraceUseCallback('VERSION - open');
       setAnchorEl(event.currentTarget);
       setOpen((prev) => !prev);
 
@@ -110,7 +108,6 @@ export default function Version(): JSX.Element {
   );
 
   const handleClickAway = useCallback(() => {
-    logger.logTraceUseCallback('VERSION - close');
     if (open) {
       setOpen(false);
       // Restore focus to the button that opened the panel

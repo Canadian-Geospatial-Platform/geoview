@@ -114,8 +114,6 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   // Modified clearHighlightsUnchecked
   const clearHighlightsUnchecked = useCallback(
     (arrayToClear: TypeFeatureInfoEntry[] | undefined | null) => {
-      logger.logTraceUseCallback('DETAILS-PANEL - clearHighlightsUnchecked');
-
       arrayToClear?.forEach((feature) => {
         if (!checkedFeaturesSet.has(feature.uid)) {
           removeHighlightedFeature(feature);
@@ -131,9 +129,6 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
    */
   const getNumFeaturesLabel = useCallback(
     (layer: TypeLayerData): string => {
-      // Log
-      logger.logTraceUseCallback('DETAILS-PANEL - getNumFeaturesLabel');
-
       const numOfFeatures = layer.features?.length ?? 0;
       const label =
         numOfFeatures === 0
@@ -319,9 +314,6 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
    */
   const updateFeatureSelected = useCallback(
     (newIndex: number, prevLayer?: TypeLayerData) => {
-      // Log
-      logger.logTraceUseCallback('DETAILS-PANEL - updateFeatureSelected');
-
       // Get the current feature in highlight
       let currentFeature;
       if (prevLayer?.features) {
@@ -443,9 +435,6 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
    * Removes the currently selected feature highlight (but keeps checked features).
    */
   const handleRightPanelClosed = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('DETAILS-PANEL - handleRightPanelClosed');
-
     // Only remove the current selected feature highlight if it's not checked
     const currentFeature = memoSelectedLayerData?.features?.[currentFeatureIndex];
     if (currentFeature && !isFeatureInCheckedFeatures(currentFeature)) {
@@ -476,8 +465,6 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
    * Updates the local state to track panel visibility.
    */
   const handleRightPanelVisibilityChanged = useCallback((isVisible: boolean): void => {
-    // Log
-    logger.logTraceUseCallback('DETAILS-PANEL - handleRightPanelVisibilityChanged', isVisible);
     setIsRightPanelVisible(isVisible);
   }, []);
 
@@ -489,9 +476,6 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
    */
   const handleFeatureNavigateChange = useCallback(
     (change: -1 | 1): void => {
-      // Log
-      logger.logTraceUseCallback('DETAILS-PANEL - handleFeatureNavigateChange', currentFeatureIndex);
-
       const newIndex = currentFeatureIndex + change;
       const maxIndex = (memoSelectedLayerData?.features?.length ?? 0) - 1;
 
@@ -525,8 +509,6 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
    */
   const handleLayerChange = useCallback(
     (layerEntry: LayerListEntry): void => {
-      // Log
-      logger.logTraceUseCallback('DETAILS-PANEL - handleLayerChange', layerEntry.layerPath);
       // Set the selected layer path in the store which will in turn trigger the store listeners on this component
       setSelectedLayerPath(layerEntry.layerPath);
 

@@ -82,9 +82,6 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
    */
   const handleLayerChange = useCallback(
     (_layer: LayerListEntry) => {
-      // Log
-      logger.logTraceUseCallback('DATA-PANEL - handleLayerChange');
-
       setSelectedLayerPath(_layer.layerPath); // This will trigger the useEffect below to call tiggerGetAllFeatureInfo()
       setIsLoading(true);
     },
@@ -98,9 +95,6 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
    */
   const isMapFilteredSelectedForLayer = useCallback(
     (layerPath: string): boolean => {
-      // Log
-      logger.logTraceUseCallback('DATA-PANEL - isMapFilteredSelectedForLayer');
-
       return datatableSettings[layerPath].mapFilteredRecord && !!datatableSettings[layerPath].rowsFilteredRecord;
     },
     [datatableSettings]
@@ -113,9 +107,6 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
    */
   const getFeaturesOfLayer = useCallback(
     (layerPath: string): string => {
-      // Log
-      logger.logTraceUseCallback('DATA-PANEL - getFeaturesOfLayer');
-
       if (datatableSettings[layerPath] && datatableSettings[layerPath].rowsFilteredRecord) {
         return `${datatableSettings[layerPath].rowsFilteredRecord} ${t('dataTable.featureFiltered')}`;
       }
@@ -144,9 +135,6 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
    */
   const getLayerTooltip = useCallback(
     (layerName: string, layerPath: string): JSX.Element => {
-      // Log
-      logger.logTraceUseCallback('DATA-PANEL - getLayerTooltip');
-
       return (
         <Box sx={{ display: 'flex', alignContent: 'center', '& svg ': { width: '0.75em', height: '0.75em' } }}>
           {`${layerName}, ${getFeaturesOfLayer(layerPath)}`}
@@ -163,8 +151,6 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
    * @returns {void}
    */
   const handlePanelClosed = useCallback((): void => {
-    logger.logTraceUseCallback('DATA-PANEL - handlePanelClosed');
-
     // If we have a selected layer, tell disableFocusTrap to focus it
     if (selectedLayerPath) {
       // Build the full layer list item ID that matches the DOM

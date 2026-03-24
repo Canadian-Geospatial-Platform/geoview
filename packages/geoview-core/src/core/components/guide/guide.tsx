@@ -54,7 +54,6 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
    */
   const handleSearchStateChange = useCallback(
     (newSearchTerm: string, newHighlightFunction: (content: string, sectionIndex: number) => string) => {
-      logger.logTraceUseCallback('GUIDE - handleSearchStateChange');
       setHighlightFunction(() => newHighlightFunction);
     },
     []
@@ -69,8 +68,6 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
    * Get Layer list with markdown content.
    */
   const getListOfGuides = useCallback((): GuideListItem[] => {
-    logger.logTraceUseCallback('GUIDE - getListOfGuides');
-
     if (!guide) return [];
 
     return Object.keys(guide).map((item: string) => {
@@ -113,8 +110,6 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
    */
   const handleSectionChange = useCallback(
     (sectionIndex: number) => {
-      logger.logTraceUseCallback('GUIDE - handleSectionChange');
-
       if (layersList[sectionIndex]) {
         setGuideItemIndex(sectionIndex);
         setSelectedLayerPath(layersList[sectionIndex].layerPath);
@@ -173,8 +168,6 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
    */
   const handleGuideItemClick = useCallback(
     (layer: LayerListEntry): void => {
-      logger.logTraceUseCallback('GUIDE - handleGuideItemClick', layer);
-
       const index: number = layersList.findIndex((item) => item.layerName === layer.layerName);
       setGuideItemIndex(index);
       setSelectedLayerPath(layer.layerPath);

@@ -72,7 +72,6 @@ export const MapInfo = memo(function MapInfo({ onScrollShellIntoView }: MapInfoP
   );
 
   const handleExpand = useCallback((value: boolean) => {
-    logger.logTraceUseCallback('MAP INFO - expand', value);
     setExpanded(value);
   }, []);
 

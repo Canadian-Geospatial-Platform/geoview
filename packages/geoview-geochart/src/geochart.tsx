@@ -97,13 +97,10 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
    */
   const handleError = useCallback<(error: string, exception: unknown | undefined) => void>(
     (errorMessage: string): void => {
-      // Log
-      logger.logTraceUseCallback('GEOVIEW-GEOCHART - handleError', mapId, errorMessage);
-
       // Show error
       addNotification({ key: 'geochart', message: errorMessage, notificationType: 'error', count: 0 });
     },
-    [addNotification, mapId]
+    [addNotification]
   );
 
   /**

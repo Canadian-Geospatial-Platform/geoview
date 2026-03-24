@@ -38,9 +38,6 @@ export function CoordinateInfoSwitch({ disabled }: CoordinateInfoSwitchProps): J
   const { toggleCoordinateInfoEnabled } = useDetailsStoreActions();
 
   const handleCoordinateInfoToggle = useCallback(() => {
-    // Log
-    logger.logTraceUseCallback('DETAILS-PANEL - handleCoordinateInfoToggle');
-
     // Toggle the state
     toggleCoordinateInfoEnabled();
   }, [toggleCoordinateInfoEnabled]);

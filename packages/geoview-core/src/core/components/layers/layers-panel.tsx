@@ -39,9 +39,6 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
   const mapId = useGeoViewMapId();
 
   const showLayerDetailsPanel = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('LAYERS-PANEL - showLayerDetailsPanel');
-
     // Just set visibility - focus will be handled automatically by useEffect
     responsiveLayoutRef.current?.setIsRightPanelVisible(true);
     responsiveLayoutRef.current?.setRightPanelFocus();
@@ -101,8 +98,6 @@ export function LayersPanel({ containerType }: TypeLayersPanel): JSX.Element {
    * Handles right panel close - restores focus to the layer list item that opened the panel
    */
   const handleRightPanelClosed = useCallback((): void => {
-    logger.logTraceUseCallback('LAYERS-PANEL - handleRightPanelClosed');
-
     // If we have a selected layer, tell disableFocusTrap to focus it
     if (selectedLayer?.layerPath) {
       const layerListItemId = `${mapId}-${containerType}-${TABS.LAYERS}-${selectedLayer.layerPath}`;

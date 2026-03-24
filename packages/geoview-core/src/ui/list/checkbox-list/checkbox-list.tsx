@@ -90,8 +90,6 @@ function CheckboxListUI(props: CheckboxListProps): JSX.Element {
    * Handles clicks on the right-side content to prevent event propagation
    */
   const handleClickContent = useCallback((event: React.MouseEvent<HTMLElement>): void => {
-    logger.logTraceUseCallback('CHECKBOX-LIST - handleClickContent');
-
     event.stopPropagation();
   }, []);
 

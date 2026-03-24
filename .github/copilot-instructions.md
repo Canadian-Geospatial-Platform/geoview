@@ -412,9 +412,6 @@ logger.logTraceUseEffect(
   "RASTER FUNCTION PANEL - Layer Raster Function Infos sync",
   rasterFunctionInfos,
 );
-
-// useCallback — similar pattern
-logger.logTraceUseCallback("LAYER DETAILS - handle visibility toggle");
 ```
 
 Control via localStorage:
@@ -661,7 +658,6 @@ Use `#region Handlers` / `#endregion` to group related handlers for clarity.
  * Handles when the user clicks on the element
  */
 const handleClick = useCallback(() => {
-  logger.logTraceUseCallback("COMPONENT_NAME - action");
   // Implementation
 }, [dependencies]);
 
@@ -670,7 +666,6 @@ const handleClick = useCallback(() => {
  */
 const handleKeyDown = useCallback(
   (event: React.KeyboardEvent) => {
-    logger.logTraceUseCallback("COMPONENT_NAME - action");
     // Implementation
   },
   [dependencies],
@@ -685,7 +680,6 @@ const handleKeyDown = useCallback(
 - **Naming**: Use verb-based names like `handleClick`, `handleToggle`, `handleMenuItemClick`, `handleClickAway`
 - **No @param/@returns tags**: Handler parameters are event objects with self-documenting property names
 - **Group with regions**: Use `#region Handlers` / `#endregion` comments to organize multiple handlers
-- **Logger pattern**: Include `logger.logTraceUseCallback()` with component name and action description
 
 **TypeDoc Generation:** Run `npm run doc` in geoview-core to generate API documentation.
 

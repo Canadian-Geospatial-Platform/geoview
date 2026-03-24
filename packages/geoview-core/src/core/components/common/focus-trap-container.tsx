@@ -48,9 +48,6 @@ export const FocusTrapContainer = memo(function FocusTrapContainer({
 
   // Callbacks
   const handleClose = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('FOCUS-TRAP-ELEMENT - handleClose');
-
     // For footer bar containers, completely disable trap and focus tab selector
     if (containerType === CONTAINER_TYPE.FOOTER_BAR) {
       // Clear the active element first to disable focus trap

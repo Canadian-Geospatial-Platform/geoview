@@ -177,9 +177,6 @@ export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onC
 
   // Memoize the window resize handler and use the hook to add listener to avoid many creation
   const handleWindowResize = useCallback(() => {
-    // Log
-    logger.logTraceUseCallback('LEGEND FULLSCREEN - window resize event');
-
     // Update the layer list based on window size
     updateFullscreenLayerListByWindowSize(layersList);
   }, [layersList, updateFullscreenLayerListByWindowSize]);

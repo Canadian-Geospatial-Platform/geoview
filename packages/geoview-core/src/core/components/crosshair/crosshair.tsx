@@ -52,7 +52,6 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
       // Use store getter, we do not subcribe to modification
       const currentPointerPosition = getMapPointerPosition(mapId);
       if (currentPointerPosition) {
-        logger.logTraceUseCallback('CROSSHAIR - simulateClick', currentPointerPosition.lonlat);
         setClickCoordinates(currentPointerPosition);
       }
     },
@@ -71,8 +70,6 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
 
       const myEvent = event as KeyboardEvent;
       if ((myEvent.key === 'ArrowDown' && myEvent.shiftKey) || (myEvent.key === 'ArrowUp' && myEvent.shiftKey)) {
-        logger.logTraceUseCallback('CROSSHAIR - managePanDelta', myEvent.key);
-
         panDelta.current = myEvent.key === 'ArrowDown' ? Math.max(10, panDelta.current - 10) : panDelta.current + 10;
 
         setMapKeyboardPanInteractions(panDelta.current);

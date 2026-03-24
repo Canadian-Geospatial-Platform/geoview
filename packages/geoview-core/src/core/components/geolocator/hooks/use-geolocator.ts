@@ -91,8 +91,6 @@ export const useGeolocator = (): UseGeolocatorReturn => {
 
   const fetchGeolocations = useCallback(
     async (searchTerm: string): Promise<void> => {
-      logger.logTraceUseCallback('GEOLOCATOR use-geolocator fetchGeolocations', searchTerm);
-
       try {
         // Check if it is a postal code and return clean term
         const cleanSearchTerm = cleanPostalCode(searchTerm);

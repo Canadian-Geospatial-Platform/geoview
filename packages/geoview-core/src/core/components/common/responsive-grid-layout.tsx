@@ -189,9 +189,6 @@ const ResponsiveGridLayout = forwardRef(
      */
     const handleIsEnlarge = useCallback(
       (isEnlarge: boolean): void => {
-        // Log
-        logger.logTraceUseCallback('LAYOUT - handleIsEnlarge', isEnlarge);
-
         // Set the isEnlarge
         setIsEnlarged(isEnlarge);
 
@@ -202,9 +199,6 @@ const ResponsiveGridLayout = forwardRef(
     );
 
     const handleOpenGuide = useCallback((): void => {
-      // Log
-      logger.logTraceUseCallback('LAYOUT - handleOpenGuide', !isGuideOpen);
-
       setIsGuideOpen(!isGuideOpen);
     }, [isGuideOpen]);
 

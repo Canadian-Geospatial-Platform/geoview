@@ -185,9 +185,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
    * @returns {boolean} Whether the children are visible
    */
   const legendLayersChildrenVisible = useCallback((legendLayer: TypeLegendLayer, curVisibleLayers: string[]): boolean => {
-    // Log
-    logger.logTraceUseCallback('LAYER-DETAILS - legendLayersChildrenVisible');
-
     // Check if any children are not visible
     if (legendLayer.children.find((child) => !curVisibleLayers.includes(child.layerPath))) return false;
 
@@ -201,9 +198,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   }, []);
 
   useEffect(() => {
-    // Log
-    logger.logTraceUseEffect('LAYER DETAILS - allChildrenVisible', layerDetails);
-
     const allChildrenVisible = legendLayersChildrenVisible(layerDetails, visibleLayers);
     if (allChildrenVisible !== allSublayersVisible) setAllSublayersVisible(allChildrenVisible);
   }, [allSublayersVisible, layerDetails, layerDetails.children, legendLayersChildrenVisible, visibleLayers]);
@@ -244,7 +238,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
    * Crossfades from settings view back to details view, restoring focus to the settings button.
    */
   const handleSettingsBackToDetails = useCallback((): void => {
-    logger.logTraceUseCallback('LAYER-DETAILS - handleSettingsBackToDetails');
     setContentVisible(false);
     delay(TIMEOUT.fadingPanelDuration)
       .then(() => {
@@ -259,7 +252,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
    * Crossfades from details view to settings view.
    */
   const handleOpenSettings = useCallback((): void => {
-    logger.logTraceUseCallback('LAYER-DETAILS - handleOpenSettings');
     setContentVisible(false);
     delay(TIMEOUT.fadingPanelDuration)
       .then(() => {
@@ -273,7 +265,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
    * Crossfades from info view back to details view, restoring focus to the info button.
    */
   const handleInfoBackToDetails = useCallback((): void => {
-    logger.logTraceUseCallback('LAYER-DETAILS - handleInfoBackToDetails');
     setContentVisible(false);
     delay(TIMEOUT.fadingPanelDuration)
       .then(() => {
@@ -288,7 +279,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
    * Crossfades from details view to info view.
    */
   const handleOpenInfo = useCallback((): void => {
-    logger.logTraceUseCallback('LAYER-DETAILS - handleOpenInfo');
     setContentVisible(false);
     delay(TIMEOUT.fadingPanelDuration)
       .then(() => {
@@ -305,9 +295,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
    */
   const setVisibilityForAllSublayers = useCallback(
     (legendLayer: TypeLegendLayer, newVisibility: boolean): void => {
-      // Log
-      logger.logTraceUseCallback('LAYER-DETAILS - setVisibilityForAllSublayers');
-
       legendLayer.children.forEach((child) => {
         if (newVisibility) {
           if (!visibleLayers.includes(child.layerPath)) setOrToggleLayerVisibility(child.layerPath, true);

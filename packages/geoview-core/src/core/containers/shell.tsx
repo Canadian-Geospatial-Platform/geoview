@@ -114,9 +114,6 @@ export function Shell(props: ShellProps): JSX.Element {
    * @param {MapComponentPayload} payload The map component being added
    */
   const handleMapAddComponent = useCallback((sender: MapViewer, event: MapComponentAddedEvent): void => {
-    // Log
-    logger.logTraceUseCallback('SHELL - handleMapAddComponent');
-
     setComponents((tempComponents) => ({
       ...tempComponents,
       [event.mapComponentId]: event.component,
@@ -129,9 +126,6 @@ export function Shell(props: ShellProps): JSX.Element {
    */
   const handleMapRemoveComponent = useCallback(
     (sender: MapViewer, event: MapComponentRemovedEvent) => {
-      // Log
-      logger.logTraceUseCallback('SHELL - handleMapRemoveComponent');
-
       const tempComponents: Record<string, JSX.Element> = { ...components };
       delete tempComponents[event.mapComponentId];
 
@@ -148,9 +142,6 @@ export function Shell(props: ShellProps): JSX.Element {
    */
   const handleModalOpen = useCallback(
     (sender: ModalApi, event: ModalEvent) => {
-      // Log
-      logger.logTraceUseCallback('SHELL - handleModalOpen', event.modalId);
-
       setModalProps(mapViewer.modal.modals[event.modalId]);
       setModalOpen(true);
     },
@@ -160,10 +151,7 @@ export function Shell(props: ShellProps): JSX.Element {
   /**
    * Handles when the modal needs to close (only 1 at a time is allowed)
    */
-  const handleModalClose = useCallback((sender: ModalApi, event: ModalEvent): void => {
-    // Log
-    logger.logTraceUseCallback('SHELL - handleModalClose', event.modalId);
-
+  const handleModalClose = useCallback((): void => {
     setModalOpen(false);
   }, []);
 
@@ -173,9 +161,6 @@ export function Shell(props: ShellProps): JSX.Element {
    */
   const handleSnackBarOpen = useCallback(
     (sender: Notifications, payload: SnackBarOpenEvent): void => {
-      // Log
-      logger.logTraceUseCallback('SHELL - handleSnackBarOpen', payload);
-
       // Create button
       const myButton = payload.button?.label ? (
         <Button type="icon" onClick={payload.button.action}>
@@ -219,9 +204,6 @@ export function Shell(props: ShellProps): JSX.Element {
    */
   const handleSnackBarClose = useCallback(
     (event?: React.SyntheticEvent | Event, reason?: string) => {
-      // Log
-      logger.logTraceUseCallback('SHELL - handleSnackBarClose', reason);
-
       // Remove displayed message from queue
       mapViewer.notifications.snackbarMessageQueue.shift();
       if (reason === 'clickaway') {
@@ -247,9 +229,6 @@ export function Shell(props: ShellProps): JSX.Element {
    * This improves accessibility by allowing users to easily return focus to the map
    */
   const handleScrollShellIntoView = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('SHELL - scrollIntoViewListener');
-
     if (!shellRef.current) return;
 
     // Check if the map is already in view, then scroll if needed
@@ -261,9 +240,6 @@ export function Shell(props: ShellProps): JSX.Element {
    * @param {string} targetId - The ID of the element to focus
    */
   const handleSkipLinkClick = useCallback((targetId: string) => {
-    // Log
-    logger.logTraceUseCallback('SHELL - handleSkipLinkClick', targetId);
-
     const targetElement = document.getElementById(targetId);
     if (targetElement) {
       targetElement.focus();
@@ -275,9 +251,6 @@ export function Shell(props: ShellProps): JSX.Element {
    * and activates the crosshair for visual feedback.
    */
   const handleSkipToMainContent = useCallback(() => {
-    // Log
-    logger.logTraceUseCallback('SHELL - handleSkipToMainContent');
-
     // Focus the map and set crosshair
     setCrosshairActive(true);
     document.getElementById(`mapTargetElement-${mapId}`)?.focus();

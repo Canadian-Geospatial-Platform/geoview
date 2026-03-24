@@ -152,9 +152,6 @@ export function SingleLayer({
   // if any of the child layers is selected return true
   const isLayerChildSelected = useCallback(
     (children: TypeLegendLayer[] | undefined): boolean => {
-      // Log
-      logger.logTraceUseCallback('SINGLE-LAYER - isLayerChildSelected');
-
       if (displayState !== 'view') {
         return false;
       }
@@ -175,9 +172,6 @@ export function SingleLayer({
   // returns true if any of the layer children has visibility of false
   const layerHasDisabledVisibility = useCallback(
     (children: TypeLegendLayer[] | undefined, controls: TypeLayerControls | undefined): boolean => {
-      // Log
-      logger.logTraceUseCallback('SINGLE-LAYER - layerHasDisabledVisibility');
-
       if (controls?.visibility === false) {
         return true;
       }
@@ -200,9 +194,6 @@ export function SingleLayer({
    * This ensures hasFocusWithin state is properly cleared on other layers.
    */
   const blurOtherLayerButtons = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('SINGLE-LAYER - blurOtherLayerButtons');
-
     const activeElement = document.activeElement as HTMLElement;
     if (activeElement && activeElement.tagName === 'BUTTON' && !layerListItemRef.current?.contains(activeElement)) {
       activeElement.blur();
@@ -215,9 +206,6 @@ export function SingleLayer({
    */
   const selectLayerIfNeeded = useCallback(
     (openPanel: boolean = true): void => {
-      // Log
-      logger.logTraceUseCallback('SINGLE-LAYER - selectLayerIfNeeded');
-
       if (!layerIsSelected && ['processed', 'loaded'].includes(layerStatus!)) {
         setSelectedLayerPath(layerPath);
         if (openPanel) {
@@ -232,9 +220,6 @@ export function SingleLayer({
    * Handle expand/shrink of layer groups.
    */
   const handleExpandGroupClick = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('SINGLE-LAYER - handleExpandGroupClick');
-
     // Blur focused buttons on other layers
     blurOtherLayerButtons();
 
@@ -247,9 +232,6 @@ export function SingleLayer({
 
   const handleExpandGroupKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>): void => {
-      // Log
-      logger.logTraceUseCallback('SINGLE-LAYER - handleExpandGroupKeyDown');
-
       if (event.key === 'Enter' || event.key === ' ') {
         // Blur focused buttons on other layers
         blurOtherLayerButtons();
@@ -268,9 +250,6 @@ export function SingleLayer({
   );
 
   const handleLayerClick = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('SINGLE-LAYER - handleLayerClick');
-
     // Only clickable if the layer status is processed or loaded
     if (!['processed', 'loaded'].includes(layerStatus!)) {
       return;
@@ -286,9 +265,6 @@ export function SingleLayer({
 
   const handleArrowClick = useCallback(
     (direction: number) => {
-      // Log
-      logger.logTraceUseCallback('SINGLE-LAYER - handleArrowClick');
-
       // Select the layer if not already selected
       selectLayerIfNeeded();
 
@@ -304,9 +280,6 @@ export function SingleLayer({
 
   const handleArrowKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>, direction: number) => {
-      // Log
-      logger.logTraceUseCallback('SINGLE-LAYER - handleArrowKeyDown');
-
       if (event.key === 'Enter' || event.key === ' ') {
         // Select the layer if not already selected
         selectLayerIfNeeded(false);
@@ -327,9 +300,6 @@ export function SingleLayer({
 
   const handleArrowKeyDownWrapper = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>) => {
-      // Log
-      logger.logTraceUseCallback('SINGLE-LAYER - handleArrowKeyDownWrapper');
-
       // Determine direction from button id
       const direction = event.currentTarget.id.includes('up-order') ? -1 : 1;
 
@@ -349,9 +319,6 @@ export function SingleLayer({
 
   const handleArrowClickWrapper = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
-      // Log
-      logger.logTraceUseCallback('SINGLE-LAYER - handleArrowClickWrapper');
-
       // Determine direction from button id
       const direction = event.currentTarget.id.includes('up-order') ? -1 : 1;
 
@@ -370,9 +337,6 @@ export function SingleLayer({
   );
 
   const handleToggleVisibility = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('SINGLE-LAYER - handleToggleVisibility');
-
     // Select the layer if not already selected
     selectLayerIfNeeded();
 
@@ -382,9 +346,6 @@ export function SingleLayer({
 
   const handleToggleVisibilityKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>): void => {
-      // Log
-      logger.logTraceUseCallback('SINGLE-LAYER - handleToggleVisibilityKeyDown');
-
       // Only handle Enter and Space keys
       if (event.key === 'Enter' || event.key === ' ') {
         // Select the layer if not already selected
@@ -401,9 +362,6 @@ export function SingleLayer({
   );
 
   const handleZoomToLayerVisibleScale = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('SINGLE-LAYER - handleZoomToLayerVisibleScale');
-
     // Select the layer if not already selected
     selectLayerIfNeeded();
 
@@ -413,9 +371,6 @@ export function SingleLayer({
 
   const handleZoomToLayerVisibleScaleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>): void => {
-      // Log
-      logger.logTraceUseCallback('SINGLE-LAYER - handleZoomToLayerVisibleScaleKeyDown');
-
       if (event.key === 'Enter' || event.key === ' ') {
         // Select the layer if not already selected
         selectLayerIfNeeded(false);
@@ -436,9 +391,6 @@ export function SingleLayer({
   );
 
   const handleReload = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('SINGLE-LAYER - handleReload');
-
     // Select the layer if not already selected
     selectLayerIfNeeded();
 
@@ -448,9 +400,6 @@ export function SingleLayer({
 
   const handleReloadKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>): void => {
-      // Log
-      logger.logTraceUseCallback('SINGLE-LAYER - handleReloadKeyDown');
-
       if (event.key === 'Enter' || event.key === ' ') {
         // Select the layer if not already selected
         selectLayerIfNeeded(false);
@@ -470,16 +419,10 @@ export function SingleLayer({
 
   // Handlers for keyboard navigation of the sorting arrows and action buttons for accessibility
   const handleFocusWithin = useCallback((): void => {
-    // Log
-    logger.logTraceUseCallback('SINGLE-LAYER - handleFocusWithin');
-
     setHasFocusWithin(true);
   }, []);
 
   const handleBlurWithin = useCallback((event: React.FocusEvent<HTMLElement>): void => {
-    // Log
-    logger.logTraceUseCallback('SINGLE-LAYER - handleBlurWithin');
-
     // Only blur if focus moved outside this layer item
     if (!event.currentTarget.contains(event.relatedTarget as Node)) {
       setHasFocusWithin(false);

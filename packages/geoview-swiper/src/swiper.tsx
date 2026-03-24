@@ -88,9 +88,6 @@ export function Swiper(props: SwiperProps): JSX.Element {
    */
   const prerender = useCallback(
     (event: Event | BaseEvent) => {
-      // Log
-      logger.logTraceUseCallback('SWIPER - prerender', event);
-
       const evt = event as RenderEvent;
       const ctx: CanvasRenderingContext2D = evt.context! as CanvasRenderingContext2D;
       const swiperValue = orientation === 'vertical' ? swiperValueVertical.current : swiperValueHorizontal.current;
@@ -184,9 +181,6 @@ export function Swiper(props: SwiperProps): JSX.Element {
    */
   const updateSwiper = useCallback(
     (event: KeyboardEvent): void => {
-      // Log
-      logger.logTraceUseCallback('SWIPER - updateSwiper', event.key);
-
       // * there is a know issue when stiching from keyboard to mouse swiper but we can live with it as we are not expecting to face this
       // * offset from mouse method is not working properly anymore
       if ('ArrowLeft ArrowRight ArrowUp ArrowDown'.includes(event.key) && layerPaths.length) {

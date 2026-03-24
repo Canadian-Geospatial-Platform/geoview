@@ -86,8 +86,6 @@ function CardMediaUI(props: CardMediaPropsExtend): JSX.Element {
    * Handles when the user clicks on the card media element
    */
   const handleClick = useCallback(() => {
-    logger.logTraceUseCallback('UI.CARD MEDIA - click');
-
     click?.();
   }, [click]);
 
@@ -96,7 +94,6 @@ function CardMediaUI(props: CardMediaPropsExtend): JSX.Element {
    */
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
-      logger.logTraceUseCallback('UI.CARD MEDIA - keyboard click');
       // Only trigger on Enter or Space key
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();

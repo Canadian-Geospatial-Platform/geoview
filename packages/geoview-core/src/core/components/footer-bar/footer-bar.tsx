@@ -174,8 +174,6 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
    * Add a tab
    */
   const handleAddTab = useCallback((sender: FooterBarApi, event: FooterTabCreatedEvent) => {
-    // Log
-    logger.logTraceUseCallback('FOOTER-BAR - handleAddTab', event);
     const newTab = {
       [event.tab.id]: {
         icon: event.tab.icon || <InfoOutlinedIcon />,
@@ -194,9 +192,6 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
    * Remove a tab
    */
   const handleRemoveTab = useCallback((sender: FooterBarApi, event: FooterTabRemovedEvent) => {
-    // Log
-    logger.logTraceUseCallback('FOOTER-BAR - handleRemoveTab', event);
-
     // remove the tab from the list
     setTabsList((prevState) => {
       const state = { ...prevState };

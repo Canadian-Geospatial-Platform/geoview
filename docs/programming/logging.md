@@ -16,8 +16,6 @@ export const LOG_TRACE_DETAILED = 1;
 export const LOG_TRACE_USE_EFFECT_UNMOUNT = 2;
 // For tracing rendering. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
 export const LOG_TRACE_RENDER = 3;
-// For tracing useCallback. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
-export const LOG_TRACE_USE_CALLBACK = 4;
 // For tracing useMemo. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
 export const LOG_TRACE_USE_MEMO = 5;
 // For tracing useEffect mounting. Disabled by default. Only shows if running in dev environment or GEOVIEW_LOG_ACTIVE key is set in local storage.
@@ -64,7 +62,7 @@ Remember to call `logTrackerStop` to stop tracking.
 
 The `useWhatChanged` function can be found here: [https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-core/src/core/utils/useWhatChanged.ts](https://github.com/Canadian-Geospatial-Platform/geoview/blob/develop/packages/geoview-core/src/core/utils/useWhatChanged.ts)
 
-The `useWhatChanged` function provides a way to monitor dependencies of `useEffect` or `useCallback` by writing a call to `useWhatChanged` above the call to `useEffect` as shown in this example:
+The `useWhatChanged` function provides a way to monitor dependencies of `useEffect`by writing a call to `useWhatChanged` above the call to `useEffect` as shown in this example:
 
 ```ts
   // Debug the below useEffect to help figure out which dependency triggered the useEffect

@@ -356,21 +356,15 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
    *
    * Adjusts the local state so the Slider thumb updates.
    */
-  const handleSliderChange = useCallback(
-    (newValues: number | number[]) => {
-      // Log
-      logger.logTraceUseCallback('TIME-SLIDER - handleSliderChange', layerPath);
+  const handleSliderChange = useCallback((newValues: number | number[]) => {
+    clearTimeout(playIntervalRef.current);
+    setIsPlaying(false);
+    sliderDeltaRef.current = undefined;
 
-      clearTimeout(playIntervalRef.current);
-      setIsPlaying(false);
-      sliderDeltaRef.current = undefined;
-
-      // Update the local values
-      if (Array.isArray(newValues)) setValues(newValues);
-      else setValues([newValues]);
-    },
-    [layerPath]
-  );
+    // Update the local values
+    if (Array.isArray(newValues)) setValues(newValues);
+    else setValues([newValues]);
+  }, []);
 
   /**
    * Handles when the slider thumb has committed to a value in the slider.
@@ -379,9 +373,6 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
    */
   const handleSliderChangeCommitted = useCallback(
     (newValues: number | number[]): void => {
-      // Log
-      logger.logTraceUseCallback('TIME-SLIDER - handleSliderChangeCommitted', layerPath);
-
       if (discreteValues && singleHandle) {
         const value = Array.isArray(newValues) ? newValues[0] : newValues;
         const nearest = timeStampRange.reduce((prev, curr) => (Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev));
@@ -440,9 +431,6 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
    */
   const handleLabelFormat = useCallback(
     (theValue: number): string => {
-      // Log
-      logger.logTraceUseCallback('TIME-SLIDER - handleLabelFormat', displayDateFormat);
-
       // Format the date using displayDateFormat.
       return DateMgt.formatDate(
         theValue,

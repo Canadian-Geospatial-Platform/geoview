@@ -87,13 +87,8 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
   /**
    * Handles click on enlarge button in the layout component.
-   *
-   * @param isEnlarge - Indicates if is enlarged
    */
-  const handleIsEnlargeClicked = useCallback((isEnlarge: boolean) => {
-    // Log
-    logger.logTraceUseCallback('GEOCHART-PANEL - handleIsEnlargeClicked', isEnlarge);
-
+  const handleIsEnlargeClicked = useCallback(() => {
     // Redraw the GeoCharts
     redrawGeoCharts();
   }, []);
@@ -118,9 +113,6 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
    */
   const getNumFeaturesLabel = useCallback(
     (layer: TypeGeochartResultSetEntry): string => {
-      // Log
-      logger.logTraceUseCallback('GEOCHART-PANEL - getNumFeaturesLabel');
-
       const numOfFeatures = layer.features?.length ?? 0;
       const label =
         numOfFeatures === 0
@@ -140,9 +132,6 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
    */
   const handleLayerChange = useCallback(
     (layer: LayerListEntry): void => {
-      // Log
-      logger.logTraceUseCallback('GEOCHART-PANEL - handleLayerChange', layer);
-
       // Set the selected layer path in the store which will in turn trigger the store listeners on this component
       setSelectedLayerPath?.(layer.layerPath);
     },
