@@ -1,13 +1,15 @@
 /**
  * Exports an Event Helper class to help doing events management between classes.
+ *
  * See examples across the code base for examples of how to implement this.
  */
 export default class EventHelper {
   /**
    * Emits an event to all handlers.
-   * @param {T} sender - The object emitting the event
-   * @param {EventDelegateBase<T, U, Z>[]} handlersList - The list of handlers to be called with the event
-   * @param {U} event - The event to emit
+   *
+   * @param sender - The object emitting the event
+   * @param handlersList - The list of handlers to be called with the event
+   * @param event - The event to emit
    */
   static emitEvent<T, U, Z>(sender: T, handlersList: EventDelegateBase<T, U, Z>[], event: U): Z[] {
     // Trigger all the handlers in the array
@@ -16,8 +18,9 @@ export default class EventHelper {
 
   /**
    * Adds an event handler callback in the provided handlersList.
-   * @param {EventDelegateBase<T, U, Z>[]} handlersList - The list of handlers to be called with the event
-   * @param {EventDelegateBase<T, U, Z>} callback - The callback to be executed whenever the event is raised
+   *
+   * @param handlersList - The list of handlers to be called with the event
+   * @param callback - The callback to be executed whenever the event is raised
    */
   static onEvent<T, U, Z>(handlersList: EventDelegateBase<T, U, Z>[], callback: EventDelegateBase<T, U, Z>): void {
     // Push a new callback handler to the list of handlers
@@ -26,8 +29,9 @@ export default class EventHelper {
 
   /**
    * Removes an event handler callback from the provided handlersList.
-   * @param {EventDelegateBase<T, U, Z>[]} handlersList - The list of handlers on which to check to remove the handler
-   * @param {EventDelegateBase<T, U, Z>} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param handlersList - The list of handlers on which to check to remove the handler
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   static offEvent<T, U, Z>(handlersList: EventDelegateBase<T, U, Z>[], callback: EventDelegateBase<T, U, Z>): void {
     // Find the callback and remove it

@@ -5,15 +5,14 @@ import { logger } from '@/core/utils/logger';
 import type { AbstractPlugin } from './abstract-plugin';
 
 /**
- * Class to manage plugins
- *
- * @exports
- * @class
+ * Class to manage plugins.
  */
 export abstract class Plugin {
   /**
-   * Load a package script on runtime
-   * @param {string} pluginId the package id to load
+   * Loads a package script on runtime.
+   *
+   * @param pluginId - The package id to load
+   * @returns A promise that resolves with the plugin class
    */
   static loadScript(pluginId: string): Promise<typeof AbstractPlugin> {
     return new Promise((resolve, reject) => {
@@ -49,10 +48,10 @@ export abstract class Plugin {
   }
 
   /**
-   * Delete a specific plugin loaded in a map
+   * Deletes a specific plugin loaded in a map.
    *
-   * @param {string} pluginId - The id of the plugin to delete
-   * @param {string} mapId - The map id to remove the plugin from
+   * @param pluginId - The id of the plugin to delete
+   * @param mapId - The map id to remove the plugin from
    */
   static async removePlugin(pluginId: string, mapId: string): Promise<void> {
     // Get the plugin and remove it
@@ -62,9 +61,9 @@ export abstract class Plugin {
   }
 
   /**
-   * Delete all plugins loaded in a map
+   * Deletes all plugins loaded in a map.
    *
-   * @param {string} mapId - The map id to remove the plugin from (if not provided then plugin will be removed from all maps)
+   * @param mapId - The map id to remove the plugin from (if not provided then plugin will be removed from all maps)
    */
   static async removePlugins(mapId: string): Promise<void> {
     const recordOfPlugins = await MapEventProcessor.getMapViewerPlugins(mapId);
@@ -84,9 +83,10 @@ export abstract class Plugin {
 
   /**
    * Utility function to call a promise callback resolve function once a plugin is actually available in window.geoviewPlugins property.
-   * @param {string} pluginId - The plugin id to look for.
-   * @param {Function} resolve  - The resolve function to callback on.
-   * @param {Function} reject - The reject function to callback on in case of failure.
+   *
+   * @param pluginId - The plugin id to look for
+   * @param resolve - The resolve function to callback on
+   * @param reject - The reject function to callback on in case of failure
    */
   static #resolveWhenReady(pluginId: string, resolve: (plugin: typeof AbstractPlugin) => void, reject: (reason: Error) => void): void {
     whenThisThen(() => window.geoviewPlugins?.[pluginId])

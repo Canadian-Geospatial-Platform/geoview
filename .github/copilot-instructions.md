@@ -454,6 +454,7 @@ JSDoc should NOT:
   - For methods returning a `Promise`, `@returns` must start with **"A promise that resolves..."** (e.g., `@returns A promise that resolves with the parsed metadata`)
   - When the return type includes `| undefined`, mention `undefined` in the `@returns` description
 - `@throws` - Document thrown exceptions. Description **must** start with **"When"** (e.g., `@throws {LayerNotGeoJsonError} When the layer type is not GeoJSON`)
+  - When the exception is propagated from another method, append `(propagated from \`methodName()\`)`at the end (e.g.,`@throws {LayerServiceMetadataEmptyError} When the metadata is missing (propagated from \`getFeatureType()\`)`)
 - `@example` - Usage examples
 - `@deprecated` - Mark deprecated APIs
 - `@see` - Reference related code

@@ -5,7 +5,7 @@ import { TileLayerEntryConfig } from '@/api/config/validation-classes/tile-layer
 import type { TypeSourceImageWMTSInitialConfig, TypeWmtsLayerConfig } from '@/geo/layer/geoview-layers/raster/wmts';
 
 export interface OgcWmtsLayerEntryConfigProps extends AbstractBaseLayerEntryConfigProps {
-  // The tile matrix set identifier to use for this WMTS layer. If not provided, the first TileMatrixSet found in the metadata will be used by default.
+  /** The tile matrix set identifier to use for this WMTS layer. If not provided, the first TileMatrixSet found in the metadata will be used by default. */
   tileMatrixSet?: string;
   /** Source settings to apply to the GeoView layer source at creation time. */
   source?: TypeSourceImageWMTSInitialConfig;
@@ -15,9 +15,9 @@ export class OgcWmtsLayerEntryConfig extends TileLayerEntryConfig {
   tileMatrixSet?: string;
 
   /**
-   * The class constructor.
+   * Creates an instance of OgcWmtsLayerEntryConfig.
    *
-   * @param layerConfig - The layer configuration we want to instanciate.
+   * @param layerConfig - The layer configuration we want to instantiate
    */
   constructor(layerConfig: OgcWmtsLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.WMTS, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
@@ -70,8 +70,8 @@ export class OgcWmtsLayerEntryConfig extends TileLayerEntryConfig {
   // #region STATIC METHODS
 
   /**
-   * Type guard that checks whether the given configuration (class instance or plain object)
-   * represents a WMTS layer type.
+   * Type guard that checks whether the given configuration (class instance or plain object) represents a WMTS layer type.
+   *
    * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
    *
    * @param layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.

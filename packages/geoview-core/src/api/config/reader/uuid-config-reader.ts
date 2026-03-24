@@ -25,19 +25,16 @@ import { Fetch } from '@/core/utils/fetch-helper';
 import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
 import type { TypeLayerEntryShell } from '@/api/config/validation-classes/config-base-class';
 
-/**
- * A class to generate GeoView layers config from a URL using a UUID.
- * @exports
- * @class UUIDmapConfigReader
- */
+/** A class to generate GeoView layers config from a URL using a UUID. */
 export class UUIDmapConfigReader {
   /**
    * Generates GeoView layers and package configurations (i.e. geochart), from GeoCore API, using a list of UUIDs.
+   *
    * @param baseUrl - The base url of GeoCore API
    * @param lang - The language to get the config for
    * @param uuids - A list of uuids to get the configurations for
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns A Promise of Layers and Geocharts read and parsed from uuids results from GeoCore
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves with the layers and geocharts parsed from GeoCore
    */
   static async getGVConfigFromUUIDs(
     baseUrl: string,
@@ -69,11 +66,12 @@ export class UUIDmapConfigReader {
 
   /**
    * Generates GeoView layers configurations, from Geonetwork RCS API, using a list of UUIDs.
+   *
    * @param baseUrl - The base url of GeoCore API
    * @param lang - The language to get the config for
    * @param uuids - A list of uuids to get the configurations for
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns A Promise of Layers read and parsed from uuids results from Geonetwork RCS
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves with the layers parsed from Geonetwork RCS
    */
   static async getGVConfigFromUUIDsRCS(
     baseUrl: string,
@@ -110,12 +108,12 @@ export class UUIDmapConfigReader {
   }
 
   /**
-   * Reads and parses Layers configs from uuid request result
-   * @param {string[]} uuids - The uuids to read Geocore API for
-   * @param {GeoCoreConfigResponseRoot} resultData - The uuid request result
-   * @param {TypeDisplayLanguage} lang - The language to use
-   * @returns {TypeGeoviewLayerConfig[]} The Layers parsed from uuid result
-   * @private
+   * Reads and parses layers configs from uuid request result.
+   *
+   * @param uuids - The uuids to read Geocore API for
+   * @param resultData - The uuid request result
+   * @param lang - The language to use
+   * @returns The layers parsed from uuid result
    */
   static #getLayerConfigFromResponse(
     uuids: string[],
@@ -251,11 +249,11 @@ export class UUIDmapConfigReader {
   }
 
   /**
-   * Reads the layers config from uuid request result
-   * @param {GeoCoreConfigResponseRoot} resultData - The uuid request result
-   * @param {TypeDisplayLanguage} lang - The language to use to read results
-   * @returns {GeoCoreConfigResponseGCSLayer | undefined} The layers snippet configs
-   * @private
+   * Reads the layers config from uuid request result.
+   *
+   * @param resultData - The uuid request result
+   * @param lang - The language to use to read results
+   * @returns The layers snippet configs, or undefined if not found
    */
   static #getGeocoreCustomLayerConfig(
     resultData: GeoCoreConfigResponseRoot,
@@ -273,11 +271,11 @@ export class UUIDmapConfigReader {
   }
 
   /**
-   * Reads and parses GeoChart configs from uuid request result
-   * @param {GeoCoreConfigResponseRoot} resultData - The uuid request result
-   * @param {TypeDisplayLanguage} lang - The language to use to read results
-   * @returns {GeoViewGeoChartConfig[]} the list of GeoChart configs
-   * @private
+   * Reads and parses GeoChart configs from uuid request result.
+   *
+   * @param resultData - The uuid request result
+   * @param lang - The language to use to read results
+   * @returns The list of GeoChart configs
    */
   static #getGeoChartConfigFromResponse(resultData: GeoCoreConfigResponseRoot, lang: TypeDisplayLanguage): GeoViewGeoChartConfig[] {
     // If no geochart information
@@ -305,9 +303,7 @@ export class UUIDmapConfigReader {
   }
 }
 
-/**
- * The GeoCore response Json root.
- */
+/** The GeoCore response JSON root. */
 export type GeoCoreConfigResponseRoot = {
   response: GeoCoreConfigResponse;
   errorMessage?: string;
@@ -355,13 +351,13 @@ export type GeoCoreConfigResponseLayer = {
   layerEntries: TypeLayerEntryShell[];
 };
 
-// The GeoChart Json object expected by GeoView
+/** The GeoChart JSON object expected by GeoView */
 // GV This type is the core equivalent of the homonym 'GeoViewGeoChartConfig' in geoview-geochart\geochart-types.ts
 export type GeoViewGeoChartConfig = {
   layers: GeoChartGeoCoreConfigLayer[]; // For us, this is an array, compared to GeoCore where it's not.
 };
 
-// The type representing the GeoCore parsed response
+/** The type representing the GeoCore parsed response */
 export type UUIDmapConfigReaderResponse = {
   layers: TypeGeoviewLayerConfig[];
   geocharts?: GeoViewGeoChartConfig[];

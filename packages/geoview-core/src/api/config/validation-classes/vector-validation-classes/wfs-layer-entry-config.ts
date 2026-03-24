@@ -17,9 +17,9 @@ export interface OgcWfsLayerEntryConfigProps extends VectorLayerEntryConfigProps
 
 export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
   /**
-   * The class constructor.
+   * Creates an instance of OgcWfsLayerEntryConfig.
    *
-   * @param layerConfig - The layer configuration we want to instanciate.
+   * @param layerConfig - The layer configuration we want to instantiate
    */
   constructor(layerConfig: OgcWfsLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.WFS);
@@ -59,15 +59,13 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Retrieves the WFS `FeatureType` metadata entry corresponding to this layer.
+   *
    * This method searches the WFS `FeatureTypeList` inside the service metadata and
    * finds the feature type whose `Name` matches the layer's `layerId`.
-   * @throws {LayerServiceMetadataEmptyError}
-   * Thrown when the WFS service metadata is missing or incomplete.
-   * @throws {LayerEntryConfigLayerIdNotFoundError}
-   * Thrown when no `FeatureType` entry matches this layer's `layerId`.
-   * @returns {TypeMetadataWFSFeatureTypeListFeatureType}
-   * The `FeatureType` metadata entry describing this layer, including supported
-   * formats, bounding boxes, and feature schema.
+   *
+   * @returns The `FeatureType` metadata entry describing this layer
+   * @throws {LayerServiceMetadataEmptyError} When the WFS service metadata is missing or incomplete
+   * @throws {LayerEntryConfigLayerIdNotFoundError} When no `FeatureType` entry matches this layer's `layerId`
    */
   getFeatureType(): TypeMetadataWFSFeatureTypeListFeatureType {
     // The metadata
@@ -98,13 +96,14 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Returns the spatial reference system (SRS) of the layer's data.
+   *
    * This method reads the layer's feature type definition and returns the
    * default SRS/projection used by the WFS layer. If the `DefaultSRS` is
    * an object with a `#text` property (common in XML-parsed responses),
    * the method returns the value of that property. Otherwise, it returns
    * `DefaultSRS` directly.
-   * @returns {string | undefined} The EPSG code or SRS string (e.g., 'EPSG:3857'),
-   *          or `undefined` if the feature type or SRS cannot be determined.
+   *
+   * @returns The EPSG code or SRS string (e.g., 'EPSG:3857'), or undefined if not determined
    */
   getProjectionOfData(): string | undefined {
     // Get the feature type
@@ -117,18 +116,14 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Returns the list of supported mime output formats for this WFS layer.
+   *
    * Formats are extracted from the `OutputFormats` section of the layer's WFS
    * `FeatureType` metadata.
-   * @param {string} [defaultWhenNone]
-   * An optional default format to return if no supported formats are found
-   * in the metadata. If provided, this value will be returned as a single-item
-   * array when no formats are found.
-   * @throws {LayerServiceMetadataEmptyError}
-   * Propagated from `getFeatureType()` if the metadata is missing or incomplete.
-   * @throws {LayerEntryConfigLayerIdNotFoundError}
-   * Propagated from `getFeatureType()` if the layer's feature type is not found.
-   * @returns {string[]}
-   * An array of MIME types / format identifiers supported by the WFS service for GetFeature responses.
+   *
+   * @param defaultWhenNone - Optional default format to return if no supported formats are found
+   * @returns An array of MIME types / format identifiers supported by the WFS service for GetFeature responses
+   * @throws {LayerServiceMetadataEmptyError} When the metadata is missing or incomplete (propagated from `getFeatureType()`)
+   * @throws {LayerEntryConfigLayerIdNotFoundError} When the layer's feature type is not found (propagated from `getFeatureType()`)
    */
   getSupportedFormats(defaultWhenNone?: string): string[] {
     // Get the feature type
@@ -163,7 +158,8 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Gets the version. Defaults to 1.3.0.
-   * @returns {string} The service version as read from the metadata attribute.
+   *
+   * @returns The service version as read from the metadata attribute
    */
   getVersion(): string {
     // Redirect
@@ -172,7 +168,8 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Gets if the config has specified that we should fetch the styles from the WMS.
-   * @returns {boolean} True when the styles should be fetched from the WMS. True by default.
+   *
+   * @returns True when the styles should be fetched from the WMS. True by default
    */
   getShouldFetchStylesFromWMS(): boolean {
     return this.getGeoviewLayerConfig().fetchStylesOnWMS ?? true; // default: true
@@ -180,19 +177,20 @@ export class OgcWfsLayerEntryConfig extends VectorLayerEntryConfig {
 
   /**
    * Gets the WMS styles layer id associated with this WFS layer entry config if any.
-   * @returns {string} The WMS styles layer id
+   *
+   * @returns The WMS styles layer id
    */
   getWmsStylesLayerId(): string {
     return this.layerEntryProps.wmsLayerId || this.layerId;
   }
 
   /**
-   * Type guard that checks whether the given configuration (class instance or plain object)
-   * represents a WFS Feature layer type.
+   * Type guard that checks whether the given configuration (class instance or plain object) represents a WFS Feature layer type.
+   *
    * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
-   * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
-   * @returns `true` if the config is for a WFS Feature layer; otherwise `false`.
-   * @static
+   *
+   * @param layerConfig - The layer config to check. Can be an instance of a config class or a raw config object
+   * @returns `true` if the config is for a WFS Feature layer; otherwise `false`
    */
   static isClassOrTypeWFSLayer(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeWFSLayerConfig {
     // Redirect

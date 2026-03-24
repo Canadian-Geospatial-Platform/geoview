@@ -45,17 +45,14 @@ type TableInfo = {
   geometryColumnName: SqlValue;
 };
 
-/**
- * A class to generate a GeoView layer config from a GeoPackage.
- * @exports
- * @class GeoPackageReader
- */
+/** A class to generate a GeoView layer config from a GeoPackage. */
 export class GeoPackageReader {
   /**
    * Generates a WKB layer config from a GeoPackage.
+   *
    * @param layerConfig - The config to convert
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns A Promise of a WKB layer config
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves with the WKB layer config
    */
   static async createLayerConfigFromGeoPackage(layerConfig: GeoPackageLayerConfig, abortSignal?: AbortSignal): Promise<TypeWkbLayerConfig> {
     // Set up WKB layer config so it can be used in layer entry configs
@@ -190,10 +187,10 @@ export class GeoPackageReader {
 
   /**
    * Fetches a GeoPackage and creates layer data from it.
-   * @param url - The URL of the GeoPackage.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns A Promise of the layer data.
-   * @private
+   *
+   * @param url - The URL of the GeoPackage
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves with the layer data
    */
   static async #getGeoPackageData(url: string, abortSignal?: AbortSignal): Promise<GeoPackageLayerData[]> {
     // Load the GeoPackage and SqlJs at the same time
@@ -270,9 +267,9 @@ export class GeoPackageReader {
 
   /**
    * Creates a GeoView style config from the provided SLD style.
-   * @param {string | number | Uint8Array} sld - The SLD style associated with the layer
-   * @returns {TypeLayerStyleConfig} The created style config
-   * @private
+   *
+   * @param sld - The SLD style associated with the layer
+   * @returns The created style config
    */
   static #processGeopackageStyle(sld: string | number | Uint8Array): TypeLayerStyleConfig {
     // Extract layer styles if they exist
@@ -549,9 +546,9 @@ export class GeoPackageReader {
 
   /**
    * Creates a feature info config from provided fields.
-   * @param {initSqlJs.ParamsObject | undefined} fields An array of field names and its aliases.
-   * @returns {TypeFeatureInfoLayerConfig} The feature info config.
-   * @private
+   *
+   * @param fields - Optional array of field names and their aliases
+   * @returns The feature info config
    */
   static #processFeatureInfoConfig(fields: initSqlJs.ParamsObject | undefined): TypeFeatureInfoLayerConfig {
     if (!fields) return { queryable: false };
@@ -591,9 +588,10 @@ export class GeoPackageReader {
   }
 
   /**
-   * Create a source configuration for the vector layer.
-   * @param {Uint8Array} gpkgBinGeom - Binary geometry array to be parsed.
-   * @returns {Uint8Array} A subarray of inputted binary geometry array.
+   * Parses a GeoPackage binary geometry to extract the WKB portion.
+   *
+   * @param gpkgBinGeom - Binary geometry array to be parsed
+   * @returns A subarray of the binary geometry array containing the WKB data
    */
   static #parseGpkgGeom(gpkgBinGeom: Uint8Array): Uint8Array {
     const flags = gpkgBinGeom[3];

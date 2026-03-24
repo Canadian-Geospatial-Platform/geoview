@@ -23,12 +23,12 @@ export * from './layout';
 export * from './button/loading-button';
 export * from './linear-progress/linear-progress';
 export * from './list/checkbox-list/checkbox-list';
-export * from './list';
+export * from './list'; // index.ts exports sub components
 export * from './menu/menu';
 export * from './menu/menu-item';
-export * from './modal';
+export * from './modal'; // index.ts exports sub components
 export * from './paper/paper';
-export * from './panel';
+export * from './panel'; // index.ts exports sub components
 export * from './popover/popover';
 export * from './popper/popper';
 export * from './select/select';
@@ -40,7 +40,7 @@ export * from './style/theme';
 export * from './svg/svg-icon';
 export * from './switch/switch';
 export * from './table/table';
-export * from './tabs/tabs';
+export * from './tabs/tabs'; // index.ts exports sub components
 export * from './text-field/text-field';
 export * from './toolbar/toolbar';
 export * from './tooltip/tooltip';

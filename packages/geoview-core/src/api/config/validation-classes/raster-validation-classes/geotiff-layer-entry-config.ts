@@ -15,17 +15,15 @@ export interface GeoTIFFLayerEntryConfigProps extends AbstractBaseLayerEntryConf
   source?: TypeSourceGeoTIFFInitialConfig;
 }
 
-/**
- * Type used to define a GeoTIFF layer to display on the map.
- */
+/** Type used to define a GeoTIFF layer to display on the map. */
 export class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /** Embedded RGBA color palette extracted from the GeoTIFF file, if present. */
   #embeddedColorMap: RGBA[] | undefined;
 
   /**
-   * The class constructor.
+   * Creates an instance of GeoTIFFLayerEntryConfig.
    *
-   * @param layerConfig -  The layer configuration we want to instanciate.
+   * @param layerConfig - The layer configuration we want to instantiate
    */
   constructor(layerConfig: GeoTIFFLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.GEOTIFF, CONST_LAYER_ENTRY_TYPES.RASTER_TILE);
@@ -71,7 +69,7 @@ export class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Getter for the embedded color map.
    *
-   * @returns {RGBA[] | undefined} The embedded RGBA color map, if present.
+   * @returns The embedded RGBA color map, or undefined if not present
    */
   getEmbeddedColorMap(): RGBA[] | undefined {
     return this.#embeddedColorMap;
@@ -80,16 +78,16 @@ export class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   /**
    * Setter for the embedded color map.
    *
-   * @param colorMap - The embedded RGBA color map to set.
+   * @param colorMap - Optional embedded RGBA color map to set
    */
   setEmbeddedColorMap(colorMap: RGBA[] | undefined): void {
     this.#embeddedColorMap = colorMap;
   }
 
   /**
-   * checks if an embedded color map is present in the layer config.
+   * Checks if an embedded color map is present in the layer config.
    *
-   * @returns `true` if an embedded color map exists; otherwise `false`.
+   * @returns `true` if an embedded color map exists; otherwise `false`
    */
   hasEmbeddedColorMap(): boolean {
     return this.#embeddedColorMap !== undefined;
@@ -98,11 +96,12 @@ export class GeoTIFFLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   // #region STATIC METHODS
 
   /**
-   * Type guard that checks whether the given configuration (class instance or plain object) represents an GeoTIFF layer type.
+   * Type guard that checks whether the given configuration (class instance or plain object) represents a GeoTIFF layer type.
+   *
    * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
-   * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
-   * @returns `true` if the config is for a GeoTIFF layer; otherwise `false`.
-   * @static
+   *
+   * @param layerConfig - The layer config to check. Can be an instance of a config class or a raw config object
+   * @returns `true` if the config is for a GeoTIFF layer; otherwise `false`
    */
   static isClassOrTypeGeoTIFF(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeGeoTIFFLayerConfig {
     // Redirect

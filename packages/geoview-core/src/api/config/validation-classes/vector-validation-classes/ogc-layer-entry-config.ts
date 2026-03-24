@@ -8,9 +8,9 @@ export interface OgcFeatureLayerEntryConfigProps extends VectorLayerEntryConfigP
 
 export class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
   /**
-   * The class constructor.
+   * Creates an instance of OgcFeatureLayerEntryConfig.
    *
-   * @param layerConfig - The layer configuration we want to instanciate.
+   * @param layerConfig - The layer configuration we want to instantiate
    */
   constructor(layerConfig: OgcFeatureLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.OGC_FEATURE);
@@ -40,12 +40,12 @@ export class OgcFeatureLayerEntryConfig extends VectorLayerEntryConfig {
   // #endregion OVERRIDES
 
   /**
-   * Type guard that checks whether the given configuration (class instance or plain object)
-   * represents a OGC Feature layer type.
+   * Type guard that checks whether the given configuration (class instance or plain object) represents an OGC Feature layer type.
+   *
    * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
-   * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
-   * @returns `true` if the config is for a OGC Feature layer; otherwise `false`.
-   * @static
+   *
+   * @param layerConfig - The layer config to check. Can be an instance of a config class or a raw config object
+   * @returns `true` if the config is for an OGC Feature layer; otherwise `false`
    */
   static isClassOrTypeOGCLayer(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeOgcFeatureLayerConfig {
     // Redirect

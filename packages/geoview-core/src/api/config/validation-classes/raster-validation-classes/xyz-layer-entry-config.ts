@@ -14,16 +14,16 @@ export interface XYZTilesLayerEntryConfigProps extends AbstractBaseLayerEntryCon
 }
 
 export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
-  /** The minimum scale denominator as read from metadata */
+  /** The minimum scale denominator as read from metadata. */
   minScaleDenominator: number;
 
-  /** The maximum scale denominator as read from metadata */
+  /** The maximum scale denominator as read from metadata. */
   maxScaleDenominator: number;
 
   /**
-   * The class constructor.
+   * Creates an instance of XYZTilesLayerEntryConfig.
    *
-   * @param layerConfig - The layer configuration we want to instanciate.
+   * @param layerConfig - The layer configuration we want to instantiate
    */
   constructor(layerConfig: XYZTilesLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.XYZ_TILES, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
@@ -62,12 +62,12 @@ export class XYZTilesLayerEntryConfig extends TileLayerEntryConfig {
   // #region STATIC METHODS
 
   /**
-   * Type guard that checks whether the given configuration (class instance or plain object)
-   * represents a XYZTiles layer type.
+   * Type guard that checks whether the given configuration (class instance or plain object) represents a XYZTiles layer type.
+   *
    * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
-   * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
-   * @returns `true` if the config is for a XYZTiles layer; otherwise `false`.
-   * @static
+   *
+   * @param layerConfig - The layer config to check. Can be an instance of a config class or a raw config object
+   * @returns `true` if the config is for a XYZTiles layer; otherwise `false`
    */
   static isClassOrTypeXYZTiles(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeXYZTilesConfig {
     // Redirect

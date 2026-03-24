@@ -26,7 +26,7 @@ export class GeochartTester extends GVAbstractTester {
    *
    * @param layerPath - The layer path of the layer
    * @param lonlat - The coordinate on the map to query
-   * @returns A Promise that resolves when the test completes
+   * @returns A promise that resolves when the test completes
    */
   testGeochartOpenForLayerMapClick(layerPath: string, lonlat: Coordinate): Promise<Test<AbstractGVLayer>> {
     // Test
@@ -52,7 +52,7 @@ export class GeochartTester extends GVAbstractTester {
   /**
    * Tests adding a the Airborne Geocore layer, launching a query layers at a given lonlat, set the active footerbar tab to geochart and select the layer in the geochart panel.
    *
-   * @returns A Promise that resolves when the test completes.
+   * @returns A promise that resolves when the test completes.
    */
   testAddGeocoreLayerUUIDForGeochartAirborne(): Promise<Test<AbstractGVLayer>> {
     // Test it

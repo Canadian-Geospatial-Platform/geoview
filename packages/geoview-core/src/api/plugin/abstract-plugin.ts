@@ -10,35 +10,36 @@ import { logger } from '@/core/utils/logger';
  * Plugin abstract base class.
  */
 export abstract class AbstractPlugin {
-  // Id of the plugin
+  /** The id of the plugin */
   pluginId: string;
 
-  // The map viewer for the plugin
+  /** The map viewer for the plugin */
   mapViewer: MapViewer;
 
-  // Plugin properties
+  /** The plugin properties */
   pluginProps?: unknown;
 
-  // Plugin config object.
+  /** The plugin config object */
   #configObj: unknown = {};
 
-  // Plugin react object.
+  /** The plugin react object */
   react: typeof React;
 
-  // Plugin createRoot object.
+  /** The plugin createRoot object */
   createRoot: typeof createRoot;
 
-  // Plugin useTheme object
+  /** The plugin useTheme object */
   useTheme: typeof useTheme;
 
-  // Plugin translate object
+  /** The plugin translate object */
   translate?: typeof i18next;
 
   /**
    * Creates an instance of the plugin.
-   * @param {string} pluginId - Unique identifier for the plugin instance.
-   * @param {MapViewer} mapViewer - The map viewer
-   * @param {unknown | undefined} props - Optional plugin options and properties.
+   *
+   * @param pluginId - Unique identifier for the plugin instance
+   * @param mapViewer - The map viewer
+   * @param props - Optional plugin options and properties
    */
   // GV Do not edit the constructor params without editing the plugin.ts dynamic constructor call looking like 'new (constructor as any)'
   constructor(pluginId: string, mapViewer: MapViewer, props: unknown | undefined) {
@@ -52,42 +53,46 @@ export abstract class AbstractPlugin {
   }
 
   /**
-   * Sets the config (which happens post creation)
-   * @param {unknown} config - The config
+   * Sets the config (which happens post creation).
+   *
+   * @param config - The config
    */
   setConfig(config: unknown): void {
     this.#configObj = config;
   }
 
   /**
-   * Gets the config
-   * @returns {unknown} The config
+   * Gets the config.
+   *
+   * @returns The config
    */
   getConfig(): unknown {
     return this.#configObj;
   }
 
   /**
-   * Returns the language currently used by the 'translate' i18next component used by this Plugin
-   * @returns string The language, 'en' (English) by default.
+   * Returns the language currently used by the 'translate' i18next component used by this Plugin.
+   *
+   * @returns The language, 'en' (English) by default
    */
   displayLanguage(): string {
     return this.translate?.getI18n().language || 'en';
   }
 
   /**
-   * Must override function to get the schema validator
+   * Must override function to get the schema validator.
    */
   abstract schema(): unknown;
 
   /**
-   * Must override function to get the default config
+   * Must override function to get the default config.
    */
   abstract defaultConfig(): unknown;
 
   /**
    * Overridable function to get the translations object for the Plugin.
-   * @returns {Record<string, unknown>} The translations object
+   *
+   * @returns The translations object
    */
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   defaultTranslations(): Record<string, unknown> {
@@ -95,22 +100,22 @@ export abstract class AbstractPlugin {
   }
 
   /**
-   * Override this to do the actual adding
+   * Override this to do the actual adding.
    */
   protected abstract onAdd(): void;
 
   /**
-   * Optionally override this to do something when done adding
+   * Optionally override this to do something when done adding.
    */
   protected onAdded?(): void;
 
   /**
-   * Override this to do the actual removal
+   * Override this to do the actual removal.
    */
   protected abstract onRemove(): void;
 
   /**
-   * Optionally override this to do something when done being removed
+   * Optionally override this to do something when done being removed.
    */
   protected onRemoved?(): void;
 

@@ -2,11 +2,9 @@ import type React from 'react';
 import type { API } from '@/api';
 import type { AbstractPlugin } from './abstract-plugin';
 
-/**
- * interface used when creating the actual plugin.
- */
+/** Interface used when creating the actual plugin. */
 export type TypePluginStructure = {
-  // id of the plugin
+  /** The id of the plugin */
   pluginId: string;
   api: API;
   createElement: typeof React.createElement;
@@ -22,7 +20,5 @@ export type TypePluginStructure = {
   select?: () => void;
 };
 
-/**
- * Record of plugins.
- */
+/** Record of plugins. */
 export type PluginsContainer = { [pluginId: string]: AbstractPlugin };

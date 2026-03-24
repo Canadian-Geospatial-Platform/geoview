@@ -17,9 +17,10 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
   maxRecordCount?: number;
 
   /**
-   * The class constructor.
+   * Creates an instance of VectorLayerEntryConfig.
    *
-   * @param layerConfig - The layer configuration we want to instanciate.
+   * @param layerConfig - The layer configuration we want to instantiate
+   * @param schemaTag - The GeoView layer type schema tag
    */
   protected constructor(layerConfig: VectorLayerEntryConfigProps | VectorLayerEntryConfig, schemaTag: TypeGeoviewLayerType) {
     super(layerConfig, schemaTag, CONST_LAYER_ENTRY_TYPES.VECTOR);
@@ -31,7 +32,7 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
   /**
    * Overrides the parent class's getter to provide a more specific return type (covariant return).
    *
-   * @returns The strongly-typed source configuration specific to this layer entry config.
+   * @returns The strongly-typed source configuration specific to this layer entry config
    */
   override getSource(): TypeBaseVectorSourceInitialConfig {
     return super.getSource();
@@ -53,7 +54,7 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
   /**
    * Helper function to get the layer metadata casted as TypeLayerMetadataVector.
    *
-   * @returns {TypeLayerMetadataVector | undefined} The casted layer metadata in the right type.
+   * @returns The casted layer metadata in the right type
    */
   getLayerMetadataCasted(): TypeLayerMetadataVector | undefined {
     // TODO: REFACTOR - Remove this function in favor of a generic to be used by the class signature itself. Search id: 7887777f :

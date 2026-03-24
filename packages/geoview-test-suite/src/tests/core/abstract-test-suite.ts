@@ -153,7 +153,7 @@ export abstract class AbstractTestSuite {
   /**
    * Overridable function called when the test suite is about to launch, to validate if it can be executed on the given map.
    *
-   * @returns A Promise that resolves to true if the test suite can execute on the given map
+   * @returns A promise that resolves to true if the test suite can execute on the given map
    */
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
   protected onCanExecuteTestSuite(): Promise<boolean> {

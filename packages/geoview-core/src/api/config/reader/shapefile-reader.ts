@@ -8,17 +8,14 @@ import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/ab
 import { generateId } from '@/core/utils/utilities';
 import { Fetch } from '@/core/utils/fetch-helper';
 
-/**
- * A class to generate a GeoView layer config from a shapefile.
- * @exports
- * @class ShapefileReader
- */
+/** A class to generate a GeoView layer config from a shapefile. */
 export class ShapefileReader {
   /**
    * Generates GeoJson layer config from a shapefile.
-   * @param layerConfig - The config to convert.
-   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process.
-   * @returns A Promise of a Geojson layer config
+   *
+   * @param layerConfig - The config to convert
+   * @param abortSignal - Optional {@link AbortSignal} used to cancel the layer creation process
+   * @returns A promise that resolves with the GeoJSON layer config
    */
   static async convertShapefileConfigToGeoJson(
     layerConfig: ShapefileLayerConfig,

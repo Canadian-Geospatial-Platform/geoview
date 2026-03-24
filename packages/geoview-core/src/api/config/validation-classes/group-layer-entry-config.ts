@@ -16,9 +16,9 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
   listOfLayerEntryConfig: TypeLayerEntryConfig[];
 
   /**
-   * The class constructor.
+   * Creates an instance of GroupLayerEntryConfig.
    *
-   * @param layerConfig - The layer configuration we want to instanciate.
+   * @param layerConfig - The layer configuration we want to instantiate
    */
   constructor(layerConfig: GroupLayerEntryConfigProps) {
     super(layerConfig, layerConfig.geoviewLayerConfig.geoviewLayerType, CONST_LAYER_ENTRY_TYPES.GROUP);
@@ -29,11 +29,12 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Overrides the setting of the service metadata to do it for all layer entries in the configuration.
+   *
    * This method overrides a base implementation to recursively apply the provided
    * `metadata` to each entry in `listOfLayerEntryConfig`. It ensures that
    * all nested or child layer entries also receive the updated metadata.
    *
-   * @param metadata - The new service metadata to be used.
+   * @param metadata - The new service metadata to be used
    */
   protected override onSetServiceMetadata(metadata: unknown): void {
     // Recursively change the service metadata for each layer entries
@@ -45,11 +46,12 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Overrides the setting of the data access path to do it for all layer entries in the configuration.
+   *
    * This method overrides a base implementation to recursively apply the provided
    * `dataAccessPath` to each entry in `listOfLayerEntryConfig`. It ensures that
    * all nested or child layer entries also receive the updated data access path.
    *
-   * @param dataAccessPath - The new path to be used for accessing data.
+   * @param dataAccessPath - The new path to be used for accessing data
    */
   protected override onSetDataAccessPath(dataAccessPath: string): void {
     // Recursively change the data access path for each layer entries
@@ -61,10 +63,11 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Overrides the creation of the layer props and return a deep clone of the layer entry configuration properties.
+   *
    * This method calls the parent method and then copies the listOfLayerEntryConfig over.
    * The listOfLayerEntryConfig isn't deeply cloned.
    *
-   * @returns A deep-cloned copy of the layer entry properties.
+   * @returns A deep-cloned copy of the layer entry properties
    */
   protected override onCloneLayerProps(): GroupLayerEntryConfigProps {
     // Sure
@@ -80,7 +83,7 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
   /**
    * Overrides the toJson of the mother class.
    *
-   * @returns The Json representation of the instance.
+   * @returns The Json representation of the instance
    */
   protected override onToJson<T>(): T {
     // Call parent
@@ -99,9 +102,10 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Returns the `layerPath` values of all immediate child layers in `listOfLayerEntryConfig`.
+   *
    * This method does **not** recurse into nested sublayers.
    *
-   * @returns An array of `layerPath` strings for direct sublayers.
+   * @returns An array of `layerPath` strings for direct sublayers
    */
   getLayerPaths(): string[] {
     return this.listOfLayerEntryConfig.map((geoviewLayerEntryConfig) => geoviewLayerEntryConfig.layerPath);
@@ -109,9 +113,10 @@ export class GroupLayerEntryConfig extends ConfigBaseClass {
 
   /**
    * Recursively returns the `layerPath` values of all layers and sublayers starting from this layer.
+   *
    * This includes the `layerPath` of the current layer, its direct children, and all nested descendants.
    *
-   * @returns An array of `layerPath` strings for all descendant layers (including nested groups).
+   * @returns An array of `layerPath` strings for all descendant layers (including nested groups)
    */
   getLayerPathsAll(): string[] {
     function getChildPaths(listOfLayerEntryConfig: TypeLayerEntryConfig[]): string[] {

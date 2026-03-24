@@ -19,17 +19,15 @@ export interface EsriDynamicLayerEntryConfigProps extends AbstractBaseLayerEntry
   maxRecordCount?: number;
 }
 
-/**
- * Type used to define a GeoView image layer to display on the map.
- */
+/** Type used to define a GeoView image layer to display on the map. */
 export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
-  /** Max number of records for query */
+  /** Max number of records for query. */
   maxRecordCount?: number;
 
   /**
-   * The class constructor.
+   * Creates an instance of EsriDynamicLayerEntryConfig.
    *
-   * @param layerConfig - The layer configuration we want to instanciate.
+   * @param layerConfig - The layer configuration we want to instantiate
    */
   constructor(layerConfig: EsriDynamicLayerEntryConfigProps) {
     super(layerConfig, CONST_LAYER_TYPES.ESRI_DYNAMIC, CONST_LAYER_ENTRY_TYPES.RASTER_IMAGE);
@@ -99,12 +97,12 @@ export class EsriDynamicLayerEntryConfig extends AbstractBaseLayerEntryConfig {
   // #region STATIC METHODS
 
   /**
-   * Type guard that checks whether the given configuration (class instance or plain object)
-   * represents an Esri Dynamic layer type.
+   * Type guard that checks whether the given configuration (class instance or plain object) represents an Esri Dynamic layer type.
+   *
    * Supports `ConfigClassOrType` (class instance or plain object) and plain layer config objects (`TypeGeoviewLayerConfig`).
-   * @param {ConfigClassOrType | TypeGeoviewLayerConfig} layerConfig - The layer config to check. Can be an instance of a config class or a raw config object.
-   * @returns `true` if the config is for an Esri Dynamic layer; otherwise `false`.
-   * @static
+   *
+   * @param layerConfig - The layer config to check. Can be an instance of a config class or a raw config object
+   * @returns `true` if the config is for an Esri Dynamic layer; otherwise `false`
    */
   static isClassOrTypeEsriDynamic(layerConfig: ConfigClassOrType | TypeGeoviewLayerConfig): layerConfig is TypeEsriDynamicLayerConfig {
     // Redirect

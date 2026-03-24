@@ -19,23 +19,18 @@ import { InitDivNotExistError, MapViewerAlreadyExistsError, MapViewerNotFoundErr
 import type { TypeMapFeaturesInstance } from '@/api/types/map-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
-/**
- * Class used to handle api calls (events, functions etc...)
- *
- * @exports
- * @class API
- */
+/** Class used to handle api calls (events, functions etc...). */
 export class API {
-  // ConfigApi static class
+  /** ConfigApi static class */
   config = ConfigApi;
 
-  // LayerApi static class
+  /** LayerApi static class */
   layer = LayerApi;
 
-  // load plugins API
+  /** Load plugins API */
   plugin = Plugin;
 
-  // utilities object
+  /** Utilities object */
   utilities = {
     core: Utilities,
     geo: GeoUtilities,
@@ -43,11 +38,11 @@ export class API {
     date: DateMgt,
   };
 
-  // list of available maps
+  /** List of available maps */
   #maps: Record<string, MapViewer> = {};
 
   /**
-   * Initiate the event and projection objects
+   * Initiates the event and projection objects.
    */
   constructor() {
     // apply focus to element when keyboard navigation is use
@@ -56,7 +51,8 @@ export class API {
 
   /**
    * Gets the list of all map IDs currently in the collection.
-   * @returns {string[]} Array of map IDs
+   *
+   * @returns Array of map IDs
    */
   getMapViewerIds(): string[] {
     return Object.keys(this.#maps);
@@ -64,8 +60,9 @@ export class API {
 
   /**
    * Returns true if a map id is already registered.
-   * @param {string} mapId - The unique identifier of the map to retrieve
-   * @returns {boolean} True if map exist
+   *
+   * @param mapId - The unique identifier of the map to retrieve
+   * @returns True if map exist
    */
   hasMapViewer(mapId: string): boolean {
     return this.getMapViewerIds().includes(mapId);
@@ -73,9 +70,10 @@ export class API {
 
   /**
    * Gets a map viewer instance by its ID.
-   * @param {string} mapId - The unique identifier of the map to retrieve
-   * @returns {MapViewer} The map viewer instance if found
-   * @throws {MapViewerNotFoundError} If the map with the specified ID is not found
+   *
+   * @param mapId - The unique identifier of the map to retrieve
+   * @returns The map viewer instance if found
+   * @throws {MapViewerNotFoundError} When the map with the specified ID is not found
    */
   getMapViewer(mapId: string): MapViewer {
     // Get the map instance
@@ -90,8 +88,9 @@ export class API {
 
   /**
    * Sets a map viewer in maps.
-   * @param {string} mapId - ID of the map
-   * @param {MapViewer} mapViewer - The viewer to be added
+   *
+   * @param mapId - ID of the map
+   * @param mapViewer - The viewer to be added
    */
   setMapViewer(mapId: string, mapViewer: MapViewer): void {
     // If alredy existing
@@ -103,9 +102,10 @@ export class API {
 
   /**
    * Asynchronously gets a map viewer instance by its ID.
-   * @param {string} mapId - The unique identifier of the map to retrieve
-   * @returns {Promise<MapViewer>} The map viewer instance when/if found.
-   * @throws {Error} If the map with the specified ID is not found
+   *
+   * @param mapId - The unique identifier of the map to retrieve
+   * @returns A promise that resolves with the map viewer instance when/if found
+   * @throws {Error} When the map with the specified ID is not found
    */
   async getMapViewerAsync(mapId: string): Promise<MapViewer> {
     // Wait for the MapViewer to be available
@@ -117,9 +117,10 @@ export class API {
 
   /**
    * Deletes a map viewer instance by its ID and unmounts it from the DOM - for React.
-   * @param {string} mapId - The unique identifier of the map to delete
-   * @param {boolean} deleteContainer - True if we want to delete div from the page
-   * @returns {Promise<void>} Promise when the map viewer is deleted
+   *
+   * @param mapId - The unique identifier of the map to delete
+   * @param deleteContainer - True if we want to delete div from the page
+   * @returns A promise that resolves when the map viewer is deleted
    */
   async deleteMapViewer(mapId: string, deleteContainer: boolean): Promise<void> {
     if (!this.hasMapViewer(mapId)) {
@@ -165,13 +166,15 @@ export class API {
   }
 
   /**
-   * Create a new map in a given div id.
+   * Creates a new map in a given div id.
+   *
    * GV The div MUST NOT have a geoview-map class or a warning will be shown when initMapDivFromFunctionCall is called.
-   * If is present, the div will be created with a default config
-   * @param {string} divId - Id of the div to create map in (becomes the mapId)
-   * @param {string} mapConfig - Config passed in from the function call (string or url of a config path)
-   * @param {number?} divHeight - Optional, height of the div to inject the map in (mandatory if the map reloads)
-   * @returns {Promise<MapViewer>} A Promise containing the MapViewer (after the onMapReady is triggered) which will be created from the configuration.
+   * If is present, the div will be created with a default config.
+   *
+   * @param divId - Id of the div to create map in (becomes the mapId)
+   * @param mapConfig - Config passed in from the function call (string or url of a config path)
+   * @param divHeight - Optional height of the div to inject the map in (mandatory if the map reloads)
+   * @returns A promise that resolves with the MapViewer (after the onMapReady is triggered) which will be created from the configuration
    */
   // This function is called by the template, and since the template use the instance of the object from cgpv.api, this function has to be on the instance, not static. Refactor this?
   async createMapFromConfig(divId: string, mapConfig: string, divHeight?: number): Promise<MapViewer> {
@@ -198,8 +201,10 @@ export class API {
 
   /**
    * Reload a map from a config object stored in store, or provided. It first removes then recreates the map.
-   * @param {TypeMapFeaturesConfig | TypeMapFeaturesInstance} mapConfig - Optional map config to use for reload.
-   * @returns {Promise<MapViewer>} A Promise containing the MapViewer which will be created once reloaded.
+   *
+   * @param mapId - The unique identifier of the map to reload
+   * @param mapConfig - Optional map config to use for reload
+   * @returns A promise that resolves with the MapViewer which will be created once reloaded
    */
   async reload(mapId: string, mapConfig?: TypeMapFeaturesConfig | TypeMapFeaturesInstance): Promise<MapViewer> {
     // If no config is provided, get the original from the store
@@ -223,9 +228,11 @@ export class API {
 
   /**
    * Reload a map from a config object created using current map state. It first removes then recreates the map.
-   * @param {boolean} maintainGeocoreLayerNames - Indicates if geocore layer names should be kept as is or returned to defaults.
-   *                                              Set to false after a language change to update the layer names with the new language.
-   * @returns {Promise<MapViewer>} A Promise containing the MapViewer which will be created once reloaded.
+   *
+   * @param mapId - The unique identifier of the map to reload
+   * @param maintainGeocoreLayerNames - Indicates if geocore layer names should be kept as is or returned to defaults.
+   *                                    Set to false after a language change to update the layer names with the new language
+   * @returns A promise that resolves with the MapViewer which will be created once reloaded
    */
   reloadWithCurrentState(mapId: string, maintainGeocoreLayerNames: boolean = true): Promise<MapViewer> {
     // Get the map viewer
@@ -239,9 +246,9 @@ export class API {
   }
 
   /**
-   * Apply outline to elements when keyboard is use to navigate
+   * Applies outline to elements when keyboard is used to navigate.
+   *
    * Code from: https://github.com/MaxMaeder/keyboardFocus.js
-   * @private
    */
   static #manageKeyboardFocus(): void {
     // Remove the 'keyboard-focused' class from any elements that have it
