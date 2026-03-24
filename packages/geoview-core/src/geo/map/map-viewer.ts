@@ -287,9 +287,9 @@ export class MapViewer {
     this.controllers = new ControllerRegistry(this, this.#uiDomain, this.#layerDomain);
     this.controllers.hookControllers();
 
-    this.appBarApi = new AppBarApi(this.mapId);
-    this.navBarApi = new NavBarApi(this.mapId);
-    this.footerBarApi = new FooterBarApi(this.mapId);
+    this.appBarApi = new AppBarApi(this.controllers.uiController);
+    this.navBarApi = new NavBarApi();
+    this.footerBarApi = new FooterBarApi(this.controllers.uiController);
     this.stateApi = new StateApi(this.mapId);
     this.notifications = new Notifications(this.controllers.uiController);
 

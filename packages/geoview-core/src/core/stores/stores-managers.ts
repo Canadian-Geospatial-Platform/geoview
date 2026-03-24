@@ -115,6 +115,12 @@ export const removeGeoviewStore = (id: string): void => {
   delete useStoresManager.getState().stores[id];
 };
 
+/**
+ * Hook to access the GeoView store from the context.
+ *
+ * @returns The GeoView store instance from the context.
+ * @throws {Error} When used outside of a StoreContext.Provider.
+ */
 export const useGeoViewStore = (): GeoviewStoreType => {
   const ctx = useContext(StoreContext);
   if (!ctx) {

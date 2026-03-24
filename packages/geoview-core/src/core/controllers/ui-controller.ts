@@ -2,7 +2,7 @@ import { type TypeDisplayLanguage, type TypeDisplayTheme } from '@/api/types/map
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import { UIStateAdaptor } from '@/core/adaptors/ui-state-adaptor';
-import type { FocusItemProps } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { type ActiveAppBarTabType, type FocusItemProps } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useControllers } from '@/core/controllers/controller-manager';
 import { DateMgt, type TimeIANA } from '@/core/utils/date-mgt';
 import type { TypeHTMLElement } from '@/core/types/global-types';
@@ -71,6 +71,15 @@ export class UIController extends AbstractMapViewerController {
   setActiveFooterBarTab(tab: string | undefined): void {
     // Save in store
     this.#uiStateAdaptor.setActiveFooterBarTab(tab);
+  }
+
+  /**
+   * Gets the active app bar tab from the store.
+   *
+   * @returns The active app bar tab info.
+   */
+  getActiveAppBarTab(): ActiveAppBarTabType {
+    return this.#uiStateAdaptor.getActiveAppBarTab();
   }
 
   /**
@@ -361,6 +370,7 @@ export class UIController extends AbstractMapViewerController {
  * Hook to access the UI controller from the controller context.
  *
  * @returns The UI controller instance
+ * @throws {Error} When used outside of a ControllerContext.Provider.
  */
 export function useUIController(): UIController {
   return useControllers().uiController;

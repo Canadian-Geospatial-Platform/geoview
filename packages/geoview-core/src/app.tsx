@@ -242,7 +242,8 @@ async function renderMap(mapElement: HTMLElement): Promise<MapViewer> {
   const mapViewer = new MapViewer(configuration, i18n);
   api.setMapViewer(mapId, mapViewer);
 
-  // Initialize the event processors with the map viewer
+  // Initialize the event processors with the map viewer.
+  // TODO: REFACTOR - Remove this call when controllers are fully implemented. This is a temporary call as we implement the controllers.
   AbstractEventProcessor.initializeMapViewer(mapId, mapViewer);
 
   // Create a promise to be resolved when the MapViewer is initialized via the AppStart component

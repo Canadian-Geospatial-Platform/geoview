@@ -151,12 +151,15 @@ export function WmsStylePanel({ layerDetails }: WmsStylePanelProps): JSX.Element
   const memoWmsStyleArray = useMemo(
     // TODO: REFACTOR - This getting of styles should be done in the store in case it changes. Here a
     // TO.DOCONT: change in the wms styles (getStylesMetadata) of a layer config from the domain will not trigger a react update.
+    // TO.DOCONT: It's also bad, because here LegendEventProcessor.getLayerWmsStyles() jumps directly to the domain to get the
+    // TO.DOCONT: styles, while it should be going through the store.
     () => LegendEventProcessor.getLayerWmsStyles(mapId, layerDetails.layerPath) || [],
     [mapId, layerDetails.layerPath]
   );
 
   const handleSelect = useCallback(
     (wmsStyleName: string): void => {
+      // TODO: REFACTOR - This setting of styles should be done through a controller, because it affects the domain directly.
       LegendEventProcessor.setLayerWmsStyle(mapId, layerDetails.layerPath, wmsStyleName);
     },
     [layerDetails.layerPath, mapId]

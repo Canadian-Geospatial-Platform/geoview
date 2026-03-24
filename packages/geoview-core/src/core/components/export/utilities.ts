@@ -12,6 +12,8 @@ import {
   isStoreTimeSliderInitialized,
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
 import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { getStoreGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
+import { getStoreLayerStateLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 // TODO As a utility file, the EventProcessors probably shouldn't be here, but it removes a lot of duplication
 // TO.DO from the pdf-layout and canvas-layout files. Possibly a rename or a better solution could be found.
@@ -24,8 +26,6 @@ import { NorthArrowIcon } from '@/core/components/north-arrow/north-arrow-icon';
 
 import { SHARED_STYLES, getScaledCanvasStyles } from '@/core/components/export/layout-styles';
 import { CanvasDocument } from '@/core/components/export/canvas-layout';
-import { getStoreGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { getStoreLayerStateLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 // GV Buffer polyfill for react-pdf
 if (typeof window !== 'undefined') {

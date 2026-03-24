@@ -11,6 +11,7 @@ import { useMapProjectionEPSG } from '@/core/stores/store-interface-and-intial-v
 import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { TIMEOUT } from '@/core/utils/constant';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useUIController } from '@/core/controllers/ui-controller';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { logger } from '@/core/utils/logger';
@@ -32,6 +33,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
   const { t } = useTranslation<string>();
 
   // get store action and map projection
+  const mapId = useGeoViewMapId();
   const uiController = useUIController();
   const mapProjectionEPSG = useMapProjectionEPSG();
   const layerName = useLayerSelectorName(layerPath) ?? '';
@@ -87,7 +89,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
           });
 
           // Query
-          LegendEventProcessor.queryLayerEsriDynamic(uiController.getMapId(), layerPath, objectids)
+          LegendEventProcessor.queryLayerEsriDynamic(mapId, layerPath, objectids)
             .then((results) => {
               // For each result
               results.forEach((result) => {
@@ -113,7 +115,7 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
         return Promise.resolve(chunk); // Return the original chunk if there's an error
       }
     },
-    [layerPath, uiController]
+    [layerPath, mapId]
   );
 
   /**

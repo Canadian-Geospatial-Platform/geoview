@@ -369,7 +369,7 @@ export class LayerApi {
   }
 
   /**
-   * Gets the Layer Entry layer paths
+   * Gets the Layer Entry layer paths.
    *
    * @returns The GeoView Layer Paths
    */
@@ -378,7 +378,7 @@ export class LayerApi {
   }
 
   /**
-   * Gets the Layer Entry Configs
+   * Gets the Layer Entry Configs.
    *
    * @returns The GeoView Layer Entry Configs
    */

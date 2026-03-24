@@ -67,49 +67,12 @@ export interface IFeatureInfoState {
 
   /** Store actions callable from adaptors. */
   actions: {
-    /**
-     * Adds a feature to the checked features list.
-     *
-     * @param feature - The feature entry to add.
-     */
     addCheckedFeature: (feature: TypeFeatureInfoEntry) => void;
-
-    /**
-     * Removes a feature from the checked features list, or clears all.
-     *
-     * @param feature - The feature to remove, or 'all' to clear the list.
-     */
     removeCheckedFeature: (feature: TypeFeatureInfoEntry | 'all') => void;
-
-    /**
-     * Sets the layer data array.
-     *
-     * @param layerDataArray - The feature info result set entries to set.
-     */
     setLayerDataArray: (layerDataArray: TypeFeatureInfoResultSetEntry[]) => void;
-
-    /**
-     * Sets the batched layer data array.
-     *
-     * @param layerDataArray - The batched feature info result set entries to set.
-     */
     setLayerDataArrayBatch: (layerDataArray: TypeFeatureInfoResultSetEntry[]) => void;
-
-    /**
-     * Sets the layer path that bypasses the batch propagation delay.
-     *
-     * @param layerPath - The layer path to bypass.
-     */
     setLayerDataArrayBatchLayerPathBypass: (layerPath: string) => void;
-
-    /**
-     * Sets the selected layer path in the details panel.
-     *
-     * @param selectedLayerPath - The layer path to select.
-     */
     setSelectedLayerPath: (selectedLayerPath: string) => void;
-
-    /** Toggles the coordinate info enabled state and creates or deletes coordinate info accordingly. */
     toggleCoordinateInfoEnabled: () => void;
   };
 }

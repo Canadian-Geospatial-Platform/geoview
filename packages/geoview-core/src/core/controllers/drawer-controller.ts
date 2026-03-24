@@ -136,7 +136,8 @@ export class DrawerController extends AbstractMapViewerController {
  * Hook to access the DrawerController from the controller context.
  *
  * @returns The drawer controller instance
- * @throws When used outside of a ControllerProvider or when the Drawer plugin is not configured
+ * @throws {Error} When used outside of a ControllerContext.Provider.
+ * @throws {Error} When the Drawer plugin is not configured.
  */
 export function useDrawerController(): DrawerController {
   const controller = useControllers().drawerController;

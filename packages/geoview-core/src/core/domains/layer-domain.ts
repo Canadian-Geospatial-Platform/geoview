@@ -7,7 +7,7 @@ import { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-lay
 import EventHelper, { type EventDelegateBase } from '@/api/events/event-helper';
 import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { LayerConfigNotFoundError } from '@/core/exceptions/geoview-exceptions';
-import { LayerWrongTypeError } from '../exceptions/layer-exceptions';
+import { LayerWrongTypeError } from '@/core/exceptions/layer-exceptions';
 
 export class LayerDomain {
   /** Layers with valid configuration for this map. */
@@ -41,7 +41,8 @@ export class LayerDomain {
   }
 
   /**
-   * Gets the Layer Entry layer paths
+   * Gets the Layer Entry layer paths.
+   *
    * @returns The GeoView Layer Paths
    */
   getLayerEntryLayerPaths(): string[] {
@@ -49,7 +50,8 @@ export class LayerDomain {
   }
 
   /**
-   * Gets the Layer Entry Configs
+   * Gets the Layer Entry Configs.
+   *
    * @returns The GeoView Layer Entry Configs
    */
   getLayerEntryConfigs(): ConfigBaseClass[] {
@@ -58,6 +60,7 @@ export class LayerDomain {
 
   /**
    * Gets the layer configuration of the specified layer path.
+   *
    * @param layerPath - The layer path.
    * @returns The layer configuration.
    * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
@@ -75,6 +78,7 @@ export class LayerDomain {
 
   /**
    * Gets the layer configuration of the specified layer path.
+   *
    * @param layerPath - The layer path.
    * @returns The layer configuration or undefined if not found.
    */
@@ -84,6 +88,7 @@ export class LayerDomain {
 
   /**
    * Gets the layer configuration of a group layer (not a regular) at the specified layer path.
+   *
    * @param layerPath - The layer path.
    * @returns The layer configuration.
    * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
@@ -100,6 +105,9 @@ export class LayerDomain {
     return layerConfig;
   }
 
+  /**
+   * TODO: JSDOC: Implement this...
+   */
   registerLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     // Keep it
     this.#layerEntryConfigs[layerConfig.layerPath] = layerConfig;
@@ -108,6 +116,9 @@ export class LayerDomain {
     layerConfig.onLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
   }
 
+  /**
+   * TODO: JSDOC: Implement this...
+   */
   deleteLayerEntryConfig(layerPath: string): void {
     // Unregister the handler
     this.#layerEntryConfigs[layerPath]?.offLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
@@ -118,6 +129,9 @@ export class LayerDomain {
 
   // #region PRIVATE HANDLERS
 
+  /**
+   * TODO: JSDOC: Implement this...
+   */
   #handleLayerStatusChanged(layerConfig: ConfigBaseClass, event: LayerStatusChangedEvent): void {
     // Emit about it
     this.#emitLayerStatusChanged({ config: layerConfig, status: event.layerStatus });

@@ -17,6 +17,7 @@ export class LayerController extends AbstractMapViewerController {
 
   /**
    * Creates an instance of LayerController.
+   *
    * @param mapViewer - The map viewer instance to associate with this controller.
    * @param layerDomain - The layer domain instance to associate with this controller.
    */
@@ -41,7 +42,8 @@ export class LayerController extends AbstractMapViewerController {
   }
 
   /**
-   * Gets the Layer Entry layer paths
+   * Gets the Layer Entry layer paths.
+   *
    * @returns The GeoView Layer Paths
    */
   getLayerEntryLayerPaths(): string[] {
@@ -49,7 +51,8 @@ export class LayerController extends AbstractMapViewerController {
   }
 
   /**
-   * Gets the Layer Entry Configs
+   * Gets the Layer Entry Configs.
+   *
    * @returns The GeoView Layer Entry Configs
    */
   getLayerEntryConfigs(): ConfigBaseClass[] {
@@ -58,6 +61,7 @@ export class LayerController extends AbstractMapViewerController {
 
   /**
    * Gets the layer configuration of the specified layer path.
+   *
    * @param layerPath - The layer path.
    * @returns The layer configuration.
    * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
@@ -68,6 +72,7 @@ export class LayerController extends AbstractMapViewerController {
 
   /**
    * Gets the layer configuration of the specified layer path.
+   *
    * @param layerPath - The layer path.
    * @returns The layer configuration or undefined if not found.
    */
@@ -76,7 +81,7 @@ export class LayerController extends AbstractMapViewerController {
   }
 
   /**
-   *
+   * TODO: JSDOC: Implement this...
    */
   // GV This function is missing logic still in the layer api that needs to be brough over here
   registerLayerEntryConfig(layerConfig: ConfigBaseClass): void {
@@ -84,7 +89,7 @@ export class LayerController extends AbstractMapViewerController {
   }
 
   /**
-   *
+   * TODO: JSDOC: Implement this...
    */
   // GV This function is missing logic still in the layer api that needs to be brough over here
   deleteLayerEntryConfig(layerPath: string): void {
@@ -94,8 +99,9 @@ export class LayerController extends AbstractMapViewerController {
 
 /**
  * Layer Controller hook to access the layer controller from the context.
+ *
  * @returns The layer controller instance from the context.
- * @throws Will throw an error if used outside of a ControllerProvider.
+ * @throws {Error} When used outside of a ControllerContext.Provider.
  */
 export function useLayerController(): LayerController {
   return useControllers().layerController;

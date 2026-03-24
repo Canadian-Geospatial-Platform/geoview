@@ -12,8 +12,6 @@ import { generateId } from '@/core/utils/utilities';
  * @class
  */
 export class NavBarApi {
-  mapId: string;
-
   // group of array to hold all buttons, button panels created on the nav-bar
   buttons: Record<string, Record<string, TypeButtonPanel>> = {};
 
@@ -28,12 +26,8 @@ export class NavBarApi {
 
   /**
    * Instantiates a NavbarApi class.
-   *
-   * @param {string} mapId - The map id this NavBarApi belongs to
    */
-  constructor(mapId: string) {
-    this.mapId = mapId;
-
+  constructor() {
     this.#createDefaultButtonPanels();
   }
 

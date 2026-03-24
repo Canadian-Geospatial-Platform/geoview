@@ -43,102 +43,18 @@ export interface IDataTableState {
 
   /** Store actions callable from adaptors. */
   actions: {
-    /**
-     * Sets the active layer data array.
-     *
-     * @param layers - The layer data objects to set as active.
-     */
     setActiveLayersData: (layers: TypeLayerData[]) => void;
-
-    /**
-     * Sets the aggregated feature info result set entries.
-     *
-     * @param allFeaturesDataArray - The feature info entries for all layers.
-     */
     setAllFeaturesDataArray: (allFeaturesDataArray: TypeAllFeatureInfoResultSetEntry[]) => void;
-
-    /**
-     * Sets the column filters for a specific layer.
-     *
-     * @param filtered - The column filter state to apply.
-     * @param layerPath - The target layer path.
-     */
     setColumnFiltersEntry: (filtered: TypeColumnFiltersState, layerPath: string) => void;
-
-    /**
-     * Sets the column filter modes for a specific layer.
-     *
-     * @param filterModes - A record mapping column ids to their filter mode.
-     * @param layerPath - The target layer path.
-     */
     setColumnFilterModesEntry: (filterModes: Record<string, string>, layerPath: string) => void;
-
-    /**
-     * Sets the visibility of column filters for a specific layer.
-     *
-     * @param visible - Whether column filters should be visible.
-     * @param layerPath - The target layer path.
-     */
     setColumnsFiltersVisibility: (visible: boolean, layerPath: string) => void;
-
-    /**
-     * Initializes default data table settings for a layer.
-     *
-     * @param layerPath - The layer path to initialize settings for.
-     */
     setInitiallayerDataTableSetting: (layerPath: string) => void;
-
-    /**
-     * Sets the global filter value for a specific layer.
-     *
-     * @param globalFilterValue - The global filter string.
-     * @param layerPath - The target layer path.
-     */
     setGlobalFilteredEntry: (globalFilterValue: string, layerPath: string) => void;
-
-    /**
-     * Sets whether the data table is filtered to the current map extent for a specific layer.
-     *
-     * @param mapFiltered - Whether map extent filtering is enabled.
-     * @param layerPath - The target layer path.
-     */
     setMapFilteredEntry: (mapFiltered: boolean, layerPath: string) => void;
-
-    /**
-     * Sets the number of filtered rows for a specific layer.
-     *
-     * @param rows - The filtered row count.
-     * @param layerPath - The target layer path.
-     */
     setRowsFilteredEntry: (rows: number, layerPath: string) => void;
-
-    /**
-     * Sets the currently selected feature in the data table.
-     *
-     * @param feature - The feature entry to select.
-     */
     setSelectedFeature: (feature: TypeFeatureInfoEntry) => void;
-
-    /**
-     * Sets the selected layer path for the data table.
-     *
-     * @param layerPath - The layer path to select.
-     */
     setSelectedLayerPath: (layerPath: string) => void;
-
-    /**
-     * Replaces all table filters with the provided filter record.
-     *
-     * @param newTableFilters - The new table filters keyed by layer path.
-     */
     setTableFilters(newTableFilters: Record<string, string>): void;
-
-    /**
-     * Sets the toolbar row-selected message for a specific layer.
-     *
-     * @param message - The message to display.
-     * @param layerPath - The target layer path.
-     */
     setToolbarRowSelectedMessageEntry: (message: string, layerPath: string) => void;
   };
 }
