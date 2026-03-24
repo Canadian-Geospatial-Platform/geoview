@@ -280,7 +280,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
       associatedLayerPaths.forEach((layerPath: string) => {
         try {
           // Get the layer at the layer path
-          const olLayer = viewer.layer.getOLLayerIfExists(layerPath);
+          const olLayer = viewer.layer.getGeoviewLayerIfExists(layerPath)?.getOLLayer();
           if (olLayer) {
             // Unwire the events on the layer
             olLayer.un(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);
