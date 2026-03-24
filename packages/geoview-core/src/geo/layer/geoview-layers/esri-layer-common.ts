@@ -416,6 +416,11 @@ export class EsriUtilities {
     // Check if we support that projection and if not add it on-the-fly
     await Projection.addProjectionIfMissing(layerMetadata.spatialReference || layerMetadata.sourceSpatialReference);
 
+    // Also register the extent's spatial reference if it exists
+    if (layerMetadata.extent?.spatialReference) {
+      await Projection.addProjectionIfMissing(layerMetadata.extent.spatialReference);
+    }
+
     this.#commonProcessFeatureInfoConfig(layerConfig, layerMetadata);
 
     this.#commonProcessInitialSettings(layerConfig, layerMetadata);

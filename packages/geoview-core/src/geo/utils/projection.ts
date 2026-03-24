@@ -329,11 +329,13 @@ export abstract class Projection {
    */
   static async #addProjectionIfMissingUsingObj(projection: TypeProjection): Promise<void> {
     try {
-      Projection.getProjectionFromObj(projection);
+      const projectionObj = Projection.getProjectionFromObj(projection);
+      if (projectionObj) return; // Already available
     } catch (error: unknown) {
       logger.logWarning(`Unsupported projection, attempting to add projection ${projection} now.`, error);
-      await Projection.addProjection(projection);
     }
+    // If we got here, the projection wasn't found or threw an error, so add it
+    await Projection.addProjection(projection);
   }
 
   /**
@@ -344,16 +346,14 @@ export abstract class Projection {
    */
   static async #addProjectionIfMissingUsingString(projection: ProjectionLike): Promise<void> {
     try {
-      Projection.getProjectionFromString(projection);
+      const projectionObj = Projection.getProjectionFromString(projection);
+      if (projectionObj) return; // Already available
     } catch (error: unknown) {
       logger.logWarning(`Unsupported projection, attempting to add projection ${projection} now.`, error);
-
-      // Read the number
-      const epsgCode = this.readEPSGNumber(projection);
-      if (epsgCode) {
-        await Projection.addProjectionCode(epsgCode);
-      }
     }
+    // Read the number and add the projection if we can read it
+    const epsgCode = this.readEPSGNumber(projection);
+    if (epsgCode) await Projection.addProjectionCode(epsgCode);
   }
 
   /**
