@@ -34,15 +34,15 @@
         ]
       },
       {
-        "geoviewLayerId": "MSI",
-        "geoviewLayerName": "MSI",
-        "metadataAccessPath": "https://datacube.services.geo.ca/ows/msi",
-        "geoviewLayerType": "ogcWms",
+        "geoviewLayerId": "fire_progression",
+        "geoviewLayerName": "fire_progression_20230915",
+        "geoviewLayerType": "esriDynamic",
         "listOfLayerEntryConfig": [
           {
-            "layerId": "msi-94-or-more"
+            "layerId": "0"
           }
-        ]
+        ],
+        "metadataAccessPath": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NRCAN/FireCreepPerimeter_20230915/MapServer/"
       },
       {
         "geoviewLayerId": "fire_perimeters",
@@ -51,17 +51,6 @@
         "listOfLayerEntryConfig": [
           {
             "layerId": "1"
-          }
-        ],
-        "metadataAccessPath": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NRCAN/FireCreepPerimeter_20230915/MapServer/"
-      },
-      {
-        "geoviewLayerId": "fire_progression",
-        "geoviewLayerName": "fire_progression_20230915",
-        "geoviewLayerType": "esriDynamic",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "0"
           }
         ],
         "metadataAccessPath": "https://geoappext.nrcan.gc.ca/arcgis/rest/services/NRCAN/FireCreepPerimeter_20230915/MapServer/"
@@ -76,6 +65,17 @@
           }
         ],
         "metadataAccessPath": "https://maps-cartes.services.geo.ca/egs_sgu/rest/services/Flood_Inondation/EGS_Flood_Product_Current_en/MapServer"
+      },
+      {
+        "geoviewLayerId": "MSI",
+        "geoviewLayerName": "MSI",
+        "metadataAccessPath": "https://datacube.services.geo.ca/ows/msi",
+        "geoviewLayerType": "ogcWms",
+        "listOfLayerEntryConfig": [
+          {
+            "layerId": "msi-94-or-more"
+          }
+        ]
       },
       {
         "geoviewLayerId": "df168bcf-4abc-4756",

@@ -143,11 +143,6 @@ import type { TypeFeatureInfoResultSet } from '@/core/stores/store-interface-and
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
  */
 export class LayerApi {
-  /** A zoom level buffer to guarantee that the calculations being done via the resolutions, inches per meter, dpi are more strict than not enough */
-  /** The value 0.21 seems rather specific, but it was the value giving us the best result during testing on layer National Forest Inventory Photo Plot Summary */
-  /** It could be increased slightly if ever we need to, but it might offer worse precision depending on various layers */
-  static readonly MIN_MAX_ZOOM_LEVEL_BUFFER = 0.21;
-
   /** The opacity ratio to use when highlighting a layer vs the other layers */
   static readonly HIGHLIGHT_OPACITY_RATIO = 4;
 
@@ -2493,10 +2488,7 @@ export class LayerApi {
     // be handled in the map-viewer's handleMapZoomEnd by checking the children visibility
     if ((layerConfig.getInitialSettings()?.maxZoom || layerConfig.getMaxScale()) && !(gvLayer instanceof GVGroupLayer)) {
       // Calculate the map zoom for the corresponding max scale
-      let scaleZoomLevel = this.mapViewer.getMapZoomFromScale(layerConfig.getMaxScale()) ?? Infinity;
-
-      // Add a buffer, because the calculations are sometimes a bit off
-      scaleZoomLevel -= LayerApi.MIN_MAX_ZOOM_LEVEL_BUFFER;
+      const scaleZoomLevel = this.mapViewer.getMapZoomFromScale(layerConfig.getMaxScale()) ?? Infinity;
 
       const maxZoom = Math.min(layerConfig.getInitialSettings()?.maxZoom ?? Infinity, scaleZoomLevel);
       gvLayer.setMaxZoom(maxZoom);
@@ -2504,10 +2496,7 @@ export class LayerApi {
 
     if ((layerConfig.getInitialSettings()?.minZoom || layerConfig.getMinScale()) && !(gvLayer instanceof GVGroupLayer)) {
       // Calculate the map zoom for the corresponding min scale
-      let scaleZoomLevel = this.mapViewer.getMapZoomFromScale(layerConfig.getMinScale()) ?? -Infinity;
-
-      // Add a buffer, because the calculations are sometimes a bit off
-      scaleZoomLevel += LayerApi.MIN_MAX_ZOOM_LEVEL_BUFFER;
+      const scaleZoomLevel = this.mapViewer.getMapZoomFromScale(layerConfig.getMinScale()) ?? -Infinity;
 
       const minZoom = Math.max(layerConfig.getInitialSettings()?.minZoom ?? -Infinity, scaleZoomLevel);
       gvLayer.setMinZoom(minZoom);

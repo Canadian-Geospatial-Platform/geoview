@@ -83,6 +83,12 @@ import type { AbstractPlugin } from '@/api/plugin/abstract-plugin';
  * Class used to manage created maps.
  */
 export class MapViewer {
+  /** A zoom level buffer to guarantee that the calculations being done via the resolutions, inches per meter, dpi are more strict than not enough
+   * The value 0.21 seems rather specific, but it was the value giving us the best result during testing on layer
+   * National Forest Inventory Photo Plot Summary (6433173f-bca8-44e6-be8e-3e8a19d3c299) at zoom level 3.78 +/- 0.25
+   * It could be increased slightly if ever we need to, but it might offer worse precision depending on various layers */
+  static readonly ZOOM_LEVEL_FROM_SCALE_BUFFER = 0.21;
+
   /** Minimum delay (in milliseconds) for map to be in loading state */
   static readonly #MIN_DELAY_LOADING = 2000; // 2 seconds
 
@@ -795,9 +801,16 @@ export class MapViewer {
    * @returns The OpenLayers zoom level corresponding to the scale, or `undefined` if `targetScale` is not provided.
    */
   getMapZoomFromScale(targetScale: number | undefined, dpiValue: number = MapViewer.DEFAULT_DPI): number | undefined {
+    // Get the resolution from the scale
     const resolution = this.getMapResolutionFromScale(targetScale, dpiValue);
     if (!resolution) return undefined;
-    return this.getView().getZoomForResolution(resolution);
+
+    // Calculate the zoom level from the resolution
+    const zoomLevel = this.getView().getZoomForResolution(resolution);
+    if (!zoomLevel) return undefined;
+
+    // Add a buffer, because the calculations are sometimes a bit off
+    return zoomLevel + MapViewer.ZOOM_LEVEL_FROM_SCALE_BUFFER;
   }
 
   /**
