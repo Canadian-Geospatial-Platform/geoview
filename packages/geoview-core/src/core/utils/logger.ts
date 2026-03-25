@@ -139,6 +139,20 @@ export class ConsoleLogger {
   }
 
   /**
+   * Logging function commonly used in the useCallback to log when a callback is being memoized.
+   * Only shows if LOG_ACTIVE is true.
+   * @param {string} useCallbackFunction - The useCallback function identifier
+   * @param {unknown[]} messages - The messages to log
+   * @deprecated This function is deprecated.
+   */
+  logTraceUseCallback(useCallbackFunction: string, ...messages: unknown[]): void {
+    // Validate log active
+    if (!LOG_ACTIVE) return;
+    // Redirect
+    this.#logLevel(3, `U_CLB`, 'darkorchid', useCallbackFunction, ...messages);
+  }
+
+  /**
    * Logging function commonly used in the useEffects to log when a component is being mounted.
    * Only shows if LOG_ACTIVE is true.
    * @param {string} useEffectFunction - The useEffect function identifier
