@@ -300,11 +300,22 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
         <>
           {filteredOrderedLayerData
             .filter((data) => data.layerPath === selectedLayerPath)
-            .map((data: MappedLayerDataType) => (
-              <Box key={data.layerPath} ref={dataTableRef} className="data-table-panel" sx={{ height: '100%' }}>
-                <DataTable data={data} layerPath={data.layerPath} containerType={containerType} />
-              </Box>
-            ))}
+            .map((data: MappedLayerDataType) => {
+              // Get unfiltered count from orderedLayerData
+              const unfilteredLayer = orderedLayerData.find((layer) => layer.layerPath === selectedLayerPath);
+              const unfilteredFeaturesCount = unfilteredLayer?.features?.length ?? 0;
+
+              return (
+                <Box key={data.layerPath} ref={dataTableRef} className="data-table-panel" sx={{ height: '100%' }}>
+                  <DataTable
+                    data={data}
+                    layerPath={data.layerPath}
+                    containerType={containerType}
+                    unfilteredFeaturesCount={unfilteredFeaturesCount}
+                  />
+                </Box>
+              );
+            })}
         </>
       );
     }

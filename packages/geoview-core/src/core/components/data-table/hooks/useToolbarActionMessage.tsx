@@ -12,6 +12,7 @@ interface UseSelectedRowMessageProps {
   columnFilters: MRTColumnFiltersState;
   globalFilter: string;
   showUnsymbolizedFeatures: boolean;
+  unfilteredFeaturesCount: number;
 }
 
 /**
@@ -28,6 +29,7 @@ export function useToolbarActionMessage({
   layerPath,
   tableInstance,
   showUnsymbolizedFeatures,
+  unfilteredFeaturesCount,
 }: UseSelectedRowMessageProps): void {
   const { t } = useTranslation();
 
@@ -42,8 +44,7 @@ export function useToolbarActionMessage({
     let message = '';
     let length = 0;
 
-    const totalFeatures = data.features?.length ?? 0;
-    const visibleFeatures = showUnsymbolizedFeatures ? totalFeatures : data.features?.filter((feature) => feature.featureIcon)?.length || 0;
+    const visibleFeatures = data.features?.length ?? 0;
 
     if (tableInstance) {
       const filteredRows = tableInstance.getFilteredRowModel().rows.length;
@@ -54,10 +55,10 @@ export function useToolbarActionMessage({
         message = t('dataTable.rowsFiltered')
           .replace('{rowsFiltered}', filteredRows.toString())
           .replace('{totalRows}', visibleFeatures.toString() ?? '');
-        message += !showUnsymbolizedFeatures ? ` (${totalFeatures} ${t('dataTable.total')})` : '';
-      } else if (!showUnsymbolizedFeatures && visibleFeatures !== totalFeatures) {
+        message += !showUnsymbolizedFeatures ? ` (${unfilteredFeaturesCount} ${t('dataTable.total')})` : '';
+      } else if (!showUnsymbolizedFeatures && visibleFeatures !== unfilteredFeaturesCount) {
         // No table filtering, but some features are hidden due to missing icons
-        message = `${visibleFeatures} ${t('dataTable.features')} ${t('dataTable.showing')} (${totalFeatures} ${t('dataTable.total')})`;
+        message = `${visibleFeatures} ${t('dataTable.features')} ${t('dataTable.showing')} (${unfilteredFeaturesCount} ${t('dataTable.total')})`;
         length = 0;
       } else {
         // No filtering
@@ -70,5 +71,5 @@ export function useToolbarActionMessage({
 
     setToolbarRowSelectedMessageEntry(message, layerPath);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [columnFilters, data.features, globalFilter, showUnsymbolizedFeatures]);
+  }, [columnFilters, data.features, globalFilter, showUnsymbolizedFeatures, unfilteredFeaturesCount]);
 }

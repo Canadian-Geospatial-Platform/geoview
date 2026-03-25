@@ -16,4 +16,5 @@ export interface DataTableProps {
   data: MappedLayerDataType;
   layerPath: string;
   containerType: TypeContainerBox;
+  unfilteredFeaturesCount: number;
 }

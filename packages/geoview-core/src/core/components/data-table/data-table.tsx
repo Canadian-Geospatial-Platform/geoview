@@ -88,7 +88,7 @@ const STRING_FIELD_FILTERS = ['contains', 'startsWith', 'endsWith'];
 
 function DataTable(props: DataTableProps): JSX.Element {
   // Props
-  const { data, layerPath, containerType } = props;
+  const { data, layerPath, containerType, unfilteredFeaturesCount } = props;
 
   // Hook
   const { t } = useTranslation();
@@ -871,7 +871,15 @@ function DataTable(props: DataTableProps): JSX.Element {
   }, [globalFilter]);
 
   // set toolbar custom action message in store.
-  useToolbarActionMessage({ data, columnFilters, globalFilter, layerPath, tableInstance: useTable, showUnsymbolizedFeatures });
+  useToolbarActionMessage({
+    data,
+    columnFilters,
+    globalFilter,
+    layerPath,
+    tableInstance: useTable,
+    showUnsymbolizedFeatures,
+    unfilteredFeaturesCount,
+  });
 
   return (
     <Box ref={dataTableWrapperRef} sx={sxClasses.dataTableWrapper} className="data-table-wrapper">
