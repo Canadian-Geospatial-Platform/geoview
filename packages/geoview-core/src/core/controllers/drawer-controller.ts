@@ -1,7 +1,7 @@
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import { useControllers } from '@/core/controllers/controller-manager';
 import { DEFAULT_TEXT_VALUES } from '@/core/stores/store-interface-and-intial-values/drawer-state';
-import type { LanguageChangedDelegate, UIDomain } from '@/core/domains/ui-domain';
+import type { DomainLanguageChangedDelegate, DomainLanguageChangedEvent, UIDomain } from '@/core/domains/ui-domain';
 import { DrawerEventProcessor } from '@/api/event-processors/event-processor-children/drawer-event-processor';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { getGeoViewStore } from '../stores';
@@ -18,7 +18,7 @@ export class DrawerController extends AbstractMapViewerController {
   #uiDomain: UIDomain;
 
   /** The language changed event hook. */
-  #hookLanguageChanged?: LanguageChangedDelegate;
+  #hookLanguageChanged?: DomainLanguageChangedDelegate;
 
   /** The store subscription callback to unsubscribe from projection changes. */
   #hookProjectionSubscription?: () => void;
@@ -53,13 +53,7 @@ export class DrawerController extends AbstractMapViewerController {
     DrawerController.#hookKeyboardHandlers(this.getMapId());
 
     // Listens when the language is changed in the UI domain and process actions accordingly
-    this.#hookLanguageChanged = this.#uiDomain.onLanguageChanged((sender, event) => {
-      // Update all measurement tooltips when language changes
-      DrawerEventProcessor.updateMeasurementTooltips(this.getMapId(), event.language);
-
-      // Update Default Text when language changes
-      DrawerEventProcessor.setTextValue(this.getMapId(), DEFAULT_TEXT_VALUES[event.language]);
-    });
+    this.#hookLanguageChanged = this.#uiDomain.onLanguageChanged(this.#handleDisplayLanguageChanged.bind(this));
 
     // Subscribe to projection changes
     // TODO: REFACTOR - Change this to listen on the domain event instead of the store state, because we are doing application-domain work with this subscribe.
@@ -100,6 +94,20 @@ export class DrawerController extends AbstractMapViewerController {
     }
   }
 
+  // #region PRIVATE HANDLERS
+
+  #handleDisplayLanguageChanged(sender: UIDomain, event: DomainLanguageChangedEvent): void {
+    // Update all measurement tooltips when language changes
+    DrawerEventProcessor.updateMeasurementTooltips(this.getMapId(), event.language);
+
+    // Update Default Text when language changes
+    DrawerEventProcessor.setTextValue(this.getMapId(), DEFAULT_TEXT_VALUES[event.language]);
+  }
+
+  // #endregion PRIVATE HANDLERS
+
+  // #region STATIC METHODS
+
   /**
    * Sets up keyboard event handling for undo (Ctrl+Z) and redo (Ctrl+Shift+Z / Ctrl+Y).
    *
@@ -130,6 +138,8 @@ export class DrawerController extends AbstractMapViewerController {
     this.#keyboardHandlers.set(mapId, handler);
     document.addEventListener('keydown', handler);
   }
+
+  // #endregion STATIC METHODS
 }
 
 /**

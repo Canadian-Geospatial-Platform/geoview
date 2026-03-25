@@ -683,7 +683,7 @@ export const useDrawerRedoDisabled = (): boolean => useStore(useGeoViewStore(), 
 // #endregion STATE HOOKS
 
 // #region STATE ADAPTORS
-// GV These methods should be inside a State Adaptor class listening on domain events triggered by controllers.
+// GV These methods should be called from a State Adaptor class listening on domain events triggered by controllers.
 
 /**
  * Sets the active geometry type in the drawer store.

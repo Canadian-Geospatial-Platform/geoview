@@ -337,6 +337,119 @@ export const getStoreCorePackageComponents = (mapId: string): TypeValidMapCorePa
   getStoreUIState(mapId).corePackagesComponents;
 
 // #endregion STATE SELECTORS
+// GV These methods should be called from a State Adaptor class listening on domain events triggered by controllers.
+
+// #region STATE ADAPTORS
+
+/**
+ * Sets the active footer bar tab.
+ *
+ * @param mapId - The map identifier
+ * @param tab - The tab identifier, or undefined to deactivate
+ */
+export const setStoreActiveFooterBarTab = (mapId: string, tab: string | undefined): void => {
+  getStoreUIState(mapId).actions.setActiveFooterBarTab(tab);
+};
+
+/**
+ * Sets the active app bar tab with its open and focus trap state.
+ *
+ * @param mapId - The map identifier
+ * @param tab - The tab identifier, or undefined to deactivate
+ * @param isOpen - Whether the tab is open
+ * @param isFocusTrapped - Whether focus is trapped on the tab
+ */
+export const setStoreActiveAppBarTab = (mapId: string, tab: string | undefined, isOpen: boolean, isFocusTrapped: boolean): void => {
+  getStoreUIState(mapId).actions.setActiveAppBarTab(tab, isOpen, isFocusTrapped);
+};
+
+/**
+ * Sets the footer bar open state.
+ *
+ * @param mapId - The map identifier
+ * @param isOpen - Whether the footer bar is open
+ */
+export const setStoreFooterBarIsOpen = (mapId: string, isOpen: boolean): void => {
+  getStoreUIState(mapId).actions.setFooterBarIsOpen(isOpen);
+};
+
+/**
+ * Enables the focus trap on a specific UI element.
+ *
+ * @param mapId - The map identifier
+ * @param uiFocus - The focus item containing active and callback element identifiers
+ */
+export const enableStoreFocusTrap = (mapId: string, uiFocus: FocusItemProps): void => {
+  getStoreUIState(mapId).actions.enableFocusTrap(uiFocus);
+};
+
+/**
+ * Disables the focus trap and restores focus to a callback element.
+ *
+ * Uses requestAnimationFrame to ensure DOM updates complete before focus restoration.
+ *
+ * @param mapId - The map identifier
+ * @param callbackElementId - Optional element identifier to restore focus to. If 'no-focus' is passed, focus is not restored
+ */
+export const disableStoreFocusTrap = (mapId: string, callbackElementId?: string): void => {
+  getStoreUIState(mapId).actions.disableFocusTrap(callbackElementId);
+};
+
+/**
+ * Toggles the GeoView-level keyboard focus trap.
+ *
+ * @param mapId - The map identifier
+ * @param active - Whether the focus trap is active
+ */
+export const setStoreActiveTrapGeoView = (mapId: string, active: boolean): void => {
+  getStoreUIState(mapId).actions.setActiveTrapGeoView(active);
+};
+
+/**
+ * Sets the footer panel resize value (percentage).
+ *
+ * @param mapId - The map identifier
+ * @param value - The resize percentage value
+ */
+export const setStoreFooterPanelResizeValue = (mapId: string, value: number): void => {
+  getStoreUIState(mapId).actions.setFooterPanelResizeValue(value);
+};
+
+/**
+ * Shows a tab button by removing it from the hidden tabs list.
+ *
+ * @param mapId - The map identifier
+ * @param tab - The tab identifier to show
+ */
+export const showStoreTabButton = (mapId: string, tab: string): void => {
+  const uiState = getStoreUIState(mapId);
+  const { hiddenTabs } = uiState;
+
+  // Find it
+  const tabIndex = hiddenTabs.indexOf(tab);
+  if (tabIndex !== -1) {
+    hiddenTabs.splice(tabIndex, 1);
+    uiState.actions.setHiddenTabs([...hiddenTabs]);
+  }
+};
+
+/**
+ * Hides a tab button by adding it to the hidden tabs list.
+ *
+ * @param mapId - The map identifier
+ * @param tab - The tab identifier to hide
+ */
+export const hideStoreTabButton = (mapId: string, tab: string): void => {
+  const uiState = getStoreUIState(mapId);
+  const { hiddenTabs } = uiState;
+
+  // Only add if not already hidden
+  if (!hiddenTabs.includes(tab)) {
+    uiState.actions.setHiddenTabs([...hiddenTabs, tab]);
+  }
+};
+
+// #endregion STATE ADAPTORS
 
 /** Describes which element holds the focus trap and where to restore focus on release. */
 export type FocusItemProps = {

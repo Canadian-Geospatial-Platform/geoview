@@ -411,7 +411,7 @@ export const getStoreDataTableAllFeaturesArray = (mapId: string): TypeAllFeature
 // #endregion STATE SELECTORS
 
 // #region STATE ADAPTORS
-// GV These methods should be inside a State Adaptor class listening on domain events triggered by controllers.
+// GV These methods should be called from a State Adaptor class listening on domain events triggered by controllers.
 
 /**
  * Initializes default data table settings for a layer in the store.

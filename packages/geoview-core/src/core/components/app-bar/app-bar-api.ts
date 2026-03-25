@@ -155,7 +155,7 @@ export class AppBarApi {
   }
 
   /**
-   * Selects a tab by id and tab group.
+   * Gets the active app bar tab.
    *
    * @return {ActiveAppBarTabType} The active app bar tab info.
    * @deprecated Legacy support. Should use uiController.getActiveAppBarTab directly instead.

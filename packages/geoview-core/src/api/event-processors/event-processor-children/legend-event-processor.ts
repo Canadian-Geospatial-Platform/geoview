@@ -258,17 +258,6 @@ export abstract class LegendEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Sets the layer queryable state.
-   *
-   * @param mapId - The map identifier
-   * @param layerPath - The layer path of the layer to change
-   * @param queryable - The queryable state to set
-   */
-  static setLayerQueryable(mapId: string, layerPath: string, queryable: boolean): void {
-    MapEventProcessor.getMapViewerLayerAPI(mapId).setLayerQueryable(layerPath, queryable);
-  }
-
-  /**
    * Sets the layer hoverable state.
    *
    * @param mapId - The map identifier

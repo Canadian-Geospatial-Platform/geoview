@@ -375,7 +375,7 @@ export const getStoreTimeSliderFilter = (mapId: string, layerPath: string): stri
 // #endregion STATE SELECTORS
 
 // #region STATE ADAPTORS
-// GV These methods should be inside a State Adaptor class listening on domain events triggered by controllers.
+// GV These methods should be called from a State Adaptor class listening on domain events triggered by controllers.
 
 /**
  * Sets the selected layer path in the time slider store.

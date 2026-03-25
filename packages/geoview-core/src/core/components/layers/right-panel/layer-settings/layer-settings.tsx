@@ -11,10 +11,11 @@ import { getSxClasses } from '../layer-details-style';
 import { RasterFunctionPanel } from './raster-function-selector';
 import { MosaicRulePanel } from './mosaic-rule-selector';
 import { WmsStylePanel } from './wms-style-selector';
-import type { TypeLegendLayer } from '../../types';
-import { logger } from '@/core/utils/logger';
+import type { TypeLegendLayer } from '@/core/components/layers/types';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
+import { useLayerController } from '@/core/controllers/layer-controller';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { logger } from '@/core/utils/logger';
 
 interface LayerSettingsPanelProps {
   layerDetails: TypeLegendLayer;
@@ -40,6 +41,7 @@ export function LayerSettingsPanel({ layerDetails }: LayerSettingsPanelProps): J
 
   // Store
   const mapId = useGeoViewMapId();
+  const layerController = useLayerController();
   const availableSettings = LegendEventProcessor.getLayerSettings(mapId, layerDetails.layerPath);
   const hasText = useLayerSelectorHasText(layerDetails.layerPath);
   const textVisible = useLayerSelectorTextVisibility(layerDetails.layerPath);
@@ -54,8 +56,8 @@ export function LayerSettingsPanel({ layerDetails }: LayerSettingsPanelProps): J
   }, [layerDetails.layerPath, layerDetails.hoverable, mapId]);
 
   const handleToggleQueryable = useCallback((): void => {
-    LegendEventProcessor.setLayerQueryable(mapId, layerDetails.layerPath, !layerDetails.queryable!);
-  }, [layerDetails.layerPath, layerDetails.queryable, mapId]);
+    layerController.setLayerQueryable(layerDetails.layerPath, !layerDetails.queryable!);
+  }, [layerDetails.layerPath, layerDetails.queryable, layerController]);
 
   const handleToggleText = useCallback((): void => {
     LegendEventProcessor.setLayerTextVisibility(mapId, layerDetails.layerPath, !textVisible);
