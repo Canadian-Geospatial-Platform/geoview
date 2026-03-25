@@ -321,7 +321,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
 
         // Spread in more properties if dataType is date
         ...(value.dataType === 'date' && {
-          accessorFn: (row) => DateMgt.createDayjs(row[key].value as string),
+          accessorFn: (row) => (row[key].value ? DateMgt.createDayjs(row[key].value as string) : undefined),
           Cell: ({ cell }) => getCellContentDate(cell.getValue<Dayjs>()),
           muiFilterDatePickerProps: {
             timezone: displayDateTimezoneUniversal,
