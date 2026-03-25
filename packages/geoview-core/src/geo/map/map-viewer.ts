@@ -301,9 +301,6 @@ export class MapViewer {
     // Initialize layer api
     this.layer = new LayerApi(this, this.controllers, this.#layerDomain);
 
-    // TODO: ALEX - Remove this temporary call
-    this.controllers.layerController.temporaryHookFeatureInfoLayerSet(this.layer.featureInfoLayerSet);
-
     // Register handler when basemap has error
     this.basemap.onBasemapError((sender, event) => {
       // Show the error
@@ -699,7 +696,7 @@ export class MapViewer {
    * @throws {InvalidTimezoneError} When the time zone is not a valid or supported IANA identifier
    */
   setDisplayDateTimezone(displayDateTimezone: TimeIANA): void {
-    // Redirect to processor
+    // Redirect to controller
     this.controllers.uiController.setDisplayDateTimezone(displayDateTimezone);
   }
 
@@ -971,7 +968,7 @@ export class MapViewer {
     // Register one-time listener for query completion
     const handleQueryEnded = (): void => {
       // Unregister the listener immediately
-      this.layer.featureInfoLayerSet.offQueryEnded(handleQueryEnded);
+      this.controllers.layerSetController.featureInfoLayerSet.offQueryEnded(handleQueryEnded);
 
       // Resolve the promise about the completion of the query
       resolveQuery();
@@ -988,7 +985,7 @@ export class MapViewer {
     };
 
     // Register the handler before clicking
-    this.layer.featureInfoLayerSet.onQueryEnded(handleQueryEnded);
+    this.controllers.layerSetController.featureInfoLayerSet.onQueryEnded(handleQueryEnded);
 
     // Emit the event is done here, not from the processor to avoid circular references
     this.#emitMapSingleClick(clickCoordinates);

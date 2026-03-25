@@ -50,7 +50,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     }
 
     if (isQueryable) {
-      this.layerApi.mapViewer.controllers.uiController.showTabButton('data-table');
+      this.mapViewer.controllers.uiController.showTabButton('data-table');
     }
 
     // Return
@@ -95,7 +95,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
   protected override onDeleteFromStore(layerPath: string): void {
     // Remove it from data table info array
     deleteStoreFeatureAllInfo(this.getMapId(), layerPath, () => {
-      this.layerApi.mapViewer.controllers.uiController.hideTabButton('data-table');
+      this.mapViewer.controllers.uiController.hideTabButton('data-table');
     });
   }
 
@@ -116,7 +116,7 @@ export class AllFeatureInfoLayerSet extends AbstractLayerSet {
     // If valid layer path
     if (this.resultSet[layerPath]) {
       // Get the layer config and layer associated with the layer path
-      const layer = this.layerApi.getGeoviewLayerRegular(layerPath);
+      const layer = this.layerDomain.getGeoviewLayerRegular(layerPath);
 
       // Flag processing
       this.resultSet[layerPath].queryStatus = 'processing';

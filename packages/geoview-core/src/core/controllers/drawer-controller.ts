@@ -38,15 +38,12 @@ export class DrawerController extends AbstractMapViewerController {
 
     // Keep a reference on the UI domain
     this.#uiDomain = uiDomain;
-
-    // Keep the state adaptor internally
-    // TODO: STATE-ADAPTOR - TO BE IMPLEMENTED
-    // this.#drawerStateAdaptor = new DrawerStateAdaptor(mapViewer.mapId);
-    // logger.logDebug(this.#drawerStateAdaptor);
   }
 
+  // #region OVERRIDES
+
   /**
-   * Hooks keyboard handlers, language change listeners, and projection subscriptions.
+   * Hooks the controller into action.
    */
   protected override onHook(): void {
     // Setup the keyboard handlers for undo/redo
@@ -71,7 +68,7 @@ export class DrawerController extends AbstractMapViewerController {
   }
 
   /**
-   * Unhooks all event listeners and subscriptions registered in `onHook`.
+   * Unhooks the controller from the action.
    */
   protected override onUnhook(): void {
     // Unsubscribe from language changes
@@ -94,7 +91,15 @@ export class DrawerController extends AbstractMapViewerController {
     }
   }
 
-  // #region PRIVATE HANDLERS
+  // #endregion OVERRIDES
+
+  // #region PUBLIC METHODS
+
+  // #endregion PUBLIC METHODS
+
+  // #region DOMAIN HANDLERS
+  // GV Eventually, these should be moved to a store adaptor or similar construct that directly connects the domain to the store without going through the controller
+  // GV.CONT but for now this allows us to keep domain-store interactions in one place and call application-level processes as needed during migration.
 
   #handleDisplayLanguageChanged(sender: UIDomain, event: DomainLanguageChangedEvent): void {
     // Update all measurement tooltips when language changes
@@ -104,7 +109,7 @@ export class DrawerController extends AbstractMapViewerController {
     DrawerEventProcessor.setTextValue(this.getMapId(), DEFAULT_TEXT_VALUES[event.language]);
   }
 
-  // #endregion PRIVATE HANDLERS
+  // #endregion DOMAIN HANDLERS
 
   // #region STATIC METHODS
 

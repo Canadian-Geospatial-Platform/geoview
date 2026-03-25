@@ -2,6 +2,8 @@ import { createContext, useContext } from 'react';
 
 import type { ControllerRegistry } from './controller-registry';
 
+// GV This file is the equivalent of the store-manager.ts file, but for controllers.
+
 /** Create the controller context */
 export const ControllerContext = createContext<ControllerRegistry | null>(null);
 

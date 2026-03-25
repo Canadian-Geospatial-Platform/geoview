@@ -1,3 +1,5 @@
+// TODO: REFACTOR - Rename this file to layer-api and move it in /api folder instead of /core
+
 import type BaseLayer from 'ol/layer/Base';
 import type { Extent } from 'ol/extent';
 import type { GeoJSONObject } from 'ol/format/GeoJSON';
@@ -55,11 +57,10 @@ import { VectorTiles } from '@/geo/layer/geoview-layers/raster/vector-tiles';
 import { CSV } from '@/geo/layer/geoview-layers/vector/csv';
 import { WKB } from '@/geo/layer/geoview-layers/vector/wkb';
 
-import type { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
-import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
-import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
-import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
-import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
+import type { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
+import type { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
+import type { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
+import type { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
 import { formatError, NotSupportedError } from '@/core/exceptions/core-exceptions';
 import {
   LayerCreatedTwiceError,
@@ -69,11 +70,10 @@ import {
   LayerWrongTypeError,
 } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigError } from '@/core/exceptions/layer-entry-config-exceptions';
-import type { AbstractBaseGVLayer, LayerNameChangedEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import {
   type LayerOpacityChangedEvent,
   type LayerOpacityChangedDelegate,
-  type LayerNameChangedDelegate,
   type VisibleChangedEvent,
   type VisibleChangedDelegate,
 } from '@/geo/layer/gv-layers/abstract-base-layer';
@@ -123,7 +123,6 @@ import {
   setStoreLayerHoverable,
   setStoreLayerItemVisibility,
   setStoreLayerMosaicRule,
-  setStoreLayerName,
   setStoreLayerRasterFunction,
   setStoreLayersAreLoading,
   setStoreLayerWmsStyle,
@@ -135,7 +134,6 @@ import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/grou
 import type { TypeLegendItem } from '@/core/components/layers/types';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
-import { FeatureInfoEventProcessor } from '@/api/event-processors/event-processor-children/feature-info-event-processor';
 import { GeoViewError, LayerNoLastQueryToPerformError } from '@/core/exceptions/geoview-exceptions';
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
 import { ShapefileReader } from '@/api/config/reader/shapefile-reader';
@@ -195,9 +193,6 @@ export class LayerApi {
   /** Feature info layer set associated to the map */
   featureInfoLayerSet: FeatureInfoLayerSet;
 
-  /** All the layer sets */
-  #allLayerSets: AbstractLayerSet[];
-
   /** Dictionary holding all the geoview layers used for processing layer entry configs */
   #geoviewLayers: { [geoviewLayerId: string]: AbstractGeoViewLayer } = {};
 
@@ -255,9 +250,6 @@ export class LayerApi {
   /** Keep a bounded reference to the handle layer error */
   #boundedHandleLayerError: GVLayerErrorDelegate;
 
-  /** Keep a bounded reference to the handle layer name changed */
-  #boundedHandleLayerNameChanged: LayerNameChangedDelegate;
-
   /** Keep a bounded reference to the handle layer opacity changed */
   #boundedHandleLayerOpacityChanged: LayerOpacityChangedDelegate;
 
@@ -284,11 +276,13 @@ export class LayerApi {
   constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain) {
     this.mapViewer = mapViewer;
     this.#controllers = controllerRegistry;
-    this.legendsLayerSet = new LegendsLayerSet(this);
-    this.hoverFeatureInfoLayerSet = new HoverFeatureInfoLayerSet(this);
-    this.allFeatureInfoLayerSet = new AllFeatureInfoLayerSet(this);
-    this.featureInfoLayerSet = new FeatureInfoLayerSet(this);
-    this.#allLayerSets = [this.legendsLayerSet, this.hoverFeatureInfoLayerSet, this.featureInfoLayerSet, this.allFeatureInfoLayerSet];
+
+    // Keep a reference on the layer sets
+    // GV This is for legacy support, should it be removed eventually?
+    this.legendsLayerSet = controllerRegistry.layerSetController.legendsLayerSet;
+    this.hoverFeatureInfoLayerSet = controllerRegistry.layerSetController.hoverFeatureInfoLayerSet;
+    this.allFeatureInfoLayerSet = controllerRegistry.layerSetController.allFeatureInfoLayerSet;
+    this.featureInfoLayerSet = controllerRegistry.layerSetController.featureInfoLayerSet;
 
     this.geometry = new GeometryApi(this.mapViewer);
     this.featureHighlight = new FeatureHighlight(this.mapViewer);
@@ -303,7 +297,6 @@ export class LayerApi {
     this.#boundedHandleLayerLoading = this.#handleLayerLoading.bind(this);
     this.#boundedHandleLayerLoaded = this.#handleLayerLoaded.bind(this);
     this.#boundedHandleLayerError = this.#handleLayerError.bind(this);
-    this.#boundedHandleLayerNameChanged = this.#handleLayerNameChanged.bind(this);
     this.#boundedHandleLayerOpacityChanged = this.#handleLayerOpacityChanged.bind(this);
     this.#boundedHandleLayerVisibleChanged = this.#handleLayerVisibleChanged.bind(this);
     this.#boundedHandleLayerHoverableChanged = this.#handleLayerHoverableChanged.bind(this);
@@ -1149,7 +1142,7 @@ export class LayerApi {
     this.getLayerEntryLayerPaths().forEach((registeredLayerPath) => {
       if (registeredLayerPath.startsWith(`${layerPath}/`) || registeredLayerPath === layerPath) {
         // Remove feature highlight and result set for features from this layer
-        FeatureInfoEventProcessor.resetResultSet(this.getMapId(), registeredLayerPath);
+        this.#controllers.layerSetController.resetResultSet(registeredLayerPath);
       }
     });
   }
@@ -1355,8 +1348,8 @@ export class LayerApi {
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
   setLayerName(layerPath: string, name: string): void {
-    // Redirect
-    this.getGeoviewLayer(layerPath).setLayerName(name);
+    // Redirect to controller
+    this.#controllers.layerController.setLayerName(layerPath, name);
   }
 
   /**
@@ -1481,7 +1474,7 @@ export class LayerApi {
     setStoreLayerRasterFunction(this.getMapId(), layerPath, rasterFunctionId);
 
     // Trigger legend re-query through the layer set system (forced refresh)
-    this.legendsLayerSet.queryLegend(layerPath, true);
+    this.#controllers.layerSetController.legendsLayerSet.queryLegend(layer, true);
   }
 
   /**
@@ -1502,7 +1495,7 @@ export class LayerApi {
     setStoreLayerMosaicRule(this.getMapId(), layerPath, mosaicRule);
 
     // Trigger legend re-query through the layer set system
-    this.legendsLayerSet.queryLegend(layerPath, true);
+    this.#controllers.layerSetController.legendsLayerSet.queryLegend(layer, true);
   }
 
   /**
@@ -1523,7 +1516,7 @@ export class LayerApi {
     setStoreLayerWmsStyle(this.getMapId(), layerPath, wmsStyle);
 
     // Trigger legend re-query through the layer set system
-    this.legendsLayerSet.queryLegend(layerPath, true);
+    this.#controllers.layerSetController.legendsLayerSet.queryLegend(layer, true);
   }
 
   /**
@@ -1550,7 +1543,7 @@ export class LayerApi {
     await gvLayer.setGeojsonSource(geojson, this.mapViewer.getProjection());
 
     // Reset the feature info result set
-    FeatureInfoEventProcessor.resetResultSet(mapId, layerPath);
+    this.#controllers.layerSetController.resetResultSet(layerPath);
 
     // Update feature info
     DataTableEventProcessor.triggerGetAllFeatureInfo(mapId, layerPath).catch((error: unknown) => {
@@ -1709,7 +1702,7 @@ export class LayerApi {
     await this.mapViewer.waitForRender();
 
     // Redirect
-    return FeatureInfoEventProcessor.repeatLastQuery(this.getMapId());
+    return this.#controllers.layerSetController.repeatLastQuery();
   }
 
   /**
@@ -1739,25 +1732,8 @@ export class LayerApi {
    * @param layerConfig - The layer entry config to register
    */
   #registerLayerConfigInit(layerConfig: ConfigBaseClass): void {
-    // Log (keep the commented line for now)
-    // logger.logDebug('registerLayerConfigInit', layerConfig.layerPath, layerConfig.layerStatus);
-
-    // Register it
+    // Register it in the domain
     this.#layerDomain.registerLayerEntryConfig(layerConfig);
-
-    // TODO: REFACTOR - MOVE THE REST OF THIS INSIDE THE LAYER DOMAIN
-
-    // Register for ordered layer information
-    if (layerConfig.getGeoviewLayerConfig().useAsBasemap !== true) this.#registerForOrderedLayerInfo(layerConfig as TypeLayerEntryConfig);
-
-    // Tell the layer sets about it
-    this.#allLayerSets.forEach((layerSet) => {
-      // Register the config to the layer set
-      layerSet.registerLayerConfig(layerConfig);
-    });
-
-    // Set the layer status to registered
-    layerConfig.setLayerStatusRegistered();
   }
 
   /**
@@ -1797,11 +1773,8 @@ export class LayerApi {
       removeStoreSwiperLayerPath(this.getMapId(), layerConfig.layerPath);
     }
 
-    // Tell the layer sets about it
-    this.#allLayerSets.forEach((layerSet) => {
-      // Unregister from the layer set
-      layerSet.unregister(layerConfig.layerPath);
-    });
+    // Unregister from the domain
+    this.#layerDomain.unregisterLayerEntryConfig(layerConfig);
   }
 
   /**
@@ -1832,9 +1805,6 @@ export class LayerApi {
 
     // Register a hook when a layer is going into error state
     gvLayer.onLayerError(this.#boundedHandleLayerError);
-
-    // Register a hook when a layer name is changed
-    gvLayer.onLayerNameChanged(this.#boundedHandleLayerNameChanged);
 
     // Register a hook when a layer opacity is changed
     gvLayer.onLayerOpacityChanged(this.#boundedHandleLayerOpacityChanged);
@@ -1899,9 +1869,6 @@ export class LayerApi {
     // Register a hook when a layer is removed from the group layer
     groupLayer.onLayerRemoved(this.#boundedHandleLayerGroupLayerRemoved);
 
-    // Register a hook when a layer name is changed
-    groupLayer.onLayerNameChanged(this.#boundedHandleLayerNameChanged);
-
     // Register a hook when a layer opacity is changed
     groupLayer.onLayerOpacityChanged(this.#boundedHandleLayerOpacityChanged);
 
@@ -1920,9 +1887,6 @@ export class LayerApi {
 
     // Register a hook when a layer is removed from the group layer
     groupLayer.offLayerRemoved(this.#boundedHandleLayerGroupLayerRemoved);
-
-    // Register a hook when a layer name is changed
-    groupLayer.offLayerNameChanged(this.#boundedHandleLayerNameChanged);
 
     // Unregister handler on layer opacity change
     groupLayer.offLayerOpacityChanged(this.#boundedHandleLayerOpacityChanged);
@@ -2148,16 +2112,6 @@ export class LayerApi {
   }
 
   /**
-   * Handles when a layer name is changed on the map.
-   *
-   * @param layer - The layer that's become changed.
-   * @param event - The event containing the name change.
-   */
-  #handleLayerNameChanged(layer: AbstractBaseGVLayer, event: LayerNameChangedEvent): void {
-    setStoreLayerName(this.getMapId(), layer.getLayerPath(), event.layerName);
-  }
-
-  /**
    * Handles when a layer opacity is changed on the map.
    *
    * @param layer - The layer that's become changed.
@@ -2197,7 +2151,7 @@ export class LayerApi {
     // If not hoverable
     if (!event.hoverable) {
       // Clear the results when turning the hoverable to false
-      this.hoverFeatureInfoLayerSet.clearResults(layer.getLayerPath());
+      this.#controllers.layerSetController.hoverFeatureInfoLayerSet.clearResults(layer.getLayerPath());
     }
 
     // TODO: MINOR - Emit LayerHoverableToggled event here?
@@ -2446,55 +2400,6 @@ export class LayerApi {
 
       // Set the layer z indices
       MapEventProcessor.setLayerZIndices(this.getMapId());
-    }
-  }
-
-  /**
-   * Registers layer information for the ordered layer info in the store.
-   *
-   * @param layerConfig - The layer configuration to be reordered.
-   */
-  #registerForOrderedLayerInfo(layerConfig: ConfigBaseClass): void {
-    // If the map index for the given layer path hasn't been set yet
-    if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), layerConfig.layerPath) === -1) {
-      // Get the parent layer path
-      const parentLayerPathArray = layerConfig.layerPath.split('/');
-      parentLayerPathArray.pop();
-      const parentLayerPath = parentLayerPathArray.join('/');
-
-      // Get the parent layer config, if any
-      const parentLayerConfig = layerConfig.getParentLayerConfig();
-
-      // If the map index of a parent layer path has been set and it is a valid UUID, the ordered layer info is a place holder
-      // registered while the geocore layer info was fetched
-      if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), parentLayerPath) !== -1 && isValidUUID(parentLayerPath)) {
-        // Replace the placeholder ordered layer info
-        MapEventProcessor.replaceOrderedLayerInfo(this.getMapId(), layerConfig, parentLayerPath);
-      } else if (parentLayerConfig) {
-        // Here the map index of a sub layer path hasn't been set and there's a parent layer config for the current layer config
-        // Get the map index of the parent layer path
-        const parentLayerIndex = MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), parentLayerPath);
-
-        // Get the number of layers
-        const numberOfLayers = MapEventProcessor.findMapLayerAndChildrenFromOrderedInfo(this.getMapId(), parentLayerPath).length;
-
-        // If the map index of the parent has been set
-        if (parentLayerIndex !== -1) {
-          // Add the ordered layer information for the sub layer path based on the parent index + the number of child layers
-          MapEventProcessor.addOrderedLayerInfoByConfig(
-            this.getMapId(),
-            layerConfig as TypeLayerEntryConfig,
-            parentLayerIndex + numberOfLayers
-          );
-        } else {
-          // If we get here, something went wrong and we have a sub layer being registered before the parent
-          logger.logError(`Sub layer ${layerConfig.layerPath} registered in layer order before parent layer`);
-          MapEventProcessor.addOrderedLayerInfoByConfig(this.getMapId(), parentLayerConfig);
-        }
-      } else {
-        // Add the orderedLayerInfo for layer that hasn't been set and has no parent layer or geocore placeholder
-        MapEventProcessor.addOrderedLayerInfoByConfig(this.getMapId(), layerConfig as TypeLayerEntryConfig);
-      }
     }
   }
 

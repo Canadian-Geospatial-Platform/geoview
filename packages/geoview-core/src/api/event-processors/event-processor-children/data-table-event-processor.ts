@@ -42,7 +42,7 @@ export abstract class DataTableEventProcessor extends AbstractEventProcessor {
    * @returns A promise that resolves with the feature info result
    */
   static triggerGetAllFeatureInfo(mapId: string, layerPath: string): Promise<TypeFeatureInfoResult> {
-    return MapEventProcessor.getMapViewerLayerAPI(mapId).allFeatureInfoLayerSet.queryLayer(layerPath);
+    return MapEventProcessor.getMapViewer(mapId).controllers.layerSetController.allFeatureInfoLayerSet.queryLayer(layerPath);
   }
 
   /**
@@ -55,7 +55,7 @@ export abstract class DataTableEventProcessor extends AbstractEventProcessor {
    */
   static triggerResetFeatureInfo(mapId: string, layerPath: string): void {
     // Clear
-    MapEventProcessor.getMapViewerLayerAPI(mapId).allFeatureInfoLayerSet.clearLayerFeatures(layerPath);
+    MapEventProcessor.getMapViewer(mapId).controllers.layerSetController.allFeatureInfoLayerSet.clearLayerFeatures(layerPath);
 
     // Update the layer data array in the store, all the time
     setStoreSelectedLayerPath(mapId, '');

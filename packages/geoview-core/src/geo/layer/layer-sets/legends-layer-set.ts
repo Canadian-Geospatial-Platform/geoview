@@ -6,6 +6,7 @@ import type {
 } from '@/api/config/validation-classes/config-base-class';
 import { logger } from '@/core/utils/logger';
 import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
+import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import {
@@ -15,6 +16,7 @@ import {
   type TypeLegendResultSet,
   type TypeLegendResultSetEntry,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import type { LayerDomain } from '@/core/domains/layer-domain';
 import type { StyleChangedDelegate, StyleChangedEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { StyleAppliedDelegate, StyleAppliedEvent } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
@@ -23,8 +25,7 @@ import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-la
 import { GVEsriDynamic } from '@/geo/layer/gv-layers/raster/gv-esri-dynamic';
 import { GVEsriFeature } from '@/geo/layer/gv-layers/vector/gv-esri-feature';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
-import type { LayerApi } from '@/geo/layer/layer';
-import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
+import type { MapViewer } from '@/geo/map/map-viewer';
 
 /**
  * A Layer-set working with the LayerApi at handling a result set of registered layers and synchronizing
@@ -47,10 +48,11 @@ export class LegendsLayerSet extends AbstractLayerSet {
   /**
    * Constructs a Legends LayerSet to manage layers legends.
    *
-   * @param layerApi - The layer api
+   * @param mapViewer - The map viewer
+   * @param layerDomain - The layer domain
    */
-  constructor(layerApi: LayerApi) {
-    super(layerApi);
+  constructor(mapViewer: MapViewer, layerDomain: LayerDomain) {
+    super(mapViewer, layerDomain);
     this.#boundedHandleLayerStatusChanged = this.#handleLayerStatusChanged.bind(this);
     this.#boundedHandleLayerStyleChanged = this.#handleLayerStyleChanged.bind(this);
     this.#boundedHandleLayerStyleApplied = this.#handleStyleApplied.bind(this);
@@ -134,12 +136,12 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * @param layerConfig - The layer config
    * @param layerStatus - The new layer status
    */
-  protected processLayerStatusChanged(layerConfig: ConfigBaseClass, layerStatus: TypeLayerStatus): void {
+  protected processLayerStatusChanged(layer: AbstractBaseGVLayer, layerStatus: TypeLayerStatus): void {
     // Change the layer status!
-    this.resultSet[layerConfig.layerPath].layerStatus = layerStatus;
+    this.resultSet[layer.getLayerPath()].layerStatus = layerStatus;
 
     // Check if ready to query legend
-    this.#checkQueryLegend(layerConfig, false);
+    this.#checkQueryLegend(layer, false);
   }
 
   /**
@@ -170,28 +172,23 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * @param layerPath - The layer path to query the legend for
    * @param forced - Whether to force the query even if already queried
    */
-  queryLegend(layerPath: string, forced: boolean = false): void {
-    // Get the layer config
-    const layerConfig = this.layerApi.getLayerEntryConfigIfExists(layerPath);
-    if (!layerConfig) return;
-
+  queryLegend(layer: AbstractBaseGVLayer, forced: boolean = false): void {
     // Trigger the check/query process
-    this.#checkQueryLegend(layerConfig, forced);
+    this.#checkQueryLegend(layer, forced);
   }
 
   /**
    * Checks if the layer config has reached the 'processed' status or greater and if so queries the legend.
    *
-   * @param layerConfig - The layer config
+   * @param layer - The layer to check for legend
    * @param forced - Indicates if the legend query should be forced to happen (example when refreshing the legend)
    */
-  #checkQueryLegend(layerConfig: ConfigBaseClass, forced: boolean): void {
+  #checkQueryLegend(layer: AbstractBaseGVLayer, forced: boolean): void {
     // Get the layer path
-    const { layerPath } = layerConfig;
+    const layerPath = layer.getLayerPath();
 
-    // Get the layer, skip when not found
-    const layer = this.layerApi.getGeoviewLayerIfExists(layerPath);
-    if (!layer) return; // Skip when no layer found
+    // Get the layer config
+    const layerConfig = layer.getLayerConfig();
 
     // If the layer legend should be queried (and not already querying).
     // GV Gotta make sure that we're not already querying, because EsriImage layers, for example, adjust the
@@ -219,7 +216,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
           // If legend received
           if (legend) {
             // Check for possible number of icons and set icon cache size
-            this.layerApi.mapViewer.updateIconImageCache(legend);
+            this.mapViewer.updateIconImageCache(legend);
 
             // Flag
             this.resultSet[layerPath].legendQueryStatus = 'queried';
@@ -305,8 +302,12 @@ export class LegendsLayerSet extends AbstractLayerSet {
    */
   #handleLayerStatusChanged(layerConfig: ConfigBaseClass, layerStatusEvent: LayerStatusChangedEvent): void {
     try {
-      // Call the overridable function to process a layer status is changing
-      this.processLayerStatusChanged(layerConfig, layerStatusEvent.layerStatus);
+      // Check if the geoview layer exists
+      const layer = this.layerDomain.getGeoviewLayerIfExists(layerConfig.layerPath);
+      if (!layer) return; // Skip
+
+      // Process a layer status changed
+      this.processLayerStatusChanged(layer, layerStatusEvent.layerStatus);
 
       // If still existing (it's possible a layer set might want to unregister a layer config depending on its status, so we check)
       if (this.resultSet[layerConfig.layerPath]) {
@@ -331,7 +332,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   #handleLayerStyleChanged(layer: AbstractGVLayer, event: StyleChangedEvent): void {
     // Force query the legend as we have a new style
-    this.#checkQueryLegend(layer.getLayerConfig(), true);
+    this.#checkQueryLegend(layer, true);
   }
 
   /**
@@ -344,7 +345,7 @@ export class LegendsLayerSet extends AbstractLayerSet {
     // If the style has been applied
     if (event.styleApplied) {
       // Force query the legend as we have a new style
-      this.#checkQueryLegend(layer.getLayerConfig(), true);
+      this.#checkQueryLegend(layer, true);
     }
   }
 }

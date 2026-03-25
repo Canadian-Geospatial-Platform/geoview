@@ -2,6 +2,7 @@ import type { UIDomain } from '@/core/domains/ui-domain';
 import type { LayerDomain } from '@/core/domains/layer-domain';
 import { UIController } from './ui-controller';
 import { LayerController } from './layer-controller';
+import { LayerSetController } from './layer-set-controller';
 import { DrawerController } from './drawer-controller';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { getGeoViewStore, hasDrawerPlugin } from '../stores/stores-managers';
@@ -21,6 +22,9 @@ export class ControllerRegistry {
   /** The layer controller used to interact with map layers. */
   readonly layerController: LayerController;
 
+  /** The layer set controller used to manage the layer sets */
+  readonly layerSetController: LayerSetController;
+
   /** The drawer controller used to interact with the drawer. Only present when the drawer plugin is configured. */
   readonly drawerController?: DrawerController;
 
@@ -39,6 +43,7 @@ export class ControllerRegistry {
   constructor(mapViewer: MapViewer, uiDomain: UIDomain, layerDomain: LayerDomain) {
     this.uiController = new UIController(mapViewer, uiDomain);
     this.layerController = new LayerController(mapViewer, layerDomain);
+    this.layerSetController = new LayerSetController(mapViewer, layerDomain);
 
     // If the drawer plugin is preset (we know via the store)
     if (hasDrawerPlugin(getGeoViewStore(mapViewer.mapId))) {
@@ -47,7 +52,7 @@ export class ControllerRegistry {
     }
 
     // Add all controllers to the registry
-    this.allControllers.push(this.uiController, this.layerController);
+    this.allControllers.push(this.uiController, this.layerController, this.layerSetController);
     if (this.drawerController) this.allControllers.push(this.drawerController);
   }
 

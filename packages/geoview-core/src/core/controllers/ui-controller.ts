@@ -2,7 +2,6 @@ import { type TypeDisplayLanguage, type TypeDisplayTheme } from '@/api/types/map
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { useControllers } from '@/core/controllers/controller-manager';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
-import { UIStateAdaptor } from '@/core/adaptors/ui-state-adaptor';
 import {
   disableStoreFocusTrap,
   enableStoreFocusTrap,
@@ -25,6 +24,7 @@ import {
   setStoreCircularProgress,
   setStoreCrosshairActive,
   setStoreDisplayDateTimezone,
+  setStoreDisplayLanguage,
   setStoreDisplayTheme,
   setStoreFullScreenActive,
   setStoreGuide,
@@ -35,7 +35,7 @@ import { formatError } from '@/core/exceptions/core-exceptions';
 import { createGuideObject, exitFullscreen, requestFullscreen } from '@/core/utils/utilities';
 import type { SnackbarType } from '@/core/utils/notifications';
 import type { NotificationDetailsType } from '@/core/components/notifications/notifications';
-import type { UIDomain } from '@/core/domains/ui-domain';
+import type { DomainLanguageChangedDelegate, DomainLanguageChangedEvent, UIDomain } from '@/core/domains/ui-domain';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { logger } from '@/core/utils/logger';
 
@@ -48,8 +48,8 @@ export class UIController extends AbstractMapViewerController {
   /** The UI Domain instance associated with this controller */
   #uiDomain: UIDomain;
 
-  /** The UI State Adaptor used to interact with the UI state store */
-  #uiStateAdaptor: UIStateAdaptor;
+  /** The bounded reference to the handle display language changed */
+  #boundedHandleDisplayLanguageChanged: DomainLanguageChangedDelegate;
 
   /**
    * Creates an instance of UIController.
@@ -63,12 +63,31 @@ export class UIController extends AbstractMapViewerController {
     // Keep the domain internally
     this.#uiDomain = uiDomain;
 
-    // Keep the state adaptor internally
-    this.#uiStateAdaptor = new UIStateAdaptor(uiDomain, mapViewer.mapId);
-
-    // Dummy log to get rid of an Eslint error about not using the uiStateAdaptor..
-    logger.logTraceDetailed(this.#uiStateAdaptor);
+    // Keep a bounded reference to the handle display language changed
+    this.#boundedHandleDisplayLanguageChanged = this.#handleDisplayLanguageChanged.bind(this);
   }
+
+  // #region OVERRIDES
+
+  /**
+   * Hooks the controller into action.
+   */
+  protected override onHook(): void {
+    // Listens when the language is changed in the UI domain and updates the store accordingly
+    this.#uiDomain.onLanguageChanged(this.#boundedHandleDisplayLanguageChanged);
+  }
+
+  /**
+   * Unhooks the controller from the action.
+   */
+  protected override onUnhook(): void {
+    // Unhooks when the language is changed in the UI domain and updates the store accordingly
+    this.#uiDomain.offLanguageChanged(this.#boundedHandleDisplayLanguageChanged);
+  }
+
+  // #endregion OVERRIDES
+
+  // #region PUBLIC METHODS
 
   /**
    * Gets the current display language.
@@ -394,6 +413,21 @@ export class UIController extends AbstractMapViewerController {
       logger.logError(mapId, error, 'createGuide');
     }
   }
+
+  // #endregion PUBLIC METHODS
+
+  // #region DOMAIN HANDLERS
+  // GV Eventually, these should be moved to a store adaptor or similar construct that directly connects the domain to the store without going through the controller
+  // GV.CONT but for now this allows us to keep domain-store interactions in one place and call application-level processes as needed during migration.
+
+  /**
+   * TODO: JSDOC THIS
+   */
+  #handleDisplayLanguageChanged(sender: UIDomain, event: DomainLanguageChangedEvent): void {
+    setStoreDisplayLanguage(this.getMapId(), event.language);
+  }
+
+  // #endregion DOMAIN HANDLERS
 }
 
 /**

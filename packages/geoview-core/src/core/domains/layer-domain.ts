@@ -11,7 +11,7 @@ import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { whenThisThen } from '@/core/utils/utilities';
 import { LayerConfigNotFoundError } from '@/core/exceptions/geoview-exceptions';
 import { LayerWrongTypeError, LayerNotFoundError } from '@/core/exceptions/layer-exceptions';
-import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { AbstractBaseGVLayer, LayerNameChangedDelegate, LayerNameChangedEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import type { LayerQueryableChangedDelegate, LayerQueryableChangedEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -30,11 +30,23 @@ export class LayerDomain {
   /** Keep a bounded reference to the handle layer status changed */
   #boundedHandleLayerStatusChanged: LayerStatusChangedDelegate;
 
+  /** Keep a bounded reference to the handle layer status changed */
+  #boundedHandleLayerNameChanged: LayerNameChangedDelegate;
+
   /** Keep a bounded reference to the handle layer queryable changed */
   #boundedHandleLayerQueryableChanged: LayerQueryableChangedDelegate;
 
   /** Keep all callback delegate references */
+  #onLayerEntryConfigRegisteredHandlers: DomainLayerStatusChangedDelegate[] = [];
+
+  /** Keep all callback delegate references */
+  #onLayerEntryConfigUnregisteredHandlers: DomainLayerStatusChangedDelegate[] = [];
+
+  /** Keep all callback delegate references */
   #onLayerStatusChangedHandlers: DomainLayerStatusChangedDelegate[] = [];
+
+  /** Keep all callback delegate references */
+  #onLayerNameChangedHandlers: DomainLayerNameChangedDelegate[] = [];
 
   /** Keep all callback delegate references */
   #onLayerQueryableChangedHandlers: DomainLayerQueryableChangedDelegate[] = [];
@@ -45,6 +57,7 @@ export class LayerDomain {
   constructor() {
     // Keep bounded references to the handles
     this.#boundedHandleLayerStatusChanged = this.#handleLayerStatusChanged.bind(this);
+    this.#boundedHandleLayerNameChanged = this.#handleLayerNameChanged.bind(this);
     this.#boundedHandleLayerQueryableChanged = this.#handleLayerQueryableChanged.bind(this);
   }
 
@@ -307,6 +320,19 @@ export class LayerDomain {
 
     // Register a handler when the config layer status changes (this allows catching the status >= registered, all the way to loaded/error)
     layerConfig.onLayerStatusChanged(this.#boundedHandleLayerStatusChanged);
+
+    // Emit about it
+    this.#emitLayerEntryConfigRegistered({ config: layerConfig, status: layerConfig.layerStatus });
+  }
+
+  /**
+   * TODO: JSDOC THIS
+   *
+   * @param layerConfig
+   */
+  unregisterLayerEntryConfig(layerConfig: ConfigBaseClass): void {
+    // Emit about it
+    this.#emitLayerEntryConfigUnregistered({ config: layerConfig, status: layerConfig.layerStatus });
   }
 
   /**
@@ -338,6 +364,9 @@ export class LayerDomain {
     this.#gvLayers[gvLayer.getLayerPath()] = gvLayer;
     this.#olLayers[gvLayer.getLayerPath()] = gvLayer.getOLLayer();
 
+    // Register a hook when a layer name is changed
+    gvLayer.onLayerNameChanged(this.#boundedHandleLayerNameChanged);
+
     // If registering a regular layer
     if (gvLayer instanceof AbstractGVLayer) {
       // Register a hook when a layer queryable is changed
@@ -357,6 +386,9 @@ export class LayerDomain {
   deleteGVLayer(layerPath: string): void {
     // Get the layer to delete
     const gvLayer = this.getGeoviewLayer(layerPath);
+
+    // Unregister handler on layer name changed
+    gvLayer.offLayerNameChanged(this.#boundedHandleLayerNameChanged);
 
     // If deleting a regular layer
     if (gvLayer instanceof AbstractGVLayer) {
@@ -385,6 +417,17 @@ export class LayerDomain {
   }
 
   /**
+   * TODO JSDOC THIS
+   *
+   * @param layer
+   * @param event
+   */
+  #handleLayerNameChanged(layer: AbstractBaseGVLayer, event: LayerNameChangedEvent): void {
+    // Emit about it
+    this.#emitLayerNameChanged({ layer, name: event.layerName });
+  }
+
+  /**
    * Handles layer queryable state changes from registered layers.
    *
    * Internal callback that is invoked when a layer's queryable state changes.
@@ -401,6 +444,66 @@ export class LayerDomain {
   // #endregion PRIVATE HANDLERS
 
   // #region EVENTS
+
+  /**
+   * Emits layer entry config registered event.
+   *
+   * @param event - The event to emit
+   */
+  #emitLayerEntryConfigRegistered(event: DomainLayerStatusChangedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerEntryConfigRegisteredHandlers, event);
+  }
+
+  /**
+   * Registers a layer entry config registered handler.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerEntryConfigRegistered(callback: DomainLayerStatusChangedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerEntryConfigRegisteredHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer entry config registered handler.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerEntryConfigRegistered(callback: DomainLayerStatusChangedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerEntryConfigRegisteredHandlers, callback);
+  }
+
+  /**
+   * Emits layer entry config unregistered event.
+   *
+   * @param event - The event to emit
+   */
+  #emitLayerEntryConfigUnregistered(event: DomainLayerStatusChangedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerEntryConfigUnregisteredHandlers, event);
+  }
+
+  /**
+   * Registers a layer entry config unregistered handler.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerEntryConfigUnregistered(callback: DomainLayerStatusChangedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerEntryConfigUnregisteredHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer entry config unregistered handler.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerEntryConfigUnregistered(callback: DomainLayerStatusChangedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerEntryConfigUnregisteredHandlers, callback);
+  }
 
   /**
    * Emits layer status changed event.
@@ -430,6 +533,36 @@ export class LayerDomain {
   offLayerStatusChanged(callback: DomainLayerStatusChangedDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerStatusChangedHandlers, callback);
+  }
+
+  /**
+   * Emits layer name changed event.
+   *
+   * @param event - The event to emit
+   */
+  #emitLayerNameChanged(event: DomainLayerNameChangedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerNameChangedHandlers, event);
+  }
+
+  /**
+   * Registers a layer name changed event handler.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerNameChanged(callback: DomainLayerNameChangedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerNameChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer name changed event handler.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerNameChanged(callback: DomainLayerNameChangedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerNameChangedHandlers, callback);
   }
 
   /**
@@ -484,8 +617,21 @@ export type DomainLayerStatusChangedDelegate = EventDelegateBase<LayerDomain, Do
 /**
  * Define an event for the delegate
  */
+export type DomainLayerNameChangedEvent = {
+  // The layer entry config changing its name
+  layer: AbstractBaseGVLayer;
+
+  // The new layer name
+  name: string | undefined;
+};
+
+export type DomainLayerNameChangedDelegate = EventDelegateBase<LayerDomain, DomainLayerNameChangedEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
 export type DomainLayerQueryableChangedEvent = {
-  // The layer entry config changing its layer status
+  // The layer changing its queryable status
   layer: AbstractBaseGVLayer;
 
   // The new queryable status
