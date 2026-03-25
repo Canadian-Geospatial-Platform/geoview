@@ -15,7 +15,7 @@ export class UIDomain {
   #displayLanguage: TypeDisplayLanguage = 'en';
 
   /** Callback delegates for the language changed event */
-  #onLanguageChangedHandlers: LanguageChangedDelegate[] = [];
+  #onLanguageChangedHandlers: DomainLanguageChangedDelegate[] = [];
 
   /**
    * Constructor for the UIDomain class.
@@ -77,7 +77,7 @@ export class UIDomain {
    *
    * @param event - The event to emit
    */
-  #emitLanguageChanged(event: LanguageChangedEvent): void {
+  #emitLanguageChanged(event: DomainLanguageChangedEvent): void {
     // Emit the event for all handlers
     EventHelper.emitEvent(this, this.#onLanguageChangedHandlers, event);
   }
@@ -87,7 +87,7 @@ export class UIDomain {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onLanguageChanged(callback: LanguageChangedDelegate): LanguageChangedDelegate {
+  onLanguageChanged(callback: DomainLanguageChangedDelegate): DomainLanguageChangedDelegate {
     // Register the event handler
     return EventHelper.onEvent(this.#onLanguageChangedHandlers, callback);
   }
@@ -97,17 +97,17 @@ export class UIDomain {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offLanguageChanged(callback: LanguageChangedDelegate): void {
+  offLanguageChanged(callback: DomainLanguageChangedDelegate): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLanguageChangedHandlers, callback);
   }
 }
 
 /** Event payload emitted when the display language changes */
-export type LanguageChangedEvent = {
+export type DomainLanguageChangedEvent = {
   /** The new display language */
   language: TypeDisplayLanguage;
 };
 
 /** Delegate type for language changed event handlers */
-export type LanguageChangedDelegate = EventDelegateBase<UIDomain, LanguageChangedEvent, void>;
+export type DomainLanguageChangedDelegate = EventDelegateBase<UIDomain, DomainLanguageChangedEvent, void>;

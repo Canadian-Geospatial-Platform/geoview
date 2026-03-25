@@ -1,16 +1,40 @@
 import { type TypeDisplayLanguage, type TypeDisplayTheme } from '@/api/types/map-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { useControllers } from '@/core/controllers/controller-manager';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import { UIStateAdaptor } from '@/core/adaptors/ui-state-adaptor';
-import { type ActiveAppBarTabType, type FocusItemProps } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useControllers } from '@/core/controllers/controller-manager';
+import {
+  disableStoreFocusTrap,
+  enableStoreFocusTrap,
+  getStoreActiveAppBarTab,
+  hideStoreTabButton,
+  setStoreActiveAppBarTab,
+  setStoreActiveFooterBarTab,
+  setStoreActiveTrapGeoView,
+  setStoreFooterBarIsOpen,
+  setStoreFooterPanelResizeValue,
+  showStoreTabButton,
+  type ActiveAppBarTabType,
+  type FocusItemProps,
+} from '@/core/stores/store-interface-and-intial-values/ui-state';
+import {
+  addStoreNotification,
+  getStoreGeoviewAssetsURL,
+  removeStoreAllNotifications,
+  removeStoreNotification,
+  setStoreCircularProgress,
+  setStoreCrosshairActive,
+  setStoreDisplayDateTimezone,
+  setStoreDisplayTheme,
+  setStoreFullScreenActive,
+  setStoreGuide,
+} from '@/core/stores/store-interface-and-intial-values/app-state';
 import { DateMgt, type TimeIANA } from '@/core/utils/date-mgt';
 import type { TypeHTMLElement } from '@/core/types/global-types';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { createGuideObject, exitFullscreen, requestFullscreen } from '@/core/utils/utilities';
 import type { SnackbarType } from '@/core/utils/notifications';
 import type { NotificationDetailsType } from '@/core/components/notifications/notifications';
-import { getStoreGeoviewAssetsURL } from '@/core/stores/store-interface-and-intial-values/app-state';
 import type { UIDomain } from '@/core/domains/ui-domain';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { logger } from '@/core/utils/logger';
@@ -41,6 +65,18 @@ export class UIController extends AbstractMapViewerController {
 
     // Keep the state adaptor internally
     this.#uiStateAdaptor = new UIStateAdaptor(uiDomain, mapViewer.mapId);
+
+    // Dummy log to get rid of an Eslint error about not using the uiStateAdaptor..
+    logger.logTraceDetailed(this.#uiStateAdaptor);
+  }
+
+  /**
+   * Gets the current display language.
+   *
+   * @returns The current display language
+   */
+  getDisplayLanguage(): TypeDisplayLanguage {
+    return this.#uiDomain.getLanguage();
   }
 
   /**
@@ -50,7 +86,7 @@ export class UIController extends AbstractMapViewerController {
    */
   showTabButton(tab: string): void {
     // Save in store
-    this.#uiStateAdaptor.showTabButton(tab);
+    showStoreTabButton(this.getMapId(), tab);
   }
 
   /**
@@ -60,7 +96,7 @@ export class UIController extends AbstractMapViewerController {
    */
   hideTabButton(tab: string): void {
     // Save in store
-    this.#uiStateAdaptor.hideTabButton(tab);
+    hideStoreTabButton(this.getMapId(), tab);
   }
 
   /**
@@ -70,7 +106,7 @@ export class UIController extends AbstractMapViewerController {
    */
   setActiveFooterBarTab(tab: string | undefined): void {
     // Save in store
-    this.#uiStateAdaptor.setActiveFooterBarTab(tab);
+    setStoreActiveFooterBarTab(this.getMapId(), tab);
   }
 
   /**
@@ -79,7 +115,7 @@ export class UIController extends AbstractMapViewerController {
    * @returns The active app bar tab info.
    */
   getActiveAppBarTab(): ActiveAppBarTabType {
-    return this.#uiStateAdaptor.getActiveAppBarTab();
+    return getStoreActiveAppBarTab(this.getMapId());
   }
 
   /**
@@ -91,7 +127,7 @@ export class UIController extends AbstractMapViewerController {
    */
   setActiveAppBarTab(tab: string | undefined, isOpen: boolean, isFocusTrapped: boolean): void {
     // Save in store
-    this.#uiStateAdaptor.setActiveAppBarTab(tab, isOpen, isFocusTrapped);
+    setStoreActiveAppBarTab(this.getMapId(), tab, isOpen, isFocusTrapped);
   }
 
   /**
@@ -101,7 +137,7 @@ export class UIController extends AbstractMapViewerController {
    */
   setFooterBarIsOpen(isOpen: boolean): void {
     // Save in store
-    this.#uiStateAdaptor.setFooterBarIsOpen(isOpen);
+    setStoreFooterBarIsOpen(this.getMapId(), isOpen);
   }
 
   /**
@@ -111,7 +147,7 @@ export class UIController extends AbstractMapViewerController {
    */
   enableFocusTrap(uiFocus: FocusItemProps): void {
     // Save in store
-    this.#uiStateAdaptor.enableFocusTrap(uiFocus);
+    enableStoreFocusTrap(this.getMapId(), uiFocus);
   }
 
   /**
@@ -121,7 +157,7 @@ export class UIController extends AbstractMapViewerController {
    */
   disableFocusTrap(callbackElementId?: string): void {
     // Save in store
-    this.#uiStateAdaptor.disableFocusTrap(callbackElementId);
+    disableStoreFocusTrap(this.getMapId(), callbackElementId);
   }
 
   /**
@@ -131,7 +167,7 @@ export class UIController extends AbstractMapViewerController {
    */
   setActiveTrapGeoView(active: boolean): void {
     // Save in store
-    this.#uiStateAdaptor.setActiveTrapGeoView(active);
+    setStoreActiveTrapGeoView(this.getMapId(), active);
   }
 
   /**
@@ -141,7 +177,7 @@ export class UIController extends AbstractMapViewerController {
    */
   setFooterPanelResizeValue(value: number): void {
     // Save in store
-    this.#uiStateAdaptor.setFooterPanelResizeValue(value);
+    setStoreFooterPanelResizeValue(this.getMapId(), value);
   }
 
   /**
@@ -151,16 +187,7 @@ export class UIController extends AbstractMapViewerController {
    */
   setCircularProgress(active: boolean): void {
     // Save in store
-    this.#uiStateAdaptor.setCircularProgress(active);
-  }
-
-  /**
-   * Gets the current display language.
-   *
-   * @returns The current display language
-   */
-  getDisplayLanguage(): TypeDisplayLanguage {
-    return this.#uiDomain.getLanguage();
+    setStoreCircularProgress(this.getMapId(), active);
   }
 
   /**
@@ -188,7 +215,7 @@ export class UIController extends AbstractMapViewerController {
       const promiseSetGuide = this.createGuide();
 
       // Remove all previous notifications to ensure there is no mix en and fr
-      this.#uiStateAdaptor.removeAllNotifications();
+      removeStoreAllNotifications(mapId);
 
       // When all promises are done
       Promise.all([promiseChangeLanguage, promiseResetBasemap, promiseSetGuide])
@@ -210,7 +237,7 @@ export class UIController extends AbstractMapViewerController {
    */
   setDisplayTheme(theme: TypeDisplayTheme): void {
     // Save in store
-    this.#uiStateAdaptor.setDisplayTheme(theme);
+    setStoreDisplayTheme(this.getMapId(), theme);
   }
 
   /**
@@ -223,7 +250,7 @@ export class UIController extends AbstractMapViewerController {
     DateMgt.validateTimezone(displayDateTimezone);
 
     // Save in store
-    this.#uiStateAdaptor.setDisplayDateTimezone(displayDateTimezone);
+    setStoreDisplayDateTimezone(this.getMapId(), displayDateTimezone);
   }
 
   /**
@@ -233,7 +260,7 @@ export class UIController extends AbstractMapViewerController {
    */
   setCrosshairActive(active: boolean): void {
     // Save in store
-    this.#uiStateAdaptor.setCrosshairActive(active);
+    setStoreCrosshairActive(this.getMapId(), active);
 
     // Because the map is focused/blured, we need to enable/disable the map interaction for WCAG
     MapEventProcessor.setActiveMapInteractionWCAG(this.getMapId(), active);
@@ -279,7 +306,7 @@ export class UIController extends AbstractMapViewerController {
     }
 
     // Save in store
-    this.#uiStateAdaptor.setFullScreen(status);
+    setStoreFullScreenActive(this.getMapId(), status);
   }
 
   /**
@@ -316,9 +343,9 @@ export class UIController extends AbstractMapViewerController {
    */
   addNotification(notification: NotificationDetailsType): void {
     // Save in store
-    this.#uiStateAdaptor.addNotification(notification).catch((error: unknown) => {
+    addStoreNotification(this.getMapId(), notification).catch((error: unknown) => {
       // Log
-      logger.logPromiseFailed('uiController.addNotification in appState', error);
+      logger.logPromiseFailed('uiController.addNotification in uiController', error);
     });
   }
 
@@ -329,13 +356,16 @@ export class UIController extends AbstractMapViewerController {
    */
   removeNotification(key: string): void {
     // Save in store
-    this.#uiStateAdaptor.removeNotification(key);
+    removeStoreNotification(this.getMapId(), key).catch((error: unknown) => {
+      // Log
+      logger.logPromiseFailed('uiController.removeNotification in uiController', error);
+    });
   }
 
   /** Removes all notifications from the notification center. */
   removeAllNotifications(): void {
     // Save in store
-    this.#uiStateAdaptor.removeAllNotifications();
+    removeStoreAllNotifications(this.getMapId());
   }
 
   /**
@@ -355,7 +385,7 @@ export class UIController extends AbstractMapViewerController {
       const guide = await createGuideObject(language, getStoreGeoviewAssetsURL(mapId));
 
       // Save in store
-      this.#uiStateAdaptor.setGuide(guide);
+      setStoreGuide(mapId, guide);
 
       // Check guide loading tracker
       logger.logMarkerCheck('map-guide', 'for guide to be loaded');

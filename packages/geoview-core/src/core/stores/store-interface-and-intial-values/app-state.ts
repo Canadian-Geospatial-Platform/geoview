@@ -3,7 +3,7 @@ import { useStore } from 'zustand';
 import type { DisplayDateMode, TypeDisplayLanguage, TypeDisplayTheme } from '@/api/types/map-schema-types';
 import { VALID_DISPLAY_LANGUAGE } from '@/api/types/map-schema-types';
 import type { TypeInitialGeoviewLayerType } from '@/api/types/layer-schema-types';
-import { getGeoViewStore, useGeoViewStore } from '@/core/stores/stores-managers';
+import { getGeoViewStore, getGeoViewStoreAsync, useGeoViewStore } from '@/core/stores/stores-managers';
 import type { TypeSetStore, TypeGetStore } from '@/core/stores/geoview-store';
 import type { NotificationDetailsType } from '@/core/components/notifications/notifications';
 import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
@@ -540,6 +540,143 @@ export const getStoreShowLayerHighlightLayerBbox = (mapId: string): boolean => g
 export const getStoreShowUnsymbolizedFeatures = (mapId: string): boolean => getStoreAppState(mapId).showUnsymbolizedFeatures;
 
 // #endregion STATE SELECTORS
+// GV These methods should be called from a State Adaptor class listening on domain events triggered by controllers.
+
+// #region STATE ADAPTORS
+
+/**
+ * Sets the circular progress indicator active state.
+ *
+ * @param mapId - The map identifier
+ * @param active - Whether the circular progress is active
+ */
+export const setStoreCircularProgress = (mapId: string, active: boolean): void => {
+  getStoreAppState(mapId).actions.setCircularProgress(active);
+};
+
+/**
+ * Sets the display language for the viewer.
+ *
+ * @param mapId - The map identifier
+ * @param lang - The language code (e.g. 'en' or 'fr')
+ */
+export const setStoreDisplayLanguage = (mapId: string, lang: TypeDisplayLanguage): void => {
+  getStoreAppState(mapId).actions.setDisplayLanguage(lang);
+};
+
+/**
+ * Sets the display theme for the viewer.
+ *
+ * @param mapId - The map identifier
+ * @param theme - The theme identifier
+ */
+export const setStoreDisplayTheme = (mapId: string, theme: TypeDisplayTheme): void => {
+  getStoreAppState(mapId).actions.setDisplayTheme(theme);
+};
+
+/**
+ * Sets the timezone for date display.
+ *
+ * @param mapId - The map identifier
+ * @param displayDateTimezone - The IANA timezone identifier
+ */
+export const setStoreDisplayDateTimezone = (mapId: string, displayDateTimezone: TimeIANA): void => {
+  getStoreAppState(mapId).actions.setDisplayDateTimezone(displayDateTimezone);
+};
+
+/**
+ * Sets the crosshair overlay active state.
+ *
+ * @param mapId - The map identifier
+ * @param active - Whether the crosshairs are active
+ */
+export const setStoreCrosshairActive = (mapId: string, active: boolean): void => {
+  getStoreAppState(mapId).actions.setCrosshairActive(active);
+};
+
+/**
+ * Sets the fullscreen mode active state.
+ *
+ * @param mapId - The map identifier
+ * @param active - Whether fullscreen mode is active
+ */
+export const setStoreFullScreenActive = (mapId: string, active: boolean): void => {
+  getStoreAppState(mapId).actions.setFullScreenActive(active);
+};
+
+/**
+ * Adds a notification to the store or increments the count if it already exists.
+ *
+ * Uses async store retrieval because notifications may be called before the map is created.
+ *
+ * @param mapId - The map identifier
+ * @param notification - The notification details to add
+ * @returns A promise that resolves when the notification has been added
+ */
+export const addStoreNotification = async (mapId: string, notification: NotificationDetailsType): Promise<void> => {
+  // Because notification is called before map is created, we use the async
+  // version of getAppStateAsync
+  const appState = await getGeoViewStoreAsync(mapId).then((store) => store.getState().appState);
+  const curNotifications = appState.notifications;
+
+  // if the notification already exist, we increment the count
+  const existingNotif = curNotifications.find(
+    (item) => item.message === notification.message && item.notificationType === notification.notificationType
+  );
+
+  if (!existingNotif) {
+    curNotifications.push({
+      key: notification.key,
+      notificationType: notification.notificationType,
+      message: notification.message,
+      count: 1,
+    });
+  } else {
+    existingNotif.count += 1;
+  }
+
+  appState.actions.setNotifications(curNotifications);
+};
+
+/**
+ * Removes a notification from the store by key.
+ *
+ * Uses async store retrieval because notifications may be called before the map is created.
+ *
+ * @param mapId - The map identifier
+ * @param key - The unique key of the notification to remove
+ * @returns A promise that resolves when the notification has been removed
+ */
+export const removeStoreNotification = async (mapId: string, key: string): Promise<void> => {
+  // Because notification is called before map is created, we use the async
+  // version of getAppStateAsync
+  const appState = await getGeoViewStoreAsync(mapId).then((store) => store.getState().appState);
+
+  // Filter out notification
+  const notifications = appState.notifications.filter((item: NotificationDetailsType) => item.key !== key);
+  appState.actions.setNotifications(notifications);
+};
+
+/**
+ * Removes all notifications from the store.
+ *
+ * @param mapId - The map identifier
+ */
+export const removeStoreAllNotifications = (mapId: string): void => {
+  getStoreAppState(mapId).actions.setNotifications([]);
+};
+
+/**
+ * Sets the guide content object to be rendered in the guide panel.
+ *
+ * @param mapId - The map identifier
+ * @param guide - The guide object to display
+ */
+export const setStoreGuide = (mapId: string, guide: TypeGuideObject): void => {
+  getStoreAppState(mapId).actions.setGuide(guide);
+};
+
+// #endregion STATE ADAPTORS
 
 /**
  * Represents a hierarchical guide content structure.

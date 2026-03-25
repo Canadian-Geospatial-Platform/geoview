@@ -126,7 +126,7 @@ export const getStoreSwiperLayerPaths = (mapId: string): string[] => {
 // #endregion STATE SELECTORS
 
 // #region STATE ADAPTORS
-// GV These methods should be inside a State Adaptor class listening on domain events triggered by controllers.
+// GV These methods should be called from a State Adaptor class listening on domain events triggered by controllers.
 
 /**
  * Sets the swiper layer paths in the store.

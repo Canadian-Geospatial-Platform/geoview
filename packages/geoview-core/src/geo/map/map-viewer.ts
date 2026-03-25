@@ -301,6 +301,9 @@ export class MapViewer {
     // Initialize layer api
     this.layer = new LayerApi(this, this.controllers, this.#layerDomain);
 
+    // TODO: ALEX - Remove this temporary call
+    this.controllers.layerController.temporaryHookFeatureInfoLayerSet(this.layer.featureInfoLayerSet);
+
     // Register handler when basemap has error
     this.basemap.onBasemapError((sender, event) => {
       // Show the error

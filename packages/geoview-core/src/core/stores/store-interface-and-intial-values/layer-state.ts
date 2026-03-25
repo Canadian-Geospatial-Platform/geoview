@@ -852,7 +852,7 @@ export const getStoreLayerRasterFunction = (mapId: string, layerPath: string): s
 // #endregion STATE SELECTORS
 
 // #region STATE ADAPTORS
-// GV These methods should be inside a State Adaptor class listening on domain events triggered by controllers.
+// GV These methods should be called from a State Adaptor class listening on domain events triggered by controllers.
 
 /**
  * Sets the layers panel display state in the store.

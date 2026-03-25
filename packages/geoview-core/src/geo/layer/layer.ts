@@ -83,8 +83,6 @@ import type {
   LayerErrorDelegate as GVLayerErrorDelegate,
   LayerMessageDelegate,
   LayerMessageEvent,
-  LayerQueryableChangedEvent,
-  LayerQueryableChangedDelegate,
   LayerHoverableChangedDelegate,
   LayerHoverableChangedEvent,
 } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -126,7 +124,6 @@ import {
   setStoreLayerItemVisibility,
   setStoreLayerMosaicRule,
   setStoreLayerName,
-  setStoreLayerQueryable,
   setStoreLayerRasterFunction,
   setStoreLayersAreLoading,
   setStoreLayerWmsStyle,
@@ -159,7 +156,7 @@ import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-v
 import { OgcWmtsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
 import { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
-import type { ConfigLayerStatusChangedDelegate, ConfigLayerStatusChangedEvent, LayerDomain } from '@/core/domains/layer-domain';
+import type { DomainLayerStatusChangedDelegate, DomainLayerStatusChangedEvent, LayerDomain } from '@/core/domains/layer-domain';
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
@@ -235,7 +232,7 @@ export class LayerApi {
   #onLayerAllLoadedHandlers: LayerConfigDelegate[] = [];
 
   /** Callback delegates for the layer status changed event */
-  #onLayerStatusChangedHandlers: ConfigLayerStatusChangedDelegate[] = [];
+  #onLayerStatusChangedHandlers: DomainLayerStatusChangedDelegate[] = [];
 
   /** Callback delegates for the layer visibility toggled event */
   #onLayerVisibilityToggledHandlers: LayerVisibilityToggledDelegate[] = [];
@@ -266,9 +263,6 @@ export class LayerApi {
 
   /** Keep a bounded reference to the handle layer visible changed */
   #boundedHandleLayerVisibleChanged: VisibleChangedDelegate;
-
-  /** Keep a bounded reference to the handle layer queryable changed */
-  #boundedHandleLayerQueryableChanged: LayerQueryableChangedDelegate;
 
   /** Keep a bounded reference to the handle layer hoverable changed */
   #boundedHandleLayerHoverableChanged: LayerHoverableChangedDelegate;
@@ -312,7 +306,6 @@ export class LayerApi {
     this.#boundedHandleLayerNameChanged = this.#handleLayerNameChanged.bind(this);
     this.#boundedHandleLayerOpacityChanged = this.#handleLayerOpacityChanged.bind(this);
     this.#boundedHandleLayerVisibleChanged = this.#handleLayerVisibleChanged.bind(this);
-    this.#boundedHandleLayerQueryableChanged = this.#handleLayerQueryableChanged.bind(this);
     this.#boundedHandleLayerHoverableChanged = this.#handleLayerHoverableChanged.bind(this);
     this.#boundedHandleLayerWMSImageLoadRescue = this.#handleLayerWMSImageLoadRescue.bind(this);
     this.#boundedHandleLayerGroupLayerAdded = this.#handleLayerGroupLayerAdded.bind(this);
@@ -1388,11 +1381,8 @@ export class LayerApi {
    * @throws {LayerWrongTypeError} When the layer was of wrong type.
    */
   setLayerQueryable(layerPath: string, queryable: boolean): void {
-    // Get the layer
-    const layer = this.getGeoviewLayerRegular(layerPath);
-
-    // Redirect
-    layer.setQueryable(queryable);
+    // Redirect on the controller
+    this.#controllers.layerController.setLayerQueryable(layerPath, queryable);
   }
 
   /**
@@ -1852,9 +1842,6 @@ export class LayerApi {
     // Register a hook when a layer visibility is changed
     gvLayer.onVisibleChanged(this.#boundedHandleLayerVisibleChanged);
 
-    // Register a hook when a layer queryable is changed
-    gvLayer.onLayerQueryableChanged(this.#boundedHandleLayerQueryableChanged);
-
     // Register a hook when a layer hoverable is changed
     gvLayer.onLayerHoverableChanged(this.#boundedHandleLayerHoverableChanged);
 
@@ -1885,9 +1872,6 @@ export class LayerApi {
 
     // Unregister handler on layer opacity change
     gvLayer.offLayerOpacityChanged(this.#boundedHandleLayerOpacityChanged);
-
-    // Unregister handler on layer queryable changed
-    gvLayer.offLayerQueryableChanged(this.#boundedHandleLayerQueryableChanged);
 
     // Unregister handler on layer hoverable changed
     gvLayer.offLayerHoverableChanged(this.#boundedHandleLayerHoverableChanged);
@@ -2195,29 +2179,6 @@ export class LayerApi {
 
     // Emit event
     this.#emitLayerVisibilityToggled({ layerPath: layer.getLayerPath(), visibility: event.visible });
-  }
-
-  /**
-   * Handles when a layer queryable state is changed on the map.
-   *
-   * @param layer - The layer that's become changed.
-   * @param event - The event containing the queryable state change.
-   */
-  #handleLayerQueryableChanged(layer: AbstractBaseGVLayer, event: LayerQueryableChangedEvent): void {
-    // Redirect
-    MapEventProcessor.setMapLayerQueryable(this.getMapId(), layer.getLayerPath(), event.queryable);
-
-    // Save in store
-    setStoreLayerQueryable(this.getMapId(), layer.getLayerPath(), event.queryable);
-
-    // If not queryable
-    if (!event.queryable) {
-      // Clear the results when turning the queryable to false
-      this.featureInfoLayerSet.clearResults(layer.getLayerPath());
-    }
-
-    // TODO: MINOR - Emit LayerQueryableToggled event here?
-    // this.#emitLayerQueryableToggled({ layerPath: layer.getLayerPath(), queryable: event.queryable });
   }
 
   /**
@@ -2732,7 +2693,7 @@ export class LayerApi {
    *
    * @param event - The event to emit
    */
-  #emitLayerStatusChanged(event: ConfigLayerStatusChangedEvent): void {
+  #emitLayerStatusChanged(event: DomainLayerStatusChangedEvent): void {
     // Emit the layersetupdated event
     EventHelper.emitEvent(this.#layerDomain, this.#onLayerStatusChangedHandlers, event);
   }
@@ -2742,7 +2703,7 @@ export class LayerApi {
    *
    * @param callback - The callback function
    */
-  onLayerStatusChanged(callback: ConfigLayerStatusChangedDelegate): void {
+  onLayerStatusChanged(callback: DomainLayerStatusChangedDelegate): void {
     // Register the layersetupdated event callback
     EventHelper.onEvent(this.#onLayerStatusChangedHandlers, callback);
   }
@@ -2752,7 +2713,7 @@ export class LayerApi {
    *
    * @param callback - The callback function to unregister
    */
-  offLayerStatusChanged(callback: ConfigLayerStatusChangedDelegate): void {
+  offLayerStatusChanged(callback: DomainLayerStatusChangedDelegate): void {
     // Unregister the layersetupdated event callback
     EventHelper.offEvent(this.#onLayerStatusChangedHandlers, callback);
   }
