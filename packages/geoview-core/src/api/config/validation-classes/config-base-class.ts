@@ -785,6 +785,7 @@ export abstract class ConfigBaseClass {
 
   /**
    * Overridable function to write the instance as Json.
+   *
    * This is used to set properties for the layerEntryConfigs when initially setting the mapConfig in the store
    *
    * @returns The Json representation of the instance
