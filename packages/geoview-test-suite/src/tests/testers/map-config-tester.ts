@@ -306,7 +306,7 @@ export class MapConfigTester extends GVAbstractTester {
 
         // Get the layer bounds
         test.addStep('Getting layer bound extent...');
-        const geoviewLayer = newMapViewer.layer.getGeoviewLayerRegular('geojsonLYR5/polygons.json');
+        const geoviewLayer = newMapViewer.controllers.layerController.getGeoviewLayerRegular('geojsonLYR5/polygons.json');
         Test.assertIsDefined('geoviewLayer', geoviewLayer);
         const layerExtent = getStoreLayerStateLayerBounds(this.getMapId(), 'geojsonLYR5/polygons.json');
         Test.assertIsArray(layerExtent);

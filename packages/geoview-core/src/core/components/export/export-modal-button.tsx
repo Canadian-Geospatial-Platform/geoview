@@ -21,7 +21,6 @@ interface ExportProps {
  *
  * @returns {JSX.Element} the export button
  */
-
 export default function ExportButton({ id, className = '', sxDetails }: ExportProps): JSX.Element {
   // Hooks
   const theme = useTheme();

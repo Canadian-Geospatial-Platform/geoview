@@ -168,12 +168,12 @@ class TimeSliderPlugin extends FooterPlugin {
    */
   initTimeSliderPlugin(): void {
     // Now the layerTimeDimension should be good on the layers
-    const orderedLayerPaths = this.mapViewer.layer.getLayerEntryLayerPaths();
+    const orderedLayerPaths = this.mapViewer.controllers.layerController.getLayerEntryLayerPaths();
     const initialTimeSliderLayerPaths = this.#filterTimeSliderLayers(orderedLayerPaths);
     if (initialTimeSliderLayerPaths) {
       initialTimeSliderLayerPaths.forEach((layerPath) => {
         // Get the layer
-        const layer = this.mapViewer.layer.getGeoviewLayerIfExists(layerPath);
+        const layer = this.mapViewer.controllers.layerController.getGeoviewLayerIfExists(layerPath);
 
         // If the layer was found and of right type
         if (layer instanceof AbstractGVLayer) {
@@ -242,7 +242,7 @@ class TimeSliderPlugin extends FooterPlugin {
     // Return the layer paths for the layers that have a time dimension
     return layerPaths.filter((layerPath) => {
       // Get the layer
-      const layer = this.mapViewer.layer.getGeoviewLayerIfExists(layerPath);
+      const layer = this.mapViewer.controllers.layerController.getGeoviewLayerIfExists(layerPath);
 
       // If of the right type
       if (layer instanceof AbstractGVLayer) {

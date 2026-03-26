@@ -5,7 +5,7 @@ import type { API } from 'geoview-core/api/api';
 import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
 import type { TypeLegendItem } from 'geoview-core/core/components/layers/types';
-import type { ControllerRegistry } from 'geoview-core/core/controllers/controller-registry';
+import type { ControllerRegistry } from 'geoview-core/core/controllers/base/controller-registry';
 import type { LayerApi } from 'geoview-core/geo/layer/layer';
 import { Test } from '../core/test';
 import { getStoreLayerStateLegendLayers } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
@@ -529,7 +529,7 @@ export abstract class GVAbstractTester extends AbstractTester {
    * @param mapViewer - The map viewer instance from which the layer is removed
    * @param layerPath - The unique path or ID of the layer to be removed
    */
-  helperFinalizeStepRemoveLayerAndAssert<T>(test: Test<T>, layerPath: string): void {
+  protected helperFinalizeStepRemoveLayerAndAssert<T>(test: Test<T>, layerPath: string): void {
     // Check that the layer is indeed there
     test.addStep(`Checking the layer path ${layerPath} exists on the map...`);
     Test.assertArrayIncludes(this.getControllersRegistry().layerController.getGeoviewLayerPaths(), layerPath);

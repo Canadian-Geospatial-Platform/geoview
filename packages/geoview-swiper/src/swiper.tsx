@@ -224,7 +224,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
     async (layerPath: string) => {
       try {
         // Get the layer at the layer path
-        const olLayer = await viewer.layer.getOLLayerAsync(layerPath, CONST_LAYERS_WAIT, CONST_LAYERS_RETRY);
+        const olLayer = await viewer.controllers.layerController.getOLLayerAsync(layerPath, CONST_LAYERS_WAIT, CONST_LAYERS_RETRY);
 
         // Set the OL layers
         setOlLayers((prevArray) => [...prevArray, olLayer]);
@@ -237,7 +237,12 @@ export function Swiper(props: SwiperProps): JSX.Element {
         olLayer.changed();
       } catch (error: unknown) {
         // Log
-        logger.logError('SWIPER - Failed to attach layer events', viewer.layer?.getGeoviewLayerIds(), layerPath, error);
+        logger.logError(
+          'SWIPER - Failed to attach layer events',
+          viewer.controllers.layerController.getGeoviewLayerIds(),
+          layerPath,
+          error
+        );
       }
     },
     [viewer, prerender]
@@ -274,7 +279,7 @@ export function Swiper(props: SwiperProps): JSX.Element {
       associatedLayerPaths.forEach((layerPath: string) => {
         try {
           // Get the layer at the layer path
-          const olLayer = viewer.layer.getGeoviewLayerIfExists(layerPath)?.getOLLayer();
+          const olLayer = viewer.controllers.layerController.getGeoviewLayerIfExists(layerPath)?.getOLLayer();
           if (olLayer) {
             // Unwire the events on the layer
             olLayer.un(['precompose' as EventTypes, 'prerender' as EventTypes], prerender);

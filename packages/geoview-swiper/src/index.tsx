@@ -98,7 +98,7 @@ class SwiperPlugin extends MapPlugin {
   activateForLayer(layerPath: string): void {
     try {
       // Check if the layer exists on the map, this call throws when it doesn't exist
-      this.mapViewer.layer.getGeoviewLayer(layerPath);
+      this.mapViewer.controllers.layerController.getGeoviewLayer(layerPath);
 
       // Add the layer path in the store
       addStoreSwiperLayerPath(this.mapViewer.mapId, layerPath);

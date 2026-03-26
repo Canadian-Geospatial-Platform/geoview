@@ -341,7 +341,7 @@ export class LayerApi {
     return this.mapViewer.mapId;
   }
 
-  // #region LAYER DOMAIN GETTERS REDIRECTIONS
+  // #region LAYER CONTROLLER GETTERS REDIRECTIONS
 
   /**
    * Gets the GeoView Layer Ids / UUIDs.
@@ -531,7 +531,7 @@ export class LayerApi {
     return this.#controllers.layerController.getOLLayerAsync(layerPath, timeout, checkFrequency);
   }
 
-  // #endregion LAYER DOMAIN GETTERS REDIRECTIONS
+  // #endregion LAYER CONTROLLER GETTERS REDIRECTIONS
 
   // #region LAYER PROCESSING
 
@@ -2466,7 +2466,7 @@ export class LayerApi {
     return allLoadedOrError;
   }
 
-  // #endregion
+  // #endregion PRIVATE FUNCTIONS
 
   // #region EVENTS
 
