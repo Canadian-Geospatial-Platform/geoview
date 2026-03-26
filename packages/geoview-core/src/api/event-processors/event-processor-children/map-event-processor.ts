@@ -77,6 +77,7 @@ import type { TypeTimeSliderProps } from '@/core/stores/store-interface-and-inti
 import { Fetch } from '@/core/utils/fetch-helper';
 import { formatError } from '@/core/exceptions/core-exceptions';
 import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
+import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 
 // GV The paradigm when working with MapEventProcessor vs MapState goes like this:
 // GV MapState provides: 'state values', 'actions' and 'setterActions'.
@@ -1756,6 +1757,8 @@ export class MapEventProcessor extends AbstractEventProcessor {
     const layerStyle =
       legendLayerInfo!.styleConfig && (!isGeocore || overrideGeocoreServiceNames === true) ? legendLayerInfo!.styleConfig : undefined;
 
+    const layerText = layerEntryConfig instanceof VectorLayerEntryConfig ? layerEntryConfig.getLayerText() : undefined;
+
     // Construct layer entry config
     const newLayerEntryConfig = {
       layerId: layerEntryConfig.layerId,
@@ -1763,6 +1766,7 @@ export class MapEventProcessor extends AbstractEventProcessor {
       layerFilter: AbstractBaseLayerEntryConfig.getClassOrTypeLayerFilter(configLayerEntryConfig),
       initialSettings,
       layerStyle,
+      layerText,
       entryType: listOfLayerEntryConfig.length ? 'group' : undefined,
       source: listOfLayerEntryConfig.length ? undefined : source,
       listOfLayerEntryConfig: listOfLayerEntryConfig.length ? listOfLayerEntryConfig : undefined,
