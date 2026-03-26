@@ -148,6 +148,9 @@ export abstract class AbstractBaseLayerEntryConfig extends ConfigBaseClass {
     serialized.initialSettings = this.getInitialSettings();
     serialized.attributions = this.getAttributions();
     serialized.source = this.getSource();
+    serialized.layerFilter = this.getLayerFilter();
+    serialized.layerStyle = this.getLayerStyle();
+    serialized.layerText = this.getLayerText();
 
     // Return it
     return serialized;

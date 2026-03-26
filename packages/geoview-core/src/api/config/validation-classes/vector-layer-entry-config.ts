@@ -47,23 +47,6 @@ export abstract class VectorLayerEntryConfig extends AbstractBaseLayerEntryConfi
   //   return super.getLayerMetadata() as TypeLayerMetadataVector | undefined;
   // }
 
-  /**
-   * Overridable function to write the instance as Json.
-   *
-   * @returns The Json representation of the instance
-   */
-  protected override onToJson<T>(): T {
-    // GV Can be any object so disable eslint and proceed with caution
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const serialized = super.onToJson<T>() as any;
-
-    serialized.layerStyle = this.getLayerStyle();
-    serialized.layerFilter = this.getLayerFilter();
-    serialized.layerText = this.getLayerText();
-
-    return serialized;
-  }
-
   // #endregion OVERRIDES
 
   // #region PUBLIC METHODS
