@@ -1,6 +1,6 @@
 import { type TypeDisplayLanguage, type TypeDisplayTheme } from '@/api/types/map-schema-types';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
-import { useControllers } from '@/core/controllers/controller-manager';
+import { useControllers } from '@/core/controllers/base/controller-manager';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import {
   disableStoreFocusTrap,

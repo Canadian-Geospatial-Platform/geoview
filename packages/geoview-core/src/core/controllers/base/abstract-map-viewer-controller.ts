@@ -1,6 +1,6 @@
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractController } from './abstract-controller';
-import type { ControllerRegistry } from '@/core/controllers/controller-registry';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 
 export class AbstractMapViewerController extends AbstractController {
   /** Holds the map viewer used by this controller */

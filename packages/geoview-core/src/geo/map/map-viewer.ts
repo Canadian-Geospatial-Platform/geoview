@@ -44,7 +44,7 @@ import { LayerApi } from '@/geo/layer/layer';
 import type { TypeFeatureStyle } from '@/geo/layer/geometry/geometry-types';
 import { Projection } from '@/geo/utils/projection';
 
-import { ControllerRegistry } from '@/core/controllers/controller-registry';
+import { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import { Plugin } from '@/api/plugin/plugin';
 import { AppBarApi } from '@/core/components/app-bar/app-bar-api';
 import { NavBarApi } from '@/core/components/nav-bar/nav-bar-api';

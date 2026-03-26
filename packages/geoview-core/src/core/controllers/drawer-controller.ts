@@ -1,5 +1,5 @@
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
-import { useControllers } from '@/core/controllers/controller-manager';
+import { useControllers } from '@/core/controllers/base/controller-manager';
 import { DEFAULT_TEXT_VALUES } from '@/core/stores/store-interface-and-intial-values/drawer-state';
 import type { DomainLanguageChangedDelegate, DomainLanguageChangedEvent, UIDomain } from '@/core/domains/ui-domain';
 import { DrawerEventProcessor } from '@/api/event-processors/event-processor-children/drawer-event-processor';

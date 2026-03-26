@@ -1,5 +1,5 @@
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
-import { useControllers } from '@/core/controllers/controller-manager';
+import { useControllers } from '@/core/controllers/base/controller-manager';
 import {
   addOrUpdateStoreTimeSliderFilter,
   addStoreTimeSliderLayer,

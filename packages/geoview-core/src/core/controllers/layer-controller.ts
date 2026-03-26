@@ -7,7 +7,7 @@ import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-class
 import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import { LayerWrongTypeError } from '@/core/exceptions/layer-exceptions';
-import { useControllers } from '@/core/controllers/controller-manager';
+import { useControllers } from '@/core/controllers/base/controller-manager';
 import {
   setStoreLayerName,
   setStoreLayerQueryable,

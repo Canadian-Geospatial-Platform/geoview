@@ -1,14 +1,14 @@
 import type { UIDomain } from '@/core/domains/ui-domain';
 import type { LayerDomain } from '@/core/domains/layer-domain';
-import { UIController } from './ui-controller';
-import { LayerController } from './layer-controller';
-import { LayerSetController } from './layer-set-controller';
-import { DrawerController } from './drawer-controller';
+import { UIController } from '../ui-controller';
+import { LayerController } from '../layer-controller';
+import { LayerSetController } from '../layer-set-controller';
+import { DrawerController } from '../drawer-controller';
 import type { MapViewer } from '@/geo/map/map-viewer';
-import { getGeoViewStore, hasDrawerPlugin, hasTimeSliderPlugin } from '../stores/stores-managers';
-import type { AbstractController } from './base/abstract-controller';
-import { DataTableController } from './data-table-controller';
-import { TimeSliderController } from './time-slider-controller';
+import { getGeoViewStore, hasDrawerPlugin, hasTimeSliderPlugin } from '../../stores/stores-managers';
+import type { AbstractController } from './abstract-controller';
+import { DataTableController } from '../data-table-controller';
+import { TimeSliderController } from '../time-slider-controller';
 
 /**
  * Central registry that owns and provides access to all framework-level controllers.

@@ -142,7 +142,7 @@ import { GeoViewError, LayerNoLastQueryToPerformError } from '@/core/exceptions/
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
 import { ShapefileReader } from '@/api/config/reader/shapefile-reader';
 import { GeoPackageReader } from '@/api/config/reader/geopackage-reader';
-import type { ControllerRegistry } from '@/core/controllers/controller-registry';
+import type { ControllerRegistry } from '@/core/controllers/base/controller-registry';
 import type { DomainLayerStatusChangedDelegate, DomainLayerStatusChangedEvent, LayerDomain } from '@/core/domains/layer-domain';
 import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { CsvLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
