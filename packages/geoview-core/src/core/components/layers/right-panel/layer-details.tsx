@@ -61,9 +61,9 @@ import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { DeleteUndoButton } from '@/core/components/layers/delete-undo-button';
 import type { TypeContainerBox } from '@/core/types/global-types';
-import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { useLayerSetController } from '@/core/controllers/layer-set-controller';
 
 // TODO: WCAG Issue #3108 - Fix layers.moreInfo button (button nested within a button)
 // TODO: WCAG Issue #3108 - Check all disabled buttons. They may need special treatment. Need to find instance in UI first)
@@ -155,6 +155,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const layerHidden = useMapSelectorIsLayerHiddenOnMap(layerDetails.layerPath);
   const timeSliderLayers = useTimeSliderLayers();
   const isFocusTrap = useUIActiveTrapGeoView();
+  const layerSetController = useLayerSetController();
 
   // Use navigate hook for time slider (only if time slider state exists)
   const navigateToTimeSlider = useNavigateToTab('time-slider', setStoreTimeSliderSelectedLayerPath);
@@ -219,7 +220,7 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
       !layersData.filter((layers) => layers.layerPath === layerDetails.layerPath && !!layers?.features?.length).length ||
       layerDetails.layerStatus === LAYER_STATUS.ERROR
     ) {
-      DataTableEventProcessor.triggerGetAllFeatureInfo(mapId, layerDetails.layerPath).catch((error: unknown) => {
+      layerSetController.triggerGetAllFeatureInfo(layerDetails.layerPath).catch((error: unknown) => {
         // Log
         logger.logPromiseFailed('Failed to triggerGetAllFeatureInfo in single-layer.handleLayerClick', error);
       });

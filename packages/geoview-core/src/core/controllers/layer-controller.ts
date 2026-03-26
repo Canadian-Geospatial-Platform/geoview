@@ -14,7 +14,6 @@ import type {
   LayerDomain,
 } from '@/core/domains/layer-domain';
 import { isValidUUID } from '@/core/utils/utilities';
-import type { MapViewer } from '@/geo/map/map-viewer';
 import { logger } from '@/core/utils/logger';
 import {
   getStoreMapOrderedLayerIndexByPath,
@@ -22,6 +21,8 @@ import {
   setStoreMapLayerQueryable,
   utilFindMapLayerAndChildrenFromOrderedInfo,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
+import type { MapViewer } from '@/geo/map/map-viewer';
+import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 
 /**
  * LayerController class that extends the AbstractMapViewerController and provides methods to interact with map layers.
@@ -116,6 +117,37 @@ export class LayerController extends AbstractMapViewerController {
   getLayerEntryConfigIfExists(layerPath: string): ConfigBaseClass | undefined {
     // Retrieve from the domain
     return this.#layerDomain.getLayerEntryConfigIfExists(layerPath);
+  }
+
+  /**
+   * Retrieves the service (metadata) projection code for a specific raster layer.
+   *
+   * @param layerPath - The fully qualified path of the layer.
+   * @returns The projection code (e.g., "EPSG:4326") defined in the layer's service metadata,
+   *          or `undefined` if:
+   *          - the layer does not exist,
+   *          - the layer is not a raster layer,
+   *          - or the metadata projection is not available.
+   * @description
+   *
+   * This method looks up the GeoView layer associated with the provided `layerPath`.
+   * If the layer exists and is an instance of `AbstractGVRaster`, it retrieves the
+   * projection defined in the service metadata via `getMetadataProjection()`.
+   * The projection code is then returned using `projection.getCode()`.
+   */
+  getLayerMetatadaProjectionEPSG(layerPath: string): string | undefined {
+    // Get the layer if it exists
+    const geoviewLayer = this.#layerDomain.getGeoviewLayerIfExists(layerPath);
+
+    // If of the right type
+    if (geoviewLayer instanceof AbstractGVRaster) {
+      // Get the projection and return its code
+      const projection = geoviewLayer.getMetadataProjection();
+      return projection?.getCode();
+    }
+
+    // Layer not found or not a Raster layer or no metadata projection
+    return undefined;
   }
 
   /**

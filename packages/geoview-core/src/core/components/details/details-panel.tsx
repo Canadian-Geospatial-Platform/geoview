@@ -511,7 +511,6 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
    */
   const handleLayerChange = useCallback(
     (layerEntry: LayerListEntry): void => {
-
       // Set the selected layer path in the store which will in turn trigger the store listeners on this component
       setStoreDetailsSelectedLayerPath(mapId, layerEntry.layerPath);
 

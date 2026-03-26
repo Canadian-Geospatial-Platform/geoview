@@ -19,7 +19,6 @@ import type {
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { TypeVectorLayerStyles } from '@/geo/utils/renderer/geoview-renderer';
 import { getStoreMapOrderedLayerIndexByPath } from './map-state';
-import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor'; // FIXME Cyclic dependency, to be removed
 import { getStoreDisplayDateFormatDefault, getStoreDisplayDateTimezone } from './app-state';
 import { logger } from '@/core/utils/logger';
 import { Projection } from '@/geo/utils/projection';
@@ -379,20 +378,6 @@ export const useLayerIconLayerSet = (layerPath: string): string[] => {
 };
 
 /**
- * React hook that returns if the time dimension for a layer.
- * @param layerPath - Unique path identifying the layer in the legend state.
- * @returns The time dimension for the layer if any.
- */
-export const useLayerTimeDimension = (layerPath: string): TimeDimension | undefined => {
-  // Hook
-  return useStore(useGeoViewStore(), (state) => {
-    // TODO: REFACTOR - EVENT PROCESSOR - This getter has nothing to do with the store state and fakes it via the LegendEventProcessor going through the layerApi.
-    // TO.DOCONT: This pattern is cool, maybe, but shouldn't be allowed if we are using proper Zustand practices.
-    return LegendEventProcessor.getLayerTimeDimension(state.mapId, layerPath);
-  });
-};
-
-/**
  * React hook that returns if the temporal modes for the layers.
  *
  * @returns The temporal mode of the dates for the layer.
@@ -538,34 +523,6 @@ export const useLayerDisplayDateTimezone = (layerPath: string | undefined): Time
 };
 
 /**
- * React hook that returns the raster function infos for a specific layer.
- *
- * @param layerPath - The layer path
- * @returns The raster function infos for the layer or undefined
- */
-export const useLayerSelectorRasterFunctionInfos = (layerPath: string): TypeMetadataEsriRasterFunctionInfos[] | undefined => {
-  return useStore(useGeoViewStore(), (state) => {
-    // TODO: REFACTOR - EVENT PROCESSOR - This getter has nothing to do with the store state and fakes it via the LegendEventProcessor going through the layerApi.
-    // TO.DOCONT: This pattern is cool, maybe, but shouldn't be allowed if we are using proper Zustand practices.
-    return LegendEventProcessor.getLayerRasterFunctionInfos(state.mapId, layerPath);
-  });
-};
-
-/**
- * React hook that returns the allowed mosaic methods for a specific layer.
- *
- * @param layerPath - The layer path
- * @returns The allowed mosaic methods for the layer or undefined
- */
-export const useLayerSelectorAllowedMosaicMethods = (layerPath: string): TypeMosaicMethod[] | undefined => {
-  return useStore(useGeoViewStore(), (state) => {
-    // TODO: REFACTOR - EVENT PROCESSOR - This getter has nothing to do with the store state and fakes it via the LegendEventProcessor going through the layerApi.
-    // TO.DOCONT: This pattern is cool, maybe, but shouldn't be allowed if we are using proper Zustand practices.
-    return LegendEventProcessor.getLayerAllowedMosaicMethods(state.mapId, layerPath);
-  });
-};
-
-/**
  * Generic hook that selects a single property from a legend layer by path.
  *
  * @param layerPath - The layer path to look up.
@@ -692,8 +649,21 @@ export const useLayerSelectorMosaicRule = createLayerSelectorHook('mosaicRule');
 
 /** Hook that returns the WMS style for a specific layer. */
 export const useLayerSelectorWmsStyle = createLayerSelectorHook('wmsStyle');
+
+/** Hook that returns if the layer has text. */
 export const useLayerSelectorHasText = createLayerSelectorHook('hasText');
+
+/** Hook that returns the text visibility for a specific layer. */
 export const useLayerSelectorTextVisibility = createLayerSelectorHook('textVisible');
+
+/** Hook that returns the raster function infos for a specific layer. */
+export const useLayerSelectorRasterFunctionInfos = createLayerSelectorHook('rasterFunctionInfos');
+
+/** Hook that returns the allowed mosaic methods for a specific layer. */
+export const useLayerSelectorAllowedMosaicMethods = createLayerSelectorHook('allowedMosaicMethods');
+
+/** Hook that returns the time dimension for a specific layer. */
+export const useLayerTimeDimension = createLayerSelectorHook('timeDimension');
 
 // #endregion STATE HOOKS
 
@@ -847,6 +817,39 @@ export const getStoreLayerMosaicRule = (mapId: string, layerPath: string): TypeM
  */
 export const getStoreLayerRasterFunction = (mapId: string, layerPath: string): string | undefined => {
   return getStoreLayerStateLegendLayerByPath(mapId, layerPath)?.rasterFunction;
+};
+
+/**
+ * Gets the raster function infos for a specific layer.
+ *
+ * @param mapId - The map identifier.
+ * @param layerPath - The layer path to look up.
+ * @returns The raster function infos, or undefined.
+ */
+export const getStoreLayerRasterFunctionInfos = (mapId: string, layerPath: string): TypeMetadataEsriRasterFunctionInfos[] | undefined => {
+  return getStoreLayerStateLegendLayerByPath(mapId, layerPath)?.rasterFunctionInfos;
+};
+
+/**
+ * Gets the allowed mosaic methods for a specific layer.
+ *
+ * @param mapId - The map identifier.
+ * @param layerPath - The layer path to look up.
+ * @returns The allowed mosaic methods, or undefined.
+ */
+export const getStoreLayerAllowedMosaicMethods = (mapId: string, layerPath: string): TypeMosaicMethod[] | undefined => {
+  return getStoreLayerStateLegendLayerByPath(mapId, layerPath)?.allowedMosaicMethods;
+};
+
+/**
+ * Gets the time dimension for a specific layer.
+ *
+ * @param mapId - The map identifier.
+ * @param layerPath - The layer path to look up.
+ * @returns The time dimension, or undefined.
+ */
+export const getStoreLayerTimeDimension = (mapId: string, layerPath: string): TimeDimension | undefined => {
+  return getStoreLayerStateLegendLayerByPath(mapId, layerPath)?.timeDimension;
 };
 
 // #endregion STATE SELECTORS

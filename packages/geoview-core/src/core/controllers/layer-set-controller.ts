@@ -22,6 +22,8 @@ import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
 import type { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
 import type { MapPointerMoveEvent, MapSingleClickEvent, MapViewer } from '@/geo/map/map-viewer';
 import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
+import type { TypeFeatureInfoResult } from '@/api/types/map-schema-types';
+import { setStoreSelectedLayerPath } from '../stores/store-interface-and-intial-values/data-table-state';
 
 /**
  * LayerSetController class that extends the AbstractMapViewerController and provides methods to interact with map layers.
@@ -85,6 +87,31 @@ export class LayerSetController extends AbstractMapViewerController {
   // #endregion OVERRIDES
 
   // #region PUBLIC METHODS
+
+  /**
+   * Queries all feature info for a given layer path.
+   *
+   * @param layerPath - The layer path to query the features from
+   * @returns A promise that resolves with the feature info result
+   */
+  triggerGetAllFeatureInfo(layerPath: string): Promise<TypeFeatureInfoResult> {
+    return this.allFeatureInfoLayerSet.queryLayer(layerPath);
+  }
+
+  /**
+   * Resets the data-table features for a given layer path.
+   *
+   * Clears the queried features and resets the selected layer path in the store.
+   *
+   * @param layerPath - The layer path to reset the features for
+   */
+  triggerResetFeatureInfo(layerPath: string): void {
+    // Clear
+    this.allFeatureInfoLayerSet.clearLayerFeatures(layerPath);
+
+    // Update the layer data array in the store, all the time
+    setStoreSelectedLayerPath(this.getMapId(), '');
+  }
 
   /**
    * Resets the feature info result set for a specific layer path.

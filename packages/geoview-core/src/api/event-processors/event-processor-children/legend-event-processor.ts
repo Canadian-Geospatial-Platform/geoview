@@ -1,8 +1,7 @@
 import type { Extent, TypeFeatureInfoEntryPartial } from '@/api/types/map-schema-types';
-import type { TimeDimension, TypeDisplayDateFormat } from '@/core/utils/date-mgt';
+import type { TypeDisplayDateFormat } from '@/core/utils/date-mgt';
 import type {
   TypeLayerControls,
-  TypeMetadataEsriRasterFunctionInfos,
   TypeMetadataWMSCapabilityLayerStyle,
   TypeMosaicMethod,
   TypeMosaicOperation,
@@ -33,7 +32,6 @@ import { MapEventProcessor } from '@/api/event-processors/event-processor-childr
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
-import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
@@ -54,52 +52,6 @@ export abstract class LegendEventProcessor extends AbstractEventProcessor {
   // #region STATIC METHODS
 
   /**
-   * Retrieves the service (metadata) projection code for a specific raster layer.
-   *
-   * @param mapId - The unique identifier of the map instance.
-   * @param layerPath - The fully qualified path of the layer.
-   * @returns The projection code (e.g., "EPSG:4326") defined in the layer's service metadata,
-   *          or `undefined` if:
-   *          - the layer does not exist,
-   *          - the layer is not a raster layer,
-   *          - or the metadata projection is not available.
-   * @description
-   *
-   * This method looks up the GeoView layer associated with the provided `layerPath`.
-   * If the layer exists and is an instance of `AbstractGVRaster`, it retrieves the
-   * projection defined in the service metadata via `getMetadataProjection()`.
-   * The projection code is then returned using `projection.getCode()`.
-   */
-  static getLayerServiceProjection(mapId: string, layerPath: string): string | undefined {
-    // Get the layer if it exists
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
-
-    // If of the right type
-    if (geoviewLayer instanceof AbstractGVRaster) {
-      // Get the projection and return its code
-      const projection = geoviewLayer.getMetadataProjection();
-      return projection?.getCode();
-    }
-
-    // Layer not found or not a Raster layer or no metadata projection
-    return undefined;
-  }
-
-  /**
-   * Retrieves the layer's rasterFunctionInfos and returns it
-   *
-   * @param mapId - The unique identifier of the map instance.
-   * @param layerPath - The path to the layer.
-   * @returns The raster function infos of the layer, or `undefined` if not available.
-   */
-  static getLayerRasterFunctionInfos(mapId: string, layerPath: string): TypeMetadataEsriRasterFunctionInfos[] | undefined {
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
-    if (!geoviewLayer || !(geoviewLayer instanceof GVEsriImage)) return;
-
-    return geoviewLayer.getMetadataRasterFunctionInfos();
-  }
-
-  /**
    * Sets the active raster function for a layer.
    *
    * @param mapId - The map identifier.
@@ -108,21 +60,6 @@ export abstract class LegendEventProcessor extends AbstractEventProcessor {
    */
   static setLayerRasterFunction(mapId: string, layerPath: string, rasterFunctionId: string | undefined): void {
     MapEventProcessor.getMapViewerLayerAPI(mapId).setLayerRasterFunction(layerPath, rasterFunctionId);
-  }
-
-  /**
-   * Gets the allowed mosaic methods for a layer.
-   *
-   * @param mapId - The map identifier.
-   * @param layerPath - The layer path.
-   * @returns The allowed mosaic methods or undefined.
-   */
-  static getLayerAllowedMosaicMethods(mapId: string, layerPath: string): TypeMosaicMethod[] | undefined {
-    const geoviewLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerIfExists(layerPath);
-    if (!geoviewLayer || !(geoviewLayer instanceof GVEsriImage)) return undefined;
-
-    const allowedMosaicMethods = geoviewLayer.getLayerConfig().getAllowedMosaicMethods();
-    return (allowedMosaicMethods?.split(',') as TypeMosaicMethod[]) ?? undefined;
   }
 
   /**
@@ -236,17 +173,15 @@ export abstract class LegendEventProcessor extends AbstractEventProcessor {
     const layer = getStoreLayerStateLegendLayerByPath(mapId, layerPath);
     if (!layer) return []; // Not in the store, no settings
 
-    // TODO: CHECK - Here, getLayerRasterFunctionInfos and getLayerWmsStyles go in the layer domain, but getStoreLayerMosaicRule goes in the store, normal!?
     // Check if raster function infos are present
     const settings: string[] = [];
 
-    const rasterFunctionInfos = this.getLayerRasterFunctionInfos(mapId, layerPath);
-    if (rasterFunctionInfos && rasterFunctionInfos.length > 0) {
+    if (layer.rasterFunctionInfos && layer.rasterFunctionInfos.length > 0) {
       settings.push('rasterFunction');
     }
 
     // Check if mosaicMode is present
-    const mosaicRule = getStoreLayerMosaicRule(mapId, layerPath);
+    const { mosaicRule } = layer;
     if (mosaicRule) {
       settings.push('mosaicRule');
     }
@@ -307,39 +242,6 @@ export abstract class LegendEventProcessor extends AbstractEventProcessor {
 
     // Get extent from features calling the GV Layer method
     return layer.getExtentFromFeatures(objectIds, layerApi.mapViewer.getProjection(), outfield);
-  }
-
-  /**
-   * Retrieves the native time dimension metadata for a specific layer.
-   *
-   * This method looks up the GeoView layer associated with the provided
-   * `layerPath` and, if available, returns its time dimension information
-   * via the layer's `getTimeDimension()` implementation.
-   *
-   * @param mapId - The map identifier
-   * @param layerPath - The fully qualified path identifying the layer
-   * @returns The layer's {@link TimeDimension} metadata if supported,
-   * or `undefined` if the layer does not exist or does not expose
-   * temporal dimension information
-   * @remarks
-   * This method does not return time-slider state or processed slider values.
-   * For time-slider-related logic, see `TimeSliderEventProcessor.getInitialTimeSliderValues`.
-   */
-  static getLayerTimeDimension(mapId: string, layerPath: string): TimeDimension | undefined {
-    // Get the layer api
-    const layerApi = MapEventProcessor.getMapViewerLayerAPI(mapId);
-
-    // Get the layer
-    const layer = layerApi.getGeoviewLayerIfExists(layerPath);
-
-    // If right type
-    if (layer instanceof AbstractGVLayer) {
-      // Return the temporal dimension if any
-      return layer.getTimeDimension();
-    }
-
-    // None
-    return undefined;
   }
 
   /**
@@ -494,7 +396,13 @@ export abstract class LegendEventProcessor extends AbstractEventProcessor {
           icons,
           // TODO: Encapsulate rasterFunction and possibly other 'settings' into their own object
           rasterFunction: layer instanceof GVEsriImage ? layer.getRasterFunction() : undefined,
+          rasterFunctionInfos: layer instanceof GVEsriImage ? layer.getMetadataRasterFunctionInfos() : undefined,
+          allowedMosaicMethods:
+            layer instanceof GVEsriImage
+              ? ((layer.getLayerConfig().getAllowedMosaicMethods()?.split(',') as TypeMosaicMethod[]) ?? undefined)
+              : undefined,
           mosaicRule: layer instanceof GVEsriImage ? layer.getMosaicRule() : undefined,
+          timeDimension: layer instanceof AbstractGVLayer ? layer.getTimeDimension() : undefined,
           hasText: layer instanceof AbstractGVVector ? layer.getTextOLLayer() !== undefined : undefined,
           textVisible: layer instanceof AbstractGVVector ? layer.getTextVisible() : undefined,
           wmsStyle: layer instanceof GVWMS ? layer.getWmsStyle() : undefined,

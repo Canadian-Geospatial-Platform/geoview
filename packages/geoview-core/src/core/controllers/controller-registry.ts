@@ -7,6 +7,7 @@ import { DrawerController } from './drawer-controller';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { getGeoViewStore, hasDrawerPlugin } from '../stores/stores-managers';
 import type { AbstractController } from './base/abstract-controller';
+import { DataTableController } from './data-table-controller';
 
 /**
  * Central registry that owns and provides access to all framework-level controllers.
@@ -22,8 +23,11 @@ export class ControllerRegistry {
   /** The layer controller used to interact with map layers. */
   readonly layerController: LayerController;
 
-  /** The layer set controller used to manage the layer sets */
+  /** The layer set controller used to manage the layer sets. */
   readonly layerSetController: LayerSetController;
+
+  /** The data table controller used to interact with the data table. */
+  readonly dataTableController: DataTableController;
 
   /** The drawer controller used to interact with the drawer. Only present when the drawer plugin is configured. */
   readonly drawerController?: DrawerController;
@@ -44,6 +48,7 @@ export class ControllerRegistry {
     this.uiController = new UIController(mapViewer, uiDomain);
     this.layerController = new LayerController(mapViewer, layerDomain);
     this.layerSetController = new LayerSetController(mapViewer, layerDomain);
+    this.dataTableController = new DataTableController(mapViewer);
 
     // If the drawer plugin is preset (we know via the store)
     if (hasDrawerPlugin(getGeoViewStore(mapViewer.mapId))) {

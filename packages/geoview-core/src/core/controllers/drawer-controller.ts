@@ -23,10 +23,6 @@ export class DrawerController extends AbstractMapViewerController {
   /** The store subscription callback to unsubscribe from projection changes. */
   #hookProjectionSubscription?: () => void;
 
-  /** The Drawer State Adaptor used to interact with the drawer state store */
-  // TODO: STATE-ADAPTOR - TO BE IMPLEMENTED
-  // #drawerStateAdaptor: DrawerStateAdaptor;
-
   /**
    * Creates an instance of DrawerController.
    *

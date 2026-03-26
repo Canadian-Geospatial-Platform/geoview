@@ -65,10 +65,10 @@ import type { DataTableProps, ColumnsType } from './data-table-types';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
-import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { Projection } from '@/geo/utils/projection';
+import { useDataTableController } from '@/core/controllers/data-table-controller';
 
 /** The possible filters for numeric columns */
 const NUMERIC_FIELD_FILTERS = [
@@ -113,6 +113,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   const displayDateTimezone = useLayerDisplayDateTimezone(layerPath);
   const displayDateTimezoneUniversal = displayDateTimezone === 'local' ? DateMgt.TIME_IANA_LOCAL : displayDateTimezone;
   const layerName = useLayerSelectorName(layerPath);
+  const dataTableController = useDataTableController();
 
   // internal state
   const [density, setDensity] = useState<MRTDensityState>('compact');
@@ -820,7 +821,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     const filterStrings = buildFilterList(filters)
       .filter((filterValue) => filterValue.length)
       .join(' and ');
-    DataTableEventProcessor.applyMapFilters(mapId, filterStrings);
+    dataTableController.applyMapFilters(filterStrings);
   }, 500);
 
   const debouncedColumnFilters = useCallback(

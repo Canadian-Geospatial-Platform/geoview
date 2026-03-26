@@ -11,7 +11,6 @@ import { logger } from '@/core/utils/logger';
 import { getLocalizedMessage, isValidUUID } from '@/core/utils/utilities';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { UtilAddLayer } from '@/core/components/layers/left-panel/add-new-layer/add-layer-utils';
-import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useAppDisplayLanguage, useAppMetadataServiceURL } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useMapProjectionEPSG } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useDataTableFilterSelector } from '@/core/stores/store-interface-and-intial-values/data-table-state';
@@ -30,7 +29,7 @@ import {
   useTimeSliderFiltersSelector,
   useTimeSliderLayersSelector,
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
+import { useLayerController } from '@/core/controllers/layer-controller';
 
 // OGC/ESRI service capability request suffixes
 const WFS_PARAMS = '?service=WFS&version=2.0.0&request=GetCapabilities';
@@ -59,7 +58,6 @@ export function LayerInfoPanel({ layerDetails }: LayerInfoPanelProps): JSX.Eleme
   const sxClasses = getSxClasses(theme);
 
   // Store hooks
-  const mapId = useGeoViewMapId();
   const language = useAppDisplayLanguage();
   const metadataUrl = useAppMetadataServiceURL();
   const mapProjectionEPSG = useMapProjectionEPSG();
@@ -75,9 +73,10 @@ export function LayerInfoPanel({ layerDetails }: LayerInfoPanelProps): JSX.Eleme
   const layerDisplayDateTimezone = useLayerDisplayDateTimezone(layerDetails.layerPath);
   const layerTimeDimension = useLayerTimeDimension(layerDetails.layerPath);
   const timeSliderDimension = useTimeSliderLayersSelector(layerDetails.layerPath);
+  const layerController = useLayerController();
 
-  // TODO: CHECK - This should probably be using a store hook
-  const layerNativeProjection = LegendEventProcessor.getLayerServiceProjection(mapId, layerDetails.layerPath);
+  // TODO: CHECK - This should probably be a Zustand store hook instead of a controller getter?
+  const layerNativeProjection = layerController.getLayerMetatadaProjectionEPSG(layerDetails.layerPath);
 
   // Derived values
   const memoLocalizedLayerType = useMemo(() => UtilAddLayer.getLocalizeLayerType(language, true), [language]);

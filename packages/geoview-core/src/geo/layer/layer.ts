@@ -141,7 +141,6 @@ import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/ab
 import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { TypeLegendItem } from '@/core/components/layers/types';
 import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
-import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import { GeoViewError, LayerNoLastQueryToPerformError } from '@/core/exceptions/geoview-exceptions';
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
 import { ShapefileReader } from '@/api/config/reader/shapefile-reader';
@@ -1542,9 +1541,6 @@ export class LayerApi {
    * @throws {LayerNotGeoJsonError} When the layer is not a GeoJson layer.
    */
   async setGeojsonSource(layerPath: string, geojson: GeoJSONObject | string): Promise<void> {
-    // Get the map id
-    const mapId = this.getMapId();
-
     // Get the GeoviewLayer
     const gvLayer = this.getGeoviewLayerRegular(layerPath);
 
@@ -1558,7 +1554,7 @@ export class LayerApi {
     this.#controllers.layerSetController.resetResultSet(layerPath);
 
     // Update feature info
-    DataTableEventProcessor.triggerGetAllFeatureInfo(mapId, layerPath).catch((error: unknown) => {
+    this.#controllers.layerSetController.triggerGetAllFeatureInfo(layerPath).catch((error: unknown) => {
       // Log
       logger.logPromiseFailed(`Update all feature info in setGeojsonSource failed for layer ${layerPath}`, error);
     });
@@ -1698,7 +1694,7 @@ export class LayerApi {
       .map((layer) => layer.getLayerConfig())
       .forEach((layerConfig) => {
         // Trigger a reset
-        DataTableEventProcessor.triggerResetFeatureInfo(this.getMapId(), layerConfig.layerPath);
+        this.#controllers.layerSetController.triggerResetFeatureInfo(layerConfig.layerPath);
       });
   }
 

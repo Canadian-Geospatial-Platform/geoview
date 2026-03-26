@@ -6,7 +6,7 @@ import { Box, Checkbox, Collapse, FormControl, Select, Typography } from '@/ui';
 import { CollectionsIcon, ExpandMoreIcon, ExpandLessIcon } from '@/ui';
 
 import { getSxClasses } from './layer-settings-style';
-import { useLayerSelectorMosaicRule } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerSelectorMosaicRule, useLayerSelectorAllowedMosaicMethods } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 import type { TypeLegendLayer } from '../../types';
 import type { TypeMosaicMethod, TypeMosaicOperation } from '@/api/types/layer-schema-types';
@@ -68,6 +68,7 @@ export function MosaicRulePanel({ layerDetails }: MosaicRulePanelProps): JSX.Ele
   // Store hooks
   const mapId = useGeoViewMapId();
   const mosaicRule = useLayerSelectorMosaicRule(layerDetails.layerPath);
+  const allowedMosaicMethods = useLayerSelectorAllowedMosaicMethods(layerDetails.layerPath);
 
   // State
   const [expanded, setExpanded] = useState(false);
@@ -112,11 +113,9 @@ export function MosaicRulePanel({ layerDetails }: MosaicRulePanelProps): JSX.Ele
       Object.entries(METHOD_ENTRIES)
         .map(([key, { name, labelKey }]) => ({ key, item: { value: key, name, children: t(labelKey) } }))
         .filter((option) => {
-          // TODO: CHECK - This seems wrong, because the memo will not be refreshed when the mosaic methods change (if they do?) - Use a hook?
-          const allowedMethods = LegendEventProcessor.getLayerAllowedMosaicMethods(mapId, layerDetails.layerPath);
-          return !allowedMethods || allowedMethods.includes(option.item.name as TypeMosaicMethod);
+          return !allowedMosaicMethods || allowedMosaicMethods.includes(option.item.name as TypeMosaicMethod);
         }),
-    [t, layerDetails.layerPath, mapId]
+    [t, allowedMosaicMethods]
   );
 
   const memoOperationMenuItems = useMemo(

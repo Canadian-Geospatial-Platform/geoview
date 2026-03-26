@@ -29,7 +29,7 @@ import type { MappedLayerDataType } from './data-table-types';
 import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import DataSkeleton from './data-skeleton';
-import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
+import { useLayerSetController } from '@/core/controllers/layer-set-controller';
 
 interface DataPanelType {
   containerType: TypeContainerBox;
@@ -52,6 +52,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
 
   const mapId = useGeoViewMapId();
   const uiController = useUIController();
+  const layerSetController = useLayerSetController();
   const layerData = useDataTableAllFeaturesDataArray();
   const selectedLayerPath = useDataTableSelectedLayerPath();
   const datatableSettings = useDataTableLayerSettings();
@@ -238,7 +239,8 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
       if (foundLayer) {
         isFirstLoad.current[selectedLayerPath] = true;
         setIsLoading(true);
-        DataTableEventProcessor.triggerGetAllFeatureInfo(mapId, selectedLayerPath)
+        layerSetController
+          .triggerGetAllFeatureInfo(selectedLayerPath)
           .catch((error: unknown) => {
             // Log error
             logger.logError(`Data panel has failed to get all feature info, error: ${error}`);
@@ -248,7 +250,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
           });
       }
     }
-  }, [orderedLayerData, selectedLayerPath, mapId]);
+  }, [orderedLayerData, selectedLayerPath, layerSetController]);
 
   /**
    * Check if layer sttaus is processing while querying
