@@ -99,7 +99,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
       // Show error
       uiController.addNotification({ key: 'geochart', message: errorMessage, notificationType: 'error', count: 0 });
     },
-    [addNotification]
+    [uiController]
   );
 
   /**
