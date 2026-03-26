@@ -14,6 +14,7 @@ import type { Condition } from 'ol/events/condition';
 import { shared as iconImageCache } from 'ol/style/IconImageCache';
 import type { Size } from 'ol/size';
 import type { GeometryFunction } from 'ol/interaction/Draw';
+import ScaleLine from 'ol/control/ScaleLine';
 
 import queryString from 'query-string';
 import type {
@@ -104,7 +105,7 @@ import type { PluginsContainer } from '@/api/plugin/plugin-types';
 import type { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { UIDomain } from '@/core/domains/ui-domain';
 import { LayerDomain } from '@/core/domains/layer-domain';
-import ScaleLine from 'ol/control/ScaleLine';
+import { GeometryApi } from '@/geo/layer/geometry/geometry';
 
 /**
  * Class used to manage created maps.
@@ -306,8 +307,11 @@ export class MapViewer {
     this.#uiDomain = new UIDomain(i18instance, mapFeaturesConfig.displayLanguage ?? 'en');
     this.#layerDomain = new LayerDomain();
 
+    // The geometry api
+    const geometryApi = new GeometryApi(this);
+
     // Initialize the controller registry
-    this.controllers = new ControllerRegistry(this, this.#uiDomain, this.#layerDomain);
+    this.controllers = new ControllerRegistry(this, this.#uiDomain, this.#layerDomain, geometryApi);
     this.controllers.hookControllers();
 
     this.appBarApi = new AppBarApi(this.controllers.uiController);
@@ -322,7 +326,7 @@ export class MapViewer {
     this.basemap = new BasemapApi(this, getStoreMapBasemapOptions(this.mapId));
 
     // Initialize layer api
-    this.layer = new LayerApi(this, this.controllers, this.#layerDomain);
+    this.layer = new LayerApi(this, this.controllers, this.#layerDomain, geometryApi);
 
     // Register handler when basemap has error
     this.basemap.onBasemapError((sender, event) => {

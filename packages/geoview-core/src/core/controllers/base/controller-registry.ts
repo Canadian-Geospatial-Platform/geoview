@@ -1,14 +1,15 @@
-import type { UIDomain } from '@/core/domains/ui-domain';
-import type { LayerDomain } from '@/core/domains/layer-domain';
 import { UIController } from '../ui-controller';
 import { LayerController } from '../layer-controller';
 import { LayerSetController } from '../layer-set-controller';
 import { DrawerController } from '../drawer-controller';
-import type { MapViewer } from '@/geo/map/map-viewer';
-import { getGeoViewStore, hasDrawerPlugin, hasTimeSliderPlugin } from '../../stores/stores-managers';
 import type { AbstractController } from './abstract-controller';
 import { DataTableController } from '../data-table-controller';
 import { TimeSliderController } from '../time-slider-controller';
+import type { UIDomain } from '@/core/domains/ui-domain';
+import type { LayerDomain } from '@/core/domains/layer-domain';
+import { getGeoViewStore, hasDrawerPlugin, hasTimeSliderPlugin } from '@/core/stores/stores-managers';
+import type { MapViewer } from '@/geo/map/map-viewer';
+import type { GeometryApi } from '@/geo/layer/geometry/geometry';
 
 /**
  * Central registry that owns and provides access to all framework-level controllers.
@@ -47,8 +48,9 @@ export class ControllerRegistry {
    * @param mapViewer - The map viewer instance
    * @param uiDomain - The UI domain instance
    * @param layerDomain - The layer domain instance
+   * @param geometryApi - The geometry API instance
    */
-  constructor(mapViewer: MapViewer, uiDomain: UIDomain, layerDomain: LayerDomain) {
+  constructor(mapViewer: MapViewer, uiDomain: UIDomain, layerDomain: LayerDomain, geometryApi: GeometryApi) {
     this.uiController = new UIController(mapViewer, uiDomain);
     this.layerController = new LayerController(mapViewer, layerDomain);
     this.layerSetController = new LayerSetController(mapViewer, layerDomain);
@@ -57,7 +59,7 @@ export class ControllerRegistry {
     // If the drawer plugin is preset (we know via the store)
     if (hasDrawerPlugin(getGeoViewStore(mapViewer.mapId))) {
       // Create the drawer controller only if the drawer plugin is present, as it relies on the drawer state which is part of that plugin
-      this.drawerController = new DrawerController(mapViewer, uiDomain);
+      this.drawerController = new DrawerController(mapViewer, uiDomain, geometryApi);
     }
 
     // If the time slider plugin is present (we know via the store)

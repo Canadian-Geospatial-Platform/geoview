@@ -8,9 +8,9 @@ import {
   useDrawerStyle,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/drawer-state';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
-import { DrawerEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/drawer-event-processor';
 
 import { logger } from 'geoview-core/core/utils/logger';
+import { useDrawerController } from 'geoview-core/core/controllers/drawer-controller';
 
 /** Props for the GeometryPickerPanel component. */
 export interface GeometryPickerPanelProps {
@@ -137,8 +137,8 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
   const { geomTypes, closePanel } = props;
 
   // Get store values
-  const mapId = useGeoViewMapId();
   const displayLanguage = useAppDisplayLanguage();
+  const drawerController = useDrawerController();
 
   // Store actions
   const style = useDrawerStyle();
@@ -184,72 +184,72 @@ export function GeometryPickerPanel(props: GeometryPickerPanelProps): JSX.Elemen
    */
   const safeStartDrawing = useCallback((): void => {
     if (!isDrawing) {
-      DrawerEventProcessor.toggleDrawing(mapId);
+      drawerController.toggleDrawing();
     }
-  }, [isDrawing, mapId]);
+  }, [isDrawing, drawerController]);
 
   /**
    * Sets the current geometry type to Point
    */
   const handleGeometrySelectPoint = useCallback((): void => {
-    DrawerEventProcessor.setActiveGeom(mapId, 'Point');
+    drawerController.setActiveGeom('Point');
     safeStartDrawing();
     closePanel?.();
-  }, [mapId, closePanel, safeStartDrawing]);
+  }, [drawerController, closePanel, safeStartDrawing]);
 
   /**
    * Sets the current geometry type to Text
    */
   const handleGeometrySelectText = useCallback((): void => {
-    DrawerEventProcessor.setActiveGeom(mapId, 'Text');
+    drawerController.setActiveGeom('Text');
     safeStartDrawing();
     closePanel?.();
-  }, [mapId, closePanel, safeStartDrawing]);
+  }, [drawerController, closePanel, safeStartDrawing]);
 
   /**
    * Sets the current geometry type to LineString
    */
   const handleGeometrySelectLineString = useCallback((): void => {
-    DrawerEventProcessor.setActiveGeom(mapId, 'LineString');
+    drawerController.setActiveGeom('LineString');
     safeStartDrawing();
     closePanel?.();
-  }, [mapId, closePanel, safeStartDrawing]);
+  }, [drawerController, closePanel, safeStartDrawing]);
 
   /**
    * Sets the current geometry type to Polygon
    */
   const handleGeometrySelectPolygon = useCallback((): void => {
-    DrawerEventProcessor.setActiveGeom(mapId, 'Polygon');
+    drawerController.setActiveGeom('Polygon');
     safeStartDrawing();
     closePanel?.();
-  }, [mapId, closePanel, safeStartDrawing]);
+  }, [drawerController, closePanel, safeStartDrawing]);
 
   /**
    * Sets the current geometry type to Rectangle
    */
   const handleGeometrySelectRectangle = useCallback((): void => {
-    DrawerEventProcessor.setActiveGeom(mapId, 'Rectangle');
+    drawerController.setActiveGeom('Rectangle');
     safeStartDrawing();
     closePanel?.();
-  }, [mapId, closePanel, safeStartDrawing]);
+  }, [drawerController, closePanel, safeStartDrawing]);
 
   /**
    * Sets the current geometry type to Circle
    */
   const handleGeometrySelectCircle = useCallback((): void => {
-    DrawerEventProcessor.setActiveGeom(mapId, 'Circle');
+    drawerController.setActiveGeom('Circle');
     safeStartDrawing();
     closePanel?.();
-  }, [mapId, closePanel, safeStartDrawing]);
+  }, [drawerController, closePanel, safeStartDrawing]);
 
   /**
    * Sets the current geometry type to Star
    */
   const handleGeometrySelectStar = useCallback((): void => {
-    DrawerEventProcessor.setActiveGeom(mapId, 'Star');
+    drawerController.setActiveGeom('Star');
     safeStartDrawing();
     closePanel?.();
-  }, [mapId, closePanel, safeStartDrawing]);
+  }, [drawerController, closePanel, safeStartDrawing]);
 
   // #endregion
 

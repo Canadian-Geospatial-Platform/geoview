@@ -6,7 +6,7 @@ import type { GeoJSONObject } from 'ol/format/GeoJSON';
 import type { FitOptions } from 'ol/View';
 
 import { GeoCore } from '@/api/config/geocore';
-import { GeometryApi } from '@/geo/layer/geometry/geometry';
+import type { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { FeatureHighlight } from '@/geo/map/feature-highlight';
 
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
@@ -277,7 +277,7 @@ export class LayerApi {
    *
    * @param mapViewer - A reference to the map viewer
    */
-  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain) {
+  constructor(mapViewer: MapViewer, controllerRegistry: ControllerRegistry, layerDomain: LayerDomain, geometryApi: GeometryApi) {
     this.mapViewer = mapViewer;
     this.#controllers = controllerRegistry;
 
@@ -288,7 +288,7 @@ export class LayerApi {
     this.allFeatureInfoLayerSet = controllerRegistry.layerSetController.allFeatureInfoLayerSet;
     this.featureInfoLayerSet = controllerRegistry.layerSetController.featureInfoLayerSet;
 
-    this.geometry = new GeometryApi(this.mapViewer);
+    this.geometry = geometryApi;
     this.featureHighlight = new FeatureHighlight(this.mapViewer);
 
     // Initialize events on domain for the events relay

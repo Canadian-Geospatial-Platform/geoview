@@ -1,4 +1,4 @@
-import { useGeoViewMapId, type TypeWindow } from 'geoview-core';
+import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import { getSxClasses } from 'geoview-core/core/components/nav-bar/nav-bar-style';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
@@ -6,7 +6,7 @@ import { useDrawerUndoDisabled } from 'geoview-core/core/stores/store-interface-
 
 import { IconButton, UndoIcon } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
-import { DrawerEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/drawer-event-processor';
+import { useDrawerController } from 'geoview-core/core/controllers/drawer-controller';
 
 /**
  * Creates an undo button to undo the last drawing action.
@@ -22,10 +22,10 @@ export default function Redo(): JSX.Element {
   const { useMemo } = cgpv.reactUtilities.react;
 
   // Get store values
-  const mapId = useGeoViewMapId();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const displayLanguage = useAppDisplayLanguage();
+  const drawerController = useDrawerController();
 
   // Store actions
   const undoDisabled = useDrawerUndoDisabled();
@@ -34,7 +34,7 @@ export default function Redo(): JSX.Element {
    * Handles a click on the undo button
    */
   const handleUndo = (): void => {
-    DrawerEventProcessor.undo(mapId);
+    drawerController.undo();
   };
 
   return (

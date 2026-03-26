@@ -1,11 +1,11 @@
-import { useGeoViewMapId, type TypeWindow } from 'geoview-core';
+import { type TypeWindow } from 'geoview-core';
 import { getSxClasses } from 'geoview-core/core/components/nav-bar/nav-bar-style';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 
 import { IconButton, UploadIcon } from 'geoview-core/ui';
 import { logger } from 'geoview-core/core/utils/logger';
-import { DrawerEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/drawer-event-processor';
+import { useDrawerController } from 'geoview-core/core/controllers/drawer-controller';
 
 /**
  * Creates an upload button to upload drawings to the viewer.
@@ -21,10 +21,10 @@ export default function Upload(): JSX.Element {
   const { useMemo, useCallback } = cgpv.reactUtilities.react;
 
   // Get store values
-  const mapId = useGeoViewMapId();
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
   const displayLanguage = useAppDisplayLanguage();
+  const drawerController = useDrawerController();
 
   /**
    * Handles a click on the upload button
@@ -37,11 +37,11 @@ export default function Upload(): JSX.Element {
     input.onchange = (event: Event): void => {
       const file = (event.target as HTMLInputElement).files![0];
       if (file) {
-        DrawerEventProcessor.uploadDrawings(mapId, file);
+        drawerController.uploadDrawings(file);
       }
     };
     input.click();
-  }, [mapId]);
+  }, [drawerController]);
 
   return (
     <IconButton
