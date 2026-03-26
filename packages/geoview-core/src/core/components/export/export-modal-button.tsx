@@ -2,9 +2,9 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@mui/material/styles';
 
-import { useUIController } from '@/core/controllers/ui-controller';
 import { IconButton } from '@/ui/icon-button/icon-button';
-import { DownloadIcon } from '@/ui/icons/index';
+import { DownloadIcon } from '@/ui/icons';
+import { useUIController } from '@/core/controllers/ui-controller';
 import { useLayerAreLayersLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 /**

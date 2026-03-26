@@ -6,7 +6,10 @@ import { Box, Checkbox, Collapse, FormControl, Select, Typography } from '@/ui';
 import { CollectionsIcon, ExpandMoreIcon, ExpandLessIcon } from '@/ui';
 
 import { getSxClasses } from './layer-settings-style';
-import { useLayerSelectorMosaicRule, useLayerSelectorAllowedMosaicMethods } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  useLayerSelectorMosaicRule,
+  useLayerSelectorAllowedMosaicMethods,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 import type { TypeLegendLayer } from '../../types';
 import type { TypeMosaicMethod, TypeMosaicOperation } from '@/api/types/layer-schema-types';
