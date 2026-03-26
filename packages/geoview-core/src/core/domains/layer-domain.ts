@@ -380,13 +380,10 @@ export class LayerDomain {
    * Removes the layer from internal registries. For regular (non-group) layers,
    * unregisters the queryable state change handler before deletion.
    *
-   * @param layerPath - The layer path of the layer to delete
+   * @param gvLayer - The GeoView layer to delete
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
    */
-  deleteGVLayer(layerPath: string): void {
-    // Get the layer to delete
-    const gvLayer = this.getGeoviewLayer(layerPath);
-
+  deleteGVLayer(gvLayer: AbstractBaseGVLayer): void {
     // Unregister handler on layer name changed
     gvLayer.offLayerNameChanged(this.#boundedHandleLayerNameChanged);
 
@@ -396,8 +393,8 @@ export class LayerDomain {
       gvLayer.offLayerQueryableChanged(this.#boundedHandleLayerQueryableChanged);
     }
 
-    delete this.#gvLayers[layerPath];
-    delete this.#olLayers[layerPath];
+    delete this.#gvLayers[gvLayer.getLayerPath()];
+    delete this.#olLayers[gvLayer.getLayerPath()];
   }
 
   // #region PRIVATE HANDLERS

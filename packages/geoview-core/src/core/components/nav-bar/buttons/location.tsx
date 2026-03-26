@@ -1,10 +1,12 @@
-import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '@mui/material/styles';
+
 import { IconButton, EmojiPeopleIcon } from '@/ui';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
-import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useUIController } from '@/core/controllers/ui-controller';
 import { logger } from '@/core/utils/logger';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 /**
  * Create a location button to zoom to user location
@@ -20,12 +22,12 @@ export default function Location(): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   // get store actions
-  const { zoomToMyLocation } = useMapStoreActions();
+  const mapId = useGeoViewMapId();
   const uiController = useUIController();
 
   const successCallback = (position: GeolocationPosition): void => {
     // Zoom to my location
-    zoomToMyLocation(position).catch((error: unknown) => {
+    MapEventProcessor.zoomToMyLocation(mapId, position).catch((error: unknown) => {
       // Log
       logger.logPromiseFailed('Failed to zoomToMyLocation in location.successCallback', error);
     });

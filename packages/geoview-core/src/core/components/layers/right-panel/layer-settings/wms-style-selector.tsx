@@ -11,8 +11,8 @@ import { useLayerSelectorWmsStyle } from '@/core/stores/store-interface-and-inti
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import type { TypeMetadataWMSCapabilityLayerStyle } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
-import { useGeoViewMapId } from '@/app';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 interface WmsStyleItemProps {
   style: TypeMetadataWMSCapabilityLayerStyle;

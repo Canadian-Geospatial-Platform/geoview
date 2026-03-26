@@ -7,7 +7,13 @@ import {
   type GeoChartStoreByLayerPath,
   type TypeGeochartResultSetEntry,
 } from './store-interface-and-intial-values/geochart-state';
-import type { TypeOrderedLayerInfo } from './store-interface-and-intial-values/map-state';
+import {
+  type TypeOrderedLayerInfo,
+  getStoreMapLegendCollapsedByPath,
+  getStoreMapOrderedLayerInfo,
+  setStoreMapLegendCollapsed,
+  utilFindMapLayerAndChildrenFromOrderedInfo,
+} from './store-interface-and-intial-values/map-state';
 import { getStoreTimeSliderLayers, type TimeSliderLayerSet } from './store-interface-and-intial-values/time-slider-state';
 import { getStoreSwiperLayerPaths } from './store-interface-and-intial-values/swiper-state';
 import { logger } from '@/core/utils/logger';
@@ -40,8 +46,8 @@ export class StateApi {
    * @returns {boolean} If the legend is collapsed.
    */
   getLegendCollapsedState(layerPath: string): boolean {
-    // Redirect to event processor
-    return MapEventProcessor.getMapLegendCollapsedFromOrderedLayerInfo(this.mapId, layerPath);
+    // Get from store
+    return getStoreMapLegendCollapsedByPath(this.mapId, layerPath);
   }
 
   /**
@@ -92,8 +98,8 @@ export class StateApi {
    * @returns {boolean} If the legend is collapsed.
    */
   setLegendCollapsedState(layerPath: string, collapsed: boolean): void {
-    // Redirect to event processor
-    MapEventProcessor.setMapLegendCollapsed(this.mapId, layerPath, collapsed);
+    // Save to the store
+    setStoreMapLegendCollapsed(this.mapId, layerPath, collapsed);
   }
 
   /**
@@ -108,7 +114,7 @@ export class StateApi {
     // Apply some ordering logic
     const direction = move < 0 ? -1 : 1;
     let absoluteMoves = Math.abs(move);
-    const orderedLayers = [...MapEventProcessor.getMapOrderedLayerInfo(this.mapId)];
+    const orderedLayers = [...getStoreMapOrderedLayerInfo(this.mapId)];
     let startingIndex = -1;
     for (let i = 0; i < orderedLayers.length; i++) if (orderedLayers[i].layerPath === layerPath) startingIndex = i;
 
@@ -119,7 +125,7 @@ export class StateApi {
     }
 
     const layerInfo = orderedLayers[startingIndex];
-    const movedLayers = MapEventProcessor.findMapLayerAndChildrenFromOrderedInfo(mapId, layerPath, orderedLayers);
+    const movedLayers = utilFindMapLayerAndChildrenFromOrderedInfo(layerPath, orderedLayers);
     orderedLayers.splice(startingIndex, movedLayers.length);
     let nextIndex = startingIndex;
     const pathLength = layerInfo.layerPath.split('/').length;

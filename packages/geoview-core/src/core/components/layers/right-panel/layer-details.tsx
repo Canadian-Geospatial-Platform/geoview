@@ -51,7 +51,6 @@ import {
   useMapVisibleLayers,
   useMapSelectorIsLayerHiddenOnMap,
   useMapSelectorLayerVisibility,
-  useMapStoreActions,
   useMapSelectorLayerParentHidden,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
@@ -89,10 +88,10 @@ const Sublayer = memo(({ layer }: SubLayerProps): JSX.Element => {
   const { t } = useTranslation<string>();
 
   // Hooks
+  const mapId = useGeoViewMapId();
   const layerHidden = useMapSelectorIsLayerHiddenOnMap(layer.layerPath);
   const parentHidden = useMapSelectorLayerParentHidden(layer.layerPath);
   const layerVisible = useMapSelectorLayerVisibility(layer.layerPath);
-  const { setOrToggleLayerVisibility } = useMapStoreActions();
 
   // Return the ui
   return (
@@ -100,7 +99,7 @@ const Sublayer = memo(({ layer }: SubLayerProps): JSX.Element => {
       <IconButton
         color="primary"
         role="checkbox"
-        onClick={() => setOrToggleLayerVisibility(layer.layerPath)}
+        onClick={() => MapEventProcessor.setOrToggleMapLayerVisibility(mapId, layer.layerPath)}
         disabled={parentHidden}
         aria-checked={layerVisible === true}
         aria-label={layerVisible ? t('layers.hideLayer', { name: layer.layerName }) : t('layers.showLayer', { name: layer.layerName })}
@@ -146,7 +145,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const highlightedLayer = useLayerHighlightedLayer();
   const availableSettings = LegendEventProcessor.getLayerSettings(mapId, layerDetails.layerPath);
   const hasText = useLayerSelectorHasText(layerDetails.layerPath);
-  const { setOrToggleLayerVisibility } = useMapStoreActions();
   const uiController = useUIController();
   const visibleLayers = useMapVisibleLayers();
   const datatableSettings = useDataTableLayerSettings();
@@ -296,12 +294,12 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
     (legendLayer: TypeLegendLayer, newVisibility: boolean): void => {
       legendLayer.children.forEach((child) => {
         if (newVisibility) {
-          if (!visibleLayers.includes(child.layerPath)) setOrToggleLayerVisibility(child.layerPath, true);
-        } else if (visibleLayers.includes(child.layerPath)) setOrToggleLayerVisibility(child.layerPath, false);
+          if (!visibleLayers.includes(child.layerPath)) MapEventProcessor.setOrToggleMapLayerVisibility(mapId, child.layerPath, true);
+        } else if (visibleLayers.includes(child.layerPath)) MapEventProcessor.setOrToggleMapLayerVisibility(mapId, child.layerPath, false);
         if (child.children.length) setVisibilityForAllSublayers(child, newVisibility);
       });
     },
-    [setOrToggleLayerVisibility, visibleLayers]
+    [mapId, visibleLayers]
   );
 
   /**

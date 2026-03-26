@@ -21,7 +21,11 @@ import type {
   BasemapJsonResponse,
 } from '@/geo/layer/basemap/basemap-types';
 import { Projection } from '@/geo/utils/projection';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import {
+  getStoreMapBasemapOptions,
+  getStoreMapCurrentProjection,
+  setStoreMapAttribution,
+} from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
@@ -417,7 +421,7 @@ export class BasemapApi {
     let maxZoom = 23;
 
     // Check if projection is provided for the basemap creation
-    const projectionCode = projection === undefined ? MapEventProcessor.getMapState(this.mapViewer.mapId).currentProjection : projection;
+    const projectionCode = projection === undefined ? getStoreMapCurrentProjection(this.mapViewer.mapId) : projection;
 
     // Check if language is provided for the basemap creation
     const languageCode = language === undefined ? this.mapViewer.getDisplayLanguage() : language;
@@ -607,7 +611,7 @@ export class BasemapApi {
    */
   async loadDefaultBasemaps(projection?: TypeValidMapProjectionCodes, language?: TypeDisplayLanguage): Promise<void> {
     // Create the core basemap
-    const basemap = await this.createCoreBasemap(MapEventProcessor.getBasemapOptions(this.mapViewer.mapId), projection, language);
+    const basemap = await this.createCoreBasemap(getStoreMapBasemapOptions(this.mapViewer.mapId), projection, language);
 
     // Info used by create custom basemap
     this.defaultOrigin = basemap?.defaultOrigin;
@@ -650,7 +654,7 @@ export class BasemapApi {
     this.activeBasemap = basemap;
 
     // Set store attribution for the selected basemap or empty string if not provided
-    MapEventProcessor.setMapAttribution(this.mapViewer.mapId, basemap ? basemap.attribution : ['']);
+    setStoreMapAttribution(this.mapViewer.mapId, basemap ? basemap.attribution : ['']);
 
     // Update the basemap layers on the map
     if (basemap?.layers) {

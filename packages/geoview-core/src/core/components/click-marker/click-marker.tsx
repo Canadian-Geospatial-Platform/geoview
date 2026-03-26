@@ -3,9 +3,14 @@ import { useEffect, useRef, memo } from 'react';
 import type { Coordinate } from 'ol/coordinate';
 import { Box, ClickMapMarker } from '@/ui';
 
-import { useMapClickMarker, useMapClickCoordinates, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import {
+  useMapClickMarker,
+  useMapClickCoordinates,
+  setStoreMapOverlayClickMarkerRef,
+} from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 export type TypeClickMarker = {
   lonlat: Coordinate;
@@ -23,26 +28,27 @@ export const ClickMarker = memo(function ClickMarker(): JSX.Element {
   logger.logTraceRender('components/click-marker/click-marker');
 
   // State
+  const mapId = useGeoViewMapId();
   const clickMarkerRef = useRef<HTMLDivElement>(null);
-  const clickMarkerId = `${useGeoViewMapId()}-clickmarker`;
+  const clickMarkerId = `${mapId}-clickmarker`;
 
   // Store
   const clickMarker = useMapClickMarker();
   const clickCoordinates = useMapClickCoordinates();
-  const { setOverlayClickMarkerRef, showClickMarker } = useMapStoreActions();
 
   useEffect(() => {
-    setOverlayClickMarkerRef(clickMarkerRef.current as HTMLElement);
-  }, [setOverlayClickMarkerRef]);
+    // Update the store
+    setStoreMapOverlayClickMarkerRef(mapId, clickMarkerRef.current as HTMLElement);
+  }, [mapId]);
 
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('CLICK-MARKER - clickCoordinates');
 
     if (clickCoordinates) {
-      showClickMarker({ lonlat: clickCoordinates.lonlat });
+      MapEventProcessor.clickMarkerIconShow(mapId, { lonlat: clickCoordinates.lonlat });
     }
-  }, [clickCoordinates, showClickMarker]);
+  }, [clickCoordinates, mapId]);
 
   return (
     <Box

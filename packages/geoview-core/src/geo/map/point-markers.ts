@@ -11,6 +11,7 @@ import { getScriptAndAssetURL } from '@/core/utils/utilities';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { logger } from '@/core/utils/logger';
 import type { TypePointMarker } from '@/api/types/map-schema-types';
+import { getStoreMapPointMarkers } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 /**
  * A class to handle point markers.
@@ -38,8 +39,7 @@ export class PointMarkers {
     this.mapProjection = mapViewer.map.getView().getProjection().getCode();
     this.mapId = mapViewer.mapId;
     this.#featureHighlight = featureHighlight;
-    if (Object.keys(MapEventProcessor.getPointMarkers(this.mapId)).length)
-      this.updatePointMarkers(MapEventProcessor.getPointMarkers(this.mapId));
+    if (Object.keys(getStoreMapPointMarkers(this.mapId)).length) this.updatePointMarkers(getStoreMapPointMarkers(this.mapId));
   }
 
   /**
@@ -122,7 +122,7 @@ export class PointMarkers {
    * @param group - The group to zoom to
    */
   zoomToPointMarkerGroup(group: string): void {
-    const groupMarkers = MapEventProcessor.getPointMarkers(this.mapId)[group];
+    const groupMarkers = getStoreMapPointMarkers(this.mapId)[group];
 
     if (groupMarkers) {
       // Create list of feature IDs

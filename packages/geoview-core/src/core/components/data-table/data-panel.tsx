@@ -12,7 +12,7 @@ import {
   setStoreSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { useAppShowUnsymbolizedFeatures } from '@/core/stores/store-interface-and-intial-values/app-state';
-import { useMapStoreActions, useMapAllVisibleandInRangeLayers } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapAllVisibleandInRangeLayers, getStoreMapIsLayerHiddenOnMap } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useLayerNames, useLayerStatuses } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
   useUIActiveAppBarTab,
@@ -55,7 +55,6 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   const layerData = useDataTableAllFeaturesDataArray();
   const selectedLayerPath = useDataTableSelectedLayerPath();
   const datatableSettings = useDataTableLayerSettings();
-  const { isLayerHiddenOnMap } = useMapStoreActions();
   const visibleInRangeLayers = useMapAllVisibleandInRangeLayers();
   const activeFooterBarTab = useUIActiveFooterBarTab();
   const activeAppBarTab = useUIActiveAppBarTab();
@@ -73,8 +72,9 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   const orderedLayerData = useMemo(() => {
     return visibleInRangeLayers
       .map((layerPath) => mappedLayerData.filter((data) => data.layerPath === layerPath)[0])
-      .filter((layer) => layer !== undefined && !isLayerHiddenOnMap(layer.layerPath));
-  }, [mappedLayerData, visibleInRangeLayers, isLayerHiddenOnMap]);
+      .filter((layer) => layer !== undefined && !getStoreMapIsLayerHiddenOnMap(mapId, layer.layerPath));
+    // TODO: CHECK - Above, we're using a state selector, where we should probably use a state hook. We do this here and elsewhere with the same selector.
+  }, [mappedLayerData, visibleInRangeLayers, mapId]);
 
   /**
    * Update local states when layer is changed from layer list.

@@ -30,11 +30,11 @@ import {
   setStoreLayerSelectedLayersTabLayer,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import {
-  useMapStoreActions,
   useMapSelectorLayerLegendCollapsed,
   useMapSelectorLayerVisibility,
   useMapSelectorLayerInVisibleRange,
   useMapSelectorLayerParentHidden,
+  setStoreMapToggleLegendCollapsed,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { DeleteUndoButton } from '@/core/components/layers/delete-undo-button';
 import { LayersList } from './layers-list';
@@ -85,7 +85,6 @@ export function SingleLayer({
   const reloadRequestedRef = useRef<boolean>(false);
 
   // Get store states
-  const { setOrToggleLayerVisibility, toggleLegendCollapsed, reorderLayer } = useMapStoreActions();
   const mapId = useGeoViewMapId();
   const selectedLayerPath = useLayerSelectedLayerPath();
   const displayState = useLayerDisplayState();
@@ -225,8 +224,8 @@ export function SingleLayer({
     selectLayerIfNeeded();
 
     // Set legend collapse value
-    toggleLegendCollapsed(layerPath);
-  }, [layerPath, selectLayerIfNeeded, toggleLegendCollapsed, blurOtherLayerButtons]);
+    setStoreMapToggleLegendCollapsed(mapId, layerPath);
+  }, [layerPath, selectLayerIfNeeded, mapId, blurOtherLayerButtons]);
 
   const handleExpandGroupKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>): void => {
@@ -238,13 +237,13 @@ export function SingleLayer({
         selectLayerIfNeeded(false);
 
         // Set legend collapse value
-        toggleLegendCollapsed(layerPath);
+        setStoreMapToggleLegendCollapsed(mapId, layerPath);
 
         // Allow the toggle expansion action to work
         event.preventDefault();
       }
     },
-    [layerPath, toggleLegendCollapsed, blurOtherLayerButtons, selectLayerIfNeeded]
+    [layerPath, mapId, blurOtherLayerButtons, selectLayerIfNeeded]
   );
 
   const handleLayerClick = useCallback((): void => {
@@ -266,14 +265,15 @@ export function SingleLayer({
       // Select the layer if not already selected
       selectLayerIfNeeded();
 
-      reorderLayer(layerPath, direction);
+      // Reorder
+      MapEventProcessor.reorderLayer(mapId, layerPath, direction);
 
       // Scroll into view after DOM updates (scrollListItemIntoView utility does not work well for this)
       requestAnimationFrame(() => {
         layerListItemRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
       });
     },
-    [layerPath, selectLayerIfNeeded, reorderLayer]
+    [layerPath, selectLayerIfNeeded, mapId]
   );
 
   const handleArrowKeyDown = useCallback(
@@ -282,7 +282,8 @@ export function SingleLayer({
         // Select the layer if not already selected
         selectLayerIfNeeded(false);
 
-        reorderLayer(layerPath, direction);
+        // Reorder
+        MapEventProcessor.reorderLayer(mapId, layerPath, direction);
 
         // Allow the reorder action to work
         event.preventDefault();
@@ -293,7 +294,7 @@ export function SingleLayer({
         });
       }
     },
-    [layerPath, selectLayerIfNeeded, reorderLayer]
+    [layerPath, selectLayerIfNeeded, mapId]
   );
 
   const handleArrowKeyDownWrapper = useCallback(
@@ -339,8 +340,8 @@ export function SingleLayer({
     selectLayerIfNeeded();
 
     // Toggle visibility
-    setOrToggleLayerVisibility(layerPath);
-  }, [layerPath, selectLayerIfNeeded, setOrToggleLayerVisibility]);
+    MapEventProcessor.setOrToggleMapLayerVisibility(mapId, layerPath);
+  }, [layerPath, mapId, selectLayerIfNeeded]);
 
   const handleToggleVisibilityKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLButtonElement>): void => {
@@ -350,13 +351,13 @@ export function SingleLayer({
         selectLayerIfNeeded(false);
 
         // Toggle visibility
-        setOrToggleLayerVisibility(layerPath);
+        MapEventProcessor.setOrToggleMapLayerVisibility(mapId, layerPath);
 
         // Allow the toggle visibility action to work
         event.preventDefault();
       }
     },
-    [layerPath, selectLayerIfNeeded, setOrToggleLayerVisibility]
+    [layerPath, mapId, selectLayerIfNeeded]
   );
 
   const handleZoomToLayerVisibleScale = useCallback((): void => {

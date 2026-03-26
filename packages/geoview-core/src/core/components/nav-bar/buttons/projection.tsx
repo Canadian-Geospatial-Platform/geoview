@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { createElement, useCallback } from 'react';
-import { useMapProjection, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapProjection } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from '@/core/components/nav-bar/nav-bar-panel-button';
 import type { TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
@@ -10,6 +10,8 @@ import { IconButton } from '@/ui/icon-button/icon-button';
 import { List, ListItem } from '@/ui/list';
 import { ProjectionIcon, PublicIcon } from '@/ui/icons';
 import { useTranslation } from 'react-i18next';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 const projectionChoiceOptions: {
   [key: string]: {
@@ -32,8 +34,8 @@ export default function Projection(): JSX.Element {
   const { t } = useTranslation<string>();
 
   // Store
+  const mapId = useGeoViewMapId();
   const projection = useMapProjection();
-  const { setProjection } = useMapStoreActions();
 
   /**
    * Handles map projection choice
@@ -41,9 +43,9 @@ export default function Projection(): JSX.Element {
    */
   const handleChoice = useCallback(
     (projectionCode: TypeValidMapProjectionCodes): void => {
-      setProjection(projectionCode);
+      MapEventProcessor.setProjectionAndForget(mapId, projectionCode);
     },
-    [setProjection]
+    [mapId]
   );
 
   /**

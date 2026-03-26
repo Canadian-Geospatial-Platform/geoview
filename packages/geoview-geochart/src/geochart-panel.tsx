@@ -7,8 +7,8 @@ import { Typography } from 'geoview-core/ui/typography/typography';
 import { Box } from 'geoview-core/ui';
 import {
   useMapClickCoordinates,
-  useMapStoreActions,
   useMapAllVisibleandInRangeLayers,
+  getStoreMapIsLayerHiddenOnMap,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 import { useLayerNames, useLayerStatuses } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeGeochartResultSetEntry } from 'geoview-core/core/stores/store-interface-and-intial-values/geochart-state';
@@ -54,7 +54,6 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
   const visibleInRangeLayers = useMapAllVisibleandInRangeLayers();
   const storeArrayOfLayerData = useGeochartLayerDataArrayBatch();
   const selectedLayerPath = useGeochartSelectedLayerPath();
-  const { isLayerHiddenOnMap } = useMapStoreActions();
   const displayLanguage = useAppDisplayLanguage();
   const mapClickCoordinates = useMapClickCoordinates();
   const layerNames = useLayerNames();
@@ -164,7 +163,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
     // Set the layers list
     return visibleInRangeLayers.reduce<LayerListEntry[]>((acc, layerPath) => {
       const layer = storeArrayOfLayerData.find(
-        (layerData) => layerData.layerPath === layerPath && !isLayerHiddenOnMap(layerData.layerPath)
+        (layerData) => layerData.layerPath === layerPath && !getStoreMapIsLayerHiddenOnMap(mapId, layerData.layerPath)
       );
 
       if (layer && memoConfigObj[layer.layerPath]) {
@@ -182,16 +181,7 @@ export function GeoChartPanel(props: GeoChartPanelProps): JSX.Element {
 
       return acc;
     }, []);
-  }, [
-    storeArrayOfLayerData,
-    visibleInRangeLayers,
-    memoConfigObj,
-    isLayerHiddenOnMap,
-    layerNames,
-    layerStatuses,
-    getNumFeaturesLabel,
-    mapId,
-  ]);
+  }, [storeArrayOfLayerData, visibleInRangeLayers, memoConfigObj, layerNames, layerStatuses, getNumFeaturesLabel, mapId]);
 
   /** Memoizes the selected layer for the LayerList component. */
   const memoLayerSelectedItem = useMemo(() => {

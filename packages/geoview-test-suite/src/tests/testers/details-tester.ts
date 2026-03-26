@@ -226,7 +226,7 @@ export class DetailsTester extends GVAbstractTester {
     test.addStep(`Perform query operation at given coordinates...`);
 
     // Perform a map click using the feature info layer set
-    return (await mapViewer.layer.featureInfoLayerSet.queryLayers(lonlat))[layerPath].features;
+    return (await mapViewer.controllers.layerSetController.queryAtLonLat(lonlat))[layerPath].features;
   }
 
   /**

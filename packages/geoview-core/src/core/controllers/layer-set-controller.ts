@@ -1,3 +1,5 @@
+import type { Coordinate } from 'ol/coordinate';
+
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
 import { useControllers } from '@/core/controllers/controller-manager';
 import type { LayerDomain } from '@/core/domains/layer-domain';
@@ -11,6 +13,7 @@ import {
   getStoreAppBarComponents,
   getStoreFooterBarComponents,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
+import { setStoreMapClickMarkerIconHide } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-layer-set';
@@ -103,14 +106,14 @@ export class LayerSetController extends AbstractMapViewerController {
     // Remove highlighted features and marker if it is the selected layer path
     if (getStoreDetailsSelectedLayerPath(this.getMapId()) === layerPath) {
       MapEventProcessor.removeHighlightedFeature(this.getMapId(), 'all');
-      MapEventProcessor.clickMarkerIconHide(this.getMapId());
+      setStoreMapClickMarkerIconHide(this.getMapId());
     }
   }
 
   /**
-   * TODO: JSDOC THIS
+   * Clears the feature info query results for a specific layer path.
    *
-   * @param layerPath
+   * @param layerPath - The layer path to clear results for
    */
   clearFeatureInfoLayerResults(layerPath: string): void {
     this.featureInfoLayerSet.clearResults(layerPath);
@@ -124,6 +127,20 @@ export class LayerSetController extends AbstractMapViewerController {
    */
   repeatLastQuery(): Promise<TypeFeatureInfoResultSet> {
     return this.featureInfoLayerSet.repeatLastQuery();
+  }
+
+  /**
+   * Performs a details query at the provided longitude/latitude.
+   * This call will also open the details panel if not already open.
+   *
+   * @param longlat - The longitude/latitude coordinates to query
+   */
+  queryAtLonLat(longlat: Coordinate): Promise<TypeFeatureInfoResultSet> {
+    // Query all layers which can be queried
+    return this.featureInfoLayerSet?.queryLayers(longlat, () => {
+      // Query has started, open the details panel
+      this.openDetailsPanelOnMapClick();
+    });
   }
 
   /**
@@ -153,29 +170,24 @@ export class LayerSetController extends AbstractMapViewerController {
   // #region ACTION HANDLERS
 
   /**
-   * TODO: JSDOC THIS
+   * Handles a single click on the map by querying all queryable layers at the click location.
    *
-   * @param mapViewer
-   * @param event
+   * @param mapViewer - The map viewer instance that fired the event
+   * @param event - The map single click event containing the click coordinates
    */
   #handleMapClicked(mapViewer: MapViewer, event: MapSingleClickEvent): void {
-    // Query all layers which can be queried
-    this.featureInfoLayerSet
-      ?.queryLayers(event.lonlat, () => {
-        // Query has started, open the details panel
-        this.openDetailsPanelOnMapClick();
-      })
-      .catch((error: unknown) => {
-        // Log
-        logger.logPromiseFailed('queryLayers in onMapSingleClick in FeatureInfoLayerSet', error);
-      });
+    // Perform a query at the clicked lonlat
+    this.queryAtLonLat(event.lonlat).catch((error: unknown) => {
+      // Log
+      logger.logPromiseFailed('performQueryAtLonLat in #handleMapClicked in LayerSetController', error);
+    });
   }
 
   /**
-   * TODO: JSDOC THIS
+   * Handles the map pointer move event by clearing all hover feature info results.
    *
-   * @param mapViewer
-   * @param event
+   * @param mapViewer - The map viewer instance that fired the event
+   * @param event - The map pointer move event
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   #handleMapPointerMoved(mapViewer: MapViewer, event: MapPointerMoveEvent): void {
@@ -184,10 +196,10 @@ export class LayerSetController extends AbstractMapViewerController {
   }
 
   /**
-   * TODO: JSDOC THIS
+   * Handles the map pointer stop event by querying hoverable layers at the pointer position.
    *
-   * @param mapViewer
-   * @param event
+   * @param mapViewer - The map viewer instance that fired the event
+   * @param event - The map pointer move event containing the pixel coordinates
    */
   #handleMapPointerStopped(mapViewer: MapViewer, event: MapPointerMoveEvent): void {
     // Query

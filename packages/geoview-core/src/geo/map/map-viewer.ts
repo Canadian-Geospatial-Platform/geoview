@@ -2,7 +2,7 @@ import type { Root } from 'react-dom/client';
 
 import type { i18n } from 'i18next';
 
-import type { MapBrowserEvent, MapEvent } from 'ol';
+import { Overlay, type MapBrowserEvent, type MapEvent } from 'ol';
 import { ObjectEvent } from 'ol/Object';
 import OLMap from 'ol/Map';
 import type { FitOptions, ViewOptions } from 'ol/View';
@@ -71,7 +71,29 @@ import type { TypeMapFeaturesConfig, TypeHTMLElement } from '@/core/types/global
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import type { TypeClickMarker } from '@/core/components/click-marker/click-marker';
 import { Notifications } from '@/core/utils/notifications';
-import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import {
+  getStoreMapBasemapOptions,
+  getStoreMapGeolocatorSearchArea,
+  getStoreMapOrderedLayerInfo,
+  setStoreMapLoaded,
+  setStoreMapClickMarkerIconHide,
+  setStoreMapZoom,
+  setStoreMapHomeButtonView,
+  type TypeOrderedLayerInfo,
+  getStoreMapStateJson,
+  setStoreMapDisplayed,
+  setStoreMapPointerPosition,
+  setStoreMapIsMouseInsideMap,
+  setStoreMapRotation,
+  setStoreMapScale,
+  setStoreMapMoveEnd,
+  type TypeScaleInfo,
+  setStoreMapOverlayNorthMarker,
+  setStoreMapOverlayClickMarker,
+  getStoreMapCurrentProjectionEPSG,
+  getStoreMapInteraction,
+  setStoreMapInteraction,
+} from '@/core/stores/store-interface-and-intial-values/map-state';
 import { getStoreDisplayTheme } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { setStoreLayerSelectedLayersTabLayer, type TypeLegend } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { TIME_DELAY_BETWEEN_PROPAGATION_FOR_BATCH } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
@@ -82,6 +104,7 @@ import type { PluginsContainer } from '@/api/plugin/plugin-types';
 import type { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import { UIDomain } from '@/core/domains/ui-domain';
 import { LayerDomain } from '@/core/domains/layer-domain';
+import ScaleLine from 'ol/control/ScaleLine';
 
 /**
  * Class used to manage created maps.
@@ -296,7 +319,7 @@ export class MapViewer {
     this.modal = new ModalApi();
 
     // create basemap and pass in the map id to be able to access the map instance
-    this.basemap = new BasemapApi(this, MapEventProcessor.getBasemapOptions(this.mapId));
+    this.basemap = new BasemapApi(this, getStoreMapBasemapOptions(this.mapId));
 
     // Initialize layer api
     this.layer = new LayerApi(this, this.controllers, this.#layerDomain);
@@ -391,7 +414,7 @@ export class MapViewer {
     this.#checkMapReadyStartTime = Date.now();
 
     // Load the Map itself and the UI controls
-    await MapEventProcessor.initMapControls(this.mapId);
+    await this.initMapControls();
 
     // Load the core packages plugins
     await this.#loadCorePackages();
@@ -418,6 +441,84 @@ export class MapViewer {
 
     // Ready the map
     return this.#readyMap();
+  }
+
+  /**
+   * Initializes the map controls
+   */
+  async initMapControls(): Promise<void> {
+    // Log
+    logger.logTraceCore('MAP EVENT PROCESSOR - initMapControls', this.mapId);
+
+    // use api to access map because this function will set map element in store
+    const { map } = this;
+    const { mapId } = this;
+
+    // Add map controls (scale)
+    const scaleBarMetric = new ScaleLine({
+      units: 'metric',
+      target: document.getElementById(`${mapId}-scaleControlBarMetric`) as HTMLElement,
+      bar: true,
+      text: true,
+    });
+
+    const scaleBarImperial = new ScaleLine({
+      units: 'imperial',
+      target: document.getElementById(`${mapId}-scaleControlBarImperial`) as HTMLElement,
+      bar: true,
+      text: true,
+    });
+
+    map.addControl(scaleBarMetric);
+    map.addControl(scaleBarImperial);
+
+    // Get the projection
+    const mapProjection = Projection.getProjectionFromString(getStoreMapCurrentProjectionEPSG(this.mapId));
+
+    // add map overlays
+    // create overlay for north pole icon
+    const northPoleId = `${mapId}-northpole`;
+    const projectionPosition = Projection.transformFromLonLat([NORTH_POLE_POSITION[1], NORTH_POLE_POSITION[0]], mapProjection);
+
+    const northPoleMarker = new Overlay({
+      id: northPoleId,
+      position: projectionPosition,
+      positioning: 'center-center',
+      element: document.getElementById(northPoleId) as HTMLElement,
+      stopEvent: false,
+    });
+    map.addOverlay(northPoleMarker);
+
+    // create overlay for click marker icon
+    const clickMarkerId = `${mapId}-clickmarker`;
+    const clickMarkerOverlay = new Overlay({
+      id: clickMarkerId,
+      position: [-1, -1],
+      positioning: 'center-center',
+      offset: [-18, -30],
+      element: document.getElementById(clickMarkerId) as HTMLElement,
+      stopEvent: false,
+    });
+    map.addOverlay(clickMarkerOverlay);
+
+    // Save to the store
+    setStoreMapOverlayNorthMarker(mapId, northPoleMarker);
+    setStoreMapOverlayClickMarker(mapId, clickMarkerOverlay);
+
+    // Get the size
+    const size = await this.getMapSize();
+
+    // Set map size
+    MapEventProcessor.setMapSize(mapId, size);
+
+    // Get the scale information
+    const scale = MapViewer.getScaleInfoFromDomElement(mapId);
+
+    // Save to the store
+    setStoreMapScale(mapId, scale);
+
+    // Save to the store
+    setStoreMapInteraction(mapId, getStoreMapInteraction(mapId));
   }
 
   // #region MAP STATES
@@ -490,7 +591,7 @@ export class MapViewer {
   getMapState(): TypeMapState {
     // map state initialize with store data coming from configuration file/object.
     // updated values will be added by store subscription in map-event-processor
-    return MapEventProcessor.getMapState(this.mapId);
+    return getStoreMapStateJson(this.mapId);
   }
 
   /**
@@ -609,7 +710,7 @@ export class MapViewer {
    * @returns The ordered layer info
    */
   getMapLayerOrderInfo(): TypeOrderedLayerInfo[] {
-    return MapEventProcessor.getMapOrderedLayerInfo(this.mapId);
+    return getStoreMapOrderedLayerInfo(this.mapId);
   }
 
   /**
@@ -627,7 +728,7 @@ export class MapViewer {
    * @returns The geolocator search area with coordinates and optional bounding box, or undefined if not set
    */
   getGeolocatorSearchArea(): { coords: Coordinate; bbox?: Extent } | undefined {
-    return MapEventProcessor.getGeolocatorSearchArea(this.mapId);
+    return getStoreMapGeolocatorSearchArea(this.mapId);
   }
 
   /**
@@ -647,7 +748,11 @@ export class MapViewer {
    * @param interaction - Map interaction
    */
   setInteraction(interaction: TypeInteraction): void {
-    MapEventProcessor.setInteraction(this.mapId, interaction);
+    // Set active the map interactions if necessary
+    this.map.getInteractions().forEach((x) => x.setActive(interaction === 'dynamic'));
+
+    // Save to the store
+    setStoreMapInteraction(this.mapId, interaction);
 
     // Register or unregister pointer handlers
     if (interaction === 'static') {
@@ -998,8 +1103,8 @@ export class MapViewer {
    * Hide a click marker from the map
    */
   clickMarkerIconHide(): void {
-    // Redirect to the processor
-    MapEventProcessor.clickMarkerIconHide(this.mapId);
+    // Save to the store
+    setStoreMapClickMarkerIconHide(this.mapId);
   }
 
   /**
@@ -1055,10 +1160,6 @@ export class MapViewer {
    * @returns A promise that resolves when the zoom operation completes
    */
   zoomToExtent(extent: Extent, options?: FitOptions): Promise<void> {
-    // TODO: DISCUSSION - Where is the line between a function using MapEventProcessor in MapViewer vs in MapState action?
-    // TO.DOCONT: This function (and there are many others in this class) redirects to the MapEventProcessor, should it be in MapState with the others or do we keep some in MapViewer and some in MapState?
-    // TO.DOCONT: If we keep some here, we should maybe add a fourth call-stack possibility in the MapEventProcessor paradigm documentation which goes like so:
-    // - 4th paradigm: MapViewer ---calls---> MapEventProcessor ---calls---> MapViewer ---calls/emits events---> MapState.setterActions.
     // Redirect to the processor
     return MapEventProcessor.zoomToExtent(this.mapId, extent, options);
   }
@@ -1079,8 +1180,8 @@ export class MapViewer {
    * @param view - The new view settings
    */
   setHomeButtonView(view: TypeMapViewSettings): void {
-    // Redirect to the processor
-    MapEventProcessor.setHomeButtonView(this.mapId, view);
+    // Save to the store
+    setStoreMapHomeButtonView(this.mapId, view);
   }
 
   /**
@@ -1335,6 +1436,29 @@ export class MapViewer {
   // #region OTHERS
 
   /**
+   * Retrieves the scale information from the DOM elements for the given map ID.
+   * @param {string} mapId - The unique identifier of the map.
+   * @returns {TypeScaleInfo} The scale information object
+   * @static
+   */
+  static getScaleInfoFromDomElement(mapId: string): TypeScaleInfo {
+    // Get metric values
+    const scaleControlBarMetric = document.getElementById(`${mapId}-scaleControlBarMetric`);
+    const lineWidthMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner') as HTMLElement)?.style.width;
+    const labelGraphicMetric = (scaleControlBarMetric?.querySelector('.ol-scale-bar-inner')?.lastChild as HTMLElement)?.innerHTML;
+
+    // Get metric values
+    const scaleControlBarImperial = document.getElementById(`${mapId}-scaleControlBarImperial`);
+    const lineWidthImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner') as HTMLElement)?.style.width;
+    const labelGraphicImperial = (scaleControlBarImperial?.querySelector('.ol-scale-bar-inner')?.lastChild as HTMLElement)?.innerHTML;
+
+    // get resolution value (same for metric and imperial)
+    const labelNumeric = (scaleControlBarMetric?.querySelector('.ol-scale-text') as HTMLElement)?.innerHTML;
+
+    return { lineWidthMetric, labelGraphicMetric, lineWidthImperial, labelGraphicImperial, labelNumeric };
+  }
+
+  /**
    * Gets if north pole is visible. This is not a perfect solution and is more a work around.
    *
    * @returns A promise that resolves with true if visible, false otherwise
@@ -1527,7 +1651,7 @@ export class MapViewer {
     removeUnlisted: boolean = false
   ): TypeMapFeaturesInstance | undefined {
     const mapConfigToUse = mapConfig || this.createMapConfigFromMapState();
-    if (mapConfigToUse) return MapEventProcessor.replaceMapConfigLayerNames(namePairs, mapConfigToUse, removeUnlisted);
+    if (mapConfigToUse) return MapEventProcessor.utilReplaceMapConfigLayerNames(namePairs, mapConfigToUse, removeUnlisted);
     return undefined;
   }
 
@@ -1544,11 +1668,15 @@ export class MapViewer {
     const mapHTMLElement = map.getTargetElement();
     mapHTMLElement.addEventListener('mouseenter', () => {
       mapHTMLElement.focus({ preventScroll: true });
-      MapEventProcessor.setIsMouseInsideMap(this.mapId, true);
+
+      // Save to the store
+      setStoreMapIsMouseInsideMap(this.mapId, true);
     });
     mapHTMLElement.addEventListener('mouseleave', () => {
       mapHTMLElement.blur();
-      MapEventProcessor.setIsMouseInsideMap(this.mapId, false);
+
+      // Save to the store
+      setStoreMapIsMouseInsideMap(this.mapId, false);
     });
 
     // Now that the map dom is loaded, register a handle when size is changing
@@ -1659,8 +1787,8 @@ export class MapViewer {
       // Get the pointer position information based on the map event
       const pointerPosition: TypeMapMouseInfo = GeoUtilities.getPointerPositionFromMapEvent(event, projCode);
 
-      // Save in the store
-      MapEventProcessor.setMapPointerPosition(this.mapId, pointerPosition);
+      // Save to the store
+      setStoreMapPointerPosition(this.mapId, pointerPosition);
 
       // Emit to the outside
       this.#emitMapPointerMove(pointerPosition);
@@ -1704,7 +1832,7 @@ export class MapViewer {
       // Get the pointer position information based on the map event
       const pointerPosition: TypeMapMouseInfo = GeoUtilities.getPointerPositionFromMapEvent(event, projCode);
 
-      // Save in the store
+      // Save to the store
       MapEventProcessor.setClickCoordinates(this.mapId, pointerPosition);
 
       // Emit to the outside
@@ -1727,8 +1855,8 @@ export class MapViewer {
       const zoom = this.getView().getZoom();
       if (!zoom) return;
 
-      // Save in the store
-      MapEventProcessor.setZoom(this.mapId, zoom);
+      // Save to the store
+      setStoreMapZoom(this.mapId, zoom);
 
       // Get all layers
       const allLayers = this.layer.getGeoviewLayers();
@@ -1751,7 +1879,7 @@ export class MapViewer {
           inVisibleRange = childLayers.some((childLayer) => childLayer.inVisibleRange(zoom));
         }
 
-        // Save in the store
+        // Save to the store
         MapEventProcessor.setLayerInVisibleRange(this.mapId, layerPath, inVisibleRange);
       });
 
@@ -1774,8 +1902,8 @@ export class MapViewer {
       // Get the map rotation
       const rotation = this.getView().getRotation();
 
-      // Save in the store
-      MapEventProcessor.setRotation(this.mapId, rotation);
+      // Save to the store
+      setStoreMapRotation(this.mapId, rotation);
 
       // Emit to the outside
       this.#emitMapRotation({ rotation });
@@ -1795,14 +1923,14 @@ export class MapViewer {
   async #handleMapChangeSize(event: ObjectEvent): Promise<void> {
     try {
       // Get the scale information
-      const scale = MapEventProcessor.getScaleInfoFromDomElement(this.mapId);
+      const scale = MapViewer.getScaleInfoFromDomElement(this.mapId);
 
       // Get the size
       const size = await this.getMapSize();
 
-      // Save in the store
+      // Save to the store
       MapEventProcessor.setMapSize(this.mapId, size);
-      MapEventProcessor.setMapScale(this.mapId, scale);
+      setStoreMapScale(this.mapId, scale);
 
       // Emit to the outside
       this.#emitMapChangeSize({ size });
@@ -1868,12 +1996,12 @@ export class MapViewer {
     // Wait at least the minimum delay before officializing the map as loaded for the UI
     await delay(MapViewer.#MIN_DELAY_LOADING - elapsedMilliseconds); // Negative value will simply resolve immediately
 
-    // Save in the store that the map is loaded
+    // Save to the store that the map is loaded
     // GV This removes the spinning circle overlay and starts showing the map correctly in the html dom
-    MapEventProcessor.setMapLoaded(this.mapId, true);
+    setStoreMapLoaded(this.mapId, true);
 
-    // Save in the store that the map is properly being displayed now
-    MapEventProcessor.setMapDisplayed(this.mapId);
+    // Save to the store that the map is properly being displayed now
+    setStoreMapDisplayed(this.mapId);
 
     // Update the map controls based on the original map state (equivalent of initMapControls, just later in the process)
     await this.#updateMapControls();
@@ -1967,10 +2095,10 @@ export class MapViewer {
     const extent = this.getView().calculateExtent();
 
     // Get the scale information
-    const scale = MapEventProcessor.getScaleInfoFromDomElement(this.mapId);
+    const scale = MapViewer.getScaleInfoFromDomElement(this.mapId);
 
-    // Save in the store
-    MapEventProcessor.setMapMoveEnd(this.mapId, centerCoordinates, pointerPosition, degreeRotation, isNorthVisible, extent, scale);
+    // Save to the store
+    setStoreMapMoveEnd(this.mapId, centerCoordinates, pointerPosition, degreeRotation, isNorthVisible, extent, scale);
   }
 
   /**

@@ -4,7 +4,11 @@ import { useTranslation } from 'react-i18next';
 
 import { Box, List, Typography, IconButton, FullscreenIcon } from '@/ui';
 import { logger } from '@/core/utils/logger';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import {
+  getStoreMapOrderedLayerInfo,
+  setStoreMapAllMapLayerCollapsed,
+  setStoreMapLegendCollapsed,
+} from '@/core/stores/store-interface-and-intial-values/map-state';
 
 import { getSxClasses } from './legend-styles';
 import { LegendLayer } from './legend-layer';
@@ -200,7 +204,7 @@ export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onC
 
     if (isOpen) {
       // Entering fullscreen: save collapse state and expand all
-      const orderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(mapId);
+      const orderedLayerInfo = getStoreMapOrderedLayerInfo(mapId);
       const collapseState: Record<string, boolean> = {};
 
       orderedLayerInfo.forEach((layer) => {
@@ -209,14 +213,15 @@ export function LegendFullscreen({ layersList, mapId, containerType, isOpen, onC
 
       setSavedCollapseState(collapseState);
 
-      // Expand all layers
-      MapEventProcessor.setAllMapLayerCollapsed(mapId, false);
+      // Save to the store
+      setStoreMapAllMapLayerCollapsed(mapId, false);
     } else {
       // Exiting fullscreen: restore saved collapse state
       setSavedCollapseState((prevState) => {
         if (Object.keys(prevState).length > 0) {
           Object.entries(prevState).forEach(([layerPath, collapsed]) => {
-            MapEventProcessor.setMapLegendCollapsed(mapId, layerPath, collapsed);
+            // Save to the store
+            setStoreMapLegendCollapsed(mapId, layerPath, collapsed);
           });
           // Return empty object to clear state
           return {};

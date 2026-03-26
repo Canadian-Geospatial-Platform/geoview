@@ -1,7 +1,7 @@
 import type { TypeWindow } from 'geoview-core/core/types/global-types';
 import type { Extent } from 'geoview-core/api/types/map-schema-types';
 import { Projection } from 'geoview-core/geo/utils/projection';
-import { useMapProjectionEPSG, useMapStoreActions } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
+import { useMapProjectionEPSG } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 import { useGeoViewMapId } from 'geoview-core/core/stores/geoview-store';
 import { MapEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/map-event-processor';
 import { logger } from 'geoview-core/core/utils/logger';
@@ -54,7 +54,6 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
 
   const mapId = useGeoViewMapId();
   const mapProjectionEPSG = useMapProjectionEPSG();
-  const { highlightBBox } = useMapStoreActions();
 
   /**
    * Handles when the user clicks on an AOI card
@@ -72,14 +71,14 @@ export function AoiPanel(props: AoiPanelProps): JSX.Element {
       MapEventProcessor.zoomToExtent(mapId, extentInMapProjection, { maxZoom: 14 })
         .then(() => {
           // Highlight
-          highlightBBox(extentInMapProjection, false);
+          MapEventProcessor.highlightBBox(mapId, extentInMapProjection, false);
         })
         .catch((error: unknown) => {
           // Log
           logger.logPromiseFailed('in zoomToLonLatExtentOrCoordinate', error);
         });
     },
-    [mapId, mapProjectionEPSG, highlightBBox]
+    [mapId, mapProjectionEPSG]
   );
 
   return (

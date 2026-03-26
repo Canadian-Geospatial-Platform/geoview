@@ -9,7 +9,6 @@ import type { StyleLike } from 'ol/style/Style';
 import type { DrawEvent, GeometryFunction, SketchCoordType } from 'ol/interaction/Draw';
 import { createBox } from 'ol/interaction/Draw';
 
-import { MapEventProcessor } from './map-event-processor';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import type { TypeDisplayLanguage, TypeValidMapProjectionCodes } from '@/api/types/map-schema-types';
 
@@ -58,6 +57,7 @@ import {
   setStoreUndoDisabled,
   updateStoreStateStyle,
 } from '@/core/stores/store-interface-and-intial-values/drawer-state';
+import { getStoreMapCurrentProjection } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { getStoreDisplayLanguage } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { generateId, formatLength, formatArea } from '@/core/utils/utilities';
 import { logger } from '@/core/utils/logger';
@@ -107,7 +107,7 @@ export abstract class DrawerEventProcessor extends AbstractEventProcessor {
    * @param geomType - The geometry type to set as active
    */
   static setActiveGeom(mapId: string, geomType: string): void {
-    // Save to store
+    // Save to the store
     setStoreActiveGeom(mapId, geomType);
 
     // Refresh
@@ -135,7 +135,7 @@ export abstract class DrawerEventProcessor extends AbstractEventProcessor {
    * @param fillColor - The fill color value
    */
   static setFillColor(mapId: string, fillColor: string): void {
-    // Save to store
+    // Save to the store
     setStoreFillColor(mapId, fillColor);
 
     // Update the feature style at large
@@ -149,7 +149,7 @@ export abstract class DrawerEventProcessor extends AbstractEventProcessor {
    * @param strokeColor - The stroke color value
    */
   static setStrokeColor(mapId: string, strokeColor: string): void {
-    // Save to store
+    // Save to the store
     setStoreStrokeColor(mapId, strokeColor);
 
     // Update the feature style at large
@@ -163,7 +163,7 @@ export abstract class DrawerEventProcessor extends AbstractEventProcessor {
    * @param strokeWidth - The stroke width value
    */
   static setStrokeWidth(mapId: string, strokeWidth: number): void {
-    // Save to store
+    // Save to the store
     setStoreStrokeWidth(mapId, strokeWidth);
 
     // Update the feature style at large
@@ -177,7 +177,7 @@ export abstract class DrawerEventProcessor extends AbstractEventProcessor {
    * @param iconSize - The icon size value
    */
   static setDrawerIconSize(mapId: string, iconSize: number): void {
-    // Save to store
+    // Save to the store
     setStoreDrawerIconSize(mapId, iconSize);
 
     // Update the feature style at large
@@ -191,7 +191,7 @@ export abstract class DrawerEventProcessor extends AbstractEventProcessor {
    * @param text - The text content
    */
   static setTextValue(mapId: string, text: string): void {
-    // Save to store
+    // Save to the store
     setStoreTextValue(mapId, text);
 
     // Update the feature style at large
@@ -205,7 +205,7 @@ export abstract class DrawerEventProcessor extends AbstractEventProcessor {
    * @param size - The text size in pixels
    */
   static setTextSize(mapId: string, size: number): void {
-    // Save to store
+    // Save to the store
     setStoreTextSize(mapId, size);
 
     // Update the feature style at large
@@ -219,7 +219,7 @@ export abstract class DrawerEventProcessor extends AbstractEventProcessor {
    * @param font - The font family name
    */
   static setTextFont(mapId: string, font: string): void {
-    // Save to store
+    // Save to the store
     setStoreTextFont(mapId, font);
 
     // Update the feature style at large
@@ -233,7 +233,7 @@ export abstract class DrawerEventProcessor extends AbstractEventProcessor {
    * @param color - The text color value
    */
   static setTextColor(mapId: string, color: string): void {
-    // Save to store
+    // Save to the store
     setStoreTextColor(mapId, color);
 
     // Update the feature style at large
@@ -247,7 +247,7 @@ export abstract class DrawerEventProcessor extends AbstractEventProcessor {
    * @param color - The halo color value
    */
   static setTextHaloColor(mapId: string, color: string): void {
-    // Save to store
+    // Save to the store
     setStoreTextHaloColor(mapId, color);
 
     // Update the feature style at large
@@ -261,7 +261,7 @@ export abstract class DrawerEventProcessor extends AbstractEventProcessor {
    * @param width - The halo width value
    */
   static setTextHaloWidth(mapId: string, width: number): void {
-    // Save to store
+    // Save to the store
     setStoreTextHaloWidth(mapId, width);
 
     // Update the feature style at large
@@ -275,7 +275,7 @@ export abstract class DrawerEventProcessor extends AbstractEventProcessor {
    * @param bold - Whether the text should be bold
    */
   static setTextBold(mapId: string, bold: boolean): void {
-    // Save to store
+    // Save to the store
     setStoreTextBold(mapId, bold);
 
     // Update the feature style at large
@@ -289,7 +289,7 @@ export abstract class DrawerEventProcessor extends AbstractEventProcessor {
    * @param italic - Whether the text should be italic
    */
   static setTextItalic(mapId: string, italic: boolean): void {
-    // Save to store
+    // Save to the store
     setStoreTextItalic(mapId, italic);
 
     // Update the feature style at large
@@ -303,7 +303,7 @@ export abstract class DrawerEventProcessor extends AbstractEventProcessor {
    * @param rotation - The rotation angle
    */
   static setTextRotation(mapId: string, rotation: number): void {
-    // Save to store
+    // Save to the store
     setStoreTextRotation(mapId, rotation);
 
     // Update the feature style at large
@@ -1462,7 +1462,7 @@ export abstract class DrawerEventProcessor extends AbstractEventProcessor {
     if (features.length === 0) return;
 
     // Get current map projection
-    const mapProjection = Projection.PROJECTIONS[MapEventProcessor.getMapState(mapId).currentProjection];
+    const mapProjection = Projection.PROJECTIONS[getStoreMapCurrentProjection(mapId)];
 
     // Convert to GeoJSON with style properties
     const geojson = {
@@ -1551,7 +1551,7 @@ export abstract class DrawerEventProcessor extends AbstractEventProcessor {
         const viewer = this.getMapViewer(mapId);
 
         // Get current map projection
-        const mapProjection = Projection.PROJECTIONS[MapEventProcessor.getMapState(mapId).currentProjection];
+        const mapProjection = Projection.PROJECTIONS[getStoreMapCurrentProjection(mapId)];
 
         const newFeatures: Feature[] = [];
         geojson.features.forEach((geoFeature: GeoJsonFeature) => {

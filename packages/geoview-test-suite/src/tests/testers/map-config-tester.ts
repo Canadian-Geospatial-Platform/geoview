@@ -3,7 +3,6 @@ import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import { delay } from 'geoview-core/core/utils/utilities';
-import { MapEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/map-event-processor';
 import {
   getStoreActiveAppBarTab,
   getStoreActiveFooterBarTab,
@@ -15,7 +14,8 @@ import {
   getStoreDataTableAllFeaturesArray,
   getStoreDataTableSelectedLayerPath,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/data-table-state';
-import { getStoreLayerStateLayerBounds } from 'geoview-core/app';
+import { getStoreLayerStateLayerBounds } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
+import { getStoreMapPointMarkers } from 'geoview-core/core/stores/store-interface-and-intial-values/map-state';
 
 /**
  * Main Map Config testing class.
@@ -369,7 +369,7 @@ export class MapConfigTester extends GVAbstractTester {
       (test) => {
         // Verify that overlay pointsMMarkers objects exist
         test.addStep('Verifying pointMarkers objects are defined...');
-        const pointsMMarkers = MapEventProcessor.getPointMarkers(mapId);
+        const pointsMMarkers = getStoreMapPointMarkers(mapId);
         Test.assertIsDefined('pointMarkers', pointsMMarkers);
 
         // Verify cities group exists

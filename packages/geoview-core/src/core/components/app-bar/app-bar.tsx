@@ -27,7 +27,7 @@ import {
   useUIActiveAppBarTab,
   useUIHiddenTabs,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
-import { useMapInteraction, useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { useMapInteraction, setStoreMapClickMarkerIconHide } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewConfig, useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
@@ -85,7 +85,6 @@ export function AppBar(props: AppBarProps): JSX.Element {
   const appBarComponents = useUIAppbarComponents();
   const { tabId, isOpen, isFocusTrapped } = useUIActiveAppBarTab();
   const hiddenTabs = useUIHiddenTabs();
-  const { hideClickMarker } = useMapStoreActions();
   const activeTrapGeoView = useUIActiveTrapGeoView();
 
   const geoviewElement = useAppGeoviewHTMLElement().querySelector('[id^="mapTargetElement-"]') as HTMLElement;
@@ -225,6 +224,14 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
     return width;
   }, []);
+
+  /**
+   * Handles when the panel closes
+   */
+  const handlePanelClose = useCallback(() => {
+    // Save to the store
+    setStoreMapClickMarkerIconHide(mapId);
+  }, [mapId]);
 
   useEffect(() => {
     // Log
@@ -432,7 +439,7 @@ export function AppBar(props: AppBarProps): JSX.Element {
               panel={buttonPanel.panel}
               button={buttonPanel.button}
               onOpen={buttonPanel.onOpen}
-              onClose={hideClickMarker}
+              onClose={handlePanelClose}
               onKeyDown={(event: KeyboardEvent) => {
                 // Early exit if lightbox is handling ESC
                 if (event.key === 'Escape') {

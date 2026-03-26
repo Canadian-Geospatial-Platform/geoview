@@ -36,7 +36,7 @@ import {
 
 import TopToolbar from './top-toolbar';
 import { useUIController } from '@/core/controllers/ui-controller';
-import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { getStoreMapCurrentProjectionEPSG } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
   useLayerDateTemporalMode,
   useLayerDisplayDateFormat,
@@ -67,6 +67,8 @@ import { GeoviewRenderer } from '@/geo/utils/renderer/geoview-renderer';
 import { LayerFilters } from '@/geo/layer/gv-layers/layer-filters';
 import { DataTableEventProcessor } from '@/api/event-processors/event-processor-children/data-table-event-processor';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { Projection } from '@/geo/utils/projection';
 
 /** The possible filters for numeric columns */
 const NUMERIC_FIELD_FILTERS = [
@@ -101,8 +103,6 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   const sxClasses = getSxClasses(sxtheme);
 
   // get store actions and values
-  const { zoomToExtent, highlightBBox, transformPoints, showClickMarker, addHighlightedFeature, removeHighlightedFeature } =
-    useMapStoreActions();
   const language = useAppDisplayLanguage();
   const datatableSettings = useDataTableLayerSettings();
   const showUnsymbolizedFeatures = useAppShowUnsymbolizedFeatures();
@@ -440,21 +440,21 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
       if (extent) {
         // Project
         const center = getCenter(extent);
-        const newCenter = transformPoints([center], 4326)[0];
+        const newCenter = Projection.transformPoints([center], getStoreMapCurrentProjectionEPSG(mapId), `EPSG:4326`)[0];
 
         // Zoom to extent and wait for it to finish
         // TODO: We have the same patch in details, see if we should create a reusable custom patch / or change design
-        zoomToExtent(extent)
+        MapEventProcessor.zoomToExtent(mapId, extent)
           .then(async () => {
             // Typically, the click marker is removed after a zoom, so wait a bit here and re-add it...
             // TODO: Refactor - Zoom ClickMarker - Improve the logic in general of when/if a click marker should be removed after a zoom
             await delay(150);
 
             // Add (back?) a click marker, a bbox extent who will disapear and remove/add higlight the zoomed feature
-            showClickMarker({ lonlat: newCenter });
-            highlightBBox(extent, false);
-            removeHighlightedFeature('all');
-            addHighlightedFeature(feature);
+            MapEventProcessor.clickMarkerIconShow(mapId, { lonlat: newCenter });
+            MapEventProcessor.highlightBBox(mapId, extent, false);
+            MapEventProcessor.removeHighlightedFeature(mapId, 'all');
+            MapEventProcessor.addHighlightedFeature(mapId, feature);
           })
           .catch((error: unknown) => {
             // Log
@@ -465,7 +465,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
         logger.logError('Cannot zoom to feature, no extent found.');
       }
     },
-    [mapId, layerPath, transformPoints, zoomToExtent, showClickMarker, highlightBBox, removeHighlightedFeature, addHighlightedFeature]
+    [mapId, layerPath]
   );
 
   /**

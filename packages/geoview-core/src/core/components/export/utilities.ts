@@ -3,7 +3,7 @@ import { Buffer } from 'buffer';
 import { renderToString } from 'react-dom/server';
 
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
-import type { TypeNorthArrow, TypeScaleInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import type { TypeNorthArrow, TypeScaleInfo, TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import {
   type TypeTimeSliderValues,
@@ -11,13 +11,9 @@ import {
   getStoreTimeSliderLayers,
   isStoreTimeSliderInitialized,
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
-import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import { getStoreMapOrderedLayerInfo, getStoreMapStateForExportLayout } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { getStoreGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { getStoreLayerStateLegendLayers } from '@/core/stores/store-interface-and-intial-values/layer-state';
-
-// TODO As a utility file, the EventProcessors probably shouldn't be here, but it removes a lot of duplication
-// TO.DO from the pdf-layout and canvas-layout files. Possibly a rename or a better solution could be found.
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 import { logger } from '@/core/utils/logger';
 import { getLocalizedMessage } from '@/core/utils/utilities';
@@ -906,7 +902,7 @@ export class ExportUtilities {
   ): Promise<TypeMapInfoResult> {
     // Get all needed data from store state
     const mapElement = getStoreGeoviewHTMLElement(mapId);
-    const mapState = MapEventProcessor.getMapStateForExportLayout(mapId);
+    const mapState = getStoreMapStateForExportLayout(mapId);
     const { northArrow, northArrowElement, attribution, mapRotation, mapScale, currentProjection } = mapState;
 
     // Get browser map dimensions from viewport element (not canvas, which changes size when rotated)
@@ -989,7 +985,7 @@ export class ExportUtilities {
     const legendLayers = getStoreLayerStateLegendLayers(mapId).filter(
       (layer) => layer.layerStatus === 'loaded' && (layer.items.length === 0 || layer.items.some((item) => item.isVisible))
     );
-    const orderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(mapId);
+    const orderedLayerInfo = getStoreMapOrderedLayerInfo(mapId);
     let timeSliderLayers = undefined;
     if (isStoreTimeSliderInitialized(mapId)) {
       timeSliderLayers = getStoreTimeSliderLayers(mapId);

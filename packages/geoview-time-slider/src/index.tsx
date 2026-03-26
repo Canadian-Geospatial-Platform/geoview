@@ -199,7 +199,7 @@ class TimeSliderPlugin extends FooterPlugin {
     let displayDateFormatToSet: TypeDisplayDateFormat = displayDateFormat as TypeDisplayDateFormat;
     if (typeof displayDateFormat === 'string') displayDateFormatToSet = { en: displayDateFormat, fr: displayDateFormat };
 
-    // Save in the store
+    // Save to the store
     setStoreTimeSliderDisplayDateFormat(this.mapViewer.mapId, layerPath, displayDateFormatToSet);
   }
 
@@ -214,7 +214,7 @@ class TimeSliderPlugin extends FooterPlugin {
     let displayDateFormatToSet: TypeDisplayDateFormat = displayDateFormat as TypeDisplayDateFormat;
     if (typeof displayDateFormat === 'string') displayDateFormatToSet = { en: displayDateFormat, fr: displayDateFormat };
 
-    // Save in the store
+    // Save to the store
     setStoreTimeSliderDisplayDateFormatShort(this.mapViewer.mapId, layerPath, displayDateFormatToSet);
   }
 
@@ -229,7 +229,7 @@ class TimeSliderPlugin extends FooterPlugin {
     // Validate the timezone before sending it in the store in order to protect the ui
     DateMgt.validateTimezone(displayDateTimezone);
 
-    // Save in the store
+    // Save to the store
     setStoreTimeSliderDisplayDateTimezone(this.mapViewer.mapId, layerPath, displayDateTimezone);
   }
 

@@ -186,7 +186,7 @@ export class GeochartTester extends GVAbstractTester {
     test.addStep(`Perform query operation at given coordinates...`);
 
     // Perform a map click using the feature info layer set
-    await mapViewer.layer.featureInfoLayerSet.queryLayers(lonlat);
+    await mapViewer.controllers.layerSetController.queryAtLonLat(lonlat);
 
     // Update the step
     test.addStep(`Setting active footerbar tab to geochart...`);

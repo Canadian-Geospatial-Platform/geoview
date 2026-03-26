@@ -16,6 +16,12 @@ import type {
 import { isValidUUID } from '@/core/utils/utilities';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { logger } from '@/core/utils/logger';
+import {
+  getStoreMapOrderedLayerIndexByPath,
+  getStoreMapOrderedLayerInfo,
+  setStoreMapLayerQueryable,
+  utilFindMapLayerAndChildrenFromOrderedInfo,
+} from '@/core/stores/store-interface-and-intial-values/map-state';
 
 /**
  * LayerController class that extends the AbstractMapViewerController and provides methods to interact with map layers.
@@ -30,7 +36,7 @@ export class LayerController extends AbstractMapViewerController {
   /** The bounded reference to the handle layer entry config unregistered */
   #boundedHandleLayerEntryConfigUnregistered: DomainLayerStatusChangedDelegate;
 
-  /** The bounded reference to the handle layer queryable changed */
+  /** The bounded reference to the handle layer name changed */
   #boundedHandleLayerNameChanged: DomainLayerNameChangedDelegate;
 
   /** The bounded reference to the handle layer queryable changed */
@@ -48,13 +54,13 @@ export class LayerController extends AbstractMapViewerController {
     // Keep the domain internally
     this.#layerDomain = layerDomain;
 
-    // Keep a bounded reference to the handle layer queryable changed
+    // Keep a bounded reference to the handle layer entry config registered
     this.#boundedHandleLayerEntryConfigRegistered = this.#handleLayerEntryConfigRegistered.bind(this);
 
-    // Keep a bounded reference to the handle layer queryable changed
+    // Keep a bounded reference to the handle layer entry config unregistered
     this.#boundedHandleLayerEntryConfigUnregistered = this.#handleLayerEntryConfigUnregistered.bind(this);
 
-    /** Keep a bounded reference to the handle layer name changed */
+    // Keep a bounded reference to the handle layer name changed
     this.#boundedHandleLayerNameChanged = this.#handleLayerNameChanged.bind(this);
 
     // Keep a bounded reference to the handle layer queryable changed
@@ -88,18 +94,29 @@ export class LayerController extends AbstractMapViewerController {
     this.#layerDomain.offLayerQueryableChanged(this.#boundedHandleLayerQueryableChanged);
 
     // Unhooks when a layer name is changed in the Layer domain
-    this.#layerDomain.onLayerNameChanged(this.#boundedHandleLayerNameChanged);
+    this.#layerDomain.offLayerNameChanged(this.#boundedHandleLayerNameChanged);
 
     // Unhooks when a layer config has been unregistered from the domain
-    this.#layerDomain.onLayerEntryConfigUnregistered(this.#boundedHandleLayerEntryConfigUnregistered);
+    this.#layerDomain.offLayerEntryConfigUnregistered(this.#boundedHandleLayerEntryConfigUnregistered);
 
     // Unhooks when a layer config has been registered in the domain
-    this.#layerDomain.onLayerEntryConfigRegistered(this.#boundedHandleLayerEntryConfigRegistered);
+    this.#layerDomain.offLayerEntryConfigRegistered(this.#boundedHandleLayerEntryConfigRegistered);
   }
 
   // #endregion OVERRIDES
 
   // #region PUBLIC METHODS
+
+  /**
+   * Retrieves the layer entry configuration for the given layer path, if it exists.
+   *
+   * @param layerPath - The layer path to look up
+   * @returns The layer entry config, or undefined if not found
+   */
+  getLayerEntryConfigIfExists(layerPath: string): ConfigBaseClass | undefined {
+    // Retrieve from the domain
+    return this.#layerDomain.getLayerEntryConfigIfExists(layerPath);
+  }
 
   /**
    * Sets the name of the layer indicated by the given layer path.
@@ -130,10 +147,13 @@ export class LayerController extends AbstractMapViewerController {
   // GV.CONT but for now this allows us to keep domain-store interactions in one place and call application-level processes as needed during migration.
 
   /**
-   * TODO: JSDOC THIS
+   * Handles when a layer entry config is registered in the domain.
    *
-   * @param sender
-   * @param event
+   * Registers the layer for ordered layer info, notifies all layer sets,
+   * and sets the layer status to registered.
+   *
+   * @param sender - The layer domain that fired the event
+   * @param event - The event containing the registered layer config
    */
   #handleLayerEntryConfigRegistered(sender: LayerDomain, event: DomainLayerStatusChangedEvent): void {
     // Register for ordered layer information
@@ -150,10 +170,12 @@ export class LayerController extends AbstractMapViewerController {
   }
 
   /**
-   * TODO: JSDOC THIS
+   * Handles when a layer entry config is unregistered from the domain.
    *
-   * @param sender
-   * @param event
+   * Notifies all layer sets to unregister the layer.
+   *
+   * @param sender - The layer domain that fired the event
+   * @param event - The event containing the unregistered layer config
    */
   #handleLayerEntryConfigUnregistered(sender: LayerDomain, event: DomainLayerStatusChangedEvent): void {
     // GV Could be moved to layer-set-controller, but keeping it here for now to be next to the layer entry config registered event hook
@@ -176,17 +198,21 @@ export class LayerController extends AbstractMapViewerController {
   }
 
   /**
-   * TODO: JSDOC THIS
+   * Handles when a layer's queryable state changes in the domain.
    *
-   * @param sender
-   * @param event
+   * Propagates the change to the store and clears feature info results
+   * when queryable is turned off.
+   *
+   * @param sender - The layer domain that fired the event
+   * @param event - The event containing the layer and new queryable state
    */
   #handleLayerQueryableChanged(sender: LayerDomain, event: DomainLayerQueryableChangedEvent): void {
     // Save in store
     setStoreLayerQueryable(this.getMapId(), event.layer.getLayerPath(), event.queryable);
 
-    // Redirect
-    MapEventProcessor.setMapLayerQueryable(this.getMapId(), event.layer.getLayerPath(), event.queryable);
+    // Save in store
+    // TODO: CHECK - Why 2 store locations to store the queryable state? Centralize?
+    setStoreMapLayerQueryable(this.getMapId(), event.layer.getLayerPath(), event.queryable);
 
     // If not queryable
     if (!event.queryable) {
@@ -206,7 +232,7 @@ export class LayerController extends AbstractMapViewerController {
    */
   #registerForOrderedLayerInfo(layerConfig: ConfigBaseClass): void {
     // If the map index for the given layer path hasn't been set yet
-    if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), layerConfig.layerPath) === -1) {
+    if (getStoreMapOrderedLayerIndexByPath(this.getMapId(), layerConfig.layerPath) === -1) {
       // Get the parent layer path
       const parentLayerPathArray = layerConfig.layerPath.split('/');
       parentLayerPathArray.pop();
@@ -217,16 +243,19 @@ export class LayerController extends AbstractMapViewerController {
 
       // If the map index of a parent layer path has been set and it is a valid UUID, the ordered layer info is a place holder
       // registered while the geocore layer info was fetched
-      if (MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), parentLayerPath) !== -1 && isValidUUID(parentLayerPath)) {
+      if (getStoreMapOrderedLayerIndexByPath(this.getMapId(), parentLayerPath) !== -1 && isValidUUID(parentLayerPath)) {
         // Replace the placeholder ordered layer info
         MapEventProcessor.replaceOrderedLayerInfo(this.getMapId(), layerConfig, parentLayerPath);
       } else if (parentLayerConfig) {
         // Here the map index of a sub layer path hasn't been set and there's a parent layer config for the current layer config
         // Get the map index of the parent layer path
-        const parentLayerIndex = MapEventProcessor.getMapIndexFromOrderedLayerInfo(this.getMapId(), parentLayerPath);
+        const parentLayerIndex = getStoreMapOrderedLayerIndexByPath(this.getMapId(), parentLayerPath);
 
         // Get the number of layers
-        const numberOfLayers = MapEventProcessor.findMapLayerAndChildrenFromOrderedInfo(this.getMapId(), parentLayerPath).length;
+        const numberOfLayers = utilFindMapLayerAndChildrenFromOrderedInfo(
+          parentLayerPath,
+          getStoreMapOrderedLayerInfo(this.getMapId())
+        ).length;
 
         // If the map index of the parent has been set
         if (parentLayerIndex !== -1) {

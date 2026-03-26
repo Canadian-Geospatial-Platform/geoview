@@ -3,7 +3,7 @@ import type { QueryType, TypeFeatureInfoResult } from '@/api/types/map-schema-ty
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
 import type { PropagationType } from '@/geo/layer/layer-sets/abstract-layer-set';
 import { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { setStoreMapHoverFeatureInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
 import type {
   TypeHoverFeatureInfo,
   TypeHoverResultSet,
@@ -214,8 +214,8 @@ export class HoverFeatureInfoLayerSet extends AbstractLayerSet {
    * @param hoverFeatureInfo - The hover info to propagate to the store
    */
   #propagateToStore(hoverFeatureInfo: TypeHoverFeatureInfo | undefined): void {
-    // Propagate
-    MapEventProcessor.setMapHoverFeatureInfo(this.getMapId(), hoverFeatureInfo);
+    // Save to the store
+    setStoreMapHoverFeatureInfo(this.getMapId(), hoverFeatureInfo);
   }
 
   /**

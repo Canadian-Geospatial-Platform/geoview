@@ -98,7 +98,15 @@ import { Projection } from '@/geo/utils/projection';
 
 import type { EventDelegateBase } from '@/api/events/event-helper';
 import EventHelper from '@/api/events/event-helper';
-import type { TypeOrderedLayerInfo } from '@/core/stores/store-interface-and-intial-values/map-state';
+import {
+  type TypeOrderedLayerInfo,
+  addStoreMapInitialFilter,
+  getStoreMapConfigCorePackagesConfig,
+  getStoreMapOrderedLayerInfo,
+  getStoreMapOrderedLayerInfoByPath,
+  getStoreMapVisibilityByPath,
+  setStoreMapLayerHoverable,
+} from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
   isStoreTimeSliderInitialized,
   removeStoreTimeSliderLayer,
@@ -139,6 +147,7 @@ import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
 import { ShapefileReader } from '@/api/config/reader/shapefile-reader';
 import { GeoPackageReader } from '@/api/config/reader/geopackage-reader';
 import type { ControllerRegistry } from '@/core/controllers/controller-registry';
+import type { DomainLayerStatusChangedDelegate, DomainLayerStatusChangedEvent, LayerDomain } from '@/core/domains/layer-domain';
 import { EsriDynamicLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/esri-dynamic-layer-entry-config';
 import { CsvLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/csv-layer-entry-config';
 import { EsriFeatureLayerEntryConfig } from '@/api/config/validation-classes/vector-validation-classes/esri-feature-layer-entry-config';
@@ -154,7 +163,6 @@ import { OgcWmsLayerEntryConfig } from '@/api/config/validation-classes/raster-v
 import { OgcWmtsLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/ogc-wmts-layer-entry-config';
 import { XYZTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/xyz-layer-entry-config';
 import { VectorTilesLayerEntryConfig } from '@/api/config/validation-classes/raster-validation-classes/vector-tiles-layer-entry-config';
-import type { DomainLayerStatusChangedDelegate, DomainLayerStatusChangedEvent, LayerDomain } from '@/core/domains/layer-domain';
 
 /**
  * A class to get the layer from layer type. Layer type can be esriFeature, esriDynamic and ogcWMS
@@ -558,8 +566,8 @@ export class LayerApi {
     // I have 3 layers loaded in Details - for example.
     // To fix this, we'll have to synch the ADD_LAYER events and make sure those 'know' what order they should be in when they
     // propagate the mapOrderedLayerInfo in their processes. For now at least, this is repeating the same behavior until the events are fixed.
-    const orderedLayerInfos: TypeOrderedLayerInfo[] = MapEventProcessor.getMapOrderedLayerInfo(this.getMapId()).length
-      ? MapEventProcessor.getMapOrderedLayerInfo(this.getMapId())
+    const orderedLayerInfos: TypeOrderedLayerInfo[] = getStoreMapOrderedLayerInfo(this.getMapId()).length
+      ? getStoreMapOrderedLayerInfo(this.getMapId())
       : [];
     const promisedLayers = await Promise.allSettled(promisesOfGeoviewLayers);
 
@@ -699,8 +707,8 @@ export class LayerApi {
       // The majority of typicaly errors happen in the addGeoviewLayer promise catcher, not here.
 
       // Remove geoCore ordered layer info placeholder
-      if (MapEventProcessor.findMapLayerFromOrderedInfo(this.getMapId(), uuid))
-        MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), uuid, false);
+      const orderedInfo = getStoreMapOrderedLayerInfoByPath(this.getMapId(), uuid);
+      if (orderedInfo) MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), uuid, false);
 
       // Show the error(s)
       this.showLayerError(error, uuid);
@@ -823,7 +831,7 @@ export class LayerApi {
    */
   reloadGeocoreLayers(): void {
     const configs = this.getLayerEntryConfigs();
-    const originalMapOrderedLayerInfo = MapEventProcessor.getMapOrderedLayerInfo(this.getMapId());
+    const originalMapOrderedLayerInfo = getStoreMapOrderedLayerInfo(this.getMapId());
     const parentPaths: string[] = [];
 
     // Have to do the Promise allSettled so the new MapOrderedLayerInfo has all the children layerPaths
@@ -905,16 +913,19 @@ export class LayerApi {
             // Get the geoview layer if exists
             const innerGVLayer = this.getGeoviewLayerIfExists(registeredLayerPath);
 
-            // Remove actual OL layer from the map
-            const layer = innerGVLayer?.getOLLayer();
-            if (layer) this.mapViewer.map.removeLayer(layer);
+            // If found
+            if (innerGVLayer) {
+              // Remove actual OL layer from the map
+              const layer = innerGVLayer.getOLLayer();
+              if (layer) this.mapViewer.map.removeLayer(layer);
 
-            // Unregister the events on the layer
-            if (innerGVLayer instanceof AbstractGVLayer) this.#unregisterLayerHandlers(innerGVLayer);
-            else if (innerGVLayer instanceof GVGroupLayer) this.#unregisterGroupLayerHandlers(innerGVLayer);
+              // Unregister the events on the layer
+              if (innerGVLayer instanceof AbstractGVLayer) this.#unregisterLayerHandlers(innerGVLayer);
+              else if (innerGVLayer instanceof GVGroupLayer) this.#unregisterGroupLayerHandlers(innerGVLayer);
 
-            // Remove from registered layers
-            this.#layerDomain.deleteGVLayer(registeredLayerPath);
+              // Remove from registered layers
+              this.#layerDomain.deleteGVLayer(innerGVLayer);
+            }
           }
         });
 
@@ -1035,7 +1046,7 @@ export class LayerApi {
           delete this.#geoviewLayers[registeredLayerPath];
 
           // Unregister from the domain
-          this.#layerDomain.deleteGVLayer(registeredLayerPath);
+          if (innerGVLayer) this.#layerDomain.deleteGVLayer(innerGVLayer);
         }
       });
 
@@ -1283,7 +1294,7 @@ export class LayerApi {
 
     // Update the legend layers if necessary
     if (refresh) {
-      // Save in the store
+      // Save to the store
       setStoreLayerItemVisibility(this.getMapId(), layerPath, item, visibility, layer.getLayerFilters().getClassFilter());
     }
 
@@ -1326,8 +1337,9 @@ export class LayerApi {
    * @throws {LayerNotFoundError} If the layer cannot be found at the given path.
    */
   setOrToggleLayerVisibility(layerPath: string, newValue?: boolean): boolean {
-    // Apply some visibility logic
-    const layerVisibility = MapEventProcessor.getMapVisibilityFromOrderedLayerInfo(this.getMapId(), layerPath);
+    // Get current visibility based on the store
+    // TODO: CHECK - Should likely check the current visibility by using the layer (domain) instead of the store
+    const layerVisibility = getStoreMapVisibilityByPath(this.getMapId(), layerPath);
 
     // Determine the outcome of the new visibility based on parameters
     const newVisibility = newValue !== undefined ? newValue : !layerVisibility;
@@ -1410,7 +1422,7 @@ export class LayerApi {
     let displayDateFormatToSet: TypeDisplayDateFormat = displayDateFormat as TypeDisplayDateFormat;
     if (typeof displayDateFormat === 'string') displayDateFormatToSet = { en: displayDateFormat, fr: displayDateFormat };
 
-    // Save in the store
+    // Save to the store
     setStoreLayerDisplayDateFormat(this.getMapId(), layerPath, displayDateFormatToSet);
   }
 
@@ -1431,7 +1443,7 @@ export class LayerApi {
     let displayDateFormatToSet: TypeDisplayDateFormat = displayDateFormat as TypeDisplayDateFormat;
     if (typeof displayDateFormat === 'string') displayDateFormatToSet = { en: displayDateFormat, fr: displayDateFormat };
 
-    // Save in the store
+    // Save to the store
     setStoreLayerDisplayDateFormatShort(this.getMapId(), layerPath, displayDateFormatToSet);
   }
 
@@ -2142,8 +2154,9 @@ export class LayerApi {
    * @param event - The event containing the hoverable state change.
    */
   #handleLayerHoverableChanged(layer: AbstractBaseGVLayer, event: LayerHoverableChangedEvent): void {
-    // Redirect
-    MapEventProcessor.setMapLayerHoverable(this.getMapId(), layer.getLayerPath(), event.hoverable);
+    // Save in store
+    // TODO: CHECK - Why 2 store locations to store the hoverable state? Centralize?
+    setStoreMapLayerHoverable(this.getMapId(), layer.getLayerPath(), event.hoverable);
 
     // Save in store
     setStoreLayerHoverable(this.getMapId(), layer.getLayerPath(), event.hoverable);
@@ -2287,9 +2300,12 @@ export class LayerApi {
             configToCreateIndex > configToTestIndex
           ) {
             this.#printDuplicateGeoviewLayerConfigError(geoviewLayerConfigToCreate);
+
             // Remove geoCore ordered layer info placeholder
-            if (MapEventProcessor.findMapLayerFromOrderedInfo(this.getMapId(), geoviewLayerConfigToCreate.geoviewLayerId))
+            const orderedInfo = getStoreMapOrderedLayerInfoByPath(this.getMapId(), geoviewLayerConfigToCreate.geoviewLayerId);
+            if (orderedInfo) {
               MapEventProcessor.removeOrderedLayerInfo(this.getMapId(), geoviewLayerConfigToCreate.geoviewLayerId, false);
+            }
 
             return false;
           }
@@ -2411,7 +2427,7 @@ export class LayerApi {
   #registerForTimeSlider(layer: AbstractGVLayer): void {
     try {
       // Get time slider config if present in map config
-      const timeSliderConfigs = MapEventProcessor.getGeoViewMapConfig(this.getMapId())?.corePackagesConfig?.find((config) =>
+      const timeSliderConfigs = getStoreMapConfigCorePackagesConfig(this.getMapId())?.find((config) =>
         Object.keys(config).includes('time-slider')
       )?.['time-slider'] as Record<'sliders', TypeTimeSliderProps[]>;
 
@@ -2445,7 +2461,8 @@ export class LayerApi {
 
       // If any layer filter
       if (layerFilter) {
-        MapEventProcessor.addInitialFilter(this.getMapId(), layerConfig.layerPath, layerFilter);
+        // Save to the store
+        addStoreMapInitialFilter(this.getMapId(), layerConfig.layerPath, layerFilter);
       }
     }
   }

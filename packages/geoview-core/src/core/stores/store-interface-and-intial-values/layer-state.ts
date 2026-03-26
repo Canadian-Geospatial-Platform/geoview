@@ -18,7 +18,7 @@ import type {
 } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { TypeVectorLayerStyles } from '@/geo/utils/renderer/geoview-renderer';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor'; // FIXME Cyclic dependency, to be removed
+import { getStoreMapOrderedLayerIndexByPath } from './map-state';
 import { LegendEventProcessor } from '@/api/event-processors/event-processor-children/legend-event-processor'; // FIXME Cyclic dependency, to be removed
 import { getStoreDisplayDateFormatDefault, getStoreDisplayDateTimezone } from './app-state';
 import { logger } from '@/core/utils/logger';
@@ -1304,9 +1304,7 @@ export const setStoreLayerSelectedLayersTabLayer = (mapId: string, layerPath: st
 export const setStoreReorderLegendLayers = (mapId: string): void => {
   // Sort the layers
   const sortedLayers = getStoreLayerStateLegendLayers(mapId).sort(
-    (a, b) =>
-      MapEventProcessor.getMapIndexFromOrderedLayerInfo(mapId, a.layerPath) -
-      MapEventProcessor.getMapIndexFromOrderedLayerInfo(mapId, b.layerPath)
+    (a, b) => getStoreMapOrderedLayerIndexByPath(mapId, a.layerPath) - getStoreMapOrderedLayerIndexByPath(mapId, b.layerPath)
   );
 
   // Save in store

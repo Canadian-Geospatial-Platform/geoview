@@ -4,7 +4,7 @@ import { DEFAULT_TEXT_VALUES } from '@/core/stores/store-interface-and-intial-va
 import type { DomainLanguageChangedDelegate, DomainLanguageChangedEvent, UIDomain } from '@/core/domains/ui-domain';
 import { DrawerEventProcessor } from '@/api/event-processors/event-processor-children/drawer-event-processor';
 import type { MapViewer } from '@/geo/map/map-viewer';
-import { getGeoViewStore } from '../stores';
+import { getGeoViewStore } from '@/core/stores/stores-managers';
 
 /**
  * Controller responsible for drawer interactions, keyboard shortcuts, and

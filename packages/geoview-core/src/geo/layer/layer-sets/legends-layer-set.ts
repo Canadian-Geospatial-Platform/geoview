@@ -136,9 +136,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * @param layerConfig - The layer config
    * @param layerStatus - The new layer status
    */
-  protected processLayerStatusChanged(layer: AbstractBaseGVLayer, layerStatus: TypeLayerStatus): void {
+  protected processLayerStatusChanged(layerPath: string, layerStatus: TypeLayerStatus, layer: AbstractBaseGVLayer | undefined): void {
     // Change the layer status!
-    this.resultSet[layer.getLayerPath()].layerStatus = layerStatus;
+    this.resultSet[layerPath].layerStatus = layerStatus;
 
     // Check if ready to query legend
     this.#checkQueryLegend(layer, false);
@@ -183,7 +183,10 @@ export class LegendsLayerSet extends AbstractLayerSet {
    * @param layer - The layer to check for legend
    * @param forced - Indicates if the legend query should be forced to happen (example when refreshing the legend)
    */
-  #checkQueryLegend(layer: AbstractBaseGVLayer, forced: boolean): void {
+  #checkQueryLegend(layer: AbstractBaseGVLayer | undefined, forced: boolean): void {
+    // If no layer, skip
+    if (!layer) return;
+
     // Get the layer path
     const layerPath = layer.getLayerPath();
 
@@ -304,10 +307,9 @@ export class LegendsLayerSet extends AbstractLayerSet {
     try {
       // Check if the geoview layer exists
       const layer = this.layerDomain.getGeoviewLayerIfExists(layerConfig.layerPath);
-      if (!layer) return; // Skip
 
       // Process a layer status changed
-      this.processLayerStatusChanged(layer, layerStatusEvent.layerStatus);
+      this.processLayerStatusChanged(layerConfig.layerPath, layerStatusEvent.layerStatus, layer);
 
       // If still existing (it's possible a layer set might want to unregister a layer config depending on its status, so we check)
       if (this.resultSet[layerConfig.layerPath]) {

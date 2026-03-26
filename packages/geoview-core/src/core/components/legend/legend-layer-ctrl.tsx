@@ -33,10 +33,11 @@ import {
   useUIActiveTrapGeoView,
 } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import {
+  getStoreMapLayerParentHidden,
+  getStoreMapOrderedLayerInfoByPath,
   useMapSelectorLayerInVisibleRange,
   useMapSelectorLayerParentHidden,
   useMapSelectorLayerVisibility,
-  useMapStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import type { TypeLegendItem, TypeLegendLayer } from '@/core/components/layers/types';
 import { getSxClasses } from './legend-styles';
@@ -70,7 +71,6 @@ type ControlActions = {
 const useControlActions = (layerPath: string): ControlActions => {
   // Store
   const mapId = useGeoViewMapId();
-  const { setOrToggleLayerVisibility } = useMapStoreActions();
 
   return useMemo(
     () => ({
@@ -81,7 +81,7 @@ const useControlActions = (layerPath: string): ControlActions => {
         const layer = getStoreLayerStateLegendLayerByPath(mapId, layerPath);
 
         // Use orderedLayerInfo to check visibility range
-        const layerInfo = MapEventProcessor.findMapLayerFromOrderedInfo(mapId, layerPath, MapEventProcessor.getMapOrderedLayerInfo(mapId));
+        const layerInfo = getStoreMapOrderedLayerInfoByPath(mapId, layerPath);
         const isInVisibleRange = layerInfo?.inVisibleRange || false;
 
         const isZoomToVisibleScaleCapable = !isInVisibleRange && layer?.entryType !== 'group';
@@ -95,23 +95,23 @@ const useControlActions = (layerPath: string): ControlActions => {
         // Read current state values when handler executes
         // TODO: REFACTOR - This isn't an ideal pattern, review.
         const layer = getStoreLayerStateLegendLayerByPath(mapId, layerPath);
-        const layerInfo = MapEventProcessor.findMapLayerFromOrderedInfo(mapId, layerPath, MapEventProcessor.getMapOrderedLayerInfo(mapId));
+        const layerInfo = getStoreMapOrderedLayerInfoByPath(mapId, layerPath);
         const isInVisibleRange = layerInfo?.inVisibleRange || false;
-        const parentHidden = MapEventProcessor.getMapLayerParentHidden(mapId, layerPath);
+        const parentHidden = getStoreMapLayerParentHidden(mapId, layerPath);
 
         if (!isInVisibleRange || parentHidden || layer?.layerStatus === 'error') {
           return false;
         }
-        return setOrToggleLayerVisibility(layerPath);
+        return MapEventProcessor.setOrToggleMapLayerVisibility(mapId, layerPath);
       },
       handleHighlightLayer: (event: React.MouseEvent): void => {
         event.stopPropagation();
         // Read current state values when handler executes
         // TODO: REFACTOR - This isn't an ideal pattern, review.
         const layer = getStoreLayerStateLegendLayerByPath(mapId, layerPath);
-        const layerInfo = MapEventProcessor.findMapLayerFromOrderedInfo(mapId, layerPath, MapEventProcessor.getMapOrderedLayerInfo(mapId));
+        const layerInfo = getStoreMapOrderedLayerInfoByPath(mapId, layerPath);
         const isInVisibleRange = layerInfo?.inVisibleRange || false;
-        const parentHidden = MapEventProcessor.getMapLayerParentHidden(mapId, layerPath);
+        const parentHidden = getStoreMapLayerParentHidden(mapId, layerPath);
         const isVisible = layerInfo?.visible || false;
 
         if (!isInVisibleRange || parentHidden || !isVisible || layer?.layerStatus === 'error') {
@@ -124,9 +124,9 @@ const useControlActions = (layerPath: string): ControlActions => {
         // Read current state values when handler executes
         // TODO: REFACTOR - This isn't an ideal pattern, review.
         const layer = getStoreLayerStateLegendLayerByPath(mapId, layerPath);
-        const layerInfo = MapEventProcessor.findMapLayerFromOrderedInfo(mapId, layerPath, MapEventProcessor.getMapOrderedLayerInfo(mapId));
+        const layerInfo = getStoreMapOrderedLayerInfoByPath(mapId, layerPath);
         const isInVisibleRange = layerInfo?.inVisibleRange || false;
-        const parentHidden = MapEventProcessor.getMapLayerParentHidden(mapId, layerPath);
+        const parentHidden = getStoreMapLayerParentHidden(mapId, layerPath);
         const isVisible = layerInfo?.visible || false;
 
         const isZoomToLayerDisabled = !isInVisibleRange || parentHidden || !isVisible || layer?.layerStatus === 'error';
@@ -138,7 +138,7 @@ const useControlActions = (layerPath: string): ControlActions => {
         });
       },
     }),
-    [layerPath, mapId, setOrToggleLayerVisibility]
+    [layerPath, mapId]
   );
 };
 

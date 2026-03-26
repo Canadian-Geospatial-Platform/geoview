@@ -3,8 +3,9 @@ import { useTheme } from '@mui/material/styles';
 
 import { IconButton, HomeIcon } from '@/ui';
 import { getSxClasses } from '@/core/components/nav-bar/nav-bar-style';
-import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
+import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 /**
  * Create a home button to return the user to the map center
@@ -21,13 +22,13 @@ export default function Home(): JSX.Element {
   const sxClasses = getSxClasses(theme);
 
   // Store actions
-  const { zoomToInitialExtent } = useMapStoreActions();
+  const mapId = useGeoViewMapId();
 
   /**
    * Handles a click on the home button
    */
   const handleZoom = (): void => {
-    zoomToInitialExtent().catch((error: unknown) => {
+    MapEventProcessor.zoomToInitialExtent(mapId).catch((error: unknown) => {
       // Log
       logger.logPromiseFailed('Failed to zoomToInitialExtent in home.handleZoom', error);
     });

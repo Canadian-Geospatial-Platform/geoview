@@ -7,9 +7,9 @@ import { Projection } from '@/geo/utils/projection';
 import { NorthArrowIcon, NorthPoleIcon } from './north-arrow-icon';
 import { getSxClasses } from './north-arrow-style';
 import {
+  setStoreMapOverlayNorthMarkerRef,
   useMapNorthArrowElement,
   useMapProjectionEPSG,
-  useMapStoreActions,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 import { useManageArrow } from './hooks/useManageArrow';
@@ -72,13 +72,13 @@ export const NorthArrow = memo(function NorthArrow(): JSX.Element {
 // Memoizes entire component, preventing re-renders if props haven't changed
 export const NorthPoleFlag = memo(function NorthPoleFlag(): JSX.Element {
   // State
-  const northPoleId = `${useGeoViewMapId()}-northpole`;
+  const mapId = useGeoViewMapId();
+  const northPoleId = `${mapId}-northpole`;
   const northPoleRef = useRef<HTMLDivElement | null>(null);
 
   // Store
   const mapProjectionEPSG = useMapProjectionEPSG();
-  const { setOverlayNorthMarkerRef } = useMapStoreActions();
-  setTimeout(() => setOverlayNorthMarkerRef(northPoleRef.current as HTMLElement), TIMEOUT.deferExecution); // set marker reference
+  setTimeout(() => setStoreMapOverlayNorthMarkerRef(mapId, northPoleRef.current as HTMLElement), TIMEOUT.deferExecution); // set marker reference
 
   const isVisible = mapProjectionEPSG === Projection.PROJECTION_NAMES.LCC;
 

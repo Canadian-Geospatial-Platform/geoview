@@ -16,7 +16,7 @@ import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 import { removeGeoviewStore } from '@/core/stores/stores-managers';
 import { InitDivNotExistError, MapViewerAlreadyExistsError, MapViewerNotFoundError } from '@/core/exceptions/geoview-exceptions';
 import type { TypeMapFeaturesInstance } from '@/api/types/map-schema-types';
-import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
+import { getStoreMapConfigState } from '@/core/stores/store-interface-and-intial-values/map-state';
 
 /** Class used to handle api calls (events, functions etc...). */
 export class API {
@@ -207,7 +207,7 @@ export class API {
    */
   async reload(mapId: string, mapConfig?: TypeMapFeaturesConfig | TypeMapFeaturesInstance): Promise<MapViewer> {
     // If no config is provided, get the original from the store
-    const config = mapConfig || MapEventProcessor.getGeoViewMapConfig(mapId);
+    const config = mapConfig || getStoreMapConfigState(mapId);
 
     // Get the map viewer
     const mapViewer = this.getMapViewer(mapId);

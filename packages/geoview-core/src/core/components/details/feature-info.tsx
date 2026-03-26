@@ -17,7 +17,6 @@ import {
   removeStoreDetailsCheckedFeature,
   useDetailsCheckedFeatures,
 } from '@/core/stores/store-interface-and-intial-values/feature-info-state';
-import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
   setStoreGeochartSelectedLayerPath,
   useGeochartConfigs,
@@ -32,6 +31,7 @@ import { FeatureInfoTable } from './feature-info-table';
 import { getSxClasses } from './details-style';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
+import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
 interface FeatureInfoProps {
   feature: TypeFeatureInfoEntry;
@@ -179,7 +179,6 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
   // Store
   const mapId = useGeoViewMapId();
   const checkedFeatures = useDetailsCheckedFeatures();
-  const { zoomToExtent, highlightBBox, addHighlightedFeature } = useMapStoreActions();
   const geochartLayerDataArrayBatch = useGeochartLayerDataArrayBatch();
   const geochartConfigs = useGeochartConfigs();
 
@@ -261,20 +260,20 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
       const zoomExtent = isPoint ? GeoUtilities.bufferExtent(feature.extent, EXTENT_BUFFER) : feature.extent;
 
       // Zoom to extent and highlight the feature
-      zoomToExtent(zoomExtent, { padding: ZOOM_PADDING, maxZoom: ZOOM_MAX_LEVEL })
+      MapEventProcessor.zoomToExtent(mapId, zoomExtent, { padding: ZOOM_PADDING, maxZoom: ZOOM_MAX_LEVEL })
         .then(() => {
           // Highlight the bounding box
           if (feature.extent && !isPoint) {
-            highlightBBox(feature.extent, false);
+            MapEventProcessor.highlightBBox(mapId, feature.extent, false);
           }
           // Add the current feature to highlights
-          addHighlightedFeature(feature);
+          MapEventProcessor.addHighlightedFeature(mapId, feature);
         })
         .catch((error: unknown) => {
           logger.logPromiseFailed('zoomToExtent in handleZoomIn in FeatureInfoNew', error);
         });
     },
-    [feature, zoomToExtent, highlightBBox, addHighlightedFeature]
+    [feature, mapId]
   );
 
   /**

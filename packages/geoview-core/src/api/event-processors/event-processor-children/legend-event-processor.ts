@@ -24,6 +24,10 @@ import {
   type TypeLegendResultSetEntry,
   setStoreLayerTextVisibility,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  getStoreMapConfigGlobalSettings,
+  getStoreMapOrderedLayerIndexByPath,
+} from '@/core/stores/store-interface-and-intial-values/map-state';
 import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
@@ -359,7 +363,7 @@ export abstract class LegendEventProcessor extends AbstractEventProcessor {
     const layerPathNodes = layerPath.split('/');
 
     const setLayerControls = (layerConfig: ConfigBaseClass, isChild: boolean = false, layer?: AbstractBaseGVLayer): TypeLayerControls => {
-      const removeDefault = isChild ? MapEventProcessor.getGeoViewMapConfig(mapId)?.globalSettings?.canRemoveSublayers !== false : true;
+      const removeDefault = isChild ? getStoreMapConfigGlobalSettings(mapId)?.canRemoveSublayers !== false : true;
 
       // Check if the layer has a minZoom or maxZoom defined, so we know if it needs the visible scale button.
       const visibleScale: boolean = Number.isFinite(layer?.getMinZoom()) || Number.isFinite(layer?.getMaxZoom());
@@ -528,9 +532,7 @@ export abstract class LegendEventProcessor extends AbstractEventProcessor {
     // Update the legend layers with the updated array, triggering the subscribe
     // Reorder the array so legend tab is in synch
     const sortedLayers = layers.sort(
-      (a, b) =>
-        MapEventProcessor.getMapIndexFromOrderedLayerInfo(mapId, a.layerPath) -
-        MapEventProcessor.getMapIndexFromOrderedLayerInfo(mapId, b.layerPath)
+      (a, b) => getStoreMapOrderedLayerIndexByPath(mapId, a.layerPath) - getStoreMapOrderedLayerIndexByPath(mapId, b.layerPath)
     );
     this.#sortLegendLayersChildren(mapId, sortedLayers);
 
@@ -553,7 +555,7 @@ export abstract class LegendEventProcessor extends AbstractEventProcessor {
     // Highlight layer and get new highlighted layer path from map event processor.
     const highlightedLayerpath = MapEventProcessor.changeOrRemoveLayerHighlight(mapId, layerPath, currentHighlight);
 
-    // Save in the store
+    // Save to the store
     setStoreHighlightedLayer(mapId, highlightedLayerpath);
   }
 
@@ -983,9 +985,7 @@ export abstract class LegendEventProcessor extends AbstractEventProcessor {
     legendLayerList.forEach((legendLayer) => {
       if (legendLayer.children.length)
         legendLayer.children.sort(
-          (a, b) =>
-            MapEventProcessor.getMapIndexFromOrderedLayerInfo(mapId, a.layerPath) -
-            MapEventProcessor.getMapIndexFromOrderedLayerInfo(mapId, b.layerPath)
+          (a, b) => getStoreMapOrderedLayerIndexByPath(mapId, a.layerPath) - getStoreMapOrderedLayerIndexByPath(mapId, b.layerPath)
         );
       this.#sortLegendLayersChildren(mapId, legendLayer.children);
     });
