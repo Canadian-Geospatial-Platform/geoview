@@ -12,7 +12,11 @@ import type { TypeMapFeaturesConfig } from '@/core/types/global-types';
 
 // #region INTERFACE DEFINITION
 
-/** Represents the UI state managed by the Zustand store. */
+/**
+ * Represents the UI Zustand store slice.
+ *
+ * Manages state for the UI including app-bar, footer-bar, nav-bar, and focus-trap states.
+ */
 export interface IUIState {
   /** Whether the GeoView-level keyboard focus trap is active. */
   activeTrapGeoView: boolean;

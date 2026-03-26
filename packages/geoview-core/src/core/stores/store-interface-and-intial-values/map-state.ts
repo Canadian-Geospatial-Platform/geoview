@@ -42,6 +42,12 @@ import { CONST_LAYER_TYPES, type MapConfigLayerEntry } from '@/api/types/layer-s
 
 // #region INTERFACE DEFINITION
 
+/**
+ * Represents the Map Zustand store slice.
+ *
+ * Manages state for the map including center coordinates, zoom level,
+ * basemap options, feature highlights, and various map interactions.
+ */
 export interface IMapState {
   attribution: string[];
   basemapOptions: TypeBasemapOptions;

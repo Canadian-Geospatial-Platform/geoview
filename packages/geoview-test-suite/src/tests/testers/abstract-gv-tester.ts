@@ -494,8 +494,8 @@ export abstract class GVAbstractTester extends AbstractTester {
 
   /**
    * Gets the layer Api.
-   * @returns The layer Api
    *
+   * @returns The layer Api
    * @deprecated This should not be used anymore, favor going through the controllers.
    */
   protected getLayerApi(): LayerApi {

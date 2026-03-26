@@ -9,12 +9,11 @@ import {
 import type { MapViewer } from '@/geo/map/map-viewer';
 
 /**
- * Controller responsible for drawer interactions, keyboard shortcuts, and
- * bridging the drawer state with the UI domain and map projection changes.
+ * Controller responsible for Data Table interactions.
  */
 export class DataTableController extends AbstractMapViewerController {
   /**
-   * Creates an instance of DrawerController.
+   * Creates an instance of DataTableController.
    *
    * @param mapViewer - The map viewer instance to associate with this controller
    */

@@ -7,7 +7,11 @@ import { logger } from '@/core/utils/logger';
 
 // #region INTERFACE DEFINITION
 
-/** Represents the Swiper plugin state managed by the Zustand store. */
+/**
+ * Represents the Swiper Zustand store slice.
+ *
+ * Manages state for the swiper including layer paths and orientation.
+ */
 export interface ISwiperState {
   /** The list of layer paths currently participating in the swiper. */
   layerPaths: string[];

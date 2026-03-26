@@ -555,8 +555,8 @@ export const getStoreIsDrawing = (mapId: string): boolean => {
  *
  * @param mapId - The map identifier
  * @returns The Draw instance, or undefined
+ * @deprecated This class instance shouldn't be in the store, remove this selector
  */
-// TODO: This class instance shouldn't be in the store, remove this selector
 export const getStoreDrawInstance = (mapId: string): Draw | undefined => {
   return getStoreDrawerState(mapId).drawInstance;
 };
@@ -576,8 +576,8 @@ export const getStoreIsEditing = (mapId: string): boolean => {
  *
  * @param mapId - The map identifier
  * @returns The Transform instance, or undefined
+ * @deprecated This class instance shouldn't be in the store, remove this selector
  */
-// TODO: This class instance shouldn't be in the store, remove this selector
 export const getStoreTransformInstance = (mapId: string): Transform | undefined => {
   return getStoreDrawerState(mapId).transformInstance;
 };
@@ -597,8 +597,8 @@ export const getStoreIsSnapping = (mapId: string): boolean => {
  *
  * @param mapId - The map identifier
  * @returns The Snap instance, or undefined
+ * @deprecated This class instance shouldn't be in the store, remove this selector
  */
-// TODO: This class instance shouldn't be in the store, remove this selector
 export const getStoreSnapInstance = (mapId: string): Snap | undefined => {
   return getStoreDrawerState(mapId).snapInstance;
 };
@@ -608,8 +608,8 @@ export const getStoreSnapInstance = (mapId: string): Snap | undefined => {
  *
  * @param mapId - The map identifier
  * @returns The selected feature, or undefined
+ * @deprecated This class instance shouldn't be in the store, remove this selector
  */
-// TODO: This class instance shouldn't be in the store, remove this selector
 export const getStoreSelectedDrawing = (mapId: string): Feature | undefined => {
   return getStoreDrawerState(mapId).selectedDrawing;
 };

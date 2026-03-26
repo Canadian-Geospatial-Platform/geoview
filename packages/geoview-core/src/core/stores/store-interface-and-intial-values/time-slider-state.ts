@@ -8,7 +8,11 @@ import { PluginStateUninitializedError } from '@/core/exceptions/geoview-excepti
 
 // #region INTERFACE DEFINITION
 
-/** Represents the TimeSlider plugin state managed by the Zustand store. */
+/**
+ * Represents the TimeSlider Zustand store slice.
+ *
+ * Manages state for the time slider including layer paths, selected layer, and filter expressions.
+ */
 export interface ITimeSliderState {
   /** The set of time-slider layers keyed by layer path. */
   timeSliderLayers: TimeSliderLayerSet;
