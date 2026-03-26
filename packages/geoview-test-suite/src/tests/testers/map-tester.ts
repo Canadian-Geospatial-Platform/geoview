@@ -1,10 +1,11 @@
+import type { Coordinate } from 'ol/coordinate';
+
 import { TestError } from '../core/exceptions';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import { delay } from 'geoview-core/core/utils/utilities';
 import { MapEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/map-event-processor';
 import type { Extent, TypeBasemapId, TypeMapState, TypeValidMapProjectionCodes } from 'geoview-core/api/types/map-schema-types';
-import type { Coordinate } from 'ol/coordinate';
 import {
   getStoreDetailsFeatures,
   getStoreDetailsSelectedLayerPath,
@@ -191,7 +192,7 @@ export class MapTester extends GVAbstractTester {
       (test) => {
         // Add a circle to a new geometry group
         test.addStep('Adding circle to test group...');
-        this.getMapViewer().layer.geometry.addCircle(
+        this.getLayerApi().geometry.addCircle(
           circleCoords,
           {
             projection: 4326,
@@ -209,16 +210,16 @@ export class MapTester extends GVAbstractTester {
 
         // Get the initial z-index
         test.addStep('Getting initial z-index...');
-        const initialZIndex = this.getMapViewer().layer.geometry.getGeometryGroupZIndex(testGroupId);
+        const initialZIndex = this.getLayerApi().geometry.getGeometryGroupZIndex(testGroupId);
 
         // Set z-index to 0
         test.addStep(`Initial z-index: ${initialZIndex}`);
         test.addStep('Setting z-index to 0...');
-        this.getMapViewer().layer.geometry.setGeometryGroupZIndex(testGroupId, 0);
+        this.getLayerApi().geometry.setGeometryGroupZIndex(testGroupId, 0);
 
         // Get the z-index again
         test.addStep('Getting final z-index...');
-        const finalZIndex = this.getMapViewer().layer.geometry.getGeometryGroupZIndex(testGroupId);
+        const finalZIndex = this.getLayerApi().geometry.getGeometryGroupZIndex(testGroupId);
 
         // Return both values
         test.addStep(`Final z-index: ${finalZIndex}`);
@@ -235,7 +236,7 @@ export class MapTester extends GVAbstractTester {
       (test) => {
         // Cleanup: remove the test group
         test.addStep('Cleaning up test geometry group...');
-        this.getMapViewer().layer.geometry.deleteGeometryGroup(testGroupId);
+        this.getLayerApi().geometry.deleteGeometryGroup(testGroupId);
       }
     );
   }
@@ -320,7 +321,7 @@ export class MapTester extends GVAbstractTester {
         test.addStep(`Selecting footer bar tab '${targetTab}'...`);
 
         // Select the tab
-        this.getMapViewer().controllers.uiController.setActiveFooterBarTab(targetTab);
+        this.getControllersRegistry().uiController.setActiveFooterBarTab(targetTab);
 
         // Wait for tab selection to complete
         await delay(500);
@@ -349,7 +350,7 @@ export class MapTester extends GVAbstractTester {
         test.addStep(`Selecting app bar tab '${targetTab}'...`);
 
         // Select the tab
-        this.getMapViewer().controllers.uiController.setActiveAppBarTab(targetTab, true, true);
+        this.getControllersRegistry().uiController.setActiveAppBarTab(targetTab, true, true);
 
         // Wait for tab selection to complete
         await delay(500);
@@ -568,7 +569,7 @@ export class MapTester extends GVAbstractTester {
       'Test non-queryable layer not in details after map click',
       async (test) => {
         // Get the layer
-        const layer = this.getLayerApi().getGeoviewLayerRegular(layerPath);
+        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
 
         // The layer should be initially queryable
         if (!layer.getQueryable()) throw new TestError(`False precondition, the layer ${layerPath} wasn't initially queryable.`);
@@ -578,7 +579,7 @@ export class MapTester extends GVAbstractTester {
 
         // Perform a map click using the feature info layer set
         test.addStep(`Perform query operation at given coordinates...`);
-        const results1 = await this.getMapViewer().controllers.layerSetController.queryAtLonLat(lonlat);
+        const results1 = await this.getControllersRegistry().layerSetController.queryAtLonLat(lonlat);
 
         // Check if there is feature selected from the layer
         test.addStep(`Checking for features from layer '${layerPath}'...`);
@@ -593,7 +594,7 @@ export class MapTester extends GVAbstractTester {
 
         // Perform a map click using the feature info layer set
         test.addStep(`Perform query operation at given coordinates...`);
-        const results2 = await this.getMapViewer().controllers.layerSetController.queryAtLonLat(lonlat);
+        const results2 = await this.getControllersRegistry().layerSetController.queryAtLonLat(lonlat);
 
         // Check if there is feature selected from the layer
         test.addStep(`Checking for features from layer '${layerPath}'...`);
@@ -608,7 +609,7 @@ export class MapTester extends GVAbstractTester {
 
         // Perform a map click using the feature info layer set
         test.addStep(`Perform query operation at given coordinates...`);
-        const results3 = await this.getMapViewer().controllers.layerSetController.queryAtLonLat(lonlat);
+        const results3 = await this.getControllersRegistry().layerSetController.queryAtLonLat(lonlat);
 
         // Check if there is feature selected from the layer
         test.addStep(`Checking for features from layer '${layerPath}'...`);
@@ -660,7 +661,7 @@ export class MapTester extends GVAbstractTester {
       'Test layer hoverable state in hoverFeatureInfoLayerSet',
       async (test) => {
         // Get the layer
-        const layer = this.getLayerApi().getGeoviewLayerRegular(layerPath);
+        const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
 
         // The layer should be initially hoverable
         if (!layer.getHoverable()) throw new TestError(`False precondition, the layer ${layerPath} wasn't initially hoverable.`);
@@ -670,7 +671,7 @@ export class MapTester extends GVAbstractTester {
 
         // Perform a hover query using the hover feature info layer set
         test.addStep(`Perform query operation at given coordinates...`);
-        await this.getLayerApi().hoverFeatureInfoLayerSet.queryLayers(lonlat, 'at_lon_lat');
+        await this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.queryLayers(lonlat, 'at_lon_lat');
 
         // Check if there is feature selected from the layer
         test.addStep(`Checking for features from layer '${layerPath}'...`);
@@ -685,7 +686,7 @@ export class MapTester extends GVAbstractTester {
 
         // Perform a hover query using the feature info layer set
         test.addStep(`Perform query operation at given coordinates...`);
-        await this.getLayerApi().hoverFeatureInfoLayerSet.queryLayers(lonlat, 'at_lon_lat');
+        await this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.queryLayers(lonlat, 'at_lon_lat');
 
         // Check if there is feature selected from the layer
         test.addStep(`Checking for features from layer '${layerPath}'...`);
@@ -700,7 +701,7 @@ export class MapTester extends GVAbstractTester {
 
         // Perform a hover query using the feature info layer set
         test.addStep(`Perform query operation at given coordinates...`);
-        await this.getLayerApi().hoverFeatureInfoLayerSet.queryLayers(lonlat, 'at_lon_lat');
+        await this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.queryLayers(lonlat, 'at_lon_lat');
 
         // Check if there is feature selected from the layer
         test.addStep(`Checking for features from layer '${layerPath}'...`);

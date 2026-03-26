@@ -30,6 +30,7 @@ import { useUIController } from '@/core/controllers/ui-controller';
 import type { TypeLegendLayer, TypeLegendItem } from '@/core/components/layers/types';
 import { getSxClasses } from './layer-details-style';
 import {
+  getStoreLayerStyleSettings,
   useLayerHighlightedLayer,
   useLayerSelectorBounds,
   useLayerSelectorHasText,
@@ -143,7 +144,6 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
 
   // get store actions
   const highlightedLayer = useLayerHighlightedLayer();
-  const availableSettings = LegendEventProcessor.getLayerSettings(mapId, layerDetails.layerPath);
   const hasText = useLayerSelectorHasText(layerDetails.layerPath);
   const uiController = useUIController();
   const visibleLayers = useMapVisibleLayers();
@@ -156,6 +156,9 @@ export function LayerDetails(props: LayerDetailsProps): JSX.Element {
   const timeSliderLayers = useTimeSliderLayers();
   const isFocusTrap = useUIActiveTrapGeoView();
   const layerSetController = useLayerSetController();
+
+  // TODO: CHECK - This should likely go through a Zustand hook instead of a state getter
+  const availableSettings = getStoreLayerStyleSettings(mapId, layerDetails.layerPath);
 
   // Use navigate hook for time slider (only if time slider state exists)
   const navigateToTimeSlider = useNavigateToTab('time-slider', setStoreTimeSliderSelectedLayerPath);

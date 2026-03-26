@@ -1,12 +1,6 @@
 import type { Extent, TypeFeatureInfoEntryPartial } from '@/api/types/map-schema-types';
 import type { TypeDisplayDateFormat } from '@/core/utils/date-mgt';
-import type {
-  TypeLayerControls,
-  TypeMetadataWMSCapabilityLayerStyle,
-  TypeMosaicMethod,
-  TypeMosaicOperation,
-  TypeMosaicRule,
-} from '@/api/types/layer-schema-types';
+import type { TypeLayerControls, TypeMosaicMethod, TypeMosaicOperation, TypeMosaicRule } from '@/api/types/layer-schema-types';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import type { TypeLegendLayer, TypeLegendLayerItem, TypeLegendItem } from '@/core/components/layers/types';
 import { GeoUtilities } from '@/geo/utils/utilities';
@@ -141,59 +135,6 @@ export abstract class LegendEventProcessor extends AbstractEventProcessor {
     if (!geoviewLayer || !(geoviewLayer instanceof GVEsriImage)) return new Map<string, Promise<string>>();
 
     return geoviewLayer.getRasterFunctionPreviews();
-  }
-
-  /**
-   * Retrieves the layer's available WMS styles.
-   *
-   * @param mapId - The unique identifier of the map instance.
-   * @param layerPath - The path to the layer.
-   * @returns The available WMS style names, or `undefined` if not available.
-   */
-  static getLayerWmsStyles(mapId: string, layerPath: string): TypeMetadataWMSCapabilityLayerStyle[] | undefined {
-    // Get the layer config
-    const layerConfig = MapEventProcessor.getMapViewerLayerAPI(mapId).getLayerEntryConfigIfExists(layerPath);
-
-    // Check if it's a WMS layer config
-    if (layerConfig && layerConfig instanceof OgcWmsLayerEntryConfig) {
-      return layerConfig.getStylesMetadata();
-    }
-
-    return undefined;
-  }
-
-  /**
-   * Gets the available settings for a layer.
-   *
-   * @param mapId - The map identifier.
-   * @param layerPath - The layer path.
-   * @returns Array of available setting types.
-   */
-  static getLayerSettings(mapId: string, layerPath: string): string[] {
-    const layer = getStoreLayerStateLegendLayerByPath(mapId, layerPath);
-    if (!layer) return []; // Not in the store, no settings
-
-    // Check if raster function infos are present
-    const settings: string[] = [];
-
-    if (layer.rasterFunctionInfos && layer.rasterFunctionInfos.length > 0) {
-      settings.push('rasterFunction');
-    }
-
-    // Check if mosaicMode is present
-    const { mosaicRule } = layer;
-    if (mosaicRule) {
-      settings.push('mosaicRule');
-    }
-
-    // Check if multiple WMS styles are available
-    const styles = this.getLayerWmsStyles(mapId, layerPath);
-    if (styles && styles.length > 1) {
-      settings.push('wmsStyles');
-    }
-
-    // Add other layer types with settings here
-    return settings;
   }
 
   /**
@@ -406,6 +347,7 @@ export abstract class LegendEventProcessor extends AbstractEventProcessor {
           hasText: layer instanceof AbstractGVVector ? layer.getTextOLLayer() !== undefined : undefined,
           textVisible: layer instanceof AbstractGVVector ? layer.getTextVisible() : undefined,
           wmsStyle: layer instanceof GVWMS ? layer.getWmsStyle() : undefined,
+          wmsStyles: layerConfigCasted instanceof OgcWmsLayerEntryConfig ? layerConfigCasted.getStylesMetadata() : undefined,
         };
 
         // If layer is regular (not group)

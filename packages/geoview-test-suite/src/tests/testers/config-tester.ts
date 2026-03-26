@@ -1,6 +1,6 @@
 import { GVAbstractTester } from './abstract-gv-tester';
-import type { ClassType } from 'geoview-core/core/types/global-types';
 import { Test } from '../core/test';
+import type { ClassType } from 'geoview-core/core/types/global-types';
 import type { MapConfigLayerEntry, TypeGeoviewLayerConfig, TypeGeoviewLayerType } from 'geoview-core/api/types/layer-schema-types';
 import { LayerNoCapabilitiesError, LayerServiceMetadataUnableToFetchError } from 'geoview-core/core/exceptions/layer-exceptions';
 import { EsriDynamic } from 'geoview-core/geo/layer/geoview-layers/raster/esri-dynamic';

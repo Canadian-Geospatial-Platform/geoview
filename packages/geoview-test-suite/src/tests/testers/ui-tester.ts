@@ -1,6 +1,6 @@
-import { delay } from 'geoview-core/index';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
+import { delay } from 'geoview-core/core/utils/utilities';
 import { getStoreGeoviewHTMLElement } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 
 /**
@@ -29,7 +29,7 @@ export class UITester extends GVAbstractTester {
       async (test) => {
         // Step 1: Select the details tab in footer bar
         test.addStep('Selecting details panel...');
-        this.getMapViewer().controllers.uiController.setActiveFooterBarTab('details');
+        this.getControllersRegistry().uiController.setActiveFooterBarTab('details');
 
         // Wait a bit for the UI to update
         await delay(500);

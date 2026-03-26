@@ -13,6 +13,7 @@ import type {
   TypeGeoviewLayerType,
   TypeLayerStatus,
   TypeMetadataEsriRasterFunctionInfos,
+  TypeMetadataWMSCapabilityLayerStyle,
   TypeMosaicMethod,
   TypeMosaicRule,
 } from '@/api/types/layer-schema-types';
@@ -650,6 +651,9 @@ export const useLayerSelectorMosaicRule = createLayerSelectorHook('mosaicRule');
 /** Hook that returns the WMS style for a specific layer. */
 export const useLayerSelectorWmsStyle = createLayerSelectorHook('wmsStyle');
 
+/** Hook that returns the available WMS styles metadata for a specific layer. */
+export const useLayerSelectorWmsStyles = createLayerSelectorHook('wmsStyles');
+
 /** Hook that returns if the layer has text. */
 export const useLayerSelectorHasText = createLayerSelectorHook('hasText');
 
@@ -798,6 +802,17 @@ export const getStoreLayerWmsStyle = (mapId: string, layerPath: string): string 
 };
 
 /**
+ * Gets the available WMS styles metadata for a specific layer.
+ *
+ * @param mapId - The map identifier.
+ * @param layerPath - The layer path to look up.
+ * @returns The WMS styles metadata, or undefined.
+ */
+export const getStoreLayerWmsStyles = (mapId: string, layerPath: string): TypeMetadataWMSCapabilityLayerStyle[] | undefined => {
+  return getStoreLayerStateLegendLayerByPath(mapId, layerPath)?.wmsStyles;
+};
+
+/**
  * Gets the mosaic rule for a specific layer.
  *
  * @param mapId - The map identifier.
@@ -850,6 +865,40 @@ export const getStoreLayerAllowedMosaicMethods = (mapId: string, layerPath: stri
  */
 export const getStoreLayerTimeDimension = (mapId: string, layerPath: string): TimeDimension | undefined => {
   return getStoreLayerStateLegendLayerByPath(mapId, layerPath)?.timeDimension;
+};
+
+/**
+ * Gets the available style settings for a layer.
+ *
+ * @param mapId - The map identifier.
+ * @param layerPath - The layer path.
+ * @returns Array of available style setting types.
+ */
+export const getStoreLayerStyleSettings = (mapId: string, layerPath: string): string[] => {
+  const layer = getStoreLayerStateLegendLayerByPath(mapId, layerPath);
+  if (!layer) return []; // Not in the store, no settings
+
+  // Check if raster function infos are present
+  const settings: string[] = [];
+
+  if (layer.rasterFunctionInfos && layer.rasterFunctionInfos.length > 0) {
+    settings.push('rasterFunction');
+  }
+
+  // Check if mosaicMode is present
+  const { mosaicRule } = layer;
+  if (mosaicRule) {
+    settings.push('mosaicRule');
+  }
+
+  // Check if multiple WMS styles are available
+  const { wmsStyles } = layer;
+  if (wmsStyles && wmsStyles.length > 1) {
+    settings.push('wmsStyles');
+  }
+
+  // Add other layer types with settings here
+  return settings;
 };
 
 // #endregion STATE SELECTORS

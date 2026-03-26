@@ -184,11 +184,11 @@ export class LayerSetController extends AbstractMapViewerController {
       (!['details', 'geochart'].includes(getStoreActiveFooterBarTab(this.getMapId()).tabId) &&
         getStoreFooterBarComponents(this.getMapId()).includes('details'))
     ) {
-      this.getMapViewer().controllers.uiController.setActiveFooterBarTab('details');
+      this.getControllersRegistry().uiController.setActiveFooterBarTab('details');
     }
     // Open details appbar tab when user clicked on map layer.
     if (getStoreAppBarComponents(this.getMapId()).includes('details')) {
-      this.getMapViewer().controllers.uiController.setActiveAppBarTab('details', true, true);
+      this.getControllersRegistry().uiController.setActiveAppBarTab('details', true, true);
     }
   }
 

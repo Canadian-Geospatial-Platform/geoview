@@ -6,6 +6,7 @@ import type {
   TypeLayerEntryType,
   TypeLayerStatus,
   TypeMetadataEsriRasterFunctionInfos,
+  TypeMetadataWMSCapabilityLayerStyle,
   TypeMosaicMethod,
   TypeMosaicRule,
 } from '@/api/types/layer-schema-types';
@@ -69,6 +70,7 @@ export interface TypeLegendLayer {
   mosaicRule?: TypeMosaicRule; // Active mosaic rule for ESRI Image layers
   timeDimension?: TimeDimension; // Temporal dimension metadata for time-aware layers
   wmsStyle?: string; // Active style for WMS layers
+  wmsStyles?: TypeMetadataWMSCapabilityLayerStyle[]; // Available WMS styles metadata from WMS capabilities
   opacity?: number;
   opacityMaxFromParent?: number;
   zoom?: number;

@@ -67,7 +67,6 @@ import {
   LayerDifferingFieldLengthsError,
   LayerNotGeoJsonError,
   LayerNotQueryableError,
-  LayerWrongTypeError,
 } from '@/core/exceptions/layer-exceptions';
 import { LayerEntryConfigError } from '@/core/exceptions/layer-entry-config-exceptions';
 import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
@@ -131,7 +130,6 @@ import {
   setStoreLayerHoverable,
   setStoreLayerItemVisibility,
   setStoreLayerMosaicRule,
-  setStoreLayerRasterFunction,
   setStoreLayersAreLoading,
   setStoreLayerWmsStyle,
   setStoreOpacity,
@@ -352,7 +350,7 @@ export class LayerApi {
    * @returns The ids of the layers
    */
   getGeoviewLayerIds(): string[] {
-    return this.#layerDomain.getGeoviewLayerIds();
+    return this.#controllers.layerController.getGeoviewLayerIds();
   }
 
   /**
@@ -361,7 +359,7 @@ export class LayerApi {
    * @returns The GeoView Layer Paths
    */
   getLayerEntryLayerPaths(): string[] {
-    return this.#layerDomain.getLayerEntryLayerPaths();
+    return this.#controllers.layerController.getLayerEntryLayerPaths();
   }
 
   /**
@@ -370,7 +368,7 @@ export class LayerApi {
    * @returns The GeoView Layer Entry Configs
    */
   getLayerEntryConfigs(): ConfigBaseClass[] {
-    return this.#layerDomain.getLayerEntryConfigs();
+    return this.#controllers.layerController.getLayerEntryConfigs();
   }
 
   /**
@@ -381,7 +379,7 @@ export class LayerApi {
    * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
    */
   getLayerEntryConfig(layerPath: string): ConfigBaseClass {
-    return this.#layerDomain.getLayerEntryConfig(layerPath);
+    return this.#controllers.layerController.getLayerEntryConfig(layerPath);
   }
 
   /**
@@ -393,7 +391,7 @@ export class LayerApi {
    * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
    */
   getLayerEntryConfigRegular(layerPath: string): AbstractBaseLayerEntryConfig {
-    return this.#layerDomain.getLayerEntryConfigRegular(layerPath);
+    return this.#controllers.layerController.getLayerEntryConfigRegular(layerPath);
   }
 
   /**
@@ -405,7 +403,7 @@ export class LayerApi {
    * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
    */
   getLayerEntryConfigGroup(layerPath: string): GroupLayerEntryConfig {
-    return this.#layerDomain.getLayerEntryConfigGroup(layerPath);
+    return this.#controllers.layerController.getLayerEntryConfigGroup(layerPath);
   }
 
   /**
@@ -415,7 +413,7 @@ export class LayerApi {
    * @returns The layer configuration or undefined if not found.
    */
   getLayerEntryConfigIfExists(layerPath: string): ConfigBaseClass | undefined {
-    return this.#layerDomain.getLayerEntryConfigIfExists(layerPath);
+    return this.#controllers.layerController.getLayerEntryConfigIfExists(layerPath);
   }
 
   /**
@@ -424,7 +422,7 @@ export class LayerApi {
    * @returns The layer paths of the GV Layers
    */
   getGeoviewLayerPaths(): string[] {
-    return this.#layerDomain.getGeoviewLayerPaths();
+    return this.#controllers.layerController.getGeoviewLayerPaths();
   }
 
   /**
@@ -433,7 +431,7 @@ export class LayerApi {
    * @returns The list of new Geoview Layers
    */
   getGeoviewLayers(): AbstractBaseGVLayer[] {
-    return this.#layerDomain.getGeoviewLayers();
+    return this.#controllers.layerController.getGeoviewLayers();
   }
 
   /**
@@ -445,7 +443,7 @@ export class LayerApi {
    * @returns An array containing only the regular layers from the current GeoView layer collection.
    */
   getGeoviewLayersRegulars(): AbstractGVLayer[] {
-    return this.#layerDomain.getGeoviewLayersRegulars();
+    return this.#controllers.layerController.getGeoviewLayersRegulars();
   }
 
   /**
@@ -457,7 +455,7 @@ export class LayerApi {
    * @returns An array containing only the group layers from the current GeoView layer collection.
    */
   getGeoviewLayersGroups(): GVGroupLayer[] {
-    return this.#layerDomain.getGeoviewLayersGroups();
+    return this.#controllers.layerController.getGeoviewLayersGroups();
   }
 
   /**
@@ -466,7 +464,7 @@ export class LayerApi {
    * @returns An array containing only the layers at the root level of the registry.
    */
   getGeoviewLayersRoot(): AbstractBaseGVLayer[] {
-    return this.#layerDomain.getGeoviewLayersRoot();
+    return this.#controllers.layerController.getGeoviewLayersRoot();
   }
 
   /**
@@ -477,7 +475,7 @@ export class LayerApi {
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
   getGeoviewLayer(layerPath: string): AbstractBaseGVLayer {
-    return this.#layerDomain.getGeoviewLayer(layerPath);
+    return this.#controllers.layerController.getGeoviewLayer(layerPath);
   }
 
   /**
@@ -492,7 +490,7 @@ export class LayerApi {
    * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
    */
   getGeoviewLayerRegular(layerPath: string): AbstractGVLayer {
-    return this.#layerDomain.getGeoviewLayerRegular(layerPath);
+    return this.#controllers.layerController.getGeoviewLayerRegular(layerPath);
   }
 
   /**
@@ -506,7 +504,7 @@ export class LayerApi {
    * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
    */
   getGeoviewLayerRegularIfExists(layerPath: string): AbstractGVLayer | undefined {
-    return this.#layerDomain.getGeoviewLayerRegularIfExists(layerPath);
+    return this.#controllers.layerController.getGeoviewLayerRegularIfExists(layerPath);
   }
 
   /**
@@ -516,7 +514,7 @@ export class LayerApi {
    * @returns The AbstractBaseGVLayer or undefined when not found
    */
   getGeoviewLayerIfExists(layerPath: string): AbstractBaseGVLayer | undefined {
-    return this.#layerDomain.getGeoviewLayerIfExists(layerPath);
+    return this.#controllers.layerController.getGeoviewLayerIfExists(layerPath);
   }
 
   /**
@@ -531,7 +529,7 @@ export class LayerApi {
    * @returns A promise that resolves to an OpenLayer layer associated to the layer path.
    */
   getOLLayerAsync(layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer> {
-    return this.#layerDomain.getOLLayerAsync(layerPath, timeout, checkFrequency);
+    return this.#controllers.layerController.getOLLayerAsync(layerPath, timeout, checkFrequency);
   }
 
   // #endregion LAYER DOMAIN GETTERS REDIRECTIONS
@@ -1471,21 +1469,8 @@ export class LayerApi {
    * @throws {LayerWrongTypeError} When the layer is not an ESRI Image layer.
    */
   setLayerRasterFunction(layerPath: string, rasterFunctionId: string | undefined): void {
-    // Get the layer
-    const layer = this.getGeoviewLayer(layerPath);
-
-    // Check if it's the right type
-    if (!(layer instanceof GVEsriImage)) throw new LayerWrongTypeError(layerPath, layer.getLayerName());
-
-    // Update the raster function
-    layer.setRasterFunction(rasterFunctionId);
-
-    // Update the store
-    //TODO: REFACTOR - The store update should happen through a store adaptor via a setRasterFunctionChanged event raised by the layer
-    setStoreLayerRasterFunction(this.getMapId(), layerPath, rasterFunctionId);
-
-    // Trigger legend re-query through the layer set system (forced refresh)
-    this.#controllers.layerSetController.legendsLayerSet.queryLegend(layer, true);
+    // Redirect
+    this.#controllers.layerController.setLayerRasterFunction(layerPath, rasterFunctionId);
   }
 
   /**

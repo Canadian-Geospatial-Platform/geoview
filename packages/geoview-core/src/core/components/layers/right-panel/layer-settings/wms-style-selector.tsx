@@ -7,7 +7,7 @@ import { Box, CircularProgress, Collapse, Typography } from '@/ui';
 import { ImageNotSupportedIcon, PaletteIcon, ExpandMoreIcon, ExpandLessIcon } from '@/ui';
 
 import { getSxClasses } from './layer-settings-style';
-import { useLayerSelectorWmsStyle } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { useLayerSelectorWmsStyle, useLayerSelectorWmsStyles } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type { TypeLegendLayer } from '@/core/components/layers/types';
 import type { TypeMetadataWMSCapabilityLayerStyle } from '@/api/types/layer-schema-types';
 import { logger } from '@/core/utils/logger';
@@ -143,19 +143,11 @@ export function WmsStylePanel({ layerDetails }: WmsStylePanelProps): JSX.Element
   // Store hooks
   const mapId = useGeoViewMapId();
   const currentWmsStyle = useLayerSelectorWmsStyle(layerDetails.layerPath);
+  const storeWmsStyles = useLayerSelectorWmsStyles(layerDetails.layerPath);
+  const memoWmsStyleArray = useMemo(() => storeWmsStyles || [], [storeWmsStyles]);
 
   // State
   const [expanded, setExpanded] = useState(false);
-
-  // Get the full style metadata
-  const memoWmsStyleArray = useMemo(
-    // TODO: REFACTOR - This getting of styles should be done in the store in case it changes. Here a
-    // TO.DOCONT: change in the wms styles (getStylesMetadata) of a layer config from the domain will not trigger a react update.
-    // TO.DOCONT: It's also bad, because here LegendEventProcessor.getLayerWmsStyles() jumps directly to the domain to get the
-    // TO.DOCONT: styles, while it should be going through the store.
-    () => LegendEventProcessor.getLayerWmsStyles(mapId, layerDetails.layerPath) || [],
-    [mapId, layerDetails.layerPath]
-  );
 
   const handleSelect = useCallback(
     (wmsStyleName: string): void => {

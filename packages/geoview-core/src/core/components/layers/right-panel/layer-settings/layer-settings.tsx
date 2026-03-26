@@ -5,7 +5,11 @@ import { useTheme } from '@mui/material/styles';
 import { Box, Divider, Typography } from '@/ui';
 import { Switch } from '@/ui/switch/switch';
 
-import { useLayerSelectorHasText, useLayerSelectorTextVisibility } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  getStoreLayerStyleSettings,
+  useLayerSelectorHasText,
+  useLayerSelectorTextVisibility,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 
 import { getSxClasses } from '../layer-details-style';
 import { RasterFunctionPanel } from './raster-function-selector';
@@ -42,9 +46,11 @@ export function LayerSettingsPanel({ layerDetails }: LayerSettingsPanelProps): J
   // Store
   const mapId = useGeoViewMapId();
   const layerController = useLayerController();
-  const availableSettings = LegendEventProcessor.getLayerSettings(mapId, layerDetails.layerPath);
   const hasText = useLayerSelectorHasText(layerDetails.layerPath);
   const textVisible = useLayerSelectorTextVisibility(layerDetails.layerPath);
+
+  // TODO: CHECK - This should likely go through a Zustand hook instead of a state getter
+  const availableSettings = getStoreLayerStyleSettings(mapId, layerDetails.layerPath);
 
   // Derived values
   const isLayerHoverable = layerDetails.controls?.hover;

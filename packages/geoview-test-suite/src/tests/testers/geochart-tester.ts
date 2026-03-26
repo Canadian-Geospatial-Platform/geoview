@@ -1,9 +1,7 @@
 import type { Coordinate } from 'ol/coordinate';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
-import { LayerTester } from './layer-tester';
 import { delay } from 'geoview-core/core/utils/utilities';
-import type { MapViewer } from 'geoview-core/geo/map/map-viewer';
 import type { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-layer';
 import { getStoreActiveFooterBarTab } from 'geoview-core/core/stores/store-interface-and-intial-values/ui-state';
 import {
@@ -38,7 +36,7 @@ export class GeochartTester extends GVAbstractTester {
       `Test Geochart on layer ${layerPath}...`,
       (test) => {
         // Continue the test and return the layer
-        return GeochartTester.helperStepLayerWithGeochart(test, this.getMapViewer(), layerPath, lonlat);
+        return this.helperStepLayerWithGeochart(test, layerPath, lonlat);
       },
       (test) => {
         // Perform assertions
@@ -119,7 +117,7 @@ export class GeochartTester extends GVAbstractTester {
         test.addStep(`Adding the layer on the map for ${uuid}`);
 
         // Add the geoview layer by geocore uuid
-        const result = await this.getMapViewer().layer.addGeoviewLayerByGeoCoreUUID(uuid);
+        const result = await this.getLayerApi().addGeoviewLayerByGeoCoreUUID(uuid);
 
         // Update the step
         test.addStep(`Adding the layer on the map...`);
@@ -128,7 +126,7 @@ export class GeochartTester extends GVAbstractTester {
         await result?.promiseLayer;
 
         // Continue the test and return the layer
-        return GeochartTester.helperStepLayerWithGeochart(test, this.getMapViewer(), layerPathAdd, lonlat);
+        return this.helperStepLayerWithGeochart(test, layerPathAdd, lonlat);
       },
       (test) => {
         // Perform assertions
@@ -146,7 +144,7 @@ export class GeochartTester extends GVAbstractTester {
       },
       (test) => {
         // Redirect to LayerTest to help test the removal of the layer
-        LayerTester.helperFinalizeStepRemoveLayerAndAssert(test, this.getMapViewer(), layerPathRemove);
+        this.helperFinalizeStepRemoveLayerAndAssert(test, layerPathRemove);
       }
     );
   }
@@ -164,17 +162,12 @@ export class GeochartTester extends GVAbstractTester {
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path
    * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path
    */
-  static async helperStepLayerWithGeochart<T>(
-    test: Test<T>,
-    mapViewer: MapViewer,
-    layerPath: string,
-    lonlat: Coordinate
-  ): Promise<AbstractGVLayer> {
+  async helperStepLayerWithGeochart<T>(test: Test<T>, layerPath: string, lonlat: Coordinate): Promise<AbstractGVLayer> {
     // Update the step
     test.addStep(`Getting the layer with the geochart ${layerPath}...`);
 
     // Get the layer
-    const layer = mapViewer.layer.getGeoviewLayerRegular(layerPath);
+    const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
 
     // Update the step
     test.addStep(`Waiting for its layer 'loaded' status...`);
@@ -186,13 +179,13 @@ export class GeochartTester extends GVAbstractTester {
     test.addStep(`Perform query operation at given coordinates...`);
 
     // Perform a map click using the feature info layer set
-    await mapViewer.controllers.layerSetController.queryAtLonLat(lonlat);
+    await this.getControllersRegistry().layerSetController.queryAtLonLat(lonlat);
 
     // Update the step
     test.addStep(`Setting active footerbar tab to geochart...`);
 
     // Set the footer tab to Geochart
-    mapViewer.controllers.uiController.setActiveFooterBarTab('geochart');
+    this.getControllersRegistry().uiController.setActiveFooterBarTab('geochart');
 
     // Update the step
     test.addStep(`Waiting on UI to refresh...`);
@@ -204,7 +197,7 @@ export class GeochartTester extends GVAbstractTester {
     test.addStep(`Selecting the geochart for the added layer...`);
 
     // Select the right layer path
-    setStoreGeochartSelectedLayerPath(mapViewer.mapId, layerPath);
+    setStoreGeochartSelectedLayerPath(this.getMapId(), layerPath);
 
     // Wait purposely on the UI, this waiting period isn't necessary for the test, but it's good to see it happen in real-time
     await delay(1000);

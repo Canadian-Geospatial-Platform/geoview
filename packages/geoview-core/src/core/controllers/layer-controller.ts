@@ -1,9 +1,18 @@
+import type BaseLayer from 'ol/layer/Base';
+
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import type { TypeLayerEntryConfig } from '@/api/types/layer-schema-types';
 import type { ConfigBaseClass } from '@/api/config/validation-classes/config-base-class';
+import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
+import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
+import { LayerWrongTypeError } from '@/core/exceptions/layer-exceptions';
 import { useControllers } from '@/core/controllers/controller-manager';
-import { setStoreLayerName, setStoreLayerQueryable } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import {
+  setStoreLayerName,
+  setStoreLayerQueryable,
+  setStoreLayerRasterFunction,
+} from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type {
   DomainLayerNameChangedDelegate,
   DomainLayerNameChangedEvent,
@@ -23,6 +32,10 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import type { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractGVRaster } from '@/geo/layer/gv-layers/raster/abstract-gv-raster';
+import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
+import type { AbstractBaseGVLayer } from '@/geo/layer/gv-layers/abstract-base-layer';
+import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import type { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 
 /**
  * LayerController class that extends the AbstractMapViewerController and provides methods to interact with map layers.
@@ -108,16 +121,212 @@ export class LayerController extends AbstractMapViewerController {
 
   // #region PUBLIC METHODS
 
+  // #region PUBLIC METHODS - GEOVIEW LAYER/ENTRY GETTERS
+
+  /**
+   * Gets the GeoView Layer Ids / UUIDs.
+   *
+   * @returns The ids of the layers
+   */
+  getGeoviewLayerIds(): string[] {
+    // Retrieve from the domain
+    return this.#layerDomain.getGeoviewLayerIds();
+  }
+
+  /**
+   * Gets the Layer Entry layer paths.
+   *
+   * @returns The GeoView Layer Paths
+   */
+  getLayerEntryLayerPaths(): string[] {
+    // Retrieve from the domain
+    return this.#layerDomain.getLayerEntryLayerPaths();
+  }
+
+  /**
+   * Gets the Layer Entry Configs.
+   *
+   * @returns The GeoView Layer Entry Configs
+   */
+  getLayerEntryConfigs(): ConfigBaseClass[] {
+    // Retrieve from the domain
+    return this.#layerDomain.getLayerEntryConfigs();
+  }
+
+  /**
+   * Retrieves the layer entry configuration for the given layer path.
+   *
+   * @param layerPath - The layer path to look up
+   * @returns The ConfigBaseClass layer configuration.
+   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
+   */
+  getLayerEntryConfig(layerPath: string): ConfigBaseClass {
+    // Retrieve from the domain
+    return this.#layerDomain.getLayerEntryConfig(layerPath);
+  }
+
   /**
    * Retrieves the layer entry configuration for the given layer path, if it exists.
    *
    * @param layerPath - The layer path to look up
-   * @returns The layer entry config, or undefined if not found
+   * @returns The ConfigBaseClass layer configuration, or undefined if not found
    */
   getLayerEntryConfigIfExists(layerPath: string): ConfigBaseClass | undefined {
     // Retrieve from the domain
     return this.#layerDomain.getLayerEntryConfigIfExists(layerPath);
   }
+
+  /**
+   * Gets the layer configuration of a regular layer (not a group) at the specified layer path.
+   *
+   * @param layerPath - The layer path.
+   * @returns The layer configuration.
+   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
+   * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
+   */
+  getLayerEntryConfigRegular(layerPath: string): AbstractBaseLayerEntryConfig {
+    return this.#layerDomain.getLayerEntryConfigRegular(layerPath);
+  }
+
+  /**
+   * Gets the layer configuration of a group layer (not a regular) at the specified layer path.
+   *
+   * @param layerPath - The layer path.
+   * @returns The layer configuration.
+   * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
+   * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
+   */
+  getLayerEntryConfigGroup(layerPath: string): GroupLayerEntryConfig {
+    return this.#layerDomain.getLayerEntryConfigGroup(layerPath);
+  }
+
+  /**
+   * Gets the GeoView Layer Paths.
+   *
+   * @returns The layer paths of the GV Layers
+   */
+  getGeoviewLayerPaths(): string[] {
+    // Retrieve from the domain
+    return this.#layerDomain.getGeoviewLayerPaths();
+  }
+
+  /**
+   * Gets all GeoView Layers
+   *
+   * @returns The list of new Geoview Layers
+   */
+  getGeoviewLayers(): AbstractBaseGVLayer[] {
+    // Retrieve from the domain
+    return this.#layerDomain.getGeoviewLayers();
+  }
+
+  /**
+   * Gets all GeoView layers that are regular layers (not groups).
+   *
+   * This method filters the list returned by `getGeoviewLayers()` and
+   * returns only the layers that are instances of `AbstractGVLayer`.
+   *
+   * @returns An array containing only the regular layers from the current GeoView layer collection.
+   */
+  getGeoviewLayersRegulars(): AbstractGVLayer[] {
+    // Retrieve from the domain
+    return this.#layerDomain.getGeoviewLayersRegulars();
+  }
+
+  /**
+   * Gets all GeoView layers that are group layers.
+   *
+   * This method filters the list returned by `getGeoviewLayers()` and
+   * returns only the layers that are instances of `GVGroupLayer`.
+   *
+   * @returns An array containing only the group layers from the current GeoView layer collection.
+   */
+  getGeoviewLayersGroups(): GVGroupLayer[] {
+    // Retrieve from the domain
+    return this.#layerDomain.getGeoviewLayersGroups();
+  }
+
+  /**
+   * Gets all GeoView layers that are at the root.
+   *
+   * @returns An array containing only the layers at the root level of the registry.
+   */
+  getGeoviewLayersRoot(): AbstractBaseGVLayer[] {
+    // Retrieve from the domain
+    return this.#layerDomain.getGeoviewLayersRoot();
+  }
+
+  /**
+   * Retrieves the Geoview layer for the given layer path.
+   *
+   * @param layerPath - The layer path to look up
+   * @returns The Geoview layer
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+   */
+  getGeoviewLayer(layerPath: string): AbstractBaseGVLayer {
+    // Retrieve from the domain
+    return this.#layerDomain.getGeoviewLayer(layerPath);
+  }
+
+  /**
+   * Retrieves the Geoview layer for the given layer path, if it exists.
+   *
+   * @param layerPath - The layer path to look up
+   * @returns The AbstractBaseGVLayer or undefined when not found
+   */
+  getGeoviewLayerIfExists(layerPath: string): AbstractBaseGVLayer | undefined {
+    // Retrieve from the domain
+    return this.#layerDomain.getGeoviewLayerIfExists(layerPath);
+  }
+
+  /**
+   * Returns the AbstractGVLayer instance associated to the layer path.
+   *
+   * This returns an actual AbstractGVLayer and throws a LayerWrongTypeError if the layerPath points to a GVGroupLayer object.
+   * An AbstractGVLayer is essentially a layer that's not a group layer.
+   *
+   * @param layerPath - The layer path
+   * @returns The AbstractGVLayer Layer
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
+   */
+  getGeoviewLayerRegular(layerPath: string): AbstractGVLayer {
+    // Retrieve from the domain
+    return this.#layerDomain.getGeoviewLayerRegular(layerPath);
+  }
+
+  /**
+   * Returns the GeoView Layer instance associated to the layer path, if it exists.
+   *
+   * This returns an actual AbstractGVLayer (or undefined) and throws a LayerWrongTypeError if the layerPath points to a GVGroupLayer object.
+   * An AbstractGVLayer is essentially a layer that's not a group layer.
+   *
+   * @param layerPath - The layer path
+   * @returns The AbstractGVLayer or undefined when not found
+   * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
+   */
+  getGeoviewLayerRegularIfExists(layerPath: string): AbstractGVLayer | undefined {
+    // Retrieve from the domain
+    return this.#layerDomain.getGeoviewLayerRegularIfExists(layerPath);
+  }
+
+  /**
+   * Asynchronously returns the OpenLayer layer associated to a specific layer path.
+   *
+   * This function waits the timeout period before abandonning (or uses the default timeout when not provided).
+   * Note this function uses the 'Async' suffix to differentiate it from 'getOLLayer'.
+   *
+   * @param layerPath - The layer path to the layer's configuration.
+   * @param timeout - Optionally indicate the timeout after which time to abandon the promise
+   * @param checkFrequency - Optionally indicate the frequency at which to check for the condition on the layerabstract
+   * @returns A promise that resolves to an OpenLayer layer associated to the layer path.
+   */
+  getOLLayerAsync(layerPath: string, timeout?: number, checkFrequency?: number): Promise<BaseLayer> {
+    // Retrieve from the domain
+    return this.#layerDomain.getOLLayerAsync(layerPath, timeout, checkFrequency);
+  }
+
+  // #endregion PUBLIC METHODS - GEOVIEW LAYER/ENTRY GETTERS
 
   /**
    * Retrieves the service (metadata) projection code for a specific raster layer.
@@ -172,6 +381,32 @@ export class LayerController extends AbstractMapViewerController {
     this.#layerDomain.getGeoviewLayerRegular(layerPath).setQueryable(queryable);
   }
 
+  /**
+   * Updates the raster function for an ESRI Image layer.
+   *
+   * @param layerPath - The path of the layer.
+   * @param rasterFunctionId - The raster function ID to apply or undefined to remove it.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+   * @throws {LayerWrongTypeError} When the layer is not an ESRI Image layer.
+   */
+  setLayerRasterFunction(layerPath: string, rasterFunctionId: string | undefined): void {
+    // Get the layer
+    const layer = this.#layerDomain.getGeoviewLayer(layerPath);
+
+    // Check if it's the right type
+    if (!(layer instanceof GVEsriImage)) throw new LayerWrongTypeError(layerPath, layer.getLayerName());
+
+    // Update the raster function
+    layer.setRasterFunction(rasterFunctionId);
+
+    // Update the store
+    //TODO: REFACTOR - The store update should happen through a store adaptor via a setRasterFunctionChanged event raised by the layer
+    setStoreLayerRasterFunction(this.getMapId(), layerPath, rasterFunctionId);
+
+    // Trigger legend re-query through the layer set system (forced refresh)
+    this.getControllersRegistry().layerSetController.legendsLayerSet.queryLegend(layer, true);
+  }
+
   // #endregion PUBLIC METHODS
 
   // #region DOMAIN HANDLERS
@@ -192,7 +427,7 @@ export class LayerController extends AbstractMapViewerController {
     if (event.config.getGeoviewLayerConfig().useAsBasemap !== true) this.#registerForOrderedLayerInfo(event.config as TypeLayerEntryConfig);
 
     // Tell the layer sets about it
-    this.getMapViewer().controllers.layerSetController.allLayerSets.forEach((layerSet) => {
+    this.getControllersRegistry().layerSetController.allLayerSets.forEach((layerSet) => {
       // Register the config to the layer set
       layerSet.registerLayerConfig(event.config);
     });
@@ -213,7 +448,7 @@ export class LayerController extends AbstractMapViewerController {
     // GV Could be moved to layer-set-controller, but keeping it here for now to be next to the layer entry config registered event hook
 
     // Tell the layer sets about it
-    this.getMapViewer().controllers.layerSetController.allLayerSets.forEach((layerSet) => {
+    this.getControllersRegistry().layerSetController.allLayerSets.forEach((layerSet) => {
       // Unregister from the layer set
       layerSet.unregister(event.config.layerPath);
     });
@@ -249,7 +484,7 @@ export class LayerController extends AbstractMapViewerController {
     // If not queryable
     if (!event.queryable) {
       // Clear the results from the layer set when turning the queryable to false
-      this.getMapViewer().controllers.layerSetController.clearFeatureInfoLayerResults(event.layer.getLayerPath());
+      this.getControllersRegistry().layerSetController.clearFeatureInfoLayerResults(event.layer.getLayerPath());
     }
   }
 

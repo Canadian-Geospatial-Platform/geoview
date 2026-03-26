@@ -1,8 +1,8 @@
-import type { DateLike } from 'geoview-core/core/utils/date-mgt';
-import { DateMgt } from 'geoview-core/core/utils/date-mgt';
 import { Test } from '../core/test';
 import { GVAbstractTester } from './abstract-gv-tester';
 import type { TypeDisplayLanguage } from 'geoview-core/api/types/map-schema-types';
+import type { DateLike } from 'geoview-core/core/utils/date-mgt';
+import { DateMgt } from 'geoview-core/core/utils/date-mgt';
 
 /**
  * Main Map testing class.

@@ -86,7 +86,7 @@ export class LayerDomain {
   /**
    * Gets the Layer Entry Configs.
    *
-   * @returns The GeoView Layer Entry Configs
+   * @returns The ConfigBaseClass Layer Entry configuration.
    */
   getLayerEntryConfigs(): ConfigBaseClass[] {
     return Object.values(this.#layerEntryConfigs);
@@ -96,7 +96,7 @@ export class LayerDomain {
    * Gets the layer configuration of the specified layer path.
    *
    * @param layerPath - The layer path.
-   * @returns The layer configuration.
+   * @returns The ConfigBaseClass layer configuration.
    * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
    */
   getLayerEntryConfig(layerPath: string): ConfigBaseClass {
@@ -114,7 +114,7 @@ export class LayerDomain {
    * Gets the layer configuration of the specified layer path.
    *
    * @param layerPath - The layer path.
-   * @returns The layer configuration or undefined if not found.
+   * @returns The ConfigBaseClass layer configuration or undefined if not found.
    */
   getLayerEntryConfigIfExists(layerPath: string): ConfigBaseClass | undefined {
     return this.#layerEntryConfigs?.[layerPath];
@@ -124,7 +124,7 @@ export class LayerDomain {
    * Gets the layer configuration of a regular layer (not a group) at the specified layer path.
    *
    * @param layerPath - The layer path.
-   * @returns The layer configuration.
+   * @returns The AbstractBaseLayerEntryConfig layer configuration.
    * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
    * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
    */
@@ -143,7 +143,7 @@ export class LayerDomain {
    * Gets the layer configuration of a group layer (not a regular) at the specified layer path.
    *
    * @param layerPath - The layer path.
-   * @returns The layer configuration.
+   * @returns The GroupLayerEntryConfig layer configuration.
    * @throws {LayerConfigNotFoundError} When the layer configuration couldn't be found at the given layer path.
    * @throws {LayerWrongTypeError} When the layer configuration is of the wrong type at the given layer path.
    */
@@ -213,7 +213,7 @@ export class LayerDomain {
    * Returns the GeoView instance associated to the layer path.
    *
    * @param layerPath - The layer path
-   * @returns The new Geoview Layer
+   * @returns The AbstractBaseGVLayer associated to the layer path
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    */
   getGeoviewLayer(layerPath: string): AbstractBaseGVLayer {
@@ -244,7 +244,7 @@ export class LayerDomain {
    * An AbstractGVLayer is essentially a layer that's not a group layer.
    *
    * @param layerPath - The layer path
-   * @returns The new Geoview Layer
+   * @returns The AbstractGVLayer Layer
    * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
    * @throws {LayerWrongTypeError} When the layer is of wrong type at the given layer path.
    */
@@ -260,7 +260,7 @@ export class LayerDomain {
   }
 
   /**
-   * Returns the GeoView Layer instance associated to the layer path.
+   * Returns the GeoView Layer instance associated to the layer path, if it exists.
    *
    * This returns an actual AbstractGVLayer (or undefined) and throws a LayerWrongTypeError if the layerPath points to a GVGroupLayer object.
    * An AbstractGVLayer is essentially a layer that's not a group layer.
