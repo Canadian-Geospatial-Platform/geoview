@@ -14,7 +14,6 @@ import {
   useLayerDisplayDateTimezone,
   useLayerNames,
 } from 'geoview-core/core/stores/store-interface-and-intial-values/layer-state';
-import { TimeSliderEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/time-slider-event-processor';
 import { getLocalizedMessage } from 'geoview-core/core/utils/utilities';
 import { useAppDisplayLanguage } from 'geoview-core/core/stores/store-interface-and-intial-values/app-state';
 import { logger } from 'geoview-core/core/utils/logger';
@@ -22,6 +21,7 @@ import { logger } from 'geoview-core/core/utils/logger';
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';
 import { getSxClasses } from './time-slider-style';
 import { Switch } from 'geoview-core/ui/switch/switch';
+import { useTimeSliderController } from 'geoview-core/core/controllers/time-slider-controller';
 
 /** Properties for the TimeSlider component. */
 interface TimeSliderProps {
@@ -93,6 +93,8 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
     displayDateTimezone: displayDateTimezoneFromStore,
     serviceDateTemporalMode: serviceDateTemporalModeFromStore,
   } = useTimeSliderLayers()![layerPath];
+
+  const timeSliderController = useTimeSliderController();
 
   // The display date format as specified by the layer
   const layerDisplayDateFormat = useLayerDisplayDateFormat(layerPath);
@@ -174,7 +176,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
         if (currentIndex === -1) {
           // Value not found - snap to nearest
           const nearest = timeStampRange.reduce((prev, curr) => (Math.abs(curr - values[0]) < Math.abs(prev - values[0]) ? curr : prev));
-          TimeSliderEventProcessor.updateTimeSliderValues(mapId, layerPath, [nearest]);
+          timeSliderController.updateTimeSliderValues(layerPath, [nearest]);
           return;
         }
 
@@ -186,7 +188,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
           newIndex = timeStampRange.length - 1; // Wrap to end
         }
 
-        TimeSliderEventProcessor.updateTimeSliderValues(mapId, layerPath, [timeStampRange[newIndex]]);
+        timeSliderController.updateTimeSliderValues(layerPath, [timeStampRange[newIndex]]);
         return;
       }
 
@@ -202,7 +204,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
           newPosition = minAndMax[1];
         }
 
-        TimeSliderEventProcessor.updateTimeSliderValues(mapId, layerPath, [newPosition]);
+        timeSliderController.updateTimeSliderValues(layerPath, [newPosition]);
         return;
       }
 
@@ -212,8 +214,7 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       // If handles are at the extremes, reset the delta
       if (rightHandle - leftHandle === minAndMax[1] - minAndMax[0]) {
         sliderDeltaRef.current = (minAndMax[1] - minAndMax[0]) / 10;
-        TimeSliderEventProcessor.updateTimeSliderValues(
-          mapId,
+        timeSliderController.updateTimeSliderValues(
           layerPath,
           isForward ? [leftHandle, leftHandle + sliderDeltaRef.current] : [rightHandle - sliderDeltaRef.current, rightHandle]
         );
@@ -259,9 +260,9 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
         if (leftHandle < sliderValueRef.current! && rightHandle > sliderValueRef.current!) leftHandle = sliderValueRef.current as number;
       }
 
-      TimeSliderEventProcessor.updateTimeSliderValues(mapId, layerPath, [leftHandle, rightHandle]);
+      timeSliderController.updateTimeSliderValues(layerPath, [leftHandle, rightHandle]);
     },
-    [mapId, discreteValues, layerPath, locked, minAndMax, reversed, values, singleHandle, step, timeStampRange]
+    [timeSliderController, discreteValues, layerPath, locked, minAndMax, reversed, values, singleHandle, step, timeStampRange]
   );
 
   const moveBack = useCallback((): void => {
@@ -344,13 +345,13 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
    */
   const handleCheckbox = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>, newValue: boolean): void => {
-      TimeSliderEventProcessor.updateTimeSliderFiltering(mapId, layerPath, newValue);
+      timeSliderController.updateTimeSliderFiltering(layerPath, newValue);
       if (!newValue) {
         clearInterval(playIntervalRef.current);
         setIsPlaying(false);
       }
     },
-    [mapId, layerPath]
+    [timeSliderController, layerPath]
   );
 
   /**
@@ -378,12 +379,12 @@ export function TimeSlider(props: TimeSliderProps): JSX.Element {
       if (discreteValues && singleHandle) {
         const value = Array.isArray(newValues) ? newValues[0] : newValues;
         const nearest = timeStampRange.reduce((prev, curr) => (Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev));
-        TimeSliderEventProcessor.updateTimeSliderValues(mapId, layerPath, [nearest]);
+        timeSliderController.updateTimeSliderValues(layerPath, [nearest]);
       } else {
-        TimeSliderEventProcessor.updateTimeSliderValues(mapId, layerPath, newValues as number[]);
+        timeSliderController.updateTimeSliderValues(layerPath, newValues as number[]);
       }
     },
-    [mapId, discreteValues, layerPath, singleHandle, timeStampRange]
+    [timeSliderController, discreteValues, layerPath, singleHandle, timeStampRange]
   );
 
   // #region USE EFFECT

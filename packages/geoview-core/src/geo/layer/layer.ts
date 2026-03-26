@@ -138,7 +138,6 @@ import { MapViewer } from '@/geo/map/map-viewer';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import type { GroupLayerEntryConfig } from '@/api/config/validation-classes/group-layer-entry-config';
 import type { TypeLegendItem } from '@/core/components/layers/types';
-import { TimeSliderEventProcessor } from '@/api/event-processors/event-processor-children/time-slider-event-processor';
 import { GeoViewError, LayerNoLastQueryToPerformError } from '@/core/exceptions/geoview-exceptions';
 import { LayerGeoCoreError } from '@/core/exceptions/geocore-exceptions';
 import { ShapefileReader } from '@/api/config/reader/shapefile-reader';
@@ -2419,7 +2418,7 @@ export class LayerApi {
       // If the layer is loaded AND flag is true to use time dimension, continue
       if (layer.getIsTimeAware() && layer.getTimeDimension()) {
         // Check (if dimension is valid) and add time slider layer when needed
-        TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.getMapId(), layer, layerSliderConfig);
+        this.#controllers.timeSliderController?.checkInitTimeSliderLayerAndApplyFilters(layer, layerSliderConfig);
       }
     } catch (error: unknown) {
       // Log error

@@ -1,40 +1,54 @@
-import { AbstractEventProcessor } from '@/api/event-processors/abstract-event-processor';
+import { AbstractMapViewerController } from '@/core/controllers/base/abstract-map-viewer-controller';
+import { useControllers } from '@/core/controllers/controller-manager';
 import {
-  type TypeTimeSliderValues,
-  type TypeTimeSliderProps,
-  isStoreTimeSliderInitialized,
-  addStoreTimeSliderLayer,
   addOrUpdateStoreTimeSliderFilter,
+  addStoreTimeSliderLayer,
+  getStoreTimeSliderLayer,
+  isStoreTimeSliderInitialized,
   setStoreTimeSliderFiltering,
   setStoreTimeSliderValues,
-  getStoreTimeSliderLayer,
+  type TypeTimeSliderProps,
+  type TypeTimeSliderValues,
 } from '@/core/stores/store-interface-and-intial-values/time-slider-state';
+import type { MapViewer } from '@/geo/map/map-viewer';
+import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import { DateMgt, type TimeDimension } from '../utils/date-mgt';
 import type { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 import { GVWMS } from '@/geo/layer/gv-layers/raster/gv-wms';
 import { GVEsriImage } from '@/geo/layer/gv-layers/raster/gv-esri-image';
-import type { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import { DateMgt, type TimeDimension } from '@/core/utils/date-mgt';
 
 /**
- * Event processor for time-slider related operations.
- *
- * Provides static methods that orchestrate store updates, filter generation,
- * and layer API calls for temporal filtering and time slider configuration.
+ * Controller responsible for time slider interactions, keyboard shortcuts, and
+ * bridging the time slider state with the UI domain and map projection changes.
  */
-export abstract class TimeSliderEventProcessor extends AbstractEventProcessor {
-  // #region STATIC METHODS
+export class TimeSliderController extends AbstractMapViewerController {
+  /**
+   * Creates an instance of TimeSliderController.
+   *
+   * @param mapViewer - The map viewer instance to associate with this controller
+   */
+  // GV Leave the constructor here, because we'll likely need it soon to inject dependencies.
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
+  constructor(mapViewer: MapViewer) {
+    super(mapViewer);
+  }
+
+  // #region OVERRIDES
+
+  // #endregion OVERRIDES
+
+  // #region PUBLIC METHODS
 
   /**
    * Checks if the layer has time slider values. If there are, adds the time slider layer and applies filters.
    *
-   * @param mapId - The map id of the state to act on
    * @param layer - The layer to add to the state
    * @param timesliderConfig - Optional time slider configuration
    */
-  static checkInitTimeSliderLayerAndApplyFilters(mapId: string, layer: AbstractGVLayer, timesliderConfig?: TypeTimeSliderProps): void {
+  checkInitTimeSliderLayerAndApplyFilters(layer: AbstractGVLayer, timesliderConfig?: TypeTimeSliderProps): void {
     // If there is no Time Slider, ignore
-    if (!isStoreTimeSliderInitialized(mapId)) return;
+    if (!isStoreTimeSliderInitialized(this.getMapId())) return;
 
     // Get the temporal dimension, if any
     const layerTimeDimension = layer.getTimeDimension();
@@ -43,56 +57,133 @@ export abstract class TimeSliderEventProcessor extends AbstractEventProcessor {
     if (!layerTimeDimension || !layerTimeDimension.isValid) return; // Skip
 
     // Get the time slider values
-    const timeSliderValues = this.#getInitialTimeSliderValues(layer.getLayerConfig(), layerTimeDimension, timesliderConfig);
+    const timeSliderValues = TimeSliderController.#getInitialTimeSliderValues(layer.getLayerConfig(), layerTimeDimension, timesliderConfig);
 
     // If any
     if (timeSliderValues) {
       // Add it to the store
-      addStoreTimeSliderLayer(mapId, layer.getLayerPath(), timeSliderValues);
+      addStoreTimeSliderLayer(this.getMapId(), layer.getLayerPath(), timeSliderValues);
 
       // Update the filters on the layer in question and potential additional ones
-      this.#updateAndApplyTimeFiltersForAll(mapId, layer, timeSliderValues, timeSliderValues.filtering, timeSliderValues.values);
+      this.#updateAndApplyTimeFiltersForAll(layer, timeSliderValues, timeSliderValues.filtering, timeSliderValues.values);
 
       // Make sure tab is visible
-      this.getUIController(mapId).showTabButton('time-slider');
+      this.getControllersRegistry().uiController.showTabButton('time-slider');
     }
   }
 
   /**
    * Updates the time slider values for a layer path and re-applies the temporal filters.
    *
-   * @param mapId - The map identifier
    * @param layerPath - The layer path
    * @param values - The new slider values (timestamps in milliseconds)
    */
-  static updateTimeSliderValues(mapId: string, layerPath: string, values: number[]): void {
+  updateTimeSliderValues(layerPath: string, values: number[]): void {
     // Get the store values
-    const timeSliderValues = getStoreTimeSliderLayer(mapId, layerPath)!;
+    const timeSliderValues = getStoreTimeSliderLayer(this.getMapId(), layerPath)!;
 
     // Get the corresponding layer
-    const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerRegular(layerPath);
+    const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
 
     // Update the filters on the layer in question and potential additional ones
-    this.#updateAndApplyTimeFiltersForAll(mapId, layer, timeSliderValues, timeSliderValues.filtering, values);
+    this.#updateAndApplyTimeFiltersForAll(layer, timeSliderValues, timeSliderValues.filtering, values);
   }
 
   /**
    * Updates the filtering state for a layer path and re-applies the temporal filters.
    *
-   * @param mapId - The map identifier
    * @param layerPath - The layer path
    * @param filtering - Whether temporal filtering is active
    */
-  static updateTimeSliderFiltering(mapId: string, layerPath: string, filtering: boolean): void {
+  updateTimeSliderFiltering(layerPath: string, filtering: boolean): void {
     // Get the store values
-    const timeSliderValues = getStoreTimeSliderLayer(mapId, layerPath)!;
+    const timeSliderValues = getStoreTimeSliderLayer(this.getMapId(), layerPath)!;
 
     // Get the corresponding layer
-    const layer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerRegular(layerPath);
+    const layer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(layerPath);
 
     // Update the filters on the layer in question and potential additional ones
-    this.#updateAndApplyTimeFiltersForAll(mapId, layer, timeSliderValues, filtering, timeSliderValues.values);
+    this.#updateAndApplyTimeFiltersForAll(layer, timeSliderValues, filtering, timeSliderValues.values);
   }
+
+  // #endregion PUBLIC METHODS
+
+  // #region PRIVATE METHODS
+
+  /**
+   * Updates and applies temporal filters for the given layer and all its additional linked layers.
+   *
+   * @param layer - The main GeoView layer
+   * @param timeSliderValues - The time slider values for this layer
+   * @param filtering - Whether temporal filtering is active
+   * @param values - The current slider values (timestamps in milliseconds)
+   */
+  #updateAndApplyTimeFiltersForAll(
+    layer: AbstractGVLayer,
+    timeSliderValues: TypeTimeSliderValues,
+    filtering: boolean,
+    values: number[]
+  ): void {
+    // Update the filters on the layer in question
+    this.#updateAndApplyTimeFiltersForOne(layer, timeSliderValues, timeSliderValues.field, filtering, values);
+
+    // Many layer paths of layers to adjust
+    // For each layer paths extra, apply the same filter
+    timeSliderValues.additionalLayerpaths?.forEach((additionalLayerPath) => {
+      // Get the time slider layer state if exists
+      const additionalTimeSliderValues = getStoreTimeSliderLayer(this.getMapId(), additionalLayerPath);
+
+      // If not exist, skip
+      if (!additionalTimeSliderValues) return;
+
+      // Get the corresponding additional layer
+      const additionalLayer = this.getControllersRegistry().layerController.getGeoviewLayerRegular(additionalLayerPath);
+
+      // Update the filters on the additional layer
+      this.#updateAndApplyTimeFiltersForOne(additionalLayer, timeSliderValues, additionalTimeSliderValues.field, filtering, values);
+    });
+  }
+
+  /**
+   * Updates and applies the temporal filter for a single layer.
+   *
+   * Generates the filter string, stores the filter and values in the store,
+   * and applies the filters on the map.
+   *
+   * @param layer - The GeoView layer to apply the filter on
+   * @param timeSliderValues - The time slider values for this layer
+   * @param field - The temporal field name to filter on
+   * @param filtering - Whether temporal filtering is active
+   * @param values - The current slider values (timestamps in milliseconds)
+   */
+  #updateAndApplyTimeFiltersForOne(
+    layer: AbstractGVLayer,
+    timeSliderValues: TypeTimeSliderValues,
+    field: string,
+    filtering: boolean,
+    values: number[]
+  ): void {
+    // Generate the filter string
+    const filter = TimeSliderController.#generateFilterString(layer, timeSliderValues, field, filtering, values);
+
+    // ---- Always applied ----
+    addOrUpdateStoreTimeSliderFilter(this.getMapId(), layer.getLayerPath(), filter);
+    setStoreTimeSliderFiltering(this.getMapId(), layer.getLayerPath(), filtering);
+    setStoreTimeSliderValues(this.getMapId(), layer.getLayerPath(), values);
+
+    // Apply filters on the map
+    MapEventProcessor.applyLayerFilters(this.getMapId(), layer.getLayerPath());
+  }
+
+  // #endregion PRIVATE METHODS
+
+  // #region DOMAIN HANDLERS
+  // GV Eventually, these should be moved to a store adaptor or similar construct that directly connects the domain to the store without going through the controller
+  // GV.CONT but for now this allows us to keep domain-store interactions in one place and call application-level processes as needed during migration.
+
+  // #endregion DOMAIN HANDLERS
+
+  // #region STATIC METHODS
 
   /**
    * Computes the initial time slider values from the layer configuration and temporal dimension metadata.
@@ -184,75 +275,6 @@ export abstract class TimeSliderEventProcessor extends AbstractEventProcessor {
   }
 
   /**
-   * Updates and applies temporal filters for the given layer and all its additional linked layers.
-   *
-   * @param mapId - The map identifier
-   * @param layer - The main GeoView layer
-   * @param timeSliderValues - The time slider values for this layer
-   * @param filtering - Whether temporal filtering is active
-   * @param values - The current slider values (timestamps in milliseconds)
-   */
-  static #updateAndApplyTimeFiltersForAll(
-    mapId: string,
-    layer: AbstractGVLayer,
-    timeSliderValues: TypeTimeSliderValues,
-    filtering: boolean,
-    values: number[]
-  ): void {
-    // Update the filters on the layer in question
-    this.#updateAndApplyTimeFiltersForOne(mapId, layer, timeSliderValues, timeSliderValues.field, filtering, values);
-
-    // Many layer paths of layers to adjust
-    // For each layer paths extra, apply the same filter
-    timeSliderValues.additionalLayerpaths?.forEach((additionalLayerPath) => {
-      // Get the time slider layer state if exists
-      const additionalTimeSliderValues = getStoreTimeSliderLayer(mapId, additionalLayerPath);
-
-      // If not exist, skip
-      if (!additionalTimeSliderValues) return;
-
-      // Get the corresponding additional layer
-      const additionalLayer = MapEventProcessor.getMapViewerLayerAPI(mapId).getGeoviewLayerRegular(additionalLayerPath);
-
-      // Update the filters on the additional layer
-      this.#updateAndApplyTimeFiltersForOne(mapId, additionalLayer, timeSliderValues, additionalTimeSliderValues.field, filtering, values);
-    });
-  }
-
-  /**
-   * Updates and applies the temporal filter for a single layer.
-   *
-   * Generates the filter string, stores the filter and values in the store,
-   * and applies the filters on the map.
-   *
-   * @param mapId - The map identifier
-   * @param layer - The GeoView layer to apply the filter on
-   * @param timeSliderValues - The time slider values for this layer
-   * @param field - The temporal field name to filter on
-   * @param filtering - Whether temporal filtering is active
-   * @param values - The current slider values (timestamps in milliseconds)
-   */
-  static #updateAndApplyTimeFiltersForOne(
-    mapId: string,
-    layer: AbstractGVLayer,
-    timeSliderValues: TypeTimeSliderValues,
-    field: string,
-    filtering: boolean,
-    values: number[]
-  ): void {
-    // Generate the filter string
-    const filter = this.#generateFilterString(layer, timeSliderValues, field, filtering, values);
-
-    // ---- Always applied ----
-    addOrUpdateStoreTimeSliderFilter(mapId, layer.getLayerPath(), filter);
-    setStoreTimeSliderFiltering(mapId, layer.getLayerPath(), filtering);
-    setStoreTimeSliderValues(mapId, layer.getLayerPath(), values);
-
-    // Apply filters on the map
-    MapEventProcessor.applyLayerFilters(mapId, layer.getLayerPath());
-  }
-
-  /**
    * Generates the filter expression string for temporal filtering on a layer.
    *
    * Handles different layer types (WMS, Esri Image, Dynamic/Vector) with their
@@ -334,4 +356,17 @@ export abstract class TimeSliderEventProcessor extends AbstractEventProcessor {
   }
 
   // #endregion STATIC METHODS
+}
+
+/**
+ * Hook to access the TimeSliderController from the controller context.
+ *
+ * @returns The time slider controller instance
+ * @throws {Error} When used outside of a ControllerContext.Provider.
+ * @throws {Error} When the TimeSlider plugin is not configured.
+ */
+export function useTimeSliderController(): TimeSliderController {
+  const controller = useControllers().timeSliderController;
+  if (!controller) throw new Error('useTimeSliderController must be used with an initialized time slider plugin state');
+  return controller;
 }

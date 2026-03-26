@@ -4,7 +4,6 @@ import { AbstractGVLayer } from 'geoview-core/geo/layer/gv-layers/abstract-gv-la
 import { TimeSliderIcon } from 'geoview-core/ui';
 import { DateMgt, type TimeIANA, type TypeDisplayDateFormat } from 'geoview-core/core/utils/date-mgt';
 import { FooterPlugin } from 'geoview-core/api/plugin/footer-plugin';
-import { TimeSliderEventProcessor } from 'geoview-core/api/event-processors/event-processor-children/time-slider-event-processor';
 
 import { TimeSliderPanel } from './time-slider-panel';
 import schema from '../schema.json';
@@ -182,7 +181,7 @@ class TimeSliderPlugin extends FooterPlugin {
           const timesliderConfig = this.getConfig().sliders.find((slider) => slider.layerPaths.includes(layerPath));
 
           // Check and add time slider layer when needed
-          TimeSliderEventProcessor.checkInitTimeSliderLayerAndApplyFilters(this.mapViewer.mapId, layer, timesliderConfig);
+          this.mapViewer.controllers.timeSliderController?.checkInitTimeSliderLayerAndApplyFilters(layer, timesliderConfig);
         }
       });
     }

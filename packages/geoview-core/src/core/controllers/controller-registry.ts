@@ -5,9 +5,10 @@ import { LayerController } from './layer-controller';
 import { LayerSetController } from './layer-set-controller';
 import { DrawerController } from './drawer-controller';
 import type { MapViewer } from '@/geo/map/map-viewer';
-import { getGeoViewStore, hasDrawerPlugin } from '../stores/stores-managers';
+import { getGeoViewStore, hasDrawerPlugin, hasTimeSliderPlugin } from '../stores/stores-managers';
 import type { AbstractController } from './base/abstract-controller';
 import { DataTableController } from './data-table-controller';
+import { TimeSliderController } from './time-slider-controller';
 
 /**
  * Central registry that owns and provides access to all framework-level controllers.
@@ -31,6 +32,9 @@ export class ControllerRegistry {
 
   /** The drawer controller used to interact with the drawer. Only present when the drawer plugin is configured. */
   readonly drawerController?: DrawerController;
+
+  /** The time slider controller used to interact with the time slider. Only present when the time slider plugin is configured. */
+  readonly timeSliderController?: TimeSliderController;
 
   /** All controllers registered in this registry. */
   readonly allControllers: AbstractController[] = [];
@@ -56,9 +60,16 @@ export class ControllerRegistry {
       this.drawerController = new DrawerController(mapViewer, uiDomain);
     }
 
+    // If the time slider plugin is present (we know via the store)
+    if (hasTimeSliderPlugin(getGeoViewStore(mapViewer.mapId))) {
+      // Create the time slider controller only if the time slider plugin is present, as it relies on the time slider state which is part of that plugin
+      this.timeSliderController = new TimeSliderController(mapViewer);
+    }
+
     // Add all controllers to the registry
     this.allControllers.push(this.uiController, this.layerController, this.layerSetController);
     if (this.drawerController) this.allControllers.push(this.drawerController);
+    if (this.timeSliderController) this.allControllers.push(this.timeSliderController);
   }
 
   /**
