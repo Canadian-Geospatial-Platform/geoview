@@ -120,7 +120,6 @@ import {
   getStoreLayerStateLegendLayerByPath,
   getStoreLayerStateSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
-import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 
 export abstract class MapEventProcessor extends AbstractEventProcessor {
   /** The minimal delay in ms to wait after a zoom animation to ensure it has completed. */
