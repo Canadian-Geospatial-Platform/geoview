@@ -532,9 +532,9 @@ export abstract class AbstractBaseGVLayer {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onLayerNameChanged(callback: LayerNameChangedDelegate): void {
+  onLayerNameChanged(callback: LayerNameChangedDelegate): LayerNameChangedDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onLayerNameChangedHandlers, callback);
+    return EventHelper.onEvent(this.#onLayerNameChangedHandlers, callback);
   }
 
   /**
@@ -542,7 +542,7 @@ export abstract class AbstractBaseGVLayer {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerNameChanged(callback: LayerNameChangedDelegate): void {
+  offLayerNameChanged(callback: LayerNameChangedDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerNameChangedHandlers, callback);
   }
@@ -562,9 +562,9 @@ export abstract class AbstractBaseGVLayer {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onVisibleChanged(callback: VisibleChangedDelegate): void {
+  onVisibleChanged(callback: VisibleChangedDelegate): VisibleChangedDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onVisibleChangedHandlers, callback);
+    return EventHelper.onEvent(this.#onVisibleChangedHandlers, callback);
   }
 
   /**
@@ -572,7 +572,7 @@ export abstract class AbstractBaseGVLayer {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offVisibleChanged(callback: VisibleChangedDelegate): void {
+  offVisibleChanged(callback: VisibleChangedDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onVisibleChangedHandlers, callback);
   }
@@ -592,9 +592,9 @@ export abstract class AbstractBaseGVLayer {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onLayerOpacityChanged(callback: LayerOpacityChangedDelegate): void {
+  onLayerOpacityChanged(callback: LayerOpacityChangedDelegate): LayerOpacityChangedDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onLayerOpacityChangedHandlers, callback);
+    return EventHelper.onEvent(this.#onLayerOpacityChangedHandlers, callback);
   }
 
   /**
@@ -602,7 +602,7 @@ export abstract class AbstractBaseGVLayer {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerOpacityChanged(callback: LayerOpacityChangedDelegate): void {
+  offLayerOpacityChanged(callback: LayerOpacityChangedDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerOpacityChangedHandlers, callback);
   }
@@ -622,9 +622,9 @@ export abstract class AbstractBaseGVLayer {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onLayerZIndexChanged(callback: LayerZIndexChangedDelegate): void {
+  onLayerZIndexChanged(callback: LayerZIndexChangedDelegate): LayerZIndexChangedDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onLayerZIndexChangedHandlers, callback);
+    return EventHelper.onEvent(this.#onLayerZIndexChangedHandlers, callback);
   }
 
   /**
@@ -632,7 +632,7 @@ export abstract class AbstractBaseGVLayer {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerZIndexChanged(callback: LayerZIndexChangedDelegate): void {
+  offLayerZIndexChanged(callback: LayerZIndexChangedDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerZIndexChangedHandlers, callback);
   }

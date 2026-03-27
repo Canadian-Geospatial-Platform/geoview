@@ -166,7 +166,7 @@ export class LayerApi {
   /** Reference on the map viewer */
   mapViewer: MapViewer;
 
-  /** Reference on the ui controller */
+  /** Reference on the controller registry */
   #controllers: ControllerRegistry;
 
   /** Reference on the layer domain. */
@@ -275,12 +275,13 @@ export class LayerApi {
     this.#controllers = controllerRegistry;
 
     // Keep a reference on the layer sets
-    // GV This is for legacy support, should it be removed eventually?
+    // GV These assignations references of the layer sets are for legacy support. They could be removed eventually.
     this.legendsLayerSet = controllerRegistry.layerSetController.legendsLayerSet;
     this.hoverFeatureInfoLayerSet = controllerRegistry.layerSetController.hoverFeatureInfoLayerSet;
     this.allFeatureInfoLayerSet = controllerRegistry.layerSetController.allFeatureInfoLayerSet;
     this.featureInfoLayerSet = controllerRegistry.layerSetController.featureInfoLayerSet;
 
+    // Keep a reference on the geometry api and feature highlight
     this.geometry = geometryApi;
     this.featureHighlight = new FeatureHighlight(this.mapViewer);
 

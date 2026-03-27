@@ -29,6 +29,8 @@ import { logger } from '@/core/utils/logger';
  */
 export abstract class AbstractLayerSet {
   /** The LayerDomain to work with */
+  // TODO: CHECK - Maybe we can get rid of the layerDomain dependency here if we
+  // TO.DOCONT: always pass the GVLayer or LayerEntry in parameters when necessary instead of the layerPath string.
   protected layerDomain: LayerDomain;
 
   /** The MapViewer to work with */

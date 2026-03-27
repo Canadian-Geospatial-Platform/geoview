@@ -20,7 +20,13 @@ import { AllFeatureInfoLayerSet } from '@/geo/layer/layer-sets/all-feature-info-
 import { HoverFeatureInfoLayerSet } from '@/geo/layer/layer-sets/hover-feature-info-layer-set';
 import { LegendsLayerSet } from '@/geo/layer/layer-sets/legends-layer-set';
 import type { AbstractLayerSet } from '@/geo/layer/layer-sets/abstract-layer-set';
-import type { MapPointerMoveEvent, MapSingleClickEvent, MapViewer } from '@/geo/map/map-viewer';
+import type {
+  MapPointerMoveDelegate,
+  MapPointerMoveEvent,
+  MapSingleClickDelegate,
+  MapSingleClickEvent,
+  MapViewer,
+} from '@/geo/map/map-viewer';
 import { FeatureInfoLayerSet } from '@/geo/layer/layer-sets/feature-info-layer-set';
 import type { TypeFeatureInfoResult } from '@/api/types/map-schema-types';
 import { setStoreSelectedLayerPath } from '../stores/store-interface-and-intial-values/data-table-state';
@@ -44,6 +50,15 @@ export class LayerSetController extends AbstractMapViewerController {
   /** All the layer sets */
   allLayerSets: AbstractLayerSet[];
 
+  /** Keep a bounded reference to the handle map click event */
+  #boundedHandleMapClicked: MapSingleClickDelegate;
+
+  /** Keep a bounded reference to the handle map pointer move event */
+  #boundedHandleMapPointerMoved: MapPointerMoveDelegate;
+
+  /** Keep a bounded reference to the handle map pointer stop event */
+  #boundedHandleMapPointerStopped: MapPointerMoveDelegate;
+
   /**
    * Creates an instance of LayerSetController.
    *
@@ -59,6 +74,11 @@ export class LayerSetController extends AbstractMapViewerController {
     this.allFeatureInfoLayerSet = new AllFeatureInfoLayerSet(mapViewer, layerDomain);
     this.featureInfoLayerSet = new FeatureInfoLayerSet(mapViewer, layerDomain);
     this.allLayerSets = [this.legendsLayerSet, this.hoverFeatureInfoLayerSet, this.featureInfoLayerSet, this.allFeatureInfoLayerSet];
+
+    // Keep bounded references to the handlers
+    this.#boundedHandleMapClicked = this.#handleMapClicked.bind(this);
+    this.#boundedHandleMapPointerMoved = this.#handleMapPointerMoved.bind(this);
+    this.#boundedHandleMapPointerStopped = this.#handleMapPointerStopped.bind(this);
   }
 
   // #region OVERRIDES
@@ -68,13 +88,13 @@ export class LayerSetController extends AbstractMapViewerController {
    */
   protected override onHook(): void {
     // Register a handler on the map click
-    this.getMapViewer().onMapSingleClick(this.#handleMapClicked.bind(this));
+    this.getMapViewer().onMapSingleClick(this.#boundedHandleMapClicked);
 
     // Register a handler when the map pointer moves
-    this.getMapViewer().onMapPointerMove(this.#handleMapPointerMoved.bind(this));
+    this.getMapViewer().onMapPointerMove(this.#boundedHandleMapPointerMoved);
 
     // Register a handler when the map pointer stops
-    this.getMapViewer().onMapPointerStop(this.#handleMapPointerStopped.bind(this));
+    this.getMapViewer().onMapPointerStop(this.#boundedHandleMapPointerStopped);
   }
 
   /**
@@ -82,6 +102,15 @@ export class LayerSetController extends AbstractMapViewerController {
    */
   protected override onUnhook(): void {
     // Unhooks when the layer queryable state is changed in the Layer domain and updates the store accordingly
+
+    // Register a handler when the map pointer stops
+    this.getMapViewer().offMapPointerStop(this.#boundedHandleMapPointerStopped);
+
+    // Register a handler when the map pointer moves
+    this.getMapViewer().offMapPointerMove(this.#boundedHandleMapPointerMoved);
+
+    // Register a handler on the map click
+    this.getMapViewer().offMapSingleClick(this.#boundedHandleMapClicked);
   }
 
   // #endregion OVERRIDES

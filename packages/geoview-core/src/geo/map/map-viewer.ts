@@ -2360,9 +2360,9 @@ export class MapViewer {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onMapPointerMove(callback: MapPointerMoveDelegate): void {
+  onMapPointerMove(callback: MapPointerMoveDelegate): MapPointerMoveDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onMapPointerMoveHandlers, callback);
+    return EventHelper.onEvent(this.#onMapPointerMoveHandlers, callback);
   }
 
   /**
@@ -2370,7 +2370,7 @@ export class MapViewer {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offMapPointerMove(callback: MapPointerMoveDelegate): void {
+  offMapPointerMove(callback: MapPointerMoveDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onMapPointerMoveHandlers, callback);
   }
@@ -2390,9 +2390,9 @@ export class MapViewer {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onMapPointerStop(callback: MapPointerMoveDelegate): void {
+  onMapPointerStop(callback: MapPointerMoveDelegate): MapPointerMoveDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onMapPointerStopHandlers, callback);
+    return EventHelper.onEvent(this.#onMapPointerStopHandlers, callback);
   }
 
   /**
@@ -2400,7 +2400,7 @@ export class MapViewer {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offMapPointerStop(callback: MapPointerMoveDelegate): void {
+  offMapPointerStop(callback: MapPointerMoveDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onMapPointerStopHandlers, callback);
   }
@@ -2420,9 +2420,9 @@ export class MapViewer {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onMapSingleClick(callback: MapSingleClickDelegate): void {
+  onMapSingleClick(callback: MapSingleClickDelegate): MapSingleClickDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onMapSingleClickHandlers, callback);
+    return EventHelper.onEvent(this.#onMapSingleClickHandlers, callback);
   }
 
   /**
@@ -2430,7 +2430,7 @@ export class MapViewer {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offMapSingleClick(callback: MapSingleClickDelegate): void {
+  offMapSingleClick(callback: MapSingleClickDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onMapSingleClickHandlers, callback);
   }

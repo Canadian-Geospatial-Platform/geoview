@@ -830,14 +830,17 @@ export const setStoreTextRotation = (mapId: string, textRotation: number): void 
  *
  * @param mapId - The map identifier
  * @param drawInstance - The Draw interaction instance
+ * @deprecated This function shouldn't exist
  */
-// TODO: REFACTOR - This function shouldn't exist
 export const setStoreDrawInstance = (mapId: string, drawInstance: Draw): void => {
   getStoreDrawerState(mapId).actions.setDrawInstance(drawInstance);
 };
 
-/** Removes the draw interaction instance from the drawer store. */
-// TODO: REFACTOR - This function shouldn't exist
+/** Removes the draw interaction instance from the drawer store.
+ *
+ * @param mapId - The map identifier
+ * @deprecated This function shouldn't exist
+ */
 export const removeStoreDrawInstance = (mapId: string): void => {
   getStoreDrawerState(mapId).actions.removeDrawInstance();
 };
@@ -847,14 +850,17 @@ export const removeStoreDrawInstance = (mapId: string): void => {
  *
  * @param mapId - The map identifier
  * @param transformInstance - The Transform interaction instance
+ * @deprecated This function shouldn't exist
  */
-// TODO: REFACTOR - This function shouldn't exist
 export const setStoreTransformInstance = (mapId: string, transformInstance: Transform): void => {
   getStoreDrawerState(mapId).actions.setTransformInstance(transformInstance);
 };
 
-/** Removes the transform interaction instance from the drawer store. */
-// TODO: REFACTOR - This function shouldn't exist
+/** Removes the transform interaction instance from the drawer store.
+ *
+ * @param mapId - The map identifier
+ * @deprecated This function shouldn't exist
+ */
 export const removeStoreTransformInstance = (mapId: string): void => {
   getStoreDrawerState(mapId).actions.removeTransformInstance();
 };
@@ -864,8 +870,8 @@ export const removeStoreTransformInstance = (mapId: string): void => {
  *
  * @param mapId - The map identifier
  * @param selectedDrawing - The selected feature, or undefined to clear selection
+ * @deprecated This function shouldn't exist
  */
-// TODO: REFACTOR - This function shouldn't exist, or is at least limit
 export const setStoreSelectedDrawing = (mapId: string, selectedDrawing: Feature | undefined): void => {
   getStoreDrawerState(mapId).actions.setSelectedDrawing(selectedDrawing);
 };
@@ -875,14 +881,17 @@ export const setStoreSelectedDrawing = (mapId: string, selectedDrawing: Feature 
  *
  * @param mapId - The map identifier
  * @param snapInstance - The Snap interaction instance
+ * @deprecated This function shouldn't exist
  */
-// TODO: REFACTOR - This function shouldn't exist
 export const setStoreSnapInstance = (mapId: string, snapInstance: Snap): void => {
   getStoreDrawerState(mapId).actions.setSnapInstance(snapInstance);
 };
 
-/** Removes the snap interaction instance from the drawer store. */
-// TODO: REFACTOR - This function shouldn't exist
+/** Removes the snap interaction instance from the drawer store.
+ *
+ * @param mapId - The map identifier
+ * @deprecated This function shouldn't exist
+ */
 export const removeStoreSnapInstance = (mapId: string): void => {
   getStoreDrawerState(mapId).actions.removeSnapInstance();
 };

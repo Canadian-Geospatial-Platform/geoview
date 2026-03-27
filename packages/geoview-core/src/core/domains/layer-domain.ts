@@ -22,6 +22,14 @@ import type {
 } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 
+/**
+ * Domain class responsible for managing layer registrations and lifecycle.
+ *
+ * Owns the registries of layer entry configurations, GeoView layers, and
+ * OpenLayers layers. Emits domain events when layers are registered,
+ * unregistered, or when their properties change (status, name, queryable,
+ * hoverable).
+ */
 export class LayerDomain {
   /** Layers with valid configuration for this map. */
   #layerEntryConfigs: { [layerPath: string]: ConfigBaseClass } = {};
@@ -32,17 +40,17 @@ export class LayerDomain {
   /** Dictionary holding all the OpenLayers layers */
   #olLayers: { [layerPath: string]: BaseLayer } = {};
 
-  /** Keep a bounded reference to the handle layer status changed */
+  /** Bounded reference to the layer status changed handler */
   #boundedHandleLayerStatusChanged: LayerStatusChangedDelegate;
 
-  /** Keep a bounded reference to the handle layer status changed */
+  /** Bounded reference to the layer name changed handler */
   #boundedHandleLayerNameChanged: LayerNameChangedDelegate;
 
-  /** Keep a bounded reference to the handle layer queryable changed */
-  #boundedHandleLayerQueryableChanged: LayerQueryableChangedDelegate;
-
-  /** Keep a bounded reference to the handle layer hoverable changed */
+  /** Bounded reference to the layer hoverable changed handler */
   #boundedHandleLayerHoverableChanged: LayerHoverableChangedDelegate;
+
+  /** Bounded reference to the layer queryable changed handler */
+  #boundedHandleLayerQueryableChanged: LayerQueryableChangedDelegate;
 
   /** Keep all callback delegate references */
   #onLayerEntryConfigRegisteredHandlers: DomainLayerStatusChangedDelegate[] = [];
@@ -66,7 +74,7 @@ export class LayerDomain {
    * Constructor for the LayerDomain class.
    */
   constructor() {
-    // Keep bounded references to the handles
+    // Keep bounded references to the handlers
     this.#boundedHandleLayerStatusChanged = this.#handleLayerStatusChanged.bind(this);
     this.#boundedHandleLayerNameChanged = this.#handleLayerNameChanged.bind(this);
     this.#boundedHandleLayerHoverableChanged = this.#handleLayerHoverableChanged.bind(this);
@@ -338,9 +346,12 @@ export class LayerDomain {
   }
 
   /**
-   * TODO: JSDOC THIS
+   * Unregisters a layer entry configuration.
    *
-   * @param layerConfig
+   * Emits the layer entry config unregistered event so that controllers
+   * can react to the removal.
+   *
+   * @param layerConfig - The layer configuration to unregister
    */
   unregisterLayerEntryConfig(layerConfig: ConfigBaseClass): void {
     // Emit about it
@@ -381,11 +392,11 @@ export class LayerDomain {
 
     // If registering a regular layer
     if (gvLayer instanceof AbstractGVLayer) {
-      // Register a hook when a layer queryable is changed
-      gvLayer.onLayerQueryableChanged(this.#boundedHandleLayerQueryableChanged);
-
       // Register a hook when a layer hoverable is changed
       gvLayer.onLayerHoverableChanged(this.#boundedHandleLayerHoverableChanged);
+
+      // Register a hook when a layer queryable is changed
+      gvLayer.onLayerQueryableChanged(this.#boundedHandleLayerQueryableChanged);
     }
   }
 
@@ -406,10 +417,16 @@ export class LayerDomain {
     if (gvLayer instanceof AbstractGVLayer) {
       // Unregister handler on layer queryable changed
       gvLayer.offLayerQueryableChanged(this.#boundedHandleLayerQueryableChanged);
+
+      // Unregister handler on layer hoverable changed
+      gvLayer.offLayerHoverableChanged(this.#boundedHandleLayerHoverableChanged);
     }
 
-    delete this.#gvLayers[gvLayer.getLayerPath()];
+    // Unregister handler on layer name changed
+    gvLayer.offLayerNameChanged(this.#boundedHandleLayerNameChanged);
+
     delete this.#olLayers[gvLayer.getLayerPath()];
+    delete this.#gvLayers[gvLayer.getLayerPath()];
   }
 
   // #region PRIVATE HANDLERS
@@ -429,10 +446,13 @@ export class LayerDomain {
   }
 
   /**
-   * TODO JSDOC THIS
+   * Handles layer name changed events from registered layers.
    *
-   * @param layer
-   * @param event
+   * Internal callback that is invoked when a layer's name changes.
+   * Forwards the event to domain listeners via emitLayerNameChanged.
+   *
+   * @param layer - The layer whose name changed
+   * @param event - The layer name changed event
    */
   #handleLayerNameChanged(layer: AbstractBaseGVLayer, event: LayerNameChangedEvent): void {
     // Emit about it
@@ -486,9 +506,9 @@ export class LayerDomain {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onLayerEntryConfigRegistered(callback: DomainLayerStatusChangedDelegate): void {
+  onLayerEntryConfigRegistered(callback: DomainLayerStatusChangedDelegate): DomainLayerStatusChangedDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onLayerEntryConfigRegisteredHandlers, callback);
+    return EventHelper.onEvent(this.#onLayerEntryConfigRegisteredHandlers, callback);
   }
 
   /**
@@ -496,7 +516,7 @@ export class LayerDomain {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerEntryConfigRegistered(callback: DomainLayerStatusChangedDelegate): void {
+  offLayerEntryConfigRegistered(callback: DomainLayerStatusChangedDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerEntryConfigRegisteredHandlers, callback);
   }
@@ -516,9 +536,9 @@ export class LayerDomain {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onLayerEntryConfigUnregistered(callback: DomainLayerStatusChangedDelegate): void {
+  onLayerEntryConfigUnregistered(callback: DomainLayerStatusChangedDelegate): DomainLayerStatusChangedDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onLayerEntryConfigUnregisteredHandlers, callback);
+    return EventHelper.onEvent(this.#onLayerEntryConfigUnregisteredHandlers, callback);
   }
 
   /**
@@ -526,7 +546,7 @@ export class LayerDomain {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerEntryConfigUnregistered(callback: DomainLayerStatusChangedDelegate): void {
+  offLayerEntryConfigUnregistered(callback: DomainLayerStatusChangedDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerEntryConfigUnregisteredHandlers, callback);
   }
@@ -546,9 +566,9 @@ export class LayerDomain {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onLayerStatusChanged(callback: DomainLayerStatusChangedDelegate): void {
+  onLayerStatusChanged(callback: DomainLayerStatusChangedDelegate): DomainLayerStatusChangedDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onLayerStatusChangedHandlers, callback);
+    return EventHelper.onEvent(this.#onLayerStatusChangedHandlers, callback);
   }
 
   /**
@@ -556,7 +576,7 @@ export class LayerDomain {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerStatusChanged(callback: DomainLayerStatusChangedDelegate): void {
+  offLayerStatusChanged(callback: DomainLayerStatusChangedDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerStatusChangedHandlers, callback);
   }
@@ -576,9 +596,9 @@ export class LayerDomain {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onLayerNameChanged(callback: DomainLayerNameChangedDelegate): void {
+  onLayerNameChanged(callback: DomainLayerNameChangedDelegate): DomainLayerNameChangedDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onLayerNameChangedHandlers, callback);
+    return EventHelper.onEvent(this.#onLayerNameChangedHandlers, callback);
   }
 
   /**
@@ -586,7 +606,7 @@ export class LayerDomain {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerNameChanged(callback: DomainLayerNameChangedDelegate): void {
+  offLayerNameChanged(callback: DomainLayerNameChangedDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerNameChangedHandlers, callback);
   }
@@ -606,9 +626,9 @@ export class LayerDomain {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onLayerHoverableChanged(callback: DomainLayerHoverableChangedDelegate): void {
+  onLayerHoverableChanged(callback: DomainLayerHoverableChangedDelegate): DomainLayerHoverableChangedDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onLayerHoverableChangedHandlers, callback);
+    return EventHelper.onEvent(this.#onLayerHoverableChangedHandlers, callback);
   }
 
   /**
@@ -616,7 +636,7 @@ export class LayerDomain {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerHoverableChanged(callback: DomainLayerHoverableChangedDelegate): void {
+  offLayerHoverableChanged(callback: DomainLayerHoverableChangedDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerHoverableChangedHandlers, callback);
   }
@@ -636,9 +656,9 @@ export class LayerDomain {
    *
    * @param callback - The callback to be executed whenever the event is emitted
    */
-  onLayerQueryableChanged(callback: DomainLayerQueryableChangedDelegate): void {
+  onLayerQueryableChanged(callback: DomainLayerQueryableChangedDelegate): DomainLayerQueryableChangedDelegate {
     // Register the event handler
-    EventHelper.onEvent(this.#onLayerQueryableChangedHandlers, callback);
+    return EventHelper.onEvent(this.#onLayerQueryableChangedHandlers, callback);
   }
 
   /**
@@ -646,7 +666,7 @@ export class LayerDomain {
    *
    * @param callback - The callback to stop being called whenever the event is emitted
    */
-  offLayerQueryableChanged(callback: DomainLayerQueryableChangedDelegate): void {
+  offLayerQueryableChanged(callback: DomainLayerQueryableChangedDelegate | undefined): void {
     // Unregister the event handler
     EventHelper.offEvent(this.#onLayerQueryableChangedHandlers, callback);
   }
@@ -681,20 +701,8 @@ export type DomainLayerNameChangedEvent = {
   name: string | undefined;
 };
 
+/** Define a delegate for the layer name changed event handler function signature. */
 export type DomainLayerNameChangedDelegate = EventDelegateBase<LayerDomain, DomainLayerNameChangedEvent, void>;
-
-/**
- * Define an event for the delegate
- */
-export type DomainLayerQueryableChangedEvent = {
-  // The layer changing its queryable status
-  layer: AbstractBaseGVLayer;
-
-  // The new queryable status
-  queryable: boolean;
-};
-
-export type DomainLayerQueryableChangedDelegate = EventDelegateBase<LayerDomain, DomainLayerQueryableChangedEvent, void>;
 
 /**
  * Define an event for the delegate
@@ -707,4 +715,19 @@ export type DomainLayerHoverableChangedEvent = {
   hoverable: boolean;
 };
 
+/** Define a delegate for the layer hoverable changed event handler function signature. */
 export type DomainLayerHoverableChangedDelegate = EventDelegateBase<LayerDomain, DomainLayerHoverableChangedEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type DomainLayerQueryableChangedEvent = {
+  // The layer changing its queryable status
+  layer: AbstractBaseGVLayer;
+
+  // The new queryable status
+  queryable: boolean;
+};
+
+/** Define a delegate for the layer queryable changed event handler function signature. */
+export type DomainLayerQueryableChangedDelegate = EventDelegateBase<LayerDomain, DomainLayerQueryableChangedEvent, void>;
