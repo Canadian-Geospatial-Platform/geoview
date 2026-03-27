@@ -67,7 +67,7 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
     setAction({ shouldRedraw: true });
   });
 
-  // #region CORE FUNCTIONS *******************************************************************************************
+  // #region CORE FUNCTIONS
 
   /**
    * Loads the chart with new inputs.
@@ -85,9 +85,9 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
     setAction({ shouldRedraw: true });
   };
 
-  // #endregion
+  // #endregion CORE FUNCTIONS
 
-  // #region HOOKS SECTION ********************************************************************************************
+  // #region HOOKS SECTION
 
   /**
    * Handles when an error happened with GeoChart.
@@ -150,17 +150,17 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
     return { foundConfigChart, foundConfigChartLyr, foundLayerEntry, foundData, chartConfig };
   }, [config, mapId, layers, displayLanguage, displayDateFormatShort, displayDateTimezone]);
 
-  // #endregion
+  // #endregion HOOKS SECTION
 
-  // #region PROCESSING ***********************************************************************************************
+  // #region PROCESSING
 
   if (memoAllInfo.chartConfig && memoAllInfo.chartConfig !== inputs) {
     setChart(memoAllInfo.chartConfig);
   }
 
-  // #endregion
+  // #endregion PROCESSING
 
-  // #region RENDER SECTION *******************************************************************************************
+  // #region RENDER SECTION
 
   return (
     <GeoChartComponent
@@ -175,5 +175,5 @@ export function GeoChart(props: GeoChartProps): JSX.Element {
     />
   );
 
-  // #endregion
+  // #endregion RENDER SECTION
 }

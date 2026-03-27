@@ -549,7 +549,7 @@ JSDoc should NOT:
 
 ### JSDoc Format Structure
 
-1. Short description (one sentence, **must end with a period**)
+1. Short description (one sentence, **must end with a period**, use **third-person singular**: "Creates", "Handles", "Checks" — not "Create", "Handle", "Check")
 2. Blank line (**always required** before tags, even without a detailed description)
 3. Detailed behavior explanation (if needed)
 4. Blank line (if detailed explanation)
@@ -626,6 +626,45 @@ function setLayerVisibility(layerPath: string, visible: boolean): void {}
 - **Custom domain interfaces:** Explode props when behavior is non-obvious
 - **Single parameters:** Describe individually
 - **Override methods:** Document ALL parameters, even if parent already documents them
+
+### Component JSDoc Pattern
+
+React components that receive props must include `@param` and `@returns`:
+
+```typescript
+// ✅ Good: component with props
+/**
+ * Creates the feature info panel component.
+ *
+ * @param props - Properties defined in FeatureInfoProps interface
+ * @returns The feature info panel component
+ */
+export function FeatureInfo(props: FeatureInfoProps): JSX.Element {
+
+// ✅ Good: component without props
+/**
+ * Creates the export modal component.
+ *
+ * @returns The export modal component
+ */
+export function ExportModal(): JSX.Element {
+
+// ✅ Good: component returning null
+/**
+ * Creates the feature info component.
+ *
+ * @param props - Properties defined in FeatureInfoProps interface
+ * @returns The feature info component, or null if no feature
+ */
+export function FeatureInfo(props: FeatureInfoProps): JSX.Element | null {
+```
+
+**Rules:**
+
+- Summary uses third-person singular: "Creates the X component." (not "Create" or "The X component")
+- `@param props - Properties defined in [InterfaceName] interface` — always reference the interface name
+- `@returns The [component description]` — brief semantic description, no `{JSX.Element}`
+- If return type includes `| null`, mention it: "or null if [condition]"
 
 ### Single-line JSDoc for Types and Interfaces
 
@@ -729,7 +768,69 @@ Handler `useCallback` functions follow the Handler Comment Pattern (no `@param`/
 
 **Never delete** existing `TODO`, `NOTE`, `TO.DOCONT`, `WCAG`, or `FIXME` comments during JSDoc cleanup. These track known issues, workarounds, and future work. Only remove them when the issue they describe has been resolved.
 
+**Do NOT convert `// GV` comment blocks to JSDoc** — these are internal implementation notes, not API documentation.
+
 **TypeDoc Generation:** Run `npm run doc` in geoview-core to generate API documentation.
+
+### JSDoc Audit Checklist
+
+When asked to **audit JSDoc comments for a folder or file**, follow these steps in order:
+
+#### Step 1 — Discover & Read
+
+- List all files in the target folder
+- Read each file fully to understand its structure
+
+#### Step 2 — Style Files (`*-style.ts`)
+
+- [ ] `getSxClasses` has `/** */` with `@param theme` and `@returns` (no `{Type}`)
+
+#### Step 3 — Types, Interfaces & Exports
+
+- [ ] Every `type` / `interface` declaration has `/** */` (single-line for simple descriptions)
+- [ ] ALL properties inside interfaces/types have single-line `/** */` comments
+- [ ] No multi-line `/** */` on properties that need only a one-liner
+
+#### Step 4 — Module-level Constants
+
+- [ ] Every `const` outside a function has `/** */` (not `//`)
+
+#### Step 5 — Component Functions
+
+- [ ] Summary: third-person singular, ends with period ("Creates the X component.")
+- [ ] Components with props: `@param props - Properties defined in [InterfaceName] interface`
+- [ ] `@returns` present (no `{JSX.Element}`)
+- [ ] `memo()` wrapped components: memo justification in JSDoc detail paragraph
+
+#### Step 6 — `useCallback` Functions
+
+- [ ] ALL `useCallback` have `/** */` JSDoc above them
+- [ ] **Handlers**: single sentence description, no `@param` / `@returns`
+- [ ] **Non-handlers** (domain logic): full JSDoc with `@param` / `@returns`
+
+#### Step 7 — `useMemo` Variables
+
+- [ ] ALL `useMemo` have `/** */` JSDoc (single sentence)
+- [ ] Variable names prefixed with `memo` (e.g., `memoFilteredList`)
+
+#### Step 8 — `useEffect` Hooks
+
+- [ ] ALL `useEffect` have `/** */` JSDoc (single sentence)
+
+#### Step 9 — JSDoc Tag Quality (all functions/methods)
+
+- [ ] No `{Type}` in `@param` / `@returns` (only `@throws` keeps `{ErrorType}`)
+- [ ] No trailing periods on `@param` / `@returns` / `@throws`
+- [ ] No `@returns` for void methods
+- [ ] Summaries end with a period
+- [ ] Blank line before `@param` tags (even without detailed description)
+- [ ] `@returns` for Promise → "A promise that resolves with..."
+
+#### Step 10 — Preservation Check
+
+- [ ] `TODO` / `NOTE` / `WCAG` / `TO.DOCONT` / `FIXME` comments NOT deleted
+- [ ] `// GV` comment blocks NOT converted to JSDoc
+- [ ] `// eslint-disable` comments NOT removed or altered
 
 ## Accessibility
 

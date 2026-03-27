@@ -433,7 +433,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
 
   // #endregion
 
-  // #region EVENT HANDLERS SECTION ***********************************************************************************
+  // #region EVENT HANDLERS SECTION
 
   /**
    * Handles click to remove all features in right panel.
@@ -543,7 +543,8 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   );
   // #endregion
 
-  // #region PROCESSING ***********************************************************************************************
+  // #region PROCESSING
+
   /**
    * Resets the currently selected feature index to 0 and keeps in reference the previously selected layer and
    * the previously selected feature index so that in the useEffect, later, the component can udpate
