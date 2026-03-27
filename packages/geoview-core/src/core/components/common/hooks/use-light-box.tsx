@@ -6,10 +6,10 @@ import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial
 import { logger } from '@/core/utils/logger';
 import { TIMEOUT } from '@/core/utils/constant';
 
-// Constants outside component to prevent recreating every render
+/** Regex pattern for detecting base64-encoded image strings. */
 const BASE64_IMAGE_PATTERN = /^data:image\/(png|jpeg|gif|webp);base64/;
 
-// Define props interface for BaseLightBoxComponent
+/** Properties for the base lightbox component. */
 interface BaseLightBoxProps {
   isLightBoxOpen: boolean;
   slides: LightBoxSlides[];
@@ -18,12 +18,12 @@ interface BaseLightBoxProps {
   onExit: () => void;
   onSlideChange?: (index: number) => void;
 }
+/** Return type for the useLightBox hook. */
 interface UseLightBoxReturnType {
   initLightBox: (images: string, altText: string, returnFocusId: string, index?: number) => void;
   LightBoxComponent: () => JSX.Element;
 }
 
-// Memoized base component with props
 // TODO: Unmemoize this component, probably, because it's in 'common' folder
 const BaseLightBoxComponent = memo(function BaseLightBoxComponent({
   isLightBoxOpen,
@@ -37,6 +37,9 @@ const BaseLightBoxComponent = memo(function BaseLightBoxComponent({
 
   const activeTrapGeoView = useUIActiveTrapGeoView();
 
+  /**
+   * Handles when the user changes slides in the lightbox.
+   */
   const handleSlideChange = useCallback(
     (index: number) => {
       onSlideChange?.(index);
@@ -44,6 +47,9 @@ const BaseLightBoxComponent = memo(function BaseLightBoxComponent({
     [onSlideChange]
   );
 
+  /**
+   * Handles when the lightbox is exited, including restoring focus to the triggering element for accessibility.
+   */
   const handleLightboxExit = useCallback(() => {
     onExit();
 
@@ -67,6 +73,11 @@ const BaseLightBoxComponent = memo(function BaseLightBoxComponent({
   );
 });
 
+/**
+ * Custom hook that provides lightbox functionality for displaying images.
+ *
+ * @returns The lightbox initializer and component
+ */
 export function useLightBox(): UseLightBoxReturnType {
   // Log
   logger.logTraceRenderDetailed('components/common/use-light-box');
@@ -77,7 +88,13 @@ export function useLightBox(): UseLightBoxReturnType {
   const [slidesIndex, setSlidesIndex] = useState(0);
   const [storedReturnFocusId, setStoredReturnFocusId] = useState('0');
 
-  // Callbacks
+  /**
+   * Creates the slides list from an image string.
+   *
+   * @param images - Semicolon-separated image URLs or a base64 string
+   * @param altText - Alt text for the images
+   * @returns The array of lightbox slides
+   */
   const createSlidesList = useCallback((images: string, altText: string): LightBoxSlides[] => {
     if (BASE64_IMAGE_PATTERN.test(images)) {
       return [{ src: images, alt: altText, downloadUrl: '' }];
@@ -89,12 +106,21 @@ export function useLightBox(): UseLightBoxReturnType {
     }));
   }, []);
 
-  const handleExit = useCallback(() => {
+  const handleExit = useCallback((): void => {
     setIsLightBoxOpen(false);
     setSlides([]);
     setSlidesIndex(0);
   }, []);
 
+  /**
+   * Initializes and opens the lightbox with the given images.
+   *
+   * @param images - Semicolon-separated image URLs or a base64 string
+   * @param altText - Alt text for the images
+   * @param returnFocusId - The element id to restore focus to on exit
+   * @param index - Optional initial slide index
+   * @param scale - Optional initial image scale
+   */
   const initLightBox = useCallback(
     (images: string, altText: string, returnFocusId: string, index?: number): void => {
       setIsLightBoxOpen(true);
@@ -105,7 +131,7 @@ export function useLightBox(): UseLightBoxReturnType {
     [createSlidesList]
   );
 
-  const LightBoxComponent = useCallback(() => {
+  const LightBoxComponent = useCallback((): JSX.Element => {
     return (
       <BaseLightBoxComponent
         isLightBoxOpen={isLightBoxOpen}

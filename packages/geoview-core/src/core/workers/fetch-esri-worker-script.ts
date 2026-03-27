@@ -18,25 +18,23 @@ import { AsyncSemaphore } from '@/core/utils/async-semaphore';
  * 2. Processing: Fetch the server and return the JSON.
  */
 
-/**
- * Interface for ESRI query parameters
- * @interface QueryParams
- * @property {string} url - The URL of the ESRI service endpoint
- * @property {string} geometryType - The type of geometry being queried
- * @property {number[]} objectIds - Array of object IDs to query
- * @property {boolean} queryGeometry - Whether to include geometry in the query
- * @property {number} projection - The spatial reference ID for the output
- * @property {number} maxAllowableOffset - The maximum allowable offset for geometry simplification
- * @property {number} maxRecordCount - The maximum number of records to return from service in one fetch
- */
+/** Interface for ESRI query parameters. */
 export interface QueryParams {
+  /** The URL of the ESRI service endpoint. */
   url: string;
+  /** The type of geometry being queried. */
   geometryType: string;
+  /** Array of object IDs to query or 'all' for all features. */
   objectIds: number[] | 'all';
+  /** Whether to include geometry in the query. */
   queryGeometry: boolean;
+  /** The spatial reference ID for the output. */
   projection: number;
+  /** The maximum allowable offset for geometry simplification. */
   maxAllowableOffset: number;
+  /** The maximum number of records to return from service in one fetch. */
   maxRecordCount: number;
+  /** The where clause for filtering features. */
   where: string;
 }
 
@@ -44,10 +42,10 @@ export interface QueryParams {
 const logger = createWorkerLogger('FetchEsriWorker');
 
 /**
- * Queries features from an ESRI service
- * @async
- * @param {QueryParams} params - The parameters for the ESRI query
- * @returns {Promise<unknown>} A promise that resolves to the query results
+ * Queries features from an ESRI service.
+ *
+ * @param params - The parameters for the ESRI query
+ * @returns A promise that resolves to the query results
  * @throws {Error} When the HTTP request fails
  */
 async function queryEsriFeatures(params: QueryParams): Promise<unknown> {
@@ -59,17 +57,16 @@ async function queryEsriFeatures(params: QueryParams): Promise<unknown> {
 }
 
 /**
- * Processes a batch of ESRI feature requests concurrently while tracking progress
- * @param {number} batchIndex - The current batch index (0-based)
- * @param {number} startIdx - Starting index for the current batch of requests
- * @param {number} endIdx - Ending index for the current batch of requests
- * @param {string} baseUrl - Base URL for the ESRI REST service query
- * @param {number} resultRecordCount - Number of records to request per query
- * @param {number} totalCount - Total number of features to be retrieved
- * @param {number} currentProcessedFeatures - Current count of processed features
- * @returns {Promise<{features: unknown[], processedCount: number}>} A promise that resolves to:
- *   - features: Array of feature objects from all queries in the batch
- *   - processedCount: Total number of features processed after this batch
+ * Processes a batch of ESRI feature requests concurrently while tracking progress.
+ *
+ * @param batchIndex - The current batch index (0-based)
+ * @param startIdx - Starting index for the current batch of requests
+ * @param endIdx - Ending index for the current batch of requests
+ * @param baseUrl - Base URL for the ESRI REST service query
+ * @param resultRecordCount - Number of records to request per query
+ * @param totalCount - Total number of features to be retrieved
+ * @param currentProcessedFeatures - Current count of processed features
+ * @returns A promise that resolves to the batch features and updated processed count
  */
 const processBatch = async (
   batchIndex: number,
@@ -138,12 +135,11 @@ const processBatch = async (
 };
 
 /**
- * Queries all features from an ESRI REST service by handling querying in batches
- * @param {QueryParams} params - The query parameters
- * @returns {Promise<unknown>} A promise that resolves to an object containing:
- *   - features: Array of feature objects
- *   - count: Total number of features
- * @throws {Error} If the query fails
+ * Queries all features from an ESRI REST service by handling querying in batches.
+ *
+ * @param params - The query parameters
+ * @returns A promise that resolves to an object containing features and total count
+ * @throws {Error} When the query fails
  */
 async function queryAllEsriFeatures(params: QueryParams): Promise<unknown> {
   const resultRecordCount = params.maxRecordCount > 10000 ? 10000 : params.maxRecordCount;
@@ -202,9 +198,7 @@ async function queryAllEsriFeatures(params: QueryParams): Promise<unknown> {
   }
 }
 
-/**
- * The main worker object containing methods for initialization and processing.
- */
+/** The main worker object containing methods for initialization and processing. */
 const worker = {
   /**
    * Initializes the worker.
@@ -218,9 +212,10 @@ const worker = {
   },
 
   /**
-   * Processes an ESRI query request
-   * @param {QueryParams} params - The parameters for the ESRI query
-   * @returns {Promise<unknown>} A promise that resolves to the query results
+   * Processes an ESRI query request.
+   *
+   * @param params - The parameters for the ESRI query
+   * @returns A promise that resolves to the query results
    * @throws {Error} When the query processing fails
    */
   process(params: QueryParams): Promise<unknown> {

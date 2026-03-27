@@ -1,12 +1,7 @@
-/**
- * Represents the log levels available for logging.
- */
+/** Represents the log levels available for logging. */
 export type WorkerLogLevel = 'info' | 'warning' | 'error' | 'debug' | 'trace';
 
-/**
- * Represents the log type available for logging. Type log is trap by viewer logger
- * and log to console and message is trap by viewer and sent to notifications
- */
+/** Represents log dispatch types: 'log' routes to the console logger, 'message' routes to viewer notifications. */
 type WorkerLogType = 'log' | 'message';
 
 /**
@@ -16,11 +11,13 @@ type WorkerLogType = 'log' | 'message';
  * maintaining a consistent logging interface across the application.
  */
 class WorkerLogger {
+  /** The prefix prepended to all log messages. */
   #prefix: string;
 
   /**
    * Creates an instance of WorkerLogger.
-   * @param {string} [prefix=''] - The prefix to be added to all log messages.
+   *
+   * @param prefix - Optional prefix to be added to all log messages
    */
   constructor(prefix: string = '') {
     this.#prefix = prefix;
@@ -28,10 +25,10 @@ class WorkerLogger {
 
   /**
    * Internal method to send log messages to the main thread.
-   * @private
-   * @param {WorkerLogType} type - The type of log message.
-   * @param {WorkerLogLevel} level - The log level of the message.
-   * @param {...unknown[]} args - The message and any additional arguments to log.
+   *
+   * @param type - The type of log message
+   * @param level - The log level of the message
+   * @param args - The message and any additional arguments to log
    */
   #log(type: WorkerLogType, level: WorkerLogLevel, ...args: unknown[]): void {
     const message = this.#prefix ? [this.#prefix, ...args] : args;
@@ -46,7 +43,8 @@ class WorkerLogger {
 
   /**
    * Logs an informational message.
-   * @param {...unknown[]} args - The message and any additional arguments to log.
+   *
+   * @param args - The message and any additional arguments to log
    */
   logInfo(...args: unknown[]): void {
     this.#log('log', 'info', ...args);
@@ -54,7 +52,8 @@ class WorkerLogger {
 
   /**
    * Logs a warning message.
-   * @param {...unknown[]} args - The message and any additional arguments to log.
+   *
+   * @param args - The message and any additional arguments to log
    */
   logWarning(...args: unknown[]): void {
     this.#log('log', 'warning', ...args);
@@ -62,7 +61,8 @@ class WorkerLogger {
 
   /**
    * Logs an error message.
-   * @param {...unknown[]} args - The message and any additional arguments to log.
+   *
+   * @param args - The message and any additional arguments to log
    */
   logError(...args: unknown[]): void {
     this.#log('log', 'error', ...args);
@@ -70,7 +70,8 @@ class WorkerLogger {
 
   /**
    * Logs a debug message.
-   * @param {...unknown[]} args - The message and any additional arguments to log.
+   *
+   * @param args - The message and any additional arguments to log
    */
   logDebug(...args: unknown[]): void {
     this.#log('log', 'debug', ...args);
@@ -78,16 +79,18 @@ class WorkerLogger {
 
   /**
    * Logs a trace message.
-   * @param {...unknown[]} args - The message and any additional arguments to log.
+   *
+   * @param args - The message and any additional arguments to log
    */
   logTrace(...args: unknown[]): void {
     this.#log('log', 'trace', ...args);
   }
 
   /**
-   * Logs a message to be handle by viewer notification.
-   * @param {WorkerLogLevel} level - The log level of the message.
-   * @param {...unknown[]} args - The message and any additional arguments to log.
+   * Logs a message to be handled by viewer notification.
+   *
+   * @param level - The log level of the message
+   * @param args - The message and any additional arguments to log
    */
   sendMessage(level: WorkerLogLevel, ...args: unknown[]): void {
     this.#log('message', level, ...args);
@@ -96,7 +99,8 @@ class WorkerLogger {
 
 /**
  * Creates and returns a new WorkerLogger instance.
- * @param {string} [prefix] - Optional prefix for all log messages from this logger.
- * @returns {WorkerLogger} A new WorkerLogger instance.
+ *
+ * @param prefix - Optional prefix for all log messages from this logger
+ * @returns A new WorkerLogger instance
  */
 export const createWorkerLogger = (prefix?: string): WorkerLogger => new WorkerLogger(prefix);

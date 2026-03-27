@@ -10,6 +10,7 @@ import type { DialogProps } from '@mui/material';
 import { CloseIcon, Dialog, DialogTitle, DialogContent, IconButton, Box } from '@/ui';
 import { logger } from '@/core/utils/logger';
 
+/** Properties for the FullScreenDialog component. */
 interface FullScreenDialogProps extends DialogProps {
   /** Whether the dialog is open */
   open: boolean;
@@ -23,23 +24,26 @@ interface FullScreenDialogProps extends DialogProps {
   children: ReactNode;
 }
 
-// Constant styles to prevent recreation on each render
+/** Styles for the dialog content container. */
 const DIALOG_CONTENT_STYLES = {
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'end',
 } as const;
 
+/** Styles for the close button. */
 const CLOSE_BUTTON_STYLES = {
   margin: '10px',
 } as const;
 
+/** Styles for the dialog header container. */
 const DIALOG_HEADER_STYLES = (theme: Theme): SxProps => ({
   display: 'flex',
   justifyContent: 'space-between',
   borderBottom: `1px solid ${theme.palette.geoViewColor.bgColor.dark[300]}`,
 });
 
+/** Styles for the dialog title text. */
 const DIALOG_TITLE_STYLES = (theme: Theme): SxProps => ({
   fontSize: theme.palette.geoViewFontSize.lg,
   fontWeight: '600',

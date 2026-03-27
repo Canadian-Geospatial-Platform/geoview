@@ -24,8 +24,9 @@ export class AsyncSemaphore {
 
   /**
    * Constructs an AsyncSemaphore.
-   * @param {number} workersCount - The number of workers.
-   * @throws {Error} Thrown if workersCount is not positive.
+   *
+   * @param workersCount - The number of workers
+   * @throws {Error} When workersCount is not positive
    */
   constructor(workersCount: number) {
     if (workersCount <= 0) throw new Error('workersCount must be positive');
@@ -38,8 +39,9 @@ export class AsyncSemaphore {
 
   /**
    * Executes a function with a lock.
-   * @param {Function} f - The function to execute.
-   * @returns {Promise<A>} A promise resolving the result of the function.
+   *
+   * @param f - The function to execute
+   * @returns A promise that resolves to the result of the function
    */
   async withLock<A>(f: () => Promise<A>): Promise<A> {
     await this.#acquire();
@@ -48,8 +50,9 @@ export class AsyncSemaphore {
 
   /**
    * Executes a function with a lock but doesn't await its completion.
-   * @param {Function} f - The function to execute.
-   * @returns {Promise<void>} A promise resolving when the function has been executed.
+   *
+   * @param f - The function to execute
+   * @returns A promise that resolves when the function has been queued for execution
    */
   async withLockRunAndForget<A>(f: () => Promise<A>): Promise<void> {
     await this.#acquire();
@@ -60,7 +63,8 @@ export class AsyncSemaphore {
 
   /**
    * Waits for all tasks to terminate.
-   * @returns {Promise<void>} A promise resolving when all tasks have terminated.
+   *
+   * @returns A promise that resolves when all tasks have terminated
    */
   awaitTerminate(): Promise<void> {
     if (this.#available < this.#workersCount) {
@@ -71,9 +75,9 @@ export class AsyncSemaphore {
 
   /**
    * Executes a function and releases the lock afterward.
-   * @param {Function} f - The function to execute.
-   * @returns {Promise<A>} A promise resolving the result of the function.
-   * @private
+   *
+   * @param f - The function to execute
+   * @returns A promise that resolves to the result of the function
    */
   async #execWithRelease<A>(f: () => Promise<A>): Promise<A> {
     try {
@@ -85,8 +89,8 @@ export class AsyncSemaphore {
 
   /**
    * Retrieves the upcoming queue.
-   * @returns {Function[]} The upcoming queue.
-   * @private
+   *
+   * @returns The upcoming queue
    */
   // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   #queue(): Function[] {
@@ -99,8 +103,8 @@ export class AsyncSemaphore {
 
   /**
    * Acquires a lock.
-   * @returns {void | Promise<void>} A promise resolving when a lock is available.
-   * @private
+   *
+   * @returns A promise that resolves when a lock is available, or undefined if immediately acquired
    */
   #acquire(): void | Promise<void> {
     if (this.#available > 0) {
@@ -121,7 +125,6 @@ export class AsyncSemaphore {
 
   /**
    * Releases a lock.
-   * @private
    */
   #release(): void {
     const queue = this.#queue();
@@ -141,7 +144,6 @@ export class AsyncSemaphore {
 
   /**
    * Refreshes the completion function and promise.
-   * @private
    */
   #refreshComplete(): void {
     let fn: () => void = () => {

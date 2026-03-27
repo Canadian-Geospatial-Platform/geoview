@@ -13,6 +13,7 @@ import { logger } from '@/core/utils/logger';
 import type { ColumnsType } from './data-table-types';
 import { useLayerSelectorName } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
+/** Properties for the ExportButton component. */
 interface ExportButtonProps {
   layerPath: string;
   rows: ColumnsType[];
@@ -24,13 +25,10 @@ interface ExportButtonProps {
 const COLUMNS_TO_REMOVE = ['ICON', 'ZOOM', 'DETAILS', 'geoviewID'];
 
 /**
- * Custom  export button which will help to download data table data in csv format.
- * @param {string} layerPath id of the layer
- * @param {ColumnsType} rows list of rows to be displayed in data table
- * @param {MRTColumnDef<ColumnsType>[]} columns array of object represent column header data.
- * @param {ReactElement} children Menu item to be rendered in Menu.
- * @returns {JSX.Element} returns export button
+ * Renders an export button with a menu for downloading data table data.
  *
+ * @param props - ExportButton properties
+ * @returns The export button element
  */
 function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps): JSX.Element {
   // Log
@@ -43,25 +41,25 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
   const open = Boolean(anchorEl);
 
   /**
-   * Shows export menu.
+   * Shows the export menu.
    */
-  const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement>): void => {
     setAnchorEl(event.currentTarget);
   }, []);
 
   /**
-   * Closes export menu.
+   * Closes the export menu.
    */
-  const handleClose = useCallback(() => {
+  const handleClose = useCallback((): void => {
     setAnchorEl(null);
   }, []);
 
   /**
-   * Builds CSV Options for download.
+   * Builds CSV options for download.
    */
-  const getCsvOptions = useMemo(() => {
+  const memoGetCsvOptions = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('DATA-TABLE - EXPORT BUTTON - getCsvOptions', columns);
+    logger.logTraceUseMemo('DATA-TABLE - EXPORT BUTTON - memoGetCsvOptions', columns);
 
     // Remove the utility columns
     const filteredColumns = columns.filter((col) => !COLUMNS_TO_REMOVE.includes(col.id as string));
@@ -79,7 +77,7 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
   }, [columns, layerName]);
 
   /**
-   * Exports data table in csv format.
+   * Exports data table in CSV format.
    */
   const handleExportData = useCallback((): void => {
     // format the rows for csv.
@@ -97,10 +95,10 @@ function ExportButton({ layerPath, rows, columns, children }: ExportButtonProps)
       );
       return mappedRow;
     });
-    const csvExporter = new ExportToCsv(getCsvOptions());
+    const csvExporter = new ExportToCsv(memoGetCsvOptions());
     csvExporter.generateCsv(csvRows);
     setAnchorEl(null);
-  }, [getCsvOptions, rows]);
+  }, [memoGetCsvOptions, rows]);
 
   return (
     <>

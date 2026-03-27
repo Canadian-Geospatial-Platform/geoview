@@ -1,33 +1,38 @@
 import type { FitOptions } from 'ol/View';
 
-// Repositry URL for GitHub
+/** Repository URL for GitHub. */
 export const GITHUB_REPO = 'https://github.com/Canadian-Geospatial-Platform/geoview';
 
-// Geo URL
+/** Geo URL and display text. */
 export const GEO_URL_TEXT = {
   url: 'https://geo.ca/',
   text: 'Geo.ca',
 };
 
-// OpenLayer constants
+/** OpenLayers zoom animation duration in milliseconds. */
 export const OL_ZOOM_DURATION: number = 500;
+/** OpenLayers default maximum zoom level. */
 export const OL_ZOOM_MAXZOOM: number = 13;
+/** OpenLayers zoom padding values [top, right, bottom, left]. */
 export const OL_ZOOM_PADDING: [number, number, number, number] = [100, 100, 100, 100];
+/** Default OpenLayers fit options combining padding, max zoom, and duration. */
 export const DEFAULT_OL_FITOPTIONS: FitOptions = {
   padding: OL_ZOOM_PADDING,
   maxZoom: OL_ZOOM_MAXZOOM,
   duration: OL_ZOOM_DURATION,
 };
 
-// The north pole position use for north arrow marker and get north arrow rotation angle
-// north value (set longitude to be half of Canada extent (142° W, 52° W)) - projection central meridian is -95
+/** The north pole position used for north arrow marker and rotation angle. */
+// NOTE: north value (set longitude to be half of Canada extent (142° W, 52° W)) - projection central meridian is -95
 export const NORTH_POLE_POSITION: [number, number] = [90, -95];
 
+/** Overview map widget dimensions. */
 export const OL_OVERVIEWMAP_SIZE = {
   width: '150px',
   height: '150px',
 };
 
+/** Layer lifecycle status values. */
 export const LAYER_STATUS = {
   NEW_INSTANCE: 'newInstance',
   REGISTERED: 'registered',
@@ -38,15 +43,19 @@ export const LAYER_STATUS = {
   ERROR: 'error',
 } as const;
 
+/** Feature info request status values. */
 export const FEATURE_INFO_STATUS = {
   PROCESSING: 'processing',
   PROCESSED: 'processed',
   ERROR: 'error',
 } as const;
 
+/** Arrow key codes for keyboard navigation. */
 export const ARROW_KEY_CODES: string[] = ['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLefts'];
+/** Arrow key codes plus Space for keyboard navigation. */
 export const ARROW_KEYS_WITH_SPACE: string[] = [...ARROW_KEY_CODES, 'Space'];
 
+/** Tab identifier constants for footer panel sections. */
 export const TABS = {
   LEGEND: 'legend',
   DETAILS: 'details',
@@ -57,6 +66,7 @@ export const TABS = {
   GEO_CHART: 'geochart',
 } as const;
 
+/** Numeric filter operator mappings for OGC queries. */
 export const NUMBER_FILTER: Record<string, string> = {
   lessThanOrEqualTo: '<=',
   lessThan: '<',
@@ -70,6 +80,7 @@ export const NUMBER_FILTER: Record<string, string> = {
   notEquals: '<>',
 };
 
+/** Date filter operator mappings for OGC queries. */
 export const DATE_FILTER: Record<string, string> = {
   greaterThan: `> date 'value'`,
   greaterThanOrEqualTo: `>= date 'value'`,
@@ -83,6 +94,7 @@ export const DATE_FILTER: Record<string, string> = {
   betweenInclusive: `>= date 'value'`,
 };
 
+/** String filter operator mappings for OGC queries. */
 export const STRING_FILTER: Record<string, string> = {
   contains: `filterId like '%value%'`,
   startsWith: `filterId like 'value%'`,
@@ -93,11 +105,13 @@ export const STRING_FILTER: Record<string, string> = {
   notEquals: `filterId <> 'value'`,
 };
 
+/** Container type identifiers for app bar and footer bar. */
 export const CONTAINER_TYPE = {
   APP_BAR: 'appBar',
   FOOTER_BAR: 'footerBar',
 } as const;
 
+/** Timeout duration constants in milliseconds for various UI and async operations. */
 export const TIMEOUT: Record<string, number> = {
   deferExecution: 0,
   focusDelay: 0,

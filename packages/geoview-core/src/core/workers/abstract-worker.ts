@@ -17,7 +17,8 @@ import type { WorkerLogLevel } from './helper/logger-worker';
 
 /**
  * Abstract base class for creating worker instances.
- * @template T - The type of the worker's exposed methods and properties.
+ *
+ * @template T - The type of the worker's exposed methods and properties
  */
 export abstract class AbstractWorker<T> {
   /** The worker name for logging purposes. */
@@ -34,8 +35,9 @@ export abstract class AbstractWorker<T> {
 
   /**
    * Creates an instance of AbstractWorker.
-   * @param {string} name - The Web Worker name for logging.
-   * @param {Worker} worker - The Web Worker instance to wrap.
+   *
+   * @param name - The Web Worker name for logging
+   * @param worker - The Web Worker instance to wrap
    */
   constructor(name: string, worker: Worker) {
     this.name = name;
@@ -48,9 +50,9 @@ export abstract class AbstractWorker<T> {
 
   /**
    * Sets up logging configuration for the worker instance.
-   * This private method initializes and configures the logging system
-   * to handle worker-specific logging requirements.
-   * @private
+   *
+   * Initializes and configures the logging system to handle worker-specific
+   * logging requirements.
    */
   #setupLogging(): void {
     // Configures logging settings for the worker process
@@ -87,29 +89,33 @@ export abstract class AbstractWorker<T> {
 
   /**
    * Initializes the worker. This method should be implemented by subclasses.
-   * @param args - Arguments to pass to the worker for initialization.
-   * @returns A promise that resolves when the worker is initialized.
+   *
+   * @param args - Arguments to pass to the worker for initialization
+   * @returns A promise that resolves when the worker is initialized
    */
   abstract init(...args: unknown[]): Promise<void>;
 
   /**
-   * Process the worker. This method should be implemented by subclasses.
-   * @param args - Arguments to pass to the worker for process.
-   * @returns A promise that resolves when the worker is processed.
+   * Processes work in the worker. This method should be implemented by subclasses.
+   *
+   * @param args - Arguments to pass to the worker for processing
+   * @returns A promise that resolves with the processed result
    */
   abstract process(...args: unknown[]): Promise<unknown>;
 
   /**
-   * Add method to register message handlers
-   * @param {MessageEvent} handler - The message handler to add.
+   * Registers a message handler for worker messages.
+   *
+   * @param handler - The message handler to add
    */
   addMessageHandler(handler: (event: MessageEvent) => void): void {
     this.#messageHandlers.push(handler);
   }
 
   /**
-   * Add method to remove message handlers
-   * @param  {MessageEvent} handler - The message handler to remove.
+   * Removes a previously registered message handler.
+   *
+   * @param handler - The message handler to remove
    */
   removeMessageHandler(handler: (event: MessageEvent) => void): void {
     const index = this.#messageHandlers.indexOf(handler);

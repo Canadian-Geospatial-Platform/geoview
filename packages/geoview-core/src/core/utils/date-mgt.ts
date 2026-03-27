@@ -13,22 +13,20 @@ import type { TypeMetadataWMSCapabilityLayerDimension } from '@/api/types/layer-
 import { InvalidDateError, InvalidTimezoneError, InvalidTimeDimensionError } from '@/core/exceptions/core-exceptions';
 import { logger } from './logger';
 
-/** Extent the Dayjs utility */
+/** Extend the Dayjs utility. */
 dayjs.extend(utc);
 dayjs.extend(dayjstimezone);
 dayjs.extend(dayjsduration);
 dayjs.extend(dayjslocalizedFormat);
 dayjs.extend(dayjscustomParseFormat);
 
-/**
- * Generic type to represent a date.
- */
+/** Generic type to represent a date. */
 export type DateLike = Date | number | string;
 
-/** The type to specify a date format for each supported language */
+/** The type to specify a date format for each supported language. */
 export type TypeDisplayDateFormat = Record<TypeDisplayLanguage, string>;
 
-/** The type to specify the default date and datetime formats for each supported display date mode */
+/** The type to specify the default date and datetime formats for each supported display date mode. */
 export type TypeDisplayDateDefaults = { dateFormat: TypeDisplayDateFormat; datetimeFormat: TypeDisplayDateFormat };
 
 /**
@@ -45,9 +43,7 @@ export type TimeIANA = string | 'local';
  */
 export type TemporalMode = 'calendar' | 'instant';
 
-/**
- * constant used to define the ESRI unit to OGC period conversion.
- */
+/** Constant used to define the ESRI unit to OGC period conversion. */
 const timeUnitsESRI = {
   esriTimeUnitsHours: 'H',
   esriTimeUnitsDays: 'D',
@@ -56,17 +52,13 @@ const timeUnitsESRI = {
   esriTimeUnitsYears: 'Y',
 };
 
-/**
- * Type used to define the range values for an OGC time dimension.
- */
+/** Type used to define the range values for an OGC time dimension. */
 type RangeItems = {
   type: string;
   range: string[];
 };
 
-/**
- * Type used to define the GeoView OGC time dimension.
- */
+/** Type used to define the GeoView OGC time dimension. */
 export type TimeDimension = {
   field: string;
   default: string[];
@@ -81,6 +73,7 @@ export type TimeDimension = {
   isValid: boolean;
 };
 
+/** Guessed time information inferred from service date formats or time dimensions. */
 export type GuessedTimeInformation = {
   displayDateFormat?: TypeDisplayDateFormat;
   displayDateFormatShort?: TypeDisplayDateFormat;
@@ -88,9 +81,7 @@ export type GuessedTimeInformation = {
   displayDateTimezone?: TimeIANA;
 };
 
-/**
- * Type used to validate the ESRI time dimension.
- */
+/** Type used to validate the ESRI time dimension. */
 export type TimeDimensionESRI = {
   startTimeField: string;
   endTimeField?: string;
@@ -110,15 +101,13 @@ const isAbsoluteRange = (ogcTimeDimension: string): boolean => ogcTimeDimension.
 const isRelativeRange = (ogcTimeDimension: string): boolean => ogcTimeDimension.split('/').length === 2;
 
 /**
- * Class used to handle date as ISO 8601
- *
- * @exports
- * @class DateMgt
+ * Class used to handle date as ISO 8601.
  */
 export abstract class DateMgt {
-  // The milliseconds for 1 day
+  /** The milliseconds for 1 day. */
   static readonly MILLISECONDS_IN_1_DAY: number = 24 * 60 * 60 * 1000;
-  static readonly MILLISECONDS_IN_1_YEAR: number = DateMgt.MILLISECONDS_IN_1_DAY * 365; // Estimation, not considering leap years
+  /** The milliseconds for 1 year (estimation, not considering leap years). */
+  static readonly MILLISECONDS_IN_1_YEAR: number = DateMgt.MILLISECONDS_IN_1_DAY * 365;
 
   /** The international ISO date format. */
   static readonly ISO_DATE_FORMAT = 'YYYY-MM-DD';
@@ -138,19 +127,19 @@ export abstract class DateMgt {
   /** The international ISO format without the seconds. */
   static readonly ISO_DATETIME_FORMAT_MINUTES = 'YYYY-MM-DDTHH:mm';
 
-  /** The display format for international ISO date only for English and French */
+  /** The display format for international ISO date only for English and French. */
   static readonly ISO_DISPLAY_DATE_FORMAT: TypeDisplayDateFormat = { en: 'YYYY-MM-DD', fr: 'YYYY-MM-DD' };
 
-  /** A Default time only format for English and French */
+  /** A default year-only format for English and French. */
   static readonly ISO_DISPLAY_YEAR_ONLY_FORMAT: TypeDisplayDateFormat = { en: 'YYYY', fr: 'YYYY' };
 
-  /** A Default time only format for English and French */
+  /** A default time-only format for English and French. */
   static readonly ISO_DISPLAY_TIME_FORMAT_MINUTES: TypeDisplayDateFormat = {
     en: DateMgt.ISO_TIME_FORMAT_MINUTES,
     fr: DateMgt.ISO_TIME_FORMAT_MINUTES,
   };
 
-  /** A Default time only format for English and French */
+  /** A default datetime format for English and French. */
   static readonly ISO_DISPLAY_DATETIME_FORMAT_MINUTES: TypeDisplayDateFormat = {
     en: DateMgt.ISO_DATETIME_FORMAT_MINUTES,
     fr: DateMgt.ISO_DATETIME_FORMAT_MINUTES,
@@ -168,18 +157,19 @@ export abstract class DateMgt {
   /** Static constant indicating the local IANA time zone. */
   static readonly TIME_IANA_LOCAL = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-  /** Regular expression for matching ISO date strings */
+  /** Regular expression for matching ISO date strings. */
   static readonly REGEX_ISO_DATE = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})/gi;
+  /** Regular expression for matching ISO date strings with a 'date' prefix. */
   static readonly REGEX_ISO_DATE_WITH_PREFIX =
     /date\s*'(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d(?::[0-5]\d(?:\.\d+)?)?(?:Z|[+-][0-2]\d:[0-5]\d)?)'/gi;
 
-  /** Regex used to spot a timezone inside a date input */
+  /** Regex used to spot a timezone inside a date input. */
   static readonly #REGEX_HAS_TIMEZONE_IN_DATE = /([Zz]|[+-]\d{2}:\d{2})$/;
 
-  /** Array of time tokens used for parsing and identifying time components in dates */
+  /** Array of time tokens used for parsing and identifying time components in dates. */
   static readonly #TIME_TOKENS = ['H', 'HH', 'h', 'hh', 'k', 'kk', 'm', 'mm', 's', 'ss', 'S', 'SS', 'SSS', 'A', 'a', 'X', 'x'];
 
-  /** The default input formats to append to the specific input formats when trying to read a date in a non-ISO format */
+  /** The default input formats to append to the specific input formats when trying to read a date in a non-ISO format. */
   // TODO: Add more date format support (this is only used when a particular input format is specified, otherwise we default to ISO formats)
   static readonly #DEFAULT_INPUT_FORMATS = [
     'YYYY-MM-DDTHH:mm:ss.SSS[Z]',
@@ -193,28 +183,28 @@ export abstract class DateMgt {
     'YYYY-MM-DD',
   ];
 
-  /** The Default date format for English and French to be used by the application */
+  /** The default date format for English and French to be used by the application. */
   static DEFAULT_DATE_FORMAT: TypeDisplayDateFormat = DateMgt.LONG_DISPLAY_DATE_FORMAT;
 
-  /** The Default date and time format for English and French to be used by the application */
+  /** The default date and time format for English and French to be used by the application. */
   static DEFAULT_DATETIME_FORMAT: TypeDisplayDateFormat = DateMgt.LONG_DISPLAY_DATETIME_FORMAT;
 
-  /** The Default time format for English and French to be used by the application */
+  /** The default time format for English and French to be used by the application. */
   static DEFAULT_TIME_FORMAT: TypeDisplayDateFormat = DateMgt.ISO_DISPLAY_TIME_FORMAT_MINUTES;
 
-  /** The Default time format for English and French to be used by the application */
+  /** The default year-only format for English and French to be used by the application. */
   static DEFAULT_DATE_YEAR_ONLY_FORMAT = DateMgt.ISO_DISPLAY_YEAR_ONLY_FORMAT;
 
-  /** The default temporal mode to be used by the application */
+  /** The default temporal mode to be used by the application. */
   static DEFAULT_TEMPORAL_MODE: TemporalMode = 'calendar';
 
   // #region STATIC PUBLIC METHODS
 
   /**
    * Gets the default date and datetime formats based on the display date mode.
-   * @param {DisplayDateMode | undefined} displayDateMode - The display date mode, e.g., 'long' or undefined for default.
-   * @returns {TypeDisplayDateDefaults} The default date and datetime formats for the given mode.
-   * @static
+   *
+   * @param displayDateMode - The display date mode, e.g., 'long' or undefined for default
+   * @returns The default date and datetime formats for the given mode
    */
   static getDisplayDateDefaults(displayDateMode: DisplayDateMode | undefined): TypeDisplayDateDefaults {
     // Depending on the display date mode
@@ -233,25 +223,26 @@ export abstract class DateMgt {
   /**
    * Parses a `DateLike` input into a Dayjs object, automatically handling different types
    * of input and temporal modes.
+   *
    * Supports:
    * 1. Epoch numbers and `Date` objects (treated as exact UTC instants)
    * 2. String representations as either "instant" or "calendar" dates
    * 3. Optional custom input formats, strict parsing, and timezones
-   * @param {DateLike} date - The input date. Can be:
+   *
+   * @param date - The input date. Can be:
    *   - A `Date` object
    *   - A timestamp number
    *   - A string (ISO, custom format, or calendar date)
-   * @param {string | string[]} [inputFormat] - Optional format(s) for parsing string inputs.
-   *   If provided, Dayjs will use these formats instead of auto-detection.
-   * @param {TimeIANA} [inputTimezone] - Optional IANA timezone to apply if the input string
-   *   does not have an explicit timezone. Defaults to `TIME_UTC` in `parseInstantDate`.
-   * @param {TemporalMode} [temporalMode=this.DEFAULT_TEMPORAL_MODE] - Determines
-   *   how string inputs are interpreted:
+   * @param inputFormat - Optional format(s) for parsing string inputs.
+   *   If provided, Dayjs will use these formats instead of auto-detection
+   * @param inputTimezone - Optional IANA timezone to apply if the input string
+   *   does not have an explicit timezone. Defaults to `TIME_UTC` in `parseInstantDate`
+   * @param temporalMode - Determines how string inputs are interpreted:
    *   - `"instant"`: exact point in time
    *   - `"calendar"`: normalized to midnight local time
-   * @param {boolean} [strict=false] - If true, enforces strict parsing according to the
-   *   provided `inputFormat`.
-   * @returns {Dayjs} A Dayjs object representing the parsed date.
+   * @param strict - Optional, if true, enforces strict parsing according to the
+   *   provided `inputFormat`
+   * @returns A Dayjs object representing the parsed date
    * @remarks
    * - If `date` is a number or `Date`, it is parsed as a UTC instant.
    * - If `date` is a string containing a timezone, it is treated as an "instant" date.
@@ -259,7 +250,6 @@ export abstract class DateMgt {
    *   `parseCalendarDate` and normalized to local midnight.
    * - Otherwise, the string is parsed as an instant using `parseInstantDate`.
    * - This method automatically determines the correct parsing helper based on the input.
-   * @static
    */
   static parseDateToDayjs(
     date: DateLike,
@@ -287,23 +277,23 @@ export abstract class DateMgt {
 
   /**
    * Parses a string as an "instant" point in time into a Dayjs object.
+   *
    * Handles:
    * 1. Optional custom input formats
    * 2. Strings with or without explicit timezones
    * 3. Applying a default timezone if missing
-   * @param {string} date - The input date string to parse.
-   * @param {string | string[]} [inputFormat] - Optional format(s) for parsing.
-   *   If provided, Dayjs will use these formats instead of auto-detection.
-   * @param {TimeIANA} [inputTimezone=this.TIME_UTC] - IANA timezone string to apply if
-   *   the input string has no explicit timezone.
-   * @param {boolean} [strict=false] - If true, enforces strict parsing according to the
-   *   provided `inputFormat`.
-   * @returns {Dayjs} A Dayjs object representing the parsed instant.
-   * @throws {InvalidTimezoneError} If the time zone is not a valid or supported IANA identifier.
+   *
+   * @param date - The input date string to parse
+   * @param inputFormat - Optional format(s) for parsing.
+   *   If provided, Dayjs will use these formats instead of auto-detection
+   * @param inputTimezone - Optional IANA timezone string to apply if
+   *   the input string has no explicit timezone
+   * @param strict - Optional, if true, enforces strict parsing according to the provided `inputFormat`
+   * @returns A Dayjs object representing the parsed instant
+   * @throws {InvalidTimezoneError} When the time zone is not a valid or supported IANA identifier
    * @remarks
    * - If the input string contains a timezone (`hasTZ` is true), it is treated as an exact instant.
    * - If the input string lacks a timezone, `inputTimezone` is applied.
-   * @static
    */
   static parseInstantDate(
     date: string,
@@ -335,18 +325,17 @@ export abstract class DateMgt {
   /**
    * Parses a date string as a **calendar date**, ignoring any timezone or offset
    * semantics and preserving the civil date and time fields as-is.
+   *
    * This function interprets the input purely in terms of its calendar
    * components (year, month, day, and optional time), then normalizes those
    * components by re-anchoring them in UTC. No timezone conversion is applied.
    * This guarantees that calendar-based dates do not shift days due to timezone
    * offsets, DST, or environment locale.
-   * @param {string} date - Date string to parse
-   * @param {string | string[] | undefined} [inputFormat] - Optional format or list
-   * of formats used to parse the input date string
-   * @param {boolean} [strict=false] - Whether to enforce strict parsing when using
-   * custom formats
-   * @returns {Dayjs} Dayjs instance normalized to UTC using calendar semantics
-   * @static
+   *
+   * @param date - Date string to parse
+   * @param inputFormat - Optional format or list of formats used to parse the input date string
+   * @param strict - Optional, whether to enforce strict parsing when using custom formats
+   * @returns Dayjs instance normalized to UTC using calendar semantics
    */
   static parseCalendarDate(date: string, inputFormat?: string | string[], strict: boolean = false): Dayjs {
     let formats = undefined;
@@ -372,15 +361,15 @@ export abstract class DateMgt {
   /**
    * Reconstructs a Dayjs instance as a UTC date using the calendar fields
    * (year, month, day, time components) of the provided Dayjs object.
+   *
    * This function discards any timezone or offset information carried by the
    * input and treats the extracted calendar fields as if they were already
    * expressed in UTC. No timezone conversion is performed.
    * This is primarily used to normalize calendar-based dates so that their
    * civil components remain stable and are not affected by timezone shifts.
-   * @param {Dayjs} date - Dayjs instance whose calendar fields will be read
-   * and reinterpreted as UTC
-   * @returns {Dayjs} New Dayjs instance representing the same calendar fields
-   * anchored in UTC
+   *
+   * @param date - Dayjs instance whose calendar fields will be read and reinterpreted as UTC
+   * @returns New Dayjs instance representing the same calendar fields anchored in UTC
    */
   static #readCalendarDay(date: Dayjs): Dayjs {
     // Return the UTC equivalent
@@ -389,26 +378,27 @@ export abstract class DateMgt {
 
   /**
    * Creates a validated Dayjs instance from a `DateLike` input.
+   *
    * This is a thin wrapper around `parseDateToDayjs` that ensures the resulting
    * Dayjs object is valid, throwing an error if parsing fails.
-   * @param {DateLike} date - The input date to parse. Can be:
+   *
+   * @param date - The input date to parse. Can be:
    *   - A `Date` object
    *   - A timestamp number
    *   - A string (ISO, custom format, or calendar/instant date)
-   * @param {string | string[]} [inputFormat] - Optional format(s) for parsing string inputs.
-   *   Passed directly to `parseDateToDayjs`.
-   * @param {TimeIANA} [inputTimezone] - Optional IANA timezone to apply if the input string
-   *   has no explicit timezone and is parsed as an instant.
-   * @param {TemporalMode} [temporalMode] - Determines how string inputs are interpreted:
+   * @param inputFormat - Optional format(s) for parsing string inputs.
+   *   Passed directly to `parseDateToDayjs`
+   * @param inputTimezone - Optional IANA timezone to apply if the input string
+   *   has no explicit timezone and is parsed as an instant
+   * @param temporalMode - Optional, determines how string inputs are interpreted:
    *   - `"calendar"`: parsed as a calendar date
    *   - `"instant"`: parsed as an exact point in time
-   *   Defaults to `DEFAULT_TEMPORAL_MODE`.
-   * @returns {Dayjs} A valid Dayjs object representing the parsed date.
-   * @throws {InvalidDateError} When input has invalid date.
+   *   - Defaults to `DEFAULT_TEMPORAL_MODE`
+   * @returns A valid Dayjs object representing the parsed date
+   * @throws {InvalidDateError} When input has invalid date
    * @remarks
    * - This method guarantees that the returned Dayjs instance is valid.
    * - All parsing rules, timezone handling, and temporal logic are delegated to `parseDateToDayjs`.
-   * @static
    */
   static createDayjs(date: DateLike, inputFormat?: string | string[], inputTimezone?: TimeIANA, temporalMode?: TemporalMode): Dayjs {
     // Parse the date
@@ -423,26 +413,26 @@ export abstract class DateMgt {
 
   /**
    * Creates a native `Date` object from a `DateLike` input.
+   *
    * This is a convenience wrapper around `createDayjs` that converts the validated
    * Dayjs instance into a native JavaScript `Date`.
-   * @param {DateLike} date - The input date to convert. Can be:
+   *
+   * @param date - The input date to convert. Can be:
    *   - A `Date` object
    *   - A timestamp number
    *   - A string (ISO, custom format, or calendar/instant date)
-   * @param {string | string[]} [inputFormat] - Optional format(s) for parsing string inputs.
-   *   Passed directly to `createDayjs`.
-   * @param {TimeIANA} [inputTimezone] - Optional IANA timezone to apply if the input string
-   *   has no explicit timezone and is parsed as an instant.
-   * @param {TemporalMode} [temporalMode] - Determines how string inputs are interpreted:
+   * @param inputFormat - Optional format(s) for parsing string inputs. Passed directly to `createDayjs`
+   * @param inputTimezone - Optional IANA timezone to apply if the input string
+   *   has no explicit timezone and is parsed as an instant
+   * @param temporalMode - Optional, determines how string inputs are interpreted:
    *   - `"calendar"`: parsed as a calendar date
    *   - `"instant"`: parsed as an exact point in time
-   *   Defaults to `DEFAULT_TEMPORAL_MODE`.
-   * @returns {Date} A native JavaScript `Date` object representing the parsed date.
-   * @throws {Error} Throws an error if the input cannot be parsed into a valid date.
+   *   - Defaults to `DEFAULT_TEMPORAL_MODE`
+   * @returns A native JavaScript `Date` object representing the parsed date
+   * @throws {Error} When the input cannot be parsed into a valid date
    * @remarks
    * - Parsing, validation, and temporal logic are delegated to `createDayjs`.
    * - The returned `Date` represents the same instant in time as the underlying Dayjs object.
-   * @static
    */
   static createDate(date: DateLike, inputFormat?: string | string[], inputTimezone?: TimeIANA, temporalMode?: TemporalMode): Date {
     // Redirect
@@ -452,28 +442,27 @@ export abstract class DateMgt {
   /**
    * Formats a `DateLike` value into a string using the specified format, locale,
    * timezone, and temporal interpretation.
+   *
    * This method first normalizes the input using `parseDateToDayjs`, then applies
    * output-specific transformations such as timezone conversion, locale, and formatting.
-   * @param {DateLike} date - The input date to format. Can be:
+   *
+   * @param date - The input date to format. Can be:
    *   - A `Date` object
    *   - A timestamp number
    *   - A string (ISO, custom format, or calendar date)
-   * @param {string} [format=this.ISO_FORMAT] - The Dayjs format string used to produce
-   *   the output.
-   * @param {TypeDisplayLanguage} [locale='en'] - Locale used for formatting (e.g. month
-   *   and weekday names).
-   * @param {TimeIANA} [outputTimezone=this.TIME_UTC] - IANA timezone applied to the output
-   *   when formatting instant dates.
-   * @param {TemporalMode} [temporalMode='calendar'] - Determines how the input is interpreted:
+   * @param format - Optional, the Dayjs format string used to produce the output
+   * @param locale - Optional locale used for formatting (e.g. month and weekday names)
+   * @param outputTimezone - Optional IANA timezone applied to the output
+   *   when formatting instant dates
+   * @param temporalMode - Optional, determines how the input is interpreted:
    *   - `"calendar"`: treated as a whole calendar day
    *   - `"instant"`: treated as an exact point in time
-   * @param {string | string[]} [inputFormat] - Optional format(s) for parsing string inputs.
-   *   If provided, these are passed through to `parseDateToDayjs`.
-   * @param {TimeIANA} [inputTimezone] - Optional IANA timezone to apply if the input string
-   *   has no explicit timezone and is parsed as an instant.
-   * @param {boolean} [withZ=false] - Whether to append a literal `'Z'` to the formatted
-   *   output string.
-   * @returns {string} The formatted date string.
+   * @param inputFormat - Optional format(s) for parsing string inputs.
+   *   If provided, these are passed through to `parseDateToDayjs`
+   * @param inputTimezone - Optional IANA timezone to apply if the input string
+   *   has no explicit timezone and is parsed as an instant
+   * @param withZ - Optional, whether to append a literal `'Z'` to the formatted output string
+   * @returns The formatted date string
    * @remarks
    * - The input is always parsed via `parseDateToDayjs`, ensuring consistent handling
    *   of `Date`, epoch, and string values.
@@ -481,7 +470,6 @@ export abstract class DateMgt {
    *   `outputTimezone`.
    * - Instant dates are converted to `outputTimezone` before formatting.
    * - The locale is applied after parsing and timezone adjustments.
-   * @static
    */
   static formatDate(
     date: DateLike,
@@ -520,29 +508,29 @@ export abstract class DateMgt {
 
   /**
    * Formats a date into a short ISO-like string (`YYYY-MM-DDTHH:mm:ss`).
+   *
    * This is a convenience wrapper around `formatDate` that produces a compact,
    * timezone-aware ISO-style representation, optionally appending a `Z` suffix
    * when formatted in UTC.
-   * @param {DateLike} date - The input date to format. Can be:
+   *
+   * @param date - The input date to format. Can be:
    *   - A `Date` object
    *   - A timestamp number
    *   - A string (ISO, custom format, or calendar/instant date)
-   * @param {TimeIANA} [outputTimezone=this.TIME_UTC] - IANA timezone applied to the
-   *   output when formatting instant dates.
-   * @param {TemporalMode} [temporalMode='calendar'] - Determines how the input is interpreted:
+   * @param outputTimezone - Optional IANA timezone applied to the
+   *   output when formatting instant dates
+   * @param temporalMode - Optional, determines how the input is interpreted:
    *   - `"calendar"`: treated as a calendar date
    *   - `"instant"`: treated as an exact point in time
-   * @param {string | string[]} [inputFormat] - Optional format(s) for parsing string inputs.
-   *   Passed through to `formatDate`.
-   * @param {TimeIANA} [inputTimezone=this.TIME_UTC] - IANA timezone to apply if the input
-   *   string has no explicit timezone and is parsed as an instant.
-   * @returns {string} A short ISO-like formatted date string.
+   * @param inputFormat - Optional format(s) for parsing string inputs. Passed through to `formatDate`
+   * @param inputTimezone - Optional IANA timezone to apply if the input
+   *   string has no explicit timezone and is parsed as an instant
+   * @returns A short ISO-like formatted date string
    * @remarks
    * - Uses the format `YYYY-MM-DDTHH:mm:ss`.
    * - Delegates all parsing and formatting logic to `formatDate`.
    * - Appends a literal `'Z'` to the output only when `outputTimezone` is UTC.
    * - Calendar dates are not shifted by `outputTimezone`.
-   * @static
    */
   static formatDateISOShort(
     date: DateLike,
@@ -567,16 +555,17 @@ export abstract class DateMgt {
   /**
    * Formats a single date or a date range according to the specified
    * display format, language, timezone, and temporal mode.
+   *
    * If a second date is provided, the function returns a string
    * representing the range in the format "date1 / date2".
-   * @param {DateLike} date1 - The first date (or the only date) to format.
-   * @param {TypeDisplayDateFormat} dateFormat - Object containing the display format for each language.
-   * @param {TypeDisplayLanguage} locale - Language code to select the correct format from `dateFormat`.
-   * @param {TimeIANA} outputTimezone - The IANA timezone to use for output formatting.
-   * @param {TemporalMode} inputTemporalMode - Whether to interpret the input as 'calendar' or 'instant'.
-   * @param {DateLike} [date2] - Optional second date for formatting a date range.
-   * @returns {string} A formatted date string or a formatted date range string.
-   * @static
+   *
+   * @param date1 - The first date (or the only date) to format
+   * @param dateFormat - Object containing the display format for each language
+   * @param locale - Language code to select the correct format from `dateFormat`
+   * @param outputTimezone - Optional IANA timezone to use for output formatting
+   * @param inputTemporalMode - Optional, whether to interpret the input as 'calendar' or 'instant'
+   * @param date2 - Optional second date for formatting a date range
+   * @returns A formatted date string or a formatted date range string
    */
   static formatDateOrDateRange(
     date1: DateLike,
@@ -601,14 +590,15 @@ export abstract class DateMgt {
   /**
    * Formats a single date or a date range according to the specified
    * display format, language, timezone, and temporal mode.
+   *
    * If a second date is provided, the function returns a string
    * representing the range in the format "date1 / date2".
-   * @param {DateLike} date1 - The first date (or the only date) to format.
-   * @param {TypeDisplayDateFormat} dateFormat - Object containing the display format for each language.
-   * @param {TemporalMode} inputTemporalMode - Whether to interpret the input as 'calendar' or 'instant'.
-   * @param {DateLike} [date2] - Optional second date for formatting a date range.
-   * @returns {string} A formatted date string or a formatted date range string.
-   * @static
+   *
+   * @param date1 - The first date (or the only date) to format
+   * @param dateFormat - Object containing the display format for each language
+   * @param inputTemporalMode - Optional, whether to interpret the input as 'calendar' or 'instant'
+   * @param date2 - Optional second date for formatting a date range
+   * @returns A formatted date string or a formatted date range string
    */
   static formatISODateOrDateRange(
     date1: DateLike,
@@ -629,12 +619,12 @@ export abstract class DateMgt {
 
   /**
    * Convert a date to milliseconds.
-   * @param {DateLike} date - The date to use
-   * @param {string | string[]} [inputFormat] - One or more format strings to prioritize when parsing string inputs.
-   * @param {TimeIANA} [inputTimezone] - The timezone to assume for string inputs that do not explicitly include a timezone.
-   * @returns {number} Date as milliseconds
-   * @throws {InvalidTimezoneError} If the time zone is not a valid or supported IANA identifier.
-   * @static
+   *
+   * @param date - The date to use
+   * @param inputFormat - Optional, one or more format strings to prioritize when parsing string inputs
+   * @param inputTimezone - Optional timezone to assume for string inputs that do not explicitly include a timezone
+   * @returns Date as milliseconds
+   * @throws {InvalidTimezoneError} When the time zone is not a valid or supported IANA identifier
    */
   static convertToMilliseconds(date: DateLike, inputFormat?: string | string[], inputTimezone?: TimeIANA): number {
     // Read it
@@ -644,10 +634,10 @@ export abstract class DateMgt {
 
   /**
    * Checks if whatever is sent looks like it could be a date.
-   * @param {string} date - The string to parse to check if it's a date.
-   * @param {TimeIANA} [inputTimezone] - The timezone to assume for string inputs that do not explicitly include a timezone.
-   * @returns {Date} A native `Date` object representing the parsed instant in UTC or `undefined` if parsing fails.
-   * @static
+   *
+   * @param date - The string to parse to check if it's a date
+   * @param inputTimezone - Optional timezone to assume for string inputs that do not explicitly include a timezone
+   * @returns A native `Date` object representing the parsed instant in UTC or `undefined` if parsing fails
    */
   static tryParseDate(date: string, inputTimezone?: TimeIANA): Date | undefined {
     // Try to create a date with the value
@@ -662,12 +652,14 @@ export abstract class DateMgt {
   /**
    * Determines whether a date/time format string contains any supported
    * time-related tokens.
+   *
    * The method performs a simple substring check against a predefined
    * list of time tokens (e.g. hours, minutes, seconds, meridiem, Unix time).
    * If the format is `undefined`, the method safely returns `false`.
-   * @param {string | undefined} format - The date/time format string to evaluate. May be `undefined`.
+   *
+   * @param format - The date/time format string to evaluate. May be `undefined`
    * @returns `true` if the format contains at least one recognized time token;
-   * otherwise `false`.
+   * otherwise `false`
    */
   static hasTimeComponents(format: string | undefined): boolean {
     return this.#TIME_TOKENS.some((token) => format?.includes(token));
@@ -676,6 +668,7 @@ export abstract class DateMgt {
   /**
    * Attempts to infer display date configuration from a service-provided
    * date format string.
+   *
    * The function inspects the format string to determine whether it contains
    * time-related components (e.g., hours, minutes, seconds, timezone tokens).
    * If time components are detected, it assumes:
@@ -683,10 +676,11 @@ export abstract class DateMgt {
    * - The display timezone should default to **local**.
    * If no time components are detected or the format is undefined,
    * no assumptions are made and `undefined` is returned.
-   * @param {string | undefined} serviceDateFormat - The date format string provided by the service
-   * (e.g., `"YYYY-MM-DDTHH:mm:ss"`).
-   * @returns {GuessedTimeInformation | undefined} A partial {@link GuessedTimeInformation} object containing inferred
-   *          display settings if time components are detected; otherwise `undefined`.
+   *
+   * @param serviceDateFormat - The date format string provided by the service
+   * (e.g., `"YYYY-MM-DDTHH:mm:ss"`)
+   * @returns A partial {@link GuessedTimeInformation} object containing inferred
+   *          display settings if time components are detected; otherwise `undefined`
    * @remarks
    * - This function performs heuristic inference and may not be accurate
    *   for all custom or non-standard format strings.
@@ -712,6 +706,7 @@ export abstract class DateMgt {
 
   /**
    * Attempts to infer display date configuration from a service time dimension.
+   *
    * This function analyzes an array of date values and applies heuristics
    * based on the overall time span and time-of-day consistency to determine:
    * - Whether the dates should be treated as `instant` or `calendar` values.
@@ -731,9 +726,10 @@ export abstract class DateMgt {
    *    - Assume the time component is not meaningful.
    *    - Use date-only formatting.
    * If none of the heuristics apply, the function returns `undefined`.
-   * @param {DateLike[]} dates - Array of service-provided date values to analyze.
-   * @returns {GuessedTimeInformation | undefined} A partially populated {@link GuessedTimeInformation} object
-   *          if a confident inference can be made; otherwise `undefined`.
+   *
+   * @param dates - Array of service-provided date values to analyze
+   * @returns A partially populated {@link GuessedTimeInformation} object
+   *          if a confident inference can be made; otherwise `undefined`
    * @remarks
    * - All comparisons are performed in UTC.
    * - This function relies on heuristics and may not be correct for all datasets.
@@ -803,11 +799,11 @@ export abstract class DateMgt {
   }
 
   /**
-   * Guesses the estimated steps that should be used by the slider, depending on the value range
-   * @param {number} minValue - The minimum value
-   * @param {number} maxValue - The maximum value
-   * @returns {number | undefined} The estimated stepping value based on the min and max values
-   * @static
+   * Guesses the estimated steps that should be used by the slider, depending on the value range.
+   *
+   * @param minValue - The minimum value
+   * @param maxValue - The maximum value
+   * @returns The estimated stepping value based on the min and max values, or `undefined`
    */
   static guessEstimatedStep(minValue: number, maxValue: number): number | undefined {
     const day1 = 86400000; // 24h x 60m x 60s x 1000ms = 86,400,000ms in a day
@@ -826,13 +822,14 @@ export abstract class DateMgt {
   }
 
   /**
-   * Create the Geoview time dimension from ESRI dimension
-   * @param {TimeDimensionESRI} timeDimensionESRI - Esri time dimension object
-   * @param {boolean} singleHandle - True if it is ESRI Image
-   * @returns {TimeDimension} The Geoview time dimension
-   * @throws {InvalidTimeDimensionError} When range couldn't be computed, or when duration is invalid, or non-positive or when an infinite loop is detected.
-   * @throws {InvalidDateError} When input has invalid dates.
-   * @static
+   * Create the Geoview time dimension from ESRI dimension.
+   *
+   * @param timeDimensionESRI - Esri time dimension object
+   * @param displayDateMode - Optional display date mode
+   * @param singleHandle - Optional, true if it is ESRI Image
+   * @returns The Geoview time dimension
+   * @throws {InvalidTimeDimensionError} When range couldn't be computed, or when duration is invalid, or non-positive or when an infinite loop is detected
+   * @throws {InvalidDateError} When input has invalid dates
    */
   static createDimensionFromESRI(
     timeDimensionESRI: TimeDimensionESRI,
@@ -882,12 +879,13 @@ export abstract class DateMgt {
   }
 
   /**
-   * Create the Geoview time dimension from OGC dimension
-   * @param {TypeMetadataWMSCapabilityLayerDimension | string} ogcTimeDimension - The OGC time dimension object or string
-   * @returns {TimeDimension} - The Geoview time dimension
-   * @throws {InvalidTimeDimensionError} When range couldn't be computed, or when duration is invalid, or non-positive or when an infinite loop is detected.
-   * @throws {InvalidDateError} When input has invalid dates.
-   * @static
+   * Create the Geoview time dimension from OGC dimension.
+   *
+   * @param ogcTimeDimension - The OGC time dimension object or string
+   * @param displayDateMode - Optional display date mode
+   * @returns The Geoview time dimension
+   * @throws {InvalidTimeDimensionError} When range couldn't be computed, or when duration is invalid, or non-positive or when an infinite loop is detected
+   * @throws {InvalidDateError} When input has invalid dates
    */
   static createDimensionFromOGC(
     ogcTimeDimension: TypeMetadataWMSCapabilityLayerDimension | string,
@@ -917,12 +915,12 @@ export abstract class DateMgt {
   }
 
   /**
-   * Create a range of date object from OGC time dimension following ISO 8601
-   * @param {string} ogcTimeDimensionValues - OGC time dimension values following
-   * @returns {RangeItems} array of date from the dimension
-   * @throws {InvalidTimeDimensionError} When range couldn't be computed, or when duration is invalid, or non-positive or when an infinite loop is detected.
-   * @throws {InvalidDateError} When input has invalid dates.
-   * @static
+   * Create a range of date object from OGC time dimension following ISO 8601.
+   *
+   * @param ogcTimeDimensionValues - OGC time dimension values
+   * @returns Array of date from the dimension
+   * @throws {InvalidTimeDimensionError} When range couldn't be computed, or when duration is invalid, or non-positive or when an infinite loop is detected
+   * @throws {InvalidDateError} When input has invalid dates
    */
   static createRangeOGC(ogcTimeDimensionValues: string): RangeItems {
     let rangeItems: RangeItems = { type: 'none', range: [] };
@@ -948,9 +946,9 @@ export abstract class DateMgt {
 
   /**
    * Validates that a given IANA time zone is supported by the runtime.
+   *
    * @param timezone - IANA time zone identifier (e.g. 'America/Toronto', 'Europe/Paris', 'UTC')
-   * @throws {InvalidTimezoneError} If the time zone is not a valid or supported IANA identifier.
-   * @static
+   * @throws {InvalidTimezoneError} When the time zone is not a valid or supported IANA identifier
    */
   static validateTimezone(timezone: TimeIANA): void {
     if (!this.isValidTimezone(timezone)) {
@@ -960,11 +958,12 @@ export abstract class DateMgt {
 
   /**
    * Checks whether a given IANA time zone is supported by the runtime.
+   *
    * Validation is performed using Day.js with the timezone plugin, which relies
    * on the underlying `Intl` time zone database.
+   *
    * @param timezone - IANA time zone identifier to check
    * @returns `true` if the time zone is valid and supported, otherwise `false`
-   * @static
    */
   static isValidTimezone(timezone: TimeIANA): boolean {
     // If meant to be 'local', that's okay
@@ -984,15 +983,16 @@ export abstract class DateMgt {
 
   /**
    * Fixes an issue when using the customParser plugin and the 'Z' suffix in the date input not being recognized as meaning UTC timezone.
+   *
    * To reproduce the issue, try calling:
    * const test1 = dayjs('2026-01-19T17:54:00Z', this.DEFAULT_INPUT_FORMATS).toDate();
    * const test2 = dayjs('2026-01-19T17:54:00Z').toDate();
    * test1 will be read as 17:54 local time, whereas test2 will be read correctly as 17h54 UTC time.
-   * @param {string} date
-   * @param {string[]} formats
-   * @param {boolean} strict
-   * @returns
-   * @static
+   *
+   * @param date - The date string to parse
+   * @param formats - Optional array of format strings for custom parsing
+   * @param strict - Whether to enforce strict parsing
+   * @returns A Dayjs instance parsed with the UTC fix applied when needed
    */
   static #createDayjsFixCustomParser(date: string, formats: string[] | undefined, strict: boolean): Dayjs {
     // If it's the UTC timezone ('Z')
@@ -1007,6 +1007,7 @@ export abstract class DateMgt {
 
   /**
    * Expands an absolute OGC time dimension interval into discrete UTC ISO date values.
+   *
    * Supported format:
    *   `start/end/period`
    * Example:
@@ -1025,15 +1026,12 @@ export abstract class DateMgt {
    * Safety:
    * - A guard limit prevents infinite loops caused by malformed or
    *   non-progressing durations.
-   * @param {string} ogcTimeDimension - An OGC absolute time dimension string
-   *                                    in the form `start/end/period`.
-   * @returns {string[]} An array of UTC ISO-8601 strings representing each step
-   *          from start to end (inclusive when aligned).
+   *
+   * @param ogcTimeDimension - An OGC absolute time dimension string in the form `start/end/period`
+   * @returns An array of UTC ISO-8601 strings representing each step from start to end (inclusive when aligned)
    * @throws {InvalidTimeDimensionError} When input does not contain exactly three segments, or when duration is
-   *                                     invalid, or non-positive, or when an infinite loop is detected.
-   * @throws {InvalidDateError} When input has invalid dates.
-   * @private
-   * @static
+   *                                     invalid, or non-positive, or when an infinite loop is detected
+   * @throws {InvalidDateError} When input has invalid dates
    */
   static #createAbsoluteInterval(ogcTimeDimension: string): string[] {
     const parts = ogcTimeDimension.split('/');
@@ -1080,6 +1078,7 @@ export abstract class DateMgt {
   /**
    * Parses and expands a relative OGC time dimension into a concrete UTC
    * start/end interval.
+   *
    * Supported formats:
    * - `start/end`
    *   Example: `"2002-09-01T00:00:00Z/2022-12-01T00:00:00Z"`
@@ -1096,13 +1095,12 @@ export abstract class DateMgt {
    * Not supported:
    * - `duration/end` forms (e.g. `"P1M/2002-09-01T00:00:00Z"`)
    * - Open-ended intervals (e.g. `"PT36H/PRESENT"`)
-   * @param {string} ogcTimeDimension - A relative OGC time dimension string (`start/end` or `start/duration`).
-   * @returns {string[]} A two-element array: `[startISO, endISO]`, both formatted as UTC ISO strings.
+   *
+   * @param ogcTimeDimension - A relative OGC time dimension string (`start/end` or `start/duration`)
+   * @returns A two-element array: `[startISO, endISO]`, both formatted as UTC ISO strings
    * @throws {InvalidTimeDimensionError} When input does not contain exactly two segments, or when duration is
-   *                                     invalid, or non-positive.
-   * @throws {InvalidDateError} When input has invalid dates.
-   * @private
-   * @static
+   *                                     invalid, or non-positive
+   * @throws {InvalidDateError} When input has invalid dates
    */
   static #createRelativeInterval(ogcTimeDimension: string): string[] {
     const parts = ogcTimeDimension.split('/');
@@ -1137,6 +1135,7 @@ export abstract class DateMgt {
 
   /**
    * Adds a duration to a Dayjs instance using calendar-safe semantics.
+   *
    * This helper ensures that variable-length calendar units (months and years)
    * are added using explicit unit-based operations rather than relying solely
    * on millisecond arithmetic. This avoids drift issues when expanding OGC
@@ -1148,13 +1147,13 @@ export abstract class DateMgt {
    *   to correctly handle leap years.
    * - All other durations (days, hours, minutes, seconds, etc.) are added
    *   directly via `.add(duration)` since they are fixed-length units.
-   * @param {Dayjs} current - The current UTC Dayjs instance to increment.
-   * @param {Duration} step - The parsed Dayjs duration representing the increment step.
-   * @param {string} periodStr - The original ISO-8601 period string (e.g. "P1M", "P1Y", "P1D").
-   *                    Used to determine whether the duration represents
-   *                    a calendar-based unit (month/year) or a fixed-length unit.
    *
-   * @returns {Dayjs} A new Dayjs instance incremented by the specified duration.
+   * @param current - The current UTC Dayjs instance to increment
+   * @param step - The parsed Dayjs duration representing the increment step
+   * @param periodStr - The original ISO-8601 period string (e.g. "P1M", "P1Y", "P1D").
+   *                    Used to determine whether the duration represents
+   *                    a calendar-based unit (month/year) or a fixed-length unit
+   * @returns A new Dayjs instance incremented by the specified duration
    */
   static #addDurationSafely(current: Dayjs, step: Duration, periodStr: string): dayjs.Dayjs {
     // Month-based duration (P1M, P2M, etc.)
@@ -1173,6 +1172,7 @@ export abstract class DateMgt {
 
   /**
    * Builds the ordered list of date input formats used for Day.js parsing.
+   *
    * This helper prioritizes service-specific date formats while preserving
    * compatibility with a canonical set of default formats.
    * Behavior:
@@ -1183,9 +1183,9 @@ export abstract class DateMgt {
    *   first (in order), followed by the default formats.
    * This ordering ensures that more specific or ambiguous formats (e.g. `DD/MM/YYYY`)
    * are attempted before generic ISO or fallback formats.
-   * @param {string | string[]} [inputFormat] - Optional custom input format(s) to prioritize during parsing.
-   * @returns {string[]} An ordered array of Day.js-compatible format strings, with custom formats evaluated before the defaults.
-   * @static
+   *
+   * @param inputFormat - Optional custom input format(s) to prioritize during parsing
+   * @returns An ordered array of Day.js-compatible format strings, with custom formats evaluated before the defaults
    */
   static #buildInputFormats(inputFormat?: string | string[]): string[] {
     if (!inputFormat) return this.#DEFAULT_INPUT_FORMATS;

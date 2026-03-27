@@ -14,31 +14,28 @@ import Worker from './fetch-esri-worker-script';
  *    const result2 = await myWorker.process(42, true);
  */
 
-/**
- * Interface defining the methods exposed by the fetch ESRI worker.
- */
+/** Interface defining the methods exposed by the fetch ESRI worker. */
 export interface FetchEsriWorkerType {
-  /**
-   * Initializes the worker - empty for now.
-   */
+  /** Initializes the worker - empty for now. */
   init: () => Promise<void>;
 
   /**
    * Processes an ESRI query JSON export.
-   * @param {QueryParams} queryParams - The query parameters for the fetch.
-   * @returns {Promise<unknown>} A promise that resolves to the response fetch as JSON string.
+   *
+   * @param queryParams - The query parameters for the fetch
+   * @returns A promise that resolves to the response fetch as JSON string
    */
   process: (queryParams: QueryParams) => Promise<unknown>;
 }
 
 /**
- * Class representing a fetch ESRI worker.
+ * Worker class for fetching ESRI features.
+ *
  * Extends AbstractWorker to handle fetch operations on ESRI ArcGIS server in a separate thread.
  */
 export class FetchEsriWorker extends AbstractWorker<FetchEsriWorkerType> {
   /**
    * Creates an instance of FetchEsriWorker.
-   * Initializes the worker with the 'fetch-esri' script.
    */
   constructor() {
     super('FetchEsriWorker', new Worker());
@@ -46,16 +43,18 @@ export class FetchEsriWorker extends AbstractWorker<FetchEsriWorkerType> {
 
   /**
    * Initializes the worker - empty for now.
-   * @returns A promise that resolves when initialization is complete.
+   *
+   * @returns A promise that resolves when initialization is complete
    */
   init(): Promise<void> {
     return this.proxy.init();
   }
 
   /**
-   * Processes a JSON fetch for an esri query.
-   * @param {QueryParams} queryParams - The query parameters for the fetch.
-   * @returns A promise that resolves to the processed JSON string.
+   * Processes a JSON fetch for an ESRI query.
+   *
+   * @param queryParams - The query parameters for the fetch
+   * @returns A promise that resolves to the processed JSON string
    */
   process(queryParams: QueryParams): Promise<unknown> {
     return this.proxy.process(queryParams);

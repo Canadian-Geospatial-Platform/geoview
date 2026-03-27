@@ -18,6 +18,7 @@ import { GeometryApi } from '@/geo/layer/geometry/geometry';
 import { CONST_LAYER_TYPES } from '@/api/types/layer-schema-types';
 import { TIMEOUT } from '@/core/utils/constant';
 
+/** Properties for the JSONExportButton component. */
 interface JSONExportButtonProps {
   layerPath: string;
   rows: unknown[];
@@ -25,13 +26,15 @@ interface JSONExportButtonProps {
 }
 
 /**
- * Custom  GeoJson export button which will help to download data table data in geojson format.
- * @param {TypeFeatureInfoEntry[]} features list of rows to be displayed in data table
- * @param {string} layerPath id of the layer
- * @returns {JSX.Element} returns Menu Item
+ * Renders a GeoJSON export menu item for downloading data table data.
  *
+ * @param props - JSONExportButton properties
+ * @returns The GeoJSON export menu item element
  */
 function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/data-table/json-export-button');
+
   const { t } = useTranslation<string>();
 
   // get store action and map projection
@@ -45,10 +48,10 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
   const [isExporting, setIsExporting] = useState(false);
 
   /**
-   * Helper function to serialize a json geometry to pass to the worker
+   * Serializes a geometry to a JSON-compatible format for the worker.
    *
-   * @param {Geometry} geometry - The geometry
-   * @returns {SerializedGeometry} The serialized geometry json
+   * @param geometry - The geometry to serialize
+   * @returns The serialized geometry JSON
    */
   const serializeGeometry = (geometry: Geometry): SerializedGeometry => {
     let builtGeometry = {} as SerializedGeometry;
@@ -75,6 +78,12 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
     return builtGeometry;
   };
 
+  /**
+   * Fetches geometries for a chunk of ESRI Dynamic features.
+   *
+   * @param chunk - The features to fetch geometries for
+   * @returns A promise that resolves with the features updated with their geometries
+   */
   const fetchESRI = useCallback(
     (chunk: TypeFeatureInfoEntry[]): Promise<TypeFeatureInfoEntry[]> => {
       try {
@@ -121,11 +130,10 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
   );
 
   /**
-   * Callback function to get JSON data for export.
-   * This function is memoized using useCallback to optimize performance.
-   * It will only be recreated if the dependencies (in the empty array) change.
+   * Generates GeoJSON data as an async generator yielding string chunks.
    *
-   * @returns {Promise<string>} A promise that resolves to the JSON string to be exported.
+   * @param fetchGeometriesDuringProcess - Whether to fetch geometries from the server during export
+   * @returns An async generator that yields GeoJSON string chunks
    */
   const getJson = useCallback(
     // The function* is crucial here because this is a generator function, specifically an async generator function.
@@ -192,9 +200,10 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
   );
 
   /**
-   * Exports the blob to a file
-   * @param {Blob} blob - The blob to save to file
-   * @param {string} filename - File name
+   * Exports a blob to a downloadable file.
+   *
+   * @param blob - The blob to save
+   * @param filename - The file name
    */
   const exportBlob = useCallback((blob: Blob, filename: string): void => {
     // Save the blob in a json file
@@ -208,7 +217,12 @@ function JSONExportButton({ rows, features, layerPath }: JSONExportButtonProps):
     URL.revokeObjectURL(url);
   }, []);
 
-  const handleExportData = useCallback(async () => {
+  /**
+   * Handles exporting data table data in GeoJSON format.
+   *
+   * @returns A promise that resolves when the export completes
+   */
+  const handleExportData = useCallback(async (): Promise<void> => {
     setIsExporting(true);
     try {
       const layerIsEsriDynamic = schemaTag === CONST_LAYER_TYPES.ESRI_DYNAMIC;

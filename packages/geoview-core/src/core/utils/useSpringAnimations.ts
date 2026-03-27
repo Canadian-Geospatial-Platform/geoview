@@ -1,12 +1,13 @@
 import type { SpringConfig } from '@react-spring/web';
 import { useSpring } from '@react-spring/web';
 
-// Common easing function
+/** Common easing function. */
 const commonConfig: SpringConfig = { duration: 500, easing: (t) => t };
+/** Record type for spring animation values. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SpringValues = Record<string, any>;
 
-// Fade In animation
+/** Fade In animation. */
 export const useFadeIn = (config?: SpringConfig): SpringValues => {
   return useSpring({
     config: { ...commonConfig, ...config },
@@ -15,7 +16,7 @@ export const useFadeIn = (config?: SpringConfig): SpringValues => {
   });
 };
 
-// Fade In Left animation
+/** Fade In Left animation. */
 export const useFadeInLeft = (config?: SpringConfig): SpringValues => {
   return useSpring({
     config: { ...commonConfig, ...config },
@@ -24,7 +25,7 @@ export const useFadeInLeft = (config?: SpringConfig): SpringValues => {
   });
 };
 
-// Fade In Right animation
+/** Fade In Right animation. */
 export const useFadeInRight = (config?: SpringConfig): SpringValues => {
   return useSpring({
     config: { ...commonConfig, ...config },
@@ -33,7 +34,7 @@ export const useFadeInRight = (config?: SpringConfig): SpringValues => {
   });
 };
 
-// Fade In Up animation
+/** Fade In Up animation. */
 export const useFadeInUp = (config?: SpringConfig): SpringValues => {
   return useSpring({
     config: { ...commonConfig, ...config },
@@ -42,7 +43,7 @@ export const useFadeInUp = (config?: SpringConfig): SpringValues => {
   });
 };
 
-// Fade In Down animation
+/** Fade In Down animation. */
 export const useFadeInDown = (config?: SpringConfig): SpringValues => {
   return useSpring({
     config: { ...commonConfig, ...config },
@@ -51,7 +52,7 @@ export const useFadeInDown = (config?: SpringConfig): SpringValues => {
   });
 };
 
-// Slide In animation
+/** Slide In animation. */
 export const useSlideIn = (config?: SpringConfig): SpringValues => {
   return useSpring({
     config: { ...commonConfig, ...config },
@@ -60,7 +61,7 @@ export const useSlideIn = (config?: SpringConfig): SpringValues => {
   });
 };
 
-// Scale In animation
+/** Scale In animation. */
 export const useScaleIn = (config?: SpringConfig): SpringValues => {
   return useSpring({
     config: { ...commonConfig, ...config },
@@ -69,6 +70,7 @@ export const useScaleIn = (config?: SpringConfig): SpringValues => {
   });
 };
 
+/** Shake animation. */
 export const useShake = (config?: SpringConfig): SpringValues => {
   return useSpring({
     from: { x: 0, scale: 1 },

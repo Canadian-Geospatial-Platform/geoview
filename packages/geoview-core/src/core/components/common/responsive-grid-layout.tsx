@@ -23,6 +23,8 @@ import { useUIActiveTrapGeoView, useUIActiveFocusItem } from '@/core/stores/stor
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE, TIMEOUT, LIGHTBOX_SELECTORS } from '@/core/utils/constant';
 
+
+/** Properties for the ResponsiveGridLayout component. */
 interface ResponsiveGridLayoutProps {
   leftTop?: ReactNode;
   leftMain?: ReactNode;
@@ -39,6 +41,7 @@ interface ResponsiveGridLayoutProps {
   toggleMode?: boolean;
 }
 
+/** Methods exposed by the ResponsiveGridLayout component via ref. */
 interface ResponsiveGridLayoutExposedMethods {
   setIsRightPanelVisible: (isVisible: boolean) => void;
   setRightPanelFocus: () => void;
@@ -46,12 +49,21 @@ interface ResponsiveGridLayoutExposedMethods {
 }
 
 /**
- * GV modal element IDs that can open within the right panel. Update this list as new modals are added.
+ * GV modal element IDs that can open within the right panel.
+ *
  * These modals should prevent focus trapping when active to avoid
  * conflicts between the FocusTrap and modal's own focus management.
+ * Note: Update this list if new modals are added that can open within the right panel.
  */
 const MODAL_ELEMENT_IDS = ['layerDataTable', 'featureDetailDataTable'] as const;
 
+/**
+ * Two-panel responsive grid layout with guide, enlarge, and fullscreen support.
+ *
+ * @param props - ResponsiveGridLayout properties
+ * @param ref - Ref exposing panel visibility and focus methods
+ * @returns The responsive grid layout element
+ */
 const ResponsiveGridLayout = forwardRef(
   (
     {
@@ -103,7 +115,9 @@ const ResponsiveGridLayout = forwardRef(
     const [isEnlarged, setIsEnlarged] = useState(false);
     const [isFullScreen, setIsFullScreen] = useState(false);
 
-    // Notify parent when right panel visibility changes
+    /**
+     * Notifies parent when right panel visibility changes.
+     */
     useEffect(() => {
       onRightPanelVisibilityChanged?.(isRightPanelVisible);
     }, [isRightPanelVisible, onRightPanelVisibilityChanged]);
@@ -134,6 +148,9 @@ const ResponsiveGridLayout = forwardRef(
       [isGuideOpen]
     );
 
+    /**
+     * Toggles guide visibility based on rightMain content availability.
+     */
     useEffect(() => {
       if (rightMain) {
         setIsGuideOpen(false);
@@ -144,10 +161,16 @@ const ResponsiveGridLayout = forwardRef(
       }
     }, [rightMain, guideContentIds]);
 
+    /**
+     * Notifies parent when guide open state changes.
+     */
     useEffect(() => {
       onGuideIsOpen?.(isGuideOpen);
     }, [isGuideOpen, onGuideIsOpen]);
 
+    /**
+     * Resets enlarged state when the enlarge button is hidden.
+     */
     useEffect(() => {
       // if hideEnlargeBtn changes to true and isEnlarged is true, set isEnlarged to false
       if (hideEnlargeBtn && isEnlarged) {
@@ -155,9 +178,12 @@ const ResponsiveGridLayout = forwardRef(
       }
     }, [hideEnlargeBtn, isEnlarged]);
 
-    // Callback to be executed after escape key is pressed.
-    // When the right sub-panel is open, escape triggers the sub-panel close button.
-    // When the right sub-panel is not open, escape closes the main panel.
+    /**
+     * Handles escape key to close the right sub-panel.
+     *
+     * When the right panel is open and has content, pressing ESC should close it. However, if the guide is open, or if certain modals are open within the right panel,
+     * we want to prevent this behavior to avoid conflicts with their own focus management and ESC handling.
+     */
     const handleEscapeKeyCallback = useCallback((): void => {
       // Don't close sub panel if guide is open - let the guide handle its own ESC
       if (isGuideOpen) {
@@ -184,10 +210,11 @@ const ResponsiveGridLayout = forwardRef(
         }
       }
     }, [isGuideOpen, hasContent, isRightPanelVisible, isFocusTrap, closeBtnRef, onRightPanelClosed]);
+
     /**
-     * Handles click on the Enlarge button.
+     * Handles click on the enlarge button.
      *
-     * @param {boolean} isEnlarge Indicate if enlarge
+     * @param isEnlarge - Whether the panel should be enlarged
      */
     const handleIsEnlarge = useCallback(
       (isEnlarge: boolean): void => {
@@ -200,6 +227,9 @@ const ResponsiveGridLayout = forwardRef(
       [onIsEnlargeClicked]
     );
 
+    /**
+     * Toggles the guide panel open or closed.
+     */
     const handleOpenGuide = useCallback((): void => {
       setIsGuideOpen(!isGuideOpen);
     }, [isGuideOpen]);
@@ -224,15 +254,19 @@ const ResponsiveGridLayout = forwardRef(
       }
     }, [isGuideOpen, mapId, containerType]);
 
-    // Add a handler to close the guide and return focus to the Guide button
-    const handleCloseGuide = useCallback(() => {
+    /**
+     * Closes the guide and returns focus to the guide toggle button.
+     */
+    const handleCloseGuide = useCallback((): void => {
       setIsGuideOpen(false);
       setTimeout(() => {
         guideToggleBtnRef.current?.focus();
       }, TIMEOUT.guideReturnFocus);
     }, []);
 
-    // Focus the close button when the right panel becomes visible with content
+    /**
+     * Focuses the close button when the right panel becomes visible with content.
+     */
     useEffect(() => {
       if (isRightPanelVisible && hasContent && !isGuideOpen && closeBtnRef.current) {
         requestAnimationFrame(() => {
@@ -241,20 +275,31 @@ const ResponsiveGridLayout = forwardRef(
       }
     }, [isRightPanelVisible, hasContent, isGuideOpen]);
 
+    /**
+     * Handles the enlarge toggle button click.
+     */
     const handleEnlargeToggle = useCallback(() => {
       handleIsEnlarge(!isEnlarged);
     }, [isEnlarged, handleIsEnlarge]);
 
+    /**
+     * Handles the right panel close action, triggered by the close button or ESC key.
+     */
     const handleClosePanel = useCallback(() => {
       setIsRightPanelVisible(false);
       onRightPanelClosed?.();
     }, [onRightPanelClosed]);
 
+    /**
+     * Toggles fullscreen mode for the right panel.
+     */
     const handleToggleFullScreen = useCallback(() => {
       setIsFullScreen(!isFullScreen);
     }, [isFullScreen]);
 
-    // Add keyboard handler for guide
+    /**
+     * Handles keyboard events within the guide container.
+     */
     const handleGuideKeyDown = useCallback(
       (event: React.KeyboardEvent<HTMLDivElement>): void => {
         // Only handle ESC when not in fullscreen (fullscreen dialog handles its own ESC)
@@ -271,7 +316,9 @@ const ResponsiveGridLayout = forwardRef(
       [isFullScreen, isFocusTrap, hasContent, handleCloseGuide]
     );
 
-    // Keyboard handler for right panel (handles escape key for panel close)
+    /**
+     * Handles escape key within the right panel to close it.
+     */
     const handlePanelKeyDown = useCallback(
       (event: React.KeyboardEvent<HTMLDivElement>): void => {
         // Only handle ESC when not in fullscreen (fullscreen dialog handles its own ESC)
@@ -298,6 +345,11 @@ const ResponsiveGridLayout = forwardRef(
       }
     }
 
+    /**
+     * Renders the enlarge/reduce button for the right panel.
+     *
+     * @returns The enlarge button, or null on mobile
+     */
     const renderEnlargeButton = (): JSX.Element | null => {
       if (isMobile) {
         return null; // Return null if on small screens (down to md)
@@ -319,6 +371,11 @@ const ResponsiveGridLayout = forwardRef(
       );
     };
 
+    /**
+     * Renders the close button for the right panel.
+     *
+     * @returns The close button, or null when not applicable
+     */
     const renderCloseButton = (): JSX.Element | null => {
       // Check conditions for hiding the button
 
@@ -353,6 +410,11 @@ const ResponsiveGridLayout = forwardRef(
       );
     };
 
+    /**
+     * Renders the guide toggle button.
+     *
+     * @returns The guide button, or null if not applicable
+     */
     const renderGuideButton = (): JSX.Element | null => {
       const isDisabled = isGuideOpen && !hasContent;
 
@@ -375,6 +437,11 @@ const ResponsiveGridLayout = forwardRef(
       );
     };
 
+    /**
+     * Renders the fullscreen toggle button.
+     *
+     * @returns The fullscreen button
+     */
     const renderFullScreenButton = (): JSX.Element => {
       return (
         <Button
@@ -397,7 +464,16 @@ const ResponsiveGridLayout = forwardRef(
       );
     };
 
-    // added a customGet function to get nested object properties. _.get was not working for this kind of object
+    /**
+     * Gets a nested object property by dot-separated path.
+     *
+     * We need this custom get function because some guide content is nested and we want to access it via dynamic keys in guideContentIds.
+     * Lodash get doesn't work well with our content structure and types, so we have this simple custom implementation.
+     *
+     * @param obj - The object to traverse
+     * @param path - Dot-separated property path
+     * @returns The value at the path, or undefined if not found
+     */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     function customGet<T>(obj: any, path: string): T | undefined {
       if (obj === undefined || obj === null) {
@@ -418,6 +494,11 @@ const ResponsiveGridLayout = forwardRef(
       return result;
     }
 
+    /**
+     * Renders the guide content panel.
+     *
+     * @returns The guide element, or null if no content
+     */
     const renderGuide = (): JSX.Element | null => {
       const content = guideContentIds
         ?.map((key) => {
@@ -473,6 +554,11 @@ const ResponsiveGridLayout = forwardRef(
     // Check if a modal is currently open within the right panel
     const isModalOpen = focusItem.activeElementId !== false && (MODAL_ELEMENT_IDS as readonly string[]).includes(focusItem.activeElementId);
 
+    /**
+     * Renders the right panel content with focus trap, fullscreen, and guide support.
+     *
+     * @returns The right panel content element
+     */
     const renderRightContent = (): JSX.Element => {
       const content = !isGuideOpen ? rightMain : renderGuide();
 

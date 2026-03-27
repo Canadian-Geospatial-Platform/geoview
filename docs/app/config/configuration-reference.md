@@ -62,17 +62,14 @@ Object affected: 4326
 ### Common Validation Errors
 
 1. **Invalid Enum Value**
-
    - **Error**: `must be equal to one of the allowed values`
    - **Solution**: Check the `params.allowedValues` in the error and use one of those values
 
 2. **Missing Required Property**
-
    - **Error**: `must have required property 'propertyName'`
    - **Solution**: Add the missing required property to your configuration
 
 3. **Wrong Type**
-
    - **Error**: `must be string/number/boolean/array/object`
    - **Solution**: Ensure the property value matches the expected type
 
@@ -154,7 +151,6 @@ basemapOptions: {
 **Properties:**
 
 - **basemapId** (Required): Basemap identifier
-
   - `"transport"` - Transportation basemap
   - `"simple"` - Simple basemap
   - `"shaded"` - Shaded relief basemap
@@ -169,13 +165,12 @@ basemapOptions: {
 
 **Examples:**
 
-```typescript
-// Transport basemap with shading and labels
-basemapOptions: {
-  basemapId: "transport",
-  shaded: true,
-  labeled: true,
-  labelZIndex: 20
+```json
+"basemapOptions": {
+  "basemapId": "transport",
+  "shaded": true,
+  "labeled": true,
+  "labelZIndex": 20
 }
 ```
 
@@ -198,8 +193,8 @@ interaction: "dynamic" | "static";
 
 **Example:**
 
-```typescript
-interaction: "dynamic";
+```json
+"interaction": "dynamic"
 ```
 
 ---
@@ -230,7 +225,6 @@ TypeMapViewSettings: {
 **Properties:**
 
 - **projection** (Required): EPSG projection code (default: 3978)
-
   - `3978` - Canada Lambert Conformal Conic
   - `3857` - Web Mercator
 
@@ -254,38 +248,48 @@ TypeMapViewSettings: {
 
 **Examples:**
 
-```typescript
-// Basic view settings with zoomAndCenter
-viewSettings: {
-  projection: 3978,
-  initialView: {
-    zoomAndCenter: [12, [-75.7, 45.4]] // Ottawa
+Basic view settings with zoomAndCenter:
+
+```json
+"viewSettings": {
+  "projection": 3978,
+  "initialView": {
+    "zoomAndCenter": [12, [-75.7, 45.4]]
   }
 }
+```
 
-// With Web Mercator projection, zoom constraints and rotation enabled (in degrees)
-viewSettings: {
-  projection: 3978,
-  initialView: {
-    zoomAndCenter: [14, [-73.6, 45.5]] // Montreal
+With zoom constraints and rotation enabled (in degrees):
+
+```json
+"viewSettings": {
+  "projection": 3978,
+  "initialView": {
+    "zoomAndCenter": [14, [-73.6, 45.5]]
   },
-  enableRotation: true,
-  rotation: 45 // 45 degrees clockwise
+  "enableRotation": true,
+  "rotation": 45
 }
+```
 
-// Using extent instead of zoomAndCenter
-viewSettings: {
-  projection: 3978,
-  initialView: {
-    extent: [-76.0, 45.0, -75.0, 46.0]
+Using extent instead of zoomAndCenter:
+
+```json
+"viewSettings": {
+  "projection": 3978,
+  "initialView": {
+    "extent": [-76.0, 45.0, -75.0, 46.0]
   }
 }
+```
 
-// Using layerIds to focus on specific layers
-viewSettings: {
-  projection: 3978,
-  initialView: {
-    layerIds: ["layer1", "layer2"]
+Using layerIds to focus on specific layers:
+
+```json
+"viewSettings": {
+  "projection": 3978,
+  "initialView": {
+    "layerIds": ["layer1", "layer2"]
   }
 }
 ```
@@ -304,14 +308,14 @@ See [GeoView Layer Configuration](#geoview-layer-configuration) section for deta
 
 **Example:**
 
-```typescript
-listOfGeoviewLayerConfig: [
+```json
+"listOfGeoviewLayerConfig": [
   {
-    geoviewLayerId: "wms-layer",
-    geoviewLayerType: "ogcWms",
-    metadataAccessPath: "https://example.com/wms",
-  },
-];
+    "geoviewLayerId": "wms-layer",
+    "geoviewLayerType": "ogcWms",
+    "metadataAccessPath": "https://example.com/wms"
+  }
+]
 ```
 
 ---
@@ -333,8 +337,8 @@ highlightColor?: "black" | "white" | "red" | "green";
 
 **Example:**
 
-```typescript
-highlightColor: "red";
+```json
+"highlightColor": "red"
 ```
 
 ---
@@ -349,10 +353,8 @@ overlayObjects?: Array<object>;
 
 **Example:**
 
-```typescript
-overlayObjects: [
-  // Custom OpenLayers overlay objects
-];
+```json
+"overlayObjects": []
 ```
 
 ---
@@ -367,39 +369,36 @@ extraOptions?: object;
 
 **Example:**
 
-```typescript
-extraOptions: {
-  // OpenLayers Map constructor options
-}
+```json
+"extraOptions": {}
 ```
 
 ---
 
 ### Complete Map Configuration Example
 
-```typescript
-map: {
-  basemapOptions: {
-    basemapId: "transport",
-    shaded: true,
-    labeled: true
+```json
+"map": {
+  "basemapOptions": {
+    "basemapId": "transport",
+    "shaded": true,
+    "labeled": true
   },
-  interaction: "dynamic",
-  viewSettings: {
-    projection: 3978,
-    initialView: {
-      zoomAndCenter: [12, [-106, 60]]
+  "interaction": "dynamic",
+  "viewSettings": {
+    "projection": 3978,
+    "initialView": {
+      "zoomAndCenter": [12, [-106, 60]]
     },
-    minZoom: 4,
-    maxZoom: 18,
-    enableRotation: false
+    "minZoom": 4,
+    "maxZoom": 18,
+    "enableRotation": false
   },
-  listOfGeoviewLayerConfig: [
+  "listOfGeoviewLayerConfig": [
     {
-      geoviewLayerId: "my-layer",
-      geoviewLayerType: "ogcWms",
-      metadataAccessPath: "https://example.com/wms",
-      ...
+      "geoviewLayerId": "my-layer",
+      "geoviewLayerType": "ogcWms",
+      "metadataAccessPath": "https://example.com/wms"
     }
   ]
 }
@@ -425,8 +424,8 @@ theme?: "dark" | "light" | "geo.ca";
 
 **Example:**
 
-```typescript
-theme: "dark";
+```json
+"theme": "dark"
 ```
 
 ---
@@ -453,9 +452,8 @@ navBar?: Array<"zoom" | "fullscreen" | "home" | "location" | "basemap-select" | 
 
 **Example:**
 
-```typescript
-// Include drawer package in navbar
-navBar: ["zoom", "fullscreen", "home", "drawer"];
+```json
+"navBar": ["zoom", "fullscreen", "home", "drawer"]
 ```
 
 > **Note:** The `"drawer"` option requires the **drawer package** to be configured. See [Drawer Package](#drawer-package) configuration.
@@ -472,7 +470,6 @@ footerBar?: {
     core: TypeValidFooterBarTabsCoreProps[];
     custom: TypeFooterBarTabsCustomProps[];
   };
-  collapsed: boolean;
   selectedTab: TypeValidFooterBarTabsCoreProps;
   selectedLayersLayerPath: string;
   selectedDataTableLayerPath: string;
@@ -491,7 +488,6 @@ TypeFooterBarTabsCustomProps = {
 **Properties:**
 
 - **tabs** (Required): Tab configuration
-
   - **core** (Required): Array of core tab identifiers
     - `"legend"` - Layer legend display
     - `"layers"` - Layer list and management
@@ -501,8 +497,6 @@ TypeFooterBarTabsCustomProps = {
     - `"geochart"` - **GeoChart package** - Chart visualization
     - `"guide"` - User guide tab
   - **custom**: Array of custom tab definitions
-
-- **collapsed**: Whether the footer bar is initially collapsed
 
 - **selectedTab**: The initially selected tab
 
@@ -516,14 +510,13 @@ TypeFooterBarTabsCustomProps = {
 
 **Example:**
 
-```typescript
-footerBar: {
-  tabs: {
-    core: ["layers", "legend", "details", "time-slider", "geochart"],
-    custom: []
+```json
+"footerBar": {
+  "tabs": {
+    "core": ["layers", "legend", "details", "time-slider", "geochart"],
+    "custom": []
   },
-  collapsed: false,
-  selectedTab: "layers"
+  "selectedTab": "layers"
 }
 ```
 
@@ -553,7 +546,6 @@ TypeValidAppBarCoreProps = "about-panel" | "geolocator" | "export" | "aoi-panel"
 **Properties:**
 
 - **tabs** (Required): Tab configuration
-
   - **core** (Required): Array of core tab identifiers
     - `"about-panel"` - **About Panel package** - Package for adding a panel with information about the map
     - `"geolocator"` - Location search and navigation
@@ -580,13 +572,13 @@ TypeValidAppBarCoreProps = "about-panel" | "geolocator" | "export" | "aoi-panel"
 
 **Example:**
 
-```typescript
-appBar: {
-  tabs: {
-    core: ["about-panel", "geolocator", "export", "aoi-panel", "custom-legend"]
+```json
+"appBar": {
+  "tabs": {
+    "core": ["about-panel", "geolocator", "export", "aoi-panel", "custom-legend"]
   },
-  collapsed: false,
-  selectedTab: "geolocator"
+  "collapsed": false,
+  "selectedTab": "geolocator"
 }
 ```
 
@@ -612,11 +604,42 @@ overviewMap?: {
 
 **Example:**
 
-```typescript
-overviewMap: {
-  hideOnZoom: true,
-  collapsed: false
+```json
+"overviewMap": {
+  "hideOnZoom": true,
+  "collapsed": false
 }
+```
+
+---
+
+#### components (Optional)
+
+Core UI components to initialize on viewer load.
+
+```typescript
+components?: Array<"overview-map" | "north-arrow">;
+```
+
+**Available Components:**
+
+- `"overview-map"` - Small overview map showing the current view extent
+- `"north-arrow"` - North arrow indicator on the map
+
+**Default:** `["overview-map", "north-arrow"]`
+
+**Example:**
+
+```json
+"components": ["north-arrow"]
+```
+
+```json
+"components": ["overview-map", "north-arrow"]
+```
+
+```json
+"components": []
 ```
 
 ---
@@ -635,8 +658,8 @@ corePackages?: Array<"swiper">;
 
 **Example:**
 
-```typescript
-corePackages: ["swiper"];
+```json
+"corePackages": ["swiper"]
 ```
 
 > **Note:** Other packages (GeoChart, Time Slider, AOI Panel, Drawer) are loaded through their respective tab configurations in `appBar`, `footerBar`, or `navBar`.
@@ -657,52 +680,53 @@ See package-specific sections ([Swiper](#swiper-package), [GeoChart](#geochart-p
 
 **Examples:**
 
-```typescript
-// Swiper package configuration
-corePackagesConfig: [
+```json
+"corePackagesConfig": [
   {
-    swiper: {
-      orientation: "vertical",
-      layers: ["layer1", "layer2"],
-      keyboardOffset: 20,
-    },
-  },
-];
+    "swiper": {
+      "orientation": "vertical",
+      "layers": ["layer1", "layer2"],
+      "keyboardOffset": 20
+    }
+  }
+]
+```
 
-// Time Slider package configuration
-corePackagesConfig: [
+```json
+"corePackagesConfig": [
   {
     "time-slider": {
-      sliders: [
+      "sliders": [
         {
-          layerPaths: ["weather-layer/temperature"],
-          title: "Weather Timeline",
-          delay: 1000,
-        },
-      ],
-    },
-  },
-];
+          "layerPaths": ["weather-layer/temperature"],
+          "title": "Weather Timeline",
+          "delay": 1000
+        }
+      ]
+    }
+  }
+]
+```
 
-// Multiple packages
-corePackagesConfig: [
+```json
+"corePackagesConfig": [
   {
-    swiper: {
-      orientation: "horizontal",
-      layers: ["layer1/0"],
-    },
+    "swiper": {
+      "orientation": "horizontal",
+      "layers": ["layer1/0"]
+    }
   },
   {
-    geochart: {
-      charts: [
+    "geochart": {
+      "charts": [
         {
-          type: "bar",
-          title: "Population Data",
-        },
-      ],
-    },
-  },
-];
+          "type": "bar",
+          "title": "Population Data"
+        }
+      ]
+    }
+  }
+]
 ```
 
 ---
@@ -725,10 +749,10 @@ serviceUrls?: {
 
 **Example:**
 
-```typescript
-serviceUrls: {
-  geolocator: "https://geolocator.api.geo.ca?keys=geonames,nominatim",
-  geocoreUrl: "https://geocore.api.geo.ca"
+```json
+"serviceUrls": {
+  "geolocator": "https://geolocator.api.geo.ca?keys=geonames,nominatim",
+  "geocoreUrl": "https://geocore.api.geo.ca"
 }
 ```
 
@@ -753,25 +777,20 @@ TypeGlobalSettings = {
 **Properties:**
 
 - **canRemoveSublayers** (Optional): Whether or not sublayers can be removed from layer groups
-
   - **Type:** `boolean`
   - **Default:** `true`
 
 - **disabledLayerTypes** (Optional): Array of layer types that should be disabled
-
   - **Type:** `TypeGeoviewLayerType[]`
   - **Valid values:** `"esriDynamic"`, `"esriFeature"`, `"imageStatic"`, `"geoJSON"`, `"geoPackage"`, `"xyzTiles"`, `"vectorTiles"`, `"ogcFeature"`, `"ogcWms"`, `"ogcWfs"`, `"CSV"`
 
 - **showUnsymbolizedFeatures** (Optional): Whether to display unsymbolized features in the datatable and other components
-
   - **Type:** `boolean`
 
 - **showLayerHighlightLayerBbox** (Optional): Whether to display bbox when layer is highlighted
-
   - **Type** `boolean`
 
 - **coordinateInfoEnabled** (Optional): Whether the initial state of the coordinate info tool should be enabled
-
   - **Type:** `boolean`
 
 - **hideCoordinateInfoSwitch** (Optional): Whether the coordinate info tool should be removed from the UI
@@ -779,14 +798,14 @@ TypeGlobalSettings = {
 
 **Example:**
 
-```typescript
-globalSettings: {
-  canRemoveSublayers: true,
-  disabledLayerTypes: ["ogcWfs", "CSV"],
-  showUnsymbolizedFeatures: false,
-  showLayerHighlightLayerBbox: true,
-  coordinateInfoEnabled: true,
-  hideCoordinateInfoSwitch: false
+```json
+"globalSettings": {
+  "canRemoveSublayers": true,
+  "disabledLayerTypes": ["ogcWfs", "CSV"],
+  "showUnsymbolizedFeatures": false,
+  "showLayerHighlightLayerBbox": true,
+  "coordinateInfoEnabled": true,
+  "hideCoordinateInfoSwitch": false
 }
 ```
 
@@ -835,8 +854,8 @@ geoviewLayerId: string;
 
 **Example:**
 
-```typescript
-geoviewLayerId: "my-wms-layer";
+```json
+"geoviewLayerId": "my-wms-layer"
 ```
 
 **Rules:**
@@ -877,8 +896,8 @@ geoviewLayerType: TypeGeoviewLayerType;
 
 **Example:**
 
-```typescript
-geoviewLayerType: "ogcWms";
+```json
+"geoviewLayerType": "ogcWms"
 ```
 
 ---
@@ -893,8 +912,8 @@ geoviewLayerName?: string;
 
 **Example:**
 
-```typescript
-geoviewLayerName: "Weather Data";
+```json
+"geoviewLayerName": "Weather Data"
 ```
 
 ---
@@ -912,12 +931,16 @@ metadataAccessPath?: string;
 
 **Examples:**
 
-```typescript
-// WMS service
-metadataAccessPath: "https://example.com/wms";
+WMS service:
 
-// GeoJSON file
-metadataAccessPath: "/data/features.geojson";
+```json
+"metadataAccessPath": "https://example.com/wms"
+```
+
+GeoJSON file:
+
+```json
+"metadataAccessPath": "/data/features.geojson"
 ```
 
 ---
@@ -946,17 +969,17 @@ See [Layer Entry Configuration](#layer-entry-configuration) section.
 
 **Example:**
 
-```typescript
-listOfLayerEntryConfig: [
+```json
+"listOfLayerEntryConfig": [
   {
-    layerId: "0",
-    layerName: "Temperature",
+    "layerId": "0",
+    "layerName": "Temperature"
   },
   {
-    layerId: "1",
-    layerName: "Precipitation",
-  },
-];
+    "layerId": "1",
+    "layerName": "Precipitation"
+  }
+]
 ```
 
 ---
@@ -980,10 +1003,16 @@ serviceDateFormat?: string;
 
 **Examples:**
 
-```typescript
-serviceDateFormat: "YYYY-MM-DD";
-serviceDateFormat: "YYYY-MM-DDTHH:mm:ss";
-serviceDateFormat: "DD/MM/YYYY";
+```json
+"serviceDateFormat": "YYYY-MM-DD"
+```
+
+```json
+"serviceDateFormat": "YYYY-MM-DDTHH:mm:ss"
+```
+
+```json
+"serviceDateFormat": "DD/MM/YYYY"
 ```
 
 ---
@@ -1000,9 +1029,12 @@ Uses same tokens as `serviceDateFormat`.
 
 **Example:**
 
-```typescript
-serviceDateFormat: "YYYY-MM-DD"; // Server format
-externalDateFormat: "DD/MM/YYYY"; // Display format
+```json
+"serviceDateFormat": "YYYY-MM-DD"
+```
+
+```json
+"externalDateFormat": "DD/MM/YYYY"
 ```
 
 ---
@@ -1019,9 +1051,11 @@ isTimeAware?: boolean;
 
 **Example:**
 
-```typescript
-isTimeAware: true;
-serviceDateFormat: "YYYY-MM-DD";
+```json
+{
+  "isTimeAware": true,
+  "serviceDateFormat": "YYYY-MM-DD"
+}
 ```
 
 ---
@@ -1036,15 +1070,22 @@ layerFilter?: string;
 
 **Examples:**
 
-```typescript
-// Simple filter
-layerFilter: "population > 1000000";
+Simple filter:
 
-// Complex filter
-layerFilter: "temperature > 0 AND temperature < 30";
+```json
+"layerFilter": "population > 1000000"
+```
 
-// Date filter
-layerFilter: "date >= '2023-01-01' AND date <= '2023-12-31'";
+Complex filter:
+
+```json
+"layerFilter": "temperature > 0 AND temperature < 30"
+```
+
+Date filter:
+
+```json
+"layerFilter": "date >= '2023-01-01' AND date <= '2023-12-31'"
 ```
 
 ---
@@ -1067,7 +1108,7 @@ interface TypeLayerEntryConfig {
   layerStyle?: TypeLayerStyle;
   layerText?: TypeLayerTextConfig;
   layerFilter?: string;
-  
+
   // Scale constraints
   minScale?: number;
   maxScale?: number;
@@ -1090,12 +1131,16 @@ layerId: string;
 
 **Examples:**
 
-```typescript
-// For WMS layers (layer name from GetCapabilities)
-layerId: "temperature";
+For WMS layers (layer name from GetCapabilities):
 
-// For ESRI services (numeric ID)
-layerId: "0";
+```json
+"layerId": "temperature"
+```
+
+For ESRI services (numeric ID):
+
+```json
+"layerId": "0"
 ```
 
 ---
@@ -1110,8 +1155,8 @@ layerName?: string;
 
 **Example:**
 
-```typescript
-layerName: "Temperature";
+```json
+"layerName": "Temperature"
 ```
 
 ---
@@ -1163,12 +1208,13 @@ layerText?: TypeLayerTextConfig;
 See [Layer Text Configuration](#layer-text-configuration) section for complete details.
 
 **Example:**
-```typescript
-layerText: {
-  field: "name",
-  fontSize: 12,
-  fill: "#000000",
-  offsetY: -10
+
+```json
+"layerText": {
+  "field": "name",
+  "fontSize": 12,
+  "fill": "#000000",
+  "offsetY": -10
 }
 ```
 
@@ -1196,13 +1242,13 @@ listOfLayerEntryConfig?: TypeLayerEntryConfig[];
 
 **Example:**
 
-```typescript
+```json
 {
-  layerId: "weather-group",
-  layerName: "Weather Data",
-  listOfLayerEntryConfig: [
-    { layerId: "temperature", layerName: "Temperature" },
-    { layerId: "precipitation", layerName: "Precipitation" }
+  "layerId": "weather-group",
+  "layerName": "Weather Data",
+  "listOfLayerEntryConfig": [
+    { "layerId": "temperature", "layerName": "Temperature" },
+    { "layerId": "precipitation", "layerName": "Precipitation" }
   ]
 }
 ```
@@ -1265,17 +1311,17 @@ controls?: TypeLayerControls;
 
 **Example:**
 
-```typescript
-initialSettings: {
-  controls: {
-    highlight: true,    // Allow highlight control
-    hover: true,        // Allow hover control
-    opacity: true,      // Allow opacity slider
-    query: true,        // Allow feature queries
-    remove: false,      // Hide remove button
-    table: true,        // Allow data table
-    visibility: true,   // Allow visibility toggle
-    zoom: true          // Allow zoom to layer
+```json
+"initialSettings": {
+  "controls": {
+    "highlight": true,
+    "hover": true,
+    "opacity": true,
+    "query": true,
+    "remove": false,
+    "table": true,
+    "visibility": true,
+    "zoom": true
   }
 }
 ```
@@ -1292,9 +1338,9 @@ bounds?: Extent; // [minLon, minLat, maxLon, maxLat]
 
 **Example:**
 
-```typescript
-initialSettings: {
-  bounds: [-75.9, 45.3, -75.5, 45.6]; // Ottawa area
+```json
+"initialSettings": {
+  "bounds": [-75.9, 45.3, -75.5, 45.6]
 }
 ```
 
@@ -1310,9 +1356,9 @@ extent?: Extent; // [minX, minY, maxX, maxY]
 
 **Example:**
 
-```typescript
-initialSettings: {
-  extent: [-120, 40, -100, 50]; // [west, south, east, north]
+```json
+"initialSettings": {
+  "extent": [-120, 40, -100, 50]
 }
 ```
 
@@ -1331,17 +1377,21 @@ maxZoom?: number; // Maximum zoom level (inclusive)
 
 **Examples:**
 
-```typescript
-// Only visible at street level
-initialSettings: {
-  minZoom: 10,
-  maxZoom: 18
-}
+Only visible at street level:
 
-// Only visible at world/country level
-initialSettings: {
-  minZoom: 0,
-  maxZoom: 6
+```json
+"initialSettings": {
+  "minZoom": 10,
+  "maxZoom": 18
+}
+```
+
+Only visible at world/country level:
+
+```json
+"initialSettings": {
+  "minZoom": 0,
+  "maxZoom": 6
 }
 ```
 
@@ -1357,9 +1407,9 @@ className?: string;
 
 **Example:**
 
-```typescript
-initialSettings: {
-  className: "my-custom-layer";
+```json
+"initialSettings": {
+  "className": "my-custom-layer"
 }
 ```
 
@@ -1375,14 +1425,14 @@ states?: TypeLayerStates;
 
 **Example:**
 
-```typescript
-initialSettings: {
-  states: {
-    visible: true,
-    legendCollapsed: false,
-    opacity: 1.0,
-    hoverable: true,
-    queryable: false
+```json
+"initialSettings": {
+  "states": {
+    "visible": true,
+    "legendCollapsed": false,
+    "opacity": 1.0,
+    "hoverable": true,
+    "queryable": false
   }
 }
 ```
@@ -1403,10 +1453,10 @@ states?: {
 
 **Example:**
 
-```typescript
-initialSettings: {
-  states: {
-    visible: false; // Layer starts hidden
+```json
+"initialSettings": {
+  "states": {
+    "visible": false
   }
 }
 ```
@@ -1427,10 +1477,10 @@ states?: {
 
 **Example:**
 
-```typescript
-initialSettings: {
-  states: {
-    legendCollapsed: true; // Start with legend collapsed
+```json
+"initialSettings": {
+  "states": {
+    "legendCollapsed": true
   }
 }
 ```
@@ -1451,18 +1501,22 @@ states?: {
 
 **Examples:**
 
-```typescript
-// Semi-transparent overlay
-initialSettings: {
-  states: {
-    opacity: 0.5;
+Semi-transparent overlay:
+
+```json
+"initialSettings": {
+  "states": {
+    "opacity": 0.5
   }
 }
+```
 
-// Very subtle background
-initialSettings: {
-  states: {
-    opacity: 0.2;
+Very subtle background:
+
+```json
+"initialSettings": {
+  "states": {
+    "opacity": 0.2
   }
 }
 ```
@@ -1483,10 +1537,10 @@ states?: {
 
 **Example:**
 
-```typescript
-initialSettings: {
-  states: {
-    hoverable: false; // Disable hover tooltips
+```json
+"initialSettings": {
+  "states": {
+    "hoverable": false
   }
 }
 ```
@@ -1507,11 +1561,10 @@ states?: {
 
 **Example:**
 
-```typescript
-// Enable feature info for basemap
-initialSettings: {
-  states: {
-    queryable: true;
+```json
+"initialSettings": {
+  "states": {
+    "queryable": true
   }
 }
 ```
@@ -1564,16 +1617,16 @@ type VectorStrategy = "all" | "bbox";
 
 **Example:**
 
-```typescript
-source: {
-  dataAccessPath: "/data/features.geojson",
-  format: "GeoJSON",
-  maxRecordCount: 10000,
-  strategy: "bbox",
-  featureInfo: {
-    queryable: true,
-    nameField: "name",
-    outfields: ["name", "population", "area"]
+```json
+"source": {
+  "dataAccessPath": "/data/features.geojson",
+  "format": "GeoJSON",
+  "maxRecordCount": 10000,
+  "strategy": "bbox",
+  "featureInfo": {
+    "queryable": true,
+    "nameField": "name",
+    "outfields": ["name", "population", "area"]
   }
 }
 ```
@@ -1618,25 +1671,32 @@ interface TypeSourceImageStaticInitialConfig {
 
 **Examples:**
 
-```typescript
-// WMS source
-source: {
-  serverType: "mapserver",
-  wmsStyle: "default",
-  featureInfo: {
-    queryable: true
+WMS source:
+
+```json
+"source": {
+  "serverType": "mapserver",
+  "wmsStyle": "default",
+  "featureInfo": {
+    "queryable": true
   }
 }
+```
 
-// ESRI Image source
-source: {
-  format: "PNG32",
-  transparent: true
+ESRI Image source:
+
+```json
+"source": {
+  "format": "PNG32",
+  "transparent": true
 }
+```
 
-// Static Image source
-source: {
-  extent: [-180, -90, 180, 90]
+Static Image source:
+
+```json
+"source": {
+  "extent": [-180, -90, 180, 90]
 }
 ```
 
@@ -1656,13 +1716,13 @@ interface TypeSourceCSVInitialConfig {
 
 **Example:**
 
-```typescript
-source: {
-  dataAccessPath: "/data/cities.csv",
-  format: "CSV",
-  latitudeField: "lat",
-  longitudeField: "lon",
-  delimiter: ",",
+```json
+"source": {
+  "dataAccessPath": "/data/cities.csv",
+  "format": "CSV",
+  "latitudeField": "lat",
+  "longitudeField": "lon",
+  "delimiter": ","
 }
 ```
 
@@ -1697,36 +1757,36 @@ interface TypeLayerStyle {
 
 #### Simple Style
 
-```typescript
-layerStyle: {
-  styleType: "simple",
-  fillColor: "#FF000088", // Red with transparency
-  strokeColor: "#000000",
-  strokeWidth: 2,
+```json
+"layerStyle": {
+  "styleType": "simple",
+  "fillColor": "#FF000088",
+  "strokeColor": "#000000",
+  "strokeWidth": 2
 }
 ```
 
 #### Point Style
 
-```typescript
-layerStyle: {
-  styleType: "simple",
-  pointRadius: 8,
-  fillColor: "#0000FF",
-  strokeColor: "#FFFFFF",
-  strokeWidth: 2,
+```json
+"layerStyle": {
+  "styleType": "simple",
+  "pointRadius": 8,
+  "fillColor": "#0000FF",
+  "strokeColor": "#FFFFFF",
+  "strokeWidth": 2
 }
 ```
 
 #### Icon Style
 
-```typescript
-layerStyle: {
-  symbol: {
-    src: "/icons/marker.png",
-    width: 32,
-    height: 32,
-  },
+```json
+"layerStyle": {
+  "symbol": {
+    "src": "/icons/marker.png",
+    "width": 32,
+    "height": 32
+  }
 }
 ```
 
@@ -1800,9 +1860,9 @@ field?: string;
 
 **Example:**
 
-```typescript
-layerText: {
-  field: "name" // Use the 'name' field from features
+```json
+"layerText": {
+  "field": "name"
 }
 ```
 
@@ -1818,30 +1878,45 @@ text?: string | string[];
 
 **Examples:**
 
-```typescript
-// Static text
-text: "Label"
+Static text:
 
-// Template with field placeholders
-text: "Name: {name} - Pop: {population}"
+```json
+"text": "Label"
+```
 
-// Date formatting
-text: "Date: {date:MM/DD/YYYY}"
+Template with field placeholders:
 
-// Rich text array (alternating text and font styles)
-text: ["Name: ", "bold 12px Arial", "{name}", "10px Arial"]
+```json
+"text": "Name: {name} - Pop: {population}"
+```
 
-// Rich text array with line break
-text: ["Name: {name}", "bold 12px Arial", "\n", "", "Pop: {population}", "12px Arial"]
+Date formatting:
+
+```json
+"text": "Date: {date:MM/DD/YYYY}"
+```
+
+Rich text array (alternating text and font styles):
+
+```json
+"text": ["Name: ", "bold 12px Arial", "{name}", "10px Arial"]
+```
+
+Rich text array with line break:
+
+```json
+"text": ["Name: {name}", "bold 12px Arial", "\n", "", "Pop: {population}", "12px Arial"]
 ```
 
 **Template Placeholders:**
+
 - `{fieldName}` - Insert field value
 - `{fieldName:format}` - Format field value (dates only)
 
 **Date Formats:**
+
 - `YYYY` - 4-digit year
-- `MM` - 2-digit month  
+- `MM` - 2-digit month
 - `DD` - 2-digit day
 
 ---
@@ -1856,9 +1931,9 @@ fontSize?: number; // Default: 10
 
 **Example:**
 
-```typescript
-layerText: {
-  fontSize: 14
+```json
+"layerText": {
+  "fontSize": 14
 }
 ```
 
@@ -1874,9 +1949,9 @@ fontFamily?: string; // Default: 'sans-serif'
 
 **Example:**
 
-```typescript
-layerText: {
-  fontFamily: "Arial"
+```json
+"layerText": {
+  "fontFamily": "Arial"
 }
 ```
 
@@ -1893,10 +1968,10 @@ italic?: boolean; // Default: false
 
 **Example:**
 
-```typescript
-layerText: {
-  bold: true,
-  italic: false
+```json
+"layerText": {
+  "bold": true,
+  "italic": false
 }
 ```
 
@@ -1913,10 +1988,10 @@ offsetY?: number; // Vertical offset
 
 **Example:**
 
-```typescript
-layerText: {
-  offsetX: 5,   // 5px right
-  offsetY: -10  // 10px up
+```json
+"layerText": {
+  "offsetX": 5,
+  "offsetY": -10
 }
 ```
 
@@ -1932,10 +2007,16 @@ fill?: string;
 
 **Examples:**
 
-```typescript
-fill: "#000000"           // Black
-fill: "rgba(255,0,0,0.8)" // Semi-transparent red
-fill: "blue"              // Named color
+```json
+"fill": "#000000"
+```
+
+```json
+"fill": "rgba(255,0,0,0.8)"
+```
+
+```json
+"fill": "blue"
 ```
 
 ---
@@ -1951,11 +2032,11 @@ haloWidth?: number;
 
 **Example:**
 
-```typescript
-layerText: {
-  fill: "#000000",
-  haloColor: "#FFFFFF",
-  haloWidth: 2
+```json
+"layerText": {
+  "fill": "#000000",
+  "haloColor": "#FFFFFF",
+  "haloWidth": 2
 }
 ```
 
@@ -1972,10 +2053,10 @@ maxZoomLevel?: number; // Show only below this zoom
 
 **Example:**
 
-```typescript
-layerText: {
-  minZoomLevel: 10, // Only show when zoomed in past level 10
-  maxZoomLevel: 18  // Hide when zoomed in past level 18
+```json
+"layerText": {
+  "minZoomLevel": 10,
+  "maxZoomLevel": 18
 }
 ```
 
@@ -1993,11 +2074,11 @@ wrapCount?: number; // Characters per line (default: 16)
 
 **Example:**
 
-```typescript
-layerText: {
-  wrap: true,
-  wrapLines: 3,
-  wrapCount: 20 // Wrap at 20 characters per line
+```json
+"layerText": {
+  "wrap": true,
+  "wrapLines": 3,
+  "wrapCount": 20
 }
 ```
 
@@ -2017,11 +2098,12 @@ declutterMode?: 'declutter' | 'obstacle' | 'none'; // Default: 'declutter'
 
 **Example:**
 
-```typescript
-layerText: {
-  declutterMode: "none" // Show all labels
+```json
+"layerText": {
+  "declutterMode": "none"
 }
 ```
+
 ---
 
 ## Temporal Configuration
@@ -2040,21 +2122,21 @@ Configuration for time-aware layers.
 
 ### Example
 
-```typescript
+```json
 {
-  geoviewLayerId: "weather-forecast",
-  geoviewLayerType: "ogcWms",
-  geoviewLayerName: "Weather Forecast",
-  metadataAccessPath: "https://example.com/wms",
-  isTimeAware: true,
-  serviceDateFormat: "YYYY-MM-DDTHH:mm:ss",
-  externalDateFormat: "YYYY-MM-DD HH:mm",
-  listOfLayerEntryConfig: [
+  "geoviewLayerId": "weather-forecast",
+  "geoviewLayerType": "ogcWms",
+  "geoviewLayerName": "Weather Forecast",
+  "metadataAccessPath": "https://example.com/wms",
+  "isTimeAware": true,
+  "serviceDateFormat": "YYYY-MM-DDTHH:mm:ss",
+  "externalDateFormat": "YYYY-MM-DD HH:mm",
+  "listOfLayerEntryConfig": [
     {
-      layerId: "temperature",
-      layerName: "Temperature",
-    },
-  ],
+      "layerId": "temperature",
+      "layerName": "Temperature"
+    }
+  ]
 }
 ```
 
@@ -2068,22 +2150,22 @@ Temporal layers automatically work with the Time Slider package. See [Packages](
 
 ### WMS Layer
 
-```typescript
+```json
 {
-  geoviewLayerId: "my-wms",
-  geoviewLayerType: "ogcWms",
-  geoviewLayerName: "WMS Layer",
-  metadataAccessPath: "https://example.com/wms",
-  listOfLayerEntryConfig: [
+  "geoviewLayerId": "my-wms",
+  "geoviewLayerType": "ogcWms",
+  "geoviewLayerName": "WMS Layer",
+  "metadataAccessPath": "https://example.com/wms",
+  "listOfLayerEntryConfig": [
     {
-      layerId: "layer-name",
-      layerName: "Layer Name",
-      initialSettings: {
-        visible: true,
-        states: { opacity: 0.8 },
-      },
-    },
-  ],
+      "layerId": "layer-name",
+      "layerName": "Layer Name",
+      "initialSettings": {
+        "visible": true,
+        "states": { "opacity": 0.8 }
+      }
+    }
+  ]
 }
 ```
 
@@ -2091,24 +2173,24 @@ Temporal layers automatically work with the Time Slider package. See [Packages](
 
 ### ESRI Feature Service
 
-```typescript
+```json
 {
-  geoviewLayerId: "esri-features",
-  geoviewLayerType: "esriFeature",
-  geoviewLayerName: "ESRI Features",
-  metadataAccessPath: "https://example.com/FeatureServer/0",
-  listOfLayerEntryConfig: [
+  "geoviewLayerId": "esri-features",
+  "geoviewLayerType": "esriFeature",
+  "geoviewLayerName": "ESRI Features",
+  "metadataAccessPath": "https://example.com/FeatureServer/0",
+  "listOfLayerEntryConfig": [
     {
-      layerId: "0",
-      layerName: "Features",
-      source: {
-        featureInfo: {
-          queryable: true,
-          outfields: ["*"],
-        },
-      },
-    },
-  ],
+      "layerId": "0",
+      "layerName": "Features",
+      "source": {
+        "featureInfo": {
+          "queryable": true,
+          "outfields": ["*"]
+        }
+      }
+    }
+  ]
 }
 ```
 
@@ -2116,23 +2198,23 @@ Temporal layers automatically work with the Time Slider package. See [Packages](
 
 ### GeoJSON Layer
 
-```typescript
+```json
 {
-  geoviewLayerId: "geojson-data",
-  geoviewLayerType: "GeoJSON",
-  geoviewLayerName: "GeoJSON Layer",
-  metadataAccessPath: "/data/features",
-  listOfLayerEntryConfig: [
+  "geoviewLayerId": "geojson-data",
+  "geoviewLayerType": "GeoJSON",
+  "geoviewLayerName": "GeoJSON Layer",
+  "metadataAccessPath": "/data/features",
+  "listOfLayerEntryConfig": [
     {
-      layerId: "polygons",
-      layerName: "Features",
-      layerStyle: {
-        fillColor: "#FF0000",
-        strokeColor: "#000000",
-        strokeWidth: 2,
-      },
-    },
-  ],
+      "layerId": "polygons",
+      "layerName": "Features",
+      "layerStyle": {
+        "fillColor": "#FF0000",
+        "strokeColor": "#000000",
+        "strokeWidth": 2
+      }
+    }
+  ]
 }
 ```
 
@@ -2140,23 +2222,23 @@ Temporal layers automatically work with the Time Slider package. See [Packages](
 
 ### CSV Layer
 
-```typescript
+```json
 {
-  geoviewLayerId: "csv-points",
-  geoviewLayerType: "CSV",
-  geoviewLayerName: "CSV Points",
-  metadataAccessPath: "/data/",
-  listOfLayerEntryConfig: [
+  "geoviewLayerId": "csv-points",
+  "geoviewLayerType": "CSV",
+  "geoviewLayerName": "CSV Points",
+  "metadataAccessPath": "/data/",
+  "listOfLayerEntryConfig": [
     {
-      layerId: "points",
-      layerName: "Points",
-      source: {
-        format: "CSV",
-        latitudeField: "latitude",
-        longitudeField: "longitude",
-      },
-    },
-  ],
+      "layerId": "points",
+      "layerName": "Points",
+      "source": {
+        "format": "CSV",
+        "latitudeField": "latitude",
+        "longitudeField": "longitude"
+      }
+    }
+  ]
 }
 ```
 
@@ -2164,20 +2246,21 @@ Temporal layers automatically work with the Time Slider package. See [Packages](
 
 ### XYZ Tiles Layer
 
-```typescript
+```json
 {
-  geoviewLayerId: "xyzTilesLYR2",
-  geoviewLayerName: "GNOSIS_Blue_Marble",
-  metadataAccessPath: "https://maps.gnosis.earth/ogcapi/collections/blueMarble/map/tiles/WebMercatorQuad",
-  geoviewLayerType: "xyzTiles",
-  listOfLayerEntryConfig: [
+  "geoviewLayerId": "xyzTilesLYR2",
+  "geoviewLayerName": "GNOSIS_Blue_Marble",
+  "metadataAccessPath": "https://maps.gnosis.earth/ogcapi/collections/blueMarble/map/tiles/WebMercatorQuad",
+  "geoviewLayerType": "xyzTiles",
+  "listOfLayerEntryConfig": [
     {
-      layerId: "blueMarble",
-      layerName: "GNOSIS Blue Marble",
-      source: {
-        dataAccessPath: "https://maps.gnosis.earth/ogcapi/collections/blueMarble/map/tiles/WebMercatorQuad/{z}/{y}/{x}.jpg"
+      "layerId": "blueMarble",
+      "layerName": "GNOSIS Blue Marble",
+      "source": {
+        "dataAccessPath": "https://maps.gnosis.earth/ogcapi/collections/blueMarble/map/tiles/WebMercatorQuad/{z}/{y}/{x}.jpg"
       }
     }
+  ]
 }
 ```
 
@@ -2199,16 +2282,16 @@ Configuration schemas for GeoView packages. Packages are loaded and configured t
 
 #### Method 1: Core Packages (Swiper only)
 
-```typescript
-corePackages: ["swiper"],
-corePackagesConfig: [
-  {
-    packageName: "swiper",
-    configObj: {
-      // Swiper-specific configuration
+```json
+{
+  "corePackages": ["swiper"],
+  "corePackagesConfig": [
+    {
+      "packageName": "swiper",
+      "configObj": {}
     }
-  }
-]
+  ]
+}
 ```
 
 #### Method 2: Tab-based Loading (GeoChart, Time Slider, AOI Panel, Drawer)
@@ -2248,16 +2331,16 @@ interface SwiperConfig {
 
 #### Example
 
-```typescript
-corePackagesConfig: [
+```json
+"corePackagesConfig": [
   {
-    swiper: {
-      orientation: "vertical",
-      layers: ["satellite-imagery", "street-map"],
-      keyboardOffset: 20,
-    },
-  },
-];
+    "swiper": {
+      "orientation": "vertical",
+      "layers": ["satellite-imagery", "street-map"],
+      "keyboardOffset": 20
+    }
+  }
+]
 ```
 
 ---
@@ -2287,22 +2370,22 @@ interface ChartConfig {
 
 #### Example
 
-```typescript
-corePackagesConfig: [
+```json
+"corePackagesConfig": [
   {
-    geochart: {
-      charts: [
+    "geochart": {
+      "charts": [
         {
-          type: "bar",
-          title: "Population by City",
-          layerPath: "population-layer",
-          xAxis: "city",
-          yAxis: "population",
-        },
-      ],
-    },
-  },
-];
+          "type": "bar",
+          "title": "Population by City",
+          "layerPath": "population-layer",
+          "xAxis": "city",
+          "yAxis": "population"
+        }
+      ]
+    }
+  }
+]
 ```
 
 ---
@@ -2335,7 +2418,7 @@ interface SliderConfig {
   timeDimension?: {
     field?: string;
     default?: Array<string>;
-    nearestValues?: 'discrete' | 'continuous';
+    nearestValues?: "discrete" | "continuous";
     singleHandle?: boolean;
     displayPattern?: Array<{
       datePrecision?: "" | "year" | "month" | "day";
@@ -2374,12 +2457,14 @@ interface SliderConfig {
 #### Temporal Modes
 
 **Discrete Mode** (`nearestValues: 'discrete'`):
+
 - Slider handle snaps only to values defined in the `range` array
 - Best for data with distinct time points (e.g., yearly data, specific dates)
 - Step selector is hidden (not applicable)
 - Filter uses exact range values: `Year >= '2015-01-01' AND Year < '2016-01-01'`
 
 **Continuous Mode** (`nearestValues: 'continuous'`):
+
 - Slider allows free movement between min and max values
 - Best for data with dense temporal coverage (e.g., hourly, daily)
 - Step selector visible to control filter range
@@ -2387,24 +2472,23 @@ interface SliderConfig {
 
 #### Example
 
-```typescript
-corePackagesConfig: [
+```json
+"corePackagesConfig": [
   {
     "time-slider": {
-      sliders: [
+      "sliders": [
         {
-          // Discrete mode example (yearly data)
-          layerPaths: ["yearly-data-layer"],
-          title: "Yearly Temperature Data",
-          description: "Annual temperature measurements from 2010-2020",
-          filtering: true,
-          timeDimension: {
-            field: "Year",
-            nearestValues: "discrete",
-            singleHandle: true,
-            rangeItems: {
-              type: "discrete",
-              range: [
+          "layerPaths": ["yearly-data-layer"],
+          "title": "Yearly Temperature Data",
+          "description": "Annual temperature measurements from 2010-2020",
+          "filtering": true,
+          "timeDimension": {
+            "field": "Year",
+            "nearestValues": "discrete",
+            "singleHandle": true,
+            "rangeItems": {
+              "type": "discrete",
+              "range": [
                 "2010-01-01T00:00:00Z",
                 "2011-01-01T00:00:00Z",
                 "2012-01-01T00:00:00Z",
@@ -2421,22 +2505,21 @@ corePackagesConfig: [
           }
         },
         {
-          // Continuous mode example (hourly data)
-          layerPaths: ["weather-layer/temperature"],
-          fields: ["timestamp"],
-          title: "Hourly Weather Data",
-          description: "Real-time temperature measurements",
-          delay: 1000,
-          filtering: true,
-          locked: false,
-          reversed: false,
-          timeDimension: {
-            field: "timestamp",
-            nearestValues: "continuous",
-            singleHandle: true,
-            rangeItems: {
-              type: "continuous",
-              range: [
+          "layerPaths": ["weather-layer/temperature"],
+          "fields": ["timestamp"],
+          "title": "Hourly Weather Data",
+          "description": "Real-time temperature measurements",
+          "delay": 1000,
+          "filtering": true,
+          "locked": false,
+          "reversed": false,
+          "timeDimension": {
+            "field": "timestamp",
+            "nearestValues": "continuous",
+            "singleHandle": true,
+            "rangeItems": {
+              "type": "continuous",
+              "range": [
                 "2024-01-01T00:00:00Z",
                 "2024-01-31T23:59:59Z"
               ]
@@ -2444,53 +2527,56 @@ corePackagesConfig: [
           }
         },
         {
-          // Multi-layer example with range handles
-          layerPaths: [
+          "layerPaths": [
             "weather-layer/temperature",
             "weather-layer/precipitation"
           ],
-          fields: ["timestamp", "date"],
-          title: "Weather Data Timeline",
-          description: "Filter multiple weather layers by time range",
-          delay: 1500,
-          filtering: true,
-          locked: false,
-          reversed: false,
-          timeDimension: {
-            nearestValues: "discrete",
-            singleHandle: false,
-            displayPattern: [
-              { datePrecision: "day" },
-              { timePrecision: "hour" }
+          "fields": ["timestamp", "date"],
+          "title": "Weather Data Timeline",
+          "description": "Filter multiple weather layers by time range",
+          "delay": 1500,
+          "filtering": true,
+          "locked": false,
+          "reversed": false,
+          "timeDimension": {
+            "nearestValues": "discrete",
+            "singleHandle": false,
+            "displayPattern": [
+              { "datePrecision": "day" },
+              { "timePrecision": "hour" }
             ]
           }
         }
       ]
     }
   }
-];
+]
 ```
 
 #### Configuration Tips
 
 **When to use Discrete Mode:**
+
 - Yearly, quarterly, or monthly data
 - Data with specific collection dates (satellite imagery dates)
 - When you want users to select from predefined time points
 - When step-based filtering doesn't make sense for your data
 
 **When to use Continuous Mode:**
+
 - Hourly, daily data with dense temporal coverage
 - Streaming or real-time data
 - When you want flexible time range selection
 - When step-based filtering is appropriate (e.g., "show last 6 hours")
 
 **Display Pattern:**
+
 - Use `datePrecision` alone for date-only data (`"year"`, `"month"`, `"day"`)
 - Add `timePrecision` for time-of-day display (`"hour"`, `"minute"`, `"second"`)
 - Leave both undefined for automatic detection based on data
 
 **Performance:**
+
 - Discrete mode with many time points (>50) may require optimization
 - Continuous mode works well for any range size
 - Consider using `delay` to control animation speed based on data density
@@ -2528,26 +2614,26 @@ interface AoiItem {
 
 #### Example
 
-```typescript
-corePackagesConfig: [
+```json
+"corePackagesConfig": [
   {
     "aoi-panel": {
-      isOpen: false,
-      aoiList: [
+      "isOpen": false,
+      "aoiList": [
         {
-          imageUrl: "/images/ottawa.png",
-          aoiTitle: "Ottawa",
-          extent: [-76.0, 45.2, -75.5, 45.6],
+          "imageUrl": "/images/ottawa.png",
+          "aoiTitle": "Ottawa",
+          "extent": [-76.0, 45.2, -75.5, 45.6]
         },
         {
-          imageUrl: "/images/toronto.png",
-          aoiTitle: "Toronto",
-          extent: [-79.7, 43.5, -79.0, 43.9],
-        },
-      ],
-    },
-  },
-];
+          "imageUrl": "/images/toronto.png",
+          "aoiTitle": "Toronto",
+          "extent": [-79.7, 43.5, -79.0, 43.9]
+        }
+      ]
+    }
+  }
+]
 ```
 
 ---
@@ -2801,14 +2887,14 @@ interface DrawerConfig {
 
 #### Example
 
-```typescript
-corePackagesConfig: [
+```json
+"corePackagesConfig": [
   {
-    drawer: {
-      version: "1.0",
-    },
-  },
-];
+    "drawer": {
+      "version": "1.0"
+    }
+  }
+]
 ```
 
 ---
@@ -2864,27 +2950,27 @@ If no content is configured, an empty panel will be displayed.
 
 **Markdown File:**
 
-```typescript
-corePackagesConfig: [
+```json
+"corePackagesConfig": [
   {
     "about-panel": {
-      isOpen: true,
-      aboutTitle: "About Atlas of Canada",
-      iconPath: "./img/canada-icon.png",
-      mdPath: "./img/about-atlas.md"
+      "isOpen": true,
+      "aboutTitle": "About Atlas of Canada",
+      "iconPath": "./img/canada-icon.png",
+      "mdPath": "./img/about-atlas.md"
     }
   }
-];
+]
 ```
 
 **Markdown Content Array:**
 
-```typescript
-corePackagesConfig: [
+```json
+"corePackagesConfig": [
   {
     "about-panel": {
-      isOpen: false,
-      mdContent: [
+      "isOpen": false,
+      "mdContent": [
         "# Atlas of Canada\n\n![Atlas Banner](./img/atlas_banner.png)",
         "## Discover Canada through geography\n\nThe Atlas of Canada provides interactive and static maps of Canada.",
         "## Key Features\n\n- **Interactive Maps** - Dynamic maps with multiple layers\n- **Historical Archive** - Digitized atlas editions from 1906\n- **Educational Resources** - Teaching materials and data",
@@ -2892,35 +2978,35 @@ corePackagesConfig: [
       ]
     }
   }
-];
+]
 ```
 
 **Default Content:**
 
-```typescript
-corePackagesConfig: [
+```json
+"corePackagesConfig": [
   {
     "about-panel": {
-      isOpen: false,
-      title: "GeoView Mapping Application",
-      logoPath: "./img/logo.png",
-      description: "A powerful and flexible geospatial viewer for the Canadian Geospatial Platform. Explore maps, analyze data, and discover geographic insights.",
-      link: "https://canadian-geospatial-platform.github.io/geoview/"
+      "isOpen": false,
+      "title": "GeoView Mapping Application",
+      "logoPath": "./img/logo.png",
+      "description": "A powerful and flexible geospatial viewer for the Canadian Geospatial Platform. Explore maps, analyze data, and discover geographic insights.",
+      "link": "https://canadian-geospatial-platform.github.io/geoview/"
     }
   }
-];
+]
 ```
 
 **Minimal Configuration:**
 
-```typescript
-corePackagesConfig: [
+```json
+"corePackagesConfig": [
   {
     "about-panel": {
-      title: "About This Map"
+      "title": "About This Map"
     }
   }
-];
+]
 ```
 
 #### Markdown Support
@@ -2948,54 +3034,53 @@ When using `mdPath` or `mdContent`, the About Panel supports standard Markdown s
 
 ### Complete Package Configuration Example
 
-```typescript
+```json
 {
-  map: {
-    basemapOptions: {
-      basemapId: "transport",
-      shaded: true,
-      labeled: true
+  "map": {
+    "basemapOptions": {
+      "basemapId": "transport",
+      "shaded": true,
+      "labeled": true
     },
-    interaction: "dynamic",
-    viewSettings: {
-      projection: 3978,
-      initialView: {
-        zoomAndCenter: [10, [-75.7, 45.4]]
+    "interaction": "dynamic",
+    "viewSettings": {
+      "projection": 3978,
+      "initialView": {
+        "zoomAndCenter": [10, [-75.7, 45.4]]
       }
     },
-    listOfGeoviewLayerConfig: [
+    "listOfGeoviewLayerConfig": [
       {
-        geoviewLayerId: "weather-data",
-        geoviewLayerType: "ogcWms",
-        metadataAccessPath: "https://example.com/wms"
+        "geoviewLayerId": "weather-data",
+        "geoviewLayerType": "ogcWms",
+        "metadataAccessPath": "https://example.com/wms"
       },
       {
-        geoviewLayerId: "satellite-layer",
-        geoviewLayerType: "esriImage",
-        metadataAccessPath: "https://example.com/arcgis/rest/services/satellite"
+        "geoviewLayerId": "satellite-layer",
+        "geoviewLayerType": "esriImage",
+        "metadataAccessPath": "https://example.com/arcgis/rest/services/satellite"
       }
     ]
   },
-  theme: "geo.ca",
-  navBar: ["zoom", "fullscreen", "home", "drawer"],
-  appBar: {
-    tabs: {
-      core: ["geolocator", "aoi-panel"]
+  "theme": "geo.ca",
+  "navBar": ["zoom", "fullscreen", "home", "drawer"],
+  "appBar": {
+    "tabs": {
+      "core": ["geolocator", "aoi-panel"]
     }
   },
-  footerBar: {
-    tabs: {
-      core: ["legend", "layers", "details", "time-slider"]
+  "footerBar": {
+    "tabs": {
+      "core": ["legend", "layers", "details", "time-slider"]
     }
   },
-  // Swiper is the only package in corePackages
-  corePackages: ["swiper"],
-  corePackagesConfig: [
+  "corePackages": ["swiper"],
+  "corePackagesConfig": [
     {
-      swiper: {
-        orientation: "vertical",
-        layers: ["weather-data", "satellite-layer"],
-        keyboardOffset: 20
+      "swiper": {
+        "orientation": "vertical",
+        "layers": ["weather-data", "satellite-layer"],
+        "keyboardOffset": 20
       }
     }
   ]
@@ -3016,38 +3101,38 @@ When using `mdPath` or `mdContent`, the About Panel supports standard Markdown s
 
 ### Complex WMS Configuration
 
-```typescript
+```json
 {
-  geoviewLayerId: "weather-layers",
-  geoviewLayerType: "ogcWms",
-  geoviewLayerName: "Weather Data",
-  metadataAccessPath: "https://example.com/wms",
-  initialSettings: {
-    visible: true,
-    bounds: [-140, 40, -50, 83], // Canada extent
-    states: {
-      opacity: 0.7,
-      queryable: true,
-    },
+  "geoviewLayerId": "weather-layers",
+  "geoviewLayerType": "ogcWms",
+  "geoviewLayerName": "Weather Data",
+  "metadataAccessPath": "https://example.com/wms",
+  "initialSettings": {
+    "visible": true,
+    "bounds": [-140, 40, -50, 83],
+    "states": {
+      "opacity": 0.7,
+      "queryable": true
+    }
   },
-  listOfLayerEntryConfig: [
+  "listOfLayerEntryConfig": [
     {
-      layerId: "temperature",
-      layerName: "Temperature",
-      initialSettings: {
-        visible: true,
-        minZoom: 0,
-        maxZoom: 10,
-      },
+      "layerId": "temperature",
+      "layerName": "Temperature",
+      "initialSettings": {
+        "visible": true,
+        "minZoom": 0,
+        "maxZoom": 10
+      }
     },
     {
-      layerId: "precipitation",
-      layerName: "Precipitation",
-      initialSettings: {
-        visible: false,
-      },
-    },
-  ],
+      "layerId": "precipitation",
+      "layerName": "Precipitation",
+      "initialSettings": {
+        "visible": false
+      }
+    }
+  ]
 }
 ```
 
@@ -3055,39 +3140,39 @@ When using `mdPath` or `mdContent`, the About Panel supports standard Markdown s
 
 ### Styled GeoJSON Layer
 
-```typescript
+```json
 {
-  geoviewLayerId: "styled-features",
-  geoviewLayerType: "GeoJSON",
-  geoviewLayerName: "Styled Features",
-  metadataAccessPath: "/data/features.geojson",
-  initialSettings: {
-    visible: true,
-    states: {
-      opacity: 0.8,
-      queryable: true,
-      hoverable: true,
-    },
+  "geoviewLayerId": "styled-features",
+  "geoviewLayerType": "GeoJSON",
+  "geoviewLayerName": "Styled Features",
+  "metadataAccessPath": "/data/features.geojson",
+  "initialSettings": {
+    "visible": true,
+    "states": {
+      "opacity": 0.8,
+      "queryable": true,
+      "hoverable": true
+    }
   },
-  listOfLayerEntryConfig: [
+  "listOfLayerEntryConfig": [
     {
-      layerId: "features",
-      layerName: "Features",
-      layerStyle: {
-        styleType: "simple",
-        fillColor: "#4CAF50",
-        strokeColor: "#1B5E20",
-        strokeWidth: 2,
+      "layerId": "features",
+      "layerName": "Features",
+      "layerStyle": {
+        "styleType": "simple",
+        "fillColor": "#4CAF50",
+        "strokeColor": "#1B5E20",
+        "strokeWidth": 2
       },
-      source: {
-        featureInfo: {
-          queryable: true,
-          nameField: "name",
-          outfields: ["name", "description", "category"],
-        },
-      },
-    },
-  ],
+      "source": {
+        "featureInfo": {
+          "queryable": true,
+          "nameField": "name",
+          "outfields": ["name", "description", "category"]
+        }
+      }
+    }
+  ]
 }
 ```
 
@@ -3095,44 +3180,44 @@ When using `mdPath` or `mdContent`, the About Panel supports standard Markdown s
 
 ### Multi-Layer ESRI Service
 
-```typescript
+```json
 {
-  geoviewLayerId: "esri-service",
-  geoviewLayerType: "esriDynamic",
-  geoviewLayerName: "ESRI Service",
-  metadataAccessPath: "https://example.com/MapServer",
-  listOfLayerEntryConfig: [
+  "geoviewLayerId": "esri-service",
+  "geoviewLayerType": "esriDynamic",
+  "geoviewLayerName": "ESRI Service",
+  "metadataAccessPath": "https://example.com/MapServer",
+  "listOfLayerEntryConfig": [
     {
-      layerId: "group-1",
-      layerName: "Administrative",
-      listOfLayerEntryConfig: [
+      "layerId": "group-1",
+      "layerName": "Administrative",
+      "listOfLayerEntryConfig": [
         {
-          layerId: "0",
-          layerName: "Provinces",
-          initialSettings: {
-            minZoom: 0,
-            maxZoom: 8,
-          },
+          "layerId": "0",
+          "layerName": "Provinces",
+          "initialSettings": {
+            "minZoom": 0,
+            "maxZoom": 8
+          }
         },
         {
-          layerId: "1",
-          layerName: "Cities",
-          initialSettings: {
-            minZoom: 8,
-            maxZoom: 18,
-          },
-        },
-      ],
+          "layerId": "1",
+          "layerName": "Cities",
+          "initialSettings": {
+            "minZoom": 8,
+            "maxZoom": 18
+          }
+        }
+      ]
     },
     {
-      layerId: "2",
-      layerName: "Roads",
-      initialSettings: {
-        visible: false,
-        minZoom: 10,
-      },
-    },
-  ],
+      "layerId": "2",
+      "layerName": "Roads",
+      "initialSettings": {
+        "visible": false,
+        "minZoom": 10
+      }
+    }
+  ]
 }
 ```
 
@@ -3144,30 +3229,26 @@ When using `mdPath` or `mdContent`, the About Panel supports standard Markdown s
 
 Always use unique, descriptive layer IDs:
 
-```typescript
-// ❌ Bad
-geoviewLayerId: "layer1";
-
-// ✅ Good
-geoviewLayerId: "canada-weather-temperature";
+```json
+"geoviewLayerId": "canada-weather-temperature"
 ```
 
 ### 2. Provide Descriptive Names
 
 Use clear, descriptive names:
 
-```typescript
-geoviewLayerName: "Temperature Forecast";
+```json
+"geoviewLayerName": "Temperature Forecast"
 ```
 
 ### 3. Set Appropriate Zoom Constraints
 
 Prevent performance issues with zoom constraints:
 
-```typescript
-initialSettings: {
-  minZoom: 10, // Only show at street level
-  maxZoom: 18,
+```json
+"initialSettings": {
+  "minZoom": 10,
+  "maxZoom": 18
 }
 ```
 
@@ -3175,11 +3256,11 @@ initialSettings: {
 
 Make overlay layers semi-transparent:
 
-```typescript
-initialSettings: {
-  states: {
-    opacity: 0.6, // Allow basemap to show through
-  },
+```json
+"initialSettings": {
+  "states": {
+    "opacity": 0.6
+  }
 }
 ```
 

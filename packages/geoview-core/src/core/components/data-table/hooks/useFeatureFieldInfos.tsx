@@ -4,12 +4,13 @@ import type { MappedLayerDataType } from '@/core/components/data-table/data-tabl
 import { logger } from '@/core/utils/logger';
 
 /**
- * Custom hook for caching the mapping of fieldInfos aka columns for data table.
- * @param {TypeAllFeatureInfoResultSetEntry[]} layerData data from the query
- * @returns {MappedLayerDataType[]} layerData with columns.
+ * Custom hook for caching the mapping of fieldInfos columns for the data table.
+ *
+ * @param layerData - Data from the query
+ * @returns The layer data with mapped field info columns
  */
 export function useFeatureFieldInfos(layerData: TypeAllFeatureInfoResultSetEntry[]): MappedLayerDataType[] {
-  const mappedLayerData = useMemo(() => {
+  const memoMappedLayerData = useMemo(() => {
     // Log
     logger.logTraceUseEffect('DATA TABLE - useFeatureFieldInfos', layerData);
 
@@ -18,5 +19,5 @@ export function useFeatureFieldInfos(layerData: TypeAllFeatureInfoResultSetEntry
     });
   }, [layerData]);
 
-  return mappedLayerData;
+  return memoMappedLayerData;
 }

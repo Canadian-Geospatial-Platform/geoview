@@ -11,6 +11,7 @@ import type { TypeContainerBox } from '@/core/types/global-types';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { useLayerSelectorName } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
+/** Properties for the Layout component. */
 interface LayoutProps {
   children?: ReactNode;
   layoutSwitch?: ReactNode; // Only Coordinate info switch at the moment
@@ -28,15 +29,23 @@ interface LayoutProps {
   toggleMode?: boolean;
 }
 
-// Constants outside component to prevent recreating every render
+/** Styles for the layer title in the right panel header. */
 const TITLE_STYLES = {
   fontWeight: '600',
 } as const;
 
+/** Methods exposed by the Layout component via ref. */
 interface LayoutExposedMethods {
   showRightPanel: (visible: boolean) => void;
 }
 
+/**
+ * Two-panel layout with a layer list on the left and content on the right.
+ *
+ * @param props - Layout properties
+ * @param ref - Ref exposing showRightPanel method
+ * @returns The two-panel layout element
+ */
 const Layout = forwardRef(
   (
     {
@@ -64,11 +73,10 @@ const Layout = forwardRef(
     const theme = useTheme();
     const layerName = useLayerSelectorName(selectedLayerPath!);
 
-    // Callbacks
     /**
-     * Handles clicks to layers in left panel. Sets selected layer.
+     * Handles clicks to layers in left panel and shows the right panel.
      *
-     * @param {LayerListEntry} layer The data of the selected layer
+     * @param layer - The selected layer entry
      */
     const handleLayerChange = useCallback(
       (layer: LayerListEntry): void => {
@@ -84,17 +92,18 @@ const Layout = forwardRef(
     );
 
     /**
-     * Render group layers as list.
+     * Renders the layer list in the left panel.
      *
-     * @returns JSX.Element
+     * @returns The layer list element
      */
-    const renderLayerList = useCallback(() => {
+    const renderLayerList = useCallback((): JSX.Element => {
       return <LayerList selectedLayerPath={selectedLayerPath} onListItemClick={handleLayerChange} layerList={layerList} />;
     }, [selectedLayerPath, handleLayerChange, layerList]);
 
     /**
-     * Render layer title
-     * @returns JSX.Element
+     * Renders the layer title in the right panel header.
+     *
+     * @returns The layer title element
      */
     const renderLayerTitle = useCallback((): JSX.Element => {
       // clamping code copied from https://tailwindcss.com/docs/line-clamp

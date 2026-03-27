@@ -11,16 +11,19 @@ import { logger } from '@/core/utils/logger';
 import { useEventListener } from '@/core/components/common/hooks/use-event-listener';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
+/** Properties for the Crosshair component. */
 type CrosshairProps = {
   mapTargetElement: HTMLElement;
 };
 
 /**
- * Create a Crosshair when map is focus with the keyboard so user can click on the map
- * @param {CrosshairProps} - Crossahir props who caintain the mapTargetELement
- * @returns {JSX.Element} the crosshair component
+ * Renders a crosshair when the map is focused with the keyboard so the user can click on the map.
+ *
+ * Memoized because the single prop is a stable DOM element reference that maintains identity across parent renders.
+ *
+ * @param props - Crosshair properties containing the map target element
+ * @returns The crosshair component, or null if inactive
  */
-// Memoizes entire component, preventing re-renders if props haven't changed
 export const Crosshair = memo(function Crosshair({ mapTargetElement }: CrosshairProps): JSX.Element | null {
   logger.logTraceRender('components/crosshair/crosshair');
 
@@ -29,7 +32,7 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
-  // State (no useState for item used inside function only without rendering... use useRef)
+  // Pan delta for keyboard pan interactions
   const panDelta = useRef(128);
 
   //  Store
@@ -39,12 +42,10 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
 
   // Callbacks
   /**
-   * Simulate map mouse click to trigger details panel
-   * @function simulateClick
-   * @param {KeyboardEvent} event the keyboard event
+   * Simulates a map mouse click to trigger the details panel.
    */
   const simulateClick = useCallback(
-    (event: HTMLElementEventMap[keyof HTMLElementEventMap]) => {
+    (event: HTMLElementEventMap[keyof HTMLElementEventMap]): void => {
       if (!isCrosshairsActive || !(event instanceof KeyboardEvent) || event.key !== 'Enter') {
         return;
       }
@@ -59,12 +60,10 @@ export const Crosshair = memo(function Crosshair({ mapTargetElement }: Crosshair
   );
 
   /**
-   * Modify the pixelDelta value for the keyboard pan on Shift arrow up or down
-   *
-   * @param {KeyboardEvent} event the keyboard event to trap
+   * Modifies the pixelDelta value for keyboard pan on Shift+Arrow up or down.
    */
   const managePanDelta = useCallback(
-    (event: HTMLElementEventMap[keyof HTMLElementEventMap]) => {
+    (event: HTMLElementEventMap[keyof HTMLElementEventMap]): void => {
       // Early return in callback
       if (!isCrosshairsActive) return;
 

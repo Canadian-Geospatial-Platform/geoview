@@ -46,22 +46,25 @@ import { camelCase, handleEscapeKey } from '@/core/utils/utilities';
 import { IconButton } from '@/ui/icon-button/icon-button';
 import { MapEventProcessor } from '@/api/event-processors/event-processor-children/map-event-processor';
 
+/** Mapping of panel id to its icon and content. */
 interface GroupPanelType {
   icon: ReactNode;
   content: ReactNode;
 }
 
+/** Props for the AppBar component. */
 type AppBarProps = {
   api: AppBarApi;
   onScrollShellIntoView: () => void;
 };
 
+/** Record of button panel ids to their configuration. */
 export interface ButtonPanelType {
   [panelType: string]: TypeButtonPanel;
 }
 
 /**
- * Create an app-bar with buttons that can open a panel
+ * Creates an app-bar with buttons that can open a panel.
  */
 export function AppBar(props: AppBarProps): JSX.Element {
   // Log
@@ -69,10 +72,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
 
   const { api: appBarApi, onScrollShellIntoView } = props;
 
+  // Hooks
   const mapId = useGeoViewMapId();
-
   const { t } = useTranslation();
-
   const theme = useTheme();
   const sxClasses = getSxClasses(theme);
 
@@ -130,8 +132,15 @@ export function AppBar(props: AppBarProps): JSX.Element {
     [mapId]
   );
 
+  // #region Handlers
+
+  /**
+   * Handles closing a panel by id and returning focus.
+   *
+   * @param buttonId - The id of the panel button to close
+   */
   const closePanelById = useCallback(
-    (buttonId: string) => {
+    (buttonId: string): void => {
       // Callback when removing and focus is lost
       const focusWhenNoElementCallback = (): void => {
         const mapCont = geoviewElement;
@@ -149,16 +158,26 @@ export function AppBar(props: AppBarProps): JSX.Element {
     [geoviewElement, mapId]
   );
 
+  /**
+   * Handles opening a panel by id.
+   *
+   * @param buttonId - The id of the panel button to open
+   */
   const openPanelById = useCallback(
-    (buttonId: string) => {
+    (buttonId: string): void => {
       // Redirect to helper
       helpOpenPanelById(buttonId, setButtonPanels, isFocusTrapped);
     },
     [isFocusTrapped]
   );
 
+  /**
+   * Handles when an app-bar button is clicked.
+   *
+   * @param buttonId - The id of the clicked button
+   */
   const handleButtonClicked = useCallback(
-    (buttonId: string) => {
+    (buttonId: string): void => {
       // Get the button panel
       const buttonPanel = buttonPanels[buttonId];
       setActiveAppBarTab(buttonId, !buttonPanel.panel?.status, !buttonPanel.panel?.status);
@@ -166,8 +185,13 @@ export function AppBar(props: AppBarProps): JSX.Element {
     [buttonPanels, setActiveAppBarTab]
   );
 
+  /**
+   * Handles the general close action of a panel.
+   *
+   * @param buttonId - The id of the panel button to close
+   */
   const handleGeneralCloseClicked = useCallback(
-    (buttonId: string) => {
+    (buttonId: string): void => {
       // Return focus to the AppBar button that opened this panel
       if (isFocusTrapped) {
         setTimeout(() => {
@@ -180,8 +204,14 @@ export function AppBar(props: AppBarProps): JSX.Element {
     [setActiveAppBarTab, isFocusTrapped, getButtonElementId]
   );
 
+  /**
+   * Handles when a new button panel is added to the AppBar.
+   *
+   * @param sender - The AppBar API instance
+   * @param event - The creation event containing the new button panel
+   */
   const handleAddButtonPanel = useCallback(
-    (sender: AppBarApi, event: AppBarCreatedEvent) => {
+    (sender: AppBarApi, event: AppBarCreatedEvent): void => {
       setButtonPanels((prevState) => {
         return {
           ...prevState,
@@ -196,8 +226,14 @@ export function AppBar(props: AppBarProps): JSX.Element {
     [buttonPanels]
   );
 
+  /**
+   * Handles when a button panel is removed from the AppBar.
+   *
+   * @param sender - The AppBar API instance
+   * @param event - The removal event containing the removed button panel id
+   */
   const handleRemoveButtonPanel = useCallback(
-    (sender: AppBarApi, event: AppBarRemovedEvent) => {
+    (sender: AppBarApi, event: AppBarRemovedEvent): void => {
       setButtonPanels((prevState) => {
         const state = { ...prevState };
 
@@ -209,11 +245,15 @@ export function AppBar(props: AppBarProps): JSX.Element {
     [setButtonPanels]
   );
 
+  // #endregion
+
   /**
-   * Panels default to a 100% width of the map container, legend and details panels are set to be slimmer
+   * Gets the panel width based on the tab type.
    *
-   * @param {string} tab - The id of the panel
-   * @returns {number} The width for the panel
+   * Panels default to 100% width; legend and details panels are set to be slimmer.
+   *
+   * @param tab - The id of the panel
+   * @returns The width percentage for the panel
    */
   const getPanelWidth = useCallback((tab: string): number => {
     let width = 100;
@@ -226,6 +266,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
     return width;
   }, []);
 
+  /**
+   * Registers and unregisters AppBar created/removed event handlers.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('APP-BAR - mount');
@@ -241,6 +284,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
     };
   }, [appBarApi, handleAddButtonPanel, handleRemoveButtonPanel]);
 
+  /**
+   * Opens or closes the active panel when isOpen or tabId changes.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('APP-BAR - PANEL - OPEN/CLOSE ', isOpen);
@@ -283,6 +329,9 @@ export function AppBar(props: AppBarProps): JSX.Element {
     }
   }, [appBarConfig, mapId]);
 
+  /**
+   * Creates AppBar button panels from configuration tabs.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('APP-BAR - create group of AppBar buttons');
@@ -338,9 +387,10 @@ export function AppBar(props: AppBarProps): JSX.Element {
   }, [buttonPanels]);
 
   /**
-   * Render Tabs in appbar.
-   * @param {string[]} panelNames tab that will be rendered in appbar.
-   * @returns JSX.Element
+   * Renders tab buttons in the app-bar.
+   *
+   * @param panelNames - The panel names to render as buttons
+   * @returns The rendered list of buttons, or null if none are visible
    */
   const renderButtonPanel = (panelNames: string[]): ReactNode => {
     // Map through panel names and create ListItems for visible buttons

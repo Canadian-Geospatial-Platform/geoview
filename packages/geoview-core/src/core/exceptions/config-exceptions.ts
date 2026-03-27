@@ -1,6 +1,9 @@
 /* eslint-disable max-classes-per-file */
 // We want more than 1 Error class here to save files
+
+/** Error thrown when a config validation error occurs. */
 export class ConfigError extends Error {
+  /** Creates an instance of ConfigError. */
   constructor() {
     super(`A config validation error occured.`);
 
@@ -10,7 +13,13 @@ export class ConfigError extends Error {
   }
 }
 
+/** Error thrown when a map configuration error occurs. */
 export class MapConfigError extends ConfigError {
+  /**
+   * Creates an instance of MapConfigError.
+   *
+   * @param message - The error message describing the config issue
+   */
   constructor(message: string) {
     super();
 

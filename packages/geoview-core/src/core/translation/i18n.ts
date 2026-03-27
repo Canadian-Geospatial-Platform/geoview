@@ -6,11 +6,7 @@ import translationFr from '@public/locales/fr/translation.json';
 import { logger } from '@/core/utils/logger';
 import type { TypeDisplayLanguage } from '@/api/types/map-schema-types';
 
-/**
- * Common configuration object for i18n instances
- * @constant
- * @type {object}
- */
+/** Common configuration object for i18n instances. */
 const i18nConfig = {
   debug: false,
   fallbackLng: ['en', 'fr'],
@@ -33,10 +29,7 @@ const i18nConfig = {
   },
 };
 
-/**
- * Initialize the default i18n instance
- * @description This is the main i18n instance used by default throughout the application
- */
+/** Initialize the default i18n instance used throughout the application. */
 await i18n
   // init i18next
   // for all options read: https://www.i18next.com/overview/configuration-options
@@ -53,11 +46,11 @@ await i18n
 export default i18n;
 
 /**
- * Creates a new i18n instance with specified language
- * @function
- * @param {TypeDisplayLanguage} language - The language to initialize the instance with
- * @returns {Promise<i18n>} A promise that resolves to the new i18n instance
- * @throws {Error} If initialization fails
+ * Creates a new i18n instance with specified language.
+ *
+ * @param language - The language to initialize the instance with
+ * @returns A promise that resolves with the new i18n instance
+ * @throws {Error} When initialization fails
  */
 export const createI18nInstance = async (language: TypeDisplayLanguage): Promise<typeof i18n> => {
   const i18nInstance = i18n.createInstance();

@@ -1,8 +1,9 @@
 import type { ComponentsVariants, ComponentsOverrides, ComponentsProps } from '@mui/material';
 import type { IGeoViewColors, IGeoViewFontSizes, IGeoViewSpacingAndSizing } from '@/ui/style/types';
 
-/** https://material-ui.com/guides/typescript/ */
+/** MUI theme augmentation. See https://material-ui.com/guides/typescript/ */
 
+/** Shape configuration for the MUI theme. */
 type Shape = {
   borderRadius: number | string;
   left: string;

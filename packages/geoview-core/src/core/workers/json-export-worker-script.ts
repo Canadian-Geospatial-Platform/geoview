@@ -8,8 +8,8 @@ import { createWorkerLogger } from '@/core/workers/helper/logger-worker';
 
 /**
  * This worker script is designed to be used with the JsonExportWorker class.
- * It handles the transformation of GeoJSON features from one coordinate system to another.
  *
+ * It handles the transformation of GeoJSON features from one coordinate system to another.
  * The main operations are:
  * 1. Initialization: Set up the source and target coordinate reference systems.
  * 2. Processing: Transform chunks of GeoJSON features, converting their geometries.
@@ -18,13 +18,15 @@ import { createWorkerLogger } from '@/core/workers/helper/logger-worker';
  * definition for the EPSG:3978 projection.
  */
 
-// Type related to the worker
+/** Chunk data structure for JSON export containing geometry and properties. */
 export type TypeWorkerExportChunk = {
   geometry: SerializedGeometry;
   properties: {
     [k: string]: unknown;
   };
 };
+
+/** Projection information for coordinate transformation. */
 export type TypeWorkerExportProjectionInfo = {
   sourceCRS: string;
   targetCRS: string;
@@ -47,8 +49,9 @@ register(proj4);
 
 /**
  * Transforms an array of points from the source CRS to the target CRS.
- * @param {Coordinate[]} points - Array of points coordinates to transform.
- * @returns {Coordinate[]} Array of transformed points coordinates.
+ *
+ * @param points - Array of point coordinates to transform
+ * @returns Array of transformed point coordinates
  */
 function transformPoints(points: Coordinate[]): Coordinate[] {
   const converted: Array<Array<number>> = [];
@@ -67,8 +70,9 @@ function transformPoints(points: Coordinate[]): Coordinate[] {
 
 /**
  * Transforms the geometry of a GeoJSON feature.
- * @param {SerializedGeometry} geometry - The geometry to transform.
- * @returns {SerializedGeometry} The transformed geometry.
+ *
+ * @param geometry - The geometry to transform
+ * @returns The transformed geometry
  */
 function transformGeometry(geometry: SerializedGeometry): SerializedGeometry {
   const { type, coordinates } = geometry;
@@ -120,13 +124,12 @@ function transformGeometry(geometry: SerializedGeometry): SerializedGeometry {
   return transformedGeometry;
 }
 
-/**
- * The main worker object containing methods for initialization and processing.
- */
+/** The main worker object containing methods for initialization and processing. */
 const worker = {
   /**
    * Initializes the worker with projection information.
-   * @param {TypeWorkerExportProjectionInfo} projectionInfo - The projection information.
+   *
+   * @param projectionInfo - The projection information
    */
   init(projectionInfo: TypeWorkerExportProjectionInfo) {
     try {
@@ -140,9 +143,10 @@ const worker = {
 
   /**
    * Processes a chunk of GeoJSON features, transforming their geometries.
-   * @param {TypeWorkerExportChunk[]} chunk - The chunk of GeoJSON features to process.
-   * @param {boolean} isFirst - Indicates if this is the first chunk of the dataset.
-   * @returns {string} A JSON string of the processed features.
+   *
+   * @param chunk - The chunk of GeoJSON features to process
+   * @param isFirst - Whether this is the first chunk of the dataset
+   * @returns The processed features as a JSON string
    */
   process(chunk: TypeWorkerExportChunk[], isFirst: boolean): string {
     try {

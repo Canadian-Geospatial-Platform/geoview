@@ -1,17 +1,19 @@
 import { useEffect, useRef } from 'react';
 
-// Indicates if currently logging useWhatChanged
+/** Indicates if currently logging useWhatChanged. */
 const CURRENT_ACTIVE = true;
+/** Whether to use the React 18 double useEffect check. */
 const USE_USE_EFFECT_REACT_18_CHECK = false;
 
-// Helper type for logging
+/** Helper type for logging. */
 type DependencyLog = {
   [key: string]: { 'Old Value': unknown; 'New Value': unknown };
 };
 
 /**
- * Gets a random color
- * @returns {string} A random hex color value
+ * Gets a random color.
+ *
+ * @returns A random hex color value
  */
 function getRandomColor(): string {
   const letters = '0123456789ABCDEF';
@@ -23,9 +25,10 @@ function getRandomColor(): string {
 }
 
 /**
- * Stringifies a value for logging purposes
- * @param {unknown} dependencyItem - The value to stringify
- * @returns {string | unknown} Stringified value (when possible)
+ * Stringifies a value for logging purposes.
+ *
+ * @param dependencyItem - The value to stringify
+ * @returns Stringified value (when possible)
  */
 function stringifyValue(dependencyItem: unknown): string | unknown {
   try {
@@ -42,9 +45,10 @@ function stringifyValue(dependencyItem: unknown): string | unknown {
 }
 
 /**
- * Helper function to create a hook on a hot reference
- * @param {unknown} value - The value to hook in a reference
- * @returns {React<useRef>} The React reference to the value
+ * Helper function to create a hook on a hot reference.
+ *
+ * @param value - The value to hook in a reference
+ * @returns The React reference to the value
  */
 // ? unknown type cannot be use, need to escape
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -57,8 +61,9 @@ function useHotRefs(value: unknown): any {
 }
 
 /**
- * Helper function to write to console
- * @param {unknown[]} messages - The messages to write to console
+ * Helper function to write to console.
+ *
+ * @param messages - The messages to write to console
  */
 function writeConsole(...messages: unknown[]): void {
   // eslint-disable-next-line no-console
@@ -66,10 +71,11 @@ function writeConsole(...messages: unknown[]): void {
 }
 
 /**
- * Exposes a function to help debug react hooks and their dependencies
- * @param {string} hookId - An indentifier for the given hook
- * @param {unknown[]} dependency - The dependency array
- * @param {string[]} dependencyNames? - The optional depedency names for each dependency in the array (strictly for user readability)
+ * Exposes a function to help debug react hooks and their dependencies.
+ *
+ * @param hookId - An identifier for the given hook
+ * @param dependency - Optional dependency array
+ * @param dependencyNames - Optional dependency names for each dependency in the array (strictly for user readability)
  */
 export const useWhatChanged = (hookId: string, dependency?: unknown[], dependencyNames?: string[]): void => {
   // This ref is responsible for book keeping of the old value
@@ -118,8 +124,9 @@ export const useWhatChanged = (hookId: string, dependency?: unknown[], dependenc
 
   const longBannersRef = useHotRefs(logHeader);
 
-  // Prepare a hook for the given dependency reference.
-  // This will attribute a number and a color for the mounted component.
+  /**
+   * Attributes a number and a color for the mounted component on the given dependency reference.
+   */
   useEffect(() => {
     // Preconds
     if (!dependencyRef.current) return;
@@ -131,8 +138,9 @@ export const useWhatChanged = (hookId: string, dependency?: unknown[], dependenc
     backgroundColorRef.current = getRandomColor();
   }, [dependencyRef]);
 
-  // Prepare a hook tracking the modifications in the dependencies.
-  // This will verify which dependency changed and log a table in the console.
+  /**
+   * Tracks modifications in the dependencies and logs which ones changed to the console.
+   */
   useEffect(() => {
     // Preconds
     if (!dependencyRef.current) return;
@@ -193,8 +201,9 @@ export const useWhatChanged = (hookId: string, dependency?: unknown[], dependenc
     longBannersRef,
   ]);
 
-  // Prepare a hook for React18+ and double useEffect reasons (when working in react.StrictMode).
-  // This will verify which dependency changed and log a table in the console.
+  /**
+   * Prepares a hook for React18+ and double useEffect reasons (when working in react.StrictMode).
+   */
   useEffect(() => {
     // Use Effect ran once
     return () => {
@@ -203,6 +212,7 @@ export const useWhatChanged = (hookId: string, dependency?: unknown[], dependenc
   }, []);
 };
 
+/** Logs and monitors render performance for a given component. */
 export const usePerformanceMonitor = (componentName: string): void => {
   const renderCount = useRef(0);
   const lastRender = useRef(performance.now());

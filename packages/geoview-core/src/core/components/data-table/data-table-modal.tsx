@@ -25,9 +25,9 @@ import { TableViewIcon } from '@/ui/icons';
 import { useNavigateToTab } from '@/core/components/common/hooks/use-navigate-to-tab';
 
 /**
- * Open lighweight version (no function) of data table in a modal window
+ * Renders a lightweight read-only data table in a modal window.
  *
- * @returns {JSX.Element} the data table modal component
+ * @returns The data table modal element
  */
 export default function DataTableModal(): JSX.Element {
   // Log
@@ -66,7 +66,10 @@ export default function DataTableModal(): JSX.Element {
   // Create columns for data table.
   const mappedLayerData = useFeatureFieldInfos(layersData);
 
-  const layer = useMemo(() => {
+  /**
+   * Finds the layer data matching the selected layer path.
+   */
+  const memoLayer = useMemo(() => {
     // Log
     logger.logTraceUseMemo('DATA-TABLE-MODAL - layer', mappedLayerData, selectedLayerPath);
 
@@ -74,10 +77,10 @@ export default function DataTableModal(): JSX.Element {
   }, [mappedLayerData, selectedLayerPath]);
 
   /**
-   * Create data table body cell
+   * Creates a data table body cell.
    *
-   * @param {string} cellValue cell value to be displayed in cell
-   * @returns {JSX.Element}
+   * @param cellValue - Cell value to be displayed
+   * @returns The cell element
    */
   const getCellValue = useCallback(
     (cellValue: string): JSX.Element => {
@@ -91,11 +94,12 @@ export default function DataTableModal(): JSX.Element {
   );
 
   /**
-   * Create table header cell
-   * @param {string} header value to be displayed in cell
-   * @returns JSX.Element
+   * Creates a table header cell.
+   *
+   * @param header - Value to be displayed in the header
+   * @returns The header element
    */
-  const getTableHeader = useCallback((header: string) => {
+  const getTableHeader = useCallback((header: string): JSX.Element => {
     return (
       <Box component="span" sx={{ whiteSpace: 'nowrap' }}>
         {header}
@@ -103,14 +107,17 @@ export default function DataTableModal(): JSX.Element {
     );
   }, []);
 
-  const columns = useMemo<MRTColumnDef<Partial<Record<string, TypeFieldEntry>>>[]>(() => {
+  /**
+   * Builds the column definitions from the layer field infos.
+   */
+  const memoColumns = useMemo<MRTColumnDef<Partial<Record<string, TypeFieldEntry>>>[]>(() => {
     // Log
-    logger.logTraceUseMemo('DATA-TABLE-MODAL - columns', layer?.features);
+    logger.logTraceUseMemo('DATA-TABLE-MODAL - columns', memoLayer?.features);
 
-    if (!layer?.fieldInfos) {
+    if (!memoLayer?.fieldInfos) {
       return [];
     }
-    const entries = Object.entries(layer?.fieldInfos ?? {});
+    const entries = Object.entries(memoLayer?.fieldInfos ?? {});
     const columnList = [] as MRTColumnDef<Partial<Record<string, TypeFieldEntry>>>[];
 
     entries.forEach(([key, value]) => {
@@ -137,19 +144,25 @@ export default function DataTableModal(): JSX.Element {
 
     return columnList;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layer?.fieldInfos]);
+  }, [memoLayer?.fieldInfos]);
 
-  const rows = useMemo(() => {
+  /**
+   * Extracts the row data from the layer features.
+   */
+  const memoRows = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('DATA-TABLE-MODAL - rows', layer?.fieldInfos);
+    logger.logTraceUseMemo('DATA-TABLE-MODAL - rows', memoLayer?.fieldInfos);
 
     return (
-      layer?.features?.map((feature) => {
+      memoLayer?.features?.map((feature) => {
         return feature.fieldInfo;
       }) ?? []
     );
-  }, [layer?.features, layer?.fieldInfos]);
+  }, [memoLayer?.features, memoLayer?.fieldInfos]);
 
+  /**
+   * Updates loading state based on query status of the selected layer.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('DATA-TABLE-MODAL - query status');
@@ -162,8 +175,10 @@ export default function DataTableModal(): JSX.Element {
     } else setIsLoading(false);
   }, [layersData, selectedLayerPath]);
 
-  // Handle navigation to advanced data table
-  const handleNavigateToDataTable = useCallback(() => {
+  /**
+   * Handles navigation to the advanced data table tab.
+   */
+  const handleNavigateToDataTable = useCallback((): void => {
     // Close modal first
     disableFocusTrap();
     // Navigate to data-table tab with selected layer
@@ -207,11 +222,11 @@ export default function DataTableModal(): JSX.Element {
                 </Box>
               )}
               <Table
-                columns={columns}
-                data={rows}
+                columns={memoColumns}
+                data={memoRows}
                 enableColumnActions={false}
-                enablePagination={(layer?.features?.length ?? 0) > 50}
-                enableBottomToolbar={(layer?.features?.length ?? 0) > 50}
+                enablePagination={(memoLayer?.features?.length ?? 0) > 50}
+                enableBottomToolbar={(memoLayer?.features?.length ?? 0) > 50}
                 initialState={{ density: 'compact', pagination: { pageSize: 50, pageIndex: 0 } }}
                 muiPaginationProps={{
                   rowsPerPageOptions: [50, 100],

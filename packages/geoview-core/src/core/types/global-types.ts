@@ -13,10 +13,7 @@ import type * as UI from '@/ui';
 import type { AbstractPlugin } from '@/api/plugin/abstract-plugin';
 import type { MapViewer } from '@/geo/map/map-viewer';
 
-/**
- * Definition of the map feature configuration according to what can be specified in the map div and in the schema for the
- * type extension TypeMapFeaturesInstance.
- */
+/** Definition of the map feature configuration according to what can be specified in the map div and in the schema for the type extension TypeMapFeaturesInstance. */
 export interface TypeMapFeaturesConfig extends TypeMapFeaturesInstance {
   /** This attribute is not part of the schema. It is placed here to keep the 'id' attribute of the HTML div of the map. */
   mapId: string;
@@ -26,9 +23,7 @@ export interface TypeMapFeaturesConfig extends TypeMapFeaturesInstance {
   sharedMode?: boolean;
 }
 
-/**
- *  Definition of a global Window type.
- */
+/** Definition of a global Window type. */
 declare global {
   interface Window {
     cgpv: TypeCGPV;
@@ -37,9 +32,7 @@ declare global {
   }
 }
 
-/**
- * Type extending the window object.
- */
+/** Type extending the window object. */
 export interface TypeWindow extends Window {
   /** the core */
   cgpv: TypeCGPV;
@@ -47,15 +40,14 @@ export interface TypeWindow extends Window {
   geoviewPlugins: Record<string, typeof AbstractPlugin> | undefined;
 }
 
+/** Utility types for React rendering functions. */
 export interface TypeReactUtilities {
   react: typeof React;
   createRoot: typeof createRoot;
   createElement: typeof React.createElement;
 }
 
-/**
- * Type used for exporting core.
- */
+/** Type used for exporting core. */
 export type TypeCGPV = {
   init: () => void;
   onMapInit: MapViewerCallback;
@@ -73,9 +65,7 @@ export type MapViewerDelegate = (mapViewer: MapViewer) => void;
 /** CGPV MapViewer callback delegate */
 export type MapViewerCallback = (callback: MapViewerDelegate) => void;
 
-/**
- * Type used for exporting UI
- */
+/** Type used for exporting UI. */
 export type TypeCGPVUI = {
   useTheme: typeof useTheme;
   useMediaQuery: typeof useMediaQuery;
@@ -83,42 +73,44 @@ export type TypeCGPVUI = {
   elements: typeof UI;
 };
 
-/**
- *  Definition of an extended HTML element type.
- */
+/** Definition of an extended HTML element type. */
 export interface TypeHTMLElement extends HTMLElement {
   webkitRequestFullscreen: () => void;
   msRequestFullscreen: () => void;
   mozRequestFullScreen: () => void;
 }
 
-/**
- *  Definition of an Container where components are rendered.
- */
+/** Definition of a container where components are rendered. */
 export type TypeContainerBox = 'appBar' | 'footerBar';
 
 /**
  * Represents a constructor type that returns an instance of `T`.
+ *
  * This is useful when you need to pass around classes (constructors) generically,
  * such as for type assertions, factories, dependency injection, or reflection.
- * @template T - The type of the instance the constructor produces.
+ *
+ * @template T - The type of the instance the constructor produces
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type RegularClassType<T> = new (...args: any[]) => T;
 
 /**
  * Represents an abstract constructor type that returns an instance of `T`.
+ *
  * This is useful when you need to pass around classes (constructors) generically,
  * such as for type assertions, factories, dependency injection, or reflection.
- * @template T - The type of the instance the constructor produces.
+ *
+ * @template T - The type of the instance the constructor produces
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AbstractClassType<T> = abstract new (...args: any[]) => T;
 
 /**
  * Represents a constructor type that returns an instance of `T`.
+ *
  * This is useful when you need to pass around classes (constructors) generically,
  * such as for type assertions, factories, dependency injection, or reflection.
- * @template T - The type of the instance the constructor produces.
+ *
+ * @template T - The type of the instance the constructor produces
  */
 export type ClassType<T> = RegularClassType<T> | AbstractClassType<T>;

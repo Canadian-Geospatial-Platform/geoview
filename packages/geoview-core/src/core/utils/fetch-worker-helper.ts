@@ -16,12 +16,13 @@
 import { RequestTimeoutError } from '@/core/exceptions/core-exceptions';
 
 /**
- * Performs a fetch request with timeout capability
+ * Performs a fetch request with timeout capability.
+ *
  * @template T - The expected type of the JSON response
- * @param {string} url - The URL to fetch from
- * @param {RequestInit} [init={}] - The optional initialization parameters for the fetch.
- * @param {number} [timeoutMs=7000] - Timeout in milliseconds before the request is aborted
- * @returns {Promise<T>} A promise that resolves with the parsed JSON response
+ * @param url - The URL to fetch from
+ * @param init - Optional initialization parameters for the fetch
+ * @param timeoutMs - Optional timeout in milliseconds before the request is aborted (defaults to 7 seconds)
+ * @returns A promise that resolves with the parsed JSON response
  * @throws {RequestTimeoutError} When the request exceeds the timeout duration
  * @throws {Error} When the response is not OK (status outside 200-299)
  *

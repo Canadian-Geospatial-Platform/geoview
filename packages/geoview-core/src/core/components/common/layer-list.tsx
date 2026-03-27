@@ -9,7 +9,9 @@ import type { TypeLayerStatus } from '@/api/types/layer-schema-types';
 import { getSxClasses } from './layer-list-style';
 import { LayerIcon } from './layer-icon';
 import { useLayerSelectorStatus } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { logger } from '@/core/utils/logger';
 
+/** Represents an entry in the layer list. */
 export interface LayerListEntry {
   content?: string | ReactNode;
   layerName: string;
@@ -25,12 +27,14 @@ export interface LayerListEntry {
   isDisabled?: boolean;
 }
 
+/** Properties for the LayerList component. */
 interface LayerListProps {
   layerList: LayerListEntry[];
   selectedLayerPath: string | undefined;
   onListItemClick: (layer: LayerListEntry) => void;
 }
 
+/** Properties for the LayerListItem component. */
 interface LayerListItemProps {
   id: string;
   isSelected: boolean;
@@ -38,9 +42,18 @@ interface LayerListItemProps {
   onListItemClick: (layer: LayerListEntry) => void;
 }
 
-// Memoizes entire component, preventing re-renders if props haven't changed
-// TODO: Unmemoize this component, probably, because it's in 'common' folder
-export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer, onListItemClick }: LayerListItemProps) {
+/**
+ * Renders a single layer list item with icon, status, and selection state.
+ *
+ * Memoized to avoid re-rendering all items when only the selected layer changes.
+ *
+ * @param props - LayerListItem properties
+ * @returns The layer list item element
+ */
+export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer, onListItemClick }: LayerListItemProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/common/layer-list > LayerListItem');
+
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();
@@ -65,7 +78,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
   const isLoading = layer.queryStatus === 'processing' || layer.layerStatus === 'loading' || layer.layerStatus === 'processing';
 
   /**
-   * Get layer status based on query status and layer status
+   * Gets the layer status label based on query and layer status.
    */
   const getLayerStatus = useCallback((): JSX.Element | string => {
     if (layer.layerStatus === 'error' || layer?.queryStatus === 'error') {
@@ -82,7 +95,7 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
   }, [layer.layerFeatures, layer.layerStatus, layer?.mapFilteredIcon, layer.queryStatus, t]);
 
   /**
-   * Handle layer selection with keyboard (Enter or Spacebar).
+   * Handles layer selection with keyboard (Enter or Spacebar).
    */
   const handleLayerKeyDown = useCallback(
     (event: React.KeyboardEvent, selectedLayer: LayerListEntry): void => {
@@ -158,17 +171,16 @@ export const LayerListItem = memo(function LayerListItem({ id, isSelected, layer
 });
 
 /**
- * Create a list of layers
- * @param {LayerListEntry} layerList  Array of layer list entries.
- * @param {boolean} isEnlarged Boolean value if right panel is enlarged or not.
- * @param {number} selectedLayerIndex  Current index of list item selected.
- * @param {string} selectedLayerPath  Selected path of the layer.
- * @param {Function} onListItemClick  Callback function executed when list item is clicked.
- * @returns {JSX.Element}
+ * Renders a list of layers with selection and status indicators.
+ *
+ * @param props - LayerList properties
+ * @returns The layer list element
  */
-// Memoizes entire component, preventing re-renders if props haven't changed
-// TODO: Unmemoize this component, probably, because it's in 'common' folder
+// TODO: Remove memo — props (selectedLayerPath, layerList) change on every layer interaction, so memo adds overhead with no benefit
 export const LayerList = memo(function LayerList({ layerList, selectedLayerPath, onListItemClick }: LayerListProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/common/layer-list > LayerList');
+
   // Hooks
   const { t } = useTranslation<string>();
   const theme = useTheme();

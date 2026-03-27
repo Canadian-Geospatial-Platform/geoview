@@ -28,14 +28,14 @@ import { isValidUUID } from '@/core/utils/utilities';
  * - Basemap options (basemapId, shaded, labeled) are updated
  * - Layers from URL parameters are appended to existing config layers (not replaced)
  *
- * @param {number} zoom - Current zoom level of the map
- * @param {Coordinate} center - Current center coordinates of the map in the map's projection
- * @param {TypeValidMapProjectionCodes} projection - Current projection code (e.g., 3857, 3978)
- * @param {TypeBasemapOptions} basemap - Current basemap configuration (basemapId, shaded, labeled)
- * @param {string[]} layers - Array of layer paths; UUIDs are extracted from paths (e.g., "uuid/sublayer" -> "uuid")
- * @returns {string} URL query string with format: "?p=3857&z=4&c=-100.123456,40.654321&b=id:transport,s:on,l:off&keys=uuid1,uuid2"
- *                   Center coordinates are automatically reprojected to lon/lat (EPSG:4326) for sharing..
- *                   Returns empty string if an error occurs during generation.
+ * @param zoom - Current zoom level of the map
+ * @param center - Current center coordinates of the map in the map's projection
+ * @param projection - Current projection code (e.g., 3857, 3978, ..)
+ * @param basemap - Current basemap configuration (basemapId, shaded, labeled)
+ * @param layers - Array of layer paths; UUIDs are extracted from paths (e.g., "uuid/sublayer" -> "uuid")
+ * @returns URL query string with format: "?p=3857&z=4&c=-100.123456,40.654321&b=id:transport,s:on,l:off&keys=uuid1,uuid2".
+ *          Center coordinates are automatically reprojected to lon/lat (EPSG:4326) for sharing.
+ *          Returns empty string if an error occurs during generation
  */
 function getShareUrl(
   zoom: number,
@@ -85,9 +85,10 @@ function getShareUrl(
 
 /**
  * Share button component that allows users to copy a shareable URL based on the current map state.
+ *
  * Only visible when the map has data-shared attribute.
  *
- * @returns {JSX.Element | null} The share button component or null if shared mode is not enabled
+ * @returns The share button and dialog, or null if shared mode is not enabled
  */
 export default function Share(): JSX.Element | null {
   // Log
@@ -110,8 +111,12 @@ export default function Share(): JSX.Element | null {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
 
-  // Handler to open modal
-  const handleShareClick = useCallback(() => {
+  // #region Handlers
+
+  /**
+   * Handles when the share button is clicked.
+   */
+  const handleShareClick = useCallback((): void => {
     // Generate the URL only when opening the modal
     const baseUrl = window.location.origin + window.location.pathname;
     const queryParams = getShareUrl(zoom, center, projection, basemap, layers);
@@ -120,13 +125,17 @@ export default function Share(): JSX.Element | null {
     setIsModalOpen(true);
   }, [zoom, center, projection, basemap, layers]);
 
-  // Handler to close modal
-  const handleCloseModal = useCallback(() => {
+  /**
+   * Handles when the modal is closed.
+   */
+  const handleCloseModal = useCallback((): void => {
     setIsModalOpen(false);
   }, []);
 
-  // Handler to copy URL to clipboard
-  const handleCopyUrl = useCallback(() => {
+  /**
+   * Handles copying the URL to clipboard.
+   */
+  const handleCopyUrl = useCallback((): void => {
     navigator.clipboard.writeText(shareUrl).then(
       () => {
         logger.logInfo('URL copied to clipboard:', shareUrl);
@@ -140,13 +149,15 @@ export default function Share(): JSX.Element | null {
     );
   }, [shareUrl]);
 
+  // #endregion
+
   // Memoize visibility check
-  const isVisible = useMemo(() => {
+  const memoIsVisible = useMemo(() => {
     return sharedMode === true;
   }, [sharedMode]);
 
   // If shared mode is not enabled, don't render the button
-  if (!isVisible) return null;
+  if (!memoIsVisible) return null;
 
   return (
     <>

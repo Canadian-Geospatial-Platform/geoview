@@ -82,14 +82,18 @@ const DATE_FIELD_FILTERS = NUMERIC_FIELD_FILTERS;
 const STRING_FIELD_FILTERS = ['contains', 'startsWith', 'endsWith'];
 
 /**
- * Build Data table from map.
- * @param {DataTableProps} data map data which will be used to build data table.
- * @param {string} mapId id of the map.
- * @param {string} layerKey key of the layer.
- * @returns {JSX.Element} Data table as react element.
+ * Renders the interactive data table for a single layer.
+ *
+ * Memoized to avoid re-rendering all layer tables when only one layer's data changes.
+ *
+ * @param props - DataTable properties
+ * @returns The data table element
  */
 
 function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Element {
+  // Log
+  logger.logTraceRender('components/data-table/data-table');
+
   const { t } = useTranslation();
 
   const sxtheme = useTheme();
@@ -139,28 +143,39 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
 
   const mapId = useGeoViewMapId();
 
+  // #region Handlers
+
+  /**
+   * Handles density change for the data table.
+   */
   const handleDensityChange = (updaterOrValue: MRTDensityState | ((prevState: MRTDensityState) => MRTDensityState)): void => {
     setDensity(updaterOrValue);
   };
 
+  /**
+   * Handles toggling column filters visibility.
+   */
   const handleToggleColumnFilters = (updaterOrValue: boolean | ((prev: boolean) => boolean)): void => {
     const newValue = typeof updaterOrValue === 'function' ? updaterOrValue(showColumnFilters) : updaterOrValue;
     setShowColumnFilters(newValue);
     setColumnsFiltersVisibility(newValue, layerPath);
   };
 
-  // Utility function to check date
+  // #endregion
+
+  /** Checks if a value is a Dayjs instance. */
   const isDayjs = (v: unknown): v is Dayjs => typeof v === 'object' && v !== null && 'isValid' in v;
 
-  // Utility function to check date range
+  /** Checks if a value is a date range tuple. */
   const isDateRange = useCallback((v: unknown): v is [Dayjs | null, Dayjs | null] => Array.isArray(v) && v.some(isDayjs), []);
 
   /**
-   * Create table header cell
-   * @param {string} header value to be displayed in cell
-   * @returns JSX.Element
+   * Creates a table header cell with tooltip.
+   *
+   * @param header - Value to be displayed in the header
+   * @returns The header element
    */
-  const getTableHeader = useCallback((header: string) => {
+  const getTableHeader = useCallback((header: string): JSX.Element => {
     return (
       // Tooltip allows long titles to be fully visible on hover
       <Tooltip title={header} placement="top" arrow disableInteractive>
@@ -188,10 +203,11 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   );
 
   /**
-   * Create image button which will trigger lightbox.
-   * @param {string | number} cellValue value to be rendered in cell.
-   * @param {string} cellId id of the column.
-   * @returns {string | number | JSX.Element}
+   * Creates an image button that triggers the lightbox.
+   *
+   * @param cellValue - Value to be rendered in the cell
+   * @param cellId - ID of the column
+   * @returns The cell content element
    */
   const createLightBoxButton = useCallback(
     (cellValue: string | number, cellId: string): string | number | JSX.Element => {
@@ -227,10 +243,11 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   );
 
   /**
-   * Create data table body cell with tooltip
+   * Creates a data table body cell with tooltip.
    *
-   * @param {string | number | JSX.Element} cellValue - Cell value to be displayed in cell
-   * @returns {JSX.Element}
+   * @param cellValue - Cell value to be displayed
+   * @param cellId - ID of the cell
+   * @returns The cell element
    */
   const getCellValueWithTooltip = useCallback(
     (cellValue: string | number | JSX.Element, cellId: string): JSX.Element => {
@@ -250,9 +267,10 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   );
 
   /**
-   * Custom date type Column tooltip
-   * @param {Date} date value to be shown in column.
-   * @returns JSX.Element
+   * Creates a formatted date cell with tooltip.
+   *
+   * @param date - The date value to render
+   * @returns The date cell element
    */
   const getCellContentDate = useCallback(
     (date: Dayjs): JSX.Element => {
@@ -273,10 +291,10 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   );
 
   /**
-   * The filter options config for the column based on the data type.
+   * Gets the filter options configuration for a column based on its data type.
    *
-   * @param dataType - The data type to use to infer the filter options config.
-   * @returns The filter options config.
+   * @param dataType - The data type to infer the filter config from
+   * @returns The filter options configuration
    */
   const getFilterConfig = useCallback((dataType: string): Partial<MRTColumnDef<ColumnsType>> => {
     // Depending on the data type
@@ -303,16 +321,14 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   }, []);
 
   /**
-   * Build material react data table column header.
-   *
-   * @param {object} data.fieldAliases object values transformed into required key value property of material react data table
+   * Builds material react data table column definitions.
    */
 
   // TODO: WCAG Issue #3114 Contrast is low on sort and action icons in header.
   // TODO: WCAG Issue #3116 At times generates empty table headings.
-  const columns = useMemo<MRTColumnDef<ColumnsType>[]>(() => {
+  const memoColumns = useMemo<MRTColumnDef<ColumnsType>[]>(() => {
     // Log
-    logger.logTraceUseMemo('DATA-TABLE - columns', density);
+    logger.logTraceUseMemo('DATA-TABLE - memoColumns', density);
 
     const entries = Object.entries({ ICON: iconColumn, ZOOM: zoomColumn, DETAILS: detailColumn, ...data.fieldInfos });
     const columnList = [] as MRTColumnDef<ColumnsType>[];
@@ -382,11 +398,11 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   }, [density, getFilterConfig, getCellContentDate, displayDateTimezone]);
 
   /**
-   * Initialize default filter modes for columns using first available option
+   * Initializes default filter modes for columns using the first available option.
    */
-  const initialColumnFilterModes = useMemo(() => {
+  const memoInitialColumnFilterModes = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('DATA-TABLE - initialColumnFilterModes');
+    logger.logTraceUseMemo('DATA-TABLE - memoInitialColumnFilterModes');
 
     // If we have stored filter modes, use them
     if (
@@ -398,21 +414,23 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
 
     // Otherwise, initialize with first available mode for each column
     const defaultModes: Record<string, string> = {};
-    columns.forEach((column) => {
+    memoColumns.forEach((column) => {
       if (column.id && column.columnFilterModeOptions && column.columnFilterModeOptions.length > 0) {
         defaultModes[column.id] = column.columnFilterModeOptions[0];
       }
     });
     return defaultModes;
-  }, [columns, datatableSettings, layerPath]);
+  }, [memoColumns, datatableSettings, layerPath]);
 
   /**
-   * Utility function to check if a particular columnId has numerical filters.
-   * @param {string} columnId - The column id to check if it has numerical filters.
+   * Checks if a column has numerical filters.
+   *
+   * @param columnId - The column ID to check
+   * @returns Whether the column uses numerical filters
    */
   const isColumnFilterNumeric = useCallback(
     (columnId: string): boolean => {
-      return !!columns.find((col) => {
+      return !!memoColumns.find((col) => {
         if (col.id === columnId) {
           // If the column has a 'lessThanOrEqualTo' filter option, we can assume it's filtering on numbers
           return col.columnFilterModeOptions?.includes('lessThanOrEqualTo');
@@ -420,16 +438,16 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
         return false;
       });
     },
-    [columns]
+    [memoColumns]
   );
 
   /**
-   * Handles zoom to feature.
+   * Handles zoom to a feature on the map.
    *
-   * @param {TypeFeatureInfoEntry} feature - The feature to zoom to.
+   * @param feature - The feature to zoom to
    */
   const handleZoomIn = useCallback(
-    async (feature: TypeFeatureInfoEntry) => {
+    async (feature: TypeFeatureInfoEntry): Promise<void> => {
       let { extent } = feature;
 
       // Get oid field
@@ -491,13 +509,11 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   );
 
   /**
-   * Build Rows for datatable
-   *
-   * @param {Features} features list of objects transform into rows.
+   * Builds the data table rows from features with filtering applied.
    */
-  const rows = useMemo(() => {
+  const memoRows = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('DATA-TABLE - rows', data.features);
+    logger.logTraceUseMemo('DATA-TABLE - memoRows', data.features);
 
     // In addition, filter on the class renderer filters and the time slider filter
     const layerFilterClassAndTime = LayerFilters.joinWithAnd([layerClassFilter, layerTimeFilter]);
@@ -567,6 +583,7 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.features, layerClassFilter, layerTimeFilter, handleZoomIn]);
 
+  // TODO: Cleanup - remove  dead code
   // TODO: The table is triggering many useless callback. With max-height of 5000px, it is slower to create but faster scroll.
   // TO.DOCONT: The x scroll is at the bottom, this is not good. We can set at the top with CSS below.
   // TO.DOCONT: It looks like we have circular dependencies, lack of useMemo to avoid rendering, callback not need like lightbox (only for images but render alll the time), ...
@@ -587,8 +604,8 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
 
   // Create the Material React Table
   useTable = useMaterialReactTable({
-    columns,
-    data: rows,
+    columns: memoColumns,
+    data: memoRows,
     enableDensityToggle: true,
     onDensityChange: handleDensityChange,
     onShowColumnFiltersChange: handleToggleColumnFilters,
@@ -629,12 +646,12 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
           t={t}
           globalFilter={globalFilter}
           useTable={useTable}
-          columns={columns}
+          columns={memoColumns}
           data={data}
           table={props.table}
         />
       ),
-      [datatableSettings, layerPath, globalFilter, columns, data, sxClasses, t, useTable] // Include dependencies
+      [datatableSettings, layerPath, globalFilter, memoColumns, data, sxClasses, t, useTable] // Include dependencies
     ),
     enableFilterMatchHighlighting: true,
     enableColumnResizing: true,
@@ -699,6 +716,9 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     },
   });
 
+  /**
+   * Scrolls to top of table when sorting changes.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('DATA-TABLE - sorting', sorting);
@@ -716,25 +736,28 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sorting]);
 
-  // Set default column filter modes when columns are available
+  /**
+   * Sets default column filter modes when columns are available.
+   */
   useEffect(() => {
     // Log
-    logger.logTraceUseEffect('DATA-TABLE - initialColumnFilterModes', initialColumnFilterModes);
+    logger.logTraceUseEffect('DATA-TABLE - memoInitialColumnFilterModes', memoInitialColumnFilterModes);
 
     // Only set defaults if we don't have stored values and columns are now available
-    if (Object.keys(columnFilterFns).length === 0 && Object.keys(initialColumnFilterModes).length > 0) {
-      setColumnFilterFns(initialColumnFilterModes);
+    if (Object.keys(columnFilterFns).length === 0 && Object.keys(memoInitialColumnFilterModes).length > 0) {
+      setColumnFilterFns(memoInitialColumnFilterModes);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialColumnFilterModes]);
+  }, [memoInitialColumnFilterModes]);
 
   /**
-   * Convert the filter list from the Column Filter state to filter the map.
+   * Converts column filter state into filter strings for the map.
    *
-   * @param {MRTColumnFiltersState} columnFilter list of filter from table.
+   * @param columnFilter - The column filters state
+   * @returns The list of filter strings
    */
   const buildFilterList = useCallback(
-    (columnFilter: MRTColumnFiltersState) => {
+    (columnFilter: MRTColumnFiltersState): string[] => {
       const tableState = useTable.getState();
       if (!columnFilter.length) return [''];
 
@@ -835,9 +858,9 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
   );
 
   /**
-   * Filter map based on the filter strings of data table.
+   * Filters the map based on the data table filter strings.
    *
-   * @param {Array} filterStrings list of filter strings.
+   * @param filters - The column filters to apply
    */
   const filterMap = debounce((filters: MRTColumnFiltersState) => {
     const filterStrings = buildFilterList(filters)
@@ -846,14 +869,22 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     applyMapFilters(filterStrings);
   }, 500);
 
+  /**
+   * Debounces column filter changes before applying them to the map.
+   *
+   * @param filters - The column filters to apply
+   */
   const debouncedColumnFilters = useCallback(
-    (filters: MRTColumnFiltersState) => {
+    (filters: MRTColumnFiltersState): void => {
       return filterMap(filters);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [datatableSettings[layerPath]?.mapFilteredRecord]
   );
 
+  /**
+   * Updates the map when column filters change.
+   */
   // update map when column filters change
   useEffect(() => {
     // Log
@@ -865,7 +896,9 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [columnFilters]);
 
-  // Save column filter modes to store when they change
+  /**
+   * Saves column filter modes to the store when they change.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('DATA-TABLE - columnFilterFns', columnFilterFns);
@@ -874,7 +907,9 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [columnFilterFns]);
 
-  // Update map when filter map switch is toggled.
+  /**
+   * Updates the map when the filter map switch is toggled.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('DATA-TABLE - mapFilteredRecord', datatableSettings[layerPath].mapFilteredRecord);
@@ -883,9 +918,12 @@ function DataTable({ data, layerPath, containerType }: DataTableProps): JSX.Elem
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [datatableSettings[layerPath].mapFilteredRecord]);
 
-  // Handle focus restoration to the search input field when the "Clear search" button is pressed
-  // A custom "Clear search" button is used because the browser's native "Clear search" button (hidden with CSS above) is not focusable
-  // The esc key will not clear the search because it is mapped to close the panel
+  /**
+   * Restores focus to the search input when the clear search button is pressed.
+   *
+   * A custom "Clear search" button is used because the browser's native "Clear search" button (hidden with CSS above) is not focusable.
+   * The esc key will not clear the search because it is mapped to close the panel.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('DATA-TABLE - globalFilter focus', globalFilter);

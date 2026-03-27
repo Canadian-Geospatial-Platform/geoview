@@ -11,20 +11,23 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import { logger } from '@/core/utils/logger';
 
+/** Properties for the IconStack component. */
 export interface TypeIconStackProps {
   layerPath: string;
 }
 
+/** Properties for the LayerIcon component. */
 interface LayerIconProps {
   layerPath: string;
 }
 
-// Constants outside component to prevent recreating every render
+/** Styles for the loading spinner container. */
 const LOADING_BOX_STYLES = {
   padding: '5px',
   marginRight: '10px',
 } as const;
 
+/** Base props shared across icon buttons. */
 const ICON_BUTTON_BASE_PROPS = {
   color: 'primary' as const,
   size: 'small' as const,
@@ -32,10 +35,10 @@ const ICON_BUTTON_BASE_PROPS = {
 };
 
 /**
- * Icon Stack to represent layer icons
+ * Renders a stack of layer legend icons.
  *
- * @param {string} layerPath
- * @returns {JSX.Element} the icon stack item
+ * @param props - IconStack properties
+ * @returns The icon stack element, or null if no icons
  */
 function IconStack({ layerPath }: TypeIconStackProps): JSX.Element | null {
   // Hooks
@@ -117,10 +120,11 @@ function IconStack({ layerPath }: TypeIconStackProps): JSX.Element | null {
 
 /**
  * Renders an appropriate icon for a layer based on its status and type.
+ *
  * Shows loading spinner, error icon, group icon, or layer legend icons as needed.
- * @param {LayerIconProps} props - The component props
- * @param {string} props.layerPath - The path identifier for the layer
- * @returns {JSX.Element} The rendered layer icon component
+ *
+ * @param props - LayerIcon properties
+ * @returns The rendered layer icon element
  */
 export function LayerIcon({ layerPath }: LayerIconProps): JSX.Element {
   // Log

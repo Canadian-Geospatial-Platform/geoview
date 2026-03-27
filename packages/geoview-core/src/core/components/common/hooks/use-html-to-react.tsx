@@ -3,9 +3,7 @@ import parse from 'html-react-parser';
 import { Box } from '@/ui/layout';
 import { logger } from '@/core/utils/logger';
 
-/**
- * Interface used for custom html elements
- */
+/** Properties for the HTML-to-React converter component. */
 interface HtmlToReactProps {
   htmlContent: string;
   className?: string;
@@ -15,10 +13,10 @@ interface HtmlToReactProps {
 }
 
 /**
- * Convert an HTML string to a JSX component
+ * Converts an HTML string to a JSX component.
  *
- * @param {HtmlToReactProps} props the properties to pass to the converted component
- * @returns {JSX.Element} returns the converted JSX component
+ * @param props - The properties for the HTML-to-React conversion
+ * @returns The converted JSX component
  */
 export function UseHtmlToReact({ htmlContent, className, style, extraOptions, itemOptions = {} }: HtmlToReactProps): JSX.Element {
   // Log

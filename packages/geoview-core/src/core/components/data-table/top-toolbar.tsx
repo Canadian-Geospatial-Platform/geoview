@@ -16,58 +16,54 @@ import type { ColumnsType } from './data-table-types';
 import type { TypeFeatureInfoEntry } from '@/api/types/map-schema-types';
 import type { SxStyles } from '@/ui/style/types';
 import { ClearFiltersIcon } from '@/ui/icons';
+import { logger } from '@/core/utils/logger';
 
+/** Properties for the TopToolbar component. */
 // GV: Disabled prop-types for this to work. From the react 19 ugprade guide it seems that prop-types are deprecated.
 interface TopToolbarProps<TData extends ColumnsType> {
-  /**
-   * Classes or styles for the component.
-   */
+  /** Classes or styles for the component. */
   sxClasses: SxStyles;
 
-  /**
-   * Settings for the datatable, indexed by layerPath.
-   */
+  /** Settings for the datatable, indexed by layerPath. */
   datatableSettings: Record<string, { toolbarRowSelectedMessageRecord: string }>;
 
-  /**
-   * The path for the current layer being processed.
-   */
+  /** The path for the current layer being processed. */
   layerPath: string;
 
-  /**
-   * Translation function for internationalization.
-   */
+  /** Translation function for internationalization. */
   t: (key: string) => string;
 
-  /**
-   * The current global filter value.
-   */
+  /** The current global filter value. */
   globalFilter: string | null;
 
-  /**
-   * Utility functions provided by the table instance.
-   */
+  /** Utility functions provided by the table instance. */
   useTable: {
     resetColumnFilters: () => void;
     getFilteredRowModel: () => { rows: Array<{ original: TData }> };
   } | null;
 
-  /**
-   * Column definitions for the table.
-   */
+  /** Column definitions for the table. */
   columns: MRT_ColumnDef<ColumnsType, unknown>[];
 
-  /**
-   * The data object containing features for the table.
-   */
+  /** The data object containing features for the table. */
   data: {
     features?: TypeFeatureInfoEntry[] | null;
   };
 
+  /** The Material React Table instance. */
   table: MRTTableInstance<ColumnsType>;
 }
 
+/**
+ * Renders the top toolbar for the data table with filters, search, and export controls.
+ *
+ * @param props - TopToolbar properties
+ * @returns The toolbar element
+ */
 function TopToolbar(props: TopToolbarProps<ColumnsType>): JSX.Element {
+  // Log
+  logger.logTraceRender('components/data-table/top-toolbar');
+
   const { sxClasses, datatableSettings, layerPath, t, globalFilter, useTable, columns, data, table } = props;
   return (
     <Box

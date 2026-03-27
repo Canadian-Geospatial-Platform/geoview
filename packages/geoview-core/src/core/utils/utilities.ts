@@ -16,15 +16,15 @@ import { CONFIG_PROXY_URL } from '@/api/types/map-schema-types';
 /** The observers to monitor element removals from the DOM tree */
 const observers: Record<string, MutationObserver> = {};
 
-/** Regex patterns for image URL validation - compiled once to avoid recreation on every isImage() call */
+/** Regex patterns for image URL validation - compiled once to avoid recreation on every isImage() call. */
 const IMAGE_VALIDATION_PATTERNS = {
-  /** URLs ending with image extensions (with optional query params/fragments) */
+  /** URLs ending with image extensions (with optional query params/fragments). */
   IMAGE_EXTENSION: /^https?:\/\/.+\.(jpe?g|png|gif|bmp|webp)(\?[^?]*)?$/i,
 
   /** Base64 data URLs */
   DATA_URL: /^data:image\/.+;base64,/,
 
-  /** Known image endpoint patterns (aspx, php, jsp) */
+  /** Known image endpoint patterns (aspx, php, jsp). */
   KNOWN_ENDPOINT: /\/(image|getimage|photo|thumbnail)\.(aspx|php|jsp)(\?|$)/i,
 } as const;
 
@@ -34,6 +34,7 @@ interface TypeDocument extends Document {
   mozCancelFullScreen: () => void;
 }
 
+/** Result of a URL reachability ping check. */
 interface PingResult {
   isValid: boolean;
   isReachable: boolean;
@@ -42,18 +43,17 @@ interface PingResult {
   error?: string;
 }
 
-/**
- * Represents RGBA color as [Red, Green, Blue, Alpha]
- */
+/** Represents RGBA color as [Red, Green, Blue, Alpha]. */
 export type RGBA = [r: number, g: number, b: number, a: number];
 
 /**
  * Generates an array of numbers from `start` (inclusive) to `end` (exclusive),
  * incrementing by `step`.
- * @param {number} start - The first number in the range.
- * @param {number} end - The end of the range (exclusive).
- * @param {number} [step=1] - The increment between numbers.
- * @returns {number[]} An array of numbers from start to end with the given step.
+ *
+ * @param start - The first number in the range
+ * @param end - The end of the range (exclusive)
+ * @param step - Optional increment between numbers (default 1)
+ * @returns An array of numbers from start to end with the given step
  * @example
  * range(0, 5); // [0, 1, 2, 3, 4]
  * range(50, 1000, 50); // [50, 100, 150, ..., 950]
@@ -66,10 +66,12 @@ export function range(start: number, end: number, step: number = 1): number[] {
 
 /**
  * Converts a string to camelCase.
+ *
  * Replaces hyphens (`-`), underscores (`_`), and spaces with capitalization
  * of the following letter, and ensures the first character is lowercase.
- * @param {string} str - The input string to convert.
- * @returns {string} The camelCased version of the input string.
+ *
+ * @param str - The input string to convert
+ * @returns The camelCased version of the input string
  * @example
  * camelCase('my_tab-name'); // 'myTabName'
  * camelCase('Hello World'); // 'helloWorld'
@@ -97,9 +99,10 @@ export function camelCase(str: string): string {
 
 /**
  * Deeply compares two values (objects, arrays, or primitives) for equality.
- * @param a - The first value to compare.
- * @param b - The second value to compare.
- * @returns `true` if the values are deeply equal, `false` otherwise.
+ *
+ * @param a - The first value to compare
+ * @param b - The second value to compare
+ * @returns `true` if the values are deeply equal, `false` otherwise
  * @example
  * ```ts
  * deepEqual({ x: 1, y: [2, 3] }, { x: 1, y: [2, 3] }); // true
@@ -121,6 +124,12 @@ export function deepEqual(a: any, b: any): boolean {
   return true;
 }
 
+/**
+ * Checks if a value is a plain object (not null, not an array).
+ *
+ * @param obj - The value to check
+ * @returns True if the value is a plain object, false otherwise
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isPlainObject(obj: any): obj is Record<string, any> {
   return obj !== null && typeof obj === 'object' && !Array.isArray(obj);
@@ -128,8 +137,9 @@ function isPlainObject(obj: any): obj is Record<string, any> {
 
 /**
  * Deeply clones a value, preserving functions and non-cloneable types by reference.
- * @param value The value to clone.
- * @returns A deep copy of the value.
+ *
+ * @param value - The value to clone
+ * @returns A deep copy of the value
  */
 export function deepClone<T>(value: T): T {
   // Primitives (string, number, boolean, null, undefined, symbol, bigint) are returned as-is
@@ -184,10 +194,12 @@ export function deepClone<T>(value: T): T {
 /**
  * Deeply merges two objects, using the base object as defaults and
  * preserving existing values from the target object.
+ *
  * Nested plain objects are merged recursively.
- * @param {S} base - The base object providing default values.
- * @param {T} target - The target object whose defined values take precedence.
- * @returns {S & T} A new object containing the merged result.
+ *
+ * @param base - The base object providing default values
+ * @param target - The target object whose defined values take precedence
+ * @returns A new object containing the merged result
  * @example
  * ```ts
  * const defaultSettings = { theme: { darkMode: false, fontSize: 14 }, locale: 'en' };
@@ -242,12 +254,14 @@ export function deepMerge<S extends any, T extends any>(base: S, target: T): S &
 
 /**
  * Performs a shallow equality check between two objects.
+ *
  * Compares the objects' own enumerable keys and values using `Object.is`.
  * Returns true if both objects have the same keys and corresponding values, false otherwise.
  * Note: This is a **shallow** comparison. Nested objects or arrays are compared by reference.
- * @param {Record<string, any>} a - The first object to compare.
- * @param {Record<string, any>} b - The second object to compare.
- * @returns {boolean} True if the objects are shallowly equal, false otherwise.
+ *
+ * @param a - The first object to compare
+ * @param b - The second object to compare
+ * @returns True if the objects are shallowly equal, false otherwise
  * @example
  * const obj1 = { foo: 1, bar: 2 };
  * const obj2 = { foo: 1, bar: 2 };
@@ -275,14 +289,16 @@ export function shallowObjectEqual<T>(a: T, b: T): boolean {
 
 /**
  * Performs a shallow equality check between two arrays.
+ *
  * Compares each element using `Object.is`. Returns true if both arrays
  * have the same length and all corresponding elements are strictly equal,
  * false otherwise.
  * Note: This is a **shallow** comparison. Nested objects or arrays are compared by reference.
- * @template T - The type of elements in the arrays.
- * @param {T[]} a - The first array to compare.
- * @param {T[]} b - The second array to compare.
- * @returns {boolean} True if the arrays are shallowly equal, false otherwise.
+ *
+ * @template T - The type of elements in the arrays
+ * @param a - The first array to compare
+ * @param b - The second array to compare
+ * @returns True if the arrays are shallowly equal, false otherwise
  * @example
  * const arr1 = [1, 2, 3];
  * const arr2 = [1, 2, 3];
@@ -302,11 +318,11 @@ export function shallowArrayEqual<T>(a: T[], b: T[]): boolean {
 }
 
 /**
- * Take string like "My string is __param__" and replace parameters (__param__) from array of values
+ * Take string like "My string is __param__" and replace parameters (__param__) from array of values.
  *
- * @param {unknown[]} params - An array of parameters to replace, i.e. ['short']
- * @param {string} message - The original message, i.e. "My string is __param__"
- * @returns {string} Message with values replaced "My string is short"
+ * @param params - An array of parameters to replace, i.e. ['short']
+ * @param message - The original message, i.e. "My string is __param__"
+ * @returns Message with values replaced "My string is short"
  */
 export function replaceParams(params: unknown[], message: string): string {
   let tmpMess = message;
@@ -318,12 +334,12 @@ export function replaceParams(params: unknown[], message: string): string {
 }
 
 /**
- * Return proper language Geoview localized values from map i18n instance
+ * Return proper language Geoview localized values from map i18n instance.
  *
- * @param {TypeDisplayLanguage} language - The language to get the message in
- * @param {string} messageKey - The localize key to read the message from
- * @param {unknown[] | undefined} params - An array of parameters to replace, i.e. ['short']
- * @returns {string} The translated message with values replaced
+ * @param language - The language to get the message in
+ * @param messageKey - The localize key to read the message from
+ * @param params - Optional array of parameters to replace, i.e. ['short']
+ * @returns The translated message with values replaced
  */
 export function getLocalizedMessage(language: TypeDisplayLanguage, messageKey: string, params: unknown[] | undefined = undefined): string {
   // Check if the message key exists, before translating it and log a warning when it doesn't exist
@@ -345,8 +361,9 @@ export function getLocalizedMessage(language: TypeDisplayLanguage, messageKey: s
 /**
  * Deep merge objects together. Latest object will overwrite value on previous one
  * if property exist.
- * @param {unknown[]} objects - The objects to deep merge.
- * @returns {T} The merged object
+ *
+ * @param objects - The objects to deep merge
+ * @returns The merged object
  */
 export function deepMergeObjects<T>(...objects: unknown[]): T {
   const deepCopyObjects = objects.map((object) => JSON.parse(JSON.stringify(object)));
@@ -354,8 +371,9 @@ export function deepMergeObjects<T>(...objects: unknown[]): T {
 }
 
 /**
- * Check if a string is a number
- * @param {string} str - The object to test
+ * Check if a string is a number.
+ *
+ * @param str - The object to test
  * @returns true if the object is numeric, false otherwise
  */
 export function isNumeric(str: string): boolean {
@@ -363,8 +381,9 @@ export function isNumeric(str: string): boolean {
 }
 
 /**
- * Check if an object is empty
- * @param {object} obj - The object to test
+ * Check if an object is empty.
+ *
+ * @param obj - The object to test
  * @returns true if the object is empty, false otherwise
  */
 export function isObjectEmpty(obj: object): boolean {
@@ -372,8 +391,9 @@ export function isObjectEmpty(obj: object): boolean {
 }
 
 /**
- * Get the URL of main script cgpv-main so we can access the assets
- * @returns {string} The URL of the main script
+ * Get the URL of main script cgpv-main so we can access the assets.
+ *
+ * @returns The URL of the main script
  */
 export function getScriptAndAssetURL(): string {
   // get all loaded js scripts on the page
@@ -401,8 +421,9 @@ export function getScriptAndAssetURL(): string {
 
 /**
  * Generates a unique id of the specified length.
- * @param {8 | 18 | 36} length - Number of characters to return.
- * @returns {string} The id.
+ *
+ * @param length - Number of characters to return
+ * @returns The id
  */
 export function generateId(length: 8 | 18 | 36 = 36): string {
   const generatedId = crypto.randomUUID().substring(0, length);
@@ -412,8 +433,9 @@ export function generateId(length: 8 | 18 | 36 = 36): string {
 // TODO: refactor - This is a duplicate of static config api function. Replace in api OR create utilities api functions
 /**
  * Validates the GeoCore UUIDs.
- * @param {string} uuid The UUID to validate.
- * @returns {boolean} Returns true if the UUID respect the format.
+ *
+ * @param uuid - The UUID to validate
+ * @returns Returns true if the UUID respect the format
  */
 export function isValidUUID(uuid: string): boolean {
   const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -423,8 +445,8 @@ export function isValidUUID(uuid: string): boolean {
 /**
  * Checks whether a text response contains a valid OGC capabilities root element.
  *
- * @param text - The response text to check.
- * @returns True if the text contains WMS or WFS capabilities markers.
+ * @param text - The response text to check
+ * @returns True if the text contains WMS or WFS capabilities markers
  */
 function isOgcCapabilitiesResponse(text: string): boolean {
   const lower = text.toLowerCase();
@@ -444,10 +466,10 @@ function isOgcCapabilitiesResponse(text: string): boolean {
  *
  * The function never throws — all failures are returned as part of the result object.
  *
- * @param targetUrl - The URL to validate and ping.
- * @param proxyBase - Optional. The proxy server base URL. Defaults to CONFIG_PROXY_URL.
- * @param timeoutMs - Optional. Request timeout in milliseconds. Defaults to 5000ms.
- * @returns A result object with isValid, isReachable, needsProxy, status, and optional error.
+ * @param targetUrl - The URL to validate and ping
+ * @param proxyBase - Optional proxy server base URL (defaults to CONFIG_PROXY_URL)
+ * @param timeoutMs - Optional request timeout in milliseconds (defaults to 5000ms)
+ * @returns A promise that resolves with a result object containing isValid, isReachable, needsProxy, status, and optional error
  */
 export async function validateAndPingUrl(
   targetUrl: string,
@@ -565,8 +587,8 @@ export async function validateAndPingUrl(
  * Returns an array of RGBA color tuples, or `undefined` if no palette is present.
  * Each color is normalized to 8-bit values.
  *
- * @param url - URL to the GeoTIFF file.
- * @returns Array of RGBA color tuples, or undefined if no palette.
+ * @param url - URL to the GeoTIFF file
+ * @returns A promise that resolves with an array of RGBA color tuples, or undefined if no palette
  */
 export async function extractGeotiffColorMap(url: string): Promise<RGBA[] | undefined> {
   const tiff = await fromUrl(url);
@@ -596,11 +618,11 @@ export async function extractGeotiffColorMap(url: string): Promise<RGBA[] | unde
 }
 
 /**
- * Set alpha for a color
- * @param {number[]} colorArray - The array of color numbers
- * @param {number} alpha - The new alpha
+ * Set alpha for a color.
  *
- * @returns {number[]} the color with the alpha set
+ * @param colorArray - The array of color numbers
+ * @param alpha - The new alpha
+ * @returns the color with the alpha set
  */
 export function setAlphaColor(colorArray: number[], alpha: number): number[] {
   const color = colorArray;
@@ -609,9 +631,10 @@ export function setAlphaColor(colorArray: number[], alpha: number): number[] {
 }
 
 /**
- * Validates if a JSON string is well formatted
- * @param {string} str - The string to test
- * @returns {bollean} true if the JSON is valid, false otherwise
+ * Validates if a JSON string is well formatted.
+ *
+ * @param str - The string to test
+ * @returns true if the JSON is valid, false otherwise
  */
 export function isJsonString(str: string): boolean {
   try {
@@ -634,8 +657,9 @@ export function isJsonString(str: string): boolean {
 }
 
 /**
- * Converts an XML document object into a json object
- * @param {Document | Node | Element} xml - The XML document object
+ * Converts an XML document object into a json object.
+ *
+ * @param xml - The XML document object
  * @returns The converted json object
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -712,8 +736,9 @@ export function xmlToJson(xml: Document | Node | Element): any {
 
 /**
  * Parses a XML string into Json.
- * @param {string} xmlContent - The XML string to parse.
- * @returns {T} A json object
+ *
+ * @param xmlContent - The XML string to parse
+ * @returns A json object
  */
 export function parseXMLToJson<T>(xmlContent: string): T {
   // Read the xml
@@ -724,9 +749,10 @@ export function parseXMLToJson<T>(xmlContent: string): T {
 }
 
 /**
- * Execute a XMLHttpRequest
- * @param {string} url - The url to request
- * @returns {Promise<string>} The return value, return is '{}' if request failed
+ * Execute a XMLHttpRequest.
+ *
+ * @param url - The url to request
+ * @returns A promise that resolves with the response text, or '{}' if the request failed
  * @deprecated Use the core/utils/fetch-helper.ts/Fetch functions instead
  */
 export function getXMLHttpRequest(url: string): Promise<string> {
@@ -758,12 +784,11 @@ export function getXMLHttpRequest(url: string): Promise<string> {
 // #region UI HELPERS
 
 /**
- * Add a UI component to a custom div. Do not listen to event from here, pass in the props
+ * Add a UI component to a custom div. Do not listen to event from here, pass in the props.
  *
- * @param {string} targetDivId - The div id to insert the component in
- * @param {React.ReactElement} component - The UI react component
- *
- * @return {Root} the React root element
+ * @param targetDivId - The div id to insert the component in
+ * @param component - The UI react component
+ * @returns the React root element
  */
 export function addUiComponent(targetDivId: string, component: React.ReactElement): Root {
   const root = createRoot(document.getElementById(targetDivId)!);
@@ -772,10 +797,10 @@ export function addUiComponent(targetDivId: string, component: React.ReactElemen
 }
 
 /**
- * Sanitizes HTML to remove threat
+ * Sanitizes HTML to remove threat.
  *
- * @param {string} contentHtml - HTML content to sanitize
- * @returns {string} Sanitized HTML or empty string if all dirty
+ * @param contentHtml - HTML content to sanitize
+ * @returns Sanitized HTML or empty string if all dirty
  */
 export function sanitizeHtmlContent(contentHtml: string): string {
   return sanitizeHtml(contentHtml, {
@@ -837,11 +862,13 @@ export function enhanceLinksAccessibility(html: string, announcementText: string
 
 /**
  * Sets up a MutationObserver to monitor when a specific DOM element (e.g., a div container)
- * is removed from the document. When the element is removed, it triggers a cleanup callback
- * and disconnects the observer to prevent memory leaks.
- * @param {string} key - A unique identifier for the element, used to manage observer references.
- * @param {Element} element - The DOM element to monitor for removal from the DOM tree.
- * @param {(key: string) => void} onHtmlElementRemoved - The callback executed once the given DOM element gets removed from the DOM tree.
+ * is removed from the document.
+ *
+ * When the element is removed, it triggers a cleanup callback and disconnects the observer to prevent memory leaks.
+ *
+ * @param key - A unique identifier for the element, used to manage observer references
+ * @param element - The DOM element to monitor for removal from the DOM tree
+ * @param onHTMLElementRemoved - The callback executed once the given DOM element gets removed from the DOM tree
  */
 export function watchHtmlElementRemoval(key: string, element: HTMLElement, onHTMLElementRemoved: (key: string) => void): void {
   if (!element || !element.parentNode) return;
@@ -880,12 +907,14 @@ export function watchHtmlElementRemoval(key: string, element: HTMLElement, onHTM
 
 /**
  * Attempts to place the given HTML element into fullscreen mode.
+ *
  * This function handles browser compatibility by trying the standard
  * `requestFullscreen()` API first, then falling back to vendor-prefixed
  * versions for Safari, IE11, and Firefox.
  * Any errors from the standard promise-based fullscreen request are caught
  * and logged using `logger.logPromiseFailed`.
- * @param {TypeHTMLElement} element - The element to display in fullscreen mode.
+ *
+ * @param element - The element to display in fullscreen mode
  */
 export function requestFullscreen(element: TypeHTMLElement): void {
   if (element.requestFullscreen) {
@@ -907,6 +936,7 @@ export function requestFullscreen(element: TypeHTMLElement): void {
 
 /**
  * Exits fullscreen mode if the document is currently in fullscreen.
+ *
  * This function uses the standard `exitFullscreen()` API when available,
  * and falls back to vendor-prefixed exit methods for Safari, IE11, and Firefox.
  * Any errors from the standard promise-based exit request are caught
@@ -934,12 +964,14 @@ export function exitFullscreen(): void {
 
 /**
  * Safely converts a JavaScript value to a JSON string, handling circular references.
+ *
  * Circular objects are replaced with the string `"{Circular JSON}"` to prevent
  * `JSON.stringify` from throwing an error. The function also supports optional
  * pretty-printing via the `space` parameter.
- * @param {*} obj - The value to stringify.
- * @param {number} [space=2] - Number of spaces to use for indentation in the resulting JSON string.
- * @returns {string} The JSON string representation of the input value, with circular references handled.
+ *
+ * @param obj - The value to stringify
+ * @param space - Optional number of spaces to use for indentation in the resulting JSON string (default 2)
+ * @returns The JSON string representation of the input value, with circular references handled
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function safeStringify(obj: any, space: number = 2): string {
@@ -961,10 +993,10 @@ export function safeStringify(obj: any, space: number = 2): string {
 }
 
 /**
- * Removes comments from JSON config
+ * Removes comments from JSON config.
  *
- * @param {string} config Map config to clean
- * @returns {string} cleaned config object
+ * @param config - Map config to clean
+ * @returns cleaned config object
  */
 export function removeCommentsFromJSON(config: string): string {
   // Erase comments in the config file.
@@ -982,8 +1014,9 @@ export function removeCommentsFromJSON(config: string): string {
 
 /**
  * Parses JSON config string into a JSON object of type T.
- * @param {string} configStr - Map config to parse
- * @returns {T} Cleaned and parsed config object
+ *
+ * @param configStr - Map config to parse
+ * @returns Cleaned and parsed config object
  */
 export function parseJSONConfig<T>(configStr: string): T {
   // remove CR and LF from the map config
@@ -996,11 +1029,11 @@ export function parseJSONConfig<T>(configStr: string): T {
 }
 
 /**
-/**
- * Export the image data url to a file
- * @param {string} dataUrl - The data Url to be downloaded.
- * @param {string} name - The name of exported file
- * @param {string} format - The format of the exported file
+ * Export the image data url to a file.
+ *
+ * @param dataUrl - The data Url to be downloaded
+ * @param name - The name of exported file
+ * @param format - The format of the exported file
  */
 export function exportFile(dataUrl: string, name: string, format: 'pdf' | 'png' | 'jpeg' = 'png'): void {
   try {
@@ -1016,9 +1049,10 @@ export function exportFile(dataUrl: string, name: string, format: 'pdf' | 'png' 
 
 /**
  * Find an object property by regex values. The find is case insensitive.
- * @param {unknown | undefined} objectItem - The object to search in.
- * @param {RegExp | RegExp[]} patterns - A single RegExp or an array of RegExp patterns to match in sequence.
- * @returns {T = Record<string, unknown> | undefined} The value found at the end of the matching path, or undefined if not found.
+ *
+ * @param objectItem - The object to search in
+ * @param patterns - A single RegExp or an array of RegExp patterns to match in sequence
+ * @returns The value found at the end of the matching path, or undefined if not found
  */
 export function findPropertyByRegexPath<T = Record<string, unknown>>(
   objectItem: unknown | undefined,
@@ -1040,10 +1074,10 @@ export function findPropertyByRegexPath<T = Record<string, unknown>>(
 }
 
 /**
- * Check string to see if it is an image
+ * Check string to see if it is an image.
  *
- * @param {string} item - The item to validate
- * @returns {boolean} true if it is an image, false otherwise
+ * @param item - The item to validate
+ * @returns true if it is an image, false otherwise
  */
 export function isImage(item: string): boolean {
   // Pattern 1: URLs ending with image extensions (with optional query parameters)
@@ -1065,7 +1099,7 @@ export function isImage(item: string): boolean {
  * Checks object to see if it can be converted to a string; if not, returns an empty string
  *
  * @param str - The unknown object to stringify
- * @return Returns the original object if it can be converted to a string; '' otherwise
+ * @returns The original object if it can be converted to a string; '' otherwise
  */
 export function stringify(str: unknown): unknown | string {
   if (typeof str === 'undefined' || str === null) {
@@ -1080,7 +1114,7 @@ export function stringify(str: unknown): unknown | string {
 /**
  * Creates a delayed job which includes a promise that resolves after a specified timeout, with the ability to cancel or reject it manually.
  *
- * @param timeout - The number of milliseconds to wait before resolving the promise.
+ * @param timeout - The number of milliseconds to wait before resolving the promise
  * @returns An object representing the delayed job, containing:
  *   - `promise`: A Promise that resolves after the timeout (or immediately if canceled).
  *   - `cancel()`: Cancels the timeout and immediately resolves the promise.
@@ -1131,8 +1165,8 @@ export function doTimeout(timeout: number): DelayJob {
 /**
  * Delay helper function.
  *
- * @param timeout - The number of milliseconds to wait for.
- * @returns A Promise which resolves when the delay timeout expires.
+ * @param timeout - The number of milliseconds to wait for
+ * @returns A promise that resolves when the delay timeout expires
  */
 export function delay(timeout: number): Promise<void> {
   // Redirect
@@ -1154,13 +1188,13 @@ export function delay(timeout: number): Promise<void> {
  *
  * @param callback - Function executed on each interval tick. Receives the elapsed
  * time (ms) since the start. If the function returns a truthy value, the interval
- * is cleared immediately.
- * @param intervalMs - Interval duration in milliseconds between each callback invocation.
+ * is cleared immediately
+ * @param intervalMs - Interval duration in milliseconds between each callback invocation
  * @param timeout - Optional maximum duration in milliseconds before the interval
- * is automatically cleared. If omitted, the interval runs until the callback stops it.
+ * is automatically cleared. If omitted, the interval runs until the callback stops it
  * @param startImmediately - If `true`, the callback is invoked once immediately
- * before the interval is scheduled. Defaults to `false`.
- * @returns The job object containing the cancel function and interval ID.
+ * before the interval is scheduled (defaults to `false`)
+ * @returns The job object containing the cancel function and interval ID
  */
 export function doUntil<T>(callback: (elapsed: number) => T, intervalMs: number, timeout?: number, startImmediately = false): DoUntilJob {
   // Note the start time
@@ -1226,13 +1260,14 @@ export function doUntil<T>(callback: (elapsed: number) => T, intervalMs: number,
  * Repeatedly invokes a callback function at a specified interval until one of two conditions is met:
  * - The callback function explicitly returns `true`, indicating the interval should be cleared.
  * - The provided promise has resolved or rejected.
+ *
  * This is useful for performing a recurring action (e.g., logging or polling) that can end either due to
  * external completion logic or once all promises are settled.
  *
- * @param callback - A function executed on each interval. If it returns `true`, the interval is cleared.
- * @param promise - A Promise whose completion will also stop the interval.
- * @param intervalMs - The interval duration in milliseconds.
- * @returns The interval timer, which can be cleared manually if needed.
+ * @param callback - A function executed on each interval. If it returns `true`, the interval is cleared
+ * @param promise - A Promise whose completion will also stop the interval
+ * @param intervalMs - The interval duration in milliseconds
+ * @returns The interval timer, which can be cleared manually if needed
  */
 export function doUntilPromise<T>(callback: () => T, promise: Promise<unknown>, intervalMs: number): DoUntilJob {
   // Start a recurrent timer
@@ -1248,6 +1283,7 @@ export function doUntilPromise<T>(callback: () => T, promise: Promise<unknown>, 
 
 /**
  * Internal function to work with async "whenThisThat"... methods.
+ *
  * This function is recursive and checks for a validity of something via the checkCallback() until it's found or until the timer runs out.
  * When the check callback returns true (or some found object), the doCallback() function is called with the found information.
  * If checkCallback wasn't found and timer expired, the failCallback() function is called.
@@ -1257,7 +1293,7 @@ export function doUntilPromise<T>(callback: () => T, promise: Promise<unknown>, 
  * @param failCallback - The function executed when checkCallback has failed for too long (went over the timeout)
  * @param startDate - The initial date this task was started
  * @param timeout - The duration in milliseconds until the task is aborted
- * @param checkFrequency - The frequency in milliseconds to callback for a check.
+ * @param checkFrequency - The frequency in milliseconds to callback for a check
  */
 // eslint-disable-next-line no-underscore-dangle
 function _whenThisThenThat<T>(
@@ -1305,6 +1341,7 @@ function _whenThisThenThat<T>(
 
 /**
  * This generic function checks for a validity of something via the checkCallback() until it's found or until the timer runs out.
+ *
  * When the check callback returns true (or some found object), the doCallback() function is called with the found information.
  * If checkCallback wasn't found and timer expired, the failCallback() function is called.
  *
@@ -1355,9 +1392,10 @@ export function escapeRegExp(text: string): string {
 
 /**
  * Tries to read an ArrayBuffer into a string by guessing different encodings and returning the best that works to read the content.
- * @param {ArrayBuffer} buffer - The array buffer to read from.
- * @param {string[]} encodings - The encodings to try, defaults to ['utf-8', 'windows-1252', 'iso-8859-1'].
- * @returns { text: string; encoding: string } The best text and the best encoding used for the text
+ *
+ * @param buffer - The array buffer to read from
+ * @param encodings - Optional encodings to try (defaults to ['utf-8', 'windows-1252', 'iso-8859-1'])
+ * @returns The best text and the best encoding used for the text
  */
 export function readTextWithBestEncoding(
   buffer: ArrayBuffer,
@@ -1392,8 +1430,9 @@ export function readTextWithBestEncoding(
 
 /**
  * Extract heading from guide content.
- * @param {string} content - Guide content to get heading from.
- * @returns {string} Content section heading
+ *
+ * @param content - Guide content to get heading from
+ * @returns Content section heading
  */
 function getSectionHeading(content: string): string {
   const firstLine = content.split('\n')[0].trim().split(' ');
@@ -1402,9 +1441,11 @@ function getSectionHeading(content: string): string {
 
 /**
  * Create guide object from .md file.
- * @param {string} mapId - ID of map.
- * @param {TypeDisplayLanguage} language - Language to use for guide.
- * @returns {Promise<TypeGuideObject | undefined>} The guide object
+ *
+ * @param mapId - ID of map
+ * @param language - Language to use for guide
+ * @param assetsURL - The base URL for assets
+ * @returns A promise that resolves with the guide object, or undefined on error
  */
 export async function createGuideObject(
   mapId: string,
@@ -1478,10 +1519,11 @@ export async function createGuideObject(
 
 /**
  * Callback function which is fired when keyboard key is pressed.
- * @param {string} key - The keyboard key pressed by user.
- * @param {string} callbackId - The Id of element which init the focus trap.
- * @param {boolean} isFocusTrapped - Component is focus trapped enabled.
- * @param {Function} cb - The callback function to be fired, if needed.
+ *
+ * @param key - The keyboard key pressed by user
+ * @param callbackId - The Id of element which init the focus trap
+ * @param isFocusTrapped - Optional, component is focus trapped enabled
+ * @param cb - Optional callback function to be fired
  */
 export function handleEscapeKey(key: string, callbackId: string, isFocusTrapped?: boolean, cb?: () => void): void {
   if (key === 'Escape') {
@@ -1495,9 +1537,10 @@ export function handleEscapeKey(key: string, callbackId: string, isFocusTrapped?
 }
 
 /**
- * Check if elemetn is in viewport
- * @param {Element} el - The element to check for
- * @returns {Boolean} true if visible, false otherwise
+ * Check if element is in viewport.
+ *
+ * @param el - The element to check for
+ * @returns true if visible, false otherwise
  */
 export function isElementInViewport(el: Element): boolean {
   const rect = el.getBoundingClientRect();
@@ -1512,13 +1555,15 @@ export function isElementInViewport(el: Element): boolean {
 
 /**
  * Scrolls an element into view only if it's not already visible in the viewport.
+ *
  * Respects user's motion preferences by using 'instant' scroll for users who prefer reduced motion.
  * For 'start': adds offset pixels above the element.
  * For 'end': adds offset pixels below the element.
  * For 'center' and 'nearest': uses standard scrollIntoView behavior without offset.
- * @param {HTMLElement} el - The HTML element to scroll into view if not visible
- * @param {ScrollLogicalPosition} blockValue - The vertical alignment ('start', 'center', 'end', 'nearest')
- * @param {number} offset - Offset in pixels for 'start' (top gap) and 'end' (bottom gap) positions (default: 100)
+ *
+ * @param el - The HTML element to scroll into view if not visible
+ * @param blockValue - The vertical alignment ('start', 'center', 'end', 'nearest')
+ * @param offset - Optional offset in pixels for 'start' (top gap) and 'end' (bottom gap) positions (default: 100)
  */
 export function scrollIfNotVisible(el: HTMLElement, blockValue: ScrollLogicalPosition, offset: number = 100): void {
   const behaviorScroll = (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth') as ScrollBehavior;
@@ -1543,8 +1588,10 @@ export function scrollIfNotVisible(el: HTMLElement, blockValue: ScrollLogicalPos
 
 /**
  * Scrolls a list item into view within its scrollable container only, without scrolling the page.
+ *
  * Adds a 20px gap for better visibility when scrolling.
- * @param {HTMLElement} listItem - The list item element to scroll into view
+ *
+ * @param listItem - The list item element to scroll into view
  */
 export function scrollListItemIntoView(listItem: HTMLElement): void {
   const behaviorScroll = (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth') as ScrollBehavior;
@@ -1590,7 +1637,7 @@ export function scrollListItemIntoView(listItem: HTMLElement): void {
 /**
  * Checks whether the current environment is running on localhost port 8080.
  *
- * @returns {boolean} True if the current hostname is localhost and the port is 8080; otherwise, false.
+ * @returns True if the current hostname is localhost and the port is 8080; otherwise, false
  */
 export function isLocalhost(): boolean {
   if (typeof window === 'undefined' || !window.location) return false;
@@ -1598,10 +1645,11 @@ export function isLocalhost(): boolean {
 }
 
 /**
- * Formats a numeric value according to the display language
- * @param {number} value - The value to format
- * @param {string} displayLanguage - The display language ('en' or 'fr')
- * @returns {string} The formatted value
+ * Formats a numeric value according to the display language.
+ *
+ * @param value - The value to format
+ * @param displayLanguage - The display language ('en' or 'fr')
+ * @returns The formatted value
  */
 export function formatMeasurementValue(value: number, displayLanguage: string): string {
   return displayLanguage === 'fr'
@@ -1610,10 +1658,11 @@ export function formatMeasurementValue(value: number, displayLanguage: string): 
 }
 
 /**
- * Formats a length measurement with appropriate units
- * @param {number} length - The length in meters
- * @param {string} displayLanguage - The display language
- * @returns {string} The formatted length string
+ * Formats a length measurement with appropriate units.
+ *
+ * @param length - The length in meters
+ * @param displayLanguage - The display language
+ * @returns The formatted length string
  */
 export function formatLength(length: number, displayLanguage: string): string {
   if (length > 100) {
@@ -1625,10 +1674,11 @@ export function formatLength(length: number, displayLanguage: string): string {
 }
 
 /**
- * Formats an area measurement with appropriate units
- * @param {number} area - The area in square meters
- * @param {string} displayLanguage - The display language
- * @returns {string} The formatted area string
+ * Formats an area measurement with appropriate units.
+ *
+ * @param area - The area in square meters
+ * @param displayLanguage - The display language
+ * @returns The formatted area string
  */
 export function formatArea(area: number, displayLanguage: string): string {
   if (area > 10000) {
@@ -1641,9 +1691,11 @@ export function formatArea(area: number, displayLanguage: string): string {
 
 /**
  * Normalizes a WMS accesspath if it is from datacube.
+ *
  * Left as 'datacube' to check for both datacube.services.geo.ca and datacube-prod-data-public.s3.ca-central-1.amazonaws.com/
- * @param {string} path - The original access path.
- * @returns {string} The normalized access path.
+ *
+ * @param path - The original access path
+ * @returns The normalized access path
  */
 export function normalizeDatacubeAccessPath(path: string): string {
   //TODO: extract to list of exceptions / normalizations?

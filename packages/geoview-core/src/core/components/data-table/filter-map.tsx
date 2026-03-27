@@ -6,17 +6,17 @@ import { Switch } from '@/ui';
 import { useDataTableStoreActions, useDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
 
+/** Properties for the FilterMap component. */
 interface FilterMapProps {
   layerPath: string;
   isGlobalFilterOn: boolean;
 }
 
 /**
- * Custom Filter map toggle button.
- * @param {string} layerPath key of the layer displayed in the map.
- * @param {boolean} isGlobalFilterOn is global filter on
- * @returns {JSX.Element} returns Switch
+ * Renders a toggle switch to filter the map based on data table filters.
  *
+ * @param props - FilterMap properties
+ * @returns The filter map toggle switch element
  */
 function FilterMap({ layerPath, isGlobalFilterOn }: FilterMapProps): JSX.Element {
   // Log

@@ -27,15 +27,9 @@
         "geoviewLayerType": "geoCore"
       },
       {
-        "geoviewLayerId": "tritium_agol",
+        "geoviewLayerId": "f0d1c3a9-cf78-4b07-af55-9e8d4303449e",
         "geoviewLayerName": "Tritium Radioactivity agol",
-        "metadataAccessPath": "https://services1.arcgis.com/HsjBaDykC1mjhXz9/ArcGIS/rest/services/CRMN___Tritium_in_Atmospheric_Water_Vapour_WFL1/FeatureServer",
-        "geoviewLayerType": "esriFeature",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "1"
-          }
-        ]
+        "geoviewLayerType": "geoCore"
       },
       {
         "geoviewLayerId": "ogcFeatureLakes",

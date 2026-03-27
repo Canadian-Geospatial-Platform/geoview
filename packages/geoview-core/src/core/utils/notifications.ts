@@ -6,23 +6,21 @@ import { generateId, getLocalizedMessage } from './utilities';
 import { logger } from './logger';
 import { GeoViewError } from '@/core/exceptions/geoview-exceptions';
 
-/**
- * Class used to send message to user for a map. Can be a notification and/or a snackbar message
- * @class Notifications
- * @exports
- */
+/** Class used to send message to user for a map. Can be a notification and/or a snackbar message. */
 export class Notifications {
+  /** The map id. */
   mapId;
 
-  // Snackbar messages to display
+  /** Snackbar messages to display. */
   snackbarMessageQueue: SnackbarProps[] = [];
 
   /** Keep all callback delegate references */
   #onSnackbarOpenHandlers: SnackBarOpenDelegate[] = [];
 
   /**
-   * The class constructor to instanciate a notification class
-   * @param {string} mapId - The map id
+   * The class constructor to instantiate a notification class.
+   *
+   * @param mapId - The map id
    */
   constructor(mapId: string) {
     this.mapId = mapId;
@@ -31,11 +29,11 @@ export class Notifications {
   // #region NOTIFICATIONS
 
   /**
-   * Reusable utility function to send event to add a notification in the notifications manager
-   * @param {NotificationType} type - The type of message (info, success, warning, error), info by default
-   * @param {string} messageKey - The message or a locale key to retrieve
-   * @param {unknown[]} params - Array of parameters to replace, i.e. ['short']
-   * @private
+   * Reusable utility function to send event to add a notification in the notifications manager.
+   *
+   * @param type - The type of message (info, success, warning, error), info by default
+   * @param messageKey - The message or a locale key to retrieve
+   * @param params - Array of parameters to replace, i.e. ['short']
    */
   #addNotification(type: NotificationType, messageKey: string, params: unknown[]): void {
     const notification = {
@@ -58,9 +56,10 @@ export class Notifications {
   // TO.DOCONT: Provide a addNotificationUsingKey and a 'showXXXXUsingKey' alternatives?
 
   /**
-   * Adds a notification message
-   * @param {string} messageKey - The message or a locale key to retrieve
-   * @param {unknown[] | undefined} params - Optional, array of parameters to replace, i.e. ['short']
+   * Adds a notification message.
+   *
+   * @param messageKey - The message or a locale key to retrieve
+   * @param params - Optional array of parameters to replace, i.e. ['short']
    */
   addNotificationMessage(messageKey: string, params: unknown[] = []): void {
     // Redirect
@@ -68,9 +67,10 @@ export class Notifications {
   }
 
   /**
-   * Adds a notification success
-   * @param {string} messageKey - The message or a locale key to retrieve
-   * @param {unknown[] | undefined} params - Optional, array of parameters to replace, i.e. ['short']
+   * Adds a notification success.
+   *
+   * @param messageKey - The message or a locale key to retrieve
+   * @param params - Optional array of parameters to replace, i.e. ['short']
    */
   addNotificationSuccess(messageKey: string, params: unknown[] = []): void {
     // Redirect
@@ -78,9 +78,10 @@ export class Notifications {
   }
 
   /**
-   * Adds a notification warning
-   * @param {string} messageKey - The message or a locale key to retrieve
-   * @param {unknown[] | undefined} params - Optional, array of parameters to replace, i.e. ['short']
+   * Adds a notification warning.
+   *
+   * @param messageKey - The message or a locale key to retrieve
+   * @param params - Optional array of parameters to replace, i.e. ['short']
    */
   addNotificationWarning(messageKey: string, params: unknown[] = []): void {
     // Redirect
@@ -88,9 +89,10 @@ export class Notifications {
   }
 
   /**
-   * Adds a notification error
-   * @param {string} messageKey - The message or a locale key to retrieve
-   * @param {unknown[] | undefined} params - Optional, array of parameters to replace, i.e. ['short']
+   * Adds a notification error.
+   *
+   * @param messageKey - The message or a locale key to retrieve
+   * @param params - Optional array of parameters to replace, i.e. ['short']
    */
   addNotificationError(messageKey: string, params: unknown[] = []): void {
     // Redirect
@@ -102,12 +104,12 @@ export class Notifications {
   // #region MESSAGES
 
   /**
-   * Reusable utility function to send event to display a message in the snackbar
-   * @param {SnackbarType} type - The  type of snackbar
-   * @param {string} messageKey - The message or a locale key to retrieve
-   * @param {unknown[] | undefined} params - Array of parameters to replace, i.e. ['short']
-   * @param {ISnackbarButton} button - Optional snackbar button
-   * @private
+   * Reusable utility function to send event to display a message in the snackbar.
+   *
+   * @param type - The type of snackbar
+   * @param messageKey - The message or a locale key to retrieve
+   * @param params - Array of parameters to replace, i.e. ['short']
+   * @param button - Optional snackbar button
    */
   #showSnackbarMessage(type: SnackbarType, messageKey: string, params: unknown[], button?: ISnackbarButton): void {
     // Get the localized message
@@ -124,12 +126,12 @@ export class Notifications {
 
   /**
    * Adds a snackbar message to the queue and displays it if it is the only one.
-   * @param {SnackbarType} type - The  type of snackbar
-   * @param {string} messageKey - The message or a locale key to retrieve
-   * @param {unknown[] | undefined} params - Array of parameters to replace, i.e. ['short']
-   * @param {boolean} withNotification - Indicates if the message has also been added as a notification
-   * @param {ISnackbarButton} button - Optional snackbar button
-   * @private
+   *
+   * @param type - The type of snackbar
+   * @param messageKey - The message or a locale key to retrieve
+   * @param params - Array of parameters to replace, i.e. ['short']
+   * @param withNotification - Indicates if the message has also been added as a notification
+   * @param button - Optional snackbar button
    */
   #addSnackbarMessage(
     type: SnackbarType,
@@ -191,7 +193,7 @@ export class Notifications {
   }
 
   /**
-   * Display next message in snackbar message queue, if there is one
+   * Display next message in snackbar message queue, if there is one.
    */
   displayNextSnackbarMessage(): void {
     if (this.snackbarMessageQueue.length) {
@@ -201,11 +203,12 @@ export class Notifications {
   }
 
   /**
-   * Displays a message in the snackbar
-   * @param {string} messageKey - The message or a locale key to retrieve
-   * @param {unknown[] | undefined} params - Optional, array of parameters to replace, i.e. ['short']
-   * @param {boolean} withNotification - Optional, indicates if the message should also be added as a notification, default true
-   * @param {ISnackbarButton} button - Optional snackbar button
+   * Displays a message in the snackbar.
+   *
+   * @param messageKey - The message or a locale key to retrieve
+   * @param params - Optional array of parameters to replace, i.e. ['short']
+   * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
+   * @param button - Optional snackbar button
    */
   showMessage(messageKey: string, params: unknown[] = [], withNotification: boolean = true, button: ISnackbarButton = {}): void {
     // Redirect
@@ -214,11 +217,12 @@ export class Notifications {
   }
 
   /**
-   * Displays an success message in the snackbar
-   * @param {string} messageKey - The message or a locale key to retrieve
-   * @param {unknown[] | undefined} params - Optional, array of parameters to replace, i.e. ['short']
-   * @param {boolean} withNotification - Optional, indicates if the message should also be added as a notification, default true
-   * @param {ISnackbarButton} button - Optional snackbar button
+   * Displays a success message in the snackbar.
+   *
+   * @param messageKey - The message or a locale key to retrieve
+   * @param params - Optional array of parameters to replace, i.e. ['short']
+   * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
+   * @param button - Optional snackbar button
    */
   showSuccess(messageKey: string, params: unknown[] = [], withNotification: boolean = true, button: ISnackbarButton = {}): void {
     // Redirect
@@ -227,11 +231,12 @@ export class Notifications {
   }
 
   /**
-   * Displays an warning message in the snackbar
-   * @param {string} messageKey - The message or a locale key to retrieve
-   * @param {unknown[] | undefined} params - Optional, array of parameters to replace, i.e. ['short']
-   * @param {boolean} withNotification - Optional, indicates if the message should also be added as a notification, default true
-   * @param {ISnackbarButton} button - Optional snackbar button
+   * Displays a warning message in the snackbar.
+   *
+   * @param messageKey - The message or a locale key to retrieve
+   * @param params - Optional array of parameters to replace, i.e. ['short']
+   * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
+   * @param button - Optional snackbar button
    */
   showWarning(messageKey: string, params: unknown[] = [], withNotification: boolean = true, button: ISnackbarButton = {}): void {
     // Also log the warning in console
@@ -243,11 +248,12 @@ export class Notifications {
   }
 
   /**
-   * Displays an error message in the snackbar
-   * @param {string} messageKey - The message or a locale key to retrieve
-   * @param {unknown[] | undefined} params - Optional, array of parameters to replace, i.e. ['short']
-   * @param {boolean} withNotification - Optional, indicates if the message should also be added as a notification, default true
-   * @param {ISnackbarButton} button - Optional snackbar button
+   * Displays an error message in the snackbar.
+   *
+   * @param messageKey - The message or a locale key to retrieve
+   * @param params - Optional array of parameters to replace, i.e. ['short']
+   * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
+   * @param button - Optional snackbar button
    */
   showError(messageKey: string, params: unknown[] = [], withNotification: boolean = true, button: ISnackbarButton = {}): void {
     // Log the error in console
@@ -260,9 +266,10 @@ export class Notifications {
 
   /**
    * Displays an error which can be a GeoViewError or a generic Error.
-   * @param {Error | unknown} error - The error to retrieve the message from and translate it
-   * @param {boolean} withNotification - Optional, indicates if the message should also be added as a notification, default true
-   * @param {ISnackbarButton} button - Optional snackbar button
+   *
+   * @param error - The error to retrieve the message from and translate it
+   * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
+   * @param button - Optional snackbar button
    */
   showErrorFromError(error: Error | unknown, withNotification: boolean = true, button: ISnackbarButton = {}): void {
     // If a GeoViewError, we know we have messageKeys for us as that's how we build our Errors
@@ -286,8 +293,10 @@ export class Notifications {
   }
 
   /**
-   * Displays a generic error message in the snackbar
-   * @param {boolean} withNotification - Optional, indicates if the message should also be added as a notification, default true
+   * Displays a generic error message in the snackbar.
+   *
+   * @param withNotification - Optional, indicates if the message should also be added as a notification (default true)
+   * @param button - Optional snackbar button
    */
   showErrorGeneric(withNotification: boolean = true, button: ISnackbarButton = {}): void {
     // Redirect
@@ -301,8 +310,8 @@ export class Notifications {
 
   /**
    * Emits a snackbar open event to all handlers.
-   * @param {SnackBarOpenDelegate} event - The event to emit
-   * @private
+   *
+   * @param event - The event to emit
    */
   #emitSnackbarOpen(event: SnackBarOpenEvent): void {
     // Emit the event for all handlers
@@ -311,7 +320,8 @@ export class Notifications {
 
   /**
    * Registers a snackbar open event handler.
-   * @param {SnackBarOpenDelegate} callback - The callback to be executed whenever the event is emitted
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
    */
   onSnackbarOpen(callback: SnackBarOpenDelegate): void {
     // Register the event handler
@@ -320,7 +330,8 @@ export class Notifications {
 
   /**
    * Unregisters a snackbar open event handler.
-   * @param {SnackBarOpenDelegate} callback - The callback to stop being called whenever the event is emitted
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
    */
   offSnackbarOpen(callback: SnackBarOpenDelegate): void {
     // Unregister the event handler
@@ -330,30 +341,26 @@ export class Notifications {
   // #endregion EVENTS
 }
 
-/**
- * Define a delegate for the event handler function signature
- */
+/** Delegate for the snackbar open event handler function signature. */
 type SnackBarOpenDelegate = EventDelegateBase<Notifications, SnackBarOpenEvent, void>;
 
-/**
- * Define an event for the delegate
- */
+/** Event payload for the snackbar open delegate. */
 export type SnackBarOpenEvent = {
   snackbarType: SnackbarType;
   message: string;
   button?: ISnackbarButton;
 };
 
-/**
- * Snackbar button properties interface
- */
+/** Snackbar button properties interface. */
 interface ISnackbarButton {
   label?: string;
   action?: () => void;
 }
 
+/** The supported snackbar message types. */
 export type SnackbarType = 'success' | 'error' | 'info' | 'warning';
 
+/** Properties for a queued snackbar message. */
 export type SnackbarProps = {
   type: SnackbarType;
   messageKey: string;

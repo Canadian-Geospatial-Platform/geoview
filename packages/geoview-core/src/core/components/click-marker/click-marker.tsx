@@ -7,18 +7,17 @@ import { useMapClickMarker, useMapClickCoordinates, useMapStoreActions } from '@
 import { logger } from '@/core/utils/logger';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
+/** Represents a click marker placed on the map at the user's click location. */
 export type TypeClickMarker = {
   lonlat: Coordinate;
   symbology?: unknown;
 };
 
 /**
- * Create a react element to display a marker ( at the click location) when a user clicks on
- * the map
+ * Displays a marker at the click location when a user clicks on the map.
  *
- * @returns {JSX.Element} the react element with a marker on click
+ * @returns The click marker element
  */
-// Memoizes entire component, preventing re-renders if props haven't changed
 export const ClickMarker = memo(function ClickMarker(): JSX.Element {
   logger.logTraceRender('components/click-marker/click-marker');
 
@@ -31,10 +30,19 @@ export const ClickMarker = memo(function ClickMarker(): JSX.Element {
   const clickCoordinates = useMapClickCoordinates();
   const { setOverlayClickMarkerRef, showClickMarker } = useMapStoreActions();
 
+  /**
+   * Registers the click marker overlay ref on mount.
+   */
   useEffect(() => {
+    // Log
+    logger.logTraceUseEffect('CLICK-MARKER - setOverlayClickMarkerRef');
+
     setOverlayClickMarkerRef(clickMarkerRef.current as HTMLElement);
   }, [setOverlayClickMarkerRef]);
 
+  /**
+   * Shows the click marker when click coordinates change.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('CLICK-MARKER - clickCoordinates');

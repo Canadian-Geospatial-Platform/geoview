@@ -18,12 +18,7 @@ import { visuallyHidden } from '@/ui/style/default';
 // eslint-disable-next-line no-underscore-dangle
 declare const __VERSION__: TypeAppVersion;
 
-/**
- * An object containing version information.
- *
- * @export
- * @interface TypeAppVersion
- */
+/** Version information for the application. */
 export type TypeAppVersion = {
   hash: string;
   major: number;
@@ -32,6 +27,12 @@ export type TypeAppVersion = {
   timestamp: string;
 };
 
+/**
+ * Gets custom sx classes for the version panel.
+ *
+ * @param theme - The MUI theme object
+ * @returns The sx classes for version panel styling
+ */
 const getSxClasses = (theme: Theme): SxStyles => ({
   versionInfoPanel: {
     width: '200px',
@@ -73,6 +74,11 @@ const getSxClasses = (theme: Theme): SxStyles => ({
   visuallyHidden,
 });
 
+/**
+ * Version button and popover panel displaying app version, build date, and links.
+ *
+ * @returns The version button and popover panel
+ */
 export default function Version(): JSX.Element {
   // Hooks
   const { t } = useTranslation<string>();
@@ -92,7 +98,11 @@ export default function Version(): JSX.Element {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [open, setOpen] = useState(false);
 
-  // Handlers
+  // #region Handlers
+
+  /**
+   * Handles when the version button is clicked to toggle the popover.
+   */
   const handleOpenPopover = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
       setAnchorEl(event.currentTarget);
@@ -107,13 +117,18 @@ export default function Version(): JSX.Element {
     [mapId, enableFocusTrap]
   );
 
-  const handleClickAway = useCallback(() => {
+  /**
+   * Handles clicking away from the version popover to close it.
+   */
+  const handleClickAway = useCallback((): void => {
     if (open) {
       setOpen(false);
       // Restore focus to the button that opened the panel
       disableFocusTrap();
     }
   }, [open, disableFocusTrap]);
+
+  // #endregion
 
   return (
     <ClickAwayListener mouseEvent="onMouseDown" touchEvent="onTouchStart" onClickAway={handleClickAway}>

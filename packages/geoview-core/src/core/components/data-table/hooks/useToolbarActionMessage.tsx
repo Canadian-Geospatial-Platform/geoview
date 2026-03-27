@@ -5,6 +5,7 @@ import { useDataTableStoreActions } from '@/core/stores/store-interface-and-inti
 import { logger } from '@/core/utils/logger';
 import type { MappedLayerDataType, ColumnsType } from '@/core/components/data-table/data-table-types';
 
+/** Properties for the useToolbarActionMessage hook. */
 interface UseSelectedRowMessageProps {
   data: MappedLayerDataType;
   layerPath: string;
@@ -15,11 +16,9 @@ interface UseSelectedRowMessageProps {
 }
 
 /**
- * Custom hook to set the selected/filtered row message for data table.
- * @param {MappedLayerDataType} data data to be rendered inside data table
- * @param {string} layerPath key of the layer selected.
- * @param {MRTTableInstance} tableInstance  object of the data table.
- * @param {MRTColumnFiltersState} columnFilters column filters set by the user on the table.
+ * Custom hook to compute and set the filtered/selected row message for the data table toolbar.
+ *
+ * @param props - Hook properties containing table data, filters, and instance
  */
 export function useToolbarActionMessage({
   data,
@@ -34,7 +33,9 @@ export function useToolbarActionMessage({
   // Get store values
   const { setToolbarRowSelectedMessageEntry, setRowsFilteredEntry } = useDataTableStoreActions();
 
-  // Set feature count message
+  /**
+   * Updates the toolbar message when filters or feature data change.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('USETOOLBARACTIONMESSAGE - combined', { columnFilters, globalFilter });

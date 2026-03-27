@@ -4,14 +4,16 @@ import type { TypeColumnFiltersState } from '@/core/stores/store-interface-and-i
 import { useDataTableStoreActions, useDataTableLayerSettings } from '@/core/stores/store-interface-and-intial-values/data-table-state';
 import { logger } from '@/core/utils/logger';
 
+/** Properties for the useFilterRows hook. */
 export interface UseFilterRowsProps {
   layerPath: string;
 }
 
 /**
- * Custom hook to set the filtered row  for data table.
- * @param {string} layerPath key of the layer selected.
- * @returns {Object}
+ * Custom hook to manage column filter state for the data table.
+ *
+ * @param props - Hook properties containing the layer path
+ * @returns The column filters state and setter
  */
 export function useFilterRows({ layerPath }: UseFilterRowsProps): {
   columnFilters: TypeColumnFiltersState;
@@ -23,7 +25,9 @@ export function useFilterRows({ layerPath }: UseFilterRowsProps): {
 
   const [columnFilters, setColumnFilters] = useState<TypeColumnFiltersState>(datatableSettings[layerPath].columnFiltersRecord || []);
 
-  // update store column filters
+  /**
+   * Syncs column filters to the store when they change.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('USEFILTERROWS - columnFilters', columnFilters);

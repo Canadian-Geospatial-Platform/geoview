@@ -7,7 +7,7 @@ import { useMapAttribution, useMapInteraction } from '@/core/stores/store-interf
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
-// Constants outside component to prevent recreating every render
+/** Popover anchor and transform origin positions. */
 const POPOVER_POSITIONS = {
   anchorOrigin: {
     vertical: 'top' as const,
@@ -19,8 +19,10 @@ const POPOVER_POSITIONS = {
   },
 } as const;
 
+/** Styles for the popover content box. */
 const BOX_STYLES = { padding: '1rem', width: '28.125rem' } as const;
 
+/** Base styles for the attribution icon button. */
 const ICON_BUTTON_BASE_STYLES = {
   width: '30px',
   height: '30px',
@@ -29,10 +31,9 @@ const ICON_BUTTON_BASE_STYLES = {
 } as const;
 
 /**
- * Create an Attribution component that will display an attribution box
- * with the attribution text
+ * Attribution component that displays a popover with map attribution text.
  *
- * @returns {JSX.Element} created attribution element
+ * @returns The attribution icon button and popover
  */
 // Memoizes entire component, preventing re-renders if props haven't changed
 export const Attribution = memo(function Attribution(): JSX.Element {
@@ -65,16 +66,25 @@ export const Attribution = memo(function Attribution(): JSX.Element {
     [mapAttribution]
   );
 
-  // Callbacks
-  // Popover state expand/collapse
+  // #region Handlers
+
+  /**
+   * Handles opening the attribution popover.
+   */
   const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>): void => {
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
   }, []);
+
+  /**
+   * Handles closing the attribution popover.
+   */
   const handleClosePopover = useCallback((event: React.MouseEvent<HTMLButtonElement>): void => {
     event.stopPropagation();
     setAnchorEl(null);
   }, []);
+
+  // #endregion
 
   return (
     <>

@@ -3,11 +3,14 @@ import { forwardRef, useMemo } from 'react';
 import { useTheme } from '@mui/material/styles';
 import type { GridProps, SxProps } from '@/ui';
 import { Grid } from '@/ui';
+import { logger } from '@/core/utils/logger';
 
+/** Properties for the responsive grid root container. */
 interface ResponsiveGridProps extends GridProps {
   children: ReactNode;
 }
 
+/** Properties for a responsive grid panel (left or right). */
 interface ResponsiveGridPanelProps extends GridProps {
   children: ReactNode;
   isRightPanelVisible: boolean;
@@ -17,23 +20,22 @@ interface ResponsiveGridPanelProps extends GridProps {
   toggleMode?: boolean;
 }
 
-// Constants outside component to prevent recreating every render
+/** Grid container padding. */
 const PADDING = '0 6px';
 
-// Panel size configurations
-// Define the base breakpoint sizes without xs since it's common
+/** Base breakpoint sizes without xs since it's common. */
 type BaseBreakpointSize = 'sm' | 'md' | 'lg' | 'xl';
 
-// PanelSize type that ensures xs is always included
+/** Panel size ensuring xs is always included. */
 type PanelSize = { xs: number | 'auto' | 'grow' } & Record<string, number | 'auto' | 'grow'>;
 
-// Panel configuration type
+/** Panel configuration for normal and enlarged states. */
 type PanelConfig = {
   normal: Partial<Record<BaseBreakpointSize, number | 'auto' | 'grow'>>;
   enlarged: Partial<Record<BaseBreakpointSize, number | 'auto' | 'grow'>>;
 };
 
-// Constants with correct typing
+/** Panel size configurations for default, left, and right panels. */
 const PANEL_SIZES = {
   default: { xs: 12 } as PanelSize,
   left: {
@@ -47,7 +49,12 @@ const PANEL_SIZES = {
 } as const;
 
 /**
- * Get the left panel grid width size
+ * Gets the left panel grid width size.
+ *
+ * @param isRightPanelVisible - Whether the right panel is visible
+ * @param isEnlarged - Whether the panel is enlarged
+ * @param toggleMode - Whether toggle mode is active
+ * @returns The panel size configuration
  */
 const getLeftPanelSize = (isRightPanelVisible: boolean, isEnlarged: boolean, toggleMode: boolean): PanelSize => {
   if ( toggleMode ) {
@@ -61,7 +68,12 @@ const getLeftPanelSize = (isRightPanelVisible: boolean, isEnlarged: boolean, tog
 };
 
 /**
- * Get the right panel grid width size
+ * Gets the right panel grid width size.
+ *
+ * @param isRightPanelVisible - Whether the right panel is visible
+ * @param isEnlarged - Whether the panel is enlarged
+ * @param toggleMode - Whether toggle mode is active
+ * @returns The panel size configuration
  */
 const getRightPanelSize = (isRightPanelVisible: boolean, isEnlarged: boolean, toggleMode: boolean): PanelSize => {
   if ( toggleMode ) {
@@ -74,6 +86,14 @@ const getRightPanelSize = (isRightPanelVisible: boolean, isEnlarged: boolean, to
   };
 };
 
+/**
+ * Computes memoized left and right panel sizes.
+ *
+ * @param isRightPanelVisible - Whether the right panel is visible
+ * @param isEnlarged - Whether the panel is enlarged
+ * @param toggleMode - Whether toggle mode is active
+ * @returns The left and right panel size configurations
+ */
 const usePanelSize = (isRightPanelVisible: boolean, isEnlarged: boolean, toggleMode: boolean): { left: PanelSize; right: PanelSize } => {
   return useMemo(
     () => ({
@@ -85,9 +105,11 @@ const usePanelSize = (isRightPanelVisible: boolean, isEnlarged: boolean, toggleM
 };
 
 /**
- * Create Responsive Grid Container
- * @param {ReactNode} children children to be renderer
- * @returns JSX.Element
+ * Responsive grid container.
+ *
+ * @param props - Grid container properties
+ * @param ref - Forwarded ref for the Grid element
+ * @returns The grid container element
  */
 const ResponsiveGridRoot = forwardRef(({ children, ...rest }: ResponsiveGridProps, ref) => (
   <Grid component="div" container {...rest} padding={PADDING} ref={ref}>
@@ -97,19 +119,13 @@ const ResponsiveGridRoot = forwardRef(({ children, ...rest }: ResponsiveGridProp
 ResponsiveGridRoot.displayName = 'ResponsiveGridRoot';
 
 /**
- * A responsive grid panel component that can be used as either a left or right panel.
- * It handles responsive behavior and visibility based on screen size and panel state.
+ * Responsive grid panel used as either a left or right panel.
  *
- * @param {Object} props - The component props
- * @param {ReactNode} props.children - The content to be rendered inside the panel
- * @param {string} [props.className=''] - Additional CSS class names
- * @param {boolean} [props.isRightPanelVisible=false] - Controls the visibility of the right panel
- * @param {SxProps} [props.sxProps={}] - MUI System props for custom styling
- * @param {boolean} props.isEnlarged - Whether the panel is in enlarged state
- * @param {boolean} props.isLeftPanel - Determines if this is a left panel (true) or right panel (false)
- * @param {boolean} props.toggleMode - Alternate mode for the grid that resizes the left panel based on right panel visibility
- * @param {Ref} ref - Forward ref for the Grid component
- * @returns {JSX.Element} A responsive grid panel component
+ * Handles responsive behavior and visibility based on screen size and panel state.
+ *
+ * @param props - Panel properties including visibility, size, and mode
+ * @param ref - Forwarded ref for the Grid element
+ * @returns The responsive grid panel element
  */
 const ResponsiveGridPanel = forwardRef(
   (
@@ -125,9 +141,12 @@ const ResponsiveGridPanel = forwardRef(
     }: ResponsiveGridPanelProps & { isLeftPanel: boolean },
     ref
   ) => {
+    // Log
+    logger.logTraceRender('components/common/responsive-grid > ResponsiveGridPanel');
+
     const theme = useTheme();
 
-    const displayStyles = useMemo(
+    const memoDisplayStyles = useMemo(
       () => ({
         [theme.breakpoints.down('sm')]: {
           // eslint-disable-next-line no-nested-ternary
@@ -151,7 +170,7 @@ const ResponsiveGridPanel = forwardRef(
                 position: 'relative',
               }),
           ...sxProps,
-          ...(!toggleMode && displayStyles),
+          ...(!toggleMode && memoDisplayStyles),
           ...(toggleMode && {
             // eslint-disable-next-line no-nested-ternary
             display: isLeftPanel ? 'flex' : !isRightPanelVisible ? 'none' : 'flex',
@@ -168,16 +187,31 @@ const ResponsiveGridPanel = forwardRef(
 );
 ResponsiveGridPanel.displayName = 'ResponsiveRightPanel';
 
+/**
+ * Left panel wrapper around ResponsiveGridPanel.
+ *
+ * @param props - Panel properties
+ * @param ref - Forwarded ref
+ * @returns The left panel element
+ */
 const ResponsiveGridLeftPanel = forwardRef((props: ResponsiveGridPanelProps, ref) => (
   <ResponsiveGridPanel {...props} isLeftPanel ref={ref} />
 ));
 ResponsiveGridLeftPanel.displayName = 'ResponsiveGridLeftPanel';
 
+/**
+ * Right panel wrapper around ResponsiveGridPanel.
+ *
+ * @param props - Panel properties
+ * @param ref - Forwarded ref
+ * @returns The right panel element
+ */
 const ResponsiveGridRightPanel = forwardRef((props: ResponsiveGridPanelProps, ref) => (
   <ResponsiveGridPanel {...props} isLeftPanel={false} ref={ref} />
 ));
 ResponsiveGridRightPanel.displayName = 'ResponsiveGridRightPanel';
 
+/** Responsive grid component with Root, Left, and Right panel slots. */
 export const ResponsiveGrid = {
   Root: ResponsiveGridRoot,
   Left: ResponsiveGridLeftPanel,

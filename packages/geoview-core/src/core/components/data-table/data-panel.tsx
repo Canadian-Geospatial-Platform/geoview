@@ -29,14 +29,17 @@ import { DEFAULT_APPBAR_CORE } from '@/api/types/map-schema-types';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import DataSkeleton from './data-skeleton';
 
+/** Properties for the Datapanel component. */
 interface DataPanelType {
   containerType: TypeContainerBox;
 }
-/**
- * Build Data panel from map.
- * @returns {JSX.Element} Data table as react element.
- */
 
+/**
+ * Renders the data panel with layer list and data table.
+ *
+ * @param props - Datapanel properties
+ * @returns The data panel element
+ */
 export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   // Log
   logger.logTraceRender('components/data-table/data-panel');
@@ -68,20 +71,19 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   const mappedLayerData = useFeatureFieldInfos(layerData);
 
   /**
-   * Order the layers by visible layer order.
+   * Orders the layers by visible layer order.
    */
-  const orderedLayerData = useMemo(() => {
+  const memoOrderedLayerData = useMemo(() => {
     return visibleInRangeLayers
       .map((layerPath) => mappedLayerData.filter((data) => data.layerPath === layerPath)[0])
       .filter((layer) => layer !== undefined && !isLayerHiddenOnMap(layer.layerPath));
   }, [mappedLayerData, visibleInRangeLayers, isLayerHiddenOnMap]);
 
   /**
-   * Update local states when layer is changed from layer list.
-   * @param {LayerListEntry} layer layer from layer list is selected.
+   * Handles layer selection change from the layer list.
    */
   const handleLayerChange = useCallback(
-    (_layer: LayerListEntry) => {
+    (_layer: LayerListEntry): void => {
       setSelectedLayerPath(_layer.layerPath); // This will trigger the useEffect below to call tiggerGetAllFeatureInfo()
       setIsLoading(true);
     },
@@ -89,9 +91,10 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   );
 
   /**
-   * Check if filtered are being set for each layer.
-   * @param {string} layerPath - The path of the layer
-   * @returns boolean
+   * Checks if map filtering is active for a given layer.
+   *
+   * @param layerPath - The path of the layer
+   * @returns Whether the layer has active map filters
    */
   const isMapFilteredSelectedForLayer = useCallback(
     (layerPath: string): boolean => {
@@ -101,9 +104,10 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   );
 
   /**
-   * Get number of features of a layer with filtered or selected layer or unknown when data table is loaded.
-   * @param {string} layerPath - The path of the layer
-   * @returns
+   * Gets the feature count string for a layer.
+   *
+   * @param layerPath - The path of the layer
+   * @returns The formatted feature count string
    */
   const getFeaturesOfLayer = useCallback(
     (layerPath: string): string => {
@@ -112,7 +116,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
       }
 
       let featureStr = t('dataTable.noFeatures');
-      let features = orderedLayerData?.find((layer) => layer.layerPath === layerPath)?.features;
+      let features = memoOrderedLayerData?.find((layer) => layer.layerPath === layerPath)?.features;
 
       // Filter unsymbolized features if configured
       if (!showUnsymbolizedFeatures) {
@@ -124,14 +128,15 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
       }
       return featureStr;
     },
-    [datatableSettings, orderedLayerData, showUnsymbolizedFeatures, t]
+    [datatableSettings, memoOrderedLayerData, showUnsymbolizedFeatures, t]
   );
 
   /**
-   * Create layer tooltip
-   * @param {string} layerName - en/fr layer name
-   * @param {string} layerPath - The path of the layer.
-   * @returns
+   * Creates a tooltip element for a layer.
+   *
+   * @param layerName - The en/fr layer name
+   * @param layerPath - The path of the layer
+   * @returns The tooltip element
    */
   const getLayerTooltip = useCallback(
     (layerName: string, layerPath: string): JSX.Element => {
@@ -146,9 +151,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   );
 
   /**
-   * Handles panel close - restores focus to the layer list item that opened the table
-   * @function handlePanelClosed
-   * @returns {void}
+   * Handles panel close and restores focus to the layer list item.
    */
   const handlePanelClosed = useCallback((): void => {
     // If we have a selected layer, tell disableFocusTrap to focus it
@@ -162,26 +165,28 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   }, [mapId, selectedLayerPath, disableFocusTrap, containerType]);
 
   /**
-   * Checks if layer is disabled when layer is selected and features have null value.
-   * @returns bool
+   * Checks if the selected layer is disabled due to null features.
    */
-  const isLayerDisabled = useMemo(() => {
+  const memoIsLayerDisabled = useMemo(() => {
     // Log
     logger.logTraceUseMemo('DATA-PANEL - isLayerDisabled', selectedLayerPath);
 
-    return () => !!orderedLayerData.find((layer) => layer.layerPath === selectedLayerPath && layer.features === null);
-  }, [orderedLayerData, selectedLayerPath]);
+    return () => !!memoOrderedLayerData.find((layer) => layer.layerPath === selectedLayerPath && layer.features === null);
+  }, [memoOrderedLayerData, selectedLayerPath]);
 
   /**
-   * Checks if selected layer has features.
+   * Checks if the selected layer has features.
    */
-  const isSelectedLayerHasFeatures = useMemo(() => {
+  const memoIsSelectedLayerHasFeatures = useMemo(() => {
     // Log
     logger.logTraceUseMemo('DATA-PANEL - isSelectedLayerHasFeatures', selectedLayerPath);
 
-    return () => orderedLayerData.find((layer) => layer.layerPath === selectedLayerPath && layer?.features?.length);
-  }, [selectedLayerPath, orderedLayerData]);
+    return () => memoOrderedLayerData.find((layer) => layer.layerPath === selectedLayerPath && layer?.features?.length);
+  }, [selectedLayerPath, memoOrderedLayerData]);
 
+  /**
+   * Clears the loading state after a timeout.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('DATA-PANEL - isLoading', isLoading, selectedLayerPath);
@@ -193,7 +198,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   }, [isLoading, selectedLayerPath]);
 
   /**
-   * This effect will unmount the FOOTER BAR if the tab is changed
+   * Unmounts the footer bar data table when the tab changes.
    */
   useEffect(() => {
     // Log
@@ -208,8 +213,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
   }, [activeFooterBarTab]);
 
   /**
-   * This effect will only run when appbar will have data table as component
-   * It will unselect the layer path when component is unmounted.
+   * Resets the selected layer path when the app bar data table tab is closed.
    */
   useEffect(() => {
     // Log
@@ -223,17 +227,20 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
     }
   }, [activeAppBarTab, setSelectedLayerPath, appBarComponents]);
 
-  // If has selected layer on load and the data for selectedLayerPath is empty, trigger a query
-  // TODO Occasionally, setting the default selected layer can have unexpected behaviours.
-  // TO.DOCONT e.g. Refresh the page, switch tabs in the browser, come back to tab when done. The layer isn't selected
+  /**
+   * Triggers feature info query on first load of the selected layer.
+   *
+   * TODO: Occasionally, setting the default selected layer can have unexpected behaviours.
+   * e.g. Refresh the page, switch tabs in the browser, come back to tab when done. The layer isn't selected.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('DATA-PANEL - selectedLayerPath', selectedLayerPath, isFirstLoad.current[selectedLayerPath]);
 
     // Only trigger on first load when we have a selectedLayerPath
     if (selectedLayerPath && !isFirstLoad.current[selectedLayerPath]) {
-      // Check if the layer is now available in orderedLayerData
-      const foundLayer = orderedLayerData.find((lyr) => lyr.layerPath === selectedLayerPath);
+      // Check if the layer is now available in memoOrderedLayerData
+      const foundLayer = memoOrderedLayerData.find((lyr) => lyr.layerPath === selectedLayerPath);
 
       if (foundLayer) {
         isFirstLoad.current[selectedLayerPath] = true;
@@ -248,31 +255,33 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
           });
       }
     }
-  }, [orderedLayerData, selectedLayerPath, triggerGetAllFeatureInfo]);
+  }, [memoOrderedLayerData, selectedLayerPath, triggerGetAllFeatureInfo]);
 
   /**
-   * Check if layer sttaus is processing while querying
+   * Checks if any layer query status is processing.
    */
   const memoIsLayerQueryStatusProcessing = useMemo(() => {
     // Log
     logger.logTraceUseMemo('DATA-PANEL - order layer status processing.');
 
-    return () => !!orderedLayerData.find((layer) => layer.queryStatus === LAYER_STATUS.PROCESSING);
-  }, [orderedLayerData]);
+    return () => !!memoOrderedLayerData.find((layer) => layer.queryStatus === LAYER_STATUS.PROCESSING);
+  }, [memoOrderedLayerData]);
 
   /**
-   * Render the right panel content based on table data and layer loading status.
-   * NOTE: Here we return null, so that in responsive grid layout, it can be used as flag to render the guide for data table.
-   * @returns {JSX.Element | null} JSX.Element | null
+   * Renders the right panel content based on table data and layer loading status.
+   *
+   * NOTE: Returns null so that responsive grid layout can use it as a flag to render the guide for data table.
+   *
+   * @returns The content element, or null when no data to show
    */
   const renderContent = (): JSX.Element | null => {
     if (isLoading || memoIsLayerQueryStatusProcessing()) {
       return <DataSkeleton />;
     }
-    if (!isLayerDisabled() && isSelectedLayerHasFeatures()) {
+    if (!memoIsLayerDisabled() && memoIsSelectedLayerHasFeatures()) {
       return (
         <>
-          {orderedLayerData
+          {memoOrderedLayerData
             .filter((data) => data.layerPath === selectedLayerPath)
             .map((data: MappedLayerDataType) => (
               <Box key={data.layerPath} ref={dataTableRef} className="data-table-panel" sx={{ height: '100%' }}>
@@ -286,11 +295,14 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
     return null;
   };
 
+  /**
+   * Builds the layer list entries for the layout component.
+   */
   const memoLayerList = useMemo(() => {
     // Log
-    logger.logTraceUseMemo('DATA-PANEL - memoLayersList', orderedLayerData);
+    logger.logTraceUseMemo('DATA-PANEL - memoLayersList', memoOrderedLayerData);
 
-    return orderedLayerData.map((layer) => ({
+    return memoOrderedLayerData.map((layer) => ({
       ...layer,
       layerName: layerNames[layer.layerPath],
       layerStatus: layerStatuses[layer.layerPath],
@@ -309,7 +321,7 @@ export function Datapanel({ containerType }: DataPanelType): JSX.Element {
     layerNames,
     layerStatuses,
     mapId,
-    orderedLayerData,
+    memoOrderedLayerData,
     theme.palette.geoViewColor.grey.main,
   ]);
 
