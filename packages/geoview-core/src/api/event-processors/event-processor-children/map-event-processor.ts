@@ -120,6 +120,7 @@ import {
   getStoreLayerStateLegendLayerByPath,
   getStoreLayerStateSelectedLayerPath,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
+import { VectorLayerEntryConfig } from '@/api/config/validation-classes/vector-layer-entry-config';
 
 export abstract class MapEventProcessor extends AbstractEventProcessor {
   /** The minimal delay in ms to wait after a zoom animation to ensure it has completed. */
@@ -1614,6 +1615,8 @@ export abstract class MapEventProcessor extends AbstractEventProcessor {
     const layerStyle =
       legendLayerInfo!.styleConfig && (!isGeocore || overrideGeocoreServiceNames === true) ? legendLayerInfo!.styleConfig : undefined;
 
+    const layerText = layerEntryConfig instanceof VectorLayerEntryConfig ? layerEntryConfig.getLayerText() : undefined;
+
     // Construct layer entry config
     const newLayerEntryConfig = {
       layerId: layerEntryConfig.layerId,
@@ -1621,6 +1624,7 @@ export abstract class MapEventProcessor extends AbstractEventProcessor {
       layerFilter: AbstractBaseLayerEntryConfig.getClassOrTypeLayerFilter(configLayerEntryConfig),
       initialSettings,
       layerStyle,
+      layerText,
       entryType: listOfLayerEntryConfig.length ? 'group' : undefined,
       source: listOfLayerEntryConfig.length ? undefined : source,
       listOfLayerEntryConfig: listOfLayerEntryConfig.length ? listOfLayerEntryConfig : undefined,
