@@ -20,62 +20,6 @@
             "layerId": "blank.json"
           }
         ]
-      },
-      {
-        "geoviewLayerId": "activefires_current",
-        "geoviewLayerName": "Active Wildland Fires",
-        "metadataAccessPath": "https://cwfis.cfs.nrcan.gc.ca/geoserver/public/wms",
-        "geoviewLayerType": "ogcWms",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "activefires_current",
-            "initialSettings": {
-              "states": {
-                "visible": false
-              }
-            }
-          }
-        ]
-      },
-      {
-        "geoviewLayerId": "cdn_geol_compil_e",
-        "geoviewLayerName": "Canada Geological Map Compilation",
-        "metadataAccessPath": "https://maps-cartes.services.geo.ca/server_serveur/services/NRCan/cdn_geol_compil_en/MapServer/WMSServer",
-        "geoviewLayerType": "ogcWms",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "0",
-            "initialSettings": {
-              "states": {
-                "visible": false
-              }
-            }
-          }
-        ]
-      },
-      {
-        "geoviewLayerId": "geo_ca_mrdem",
-        "geoviewLayerName": "Canada DEM maps",
-        "metadataAccessPath": "https://datacube.services.geo.ca/ows/mrdem",
-        "geoviewLayerType": "ogcWms",
-        "listOfLayerEntryConfig": [
-          {
-            "layerId": "dtm",
-            "initialSettings": {
-              "states": {
-                "visible": false
-              }
-            }
-          },
-          {
-            "layerId": "dtm-hillshade",
-            "initialSettings": {
-              "states": {
-                "visible": false
-              }
-            }
-          }
-        ]
       }
     ]
   },
@@ -91,7 +35,7 @@
   "navBar": ["zoom", "fullscreen", "home","basemap-select", "drawer"],
   "footerBar": {
     "tabs": {
-      "core": ["layers","data-table"],
+      "core": ["layers", "data-table"],
       "custom": [
         {
           "id": "download-map-data",

@@ -277,7 +277,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const memoLayerSelectedItem = useMemo(() => {
     // Log
     logger.logTraceUseMemo('DETAILS-PANEL - memoLayerSelectedItem', memoLayersList, selectedLayerPath);
-  
+
     return memoLayersList.find((layer) => layer.layerPath === selectedLayerPath);
   }, [memoLayersList, selectedLayerPath]);
 
@@ -287,7 +287,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const memoSelectedLayerData = useMemo(() => {
     // Log
     logger.logTraceUseMemo('DETAILS-PANEL - memoSelectedLayerData', arrayOfLayerDataBatch, selectedLayerPath);
-  
+
     return arrayOfLayerDataBatch.find((layer) => layer.layerPath === selectedLayerPath);
   }, [arrayOfLayerDataBatch, selectedLayerPath]);
 
@@ -297,7 +297,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const memoSelectedLayerDataFeatures = useMemo(() => {
     // Log
     logger.logTraceUseMemo('DETAILS-PANEL - memoSelectedLayerDataFeatures', memoSelectedLayerData?.features);
-  
+
     return memoSelectedLayerData?.features;
   }, [memoSelectedLayerData?.features]);
 
@@ -307,7 +307,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const memoCurrentFeature = useMemo(() => {
     // The current feature
     logger.logTraceUseMemo('DETAILS-PANEL - memoCurrentFeature', currentFeatureIndex);
-  
+
     return memoSelectedLayerDataFeatures?.[currentFeatureIndex];
   }, [memoSelectedLayerDataFeatures, currentFeatureIndex]);
 
@@ -317,7 +317,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const memoCurrentFeatureHasGeometry = useMemo(() => {
     // The current feature has its geometry loaded
     logger.logTraceUseMemo('DETAILS-PANEL - memoCurrentFeatureHasGeometry', !!memoCurrentFeature?.geometry);
-  
+
     return !!memoCurrentFeature?.geometry;
   }, [memoCurrentFeature?.geometry]);
 
