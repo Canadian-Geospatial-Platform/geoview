@@ -2,10 +2,10 @@ import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
 
 /**
- * Get custom sx classes for the navigation bar
+ * Gets custom sx classes for the navigation bar.
  *
- * @param {Theme} theme the theme object
- * @returns {Object} the sx classes object
+ * @param theme - The theme object
+ * @returns The sx classes object
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
   navBarRef: {

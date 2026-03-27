@@ -11,6 +11,7 @@ import { List, ListItem } from '@/ui/list';
 import { ProjectionIcon, PublicIcon } from '@/ui/icons';
 import { useTranslation } from 'react-i18next';
 
+/** Mapping of projection codes to their display names. */
 const projectionChoiceOptions: {
   [key: string]: {
     code: TypeValidMapProjectionCodes;
@@ -22,8 +23,9 @@ const projectionChoiceOptions: {
 };
 
 /**
- * Create a projection select button to open the select panel, and set panel content
- * @returns {JSX.Element} the created basemap select button
+ * Creates a projection select button to open the select panel.
+ *
+ * @returns The projection select button
  */
 export default function Projection(): JSX.Element {
   // Log
@@ -36,8 +38,9 @@ export default function Projection(): JSX.Element {
   const { setProjection } = useMapStoreActions();
 
   /**
-   * Handles map projection choice
-   * @param {TypeValidMapProjectionCodes} projectionCode the projection code to switch to
+   * Handles map projection choice.
+   *
+   * @param projectionCode - The projection code to switch to
    */
   const handleChoice = useCallback(
     (projectionCode: TypeValidMapProjectionCodes): void => {
@@ -47,8 +50,9 @@ export default function Projection(): JSX.Element {
   );
 
   /**
-   * Render buttons in navbar panel.
-   * @returns ReactNode
+   * Renders the projection choice buttons.
+   *
+   * @returns The list of projection buttons
    */
   const renderButtons = (): ReactNode => {
     return (

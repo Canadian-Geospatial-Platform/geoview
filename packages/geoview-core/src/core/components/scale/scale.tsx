@@ -10,31 +10,40 @@ import { useMapInteraction, useMapScale } from '@/core/stores/store-interface-an
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
+/** The properties for the scale component. */
 interface ScaleProps {
+  /** Whether the scale is in expanded mode. */
   expanded: boolean;
 }
 
+/** Represents a single scale display option. */
 interface TypeScale {
+  /** The unique identifier for the scale option. */
   scaleId: string;
+  /** The display label text. */
   label: string;
+  /** Whether to show a border bottom line. */
   borderBottom: boolean;
 }
 
-// Constants outside component to prevent recreating every render
+/** Scale mode index constants. */
 const SCALE_MODES = {
   METRIC: 0,
   IMPERIAL: 1,
   NUMERIC: 2,
 } as const;
 
+/** Minimum width style for the scale container box. */
 const BOX_STYLES = { minWidth: 120 } as const;
 
 /**
- * Create a scale component
+ * Creates a scale component.
  *
- * @returns {JSX.Element} created scale element
+ * Memoized to avoid re-rendering when parent updates but scale props remain unchanged.
+ *
+ * @param props - The scale properties
+ * @returns The scale component
  */
-// Memoizes entire component, preventing re-renders if props haven't changed
 export const Scale = memo(function Scale({ expanded }: ScaleProps): JSX.Element {
   logger.logTraceRender('components/scale/scale');
 
@@ -51,8 +60,10 @@ export const Scale = memo(function Scale({ expanded }: ScaleProps): JSX.Element 
   const scale = useMapScale();
   const interaction = useMapInteraction();
 
-  // Memoize values
-  const scaleValues: TypeScale[] = useMemo(
+  /**
+   * Builds the list of scale display options.
+   */
+  const memoScaleValues: TypeScale[] = useMemo(
     () => [
       {
         scaleId: '0',
@@ -73,7 +84,12 @@ export const Scale = memo(function Scale({ expanded }: ScaleProps): JSX.Element 
     [scale.labelGraphicMetric, scale.labelGraphicImperial, scale.labelNumeric]
   );
 
-  // Callback
+  /**
+   * Returns the line width for the given scale mode.
+   *
+   * @param mode - The scale mode index
+   * @returns The line width string or 'none'
+   */
   const getScaleWidth = useCallback(
     (mode: number): string => {
       switch (mode) {
@@ -87,16 +103,21 @@ export const Scale = memo(function Scale({ expanded }: ScaleProps): JSX.Element 
     },
     [scale.lineWidthMetric, scale.lineWidthImperial]
   );
+  /**
+   * Handles when the user clicks the scale button to cycle through modes.
+   */
   const switchScale = useCallback((event: React.MouseEvent<HTMLButtonElement>): void => {
     event.stopPropagation();
     setScaleMode((prev) => (prev + 1) % 3);
   }, []);
 
-  // Memoize UI - expanded content
-  const expandedContent = useMemo(
+  /**
+   * Builds the expanded scale content showing all three scale options.
+   */
+  const memoExpandedContent = useMemo(
     () => (
       <Box sx={sxClasses.scaleExpandedContainer}>
-        {scaleValues.map((value, index) => (
+        {memoScaleValues.map((value, index) => (
           <Box sx={sxClasses.scaleExpandedCheckmarkText} key={value.scaleId}>
             <CheckIcon
               sx={{
@@ -120,25 +141,27 @@ export const Scale = memo(function Scale({ expanded }: ScaleProps): JSX.Element 
         ))}
       </Box>
     ),
-    [scaleValues, scaleMode, sxClasses, theme.palette.geoViewFontSize.lg, getScaleWidth]
+    [memoScaleValues, scaleMode, sxClasses, theme.palette.geoViewFontSize.lg, getScaleWidth]
   );
 
-  // Memoize UI - collapsed content
-  const collapsedContent = useMemo(
+  /**
+   * Builds the collapsed scale content showing only the active scale option.
+   */
+  const memoCollapsedContent = useMemo(
     () => (
       <Box
         component="span"
-        className={`interaction-${interaction} ${scaleValues[scaleMode].borderBottom ? 'hasScaleLine' : ''}`}
+        className={`interaction-${interaction} ${memoScaleValues[scaleMode].borderBottom ? 'hasScaleLine' : ''}`}
         sx={{
           ...sxClasses.scaleText,
-          borderBottom: scaleValues[scaleMode].borderBottom ? '1px solid' : 'none',
-          width: scaleValues[scaleMode].borderBottom ? getScaleWidth(scaleMode) : 'none',
+          borderBottom: memoScaleValues[scaleMode].borderBottom ? '1px solid' : 'none',
+          width: memoScaleValues[scaleMode].borderBottom ? getScaleWidth(scaleMode) : 'none',
         }}
       >
-        {scaleValues[scaleMode].label}
+        {memoScaleValues[scaleMode].label}
       </Box>
     ),
-    [interaction, scaleValues, scaleMode, sxClasses.scaleText, getScaleWidth]
+    [interaction, memoScaleValues, scaleMode, sxClasses.scaleText, getScaleWidth]
   );
   // TODO: WCAG Issue #2390 - Ensure that scale button updates are announced by screen readers
   // TODO: WCAG Issue #2390 - Rethink this to use mutliple buttons or select element for better accessibility?
@@ -148,7 +171,7 @@ export const Scale = memo(function Scale({ expanded }: ScaleProps): JSX.Element 
         <Box id={`${mapId}-scaleControlBarMetric`} sx={sxClasses.scaleControl} />
         <Box id={`${mapId}-scaleControlBarImperial`} sx={sxClasses.scaleControl} />
         <Button onClick={switchScale} type="text" sx={sxClasses.scaleContainer} disableRipple className={`interaction-${interaction}`}>
-          {expanded ? expandedContent : collapsedContent}
+          {expanded ? memoExpandedContent : memoCollapsedContent}
         </Button>
       </Box>
     </Tooltip>

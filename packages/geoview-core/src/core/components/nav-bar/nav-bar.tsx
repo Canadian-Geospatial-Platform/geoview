@@ -23,10 +23,13 @@ import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import NavbarPanelButton from './nav-bar-panel-button';
 
+/** The properties for the nav-bar component. */
 type NavBarProps = {
+  /** The nav-bar API instance. */
   api: NavBarApi;
 };
 
+/** Valid default navbar button identifiers. */
 type DefaultNavbar =
   | 'fullScreen'
   | 'location'
@@ -37,9 +40,12 @@ type DefaultNavbar =
   | 'measurement'
   | 'projection'
   | 'mapRotation';
+/** A group of button panels indexed by key. */
 type NavbarButtonGroup = Record<string, TypeButtonPanel | DefaultNavbar>;
+/** All button panel groups indexed by group name. */
 type NavButtonGroups = Record<string, NavbarButtonGroup>;
 
+/** Mapping of default navbar identifiers to their component elements. */
 const defaultNavbar: Record<DefaultNavbar, JSX.Element> = {
   fullScreen: <Fullscreen />,
   location: <Location />,
@@ -53,7 +59,10 @@ const defaultNavbar: Record<DefaultNavbar, JSX.Element> = {
 };
 
 /**
- * Create a nav-bar with buttons that can call functions or open custom panels
+ * Creates a nav-bar with buttons that can call functions or open custom panels.
+ *
+ * @param props - The nav-bar properties
+ * @returns The nav-bar component
  */
 export function NavBar(props: NavBarProps): JSX.Element {
   // Log
@@ -77,6 +86,9 @@ export function NavBar(props: NavBarProps): JSX.Element {
   const [buttonPanelGroups, setButtonPanelGroups] = useState<NavButtonGroups>({});
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
+  /**
+   * Builds the initial button panel groups from the navbar component configuration.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('navBarComponents store value changed');
@@ -122,7 +134,10 @@ export function NavBar(props: NavBarProps): JSX.Element {
     // If buttonPanelGroups is in the dependencies, it triggers endless rerenders
   }, [navBarComponents]);
 
-  const handleNavApiAddButtonPanel = useCallback((sender: NavBarApi, event: NavBarCreatedEvent) => {
+  /**
+   * Handles when a button panel is added via the NavBar API.
+   */
+  const handleNavApiAddButtonPanel = useCallback((sender: NavBarApi, event: NavBarCreatedEvent): void => {
     setButtonPanelGroups((prevState) => {
       const existingGroup = prevState?.[event.group] || {};
 
@@ -136,8 +151,11 @@ export function NavBar(props: NavBarProps): JSX.Element {
     });
   }, []);
 
+  /**
+   * Handles when a button panel is removed via the NavBar API.
+   */
   const handleNavApiRemoveButtonPanel = useCallback(
-    (sender: NavBarApi, event: NavBarRemovedEvent) => {
+    (sender: NavBarApi, event: NavBarRemovedEvent): void => {
       setButtonPanelGroups((prevState) => {
         const state = { ...prevState };
         const group = state[event.group];
@@ -148,7 +166,9 @@ export function NavBar(props: NavBarProps): JSX.Element {
     [setButtonPanelGroups]
   );
 
-  // Add navbar plugins
+  /**
+   * Loads and adds navbar plugins from the configuration.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('NAV-BAR - navBarComponents');
@@ -168,6 +188,9 @@ export function NavBar(props: NavBarProps): JSX.Element {
     processPlugin('drawer');
   }, [navBarComponents, mapId]);
 
+  /**
+   * Registers NavBar API event listeners on mount and cleans up on unmount.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('NAV-BAR API - mount');
@@ -183,6 +206,13 @@ export function NavBar(props: NavBarProps): JSX.Element {
     };
   }, [navBarApi, handleNavApiAddButtonPanel, handleNavApiRemoveButtonPanel]);
 
+  /**
+   * Renders a single button panel or default button.
+   *
+   * @param buttonPanel - The button panel or default navbar key
+   * @param key - The unique key for the element
+   * @returns The rendered button panel element, or null if not visible
+   */
   function renderButtonPanel(buttonPanel: TypeButtonPanel | DefaultNavbar, key: string): JSX.Element | null {
     if (typeof buttonPanel === 'string') {
       return <Fragment key={`${key}-component`}>{defaultNavbar[buttonPanel]}</Fragment>;
@@ -220,6 +250,13 @@ export function NavBar(props: NavBarProps): JSX.Element {
     );
   }
 
+  /**
+   * Renders a group of button panels with optional expansion.
+   *
+   * @param buttonPanelGroup - The group of button panels
+   * @param groupName - The name of the group
+   * @returns The rendered button group element, or null if empty
+   */
   function renderButtonPanelGroup(buttonPanelGroup: NavbarButtonGroup, groupName: string): JSX.Element | null {
     if (Object.keys(buttonPanelGroup).length === 0) {
       return null;

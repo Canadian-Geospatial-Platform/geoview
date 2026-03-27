@@ -4,37 +4,45 @@ import { useTheme } from '@mui/material';
 import { ExpandMoreIcon, ExpandLessIcon, IconButton, Box } from '@/ui';
 import { logger } from '@/core/utils/logger';
 
+/** Props for the MapInfoExpandButton component. */
 interface MapInfoExpandButtonProps {
+  /** Callback to toggle the expanded state. */
   onExpand: (value: boolean) => void;
+  /** Whether the map info bar is expanded. */
   expanded: boolean;
 }
 
-// Constants outside component to prevent recreating every render
+/** Translation key for the expand/collapse tooltip. */
 const TOOLTIP_KEY = 'layers.toggleCollapse';
 
+/** Layout styles for the expand button container. */
 const BOX_STYLES = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
 } as const;
 
+/** Base styles for the expand button. */
 const BUTTON_BASE_STYLES = {
   my: '1rem',
 } as const;
 
 /**
- * Expand icon component
+ * Renders the expand or collapse icon based on state.
+ *
+ * Memoized to skip re-rendering when the expanded state has not changed.
  */
 const ExpandIcon = memo(function ExpandIcon({ expanded }: { expanded: boolean }) {
   return expanded ? <ExpandMoreIcon /> : <ExpandLessIcon />;
 });
 
 /**
- * Map Information Expand Button component
+ * Creates the map information expand button component.
  *
- * @returns {JSX.Element} the expand buttons
+ * Memoized to prevent re-renders when parent updates but props have not changed.
+ *
+ * @returns The expand button
  */
-// Memoizes entire component, preventing re-renders if props haven't changed
 export const MapInfoExpandButton = memo(function MapInfoExpandButton({ onExpand, expanded }: MapInfoExpandButtonProps): JSX.Element {
   logger.logTraceRender('components/map-info/mmap-info-expand-button');
 
@@ -47,8 +55,11 @@ export const MapInfoExpandButton = memo(function MapInfoExpandButton({ onExpand,
     color: theme.palette.geoViewColor.bgColor.light[800],
   };
 
+  /**
+   * Handles the expand button click.
+   */
   const handleClick = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
+    (event: React.MouseEvent<HTMLButtonElement>): void => {
       event.stopPropagation();
       onExpand(!expanded);
     },

@@ -12,20 +12,36 @@ import {
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { logger } from '@/core/utils/logger';
 
+/** Coordinate data extracted from the feature info. */
 type CoordinateData = {
+  /** The latitude value. */
   lat: number;
+  /** The longitude value. */
   lng: number;
+  /** Optional UTM zone string. */
   utmZone?: string;
+  /** Optional easting value. */
   easting?: string;
+  /** Optional northing value. */
   northing?: string;
+  /** Optional NTS mapsheet identifier. */
   ntsMapsheet?: string;
+  /** Optional elevation value. */
   elevation?: string;
 };
 
+/** Properties for the CoordinateInfoSwitch component. */
 interface CoordinateInfoSwitchProps {
+  /** Optional flag to disable the switch. */
   disabled?: boolean;
 }
 
+/**
+ * Creates the coordinate info toggle switch component.
+ *
+ * @param props - Properties defined in CoordinateInfoSwitchProps interface
+ * @returns The coordinate info switch
+ */
 export function CoordinateInfoSwitch({ disabled }: CoordinateInfoSwitchProps): JSX.Element {
   // Log
   logger.logTraceRender('components/details/coordinate-info');
@@ -37,7 +53,10 @@ export function CoordinateInfoSwitch({ disabled }: CoordinateInfoSwitchProps): J
   const coordinateInfoEnabled = useDetailsCoordinateInfoEnabled();
   const { toggleCoordinateInfoEnabled } = useDetailsStoreActions();
 
-  const handleCoordinateInfoToggle = useCallback(() => {
+  /**
+   * Handles toggling the coordinate info switch.
+   */
+  const handleCoordinateInfoToggle = useCallback((): void => {
     // Toggle the state
     toggleCoordinateInfoEnabled();
   }, [toggleCoordinateInfoEnabled]);
@@ -58,9 +77,9 @@ export function CoordinateInfoSwitch({ disabled }: CoordinateInfoSwitchProps): J
 }
 
 /**
- * The Coordinate Info feature info to be shown on the right panel
- * @param {TypeCoordinateInfoProps} props - The properties passed to CoordinateInfo
- * @returns {JSX.Element} The coordinate info panel
+ * Creates the coordinate info panel component.
+ *
+ * @returns The coordinate info panel
  */
 export function CoordinateInfo(): JSX.Element {
   const { t } = useTranslation();
@@ -73,7 +92,10 @@ export function CoordinateInfo(): JSX.Element {
   const coordinateInfoLayer = layerDataArray.find((layer) => layer.layerPath === 'coordinate-info');
   const feature = coordinateInfoLayer?.features?.[0];
 
-  const coordinateData = useMemo((): CoordinateData | undefined => {
+  /**
+   * Memoizes the parsed coordinate data from the feature.
+   */
+  const memoCoordinateData = useMemo((): CoordinateData | undefined => {
     if (!feature?.fieldInfo) return undefined;
 
     return {
@@ -87,11 +109,11 @@ export function CoordinateInfo(): JSX.Element {
     };
   }, [feature]);
 
-  if (!coordinateData) {
+  if (!memoCoordinateData) {
     return <Typography>{t('details.noCoordinateInfo')}</Typography>;
   }
 
-  const { lat, lng, utmZone, easting, northing, ntsMapsheet, elevation } = coordinateData;
+  const { lat, lng, utmZone, easting, northing, ntsMapsheet, elevation } = memoCoordinateData;
 
   return (
     <Box sx={sxClasses.rightPanelContainer} className="guide-content-container">

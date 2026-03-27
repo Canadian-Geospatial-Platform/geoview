@@ -33,20 +33,27 @@ import { FooterPlugin } from '@/api/plugin/footer-plugin';
 import { CONTAINER_TYPE } from '@/core/utils/constant';
 import { camelCase, delay, scrollIfNotVisible } from '@/core/utils/utilities';
 
+/** Tab definition with icon, content, and optional label. */
 interface Tab {
+  /** The tab icon element. */
   icon: ReactNode;
+  /** The tab content element. */
   content: ReactNode;
+  /** Optional tab label. */
   label?: string;
 }
 
+/** Props for the FooterBar component. */
 type FooterBarProps = {
+  /** The footer bar API instance. */
   api: FooterBarApi;
 };
 
 /**
- * The FooterBar component is used to display a list of tabs and their content.
+ * Creates the FooterBar component to display a list of tabs and their content.
  *
- * @returns {JSX.Element} returns the FooterBar Tabs component
+ * @param props - The footer bar props
+ * @returns The FooterBar tabs component, or null if no tabs
  */
 export function FooterBar(props: FooterBarProps): JSX.Element | null {
   // Log
@@ -78,6 +85,9 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   // get store config for footer bar tabs to add (similar logic as in app-bar)
   const footerBarTabsConfig = useGeoViewConfig()?.footerBar;
 
+  /**
+   * Builds the footer bar tab keys from configuration.
+   */
   const memoFooterBarTabKeys = useMemo(() => {
     // Log
     logger.logTraceUseMemo('FOOTER-BAR - memoFooterBarTabKeys', footerBarTabsConfig?.tabs?.core);
@@ -107,7 +117,9 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   // List of Footer Tabs created from config file.
   const [tabsList, setTabsList] = useState<Record<string, Tab>>(memoFooterBarTabKeys);
 
-  // Create custom tabs from configuration
+  /**
+   * Creates custom tabs from configuration.
+   */
   useEffect(() => {
     if (footerBarTabsConfig?.tabs?.custom) {
       footerBarTabsConfig.tabs.custom.forEach((customTab) => {
@@ -127,7 +139,9 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     }
   }, [footerBarTabsConfig]);
 
-  // Panels for each tab in footer config file.
+  /**
+   * Builds the panel definitions for each core tab.
+   */
   const memoTabs = useMemo(() => {
     // Log
     logger.logTraceUseMemo('FOOTER-BAR - memoTabs');
@@ -141,7 +155,9 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     } as Record<string, Tab>;
   }, []);
 
-  // Map the panels with footer bar tab keys.
+  /**
+   * Maps the panels with footer bar tab keys in display order.
+   */
   const memoFooterBarTabs = useMemo(() => {
     // Log
     logger.logTraceUseMemo('FOOTER-BAR - memoFooterBarTabs', tabsList, memoTabs);
@@ -171,9 +187,9 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   }, [memoTabs, tabsList, sxClasses]);
 
   /**
-   * Add a tab
+   * Handles adding a tab from the API.
    */
-  const handleAddTab = useCallback((sender: FooterBarApi, event: FooterTabCreatedEvent) => {
+  const handleAddTab = useCallback((sender: FooterBarApi, event: FooterTabCreatedEvent): void => {
     const newTab = {
       [event.tab.id]: {
         icon: event.tab.icon || <InfoOutlinedIcon />,
@@ -189,9 +205,9 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   }, []);
 
   /**
-   * Remove a tab
+   * Handles removing a tab from the API.
    */
-  const handleRemoveTab = useCallback((sender: FooterBarApi, event: FooterTabRemovedEvent) => {
+  const handleRemoveTab = useCallback((sender: FooterBarApi, event: FooterTabRemovedEvent): void => {
     // remove the tab from the list
     setTabsList((prevState) => {
       const state = { ...prevState };
@@ -200,7 +216,9 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     });
   }, []);
 
-  // Update the active footer tab based on footer tabs created from configuration.
+  /**
+   * Updates the active footer tab based on footer tabs created from configuration.
+   */
   useEffect(() => {
     if (!activeFooterBarTab.tabId && activeFooterBarTab.isOpen) setActiveFooterBarTab(memoFooterBarTabs?.[0]?.id ?? '');
     // No need to update when selected tab changes
@@ -246,7 +264,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   }, [activeFooterBarTab.isOpen, setActiveFooterBarTab]);
 
   /**
-   * Handle a collapse, expand event for the tabs component
+   * Handles the collapse/expand toggle.
    */
   const handleToggleCollapse = (): void => {
     if (activeFooterBarTab.isOpen) setActiveFooterBarTab(undefined);
@@ -254,8 +272,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   };
 
   /**
-   * Handles when the selected tab changes
-   * @param {TypeTabs} tab - The newly selected tab
+   * Handles when the selected tab changes.
    */
   const handleSelectedTabChanged = (tab: TypeTabs): void => {
     setActiveFooterBarTab(tab.id);
@@ -263,7 +280,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   };
 
   /**
-   * Handles resizing the footerbar when toggling fullscreen
+   * Handles resizing the footerbar when toggling fullscreen.
    */
   useEffect(() => {
     if (!tabsContainerRef.current) {
@@ -284,7 +301,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   }, [tabsContainerRef, activeFooterBarTab.isOpen, isMapFullScreen, footerPanelResizeValue]);
 
   /**
-   * Add plugins
+   * Selects the active plugin when the tab changes.
    */
   useEffect(() => {
     // Log
@@ -309,7 +326,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   }, [mapId, activeFooterBarTab]);
 
   /**
-   * Manage the tab 'create', 'remove'
+   * Registers and unregisters tab create/remove event handlers on mount.
    */
   useEffect(() => {
     // Log
@@ -334,7 +351,7 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
   }, [footerBarApi, handleAddTab, handleRemoveTab]);
 
   /**
-   * Create default tabs from configuration parameters (similar logic as in app-bar).
+   * Creates default tabs from configuration parameters (similar logic as iin app-bar).
    */
   useEffect(() => {
     // Log
@@ -363,7 +380,9 @@ export function FooterBar(props: FooterBarProps): JSX.Element | null {
     }
   }, [footerBarTabsConfig, mapId]);
 
-  // Scroll the footer into view on mouse click
+  /**
+   * Scrolls the footer into view on mouse click.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('FOOTER BAR - scrollIntoViewListener');

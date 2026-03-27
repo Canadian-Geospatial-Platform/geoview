@@ -24,15 +24,17 @@ import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 import { useLayerAreLayersLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
+/** Props for the Map component. */
 type MapProps = {
+  /** The map viewer instance. */
   viewer: MapViewer;
 };
 
 /**
- * Create a map component
- * @param {MapProps} props - Map props containing the viewer
+ * Creates the map component.
  *
- * @return {JSX.Element} The map component
+ * @param props - The map component props
+ * @returns The map component
  */
 export function Map(props: MapProps): JSX.Element {
   // Log
@@ -58,6 +60,9 @@ export function Map(props: MapProps): JSX.Element {
   // flag to check if map is initialized. we added to prevent double rendering in StrictMode
   const hasRun = useRef<boolean>(false);
 
+  /**
+   * Initializes the map viewer on mount.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('MAP - viewer');

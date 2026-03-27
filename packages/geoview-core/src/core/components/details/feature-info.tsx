@@ -28,23 +28,36 @@ import { FeatureInfoTable } from './feature-info-table';
 import { getSxClasses } from './details-style';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
+/** Properties for the FeatureInfo component. */
 interface FeatureInfoProps {
+  /** The feature info entry to display. */
   feature: TypeFeatureInfoEntry;
+  /** The container type (appBar or footerBar). */
   containerType: TypeContainerBox;
 }
 
+/** Properties for the FeatureHeader component. */
 interface FeatureHeaderProps {
+  /** The feature icon source URL. */
   iconSrc: string | undefined;
+  /** The feature name. */
   name: string;
+  /** Whether the feature has geometry. */
   hasGeometry: boolean;
+  /** Whether the feature has a geochart. */
   hasGeochart: boolean;
+  /** Whether the feature is checked. */
   checked: boolean;
+  /** Callback when checked state changes. */
   onCheckChange: (checked: boolean) => void;
+  /** Callback when zoom in is clicked. */
   onZoomIn: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  /** Callback when geochart is clicked. */
   onGeochart: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 // Constants outside component to prevent recreating every render
+/** Style constants for the feature header container. */
 const HEADER_STYLES = {
   container: {
     p: '0 16px 10px 16px',
@@ -54,21 +67,33 @@ const HEADER_STYLES = {
   },
 } as const;
 
+/** Style constants for the Paper wrapper. */
 const PAPER_STYLES = {
   boxShadow: 'none',
   border: 'none',
   paddingTop: '0.5rem',
 } as const;
 
+/** Style constants for the Typography component. */
 const TYPOGRAPHY_STYLES = {
   overflowWrap: 'anywhere',
 } as const;
 
+/** Padding values for zoom operations. */
 const ZOOM_PADDING = [5, 5, 5, 5];
+/** Maximum zoom level for zoom-to-feature. */
 const ZOOM_MAX_LEVEL = 17;
+/** Buffer distance in meters for point extent. */
 const EXTENT_BUFFER = 1000;
 
-// Extracted Header Component
+/**
+ * Creates the feature header component.
+ *
+ * Memoized to avoid re-rendering unchanged headers in the feature list.
+ *
+ * @param props - Properties defined in FeatureHeaderProps interface
+ * @returns The feature header component
+ */
 const FeatureHeader = memo(function FeatureHeader({
   iconSrc,
   name,
@@ -88,7 +113,7 @@ const FeatureHeader = memo(function FeatureHeader({
   /**
    * Handles when the checked button is toggled.
    */
-  const handleChecked = useCallback(() => {
+  const handleChecked = useCallback((): void => {
     // Callback about the checked state providing the checked information
     onCheckChange(!checked);
   }, [checked, onCheckChange]);
@@ -164,6 +189,12 @@ const FeatureHeader = memo(function FeatureHeader({
   );
 });
 
+/**
+ * Creates the feature info component.
+ *
+ * @param props - Properties defined in FeatureInfoProps interface
+ * @returns The feature info component, or null if no feature
+ */
 export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.Element | null {
   logger.logTraceRender('components/details/feature-info', feature);
 
@@ -189,7 +220,7 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
   );
 
   /**
-   * Memoize the feature name
+   * Memoizes the feature name.
    */
   const memoFeatureName = useMemo(() => {
     // Try to get the value at the fieldName
@@ -198,14 +229,14 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
   }, [feature]);
 
   /**
-   * Memoize if the feature has a geometry associated with the object
+   * Memoizes whether the feature has a geometry.
    */
   const memoFeatureHasGeometry = useMemo(() => {
     return !!feature.geometry;
   }, [feature.geometry]);
 
   /**
-   * Memoize the Feature Info list
+   * Memoizes the feature info list.
    */
   const memoFeatureInfoList: TypeFieldEntry[] = useMemo(() => {
     if (!feature?.fieldInfo) return [];
@@ -224,7 +255,7 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
   }, [feature]);
 
   /**
-   * Memoize if the feature has a geochart
+   * Memoizes whether the feature has a geochart.
    */
   const memoHasGeochart = useMemo(() => {
     return (
@@ -234,7 +265,7 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
   }, [feature.layerPath, geochartConfigs, geochartLayerDataArrayBatch]);
 
   /**
-   * Handles when the feature has been checked/unchecked changes.
+   * Handles when the feature checked state changes.
    */
   const handleFeatureChecked = useCallback(
     (checkedState: boolean): void => {
@@ -251,7 +282,7 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
   );
 
   /**
-   * Handles when the button to zoom in on the feature has been clicked.
+   * Handles when the zoom-in button is clicked.
    */
   const handleZoomIn = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>): void => {
@@ -280,7 +311,7 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
   );
 
   /**
-   * Handles when the button to jump to the chart has been clicked.
+   * Handles when the geochart button is clicked.
    */
   const handleGeochart = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>): void => {
@@ -291,7 +322,9 @@ export function FeatureInfo({ feature, containerType }: FeatureInfoProps): JSX.E
     [feature, navigateToGeochart]
   );
 
-  // Effects
+  /**
+   * Syncs the checked state with the store checkedFeatures.
+   */
   useEffect(() => {
     logger.logTraceUseEffect('FEATURE-INFO - checkedFeatures', checkedFeatures);
 

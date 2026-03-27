@@ -19,19 +19,35 @@ import { handleEscapeKey } from '@/core/utils/utilities';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
 
+/** Geolocation search result item. */
 export interface GeoListItem {
+  /** Unique key for the item. */
   key: string;
+  /** Display name of the location. */
   name: string;
+  /** Latitude coordinate. */
   lat: number;
+  /** Longitude coordinate. */
   lng: number;
+  /** Bounding box as [west, south, east, north]. */
   bbox: [number, number, number, number];
+  /** Province or territory name. */
   province: string;
+  /** Location category. */
   category: string;
 }
 
+/** Minimum number of characters required to trigger a search. */
 const MIN_SEARCH_LENGTH = 3;
+
+/** Debounce delay in milliseconds for search input. */
 const DEBOUNCE_DELAY = 500;
 
+/**
+ * Creates the geolocator search component.
+ *
+ * @returns The geolocator component
+ */
 export function Geolocator(): JSX.Element {
   logger.logTraceRender('components/geolocator/geolocator');
 
@@ -69,13 +85,19 @@ export function Geolocator(): JSX.Element {
     [getGeolocations]
   );
 
-  const handleSearch = useCallback(() => {
+  /**
+   * Triggers a search when criteria are met.
+   */
+  const handleSearch = useCallback((): void => {
     if (searchValue.length >= MIN_SEARCH_LENGTH) {
       debouncedRequest(searchValue);
     }
   }, [searchValue, debouncedRequest]);
 
-  const handleReset = useCallback(() => {
+  /**
+   * Resets the search and closes the geolocator panel.
+   */
+  const handleReset = useCallback((): void => {
     setSearchValue('');
     setActiveAppBarTab(DEFAULT_APPBAR_CORE.GEOLOCATOR, false, false);
     setTimeout(() => {
@@ -83,6 +105,9 @@ export function Geolocator(): JSX.Element {
     }, TIMEOUT.deferExecution);
   }, [setActiveAppBarTab, setSearchValue, disableFocusTrap, mapId]);
 
+  /**
+   * Handles search input value changes.
+   */
   const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
     const { value } = event.target;
     setSearchValue(value);
@@ -97,14 +122,18 @@ export function Geolocator(): JSX.Element {
     }
   };
 
-  // Cleanup debounce on unmount
+  /**
+   * Cancels the debounced request on unmount.
+   */
   useEffect(() => {
     return () => {
       debouncedRequest.cancel();
     };
   }, [debouncedRequest]);
 
-  // Focus search input when geolocator opens
+  /**
+   * Focuses the search input when the geolocator opens.
+   */
   useEffect(() => {
     logger.logTraceUseEffect('GEOLOCATOR - focus input', isOpen, tabId);
 
@@ -113,7 +142,9 @@ export function Geolocator(): JSX.Element {
     }
   }, [isOpen, tabId]);
 
-  // Handle ESC key to close geolocator
+  /**
+   * Handles ESC key to close the geolocator panel.
+   */
   useEffect(() => {
     logger.logTraceUseEffect('GEOLOCATOR - handleKeyDown', isOpen, tabId);
 
@@ -131,8 +162,10 @@ export function Geolocator(): JSX.Element {
     };
   }, [isOpen, tabId, handleReset, mapId]);
 
-  // WCAG - Track loading status changes for screen reader announcements.
-  // Results are announced separately in the GeolocatorResult component, so we only announce loading status here.
+  /**
+   * Tracks loading status changes for screen reader announcements.
+   */
+  // WCAG - Results are announced separately in the GeolocatorResult component, so we only announce loading status here.
   useEffect(() => {
     logger.logTraceUseEffect('GEOLOCATOR - status announcements', isLoading);
 

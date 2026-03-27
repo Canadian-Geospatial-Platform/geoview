@@ -18,11 +18,12 @@ import { logger } from '@/core/utils/logger';
 import { TIMEOUT } from '@/core/utils/constant';
 
 /**
- * Create a north arrow component
+ * Creates a north arrow component.
  *
- * @returns {JSX.Element} the north arrow component
+ * Memoized to prevent re-renders since the component has no props and relies entirely on store state.
+ *
+ * @returns The north arrow component
  */
-// Memoizes entire component, preventing re-renders if props haven't changed
 export const NorthArrow = memo(function NorthArrow(): JSX.Element {
   logger.logTraceRender('components/north-arrow/north-arrow');
 
@@ -38,13 +39,15 @@ export const NorthArrow = memo(function NorthArrow(): JSX.Element {
   const northArrowElement = useMapNorthArrowElement();
   const { rotationAngle, northOffset } = useManageArrow();
 
-  // Memoize this check as it's used in conditional rendering
-  const isValidProjection = useMemo(
+  /**
+   * Checks whether the map projection supports a north arrow.
+   */
+  const memoIsValidProjection = useMemo(
     () => mapProjectionEPSG === Projection.PROJECTION_NAMES.LCC || mapProjectionEPSG === Projection.PROJECTION_NAMES.WM,
     [mapProjectionEPSG]
   );
 
-  if (!isValidProjection) return <Box />;
+  if (!memoIsValidProjection) return <Box />;
 
   return (
     <Box
@@ -66,10 +69,12 @@ export const NorthArrow = memo(function NorthArrow(): JSX.Element {
 });
 
 /**
- * Create a north pole flag icon
- * @returns {JSX.Element} the north pole marker icon
+ * Creates a north pole flag marker icon.
+ *
+ * Memoized to prevent re-renders since the component has no props and relies entirely on store state.
+ *
+ * @returns The north pole marker component
  */
-// Memoizes entire component, preventing re-renders if props haven't changed
 export const NorthPoleFlag = memo(function NorthPoleFlag(): JSX.Element {
   // State
   const northPoleId = `${useGeoViewMapId()}-northpole`;

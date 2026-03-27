@@ -308,7 +308,7 @@ export class NoFeaturesPropertyError extends GeoViewError {
  */
 export class CoreBasemapCreationError extends GeoViewError {
   /**
-   * Constructs a CoreBasemapCreationError error for the specified map ID.
+   * Creates an instance of CoreBasemapCreationError.
    */
   constructor() {
     super('mapctrl.overviewmap.error');
@@ -329,7 +329,7 @@ export class CoreBasemapCreationError extends GeoViewError {
  */
 export class BasemapTakingLongTimeError extends GeoViewError {
   /**
-   * Constructs a BasemapTakingLongTimeError error for the specified map ID.
+   * Creates an instance of BasemapTakingLongTimeError.
    */
   constructor() {
     super('warning.layer.basemapTakingLongTime');
@@ -347,7 +347,9 @@ export class BasemapTakingLongTimeError extends GeoViewError {
  */
 export class BasemapLayerCreationError extends GeoViewError {
   /**
-   * Constructs a BasemapLayerCreationError error for the specified map ID.
+   * Creates an instance of BasemapLayerCreationError.
+   *
+   * @param basemapType - The basemap type that failed to create
    */
   constructor(basemapType: string) {
     super('warning.layer.basemapLayerCreationError', [basemapType]);
@@ -426,6 +428,7 @@ export class NoExtentError extends GeoViewError {
 
 /**
  * Error thrown when a map-related function is called at the wrong time or under invalid conditions during initialization.
+ *
  * Typically used to indicate misuse of the initialization sequence.
  */
 export class InitDivNotExistError extends GeoViewError {
@@ -447,6 +450,7 @@ export class InitDivNotExistError extends GeoViewError {
 
 /**
  * Error thrown when a map-related function is called at the wrong time or under invalid conditions during initialization.
+ *
  * Typically used to indicate misuse of the initialization sequence.
  */
 export class InitMapWrongCallError extends GeoViewError {

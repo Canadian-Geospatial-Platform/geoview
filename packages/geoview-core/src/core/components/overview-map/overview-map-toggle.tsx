@@ -9,17 +9,13 @@ import { logger } from '@/core/utils/logger';
 import { Box } from '@/ui/layout';
 import { getSxClasses } from './overview-map-toggle-styles';
 
-/**
- * Properties for the overview map toggle
- */
+/** Properties for the overview map toggle. */
 interface OverviewMapToggleProps {
-  /**
-   * OpenLayers overview map control
-   */
+  /** OpenLayers overview map control. */
   overviewMap: OLOverviewMap;
 }
 
-// Define static styles outside component
+/** Static styles for the overview toggle button. */
 const OVERVIEW_STYLES = {
   margin: 0,
   padding: 0,
@@ -28,10 +24,10 @@ const OVERVIEW_STYLES = {
 } as const;
 
 /**
- * Create a toggle icon button
+ * Creates a toggle icon button for the overview map.
  *
- * @param {OverviewMapToggleProps} props overview map toggle properties
- * @returns {JSX.Element} returns the toggle icon button
+ * @param props - The overview map toggle properties
+ * @returns The toggle icon button or null if not yet mounted
  */
 export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element | null {
   // Component props
@@ -46,7 +42,9 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element | 
   const [isExpanded, setIsExpanded] = useState(true);
   const [targetElement, setTargetElement] = useState<HTMLDivElement | null>(null);
 
-  // Handlers
+  /**
+   * Handles when the user clicks the toggle button to expand or collapse the overview map.
+   */
   const handleClick = useCallback((): void => {
     const isCollapsed = overviewMap.getCollapsed();
     setIsExpanded(!isCollapsed);
@@ -65,6 +63,9 @@ export function OverviewMapToggle(props: OverviewMapToggleProps): JSX.Element | 
     }
   }, [overviewMap]);
 
+  /**
+   * Polls for the overview map button element and attaches the click handler.
+   */
   useEffect(() => {
     logger.logTraceUseEffect('OVERVIEW-MAP-TOGGLE - mount');
     let isCleanedUp = false;

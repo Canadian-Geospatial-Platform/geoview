@@ -7,19 +7,21 @@ import { DownloadIcon } from '@/ui/icons/index';
 import { useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { useLayerAreLayersLoading } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
-/**
- * Interface used for export button properties
- */
+/** Props for the ExportButton component. */
 interface ExportProps {
+  /** The button element id. */
   id: string;
+  /** Optional CSS class name. */
   className?: string;
+  /** Optional additional sx styles. */
   sxDetails?: object;
 }
 
 /**
- * Export PNG Button component
+ * Creates the export PNG button component.
  *
- * @returns {JSX.Element} the export button
+ * @param props - Properties defined in ExportProps interface
+ * @returns The export button
  */
 
 export default function ExportButton({ id, className = '', sxDetails }: ExportProps): JSX.Element {

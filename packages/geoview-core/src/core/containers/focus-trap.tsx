@@ -14,25 +14,27 @@ import { logger } from '@/core/utils/logger';
 import { useAppGeoviewHTMLElement, useAppStoreActions } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useUIActiveTrapGeoView, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
-/**
- * Interface for the focus trap properties
- */
+/** Interface for the focus trap properties. */
 interface FocusTrapProps {
+  /** The map identifier. */
   mapId: string;
+  /** The focus trap element identifier. */
   focusTrapId: string;
 }
 
-// Define constants and style outside component
+/** Delay in milliseconds before focusing an element after DOM updates. */
 const FOCUS_DELAY = 0;
+/** Default styles for modal action buttons. */
 const MODAL_BUTTON_STYLES = {
   width: 'initial',
   textTransform: 'none',
 } as const;
 
 /**
- * Create a dialog component to explain to keyboard user how to trigger and remove FocusTrap
- * @param {FocusTrapProps} props the focus trap dialog properties
- * @returns {JSX.Element} the focus trap dialog component
+ * Creates a dialog component to explain to keyboard user how to trigger and remove FocusTrap.
+ *
+ * @param props - The focus trap dialog properties
+ * @returns The focus trap dialog component
  */
 export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   // Log
@@ -63,6 +65,10 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   // ? useRef, if not mapElementStore is undefined - happen because the value is used inside an event listener
   const mapElementRef = useRef(mapElementStore);
+
+  /**
+   * Keeps the mapElementRef in sync with the store value.
+   */
   useEffect(() => {
     logger.logTraceUseEffect('FOCUS-TRAP - mapElementRef', mapElementStore);
     mapElementRef.current = mapElementStore;
@@ -70,6 +76,10 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
 
   // Use shellElementRef.current instead of querying DOM multiple times
   const shellElementRef = useRef<HTMLElement | null>(null);
+
+  /**
+   * Caches the shell element reference to avoid repeated DOM queries.
+   */
   useEffect(() => {
     logger.logTraceUseEffect('FOCUS-TRAP - shellElementRef');
     shellElementRef.current = geoviewElement.querySelector('.geoview-shell') as HTMLElement;
@@ -81,6 +91,9 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
    */
   const hasBeenPromptedRef = useRef(false);
 
+  /**
+   * Intercepts Tab key presses to redirect focus to skip links until the user has been prompted.
+   */
   useEffect(() => {
     logger.logTraceUseEffect('FOCUS-TRAP - Tab navigation guard');
 
@@ -116,6 +129,9 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     };
   }, [focusTrapId, geoviewElement, activeTrapGeoView]);
 
+  /**
+   * Marks the user as having been prompted when the modal opens.
+   */
   // Reset prompt flag when modal is dismissed (user made a choice)
   useEffect(() => {
     if (open) {
@@ -124,10 +140,10 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   }, [open]);
 
   /**
-   * Disable scrolling on keydown space, so that screen doesn't scroll down.
-   * when focus is set to map and arrows and enter keys are used to navigate the map
+   * Disables scrolling on keydown space, so that screen doesn't scroll down
+   * when focus is set to map and arrows and enter keys are used to navigate the map.
    *
-   * @param {KeyboardEvent} evt the keyboard event to trap
+   * @param evt - The keyboard event to intercept
    */
   const handleScrolling = useCallback((evt: KeyboardEvent): void => {
     if (mapElementRef.current === document.activeElement) {
@@ -143,6 +159,9 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     handleKeyDown: (evt: KeyboardEvent) => void;
   }>();
 
+  /**
+   * Initializes the handlers ref with exit and keydown functions to avoid circular dependencies.
+   */
   // Initialize the handlers object
   useEffect(() => {
     logger.logTraceUseEffect('FOCUS-TRAP - handlers', handlers.current);
@@ -179,16 +198,25 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   }, [focusTrapId, geoviewElement, handleScrolling, mapElementStore, setActiveTrapGeoView, setCrosshairActive]);
 
   // Create memoized functions that use the handlers
-  const exitFocus = useCallback(() => {
+  /**
+   * Exits the focus trap by delegating to the handlers ref.
+   */
+  const exitFocus = useCallback((): void => {
     handlers.current?.exit();
   }, []);
 
-  const handleExit = useCallback((evt: KeyboardEvent) => {
+  /**
+   * Handles keydown events by delegating to the handlers ref.
+   */
+  const handleExit = useCallback((evt: KeyboardEvent): void => {
     handlers.current?.handleKeyDown(evt);
   }, []);
 
+  /**
+   * Activates the focus trap on the shell element.
+   */
   // Set focus trap function
-  const setFocusTrap = useCallback(() => {
+  const setFocusTrap = useCallback((): void => {
     if (shellElementRef.current) {
       const mapHTMLElement = shellElementRef.current;
 
@@ -203,11 +231,17 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   }, [handleExit, mapId, setActiveTrapGeoView]);
 
   // Handle button clicks
+  /**
+   * Handles when the user clicks the enable focus trap button.
+   */
   const handleEnable = useCallback((): void => {
     setOpen(false);
     setFocusTrap();
   }, [setFocusTrap]);
 
+  /**
+   * Handles when the user clicks the skip button.
+   */
   const handleSkip = useCallback((): void => {
     setOpen(false);
 
@@ -216,11 +250,12 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   }, []);
 
   /**
-   * Manage skip top and bottom link. If user press enter it goes to top link and if he tries to focus the map, it goes to focus dialog
-   * @param {KeyboardEvent} event the keyboard event
+   * Manages skip top and bottom link navigation.
+   *
+   * @param event - The DOM event triggered on the skip link element
    */
   const manageLinks = useCallback(
-    (event: HTMLElementEventMap[keyof HTMLElementEventMap]) => {
+    (event: HTMLElementEventMap[keyof HTMLElementEventMap]): void => {
       // If not Tab, skip to the right link (handle the ref of the link)
       if (!(event instanceof KeyboardEvent) || event.key !== 'Tab') {
         return;
@@ -259,14 +294,18 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
   useEventListener<HTMLElement>('keydown', manageLinks, document.getElementById(`bottomlink-${focusTrapId}`));
   useEventListener<HTMLElement>('keydown', manageLinks, document.getElementById(`toplink-${focusTrapId}`));
 
-  // Ensure the enable button gets focus when modal opens
+  /**
+   * Focuses the enable button when the modal opens.
+   */
   useEffect(() => {
     if (open) {
       setTimeout(() => document.getElementById('enable-focus')?.focus(), FOCUS_DELAY);
     }
   }, [open]);
 
-  // Function to log the currently active/focused element
+  /**
+   * Logs the currently active focused element for debugging.
+   */
   function handleFocusIn(): void {
     const activeEl = document.activeElement;
     if (activeEl) {
@@ -274,6 +313,9 @@ export function FocusTrapDialog(props: FocusTrapProps): JSX.Element {
     }
   }
 
+  /**
+   * Registers or removes the focusin debug listener based on the active trap state.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('FOCUS-TRAP - handleFocusIn', activeTrapGeoView);

@@ -31,29 +31,50 @@ import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial
 import type { SxStyles } from '@/ui/style/types';
 import { CONTAINER_TYPE, TIMEOUT } from '@/core/utils/constant';
 
+/** Details for a single notification entry. */
 export type NotificationDetailsType = {
+  /** The unique key for the notification. */
   key: string;
+  /** The type of notification. */
   notificationType: NotificationType;
+  /** The notification message text. */
   message: string;
+  /** Optional extended description. */
   description?: string;
+  /** The number of times this notification has occurred. */
   count: number;
 };
 
+/** The type of notification severity. */
 export type NotificationType = 'success' | 'error' | 'info' | 'warning';
 
-// NotificationItem component
+/**
+ * Renders a single notification list item with an icon, message, and remove button.
+ *
+ * Memoized to avoid re-rendering all items when only one notification changes.
+ *
+ * @param props - The notification item properties
+ * @returns The notification item element
+ */
 const NotificationItem = memo(function NotificationItem({
   notification,
   onRemove,
   sxClasses,
   t,
 }: {
+  /** The notification details to display. */
   notification: NotificationDetailsType;
+  /** Callback to remove a notification by key. */
   onRemove: (key: string) => void;
+  /** The sx classes object. */
   sxClasses: SxStyles;
+  /** The translation function. */
   t: (key: string, options?: Record<string, unknown>) => string;
 }) {
-  const handleRemove = useCallback(() => {
+  /**
+   * Handles when the user clicks the remove button for this notification.
+   */
+  const handleRemove = useCallback((): void => {
     onRemove(notification.key);
   }, [notification.key, onRemove]);
 
@@ -95,7 +116,14 @@ const NotificationItem = memo(function NotificationItem({
   );
 });
 
-// NotificationHeader component
+/**
+ * Renders the notification panel header with title, remove all, and close buttons.
+ *
+ * Memoized to avoid re-rendering when notification list changes but header props remain the same.
+ *
+ * @param props - The notification header properties
+ * @returns The notification header element
+ */
 const NotificationHeader = memo(function NotificationHeader({
   onClose,
   onRemoveAll,
@@ -104,11 +132,17 @@ const NotificationHeader = memo(function NotificationHeader({
   sxClasses,
   mapId,
 }: {
+  /** Callback to close the notification panel. */
   onClose: () => void;
+  /** Callback to remove all notifications. */
   onRemoveAll: () => void;
+  /** Whether there are any notifications. */
   hasNotifications: boolean;
+  /** The translation function. */
   t: (key: string) => string;
+  /** The sx classes object. */
   sxClasses: SxStyles;
+  /** The map identifier. */
   mapId: string;
 }) {
   return (
@@ -143,9 +177,11 @@ const NotificationHeader = memo(function NotificationHeader({
 });
 
 /**
- * Notification main component
+ * Renders the notification panel with a badge, popover, and notification list.
  *
- * @returns {JSX.Element} the notification component
+ * Memoized to prevent re-renders triggered by parent updates when the component has no props.
+ *
+ * @returns The notification component
  */
 export default memo(function Notifications(): JSX.Element {
   logger.logTraceRender('components/notifications/notifications');
@@ -176,24 +212,36 @@ export default memo(function Notifications(): JSX.Element {
   const timerRef = useRef<ReturnType<typeof setTimeout>>();
   const AnimatedSpan = animated('span');
 
-  // Handlers
-  const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+  /**
+   * Handles when the user clicks the notification bell button.
+   */
+  const handleOpenPopover = useCallback((event: React.MouseEvent<HTMLButtonElement>): void => {
     setAnchorEl(event.currentTarget);
     setOpen((prev) => !prev);
   }, []);
 
-  const handleClickAway = useCallback(() => {
+  /**
+   * Handles when the user clicks away from the notification popover.
+   */
+  const handleClickAway = useCallback((): void => {
     if (open) setOpen(false);
   }, [open]);
 
+  /**
+   * Handles when the user removes a single notification.
+   *
+   * @param key - The notification key to remove
+   */
   const handleRemoveNotification = useCallback(
-    (key: string) => {
+    (key: string): void => {
       removeNotification(key);
     },
     [removeNotification]
   );
 
-  // Effects
+  /**
+   * Resets the notification count when the popover opens.
+   */
   useEffect(() => {
     if (open) {
       // When panel open, remove the notification count on the popover. On new notification, it will continue to
@@ -202,6 +250,9 @@ export default memo(function Notifications(): JSX.Element {
     }
   }, [open]);
 
+  /**
+   * Triggers the shake animation when new notifications arrive.
+   */
   useEffect(() => {
     logger.logTraceUseEffect('Notifications - notifications list changed', notificationsCount, notifications);
 
@@ -228,8 +279,10 @@ export default memo(function Notifications(): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notifications]); // Only depend on notifications changes
 
-  // Memoized notification list
-  const notificationsList = useMemo(
+  /**
+   * Builds the rendered list of notification items.
+   */
+  const memoNotificationsList = useMemo(
     () =>
       notifications.map((notification) => (
         <NotificationItem
@@ -304,7 +357,7 @@ export default memo(function Notifications(): JSX.Element {
             />
             <List sx={sxClasses.notificationsList} aria-live="polite" aria-relevant="all">
               {notifications.length > 0 ? (
-                notificationsList
+                memoNotificationsList
               ) : (
                 <Typography component="p" sx={{ padding: '10px 0' }}>
                   {t('appbar.noNotificationsAvailable')}

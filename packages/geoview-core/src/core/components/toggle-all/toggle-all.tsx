@@ -14,11 +14,15 @@ import { logger } from '@/core/utils/logger';
 
 import type { TypeContainerBox } from '@/core/types/global-types';
 
+/** The properties for the toggle all component. */
 interface ToggleAllProps {
+  /** The source panel triggering the toggle. */
   source: 'layers' | 'legend';
+  /** The type of container box. */
   containerType: TypeContainerBox;
 }
 
+/** Default styles for the toggle all container. */
 const toggleAllStyle = {
   display: 'flex',
   flexDirection: 'row',
@@ -28,6 +32,12 @@ const toggleAllStyle = {
   width: 'fit-content',
 };
 
+/**
+ * Renders toggle switches to control visibility and collapse state of all layers.
+ *
+ * @param props - The toggle all properties
+ * @returns The toggle all component
+ */
 export function ToggleAll({ source, containerType }: ToggleAllProps): JSX.Element {
   // Log
   logger.logTraceRender('components/toggle-all/toggle');
@@ -44,11 +54,17 @@ export function ToggleAll({ source, containerType }: ToggleAllProps): JSX.Elemen
   const hasCollapsibleLayers = useMapHasCollapsibleLayersToggle();
   const { setAllLayersVisibility, setAllLayersCollapsed } = useMapStoreActions();
 
-  const handleVisibilityToggle = useCallback(() => {
+  /**
+   * Handles when the user toggles the visibility switch.
+   */
+  const handleVisibilityToggle = useCallback((): void => {
     setAllLayersVisibility(!allLayersVisible);
   }, [allLayersVisible, setAllLayersVisibility]);
 
-  const handleCollapseToggle = useCallback(() => {
+  /**
+   * Handles when the user toggles the collapse switch.
+   */
+  const handleCollapseToggle = useCallback((): void => {
     setAllLayersCollapsed(!allLayersCollapsed);
   }, [allLayersCollapsed, setAllLayersCollapsed]);
 

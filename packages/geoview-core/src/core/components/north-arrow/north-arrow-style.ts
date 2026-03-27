@@ -1,8 +1,11 @@
 import type { Theme } from '@mui/material/styles';
 import type { SxProps } from '@mui/system';
 
+/** Sx class definitions for the north arrow component. */
 interface NorthArrowStyles {
+  /** Styles for the north arrow container. */
   northArrowContainer: SxProps<Theme>;
+  /** Dimensions for the north arrow icon. */
   northArrow: {
     width?: number;
     height?: number;
@@ -10,9 +13,11 @@ interface NorthArrowStyles {
 }
 
 /**
- * Helper function to convert string or number to number with default
+ * Converts a string or number value to a number with a fallback default.
+ *
  * @param value - The value to convert
  * @param defaultValue - The default value to use if conversion fails
+ * @returns The converted number or the default value
  */
 const toNumber = (value: string | number | undefined, defaultValue: number): number => {
   if (typeof value === 'undefined') return defaultValue;
@@ -23,10 +28,10 @@ const toNumber = (value: string | number | undefined, defaultValue: number): num
 };
 
 /**
- * Get custom sx classes for the north arrow
+ * Gets custom sx classes for the north arrow.
  *
- * @param {Theme} theme the theme object
- * @returns {Object} the sx classes object
+ * @param theme - The theme object
+ * @returns The sx classes object
  */
 export const getSxClasses = (theme: Theme): NorthArrowStyles => {
   // Default sizes

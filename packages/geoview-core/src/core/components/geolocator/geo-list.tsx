@@ -8,16 +8,18 @@ import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-val
 import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react';
 import { logger } from '@/core/utils/logger';
 
+/** Props for the GeoList component. */
 type GeoListProps = {
+  /** The geolocation items to display. */
   geoListItems: GeoListItem[];
+  /** The current search text. */
   searchValue: string;
 };
 
 /**
- * Create list of items to display under search.
- * @param {GeoListItem[]} geoListItems - The items to display
- * @param {string} searchValue - The search text
- * @returns {JSX.Element} React JSX element
+ * Creates the list of geolocation results to display under search.
+ *
+ * @returns The geolocation result list
  */
 export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Element {
   // Log
@@ -30,7 +32,9 @@ export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Elemen
   // Store
   const { zoomToGeoLocatorLocation } = useMapStoreActions();
 
-  // Handle the zoom to geolocation
+  /**
+   * Handles zooming to a geolocation result.
+   */
   const handleZoomToGeoLocator = useCallback(
     (geoListItem: GeoListItem): void => {
       zoomToGeoLocatorLocation(
@@ -45,13 +49,14 @@ export function GeoList({ geoListItems, searchValue }: GeoListProps): JSX.Elemen
   );
 
   /**
-   * Transforms a title string into a JSX element with bold highlighting for search matches
-   * @param {string} title - The original title text to transform
-   * @param {string} searchTerm - The search term to highlight in the title
-   * @param {string} province - The province to append to the title
-   * @returns {JSX.Element} A span element containing the formatted title with bold highlights and province
+   * Transforms a title string into a JSX element with bold highlighting for search matches.
    *
-   * @note It's a render-related transformation function who takes direct parameters.
+   * NOTE: It's a render-related transformation functions who takes direct parameters.
+   *
+   * @param title - The original title text to transform
+   * @param searchTerm - The search term to highlight in the title
+   * @param province - The province to append to the title
+   * @returns A span element containing the formatted title with bold highlights and province
    */
   const transformListTitle = (title: string, searchTerm: string, province: string): JSX.Element => {
     const newTitle = getBoldListTitle(title, searchTerm);

@@ -1,19 +1,21 @@
 import { memo } from 'react';
 
-/**
- * interface for north arrow icon properties
- */
+/** Properties for the north arrow icon. */
 interface NorthArrowIconProps {
+  /** The icon width in pixels. */
   width: number;
+  /** The icon height in pixels. */
   height: number;
 }
 
 /**
- * Create a north arrow icon
+ * Creates a north arrow SVG icon.
  *
- * @param {NorthArrowIconProps} props north arrow icon properties
+ * Memoized to prevent re-renders when the parent updates but icon dimensions remain unchanged.
+ *
+ * @param props - The north arrow icon properties
+ * @returns The north arrow SVG element
  */
-// Memoizes entire component, preventing re-renders if props haven't changed
 export const NorthArrowIcon = memo(function NorthArrowIcon(props: NorthArrowIconProps): JSX.Element {
   const { width, height } = props;
 
@@ -57,10 +59,12 @@ export const NorthArrowIcon = memo(function NorthArrowIcon(props: NorthArrowIcon
 });
 
 /**
- * Create a north pole icon
+ * Creates a north pole flag SVG icon.
  *
+ * Memoized to prevent re-renders since the icon takes no props and never changes.
+ *
+ * @returns The north pole SVG element
  */
-// Memoizes entire component, preventing re-renders if props haven't changed
 export const NorthPoleIcon = memo(function NorthPoleIcon(): JSX.Element {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24">

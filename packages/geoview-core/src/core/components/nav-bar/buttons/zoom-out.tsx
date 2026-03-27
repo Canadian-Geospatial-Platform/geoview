@@ -6,9 +6,9 @@ import { useMapStoreActions, useMapZoom } from '@/core/stores/store-interface-an
 import { logger } from '@/core/utils/logger';
 
 /**
- * Create a zoom out button
+ * Creates a zoom out button.
  *
- * @returns {JSX.Element} return the new created zoom out button
+ * @returns The zoom out button
  */
 export default function ZoomOut(): JSX.Element {
   // Log

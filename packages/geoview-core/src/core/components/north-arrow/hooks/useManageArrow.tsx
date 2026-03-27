@@ -13,16 +13,21 @@ import {
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import { logger } from '@/core/utils/logger';
 
+/** Return type for the useManageArrow hook. */
 interface ArrowReturn {
+  /** The current rotation angle for the north arrow. */
   rotationAngle: { angle: number };
+  /** The horizontal offset in pixels for the north arrow. */
   northOffset: number;
 }
 
+/** The central meridian longitude used for LCC projection calculations. */
 const CENTRAL_MERIDIAN = -92;
 
 /**
- * Custom hook to Manage North arrow (rotation and offset) and update store state.
- * @returns {ArrowReturn} The ArrowReturn object who contains rotationAngle and northoffset
+ * Custom hook to manage north arrow rotation and offset and update store state.
+ *
+ * @returns The rotation angle and north offset values
  */
 export const useManageArrow = (): ArrowReturn => {
   // State
@@ -40,18 +45,22 @@ export const useManageArrow = (): ArrowReturn => {
   const mapSize = useMapSize();
   const { getPixelFromCoordinate, setRotation } = useMapStoreActions();
 
-  // Memoize projection check as it's used multiple times
-  const isLCCProjection = useMemo(() => mapProjectionEPSG === Projection.PROJECTION_NAMES.LCC, [mapProjectionEPSG]);
-  const isWebMercator = useMemo(() => mapProjectionEPSG === Projection.PROJECTION_NAMES.WM, [mapProjectionEPSG]);
+  /**
+   * Whether the map projection is Lambert Conformal Conic.
+   */
+  const memoIsLCCProjection = useMemo(() => mapProjectionEPSG === Projection.PROJECTION_NAMES.LCC, [mapProjectionEPSG]);
+  /**
+   * Whether the map projection is Web Mercator.
+   */
+  const memoIsWebMercator = useMemo(() => mapProjectionEPSG === Projection.PROJECTION_NAMES.WM, [mapProjectionEPSG]);
 
   const prevRotationRef = useRef(0);
   const equalCountRef = useRef(0);
 
   /**
-   * Calculate the north arrow offset and angle
-   * Calculation taken from RAMP: https://github.com/fgpv-vpgf/fgpv-vpgf/blob/master/packages/ramp-core/src/app/geo/map-tools.service.js
+   * Calculates the north arrow rotation and offset based on projection and map state.
    */
-  const { calculatedRotation, calculatedOffset } = useMemo(() => {
+  const { memoCalculatedRotation, memoCalculatedOffset } = useMemo(() => {
     // Log
     logger.logTraceUseMemo('USE-MANAGE-ARROW - calculatedRotation, calculatedOffset');
 
@@ -62,35 +71,35 @@ export const useManageArrow = (): ArrowReturn => {
 
     // Early return if no arrow element
     if (!northArrowElement) {
-      return { calculatedRotation: { angle: 0 }, calculatedOffset: 0 };
+      return { memoCalculatedRotation: { angle: 0 }, memoCalculatedOffset: 0 };
     }
 
     // Early return if unsupported projection
-    if (!isLCCProjection && !isWebMercator) {
-      return { calculatedRotation: { angle: 0 }, calculatedOffset: 0 };
+    if (!memoIsLCCProjection && !memoIsWebMercator) {
+      return { memoCalculatedRotation: { angle: 0 }, memoCalculatedOffset: 0 };
     }
 
     // Handle Web Mercator Projection first - north is always up, only map rotation matters
-    if (isWebMercator) {
+    if (memoIsWebMercator) {
       return {
-        calculatedRotation: { angle: mapRotation * (180 / Math.PI) },
-        calculatedOffset: offsetX,
+        memoCalculatedRotation: { angle: mapRotation * (180 / Math.PI) },
+        memoCalculatedOffset: offsetX,
       };
     }
 
     // Early return if zoom level is smaller than 5 and map center is near central meridian (keep rotation to 0)
     const mapCenterLongitude: number = Projection.transformCoordinates(mapCenterCoord, 'EPSG:3978', 'EPSG:4326')![0] as number;
     if (mapZoom < 5 && Math.abs(CENTRAL_MERIDIAN - mapCenterLongitude) < 10) {
-      return { calculatedRotation: { angle: 0 }, calculatedOffset: offsetX };
+      return { memoCalculatedRotation: { angle: 0 }, memoCalculatedOffset: offsetX };
     }
 
     // Early return if north is visible
     if (northArrowElement.isNorthVisible) {
-      return { calculatedRotation: { angle: 0 }, calculatedOffset: offsetX };
+      return { memoCalculatedRotation: { angle: 0 }, memoCalculatedOffset: offsetX };
     }
 
     // Handle LCC Projection
-    if (isLCCProjection) {
+    if (memoIsLCCProjection) {
       const arrowAngle = parseFloat(northArrowElement.degreeRotation);
       const angleDegrees = 270 - arrowAngle;
 
@@ -158,15 +167,15 @@ export const useManageArrow = (): ArrowReturn => {
         newOffset = offsetX - Math.sign(deviationFromCenter) * MAX_OFFSET * combinedFactor;
       }
 
-      return { calculatedRotation: newRotation, calculatedOffset: newOffset };
+      return { memoCalculatedRotation: newRotation, memoCalculatedOffset: newOffset };
     }
 
     // Should never goes here but failover to default values
-    return { calculatedRotation: { angle: 0 }, calculatedOffset: 0 };
+    return { memoCalculatedRotation: { angle: 0 }, memoCalculatedOffset: 0 };
   }, [
     northArrowElement,
-    isLCCProjection,
-    isWebMercator,
+    memoIsLCCProjection,
+    memoIsWebMercator,
     fixNorth,
     mapRotation,
     mapZoom,
@@ -176,18 +185,19 @@ export const useManageArrow = (): ArrowReturn => {
     setRotation,
   ]);
 
-  // Update state with calculated values
-  // State updates are side effects and belong in useEffect
+  /**
+   * Updates local state with the calculated rotation and offset values.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('USE-MANAGE-ARROW - calculatedRotation, calculatedOffset', {
-      calculatedRotation,
-      calculatedOffset,
+      memoCalculatedRotation,
+      memoCalculatedOffset,
     });
 
-    setRotationAngle(calculatedRotation);
-    setNorthOffset(calculatedOffset);
-  }, [calculatedRotation, calculatedOffset, rotationAngle, northOffset]);
+    setRotationAngle(memoCalculatedRotation);
+    setNorthOffset(memoCalculatedOffset);
+  }, [memoCalculatedRotation, memoCalculatedOffset, rotationAngle, northOffset]);
 
   return { rotationAngle, northOffset };
 };

@@ -1,9 +1,9 @@
 import type { SxStyles } from '@/ui/style/types';
 
 /**
- * Get custom sx classes for the resize footer panel size
+ * Gets custom sx classes for the resize footer panel.
  *
- * @returns {Object} the sx classes object
+ * @returns The sx classes object
  */
 export const getSxClasses = (): SxStyles => ({
   slider: {

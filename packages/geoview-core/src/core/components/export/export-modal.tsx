@@ -39,24 +39,34 @@ import { createCanvasMapUrls } from '@/core/components/export/canvas-layout';
 import { getSxClasses } from '@/core/components/export/export-modal-style';
 import { TIMEOUT } from '@/core/utils/constant';
 
+/** Supported export file formats. */
 type FileFormat = 'pdf' | 'png' | 'jpeg';
 
+/** Available JPEG quality options (percentage values). */
 const QUALITY_OPTIONS = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
 
+/** Properties for file export configuration. */
 export interface FileExportProps {
+  /** The export title text. */
   exportTitle: string;
+  /** The disclaimer text. */
   disclaimer: string;
+  /** The export resolution in DPI. */
   dpi: number;
+  /** Optional JPEG quality percentage. */
   jpegQuality?: number;
+  /** The output file format. */
   format: FileFormat;
+  /** Date display formats keyed by layer path. */
   layerDateFormats: Record<string, TypeDisplayDateFormat>;
+  /** Temporal modes keyed by layer path. */
   layerDateTemporalModes: Record<string, TemporalMode>;
 }
 
 /**
- * Export modal window component to export the viewer information in a PNG file
+ * Creates the export modal component for exporting the viewer information.
  *
- * @returns {JSX.Element} the export modal component
+ * @returns The export modal component
  */
 export default function ExportModal(): JSX.Element {
   // Log
@@ -97,8 +107,12 @@ export default function ExportModal(): JSX.Element {
 
   const fileExportDefaultPrefixName = t('exportModal.fileExportDefaultPrefixName');
 
-  // Generate preview at maximum quality (300 DPI) - export will regenerate at selected DPI
-  const generatePreview = useCallback(async () => {
+  /**
+   * Generates the export preview at maximum quality.
+   *
+   * @returns A promise that resolves when the preview generation is complete
+   */
+  const generatePreview = useCallback(async (): Promise<void> => {
     try {
       setIsMapLoading(true);
       const disclaimer = t('mapctrl.disclaimer.message');
@@ -122,8 +136,13 @@ export default function ExportModal(): JSX.Element {
     }
   }, [t, mapId, layerDateFormats, layerDateTemporalModes]);
 
+  /**
+   * Exports the file in the selected format and resolution.
+   *
+   * @returns A promise that resolves when the export process is complete
+   */
   // Export the requested file
-  const performExport = useCallback(async () => {
+  const performExport = useCallback(async (): Promise<void> => {
     try {
       setIsMapExporting(true);
       const disclaimer = t('mapctrl.disclaimer.message');
@@ -181,7 +200,9 @@ export default function ExportModal(): JSX.Element {
     t,
   ]);
 
-  // Use Effect to generate the image preview on load
+  /**
+   * Generates the image preview when the modal opens.
+   */
   useEffect(() => {
     logger.logTraceUseEffect('EXPORT-MODAL - generatePreview useEffect');
     if (activeModalId !== 'export') return;
@@ -205,6 +226,9 @@ export default function ExportModal(): JSX.Element {
 
   // #region HANDLERS
 
+  /**
+   * Handles closing the export modal.
+   */
   // TODO: WCAG Issue #3222 - Review Disable Focus Trap Behaviour
   const handleCloseModal = useCallback(() => {
     // Defer disabling the focus trap to the next tick so the Dialog's own focus trap
@@ -220,21 +244,35 @@ export default function ExportModal(): JSX.Element {
     setIsLegendLoading(false);
   }, [disableFocusTrap]);
 
-  const handleExport = useCallback(() => {
+  /**
+   * Handles triggering the export process.
+   */
+  const handleExport = useCallback((): void => {
     performExport().catch((error) => logger.logError(error));
   }, [performExport]);
 
+  /**
+   * Handles opening the format selection menu.
+   */
   const handleFormatMenuClick = (event: React.MouseEvent<HTMLElement>): void => {
     setFormatAnchorEl(event.currentTarget);
     setFormatMenuOpen(true);
   };
 
-  const handleFormatMenuClose = useCallback(() => {
+  /**
+   * Handles closing the format selection menu.
+   */
+  const handleFormatMenuClose = useCallback((): void => {
     setFormatMenuOpen(false);
   }, []);
 
+  /**
+   * Handles selecting a file format.
+   *
+   * @param format - The selected file format
+   */
   const handleSelectFormat = useCallback(
-    (format: FileFormat) => {
+    (format: FileFormat): void => {
       setExportFormat(format);
       if (format === 'pdf') {
         setExportMapResolution(300);
@@ -244,41 +282,66 @@ export default function ExportModal(): JSX.Element {
     [handleFormatMenuClose]
   );
 
+  /**
+   * Handles opening the DPI selection menu.
+   */
   const handleDpiMenuClick = (event: React.MouseEvent<HTMLElement>): void => {
     setDpiAnchorEl(event.currentTarget);
     setDpiMenuOpen(true);
   };
 
-  const handleMenuClose = useCallback(() => {
+  /**
+   * Handles closing the DPI selection menu.
+   */
+  const handleMenuClose = useCallback((): void => {
     setDpiMenuOpen(false);
   }, []);
 
+  /**
+   * Handles selecting a DPI value.
+   *
+   * @param dpi - The selected DPI value
+   */
   const handleSelectDpi = useCallback(
-    (dpi: number) => {
+    (dpi: number): void => {
       setExportMapResolution(dpi);
       handleMenuClose();
     },
     [handleMenuClose]
   );
 
+  /**
+   * Handles opening the quality selection menu.
+   */
   const handleQualityMenuClick = (event: React.MouseEvent<HTMLElement>): void => {
     setQualityAnchorEl(event.currentTarget);
     setQualityMenuOpen(true);
   };
 
-  const handleQualityMenuClose = useCallback(() => {
+  /**
+   * Handles closing the quality selection menu.
+   */
+  const handleQualityMenuClose = useCallback((): void => {
     setQualityMenuOpen(false);
   }, []);
 
+  /**
+   * Handles selecting a quality value.
+   *
+   * @param quality - The selected JPEG quality percentage
+   */
   const handleSelectQuality = useCallback(
-    (quality: number) => {
+    (quality: number): void => {
       setJpegQuality(quality);
       handleQualityMenuClose();
     },
     [handleQualityMenuClose]
   );
 
-  const handleDialogEntered = useCallback(() => {
+  /**
+   * Handles focusing the title input when the dialog opens.
+   */
+  const handleDialogEntered = useCallback((): void => {
     titleInputRef.current?.focus();
   }, []);
 

@@ -20,33 +20,62 @@ import { useLightBox } from '@/core/components/common';
 import { getSxClasses } from './details-style';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
+/** Properties for the FeatureInfoTable component. */
 interface FeatureInfoTableProps {
+  /** The layer path for date format lookups. */
   layerPath: string;
+  /** The list of field entries to display. */
   featureInfoList: TypeFieldEntry[];
+  /** The container type (appBar or footerBar). */
   containerType: TypeContainerBox;
 }
 
+/** Properties for the FeatureItem component. */
 interface FeatureItemProps {
+  /** The item value string. */
   item: string;
+  /** The field alias label. */
   alias: string;
+  /** The item index within the field values. */
   index: number;
+  /** The unique item identifier for focus management. */
   uniqueItemId: string;
+  /** The GeoView map ID. */
   mapId: string;
+  /** The container type (appBar or footerBar). */
   containerType: TypeContainerBox;
+  /** The full field entry data. */
   featureInfoItem: TypeFieldEntry;
+  /** Callback to initialize the lightbox for image viewing. */
   onInitLightBox: (images: string, altText: string, returnFocusId: string, index?: number) => void;
 }
 
+/** Properties for the FeatureRow component. */
 interface FeatureRowProps {
+  /** The field entry data. */
   featureInfoItem: TypeFieldEntry;
+  /** Callback to initialize the lightbox for image viewing. */
   onInitLightBox: (images: string, altText: string, returnFocusId: string, index?: number) => void;
+  /** The display language. */
   language: TypeDisplayLanguage;
+  /** The temporal mode for the layer. */
   layerDateTemporalMode: TemporalMode;
+  /** The date display format for the layer. */
   displayDateFormat: TypeDisplayDateFormat;
+  /** The timezone for date display. */
   displayDateTimezone: TimeIANA;
+  /** The container type (appBar or footerBar). */
   containerType: TypeContainerBox;
 }
 
+/**
+ * Creates a single feature item cell (image, HTML, or text with links).
+ *
+ * Memoized to avoid re-rendering unchanged items in the feature table.
+ *
+ * @param props - Properties defined in FeatureItemProps interface
+ * @returns The rendered feature item
+ */
 // Extracted FeatureItem component
 export const FeatureItem = memo(function FeatureItem({
   item,
@@ -63,7 +92,10 @@ export const FeatureItem = memo(function FeatureItem({
   const theme = useTheme();
   const sxClasses = useMemo(() => getSxClasses(theme), [theme]);
 
-  const linkifyOptions = useMemo(
+  /**
+   * Gets the linkify options for converting text URLs into clickable links, memoized to avoid unnecessary recalculations.
+   */
+  const memoLinkifyOptions = useMemo(
     () => ({
       attributes: {
         target: '_blank',
@@ -114,13 +146,21 @@ export const FeatureItem = memo(function FeatureItem({
     <Box sx={sxClasses.featureInfoItemValue}>
       <UseHtmlToReact
         htmlContent={sanitizeHtmlContent(
-          enhanceLinksAccessibility(linkifyHtml(item.toString(), linkifyOptions), t('general.opensInNewTab'))
+          enhanceLinksAccessibility(linkifyHtml(item.toString(), memoLinkifyOptions), t('general.opensInNewTab'))
         )}
       />
     </Box>
   );
 });
 
+/**
+ * Creates a table row for a single feature field entry.
+ *
+ * Memoized to avoid re-rendering unchanged rows in the feature table.
+ *
+ * @param props - Properties defined in FeatureRowProps interface
+ * @returns The rendered table row
+ */
 // Extracted FeatureRow component
 export const FeatureRow = memo(function FeatureRow({
   featureInfoItem,
@@ -226,6 +266,14 @@ export const FeatureRow = memo(function FeatureRow({
   );
 });
 
+/**
+ * Creates the feature info table component.
+ *
+ * Memoized to avoid re-rendering the table when parent re-renders with same data.
+ *
+ * @param props - Properties defined in FeatureInfoTableProps interface
+ * @returns The feature info table
+ */
 export const FeatureInfoTable = memo(function FeatureInfoTable({
   layerPath,
   featureInfoList,

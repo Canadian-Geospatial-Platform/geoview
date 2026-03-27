@@ -7,6 +7,7 @@ import { Fetch } from '@/core/utils/fetch-helper';
 import { RequestAbortedError } from '@/core/exceptions/core-exceptions';
 import { TIMEOUT } from '@/core/utils/constant';
 
+/** Return type for the useGeolocator hook. */
 interface UseGeolocatorReturn {
   /** Array of geolocation results */
   data: GeoListItem[] | undefined;
@@ -24,6 +25,11 @@ interface UseGeolocatorReturn {
   resetState: () => void;
 }
 
+/**
+ * Provides geolocation search functionality with debounced requests.
+ *
+ * @returns The geolocator state and actions
+ */
 export const useGeolocator = (): UseGeolocatorReturn => {
   logger.logTraceCore('GEOLOCATOR - useGeolocator');
 
@@ -42,8 +48,10 @@ export const useGeolocator = (): UseGeolocatorReturn => {
   const abortControllerRef = useRef<AbortController | null>(null);
   const fetchTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>();
 
-  // Reset state helper
-  const resetState = useCallback(() => {
+  /**
+   * Resets the hook state and aborts any pending request.
+   */
+  const resetState = useCallback((): void => {
     setData(undefined);
     setTheError(false);
     setIsLoading(false);
@@ -57,7 +65,9 @@ export const useGeolocator = (): UseGeolocatorReturn => {
     }
   }, []);
 
-  // Handle timeout effect
+  /**
+   * Aborts the request after a timeout when loading.
+   */
   useEffect(() => {
     if (isLoading) {
       // Store the current timer reference
@@ -82,13 +92,21 @@ export const useGeolocator = (): UseGeolocatorReturn => {
     return () => {};
   }, [isLoading, resetState]);
 
-  // Component unmount cleanup
+  /**
+   * Cleans up state on unmount.
+   */
   useEffect(() => {
     return () => {
       resetState();
     };
   }, [resetState]);
 
+  /**
+   * Fetches geolocation results for a search term.
+   *
+   * @param searchTerm - The term to search for
+   * @returns A promise that resolves when the fetch completes
+   */
   const fetchGeolocations = useCallback(
     async (searchTerm: string): Promise<void> => {
       try {
@@ -122,7 +140,11 @@ export const useGeolocator = (): UseGeolocatorReturn => {
     [geolocatorServiceURL]
   );
 
-  // Public function that handles the Promise
+  /**
+   * Triggers geolocation search and handles errors.
+   *
+   * @param searchTerm - The term to search for
+   */
   const getGeolocations = useCallback(
     (searchTerm: string): void => {
       fetchGeolocations(searchTerm).catch((error: unknown) => {
@@ -141,6 +163,9 @@ export const useGeolocator = (): UseGeolocatorReturn => {
     [fetchGeolocations]
   );
 
+  /**
+   * Re-fetches results when the display language changes.
+   */
   useEffect(() => {
     logger.logTraceUseEffect('GEOLOCATOR - change language', displayLanguage, searchValue);
 

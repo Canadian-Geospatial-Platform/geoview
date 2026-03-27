@@ -10,16 +10,27 @@ import { logger } from '@/core/utils/logger';
 import { getSxClasses } from './guide-style';
 import { TIMEOUT } from '@/core/utils/constant';
 
+/** Props for the GuideSearch component. */
 interface GuideSearchProps {
+  /** The guide content object. */
   guide: TypeGuideObject | undefined;
+  /** Callback to change the active guide section. */
   onSectionChange: (sectionIndex: number) => void;
+  /** Callback to notify parent of search state changes. */
   onSearchStateChange: (searchTerm: string, highlightFunction: (content: string, sectionIndex: number) => string) => void;
 }
 
+/** Represents a search match location. */
 interface SearchMatch {
+  /** The index of the guide section containing the match. */
   sectionIndex: number;
 }
 
+/**
+ * Creates the guide search component.
+ *
+ * @returns The guide search input and navigation controls
+ */
 export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: GuideSearchProps): JSX.Element {
   logger.logTraceRender('components/guide/guide');
 
@@ -36,20 +47,23 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
 
   // #region Helper functions
   /**
-   * Normalizes text by removing accents/diacritics for accent-insensitive search
+   * Normalizes text by removing accents/diacritics for accent-insensitive search.
+   *
    * GV IMPORTANT: Allows searching for "legende" to match "légende", and vice versa
-   * @param {string} text - Text to normalize
-   * @returns {string} Text with accents removed
+   *
+   * @param text - Text to normalize
+   * @returns Text with accents removed
    */
   const normalizeAccents = useCallback((text: string): string => {
     return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   }, []);
 
   /**
-   * Creates a regex pattern that allows proximity search with up to maxWords between keywords
-   * @param {string} term - The search term
-   * @param {number} maxWords - Maximum number of words allowed between keywords (default: 5)
-   * @returns {RegExp} Regex pattern for proximity search
+   * Creates a regex pattern that allows proximity search with up to maxWords between keywords.
+   *
+   * @param term - The search term
+   * @param maxWords - Optional maximum number of words allowed between keywords (default: 5)
+   * @returns Regex pattern for proximity search
    */
   const createProximitySearchPattern = useCallback(
     (term: string, maxWords: number = 5): RegExp => {
@@ -86,14 +100,16 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
   // #endregion Helper functions
 
   /**
-   * Recursively finds all text nodes in a DOM node, excluding certain elements
+   * Recursively finds all text nodes in a DOM node, excluding certain elements.
+   *
    * GV IMPORTANT: This function processes HTML content after markdown conversion.
    * GV When using anchor tags (<a href>) in markdown tables, they can break table rendering
    * GV because the markdown-to-jsx parser applies HTML conversion before processing table syntax.
    * GV To preserve table formatting, use plain text in table cells instead of anchor tags.
-   * @param {Node} node - The DOM node to search
-   * @param {Node[]} textNodes - Array to store found text nodes
-   * @param {Set<string>} skipTags - Set of tag names to skip
+   *
+   * @param node - The DOM node to search
+   * @param textNodes - Array to store found text nodes
+   * @param skipTags - Optional set of tag names to skip
    */
   const findTextNodes = useCallback(
     (node: Node, textNodes: Node[], skipTags: Set<string> = new Set(['SCRIPT', 'STYLE', 'CODE', 'PRE', 'IMG', 'A'])): void => {
@@ -124,11 +140,12 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
   );
 
   /**
-   * Finds all search matches across all guide sections
-   * @param {string} term - The search term to find
+   * Finds all search matches across all guide sections.
+   *
+   * @param term - The search term to find
    */
   const findAllMatches = useCallback(
-    (term: string) => {
+    (term: string): void => {
       if (!term.trim() || term.trim().length < 3 || !guide) {
         setAllMatches([]);
         setCurrentMatchIndex(0);
@@ -186,10 +203,11 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
   );
 
   /**
-   * Highlights search terms in content with visual markers using DOM-based approach
-   * @param {string} content - The content to highlight
-   * @param {number} sectionIndex - The section index being processed
-   * @returns {string} Content with highlighted search terms
+   * Highlights search terms in content with visual markers using DOM-based approach.
+   *
+   * @param content - The content to highlight
+   * @param sectionIndex - The section index being processed
+   * @returns Content with highlighted search terms
    */
   const highlightSearchTerm = useCallback(
     (content: string, sectionIndex: number): string => {
@@ -361,11 +379,12 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
   }, [searchTerm, highlightSearchTerm, onSearchStateChange]);
 
   /**
-   * Navigates to a specific search match
-   * @param {number} index - The match index to navigate to
+   * Navigates to a specific search match.
+   *
+   * @param index - The match index to navigate to
    */
   const navigateToMatch = useCallback(
-    (index: number) => {
+    (index: number): void => {
       if (allMatches.length === 0) return;
 
       const match = allMatches[index];
@@ -401,25 +420,25 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
   );
 
   /**
-   * Navigates to the next search match
+   * Navigates to the next search match.
    */
-  const handleNext = useCallback(() => {
+  const handleNext = useCallback((): void => {
     const nextIndex = (currentMatchIndex + 1) % allMatches.length;
     navigateToMatch(nextIndex);
   }, [currentMatchIndex, allMatches.length, navigateToMatch]);
 
   /**
-   * Navigates to the previous search match
+   * Navigates to the previous search match.
    */
-  const handlePrevious = useCallback(() => {
+  const handlePrevious = useCallback((): void => {
     const prevIndex = currentMatchIndex === 0 ? allMatches.length - 1 : currentMatchIndex - 1;
     navigateToMatch(prevIndex);
   }, [currentMatchIndex, allMatches.length, navigateToMatch]);
 
   /**
-   * Clears the search term and resets search state
+   * Clears the search term and resets search state.
    */
-  const handleClear = useCallback(() => {
+  const handleClear = useCallback((): void => {
     setSearchTerm('');
     setCurrentMatchIndex(0);
     setAllMatches([]);
@@ -427,11 +446,10 @@ export function GuideSearch({ guide, onSectionChange, onSearchStateChange }: Gui
   }, []);
 
   /**
-   * Handles keyboard navigation for search
-   * @param {React.KeyboardEvent} e - The keyboard event
+   * Handles keyboard navigation for search.
    */
   const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
+    (e: React.KeyboardEvent): void => {
       if (allMatches.length === 0) return;
 
       if (e.key === 'Enter' || e.key === 'ArrowDown') {

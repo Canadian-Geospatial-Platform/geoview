@@ -36,15 +36,17 @@ import { DetailsSkeleton } from './details-skeleton';
 import { CoordinateInfo, CoordinateInfoSwitch } from './coordinate-info';
 import { logger } from '@/core/utils/logger';
 
+/** Properties for the details panel component. */
 interface DetailsPanelType {
+  /** The container type (appBar or footerBar). */
   containerType: TypeContainerBox;
 }
 
 /**
- * layers list
+ * Creates the details panel component.
  *
- * @param {DetailsPanelProps} props The properties passed to LayersListFooter
- * @returns {JSX.Element} the layers list
+ * @param props - Properties defined in DetailsPanelType interface
+ * @returns The details panel component
  */
 export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   logger.logTraceRender('components/details/details-panel');
@@ -86,46 +88,53 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const prevButtonRef = useRef<HTMLButtonElement>(null);
   const nextButtonRef = useRef<HTMLButtonElement>(null);
 
-  // #region MAIN HOOKS SECTION ***************************************************************************************
+  // #region MAIN HOOKS SECTION
 
   /**
-   * Checks if feature is in the store checkedFeatures array
-   *
-   * @param {TypeFeatureInfoEntry} feature The feature to check
-   * @returns {boolean} true if feature is in checkedFeatures
+   * Memoizes the set of checked feature IDs for O(1) lookup.
    */
   // Create a memoized Set of checked feature IDs
-  const checkedFeaturesSet = useMemo(() => {
+  const memoIsCheckedFeaturesSet = useMemo(() => {
     return new Set(checkedFeatures.map((feature) => feature?.uid));
   }, [checkedFeatures]);
 
-  // Modified isFeatureInCheckedFeatures using the Set for O(1) lookup
+  /**
+   * Checks if a feature is in the store checkedFeatures array.
+   *
+   * Modified memoIsCheckedFeaturesSet using the Set for O(1) lookup
+   *
+   * @param feature - The feature to check
+   * @returns Whether the feature is in checkedFeatures
+   */
   const isFeatureInCheckedFeatures = useCallback(
     (feature: TypeFeatureInfoEntry): boolean => {
-      return checkedFeaturesSet.has(feature?.uid);
+      return memoIsCheckedFeaturesSet.has(feature?.uid);
     },
-    [checkedFeaturesSet]
+    [memoIsCheckedFeaturesSet]
   );
 
   /**
-   * Clears the highlighed features when they are not checked.
-   * @param {TypeFeatureInfoEntry[] | undefined | null} arrayToClear The array to clear of the unchecked features
+   * Clears the highlighted features when they are not checked.
+   *
+   * @param arrayToClear - The array to clear of unchecked features
    */
   // Modified clearHighlightsUnchecked
   const clearHighlightsUnchecked = useCallback(
     (arrayToClear: TypeFeatureInfoEntry[] | undefined | null) => {
       arrayToClear?.forEach((feature) => {
-        if (!checkedFeaturesSet.has(feature.uid)) {
+        if (!memoIsCheckedFeaturesSet.has(feature.uid)) {
           removeHighlightedFeature(feature);
         }
       });
     },
-    [checkedFeaturesSet, removeHighlightedFeature]
+    [memoIsCheckedFeaturesSet, removeHighlightedFeature]
   );
 
   /**
    * Gets the label for the number of features of a layer.
-   * @returns string
+   *
+   * @param layer - The layer data to get the label for
+   * @returns The features count label string
    */
   const getNumFeaturesLabel = useCallback(
     (layer: TypeLayerData): string => {
@@ -140,18 +149,19 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   );
 
   /**
-   * Checks if a feature has valid geometry
-   * @param {TypeFeatureInfoEntry} feature - The feature to check
-   * @returns {boolean} true if feature has valid geometry
+   * Checks if a feature has valid geometry.
+   *
+   * @param feature - The feature to check
+   * @returns Whether the feature has valid geometry
    */
   const hasValidGeometry = useCallback((feature: TypeFeatureInfoEntry | undefined): boolean => {
     return !!(feature?.geometry && feature?.extent && !feature.extent.includes(Infinity));
   }, []);
 
   /**
-   * Memoizes whether the panel is currently open
+   * Memoizes whether the panel is currently open.
    */
-  const isPanelOpen = useMemo(() => {
+  const memoIsPanelOpen = useMemo(() => {
     if (containerType === CONTAINER_TYPE.FOOTER_BAR) {
       return activeFooterBarTab.tabId === TABS.DETAILS && activeFooterBarTab.isOpen && isRightPanelVisible;
     }
@@ -267,6 +277,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const memoLayerSelectedItem = useMemo(() => {
     // Log
     logger.logTraceUseMemo('DETAILS-PANEL - memoLayerSelectedItem', memoLayersList, selectedLayerPath);
+  
     return memoLayersList.find((layer) => layer.layerPath === selectedLayerPath);
   }, [memoLayersList, selectedLayerPath]);
 
@@ -276,6 +287,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const memoSelectedLayerData = useMemo(() => {
     // Log
     logger.logTraceUseMemo('DETAILS-PANEL - memoSelectedLayerData', arrayOfLayerDataBatch, selectedLayerPath);
+  
     return arrayOfLayerDataBatch.find((layer) => layer.layerPath === selectedLayerPath);
   }, [arrayOfLayerDataBatch, selectedLayerPath]);
 
@@ -285,6 +297,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const memoSelectedLayerDataFeatures = useMemo(() => {
     // Log
     logger.logTraceUseMemo('DETAILS-PANEL - memoSelectedLayerDataFeatures', memoSelectedLayerData?.features);
+  
     return memoSelectedLayerData?.features;
   }, [memoSelectedLayerData?.features]);
 
@@ -294,6 +307,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const memoCurrentFeature = useMemo(() => {
     // The current feature
     logger.logTraceUseMemo('DETAILS-PANEL - memoCurrentFeature', currentFeatureIndex);
+  
     return memoSelectedLayerDataFeatures?.[currentFeatureIndex];
   }, [memoSelectedLayerDataFeatures, currentFeatureIndex]);
 
@@ -303,14 +317,17 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   const memoCurrentFeatureHasGeometry = useMemo(() => {
     // The current feature has its geometry loaded
     logger.logTraceUseMemo('DETAILS-PANEL - memoCurrentFeatureHasGeometry', !!memoCurrentFeature?.geometry);
+  
     return !!memoCurrentFeature?.geometry;
   }, [memoCurrentFeature?.geometry]);
 
   /**
    * Updates the selected features for the highlight on the map.
+   *
    * Removes the previously highlighted feature and adds a new one.
-   * @param {number} newIndex The new index to select the feature
-   * @param {TypeLayerData?} prevLayer The layer on which to unselect features
+   *
+   * @param newIndex - The new index to select the feature
+   * @param prevLayer - Optional layer on which to unselect features
    */
   const updateFeatureSelected = useCallback(
     (newIndex: number, prevLayer?: TypeLayerData) => {
@@ -380,12 +397,12 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     if (memoCurrentFeature) {
       // If the geometry has been loaded
       if (memoCurrentFeatureHasGeometry) {
-        if (isPanelOpen) addHighlightedFeature(memoCurrentFeature);
+        if (memoIsPanelOpen) addHighlightedFeature(memoCurrentFeature);
       } else {
         removeHighlightedFeature(memoCurrentFeature);
       }
     }
-  }, [memoCurrentFeature, memoCurrentFeatureHasGeometry, isPanelOpen, addHighlightedFeature, removeHighlightedFeature]);
+  }, [memoCurrentFeature, memoCurrentFeatureHasGeometry, memoIsPanelOpen, addHighlightedFeature, removeHighlightedFeature]);
 
   /**
    * Effect used to persist the layer path bypass for the layerDataArray.
@@ -462,8 +479,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   ]);
 
   /**
-   * Handles when the right panel visibility changes in responsive layout.
-   * Updates the local state to track panel visibility.
+   * Handles when the right panel visibility changes.
    */
   const handleRightPanelVisibilityChanged = useCallback((isVisible: boolean): void => {
     setIsRightPanelVisible(isVisible);
@@ -473,7 +489,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
    * Handles clicks to forward and back arrows in right panel.
    * Removes previous feature from selectedFeatures store if it is not checked, and adds new feature.
    *
-   * @param {-1 | 1} change The change to index number (-1 for back, 1 for forward)
+   * @param change - The change to index number (-1 for back, 1 for forward)
    */
   const handleFeatureNavigateChange = useCallback(
     (change: -1 | 1): void => {
@@ -506,7 +522,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   /**
    * Handles click to change the selected layer in left panel.
    *
-   * @param {LayerListEntry} layerEntry The data of the newly selected layer
+   * @param layerEntry - The data of the newly selected layer
    */
   const handleLayerChange = useCallback(
     (layerEntry: LayerListEntry): void => {
@@ -567,7 +583,9 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
     resetCurrentIndex();
   }
 
-  // Select a layer after a map click happened on the map.
+  /**
+   * Selects a layer after a map click.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('DETAILS-PANEL- mapClickCoordinates', mapClickCoordinates);
@@ -636,7 +654,7 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   }, [activeFooterBarTab, activeAppBarTab, containerType]);
 
   /**
-   * Check all layers status is processed while querying
+   * Checks if all layers query status is processed.
    */
   const memoIsAllLayersQueryStatusProcessed = useMemo(() => {
     // Log
@@ -690,9 +708,11 @@ export function DetailsPanel({ containerType }: DetailsPanelType): JSX.Element {
   // #endregion
 
   /**
-   * Render the right panel content based on detail's layer and loading status.
+   * Renders the right panel content based on detail's layer and loading status.
+   *
    * NOTE: Here we return null, so that in responsive grid layout, it can be used as flag to render the guide for details.
-   * @returns {JSX.Element | null} JSX.Element | null
+   *
+   * @returns The right panel content, or null to show the guide
    */
   const renderContent = (): JSX.Element | null => {
     if (selectedLayerPath === 'coordinate-info') {

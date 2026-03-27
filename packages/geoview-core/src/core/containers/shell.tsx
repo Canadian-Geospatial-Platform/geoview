@@ -39,20 +39,23 @@ import type { Notifications, SnackBarOpenEvent, SnackbarType } from '@/core/util
 import { useMapResize } from './use-map-resize';
 import { delay, scrollIfNotVisible } from '@/core/utils/utilities';
 
+/** The properties for the shell component. */
 type ShellProps = {
+  /** The map viewer instance. */
   mapViewer: MapViewer;
 };
 
-/** The length of time to display the snackbar message before closing it */
+/** The length of time to display the snackbar message before closing it. */
 const DEFAULT_SNACKBAR_DISPLAY_TIME = 5 * 1000; // 5 seconds
 
-/** The length of time to display the snackbar message if there are more messages in the queue */
+/** The length of time to display the snackbar message if there are more messages in the queue. */
 const QUEUED_SNACKBAR_DISPLAY_TIME = 3 * 1000; // 3 seconds
 
 /**
- * Create a shell component to wrap the map and other components not inside the map
- * @param {ShellProps} props the shell properties
- * @returns {JSX.Element} the shell component
+ * Creates a shell component to wrap the map and other components not inside the map.
+ *
+ * @param props - The shell properties
+ * @returns The shell component
  */
 export function Shell(props: ShellProps): JSX.Element {
   // Log
@@ -110,8 +113,10 @@ export function Shell(props: ShellProps): JSX.Element {
   // #region HANDLERS
 
   /**
-   * Handles when a component is being added to the map
-   * @param {MapComponentPayload} payload The map component being added
+   * Handles when a component is being added to the map.
+   *
+   * @param sender - The map viewer instance
+   * @param event - The component added event
    */
   const handleMapAddComponent = useCallback((sender: MapViewer, event: MapComponentAddedEvent): void => {
     setComponents((tempComponents) => ({
@@ -121,11 +126,13 @@ export function Shell(props: ShellProps): JSX.Element {
   }, []);
 
   /**
-   * Handles when a component is being removed from the map
-   * @param {MapComponentPayload} payload The map component being removed (component is empty, only mapComponentId is set)
+   * Handles when a component is being removed from the map.
+   *
+   * @param sender - The map viewer instance
+   * @param event - The component removed event
    */
   const handleMapRemoveComponent = useCallback(
-    (sender: MapViewer, event: MapComponentRemovedEvent) => {
+    (sender: MapViewer, event: MapComponentRemovedEvent): void => {
       const tempComponents: Record<string, JSX.Element> = { ...components };
       delete tempComponents[event.mapComponentId];
 
@@ -137,11 +144,13 @@ export function Shell(props: ShellProps): JSX.Element {
   );
 
   /**
-   * Handles when a modal needs to open
-   * @param {ModalPayload} payload The modal being opened
+   * Handles when a modal needs to open.
+   *
+   * @param sender - The modal API instance
+   * @param event - The modal event
    */
   const handleModalOpen = useCallback(
-    (sender: ModalApi, event: ModalEvent) => {
+    (sender: ModalApi, event: ModalEvent): void => {
       setModalProps(mapViewer.modal.modals[event.modalId]);
       setModalOpen(true);
     },
@@ -149,15 +158,17 @@ export function Shell(props: ShellProps): JSX.Element {
   );
 
   /**
-   * Handles when the modal needs to close (only 1 at a time is allowed)
+   * Handles when the modal needs to close (only 1 at a time is allowed).
    */
   const handleModalClose = useCallback((): void => {
     setModalOpen(false);
   }, []);
 
   /**
-   * Handles when a SnackBar needs to open
-   * @param {SnackBarOpenEvent} payload The snackbar information to open
+   * Handles when a SnackBar needs to open.
+   *
+   * @param sender - The notifications instance
+   * @param payload - The snackbar open event payload
    */
   const handleSnackBarOpen = useCallback(
     (sender: Notifications, payload: SnackBarOpenEvent): void => {
@@ -198,12 +209,13 @@ export function Shell(props: ShellProps): JSX.Element {
   );
 
   /**
-   * Handles when a SnackBar needs to close
-   * @param {React.SyntheticEvent | Event} event The event associated with the closing of the snackbar
-   * @param {string} reason The reason for closing
+   * Handles when a SnackBar needs to close.
+   *
+   * @param event - Optional synthetic or native event that triggered the close
+   * @param reason - Optional reason for the close action
    */
   const handleSnackBarClose = useCallback(
-    (event?: React.SyntheticEvent | Event, reason?: string) => {
+    (event?: React.SyntheticEvent | Event, reason?: string): void => {
       // Remove displayed message from queue
       mapViewer.notifications.snackbarMessageQueue.shift();
       if (reason === 'clickaway') {
@@ -221,12 +233,8 @@ export function Shell(props: ShellProps): JSX.Element {
     [mapViewer.notifications]
   );
 
-  // #endregion HANDLERS
-
   /**
-   * Scrolls the map into view when clicking on the map info area
-   * Uses smooth scrolling when available, or instant scrolling for users who prefer reduced motion
-   * This improves accessibility by allowing users to easily return focus to the map
+   * Scrolls the map into view when clicking on the map info area.
    */
   const handleScrollShellIntoView = useCallback((): void => {
     if (!shellRef.current) return;
@@ -236,10 +244,11 @@ export function Shell(props: ShellProps): JSX.Element {
   }, []);
 
   /**
-   * Handles skip link navigation by focusing the target element
-   * @param {string} targetId - The ID of the element to focus
+   * Handles skip link navigation by focusing the target element.
+   *
+   * @param targetId - The ID of the element to focus
    */
-  const handleSkipLinkClick = useCallback((targetId: string) => {
+  const handleSkipLinkClick = useCallback((targetId: string): void => {
     const targetElement = document.getElementById(targetId);
     if (targetElement) {
       targetElement.focus();
@@ -247,16 +256,19 @@ export function Shell(props: ShellProps): JSX.Element {
   }, []);
 
   /**
-   * Handles the skip to main content by focusing the map container element so keyboard users can quickly access the map,
-   * and activates the crosshair for visual feedback.
+   * Handles the skip to main content by focusing the map container element and activating the crosshair.
    */
-  const handleSkipToMainContent = useCallback(() => {
+  const handleSkipToMainContent = useCallback((): void => {
     // Focus the map and set crosshair
     setCrosshairActive(true);
     document.getElementById(`mapTargetElement-${mapId}`)?.focus();
   }, [mapId, setCrosshairActive]);
 
-  // Mount component
+  // #endregion HANDLERS
+
+  /**
+   * Registers map viewer event listeners on mount and cleans up on unmount.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('SHELL - mount');

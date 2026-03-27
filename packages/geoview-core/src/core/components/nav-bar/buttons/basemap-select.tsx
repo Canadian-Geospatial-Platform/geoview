@@ -16,6 +16,7 @@ import { IconButton } from '@/ui/icon-button/icon-button';
 import { List, ListItem } from '@/ui/list';
 import { BlockIcon, PublicIcon, SatelliteIcon, SignpostIcon } from '@/ui/icons';
 
+/** Mapping of basemap choice identifiers to their options. */
 const basemapChoiceOptions: Record<string, TypeBasemapOptions> = {
   transport: { basemapId: 'transport', shaded: true, labeled: true },
   imagery: { basemapId: 'imagery', shaded: false, labeled: false },
@@ -24,8 +25,9 @@ const basemapChoiceOptions: Record<string, TypeBasemapOptions> = {
 };
 
 /**
- * Create a basemap select button to open the select panel, and set panel content
- * @returns {JSX.Element} the created basemap select button
+ * Creates a basemap select button to open the select panel.
+ *
+ * @returns The basemap select button
  */
 export default function BasemapSelect(): JSX.Element {
   // Log
@@ -48,7 +50,9 @@ export default function BasemapSelect(): JSX.Element {
   const [selectedBasemap, setSelectedBasemap] = useState<string>(noDefault ? configBasemapOptions.basemapId : 'default');
 
   /**
-   * Handles basemap selection and updates basemap
+   * Handles basemap selection and updates the map basemap.
+   *
+   * @param basemapChoice - The selected basemap identifier
    */
   const handleChoice = useCallback(
     (basemapChoice: string): void => {
@@ -77,8 +81,9 @@ export default function BasemapSelect(): JSX.Element {
   );
 
   /**
-   * Render buttons in navbar panel.
-   * @returns ReactNode
+   * Renders the basemap choice buttons.
+   *
+   * @returns The list of basemap buttons
    */
   const renderButtons = (): ReactNode => {
     return (

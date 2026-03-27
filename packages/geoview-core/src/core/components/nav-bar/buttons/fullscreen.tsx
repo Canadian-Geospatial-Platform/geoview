@@ -9,9 +9,9 @@ import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { logger } from '@/core/utils/logger';
 
 /**
- * Create a toggle button to toggle between fullscreen
+ * Creates a toggle button to toggle between fullscreen.
  *
- * @returns {JSX.Element} the fullscreen toggle button
+ * @returns The fullscreen toggle button
  */
 export default function Fullscreen(): JSX.Element {
   // Log
@@ -28,7 +28,7 @@ export default function Fullscreen(): JSX.Element {
   const { setFullScreenActive } = useAppStoreActions();
 
   /**
-   * Toggle between fullscreen and window mode
+   * Toggles between fullscreen and window mode.
    */
   function setFullscreen(): void {
     const element = document.getElementById(`shell-${mapId}`);
@@ -40,12 +40,15 @@ export default function Fullscreen(): JSX.Element {
     }
   }
 
+  /**
+   * Registers fullscreen change listeners to detect ESC key exit.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('FULLSCREEN - mount');
 
     /**
-     * Exit fullscreen with ESC key
+     * Exits fullscreen when the browser fullscreen state changes.
      */
     function handleExit(): void {
       if (!document.fullscreenElement) {

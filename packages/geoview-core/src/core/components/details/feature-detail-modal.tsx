@@ -15,9 +15,9 @@ import { logger } from '@/core/utils/logger';
 import { TABS, LIGHTBOX_SELECTORS } from '@/core/utils/constant';
 
 /**
- * Open lighweight version (no function) of feature detail in modal.
+ * Creates the lightweight feature detail modal component.
  *
- * @returns {JSX.Element} the feature detail modal component
+ * @returns The feature detail modal component
  */
 export default function FeatureDetailModal(): JSX.Element {
   // Log
@@ -40,9 +40,9 @@ export default function FeatureDetailModal(): JSX.Element {
   const containerType = activeAppBarTab.tabId === TABS.DATA_TABLE && activeAppBarTab.isOpen ? 'appBar' : 'footerBar';
 
   /**
-   * Build features list to displayed in table
+   * Builds the features list to display in the table.
    */
-  const featureInfoList: TypeFieldEntry[] = useMemo(() => {
+  const memoFeatureInfoList: TypeFieldEntry[] = useMemo(() => {
     // Log
     logger.logTraceUseMemo('DETAILS PANEL - Feature Detail Modal - featureInfoList');
 
@@ -95,7 +95,7 @@ export default function FeatureDetailModal(): JSX.Element {
             </Typography>
           </Box>
           <List sx={sxClasses.featureDetailListContainer}>
-            <FeatureInfoTable layerPath={feature.layerPath} featureInfoList={featureInfoList} containerType={containerType} />
+            <FeatureInfoTable layerPath={feature.layerPath} featureInfoList={memoFeatureInfoList} containerType={containerType} />
           </List>
         </>
       }

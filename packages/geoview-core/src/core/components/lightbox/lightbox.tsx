@@ -14,35 +14,43 @@ import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { LIGHTBOX_SELECTORS } from '@/core/utils/constant';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
-/**
- * Interface used for lightbox properties and slides
- */
+/** Slide definition for the lightbox. */
 export interface LightBoxSlides {
+  /** The image source URL. */
   src: string;
+  /** The image alt text. */
   alt: string;
+  /** The download URL for the image. */
   downloadUrl: string;
 }
+
+/** Props for the LightboxImg component. */
 export interface LightboxProps {
+  /** Whether the lightbox is open. */
   open: boolean;
+  /** The slides to display. */
   slides: LightBoxSlides[];
+  /** The initial slide index. */
   index: number;
+  /** Callback invoked when the lightbox exit animation completes. */
   exited: () => void;
+  /** Optional callback invoked when the active slide changes. */
   onSlideChange?: (index: number) => void;
 }
 
-// Constants outside component to prevent recreating every render
+/** Animation duration constants for the lightbox transitions. */
 const LIGHTBOX_CONSTANTS = {
   FADE_DURATION: 250,
   SWIPE_DURATION: 500,
 } as const;
 
 /**
- * Create an element that displays a lightbox
+ * Creates the lightbox image viewer component.
  *
- * @param {LightboxProps} props the lightbox properties
- * @returns {JSX.Element} created lightbox element
+ * Memoized to prevent re-renders when parent updates but lightbox props have not changed.
+ *
+ * @returns The lightbox element
  */
-// Memoizes entire component, preventing re-renders if props haven't changed
 export const LightboxImg = memo(function LightboxImg({ open, slides, index, exited, onSlideChange }: LightboxProps): JSX.Element {
   logger.logTraceRender('components/lightbox/lightbox');
 
@@ -58,13 +66,17 @@ export const LightboxImg = memo(function LightboxImg({ open, slides, index, exit
   const mapId = useGeoViewMapId();
   const activeTrapGeoView = useUIActiveTrapGeoView();
 
-  // Update open state when prop changes
+  /**
+   * Syncs internal open state when the prop changes.
+   */
   useEffect(() => {
     logger.logTraceUseEffect('LIGHTBOX - open', open);
     setIsOpen(open);
   }, [open]);
 
-  // Make shell's children inert when lightbox opens, except the lightbox itself
+  /**
+   * Manages inert attribute on shell children when the lightbox opens or closes.
+   */
   useEffect(() => {
     const shellElement = document.getElementById(`shell-${mapId}`);
     if (!shellElement) return;
@@ -94,7 +106,9 @@ export const LightboxImg = memo(function LightboxImg({ open, slides, index, exit
     };
   }, [isOpen, activeTrapGeoView, mapId]);
 
-  // Trap focus within lightbox buttons
+  /**
+   * Traps focus within lightbox buttons when open.
+   */
   useEffect(() => {
     if (!isOpen) return;
 

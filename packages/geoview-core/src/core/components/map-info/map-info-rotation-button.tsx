@@ -10,12 +10,12 @@ import { logger } from '@/core/utils/logger';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
 /**
- * Map Information Rotation Indicator component
- * Displays the current map rotation angle
+ * Creates the map information rotation indicator component.
  *
- * @returns {JSX.Element} the rotation indicator
+ * Memoized to prevent re-renders since this component has no props.
+ *
+ * @returns The rotation indicator
  */
-// Memoizes entire component, preventing re-renders if props haven't changed
 export const MapInfoRotationButton = memo(function MapInfoRotationButton(): JSX.Element {
   logger.logTraceRender('components/map-info/map-info-rotation-button');
 

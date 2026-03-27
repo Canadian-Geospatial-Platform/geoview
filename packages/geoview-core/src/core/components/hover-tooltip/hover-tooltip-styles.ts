@@ -1,12 +1,13 @@
 import type { Theme } from '@mui/material/styles';
 
+/** Record of sx class name to style object. */
 type SxClasses = Record<string, object>;
 
 /**
- * Get custom sx classes for the hover tooltip
+ * Gets custom sx classes for the hover tooltip.
  *
- * @param {Theme} theme the theme object
- * @returns {Object} the sx classes object
+ * @param theme - The theme object
+ * @returns The sx classes object
  */
 export const getSxClasses = (theme: Theme): SxClasses => ({
   tooltipItem: {

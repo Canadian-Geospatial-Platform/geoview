@@ -3,10 +3,10 @@ import type { SxStyles } from '@/ui/style/types';
 import { visuallyHidden } from '@/ui/style/default';
 
 /**
- * Get custom sx classes for the details
+ * Gets the sx classes for the details components.
  *
- * @param {Theme} theme the theme object
- * @returns {Object} the sx classes object
+ * @param theme - The theme object
+ * @returns The sx classes object
  */
 export const getSxClasses = (theme: Theme): SxStyles => ({
   detailsContainer: {

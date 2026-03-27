@@ -19,8 +19,9 @@ import type { IconButtonPropsExtend } from '@/ui/icon-button/icon-button';
 import { IconButton } from '@/ui/icon-button/icon-button';
 
 /**
- * Create a map rotation button to open the rotation control panel
- * @returns {JSX.Element} the created map rotation button
+ * Creates a map rotation button to open the rotation control panel.
+ *
+ * @returns The map rotation button
  */
 export default function MapRotation(): JSX.Element {
   // Log
@@ -56,7 +57,9 @@ export default function MapRotation(): JSX.Element {
       : `${t('mapctrl.rotation.rotation')}: ${rotationDegrees}°`;
 
   /**
-   * Handles rotation slider change
+   * Handles rotation slider change.
+   *
+   * @param value - The new slider value
    */
   const handleSliderChange = useCallback(
     (value: number | number[]): void => {
@@ -68,7 +71,7 @@ export default function MapRotation(): JSX.Element {
   );
 
   /**
-   * Handles fix north toggle
+   * Handles fix north toggle.
    */
   const handleFixNorth = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -83,15 +86,16 @@ export default function MapRotation(): JSX.Element {
   );
 
   /**
-   * Handles reset button click
+   * Handles when the user clicks the reset button.
    */
   const handleReset = useCallback((): void => {
     setRotation(0);
   }, [setRotation]);
 
   /**
-   * Render rotation control panel content
-   * @returns ReactNode
+   * Renders the rotation control panel content.
+   *
+   * @returns The rotation control panel
    */
   const renderRotationControl = (): ReactNode => {
     return (

@@ -13,18 +13,21 @@ import { logger } from '@/core/utils/logger';
 import { useAppShellContainer } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
+/** Props for the GeolocatorResult component. */
 interface GeolocatorFiltersType {
+  /** The geolocation data to display. */
   geoLocationData: GeoListItem[];
+  /** The search value entered by the user. */
   searchValue: string;
+  /** Whether an error occurred during the API call. */
   error: boolean;
 }
 
 /**
- * Component to display filters and geo location result.
- * @param {GeoListItem[]} geoLocationData - The data to be displayed in result
- * @param {string} searchValue - The search value entered by the user.
- * @param {boolean} error - If there is an error thrown api call.
- * @returns {JSX.Element}
+ * Creates the component to display filters and geolocation results.
+ *
+ * @param props - Properties defined in GeolocatorFiltersType interface
+ * @returns The geolocation result component
  */
 export function GeolocatorResult({ geoLocationData, searchValue, error }: GeolocatorFiltersType): JSX.Element {
   // Log
@@ -43,7 +46,10 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
   const [province, setProvince] = useState<string>('');
   const [category, setCategory] = useState<string>('');
 
-  const hasActiveFilters = useMemo(() => {
+  /**
+   * Checks whether any filter is active.
+   */
+  const memoHasActiveFilters = useMemo(() => {
     return !!(province.length || category.length);
   }, [province, category]);
 
@@ -52,11 +58,11 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
   const mapSize = useMapSize();
 
   /**
-   * Clear all filters.
+   * Clears all filters.
    */
   const handleClearFilters = (): void => {
     // Prevent action when button is disabled
-    if (!hasActiveFilters) {
+    if (!memoHasActiveFilters) {
       return;
     }
     setProvince('');
@@ -64,7 +70,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
   };
 
   /**
-   * Reduce provinces from api response data i.e. geoLocationData
+   * Reduces provinces from the API response data.
    */
   const memoProvinces: TypeMenuItemProps[] = useMemo(() => {
     logger.logTraceUseMemo('GEOLOCATOR-RESULT - provinces', geoLocationData);
@@ -72,13 +78,16 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
   }, [geoLocationData, t]);
 
   /**
-   * Reduce categories from api response data i.e. geoLocationData
+   * Reduces categories from the API response data.
    */
   const memoCategories: TypeMenuItemProps[] = useMemo(() => {
     logger.logTraceUseMemo('GEOLOCATOR-RESULT - categories', geoLocationData);
     return createMenuItems(geoLocationData, 'category', t('geolocator.noFilter'));
   }, [geoLocationData, t]);
 
+  /**
+   * Filters geolocation data by selected province and category.
+   */
   // Filter data with memo
   const memoFilteredData = useMemo(() => {
     logger.logTraceUseMemo('GEOLOCATOR-RESULT - filtering data', {
@@ -94,8 +103,10 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
     });
   }, [geoLocationData, province, category]);
 
-  // List active filters in the results
-  const activeFiltersDisplay = useMemo(() => {
+  /**
+   * Builds the active filters display for screen readers.
+   */
+  const memoActiveFiltersDisplay = useMemo(() => {
     if (!(province.length || category.length)) return null;
 
     return (
@@ -158,7 +169,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               className="buttonOutline"
               aria-label={t('geolocator.clearFilters')}
               onClick={handleClearFilters}
-              aria-disabled={!hasActiveFilters}
+              aria-disabled={!memoHasActiveFilters}
             >
               <ClearFiltersIcon sx={{ fontSize: theme.palette.geoViewFontSize.md }} />
             </IconButton>
@@ -189,7 +200,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
               <Typography role="status" aria-live="polite" aria-atomic="true" component="p">
                 {t('geolocator.resultsFound', { count: memoFilteredData.length, searchTerm: searchValue })}
               </Typography>
-              {activeFiltersDisplay}
+              {memoActiveFiltersDisplay}
             </Box>
             <GeoList geoListItems={memoFilteredData} searchValue={searchValue} />
           </>
@@ -205,7 +216,7 @@ export function GeolocatorResult({ geoLocationData, searchValue, error }: Geoloc
             >
               {t('geolocator.noResult')} <b>{searchValue}</b>
             </Typography>
-            {activeFiltersDisplay}
+            {memoActiveFiltersDisplay}
           </Box>
         )}
       </Box>

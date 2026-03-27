@@ -1,3 +1,4 @@
+/** Color constants for export layouts. */
 const COLORS = {
   lightGrey: '#f5f5f5',
   standardGrey: '#9e9e9e',
@@ -5,6 +6,7 @@ const COLORS = {
   darkGrey: '#424242',
 } as const;
 
+/** Shared style constants for both Canvas and PDF export layouts. */
 export const SHARED_STYLES = {
   fontFamily: 'Helvetica',
   padding: 36,
@@ -181,7 +183,7 @@ export const SHARED_STYLES = {
   },
 } as const;
 
-// PDF-specific styles (react-pdf format)
+/** PDF-specific styles in react-pdf format. */
 export const PDF_STYLES = {
   ...SHARED_STYLES,
   scaleContainer: {
@@ -244,7 +246,7 @@ export const PDF_STYLES = {
   },
 } as const;
 
-// Canvas-specific styles (CSS format)
+/** Canvas-specific styles in CSS format. */
 export const CANVAS_STYLES = {
   page: (width: number) => ({
     width: `${width}px`,
@@ -429,7 +431,10 @@ export const CANVAS_STYLES = {
 } as const;
 
 /**
- * Get scaled PDF styles for AUTO mode
+ * Gets scaled PDF styles for AUTO mode.
+ *
+ * @param docWidth - The document width in pixels
+ * @returns The scaled PDF styles object
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getScaledPDFStyles = (docWidth: number): any => {
@@ -514,7 +519,10 @@ export const getScaledPDFStyles = (docWidth: number): any => {
 };
 
 /**
- * Get scaled Canvas styles for AUTO mode
+ * Gets scaled Canvas styles for AUTO mode.
+ *
+ * @param docWidth - The document width in pixels
+ * @returns The scaled Canvas styles object
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getScaledCanvasStyles = (docWidth: number): any => {

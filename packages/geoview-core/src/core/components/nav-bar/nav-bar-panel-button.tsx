@@ -12,15 +12,19 @@ import { UseHtmlToReact } from '@/core/components/common/hooks/use-html-to-react
 import { handleEscapeKey } from '@/core/utils/utilities';
 import { useUIActiveTrapGeoView } from '@/core/stores/store-interface-and-intial-values/ui-state';
 
+/** The properties for the navbar panel button. */
 interface NavbarPanelButtonType {
+  /** The button panel configuration. */
   buttonPanel: TypeButtonPanel;
+  /** Whether the button is in an active state. */
   isActive?: boolean;
 }
 
 /**
- * Navbar popover component
+ * Creates a navbar button with a popover panel.
  *
- * @returns {JSX.Element} the export popover component
+ * @param props - The navbar panel button properties
+ * @returns The navbar panel button component
  */
 export default function NavbarPanelButton({ buttonPanel, isActive = false }: NavbarPanelButtonType): JSX.Element {
   // Log
@@ -39,13 +43,17 @@ export default function NavbarPanelButton({ buttonPanel, isActive = false }: Nav
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [open, setOpen] = useState(false);
 
-  // Close function to pass to panel content
+  /**
+   * Closes the panel and clears the anchor element.
+   */
   const closePanel = (): void => {
     setOpen(false);
     setAnchorEl(null);
   };
 
-  // Handlers
+  /**
+   * Handles when the user clicks the navbar button to toggle the panel.
+   */
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>): void => {
     if (open) {
       closePanel();
@@ -55,13 +63,20 @@ export default function NavbarPanelButton({ buttonPanel, isActive = false }: Nav
     }
   };
 
+  /**
+   * Handles when the user clicks away from the popover.
+   */
   const handleClickAway = (): void => {
     if (open) {
       closePanel();
     }
   };
 
-  // Clone panel content and inject close function if it's a React element
+  /**
+   * Renders the panel content based on the button panel configuration.
+   *
+   * @returns The rendered panel content
+   */
   const renderPanelContent = (): JSX.Element => {
     if (buttonPanel.panel?.convertHtmlContent) {
       return <UseHtmlToReact htmlContent={buttonPanel.panel?.content as string} />;

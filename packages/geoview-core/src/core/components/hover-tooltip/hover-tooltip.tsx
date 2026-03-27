@@ -20,6 +20,13 @@ import {
   useLayerDisplayDateTimezones,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 
+/**
+ * Creates the hover tooltip component.
+ *
+ * Memoized to prevent re-renders since this component has no props.
+ *
+ * @returns The hover tooltip element, or null when not visible
+ */
 export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
   // Log
   logger.logTraceRenderDetailed('components/hover-tooltip/hover-tooltip');
@@ -45,6 +52,9 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
   const displayDateFormats = useLayerDisplayDateFormats();
   const displayDateTimezones = useLayerDisplayDateTimezones();
 
+  /**
+   * Formats the hovered feature value for display.
+   */
   const memoValue = useMemo(() => {
     logger.logTraceUseMemo('HOVER TOOLTIP - memoValue', hoverFeatureInfo?.fieldInfo?.value);
 
@@ -65,8 +75,10 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
     return valueString;
   }, [hoverFeatureInfo, displayDateFormats, displayDateTimezones, language, layerDateTemporalModes]);
 
-  // Calculate position with boundary checks
-  const position = useMemo(() => {
+  /**
+   * Calculates the tooltip position with boundary checks.
+   */
+  const memoPosition = useMemo(() => {
     // Use store getter, we do not subcribe to modification and use it only when needed
     const pointerPosition = getMapPointerPosition(mapId);
 
@@ -103,9 +115,11 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
     return { left: `${tooltipX}px`, top: `${tooltipY}px`, isValid: true };
   }, [mapId, mapElem, memoValue, isMouseouseInMap]);
 
-  // Compute tooltip content and visibility
-  const tooltipContent = useMemo(() => {
-    if (!hoverFeatureInfo || !position.isValid) {
+  /**
+   * Computes the tooltip content and visibility state.
+   */
+  const memoTooltipContent = useMemo(() => {
+    if (!hoverFeatureInfo || !memoPosition.isValid) {
       return {
         content: { value: '', icon: '' },
         isVisible: false,
@@ -121,26 +135,26 @@ export const HoverTooltip = memo(function HoverTooltip(): JSX.Element | null {
       },
       isVisible: true,
     };
-  }, [hoverFeatureInfo, memoValue, position.isValid]);
+  }, [hoverFeatureInfo, memoValue, memoPosition.isValid]);
 
   return (
     <Box
       ref={tooltipRef}
       sx={sxClasses.tooltipItem}
       style={{
-        visibility: position.isValid && tooltipContent.isVisible ? 'visible' : 'hidden',
-        left: position.left,
-        top: position.top,
+        visibility: memoPosition.isValid && memoTooltipContent.isVisible ? 'visible' : 'hidden',
+        left: memoPosition.left,
+        top: memoPosition.top,
       }}
     >
-      {tooltipContent.content.icon ? (
-        <Box component="img" className="layer-icon" alt={t('hovertooltip.alticon')!} src={tooltipContent.content.icon} />
+      {memoTooltipContent.content.icon ? (
+        <Box component="img" className="layer-icon" alt={t('hovertooltip.alticon')!} src={memoTooltipContent.content.icon} />
       ) : (
         <Box component="div" className="layer-icon" aria-label={t('hovertooltip.alticon')!}>
           <BrowserNotSupportedIcon />
         </Box>
       )}
-      {tooltipContent.content.value !== undefined && <Box sx={sxClasses.tooltipText}>{tooltipContent.content.value}</Box>}
+      {memoTooltipContent.content.value !== undefined && <Box sx={sxClasses.tooltipText}>{memoTooltipContent.content.value}</Box>}
     </Box>
   );
 });

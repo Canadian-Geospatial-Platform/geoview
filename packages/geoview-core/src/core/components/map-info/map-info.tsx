@@ -11,7 +11,7 @@ import { useMapInteraction } from '@/core/stores/store-interface-and-intial-valu
 import { logger } from '@/core/utils/logger';
 import { useGeoViewMapId } from '@/core/stores/geoview-store';
 
-// Constants outside component to prevent recreating every render
+/** Base styles for the map info bar container. */
 const MAP_INFO_BASE_STYLES = {
   display: 'flex',
   alignItems: 'center',
@@ -22,18 +22,22 @@ const MAP_INFO_BASE_STYLES = {
   px: '1rem',
 } as const;
 
+/** Flex spacer style for distributing map info items. */
 const FLEX_STYLE = { flexGrow: 1, height: '100%' };
 
+/** Props for the MapInfo component. */
 interface MapInfoProps {
+  /** Callback to scroll the shell into view when the info bar is clicked. */
   onScrollShellIntoView: () => void;
 }
 
 /**
- * Create a map information element that contains attribtuion, mouse position and scale
+ * Creates the map information bar containing attribution, mouse position, and scale.
  *
- * @returns {JSX.Element} the map information element
+ * Memoized to prevent re-renders when parent updates but the onScrollShellIntoView callback has not changed.
+ *
+ * @returns The map information bar
  */
-// Memoizes entire component, preventing re-renders if props haven't changed
 export const MapInfo = memo(function MapInfo({ onScrollShellIntoView }: MapInfoProps): JSX.Element {
   logger.logTraceRender('components/map-info/map-info');
 
@@ -47,8 +51,10 @@ export const MapInfo = memo(function MapInfo({ onScrollShellIntoView }: MapInfoP
   // State
   const [expanded, setExpanded] = useState(false);
 
-  // Memoize values
-  const containerStyles = useMemo(
+  /**
+   * Computes the dynamic container styles for the map info bar.
+   */
+  const memoContainerStyles = useMemo(
     () => ({
       ...MAP_INFO_BASE_STYLES,
       height: expanded ? '80px' : '40px',
@@ -60,7 +66,10 @@ export const MapInfo = memo(function MapInfo({ onScrollShellIntoView }: MapInfoP
     [expanded, theme.palette.geoViewColor.bgColor, theme.zIndex.appBar]
   );
 
-  const staticContainerStyles = useMemo(
+  /**
+   * Computes the static map container styles.
+   */
+  const memoStaticContainerStyles = useMemo(
     () => ({
       ...MAP_INFO_BASE_STYLES,
       height: '40px',
@@ -71,12 +80,19 @@ export const MapInfo = memo(function MapInfo({ onScrollShellIntoView }: MapInfoP
     [theme.palette.geoViewColor.grey]
   );
 
-  const handleExpand = useCallback((value: boolean) => {
+  /**
+   * Handles toggling the expanded state.
+   */
+  const handleExpand = useCallback((value: boolean): void => {
     setExpanded(value);
   }, []);
 
   return (
-    <Box id={`${mapId}-mapInfo`} sx={interaction === 'dynamic' ? containerStyles : staticContainerStyles} onClick={onScrollShellIntoView}>
+    <Box
+      id={`${mapId}-mapInfo`}
+      sx={interaction === 'dynamic' ? memoContainerStyles : memoStaticContainerStyles}
+      onClick={onScrollShellIntoView}
+    >
       {interaction === 'dynamic' && <MapInfoExpandButton onExpand={handleExpand} expanded={expanded} />}
       <Attribution />
       {interaction === 'dynamic' && (

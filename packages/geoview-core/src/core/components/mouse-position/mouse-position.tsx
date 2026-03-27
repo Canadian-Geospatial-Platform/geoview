@@ -8,16 +8,21 @@ import { useMapPointerPosition } from '@/core/stores/store-interface-and-intial-
 import { GeoUtilities } from '@/geo/utils/utilities';
 import { getSxClasses } from './mouse-position-style';
 
+/** Mouse position component props. */
 interface MousePositionProps {
+  /** Whether the mouse position display is expanded. */
   expanded: boolean;
 }
 
+/** Formatted coordinate strings for display. */
 interface FormattedCoordinates {
+  /** Formatted longitude string. */
   lng: string;
+  /** Formatted latitude string. */
   lat: string;
 }
 
-// Constants outside component to prevent recreating every render
+/** Available position display modes. */
 const POSITION_MODES = {
   DMS: 0,
   DD: 1,
@@ -25,7 +30,9 @@ const POSITION_MODES = {
 } as const;
 
 /**
- * Format coordinates utility component
+ * Renders a single coordinate display line with an active indicator.
+ *
+ * Memoized to avoid re-rendering unchanged coordinate lines when only the active mode changes.
  */
 const CoordinateDisplay = memo(function CoordinateDisplay({
   position,
@@ -54,7 +61,12 @@ const CoordinateDisplay = memo(function CoordinateDisplay({
 });
 
 /**
- * Format the coordinates output in lat long
+ * Formats the coordinates output in latitude and longitude.
+ *
+ * @param lonlat - The coordinate array [longitude, latitude]
+ * @param DMS - Whether to format as degrees-minutes-seconds
+ * @param t - The translation function
+ * @returns The formatted coordinate strings
  */
 const formatCoordinates = (lonlat: Coordinate, DMS: boolean, t: (key: string) => string): FormattedCoordinates => {
   const labelX = lonlat[0] < 0 ? t('mapctrl.mouseposition.west') : t('mapctrl.mouseposition.east');
@@ -67,10 +79,12 @@ const formatCoordinates = (lonlat: Coordinate, DMS: boolean, t: (key: string) =>
 };
 
 /**
- * Create mouse position component
- * @returns {JSX.Element} the mouse position component
+ * Creates the mouse position component.
+ *
+ * Memoized to prevent re-renders when parent updates but expanded prop hasn't changed.
+ *
+ * @returns The mouse position component
  */
-// Memoizes entire component, preventing re-renders if props haven't changed
 export const MousePosition = memo(function MousePosition({ expanded }: MousePositionProps): JSX.Element {
   // Log too annoying
   // logger.logTraceRender('components/mouse-position/mouse-position');
@@ -86,8 +100,10 @@ export const MousePosition = memo(function MousePosition({ expanded }: MousePosi
   // Store
   const pointerPosition = useMapPointerPosition();
 
-  // Format positions only when pointerPosition changes
-  const positions = useMemo(() => {
+  /**
+   * Formats position strings for all display modes.
+   */
+  const memoPositions = useMemo(() => {
     if (!pointerPosition) return ['', '', ''];
 
     // Log too annoying
@@ -100,14 +116,18 @@ export const MousePosition = memo(function MousePosition({ expanded }: MousePosi
     return [`${DMS.lng} | ${DMS.lat}`, `${DD.lng} | ${DD.lat}`, `${projected[0].toFixed(4)}m E | ${projected[1].toFixed(4)}m N`];
   }, [pointerPosition, t]);
 
-  // Callbacks
+  /**
+   * Handles cycling through position display modes.
+   */
   const switchPositionMode = useCallback((event: React.MouseEvent<HTMLButtonElement>): void => {
     event.stopPropagation();
     setPositionMode((p) => (p + 1) % 3);
   }, []);
 
-  // Memoized content
-  const expandedContent = useMemo(
+  /**
+   * Builds the expanded coordinate display content.
+   */
+  const memoExpandedContent = useMemo(
     () => (
       <Box
         id="mousePositionWrapper"
@@ -116,7 +136,7 @@ export const MousePosition = memo(function MousePosition({ expanded }: MousePosi
           transition: 'display 1ms ease-in 300ms',
         }}
       >
-        {positions.map((position, index) => (
+        {memoPositions.map((position, index) => (
           <CoordinateDisplay
             // eslint-disable-next-line react/no-array-index-key
             key={`pos-${index}`}
@@ -128,13 +148,16 @@ export const MousePosition = memo(function MousePosition({ expanded }: MousePosi
         ))}
       </Box>
     ),
-    [positions, positionMode, expanded, sxClasses, theme.palette.geoViewFontSize.lg]
+    [memoPositions, positionMode, expanded, sxClasses, theme.palette.geoViewFontSize.lg]
   );
 
   // TODO: WCAG Issue #2390 - Ensure that mouse position button updates are announced by screen readers
   // TODO: WCAG Issue #2390 - Rethink this to use mutliple buttons or select element for better accessibility?
 
-  const collapsedContent = useMemo(
+  /**
+   * Builds the collapsed coordinate display content.
+   */
+  const memoCollapsedContent = useMemo(
     () => (
       <Box
         component="span"
@@ -143,10 +166,10 @@ export const MousePosition = memo(function MousePosition({ expanded }: MousePosi
           ...sxClasses.mousePositionText,
         }}
       >
-        {positions[positionMode]}
+        {memoPositions[positionMode]}
       </Box>
     ),
-    [expanded, positions, positionMode, sxClasses.mousePositionText]
+    [expanded, memoPositions, positionMode, sxClasses.mousePositionText]
   );
 
   return (
@@ -159,8 +182,8 @@ export const MousePosition = memo(function MousePosition({ expanded }: MousePosi
       disableRipple
     >
       <Box sx={sxClasses.mousePositionTextContainer}>
-        {expandedContent}
-        {collapsedContent}
+        {memoExpandedContent}
+        {memoCollapsedContent}
       </Box>
     </Button>
   );

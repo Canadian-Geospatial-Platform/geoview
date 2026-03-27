@@ -121,6 +121,7 @@ export class LayerEntryConfigUnableToCreateGroupLayerError extends LayerEntryCon
 
 /**
  * Error thrown when a vector layer configuration is missing its required source URL.
+ *
  * This typically indicates an improperly defined `LayerEntryConfig` for a vector source.
  */
 export class LayerEntryConfigVectorSourceURLNotDefinedError extends LayerEntryConfigError {

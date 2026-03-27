@@ -27,23 +27,24 @@ if (typeof window !== 'undefined') {
   (window as typeof globalThis).Buffer = Buffer;
 }
 
-// Export constants
+/** Constants for export configuration. */
 export const EXPORT_CONSTANTS = {
-  // DPI and quality settings
+  /** DPI and quality settings */
   DEFAULT_DPI: 96, // Standard screen DPI
   JPEG_QUALITY: 0.98, // JPEG compression quality for map image
 
-  // Column optimization
+  /** Column optimization settings */
   COLUMN_BALANCE_THRESHOLD: 0.8, // Columns within 80% height ratio are considered balanced
   MAX_OPTIMIZATION_ITERATIONS: 20, // Maximum iterations for column balancing
   DEFAULT_MAX_COLUMNS: 4, // Default maximum number of legend columns
   COLUMN_GAP: 10, // Gap between legend columns in pixels
 
-  // WMS image constraints
+  /** WMS image constraints */
   WMS_MAX_WIDTH: 500, // Maximum width for WMS images
   WMS_INDENT_PER_LEVEL: 10, // Indent in pixels per depth level
 } as const;
 
+/** Map state properties needed for export layout rendering. */
 export type TypeMapStateForExportLayout = {
   attribution: string[];
   northArrow: boolean;
@@ -53,6 +54,7 @@ export type TypeMapStateForExportLayout = {
   currentProjection: number;
 };
 
+/** North arrow SVG path data. */
 export type NorthArrowSVG = {
   d: string | null; // null because this is SVG for HTML
   fill: string | null; // null because this is SVG for HTML
@@ -60,6 +62,7 @@ export type NorthArrowSVG = {
   strokeWidth: string | null; // null because this is SVG for HTML
 };
 
+/** Flattened legend item for layout processing. */
 export type FlattenedLegendItem = {
   type: 'layer' | 'item' | 'child' | 'wms' | 'time';
   data: TypeLegendLayer;
@@ -72,10 +75,7 @@ export type FlattenedLegendItem = {
   wmsImageSize?: { width: number; height: number }; // Actual measured WMS image dimensions
 };
 
-/**
- * Element factory interface for creating renderer-specific elements
- * Allows us to abstract between Canvas (HTML) and PDF rendering
- */
+/** Element factory interface for creating renderer-specific elements (Canvas/HTML or PDF). */
 export interface ElementFactory {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   View: (props: any) => JSX.Element;
@@ -91,6 +91,7 @@ export interface ElementFactory {
   Path: (props: any) => JSX.Element;
 }
 
+/** Result type containing all map export information. */
 export type TypeMapInfoResult = {
   mapDataUrl: string;
   scaleText: string;
@@ -104,7 +105,7 @@ export type TypeMapInfoResult = {
   canvasHeight: number;
 };
 
-// Export dimension constants at 300DPI (only AUTO is supported)
+/** Export dimension constants at 300DPI (only AUTO is supported). */
 const MAP_IMAGE_DIMENSIONS = {
   AUTO: {
     // Width and height calculated dynamically
@@ -113,14 +114,16 @@ const MAP_IMAGE_DIMENSIONS = {
   },
 };
 
+/** Utility class providing static methods for map export processing and layout rendering. */
 export class ExportUtilities {
   /**
-   * Extract native dimensions from a base64-encoded PNG image by reading the IHDR chunk.
+   * Extracts native dimensions from a base64-encoded PNG image by reading the IHDR chunk.
+   *
    * PNG format stores width/height in IHDR chunk at bytes 16-23 after the 8-byte signature.
    * Used to ensure legend icons render at their actual size without scaling artifacts.
    *
-   * @param {string} base64Data - The base64 image string (with or without data:image/png;base64, prefix)
-   * @returns {{ width: number; height: number } | null} The image dimensions in pixels, or null if extraction fails
+   * @param base64Data - The base64 image string (with or without data:image/png;base64, prefix)
+   * @returns The image dimensions in pixels, or null if extraction fails
    */
   static #getPNGDimensions(base64Data: string): { width: number; height: number } | null {
     try {
@@ -146,11 +149,12 @@ export class ExportUtilities {
 
   /**
    * Sanitizes legend text for PDF rendering by replacing problematic Unicode characters with safe alternatives.
+   *
    * React-pdf has issues with certain characters (≤, ≥, etc.) which get rendered incorrectly in legend items.
    * Uses Unicode escape codes to ensure proper matching regardless of source encoding.
    *
-   * @param {string} text - The legend text to sanitize
-   * @returns {string} The sanitized text safe for PDF rendering
+   * @param text - The legend text to sanitize
+   * @returns The sanitized text safe for PDF rendering
    */
   static #sanitizeLegendText(text: string): string {
     return text
@@ -164,7 +168,8 @@ export class ExportUtilities {
   }
 
   /**
-   * Renders a single legend item (layer, child, wms, time, or item type) using the provided element factory.
+   * Renders a single legend item using the provided element factory.
+   *
    * Handles different item types with appropriate styling and structure:
    * - layer: Root layer name with optional separator line
    * - child: Child layer name with indentation
@@ -172,15 +177,15 @@ export class ExportUtilities {
    * - time: Time dimension text (single date or range)
    * - item: Legend icon + label with native PNG dimensions
    *
-   * @param {FlattenedLegendItem} item - The legend item to render
-   * @param {number} itemIndex - Index of the item in the column (used for separator logic)
-   * @param {number} indentLevel - The indentation level (0-3) based on item depth
-   * @param {ElementFactory} factory - Element factory for creating renderer-specific elements (Canvas/PDF)
-   * @param {any} scaledStyles - The scaled styles object (CANVAS_STYLES or PDF_STYLES)
-   * @param {any} baseStyles - The base styles object with factory-specific properties
-   * @param {Record<string, TypeDisplayDateFormat>} layerDateFormats - Date formats for layers
-   * @param {Record<string, TemporalMode>} layerDateTemporalModes - Temporal modes for layers
-   * @returns {JSX.Element} The rendered item element
+   * @param item - The legend item to render
+   * @param itemIndex - Index of the item in the column (used for separator logic)
+   * @param indentLevel - The indentation level (0-3) based on item depth
+   * @param factory - Element factory for creating renderer-specific elements (Canvas/PDF)
+   * @param scaledStyles - The scaled styles object (CANVAS_STYLES or PDF_STYLES)
+   * @param baseStyles - The base styles object with factory-specific properties
+   * @param layerDateFormats - Date formats for layers
+   * @param layerDateTemporalModes - Temporal modes for layers
+   * @returns The rendered item element
    */
   static #renderSingleLegendItem(
     item: FlattenedLegendItem,
@@ -306,21 +311,22 @@ export class ExportUtilities {
 
   /**
    * Renders all items in a legend column, grouping content items under their parent layers.
+   *
    * Wraps immediate children (non-child-layer items) in a container for proper visual grouping.
    * Recursively processes nested child layers to maintain hierarchy.
    *
    * Processing logic:
-   * - Layer/child headers rendered first
-   * - Immediate children (wms, time, item) wrapped in container
-   * - Nested child layers processed separately (not wrapped)
+   * - Layer/child headers are rendered first without borders
+   * - Immediate content items (depth = parent depth + 1) are collected and wrapped in a container
+   * - Child layers (type 'child') are not included in content grouping and are processed separately
    *
-   * @param {FlattenedLegendItem[]} column - The column items to render in order
-   * @param {ElementFactory} factory - Element factory for creating renderer-specific elements
-   * @param {any} scaledStyles - The scaled styles object for sizing
-   * @param {any} baseStyles - The base styles object for layout
-   * @param {Record<string, TypeDisplayDateFormat>} layerDateFormats - Date formats for layers
-   * @param {Record<string, TemporalMode>} layerDateTemporalModes - Temporal modes for layers
-   * @returns {JSX.Element[]} Array of rendered elements (headers + content containers)
+   * @param column - The column items to render in order
+   * @param factory - Element factory for creating renderer-specific elements
+   * @param scaledStyles - The scaled styles object for sizing
+   * @param baseStyles - The base styles object for layout
+   * @param layerDateFormats - Date formats for layers
+   * @param layerDateTemporalModes - Temporal modes for layers
+   * @returns Array of rendered elements (headers + content containers)
    */
   static #renderColumnItems(
     column: FlattenedLegendItem[],
@@ -409,21 +415,22 @@ export class ExportUtilities {
 
   /**
    * Renders multiple legend columns in a flexbox container with dynamic or fixed widths.
+   *
    * Uses space-between justification when columnWidths are provided to eliminate gaps.
    * Falls back to gap-based layout for equal-width columns.
    *
    * Layout modes:
    * - With columnWidths: Justified layout, each column has exact width, no gaps
-   * - Without columnWidths: Flex layout with 10px gaps between equal-width columns
+   * - Without columnWidths: Flexible layout, columns share available space with gaps in between
    *
-   * @param {FlattenedLegendItem[][]} columns - Array of columns, each containing legend items
-   * @param {ElementFactory} factory - Element factory for creating renderer-specific elements
-   * @param {any} scaledStyles - The scaled styles object for sizing
-   * @param {any} baseStyles - The base styles object for layout
-   * @param {Record<string, TypeDisplayDateFormat>} layerDateFormats - Date formats for layers
-   * @param {Record<string, TemporalMode>} layerDateTemporalModes - Temporal modes for layers
-   * @param {number[]} [columnWidths] - Optional array of column widths in pixels for justified layout
-   * @returns {JSX.Element} The rendered legend container with all columns
+   * @param columns - Array of columns, each containing legend items
+   * @param factory - Element factory for creating renderer-specific elements
+   * @param scaledStyles - The scaled styles object for sizing
+   * @param baseStyles - The base styles object for layout
+   * @param layerDateFormats - Date formats for layers
+   * @param layerDateTemporalModes - Temporal modes for layers
+   * @param columnWidths - Optional array of column widths in pixels for justified layout
+   * @returns The rendered legend container with all columns
    */
   static renderLegendColumns(
     columns: FlattenedLegendItem[][],
@@ -472,13 +479,12 @@ export class ExportUtilities {
 
   /**
    * Renders the footer section with disclaimer, attributions, and date.
-   * Footer appears at the bottom of the export document in all formats.
    *
-   * @param {string} disclaimer - The disclaimer text to display
-   * @param {string[]} attributions - Array of attribution texts (one per map layer)
-   * @param {ElementFactory} factory - Element factory for creating renderer-specific elements
-   * @param {any} scaledStyles - The scaled styles object with footer styling
-   * @returns {JSX.Element} The rendered footer container
+   * @param disclaimer - The disclaimer text to display
+   * @param attributions - Array of attribution texts (one per map layer)
+   * @param factory - Element factory for creating renderer-specific elements
+   * @param scaledStyles - The scaled styles object with footer styling
+   * @returns The rendered footer container
    */
   static renderFooter(
     disclaimer: string,
@@ -503,15 +509,15 @@ export class ExportUtilities {
 
   /**
    * Renders a scale bar with tick marks and label text.
-   * The scale bar width is dynamically calculated to match the map extent.
-   * Includes left and right tick marks to clearly indicate the measurement distance.
    *
-   * @param {string} scaleText - The scale text label (e.g., "100 km (approx)")
-   * @param {string} scaleLineWidth - The scale line width as CSS string (e.g., "150px")
-   * @param {ElementFactory} factory - Element factory for creating renderer-specific elements
-   * @param {any} scaledStyles - The scaled styles object for text sizing
-   * @param {any} baseStyles - The base styles object for scale bar layout
-   * @returns {JSX.Element} The rendered scale bar container
+   * The scale bar width is dynamically calculated to match the map extent.
+   *
+   * @param scaleText - The scale text label (e.g., "100 km (approx)")
+   * @param scaleLineWidth - The scale line width as CSS string (e.g., "150px")
+   * @param factory - Element factory for creating renderer-specific elements
+   * @param scaledStyles - The scaled styles object for text sizing
+   * @param baseStyles - The base styles object for scale bar layout
+   * @returns The rendered scale bar container
    */
   static renderScaleBar(
     scaleText: string,
@@ -537,14 +543,15 @@ export class ExportUtilities {
 
   /**
    * Renders a north arrow SVG icon with rotation to indicate true north direction.
+   *
    * The rotation accounts for both map rotation and user-configured north arrow orientation.
    * Returns null if north arrow is disabled or SVG data is unavailable.
    *
-   * @param {NorthArrowSVG[] | undefined} northArrowSvg - Array of SVG path data with stroke/fill properties
-   * @param {number} northArrowRotation - The rotation angle in degrees (includes map rotation + config offset)
-   * @param {ElementFactory} factory - Element factory for creating renderer-specific elements
-   * @param {any} scaledStyles - The scaled styles object for sizing and rotation
-   * @returns {JSX.Element | null} The rendered north arrow SVG or null if disabled
+   * @param northArrowSvg - Array of SVG path data with stroke/fill properties
+   * @param northArrowRotation - The rotation angle in degrees
+   * @param factory - Element factory for creating renderer-specific elements
+   * @param scaledStyles - The scaled styles object for sizing and rotation
+   * @returns The rendered north arrow SVG, or null if disabled
    */
   static renderNorthArrow(
     northArrowSvg: NorthArrowSVG[] | undefined,
@@ -579,14 +586,14 @@ export class ExportUtilities {
 
   /**
    * Calculates actual WMS image height by loading the image and applying max-width constraint.
+   *
    * Images wider than maxWidth (500px * scale) are scaled down proportionally.
    * Narrower images keep their original dimensions (no stretching).
-   * Includes scaled margin to match CSS rendering.
    *
-   * @param {string | undefined} imageUrl - The WMS image URL (data URI or http/https)
-   * @param {number} [scale=1] - The scale factor based on document width (e.g., 1.634 for 1000px, 3.922 for 2400px)
-   * @param {string} [layerName='unknown'] - The layer name for error/warning logging
-   * @returns {Promise<number>} The calculated height in pixels including scaled margin
+   * @param imageUrl - The WMS image URL (data URI or http/https)
+   * @param scale - Optional scale factor based on document width (default 1)
+   * @param layerName - Optional layer name for error/warning logging (default 'unknown')
+   * @returns A promise that resolves with the calculated height in pixels including scaled margin
    */
   static #calculateWMSImageHeight(imageUrl: string | undefined, scale = 1, layerName = 'unknown'): Promise<number> {
     // Missing URL fallback
@@ -633,6 +640,7 @@ export class ExportUtilities {
 
   /**
    * Calculates optimal number of columns (2-4) based on available width and minimum column requirements.
+   *
    * Ensures each column can accommodate:
    * - WMS images up to 500px wide
    * - Content padding and margins (20px total)
@@ -643,9 +651,12 @@ export class ExportUtilities {
    * - Returns first count where all columns meet minimum width requirement
    * - Falls back to 2 columns if narrower document
    *
-   * @param {number} canvasWidth - The total canvas/document width in pixels
-   * @param {number} defaultColumns - The default maximum number of columns (typically 4)
-   * @returns {number} The optimal number of columns (2-4)
+   * Tries each column count from default (4) down to minimum (2), returning the first count
+   * where all columns meet the minimum width requirement (280px).
+   *
+   * @param canvasWidth - The total canvas/document width in pixels
+   * @param defaultColumns - The default maximum number of columns (typically 4)
+   * @returns The optimal number of columns (2-4)
    */
   static #calculateOptimalColumns(canvasWidth: number, defaultColumns: number): number {
     // Calculate available width for legend content
@@ -691,10 +702,10 @@ export class ExportUtilities {
    * - wms: WMS/dynamic service legend image
    * - item: Individual legend icon + label
    *
-   * @param {TypeLegendLayer[]} layers - The legend layers from the map state
-   * @param {TypeOrderedLayerInfo[]} orderedLayerInfo - Layer visibility info for filtering
-   * @param {TimeSliderLayerSet} [timeSliderLayers] - Time-enabled layers with dimension data
-   * @returns {FlattenedLegendItem[]} Flattened array of all legend items with depth/parent info
+   * @param layers - The legend layers from the map state
+   * @param orderedLayerInfo - Layer visibility info for filtering
+   * @param timeSliderLayers - Optional time-enabled layers with dimension data
+   * @returns Flattened array of all legend items with depth/parent info
    */
   static #processLegendLayers(
     layers: TypeLegendLayer[],
@@ -884,13 +895,13 @@ export class ExportUtilities {
    * - Balances columns within 80% height ratio threshold
    * - All content fits on single auto-sized page
    *
-   * @param {string} mapId - The GeoView map ID
-   * @param {string} exportTitle - The export title (affects height calculation)
-   * @param {string} disclaimer - The disclaimer text (affects height calculation)
-   * @param {Record<string, TypeDisplayDateFormat>} layerDateFormats - Date formats for layers
-   * @param {Record<string, TemporalMode>} layerDateTemporalModes - Temporal modes for layers
-   * @returns {Promise<TypeMapInfoResult>} Map image URL, scale info, north arrow, legend columns, canvas dimensions
-   * @throws {Error} If canvas context is unavailable
+   * @param mapId - The GeoView map ID
+   * @param exportTitle - The export title (affects height calculation)
+   * @param disclaimer - The disclaimer text (affects height calculation)
+   * @param layerDateFormats - Date formats for layers
+   * @param layerDateTemporalModes - Temporal modes for layers
+   * @returns A promise that resolves with map image URL, scale info, north arrow, legend columns, and canvas dimensions
+   * @throws {Error} When canvas context is unavailable
    */
   static async getMapInfo(
     mapId: string,

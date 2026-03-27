@@ -2,10 +2,10 @@ import type { Theme } from '@mui/material/styles';
 import type { SxStyles } from '@/ui/style/types';
 
 /**
- * Get reusable guide box styles for guide content
+ * Gets reusable guide box styles for guide content.
  *
- * @param {Theme} theme the theme object
- * @returns {Object} the guide box sx styles object
+ * @param theme - The theme object
+ * @returns The guide box sx styles object
  */
 const getGuideBoxStyles = (theme: Theme): Object => ({
   color: theme.palette.geoViewColor.grey.dark[800],
@@ -76,10 +76,10 @@ const getGuideBoxStyles = (theme: Theme): Object => ({
 });
 
 /**
- * Get custom sx classes for the guide
+ * Gets custom sx classes for the guide.
  *
- * @param {Theme} theme the theme object
- * @returns {Object} the sx classes object
+ * @param theme - The theme object
+ * @returns The sx classes object
  */
 export const getSxClasses = (theme: Theme): SxStyles =>
   ({

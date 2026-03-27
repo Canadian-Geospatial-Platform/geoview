@@ -8,27 +8,34 @@ import { getSxClasses } from './resize-footer-panel-style';
 import { useUIFooterPanelResizeValue, useUIStoreActions } from '@/core/stores/store-interface-and-intial-values/ui-state';
 import { logger } from '@/core/utils/logger';
 
-// Define static styles outside component
+/** Slider input styles for vertical orientation. */
 const SLIDER_STYLES = {
   '& input[type="range"]': {
     WebkitAppearance: 'slider-vertical',
   },
 } as const;
 
+/** Popover anchor origin configuration. */
 const ANCHOR_ORIGIN = {
   vertical: 'top',
   horizontal: 'left',
 } as const;
 
+/** Popover transform origin configuration. */
 const TRANSFORM_ORIGIN = {
   vertical: 'bottom',
   horizontal: 'left',
 } as const;
 
+/** Available resize percentage values. */
 const RESIZE_VALUES = [35, 50, 100];
+
 /**
- * Popover to resize the map container and footer panel.
- * @returns
+ * Creates the popover to resize the map container and footer panel.
+ *
+ * Memoized to prevent re-renders since this component has no props.
+ *
+ * @returns The resize footer panel
  */
 export const ResizeFooterPanel = memo(function ResizeFooterPanel(): JSX.Element {
   // Log
@@ -52,16 +59,26 @@ export const ResizeFooterPanel = memo(function ResizeFooterPanel(): JSX.Element 
   // Marks calculation
   const marks = RESIZE_VALUES.map((value) => ({ value, label: `${value}%` }));
 
-  // Handlers
+  // #region Handlers
+
+  /**
+   * Handles opening the resize popover.
+   */
   const handleClick = useCallback((event: MouseEvent<HTMLButtonElement>): void => {
     event.preventDefault();
     setAnchorEl(event.currentTarget);
   }, []);
 
+  /**
+   * Handles closing the resize popover.
+   */
   const handleClose = useCallback((): void => {
     setAnchorEl(null);
   }, []);
 
+  /**
+   * Handles slider value change and closes the popover.
+   */
   const handleOnSliderChange = useCallback(
     (event: Event, value: number | number[]): void => {
       setFooterPanelResizeValue(value as number);
@@ -69,6 +86,8 @@ export const ResizeFooterPanel = memo(function ResizeFooterPanel(): JSX.Element 
     },
     [handleClose, setFooterPanelResizeValue]
   );
+
+  // #endregion Handlers
 
   const open = Boolean(anchorEl);
   return (

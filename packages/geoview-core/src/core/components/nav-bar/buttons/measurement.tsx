@@ -25,16 +25,19 @@ import { useGeoViewMapId } from '@/core/stores/geoview-store';
 import { useAppDisplayLanguage, useAppGeoviewHTMLElement } from '@/core/stores/store-interface-and-intial-values/app-state';
 import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-values/map-state';
 
+/** The geometry group key for measurement features. */
 const MEASURE_GROUP_KEY = 'geoview-measurement';
 
-// Style constants
+/** Stroke color for measurement lines. */
 const STROKE_COLORS = '#ff0000';
 
+/** Fill color for measurement areas. */
 const FILL_COLORS = 'rgba(255, 0, 0, 0.2)';
 
+/** Stroke width for measurement lines. */
 const STROKE_WIDTH = 2;
 
-// Shared tooltip/label style values (drawer-tooltip style)
+/** Base style values for measurement tooltips and labels. */
 const TOOLTIP_BASE_STYLE = {
   backgroundColor: 'rgba(0, 0, 0, 0.7)',
   textColor: '#fff',
@@ -43,7 +46,7 @@ const TOOLTIP_BASE_STYLE = {
   padding: { top: 4, right: 8, bottom: 4, left: 8 },
 } as const;
 
-// OpenLayers canvas Text style config (for segment labels)
+/** OpenLayers canvas text style configuration for segment labels. */
 const LABEL_STYLE_CONFIG = {
   font: `${TOOLTIP_BASE_STYLE.fontWeight} ${TOOLTIP_BASE_STYLE.fontSize} sans-serif`,
   textColor: TOOLTIP_BASE_STYLE.textColor,
@@ -51,15 +54,18 @@ const LABEL_STYLE_CONFIG = {
   haloWidth: 9,
 } as const;
 
-// Reusable Fill and Stroke objects for labels
+/** Reusable fill for label text. */
 const LABEL_TEXT_FILL = new Fill({ color: LABEL_STYLE_CONFIG.textColor });
+/** Reusable stroke for label halo. */
 const LABEL_HALO_STROKE = new Stroke({ color: LABEL_STYLE_CONFIG.haloColor, width: LABEL_STYLE_CONFIG.haloWidth });
 
+/** The type of measurement operation. */
 type MeasureType = 'line' | 'area' | null;
 
 /**
- * Create a measurement button to open the measurement panel
- * @returns {JSX.Element} the created measurement button
+ * Creates a measurement button to open the measurement panel.
+ *
+ * @returns The measurement button
  */
 export default function Measurement(): JSX.Element {
   // Log
@@ -80,9 +86,10 @@ export default function Measurement(): JSX.Element {
   const [measurementFeatures, setMeasurementFeatures] = useState<Feature<Geometry>[]>([]);
 
   /**
-   * Creates a style function that shows segment lengths
-   * @param {boolean} [includeSegmentLabels=true] - Whether to include segment length labels on the geometry
-   * @returns {StyleFunction} OpenLayers style function that applies measurement styles
+   * Creates a style function that shows segment lengths.
+   *
+   * @param includeSegmentLabels - Optional whether to include segment length labels on the geometry
+   * @returns OpenLayers style function that applies measurement styles
    */
   const createSegmentStyle = useCallback(
     (includeSegmentLabels: boolean = true): StyleFunction => {
@@ -212,8 +219,9 @@ export default function Measurement(): JSX.Element {
   );
 
   /**
-   * Starts a measurement operation
-   * @param {MeasureType} type - The type of measurement to start ('line' for distance, 'area' for area, null to clear)
+   * Starts a measurement operation.
+   *
+   * @param type - The type of measurement to start
    */
   const startMeasurement = useCallback(
     (type: MeasureType): void => {
@@ -266,7 +274,7 @@ export default function Measurement(): JSX.Element {
   );
 
   /**
-   * Stops the current measurement
+   * Stops the current measurement.
    */
   const stopMeasurement = useCallback((): void => {
     if (drawInstance) {
@@ -277,7 +285,7 @@ export default function Measurement(): JSX.Element {
   }, [drawInstance]);
 
   /**
-   * Clears all measurements
+   * Clears all measurements.
    */
   const clearMeasurements = useCallback((): void => {
     // Clear stored feature references
@@ -291,9 +299,7 @@ export default function Measurement(): JSX.Element {
   }, [stopMeasurement, deleteGeometriesFromGroup]);
 
   /**
-   * Handles measurement mode toggle
-   * @param {React.ChangeEvent<HTMLInputElement>} event - The change event from the switch toggle
-   * @param {boolean} event.target.checked - Whether the measurement mode is enabled or disabled
+   * Handles measurement mode toggle.
    */
   const handleMeasurementToggle = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -308,9 +314,7 @@ export default function Measurement(): JSX.Element {
   );
 
   /**
-   * Handles segment labels visibility toggle
-   * @param {React.ChangeEvent<HTMLInputElement>} event - The change event from the segment labels switch toggle
-   * @param {boolean} event.target.checked - Whether segment labels should be shown or hidden
+   * Handles segment labels visibility toggle.
    */
   const handleSegmentLabelsToggle = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -334,9 +338,7 @@ export default function Measurement(): JSX.Element {
   );
 
   /**
-   * Handles measurement type selection
-   * @param {React.MouseEvent<HTMLElement>} _event - The mouse event from the toggle button (unused)
-   * @param {MeasureType} newType - The newly selected measurement type ('line' or 'area')
+   * Handles measurement type selection.
    */
   const handleTypeChange = useCallback(
     (_event: React.MouseEvent<HTMLElement>, newType: MeasureType): void => {
@@ -347,7 +349,9 @@ export default function Measurement(): JSX.Element {
     [startMeasurement]
   );
 
-  // Cleanup on unmount
+  /**
+   * Cleans up measurement resources on unmount.
+   */
   useEffect(() => {
     // Log
     logger.logTraceUseEffect('MEASUREMENT, Clean up on mount');
@@ -367,7 +371,9 @@ export default function Measurement(): JSX.Element {
   }, []);
 
   /**
-   * Render buttons in navbar panel
+   * Renders the measurement control panel content.
+   *
+   * @returns The measurement panel content
    */
   const renderButtons = (): ReactNode => {
     const isMeasurementActive = activeMeasurement !== null;

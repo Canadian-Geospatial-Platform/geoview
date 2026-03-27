@@ -25,6 +25,12 @@ interface UseLightBoxReturnType {
 }
 
 // TODO: Unmemoize this component, probably, because it's in 'common' folder
+/**
+ * Base component for the lightbox, separated to avoid unnecessary re-renders of the lightbox when parent components update but lightbox props have not changed.
+ * 
+ * @param props - The properties defined in BaseLightBoxProps interface
+ * @returns The base lightbox component
+ */
 const BaseLightBoxComponent = memo(function BaseLightBoxComponent({
   isLightBoxOpen,
   slides,
@@ -106,6 +112,9 @@ export function useLightBox(): UseLightBoxReturnType {
     }));
   }, []);
 
+  /**
+   * Initializes and opens the lightbox with the given images.
+   */
   const handleExit = useCallback((): void => {
     setIsLightBoxOpen(false);
     setSlides([]);

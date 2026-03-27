@@ -7,24 +7,39 @@ import { ExportUtilities } from '@/core/components/export/utilities';
 import type { FileExportProps } from '@/core/components/export/export-modal';
 import { PDF_STYLES, getScaledPDFStyles } from '@/core/components/export/layout-styles';
 
+/** Properties for the PDF export document component. */
 interface ExportDocumentProps {
+  /** The base64-encoded map image data URL. */
   mapDataUrl: string;
+  /** The export title text. */
   exportTitle: string;
+  /** The scale bar text label. */
   scaleText: string;
+  /** The scale line width as CSS string. */
   scaleLineWidth: string;
+  /** Optional north arrow SVG path data. */
   northArrowSvg?: NorthArrowSVG[];
+  /** The north arrow rotation angle in degrees. */
   northArrowRotation: number;
+  /** The disclaimer text. */
   disclaimer: string;
+  /** Array of attribution texts. */
   attributions: string[];
+  /** Date display formats keyed by layer path. */
   layerDateFormats: Record<string, TypeDisplayDateFormat>;
+  /** Temporal modes keyed by layer path. */
   layerDateTemporalModes: Record<string, TemporalMode>;
+  /** Pre-organized legend items grouped into columns. */
   fittedColumns: FlattenedLegendItem[][];
+  /** Optional array of column widths in pixels. */
   columnWidths?: number[];
+  /** The canvas width in pixels. */
   canvasWidth: number;
+  /** The canvas height in pixels. */
   canvasHeight: number;
 }
 
-// PDF element factory for react-pdf elements
+/** PDF element factory mapping to react-pdf elements. */
 const pdfElementFactory: ElementFactory = {
   View: (props) => <View {...props} />,
   Text: (props) => <Text {...props} />,
@@ -35,13 +50,14 @@ const pdfElementFactory: ElementFactory = {
 };
 
 /**
- * Render legend items in columns for PDF export
- * @param {FlattenedLegendItem[][]} columns - Pre-organized legend items grouped into columns
- * @param {any} styles - Scaled styles for the PDF layout
- * @param {Record<string, TypeDisplayDateFormat>} layerDateFormats - Date formats for layers
- * @param {Record<string, TemporalMode>} layerDateTemporalModes - Temporal modes for layers
- * @param {number[]} [columnWidths] - Optional array of column widths in pixels
- * @returns {JSX.Element} The rendered legend columns as JSX
+ * Renders legend items in columns for PDF export.
+ *
+ * @param columns - Pre-organized legend items grouped into columns
+ * @param styles - Scaled styles for the PDF layout
+ * @param layerDateFormats - Date formats for layers
+ * @param layerDateTemporalModes - Temporal modes for layers
+ * @param columnWidths - Optional array of column widths in pixels
+ * @returns The rendered legend columns
  */
 const renderLegendInRows = (
   columns: FlattenedLegendItem[][],
@@ -63,9 +79,10 @@ const renderLegendInRows = (
 };
 
 /**
- * The PDF export document that is created for the map export
- * @param {ExportDocumentProps} props - The PDF Export Document properties
- * @returns {JSX.Element} The resulting html map
+ * Creates the PDF export document for the map export.
+ *
+ * @param props - Properties defined in ExportDocumentProps interface
+ * @returns The rendered PDF document
  */
 export function ExportDocument({
   mapDataUrl,
@@ -122,10 +139,11 @@ export function ExportDocument({
 }
 
 /**
- * Creates the PDF map for the export
- * @param {string} mapId - The map ID
- * @param {FileExportProps} props - The file export props
- * @returns {Promise<string>} A string URL for the document
+ * Creates the PDF map for the export.
+ *
+ * @param mapId - The map ID
+ * @param params - The file export properties
+ * @returns A promise that resolves with a string URL for the document
  */
 export async function createPDFMapUrl(mapId: string, params: FileExportProps): Promise<string> {
   const { exportTitle, disclaimer, layerDateFormats, layerDateTemporalModes } = params;

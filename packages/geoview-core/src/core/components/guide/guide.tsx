@@ -15,20 +15,25 @@ import { TABS } from '@/core/utils/constant';
 import type { TypeContainerBox } from '@/core/types/global-types';
 import { GuideSearch } from './guide-search';
 
+/** Guide list item extending LayerListEntry with content. */
 interface GuideListItem extends LayerListEntry {
+  /** The rendered guide content. */
   content: string | ReactNode;
 }
 
+/** Props for the Guide component. */
 interface GuideType {
+  /** The container box type for layout. */
   containerType: TypeContainerBox;
 }
 
 /**
- * Guide component to display help content
+ * Creates the guide component to display help content.
  *
- * @returns {JSX.Element} the guide (help) component
+ * Memoized to prevent re-renders when parent updates but containerType has not changed.
+ *
+ * @returns The guide component
  */
-// Memoizes entire component, preventing re-renders if props haven't changed
 export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX.Element {
   logger.logTraceRender('components/guide/guide');
 
@@ -50,22 +55,30 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
 
   // Callbacks & Memoize values
   /**
-   * Handle search state changes from GuideSearch component
+   * Handles search state changes from GuideSearch component.
    */
   const handleSearchStateChange = useCallback(
-    (newSearchTerm: string, newHighlightFunction: (content: string, sectionIndex: number) => string) => {
+    (newSearchTerm: string, newHighlightFunction: (content: string, sectionIndex: number) => string): void => {
       setHighlightFunction(() => newHighlightFunction);
     },
     []
   );
 
   /**
-   * Creates a markdown component with the given content
+   * Creates a markdown component with the given content.
+   *
+   * @param content - The markdown content string
+   * @returns The rendered markdown component
    */
-  const createMarkdownComponent = useCallback((content: string) => <Markdown options={{ wrapper: 'article' }}>{content}</Markdown>, []);
+  const createMarkdownComponent = useCallback(
+    (content: string): JSX.Element => <Markdown options={{ wrapper: 'article' }}>{content}</Markdown>,
+    []
+  );
 
   /**
-   * Get Layer list with markdown content.
+   * Gets the layer list with markdown content.
+   *
+   * @returns The list of guide items
    */
   const getListOfGuides = useCallback((): GuideListItem[] => {
     if (!guide) return [];
@@ -101,28 +114,28 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
   }, [guide, mapId, createMarkdownComponent, containerType]);
 
   /**
-   * Memo version of layer list with markdown content
+   * Builds the memoized layer list with markdown content.
    */
-  const layersList = useMemo(() => getListOfGuides(), [getListOfGuides]);
+  const memoLayersList = useMemo(() => getListOfGuides(), [getListOfGuides]);
 
   /**
-   * Handle section change from GuideSearch component
+   * Handles section change from GuideSearch component.
    */
   const handleSectionChange = useCallback(
-    (sectionIndex: number) => {
-      if (layersList[sectionIndex]) {
+    (sectionIndex: number): void => {
+      if (memoLayersList[sectionIndex]) {
         setGuideItemIndex(sectionIndex);
-        setSelectedLayerPath(layersList[sectionIndex].layerPath);
+        setSelectedLayerPath(memoLayersList[sectionIndex].layerPath);
       }
     },
-    [layersList]
+    [memoLayersList]
   );
 
   /**
-   * Current guide content with search highlighting
+   * Builds the current guide content with search highlighting applied.
    */
-  const currentGuideContent = useMemo(() => {
-    const currentItem = layersList[guideItemIndex];
+  const memoCurrentGuideContent = useMemo(() => {
+    const currentItem = memoLayersList[guideItemIndex];
     if (!currentItem || !guide) return null;
 
     const currentGuideKey = Object.keys(guide)[guideItemIndex];
@@ -160,21 +173,25 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
     // 4. No user-generated content is involved in this process
     // eslint-disable-next-line react/no-danger
     return <article dangerouslySetInnerHTML={{ __html: highlightedHTML }} />;
-  }, [layersList, guideItemIndex, guide, highlightFunction]);
+  }, [memoLayersList, guideItemIndex, guide, highlightFunction]);
 
   /**
-   * Handle Guide layer list.
-   * @param {LayerListEntry} layer geoview layer.
+   * Handles guide layer list item click.
+   *
+   * @param layer - The clicked guide item layer
    */
   const handleGuideItemClick = useCallback(
     (layer: LayerListEntry): void => {
-      const index: number = layersList.findIndex((item) => item.layerName === layer.layerName);
+      const index: number = memoLayersList.findIndex((item) => item.layerName === layer.layerName);
       setGuideItemIndex(index);
       setSelectedLayerPath(layer.layerPath);
     },
-    [layersList]
+    [memoLayersList]
   );
 
+  /**
+   * Resets scroll position and handles anchor link navigation when content changes.
+   */
   useEffect(() => {
     const container = document.querySelector('.guidebox-container')!.parentElement;
 
@@ -225,12 +242,12 @@ export const Guide = memo(function GuidePanel({ containerType }: GuideType): JSX
           titleFullscreen={t('guide.title')}
           selectedLayerPath={selectedLayerPath}
           layoutSwitch={<GuideSearch guide={guide} onSectionChange={handleSectionChange} onSearchStateChange={handleSearchStateChange} />}
-          layerList={layersList}
+          layerList={memoLayersList}
           onLayerListClicked={handleGuideItemClick}
           aria-label={ariaLabel}
         >
           <Box sx={sxClasses.rightPanelContainer} className="guidebox-container">
-            <Box className="guideBox">{currentGuideContent}</Box>
+            <Box className="guideBox">{memoCurrentGuideContent}</Box>
           </Box>
         </Layout>
       </Box>

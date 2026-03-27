@@ -2,8 +2,10 @@ import { memo } from 'react';
 import { Box, Skeleton } from '@/ui';
 
 // Constants outside component to prevent recreating every render
+/** Skeleton width percentages for each row. */
 const sizes = ['15%', '10%', '15%', '25%', '10%', '20%', '10%'];
 
+/** Style constants for the skeleton layout. */
 const SKELETON_STYLES = {
   box: { padding: '10px' },
   title: { mb: 1 },
@@ -11,10 +13,12 @@ const SKELETON_STYLES = {
 } as const;
 
 /**
- * Custom details skeleton build with mui skeleton component.
- * @returns {JSX.Element}
+ * Creates the details skeleton placeholder component.
+ *
+ * Memoized to prevent re-renders since it has no props.
+ *
+ * @returns The skeleton component
  */
-// Memoizes entire component, preventing re-renders if props haven't changed
 export const DetailsSkeleton = memo(function DetailsSkeleton(): JSX.Element {
   return (
     <Box sx={SKELETON_STYLES.box}>

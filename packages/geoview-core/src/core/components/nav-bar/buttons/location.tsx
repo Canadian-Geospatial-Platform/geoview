@@ -7,9 +7,9 @@ import { useAppStoreActions } from '@/core/stores/store-interface-and-intial-val
 import { logger } from '@/core/utils/logger';
 
 /**
- * Create a location button to zoom to user location
+ * Creates a location button to zoom to user location.
  *
- * @returns {JSX.Element} the created location button
+ * @returns The location button
  */
 export default function Location(): JSX.Element {
   // Log
@@ -23,6 +23,11 @@ export default function Location(): JSX.Element {
   const { zoomToMyLocation } = useMapStoreActions();
   const { addNotification } = useAppStoreActions();
 
+  /**
+   * Handles successful geolocation by zooming to the user position.
+   *
+   * @param position - The geolocation position
+   */
   const successCallback = (position: GeolocationPosition): void => {
     // Zoom to my location
     zoomToMyLocation(position).catch((error: unknown) => {
@@ -31,6 +36,11 @@ export default function Location(): JSX.Element {
     });
   };
 
+  /**
+   * Handles geolocation errors by showing a notification.
+   *
+   * @param err - The geolocation position error
+   */
   const errorCallback = (err: GeolocationPositionError): void => {
     addNotification({
       key: 'location',
@@ -41,7 +51,7 @@ export default function Location(): JSX.Element {
   };
 
   /**
-   * Handles a click to zoom to the user location when the user location can be retrieved
+   * Handles when the user clicks the location button.
    */
   const handleZoomToMe = (): void => {
     // Try to get current position and callback

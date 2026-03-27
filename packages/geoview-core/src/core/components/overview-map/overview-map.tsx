@@ -16,13 +16,17 @@ import { logger } from '@/core/utils/logger';
 import { Box } from '@/ui/layout';
 import { TIMEOUT } from '@/core/utils/constant';
 
+/** The properties for the overview map component. */
 export type OverviewMapProps = {
+  /** The i18next instance for translations. */
   i18n: i18n;
 };
 
 /**
- * Creates an overview map control and adds it to the map
- * @returns {JSX.Element} returns empty container
+ * Creates an overview map control and adds it to the map.
+ *
+ * @param props - The overview map properties
+ * @returns The overview map container element
  */
 export function OverviewMap(props: OverviewMapProps): JSX.Element {
   // Log
@@ -39,7 +43,9 @@ export function OverviewMap(props: OverviewMapProps): JSX.Element {
   const [visibility, setVisibility] = useState<boolean>(!(zoomLevel > hideOnZoom));
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // hide on zoom
+  /**
+   * Updates visibility based on zoom level changes.
+   */
   useEffect(() => {
     logger.logTraceUseEffect('OVERVIEW-MAP - zoom level changed');
 
@@ -53,6 +59,9 @@ export function OverviewMap(props: OverviewMapProps): JSX.Element {
     }
   }, [mapId, hideOnZoom, zoomLevel, visibility, isInitialized]);
 
+  /**
+   * Initializes the overview map control and renders the toggle button on mount.
+   */
   useEffect(() => {
     logger.logTraceUseEffect('OVERVIEW-MAP - mount');
 

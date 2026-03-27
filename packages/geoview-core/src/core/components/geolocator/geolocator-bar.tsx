@@ -5,6 +5,7 @@ import { SearchIcon } from '@/ui/icons';
 import { StyledInputField } from '@/core/components/geolocator/geolocator-style';
 import { logger } from '@/core/utils/logger';
 
+/** Props for the GeolocatorBar component. */
 interface GeolocatorBarProps {
   /** Current search input value */
   searchValue: string;
@@ -20,6 +21,12 @@ interface GeolocatorBarProps {
   inputRef?: React.RefObject<HTMLInputElement>;
 }
 
+/**
+ * Creates the geolocator search bar component.
+ *
+ * @param props - Properties defined in GeolocatorBarProps interface
+ * @returns The geolocator bar
+ */
 export function GeolocatorBar({ searchValue, onChange, onSearch, onReset, isLoading, inputRef }: GeolocatorBarProps): JSX.Element {
   logger.logTraceRender('components/geolocator/geolocator-bar');
 

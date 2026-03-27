@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { logger } from '@/core/utils/logger';
 
 // #region USE MAP RESIZE
+/** Props for the useMapResize hook. */
 interface UseMapResizeProps {
   isMapFullScreen: boolean;
   isFooterBarOpen: boolean;
@@ -12,10 +13,17 @@ interface UseMapResizeProps {
   appHeight: number;
 }
 
+/** Return type for the useMapResize hook. */
 type TypeUseMapResize = {
   mapShellContainerRef: React.RefObject<HTMLDivElement>;
 };
 
+/**
+ * Hook that manages map shell container resizing based on fullscreen and footer panel state.
+ *
+ * @param props - The resize hook configuration properties
+ * @returns An object containing the mapShellContainerRef
+ */
 export const useMapResize = ({
   isMapFullScreen,
   isFooterBarOpen,
@@ -28,7 +36,7 @@ export const useMapResize = ({
   const mapShellContainerRef = useRef<HTMLDivElement>(null);
 
   /**
-   * Update map height when toggling fullscreen and changing footer panel size
+   * Updates map height when toggling fullscreen and changing footer panel size.
    */
   useEffect(() => {
     logger.logTraceUseEffect('USE MAP RESIZE - adjust map height for fullscren');
@@ -63,6 +71,9 @@ export const useMapResize = ({
     mapShellContainerRef.current.style.height = containerHeight;
   }, [footerTabContainer, footerPanelResizeValue, isFooterBarOpen, isMapFullScreen, appHeight]);
 
+  /**
+   * Adjusts geoviewElement height to accommodate the footer bar.
+   */
   useEffect(() => {
     logger.logTraceUseEffect('USE MAP RESIZE - adjust geoviewElement height for Footerbar');
 
@@ -77,4 +88,4 @@ export const useMapResize = ({
 
   return { mapShellContainerRef };
 };
-// #end region USE MAP SIZE
+// #endregion USE MAP SIZE

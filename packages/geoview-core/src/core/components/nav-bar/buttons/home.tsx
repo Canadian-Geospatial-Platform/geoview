@@ -7,9 +7,9 @@ import { useMapStoreActions } from '@/core/stores/store-interface-and-intial-val
 import { logger } from '@/core/utils/logger';
 
 /**
- * Create a home button to return the user to the map center
+ * Creates a home button to return the user to the map center.
  *
- * @returns {JSX.Element} the created home button
+ * @returns The home button
  */
 export default function Home(): JSX.Element {
   // Log
@@ -24,7 +24,7 @@ export default function Home(): JSX.Element {
   const { zoomToInitialExtent } = useMapStoreActions();
 
   /**
-   * Handles a click on the home button
+   * Handles when the user clicks the home button.
    */
   const handleZoom = (): void => {
     zoomToInitialExtent().catch((error: unknown) => {
