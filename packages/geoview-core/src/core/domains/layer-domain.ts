@@ -14,7 +14,12 @@ import { LayerWrongTypeError, LayerNotFoundError } from '@/core/exceptions/layer
 import type { AbstractBaseGVLayer, LayerNameChangedDelegate, LayerNameChangedEvent } from '@/geo/layer/gv-layers/abstract-base-layer';
 import { GVGroupLayer } from '@/geo/layer/gv-layers/gv-group-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
-import type { LayerQueryableChangedDelegate, LayerQueryableChangedEvent } from '@/geo/layer/gv-layers/abstract-gv-layer';
+import type {
+  LayerHoverableChangedDelegate,
+  LayerHoverableChangedEvent,
+  LayerQueryableChangedDelegate,
+  LayerQueryableChangedEvent,
+} from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractBaseLayerEntryConfig } from '@/api/config/validation-classes/abstract-base-layer-entry-config';
 
 export class LayerDomain {
@@ -36,6 +41,9 @@ export class LayerDomain {
   /** Keep a bounded reference to the handle layer queryable changed */
   #boundedHandleLayerQueryableChanged: LayerQueryableChangedDelegate;
 
+  /** Keep a bounded reference to the handle layer hoverable changed */
+  #boundedHandleLayerHoverableChanged: LayerHoverableChangedDelegate;
+
   /** Keep all callback delegate references */
   #onLayerEntryConfigRegisteredHandlers: DomainLayerStatusChangedDelegate[] = [];
 
@@ -49,6 +57,9 @@ export class LayerDomain {
   #onLayerNameChangedHandlers: DomainLayerNameChangedDelegate[] = [];
 
   /** Keep all callback delegate references */
+  #onLayerHoverableChangedHandlers: DomainLayerHoverableChangedDelegate[] = [];
+
+  /** Keep all callback delegate references */
   #onLayerQueryableChangedHandlers: DomainLayerQueryableChangedDelegate[] = [];
 
   /**
@@ -58,6 +69,7 @@ export class LayerDomain {
     // Keep bounded references to the handles
     this.#boundedHandleLayerStatusChanged = this.#handleLayerStatusChanged.bind(this);
     this.#boundedHandleLayerNameChanged = this.#handleLayerNameChanged.bind(this);
+    this.#boundedHandleLayerHoverableChanged = this.#handleLayerHoverableChanged.bind(this);
     this.#boundedHandleLayerQueryableChanged = this.#handleLayerQueryableChanged.bind(this);
   }
 
@@ -371,6 +383,9 @@ export class LayerDomain {
     if (gvLayer instanceof AbstractGVLayer) {
       // Register a hook when a layer queryable is changed
       gvLayer.onLayerQueryableChanged(this.#boundedHandleLayerQueryableChanged);
+
+      // Register a hook when a layer hoverable is changed
+      gvLayer.onLayerHoverableChanged(this.#boundedHandleLayerHoverableChanged);
     }
   }
 
@@ -436,6 +451,20 @@ export class LayerDomain {
   #handleLayerQueryableChanged(layer: AbstractBaseGVLayer, event: LayerQueryableChangedEvent): void {
     // Emit about it
     this.#emitLayerQueryableChanged({ layer, queryable: event.queryable });
+  }
+
+  /**
+   * Handles layer hoverable state changes from registered layers.
+   *
+   * Internal callback that is invoked when a layer's hoverable state changes.
+   * Forwards the event to domain listeners via emitLayerHoverableChanged.
+   *
+   * @param layer - The layer whose hoverable state changed
+   * @param event - The layer hoverable changed event
+   */
+  #handleLayerHoverableChanged(layer: AbstractBaseGVLayer, event: LayerHoverableChangedEvent): void {
+    // Emit about it
+    this.#emitLayerHoverableChanged({ layer, hoverable: event.hoverable });
   }
 
   // #endregion PRIVATE HANDLERS
@@ -563,6 +592,36 @@ export class LayerDomain {
   }
 
   /**
+   * Emits layer hoverable changed event.
+   *
+   * @param event - The event to emit
+   */
+  #emitLayerHoverableChanged(event: DomainLayerHoverableChangedEvent): void {
+    // Emit the event for all handlers
+    EventHelper.emitEvent(this, this.#onLayerHoverableChangedHandlers, event);
+  }
+
+  /**
+   * Registers a layer hoverable changed event handler.
+   *
+   * @param callback - The callback to be executed whenever the event is emitted
+   */
+  onLayerHoverableChanged(callback: DomainLayerHoverableChangedDelegate): void {
+    // Register the event handler
+    EventHelper.onEvent(this.#onLayerHoverableChangedHandlers, callback);
+  }
+
+  /**
+   * Unregisters a layer hoverable changed event handler.
+   *
+   * @param callback - The callback to stop being called whenever the event is emitted
+   */
+  offLayerHoverableChanged(callback: DomainLayerHoverableChangedDelegate): void {
+    // Unregister the event handler
+    EventHelper.offEvent(this.#onLayerHoverableChangedHandlers, callback);
+  }
+
+  /**
    * Emits layer queryable changed event.
    *
    * @param event - The event to emit
@@ -636,3 +695,16 @@ export type DomainLayerQueryableChangedEvent = {
 };
 
 export type DomainLayerQueryableChangedDelegate = EventDelegateBase<LayerDomain, DomainLayerQueryableChangedEvent, void>;
+
+/**
+ * Define an event for the delegate
+ */
+export type DomainLayerHoverableChangedEvent = {
+  // The layer changing its hoverable status
+  layer: AbstractBaseGVLayer;
+
+  // The new hoverable status
+  hoverable: boolean;
+};
+
+export type DomainLayerHoverableChangedDelegate = EventDelegateBase<LayerDomain, DomainLayerHoverableChangedEvent, void>;

@@ -5,7 +5,7 @@ import type { DateLike } from 'geoview-core/core/utils/date-mgt';
 import { DateMgt } from 'geoview-core/core/utils/date-mgt';
 
 /**
- * Main Map testing class.
+ * Main Core testing class.
  */
 export class CoreTester extends GVAbstractTester {
   /** The epoch for new year 2000 midnight */

@@ -9,11 +9,14 @@ import { AbstractMapViewerController } from '@/core/controllers/base/abstract-ma
 import { LayerWrongTypeError } from '@/core/exceptions/layer-exceptions';
 import { useControllers } from '@/core/controllers/base/controller-manager';
 import {
+  setStoreLayerHoverable,
   setStoreLayerName,
   setStoreLayerQueryable,
   setStoreLayerRasterFunction,
 } from '@/core/stores/store-interface-and-intial-values/layer-state';
 import type {
+  DomainLayerHoverableChangedDelegate,
+  DomainLayerHoverableChangedEvent,
   DomainLayerNameChangedDelegate,
   DomainLayerNameChangedEvent,
   DomainLayerQueryableChangedDelegate,
@@ -27,6 +30,7 @@ import { logger } from '@/core/utils/logger';
 import {
   getStoreMapOrderedLayerIndexByPath,
   getStoreMapOrderedLayerInfo,
+  setStoreMapLayerHoverable,
   setStoreMapLayerQueryable,
   utilFindMapLayerAndChildrenFromOrderedInfo,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
@@ -53,6 +57,9 @@ export class LayerController extends AbstractMapViewerController {
   /** The bounded reference to the handle layer name changed */
   #boundedHandleLayerNameChanged: DomainLayerNameChangedDelegate;
 
+  /** The bounded reference to the handle layer hoverable changed */
+  #boundedHandleLayerHoverableChanged: DomainLayerHoverableChangedDelegate;
+
   /** The bounded reference to the handle layer queryable changed */
   #boundedHandleLayerQueryableChanged: DomainLayerQueryableChangedDelegate;
 
@@ -77,6 +84,9 @@ export class LayerController extends AbstractMapViewerController {
     // Keep a bounded reference to the handle layer name changed
     this.#boundedHandleLayerNameChanged = this.#handleLayerNameChanged.bind(this);
 
+    // Keep a bounded reference to the handle layer hoverable changed
+    this.#boundedHandleLayerHoverableChanged = this.#handleLayerHoverableChanged.bind(this);
+
     // Keep a bounded reference to the handle layer queryable changed
     this.#boundedHandleLayerQueryableChanged = this.#handleLayerQueryableChanged.bind(this);
   }
@@ -96,6 +106,9 @@ export class LayerController extends AbstractMapViewerController {
     // Listens when the layer name is changed in the Layer domain
     this.#layerDomain.onLayerNameChanged(this.#boundedHandleLayerNameChanged);
 
+    // Listens when the layer hoverable state is changed in the Layer domain
+    this.#layerDomain.onLayerHoverableChanged(this.#boundedHandleLayerHoverableChanged);
+
     // Listens when the layer queryable state is changed in the Layer domain
     this.#layerDomain.onLayerQueryableChanged(this.#boundedHandleLayerQueryableChanged);
   }
@@ -106,6 +119,9 @@ export class LayerController extends AbstractMapViewerController {
   protected override onUnhook(): void {
     // Unhooks when the layer queryable state is changed in the Layer domain
     this.#layerDomain.offLayerQueryableChanged(this.#boundedHandleLayerQueryableChanged);
+
+    // Unhooks when the layer hoverable state is changed in the Layer domain
+    this.#layerDomain.offLayerHoverableChanged(this.#boundedHandleLayerHoverableChanged);
 
     // Unhooks when a layer name is changed in the Layer domain
     this.#layerDomain.offLayerNameChanged(this.#boundedHandleLayerNameChanged);
@@ -346,7 +362,7 @@ export class LayerController extends AbstractMapViewerController {
    */
   getLayerMetatadaProjectionEPSG(layerPath: string): string | undefined {
     // Get the layer if it exists
-    const geoviewLayer = this.#layerDomain.getGeoviewLayerIfExists(layerPath);
+    const geoviewLayer = this.getGeoviewLayerIfExists(layerPath);
 
     // If of the right type
     if (geoviewLayer instanceof AbstractGVRaster) {
@@ -364,10 +380,12 @@ export class LayerController extends AbstractMapViewerController {
    *
    * @param layerPath - The layer path to set the queryable property
    * @param name - The value to set for the name property
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+   * @throws {LayerWrongTypeError} When the layer was of wrong type.
    */
   setLayerName(layerPath: string, name: string): void {
     // Act on the domain
-    this.#layerDomain.getGeoviewLayer(layerPath).setLayerName(name);
+    this.getGeoviewLayer(layerPath).setLayerName(name);
   }
 
   /**
@@ -375,10 +393,28 @@ export class LayerController extends AbstractMapViewerController {
    *
    * @param layerPath - The layer path to set the queryable property
    * @param queryable - The value to set for the queryable property
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+   * @throws {LayerWrongTypeError} When the layer was of wrong type.
    */
   setLayerQueryable(layerPath: string, queryable: boolean): void {
     // Act on the domain
-    this.#layerDomain.getGeoviewLayerRegular(layerPath).setQueryable(queryable);
+    this.getGeoviewLayerRegular(layerPath).setQueryable(queryable);
+  }
+
+  /**
+   * Sets hoverable state for a layer.
+   *
+   * @param layerPath - The path of the layer.
+   * @param hoverable - The new hoverable state for the layer.
+   * @throws {LayerNotFoundError} When the layer couldn't be found at the given layer path.
+   * @throws {LayerWrongTypeError} When the layer was of wrong type.
+   */
+  setLayerHoverable(layerPath: string, hoverable: boolean): void {
+    // Get the layer
+    const layer = this.getGeoviewLayerRegular(layerPath);
+
+    // Redirect
+    layer.setHoverable(hoverable);
   }
 
   /**
@@ -391,7 +427,7 @@ export class LayerController extends AbstractMapViewerController {
    */
   setLayerRasterFunction(layerPath: string, rasterFunctionId: string | undefined): void {
     // Get the layer
-    const layer = this.#layerDomain.getGeoviewLayer(layerPath);
+    const layer = this.getGeoviewLayer(layerPath);
 
     // Check if it's the right type
     if (!(layer instanceof GVEsriImage)) throw new LayerWrongTypeError(layerPath, layer.getLayerName());
@@ -462,6 +498,30 @@ export class LayerController extends AbstractMapViewerController {
    */
   #handleLayerNameChanged(sender: LayerDomain, event: DomainLayerNameChangedEvent): void {
     setStoreLayerName(this.getMapId(), event.layer.getLayerPath(), event.name);
+  }
+
+  /**
+   * Handles when a layer's hoverable state changes in the domain.
+   *
+   * Propagates the change to the store and clears feature info results
+   * when hoverable is turned off.
+   *
+   * @param sender - The layer domain that fired the event
+   * @param event - The event containing the layer and new hoverable state
+   */
+  #handleLayerHoverableChanged(sender: LayerDomain, event: DomainLayerHoverableChangedEvent): void {
+    // Save in store
+    // TODO: CHECK - Why 2 store locations to store the hoverable state? Centralize?
+    setStoreMapLayerHoverable(this.getMapId(), event.layer.getLayerPath(), event.hoverable);
+
+    // Save in store
+    setStoreLayerHoverable(this.getMapId(), event.layer.getLayerPath(), event.hoverable);
+
+    // If not hoverable
+    if (!event.hoverable) {
+      // Clear the results when turning the hoverable to false
+      this.getControllersRegistry().layerSetController.hoverFeatureInfoLayerSet.clearResults(event.layer.getLayerPath());
+    }
   }
 
   /**

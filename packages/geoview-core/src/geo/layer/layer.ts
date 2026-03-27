@@ -82,8 +82,6 @@ import type {
   LayerErrorDelegate as GVLayerErrorDelegate,
   LayerMessageDelegate,
   LayerMessageEvent,
-  LayerHoverableChangedDelegate,
-  LayerHoverableChangedEvent,
 } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractGVLayer } from '@/geo/layer/gv-layers/abstract-gv-layer';
 import { AbstractGVVector } from '@/geo/layer/gv-layers/vector/abstract-gv-vector';
@@ -104,7 +102,6 @@ import {
   getStoreMapOrderedLayerInfo,
   getStoreMapOrderedLayerInfoByPath,
   getStoreMapVisibilityByPath,
-  setStoreMapLayerHoverable,
 } from '@/core/stores/store-interface-and-intial-values/map-state';
 import {
   isStoreTimeSliderInitialized,
@@ -127,7 +124,6 @@ import {
   setStoreLayerDateTemporal,
   setStoreLayerDisplayDateFormat,
   setStoreLayerDisplayDateFormatShort,
-  setStoreLayerHoverable,
   setStoreLayerItemVisibility,
   setStoreLayerMosaicRule,
   setStoreLayersAreLoading,
@@ -260,9 +256,6 @@ export class LayerApi {
   /** Keep a bounded reference to the handle layer visible changed */
   #boundedHandleLayerVisibleChanged: VisibleChangedDelegate;
 
-  /** Keep a bounded reference to the handle layer hoverable changed */
-  #boundedHandleLayerHoverableChanged: LayerHoverableChangedDelegate;
-
   /** Keep a bounded reference to the handle WMS Layer Image Load Callbacks */
   #boundedHandleLayerWMSImageLoadRescue: ImageLoadRescueDelegate;
 
@@ -303,7 +296,6 @@ export class LayerApi {
     this.#boundedHandleLayerError = this.#handleLayerError.bind(this);
     this.#boundedHandleLayerOpacityChanged = this.#handleLayerOpacityChanged.bind(this);
     this.#boundedHandleLayerVisibleChanged = this.#handleLayerVisibleChanged.bind(this);
-    this.#boundedHandleLayerHoverableChanged = this.#handleLayerHoverableChanged.bind(this);
     this.#boundedHandleLayerWMSImageLoadRescue = this.#handleLayerWMSImageLoadRescue.bind(this);
     this.#boundedHandleLayerGroupLayerAdded = this.#handleLayerGroupLayerAdded.bind(this);
     this.#boundedHandleLayerGroupLayerRemoved = this.#handleLayerGroupLayerRemoved.bind(this);
@@ -1395,11 +1387,8 @@ export class LayerApi {
    * @throws {LayerWrongTypeError} When the layer was of wrong type.
    */
   setLayerHoverable(layerPath: string, hoverable: boolean): void {
-    // Get the layer
-    const layer = this.getGeoviewLayerRegular(layerPath);
-
-    // Redirect
-    layer.setHoverable(hoverable);
+    // Redirect on the controller
+    this.#controllers.layerController.setLayerHoverable(layerPath, hoverable);
   }
 
   /**
@@ -1804,9 +1793,6 @@ export class LayerApi {
     // Register a hook when a layer visibility is changed
     gvLayer.onVisibleChanged(this.#boundedHandleLayerVisibleChanged);
 
-    // Register a hook when a layer hoverable is changed
-    gvLayer.onLayerHoverableChanged(this.#boundedHandleLayerHoverableChanged);
-
     // For a WMS, register a hook when the image fails to load so that we can try to rescue it
     if (gvLayer instanceof GVWMS) gvLayer.onImageLoadRescue(this.#boundedHandleLayerWMSImageLoadRescue);
   }
@@ -1834,9 +1820,6 @@ export class LayerApi {
 
     // Unregister handler on layer opacity change
     gvLayer.offLayerOpacityChanged(this.#boundedHandleLayerOpacityChanged);
-
-    // Unregister handler on layer hoverable changed
-    gvLayer.offLayerHoverableChanged(this.#boundedHandleLayerHoverableChanged);
 
     // Unregister handler on layer visibility change
     gvLayer.offVisibleChanged(this.#boundedHandleLayerVisibleChanged);
@@ -2125,30 +2108,6 @@ export class LayerApi {
 
     // Emit event
     this.#emitLayerVisibilityToggled({ layerPath: layer.getLayerPath(), visibility: event.visible });
-  }
-
-  /**
-   * Handles when a layer hoverable state is changed on the map.
-   *
-   * @param layer - The layer that's become changed.
-   * @param event - The event containing the hoverable state change.
-   */
-  #handleLayerHoverableChanged(layer: AbstractBaseGVLayer, event: LayerHoverableChangedEvent): void {
-    // Save in store
-    // TODO: CHECK - Why 2 store locations to store the hoverable state? Centralize?
-    setStoreMapLayerHoverable(this.getMapId(), layer.getLayerPath(), event.hoverable);
-
-    // Save in store
-    setStoreLayerHoverable(this.getMapId(), layer.getLayerPath(), event.hoverable);
-
-    // If not hoverable
-    if (!event.hoverable) {
-      // Clear the results when turning the hoverable to false
-      this.#controllers.layerSetController.hoverFeatureInfoLayerSet.clearResults(layer.getLayerPath());
-    }
-
-    // TODO: MINOR - Emit LayerHoverableToggled event here?
-    // this.#emitLayerHoverableToggled({ layerPath: layer.getLayerPath(), hoverable: event.hoverable });
   }
 
   /**
